@@ -110,14 +110,13 @@
           <es-actionbar
             #actionbarSearchTab
             class="actionbar-search"
-            [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
+            [class.display-none]="dataSourceSearch.isEmpty()"
           ></es-actionbar>
           <es-node-entries-wrapper
             #searchWrapperRef
             *ngIf="
               selectedTab() === TabType.SEARCH &&
-              !dataSourceSearch.isLoading &&
-              !dataSourceSearch.isEmpty()
+              (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)
             "
             [dragDrop]="{
               dragAllowed: selectionMode() !== 'target',
@@ -137,9 +136,6 @@
             (fetchData)="loadMore($event)"
             (selectionChange)="onNodeSelectionChange($event)"
           ></es-node-entries-wrapper>
-          <ng-container *ngIf="dataSourceSearch.isLoading">
-            <ng-container *ngTemplateOutlet="loading"></ng-container>
-          </ng-container>
           <ng-container
             *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
           ></ng-container>
@@ -186,10 +182,9 @@
           #collectionsWrapperRef
           *ngIf="
             selectedTab() === TabType.COLLECTIONS &&
-            !(
-              collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsFlat.isEmpty()
-            )
+            (collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
+              !dataSourceCollectionsFlat.isEmpty() ||
+              dataSourceCollectionsFlat.isLoading)
           "
           [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
           [columns]="flatNodeEntriesColumns"
