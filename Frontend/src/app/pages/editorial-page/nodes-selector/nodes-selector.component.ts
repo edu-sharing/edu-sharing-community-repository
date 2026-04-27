@@ -960,8 +960,10 @@ export class NodesSelectorComponent implements OnInit {
                 collection.collection.childReferencesCount = 0;
             }
         });
-        initialData.push(recentCollectionsNode);
-        initialData = initialData.concat(subRecentCollections.collections);
+        if (subRecentCollections.collections?.length) {
+            initialData.push(recentCollectionsNode);
+            initialData = initialData.concat(subRecentCollections.collections);
+        }
         // my collections
         const myCollectionsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'COLLECTIONS.MY_COLLECTIONS'),
@@ -981,8 +983,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = myCollectionsNode.ref.id;
         });
-        initialData.push(myCollectionsNode);
-        initialData = initialData.concat(subMyCollections.collections);
+        if (subMyCollections.collections?.length) {
+            initialData.push(myCollectionsNode);
+            initialData = initialData.concat(subMyCollections.collections);
+        }
         // editorial collections
         const editorialCollectionsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'COLLECTIONS.EDITORIAL_COLLECTIONS'),
@@ -1002,8 +1006,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = editorialCollectionsNode.ref.id;
         });
-        initialData.push(editorialCollectionsNode);
-        initialData = initialData.concat(subEditorialCollections.collections);
+        if (subEditorialCollections.collections?.length) {
+            initialData.push(editorialCollectionsNode);
+            initialData = initialData.concat(subEditorialCollections.collections);
+        }
         this.dataSourceCollectionsTree.setData(initialData);
         this.dataSourceCollectionsTree.isLoading = false;
     }
