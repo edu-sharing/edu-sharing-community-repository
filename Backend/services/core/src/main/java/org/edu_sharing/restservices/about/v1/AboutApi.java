@@ -85,6 +85,7 @@ public class AboutApi {
                 supportedSigAlg.add(defaultVerify);
             }
             about.setSignatureAlgorithms(supportedSigAlg);
+            about.setDefaultSignatureAlgorithm(defaultVerify);
 
             Map<String, AboutService> services = new HashMap<>();
             for (Class<?> clazz : ApiApplication.SERVICES) {
