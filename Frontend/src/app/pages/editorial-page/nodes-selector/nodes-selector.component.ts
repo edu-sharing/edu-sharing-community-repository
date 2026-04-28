@@ -40,6 +40,7 @@ import {
     DropSource,
     FetchEvent,
     InteractionType,
+    ListItem,
     LocalEventsService,
     MdsExtendedValueData,
     MdsExtendedValues,
@@ -265,11 +266,13 @@ export class NodesSelectorComponent implements OnInit {
 
     // search tab
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    searchColumns: ColumnType;
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
+    collectionsColumns: ColumnType;
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
     );
@@ -294,7 +297,6 @@ export class NodesSelectorComponent implements OnInit {
     inboxNode: Node;
 
     // shared among tabs
-    flatNodeEntriesColumns: ColumnType;
     searchCompleted: WritableSignal<boolean> = signal(false);
     searchText = model('');
     /**
@@ -346,9 +348,12 @@ export class NodesSelectorComponent implements OnInit {
             this.selectedTab.set(this.supportedTabs()[0]);
             await this.refreshData(this.selectedTab());
         }
-        this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+        this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
+        this.collectionsColumns = {
+            Default: ListItem.getCollectionDefaults(),
+        };
         this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
     }
 
@@ -483,7 +488,9 @@ export class NodesSelectorComponent implements OnInit {
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
-            [NodeEntriesDisplayType.Grid, NodeEntriesDisplayType.Table].includes(nextDisplayType)
+            [NodeEntriesDisplayType.SmallGrid, NodeEntriesDisplayType.Table].includes(
+                nextDisplayType,
+            )
         ) {
             // reset the flat datasource
             this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();

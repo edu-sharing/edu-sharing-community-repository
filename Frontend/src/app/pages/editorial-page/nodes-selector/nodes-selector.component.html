@@ -124,7 +124,7 @@
               dropAllowed: canDropOnSearchRef,
               dropped: dropped
             }"
-            [columns]="flatNodeEntriesColumns"
+            [columns]="searchColumns"
             [dataSource]="dataSourceSearch"
             [(displayType)]="searchDisplayType"
             [elementInteractionType]="InteractionType.Emitter"
@@ -169,7 +169,7 @@
           [value]="collectionsDisplayType()"
           (change)="onCollectionsDisplayTypeChange($event)"
         >
-          <mat-button-toggle [value]="NodeEntriesDisplayType.Grid">
+          <mat-button-toggle [value]="NodeEntriesDisplayType.SmallGrid">
             <i esIcon="grid_view"></i>
           </mat-button-toggle>
 
@@ -191,7 +191,7 @@
               dataSourceCollectionsFlat.isLoading)
           "
           [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
-          [columns]="flatNodeEntriesColumns"
+          [columns]="collectionsColumns"
           [dataSource]="
             collectionsDisplayType() === NodeEntriesDisplayType.Tree
               ? dataSourceCollectionsTree
@@ -238,7 +238,6 @@
           #workspaceWrapperRef
           *ngIf="selectedTab() === TabType.WORKSPACE"
           [checkbox]="false"
-          [columns]="flatNodeEntriesColumns"
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"
           [dragDrop]="{
