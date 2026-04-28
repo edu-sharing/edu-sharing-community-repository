@@ -93,6 +93,12 @@
           "TARGET": "Hier einsortieren",
           "ERROR": "Beim Kopieren der Inhalte ist ein Fehler aufgetreten."
         },
+        "INVALID_SELECTION_REASON": {
+          "invalidCombination": "Die ausgewählten Inhalte können nicht (zusammen) kopiert werden.",
+          "invalidSelection": "Die aktuelle Auswahl ist ungültig.",
+          "missingPrivileges": "Du hast nicht die erforderlichen Berechtigungen, um diese Inhalte zu kopieren.",
+          "atLeastRootOrChildrenSelected": "Zum Kopieren muss entweder die Checkbox für den Haupt- oder die Untersammlungen gesetzt sein."
+        },
         "CONFIGURE_CONFIG": {
           "INFO_HEADING": "Wie wir Speicherplatz sparen:",
           "INFO_MESSAGE": "Standardmäßig werden Inhalte nicht kopiert, sondern verlinkt und freigegeben. Das belastet deine Quota nicht. In den kopierten Sammlungshüllen werden Links zu den Original-Inhalten eingefügt. Später am Herkunftsort eingefügte Inhalte werden nicht freigegeben.",

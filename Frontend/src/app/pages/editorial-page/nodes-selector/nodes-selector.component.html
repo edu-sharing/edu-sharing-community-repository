@@ -363,17 +363,24 @@
 <!-- FOOTER ACTION BAR -->
 <div class="tab-action-bar" *ngIf="selectedNodes().length || methodologyTabWithValue()">
   <ng-container *ngIf="selectionMode() === 'target'">
-    <ng-container *ngIf="!isMethodologyTab(); else methodologyActions">
+    <div
+      [matTooltip]="
+        invalidSelectionReason()
+          ? (i18nPrefix + 'INVALID_SELECTION_REASON.' + invalidSelectionReason() | translate)
+          : null
+      "
+      *ngIf="!isMethodologyTab(); else methodologyActions"
+    >
       <button
         mat-flat-button
         color="primary"
-        [disabled]="!isValidSelection()"
+        [disabled]="!!invalidSelectionReason()"
         (click)="insertSelectedNodes()"
       >
         {{ option().optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
         <i esIcon="arrow_forward"></i>
       </button>
-    </ng-container>
+    </div>
     <ng-template #methodologyActions>
       <button mat-flat-button color="primary" (click)="saveMetadata()">
         {{ 'SAVE' | translate }}
@@ -387,12 +394,18 @@
         {{ 'BACK' | translate }}
       </button>
     </ng-container>
-    <ng-container>
-      <!-- disable in second step, if root or child collections are not selected -->
+    <!-- disable in second step, if root or child collections are not selected -->
+    <div
+      [matTooltip]="
+        invalidSelectionReason()
+          ? (i18nPrefix + 'INVALID_SELECTION_REASON.' + invalidSelectionReason() | translate)
+          : null
+      "
+    >
       <button
         mat-flat-button
         color="primary"
-        [disabled]="!isValidSelection() || (!isSelectStep() && !atLeastRootOrChildrenSelected())"
+        [disabled]="!!invalidSelectionReason()"
         (click)="copyNodes()"
       >
         {{
@@ -402,6 +415,6 @@
         }}
         <i esIcon="arrow_forward"></i>
       </button>
-    </ng-container>
+    </div>
   </ng-container>
 </div>

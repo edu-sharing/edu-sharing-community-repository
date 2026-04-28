@@ -92,6 +92,13 @@ enum StepType {
     CONFIGURE = 'configure',
 }
 
+enum InvalidSelectionReason {
+    INVALID_COMBINATION = 'invalidCombination',
+    INVALID_SELECTION = 'invalidSelection',
+    MISSING_PRIVILEGES = 'missingPrivileges',
+    AT_LEAST_ROOT_OR_CHILDREN_SELECTED = 'atLeastRootOrChildrenSelected',
+}
+
 export type NodesSelectorConfig = {
     state?: TabType;
     /**
@@ -179,41 +186,50 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
-    isValidSelection: Signal<boolean> = computed((): boolean => {
-        if (this.selectionMode() === 'source') {
-            if (
-                this.option().optionConfig?.applyCallback &&
-                !this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[])
-            ) {
-                return false;
+    invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
+        (): InvalidSelectionReason | null => {
+            if (this.selectionMode() === 'source') {
+                if (
+                    this.option().optionConfig?.applyCallback &&
+                    !this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[])
+                ) {
+                    return InvalidSelectionReason.INVALID_SELECTION;
+                }
+                // fallback for configuration tab
+                if (!this.isSelectStep() && !this.atLeastRootOrChildrenSelected()) {
+                    return InvalidSelectionReason.AT_LEAST_ROOT_OR_CHILDREN_SELECTED;
+                }
+                // copy collection dialog
+                if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
+                    return null;
+                }
+                if (!this.onlyFilesSelected()) {
+                    return InvalidSelectionReason.INVALID_COMBINATION;
+                }
+                // only allow insert into collection when all have CCPublish
+                if (
+                    this.nodeHelperService.isNodeCollection(this.parent) &&
+                    !this.nodeHelperService.getNodesRight(
+                        this.selectedNodes() as Node[],
+                        RestConstants.ACCESS_CC_PUBLISH,
+                        NodesRightMode.Effective,
+                    )
+                ) {
+                    return InvalidSelectionReason.MISSING_PRIVILEGES;
+                }
+                return null;
+            } else {
+                if (
+                    this.onlyOneSelected() &&
+                    (this.selectedNodes()[0].mediatype === 'folder' ||
+                        this.selectedNodes()[0].mediatype === 'collection')
+                ) {
+                    return null;
+                }
+                return InvalidSelectionReason.INVALID_SELECTION;
             }
-            // copy collection dialog
-            if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
-                return true;
-            }
-            if (!this.onlyFilesSelected()) {
-                return false;
-            }
-            // only allow insert into collection when all have CCPublish
-            if (
-                this.nodeHelperService.isNodeCollection(this.parent) &&
-                !this.nodeHelperService.getNodesRight(
-                    this.selectedNodes() as Node[],
-                    RestConstants.ACCESS_CC_PUBLISH,
-                    NodesRightMode.Effective,
-                )
-            ) {
-                return false;
-            }
-            return true;
-        } else {
-            return (
-                this.onlyOneSelected() &&
-                (this.selectedNodes()[0].mediatype === 'folder' ||
-                    this.selectedNodes()[0].mediatype === 'collection')
-            );
-        }
-    });
+        },
+    );
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
         () =>
