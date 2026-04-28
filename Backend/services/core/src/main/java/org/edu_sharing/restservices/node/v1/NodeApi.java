@@ -1021,7 +1021,7 @@ public class NodeApi {
             }
             if (response == null)
                 response = NodeDao.convertToRest(repoDao, propFilter, children, skipCount == null ? 0 : skipCount, maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems, (nodeDao) -> {
-                    if(resolveInheritedAccess) {
+                    if(Boolean.TRUE.equals(resolveInheritedAccess)) {
                         nodeDao.fetchInheritedAccess();
                     }
                     return nodeDao;
