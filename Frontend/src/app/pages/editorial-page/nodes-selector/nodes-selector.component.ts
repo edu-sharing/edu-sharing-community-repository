@@ -838,7 +838,15 @@ export class NodesSelectorComponent implements OnInit {
         }
         // when there are not the only files selected, switch to the configuration mode
         else if (this.currentStep() === StepType.SELECT) {
-            const selectedNode: Partial<Node> = this.highestSelectedNode();
+            // fix that selected nodes (collections) might have reset their attributes to avoid toggling them
+            const selectedNode: Node = await firstValueFrom(
+                this.nodeService.getNode(this.highestSelectedNode().ref.id),
+            );
+            this.selectedNodes.set(
+                this.selectedNodes().map((node) =>
+                    node.ref.id === selectedNode.ref.id ? selectedNode : node,
+                ),
+            );
             // reset the default configuration and sync it with the view
             this.copyRoot.set(!!selectedNode.collection);
             this.copyChildCollections.set(selectedNode.collection?.childCollectionsCount > 0);
