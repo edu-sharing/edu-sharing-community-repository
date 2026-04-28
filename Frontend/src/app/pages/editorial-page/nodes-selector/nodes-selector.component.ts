@@ -272,7 +272,8 @@ export class NodesSelectorComponent implements OnInit {
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
-    collectionsColumns: ColumnType;
+    collectionsGridColumns: ColumnType;
+    collectionsTableColumns: ColumnType;
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
     );
@@ -351,9 +352,12 @@ export class NodesSelectorComponent implements OnInit {
         this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
-        this.collectionsColumns = {
+        this.collectionsGridColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
+        this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+            repository: HOME_REPOSITORY,
+        });
         this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
     }
 

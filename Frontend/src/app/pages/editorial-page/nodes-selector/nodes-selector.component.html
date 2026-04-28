@@ -191,7 +191,11 @@
               dataSourceCollectionsFlat.isLoading)
           "
           [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
-          [columns]="collectionsColumns"
+          [columns]="
+            collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid
+              ? collectionsGridColumns
+              : collectionsTableColumns
+          "
           [dataSource]="
             collectionsDisplayType() === NodeEntriesDisplayType.Tree
               ? dataSourceCollectionsTree
