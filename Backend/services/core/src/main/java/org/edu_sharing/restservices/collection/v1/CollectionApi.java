@@ -417,7 +417,7 @@ public class CollectionApi {
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope,
 					fetchCounts == null || fetchCounts,
-					resolveInheritedAccess,
+					Boolean.TRUE.equals(resolveInheritedAccess),
 					filter,
 					sortDefinition,
 					skipCount == null ? 0 : skipCount,
