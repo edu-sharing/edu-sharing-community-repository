@@ -64,6 +64,7 @@ import {
 } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
+import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
@@ -77,7 +78,6 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
-import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 
 export enum TabType {
     SEARCH = 'search',
@@ -338,6 +338,13 @@ export class NodesSelectorComponent implements OnInit {
             if (!this.canMoveWorkspaceNodes()) {
                 this.workspaceAction.set('copy');
             }
+        });
+        // only allow copying collections if the target is a collection again
+        this.treeNodeService.setCustomIsValidSourceCallback((node: Node) => {
+            return (
+                (this.parent?.mediatype === 'collection' && node?.mediatype === 'collection') ||
+                node?.type === RestConstants.CCM_TYPE_IO
+            );
         });
     }
 

@@ -47,6 +47,10 @@ export class TreeNodeService {
     readonly nodesChanged = new EventEmitter<Node[]>();
     // holds the currently expanded nodes
     private expandedNodes: string[] = [];
+    // callback registered by components to define a custom isValidSource check
+    private isValidSourceCallback: ((node: Node) => boolean) | null = null;
+    // callback registered by components to define a custom isValidTarget check
+    private isValidTargetCallback: ((node: Node) => boolean) | null = null;
 
     constructor(
         private collectionService: CollectionService,
@@ -511,6 +515,34 @@ export class TreeNodeService {
      */
     setApplySelectionCallback(callback: ((nodes: Node[]) => void) | null): void {
         this.applySelectionCallback = callback;
+    }
+
+    /**
+     * Sets the callback to define a custom isValidSource check.
+     */
+    setCustomIsValidSourceCallback(callback: ((node: Node) => boolean) | null): void {
+        this.isValidSourceCallback = callback;
+    }
+
+    /**
+     * Retrieves the callback defining a custom isValidSource check.
+     */
+    getCustomIsValidSourceCallback(): ((node: Node) => boolean) | null {
+        return this.isValidSourceCallback;
+    }
+
+    /**
+     * Sets the callback to define a custom isValidTarget check.
+     */
+    setCustomIsValidTargetCallback(callback: ((node: Node) => boolean) | null): void {
+        this.isValidTargetCallback = callback;
+    }
+
+    /**
+     * Retrieves the callback defining a custom isValidTarget check.
+     */
+    getCustomIsValidTargetCallback(): ((node: Node) => boolean) | null {
+        return this.isValidTargetCallback;
     }
 
     /**

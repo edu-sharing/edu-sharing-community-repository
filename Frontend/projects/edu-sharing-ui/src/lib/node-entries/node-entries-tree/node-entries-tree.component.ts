@@ -337,6 +337,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param flatNode
      */
     isValidInsertTarget(flatNode: DynamicFlatNode): boolean {
+        // custom validation callback defined?
+        if (this.treeNodeService.getCustomIsValidTargetCallback()) {
+            return this.treeNodeService.getCustomIsValidTargetCallback()(flatNode.item as Node);
+        }
         if (flatNode.item?.mediatype) {
             return flatNode.item.mediatype === 'collection' || flatNode.item.mediatype === 'folder';
         }
@@ -349,6 +353,10 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param flatNode
      */
     isValidSource(flatNode: DynamicFlatNode): boolean {
+        // custom validation callback defined?
+        if (this.treeNodeService.getCustomIsValidSourceCallback()) {
+            return this.treeNodeService.getCustomIsValidSourceCallback()(flatNode.item as Node);
+        }
         return (
             flatNode.item?.mediatype === 'collection' ||
             flatNode.item?.type === RestConstants.CCM_TYPE_IO
