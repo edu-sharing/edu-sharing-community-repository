@@ -405,6 +405,8 @@ public class CollectionApi {
 			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "Resolve inherited access permissions from parent nodes (default false)") @QueryParam("resolveInheritedAccess") Boolean resolveInheritedAccess,
+
 			@Context HttpServletRequest req) {
 
 		try {
@@ -415,6 +417,7 @@ public class CollectionApi {
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsSubcollections(repoDao, parentId, scope,
 					fetchCounts == null || fetchCounts,
+					resolveInheritedAccess,
 					filter,
 					sortDefinition,
 					skipCount == null ? 0 : skipCount,

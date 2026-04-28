@@ -19363,6 +19363,14 @@
               },
               "type": "array"
             }
+          },
+          {
+            "description": "Resolve inherited access permissions from parent nodes (default false)",
+            "in": "query",
+            "name": "resolveInheritedAccess",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {

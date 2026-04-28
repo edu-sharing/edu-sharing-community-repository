@@ -1020,7 +1020,13 @@ public class NodeApi {
                 children = nodeDao.getChildren(assocName, filter, sortDefinition);
             }
             if (response == null)
-                response = NodeDao.convertToRest(repoDao, propFilter, children, skipCount == null ? 0 : skipCount, maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+                response = NodeDao.convertToRest(repoDao, propFilter, children, skipCount == null ? 0 : skipCount, maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems, (nodeDao) -> {
+                    if(resolveInheritedAccess) {
+                        nodeDao.fetchInheritedAccess();
+                    }
+                    return nodeDao;
+
+                });
             //List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
             //Collections.sort(children);
             //NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);

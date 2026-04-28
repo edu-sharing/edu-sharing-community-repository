@@ -304,6 +304,14 @@ public class NodeDao {
         }
     }
 
+    public void fetchInheritedAccess() {
+        if (this.inherited == null) {
+            boolean isRemoteCopy = !this.isCollectionReference() && aspects.contains(CCConstants.CCM_ASPECT_REMOTEREPOSITORY);
+            org.edu_sharing.service.permission.PermissionService usedPermissionService = isRemoteCopy ? PermissionServiceFactory.getInstance().getLocalService() : permissionService;
+            this.inherited = usedPermissionService.isInherited(storeProtocol, storeId, nodeId);
+        }
+    }
+
 
     public enum ExistingMode {
         // Fallback if the original node does not exist
@@ -938,7 +946,6 @@ public class NodeDao {
             this.hasPermissions = nodeRef.getPermissions();
         } else {
             this.hasPermissions = usedPermissionService.hasAllPermissions(storeProtocol, storeId, nodeId, DAO_PERMISSIONS);
-            this.inherited = usedPermissionService.isInherited(storeProtocol, storeId, nodeId);
         }
     }
 
@@ -2070,7 +2077,7 @@ public class NodeDao {
                 logger.warn("Error while fetching original node version from " + nodeId + ":" + t.getMessage());
             }
         }
-        if(this.version != null) {
+        if (this.version != null) {
             return this.version;
         }
         String version = (String) nodeProps.get(CCConstants.LOM_PROP_LIFECYCLE_VERSION);
