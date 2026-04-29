@@ -831,6 +831,7 @@ export class NodesSelectorComponent implements OnInit {
             parent: this.parent,
         });
         if (!this.parent) {
+            this.resetNodeEntriesSelections();
             return;
         }
         // only files are selected -> directly copy them, depending on the parent type
