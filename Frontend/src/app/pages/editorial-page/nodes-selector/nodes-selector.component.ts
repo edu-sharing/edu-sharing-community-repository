@@ -208,6 +208,7 @@ export class NodesSelectorComponent implements OnInit {
                 }
                 // only allow insert into collection when all have CCPublish
                 if (
+                    this.parent &&
                     this.nodeHelperService.isNodeCollection(this.parent) &&
                     !this.nodeHelperService.getNodesRight(
                         this.selectedNodes() as Node[],
