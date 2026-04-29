@@ -273,6 +273,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
             this.createSubCollectionOptionItem.name =
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
+            void this.listCollections?.initOptionsGenerator({});
             if (this.isRootLevel) {
                 // display root collections with tabs
 
