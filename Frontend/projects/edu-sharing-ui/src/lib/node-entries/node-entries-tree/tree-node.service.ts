@@ -39,6 +39,8 @@ export class TreeNodeService {
     };
     // whether files should be requested and shown as well
     private showFiles: boolean = true;
+    // whether includeResolveInheritedAccess should be added in requests
+    private includeResolveInheritedAccess: boolean = false;
     // holds an attribute used to decide whether a node is initially selected
     private initialSelectionAttribute: string;
     // callback provided by the tree component to apply a selection to the UI layer
@@ -203,6 +205,9 @@ export class TreeNodeService {
                             this.nodeHelperService.getSortByForCollection(node as Node)
                                 .direction === 'asc',
                         ],
+                        ...(this.includeResolveInheritedAccess
+                            ? { resolveInheritedAccess: true }
+                            : {}),
                     })
                     .pipe(
                         map((s) => {
@@ -249,6 +254,7 @@ export class TreeNodeService {
             const request = {
                 ...this.baseSearchParams,
                 ...(this.showFiles ? {} : { filter: ['folders'] }),
+                ...(this.includeResolveInheritedAccess ? { resolveInheritedAccess: true } : {}),
             };
             nodeEntries = await firstValueFrom(this.nodeService.getChildren(nodeId, request));
         }
@@ -284,6 +290,7 @@ export class TreeNodeService {
             ...this.baseSearchParams,
             skipCount: existingChildren.length,
             ...(this.showFiles ? {} : { filter: ['folders'] }),
+            ...(this.includeResolveInheritedAccess ? { resolveInheritedAccess: true } : {}),
         };
         const nodeEntries: NodeEntries = await firstValueFrom(
             this.nodeService.getChildren(nodeId, request),
@@ -460,6 +467,15 @@ export class TreeNodeService {
      */
     updateShowFiles(showFiles: boolean) {
         this.showFiles = showFiles;
+    }
+
+    /**
+     * Updates the include resolve inherited access flag to a given value.
+     *
+     * @param includeResolveInheritedAccess
+     */
+    updateIncludeResolveInheritedAccess(includeResolveInheritedAccess: boolean) {
+        this.includeResolveInheritedAccess = includeResolveInheritedAccess;
     }
 
     /**

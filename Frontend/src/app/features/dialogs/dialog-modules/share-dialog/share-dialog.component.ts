@@ -277,6 +277,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         };
         // do not show files in the node-entries-tree of the structure tab
         this.treeNodeService.updateShowFiles(false);
+        // include resolve inherited access in the request
+        this.treeNodeService.updateIncludeResolveInheritedAccess(true);
         // update attribute name for initial selection
         this.treeNodeService.updateInitialSelectionAttribute('inherited');
         // update the tree node service selection mode to control the selection behavior
