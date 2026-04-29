@@ -66,7 +66,7 @@ export const AssignmentEditorConfig = {
 export class ManageAssignmentComponent {
     readonly editorConfig = {
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
     };
     now = new Date().getTime();

@@ -65,7 +65,7 @@ export class SubmissionSidebarComponent {
     //@ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     readonly editorConfig = {
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
     };
     submitFormGroup: FormGroup;
