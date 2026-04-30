@@ -227,11 +227,11 @@
 
       <!-- WORKSPACE TAB -->
       <ng-container *ngSwitchCase="TabType.WORKSPACE">
-        <mat-form-field
-          *ngIf="this.option().optionConfig?.selection?.selected?.length"
-          class="workspace-action-select"
-        >
-          <mat-select [(ngModel)]="workspaceAction">
+        <mat-form-field *ngIf="selectionMode() === 'target'" class="workspace-action-select">
+          <mat-select
+            [(ngModel)]="workspaceAction"
+            [disabled]="selectedTab() === TabType.WORKSPACE && dataSourceWorkspace.isLoading"
+          >
             <mat-option value="copy">{{ 'WORKSPACE.COPY_MOVE.COPY' | translate }}</mat-option>
             <mat-option value="move" [disabled]="!canMoveWorkspaceNodes()">{{
               'WORKSPACE.COPY_MOVE.MOVE' | translate

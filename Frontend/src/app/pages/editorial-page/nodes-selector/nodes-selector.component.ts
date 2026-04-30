@@ -232,16 +232,24 @@ export class NodesSelectorComponent implements OnInit {
             }
         },
     );
+    // The nodes that are currently selected as source
+    selectedSourceNodes: Signal<Node[]> = computed(() => {
+        const selected = this.option()?.optionConfig?.selection?.selected as Node[];
+        if (selected?.length) {
+            return selected;
+        }
+        return (this.editorialSidebarService.nodes() ?? []) as Node[];
+    });
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
         () =>
             this.option().optionConfig &&
-            this.option().optionConfig.selection?.selected?.length &&
-            this.option().optionConfig.selection?.selected.every(
+            this.selectedSourceNodes()?.length &&
+            this.selectedSourceNodes().every(
                 (n: Node) => !n.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),
             ) &&
             this.nodeHelperService.getNodesRight(
-                this.option().optionConfig.selection?.selected as Node[],
+                this.selectedSourceNodes(),
                 RestConstants.ACCESS_CHANGE_PERMISSIONS,
                 NodesRightMode.Effective,
             ),
@@ -318,15 +326,8 @@ export class NodesSelectorComponent implements OnInit {
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
     searchText = model('');
-    /**
-     * is this component acting as the target our source?
-     */
-    selectionMode = computed(() =>
-        this.option()?.optionConfig?.selection?.selected.length > 0 ||
-        this.editorialSidebarService.nodes()?.length > 0
-            ? 'target'
-            : 'source',
-    );
+    // Is this component acting as the target our source?
+    selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
 
     constructor(
         private apiCollectionService: ApiCollectionService,
@@ -685,7 +686,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async insertSelectedNodes(): Promise<void> {
         const target = this.selectedNodes()[0] as Node;
-        const source = this.option().optionConfig.selection?.selected as Node[];
+        const source = this.selectedSourceNodes();
         if (target.mediatype === 'collection') {
             this.editorialSidebarService.sidebarLoading.set(true);
             this.uiService.addToCollection(target, source, false, () => {
@@ -707,7 +708,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async saveMetadata(): Promise<void> {
         this.editorialSidebarService.sidebarLoading.set(true);
-        const source = this.option().optionConfig.selection?.selected as Node[];
+        const source = this.selectedSourceNodes();
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
         const enabledMetadata: { [key: string]: string[] } = {};
