@@ -9,6 +9,9 @@
     "SIDEBAR": {
       "TITLE_SHARE": "Freigaben",
       "TITLE_ASSIGNMENT": "Aufgaben",
+      "TITLE_WORKSPACE": "Aktionen & Optionen",
+      "TITLE_SEARCH": "Aktionen & Optionen",
+      "TITLE_COLLECTIONS": "Aktionen & Optionen",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
       "SUBMISSION": {
