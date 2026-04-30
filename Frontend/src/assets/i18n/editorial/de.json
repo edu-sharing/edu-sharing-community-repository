@@ -37,14 +37,14 @@
       "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },
     "OPTIONS": {
-      "SORT_INTO": "Mit Splitscreen einsortieren",
-      "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
-      "MANAGE_CONTENT": "Inhalte zuordnen & freigeben",
+      "SORT_INTO": "Inhalt hinzufügen",
+      "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas hinzufügen.",
+      "MANAGE_CONTENT": "Inhalte zuordnen",
       "MANAGE_CONTENT_DESCRIPTION": "Mit diesem Panel kannst du rechts eine beliebige andere Ansicht als Quelle für deinen Kooperationsort öffnen.",
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
       "MANAGE_SUBMISSION": "Abgabe bearbeiten",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
-      "PREVIEW": "Vorschau anzeigen",
+      "PREVIEW": "Vorschau",
       "SUBMISSION_REMOVE": "Element entfernen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
