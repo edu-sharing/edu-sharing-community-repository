@@ -1,4 +1,6 @@
 @use 'sass:map';
+@use 'branding' as *;
+
 @forward 'variables-root';
 @forward 'branding';
 
