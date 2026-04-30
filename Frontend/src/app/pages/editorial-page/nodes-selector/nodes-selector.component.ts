@@ -68,7 +68,10 @@ import { RestConnectorService } from '../../../core-module/rest/services/rest-co
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
-import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
+import {
+    OptionState,
+    SidebarContext,
+} from '../../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { MetadataTemplateManagementComponent } from '../../../features/metadata-template-management/metadata-template-management.component';
@@ -138,6 +141,7 @@ export class NodesSelectorComponent implements OnInit {
 
     option = input<OptionState<NodesSelectorConfig>>();
     @Input() parent: Node;
+    primaryMode = input<SidebarContext>();
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -238,11 +242,13 @@ export class NodesSelectorComponent implements OnInit {
         if (selected?.length) {
             return selected;
         }
-        const scopesWithAutomaticSelection: Scope[] = [
-            Scope.WorkspaceList,
-            Scope.CollectionsReferences,
+        // note: use primaryMode() over scope, as scope resets on reload
+        const primaryModesWithAutomaticSelection: SidebarContext[] = [
+            'collections',
+            'workspace',
+            'search',
         ];
-        if (scopesWithAutomaticSelection.includes(this.editorialSidebarService.scope())) {
+        if (this.primaryMode() && primaryModesWithAutomaticSelection.includes(this.primaryMode())) {
             return (this.editorialSidebarService.nodes() ?? []) as Node[];
         }
         return [];

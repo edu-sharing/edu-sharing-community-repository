@@ -28,6 +28,7 @@
           *ngIf="option === 'SORT_INTO'"
           [option]="enabledOption()"
           [parent]="parent()"
+          [primaryMode]="primaryMode()"
         ></es-nodes-selector>
         <es-metadata-sidebar
           *ngIf="option === 'WORKSPACE_METADATA'"
