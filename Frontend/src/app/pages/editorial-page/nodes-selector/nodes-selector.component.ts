@@ -135,8 +135,9 @@ export type NodesSelectorConfig = {
 export class NodesSelectorComponent implements OnInit {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
-    @Input() parent: Node;
+
     option = input<OptionState<NodesSelectorConfig>>();
+    @Input() parent: Node;
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -321,7 +322,10 @@ export class NodesSelectorComponent implements OnInit {
      * is this component acting as the target our source?
      */
     selectionMode = computed(() =>
-        this.option()?.optionConfig?.selection?.selected.length > 0 ? 'target' : 'source',
+        this.option()?.optionConfig?.selection?.selected.length > 0 ||
+        this.editorialSidebarService.nodes()?.length > 0
+            ? 'target'
+            : 'source',
     );
 
     constructor(
