@@ -238,7 +238,14 @@ export class NodesSelectorComponent implements OnInit {
         if (selected?.length) {
             return selected;
         }
-        return (this.editorialSidebarService.nodes() ?? []) as Node[];
+        const scopesWithAutomaticSelection: Scope[] = [
+            Scope.WorkspaceList,
+            Scope.CollectionsReferences,
+        ];
+        if (scopesWithAutomaticSelection.includes(this.editorialSidebarService.scope())) {
+            return (this.editorialSidebarService.nodes() ?? []) as Node[];
+        }
+        return [];
     });
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
