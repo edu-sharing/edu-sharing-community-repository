@@ -76,7 +76,7 @@ export class EditorialSidebarService {
     }
 
     /**
-     * handle a s select event from the node entries wrapper component and trigger the sidebar
+     * handle a select event from the node entries wrapper component and trigger the sidebar
      */
     handleSelect(
         nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>,
