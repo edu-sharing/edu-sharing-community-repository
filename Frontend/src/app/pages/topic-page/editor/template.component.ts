@@ -1516,6 +1516,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
+        // change link to include current variantId
+        const queryParamsToAddOrOverwrite: Params = {
+            variantId: retrieveNodeId(this.pageVariantNode),
+        };
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: queryParamsToAddOrOverwrite,
+            queryParamsHandling: 'merge',
+        });
         this.qrCodeUrl.set(
             this.retrieveFragmentUrl(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id),
         );
@@ -1534,6 +1543,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
+        // change link to include current variantId
+        const queryParamsToAddOrOverwrite: Params = {
+            variantId: retrieveNodeId(this.pageVariantNode),
+        };
+        await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: queryParamsToAddOrOverwrite,
+            queryParamsHandling: 'merge',
+        });
         // similar to copying links in GitHub issues, the target is first set to the URL and then copied
         await this.navigateToFragment(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id);
         // workaround: setTimeout is necessary, as navigateToFragment includes a delay
