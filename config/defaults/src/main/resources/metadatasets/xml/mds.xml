@@ -1111,6 +1111,13 @@
       ]]></html>
     </template>
     <template>
+      <id>topic_page_variant_configuration</id>
+      <html><![CDATA[
+          <ccm:page_variant_profiling_target_group type="checkboxVertical">
+          <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
+    </template>
+    <template>
       <id>topic_page_variant_search</id>
       <html><![CDATA[
           <ccm:page_variant_profiling_target_group type="multivalueFixedBadges">
