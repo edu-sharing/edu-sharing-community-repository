@@ -20,7 +20,7 @@
 .topBar {
     width: 100%;
     max-width: 100%;
-    :host ::ng-deep &.topBar-safe > div {
+    :host ::ng-deep &.topBar-safe > div .main-bar {
         background: var(--workspaceTopBarSafeBackground);
     }
 }

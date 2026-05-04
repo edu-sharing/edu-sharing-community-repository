@@ -132,7 +132,11 @@ form {
     align-items: center;
     justify-content: center;
     border-radius: 0 3px 3px 0;
-    background-color: color.mix($workspaceTopBarInputBackground, $workspaceTopBarBackground, 80%);
+    background-color: color-mix(
+        in srgb,
+        #{$workspaceTopBarInputBackground} 80%,
+        var(--workspaceTopBarBackground)
+    );
     & ::ng-deep .mdc-icon-button__ripple {
         border-radius: unset;
     }
