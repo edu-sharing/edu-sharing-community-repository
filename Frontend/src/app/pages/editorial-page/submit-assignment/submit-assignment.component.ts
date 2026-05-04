@@ -125,12 +125,16 @@ export class SubmitAssignmentComponent implements OnDestroy {
     submissionSent = computed(
         () => this.submission() && this.submission()?.submissionStatus === 'FINISHED',
     );
-    canSendSubmission = computed(
+    canEditSubmissionNotes = computed(
         () =>
             this.isOpenForSubmission() &&
             !this.submissionSent() &&
             this.isBeforeEndDate() &&
-            !this.loading() &&
+            !this.loading(),
+    );
+    canSendSubmission = computed(
+        () =>
+            this.canEditSubmissionNotes() &&
             this.files().every(
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
             ),
@@ -172,7 +176,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         effect(() => {
             const file = this.selectedCorrectedFile();
             this.selectedCorrectedFileUrl.set(undefined);
-            if (this.isOpenForSubmission()) {
+            if (this.canEditSubmissionNotes()) {
                 this.submitFormGroup?.get('userNotes')?.enable();
             } else {
                 this.submitFormGroup?.get('userNotes')?.disable();

@@ -135,7 +135,7 @@
             <button
               mat-stroked-button
               color="primary"
-              [disabled]="!(isOpenForSubmission() || loading())"
+              [disabled]="!(canEditSubmissionNotes() || loading())"
               (click)="saveUserNotes()"
             >
               {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SAVE_NOTES' | translate }}
