@@ -1962,25 +1962,26 @@ export class TemplateComponent implements AfterViewInit, OnDestroy, OnInit {
             }),
         );
         this.defaultPageVariantNodes =
-            searchResult.nodes ||
-            ([
-                {
-                    ref: {
-                        archived: false,
-                        id: uuidv4(),
-                        repo: HOME_REPOSITORY,
-                    },
-                    name: 'DEFAULT TEMPLATE',
-                    title: 'DEFAULT TEMPLATE',
-                    type: RestConstants.CCM_TYPE_MAP,
-                    properties: {
-                        [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: [
-                            '{"variables":{},"template":{},"structure":{"swimlanes":[]}}',
-                        ],
-                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
-                    },
-                },
-            ] as Partial<Node>[]);
+            searchResult.nodes?.length > 0
+                ? searchResult.nodes
+                : ([
+                      {
+                          ref: {
+                              archived: false,
+                              id: uuidv4(),
+                              repo: HOME_REPOSITORY,
+                          },
+                          name: 'DEFAULT TEMPLATE',
+                          title: 'DEFAULT TEMPLATE',
+                          type: RestConstants.CCM_TYPE_MAP,
+                          properties: {
+                              [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: [
+                                  '{"variables":{},"template":{},"structure":{"swimlanes":[]}}',
+                              ],
+                              [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
+                          },
+                      },
+                  ] as Partial<Node>[]);
         return null;
     }
 

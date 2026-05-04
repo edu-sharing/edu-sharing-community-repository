@@ -4,7 +4,6 @@ set -eu
 
 ########################################################################################################################
 
-alfresco_share_enabled="${REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED:-false}"
 my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 -provider legacy | awk '{ print $2 }')"
 
@@ -453,11 +452,6 @@ xmlstarlet ed -L \
 
   cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
-}
-
-[[ "${alfresco_share_enabled}" == "false" ]] && {
-  echo "Alfresco share is disabled. Removing webapp"
-  rm -rf tomcat/webapps/share
 }
 
 ### edu-sharing ########################################################################################################

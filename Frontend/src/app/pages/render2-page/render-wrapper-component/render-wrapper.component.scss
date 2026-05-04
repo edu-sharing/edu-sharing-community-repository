@@ -137,12 +137,23 @@ rs-root {
             &.module-MOODLE,
             &.module-HTML {
                 width: 70%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
+                }
                 height: auto;
                 aspect-ratio: 16 / 9;
             }
-            &.module-VIDEO,
             &.module-url {
-                width: 40%;
+                width: 60%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
+                }
+            }
+            &.module-VIDEO {
+                width: 50%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
+                }
             }
             &.module-AUDIO {
                 width: 70%;
@@ -155,16 +166,18 @@ rs-root {
                     width: 90%;
                 }
             }
-            // @TODO: Move this into the library pdf component and obey the --containerHeight var!
             &.module-DOCUMENT,
             &.module-PDF {
-                ngx-extended-pdf-viewer .zoom {
-                    height: var(--containerHeight) !important;
+                width: 70%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
                 }
             }
-            // some modules should get 100% of the browser height
-            rs-module-pdf {
-                // height: $maxHeight;
+            &.module-H5P {
+                width: 70%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
+                }
             }
         }
     }

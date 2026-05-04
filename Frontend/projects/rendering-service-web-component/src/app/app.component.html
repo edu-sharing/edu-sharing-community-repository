@@ -10,7 +10,9 @@
 </rs-root>
 <div class="inline-metadata" *ngIf="display_mode === 'inline' && node()">
   <div>
-    <a [href]="resourceUrl">{{ node().title || node().name }}</a>
+    <a [href]="resourceUrl" [target]="targetBlank ? '_blank' : '_self'">{{
+      node().title || node().name
+    }}</a>
     {{ 'RENDERING.AUTHORED_BY' | translate }} {{ getAuthors() }}
     <ng-container *ngIf="node().license as license">
       <ng-container *ngIf="license.url; else noLink">
