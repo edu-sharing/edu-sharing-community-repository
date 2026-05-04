@@ -258,7 +258,7 @@ export class DashboardSwimlaneComponent {
                         this.searchService.search({
                             metadataset: DEFAULT,
                             query: null,
-                            type: 'recentActivity',
+                            searchMode: 'recentActivity',
                             repository: HOME_REPOSITORY,
                             contentType: k[1] as any,
                             maxItems: this.maxItemsEvents,
@@ -287,7 +287,7 @@ export class DashboardSwimlaneComponent {
                         this.searchService.search({
                             metadataset: DEFAULT,
                             query: null,
-                            type: 'shares',
+                            searchMode: 'shares',
                             direction: k[1] as any,
                             repository: HOME_REPOSITORY,
                             contentType: 'ALL',

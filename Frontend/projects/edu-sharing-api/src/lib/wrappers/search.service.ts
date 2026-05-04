@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 import {
     Assignment,
@@ -11,11 +11,10 @@ import {
     MdsQueryCriteria,
     NetworkService,
     Node,
-    SearchResultEvent,
-    SearchResultInvite,
     SearchResults,
     UserEvent,
 } from '../../public-api';
+import { SuggestionNode } from '../api/models/suggestion-node';
 import { SearchV1Service } from '../api/services';
 import { onSubscription } from '../utils/rxjs-operators/on-subscription';
 import { LabeledValuesDict, MdsLabelService, RawValuesDict } from './mds-label.service';
@@ -61,8 +60,12 @@ export type DidYouMeanSuggestion = Pick<Suggest, 'highlighted' | 'text'>;
 /** Parameters to be provided to `search`. */
 export type SearchRequestParams = (Parameters<SearchV1Service['search']>[0] &
     Partial<Parameters<SearchV1Service['getRecentUserShares']>[0]> &
-    Partial<Parameters<SearchV1Service['getRecentUserEvents']>[0]>) & {
-    type?: 'search' | 'shares' | 'recentActivity' | 'assignments';
+    Partial<Parameters<SearchV1Service['getRecentUserEvents']>[0]> &
+    Partial<Parameters<SearchV1Service['getNodesBySuggestion']>[0]>) & {
+    /**
+     * internal search endpoint to be used
+     */
+    searchMode?: 'search' | 'shares' | 'recentActivity' | 'assignments' | 'suggestions';
     /**
      * the metadataset id
      * Note: This will also be used to resolve facet labels!
@@ -81,12 +84,14 @@ export type SearchResultGeneric<T extends Node | Assignment> = Omit<SearchResult
 };
 export type NodeShare = Node & { share: Omit<InviteEvent, 'node'> };
 export type NodeEvent = Node & { event: Omit<UserEvent, 'node'> };
+export type NodeSuggestion = Node & { suggestions: SuggestionNode[] };
 
 export type GenericSearchResults =
     | SearchResultGeneric<Node>
     | SearchResultGeneric<NodeShare>
     | SearchResultGeneric<Assignment>
-    | SearchResultGeneric<NodeEvent>;
+    | SearchResultGeneric<NodeEvent>
+    | SearchResultGeneric<NodeSuggestion>;
 
 interface CompletedRequest {
     /** Parameters sent with the API request. */
@@ -165,9 +170,9 @@ export class SearchService {
      * Sends a plain search request without updating any global state.
      */
     requestSearch(params: SearchRequestParams): Observable<GenericSearchResults> {
-        if (!params.type || params.type === 'search') {
+        if (!params.searchMode || params.searchMode === 'search') {
             return this.searchV1.search(params);
-        } else if (params.type === 'recentActivity') {
+        } else if (params.searchMode === 'recentActivity') {
             return this.searchV1.getRecentUserEvents(params).pipe(
                 map((r) => {
                     (r as any).nodes = r.nodes.map((e) => {
@@ -179,7 +184,7 @@ export class SearchService {
                     return r as SearchResultGeneric<NodeEvent>;
                 }),
             );
-        } else if (params.type === 'shares') {
+        } else if (params.searchMode === 'shares') {
             return this.searchV1.getRecentUserShares(params).pipe(
                 map((r) => {
                     (r as any).nodes = r.nodes.map((e) => {
@@ -191,8 +196,20 @@ export class SearchService {
                     return r as SearchResultGeneric<NodeEvent>;
                 }),
             );
-        } else if (params.type === 'assignments') {
+        } else if (params.searchMode === 'assignments') {
             return this.assignmentV1Service.searchAssignments(params);
+        } else if (params.searchMode === 'suggestions') {
+            return this.searchV1.getNodesBySuggestion(params).pipe(
+                map((r) => {
+                    (r as any).nodes = r.nodes.map((e) => {
+                        return {
+                            ...e.node,
+                            suggestions: e.suggestionNodes ?? [],
+                        };
+                    });
+                    return r as SearchResultGeneric<NodeSuggestion>;
+                }),
+            );
         }
         throw new Error('invalid type: ' + params.type);
     }

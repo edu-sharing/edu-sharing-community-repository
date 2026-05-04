@@ -25,6 +25,7 @@ export class ListItemLabelPipe implements PipeTransform {
             ASSIGNMENT: 'ASSIGNMENT',
             SUBMISSION: 'SUBMISSION',
             SHARE: 'SHARE',
+            SUGGESTION: 'SUGGESTION',
         };
         if (item.label) {
             return rxjs.of(item.label);

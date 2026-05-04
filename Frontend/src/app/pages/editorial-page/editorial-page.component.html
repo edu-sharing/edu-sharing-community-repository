@@ -111,7 +111,14 @@
           ></es-actionbar>
         </div>
         <ng-container *ngIf="(params$ | async).primaryMode as mode">
-          <ng-container *ngIf="mode === 'activity' || mode === 'share' || mode === 'assignment'">
+          <ng-container
+            *ngIf="
+              mode === 'activity' ||
+              mode === 'share' ||
+              mode === 'assignment' ||
+              mode === 'suggestions'
+            "
+          >
             <es-node-entries-wrapper
               [primaryInstance]="true"
               [dataSource]="dataSource"

@@ -1,0 +1,11 @@
+TEST
+<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'SUGGESTION'">
+  <span *ngSwitchCase="'fields'">
+    <ng-container *ngFor="let caption of pendingPropertyCaptions$ | async; let last = last">
+      {{ caption | translate }}{{ last ? '' : ', ' }}
+    </ng-container>
+  </span>
+  <span *ngSwitchCase="'count'">
+    {{ pendingCount$ | async }}
+  </span>
+</ng-container>

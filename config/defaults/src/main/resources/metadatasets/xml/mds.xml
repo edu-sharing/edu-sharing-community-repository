@@ -824,6 +824,15 @@
         <entry icon="done_all">finished</entry>
       </values>
     </widget>
+    <widget>
+      <id>virtual:suggestionType</id>
+      <caption>cp_virtual_suggestionType</caption>
+      <valuespace_i18n_prefix>suggestionType_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="person">USER_PROPOSAL</entry>
+        <entry icon="auto_awesome">AI</entry>
+      </values>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1170,6 +1179,13 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_suggestions</id>
+      <html><![CDATA[
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
+      ]]></html>
+    </template>
+    <template>
       <id>editorial_assignment</id>
       <html><![CDATA[
 				]]></html>
@@ -1454,6 +1470,13 @@
       <rendering>angular</rendering>
       <views>
         <view>editorial_assignment</view>
+      </views>
+    </group>
+    <group>
+      <id>editorial_suggestions</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_suggestions</view>
       </views>
     </group>
   </groups>
@@ -1772,6 +1795,73 @@
           ],
           "minimum_should_match": 1
           }}
+        </statement>
+      </property>
+    </query>
+    <query join="AND" id="nodesBySuggestion">
+      <basequery>{"bool":{
+        "should":[
+        {"match":{"type":"ccm:io"}},
+        {"match":{"type":"ccm:map"}}
+        ],
+        "must_not": [
+        {"match":{"type":"ccm:notify"}},
+        {"match":{"aspects":"ccm:collection_io_reference"}}
+        ],
+        "minimum_should_match": 1
+        }}
+      </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
+      <property name="ngsearchword">
+        <statement>
+          {"bool": {
+          "must_not": [
+          {"match":{"type":"ccm:notify"}},
+          {"match":{"aspects":"ccm:collection_io_reference"}}
+          ],
+          "should":[
+          {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"content.fulltext": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_description.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_keyword.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationallearningresourcetype": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationalcontext": {"value": "*${value}*", "case_insensitive": true}}}
+          ],
+          "minimum_should_match": 1
+          }}
+        </statement>
+      </property>
+      <property name="ccm:taxonid">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:taxonid.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:taxonid"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="ccm:educationalcontext">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:educationalcontext"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="ccm:educationallearningresourcetype">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:educationallearningresourcetype.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:educationallearningresourcetype"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="cclom:general_keyword">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.cclom:general_keyword.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"cclom:general_keyword"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="virtual:suggestionType">
+        <statement value="AI">
+          {"nested":{"path":"suggestions","query":{"term":{"suggestions.type":"AI"}}}}
+        </statement>
+        <statement value="USER_PROPOSAL">
+          {"nested":{"path":"suggestions","query":{"term":{"suggestions.type":"USER_PROPOSAL"}}}}
         </statement>
       </property>
     </query>

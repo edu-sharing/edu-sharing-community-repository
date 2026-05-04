@@ -21,6 +21,7 @@ import {
     Node,
     NodeEvent,
     NodeShare,
+    NodeSuggestion,
     SearchResults,
     SearchService,
     SearchServiceUnwrapped,
@@ -107,6 +108,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly TabWidgetShares = 'virtual:shareDirection';
     readonly TabWidgetAssignment = 'virtual:assignmentType';
+    readonly TabWidgetSuggestions = 'virtual:suggestionType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -144,7 +146,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
-    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent | Assignment>();
+    readonly dataSource = new NodeDataSource<
+        Node | NodeShare | NodeEvent | Assignment | NodeSuggestion
+    >();
     columns = signal<ColumnType>(null);
     selection = signal<SelectionModel<NodeEntriesDataType | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
@@ -334,6 +338,26 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     currentScope: 'editorial_suggestions',
                     title: 'EDITORIAL.TITLE_SUGGESTIONS',
                 });
+                this.columns.set({ Default: ListItem.getSuggestionDefaults() });
+                this.mdsDefinition$.next(
+                    await firstValueFrom(
+                        this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
+                    ),
+                );
+                const widget = MdsHelperService.getWidget(
+                    this.TabWidgetSuggestions,
+                    null,
+                    this.mdsDefinition$.value.widgets,
+                );
+                this.mdsGroup.set('editorial_suggestions');
+                if (widget == null) {
+                    console.warn(
+                        'Can not register tabs since widget definition was not found',
+                        this.TabWidgetSuggestions,
+                    );
+                } else {
+                    this.editorialPageService.registerTabsFromWidget(widget);
+                }
             } else if (p.primaryMode === 'assignment') {
                 this.mainNav.patchMainNavConfig({
                     currentScope: 'editorial_assignment',
@@ -529,7 +553,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             );
             this.searchService
                 .search({
-                    type: 'recentActivity',
+                    searchMode: 'recentActivity',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
@@ -562,7 +586,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             const maxAge = originalCriteria['virtual:shareMaxAge']?.[0];
             this.searchService
                 .search({
-                    type: 'shares',
+                    searchMode: 'shares',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
@@ -582,10 +606,43 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.dataSource.isLoading = false;
                     this.setNewData(event);
                 });
+        } else if (routeConfig.primaryMode === 'suggestions') {
+            const searchCriteria = this.searchHelperService.convertCritieria(
+                {
+                    ...criteria,
+                    ...(ngsearchword
+                        ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
+                        : {}),
+                },
+                mds.widgets,
+                true,
+            );
+            const tabCriteria = this.editorialPageService.buildSearchCriteria(
+                this.tabSelection$.value,
+            );
+            this.searchService
+                .search<GenericSearchResults>({
+                    searchMode: 'suggestions',
+                    metadataset: DEFAULT,
+                    query: null,
+                    repository: HOME_REPOSITORY,
+                    type: tabCriteria[this.TabWidgetSuggestions] as any,
+                    contentType: 'ALL',
+                    ...pagination,
+                    body: {
+                        facetLimit: 5,
+                        facetMinCount: 1,
+                        criteria: searchCriteria,
+                    },
+                })
+                .subscribe((event) => {
+                    this.dataSource.isLoading = false;
+                    this.setNewData(event);
+                });
         } else if (routeConfig.primaryMode === 'assignment') {
             this.searchService
                 .search({
-                    type: 'assignments',
+                    searchMode: 'assignments',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,

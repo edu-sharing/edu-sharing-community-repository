@@ -114,6 +114,16 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class SearchServiceElastic implements SearchService {
     public static final String WORKSPACE_INDEX = "workspace_11.0";
+
+    private static final String SUGGESTION_COMBINED_FACET_SCRIPT = loadScript("suggestion-combined-facet.painless");
+
+    public static String loadScript(String resource) {
+        try (java.io.InputStream is = SearchServiceElastic.class.getClassLoader().getResource(resource).openStream()) {
+            return org.apache.commons.io.IOUtils.toString(is, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to load Painless script: " + resource, e);
+        }
+    }
     public static final String AUTHORITIES_INDEX = "authorities_11.0";
     public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
@@ -289,6 +299,18 @@ public class SearchServiceElastic implements SearchService {
 
     public BoolQuery.Builder getPublishedPermissionsQuery(BoolQuery.Builder builder) {
         return builder.must(m -> m.term(t -> t.field("permissions.read").value(CCConstants.AUTHORITY_GROUP_EVERYONE)));
+    }
+
+    public BoolQuery.Builder getWritePermissionsQuery(BoolQuery.Builder builder) {
+        if (AuthorityServiceHelper.isAdmin() || AuthenticationUtil.isRunAsUserTheSystemUser()) {
+            return builder.must(q -> q.matchAll(all -> all));
+        }
+
+        String user = authenticationService.getCurrentUserName();
+        return builder
+                .minimumShouldMatch("1")
+                .should(s -> s.bool(b -> getPermissionsQuery(b, "permissions.write")))
+                .should(q -> q.match(m -> m.field("owner").query(user)));
     }
 
     public BoolQuery.Builder getCoordinatorPermissionsQuery(BoolQuery.Builder builder) {
@@ -1778,6 +1800,129 @@ public class SearchServiceElastic implements SearchService {
         });
     }
 
+    @Override
+    public org.edu_sharing.repository.server.SearchResult<SearchSuggestionNode> getNodesBySuggestion(
+            List<org.edu_sharing.service.suggestion.SuggestionStatus> statusFilter,
+            List<org.edu_sharing.service.suggestion.SuggestionType> typeFilter,
+            Map<String, String[]> searchCriteria,
+            SearchToken searchToken) throws Exception {
+
+        Query nestedQuery = Query.of(q -> q.nested(n -> n
+                .path("suggestions")
+                .query(nq -> nq.bool(b -> {
+                    if (statusFilter != null && !statusFilter.isEmpty()) {
+                        b = b.must(m -> m.bool(sb -> {
+                            sb = sb.minimumShouldMatch("1");
+                            for (org.edu_sharing.service.suggestion.SuggestionStatus status : statusFilter) {
+                                sb = sb.should(s -> s.term(t -> t
+                                        .field("suggestions.status")
+                                        .value(status.name())
+                                ));
+                            }
+                            return sb;
+                        }));
+                    }
+                    if (typeFilter != null && !typeFilter.isEmpty()) {
+                        b = b.must(m -> m.bool(tb -> {
+                            tb = tb.minimumShouldMatch("1");
+                            for (org.edu_sharing.service.suggestion.SuggestionType type : typeFilter) {
+                                tb = tb.should(s -> s.term(t -> t
+                                        .field("suggestions.type")
+                                        .value(type.name())
+                                ));
+                            }
+                            return tb;
+                        }));
+                    }
+                    return b;
+                }))
+                .innerHits(ih -> ih
+                        .name("suggestions")
+                        .size(100)
+                        .sort(so -> so.field(sf -> sf
+                                .field("suggestions.created")
+                                .order(SortOrder.Desc)
+                        ))
+                )
+        ));
+
+        Query combinedQuery = BoolQuery.of(bool -> bool
+                .must(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
+                .must(nestedQuery)
+        )._toQuery();
+
+        List<SearchFacet> requestedFacets = searchToken.getFacets();
+        // we set facets null because the
+        searchToken.setFacets(null);
+
+        org.edu_sharing.repository.server.SearchResult<SearchSuggestionNode> result =
+            searchInternalWithChildQuery("nodesBySuggestion", searchCriteria, searchToken, null, combinedQuery, (data) -> {
+            List<Map> suggestionMaps = data.getInnerHits().get("suggestions").hits().hits().stream()
+                    .map(hit -> hit.source().to(Map.class))
+                    .collect(Collectors.toList());
+            List<SearchSuggestionNode.SuggestionNode> suggestions = suggestionMaps.stream()
+                    .map(s -> new SearchSuggestionNode.SuggestionNode(
+                            Objects.toString(s.get("id"), null),
+                            s.get("type") != null ? org.edu_sharing.service.suggestion.SuggestionType.valueOf(s.get("type").toString()) : null,
+                            s.get("status") != null ? org.edu_sharing.service.suggestion.SuggestionStatus.valueOf(s.get("status").toString()) : null,
+                            Objects.toString(s.get("propertyId"), null),
+                            Objects.toString(s.get("value"), null),
+                            Objects.toString(s.get("version"), null),
+                            Objects.toString(s.get("description"), null),
+                            Objects.toString(s.get("createdBy"), null),
+                            parseElasticDate(s.get("created"))
+                    ))
+                    .collect(Collectors.toList());
+            return new SearchSuggestionNode(data.getNodeRef(), suggestions);
+        });
+
+        if (requestedFacets != null && !requestedFacets.isEmpty()) {
+            result.setFacets(computeCombinedSuggestionFacets(requestedFacets, combinedQuery, searchToken));
+        }
+        return result;
+    }
+
+    private List<NodeSearch.Facet> computeCombinedSuggestionFacets(
+            List<SearchFacet> requestedFacets, Query combinedQuery, SearchToken searchToken) throws IOException {
+        Map<String, Aggregation> aggregations = new LinkedHashMap<>();
+        int bucketSize = searchToken.getFacetLimit() * MetadataElasticSearchHelper.FACET_LIMIT_MULTIPLIER;
+        for (SearchFacet sf : requestedFacets) {
+            String property = sf.getProperty();
+            aggregations.put(property, Aggregation.of(a -> a.terms(t -> t
+                    .script(s -> s
+                            .source(SUGGESTION_COMBINED_FACET_SCRIPT)
+                            .lang("painless")
+                            .params(Map.of("property", JsonData.of(property)))
+                    )
+                    .size(bucketSize)
+            )));
+        }
+        SearchRequest req = new SearchRequest.Builder()
+                .index(WORKSPACE_INDEX)
+                .size(0)
+                .query(combinedQuery)
+                .aggregations(aggregations)
+                .build();
+        SearchResponse<Map> resp = client.search(req, Map.class);
+
+        List<NodeSearch.Facet> result = new ArrayList<>();
+        for (SearchFacet sf : requestedFacets) {
+            String property = sf.getProperty();
+            Aggregate agg = resp.aggregations().get(property);
+            if (agg != null && agg.isSterms()) {
+                NodeSearch.Facet facet = new NodeSearch.Facet();
+                facet.setProperty(property);
+                List<NodeSearch.Facet.Value> values = new ArrayList<>();
+                for (StringTermsBucket b : agg.sterms().buckets().array()) {
+                    values.add(new NodeSearch.Facet.Value(b.key().stringValue(), b.docCount()));
+                }
+                facet.setValues(values);
+                result.add(facet);
+            }
+        }
+        return result;
+    }
+
     private <T> org.edu_sharing.repository.server.SearchResult<T> searchInternalWithChildQuery(
             String queryId,
             Map<String, String[]> searchCriteria,
@@ -2913,6 +3058,19 @@ public class SearchServiceElastic implements SearchService {
                     "Toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SAFE + " or "
                             + CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE + " are missing");
         }
+    }
+
+
+    /**
+     * Parses an object into a Date instance. The method supports Long and String values.
+     * If the provided value is a Long, it will be interpreted as the number of milliseconds
+     * since the epoch. If the value is a String, it will attempt to parse it as an ISO-8601
+     * formatted date-time string. If the value is of an unsupported type, the method returns null.
+     */
+    private static Date parseElasticDate(Object value) {
+        if (value instanceof Long l) return new Date(l);
+        if (value instanceof String s) return Date.from(Instant.parse(s));
+        return null;
     }
 
     @Data
