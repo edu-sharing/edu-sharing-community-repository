@@ -1,7 +1,6 @@
 <div *ngIf="initialized(); else loadingSpinner">
   <!-- content teaser entries -->
   <es-node-entries
-    class="main-content"
     [blacklistedNodeIds]="blacklistedNodeIds"
     [contextNodeId]="contextNodeId"
     [queryId]="queryId"
