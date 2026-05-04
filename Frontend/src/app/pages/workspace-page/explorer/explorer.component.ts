@@ -365,6 +365,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     ) {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
+        this.registerNodesChanged();
         this.registerNodesDeleted();
         combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
@@ -509,6 +510,20 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             customOptions: this.customOptions,
             parent: this.node$.value,
         });
+    }
+
+    private registerNodesChanged(): void {
+        this.localEvents.nodesChanged
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((n) => n.some((n1) => n1?.ref?.id === this.node$.value?.ref?.id)),
+            )
+            .subscribe(() => {
+                void this.load({
+                    offset: 0,
+                    reset: true,
+                });
+            });
     }
 
     private registerNodesDeleted(): void {
