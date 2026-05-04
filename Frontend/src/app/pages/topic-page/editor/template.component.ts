@@ -2076,7 +2076,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                           type: RestConstants.CCM_TYPE_MAP,
                           properties: {
                               [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: [
-                                  '{"variables":{},"template":{},"structure":{"swimlanes":[]}}',
+                                  '{"structure":{"swimlanes":[]}}',
                               ],
                               [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
                           },
