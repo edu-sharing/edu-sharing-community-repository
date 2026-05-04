@@ -162,7 +162,6 @@ export class TopicPageHelperService {
      * @param variables
      */
     setSelectedVariables(variables: { [property: string]: string[] }): void {
-        console.log('setSelectedVariables', variables);
         this.selectedVariablesSubject.next(variables);
     }
 
@@ -418,18 +417,6 @@ export class TopicPageHelperService {
         isBreadcrumbNode: boolean = false,
         isHeaderNode: boolean = false,
     ): Promise<Node> {
-        console.log(
-            'persistConfig',
-            nodeId,
-            gridIndex,
-            swimlaneIndex,
-            pageVariantNode,
-            widgetConfig,
-            aiConfig,
-            parentWidgetConfigNodeId,
-            isBreadcrumbNode,
-            isHeaderNode,
-        );
         this.openSaveConfigToast();
         const configNodeExists: boolean = nodeId && nodeId !== '';
         try {

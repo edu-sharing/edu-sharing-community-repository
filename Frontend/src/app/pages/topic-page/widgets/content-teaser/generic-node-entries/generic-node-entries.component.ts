@@ -143,30 +143,30 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             case GenericNodeEntriesDisplayType.SingleView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.SplitView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.StandardView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.CompactView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'grid';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.ListView:
                 newDisplayType = NodeEntriesDisplayType.Table;
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             default:
