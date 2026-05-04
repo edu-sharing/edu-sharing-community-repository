@@ -862,6 +862,7 @@ export class NodesSelectorComponent implements OnInit {
                         this.selectedNodes() as Node[],
                         false,
                         () => {
+                            this.resetNodeEntriesSelections();
                             this.toast.closeProgressSpinner();
                         },
                     );
@@ -873,6 +874,7 @@ export class NodesSelectorComponent implements OnInit {
                     );
                     this.localEventsService.nodesCreated.emit(this.selectedNodes() as Node[]);
                     this.localEventsService.nodesChanged.emit([this.parent]);
+                    this.resetNodeEntriesSelections();
                     this.toast.closeProgressSpinner();
                 }
             } catch (e) {
@@ -951,6 +953,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     goBack() {
         this.currentStep.set(StepType.SELECT);
+        this.resetNodeEntriesSelections();
         this.selectedNodes.set([]);
         this.selectedNodeChildren.set([]);
     }
