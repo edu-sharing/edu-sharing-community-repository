@@ -13,7 +13,11 @@
         {{ rootName ?? (i18nPrefix + 'DEFAULT_ROOT_NAME' | translate) }}
       </a>
       <ng-template #defaultLink>
-        <a *ngIf="customUrl && customUrl(node); else defaultNodeLink" [href]="customUrl(node)">
+        <a
+          *ngIf="customUrl && customUrl(node); else defaultNodeLink"
+          [href]="customUrl(node)"
+          [target]="customUrlTarget"
+        >
           <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
         </a>
         <ng-template #defaultNodeLink>

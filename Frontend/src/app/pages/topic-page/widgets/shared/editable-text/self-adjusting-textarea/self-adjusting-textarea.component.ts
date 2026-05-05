@@ -2,18 +2,26 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { CommonModule } from '@angular/common';
 import {
     Component,
+    computed,
     CUSTOM_ELEMENTS_SCHEMA,
+    effect,
     EventEmitter,
+    input,
     Input,
+    InputSignal,
     NgZone,
     OnChanges,
     OnInit,
     Output,
+    signal,
+    Signal,
     SimpleChanges,
     ViewChild,
+    WritableSignal,
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -24,6 +32,7 @@ import { take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
 import { AiTagOption } from '../../../../shared/types/ai-tag-option';
+import { containsAiTags } from '../../../../shared/utils/ai-util';
 
 @Component({
     selector: 'es-self-adjusting-textarea',
@@ -32,6 +41,7 @@ import { AiTagOption } from '../../../../shared/types/ai-tag-option';
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
+        MatCheckbox,
         MatFormFieldModule,
         MatInputModule,
         MatTooltip,
@@ -43,6 +53,7 @@ import { AiTagOption } from '../../../../shared/types/ai-tag-option';
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
+    aiGenerated: InputSignal<boolean> = input(false);
     @Input() alignCenter: boolean = false;
     @Input() disabled: boolean = false;
     @Input() headerElement: '' | 'h1' | 'h2' | 'h3' = '';
@@ -50,7 +61,9 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
     @Input() inputLimit?: number;
     @Input() label: string;
     @Input() showAiButtons: boolean = false;
+    @Input() showAiCheckbox: boolean = false;
     @Input() text: string;
+    @Output() generateWithAiChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() textChange: EventEmitter<string> = new EventEmitter<string>();
     @ViewChild('autosize', { static: false }) autosize: CdkTextareaAutosize;
 
@@ -58,10 +71,27 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
     avoidFocusChange: boolean = false;
     controlId: string;
     descriptionControl: FormControl;
-    latestStoredText: string;
+    readonly generateWithAi: WritableSignal<boolean> = signal(false);
+    latestStoredText: WritableSignal<string> = signal('');
     markdownForm: FormGroup;
 
-    constructor(private ngZone: NgZone) {}
+    disableAiCheckbox: Signal<boolean> = computed((): boolean => {
+        return !this.latestStoredText() || containsAiTags(this.latestStoredText());
+    });
+    disableAiCheckboxReason: Signal<string> = computed((): string => {
+        if (!this.latestStoredText()) {
+            return 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.MISSING_TEXT';
+        } else if (containsAiTags(this.latestStoredText())) {
+            return 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.AI_TAGS_EXIST';
+        }
+        return null;
+    });
+
+    constructor(private ngZone: NgZone) {
+        effect((): void => {
+            this.generateWithAi.set(this.aiGenerated());
+        });
+    }
 
     /**
      * Initializes the component by assigning a unique control id and creating a form control for the text input
@@ -106,7 +136,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         // listen to text changes
         if (changes.text?.firstChange) {
-            this.latestStoredText = changes.text.currentValue;
+            this.latestStoredText.set(changes.text.currentValue);
             this.markdownForm = new FormGroup({
                 description: new FormControl(this.text),
             });
@@ -117,7 +147,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
                 .pipe(take(1))
                 .subscribe(() => this.autosize?.resizeToFitContent(true));
         } else if (changes.text?.previousValue !== changes.text?.currentValue) {
-            this.latestStoredText = changes.text.currentValue;
+            this.latestStoredText.set(changes.text.currentValue);
             this.descriptionControl.patchValue(changes.text.currentValue);
         }
         // listen to changes of disabled state
@@ -136,7 +166,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
     addAiTag(tag: string): void {
         // check whether the string ends with whitespace: https://stackoverflow.com/a/30566492
         const endSpace: RegExp = /\s$/;
-        // only add leading whitespace, if it does not already exist
+        // only add leading whitespace if it does not already exist
         this.descriptionControl.setValue(
             this.descriptionControl.value +
                 (endSpace.test(this.descriptionControl.value) ? '' : ' ') +
@@ -152,14 +182,18 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
         if (this.avoidFocusChange) {
             return;
         }
-        // check, whether the text has been changed
-        if (this.latestStoredText !== this.descriptionControl.value) {
+        // check whether the text has been changed
+        if (this.latestStoredText() !== this.descriptionControl.value) {
+            if (containsAiTags(this.descriptionControl.value)) {
+                this.generateWithAi.set(true);
+                this.generateWithAiChanged.emit(true);
+            }
             this.textChange.emit(this.descriptionControl.value);
         }
     }
 
     /**
-     * Allows to avoid a focus change of the textarea,
+     * Allows avoiding a focus change of the textarea,
      * which is necessary to prevent it from saving the text on every click on the toolbar.
      */
     avoidSaveText(): void {
@@ -168,4 +202,13 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
             this.avoidFocusChange = false;
         }, 250);
     }
+
+    /**
+     * Emits the change event whether the text should be generated with AI.
+     *
+     * @param checked
+     */
+    onGenerateWithAiChange = (checked: boolean): void => {
+        this.generateWithAiChanged.emit(checked);
+    };
 }

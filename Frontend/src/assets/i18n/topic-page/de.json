@@ -71,6 +71,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Nicht sortierte Liste",
         "ORDERED_LIST": "Sortierte Liste",
+        "GENERATE_WITH_AI": "Mit KI generieren",
+        "MISSING_TEXT": "Bitte geben Sie zuerst einen Text ein.",
+        "AI_TAGS_EXIST": "Es wurden KI-Platzhalter gefunden, wodurch der Text automatisch generiert wird.",
         "TITLE": "Titel der Sammlung einfügen",
         "DESCRIPTION": "Beschreibung der Sammlung einfügen",
         "TARGET_GROUP": "Zielgruppe des Nutzers einfügen",
@@ -215,14 +218,9 @@
         "DELETE_VARIANT": "Vorlage löschen"
       }
     },
-    "CONFIG_PAGE_TEMPLATE": {
-      "HEADING": "Bearbeitung der Seiten-Vorlage(n)",
-      "SAME_REF_ERROR": "Sie nutzen derzeit die gleiche Vorlage für Portale und Themenseiten. Dies sollte vermieden werden.",
-      "UNLINK": "Loslösen",
-      "ADD_EMPTY_TEMPLATE": "Leere Vorlage erstellen",
-      "EMPTY_TEMPLATE_HINT": "Bisher ist noch keine Vorlage vorhanden. Verwenden Sie den Button, um eine leere Vorlage anzulegen und dahin zu wechseln.",
-      "SWITCH_TO_PAGE_VARIANT": "Zur Seiten-Vorlage wechseln",
-      "SWITCH_TO_PAGE_VARIANT_HINT": "Klicken Sie den Button, um zur Vorlage zu wechseln und diese zu bearbeiten."
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Themenseiten-Vorlage erstellen",
+      "MESSAGE": "Bisher ist noch keine Vorlage vorhanden. Möchtest du eine leere Vorlage anlegen und dahin wechseln?"
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Widget einbetten",
@@ -354,6 +352,8 @@
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
+    "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
+    "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "EXISTING_VARIANT": {
@@ -373,6 +373,8 @@
         "TEMPLATE": "Vorlage"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "SEARCH": "Suche",
+      "EMPTY": "Es konnten keine Vorlagen gefunden werden.",
       "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
       "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
       "COPY_SUFFIX": "Kopie"

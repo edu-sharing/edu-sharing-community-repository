@@ -32,6 +32,9 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() resource_url: string = '';
     @Input() preview_url: string = '';
     @Input() signature_algorithm: string | null = null;
+    @Input() component_height: number | null = null;
+    @Input() footer_height: number = 100;
+    @Input() target_blank: boolean = false;
     showInlineMetadata = false;
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
@@ -41,6 +44,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     assetUrl: string;
     resourceUrl: string;
     previewUrl: string;
+    targetBlank: boolean;
 
     constructor(
         private renderHelperService: RenderHelperService,
@@ -61,6 +65,12 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.assetUrl = this.assets_url;
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
+        this.targetBlank = this.target_blank;
+        console.log('setting height');
+        if (this.component_height !== null && this.component_height > 0) {
+            const containerHeight = this.component_height - this.footer_height;
+            document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
+        }
     }
 
     async ngOnChanges(changes: SimpleChanges) {

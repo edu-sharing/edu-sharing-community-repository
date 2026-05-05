@@ -23,6 +23,7 @@
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
                   [attr.data-text]="node.data | nodeTitle"
+                  [target]="customUrlTarget"
                 >
                   {{ node.data | nodeTitle }}
                 </a>
@@ -99,6 +100,7 @@
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
                   [attr.data-text]="node.data | nodeTitle"
+                  [target]="customUrlTarget"
                 >
                   {{ node.data | nodeTitle }}
                 </a>

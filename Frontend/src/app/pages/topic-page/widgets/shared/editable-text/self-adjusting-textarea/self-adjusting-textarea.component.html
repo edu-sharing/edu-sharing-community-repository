@@ -12,8 +12,8 @@
     <!--       resulting in strike-through and horizontal lines being supported but not included -->
     <div
       class="toolbars"
-      [class.justify-end]="showAiButtons && hideToolbar"
-      *ngIf="!hideToolbar || showAiButtons"
+      [class.absolute-positioning]="(showAiButtons || showAiCheckbox) && hideToolbar"
+      *ngIf="!hideToolbar || showAiButtons || showAiCheckbox"
     >
       <markdown-toolbar [attr.for]="controlId" *ngIf="!hideToolbar">
         <md-bold
@@ -73,18 +73,35 @@
           </button>
         </md-ordered-list>
       </markdown-toolbar>
-      <div class="ai-buttons" *ngIf="showAiButtons">
-        <button
-          *ngFor="let option of aiTagOptions"
-          [disabled]="disabled"
-          [matTooltip]="option.tooltip | translate"
-          mat-icon-button
-          color="primary"
-          (mousedown)="avoidSaveText()"
-          (click)="addAiTag(option.value)"
+
+      <div class="ai-buttons" *ngIf="showAiCheckbox || showAiButtons">
+        <div
+          [matTooltip]="disableAiCheckboxReason() ? (disableAiCheckboxReason() | translate) : null"
         >
-          <i [esIcon]="option.icon" [attr.aria-label]="option.ariaLabel | translate"></i>
-        </button>
+          <mat-checkbox
+            *ngIf="showAiCheckbox"
+            [disabled]="disableAiCheckbox()"
+            [(ngModel)]="generateWithAi"
+            (ngModelChange)="onGenerateWithAiChange($event)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            {{ 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.GENERATE_WITH_AI' | translate }}
+          </mat-checkbox>
+        </div>
+
+        <div class="button-container" [class.separator]="showAiCheckbox" *ngIf="showAiButtons">
+          <button
+            *ngFor="let option of aiTagOptions"
+            [disabled]="disabled"
+            [matTooltip]="option.tooltip | translate"
+            mat-icon-button
+            color="primary"
+            (mousedown)="avoidSaveText()"
+            (click)="addAiTag(option.value)"
+          >
+            <i [esIcon]="option.icon" [attr.aria-label]="option.ariaLabel | translate"></i>
+          </button>
+        </div>
       </div>
     </div>
 

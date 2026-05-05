@@ -287,6 +287,7 @@
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",
     "ccm:eaf_productionyear": "Production year",
+    "ccm:page_variant_profiling_target_group": "Target group",
     "counts": {
       "OVERALL": "Sum",
       "VIEW_MATERIAL": "Access",
@@ -888,6 +889,7 @@
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
     "QUEUE_POSITION": "Queue position",
+    "OPEN_IN_NEW_TAB": "Open in new tab",
     "REVOKED": {
       "DETAILS_EMPTY": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DETAILS": "The publisher or editorial team has revoked this object.\n\nCheck the reason below for more details",

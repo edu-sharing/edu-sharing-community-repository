@@ -7,6 +7,11 @@
     --cardWidth: 314px;
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
     container-type: inline-size;
+    --scroll-gradient-color: #fff;
+}
+
+es-node-entries-wrapper {
+    --es-node-entries-scroll-gradient-color: var(--scroll-gradient-color);
 }
 
 // do not display the card / list (table) options in view mode

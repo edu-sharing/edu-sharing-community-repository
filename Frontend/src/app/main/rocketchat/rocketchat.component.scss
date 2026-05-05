@@ -31,8 +31,8 @@ $chatHeight: 550px;
         display: flex;
         padding: 0 10px;
         align-items: center;
-        color: $workspaceTopBarFontColor;
-        background-color: $workspaceTopBarBackground;
+        color: var(--workspaceTopBarFontColor);
+        background-color: var(--workspaceTopBarBackground);
         height: $barHeight;
         .title {
             flex-grow: 1;

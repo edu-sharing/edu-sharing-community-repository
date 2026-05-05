@@ -22,10 +22,7 @@ import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import {
-    DEFAULT_ICON_PATH,
-    DEFAULT_WIDGET_CONFIG_PROP,
-} from '../../shared/types/custom-definitions';
+import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
 import { retrieveResultString } from '../../shared/utils/ai-util';
 import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
@@ -125,14 +122,17 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
         if (
             changes.nodeId?.firstChange ||
-            changes.nodeId?.currentValue !== changes.nodeId?.previousValue
+            changes.nodeId?.currentValue !== changes.nodeId?.previousValue ||
+            topicChanged
         ) {
             // reset several variables if an actual change was detected
             if (
-                !changes.nodeId?.firstChange &&
-                changes.nodeId?.currentValue !== changes.nodeId?.previousValue
+                (!changes.nodeId?.firstChange &&
+                    changes.nodeId?.currentValue !== changes.nodeId?.previousValue) ||
+                topicChanged
             ) {
                 this.aiGeneratedImage = this.aiSupported();
                 this.aiGeneratedText.set(false);
@@ -332,6 +332,5 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         return headerConfig;
     }
 
-    protected readonly iconPath: string = DEFAULT_ICON_PATH;
     protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
 }

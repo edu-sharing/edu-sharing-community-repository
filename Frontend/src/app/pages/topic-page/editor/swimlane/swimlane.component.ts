@@ -19,6 +19,7 @@ import { GenericWidgetComponent } from '../../widgets/generic-widget/generic-wid
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { ConfigureGridComponent } from './configure-grid/configure-grid.component';
 import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-type.component';
+import { Values } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-swimlane',
@@ -46,11 +47,12 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Input() grid: GridTile[] = [];
     @Input() pageVariantNode?: Node;
     @Input() searchInput: string;
+    @Input() searchFilters: Values;
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
     @Input() swimlaneIndex: number;
     @Input() topicWidgets: NodeEntries;
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
-    @Output() searchInputHitsChanged: EventEmitter<GridTileToHitsMapping> =
+    @Output() searchHitsChanged: EventEmitter<GridTileToHitsMapping> =
         new EventEmitter<GridTileToHitsMapping>();
     @Output() visibleNodesChanged: EventEmitter<GridTileToSearchResultsMapping> =
         new EventEmitter<GridTileToSearchResultsMapping>();
@@ -94,14 +96,14 @@ export class SwimlaneComponent implements AfterViewChecked {
     }
 
     /**
-     * Called by es-generic-widget searchInputHitsChanged output event.
+     * Called by es-generic-widget searchHitsChanged output event.
      * Emits the hasHits.
      *
      * @param hasHits
      * @param gridIndex
      */
-    changeSearchInputHits(hasHits: boolean, gridIndex: number): void {
-        this.searchInputHitsChanged.emit({ hasHits, gridIndex });
+    changeSearchHits(hasHits: boolean, gridIndex: number): void {
+        this.searchHitsChanged.emit({ hasHits, gridIndex });
     }
 
     /**

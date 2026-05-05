@@ -19,9 +19,13 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../../services/toast';
+import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+    DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
+    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
 } from '../types/custom-definitions';
 import { BapiConfigObject } from '../types/bapi-config-object';
@@ -30,7 +34,12 @@ import { PageVariantConfig } from '../types/page-variant-config';
 import { Swimlane } from '../types/swimlane';
 import { WidgetConfig } from '../types/widget-config/widget-config';
 import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
-import { convertNodeRefIntoNodeId } from '../utils/template-util';
+import {
+    convertNodeRefIntoNodeId,
+    retrieveNodeId,
+    retrievePageVariantTemplateRef,
+    retrievePageVariantTemplateVersion,
+} from '../utils/template-util';
 import { TopicPageEventsService } from './topic-page-events.service';
 import { TopicPageGlobalService } from './topic-page-global.service';
 
@@ -46,6 +55,7 @@ export class TopicPageHelperService {
     constructor(
         private collectionApi: CollectionService,
         private dialogs: DialogsService,
+        private genericWidgetGlobalService: GenericWidgetGlobalService,
         private nodeApi: NodeService,
         private nodeApiUnwrapped: NodeServiceUnwrapped,
         private platformLocation: PlatformLocation,
@@ -154,7 +164,6 @@ export class TopicPageHelperService {
      * @param variables
      */
     setSelectedVariables(variables: { [property: string]: string[] }): void {
-        console.log('setSelectedVariables', variables);
         this.selectedVariablesSubject.next(variables);
     }
 
@@ -257,7 +266,7 @@ export class TopicPageHelperService {
         type: string,
         name: string,
         aspect?: string,
-        properties?: { [key: string]: string },
+        properties?: { [key: string]: string | string[] },
     ): Promise<Node> {
         parentId = convertNodeRefIntoNodeId(parentId);
         const request: any = {
@@ -266,6 +275,9 @@ export class TopicPageHelperService {
             type,
             body: {
                 [RestConstants.CM_NAME]: [name],
+                [RestConstants.CM_PROP_METADATASET_EDU_METADATASET]: [
+                    this.genericWidgetGlobalService.getDefaultMds(),
+                ],
             },
         };
         if (aspect) {
@@ -279,7 +291,7 @@ export class TopicPageHelperService {
             request.obeyMds = false;
             // enrich the request body with the input parameters
             Object.entries(properties).forEach(([key, value]) => {
-                request.body[key] = [value];
+                request.body[key] = Array.isArray(value) ? value : [value];
             });
             return (await firstValueFrom(this.nodeApiUnwrapped.createChild(request))).node;
         }
@@ -288,13 +300,16 @@ export class TopicPageHelperService {
     /**
      * Sets a property to an existing node.
      */
-    async setProperty(nodeId: string, property: string, value: string): Promise<Node> {
+    async setProperty(nodeId: string, property: string, value: string | string[]): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
+        const convertedValue: string[] = Array.isArray(value) ? value : [value];
         // workaround to remove temporary properties from the page variant config
         if (property === DEFAULT_PAGE_VARIANT_CONFIG_PROP) {
-            value = this.cleanPageVariantConfig(value);
+            convertedValue[0] = this.cleanPageVariantConfig(convertedValue[0]);
         }
-        return firstValueFrom(this.nodeApi.setProperty(HOME_REPOSITORY, nodeId, property, [value]));
+        return firstValueFrom(
+            this.nodeApi.setProperty(HOME_REPOSITORY, nodeId, property, convertedValue),
+        );
     }
 
     /**
@@ -329,7 +344,7 @@ export class TopicPageHelperService {
     async setPropertyAndRetrieveUpdatedNode(
         nodeId: string,
         propertyName: string,
-        value: string,
+        value: string | string[],
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);
@@ -407,18 +422,6 @@ export class TopicPageHelperService {
         isBreadcrumbNode: boolean = false,
         isHeaderNode: boolean = false,
     ): Promise<Node> {
-        console.log(
-            'persistConfig',
-            nodeId,
-            gridIndex,
-            swimlaneIndex,
-            pageVariantNode,
-            widgetConfig,
-            aiConfig,
-            parentWidgetConfigNodeId,
-            isBreadcrumbNode,
-            isHeaderNode,
-        );
         this.openSaveConfigToast();
         const configNodeExists: boolean = nodeId && nodeId !== '';
         try {
@@ -492,6 +495,49 @@ export class TopicPageHelperService {
     async uploadFile(parentId: string, name: string, mimeType: string, blob: Blob): Promise<Node> {
         const fileNode: Node = await this.createChild(parentId, RestConstants.CCM_TYPE_IO, name);
         return await firstValueFrom(this.changeContent(fileNode.ref.id, mimeType, blob));
+    }
+
+    /**
+     * Retrieves the page variant properties for a given node, title suffix and page config.
+     *
+     * @param node
+     * @param customTitleSuffix
+     * @param variantConfig
+     */
+    async retrievePageVariantProperties(
+        node: Node,
+        customTitleSuffix: string = '',
+        variantConfig?: PageVariantConfig,
+    ) {
+        const variantTemplateRef: string = retrievePageVariantTemplateRef(node);
+        const variantTemplateNode: Node = variantTemplateRef.includes(retrieveNodeId(node))
+            ? node
+            : await this.getNode(convertNodeRefIntoNodeId(variantTemplateRef));
+        const variantTemplateVersion: string =
+            retrievePageVariantTemplateVersion(variantTemplateNode);
+        const properties: { [p: string]: string | string[] } = {
+            [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
+            [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: retrievePageVariantTemplateRef(node),
+            [DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]: variantTemplateVersion,
+        };
+        // if a variant config is set, copy it as well
+        if (variantConfig) {
+            properties[DEFAULT_PAGE_VARIANT_CONFIG_PROP] = JSON.stringify(variantConfig);
+        }
+        // if a title is set, copy it as well, otherwise set a default
+        if (
+            node.properties[RestConstants.LOM_PROP_TITLE]?.length &&
+            node.properties[RestConstants.LOM_PROP_TITLE][0]
+        ) {
+            properties[RestConstants.LOM_PROP_TITLE] =
+                node.properties[RestConstants.LOM_PROP_TITLE][0] +
+                (customTitleSuffix ? customTitleSuffix : '');
+        } else {
+            properties[RestConstants.LOM_PROP_TITLE] =
+                this.translate.instant('TOPIC_PAGE.DEFAULT_PAGE_VARIANT_NAME') +
+                (customTitleSuffix ? customTitleSuffix : '');
+        }
+        return properties;
     }
 
     /**

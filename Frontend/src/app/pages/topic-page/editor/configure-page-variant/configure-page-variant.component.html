@@ -1,13 +1,8 @@
-<form
-  class="config-form"
-  [class.valid-form]="formInputValid()"
-  [formGroup]="form"
-  *ngIf="formInitialized()"
->
-  <es-info-message mode="error" class="info-message" *ngIf="!formInputValid()">
+<div class="config-page-variant" *ngIf="initialized(); else loadingSpinner">
+  <es-info-message mode="error" class="info-message" *ngIf="!variableInputValid()">
     {{ i18nPrefix + (isDuplicate() ? 'DUPLICATE_WARN_TEXT' : 'WARN_TEXT') | translate }}
   </es-info-message>
-  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="page-variant-parameter">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>
       {{ (templateMode() ? templateI18nPrefix : i18nPrefix) + 'TITLE' | translate }}
     </mat-label>
@@ -17,42 +12,22 @@
       [placeholder]="
         (templateMode() ? templateI18nPrefix : i18nPrefix) + 'TITLE_PLACEHOLDER' | translate
       "
-      formControlName="title"
+      [(ngModel)]="titleInput"
     />
   </mat-form-field>
 
-  <div class="select-dimensions" *ngIf="availableSelectDimensionKeys().length">
-    <div *ngFor="let dimensionKey of availableSelectDimensionKeys(); let i = index">
-      <ng-container *ngVar="viewModes[i] ? viewModes[i] : viewModes[0] as viewMode">
-        <ng-container *ngVar="selectDimensions().get(dimensionKey) as dimension">
-          <div class="dimension-wrapper">
-            <label class="dimension-label">
-              <i [esIcon]="viewIcons[i]" *ngIf="viewIcons[i]"></i>
-              {{ viewLabels[i] ? viewLabels[i] : dimension.caption }}
-            </label>
-            <mat-radio-group
-              class="dimension-container"
-              [formControlName]="dimensionKey"
-              *ngIf="viewMode !== 'checkbox'; else checkboxContainer"
-            >
-              <mat-radio-button *ngFor="let value of dimension.values" [value]="value.id">
-                {{ value.caption }}
-              </mat-radio-button>
-            </mat-radio-group>
-            <ng-template #checkboxContainer>
-              <div class="dimension-container" [formArrayName]="dimensionKey">
-                <div *ngFor="let value of dimension.values; let i = index" [formGroupName]="i">
-                  <mat-checkbox formControlName="checked">
-                    {{ value.caption }}
-                  </mat-checkbox>
-                </div>
-              </div>
-            </ng-template>
-          </div>
-        </ng-container>
-      </ng-container>
-    </div>
-  </div>
+  <es-mds-editor-wrapper
+    class="page-variant-config-editor"
+    [currentValues]="currentValues"
+    [editorMode]="'search'"
+    [embedded]="true"
+    groupId="topic_page_variant_configuration"
+    mode="search"
+    [repository]="mdsParams.repository"
+    [setId]="mdsParams.setId"
+    (currentValuesChange)="onCurrentValuesChange($event)"
+  >
+  </es-mds-editor-wrapper>
 
   <div class="delete-and-apply-buttons">
     <button
@@ -67,7 +42,7 @@
     </button>
     <div
       [matTooltip]="
-        !formInputValid()
+        !variableInputValid()
           ? (i18nPrefix + (isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS')
             | translate)
           : null
@@ -76,11 +51,14 @@
       <button
         mat-flat-button
         color="primary"
-        [disabled]="!formInputValid()"
+        [disabled]="!variableInputValid()"
         (click)="applyChanges()"
       >
         {{ 'APPLY' | translate }}
       </button>
     </div>
   </div>
-</form>
+</div>
+<ng-template #loadingSpinner>
+  <es-spinner></es-spinner>
+</ng-template>

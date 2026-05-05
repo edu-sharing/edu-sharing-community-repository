@@ -6,18 +6,17 @@
   <!-- for requestInProgress the page might be too large to display a visible spinner -->
   <es-spinner *ngIf="!initialLoadSuccessfully()"></es-spinner>
 </div>
-
 <es-info-message mode="info" class="template-mode" *ngIf="templateMode()">
   {{
     i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
       | translate
   }}
-  <button mat-flat-button color="primary" (click)="toggleTemplateMode()">
+  <button mat-flat-button color="primary" (click)="leaveTemplateMode()">
     {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
   </button>
 </es-info-message>
-<ng-container *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage">
-  <ng-container *ngIf="initialLoadSuccessfully()">
+<main *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage">
+  <ng-container *ngIf="initialLoadSuccessfully() && showBreadcrumb()">
     <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
     <div class="custom-breadcrumb-overflow-container" *ngIf="hasCustomBreadcrumbExtension()"></div>
     <!-- BREADCRUMBS -->
@@ -38,510 +37,540 @@
         ></es-topic-page-breadcrumb>
       </div>
     </div>
-    <!-- TOPIC HERO HEADER -->
-    <!-- wait until the initial load is successfully to retrieve the correct nodeID for the header -->
-    <div
-      class="template-header"
-      [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
-      [class.extra-padding-bottom]="
-        (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
-      "
-    >
-      <es-color-picker
-        *ngIf="editMode()"
-        class="topic-color-picker"
-        [selectedColor]="topicColor ?? initialTopicColor"
-        [acceptLabel]="'APPLY'"
-        [cancelLabel]="'CANCEL'"
-        [customClass]="'widget-color-picker'"
-        [colorLabel]="'TOPIC_PAGE.WIDGET.COLOR'"
-        (colorChange)="updateTopicOrAnchorItemColor($event, true)"
-      ></es-color-picker>
-      <div class="template-header-wrapper">
-        <div class="template-header-container">
-          <es-topic-header
-            [collectionNode]="collectionNode"
-            [contextNodeId]="topicCollectionID()"
-            [editMode]="editMode()"
-            [nodeId]="convertedHeaderNodeId()"
-            [parentEntries]="parentEntries()"
-            [pageVariantNode]="pageVariantNode"
-            [searchInput]="computedSearchInput()"
-            [topic]="topic()"
-          ></es-topic-header>
-        </div>
-      </div>
-    </div>
   </ng-container>
-
-  <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (VIEW MODE) -->
-  <es-side-menu-wrapper
-    [mobileHidden]="sidebarMobileHidden()"
-    [selectedMenuItem]="selectedMenuItem"
-    (closeContentView)="selectedMenuItem = ''"
-    *ngIf="!editMode(); else editModeMenu"
-  >
-    <ng-container slot="menu">
-      <ng-container *ngFor="let customItem of customSideMenuItemsBefore()">
-        <es-side-menu-item
-          [icon]="customItem.icon"
-          [selectedMenuItem]="selectedMenuItem"
-          [title]="customItem.id | translate"
-          (itemClicked)="collapsibleItemClicked($event)"
-        ></es-side-menu-item>
-      </ng-container>
-      <es-side-menu-item
-        icon="person"
-        [selectedMenuItem]="selectedMenuItem"
-        [title]="'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate"
-        (itemClicked)="collapsibleItemClicked($event)"
-      ></es-side-menu-item>
-      <es-side-menu-item
-        [selectedMenuItem]="selectedMenuItem"
-        [title]="'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate"
-        (itemClicked)="collapsibleItemClicked($event)"
-      ></es-side-menu-item>
-      <ng-container *ngFor="let customItem of customSideMenuItemsAfter()">
-        <es-side-menu-item
-          [icon]="customItem.icon"
-          [selectedMenuItem]="selectedMenuItem"
-          [title]="customItem.id | translate"
-          (itemClicked)="collapsibleItemClicked($event)"
-        ></es-side-menu-item>
-      </ng-container>
-    </ng-container>
-    <ng-container slot="content">
-      <!-- This is important to successfully read the selectedDimensionValueIds -->
-      <ng-container *ngFor="let customItem of customSideMenuItems()">
-        <ng-container *ngIf="selectedMenuItem === (customItem.id | translate)">
-          <h2 class="side-menu-header mat-heading-4 font-bold">
-            {{ customItem.heading | translate : { topic: topic() } }}
-          </h2>
-          <ng-container
-            *ngTemplateOutlet="
-              customItem.templateRef;
-              context: {
-                requestInProgress: requestInProgress(),
-                swimlanes,
-                topicName: topic(),
-              }
-            "
-          ></ng-container>
-        </ng-container>
-      </ng-container>
-      <!-- [hidden] is used to load the component, even when the menu item is not selected -->
-      <div [hidden]="selectedMenuItem !== ('TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate)">
-        <h2 class="side-menu-header mat-heading-4 font-bold">
-          {{ 'TOPIC_PAGE.SIDE_MENU.PROFILING.HEADING' | translate }}
-        </h2>
-        <es-profiling (selectDimensionsChanged)="selectDimensionsChanged($event)"></es-profiling>
-      </div>
-
-      <ng-container
-        *ngIf="selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate)"
-      >
-        <h2 class="side-menu-header mat-heading-4 font-bold">
-          {{ 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
-        </h2>
-        <es-generic-widget
-          *ngIf="topicCollectionID(); else loadingIndicator"
-          [contextNodeId]="topicCollectionID()"
-          [height]="'400'"
-          [sidebarEmbedding]="true"
-          [widgetType]="WIDGETS.TOPICS_COLUMN_BROWSER"
-        ></es-generic-widget>
-      </ng-container>
-      <ng-template #loadingIndicator>
-        <es-spinner></es-spinner>
-      </ng-template>
-    </ng-container>
-  </es-side-menu-wrapper>
-
-  <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (EDIT MODE) -->
-  <ng-template #editModeMenu>
-    <es-side-menu-wrapper
-      [closeDisabled]="
-        selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
-        !pageVariantSettingsValid()
-      "
-      [selectedMenuItem]="selectedMenuItem"
-      (closeContentView)="selectedMenuItem = ''"
-    >
-      <ng-container slot="menu">
-        <es-side-menu-item
-          [disabled]="
-            selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
-            !pageVariantSettingsValid()
-          "
-          icon="manage_accounts"
-          [selectedMenuItem]="selectedMenuItem"
-          [title]="'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
-          (itemClicked)="collapsibleItemClicked($event)"
-        ></es-side-menu-item>
-      </ng-container>
-      <ng-container slot="content">
+  <div class="topic-page-outer-wrapper">
+    <es-topic-page-filters-sidebar
+      *ngIf="filterPanelOpen()"
+      (closeFilterbar)="filterPanelOpen.set(false)"
+      (currentValuesChange)="applySearchFilters($event)"
+    ></es-topic-page-filters-sidebar>
+    <div class="topic-page-wrapper">
+      <ng-container *ngIf="initialLoadSuccessfully()">
+        <!-- TOPIC HERO HEADER -->
+        <!-- wait until the initial load is successfully to retrieve the correct nodeID for the header -->
         <div
-          *ngIf="
-            selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate)
+          class="template-header"
+          [class.sidebar-hidden]="sidebarMobileHidden() || !showSidebar()"
+          [class.extra-padding-bottom]="
+            (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
           "
         >
-          <h2 class="side-menu-header mat-heading-4 font-bold">
-            {{
-              'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_' +
-                (templateMode() ? 'TEMPLATE' : 'VARIANT') +
-                '.HEADING' | translate
-            }}
-          </h2>
-          <es-configure-page-variant-dialog
-            [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
-            [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
-            [pageVariantNode]="pageVariantNode"
-            [pageVariantTitle]="
-              pageVariantNode.title && !pageVariantNode.title.includes(pageVariantConfigPrefix)
-                ? (pageVariantNode | nodeTitle)
-                : (i18nPrefix + 'WIDGET.BREADCRUMB.PAGE_VARIANT_LABEL' | translate) +
-                  ' ' +
-                  (pageVariantNodeIndex + 1)
-            "
-            [selectDimensions]="selectDimensions"
-            [templateMode]="templateMode()"
-            [viewModes]="['checkbox', 'checkbox']"
-            (applyChangesClicked)="applyPageVariant($event)"
-            (deletePageVariantClicked)="deletePageVariant()"
-            (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
-          ></es-configure-page-variant-dialog>
-        </div>
-      </ng-container>
-    </es-side-menu-wrapper>
-  </ng-template>
-
-  <!-- PAGE CONTENT -->
-  <div
-    class="topic-page-content-outer-wrapper"
-    [class.edit-mode]="editMode()"
-    [class.sidebar-mobile-hidden]="sidebarMobileHidden()"
-    [class.sidebar-open]="sidebarOpen()"
-  >
-    <div
-      class="topic-page-content-wrapper"
-      [class.extra-padding-top]="anchorSwimlanes.length > 0"
-      *ngVar="
-        (swimlanes
-          | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger
-          | filterVisibleSwimlanes : computedSearchInput() : swimlaneIdToHitMatching) ??
-        [] as anchorSwimlanes
-      "
-    >
-      <!-- ANCHOR MENU -->
-      <ng-container *ngIf="anchorSwimlanes.length > 0">
-        <div class="anchor-container" [class.edit-mode]="editMode()">
-          <div class="anchor-menu">
-            <div class="anchor-item" *ngFor="let anchor of anchorSwimlanes; let i = index">
-              <button
-                type="button"
-                (click)="navigateToFragment(SWIMLANE_ID_PREFIX + anchor.id)"
-                class="item-container"
-              >
-                <div class="item-text">
-                  {{
-                    (anchor.heading
-                      | aiTextPrompt : editMode() : swimlaneIdToPromptTextMapping.get(anchor.id)) ||
-                      ('TOPIC_PAGE.ANCHOR_FALLBACK_PREFIX' | translate) + ' ' + (i + 1)
-                  }}
-                </div>
-              </button>
-              <es-color-picker
-                *ngIf="editMode() && i === 0"
-                class="anchor-item-color-picker"
-                [selectedColor]="anchorItemColor ?? initialAnchorItemColor"
-                [acceptLabel]="'APPLY'"
-                [cancelLabel]="'CANCEL'"
-                [customClass]="'widget-color-picker'"
-                (colorChange)="updateTopicOrAnchorItemColor($event)"
-              ></es-color-picker>
-              <ng-container
-                *ngVar="anchor | swimlaneSearchCount : searchCountTrigger as searchCount"
-              >
-                <div class="total-count" *ngIf="searchCount > 0">
-                  {{ searchCount }}
-                </div>
-              </ng-container>
+          <es-color-picker
+            *ngIf="editMode()"
+            class="topic-color-picker"
+            [selectedColor]="topicColor ?? initialTopicColor"
+            [acceptLabel]="'APPLY'"
+            [cancelLabel]="'CANCEL'"
+            [customClass]="'widget-color-picker'"
+            [colorLabel]="'TOPIC_PAGE.WIDGET.COLOR'"
+            (colorChange)="updateTopicOrAnchorItemColor($event, true)"
+          ></es-color-picker>
+          <div class="template-header-wrapper">
+            <div class="template-header-container">
+              <es-topic-header
+                [collectionNode]="collectionNode"
+                [contextNodeId]="topicCollectionID()"
+                [editMode]="editMode()"
+                [nodeId]="convertedHeaderNodeId()"
+                [parentEntries]="parentEntries()"
+                [pageVariantNode]="pageVariantNode"
+                [searchInput]="computedSearchInput()"
+                [topic]="topic()"
+              ></es-topic-header>
             </div>
           </div>
         </div>
       </ng-container>
-      <ng-container *ngIf="swimlanes.length > 0; else noSwimlanesCreatedYet">
-        <es-info-message
-          *ngIf="computedSearchInput() && !firstMatchingSwimlaneId"
-          mode="info"
-          class="no-search-hit"
-        >
-          {{ 'TOPIC_PAGE.NO_SEARCH_RESULTS' | translate }}
-        </es-info-message>
-        <!-- note: do not show empty swimlanes to users -->
-        <ng-container *ngFor="let swimlane of swimlanes; let i = index">
-          <!-- border with button to add a swimlane -->
-          <es-add-swimlane-border-button
-            [requestInProgress]="requestInProgress()"
-            (addSwimlaneTriggered)="addSwimlane($event, i)"
-            *ngIf="swimlane.grid?.length > 0 && userHasEditRights() && editMode()"
-          ></es-add-swimlane-border-button>
-          <!-- swimlane content -->
-          <!-- note: do not show empty swimlanes or swimlanes without search hit -->
-          <div
-            *ngIf="editMode() || swimlane.grid?.length > 0"
-            [attr.id]="swimlane.id ? SWIMLANE_ID_PREFIX + swimlane.id : null"
-            class="topic-page-swimlane-wrapper"
-            [class.custom-background-color]="!!swimlane.backgroundColor"
-            [class.edit-mode]="editMode()"
-            [class.next-item-accordion]="swimlanes[i + 1]?.type === ACCORDION_TYPE"
-            [class.no-search-hit]="
-              !editMode() && computedSearchInput() && !swimlaneIdToHitMatching.get(swimlane.id)
-            "
-            [class.reserve-space-bottom]="i === swimlanes.length - 1"
-            [class.reserve-space-top]="i === 0 && swimlane.type === ACCORDION_TYPE"
-            [class.topic-page-accordion-swimlane]="swimlane.type === ACCORDION_TYPE"
-            [style.background-color]="
-              (swimlane.backgroundShape === undefined ||
-                swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
-              swimlane.type !== ACCORDION_TYPE &&
-              swimlane.backgroundColor
-                ? swimlane.backgroundColor
-                : null
-            "
-          >
-            <ng-container *ngIf="swimlane.type !== ACCORDION_TYPE">
-              <ng-container *ngTemplateOutlet="swimlaneShape; context: { swimlane }"></ng-container>
+
+      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS -->
+      <es-side-menu-wrapper
+        [mobileHidden]="sidebarMobileHidden()"
+        [selectedMenuItem]="selectedMenuItem"
+        [sideMenuHidden]="!showSidebar()"
+        (closeContentView)="selectedMenuItem = ''"
+        *ngIf="!editMode(); else editModeMenu"
+      >
+        <ng-container slot="menu">
+          <ng-container *ngFor="let customItem of customSideMenuItemsBefore()">
+            <es-side-menu-item
+              [icon]="customItem.icon"
+              [selectedMenuItem]="selectedMenuItem"
+              [title]="customItem.id | translate"
+              (itemClicked)="collapsibleItemClicked($event)"
+            ></es-side-menu-item>
+          </ng-container>
+          <es-side-menu-item
+            icon="person"
+            [selectedMenuItem]="selectedMenuItem"
+            [title]="'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate"
+            (itemClicked)="collapsibleItemClicked($event)"
+          ></es-side-menu-item>
+          <es-side-menu-item
+            [selectedMenuItem]="selectedMenuItem"
+            [title]="'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate"
+            (itemClicked)="collapsibleItemClicked($event)"
+          ></es-side-menu-item>
+          <ng-container *ngFor="let customItem of customSideMenuItemsAfter()">
+            <es-side-menu-item
+              [icon]="customItem.icon"
+              [selectedMenuItem]="selectedMenuItem"
+              [title]="customItem.id | translate"
+              (itemClicked)="collapsibleItemClicked($event)"
+            ></es-side-menu-item>
+          </ng-container>
+        </ng-container>
+        <ng-container slot="content">
+          <!-- This is important to successfully read the selectedDimensionValueIds -->
+          <ng-container *ngFor="let customItem of customSideMenuItems()">
+            <ng-container *ngIf="selectedMenuItem === (customItem.id | translate)">
+              <h2 class="side-menu-header mat-heading-4 font-bold">
+                {{ customItem.heading | translate : { topic: topic() } }}
+              </h2>
+              <ng-container
+                *ngTemplateOutlet="
+                  customItem.templateRef;
+                  context: {
+                    requestInProgress: requestInProgress(),
+                    swimlanes,
+                    topicName: topic(),
+                  }
+                "
+              ></ng-container>
             </ng-container>
+          </ng-container>
+          <!-- [hidden] is used to load the component, even when the menu item is not selected -->
+          <div [hidden]="selectedMenuItem !== ('TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate)">
+            <h2 class="side-menu-header mat-heading-4 font-bold">
+              {{ 'TOPIC_PAGE.SIDE_MENU.PROFILING.HEADING' | translate }}
+            </h2>
+            <es-profiling
+              (selectDimensionsChanged)="selectDimensionsChanged($event)"
+            ></es-profiling>
+          </div>
+
+          <ng-container
+            *ngIf="selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate)"
+          >
+            <h2 class="side-menu-header mat-heading-4 font-bold">
+              {{ 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
+            </h2>
+            <es-generic-widget
+              *ngIf="topicCollectionID(); else loadingIndicator"
+              [contextNodeId]="topicCollectionID()"
+              [height]="'400'"
+              [sidebarEmbedding]="true"
+              [widgetType]="WIDGETS.TOPICS_COLUMN_BROWSER"
+            ></es-generic-widget>
+          </ng-container>
+          <ng-template #loadingIndicator>
+            <es-spinner></es-spinner>
+          </ng-template>
+        </ng-container>
+      </es-side-menu-wrapper>
+
+      <!-- RIGHT SIDE MENU WITH MULTIPLE COLLAPSIBLE ITEMS (EDIT MODE) -->
+      <ng-template #editModeMenu>
+        <es-side-menu-wrapper
+          [closeDisabled]="
+            selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+            !pageVariantSettingsValid()
+          "
+          [selectedMenuItem]="selectedMenuItem"
+          [sideMenuHidden]="!showSidebar()"
+          (closeContentView)="selectedMenuItem = ''"
+        >
+          <ng-container slot="menu">
+            <es-side-menu-item
+              [disabled]="
+                selectedMenuItem ===
+                  ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+                !pageVariantSettingsValid()
+              "
+              icon="manage_accounts"
+              [selectedMenuItem]="selectedMenuItem"
+              [title]="'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
+              (itemClicked)="collapsibleItemClicked($event)"
+            ></es-side-menu-item>
+          </ng-container>
+          <ng-container slot="content">
             <div
-              class="topic-page-swimlane"
-              [style.background-color]="
-                (swimlane.backgroundShape === undefined ||
-                  swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
-                swimlane.type === ACCORDION_TYPE &&
-                swimlane.backgroundColor
-                  ? swimlane.backgroundColor
-                  : null
+              *ngIf="
+                selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate)
               "
             >
-              <!-- edit privileges -->
-              <ng-container *ngIf="userHasEditRights() && editMode()">
-                <!-- action buttons for moving -->
-                <div class="topic-page-move-buttons">
+              <h2 class="side-menu-header mat-heading-4 font-bold">
+                {{
+                  'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_' +
+                    (templateMode() ? 'TEMPLATE' : 'VARIANT') +
+                    '.HEADING' | translate
+                }}
+              </h2>
+              <es-configure-page-variant-dialog
+                [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
+                [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
+                [pageVariantNode]="pageVariantNode"
+                [pageVariantTitle]="
+                  pageVariantNode.title && !pageVariantNode.title.includes(pageVariantConfigPrefix)
+                    ? (pageVariantNode | nodeTitle)
+                    : (i18nPrefix + 'WIDGET.BREADCRUMB.PAGE_VARIANT_LABEL' | translate) +
+                      ' ' +
+                      (pageVariantNodeIndex + 1)
+                "
+                [selectDimensions]="selectDimensions"
+                [templateMode]="templateMode()"
+                [viewModes]="['checkbox', 'checkbox']"
+                (applyChangesClicked)="applyPageVariant($event)"
+                (deletePageVariantClicked)="deletePageVariant()"
+                (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
+              ></es-configure-page-variant-dialog>
+            </div>
+          </ng-container>
+        </es-side-menu-wrapper>
+      </ng-template>
+
+      <!-- PAGE CONTENT -->
+      <div
+        class="topic-page-content-outer-wrapper"
+        [class.edit-mode]="editMode()"
+        [class.sidebar-hidden]="sidebarMobileHidden() || !showSidebar()"
+        [class.sidebar-open]="sidebarOpen()"
+      >
+        <div
+          class="topic-page-content-wrapper"
+          [class.extra-padding-top]="anchorSwimlanes.length > 0"
+          *ngVar="
+            (swimlanes
+              | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger
+              | filterVisibleSwimlanes : searchInputOrFiltersDefined() : swimlaneIdToHitMatching) ??
+            [] as anchorSwimlanes
+          "
+        >
+          <!-- ANCHOR MENU -->
+          <ng-container *ngIf="anchorSwimlanes.length > 0">
+            <div class="anchor-container" [class.edit-mode]="editMode()">
+              <div class="anchor-menu">
+                <div class="anchor-item" *ngFor="let anchor of anchorSwimlanes; let i = index">
                   <button
-                    mat-mini-fab
-                    class="action-btn"
-                    [disabled]="i === 0 || requestInProgress()"
-                    (click)="moveSwimlanePosition(i, i - 1)"
-                    [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_UP' | translate"
+                    type="button"
+                    (click)="navigateToFragment(SWIMLANE_ID_PREFIX + anchor.id)"
+                    class="item-container"
                   >
-                    <i esIcon="arrow_upward"></i>
+                    <div class="item-text">
+                      {{
+                        (anchor.heading
+                          | aiTextPrompt
+                            : editMode()
+                            : swimlaneIdToPromptTextMapping.get(anchor.id)) ||
+                          ('TOPIC_PAGE.ANCHOR_FALLBACK_PREFIX' | translate) + ' ' + (i + 1)
+                      }}
+                    </div>
                   </button>
-                  <button
-                    mat-mini-fab
-                    class="action-btn"
-                    [disabled]="i === swimlanes.length - 1 || requestInProgress()"
-                    (click)="moveSwimlanePosition(i, i + 1)"
-                    [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_DOWN' | translate"
+                  <es-color-picker
+                    *ngIf="editMode() && i === 0"
+                    class="anchor-item-color-picker"
+                    [selectedColor]="anchorItemColor ?? initialAnchorItemColor"
+                    [acceptLabel]="'APPLY'"
+                    [cancelLabel]="'CANCEL'"
+                    [customClass]="'widget-color-picker'"
+                    (colorChange)="updateTopicOrAnchorItemColor($event)"
+                  ></es-color-picker>
+                  <ng-container
+                    *ngVar="anchor | swimlaneSearchCount : searchCountTrigger as searchCount"
                   >
-                    <i esIcon="arrow_downward"></i>
-                  </button>
-                </div>
-                <!-- action buttons for modifications -->
-                <div class="topic-page-edit-buttons">
-                  <button
-                    mat-mini-fab
-                    class="action-btn btn-modify"
-                    [disabled]="requestInProgress()"
-                    (click)="editSwimlane(swimlane, i)"
-                    [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.EDIT.ARIA_LABEL' | translate"
-                  >
-                    <i esIcon="tune"></i>
-                  </button>
-                  <button
-                    mat-mini-fab
-                    class="action-btn"
-                    [disabled]="requestInProgress()"
-                    (click)="deleteSwimlane(i)"
-                    [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.DELETE.LABEL' | translate"
-                  >
-                    <i esIcon="delete"></i>
-                  </button>
-                </div>
-                <div class="topic-page-color-shape-buttons">
-                  <es-swimlane-configuration-buttons
-                    [pageVariantNode]="pageVariantNode"
-                    [swimlaneColor]="swimlane.backgroundColor"
-                    [swimlaneIndex]="i"
-                    [swimlaneShape]="swimlane.backgroundShape"
-                    (swimlaneShapeUpdated)="updateSwimlaneShape($event, false, i)"
-                    (swimlaneShapeMirroringToggled)="updateSwimlaneShape(null, true, i)"
-                  ></es-swimlane-configuration-buttons>
-                </div>
-              </ng-container>
-              <!-- type: collapse -->
-              <cdk-accordion class="topic-page-accordion" *ngIf="swimlane.type === ACCORDION_TYPE">
-                <cdk-accordion-item
-                  #accordionItem="cdkAccordionItem"
-                  class="topic-page-accordion-item"
-                  [class.topic-page-accordion-item-expanded]="accordionItem.expanded"
-                  role="button"
-                  tabindex="0"
-                  [attr.id]="'accordion-header-' + i"
-                  [attr.aria-expanded]="accordionItem.expanded"
-                  [attr.aria-controls]="'accordion-body-' + i"
-                  expanded="false"
-                >
-                  <ng-container *ngIf="accordionItem.expanded">
-                    <ng-container
-                      *ngTemplateOutlet="swimlaneShape; context: { swimlane }"
-                    ></ng-container>
+                    <div class="total-count" *ngIf="searchCount > 0">
+                      {{ searchCount }}
+                    </div>
                   </ng-container>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="swimlanes.length > 0; else noSwimlanesCreatedYet">
+            <div
+              class="topic-page-swimlane-wrapper"
+              *ngIf="searchInputOrFiltersDefined() && !firstMatchingSwimlaneId"
+            >
+              <div class="topic-page-swimlane">
+                <es-info-message mode="info" class="no-search-hit-message">
+                  {{ 'TOPIC_PAGE.NO_SEARCH_RESULTS' | translate }}
+                </es-info-message>
+              </div>
+            </div>
+            <!-- note: do not show empty swimlanes to users -->
+            <ng-container *ngFor="let swimlane of swimlanes; let i = index">
+              <!-- border with button to add a swimlane -->
+              <es-add-swimlane-border-button
+                [requestInProgress]="requestInProgress()"
+                (addSwimlaneTriggered)="addSwimlane($event, i)"
+                *ngIf="swimlane.grid?.length > 0 && userHasEditRights() && editMode()"
+              ></es-add-swimlane-border-button>
+              <!-- swimlane content -->
+              <!-- note: do not show empty swimlanes or swimlanes without search hit -->
+              <div
+                *ngIf="editMode() || swimlane.grid?.length > 0"
+                [attr.id]="swimlane.id ? SWIMLANE_ID_PREFIX + swimlane.id : null"
+                class="topic-page-swimlane-wrapper"
+                [class.custom-background-color]="!!swimlane.backgroundColor"
+                [class.edit-mode]="editMode()"
+                [class.next-item-accordion]="swimlanes[i + 1]?.type === ACCORDION_TYPE"
+                [class.no-search-hit]="
+                  !editMode() &&
+                  searchInputOrFiltersDefined() &&
+                  !swimlaneIdToHitMatching.get(swimlane.id)
+                "
+                [class.reserve-space-bottom]="i === swimlanes.length - 1"
+                [class.reserve-space-top]="i === 0 && swimlane.type === ACCORDION_TYPE"
+                [class.topic-page-accordion-swimlane]="swimlane.type === ACCORDION_TYPE"
+                [style.background-color]="
+                  (swimlane.backgroundShape === undefined ||
+                    swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
+                  swimlane.type !== ACCORDION_TYPE &&
+                  swimlane.backgroundColor
+                    ? swimlane.backgroundColor
+                    : null
+                "
+              >
+                <ng-container *ngIf="swimlane.type !== ACCORDION_TYPE">
+                  <ng-container
+                    *ngTemplateOutlet="swimlaneShape; context: { swimlane }"
+                  ></ng-container>
+                </ng-container>
+                <div
+                  class="topic-page-swimlane"
+                  [style.background-color]="
+                    (swimlane.backgroundShape === undefined ||
+                      swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
+                    swimlane.type === ACCORDION_TYPE &&
+                    swimlane.backgroundColor
+                      ? swimlane.backgroundColor
+                      : null
+                  "
+                >
+                  <!-- edit privileges -->
+                  <ng-container *ngIf="userHasEditRights() && editMode()">
+                    <!-- action buttons for moving -->
+                    <div class="topic-page-move-buttons">
+                      <button
+                        mat-mini-fab
+                        class="action-btn"
+                        [disabled]="i === 0 || requestInProgress()"
+                        (click)="moveSwimlanePosition(i, i - 1)"
+                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_UP' | translate"
+                      >
+                        <i esIcon="arrow_upward"></i>
+                      </button>
+                      <button
+                        mat-mini-fab
+                        class="action-btn"
+                        [disabled]="i === swimlanes.length - 1 || requestInProgress()"
+                        (click)="moveSwimlanePosition(i, i + 1)"
+                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_DOWN' | translate"
+                      >
+                        <i esIcon="arrow_downward"></i>
+                      </button>
+                    </div>
+                    <!-- action buttons for modifications -->
+                    <div class="topic-page-edit-buttons">
+                      <button
+                        mat-mini-fab
+                        class="action-btn btn-modify"
+                        [disabled]="requestInProgress()"
+                        (click)="editSwimlane(swimlane, i)"
+                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.EDIT.ARIA_LABEL' | translate"
+                      >
+                        <i esIcon="tune"></i>
+                      </button>
+                      <button
+                        mat-mini-fab
+                        class="action-btn"
+                        [disabled]="requestInProgress()"
+                        (click)="deleteSwimlane(i)"
+                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.DELETE.LABEL' | translate"
+                      >
+                        <i esIcon="delete"></i>
+                      </button>
+                    </div>
+                    <div class="topic-page-color-shape-buttons">
+                      <es-swimlane-configuration-buttons
+                        [pageVariantNode]="pageVariantNode"
+                        [swimlaneColor]="swimlane.backgroundColor"
+                        [swimlaneIndex]="i"
+                        [swimlaneShape]="swimlane.backgroundShape"
+                        (swimlaneShapeUpdated)="updateSwimlaneShape($event, false, i)"
+                        (swimlaneShapeMirroringToggled)="updateSwimlaneShape(null, true, i)"
+                      ></es-swimlane-configuration-buttons>
+                    </div>
+                  </ng-container>
+                  <!-- type: collapse -->
+                  <cdk-accordion
+                    class="topic-page-accordion"
+                    *ngIf="swimlane.type === ACCORDION_TYPE"
+                  >
+                    <cdk-accordion-item
+                      #accordionItem="cdkAccordionItem"
+                      class="topic-page-accordion-item"
+                      [class.topic-page-accordion-item-expanded]="accordionItem.expanded"
+                      role="button"
+                      tabindex="0"
+                      [attr.id]="'accordion-header-' + i"
+                      [attr.aria-expanded]="accordionItem.expanded"
+                      [attr.aria-controls]="'accordion-body-' + i"
+                      expanded="false"
+                    >
+                      <ng-container *ngIf="accordionItem.expanded">
+                        <ng-container
+                          *ngTemplateOutlet="swimlaneShape; context: { swimlane }"
+                        ></ng-container>
+                      </ng-container>
+                      <div
+                        class="topic-page-accordion-item-header"
+                        (click)="!editMode() ? accordionItem.toggle() : ''"
+                      >
+                        <ng-container
+                          *ngTemplateOutlet="
+                            swimlaneHeading;
+                            context: { swimlane, index: i, isAccordion: true }
+                          "
+                        ></ng-container>
+                        <span class="topic-page-accordion-item-description">
+                          <i *ngIf="accordionItem.expanded" esIcon="expand_less"></i>
+                          <i *ngIf="!accordionItem.expanded" esIcon="expand_more"></i>
+                        </span>
+                      </div>
+                      <div
+                        class="topic-page-accordion-item-body"
+                        role="region"
+                        [style.display]="accordionItem.expanded ? '' : 'none'"
+                        [attr.id]="'accordion-body-' + i"
+                        [attr.aria-labelledby]="'accordion-header-' + i"
+                      >
+                        <ng-container
+                          *ngTemplateOutlet="swimlaneTemplate; context: { swimlane, index: i }"
+                        ></ng-container>
+                      </div>
+                    </cdk-accordion-item>
+                  </cdk-accordion>
+
+                  <!-- type: container -->
                   <div
-                    class="topic-page-accordion-item-header"
-                    (click)="!editMode() ? accordionItem.toggle() : ''"
+                    class="topic-page-container"
+                    *ngIf="swimlane.type === CONTAINER_TYPE || swimlane.type === ANCHOR_TYPE"
                   >
                     <ng-container
                       *ngTemplateOutlet="
                         swimlaneHeading;
-                        context: { swimlane, index: i, isAccordion: true }
+                        context: { swimlane, index: i, isAccordion: false }
                       "
                     ></ng-container>
-                    <span class="topic-page-accordion-item-description">
-                      <i *ngIf="accordionItem.expanded" esIcon="expand_less"></i>
-                      <i *ngIf="!accordionItem.expanded" esIcon="expand_more"></i>
-                    </span>
-                  </div>
-                  <div
-                    class="topic-page-accordion-item-body"
-                    role="region"
-                    [style.display]="accordionItem.expanded ? '' : 'none'"
-                    [attr.id]="'accordion-body-' + i"
-                    [attr.aria-labelledby]="'accordion-header-' + i"
-                  >
                     <ng-container
                       *ngTemplateOutlet="swimlaneTemplate; context: { swimlane, index: i }"
                     ></ng-container>
                   </div>
-                </cdk-accordion-item>
-              </cdk-accordion>
-
-              <!-- type: container -->
-              <div
-                class="topic-page-container"
-                *ngIf="swimlane.type === CONTAINER_TYPE || swimlane.type === ANCHOR_TYPE"
-              >
-                <ng-container
-                  *ngTemplateOutlet="
-                    swimlaneHeading;
-                    context: { swimlane, index: i, isAccordion: false }
-                  "
-                ></ng-container>
-                <ng-container
-                  *ngTemplateOutlet="swimlaneTemplate; context: { swimlane, index: i }"
-                ></ng-container>
+                </div>
+              </div>
+              <!-- border with button to add a swimlane (special case for last element) -->
+              <es-add-swimlane-border-button
+                [requestInProgress]="requestInProgress()"
+                (addSwimlaneTriggered)="addSwimlane($event, i + 1)"
+                *ngIf="
+                  swimlane.grid?.length > 0 &&
+                  userHasEditRights() &&
+                  editMode() &&
+                  i === swimlanes.length - 1
+                "
+              ></es-add-swimlane-border-button>
+            </ng-container>
+          </ng-container>
+          <ng-template
+            #swimlaneHeading
+            let-swimlane="swimlane"
+            let-index="index"
+            let-isAccordion="isAccordion"
+          >
+            <div class="swimlane-heading-wrapper" [class.is-accordion]="isAccordion">
+              <es-editable-text
+                [alignCenter]="true"
+                [applyTextareaPadding]="false"
+                [editable]="editMode()"
+                [headerElement]="'h2'"
+                [label]="'TOPIC_PAGE.SWIMLANE.HEADING_LABEL' | translate"
+                [searchInput]="computedSearchInput()"
+                (searchResultsUpdated)="updateTitleSearchResults($event, swimlane.id)"
+                [text]="
+                  swimlane.heading
+                    | aiTextPrompt : editMode() : swimlaneIdToPromptTextMapping.get(swimlane.id)
+                "
+                (textChange)="swimlaneTitleChanged($event, index)"
+              ></es-editable-text>
+              <div class="swimlane-heading-buttons" *ngIf="!editMode()">
+                <button
+                  mat-icon-button
+                  [matTooltip]="'TOPIC_PAGE.SWIMLANE.QR_CODE.TOOLTIP' | translate"
+                  (click)="openQrCodeDialog(index)"
+                >
+                  <i esIcon="qr_code_scanner"></i>
+                </button>
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="shareMenu"
+                  [matTooltip]="'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate"
+                  (click)="$event.stopPropagation()"
+                >
+                  <i esIcon="share"></i>
+                </button>
+                <!-- SHARE MENU -->
+                <mat-menu #shareMenu="matMenu" class="topic-page-menu">
+                  <div class="mat-menu-header-container">
+                    {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate }}
+                  </div>
+                  <button mat-menu-item (click)="copySwimlaneLink(index)">
+                    <i esIcon="content_copy"></i>
+                    <span>
+                      {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.COPY_LINK' | translate }}
+                    </span>
+                  </button>
+                  <button mat-menu-item (click)="writeMail(index)">
+                    <i esIcon="mail"></i>
+                    <span>
+                      {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.HEADING' | translate }}
+                    </span>
+                  </button>
+                </mat-menu>
               </div>
             </div>
-          </div>
-          <!-- border with button to add a swimlane (special case for last element) -->
-          <es-add-swimlane-border-button
-            [requestInProgress]="requestInProgress()"
-            (addSwimlaneTriggered)="addSwimlane($event, i + 1)"
-            *ngIf="
-              swimlane.grid?.length > 0 &&
-              userHasEditRights() &&
-              editMode() &&
-              i === swimlanes.length - 1
-            "
-          ></es-add-swimlane-border-button>
-        </ng-container>
-      </ng-container>
-      <ng-template
-        #swimlaneHeading
-        let-swimlane="swimlane"
-        let-index="index"
-        let-isAccordion="isAccordion"
-      >
-        <div class="swimlane-heading-wrapper" [class.is-accordion]="isAccordion">
-          <es-editable-text
-            [alignCenter]="true"
-            [applyTextareaPadding]="false"
-            [editable]="editMode()"
-            [headerElement]="'h2'"
-            [label]="'TOPIC_PAGE.SWIMLANE.HEADING_LABEL' | translate"
-            [searchInput]="computedSearchInput()"
-            (searchResultsUpdated)="updateTitleSearchResults($event, swimlane.id)"
-            [text]="
-              swimlane.heading
-                | aiTextPrompt : editMode() : swimlaneIdToPromptTextMapping.get(swimlane.id)
-            "
-            (textChange)="swimlaneTitleChanged($event, index)"
-          ></es-editable-text>
-          <div class="swimlane-heading-buttons" *ngIf="!editMode()">
-            <button
-              mat-icon-button
-              [matTooltip]="'TOPIC_PAGE.SWIMLANE.QR_CODE.TOOLTIP' | translate"
-              (click)="openQrCodeDialog(index)"
+          </ng-template>
+          <ng-template #swimlaneShape let-swimlane="swimlane">
+            <div
+              class="bg-shape"
+              [class.shape-mirrored]="swimlane.backgroundShapeMirrored"
+              [style.color]="swimlane.backgroundColor ? swimlane.backgroundColor : null"
+              *ngIf="swimlane.backgroundShape !== SwimlaneBackgroundShape.None"
             >
-              <i esIcon="qr_code_scanner"></i>
-            </button>
-            <button
-              mat-icon-button
-              [matMenuTriggerFor]="shareMenu"
-              [matTooltip]="'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate"
-              (click)="$event.stopPropagation()"
-            >
-              <i esIcon="share"></i>
-            </button>
-            <!-- SHARE MENU -->
-            <mat-menu #shareMenu="matMenu" class="topic-page-menu">
-              <div class="mat-menu-header-container">
-                {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate }}
+              <es-swimlane-background-shape
+                [shape]="swimlane.backgroundShape"
+              ></es-swimlane-background-shape>
+            </div>
+          </ng-template>
+          <ng-template #noSwimlanesCreatedYet>
+            <div class="topic-page-swimlane-wrapper is-empty" [class.edit-mode]="editMode()">
+              <div class="topic-page-swimlane">
+                <es-add-swimlane-border-button
+                  [requestInProgress]="requestInProgress()"
+                  (addSwimlaneTriggered)="addSwimlane($event, 0)"
+                  *ngIf="editMode()"
+                ></es-add-swimlane-border-button>
+                <es-info-message mode="info">
+                  {{ 'TOPIC_PAGE.NO_SWIMLANES' | translate }}
+                </es-info-message>
               </div>
-              <button mat-menu-item (click)="copySwimlaneLink(index)">
-                <i esIcon="content_copy"></i>
-                <span>
-                  {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.COPY_LINK' | translate }}
-                </span>
-              </button>
-              <button mat-menu-item (click)="writeMail(index)">
-                <i esIcon="mail"></i>
-                <span>
-                  {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.HEADING' | translate }}
-                </span>
-              </button>
-            </mat-menu>
-          </div>
+            </div>
+          </ng-template>
         </div>
-      </ng-template>
-      <ng-template #swimlaneShape let-swimlane="swimlane">
-        <i
-          *ngIf="swimlane.backgroundShape !== SwimlaneBackgroundShape.None"
-          class="bg-shape"
-          [class.shape-mirrored]="swimlane.backgroundShapeMirrored"
-          [esIcon]="swimlaneShapeToImageMapping.get(swimlane.backgroundShape)"
-          [path]="iconPath + 'background/'"
-          [style.color]="swimlane.backgroundColor ? swimlane.backgroundColor : null"
-        ></i>
-      </ng-template>
-      <ng-template #noSwimlanesCreatedYet>
-        <div class="topic-page-swimlane-wrapper is-empty" [class.edit-mode]="editMode()">
-          <div class="topic-page-swimlane">
-            <es-add-swimlane-border-button
-              [requestInProgress]="requestInProgress()"
-              (addSwimlaneTriggered)="addSwimlane($event, 0)"
-              *ngIf="editMode()"
-            ></es-add-swimlane-border-button>
-            <es-info-message mode="info">
-              {{ 'TOPIC_PAGE.NO_SWIMLANES' | translate }}
-            </es-info-message>
-          </div>
-        </div>
-      </ng-template>
+        <es-preview-sidebar [customOptions]="customSidebarOptions"></es-preview-sidebar>
+      </div>
     </div>
-    <es-preview-sidebar [customOptions]="customSidebarOptions"></es-preview-sidebar>
   </div>
-</ng-container>
+</main>
 
 <!-- failed to load page config -> currently, no further action possible -->
 <ng-template #pageConfigCheckFailedMessage>
@@ -601,11 +630,12 @@
     [grid]="swimlane.grid"
     [pageVariantNode]="pageVariantNode"
     [searchInput]="computedSearchInput()"
+    [searchFilters]="computedSearchFilters()"
     [selectDimensions]="selectDimensions"
     [swimlaneIndex]="index"
     [topicWidgets]="topicWidgets"
     (gridUpdated)="handleGridUpdate($event, index)"
-    (searchInputHitsChanged)="updateGridItemSearchInputHits($event, index)"
+    (searchHitsChanged)="updateGridItemSearchInputHits($event, index)"
     (visibleNodesChanged)="updateVisibleNodes($event, index)"
   ></es-swimlane>
 </ng-template>
@@ -623,16 +653,6 @@
     [(selectedNode)]="pageVariantCreateDialogSelectedNode"
     (copyOptionChanged)="pageVariantCreateDialogCopyOption = $event"
   ></es-add-page-variant-dialog>
-</ng-template>
-
-<ng-template #configurePageTemplate>
-  <es-configure-page-template-dialog
-    [dialogRef]="pageTemplateEditDialogRef"
-    [collectionId]="collectionNode.ref.id"
-    [pageConfigRef]="collectionNodePageConfigRef"
-    [pageConfigPropagateRef]="collectionNodePagePropagateConfigRef"
-    (switchIntoTemplateMode)="switchIntoTemplateMode($event)"
-  ></es-configure-page-template-dialog>
 </ng-template>
 
 <ng-template #showQrCodeDialog>

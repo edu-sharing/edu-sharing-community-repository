@@ -1,4 +1,6 @@
 @use 'sass:map';
+@use 'branding' as *;
+
 @forward 'variables-root';
 @forward 'branding';
 
@@ -34,8 +36,6 @@ $fontSizeXSmall: var(--fontSizeXSmall) !default;
 $backgroundColor: #fff !default;
 $workspaceSidebarWidth: 300px !default;
 $workspaceInheritColor: #42ca8d !default;
-$workspaceTopBarBackground: #383838 !default;
-$workspaceTopBarFontColor: #fff !default;
 $editorialCollectionsBackground: #f5ec19 !default;
 $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
@@ -53,7 +53,6 @@ $workspaceSelectedBackgroundEffect: linear-gradient(
     )
     no-repeat !default;
 $workspaceTreeBackground: #f7f7f7 !default;
-$workspaceTopBarSafeBackground: #963a3a;
 $dialogRightWidth: 320px !default;
 $workspaceTreeSelectedBackground: #fff !default;
 $workspaceTreeWidth: 300px !default;

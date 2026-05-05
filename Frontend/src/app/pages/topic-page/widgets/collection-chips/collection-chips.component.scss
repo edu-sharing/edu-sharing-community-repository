@@ -1,6 +1,10 @@
 @use 'mixins' as mixin;
 @use '../../topic-page-variables' as topicPageVars;
 
+:host {
+    --collection-chip-tile-bg: #{topicPageVars.$surface-container-lowest};
+}
+
 .list {
     margin-top: 8px;
     // add paddings due to tile hover effect
@@ -59,7 +63,7 @@
     justify-content: start;
     align-items: center;
     position: relative;
-    background: topicPageVars.$surface;
+    background: var(--collection-chip-tile-bg);
     border: 1px solid topicPageVars.$outline-light;
     border-radius: 8px;
     overflow: hidden;
@@ -96,12 +100,16 @@
                 object-fit: cover;
             }
         }
+
+        &:not(.default-icon) {
+            padding-top: 16px;
+        }
     }
 
     .tile-content {
         // grow to fill remaining space
         flex: 1 1 auto;
-        padding: 0 12px;
+        padding: 0 12px 8px 12px;
         display: inline-flex;
         align-items: center;
 
@@ -114,6 +122,17 @@
             color: topicPageVars.$primary-dark;
             @include mixin.limitLineCount(2, 1.25);
         }
+    }
+}
+
+.toggle-show-more {
+    margin-top: 8px;
+    padding-right: 16px;
+    width: 100%;
+    text-align: right;
+
+    button {
+        color: topicPageVars.$primary-dark;
     }
 }
 

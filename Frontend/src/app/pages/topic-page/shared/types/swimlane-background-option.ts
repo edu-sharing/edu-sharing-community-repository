@@ -1,7 +1,7 @@
 import { SwimlaneBackgroundShape } from './swimlane-background-shape';
 
 export interface SwimlaneBackgroundOption {
-    image: string;
+    image?: string;
     shape: SwimlaneBackgroundShape;
     viewValue: string;
 }
