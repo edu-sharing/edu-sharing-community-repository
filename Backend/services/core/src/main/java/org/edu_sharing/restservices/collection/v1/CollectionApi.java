@@ -615,18 +615,14 @@ public class CollectionApi {
 					collectionId);
 
 			if (collectionDao == null) {
-
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
-			
-			if (nodeDao == null) {
-
+			if (!NodeDao.exists(repoDao, nodeId)) {
 				return Response.status(Response.Status.NOT_FOUND).build();
 			}
 			
-			collectionDao.removeFromCollection(nodeDao);
+			collectionDao.removeFromCollection(nodeId);
 
 			return Response.status(Response.Status.OK).build();
 

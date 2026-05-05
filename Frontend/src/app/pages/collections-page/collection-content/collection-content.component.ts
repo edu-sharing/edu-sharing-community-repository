@@ -988,7 +988,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     canDelete(node: EduData.CollectionReference) {
-        return RestHelper.hasAccessPermission(node, 'Delete');
+        return RestHelper.hasAccessPermission(this.collection, 'Delete');
     }
 
     isDeleted(node: CollectionReference) {

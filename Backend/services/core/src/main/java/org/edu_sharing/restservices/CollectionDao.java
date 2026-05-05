@@ -373,11 +373,11 @@ public class CollectionDao {
 		}
 	}
 	
-	public void removeFromCollection(NodeDao node) throws DAOException {
+	public void removeFromCollection(String nodeId) throws DAOException {
 		
 		try {
 		
-			collectionClient.removeFromCollection(nodeDao.getRef().getId(), node.getRef().getId());
+			collectionClient.removeFromCollection(nodeDao.getRef().getId(), nodeId);
 			
 		} catch (Exception e) {
 

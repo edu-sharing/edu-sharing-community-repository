@@ -152,6 +152,26 @@
                 </button>
               </div>
             </div>
+            <div
+              class="node-deleted"
+              *ngIf="element.accessEffective == null && !isDeleted(element)"
+            >
+              <div>
+                <i esIcon="lock"></i>
+                <div class="headline">{{ 'ORIGINAL_ACCESS_DENIED' | translate }}</div>
+                <div class="subline">{{ 'ORIGINAL_ACCESS_DENIED_INFO' | translate }}</div>
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="
+                    deleteReference(element); $event.stopPropagation(); $event.preventDefault()
+                  "
+                  *ngIf="canDelete(element)"
+                >
+                  {{ 'ORIGINAL_DELETE' | translate }}
+                </button>
+              </div>
+            </div>
           </ng-template>
         </es-node-entries-wrapper>
         <div

@@ -179,6 +179,10 @@ public class NodeDao {
         return null;
     }
 
+    public static boolean exists(RepositoryDao repoDao, String nodeId) {
+        return NodeServiceFactory.getNodeService(repoDao.getId()).exists(nodeId);
+    }
+
     public org.edu_sharing.service.model.NodeRef getNodeRef() {
         if (this.nodeRef != null) {
             return this.nodeRef;
@@ -656,6 +660,7 @@ public class NodeDao {
         node.setType(CCConstants.getValidLocalName(nodeType));
         node.setName(nodeRef.getId());
         node.setPreview(new Preview());
+        node.setProperties(Collections.emptyMap());
         // allow fetching as admin to properly resolve the url
         AuthenticationUtil.runAsSystem(() -> {
             try {
