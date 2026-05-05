@@ -56,6 +56,7 @@ import { Params, Router, RouterLink } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { RECENT_ACTIVITY_EVENT_TYPES } from '../../pages/editorial-page/editorial-page.service';
 
 type StreamDetails = { key: string; result: SearchResultGeneric<NodeEvent>; params: Params };
 type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; params: Params };
@@ -247,20 +248,18 @@ export class DashboardSwimlaneComponent {
         } else if (this.swimlane().id === 'recent-activities') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/activity');
             const events = [] as StreamDetails[];
-            [
-                ['files', 'FILES'],
-                ['collections', 'COLLECTIONS'],
-                ['folders', 'FOLDERS'],
-            ].forEach(async (k, i) => {
-                events.splice(i, 0, {
-                    key: k[0],
+            let i = 0;
+            for (const [key, types] of Object.entries(RECENT_ACTIVITY_EVENT_TYPES)) {
+                events.splice(i++, 0, {
+                    key,
                     result: await firstValueFrom(
                         this.searchService.search({
                             metadataset: DEFAULT,
                             query: null,
                             searchMode: 'recentActivity',
                             repository: HOME_REPOSITORY,
-                            contentType: k[1] as any,
+                            contentType: 'ALL',
+                            eventType: types,
                             maxItems: this.maxItemsEvents,
                             body: {
                                 criteria: [],
@@ -268,10 +267,10 @@ export class DashboardSwimlaneComponent {
                         }),
                     ),
                     params: {
-                        filters: JSON.stringify({ 'virtual:activityType': [k[1]] }),
+                        filters: JSON.stringify({ 'virtual:activityType': key }),
                     },
                 });
-            });
+            }
             this.streamEvents.set(events);
         } else if (this.swimlane().id === 'shares') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/share');

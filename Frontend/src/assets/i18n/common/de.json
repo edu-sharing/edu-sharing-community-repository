@@ -380,6 +380,7 @@
     "eventType": "Aktion",
     "timestamp": "Zeitpunkt",
     "TYPE": {
+      "CREATE_MATERIAL": "erstellt",
       "EDIT_MATERIAL": "bearbeitet",
       "DOWNLOAD_MATERIAL": "heruntergeladen",
       "ADD_MATERIAL_TO_COLLECTION": "Material hinzugefügt",
@@ -1678,9 +1679,9 @@
     "recent-activities": {
       "TITLE": "Letzte Aktivitäten",
       "SUBTITLE": {
-        "collections": "Sammlungen",
-        "files": "Dateien",
-        "folders": "Ordner"
+        "viewed": "Angesehen",
+        "created": "Erstellt",
+        "edited": "Bearbeitet"
       }
     }
   },

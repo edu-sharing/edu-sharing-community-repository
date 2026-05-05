@@ -1,8 +1,26 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { MdsWidget } from 'ngx-edu-sharing-api';
+import { MdsWidget, UserEvent } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
 import { PrimaryMode } from '../../features/editorial-sidebar/editorial-sidebar.component';
+
+export const RECENT_ACTIVITY_EVENT_TYPES: Record<string, NonNullable<UserEvent['eventType']>[]> = {
+    viewed: [
+        'VIEW_MATERIAL',
+        'VIEW_COLLECTION',
+        'VIEW_MATERIAL_EMBEDDED',
+        'VIEW_MATERIAL_PLAY_MEDIA',
+        'OPEN_EXTERNAL_LINK',
+    ],
+    created: ['CREATE_MATERIAL', 'EDIT_MATERIAL_RELATION'],
+    edited: [
+        'EDIT_MATERIAL',
+        'MOVE_MATERIAL',
+        'COPY_MATERIAL',
+        'ARCHIVE_MATERIAL',
+        'DELETE_MATERIAL',
+    ],
+};
 
 export type EditorialTab = {
     id: string;
