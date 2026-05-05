@@ -9,6 +9,7 @@
     --content-max-width: 1440px;
     --navbar-height: var(--mainnavHeight, 89px);
     --sidebar-offset: 16px;
+    --sidebar-width: 450px;
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
     // overwrite border radius for template page
@@ -774,13 +775,17 @@ es-editable-text {
 :host es-preview-sidebar ::ng-deep .preview-sidebar {
     margin: 10px;
     max-height: calc(100vh - var(--navbar-height) - 2 * var(--sidebar-offset));
-    width: 450px;
+    width: var(--sidebar-width);
     max-width: 550px;
     position: sticky;
     top: calc(var(--navbar-height) + var(--sidebar-offset));
     border-radius: 16px;
     display: flex;
     overflow: hidden;
+
+    .preview-sidebar-body .mds-views {
+        width: calc(var(--sidebar-width) - 2 * 15px);
+    }
 
     es-render-wrapper-component {
         // reduce min-height
