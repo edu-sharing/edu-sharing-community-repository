@@ -67,7 +67,7 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EditorialPageService } from './editorial-page.service';
+import { EditorialPageService, RECENT_ACTIVITY_EVENT_TYPES } from './editorial-page.service';
 import {
     debounceTime,
     delay,
@@ -551,6 +551,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 mds.widgets,
                 true,
             );
+            const activityTabKey = this.editorialPageService.buildSearchCriteria(
+                this.tabSelection$.value,
+            )[this.TabWidgetActivities]?.[0];
             this.searchService
                 .search({
                     searchMode: 'recentActivity',
@@ -558,10 +561,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     query: null,
                     repository: HOME_REPOSITORY,
                     ...pagination,
-                    // @TODO: we might need to consider eventType instead?
-                    contentType: this.editorialPageService.buildSearchCriteria(
-                        this.tabSelection$.value,
-                    )[this.TabWidgetActivities] as any,
+                    contentType: 'ALL',
+                    eventType: RECENT_ACTIVITY_EVENT_TYPES[activityTabKey],
                     body: {
                         facetLimit: 5,
                         facetMinCount: 1,

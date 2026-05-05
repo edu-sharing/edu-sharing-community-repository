@@ -786,9 +786,9 @@
       <caption>cp_virtual_activityType</caption>
       <valuespace_i18n_prefix>activityType_</valuespace_i18n_prefix>
       <values>
-        <entry icon="description">FILES</entry>
-        <entry icon="folder">FOLDERS</entry>
-        <entry icon="layers">COLLECTIONS</entry>
+        <entry icon="visibility">viewed</entry>
+        <entry icon="post_add">created</entry>
+        <entry icon="edit">edited</entry>
       </values>
     </widget>
     <widget>
