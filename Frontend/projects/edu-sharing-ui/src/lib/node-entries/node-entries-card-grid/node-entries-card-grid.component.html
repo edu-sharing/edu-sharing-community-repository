@@ -236,7 +236,12 @@
       (click)="doScroll('left')"
       *ngIf="scroll.left"
     >
-      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('left')">
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="$event.stopPropagation(); doScroll('left')"
+        tabindex="-1"
+      >
         <i esIcon="keyboard_arrow_left" [aria]="true"></i>
       </button>
     </div>
@@ -246,7 +251,12 @@
       (click)="doScroll('right')"
       *ngIf="scroll.right"
     >
-      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('right')">
+      <button
+        mat-icon-button
+        color="primary"
+        (click)="$event.stopPropagation(); doScroll('right')"
+        tabindex="-1"
+      >
         <i esIcon="keyboard_arrow_right" [aria]="true"></i>
       </button>
     </div>
