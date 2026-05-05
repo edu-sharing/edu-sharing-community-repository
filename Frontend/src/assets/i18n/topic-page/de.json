@@ -113,7 +113,6 @@
         "REGENERATE": "Bild neu generieren",
         "UPLOAD": "Bild hochladen",
         "DELETE": "Bild löschen",
-        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Ich stimme zu, dass ich alle notwendigen Rechte an diesem Bild besitze, um es auf der Themenseite einzubinden."
       },
       "MEDIA_RENDERING": {
