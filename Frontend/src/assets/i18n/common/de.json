@@ -1641,7 +1641,7 @@
     "EXPAND": "{{ element }} ausklappen",
     "COLLAPSE": "{{ element }} einklappen",
     "ACTIVITY": {
-      "ACTION_TEXT_PREFIX": "zuletzt",
+      "ACTION_TEXT_PREFIX": "",
       "ACTION_TEXT_SUFFIX": "am",
       "EMPTY": "Keine kürzlichen Aktivitäten",
       "TIMEGROUP": {
