@@ -86,6 +86,7 @@ export class ImageWrapperComponent implements OnInit {
     });
     private fileInput: HTMLInputElement;
     imagePath: SafeResourceUrl;
+    imageNode: Node;
     imageProcessing: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
 
@@ -132,19 +133,21 @@ export class ImageWrapperComponent implements OnInit {
         userUploadedNodeId: string,
         regenerateNecessary: boolean = false,
     ): Promise<void> {
+        // reset both sources before loading the new one
+        this.imagePath = null;
+        this.imageNode = null;
         // user has uploaded a custom image
         if (userUploadedNodeId) {
             const uploadedNode: Node = await this.topicPageHelperService.getNode(
                 userUploadedNodeId,
             );
-            if (uploadedNode.preview.url) {
-                this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                    uploadedNode.preview.url,
-                );
+            if (uploadedNode.preview?.url) {
+                this.imageNode = uploadedNode;
             }
+            return;
         }
         // user has selected an AI generated image
-        else if (aiGeneratedImage) {
+        if (aiGeneratedImage) {
             const imageData: ImageResult = regenerateNecessary
                 ? await this.aiHelperService.updateAiImage(
                       this.widgetNodeId(),
@@ -157,16 +160,11 @@ export class ImageWrapperComponent implements OnInit {
             this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
                 this.BASE_64_PREFIX + imageData.data[0].b64_json,
             );
+            return;
         }
         // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
-        else if (this.fallbackNode) {
-            this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                this.fallbackNode.preview.url,
-            );
-        }
-        // reset the image path
-        else {
-            this.imagePath = null;
+        if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
+            this.imageNode = this.fallbackNode;
         }
     }
 

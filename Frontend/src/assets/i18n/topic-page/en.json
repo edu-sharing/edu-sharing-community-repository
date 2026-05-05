@@ -115,7 +115,6 @@
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
         "DELETE": "Delete image",
-        "NO_IMAGE_SELECTED": "No image has been selected yet.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
       "MEDIA_RENDERING": {

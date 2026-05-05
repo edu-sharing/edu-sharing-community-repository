@@ -123,3 +123,23 @@
     background: rgba(0, 0, 0, 0.45);
     z-index: 3;
 }
+
+.card-image-icon-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+
+    > i.mat-icon {
+        color: #fff;
+        font-size: 45px;
+        width: 1em;
+        height: 1em;
+    }
+}
