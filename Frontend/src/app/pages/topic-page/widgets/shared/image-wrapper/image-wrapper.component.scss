@@ -76,6 +76,8 @@
     min-height: 100%;
     max-height: 512px;
     flex-shrink: 0;
+    object-fit: cover;
+    object-position: center;
 }
 
 // vertically centered buttons to change or delete the image
