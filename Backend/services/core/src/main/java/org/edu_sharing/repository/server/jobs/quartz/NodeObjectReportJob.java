@@ -251,7 +251,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             if (isInterrupted()) {
                 return;
             }
-            if(!nodePropertiesFilters.isEmpty()) {
+            if(nodePropertiesFilters != null && !nodePropertiesFilters.isEmpty()) {
                 try {
                     boolean filter = false;
                     for (Map.Entry<String, String> filterEntry : nodePropertiesFilters.entrySet()) {
