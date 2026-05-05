@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.collection.v1;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,12 +8,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.metadataset.v2.MetadataSet;
-import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.*;
@@ -35,12 +36,11 @@ import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.util.AlfrescoDaoHelper;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/collection/v1")
 @Tag(name= "COLLECTION v1" )
@@ -347,7 +347,11 @@ public class CollectionApi {
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
 			for (Node item : base.getEntries()) {
-				references.add((CollectionReference) item);
+				if(item instanceof CollectionReference) {
+					references.add((CollectionReference) item);
+				} else {
+					references.add(new CollectionReference(item));
+				}
 			}
 			response.setReferences(references);
 			response.setPagination(base.getPagination());

@@ -137,7 +137,7 @@ public class Node implements Serializable {
 	 * @return
 	 */
 	public static Node FakeFromRef(NodeRef ref) throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-		Node node = NodeDao.createEmptyDummy(Node.class, ref);
+		Node node = NodeDao.createEmptyDummy(Node.class, ref, CCConstants.CCM_TYPE_IO);
 		node.setPreview(new Preview());
 		node.setIconURL(new MimeTypesV2().getDefaultIcon());
 		HashMap<String, String[]> props = new HashMap<>();
