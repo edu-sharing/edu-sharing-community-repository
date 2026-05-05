@@ -267,7 +267,7 @@ export class DashboardSwimlaneComponent {
                         }),
                     ),
                     params: {
-                        filters: JSON.stringify({ 'virtual:activityType': key }),
+                        filters: JSON.stringify({ 'virtual:activityType': [key] }),
                     },
                 });
             }
