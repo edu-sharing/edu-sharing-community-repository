@@ -815,6 +815,13 @@ es-editable-text {
 // styling of page edit button (template)
 button.topic-page-edit-toggle-btn {
     margin-left: 16px;
+    padding-left: 16px;
+    padding-right: 25px;
+    height: 39px;
+    background-color: rgb(
+        from var(--workspaceTopBarFontColor) r g b / var(--workspaceTopBarNewAlpha)
+    );
+    border-radius: 0;
 
     .mdc-button__label {
         gap: 8px;
