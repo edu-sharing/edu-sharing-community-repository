@@ -51,6 +51,7 @@ es-collection-proposals {
     height: 100%;
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(5px);
+    padding: 20px;
     display: flex;
     justify-content: center;
     text-align: center;
@@ -72,11 +73,18 @@ es-collection-proposals {
         font-size: 90%;
     }
     a {
-        text-transform: uppercase;
         font-weight: bold;
         i {
             position: relative;
             top: 7px;
+        }
+        .details {
+            display: flex;
+            align-items: center;
+            i {
+                top: 0;
+                font-size: 20px;
+            }
         }
     }
 }

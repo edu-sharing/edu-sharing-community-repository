@@ -17,6 +17,7 @@ import {
     AuthenticationService,
     CollectionReference,
     ConfigService,
+    ConfigValues,
     MdsService,
     Node,
     NodeService,
@@ -176,12 +177,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
+    config: ConfigValues;
 
     constructor(
         private authenticationService: AuthenticationService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
-        private configurationService: ConfigService,
+        public configurationService: ConfigService,
         private sessionStorageService: SessionStorageService,
         private dialogs: DialogsService,
         private infobar: InfobarService,
@@ -246,6 +248,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
         // check: this sometimes caused missing actionbar data, why is it here?
         //this.optionsService.clearComponents(this.actionbarReferences);
+        this.configurationService
+            .observeConfig()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((config) => (this.config = config));
         this.registerMainNav();
         this.mainNavUpdateTrigger.next();
     }

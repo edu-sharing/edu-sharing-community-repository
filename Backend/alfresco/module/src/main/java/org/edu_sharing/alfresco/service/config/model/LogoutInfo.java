@@ -1,33 +1,20 @@
 package org.edu_sharing.alfresco.service.config.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 
 public class LogoutInfo implements Serializable {
-	/**
-	 * url to navigate to
-	 */
+	@Schema(description = "URL to navigate to on logout")
 	@XmlElement public String url;
-	/**
-	 * url for locale users
-	 * if not set, url will be used
-	 */
+	@Schema(description = "URL for local users (overrides url if set)")
 	@XmlElement public String localUrl;
-	/**
-	 * url for shibboleth or sso users
-	 * if not set, url will be used
-	 */
+	@Schema(description = "URL for Shibboleth/SSO users (overrides url if set)")
 	@XmlElement public String ssoUrl;
-	/**
-	 * destroy the local session?
-	 */
+	@Schema(description = "If true, destroy the edu-sharing session before navigating to URL")
 	@XmlElement public Boolean destroySession;
-	/**
-	 * call the given url via ajax (true) or navigate via browser (false)
-	 */
+	@Schema(description = "If true, call URL via AJAX; if false, navigate via browser")
 	@XmlElement public Boolean ajax;
-	/**
-	 * only if ajax: url to navigate the browser to after triggering "url" via ajax.
-	 */
-	@XmlElement	public String next;
+	@Schema(description = "URL to navigate to after AJAX call completes (only if ajax=true)")
+	@XmlElement public String next;
 }

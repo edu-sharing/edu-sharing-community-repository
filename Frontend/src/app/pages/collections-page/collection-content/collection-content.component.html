@@ -157,6 +157,18 @@
                 <i esIcon="lock"></i>
                 <div class="headline">{{ 'ORIGINAL_ACCESS_DENIED' | translate }}</div>
                 <div class="subline">{{ 'ORIGINAL_ACCESS_DENIED_INFO' | translate }}</div>
+                <a
+                  mat-button
+                  color="primary"
+                  [href]="config?.accessDeniedInfoUrl"
+                  target="_blank"
+                  *ngIf="config?.accessDeniedInfoUrl"
+                >
+                  <span class="details">
+                    {{ 'ORIGINAL_ACCESS_DENIED_MORE' | translate }}
+                    <i esIcon="open_in_new"></i>
+                  </span>
+                </a>
                 <button
                   mat-button
                   color="primary"
