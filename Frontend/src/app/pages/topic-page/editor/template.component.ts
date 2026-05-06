@@ -834,6 +834,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 top: offsetPosition,
                 behavior: 'smooth',
             });
+
+            // set focus to element that was scrolled into view
+            if (!element.hasAttribute('tabindex')) {
+                element.setAttribute('tabindex', '-1');
+            }
+
+            window.setTimeout(() => {
+                element.focus({ preventScroll: true });
+            }, 500);
+
             return true;
         } else {
             return false;
