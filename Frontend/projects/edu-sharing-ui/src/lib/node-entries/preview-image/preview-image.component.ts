@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { NodesRightMode } from '../../types/option-item';
 
 /**
  * Displays the preview image of `node`.
