@@ -152,10 +152,7 @@
                 </button>
               </div>
             </div>
-            <div
-              class="node-deleted"
-              *ngIf="element.accessEffective == null && !isDeleted(element)"
-            >
+            <div class="node-deleted" *ngIf="element.access === null && !isDeleted(element)">
               <div>
                 <i esIcon="lock"></i>
                 <div class="headline">{{ 'ORIGINAL_ACCESS_DENIED' | translate }}</div>

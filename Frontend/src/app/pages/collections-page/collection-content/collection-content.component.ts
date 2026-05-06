@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
+    CollectionReference,
     ConfigService,
     MdsService,
     Node,
@@ -50,7 +51,6 @@ import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import {
-    CollectionReference,
     ConfigurationHelper,
     LoginResult,
     NodeWrapper,
@@ -543,6 +543,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.contentNode = event.element;
         if (event.element.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             this.clickElementEvent(event);
+        } else if ((event.element as CollectionReference).accessEffective === null) {
+            // no metadata available
+            return;
         } else if ((event.element as CollectionReference).originalId == null) {
             const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'COLLECTIONS.ORIGINAL_MISSING',
