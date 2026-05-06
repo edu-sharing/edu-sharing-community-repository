@@ -12,6 +12,7 @@
     (click)="option.callback()"
     class="global-option-btn"
     attr.data-test="card-button-{{ option.name }}"
+    attr.aria-label="{{ option.name | translate }}"
   >
     <ng-container *ngTemplateOutlet="globalOption; context: { option: option }"></ng-container>
   </button>
