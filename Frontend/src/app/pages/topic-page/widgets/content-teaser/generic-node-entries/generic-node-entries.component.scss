@@ -195,6 +195,42 @@ es-node-entries-wrapper {
     }
 }
 
+// adjust background for blacklisted + not blacklisted items
+:host ::ng-deep es-node-entries-wrapper {
+    es-node-entries-card .grid-card,
+    es-node-entries-table mat-table .mat-row {
+        // !important is currently necessary due to a very specific selector being applied
+        &:not(.blacklisted) {
+            background-color: topicPageVars.$surface !important;
+        }
+
+        &.blacklisted {
+            // https://www.magicpattern.design/tools/css-backgrounds
+            $blacklist-color: topicPageVars.$surface-container-highest;
+            $blacklist-color-contrast: topicPageVars.$surface-container;
+            background-color: $blacklist-color;
+            background-image: repeating-linear-gradient(
+                    45deg,
+                    $blacklist-color-contrast 25%,
+                    transparent 25%,
+                    transparent 75%,
+                    $blacklist-color-contrast 75%,
+                    $blacklist-color-contrast
+                ),
+                repeating-linear-gradient(
+                    45deg,
+                    $blacklist-color-contrast 25%,
+                    $blacklist-color 25%,
+                    $blacklist-color 75%,
+                    $blacklist-color-contrast 75%,
+                    $blacklist-color-contrast
+                );
+            background-position: 0 0, 3px 3px;
+            background-size: 6px 6px;
+        }
+    }
+}
+
 // for single- and split-view also make sure that the --cardWidth is not too large
 // case 1: sidebar is not open
 // desktop breakpoint is 1210px
