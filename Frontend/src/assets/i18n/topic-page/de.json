@@ -241,6 +241,8 @@
       "RECOMMENDED": "Empfohlen"
     },
     "ANCHOR_FALLBACK_PREFIX": "Abschnitt",
+    "ANCHOR_ARIA_HEADING": "Springe zu Abschnitt: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Anzahl der Suchergebnisse: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Überschrift",
       "DEFAULT_HEADING": "Eine beispielhafte Überschrift",
