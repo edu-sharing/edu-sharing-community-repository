@@ -239,6 +239,8 @@
       "RECOMMENDED": "Recommended"
     },
     "ANCHOR_FALLBACK_PREFIX": "Section",
+    "ANCHOR_ARIA_HEADING": "Navigate to section: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Number of search results: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Heading",
       "DEFAULT_HEADING": "An example heading",
