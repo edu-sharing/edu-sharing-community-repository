@@ -354,11 +354,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 const nodeToChange: Node =
                     node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
                 if (nodeToChange) {
-                    const url: string =
-                        this.topicPageHelperService.getBaseHref() +
-                        'components/editorial-desk?mode=audit&fromMds=true&viewType=Single&nodeId=' +
-                        nodeToChange.ref.id;
-                    window.open(url, '_blank');
+                    this.topicPageHelperService.openChangeOnInspectionTableLink(nodeToChange);
                 }
             },
         );
