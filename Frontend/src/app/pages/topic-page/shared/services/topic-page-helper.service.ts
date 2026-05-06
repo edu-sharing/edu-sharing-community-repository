@@ -137,6 +137,41 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Opens the link to a node for inspection.
+     *
+     * @param node
+     */
+    openChangeOnInspectionTableLink(node: Node): void {
+        const component = this.topicPageGlobalService.getCustomApplyFilterComponent() || 'render';
+        const urlBase = this.buildInspectionTableUrlBase(component, node);
+        const extras = this.topicPageGlobalService.getCustomInspectionTableExtras() || {};
+
+        const link = this.getBaseHref() + this.router.createUrlTree(urlBase, extras).toString();
+
+        window.open(link, '_blank');
+    }
+
+    /**
+     * Helper function to build the inspection table URL base.
+     *
+     * @param component
+     * @param node
+     */
+    private buildInspectionTableUrlBase(component: string, node: Node): string[] {
+        if (component !== 'render') {
+            return [UIConstants.ROUTER_PREFIX + component];
+        }
+
+        const urlBase = [UIConstants.ROUTER_PREFIX + component, retrieveNodeId(node)];
+
+        if (node.content.version) {
+            urlBase.push(node.content.version);
+        }
+
+        return urlBase;
+    }
+
+    /**
      * Helper function to merge navigation extras with special consideration for filters.
      *
      * @param obj1
