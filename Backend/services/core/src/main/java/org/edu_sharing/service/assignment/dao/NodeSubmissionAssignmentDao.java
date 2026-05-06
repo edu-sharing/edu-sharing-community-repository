@@ -14,7 +14,9 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
+import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.MissingResourceException;
+import org.edu_sharing.restservices.PersonDao;
 import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
@@ -164,7 +166,13 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                                     return null;
                                 }
 
-                                return new Assignment.Permission(new Authority(ace), role);
+                                Authority authority = new Authority(ace);
+                                return new Assignment.Permission(switch (authority.getAuthorityType()) {
+                                    case USER, OWNER, GUEST ->
+                                            PersonDao.getPerson(repositoryDao.get(), authority.getAuthorityName()).asPersonSimple(false);
+                                    case GROUP, EVERYONE ->
+                                            GroupDao.getGroup(repositoryDao.get(), authority.getAuthorityName()).asGroup();
+                                }, role);
                             })
                             .filter(Objects::nonNull)
                             .toList()
@@ -283,8 +291,11 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             put(CCConstants.CCM_PROP_ASSIGNMENT_END_DATE, request.endTime());
         }};
 
-        log.debug("Update assignment node {} with {}", nodeId, properties);
-        nodeService.updateNodeNative(nodeId, properties);
+        AuthenticationUtil.runAsSystem(() -> {
+            log.debug("Update assignment node {} with {}", nodeId, properties);
+            nodeService.updateNodeNative(nodeId, properties);
+            return null;
+        });
 
         setAssignmentPermissions(request.permissions(), request.status() == Assignment.Status.DRAFT);
         setSubmissionPermissions(request.permissions());
