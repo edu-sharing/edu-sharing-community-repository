@@ -109,8 +109,6 @@
         "MISSING_SRC": "Es wurde keine Quelle angegeben, wodurch kein iFrame angezeigt werden kann."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Verschommener Hintergrund des Bilds",
-        "ALT": "Bild zur Motivation des Themas",
         "GENERATE": "Bild generieren",
         "REGENERATE": "Bild neu generieren",
         "UPLOAD": "Bild hochladen",

@@ -109,8 +109,6 @@
         "MISSING_SRC": "No source was specified, therefore no iframe can be displayed."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Blurred background of the image",
-        "ALT": "Image to motivate the topic",
         "GENERATE": "Generate image",
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
