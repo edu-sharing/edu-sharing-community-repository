@@ -32,6 +32,7 @@ export class TopicPageGlobalService {
     private customApplyFilterExtras: NavigationExtras;
     private customInspectionTableComponent: string = '';
     private customInspectionTableExtras: NavigationExtras;
+    private customInspectionTableNodeIdQueryParam: string = '';
     private customColorPalette: string[] | NgxColorsColor[] = [];
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
@@ -115,6 +116,13 @@ export class TopicPageGlobalService {
      */
     setCustomInspectionTableExtras(extras: NavigationExtras) {
         this.customInspectionTableExtras = extras;
+    }
+
+    /**
+     * Sets a custom query param for the node ID to be used for the inspection table link.
+     */
+    setCustomInspectionTableNodeIdQueryParam(queryParam: string) {
+        this.customInspectionTableNodeIdQueryParam = queryParam;
     }
 
     /**
@@ -206,6 +214,13 @@ export class TopicPageGlobalService {
      */
     getCustomInspectionTableExtras() {
         return this.customInspectionTableExtras;
+    }
+
+    /**
+     * Retrieves the custom query param for the node ID to be used for the inspection table link, if available.
+     */
+    getCustomInspectionTableNodeIdQueryParam(): string {
+        return this.customInspectionTableNodeIdQueryParam;
     }
 
     /**

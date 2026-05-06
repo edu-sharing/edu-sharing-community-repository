@@ -145,7 +145,11 @@ export class TopicPageHelperService {
         const component = this.topicPageGlobalService.getCustomApplyFilterComponent() || 'render';
         const urlBase = this.buildInspectionTableUrlBase(component, node);
         const extras = this.topicPageGlobalService.getCustomInspectionTableExtras() || {};
-
+        if (this.topicPageGlobalService.getCustomInspectionTableNodeIdQueryParam()) {
+            extras.queryParams[
+                this.topicPageGlobalService.getCustomInspectionTableNodeIdQueryParam()
+            ] = retrieveNodeId(node);
+        }
         const link = this.getBaseHref() + this.router.createUrlTree(urlBase, extras).toString();
 
         window.open(link, '_blank');
