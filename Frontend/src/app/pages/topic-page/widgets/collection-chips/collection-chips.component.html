@@ -23,16 +23,21 @@
             (click)="collectionItemClicked(n)"
           >
             <!-- tile header -->
-            <div class="tile-header" [class.default-icon]="n.preview.isIcon">
+            <div
+              class="tile-header"
+              [class.default-icon]="n.preview.isIcon"
+              [style.background-color]="
+                n.preview.isIcon ? customCollectionChipsTileColor || n.collection?.color : null
+              "
+            >
               <!-- if isIcon is set to true, the default icon of the node type is displayed -->
-              <img
-                [src]="n.preview.url"
-                [alt]="
-                  n.preview.isIcon
-                    ? (i18nPrefix + 'DEFAULT_ICON' | translate)
-                    : (i18nPrefix + 'UPLOADED_ICON' | translate)
-                "
-              />
+              <!-- use alt="" to tell the user that the image is only decorative -->
+              <ng-container *ngIf="n.preview && !n.preview.isIcon; else defaultCollectionIcon">
+                <img [src]="n | esNodeImage | async" alt="" />
+              </ng-container>
+              <ng-template #defaultCollectionIcon>
+                <i esIcon="layers"></i>
+              </ng-template>
             </div>
             <!-- tile content -->
             <div class="tile-content">

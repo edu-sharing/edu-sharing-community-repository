@@ -83,26 +83,35 @@
     }
 
     .tile-header {
-        padding: 8px 8px 0 8px;
+        padding: 16px 8px 0 8px;
         height: 92px;
         width: 100%;
 
-        img {
-            height: 100%;
-            width: auto;
-        }
-
         &.default-icon {
             padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-            img {
-                width: 100%;
-                object-fit: cover;
+            > i {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-user-select: none;
+                user-select: none;
+                color: rgba(0, 0, 0, 0.75);
+                background-color: rgba(255, 255, 255, 0.5);
+                padding: 25px;
+                font-size: 25px;
+                border-radius: 50%;
             }
         }
 
         &:not(.default-icon) {
-            padding-top: 16px;
+            img {
+                height: 100%;
+                width: auto;
+            }
         }
     }
 
