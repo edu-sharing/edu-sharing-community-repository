@@ -87,8 +87,15 @@ export class SubmissionSidebarComponent {
     readonly isReadOnly = computed(
         () =>
             this.data()?.assignment?.status === 'CANCELED' ||
+            this.data()?.assignment?.status === 'CORRECTED' ||
             this.data()?.assignment?.status === 'DRAFT' ||
             this.data()?.assignment?.status === 'FINISHED',
+    );
+    readonly isClosed = computed(
+        () =>
+            this.data()?.assignment?.status === 'CORRECTED' ||
+            this.data()?.assignment?.status === 'FINISHED' ||
+            this.data()?.assignment?.status === 'CANCELED',
     );
     readonly submissionStatus = new ListItem('SUBMISSION', 'submissionStatus');
     readonly validationStatus = new ListItem('SUBMISSION', 'validationStatus');

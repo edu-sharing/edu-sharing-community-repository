@@ -158,14 +158,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
             .subscribe(([assignment, files]) => {
                 this.assignment.set(assignment);
                 this.dataSource.isLoading = false;
-                this.dataSource.setData(
-                    files.map((submission) => {
-                        return {
-                            ...submission,
-                            assignment,
-                        };
-                    }) as SubmissionWithAssignment[],
-                );
+                this.setSubmissions(files);
             });
     }
     ngOnDestroy() {
@@ -175,6 +168,15 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
     protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
+
+    private setSubmissions(submissions: Submission[]) {
+        this.dataSource.setData(
+            submissions.map((submission) => ({
+                ...submission,
+                assignment: this.assignment(),
+            })) as SubmissionWithAssignment[],
+        );
+    }
 
     select(event: SubmissionWithAssignment) {
         this.nodeEntries.getSelection().setSelection(event);
@@ -263,6 +265,13 @@ export class AssignmentSubmissionComponent implements OnDestroy {
             ...this.assignment(),
             status: 'CORRECTED',
         });
+        this.setSubmissions(
+            await firstValueFrom(
+                this.assignmentService.getSubmissions({
+                    assignmentId: this.assignment().ref.id,
+                }),
+            ),
+        );
         this.toast.toast('EDITORIAL.ASSIGNMENT.SUBMISSIONS.ALL_CORRECTED');
     }
 }
