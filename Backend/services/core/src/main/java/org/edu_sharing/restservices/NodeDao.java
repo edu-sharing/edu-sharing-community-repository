@@ -2371,7 +2371,7 @@ public class NodeDao {
         } else{
             user = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
+        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
         Node node = asNode();
 
         java.util.Collection<String> permissions;
