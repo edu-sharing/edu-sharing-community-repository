@@ -1564,6 +1564,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         infoVersions.scopes = [Scope.WorkspaceList, Scope.Search, Scope.EditorialPage];
         infoVersions.group = DefaultGroups.View;
+        infoVersions.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         infoVersions.priority = 20;
 
         const registerSelectionChange = (list: ListEventInterface<any>) => {

@@ -148,7 +148,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             () => this.enabledOption.set({ trap: false, option: 'WORKSPACE_METADATA' }),
         );
         workspaceMetadata.elementType = [ElementType.Node];
-        workspaceMetadata.constrains = [Constrain.NoBulk];
+        workspaceMetadata.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         workspaceMetadata.scopes = ['workspace'];
         options.push(workspaceMetadata);
 
