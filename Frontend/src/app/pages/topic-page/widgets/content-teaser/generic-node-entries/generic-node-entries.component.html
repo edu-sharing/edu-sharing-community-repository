@@ -21,7 +21,9 @@
 >
   <!-- placeholder template for empty content -->
   <ng-template #empty>
-    <div class="empty">{{ 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.NO_CONTENTS' | translate }}</div>
+    <es-info-message>
+      {{ 'TOPIC_PAGE.WIDGET.CONTENT_TEASER.NO_CONTENTS' | translate }}
+    </es-info-message>
   </ng-template>
 </es-node-entries-wrapper>
 

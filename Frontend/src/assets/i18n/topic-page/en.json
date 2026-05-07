@@ -58,7 +58,7 @@
         "SWITCH_INTO_VIEW_MODE": "Switch to view mode",
         "POPUP_BLOCKED": "Popup was blocked or could not be opened.",
         "FILTER_EVENT_RECEIVED": "Filter event received",
-        "NO_CONTENTS": "No contents yet",
+        "NO_CONTENTS": "No search results were found.",
         "CHANGE_ON_INSPECTION_TABLE": "Change object on inspection table",
         "REMOVE_FROM_WIDGET": "Hide object",
         "ADD_TO_WIDGET": "Show object"
