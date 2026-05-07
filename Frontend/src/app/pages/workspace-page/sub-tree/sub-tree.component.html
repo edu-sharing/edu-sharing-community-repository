@@ -30,6 +30,8 @@
           class="expand-toggle"
           (click)="toggleNodeExpansion($event, node)"
           [class.opacity-invisible]="_hasChildren[node.ref.id] === false"
+          [attr.aria-expanded]="isOpen(node)"
+          attr.aria-label="{{ node.name }}"
         >
           <i *ngIf="!isOpen(node)" esIcon="keyboard_arrow_right"></i>
           <i *ngIf="isOpen(node)" esIcon="keyboard_arrow_down"></i>
