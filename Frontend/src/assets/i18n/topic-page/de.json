@@ -44,8 +44,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Standard-Icon",
-        "UPLOADED_ICON": "Hochgeladenes Icon",
         "CONFIG_ARIA": "Wähle das Layout der Navigationspillen",
         "CHANGE_FILTER_OR_SEARCH": "Filter oder Suche ändern"
       },

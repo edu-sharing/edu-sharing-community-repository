@@ -34,6 +34,7 @@ export class TopicPageGlobalService {
     private customInspectionTableExtras: NavigationExtras;
     private customInspectionTableNodeIdQueryParam: string = '';
     private customColorPalette: string[] | NgxColorsColor[] = [];
+    private customCollectionChipsTileColor: string = '';
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
     private customUrlTarget: '_self' | '_blank' = '_self';
@@ -123,6 +124,13 @@ export class TopicPageGlobalService {
      */
     setCustomInspectionTableNodeIdQueryParam(queryParam: string) {
         this.customInspectionTableNodeIdQueryParam = queryParam;
+    }
+
+    /**
+     * Sets a custom color for the collection chips tile.
+     */
+    setCustomCollectionChipsTileColor(color: string) {
+        this.customCollectionChipsTileColor = color;
     }
 
     /**
@@ -221,6 +229,13 @@ export class TopicPageGlobalService {
      */
     getCustomInspectionTableNodeIdQueryParam(): string {
         return this.customInspectionTableNodeIdQueryParam;
+    }
+
+    /**
+     * Retrieves the custom color for the collection chips tile.
+     */
+    getCustomCollectionChipsTileColor(): string {
+        return this.customCollectionChipsTileColor;
     }
 
     /**

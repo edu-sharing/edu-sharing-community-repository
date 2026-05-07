@@ -50,6 +50,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
+    customCollectionChipsTileColor: string;
     customUrl: (node: Node) => string;
     layout: CollectionListDisplayType = CollectionListDisplayType.Chips;
     layoutOptions: LayoutOption[] = [
@@ -87,6 +88,8 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
+        this.customCollectionChipsTileColor =
+            this.topicPageGlobalService.getCustomCollectionChipsTileColor();
     }
 
     /**
