@@ -108,7 +108,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     criteria: Signal<MdsQueryCriteria[]> = computed((): MdsQueryCriteria[] => {
         const criteriaArray: MdsQueryCriteria[] = [];
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to search for the collection
-        if (!Object.keys(this.propertyFilters())?.length) {
+        if (!this.propertyFilters()) {
             criteriaArray.push({
                 property: DEFAULT_COLLECTION_ID_PROP,
                 values: [this.contextNodeId],
@@ -196,7 +196,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             viewValue: 'LIST_VIEW',
         },
     ];
-    private propertyFilters: WritableSignal<Values> = signal({});
+    private propertyFilters: WritableSignal<Values> = signal(null);
     queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     private searchMode: string = RestConstants.PRIMARY_SEARCH_CRITERIA;
     totalSearchResultCount: number = -1;
@@ -268,10 +268,12 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
      * Opens the repository content URL using the previously set propertyFilters and searchText.
      */
     openRepoContentUrl(): void {
-        const propertyFilters: Values = this.propertyFilters();
+        let propertyFilters: Values | null = this.propertyFilters();
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to filter for the collection
-        if (!Object.keys(propertyFilters)?.length) {
-            propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [this.contextNodeId];
+        if (!propertyFilters) {
+            propertyFilters = {
+                [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+            };
         }
         // set both filters and query string
         const contentTeaserExtra: NavigationExtras = {
