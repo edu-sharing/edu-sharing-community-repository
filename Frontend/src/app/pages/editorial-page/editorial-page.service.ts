@@ -81,14 +81,22 @@ export class EditorialPageService {
             };
         });
     }
-    getVirtualNodes(mode: PrimaryMode) {
-        return this.virtualNodes$.value[mode];
+    getTabId(tabIndex: number): string {
+        return this.tabs$.value?.[tabIndex]?.id;
     }
-    addVirtualNodes(nodes: NodeEntriesDataType[], mode: PrimaryMode) {
-        if (!this.virtualNodes$.value[mode]) {
-            this.virtualNodes$.value[mode] = [];
+    getVirtualNodes(mode: PrimaryMode, tabId: string) {
+        return this.virtualNodes$.value[`${mode}:${tabId}`];
+    }
+    clearVirtualNodes(mode: PrimaryMode, tabId: string) {
+        delete this.virtualNodes$.value[`${mode}:${tabId}`];
+        this.virtualNodes$.next(this.virtualNodes$.value);
+    }
+    addVirtualNodes(nodes: NodeEntriesDataType[], mode: PrimaryMode, tabId: string) {
+        const key = `${mode}:${tabId}`;
+        if (!this.virtualNodes$.value[key]) {
+            this.virtualNodes$.value[key] = [];
         }
-        this.virtualNodes$.value[mode] = [...this.virtualNodes$.value[mode], ...nodes];
+        this.virtualNodes$.value[key] = [...this.virtualNodes$.value[key], ...nodes];
         this.virtualNodes$.next(this.virtualNodes$.value);
     }
 }

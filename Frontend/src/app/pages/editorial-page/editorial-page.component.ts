@@ -738,13 +738,14 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        if (
-            this.nodeEntriesRef &&
-            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode)
-        ) {
-            this.nodeEntriesRef.addVirtualNodes(
-                this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
-            );
+        const tabId = this.editorialPageService.getTabId(this.tabSelection$.value);
+        const virtualNodes = this.editorialPageService.getVirtualNodes(
+            this.params$.value.primaryMode,
+            tabId,
+        );
+        if (this.nodeEntriesRef && virtualNodes) {
+            this.nodeEntriesRef.addVirtualNodes(virtualNodes);
+            this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
         }
     }
 

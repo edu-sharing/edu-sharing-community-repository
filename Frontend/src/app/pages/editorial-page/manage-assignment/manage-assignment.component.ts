@@ -280,7 +280,7 @@ export class ManageAssignmentComponent {
         } finally {
             this.saving.set(false);
         }
-        this.editorialPageService.addVirtualNodes([newAssignment], 'assignment');
+        this.editorialPageService.addVirtualNodes([newAssignment], 'assignment', 'created');
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParamsHandling: 'merge',
