@@ -2387,7 +2387,7 @@ public class NodeDao {
 
     public String getJWT() throws GeneralSecurityException {
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
-        UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
+        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
 
         Node node = asNode();
 
