@@ -19,11 +19,13 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     @Input() storageKey: string;
     @Input() position: 'start' | 'end' = 'start';
     @Input() minWidth = 0.2;
+    @Input() minWidthPx = 400;
     /**
      * default width (is calculated based on the full screen with [0...1]
      */
     @Input() defaultWidth = 0.3;
-    @Input() maxWidth = 0.7;
+    @Input() maxWidth = 0.5;
+    @Input() maxWidthPx = 600;
     private resizer!: HTMLElement;
     private dragging = false;
     private width$ = new BehaviorSubject<number>(0);
@@ -101,8 +103,9 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
 
     private applyWidthConstrains(newWidth: number) {
         return Math.max(
+            this.minWidthPx,
             this.minWidth * window.innerWidth,
-            Math.min(newWidth, this.maxWidth * window.innerWidth),
+            Math.min(newWidth, this.maxWidth * window.innerWidth, this.maxWidthPx),
         );
     }
 
