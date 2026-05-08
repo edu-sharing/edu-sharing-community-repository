@@ -8,7 +8,7 @@ import {
     Renderer2,
 } from '@angular/core';
 import { MatSidenavContainer } from '@angular/material/sidenav';
-import { SessionStorageService } from 'ngx-edu-sharing-api';
+import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -34,9 +34,9 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         private storage: SessionStorageService,
         @Optional() private sidenavContainer: MatSidenavContainer, // inject container
     ) {
-        this.width$.pipe(debounceTime(100)).subscribe((width) => {
+        this.width$.pipe(debounceTime(10)).subscribe((width) => {
             if (this.storageKey) {
-                void this.storage.set(this.storageKey, width);
+                void this.storage.set(this.storageKey, width, Store.LocalStorage);
             }
         });
     }
@@ -50,7 +50,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         const defaultWidth = window.innerWidth * this.defaultWidth;
         if (this.storageKey) {
             const lastValue = this.applyWidthConstrains(
-                await this.storage.get<number>(this.storageKey, defaultWidth),
+                await this.storage.get<number>(this.storageKey, defaultWidth, Store.LocalStorage),
             );
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
             this.sidenavContainer.updateContentMargins();
@@ -114,7 +114,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     };
 
     private resetToDefault = async () => {
-        void this.storage.delete(this.storageKey);
+        void this.storage.delete(this.storageKey, Store.LocalStorage);
         const defaultWidth = window.innerWidth * this.defaultWidth;
         this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
         this.sidenavContainer.updateContentMargins();
