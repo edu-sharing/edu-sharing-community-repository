@@ -18,6 +18,9 @@
         color: var(--light-primary-text);
     }
 }
+es-node-entries-wrapper {
+    --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
+}
 
 .entries-wrapper {
     @include entriesWrapper;
