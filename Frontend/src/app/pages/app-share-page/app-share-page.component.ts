@@ -229,7 +229,7 @@ export class AppSharePageComponent {
         return !this.uri.startsWith('content://') && !this.uri.startsWith('file://');
     }
     private goToInbox() {
-        UIHelper.goToWorkspaceFolder(this.node, this.router, null, this.inbox.ref.id, {
+        UIHelper.goToWorkspaceFolder(this.router, null, this.inbox.ref.id, {
             replaceUrl: true,
         });
     }

@@ -27,6 +27,7 @@
       class="breadcrumbFrame"
       *ngIf="!searchMode"
       [createLink]="false"
+      [showLanding]="false"
       (clickBreadcrumb)="selectBreadcrumb($event)"
       [home]="homeOverride ? homeOverride.label : (label | translate)"
       [homeIcon]="homeOverride ? homeOverride.icon : homeIcon"

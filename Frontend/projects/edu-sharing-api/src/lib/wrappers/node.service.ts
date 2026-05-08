@@ -342,6 +342,20 @@ export class NodeService {
         }
     }
 
+    forkNode(
+        targetParent: string,
+        sourceNode: string,
+        repository = HOME_REPOSITORY,
+        withChildren = true,
+    ) {
+        return this.nodeV1.createForkOfNode({
+            node: targetParent,
+            source: sourceNode,
+            repository,
+            withChildren,
+        });
+    }
+
     /**
      * Set single property of node.
      *

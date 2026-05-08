@@ -98,7 +98,6 @@ export class CreateMapLinkDialogComponent implements OnInit {
                             caption: 'MAP_LINK.CREATED_LINK',
                             callback: () => {
                                 UIHelper.goToWorkspaceFolder(
-                                    this.nodeApi,
                                     this.router,
                                     this.connector.getCurrentLogin(),
                                     this.breadcrumbsService.breadcrumbs$.value[

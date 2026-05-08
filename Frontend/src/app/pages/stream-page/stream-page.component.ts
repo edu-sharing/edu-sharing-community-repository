@@ -420,12 +420,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe(
                 (data) => {
                     this.editConnector(data.node, event.type as Filetype, event.window, connector);
-                    UIHelper.goToWorkspaceFolder(
-                        this.nodeService,
-                        this.router,
-                        null,
-                        RestConstants.INBOX,
-                    );
+                    UIHelper.goToWorkspaceFolder(this.router, null, RestConstants.INBOX);
                 },
                 (error: any) => {
                     event.window?.close();

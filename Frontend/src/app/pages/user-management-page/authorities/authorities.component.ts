@@ -1436,12 +1436,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         );
     }
     openFolder(folder: SharedFolder) {
-        UIHelper.goToWorkspaceFolder(
-            this.node,
-            this.router,
-            this.connector.getCurrentLogin(),
-            folder.id,
-        );
+        UIHelper.goToWorkspaceFolder(this.router, this.connector.getCurrentLogin(), folder.id);
     }
 
     private updateButtons() {

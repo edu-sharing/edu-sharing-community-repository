@@ -1179,7 +1179,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         if (name == 'COMPANY_HOME') {
             check.callback = () => {
                 this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node) => {
-                    UIHelper.goToWorkspaceFolder(this.node, this.router, null, node.node.parent.id);
+                    UIHelper.goToWorkspaceFolder(this.router, null, node.node.parent.id);
                 });
             };
         }
