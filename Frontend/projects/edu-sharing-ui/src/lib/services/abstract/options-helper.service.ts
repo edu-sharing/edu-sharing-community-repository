@@ -188,6 +188,13 @@ export abstract class OptionsHelperService {
                 return false;
             }
         }
+        if (option.constrains != null) {
+            const matched = await this.objectsMatchesConstrains(option.constrains, data, objects);
+            if (matched != null) {
+                // console.log('Constrain failed: ' + matched, option, objects);
+                return false;
+            }
+        }
         if (option.customShowCallback) {
             if ((await option.customShowCallback(objects)) === false) {
                 // console.log('customShowCallback  was false', option, objects);
@@ -203,13 +210,6 @@ export abstract class OptionsHelperService {
         if (option.permissions != null && option.permissionsMode === HideMode.Hide) {
             if (!this.validatePermissions(option, objects)) {
                 // console.log('permissions missing', option, objects);
-                return false;
-            }
-        }
-        if (option.constrains != null) {
-            const matched = await this.objectsMatchesConstrains(option.constrains, data, objects);
-            if (matched != null) {
-                // console.log('Constrain failed: ' + matched, option, objects);
                 return false;
             }
         }
