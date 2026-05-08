@@ -16,7 +16,10 @@
   </mat-tab>
 
   <!-- METHODOLOGY TAB -->
-  <mat-tab [id]="idPrefix + TabType.METHODOLOGY" *ngIf="selectionMode() !== 'source'">
+  <mat-tab
+    [id]="idPrefix + TabType.METHODOLOGY"
+    *ngIf="supportedTabs().includes(TabType.METHODOLOGY)"
+  >
     <ng-template mat-tab-label>
       <i esIcon="dashboard" class="tab-icon"></i>
       <span class="tab-label">{{ i18nPrefix + 'METHODOLOGY.TITLE' | translate }}</span>
@@ -40,7 +43,10 @@
   <!-- WORKSPACE TAB -->
   <mat-tab
     [id]="idPrefix + TabType.WORKSPACE"
-    *ngIf="'TOOLPERMISSION_WORKSPACE' | esToolpermission | async"
+    *ngIf="
+      supportedTabs().includes(TabType.WORKSPACE) &&
+      ('TOOLPERMISSION_WORKSPACE' | esToolpermission | async)
+    "
   >
     <ng-template mat-tab-label>
       <i esIcon="cloud" class="tab-icon"></i>

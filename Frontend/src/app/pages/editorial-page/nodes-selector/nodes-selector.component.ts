@@ -24,6 +24,7 @@ import {
     DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
+    NetworkService,
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
@@ -56,7 +57,8 @@ import {
     TreeConfig,
     TreeNodeService,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     CollectionReference,
@@ -163,7 +165,9 @@ export class NodesSelectorComponent implements OnInit {
     supportedTabs: Signal<TabType[]> = computed(() =>
         this.selectionMode() === 'source'
             ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
-            : [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE],
+            : this.allSelectedNodesFromHomeRepo()
+            ? [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE]
+            : [TabType.COLLECTIONS],
     );
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
@@ -253,6 +257,18 @@ export class NodesSelectorComponent implements OnInit {
         }
         return [];
     });
+    allSelectedNodesFromHomeRepo: Signal<boolean> = toSignal(
+        toObservable(this.selectedSourceNodes).pipe(
+            switchMap((nodes) =>
+                nodes.length === 0
+                    ? of(false)
+                    : combineLatest(
+                          nodes.map((n) => this.networkService.isFromHomeRepository(n as Node)),
+                      ).pipe(map((results) => results.every(Boolean))),
+            ),
+        ),
+        { initialValue: false },
+    );
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
         () =>
@@ -345,6 +361,7 @@ export class NodesSelectorComponent implements OnInit {
     constructor(
         private apiCollectionService: ApiCollectionService,
         private bridge: BridgeService,
+        private networkService: NetworkService,
         private collectionService: RestCollectionService,
         private localEventsService: LocalEventsService,
         private mdsHelperService: MdsHelperService,

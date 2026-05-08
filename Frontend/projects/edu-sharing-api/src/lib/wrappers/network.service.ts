@@ -8,7 +8,6 @@ import { Node } from '../models';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 import { AuthenticationService } from './authentication.service';
 import { Repo } from '../api/models/repo';
-import { RestConstants } from '../rest-constants';
 
 type Repository = Repo;
 
@@ -57,7 +56,7 @@ export class NetworkService {
     }
 
     isFromHomeRepository(node: Node): Observable<boolean> {
-        if (node.ref.isHomeRepo) {
+        if (!node?.ref || node.ref.isHomeRepo) {
             return rxjs.of(true);
         } else {
             return this.isHomeRepository(node.ref.repo);

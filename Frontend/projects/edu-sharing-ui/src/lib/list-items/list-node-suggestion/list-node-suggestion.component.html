@@ -1,4 +1,3 @@
-TEST
 <ng-container [ngSwitch]="item.name" *ngIf="item.type === 'SUGGESTION'">
   <span *ngSwitchCase="'fields'">
     <ng-container *ngFor="let caption of pendingPropertyCaptions$ | async; let last = last">
