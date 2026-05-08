@@ -4,14 +4,11 @@
 $previewHeight: 400px;
 
 :host {
-    overflow-y: auto;
-    overflow-x: hidden;
-    &::-webkit-scrollbar {
-        width: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.26);
-    }
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
     ::ng-deep {
         es-mds-editor-wrapper es-mds-editor-core {
             display: grid;
@@ -38,6 +35,14 @@ $previewHeight: 400px;
         min-height: calc(100vh - 200px);
     }
 }
+
+.preview-sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include materialScrollbarLight();
+}
+
 es-render-wrapper-component {
     display: flex;
     min-height: $previewHeight;
@@ -69,7 +74,16 @@ es-render-wrapper-component {
     }
 }
 
+.all-details-link {
+    align-self: flex-end;
+    margin: 8px 16px 16px;
+    padding-right: 6px;
+    border-radius: 18px;
+}
+
 .preview-sidebar-body {
+    display: flex;
+    flex-direction: column;
     padding: 15px;
     overflow-wrap: break-word;
     .top-h-box {
@@ -91,10 +105,5 @@ es-render-wrapper-component {
     .description {
         margin-top: 0;
         color: $textMain;
-    }
-    .all-details-link {
-        padding-right: 6px;
-        border-radius: 18px;
-        background: rgba(0, 0, 0, 0.1);
     }
 }
