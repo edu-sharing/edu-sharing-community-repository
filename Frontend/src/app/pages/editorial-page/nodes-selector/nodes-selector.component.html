@@ -90,12 +90,7 @@
               | translate
           "
           [(ngModel)]="searchText"
-          [disabled]="
-            (isSearchTab() && dataSourceSearch.isLoading) ||
-            (isCollectionsTab() &&
-              collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-              (dataSourceCollectionsTree.isLoading || dataSourceCollectionsTree.isEmpty()))
-          "
+          [disabled]="isSearchTab() && dataSourceSearch.isLoading"
           (keydown.enter)="executeSearch()"
         />
         <button
