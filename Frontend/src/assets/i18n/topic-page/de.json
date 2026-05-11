@@ -148,7 +148,8 @@
         "IMPORTANCE_LABEL": "Beschreibung der Wichtigkeit"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten"
+        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten",
+        "REFERENCES_LABEL": "Anzahl Materialien"
       },
       "EMBEDDING": {
         "LABEL": "Einbetten",

@@ -42,7 +42,16 @@
                   "
                   class="container-right"
                 >
-                  <span *ngIf="node.data.collection.childReferencesCount" class="badge">
+                  <span
+                    *ngIf="node.data.collection.childReferencesCount"
+                    class="badge"
+                    [matTooltip]="
+                      (i18nPrefix + 'REFERENCES_LABEL' | translate) +
+                      ': ' +
+                      node.data.collection.childReferencesCount
+                    "
+                    tooltipAriaLabel
+                  >
                     {{ node.data.collection.childReferencesCount }}
                   </span>
                   <i
@@ -60,7 +69,7 @@
         </div>
         <div *ngIf="nodes.state === 'error'" class="error-notice">
           <p>
-            {{ 'TOPIC_PAGE.WIDGET.TOPICS_COLUMN_BROWSER.ERROR_RECEIVING_DATA' | translate }}
+            {{ i18nPrefix + 'ERROR_RECEIVING_DATA' | translate }}
           </p>
         </div>
       </ng-container>
@@ -129,7 +138,16 @@
                   "
                   class="container-right"
                 >
-                  <span *ngIf="node.data.collection.childReferencesCount" class="badge">
+                  <span
+                    *ngIf="node.data.collection.childReferencesCount"
+                    class="badge"
+                    [matTooltip]="
+                      (i18nPrefix + 'REFERENCES_LABEL' | translate) +
+                      ': ' +
+                      node.data.collection.childReferencesCount
+                    "
+                    tooltipAriaLabel
+                  >
                     {{ node.data.collection.childReferencesCount }}
                   </span>
                   <i
@@ -145,7 +163,7 @@
             </div>
             <div *ngIf="nodes.state === 'error'" class="error-notice">
               <p>
-                {{ 'TOPIC_PAGE.WIDGET.TOPICS_COLUMN_BROWSER.ERROR_RECEIVING_DATA' | translate }}
+                {{ i18nPrefix + 'ERROR_RECEIVING_DATA' | translate }}
               </p>
             </div>
             <div *ngIf="nodes.state === 'success' && nodes.data.length === 0">

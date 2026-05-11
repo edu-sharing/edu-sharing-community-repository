@@ -148,7 +148,8 @@
         "IMPORTANCE_LABEL": "Description of importance"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Error receiving data"
+        "ERROR_RECEIVING_DATA": "Error receiving data",
+        "REFERENCES_LABEL": "References count"
       },
       "EMBEDDING": {
         "LABEL": "Embed",
