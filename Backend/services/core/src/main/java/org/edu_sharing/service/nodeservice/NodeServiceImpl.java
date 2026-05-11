@@ -19,7 +19,10 @@ import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.namespace.*;
+import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.QNamePattern;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -1931,6 +1934,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 return (Serializable) Array.get(value, 0);
             }
             return value;
+        } else if(value.getClass().isArray()) {
+            return new ArrayList<>(List.of((Serializable[]) value));
         }
         return value;
     }
