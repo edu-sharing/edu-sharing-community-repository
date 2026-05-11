@@ -1,17 +1,19 @@
 <div *ngIf="initialized(); else loadingSpinner">
   <!-- content teaser entries -->
   <es-node-entries
-    class="main-content"
     [blacklistedNodeIds]="blacklistedNodeIds"
     [contextNodeId]="contextNodeId"
     [queryId]="queryId"
     [criteria]="criteria()"
+    [includeCustomCard]="includeCustomCard()"
     [layout]="layout"
     [scrollGradientColor]="swimlaneColor() && !swimlaneShapeSelected() ? swimlaneColor() : null"
     [hasEditRightsAndIsEditMode]="editMode()"
+    [lastSearchUpdate]="lastSearchUpdate()"
     [searchText]="searchText"
     (blacklistChanged)="changedBlacklist($event)"
     (displayTypeChanged)="layoutChangeAction()"
+    (includeCardChanged)="includeCardChanged($event)"
     (itemClicked)="itemClicked($event)"
     (totalSearchResultCountChanged)="changeTotalSearchResultCount($event)"
     (visibleNodesChanged)="changeVisibleNodes($event)"

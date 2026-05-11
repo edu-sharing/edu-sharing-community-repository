@@ -4,6 +4,7 @@
     role="group"
     class="side-menu"
     [class.mobile-hidden]="mobileHidden()"
+    [class.menu-hidden]="sideMenuHidden()"
     [attr.aria-label]="'TOPIC_PAGE.WIDGET.SIDE_MENU' | translate"
   >
     <ng-content select="[slot=menu]"></ng-content>
@@ -15,7 +16,7 @@
     [style.min-height.px]="sideMenuWrapper.offsetHeight + 20"
   >
     <button mat-icon-button class="close-btn" [disabled]="closeDisabled()" (click)="closeContent()">
-      <i esIcon="close"></i>
+      <i esIcon="close" [aria]="true"></i>
     </button>
     <ng-content select="[slot=content]"></ng-content>
   </div>

@@ -7,8 +7,9 @@
     --anchor-menu-height: 108px;
     --border-radius: 24px;
     --content-max-width: 1440px;
-    --sidebar-height: var(--mainnavHeight, 89px);
+    --navbar-height: var(--mainnavHeight, 89px);
     --sidebar-offset: 16px;
+    --sidebar-width: 450px;
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
     // overwrite border radius for template page
@@ -144,6 +145,15 @@ es-side-menu-wrapper {
     }
 }
 
+.topic-page-outer-wrapper {
+    display: flex;
+    flex-direction: row;
+}
+
+.topic-page-wrapper {
+    width: 100%;
+}
+
 .topic-page-content-outer-wrapper {
     --action-button-width: 48px;
     --container-border-radius: 16px;
@@ -272,7 +282,7 @@ es-side-menu-wrapper {
         }
 
         .topic-page-swimlane-wrapper {
-            --swimlane-gap: 16px;
+            --swimlane-gap: 32px;
             margin: 0 auto var(--swimlane-gap) auto;
             padding-left: var(--offcanvas-offset);
             padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
@@ -326,26 +336,34 @@ es-side-menu-wrapper {
                 position: absolute;
                 top: 0;
                 left: 0;
+                width: 100%;
                 height: 100%;
                 z-index: 0;
-                width: auto;
-                max-width: 85%;
-                font-size: unset;
 
-                // mirror left-aligned shapes horizontally
-                &.shape-mirrored {
-                    left: unset;
-                    right: 0;
-                    transform: scaleX(-1);
+                es-swimlane-background-shape {
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
                 }
 
-                // override default style set by icon directive to display full view background SVG
-                ::ng-deep .svg-icons {
+                svg {
                     height: 100%;
                     max-height: 100%;
                     width: auto;
                     max-width: 100%;
                     display: block;
+                }
+
+                // mirror left-aligned shapes horizontally
+                &.shape-mirrored {
+                    es-swimlane-background-shape {
+                        justify-content: flex-end;
+                    }
+
+                    &::ng-deep svg {
+                        transform: scaleX(-1);
+                    }
                 }
             }
 
@@ -482,7 +500,7 @@ es-side-menu-wrapper {
 
             // CONTAINERS
             .topic-page-container {
-                padding: 24px 0;
+                padding: 32px 0;
                 height: 100%;
                 box-sizing: border-box;
 
@@ -533,8 +551,9 @@ es-side-menu-wrapper {
             }
         }
 
-        .no-search-hit {
-            margin-top: 16px;
+        .no-search-hit-message {
+            margin: 16px 8px 0 8px;
+            display: block;
         }
 
         .mat-grid-tile {
@@ -570,8 +589,8 @@ es-side-menu-wrapper {
         padding-top: var(--offcanvas-offset);
         padding-bottom: var(--offcanvas-offset);
 
-        // reset padding-right on mobile, if the offcanvas menu is moved to the main menu
-        &.sidebar-mobile-hidden {
+        // reset padding-right, if the offcanvas menu is hidden
+        &.sidebar-hidden {
             padding-right: var(--offcanvas-offset);
         }
 
@@ -590,8 +609,8 @@ es-side-menu-wrapper {
         }
     }
 
-    // mobile spacing adjustments
-    .topic-page-content-outer-wrapper.sidebar-mobile-hidden {
+    // spacing adjustments when sidebar is hidden
+    .topic-page-content-outer-wrapper.sidebar-hidden {
         // reset padding-right on mobile, as the offcanvas menu is moved to the main menu
         .topic-page-content-wrapper .topic-page-swimlane-wrapper {
             padding-right: var(--offcanvas-offset);
@@ -684,6 +703,10 @@ es-side-menu-wrapper {
         padding-bottom: 52px !important;
         max-height: 0;
         visibility: hidden;
+        .topic-page-swimlane {
+            max-height: 0;
+            overflow: hidden;
+        }
     }
 }
 
@@ -693,7 +716,7 @@ es-side-menu-wrapper {
     }
 
     .total-count {
-        color: topicPageVars.$on-primary;
+        color: #fff;
         background-color: topicPageVars.$pink-default;
     }
 }
@@ -719,15 +742,6 @@ es-editable-text {
         font-weight: topicPageVars.$font-weight-x-bold;
         line-height: topicPageVars.$line-height-small;
     }
-}
-
-.abo-label {
-    margin-left: 8px;
-    padding: 4px 8px;
-    background-color: #4caf50;
-    color: white;
-    border-radius: 4px;
-    font-size: 16px;
 }
 
 .swimlane-qr-code {
@@ -759,17 +773,55 @@ es-editable-text {
 
 // adjust style of es-preview-sidebar for topic page
 :host es-preview-sidebar ::ng-deep .preview-sidebar {
-    max-height: calc(100vh - var(--sidebar-height) - 2 * var(--sidebar-offset));
+    margin: 10px;
+    max-height: calc(100vh - var(--navbar-height) - 2 * var(--sidebar-offset));
+    width: var(--sidebar-width);
     max-width: 550px;
     position: sticky;
-    top: calc(var(--sidebar-height) + var(--sidebar-offset));
+    top: calc(var(--navbar-height) + var(--sidebar-offset));
+    border-radius: 16px;
     display: flex;
+    overflow: hidden;
+
+    .preview-sidebar-body .mds-views {
+        width: calc(var(--sidebar-width) - 2 * 15px);
+    }
+
+    es-render-wrapper-component {
+        // reduce min-height
+        min-height: 250px;
+
+        rs-root {
+            // reduce min-height
+            min-height: 250px;
+
+            // adjust img width + avoid having visual empty space at the bottom
+            img {
+                max-width: 100%;
+                display: block;
+            }
+
+            // remove link to original content from link-wrapper
+            .link-wrapper {
+                > a {
+                    display: none;
+                }
+            }
+        }
+    }
 }
 
 // common styles
 // styling of page edit button (template)
 button.topic-page-edit-toggle-btn {
     margin-left: 16px;
+    padding-left: 16px;
+    padding-right: 25px;
+    height: 39px;
+    background-color: rgb(
+        from var(--workspaceTopBarFontColor) r g b / var(--workspaceTopBarNewAlpha)
+    );
+    border-radius: 0;
 
     .mdc-button__label {
         gap: 8px;

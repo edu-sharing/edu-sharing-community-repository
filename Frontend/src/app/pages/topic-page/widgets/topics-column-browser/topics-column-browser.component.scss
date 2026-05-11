@@ -73,7 +73,8 @@
     }
 }
 
-.item-link {
+.item-link,
+es-node-url ::ng-deep > a {
     text-decoration: unset;
     color: topicPageVars.$primary-dark;
     display: inline-block;

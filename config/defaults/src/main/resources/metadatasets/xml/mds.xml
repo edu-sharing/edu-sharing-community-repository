@@ -755,10 +755,10 @@
       <type>nodefilter</type>
     </widget>
     <widget>
-      <id>virtual:profiling_target_group</id>
-      <caption>virtual_profiling_target_group</caption>
+      <id>ccm:page_variant_profiling_target_group</id>
+      <caption>ccm_page_variant_profiling_target_group</caption>
       <type>radioVertical</type>
-      <valuespace_i18n_prefix>virtual_profiling_target_group_</valuespace_i18n_prefix>
+      <valuespace_i18n_prefix>ccm_page_variant_profiling_target_group_</valuespace_i18n_prefix>
       <values>
         <value>learner</value>
         <value>teacher</value>
@@ -1106,8 +1106,22 @@
     <template>
       <id>topic_page_profiling</id>
       <html><![CDATA[
-          <virtual:profiling_target_group>
+          <ccm:page_variant_profiling_target_group>
           <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
+    </template>
+    <template>
+      <id>topic_page_variant_configuration</id>
+      <html><![CDATA[
+          <ccm:page_variant_profiling_target_group type="checkboxVertical">
+          <ccm:educationalcontext type="checkboxVertical">
+      ]]></html>
+    </template>
+    <template>
+      <id>topic_page_variant_search</id>
+      <html><![CDATA[
+          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges">
+          <ccm:educationalcontext type="multivalueFixedBadges">
       ]]></html>
     </template>
   </templates>
@@ -1311,6 +1325,20 @@
       <views>
         <view>topic_page_profiling</view>
       </views>
+    </group>
+    <group>
+        <id>topic_page_variant_configuration</id>
+        <rendering>angular</rendering>
+        <views>
+            <view>topic_page_variant_configuration</view>
+        </views>
+    </group>
+    <group>
+        <id>topic_page_variant_search</id>
+        <rendering>angular</rendering>
+        <views>
+            <view>topic_page_variant_search</view>
+        </views>
     </group>
   </groups>
   <sorts>
@@ -1978,6 +2006,14 @@
         <statement>
           {"match":{"properties.ccm:page_variant_is_template.keyword":"${value}"}}
         </statement>
+      </property>
+      <property name="ccm:page_variant_profiling_target_group">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="ccm:educationalcontext">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
       </property>
     </query>
 

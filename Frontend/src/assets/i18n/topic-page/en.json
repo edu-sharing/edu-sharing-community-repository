@@ -44,8 +44,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Default icon",
-        "UPLOADED_ICON": "Uploaded icon",
         "CONFIG_ARIA": "Choose the layout of the navigation pills",
         "CHANGE_FILTER_OR_SEARCH": "Change filter or search"
       },
@@ -56,7 +54,7 @@
         "SWITCH_INTO_VIEW_MODE": "Switch to view mode",
         "POPUP_BLOCKED": "Popup was blocked or could not be opened.",
         "FILTER_EVENT_RECEIVED": "Filter event received",
-        "NO_CONTENTS": "No contents yet",
+        "NO_CONTENTS": "No search results were found.",
         "CHANGE_ON_INSPECTION_TABLE": "Change object on inspection table",
         "REMOVE_FROM_WIDGET": "Hide object",
         "ADD_TO_WIDGET": "Show object"
@@ -71,6 +69,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Unordered list",
         "ORDERED_LIST": "Ordered list",
+        "GENERATE_WITH_AI": "Generate with AI",
+        "MISSING_TEXT": "Please enter a text first.",
+        "AI_TAGS_EXIST": "AI placeholders were found, the text will be generated automatically.",
         "TITLE": "Add collection title",
         "DESCRIPTION": "Add collection description",
         "TARGET_GROUP": "Add user target group",
@@ -104,13 +105,10 @@
         "MISSING_SRC": "No source was specified, therefore no iframe can be displayed."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Blurred background of the image",
-        "ALT": "Image to motivate the topic",
         "GENERATE": "Generate image",
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
         "DELETE": "Delete image",
-        "NO_IMAGE_SELECTED": "No image has been selected yet.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
       "MEDIA_RENDERING": {
@@ -215,14 +213,9 @@
         "DELETE_VARIANT": "Delete template"
       }
     },
-    "CONFIG_PAGE_TEMPLATE": {
-      "HEADING": "Edit the page template(s)",
-      "SAME_REF_ERROR": "You are currently using the same template for portals and topic pages. This should be avoided.",
-      "UNLINK": "Unlink",
-      "ADD_EMPTY_TEMPLATE": "Add empty template",
-      "EMPTY_TEMPLATE_HINT": "No template exists yet. Use the button to create an empty template and switch to it.",
-      "SWITCH_TO_PAGE_VARIANT": "Switch to page variant",
-      "SWITCH_TO_PAGE_VARIANT_HINT": "Click the button to switch to the template in order to edit it."
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Create topic page template",
+      "MESSAGE": "No template exists yet. Would you like to create an empty template and switch to it?"
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Embed widget",
@@ -244,6 +237,8 @@
       "RECOMMENDED": "Recommended"
     },
     "ANCHOR_FALLBACK_PREFIX": "Section",
+    "ANCHOR_ARIA_HEADING": "Navigate to section: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Number of search results: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Heading",
       "DEFAULT_HEADING": "An example heading",
@@ -354,6 +349,8 @@
     "SAVE_CONFIG_MESSAGE": "Your changes are being saved.",
     "SAVE_CONFIG_ERROR_ACTION": "Reload page",
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
+    "DEFAULT_PAGE_TEMPLATE_NAME": "Page template",
+    "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
       "EXISTING_VARIANT": {
@@ -373,6 +370,8 @@
         "TEMPLATE": "Template"
       },
       "SEARCH_PLACEHOLDER": "Search topic page templates",
+      "SEARCH": "Search",
+      "EMPTY": "No templates could be found.",
       "PENDING_MESSAGE": "A new page variant is being created and loaded.",
       "SUCCESS_MESSAGE": "Topic page copy created successfully",
       "COPY_SUFFIX": "Copy"

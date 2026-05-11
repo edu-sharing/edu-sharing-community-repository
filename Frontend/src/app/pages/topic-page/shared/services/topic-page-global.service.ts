@@ -1,5 +1,6 @@
 import { Injectable, TemplateRef, Type } from '@angular/core';
 import { NavigationExtras } from '@angular/router';
+import { NgxColorsColor } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { BreadcrumbExtensionInterface } from '../../widgets/breadcrumb/breadcrumb.component';
@@ -29,8 +30,14 @@ export class TopicPageGlobalService {
     private customReurlExtras: NavigationExtras;
     private customApplyFilterComponent: string = '';
     private customApplyFilterExtras: NavigationExtras;
+    private customInspectionTableComponent: string = '';
+    private customInspectionTableExtras: NavigationExtras;
+    private customInspectionTableNodeIdQueryParam: string = '';
+    private customColorPalette: string[] | NgxColorsColor[] = [];
+    private customCollectionChipsTileColor: string = '';
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
+    private customUrlTarget: '_self' | '_blank' = '_self';
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
@@ -72,6 +79,15 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Sets a custom color palette for the topic page.
+     *
+     * @param palette
+     */
+    setCustomColorPalette(palette: string[] | NgxColorsColor[]) {
+        this.customColorPalette = palette;
+    }
+
+    /**
      * Sets a custom component for the apply filter link to be used.
      *
      * @param component
@@ -87,6 +103,34 @@ export class TopicPageGlobalService {
      */
     setCustomApplyFilterExtras(extras: NavigationExtras) {
         this.customApplyFilterExtras = extras;
+    }
+
+    /**
+     * Sets a custom component for the inspection table to be used.
+     */
+    setCustomInspectionTableComponent(component: string) {
+        this.customInspectionTableComponent = component;
+    }
+
+    /**
+     * Sets custom navigation extras for the inspection table link to be used.
+     */
+    setCustomInspectionTableExtras(extras: NavigationExtras) {
+        this.customInspectionTableExtras = extras;
+    }
+
+    /**
+     * Sets a custom query param for the node ID to be used for the inspection table link.
+     */
+    setCustomInspectionTableNodeIdQueryParam(queryParam: string) {
+        this.customInspectionTableNodeIdQueryParam = queryParam;
+    }
+
+    /**
+     * Sets a custom color for the collection chips tile.
+     */
+    setCustomCollectionChipsTileColor(color: string) {
+        this.customCollectionChipsTileColor = color;
     }
 
     /**
@@ -125,6 +169,13 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Sets a custom URL target for links.
+     */
+    setCustomUrlTarget(target: '_self' | '_blank'): void {
+        this.customUrlTarget = target;
+    }
+
+    /**
      * Retrieves the custom reurl component, if available.
      */
     getCustomReurlComponent(): string {
@@ -136,6 +187,13 @@ export class TopicPageGlobalService {
      */
     getCustomReurlExtras() {
         return this.customReurlExtras;
+    }
+
+    /**
+     * Retrieves the custom color palette, if available.
+     */
+    getCustomColorPalette(): string[] | NgxColorsColor[] {
+        return this.customColorPalette;
     }
 
     /**
@@ -153,10 +211,45 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Retrieves the custom inspection table component, if available.
+     */
+    getCustomInspectionTableComponent(): string {
+        return this.customInspectionTableComponent;
+    }
+
+    /**
+     * Retrieves the custom navigation extras for the inspection table link, if available.
+     */
+    getCustomInspectionTableExtras() {
+        return this.customInspectionTableExtras;
+    }
+
+    /**
+     * Retrieves the custom query param for the node ID to be used for the inspection table link, if available.
+     */
+    getCustomInspectionTableNodeIdQueryParam(): string {
+        return this.customInspectionTableNodeIdQueryParam;
+    }
+
+    /**
+     * Retrieves the custom color for the collection chips tile.
+     */
+    getCustomCollectionChipsTileColor(): string {
+        return this.customCollectionChipsTileColor;
+    }
+
+    /**
      * Retrieves the custom URL function, if available.
      */
     getCustomUrlFunction(): ((node: Node) => string) | null {
         return this.customUrlFunction;
+    }
+
+    /**
+     * Retrieves the custom URL target, if available.
+     */
+    getCustomUrlTarget(): '_self' | '_blank' {
+        return this.customUrlTarget;
     }
 
     /**

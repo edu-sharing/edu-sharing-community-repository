@@ -27,7 +27,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
-import { UIService } from 'ngx-edu-sharing-ui';
+import { UIService, Values } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -37,6 +37,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { Toast, ToastType } from '../../../../services/toast';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
@@ -67,7 +68,11 @@ import {
     WidgetEmbeddingOption,
 } from './configure-widget-embedding-dialog/configure-widget-embedding-dialog.component';
 import { GenericWidgetGlobalService } from './generic-widget-global.service';
-import { WidgetHeaderComponent } from './generic-widget-header/generic-widget-header.component';
+import {
+    GenerateWithAiChangeEvent,
+    TextChangeEvent,
+    WidgetHeaderComponent,
+} from './generic-widget-header/generic-widget-header.component';
 
 export interface WidgetComponentInterface {
     // inputs
@@ -118,23 +123,26 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     @Input() pageVariantNode?: Node;
     @Input() propagatedNodeId: string;
     searchInput: InputSignal<string> = input<string>(null);
+    searchFilters: InputSignal<Values> = input<Values>(null);
     @Input() swimlaneColor: string = DEFAULT_BG_COLOR;
     @Input() swimlaneIndex: number = -1;
     @Input() swimlaneShape: SwimlaneBackgroundShape = SwimlaneBackgroundShape.None;
     @Input() widgetType: WIDGET_TYPE | string = WIDGETS.CONTENT_TEASER;
 
     // Additional inputs that might be specific to certain widgets
+    @Input() customUrl?: (node: Node) => string;
+    @Input() customUrlTarget?: '_self' | '_blank';
     @Input() defaultNodeId: string = '';
+    @Input() displayLimit?: number;
     @Input() height?: string;
     @Input() hideDescription: boolean = false;
-    @Input() isEmbedMode: boolean = false;
     @Input() searchText: string = '';
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
     @Input() sidebarEmbedding: boolean = false;
 
     // OUTPUTS
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
-    @Output() searchInputHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() searchHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     @ViewChild('configureWidgetEmbeddingTemplate')
@@ -152,9 +160,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineMapping: PromptToTextMapping;
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
+    private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
-    private updateSearchInputCount$: Subject<void> = new Subject<void>();
+    private updateSearchResultCount$: Subject<void> = new Subject<void>();
     private viewInitialized: boolean = false;
     private widgetComponentRef: ComponentRef<any> | null = null;
     widgetInstance: WidgetComponentInterface | null = null;
@@ -169,17 +178,18 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         private globalWidgetConfigService: GlobalWidgetConfigService,
         private platformLocation: PlatformLocation,
         private toast: Toast,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
         private translate: TranslateService,
         private uiService: UIService,
     ) {
-        this.updateSearchInputCount$
+        this.updateSearchResultCount$
             .pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {
                 const hasHits: boolean = [...this.searchResults.values()].some(
                     (count) => count > 0,
                 );
-                this.searchInputHitsChanged.emit(hasHits);
+                this.searchHitsChanged.emit(hasHits);
             });
 
         // listen to changes in the selected variables and update potentially AI-generated properties
@@ -197,6 +207,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     void this.updateCommonProperties(widgetConfig, aiConfig);
                 }
             });
+        // listen to changes in the persist config trigger
+        this.persistConfigTrigger$
+            .pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef))
+            .subscribe((): void => void this.persistConfig());
     }
 
     /**
@@ -226,9 +240,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         // allow later changes if certain inputs were changed
         if (
             this.viewInitialized &&
-            (changes.editMode ||
+            (changes.displayLimit ||
+                changes.editMode ||
                 changes.gridIndex ||
                 changes.searchInput ||
+                changes.searchFilters ||
                 changes.swimlaneColor ||
                 changes.swimlaneIndex ||
                 changes.swimlaneShape ||
@@ -250,6 +266,14 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             await this.processChanges(changes);
             // read widget configuration (again) and set widget values
             await this.readWidgetConfig();
+        }
+        // special case for customUrl: if defined, set it globally for the widgets
+        if (this.customUrl) {
+            this.topicPageGlobalService.setCustomUrlFunction(this.customUrl);
+        }
+        // if a custom URL target is input, register it in the topic page global service
+        if (this.customUrlTarget) {
+            this.topicPageGlobalService.setCustomUrlTarget(this.customUrlTarget);
         }
     }
 
@@ -275,8 +299,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             : {};
         let widgetConfig: WidgetConfig = { ...baseConfig, ...specificWidgetConfig };
         // retrieve an AI config object if either the description or the headline contains AI tags
-        const aiDescription: string = containsAiTags(this.description) ? this.description : '';
-        const aiHeadline: string = containsAiTags(this.headline) ? this.headline : '';
+        const aiDescription: string = this.descriptionAiGenerated() ? this.description : '';
+        const aiHeadline: string = this.headlineAiGenerated() ? this.headline : '';
         let keyValue;
         if (this.widgetInstance.retrieveCustomAiKeyValuePairs) {
             keyValue = this.widgetInstance.retrieveCustomAiKeyValuePairs();
@@ -331,16 +355,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     ): Promise<void> {
         // reset the mappings
         this.headlineMapping = null;
-        this.headlineAiGenerated.set(false);
         this.descriptionMapping = null;
-        this.descriptionAiGenerated.set(false);
-        // set description and headline
-        if (widgetConfig.description !== undefined) {
-            this.description = widgetConfig.description;
-        }
-        if (widgetConfig.headline) {
-            this.headline = widgetConfig.headline;
-        }
+        // do not automatically set the global variables as those would be input to the header component
+        let headlineAiGeneratedUpdated: boolean = false;
+        let descriptionAiGeneratedUpdated: boolean = false;
+        // do not automatically set the global variables for the headline and description, as the prompts would be visible
+        let headlineSyncedWithPrompt: boolean = false;
+        let descriptionSyncedWithPrompt: boolean = false;
         // in case an AI config is defined, execute the prompts and store the results
         if (aiConfig && Object.keys(aiConfig).length && this.aiSupported()) {
             if (aiConfig.headline) {
@@ -359,9 +380,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'headline');
                 // make sure to sync both headline and prompt
                 this.headline = prompt;
+                headlineSyncedWithPrompt = true;
                 if (prompt && responseText) {
                     this.headlineMapping = new PromptToTextMapping(prompt, responseText);
                     this.headlineAiGenerated.set(true);
+                    headlineAiGeneratedUpdated = true;
                 }
             }
             if (aiConfig.description) {
@@ -379,9 +402,11 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 const responseText: string = retrieveResultString(promptResponse);
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'description');
                 this.description = prompt;
+                descriptionSyncedWithPrompt = true;
                 if (responseText) {
                     this.descriptionMapping = new PromptToTextMapping(prompt, responseText);
                     this.descriptionAiGenerated.set(true);
+                    descriptionAiGeneratedUpdated = true;
                 }
             }
             if (this.widgetType === WIDGETS.MEDIA_RENDERING) {
@@ -389,6 +414,20 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             }
             this.updateInProgress.set(false);
             this.widgetInstance.updateInProgress.set(false);
+        }
+        // when the headline or description are not synced with the prompt, set them to the config value
+        if (!headlineSyncedWithPrompt && widgetConfig.headline !== undefined) {
+            this.headline = widgetConfig.headline;
+        }
+        if (!descriptionSyncedWithPrompt && widgetConfig.description !== undefined) {
+            this.description = widgetConfig.description;
+        }
+        // when the headline or description were not AI-generated, reset the flag
+        if (!headlineAiGeneratedUpdated) {
+            this.headlineAiGenerated.set(false);
+        }
+        if (!descriptionAiGeneratedUpdated) {
+            this.descriptionAiGenerated.set(false);
         }
     }
 
@@ -453,11 +492,19 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             if (Object.keys(widgetConfig).length) {
                 const commonAiProperties: (keyof WidgetConfig)[] = ['headline', 'description'];
                 commonAiProperties.forEach((property) => {
-                    if (widgetConfig[property] && containsAiTags(widgetConfig[property])) {
-                        if (property === 'headline' && this.headlineMapping?.text) {
+                    if (widgetConfig[property]) {
+                        if (
+                            property === 'headline' &&
+                            this.headlineMapping?.text &&
+                            this.headlineAiGenerated()
+                        ) {
                             widgetConfig[property] = this.headlineMapping.text;
                         }
-                        if (property === 'description' && this.descriptionMapping?.text) {
+                        if (
+                            property === 'description' &&
+                            this.descriptionMapping?.text &&
+                            this.descriptionAiGenerated()
+                        ) {
                             widgetConfig[property] = this.descriptionMapping.text;
                         }
                     }
@@ -555,11 +602,25 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
+     * Retrieves an update of the generate with AI flag.
+     *
+     * @param event
+     */
+    async onGenerateWithAiChanged(event: GenerateWithAiChangeEvent): Promise<void> {
+        if (event.isHeadline) {
+            this.headlineAiGenerated.set(event.aiGenerated);
+        } else {
+            this.descriptionAiGenerated.set(event.aiGenerated);
+        }
+        this.persistConfigTrigger$.next();
+    }
+
+    /**
      * Reacts to es-generic-widget-header (textChange) event by updating the widget config.
      *
      * @param event
      */
-    async onHeaderTextChange(event: { text: string; isHeadline: boolean }): Promise<void> {
+    async onHeaderTextChange(event: TextChangeEvent): Promise<void> {
         if (this.widgetInstance) {
             if (event.isHeadline) {
                 this.headline = event.text;
@@ -569,7 +630,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             } else {
                 this.description = event.text;
             }
-            await this.persistConfig();
+            this.persistConfigTrigger$.next();
         }
     }
 
@@ -581,7 +642,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     onSearchResultsUpdated(event: { count: number; type: string }): void {
         this.searchResults.set(event.type, event.count);
-        this.updateSearchInputCount$.next();
+        this.updateSearchResultCount$.next();
     }
 
     /**
@@ -592,7 +653,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      */
     updateSearchResults(count: number, type: string): void {
         this.searchResults.set(type, count);
-        this.updateSearchInputCount$.next();
+        this.updateSearchResultCount$.next();
     }
 
     // HELPERS
@@ -843,11 +904,16 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 this.widgetComponentRef.setInput('selectDimensions', this.selectDimensions);
                 break;
 
+            case WIDGETS.COLLECTION_CHIPS:
+                this.widgetComponentRef.setInput('displayLimit', this.displayLimit);
+                break;
+
             case WIDGETS.CONTENT_TEASER:
                 this.widgetComponentRef.setInput('defaultNodeId', this.defaultNodeId);
                 this.widgetComponentRef.setInput('nodeId', this.nodeId);
                 this.widgetComponentRef.setInput('propagatedNodeId', this.propagatedNodeId);
                 this.widgetComponentRef.setInput('searchInput', this.searchInput());
+                this.widgetComponentRef.setInput('searchFilters', this.searchFilters());
                 this.widgetComponentRef.setInput('searchText', this.searchText);
                 this.widgetComponentRef.setInput('swimlaneColor', this.swimlaneColor);
                 this.widgetComponentRef.setInput('swimlaneShape', this.swimlaneShape);
@@ -865,7 +931,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             // default break for unknown widget types and widget types without additional inputs
-            // e.g., collection-chips, iframe-widget and text-widget
+            // e.g., iframe-widget and text-widget
             default:
                 break;
         }

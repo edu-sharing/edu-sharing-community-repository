@@ -1,18 +1,21 @@
 <ng-container *ngIf="initialized(); else loadingSpinner">
-  <ng-container *ngIf="imagePath; else noImageSelected">
+  <ng-container *ngIf="imagePath || imageNode; else defaultCollectionImage">
     <!-- the actual image -->
     <div class="image-wrapper">
-      <div class="image-backdrop">
-        <img [src]="imagePath" [alt]="i18nPrefix + 'BACKDROP' | translate" aria-hidden="true" />
+      <div class="image-backdrop" aria-hidden="true">
+        <img [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath" alt="" />
       </div>
-      <img class="topic-image" [src]="imagePath" [alt]="i18nPrefix + 'ALT' | translate" />
+      <img
+        class="topic-image"
+        [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath"
+        alt=""
+      />
       <!-- displays an AI label, if the image is generated and has not been uploaded by the user -->
       <es-ai-label
         *ngIf="aiGeneratedImage() && !userUploadedNodeId() && !imageProcessing()"
         [imageContainer]="aiGeneratedImage()"
       ></es-ai-label>
     </div>
-
     <!-- displays a spinner while the image is being processed -->
     <div class="image-loading" *ngIf="imageProcessing()">
       <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
@@ -55,9 +58,9 @@
     </button>
     <input #fileInput type="file" accept="image/*" (change)="imageChanged($event)" hidden />
   </div>
-  <ng-template #noImageSelected>
-    <div class="no-image-msg">
-      {{ i18nPrefix + 'NO_IMAGE_SELECTED' | translate }}
+  <ng-template #defaultCollectionImage>
+    <div class="card-image-icon-circle">
+      <i esIcon="layers"></i>
     </div>
   </ng-template>
 </ng-container>

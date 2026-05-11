@@ -6,6 +6,7 @@
     </label>
 
     <es-color-picker
+      [addTransparency]="true"
       [selectedColor]="swimlaneColor"
       [disabled]="inputsDisabled()"
       [acceptLabel]="'APPLY'"
@@ -35,7 +36,10 @@
         *ngFor="let option of swimlaneBackgroundShapeOptions"
         (click)="updateSwimlaneShape(option.shape)"
       >
-        <i [esIcon]="option.image" [path]="option.image.startsWith('svg-') ? iconPath : null"></i>
+        <i [esIcon]="option.image" *ngIf="option.image; else backgroundShape"></i>
+        <ng-template #backgroundShape>
+          <es-swimlane-background-shape [shape]="option.shape"></es-swimlane-background-shape>
+        </ng-template>
         {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.' + option.viewValue | translate }}
       </button>
     </mat-menu>

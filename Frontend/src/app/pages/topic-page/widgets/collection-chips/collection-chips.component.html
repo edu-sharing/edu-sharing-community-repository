@@ -1,84 +1,101 @@
 <ng-container *ngIf="initialized(); else loadingSpinner">
-  <ng-container *ngIf="list && list.length > 0; else noListItems">
+  <ng-container *ngIf="visibleList()?.length > 0; else noListItems">
     <div
       class="list"
       cdkDropList
       cdkDropListOrientation="mixed"
       (cdkDropListDropped)="drop($event)"
     >
-      <ng-container *ngFor="let n of list" [ngSwitch]="layout">
-        <!-- note: both dynamic applying mat-flat-button to the button and cdkDrag to the *ngFor container did not worked properly -->
-        <!-- as a result, separate button tags are used -->
-        <!-- display collection tile -->
-        <button
-          *ngSwitchCase="CollectionListLayout.Tiles"
-          class="collection-tile"
-          role="button"
-          [disabled]="updateInProgress()"
-          cdkDrag
-          [cdkDragDisabled]="!editMode()"
-          (cdkDragEnded)="dragging = false"
-          (cdkDragStarted)="dragging = true"
-          (click)="collectionItemClicked(n)"
-        >
-          <!-- tile header -->
-          <div class="tile-header" [class.default-icon]="n.preview.isIcon">
-            <!-- if isIcon is set to true, the default icon of the node type is displayed -->
-            <img
-              [src]="n.preview.url"
-              [alt]="
-                n.preview.isIcon
-                  ? ('TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.DEFAULT_ICON' | translate)
-                  : ('TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.UPLOADED_ICON' | translate)
+      <ng-container *ngFor="let n of visibleList(); let i = index" [ngSwitch]="layout">
+        <ng-container *ngIf="editMode() || showMore() || !displayLimit || i < displayLimit">
+          <!-- note: both dynamic applying mat-flat-button to the button and cdkDrag to the *ngFor container did not worked properly -->
+          <!-- as a result, separate button tags are used -->
+          <!-- display collection tile -->
+          <button
+            *ngSwitchCase="CollectionListLayout.Tiles"
+            class="collection-tile"
+            role="button"
+            [disabled]="updateInProgress()"
+            cdkDrag
+            [cdkDragDisabled]="!editMode()"
+            (cdkDragEnded)="dragging = false"
+            (cdkDragStarted)="dragging = true"
+            (click)="collectionItemClicked(n)"
+          >
+            <!-- tile header -->
+            <div
+              class="tile-header"
+              [class.default-icon]="n.preview.isIcon"
+              [style.background-color]="
+                n.preview.isIcon ? customCollectionChipsTileColor || n.collection?.color : null
               "
-            />
-          </div>
-          <!-- tile content -->
-          <div class="tile-content">
-            <!-- reference for adding lang="de": https://stackoverflow.com/a/71648585 -->
-            <div class="tile-title" lang="de">
+            >
+              <!-- if isIcon is set to true, the default icon of the node type is displayed -->
+              <!-- use alt="" to tell the user that the image is only decorative -->
+              <ng-container *ngIf="n.preview && !n.preview.isIcon; else defaultCollectionIcon">
+                <img [src]="n | esNodeImage | async" alt="" />
+              </ng-container>
+              <ng-template #defaultCollectionIcon>
+                <i esIcon="layers"></i>
+              </ng-template>
+            </div>
+            <!-- tile content -->
+            <div class="tile-content">
+              <!-- reference for adding lang="de": https://stackoverflow.com/a/71648585 -->
+              <div class="tile-title" lang="de">
+                <ng-container
+                  *ngTemplateOutlet="collectionTitle; context: { node: n }"
+                ></ng-container>
+              </div>
+            </div>
+            <!-- absolute positioned drag handle -->
+            <button
+              *ngIf="editMode()"
+              class="drag-btn"
+              mat-icon-button
+              cdkDragHandle
+              (click)="$event.stopPropagation(); $event.preventDefault()"
+            >
+              <i esIcon="drag_indicator"></i>
+            </button>
+          </button>
+          <!-- display collection chip -->
+          <button
+            *ngSwitchDefault
+            class="collection-chip"
+            role="button"
+            mat-flat-button
+            [disabled]="updateInProgress()"
+            cdkDrag
+            [cdkDragDisabled]="!editMode()"
+            (cdkDragEnded)="dragging = false"
+            (cdkDragStarted)="dragging = true"
+            (click)="collectionItemClicked(n)"
+          >
+            <!-- note: this has to be a separate element to be aligned properly -->
+            <span class="chip-title">
+              <i esIcon="drag_indicator" role="button" *ngIf="editMode()" cdkDragHandle></i>
               <ng-container
                 *ngTemplateOutlet="collectionTitle; context: { node: n }"
               ></ng-container>
-            </div>
-          </div>
-          <!-- absolute positioned drag handle -->
-          <button
-            *ngIf="editMode()"
-            class="drag-btn"
-            mat-icon-button
-            cdkDragHandle
-            (click)="$event.stopPropagation(); $event.preventDefault()"
-          >
-            <i esIcon="drag_indicator"></i>
+              <i esIcon="arrow_forward"></i>
+            </span>
           </button>
-        </button>
-        <!-- display collection chip -->
-        <button
-          *ngSwitchDefault
-          class="collection-chip"
-          role="button"
-          mat-flat-button
-          [disabled]="updateInProgress()"
-          cdkDrag
-          [cdkDragDisabled]="!editMode()"
-          (cdkDragEnded)="dragging = false"
-          (cdkDragStarted)="dragging = true"
-          (click)="collectionItemClicked(n)"
-        >
-          <!-- note: this has to be a separate element to be aligned properly -->
-          <span class="chip-title">
-            <i esIcon="drag_indicator" role="button" *ngIf="editMode()" cdkDragHandle></i>
-            <ng-container *ngTemplateOutlet="collectionTitle; context: { node: n }"></ng-container>
-            <i esIcon="arrow_forward"></i>
-          </span>
-        </button>
+        </ng-container>
       </ng-container>
+      <div
+        class="toggle-show-more"
+        *ngIf="!editMode() && displayLimit > 0 && displayLimit < list.length"
+      >
+        <button mat-button (click)="toggleShowMore()">
+          {{ i18nPrefix + (showMore() ? 'SHOW_LESS' : 'SHOW_MORE') | translate }}
+        </button>
+      </div>
     </div>
     <!-- color + configuration buttons -->
     <es-widget-configuration-buttons
       *ngIf="editMode()"
-      [ariaLabel]="'TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.CONFIG_ARIA' | translate"
+      [ariaLabel]="i18nPrefix + 'CONFIG_ARIA' | translate"
       [(layout)]="layout"
       [layoutOptions]="layoutOptions"
       [optionOne]="embedConfigurationOption"

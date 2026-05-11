@@ -86,10 +86,42 @@
             padding-right: 16px;
             min-height: unset !important;
             height: calc(52px - 12px);
-            border-radius: 16px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             flex-shrink: 0;
+        }
+    }
+}
+
+.search-filters-and-results {
+    .empty {
+        padding: 8px 16px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.page-variant-search-filters ::ng-deep {
+    .content {
+        flex-direction: row;
+        gap: 16px;
+
+        // remove unnecessary margin-bottom from widgets
+        .widget-container {
+            margin-bottom: 0;
+        }
+
+        // fix floating label is cut off
+        .mat-mdc-form-field {
+            padding-top: 8px;
+        }
+
+        // fix paddings of form-field
+        .mat-mdc-form-field-infix {
+            padding: 12px 0 !important;
         }
     }
 }

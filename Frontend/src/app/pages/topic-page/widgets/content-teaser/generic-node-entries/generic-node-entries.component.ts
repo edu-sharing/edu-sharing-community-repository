@@ -3,7 +3,10 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    HostBinding,
+    input,
     Input,
+    InputSignal,
     OnChanges,
     OnDestroy,
     OnInit,
@@ -57,10 +60,12 @@ import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-
 
 export interface DisplayTypeComponentInterface {
     // inputs
+    contextNodeId: string;
     criteria: MdsQueryCriteria[];
     selectedNode: Node;
     // outputs
     itemClicked: EventEmitter<Node>;
+    totalSearchResultCountChanged: EventEmitter<number>;
     visibleNodesChanged: EventEmitter<Node[]>;
     // methods
     setDataSource(resetNecessary: boolean, skipCount?: number): Promise<void>;
@@ -132,6 +137,8 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             }
         }
     }
+    includeCustomCard: InputSignal<boolean> = input(true);
+    @Input() lastSearchUpdate: Date | null;
     private _layout: GenericNodeEntriesDisplayType;
     @Input() get layout() {
         return this._layout;
@@ -143,30 +150,30 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             case GenericNodeEntriesDisplayType.SingleView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.SplitView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.FULL_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.StandardView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'scroll';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.CompactView:
                 newDisplayType = NodeEntriesDisplayType.Grid;
                 this.gridConfig.layout = 'grid';
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             case GenericNodeEntriesDisplayType.ListView:
                 newDisplayType = NodeEntriesDisplayType.Table;
-                this.nodeEntries?.ngOnChanges();
+                void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
             default:
@@ -180,8 +187,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                                 componentClass,
                                 this.customTypeElement.nativeElement,
                                 {
-                                    selectedNode: this.selectedNode(),
+                                    contextNodeId: this.contextNodeId,
                                     criteria: this.criteria,
+                                    selectedNode: this.selectedNode(),
                                 } as unknown as Partial<DisplayTypeComponentInterface>,
                                 { replace: false },
                             ).instance;
@@ -204,10 +212,11 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Input() maxItems: number = 11;
     @Input() mds: string | null = null;
     @Input() queryId: string = RestConstants.DEFAULT_QUERY_NAME;
-    @Input() scrollGradientColor: string;
+    @HostBinding('style.--scroll-gradient-color') @Input() scrollGradientColor: string = '#fff';
     @Input() searchText: string;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() includeCardChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() itemClicked: EventEmitter<Node> = new EventEmitter<Node>();
     @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
@@ -345,11 +354,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 const nodeToChange: Node =
                     node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
                 if (nodeToChange) {
-                    const url: string =
-                        this.topicPageHelperService.getBaseHref() +
-                        'components/editorial-desk?mode=audit&fromMds=true&viewType=Single&nodeId=' +
-                        nodeToChange.ref.id;
-                    window.open(url, '_blank');
+                    this.topicPageHelperService.openChangeOnInspectionTableLink(nodeToChange);
                 }
             },
         );
@@ -553,7 +558,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
         // avoid pushing potential duplicates
         // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
-        const existingNodeIds: string[] = this.allRequestedNodes.map((n: Node) => n.ref.id);
+        const existingNodeIds: string[] = this.allRequestedNodes
+            .filter((n) => n.ref?.id)
+            .map((n: Node) => n.ref.id);
         searchResult.nodes?.forEach((node: Node) => {
             if (!existingNodeIds.includes(node.ref.id)) {
                 this.allRequestedNodes.push(node);
@@ -561,9 +568,11 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             }
         });
 
+        let customCardsCount: number;
         // in edit mode, display all requested nodes
         if (this.hasEditRightsAndIsEditMode) {
             this.dataSource.setData(this.allRequestedNodes, searchResult.pagination);
+            customCardsCount = this.allRequestedNodes.length;
         }
         // in view mode, display the filtered nodes
         else {
@@ -576,29 +585,31 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             );
             updatedPagination.total -= this.allRequestedNodes.length - filteredNodes.length;
             this.dataSource.setData(filteredNodes, updatedPagination);
-            // in view mode, inject custom card,
-            // if too few elements exist
-            // and if the correct type is selected (TODO: list is currently not supported)
-            const isGridItemType: boolean = [
-                GenericNodeEntriesDisplayType.SingleView,
-                GenericNodeEntriesDisplayType.SplitView,
-                GenericNodeEntriesDisplayType.StandardView,
-                GenericNodeEntriesDisplayType.CompactView,
-            ].includes(this.layout);
-            if (isGridItemType) {
-                this.injectCustomCards(filteredNodes.length);
-            }
+            customCardsCount = filteredNodes.length;
         }
 
-        // emit the node statistics of the search result
-        void this.emitVisibleNodes(
-            this.allRequestedNodes,
-            this.blacklistedNodeIds,
-            searchResult.pagination.total,
-            skipCount,
-            query,
-            criteria,
-        );
+        // inject custom card,
+        // if too few elements exist
+        // and if the correct type is selected (TODO: list is currently not supported)
+        const isGridItemType: boolean = [
+            GenericNodeEntriesDisplayType.SingleView,
+            GenericNodeEntriesDisplayType.SplitView,
+            GenericNodeEntriesDisplayType.StandardView,
+            GenericNodeEntriesDisplayType.CompactView,
+        ].includes(this.layout);
+        if ((this.includeCustomCard() || this.hasEditRightsAndIsEditMode) && isGridItemType) {
+            this.injectCustomCards(customCardsCount);
+        }
+
+        // emit the currently loaded visible nodes
+        const emitNodes = (mappingNodes: Node[]): void => {
+            const visibleNodes: Node[] = mappingNodes.filter(
+                (n) => n?.ref?.id && !this.blacklistedNodeIds.includes(n.ref.id),
+            );
+            this.visibleNodesChanged.emit(visibleNodes);
+        };
+
+        emitNodes(this.allRequestedNodes);
     }
 
     /**
@@ -761,7 +772,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             if (positionToAdd > this.CUSTOM_CARD_POSITION_INDEX) {
                 positionToAdd = this.CUSTOM_CARD_POSITION_INDEX;
             }
-            this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+            // workaround to check whether the custom card was already added (it is not a node with a ref ID)
+            if (this.dataSource.getData()?.[positionToAdd]?.ref?.id) {
+                this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+            }
         }
     }
 
@@ -779,7 +793,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     ): void {
         nodes?.forEach((node: Node, index: number): void => {
             let element: HTMLElement | null = this.queryElement(index);
-            if (!element) {
+            if (!element || !node?.ref?.id) {
                 return;
             }
 
@@ -812,70 +826,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             )?.[index];
         }
         return null;
-    }
-
-    /**
-     * Helper function to emit the visible nodes.
-     * Blacklisted nodes are not emitted.
-     */
-    async emitVisibleNodes(
-        nodes: Node[],
-        blacklistedIds: string[],
-        totalCount: number,
-        skipCount: number = 0,
-        query: string,
-        criteria: MdsQueryCriteria[],
-    ): Promise<void> {
-        // emit the visible nodes
-        const emitNodes = (mappingNodes: Node[]): void => {
-            const visibleNodes: Node[] = mappingNodes.filter(
-                (n) => !blacklistedIds.includes(n.ref.id),
-            );
-            this.visibleNodesChanged.emit(visibleNodes);
-        };
-        // nodes have already removed duplicates, so no additional check is necessary
-        if (totalCount <= this.maxItems) {
-            emitNodes(nodes);
-        }
-
-        // an update should be emitted if it is the initial call and the totalCount is larger than the maxItems
-        // in this case, 100 items are loaded
-        if (skipCount === 0 && totalCount > this.maxItems) {
-            // TODO: remove, if implemented properly
-            if (this.customTypeInstance) {
-                return;
-            }
-            const request: SearchRequestParams = {
-                query,
-                repository: HOME_REPOSITORY,
-                maxItems: 100,
-                skipCount: 0,
-                propertyFilter: [PROPERTY_FILTER_ALL],
-                contentType: 'ALL',
-                metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
-                sortProperties: ['cm:created'],
-                sortAscending: [true],
-                body: {
-                    criteria,
-                    resolveCollections: this.layout !== GenericNodeEntriesDisplayType.MapView,
-                },
-            };
-            const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search(request),
-            );
-            const copyOfAllRequestedNodes: Node[] = JSON.parse(
-                JSON.stringify(this.allRequestedNodes),
-            );
-            const existingNodeIds: string[] = copyOfAllRequestedNodes.map((n: Node) => n.ref.id);
-            // avoid pushing duplicates
-            searchResult.nodes?.forEach((node: Node): void => {
-                if (!existingNodeIds.includes(node.ref.id)) {
-                    copyOfAllRequestedNodes.push(node);
-                    existingNodeIds.push(node.ref.id);
-                }
-            });
-            emitNodes(copyOfAllRequestedNodes);
-        }
     }
 
     /**
@@ -922,6 +872,13 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     }
 
     /**
+     * Emits an event when the include custom card state changes.
+     */
+    onIncludeCardChanged(includeCard: boolean): void {
+        this.includeCardChanged.emit(includeCard);
+    }
+
+    /**
      * Registers actions that should be executed if a specific output is called.
      */
     private setupCustomTypeInstanceOutputs(): void {
@@ -932,10 +889,13 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             ?.pipe(takeUntil(this.destroy$))
             .subscribe((nodes: Node[]) => {
                 this.visibleNodesChanged.emit(nodes);
-                // no blacklisting supported here, so emit the count of the nodes
-                this.totalSearchResultCountChanged.emit(nodes.length);
             });
-
+        this.customTypeInstance.totalSearchResultCountChanged
+            ?.pipe(takeUntil(this.destroy$))
+            .subscribe((count: number) => {
+                // no blacklisting supported here, so emit the total count
+                this.totalSearchResultCountChanged.emit(count);
+            });
         this.customTypeInstance.itemClicked
             ?.pipe(takeUntil(this.destroy$))
             .subscribe((node: Node) => this.onItemClicked(node));

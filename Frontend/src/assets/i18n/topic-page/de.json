@@ -44,8 +44,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Standard-Icon",
-        "UPLOADED_ICON": "Hochgeladenes Icon",
         "CONFIG_ARIA": "Wähle das Layout der Navigationspillen",
         "CHANGE_FILTER_OR_SEARCH": "Filter oder Suche ändern"
       },
@@ -56,7 +54,7 @@
         "SWITCH_INTO_VIEW_MODE": "In den Anzeigemodus wechseln",
         "POPUP_BLOCKED": "Popup wurde blockiert oder konnte nicht geöffnet werden.",
         "FILTER_EVENT_RECEIVED": "Filter-Event empfangen",
-        "NO_CONTENTS": "Noch keine Inhalte",
+        "NO_CONTENTS": "Es konnten keine Suchergebnisse gefunden werden.",
         "CHANGE_ON_INSPECTION_TABLE": "Objekt auf Prüftisch ändern",
         "REMOVE_FROM_WIDGET": "Objekt ausblenden",
         "ADD_TO_WIDGET": "Objekt einblenden"
@@ -71,6 +69,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Nicht sortierte Liste",
         "ORDERED_LIST": "Sortierte Liste",
+        "GENERATE_WITH_AI": "Mit KI generieren",
+        "MISSING_TEXT": "Bitte geben Sie zuerst einen Text ein.",
+        "AI_TAGS_EXIST": "Es wurden KI-Platzhalter gefunden, wodurch der Text automatisch generiert wird.",
         "TITLE": "Titel der Sammlung einfügen",
         "DESCRIPTION": "Beschreibung der Sammlung einfügen",
         "TARGET_GROUP": "Zielgruppe des Nutzers einfügen",
@@ -104,13 +105,10 @@
         "MISSING_SRC": "Es wurde keine Quelle angegeben, wodurch kein iFrame angezeigt werden kann."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Verschommener Hintergrund des Bilds",
-        "ALT": "Bild zur Motivation des Themas",
         "GENERATE": "Bild generieren",
         "REGENERATE": "Bild neu generieren",
         "UPLOAD": "Bild hochladen",
         "DELETE": "Bild löschen",
-        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Ich stimme zu, dass ich alle notwendigen Rechte an diesem Bild besitze, um es auf der Themenseite einzubinden."
       },
       "MEDIA_RENDERING": {
@@ -215,14 +213,9 @@
         "DELETE_VARIANT": "Vorlage löschen"
       }
     },
-    "CONFIG_PAGE_TEMPLATE": {
-      "HEADING": "Bearbeitung der Seiten-Vorlage(n)",
-      "SAME_REF_ERROR": "Sie nutzen derzeit die gleiche Vorlage für Portale und Themenseiten. Dies sollte vermieden werden.",
-      "UNLINK": "Loslösen",
-      "ADD_EMPTY_TEMPLATE": "Leere Vorlage erstellen",
-      "EMPTY_TEMPLATE_HINT": "Bisher ist noch keine Vorlage vorhanden. Verwenden Sie den Button, um eine leere Vorlage anzulegen und dahin zu wechseln.",
-      "SWITCH_TO_PAGE_VARIANT": "Zur Seiten-Vorlage wechseln",
-      "SWITCH_TO_PAGE_VARIANT_HINT": "Klicken Sie den Button, um zur Vorlage zu wechseln und diese zu bearbeiten."
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Themenseiten-Vorlage erstellen",
+      "MESSAGE": "Bisher ist noch keine Vorlage vorhanden. Möchtest du eine leere Vorlage anlegen und dahin wechseln?"
     },
     "CONFIG_WIDGET_EMBEDDING": {
       "HEADING": "Widget einbetten",
@@ -244,6 +237,8 @@
       "RECOMMENDED": "Empfohlen"
     },
     "ANCHOR_FALLBACK_PREFIX": "Abschnitt",
+    "ANCHOR_ARIA_HEADING": "Springe zu Abschnitt: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Anzahl der Suchergebnisse: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Überschrift",
       "DEFAULT_HEADING": "Eine beispielhafte Überschrift",
@@ -354,6 +349,8 @@
     "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
+    "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
+    "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "EXISTING_VARIANT": {
@@ -373,6 +370,8 @@
         "TEMPLATE": "Vorlage"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "SEARCH": "Suche",
+      "EMPTY": "Es konnten keine Vorlagen gefunden werden.",
       "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
       "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
       "COPY_SUFFIX": "Kopie"

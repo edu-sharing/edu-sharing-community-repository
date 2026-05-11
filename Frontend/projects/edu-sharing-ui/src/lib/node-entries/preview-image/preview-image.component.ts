@@ -1,5 +1,7 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
+import { NodeHelperService } from '../../services/node-helper.service';
+import { NodesRightMode } from '../../types/option-item';
 
 /**
  * Displays the preview image of `node`.
@@ -13,7 +15,7 @@ import { Node } from 'ngx-edu-sharing-api';
     styleUrls: ['./preview-image.component.scss'],
     standalone: false,
 })
-export class PreviewImageComponent<T extends Node> {
+export class PreviewImageComponent<T extends Node> implements OnChanges {
     @Input() node: T;
     @Input() playAnimation = false;
 
@@ -23,8 +25,14 @@ export class PreviewImageComponent<T extends Node> {
 
     showCanvas: boolean = false;
     replacedWithStatic: boolean = false;
+    hasPreviewPermission: boolean;
 
-    constructor() {}
+    constructor(private nodeHelper: NodeHelperService) {}
+    ngOnChanges(changes: SimpleChanges): void {
+        this.hasPreviewPermission =
+            this.node &&
+            this.nodeHelper.getNodesRight([this.node], 'ReadPreview', NodesRightMode.Effective);
+    }
 
     onImageLoad(event: Event): void {
         if (this.node.mimetype?.startsWith('video')) {

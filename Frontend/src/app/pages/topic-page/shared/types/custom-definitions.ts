@@ -17,6 +17,9 @@ export const DEFAULT_PAGE_CONFIG_REF_PROP: string = RestConstants.CCM_PROP_PAGE_
 export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
 export const DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP: string = 'ccm:page_variant_is_template';
+export const DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP: string = 'ccm:page_variant_template_ref';
+export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP: string =
+    'ccm:page_variant_template_version';
 export const DEFAULT_PAGE_VARIANT_QUERY_ID: string = 'page_variant';
 export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 
@@ -24,6 +27,7 @@ export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 export const DEFAULT_BG_COLOR: string = '#F4F4F4';
 export const DEFAULT_PAGE_NAME_PREFIX: string = 'PAGE_';
 export const DEFAULT_PAGE_VARIANT_NAME_PREFIX: string = 'PAGE_VARIANT_';
+export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1.0.0';
 export const DEFAULT_ICON_PATH: string = 'assets/images/topic-page/';
 export const DEFAULT_WIDGET_NAME_PREFIX: string = 'WIDGET_';
 
@@ -52,7 +56,6 @@ export const DEFAULT_AI_CHAT_COMPLETION_CONFIG_ID: string = 'topic_page_ai_chat_
 export const DEFAULT_AI_IMAGE_CREATE_CONFIG_ID: string = 'topic_page_ai_create_image';
 export const DEFAULT_AI_CLEAR_CACHE_CONFIG_ID: string = 'topic_page_ai_clear_cache';
 export const DEFAULT_AI_TEXT_WIDGET_CONFIG_ID: string = 'topic_page_ai_text_widget';
-export const DEFAULT_CONTENT_TEASER_WIDGET_CONFIG_ID: string = 'topic_page_ai_content_teaser';
 export const DEFAULT_TOPIC_HEADER_DESCRIPTION_WIDGET_CONFIG_ID: string =
     'topic_page_ai_topic_header_description';
 export const DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID: string =
@@ -67,22 +70,22 @@ export const SWIMLANE_GRID_OPTIONS: SelectOption[] = [
         viewValue: 'ONE_COLUMN',
     },
     {
-        icon: 'svg-two_columns',
+        icon: 'edu-two_columns',
         value: 'two_columns',
         viewValue: 'TWO_COLUMNS',
     },
     {
-        icon: 'svg-three_columns',
+        icon: 'edu-three_columns',
         value: 'three_columns',
         viewValue: 'THREE_COLUMNS',
     },
     {
-        icon: 'svg-left_side_panel',
+        icon: 'edu-left_side_panel',
         value: 'left_side_panel',
         viewValue: 'LEFT_SIDE_PANEL',
     },
     {
-        icon: 'svg-right_side_panel',
+        icon: 'edu-right_side_panel',
         value: 'right_side_panel',
         viewValue: 'RIGHT_SIDE_PANEL',
     },
@@ -113,38 +116,27 @@ export const SWIMLANE_BACKGROUND_SHAPE_OPTIONS: SwimlaneBackgroundOption[] = [
         viewValue: 'NONE',
     },
     {
-        image: 'svg-arrow_large_shape',
         shape: SwimlaneBackgroundShape.ArrowLarge,
         viewValue: 'ARROW_LARGE',
     },
     {
-        image: 'svg-arrow_small_shape',
         shape: SwimlaneBackgroundShape.ArrowSmall,
         viewValue: 'ARROW_SMALL',
     },
     {
-        image: 'svg-flag_large_shape',
         shape: SwimlaneBackgroundShape.FlagLarge,
         viewValue: 'FLAG_LARGE',
     },
     {
-        image: 'svg-flag_small_shape',
         shape: SwimlaneBackgroundShape.FlagSmall,
         viewValue: 'FLAG_SMALL',
     },
     {
-        image: 'svg-round_large_shape',
         shape: SwimlaneBackgroundShape.RoundLarge,
         viewValue: 'ROUND_LARGE',
     },
     {
-        image: 'svg-round_small_shape',
         shape: SwimlaneBackgroundShape.RoundSmall,
         viewValue: 'ROUND_SMALL',
     },
 ];
-
-export const SWIMLANE_SHAPE_TO_IMAGE_MAPPING: Map<SwimlaneBackgroundShape, string> = new Map<
-    SwimlaneBackgroundShape,
-    string
->(SWIMLANE_BACKGROUND_SHAPE_OPTIONS.map((option) => [option.shape, option.image]));

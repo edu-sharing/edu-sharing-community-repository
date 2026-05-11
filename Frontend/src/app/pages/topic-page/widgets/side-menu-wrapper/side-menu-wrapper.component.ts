@@ -22,6 +22,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 export class SideMenuWrapperComponent {
     closeDisabled: InputSignal<boolean> = input<boolean>(false);
     mobileHidden: InputSignal<boolean> = input<boolean>(false);
+    sideMenuHidden: InputSignal<boolean> = input<boolean>(false);
 
     @Input() position: string = 'right';
     @Input() selectedMenuItem: string = '';

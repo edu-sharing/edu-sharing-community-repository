@@ -5,6 +5,7 @@ import { BaseWidgetConfig } from './base-widget-config';
 export interface ContentTeaserConfig extends BaseWidgetConfig {
     blacklistedNodeIds?: string[];
     contentTeaserLayout?: GenericNodeEntriesDisplayType;
+    includeCustomCard?: boolean;
     propertyFilters?: Values;
     searchText?: string;
 }

@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     CUSTOM_ELEMENTS_SCHEMA,
+    effect,
     EventEmitter,
     input,
     Input,
@@ -82,6 +83,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     @Input() pageVariantNode?: Node;
     @Input() propagatedNodeId?: string;
     searchInput: InputSignal<string> = input<string>(null);
+    searchFilters: InputSignal<Values> = input<Values>(null);
+    lastSearchUpdate: WritableSignal<Date | null> = signal<Date | null>(null);
     @Input() searchText: string;
     swimlaneColor: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
@@ -105,7 +108,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     criteria: Signal<MdsQueryCriteria[]> = computed((): MdsQueryCriteria[] => {
         const criteriaArray: MdsQueryCriteria[] = [];
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to search for the collection
-        if (!Object.keys(this.propertyFilters())?.length) {
+        if (!this.propertyFilters()) {
             criteriaArray.push({
                 property: DEFAULT_COLLECTION_ID_PROP,
                 values: [this.contextNodeId],
@@ -138,6 +141,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 values: [value],
             });
         }
+
         // special cases for propagating parent: replace the collectionId
         const propagatedWidget: boolean = this.propagatedNodeId && !this.nodeId;
         // check if the propertyFilter contains the collectionId and replace it
@@ -150,8 +154,15 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         criteriaArray.push(
             ...this.searchHelperService.convertCritieria(this.propertyFilters(), []),
         );
+        if (this.searchFilters()) {
+            // @TODO: This will AND combine the local swimlane filters and external filters
+            criteriaArray.push(
+                ...this.searchHelperService.convertCritieria(this.searchFilters(), [], false),
+            );
+        }
         return criteriaArray;
     });
+    includeCustomCard: WritableSignal<boolean> = signal(true);
     initialized: WritableSignal<boolean> = signal(false);
     layoutOptions: LayoutOption[] = [
         {
@@ -162,7 +173,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         },
         {
             ariaLabel: 'SPLIT_VIEW_ARIA',
-            icon: 'svg-view_carousel_split',
+            icon: 'edu-view_carousel_split',
             value: GenericNodeEntriesDisplayType.SplitView,
             viewValue: 'SPLIT_VIEW',
         },
@@ -185,7 +196,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             viewValue: 'LIST_VIEW',
         },
     ];
-    private propertyFilters: WritableSignal<Values> = signal({});
+    private propertyFilters: WritableSignal<Values> = signal(null);
     queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     private searchMode: string = RestConstants.PRIMARY_SEARCH_CRITERIA;
     totalSearchResultCount: number = -1;
@@ -211,6 +222,13 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 viewValue: 'MAP_VIEW',
             });
         }
+        // hold the last search update date to avoid omitting updates coming too late
+        effect((): void => {
+            // track update of both signals
+            this.searchInput();
+            this.searchFilters();
+            this.lastSearchUpdate.set(new Date());
+        });
     }
 
     /**
@@ -250,10 +268,12 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
      * Opens the repository content URL using the previously set propertyFilters and searchText.
      */
     openRepoContentUrl(): void {
-        const propertyFilters: Values = this.propertyFilters();
+        let propertyFilters: Values | null = this.propertyFilters();
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to filter for the collection
-        if (!Object.keys(propertyFilters)?.length) {
-            propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [this.contextNodeId];
+        if (!propertyFilters) {
+            propertyFilters = {
+                [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+            };
         }
         // set both filters and query string
         const contentTeaserExtra: NavigationExtras = {
@@ -287,6 +307,14 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
      */
     layoutChangeAction(): void {
         this.scrollHelperService.restoreScrollPosition();
+    }
+
+    /**
+     * Updates the include custom card state and persists it to the node.
+     */
+    includeCardChanged(includeCard: boolean): void {
+        this.includeCustomCard.set(includeCard);
+        this.configChanged.emit();
     }
 
     /**
@@ -325,6 +353,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         return {
             blacklistedNodeIds: this.blacklistedNodeIds,
             contentTeaserLayout: this.layout,
+            includeCustomCard: this.includeCustomCard(),
             propertyFilters: this.propertyFilters(),
             searchText: this.searchText ?? '',
         };
@@ -343,6 +372,9 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         // 0 is a valid enum value, so check for undefined
         if (config.contentTeaserLayout !== undefined) {
             this.layout = config.contentTeaserLayout;
+        }
+        if (config.includeCustomCard !== undefined) {
+            this.includeCustomCard.set(config.includeCustomCard);
         }
         if (config.propertyFilters) {
             this.propertyFilters.set(config.propertyFilters);

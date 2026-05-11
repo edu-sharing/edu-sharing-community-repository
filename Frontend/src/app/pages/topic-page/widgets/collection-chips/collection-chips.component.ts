@@ -1,11 +1,13 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     Component,
+    computed,
     EventEmitter,
     input,
     Input,
     InputSignal,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
@@ -32,11 +34,14 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     styleUrls: ['./collection-chips.component.scss'],
 })
 export class CollectionChipsComponent implements WidgetComponentInterface {
+    protected readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.';
+
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     editMode: InputSignal<boolean> = input<boolean>(false);
     @Input() embedConfigurationOption?: ConfigurationOption;
     @Input() gridIndex: number = -1;
+    @Input() displayLimit: number = 0;
     @Input() pageVariantNode?: Node;
     searchInput: InputSignal<string> = input<string>(null);
     @Input() swimlaneIndex: number = -1;
@@ -45,12 +50,13 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
+    customCollectionChipsTileColor: string;
     customUrl: (node: Node) => string;
     layout: CollectionListDisplayType = CollectionListDisplayType.Chips;
     layoutOptions: LayoutOption[] = [
         {
             ariaLabel: 'BUTTONS_ARIA',
-            icon: 'svg-view_pills',
+            icon: 'edu-view_pills',
             value: CollectionListDisplayType.Chips,
             viewValue: 'BUTTONS',
         },
@@ -65,6 +71,13 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     initialized: WritableSignal<boolean> = signal(false);
     list: Node[];
     updateInProgress: WritableSignal<boolean> = signal(false);
+    showMore: WritableSignal<boolean> = signal(false);
+
+    protected readonly visibleList: Signal<Node[]> = computed(() =>
+        this.editMode() || this.showMore() || !this.displayLimit
+            ? this.list
+            : this.list.slice(0, this.displayLimit),
+    );
 
     constructor(
         private nodeHelper: NodeHelperService,
@@ -75,6 +88,8 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
+        this.customCollectionChipsTileColor =
+            this.topicPageGlobalService.getCustomCollectionChipsTileColor();
     }
 
     /**
@@ -99,7 +114,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
                 (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
             await this.router.navigateByUrl(url);
         } else {
-            window.open(url, '_self');
+            window.open(url, this.topicPageGlobalService.getCustomUrlTarget());
         }
     }
 
@@ -180,11 +195,25 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
             this.layout = config.collectionListLayout;
         }
         if (config.sortedNodeIds?.length) {
-            this.list.sort(
-                (a: Node, b: Node) =>
-                    config.sortedNodeIds.indexOf(a.ref.id) - config.sortedNodeIds.indexOf(b.ref.id),
-            );
+            this.list.sort((a: Node, b: Node) => {
+                // check whether the node is in the list of sorted node ids,
+                // if not, keep the existing order and put it at the end of the list
+                const indexA = config.sortedNodeIds.indexOf(a.ref.id);
+                const indexB = config.sortedNodeIds.indexOf(b.ref.id);
+
+                const sortedIndexA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
+                const sortedIndexB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
+
+                return sortedIndexA - sortedIndexB;
+            });
         }
+    }
+
+    /**
+     * Toggles the show more state.
+     */
+    toggleShowMore(): void {
+        this.showMore.set(!this.showMore());
     }
 
     protected readonly CollectionListLayout = CollectionListDisplayType;

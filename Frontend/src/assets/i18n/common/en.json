@@ -108,6 +108,9 @@
   "ORIGINAL_DELETE": "Remove",
   "ORIGINAL_DELETED": "Content deleted",
   "ORIGINAL_DELETED_INFO": "Only metadata accessable",
+  "ORIGINAL_ACCESS_DENIED": "Access denied",
+  "ORIGINAL_ACCESS_DENIED_INFO": "No permissions to view details of this material",
+  "ORIGINAL_ACCESS_DENIED_MORE": "More information",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details ({{date}})",
   "RENDERSERVICE_API_ERROR": "error while reaching rendering service. Please report this error an administrator.",
@@ -287,6 +290,7 @@
     "ccm:lifecyclecontributer_authorFN": "author",
     "ccm:wf_status": "status",
     "ccm:eaf_productionyear": "Production year",
+    "ccm:page_variant_profiling_target_group": "Target group",
     "counts": {
       "OVERALL": "Sum",
       "VIEW_MATERIAL": "Access",
