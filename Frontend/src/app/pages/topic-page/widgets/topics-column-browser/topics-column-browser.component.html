@@ -14,7 +14,9 @@
               *ngFor="let node of nodes.data"
               [value]="node"
               [selected]="path[0] === node"
+              [attr.data-node-id]="node.id"
               (click)="scrollLeft(); onSelectedChange(node)"
+              (keydown)="onFirstLevelKeydown($event, node)"
             >
               <span matListItemTitle class="list-item-title-container">
                 <a
@@ -22,6 +24,7 @@
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
+                  tabindex="-1"
                   [attr.data-text]="node.data | nodeTitle"
                   [target]="customUrlTarget"
                 >
@@ -72,9 +75,14 @@
     <ng-container *ngFor="let selectedNode of path; let last = last; let index = index">
       <ng-container *ngIf="dataSource.getChildren(selectedNode) | wrapObservable | async as nodes">
         <ng-container *ngIf="(isMobile() | async) === false || last">
-          <div class="children-list-container" esLifecycle>
+          <div class="children-list-container" [attr.data-parent-id]="selectedNode.id" esLifecycle>
             <div *ngIf="isMobile() | async" class="back">
-              <button mat-button (click)="path = path.slice(0, path.length - 1)">
+              <button
+                mat-button
+                class="back-button"
+                (click)="goBackOneLevel()"
+                (keydown)="onBackButtonKeydown($event)"
+              >
                 <i esIcon="arrow_back_ios"></i>
                 {{ 'BACK' | translate }}
               </button>
@@ -87,18 +95,23 @@
               (afterViewInit)="index > 0 && scrollIntoView($event.nativeElement)"
             >
               <li
-                *ngFor="let node of nodes.data"
+                *ngFor="let node of nodes.data; let itemIndex = index"
                 class="child-list-item"
+                role="option"
+                [attr.tabindex]="itemIndex === 0 ? 0 : -1"
+                [attr.aria-selected]="path.includes(node)"
+                [attr.data-node-id]="node.id"
                 [class.cursor-pointer]="node.data.collection.childCollectionsCount"
                 [class.item-selected]="path.includes(node) && node.children?.length"
                 (click)="node.data.collection.childCollectionsCount && onSelectedChange(node)"
-                tabindex="1"
+                (keydown)="onChildItemKeydown($event, node, index + 1)"
               >
                 <a
                   *ngIf="customUrl && customUrl(node.data); else defaultNodeLink"
                   [href]="customUrl(node.data)"
                   (click)="$event.stopPropagation()"
                   class="item-link cursor-pointer"
+                  tabindex="-1"
                   [attr.data-text]="node.data | nodeTitle"
                   [target]="customUrlTarget"
                 >
