@@ -36,6 +36,8 @@ export class ColorPickerComponent implements OnInit {
     @Input() cancelLabel: string = 'CANCEL';
     @Input() colorLabel: string;
     @Input() customClass: string = '';
+    @Input() customColor: string = '';
+    @Input() customColorPosition: 'start' | 'end' = 'end';
     @Output() colorChange: EventEmitter<string> = new EventEmitter<string>();
 
     get internalColor(): string {
@@ -74,6 +76,23 @@ export class ColorPickerComponent implements OnInit {
                     variants: ColorHelper.generateHslVariants(c, 7).reverse(),
                 });
             });
+        }
+        // add a custom color to the palette (if not already included)
+        if (this.customColor) {
+            const customColorIncluded = this.palette.find((c) => {
+                return (
+                    c === this.customColor ||
+                    c?.preview === this.customColor ||
+                    c?.variants?.includes(this.customColor)
+                );
+            });
+            if (!customColorIncluded) {
+                if (this.customColorPosition === 'start') {
+                    this.palette.unshift(this.customColor);
+                } else {
+                    this.palette.push(this.customColor);
+                }
+            }
         }
         // workaround to reset the color to the default undefined color
         if (this.addTransparency && !this.palette.includes(undefined)) {

@@ -61,8 +61,8 @@
             [selectedColor]="topicColor ?? initialTopicColor"
             [acceptLabel]="'APPLY'"
             [cancelLabel]="'CANCEL'"
-            [customClass]="'widget-color-picker'"
             [colorLabel]="i18nPrefix + 'WIDGET.COLOR'"
+            [customClass]="'widget-color-picker'"
             (colorChange)="updateTopicOrAnchorItemColor($event, true)"
           ></es-color-picker>
           <div class="template-header-wrapper">

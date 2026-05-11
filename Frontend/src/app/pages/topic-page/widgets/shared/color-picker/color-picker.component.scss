@@ -55,7 +55,7 @@
 // adjust style of ngx-colors component
 ::ng-deep .ngx-colors-overlay {
     .opened {
-        background: topicPageVars.$surface !important;
+        background: topicPageVars.$surface-container-low !important;
         outline: 1px solid topicPageVars.$outline-light;
 
         // input field for color code
