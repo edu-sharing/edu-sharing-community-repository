@@ -256,7 +256,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
-        if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
+        if (
+            (this._parent && this.nodeHelper.isNodeCollection(this._parent)) ||
+            ['collections', 'landing'].includes(this.scope)
+        ) {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
                 this.uiService.goToCollection(this._parent, 'new'),
             );

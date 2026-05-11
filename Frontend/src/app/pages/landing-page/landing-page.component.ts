@@ -30,7 +30,7 @@ export type SwimlaneEntry = {
 export class LandingPageComponent implements OnInit, OnDestroy {
     private readonly destroyed$ = new Subject<void>();
     readonly i18nPrefix: string = 'LANDING_PAGE.';
-    landingPageScope: string = 'LANDING';
+    landingPageScope: string = 'landing';
     searchEvent$: Observable<SearchEvent>;
 
     /**
