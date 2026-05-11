@@ -1306,39 +1306,34 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         color: string,
         isTopicColor: boolean = false,
     ): Promise<void> {
-        const initialColor: string = isTopicColor
-            ? this.initialTopicColor
-            : this.initialAnchorItemColor;
-        if (color !== initialColor) {
-            if (isTopicColor) {
-                this.topicColor = color;
-            } else {
-                this.anchorItemColor = color;
-            }
-            this.startEditing();
-            try {
-                await this.checkForCustomPageNodeExistence();
-                const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                if (!pageVariant) {
-                    this.endEditing();
-                    return;
-                }
-                const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
-                pageVariant.structure[propertyName] = color;
-                this.pageVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(this.pageVariantNode),
-                        DEFAULT_PAGE_VARIANT_CONFIG_PROP,
-                        JSON.stringify(pageVariant),
-                    );
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
+        if (isTopicColor) {
+            this.topicColor = color;
+        } else {
+            this.anchorItemColor = color;
+        }
+        this.startEditing();
+        try {
+            await this.checkForCustomPageNodeExistence();
+            const pageVariant: PageVariantConfig = this.retrievePageVariant();
+            if (!pageVariant) {
                 this.endEditing();
-            } catch (err) {
-                console.error(err);
-                this.endEditing();
-                this.topicPageHelperService.displayErrorToast();
+                return;
             }
+            const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
+            pageVariant.structure[propertyName] = color;
+            this.pageVariantNode =
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(this.pageVariantNode),
+                    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+                    JSON.stringify(pageVariant),
+                );
+            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+            this.pageVariantReloadNecessary = false;
+            this.endEditing();
+        } catch (err) {
+            console.error(err);
+            this.endEditing();
+            this.topicPageHelperService.displayErrorToast();
         }
     }
 
