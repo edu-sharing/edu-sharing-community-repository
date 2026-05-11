@@ -1459,7 +1459,7 @@ public class NodeDao {
             result.addAll(reference.getAccessOriginal());
         }
         boolean restrictedAccess = reference.isOriginalRestrictedAccess();
-        result.addAll(PermissionServiceHelper.getEffectivePermissions(restrictedPermissions, restrictedAccess));
+        result.addAll(PermissionServiceHelper.getEffectivePermissions(reference.getOriginalId(), restrictedPermissions, restrictedAccess));
         return result;
     }
 
