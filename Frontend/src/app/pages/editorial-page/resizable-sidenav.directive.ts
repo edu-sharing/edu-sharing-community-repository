@@ -25,7 +25,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
      */
     @Input() defaultWidth = 0.3;
     @Input() maxWidth = 0.5;
-    @Input() maxWidthPx = 600;
+    @Input() maxWidthPx = 800;
     private resizer!: HTMLElement;
     private dragging = false;
     private width$ = new BehaviorSubject<number>(0);
