@@ -135,15 +135,18 @@ export class ImageWrapperComponent implements OnInit {
         userUploadedNodeId: string,
         regenerateNecessary: boolean = false,
     ): Promise<void> {
-        // reset both sources before loading the new one
-        this.imagePath = null;
-        this.imageNode = null;
+        const resetSources = () => {
+            this.imagePath = null;
+            this.imageNode = null;
+        };
         // user has uploaded a custom image
         if (userUploadedNodeId) {
             const uploadedNode: Node = await this.topicPageHelperService.getNode(
                 userUploadedNodeId,
             );
             if (uploadedNode.preview?.url) {
+                // reset both sources before loading the new one
+                resetSources();
                 this.imageNode = uploadedNode;
             }
             return;
@@ -159,6 +162,8 @@ export class ImageWrapperComponent implements OnInit {
                       this.widgetNodeId(),
                       this.contextNodeId(),
                   );
+            // reset both sources before loading the new one
+            resetSources();
             this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
                 this.BASE_64_PREFIX + imageData.data[0].b64_json,
             );
@@ -166,14 +171,18 @@ export class ImageWrapperComponent implements OnInit {
         }
         // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
         if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
+            // reset both sources before loading the new one
+            resetSources();
             this.imageNode = this.fallbackNode;
         }
+        // reset both sources, if no condition matches
+        resetSources();
     }
 
     /**
      * Triggers the process of generating an AI image when the related button is clicked.
      */
-    async generateImageClicked(): Promise<void> {
+    async generateImage(): Promise<void> {
         // set the image processing to true
         this.imageProcessing.set(true);
         // check, whether an AI generated image is already shown and a regeneration is requested
