@@ -16,11 +16,11 @@
         [imageContainer]="aiGeneratedImage()"
       ></es-ai-label>
     </div>
-    <!-- displays a spinner while the image is being processed -->
-    <div class="image-loading" *ngIf="imageProcessing()">
-      <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
-    </div>
   </ng-container>
+  <!-- displays a spinner while the image is being processed -->
+  <div class="image-loading" *ngIf="imageProcessing()">
+    <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
+  </div>
   <!-- edit buttons to generate, upload or delete an image -->
   <div class="image-buttons" *ngIf="editMode && atLeastOneEditOptionSupported()">
     <button
@@ -34,7 +34,7 @@
           : (i18nPrefix + 'GENERATE' | translate)
       "
       tooltipAriaLabel
-      (click)="generateImageClicked()"
+      (click)="generateImage()"
     >
       <i esIcon="magic_button"></i>
     </button>
