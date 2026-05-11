@@ -556,6 +556,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
                 this.searchEvent$ = instance.onSearchTriggered();
+                // startWith defines the initial value
                 this.searchEvent$
                     .pipe(
                         takeUntil(this.destroyed$),
@@ -2509,6 +2510,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private endEditing(): void {
         this.anchorTrigger++;
+        this.updateSwimlaneIdToHitMatching();
         this.requestInProgress.set(false);
         // wait for the swimlane to be loaded before checking whether all accordions are opened in edit mode
         setTimeout((): void => {
