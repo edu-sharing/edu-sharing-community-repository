@@ -30,6 +30,11 @@
     align-items: center;
 }
 
+// fix: do not place color picker behind topic header
+es-color-picker {
+    z-index: 1;
+}
+
 // OFFCANVAS MENU
 // reserve space for close button + adjust color
 .side-menu-header {
