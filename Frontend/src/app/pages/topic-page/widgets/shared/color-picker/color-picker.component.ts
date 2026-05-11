@@ -105,7 +105,10 @@ export class ColorPickerComponent implements OnInit {
      * Only emits if the color actually changed from the initial value.
      */
     onColorChange(): void {
-        if (this._initialColor !== null && this._selectedColor !== this._initialColor) {
+        if (
+            this._initialColor &&
+            this._selectedColor?.toLowerCase() !== this._initialColor?.toLowerCase()
+        ) {
             this.colorChange.emit(this.selectedColor);
             // update the initial value for further changes
             this._initialColor = this._selectedColor;
