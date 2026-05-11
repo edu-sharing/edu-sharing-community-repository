@@ -126,6 +126,7 @@
               [scope]="Scope.EditorialPage"
               singleClickHint="static"
               (clickItem)="select($event)"
+              (dblClickItem)="openItem($event.element)"
               (fetchData)="fetchEvent($event)"
               (selectionChange)="selectionChange($event)"
               [columns]="columns()"

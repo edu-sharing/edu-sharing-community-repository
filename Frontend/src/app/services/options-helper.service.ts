@@ -502,11 +502,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         const viewElement = new OptionItem('OPTIONS.VIEW_ELEMENT', 'visibility', async (object) => {
             const node = this.getObjects(object, data)[0];
-            if (this.nodeHelper.isNodeCollection(node)) {
-                UIHelper.goToCollection(this.router, node);
-            } else {
-                UIHelper.goToWorkspaceFolder(this.router, await this.getLogin(), node.ref.id);
-            }
+            await this.uiService.openNode(node, false);
         });
         viewElement.priority = 2;
         viewElement.group = DefaultGroups.View;

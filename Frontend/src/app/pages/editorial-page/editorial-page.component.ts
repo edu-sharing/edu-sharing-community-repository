@@ -58,7 +58,6 @@ import {
     Scope,
     SearchHelperService,
     ToolpermissionPipe,
-    UIService,
     Values,
 } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -86,6 +85,7 @@ import {
     PrimaryMode,
 } from '../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { UIService } from '../../core-module/rest/services/ui.service';
 
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -748,7 +748,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
         }
     }
-
+    openItem(element: NodeEntriesDataType) {
+        void this.ui.openNode(element as Node, false);
+    }
     private clearSelection() {
         this.nodeEntriesRef?.getSelection()?.clear();
         this.editorialSidebarService.sidebarOpened.set(false);
