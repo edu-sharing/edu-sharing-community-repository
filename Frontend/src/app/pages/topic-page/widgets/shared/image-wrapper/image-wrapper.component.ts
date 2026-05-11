@@ -25,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
+import { TooltipAriaLabelDirective } from '../../../shared/directives/tooltip-aria-label.directive';
 import { AiHelperService } from '../../../shared/services/ai-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { AiLabelComponent } from '../ai-label/ai-label.component';
@@ -37,6 +38,7 @@ import { AiLabelComponent } from '../ai-label/ai-label.component';
         EduSharingUiCommonModule,
         MatIconButton,
         MatTooltip,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     templateUrl: './image-wrapper.component.html',
