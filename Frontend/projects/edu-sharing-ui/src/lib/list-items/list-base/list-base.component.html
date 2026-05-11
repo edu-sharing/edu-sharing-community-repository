@@ -37,6 +37,12 @@
     [node]="node"
     [provideLabel]="provideLabel"
   ></es-list-node-assignment>
+  <es-list-node-suggestion
+    *ngSwitchCase="'NodeSuggestion'"
+    [item]="item"
+    [node]="node"
+    [provideLabel]="provideLabel"
+  ></es-list-node-suggestion>
   <es-list-node-license
     *ngSwitchCase="'NodeLicense'"
     [item]="item"

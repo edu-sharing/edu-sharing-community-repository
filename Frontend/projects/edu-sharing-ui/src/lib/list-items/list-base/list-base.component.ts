@@ -41,6 +41,7 @@ export class ListBaseComponent extends ListWidget implements OnChanges {
                     ![
                         ListWidgetType.NodeCounts,
                         ListWidgetType.NodeAssignment,
+                        ListWidgetType.NodeSuggestion,
                         ListWidgetType.Text,
                     ].includes(this.widgetType)
                 ) {

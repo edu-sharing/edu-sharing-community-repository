@@ -53,11 +53,7 @@ export class ListItem {
     }
 
     static getSuggestionDefaults() {
-        return [
-            new ListItem('NODE', 'title'),
-            new ListItem('SUGGESTION', 'fields'),
-            new ListItem('SUGGESTION', 'count'),
-        ];
+        return [new ListItem('NODE', 'title'), new ListItem('SUGGESTION', 'count')];
     }
 }
 export class ListItemSort extends ListItem {

@@ -1584,7 +1584,11 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
         infoVersions.scopes = [Scope.WorkspaceList, Scope.Search, Scope.EditorialPage];
         infoVersions.group = DefaultGroups.View;
-        infoVersions.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        infoVersions.constrains = [
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.FilesAndDirectories,
+        ];
         infoVersions.priority = 20;
         infoVersions.showAsAction = false;
 
