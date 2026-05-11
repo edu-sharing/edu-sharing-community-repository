@@ -91,7 +91,7 @@
         "HEIGHT": "Height",
         "TITLE": "Title (for accessibility)",
         "SHOW_BORDER": "Show border?",
-        "SHOW_CONFIRMATION": "Show confirmation?",
+        "SHOW_CONFIRMATION": "Show dialog for embedding external content?",
         "SHOW_PREVIEW": "Show preview",
         "UPDATE_PREVIEW": "Update preview",
         "PREVIEW_TITLE": "iframe preview",
