@@ -3,10 +3,27 @@
 :host {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    > a {
-        font-size: vars.$fontSizeXLarge;
-        font-weight: bold;
-        text-decoration: none;
+
+    .nav-wrapper {
+        ol {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+
+            list-style: none;
+            margin: 0;
+            padding: 0;
+
+            li {
+                margin: 0;
+                padding: 0;
+
+                > a {
+                    font-size: vars.$fontSizeXLarge;
+                    font-weight: bold;
+                    text-decoration: none;
+                }
+            }
+        }
     }
 }

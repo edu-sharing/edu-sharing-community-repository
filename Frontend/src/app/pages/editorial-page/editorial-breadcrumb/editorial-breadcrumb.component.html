@@ -1,18 +1,36 @@
-<a class="home" [routerLink]="'/' + ROUTER_PREFIX + 'landing'">
-  {{ 'EDITORIAL.BREADCRUMB.HOME' | translate }}
-</a>
-<ng-container *ngIf="editorialBreadcrumbService.mode()">
-  <i esIcon="keyboard_arrow_right"></i>
-  <a
-    class="main-scope"
-    [routerLink]="'/' + ROUTER_PREFIX + 'editorial/' + editorialBreadcrumbService.mode()"
-  >
-    {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
-  </a>
-</ng-container>
-<ng-container *ngFor="let e of editorialBreadcrumbService.path()">
-  <i esIcon="keyboard_arrow_right"></i>
-  <a class="path-scope" [class.clickable]="e.callback" (click)="e.callback ? e.callback() : null">
-    {{ e.title }}
-  </a>
-</ng-container>
+<nav class="nav-wrapper" aria-label="breadcrumbs">
+  <ol>
+    <li>
+      <a class="home" [routerLink]="'/' + ROUTER_PREFIX + 'landing'">
+        {{ 'EDITORIAL.BREADCRUMB.HOME' | translate }}
+      </a>
+    </li>
+    <ng-container *ngIf="editorialBreadcrumbService.mode()">
+      <i esIcon="keyboard_arrow_right"></i>
+      <li>
+        <a
+          class="main-scope"
+          [routerLink]="'/' + ROUTER_PREFIX + 'editorial/' + editorialBreadcrumbService.mode()"
+          [attr.aria-current]="editorialBreadcrumbService.path().length === 0 ? 'page' : null"
+        >
+          {{
+            'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate
+          }}
+        </a>
+      </li>
+    </ng-container>
+    <ng-container *ngFor="let e of editorialBreadcrumbService.path(); let last = last">
+      <i esIcon="keyboard_arrow_right"></i>
+      <li>
+        <a
+          class="path-scope"
+          [class.clickable]="e.callback"
+          (click)="e.callback ? e.callback() : null"
+          [attr.aria-current]="last ? 'page' : null"
+        >
+          {{ e.title }}
+        </a>
+      </li>
+    </ng-container>
+  </ol>
+</nav>
