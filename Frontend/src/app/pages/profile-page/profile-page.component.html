@@ -34,6 +34,7 @@
           [style]="'flat'"
           [numberOfAlwaysVisibleOptions]="1"
           [numberOfAlwaysVisibleOptionsMobile]="1"
+          [backgroundType]="'primary'"
         ></es-actionbar>
         <button mat-button class="edit clickable" *ngIf="isMe && edit" (click)="edit = false">
           <i esIcon="close"></i><span>{{ 'PROFILES.CANCEL_EDIT' | translate }}</span>
