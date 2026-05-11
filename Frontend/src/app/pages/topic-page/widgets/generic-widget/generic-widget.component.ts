@@ -646,7 +646,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
+     * Handles the update of the generic widget search results.
      *
      * @param count
      * @param type

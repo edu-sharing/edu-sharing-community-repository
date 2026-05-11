@@ -399,16 +399,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     searchEvent$: Observable<SearchEvent>;
     searchCountTrigger: number = 1;
     computedSearchInput: Signal<string> = computed((): string =>
-        this.editMode() ? '' : this.searchInput(),
+        this.editMode() ? '' : this.searchInput() ?? '',
     );
     computedSearchFilters: Signal<Values> = computed(
         (): Values => (this.editMode() ? {} : this.searchFilters()),
     );
     searchInputOrFiltersDefined: Signal<boolean> = computed(() => {
-        return (
-            this.computedSearchInput() !== '' ||
-            (this.computedSearchFilters() && Object.keys(this.computedSearchFilters())?.length > 0)
-        );
+        const filters = this.computedSearchFilters();
+        return !!this.computedSearchInput() || (filters && Object.keys(filters).length > 0);
     });
     private searchInput: WritableSignal<string> = signal('');
     private searchFilters: WritableSignal<Values> = signal({});
@@ -556,6 +554,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
                 this.searchEvent$ = instance.onSearchTriggered();
+                // startWith defines the initial value
                 this.searchEvent$
                     .pipe(
                         takeUntil(this.destroyed$),
@@ -2509,6 +2508,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private endEditing(): void {
         this.anchorTrigger++;
+        this.updateSwimlaneIdToHitMatching();
         this.requestInProgress.set(false);
         // wait for the swimlane to be loaded before checking whether all accordions are opened in edit mode
         setTimeout((): void => {
