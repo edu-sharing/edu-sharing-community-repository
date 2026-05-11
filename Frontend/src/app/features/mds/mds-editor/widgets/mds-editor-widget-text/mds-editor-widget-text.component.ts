@@ -168,8 +168,8 @@ class FileNameChecker {
         const currentValue = this.formControl.value;
         if (this.shouldWarn(this.previousValue, currentValue)) {
             void this.warn(
-                [...this.previousValue.split('.').slice(1)].join('.'),
-                [...currentValue.split('.').slice(1)].join('.'),
+                [...this.previousValue.split('.').slice(-1)].join('.'),
+                [...currentValue.split('.').slice(-1)].join('.'),
                 {
                     onAccept: () => this.onAccept(),
                     onRevert: () => this.onRevert(),
