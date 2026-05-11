@@ -711,7 +711,21 @@ public class PreviewServlet extends HttpServlet {
 	public static PreviewDetail getPreview(NodeService nodeService,String storeProtocol, String storeIdentifier, String nodeId,Map<String, Object> nodeProps){
 		StoreRef storeRef = new StoreRef(storeProtocol,storeIdentifier);
 		NodeRef nodeRef = new NodeRef(storeRef,nodeId);
-		if(!nodeService.getType(nodeId).equals(CCConstants.CCM_TYPE_IO)){
+
+        String nodeType = nodeService.getType(nodeId);
+
+        if(nodeType.equals(CCConstants.CCM_TYPE_MAP)){
+
+            String prevType = PreviewDetail.TYPE_DEFAULT;
+            if(nodeProps != null){
+                if(nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null) prevType = PreviewDetail.TYPE_USERDEFINED;
+            }else{
+                if(nodeService.getProperty(storeProtocol,storeIdentifier,nodeId,CCConstants.CCM_PROP_MAP_ICON) != null) prevType = PreviewDetail.TYPE_USERDEFINED;
+            }
+            return new PreviewDetail(null,prevType,false);
+        }
+
+		if(!nodeType.equals(CCConstants.CCM_TYPE_IO)){
 			return null;
 		}
 

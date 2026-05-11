@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.copy.CopyServicePolicies.OnCopyCompletePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -91,6 +92,9 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies
 		}
 
 		removeCopiedUsages(nodeService, targetNodeRef);
+        if(nodeService.getProperty(targetNodeRef, ContentModel.PROP_CONTENT) != null){
+            new ThumbnailHandling().thumbnailHandling(targetNodeRef);
+        }
 	}
 	
 	

@@ -35,10 +35,10 @@ class ConnectorServletTest {
         api.setUrl("https://curriculum-dev.schulcampus-rlp.de/api/v1/kanbans");
         api.setMethod(SimpleConnector.SimpleConnectorApi.Method.Post);
         api.setPostRequestHandler("org.edu_sharing.alfresco.service.connector.defaulthandler.CurriculumPostRequestHandler");
+        api.setBodyHandler("org.edu_sharing.alfresco.service.connector.bodyhandler.CurriculumBodyHandler");
         api.setBodyType(SimpleConnector.SimpleConnectorApi.BodyType.Form);
         api.setBody(Map.ofEntries(
-                        Map.entry("title", "Sample-Kanban " + UUID.randomUUID())
-                        // Map.entry("owner_cn", "${user.cm:authorityName}")
+                        Map.entry("owner_cn", "uuid")
                 )
         );
         SimpleConnector.SimpleConnectorAuthentication authentication = new SimpleConnector.SimpleConnectorAuthentication();
@@ -54,7 +54,10 @@ class ConnectorServletTest {
                 )
         );
         connector.setId("test");
-        HashMap<String, Serializable> result = underTest.handleSimpleConnector(Maps.empty(), connector, null);
+        HashMap<String, Serializable> result = underTest.handleSimpleConnector(Map.ofEntries(
+                Map.entry("curriculum_title", new String[]{"Sample-Kanban " + UUID.randomUUID()}),
+                Map.entry("curriculum_description", new String[]{"Sample-Kanban Description " + UUID.randomUUID()})
+        ), connector, null);
         assertThat(result.get(CCConstants.CCM_PROP_IO_WWWURL).toString(), CoreMatchers.containsString("https://curriculum-dev.schulcampus-rlp.de/kanbans/"));
     }
 }
