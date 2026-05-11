@@ -18,6 +18,7 @@
     flex-direction: column;
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     .landing-main {
+        background-color: #fefef9;
         flex-grow: 1;
     }
 }
