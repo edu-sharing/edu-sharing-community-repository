@@ -83,8 +83,8 @@
         [attr.height]="config.height || '450px'"
         [attr.title]="config.title || 'Embedded Content'"
         loading="lazy"
-        sandbox="allow-same-origin allow-scripts allow-popups"
-        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+        referrerpolicy="strict-origin-when-cross-origin"
         allow="encrypted-media"
         allowfullscreen
       >
