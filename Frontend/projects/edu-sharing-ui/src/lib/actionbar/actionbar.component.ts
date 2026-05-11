@@ -150,10 +150,10 @@ export class ActionbarComponent implements OnChanges {
     private sortByActionOptions(options: OptionItem[]) {
         const result: OptionItem[] = [];
         for (const option of options) {
-            if (option.showAsAction) result.push(option);
+            if (option.showAsAction === true) result.push(option);
         }
         for (const option of options) {
-            if (!option.showAsAction) result.push(option);
+            if (option.showAsAction === 'auto') result.push(option);
         }
         return result;
     }

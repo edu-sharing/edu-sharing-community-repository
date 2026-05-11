@@ -24,9 +24,10 @@ export class OptionItem {
     public showAlways = false;
     /**
      * If true, this option will be shown as an action (if room). If none of the items has showAsAction set, the first items will always be shown as action
+     * False explicitly will opt out this option to become an action
      * @type {boolean}
      */
-    public showAsAction = false;
+    public showAsAction: boolean | 'auto' = 'auto';
     /**
      * If true, shows a line at the top.
      *

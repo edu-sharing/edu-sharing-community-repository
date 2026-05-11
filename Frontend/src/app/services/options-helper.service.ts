@@ -42,7 +42,6 @@ import {
     OptionItemToggle,
     OptionsHelperComponents,
     OptionsHelperService as OptionsHelperServiceAbstract,
-    OptionTooltipPipe,
     Scope,
     Target,
     TemporaryStorageService,
@@ -424,6 +423,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         });
         debugNode.elementType = [];
         debugNode.onlyDesktop = true;
+
         debugNode.constrains = [Constrain.AdminOrDebug, Constrain.Selection];
         debugNode.group = DefaultGroups.View;
         debugNode.priority = -100;
@@ -500,6 +500,22 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         editRevocation.permissionsRightMode = NodesRightMode.Effective;
         editRevocation.permissionsMode = HideMode.Hide;
 
+        const viewElement = new OptionItem('OPTIONS.VIEW_ELEMENT', 'visibility', async (object) => {
+            const node = this.getObjects(object, data)[0];
+            if (this.nodeHelper.isNodeCollection(node)) {
+                UIHelper.goToCollection(this.router, node);
+            } else {
+                UIHelper.goToWorkspaceFolder(this.router, await this.getLogin(), node.ref.id);
+            }
+        });
+        viewElement.priority = 2;
+        viewElement.group = DefaultGroups.View;
+        viewElement.showAsAction = true;
+        viewElement.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        viewElement.customShowCallback = async (nodes: Node[]) => {
+            return nodes && nodes.length === 1 && nodes[0].type === RestConstants.CCM_TYPE_MAP;
+        };
+
         const openOriginalNode = new OptionItem(
             'OPTIONS.OPEN_ORIGINAL_NODE',
             'description',
@@ -512,6 +528,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 UIHelper.goToNode(this.router, { ref: { id: nodeId } } as Node);
             },
         );
+        openOriginalNode.constrains = [
+            Constrain.Files,
+            Constrain.NoBulk,
+            Constrain.HomeRepository,
+            Constrain.User,
+        ];
         openOriginalNode.constrains = [
             Constrain.Files,
             Constrain.NoBulk,
@@ -541,6 +563,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         openOriginalNode.elementType = [ElementType.NodePublishedCopy, ElementType.NodeRevoked];
         openOriginalNode.group = DefaultGroups.View;
         openOriginalNode.priority = 13;
+        openOriginalNode.showAsAction = false;
 
         const openParentNode = new OptionItem('OPTIONS.SHOW_IN_FOLDER', 'folder', async (object) =>
             this.goToWorkspace((await this.getObjectsAsync(object, data, true))[0]),
@@ -580,6 +603,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         };
         openParentNode.group = DefaultGroups.View;
         openParentNode.priority = 15;
+        openParentNode.showAsAction = false;
 
         const openNode = new OptionItem('OPTIONS.SHOW', 'remove_red_eye', (object) =>
             UIHelper.goToNode(this.router, this.getObjects(object, data)[0]),
@@ -1566,6 +1590,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         infoVersions.group = DefaultGroups.View;
         infoVersions.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
         infoVersions.priority = 20;
+        infoVersions.showAsAction = false;
 
         const registerSelectionChange = (list: ListEventInterface<any>) => {
             const updateVisibility = () => {
@@ -1613,6 +1638,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         options.push(acceptProposal);
         options.push(declineProposal);
         options.push(editRevocation);
+        options.push(viewElement);
         options.push(openOriginalNode);
         options.push(openParentNode);
         options.push(openNode);
