@@ -190,6 +190,7 @@ export class DashboardSwimlaneComponent {
                     queryParams: {
                         mainComponent: 'manageAssignment',
                     },
+                    queryParamsHandling: 'replace',
                 });
             });
             createAssignment.elementType = [ElementType.NoneOrUnknown];

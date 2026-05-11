@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
-import { UIConstants, UIService } from 'ngx-edu-sharing-ui';
+import { DefaultGroups, ElementType, OptionItem, UIConstants, UIService } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -47,6 +47,19 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         private searchFieldService: SearchFieldService,
         private ui: UIService,
     ) {
+        const createAssignment = new OptionItem('EDITORIAL.OPTIONS.CREATE_ASSIGNMENT', 'task', () =>
+            this.router.navigate([UIConstants.ROUTER_PREFIX, 'editorial', 'assignment'], {
+                queryParams: {
+                    mainComponent: 'manageAssignment',
+                },
+                queryParamsHandling: 'replace',
+            }),
+        );
+        createAssignment.group = DefaultGroups.Create;
+        createAssignment.elementType = [ElementType.NoneOrUnknown];
+        createAssignment.toolpermissions = [
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+        ];
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
@@ -56,6 +69,10 @@ export class LandingPageComponent implements OnInit, OnDestroy {
             create: {
                 allowed: true,
                 allowBinary: true,
+            },
+            customCreateOptions: {
+                useDefaultOptions: true,
+                addOptions: [createAssignment],
             },
             showNavigation: true,
         });
