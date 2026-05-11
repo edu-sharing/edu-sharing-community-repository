@@ -33,6 +33,7 @@
           ? (i18nPrefix + 'REGENERATE' | translate)
           : (i18nPrefix + 'GENERATE' | translate)
       "
+      tooltipAriaLabel
       (click)="generateImageClicked()"
     >
       <i esIcon="magic_button"></i>
@@ -43,6 +44,7 @@
       color="primary"
       [disabled]="imageProcessing()"
       [matTooltip]="i18nPrefix + 'UPLOAD' | translate"
+      tooltipAriaLabel
       (click)="uploadImageClicked(fileInput)"
     >
       <i esIcon="publish"></i>
@@ -51,6 +53,7 @@
       mat-icon-button
       color="primary"
       [matTooltip]="i18nPrefix + 'DELETE' | translate"
+      tooltipAriaLabel
       [disabled]="deleteImageDisabled() || imageProcessing()"
       (click)="deleteImage()"
     >
