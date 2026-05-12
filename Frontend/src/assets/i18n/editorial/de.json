@@ -168,8 +168,6 @@
       "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SAVE_DRAFT": "Entwurf speichern",
-      "SAVE_RESET_DRAFT": "Aufgabe zurückziehen",
-      "SAVE_FINISH": "Aufgabe abschließen",
       "SUBMIT": "Aufgabe austeilen",
       "SELECT_FILE": "Anhängen",
       "RESET_DRAFT_MESSAGE": "Die Aufgabe wird für alle Lernenden zurückgezogen und wieder in einen Entwurf umgewandelt. Dies ist nur möglich, solange noch keine Einreichung erfolgt ist.",

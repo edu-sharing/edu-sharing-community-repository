@@ -96,31 +96,13 @@
       </button>
       <ng-container *ngIf="assignment().status !== 'DRAFT'">
         <button
-          mat-button
+          mat-flat-button
           color="primary"
           matStepperNext
           (click)="submit('INPROGRESS')"
           [disabled]="saving()"
         >
           {{ 'SAVE' | translate }}
-        </button>
-        <button
-          mat-flat-button
-          color="primary"
-          matStepperNext
-          (click)="finishSubmission()"
-          [disabled]="saving()"
-        >
-          {{ 'EDITORIAL.ASSIGNMENT.SAVE_FINISH' | translate }}
-        </button>
-        <button
-          mat-flat-button
-          color="warn"
-          [disabled]="submissionsWithContent()?.length > 0 || saving()"
-          matStepperNext
-          (click)="resetToDraft()"
-        >
-          {{ 'EDITORIAL.ASSIGNMENT.SAVE_RESET_DRAFT' | translate }}
         </button>
       </ng-container>
       <button
