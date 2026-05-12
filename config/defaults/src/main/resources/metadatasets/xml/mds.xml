@@ -29,10 +29,9 @@
       <useCaching>false</useCaching>
       <createImage>
         {
-        "model": "dall-e-2",
+        "model": "gpt-image-2",
         "size": "256x256",
         "n": 3,
-        "response_format": "b64_json",
         "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
       </createImage>
@@ -54,10 +53,9 @@
       <id>topic_page_ai_create_image</id>
       <createImage>
         {
-        "model": "dall-e-3",
+        "model": "gpt-image-2",
         "size": "1024x1024",
         "n": 1,
-        "response_format": "b64_json"
         }
       </createImage>
     </aiConfig>
