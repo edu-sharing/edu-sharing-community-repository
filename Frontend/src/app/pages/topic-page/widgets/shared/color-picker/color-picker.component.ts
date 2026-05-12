@@ -102,16 +102,23 @@ export class ColorPickerComponent implements OnInit {
 
     /**
      * Emits the color change event when the color is changed.
-     * Only emits if the color actually changed from the initial value.
+     * Treats empty string / null / undefined as the same "transparent" state
+     * so that intermediate values emitted by ngx-colors (caused by duplicate internalColor)
+     * do not trigger a spurious second event.
+     *
+     * Hint: null/undefined/empty string are all interpreted as transparency.
      */
     onColorChange(): void {
-        if (
-            this._initialColor &&
-            this._selectedColor?.toLowerCase() !== this._initialColor?.toLowerCase()
-        ) {
-            this.colorChange.emit(this.selectedColor);
-            // update the initial value for further changes
-            this._initialColor = this._selectedColor;
+        const normalize = (v: string | null | undefined): string | null =>
+            v == null || v === '' ? null : v.toLowerCase();
+
+        const previous: string | null = normalize(this._initialColor);
+        const current: string | null = normalize(this._selectedColor);
+
+        if (previous === current) {
+            return;
         }
+        this.colorChange.emit(this._selectedColor);
+        this._initialColor = this._selectedColor;
     }
 }
