@@ -95,6 +95,7 @@
       "ERROR_IMAGE_APPLY": "Unfortunately, the selected image could not be read. Please try another element.",
       "CREATED": "Collection has been created",
       "COPIED": "Collection has been copied",
+      "COPIED_NO_PUBLISH_PERMISSION": "Collection copied - {{count}} reference(s) skipped (missing permission)",
       "INVALID_NAME": "The given name is invalid. Please don't use special characters",
       "SORT_SAVED_TYPE": "The selected sorting by \"{{type}}\" will apply to all viewers of the collection in the future",
       "SORT_SAVED_CUSTOM": "The order established will apply to all viewers of the collection in the future"

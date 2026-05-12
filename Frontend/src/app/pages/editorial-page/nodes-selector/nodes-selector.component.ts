@@ -946,7 +946,19 @@ export class NodesSelectorComponent implements OnInit {
                 const copyResponse: Copy = await firstValueFrom(
                     this.apiCollectionService.copyCollection(copyParams),
                 );
-                this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
+                const refsWithoutPublishPermission: number =
+                    copyResponse?.entries?.filter(
+                        (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
+                    )?.length ?? 0;
+                if (refsWithoutPublishPermission > 0) {
+                    this.bridge.showTemporaryMessage(
+                        MessageType.info,
+                        'COLLECTIONS.TOAST.COPIED_NO_PUBLISH_PERMISSION',
+                        { count: refsWithoutPublishPermission },
+                    );
+                } else {
+                    this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
+                }
                 this.localEventsService.nodesChanged.emit([this.parent]);
                 if (copyResponse?.root) {
                     this.localEventsService.nodesCreated.emit([copyResponse.root]);
