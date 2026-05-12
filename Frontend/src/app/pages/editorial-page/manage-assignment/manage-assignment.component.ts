@@ -229,18 +229,20 @@ export class ManageAssignmentComponent {
     }
 
     async submit(status: Assignment['status']) {
-        if (!this.authorities()?.length) {
-            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
-            return;
+        if (status !== 'DRAFT') {
+            if (!this.authorities()?.length) {
+                this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
+                return;
+            }
+            if (
+                this.assignment().type === 'SUBMISSION' &&
+                !this.authorities()?.some((a) => a.role === 'ASSIGNEE')
+            ) {
+                this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
+                return;
+            }
         }
-        if (
-            this.assignment().type === 'SUBMISSION' &&
-            !this.authorities()?.some((a) => a.role === 'ASSIGNEE')
-        ) {
-            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
-            return;
-        }
-        const permissions: PermissionRequest[] = this.authorities().map((a) => {
+        const permissions: PermissionRequest[] = (this.authorities() || []).map((a) => {
             return {
                 authorityName: a.authority.authorityName,
                 role: a.role,
