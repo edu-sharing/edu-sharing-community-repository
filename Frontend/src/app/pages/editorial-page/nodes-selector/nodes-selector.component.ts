@@ -394,7 +394,10 @@ export class NodesSelectorComponent implements OnInit {
         // only allow copying collections if the target is a collection again
         this.treeNodeService.setCustomIsValidSourceCallback((node: Node) => {
             return (
-                (this.parent?.mediatype === 'collection' && node?.mediatype === 'collection') ||
+                (this.parent?.mediatype === 'collection' &&
+                    node?.mediatype === 'collection' &&
+                    this.parent?.ref.id !== node?.ref.id &&
+                    this.parent?.parent?.id !== node?.ref.id) ||
                 node?.type === RestConstants.CCM_TYPE_IO
             );
         });
