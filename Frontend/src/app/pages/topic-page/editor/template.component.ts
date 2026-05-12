@@ -110,6 +110,7 @@ import { BapiConfigObject } from '../shared/types/bapi-config-object';
 import { ColorChangeEvent } from '../shared/types/color-change-event';
 import { GridTile } from '../shared/types/grid-tile';
 import { GridTileToHitsMapping } from '../shared/types/grid-tile-to-hits-mapping';
+import { GridTileToSearchCountMapping } from '../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../shared/types/grid-tile-to-search-results-mapping';
 import { PageConfig } from '../shared/types/page-config';
 import { PageVariantConfig } from '../shared/types/page-variant-config';
@@ -1893,16 +1894,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Called by es-swimlane totalSearchResultCountChanged output event.
+     * Sets the search count and triggers an update.
+     *
+     * @param event
+     * @param swimlaneIndex
+     */
+    updateGridItemTotalSearchCount(event: GridTileToSearchCountMapping, swimlaneIndex: number) {
+        this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event?.count || 0;
+        this.searchCountTrigger++;
+    }
+
+    /**
      * Called by es-swimlane visibleNodesChanged output event.
-     * Sets the visible nodes in the global service and triggers the search count update and hit matching.
+     * Sets the visible nodes in the global service and triggers the hit matching.
      *
      * @param event
      * @param swimlaneIndex
      */
     updateVisibleNodes(event: GridTileToSearchResultsMapping, swimlaneIndex: number): void {
         this.topicPageGlobalService.updateVisibleNodes(swimlaneIndex, event.gridIndex, event.nodes);
-        this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event.nodes?.length || 0;
-        this.searchCountTrigger++;
         this.updateSwimlaneIdToHitMatching();
     }
 

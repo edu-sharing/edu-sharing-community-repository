@@ -101,6 +101,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     @Output() configChanged: EventEmitter<void> = new EventEmitter<void>();
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     // VARIABLES
@@ -327,13 +328,14 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     }
 
     /**
-     * Reacts to es-node-entries (totalSearchResultCountChanged) event by displaying the new count.
-     * In this case, the total count is displayed rather than the filtered nodes count.
+     * Reacts to es-node-entries (totalSearchResultCountChanged) event
+     * by displaying the new count and emitting it.
      *
      * @param count
      */
     changeTotalSearchResultCount(count: number): void {
         this.totalSearchResultCount = count;
+        this.totalSearchResultCountChanged.emit(count);
     }
 
     /**

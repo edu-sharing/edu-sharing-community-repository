@@ -645,6 +645,7 @@
     [topicWidgets]="topicWidgets"
     (gridUpdated)="handleGridUpdate($event, index)"
     (searchHitsChanged)="updateGridItemSearchInputHits($event, index)"
+    (totalSearchResultCountChanged)="updateGridItemTotalSearchCount($event, index)"
     (visibleNodesChanged)="updateVisibleNodes($event, index)"
   ></es-swimlane>
 </ng-template>
