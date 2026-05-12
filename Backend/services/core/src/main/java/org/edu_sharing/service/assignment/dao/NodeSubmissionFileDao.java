@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
@@ -200,7 +199,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
             log.debug("Copying reference node {}", request.originalFile());
-            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true);
+            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true, null);
             nodeService.setOwner(contentNodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
             log.debug("Copied reference node {}", contentNodeRef.getId());
 

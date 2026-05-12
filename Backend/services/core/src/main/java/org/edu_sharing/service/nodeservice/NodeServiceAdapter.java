@@ -58,7 +58,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
     @Override
-    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy) {
         return null;
     }
 

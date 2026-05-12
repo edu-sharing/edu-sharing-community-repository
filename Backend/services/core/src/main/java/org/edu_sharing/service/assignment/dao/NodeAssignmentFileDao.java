@@ -3,7 +3,6 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -146,7 +145,7 @@ final class NodeAssignmentFileDao extends BasicNodeDaoImpl implements Assignment
         }
 
         log.debug("Copying reference node {}", assignmentFileRequest.refId());
-        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true);
+        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true, null);
         nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
         log.debug("Copied reference node {}", nodeRef.getId());
         properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, nodeRef);

@@ -289,6 +289,12 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
      * - mainnav
      */
     private initMainNav(): void {
+        this.localEvents.nodesCreated.subscribe((nodes) => {
+            const filtered = nodes.filter((n) => n.parent?.id === this.currentFolder?.ref?.id);
+            if (filtered.length) {
+                this.explorer.nodeEntries.addVirtualNodes(filtered);
+            }
+        });
         this.mainNavService.setMainNavConfig({
             title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
             currentScope: this.isSafe ? 'safe' : 'workspace',

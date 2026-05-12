@@ -146,7 +146,7 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
         }
 
         log.debug("Copying reference node {}", assignmentFileRequest.refId());
-        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true);
+        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true, null);
         nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
         log.debug("Copied reference node {}", nodeRef.getId());
         properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, nodeRef);

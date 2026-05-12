@@ -1,15 +1,13 @@
 import { Component, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import {
     Connector,
     DialogButton,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
-    RestHelper,
-    RestNodeService,
     UIService,
 } from '../../../../core-module/core.module';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
@@ -43,6 +41,7 @@ export class CreateVariantDialogComponent {
         private breadcrumbsService: BreadcrumbsService,
         private connector: RestConnectorService,
         private connectors: RestConnectorsService,
+        private localEvents: LocalEventsService,
         private dialogs: DialogsService,
         private uiService: UIService,
         private nodeService: NodeService,
@@ -106,19 +105,26 @@ export class CreateVariantDialogComponent {
                     this.breadcrumbsService.breadcrumbs$.value.length - 1
                 ].ref.id,
                 this.data.node.ref.id,
+                this.variantName,
             )
             .subscribe(
                 (created) => {
-                    this.nodeService
-                        .editNodeMetadata(
-                            created.node.ref.id,
-                            RestHelper.createNameProperty(this.variantName),
-                        )
-                        .subscribe(
-                            (edited) => {
-                                this.dialogRef.patchState({ isLoading: false });
-                                if (this._openViaConnector) {
-                                    this.uiService.openConnector(edited, null, win);
+                    this.dialogRef.patchState({ isLoading: false });
+                    this.localEvents.nodesCreated.emit([created.node]);
+                    if (this._openViaConnector) {
+                        this.uiService.openConnector(created.node, null, win);
+                        UIHelper.goToWorkspaceFolder(
+                            this.router,
+                            this.connector.getCurrentLogin(),
+                            this.breadcrumbsService.breadcrumbs$.value[
+                                this.breadcrumbsService.breadcrumbs$.value.length - 1
+                            ].ref.id,
+                        );
+                    } else {
+                        let additional = {
+                            link: {
+                                caption: 'NODE_VARIANT.CREATED_LINK',
+                                callback: () => {
                                     UIHelper.goToWorkspaceFolder(
                                         this.router,
                                         this.connector.getCurrentLogin(),
@@ -126,43 +132,22 @@ export class CreateVariantDialogComponent {
                                             this.breadcrumbsService.breadcrumbs$.value.length - 1
                                         ].ref.id,
                                     );
-                                } else {
-                                    let additional = {
-                                        link: {
-                                            caption: 'NODE_VARIANT.CREATED_LINK',
-                                            callback: () => {
-                                                UIHelper.goToWorkspaceFolder(
-                                                    this.router,
-                                                    this.connector.getCurrentLogin(),
-                                                    this.breadcrumbsService.breadcrumbs$.value[
-                                                        this.breadcrumbsService.breadcrumbs$.value
-                                                            .length - 1
-                                                    ].ref.id,
-                                                );
-                                            },
-                                        },
-                                    };
-                                    this.toast.toast(
-                                        'NODE_VARIANT.CREATED',
-                                        {
-                                            folder: this.breadcrumbsService.breadcrumbs$.value[
-                                                this.breadcrumbsService.breadcrumbs$.value.length -
-                                                    1
-                                            ].name,
-                                        },
-                                        null,
-                                        null,
-                                        additional,
-                                    );
-                                }
-                                this._done();
+                                },
                             },
-                            (error) => {
-                                this.dialogRef.patchState({ isLoading: false });
-                                this.nodeHelper.handleNodeError(this.variantName, error);
-                                if (win) win.close();
+                        };
+                        this.toast.toast(
+                            'NODE_VARIANT.CREATED',
+                            {
+                                folder: this.breadcrumbsService.breadcrumbs$.value[
+                                    this.breadcrumbsService.breadcrumbs$.value.length - 1
+                                ].name,
                             },
+                            null,
+                            null,
+                            additional,
                         );
+                    }
+                    this._done();
                 },
                 (error) => {
                     this.dialogRef.patchState({ isLoading: false });

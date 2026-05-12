@@ -180,28 +180,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
         // copy and rename has a weird naming scheme
-        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren);
+        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren, null);
     }
 
     @Override
-    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy) {
         return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             throwIfRestrictedAccessPresent(nodeRef);
 
             // copy and rename has a weird naming scheme
             String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+            String finalName = nameOfCopy;
+            if(StringUtils.isEmpty(nameOfCopy)){
+                finalName = originalName;
+            }
             NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
                     new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
                     QName.createQName(assocType),
-                    QName.createQName(originalName), copyChildren);
+                    QName.createQName(finalName), copyChildren);
 
             int renameCounter = 1;
             while (true) {
                 try {
-                    String name = originalName;
+                    String name = finalName;
                     if (renameCounter > 1) {
-                        name = NodeServiceHelper.renameNode(originalName, renameCounter);
+                        name = NodeServiceHelper.renameNode(finalName, renameCounter);
                     }
                     nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
                     break;

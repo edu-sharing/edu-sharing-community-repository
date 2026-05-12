@@ -19,7 +19,6 @@ import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
 import {
     cachedApiReplay,
-    cachedShareReplay,
     DEFAULT_API_CACHE_DURATION,
     KeyCache,
 } from '../utils/decorators/cached-share-replay';
@@ -345,12 +344,14 @@ export class NodeService {
     forkNode(
         targetParent: string,
         sourceNode: string,
+        forkName: string,
         repository = HOME_REPOSITORY,
         withChildren = true,
     ) {
         return this.nodeV1.createForkOfNode({
             node: targetParent,
             source: sourceNode,
+            name: forkName,
             repository,
             withChildren,
         });

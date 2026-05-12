@@ -33175,6 +33175,15 @@
             }
           },
           {
+            "description": "new file name for the forked element",
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "flag for children",
             "in": "query",
             "name": "withChildren",

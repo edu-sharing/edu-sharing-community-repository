@@ -2810,13 +2810,13 @@ public class NodeDao {
         }
     }
 
-    public NodeDao createFork(String sourceId) throws DAOException {
+    public NodeDao createFork(String sourceId, String name) throws DAOException {
         try {
             NodeDao sourceDao = NodeDao.getNode(repoDao, sourceId);
             String[] source = new String[]{sourceId};
             RunAsWork<NodeDao> work = () -> {
                 try {
-                    org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(source[0], nodeId, false);
+                    org.alfresco.service.cmr.repository.NodeRef newNode = nodeService.copyNode(source[0], nodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, false, name);
                     permissionService.createNotifyObject(newNode.getId(), AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.CCM_VALUE_NOTIFY_ACTION_PERMISSION_ADD);
                     nodeService.addAspect(newNode.getId(), CCConstants.CCM_ASPECT_FORKED);
                     nodeService.setProperty(newNode.getStoreRef().getProtocol(), newNode.getStoreRef().getIdentifier(), newNode.getId(), CCConstants.CCM_PROP_FORKED_ORIGIN,
@@ -2829,7 +2829,7 @@ public class NodeDao {
                         permissionService.setPermissions(newNode.getId(), null, true);
                         return null;
                     });
-                    return new NodeDao(repoDao, newNode.getId());
+                    return new NodeDao(repoDao, newNode.getId(), Filter.createShowAllFilter());
                 } catch (Throwable throwable) {
                     throw new RuntimeException(throwable);
                 }

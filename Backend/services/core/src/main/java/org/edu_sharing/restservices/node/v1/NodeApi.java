@@ -64,7 +64,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1570,6 +1569,7 @@ public class NodeApi {
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = RestConstants.MESSAGE_PARENT_NODE, required = true) @PathParam("node") String node,
             @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE, required = true) @QueryParam("source") String source,
+            @Parameter(description = "new file name for the forked element", required = true) @QueryParam("name") String name,
             @Parameter(description = "flag for children", required = true) @QueryParam("withChildren") boolean withChildren,
             @Context HttpServletRequest req) {
 
@@ -1581,7 +1581,7 @@ public class NodeApi {
             source = NodeDao.mapNodeConstants(repoDao, source);
 
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-            NodeDao child = nodeDao.createFork(source);
+            NodeDao child = nodeDao.createFork(source, name);
 
             NodeEntry response = new NodeEntry();
             response.setNode(child.asNode());
