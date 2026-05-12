@@ -8,10 +8,12 @@ import {
     Output,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
+import { Values } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../../shared/shared.module';
 import { WIDGET_TYPE_OPTIONS, WIDGETS } from '../../shared/types/custom-definitions';
 import { GridTile } from '../../shared/types/grid-tile';
 import { GridTileToHitsMapping } from '../../shared/types/grid-tile-to-hits-mapping';
+import { GridTileToSearchCountMapping } from '../../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../../shared/types/grid-tile-to-search-results-mapping';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 import { convertNodeRefIntoNodeId } from '../../shared/utils/template-util';
@@ -19,7 +21,6 @@ import { GenericWidgetComponent } from '../../widgets/generic-widget/generic-wid
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { ConfigureGridComponent } from './configure-grid/configure-grid.component';
 import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-type.component';
-import { Values } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-swimlane',
@@ -54,6 +55,8 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
     @Output() searchHitsChanged: EventEmitter<GridTileToHitsMapping> =
         new EventEmitter<GridTileToHitsMapping>();
+    @Output() totalSearchResultCountChanged: EventEmitter<GridTileToSearchCountMapping> =
+        new EventEmitter<GridTileToSearchCountMapping>();
     @Output() visibleNodesChanged: EventEmitter<GridTileToSearchResultsMapping> =
         new EventEmitter<GridTileToSearchResultsMapping>();
 
@@ -93,6 +96,17 @@ export class SwimlaneComponent implements AfterViewChecked {
      */
     changeVisibleNodes(nodes: Node[], gridIndex: number): void {
         this.visibleNodesChanged.emit({ gridIndex, nodes });
+    }
+
+    /**
+     * Called by es-generic-widget totalSearchResultCountChanged output event.
+     * Emits the total search result count.
+     *
+     * @param count
+     * @param gridIndex
+     */
+    changeTotalSearchResultCount(count: number, gridIndex: number): void {
+        this.totalSearchResultCountChanged.emit({ gridIndex, count });
     }
 
     /**

@@ -143,6 +143,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     // OUTPUTS
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
     @Output() searchHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     @ViewChild('configureWidgetEmbeddingTemplate')
@@ -957,6 +958,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         instance.visibleNodesChanged?.subscribe((nodes: Node[] = []) => {
             this.updateSearchResults(nodes.length, 'nodes');
             this.visibleNodesChanged.emit(nodes);
+        });
+        instance.totalSearchResultCountChanged?.subscribe((count: number) => {
+            this.totalSearchResultCountChanged.emit(count);
         });
     }
 
