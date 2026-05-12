@@ -785,7 +785,7 @@ public class CollectionServiceElastic implements CollectionService {
                 List<org.edu_sharing.service.model.NodeRef> returnVal = new ArrayList<>();
                 for (ChildAssociationRef child : children) {
                     returnVal.add(new NodeRefImpl(
-                            child.getChildRef().getId()
+                            child.getChildRef()
                     ));
                 }
                 return returnVal;
