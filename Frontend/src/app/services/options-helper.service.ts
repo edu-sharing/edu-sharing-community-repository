@@ -508,6 +508,13 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         viewElement.group = DefaultGroups.View;
         viewElement.showAsAction = true;
         viewElement.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        viewElement.scopes = [
+            Scope.Search,
+            Scope.WorkspaceList,
+            Scope.EditorialPage,
+            Scope.EditorialSidebar,
+            Scope.CollectionsReferences,
+        ];
         viewElement.customShowCallback = async (nodes: Node[]) => {
             return nodes && nodes.length === 1 && nodes[0].type === RestConstants.CCM_TYPE_MAP;
         };
