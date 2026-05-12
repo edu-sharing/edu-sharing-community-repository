@@ -117,13 +117,13 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.TARGET_GROUP',
                 'group',
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.TARGET_GROUP',
-                '{{var(virtual:profiling_widget_intention)|-}}',
+                '{{var(ccm:page_variant_profiling_target_group)|-}}',
             ),
             new AiTagOption(
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.EDUCATIONAL_LEVEL',
                 'school',
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.EDUCATIONAL_LEVEL',
-                '{{var(virtual:profiling_widget_education_level)|-}}',
+                '{{var(ccm:educationalcontext)|-}}',
             ),
         );
     }
