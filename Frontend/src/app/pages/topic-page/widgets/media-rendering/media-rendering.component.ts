@@ -87,6 +87,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() internalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     private destroy$ = new Subject<void>();
@@ -304,8 +305,10 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     private emitVisibleNode(): void {
         if (this.selectedNode) {
             this.visibleNodesChanged.emit([this.selectedNode]);
+            this.totalSearchResultCountChanged.emit(1);
         } else {
             this.visibleNodesChanged.emit([]);
+            this.totalSearchResultCountChanged.emit(0);
         }
     }
 
