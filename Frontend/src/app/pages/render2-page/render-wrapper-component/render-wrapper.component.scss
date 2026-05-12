@@ -233,8 +233,12 @@ rs-root {
         width: 100%;
         padding: 0 $rsPaddingHorizontal;
         grid-gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-
+        grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
+        .mds-views {
+            display: grid;
+            grid-gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
+        }
         es-mds-editor-view {
             padding: 0;
             //border: 1px solid var(--palette-primary-100);
