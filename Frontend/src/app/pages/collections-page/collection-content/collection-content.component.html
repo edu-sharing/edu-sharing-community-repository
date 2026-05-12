@@ -118,6 +118,7 @@
               isUserAllowedToEdit(collection) &&
               !sortCollections?.customSortingInProgress,
           }"
+          ctrlClickBehavior="emit"
           (clickItem)="onContentClick($event)"
           (sortChange)="setReferenceSort($event)"
           [globalOptions]="

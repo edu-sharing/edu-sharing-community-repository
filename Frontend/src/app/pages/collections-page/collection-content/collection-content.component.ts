@@ -12,6 +12,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
@@ -195,6 +196,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private nodeService: RestNodeService,
         private nodeServiceApi: NodeService,
         private optionsService: OptionsHelperDataService,
+        private platformLocation: PlatformLocation,
         private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
@@ -577,6 +579,19 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
+            if (event.ctrlKey) {
+                window.open(
+                    this.platformLocation.getBaseHrefFromDOM() +
+                        this.router.serializeUrl(
+                            this.router.createUrlTree([
+                                UIConstants.ROUTER_PREFIX + 'render',
+                                event.element.ref.id,
+                            ]),
+                        ),
+                    '_blank',
+                );
+                return;
+            }
             this.nodeService
                 .getNodeMetadata(event.element.ref.id)
                 .subscribe((data: NodeWrapper) => {
