@@ -1106,22 +1106,22 @@
     <template>
       <id>topic_page_profiling</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group>
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="radioVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_configuration</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="checkboxVertical">
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="checkboxVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_search</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges">
-          <ccm:educationalcontext type="multivalueFixedBadges">
+          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges" isExtended="false">
+          <ccm:educationalcontext type="multivalueFixedBadges" isExtended="false">
       ]]></html>
     </template>
   </templates>
