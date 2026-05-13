@@ -15,8 +15,17 @@
         <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.TITLE' | translate }}</mat-label>
         <input matInput formControlName="title" required autofocus />
       </mat-form-field>
-      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}</mat-label>
-      <editor [init]="editorConfig" formControlName="summary"></editor>
+      <mat-label
+        >{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}
+        <span aria-hidden="true" class="mat-mdc-form-field-required-marker">*</span></mat-label
+      >
+      <editor
+        [init]="editorConfig"
+        formControlName="summary"
+        [class.editor-invalid]="
+          mainDataFormGroup.get('summary').invalid && mainDataFormGroup.get('summary').touched
+        "
+      ></editor>
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
       <div class="files">
         <es-info-message class="submissions" *ngIf="submissionsWithContent()?.length > 0">{{
@@ -69,7 +78,7 @@
       </div>
       <div class="navigation">
         <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>
-        <button mat-flat-button color="primary" matStepperNext (click)="validateMainForm()">
+        <button mat-flat-button color="primary" (click)="validateMainForm()">
           {{ 'NEXT' | translate }}
         </button>
       </div>

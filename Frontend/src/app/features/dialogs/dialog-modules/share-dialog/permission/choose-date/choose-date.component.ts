@@ -31,7 +31,7 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     @Input() to?: number;
     @Output() dateTimeChange = new EventEmitter<number>();
 
-    timeControl = new FormControl('', [Validators.pattern(/\d\d:\d\d/)]);
+    timeControl = new FormControl('', [Validators.pattern(/\d\d?:\d\d/)]);
     constructor(
         private toast: Toast,
         private translationsService: TranslationsService,
@@ -52,6 +52,7 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
                 const date = this.toDate(this.dateTime);
                 const valueSplit = value.split(':');
                 date.setHours(parseInt(valueSplit[0]), parseInt(valueSplit[1]));
+                console.log('new', date, valueSplit);
                 this.dateTime = date.getTime();
                 this.dateTimeChange.emit(this.dateTime);
             }
@@ -70,6 +71,10 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
             new DatePipe('en').transform(this.toDate(this.dateTime), 'HH:mm'),
         );
         setTimeout(() => (this.matInput.value = this.toDate(this.dateTime)));
+    }
+
+    isValid(from: number): boolean {
+        return this.timeControl.valid && this.dateTime > (from ?? 0);
     }
 
     updateDate(event: MatDatepickerInputEvent<Date, any>) {

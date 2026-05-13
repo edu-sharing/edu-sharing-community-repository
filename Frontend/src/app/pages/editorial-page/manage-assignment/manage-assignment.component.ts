@@ -35,6 +35,7 @@ import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
+
 export const AssignmentEditorConfig = {
     branding: false,
     height: 200,
@@ -98,6 +99,11 @@ export class ManageAssignmentComponent {
                     break;
                 }
             }
+        } else if (
+            this.mainDataFormGroup.get('useEndTime').value &&
+            !this.dateChooserRef?.isValid(this.now)
+        ) {
+            this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
         } else {
             this.matStepper.next();
         }

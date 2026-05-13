@@ -30,6 +30,9 @@ mat-stepper {
         flex-grow: 1;
     }
 }
+::ng-deep editor.editor-invalid .tox-tinymce {
+    border-color: vars.$warning;
+}
 .files {
     > button {
         margin-top: 10px;
