@@ -312,17 +312,24 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         }
         List<String> result = ((SearchServiceElastic) providerByApp.getSearchService()).hasPermissions(nodeId, permissionsToValidate);
         logger.debug("collection permission check took:" + (System.currentTimeMillis() - test) + "ms");
-        // result = handleCollectionPermissionsFromInterceptors(nodeId, permissionsToValidate, result);
+        result = handleCollectionPermissionsFromInterceptors(nodeId, permissionsToValidate, result);
         return result;
     }
 
     public static List<String> handleCollectionPermissionsFromInterceptors(String nodeId, List<String> permissionsToValidate, List<String> resultingPermissions) {
         List<? extends NodeServiceInterceptorPermissions> permInterceptor = PropertiesInterceptorFactory.getNodeServiceInterceptorPermissions();
         if(!permInterceptor.isEmpty()) {
-            for (NodeServiceInterceptorPermissions c : permInterceptor) {
-                resultingPermissions = c.hasCollectionPermissions(nodeId, permissionsToValidate, resultingPermissions);
-            }
+            // not ideal: In some scenarios, we're in an external runAsSystem block. But the intercpetor might need to do
+            // user specific permission checks so we need it to run as the regular user
+            return AuthenticationUtil.runAs(() -> {
+                List<String> p = resultingPermissions;
+                for (NodeServiceInterceptorPermissions c : permInterceptor) {
+                    p = c.hasCollectionPermissions(nodeId, permissionsToValidate, p);
+                }
+                return p;
+            }, AuthenticationUtil.getFullyAuthenticatedUser());
+        } else {
+            return resultingPermissions;
         }
-        return resultingPermissions;
     }
 }
