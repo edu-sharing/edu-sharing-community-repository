@@ -13,8 +13,6 @@ export type NodeRoot =
     | 'MY_FILES'
     | 'COLLECTION_HOME'
     | 'SHARED_FILES'
-    | 'MY_SHARED_FILES'
-    | 'TO_ME_SHARED_FILES'
     | 'WORKFLOW_RECEIVE'
     | 'RECYCLE'
     | 'ALL_FILES';

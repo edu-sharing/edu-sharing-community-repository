@@ -1,5 +1,6 @@
 import { trigger } from '@angular/animations';
 import {
+    AfterViewInit,
     ApplicationRef,
     Component,
     HostListener,
@@ -100,21 +101,11 @@ type NodeWrapper = { node: Node };
     providers: [OptionsHelperService],
     standalone: false,
 })
-export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy {
-    private static VALID_ROOTS = [
-        'MY_FILES',
-        'SHARED_FILES',
-        'MY_SHARED_FILES',
-        'TO_ME_SHARED_FILES',
-        'WORKFLOW_RECEIVE',
-        'RECYCLE',
-    ];
+export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
+    private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [
         RestConstants.USERHOME,
         '-shared_files-',
-        '-my_shared_files-',
-        '-to_me_shared_files_personal-',
-        '-to_me_shared_files-',
         '-workflow_receive-',
     ];
     readonly UIConstants = UIConstants;
@@ -126,6 +117,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
+    sidebarParent: Node;
     private isRootFolder: boolean;
     private sharedFolders: Node[] = [];
     path: Node[] = [];
@@ -870,6 +862,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             }
             const node: Node | any = {
                 ref: {
+                    repo: HOME_REPOSITORY,
                     id,
                 },
                 name: this.translate.instant('WORKSPACE.' + this.root),
@@ -997,12 +990,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         if (this.root === 'SHARED_FILES') {
             return RestConstants.SHARED_FILES;
         }
-        if (this.root === 'MY_SHARED_FILES') {
-            return RestConstants.MY_SHARED_FILES;
-        }
-        if (this.root === 'TO_ME_SHARED_FILES') {
-            return RestConstants.TO_ME_SHARED_FILES;
-        }
         if (this.root === 'WORKFLOW_RECEIVE') {
             return RestConstants.WORKFLOW_RECEIVE;
         }
@@ -1010,19 +997,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     async getRootFolderInternalId() {
-        if (this.root === 'TO_ME_SHARED_FILES') {
-            const toggle = await this.toMeSharedToggle$
-                .pipe(
-                    filter((v) => v !== null),
-                    first(),
-                )
-                .toPromise();
-            if (toggle) {
-                return RestConstants.TO_ME_SHARED_FILES;
-            } else {
-                return RestConstants.TO_ME_SHARED_FILES_PERSONAL;
-            }
-        }
         return this.getRootFolderId();
     }
 
@@ -1096,37 +1070,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 this.config.instant('workspaceSharedToMeDefaultAll', false),
             ),
         );
-        const shareToggle = new OptionItemToggle(
-            {
-                enabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
-                disabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
-            },
-            {
-                enabled: 'edu-content_shared_me_all',
-                disabled: 'edu-content_shared_me_private',
-            },
-            this.toMeSharedToggle$.value,
-            () => {
-                this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
-                void this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
-                void this.openDirectoryFromRoute();
-                //this.treeComponent.reload = Boolean(true);
-                this.toast.toast(
-                    'WORKSPACE.TOAST.TO_ME_SHARED_' +
-                        (this.toMeSharedToggle$.value ? 'ALL' : 'PERSONAL'),
-                );
-            },
-        );
-        shareToggle.group = DefaultGroups.Toggles;
-        shareToggle.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
-        shareToggle.priority = 5;
-        shareToggle.customShowCallback = async () => {
-            return this.root === 'TO_ME_SHARED_FILES';
-        };
         const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
             this.editorialSidebarService.sidebarOpened,
         );
-        this.customOptions.addOptions = [sidebarToggle, shareToggle];
+        this.customOptions.addOptions = [sidebarToggle];
     }
 
     private getLastLocationStorageId() {
@@ -1178,6 +1125,26 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     onDeleteNodes(nodes: Node[]): void {
         void this.dialogs.openDeleteNodesDialog({ nodes });
         // this.mainNavService.getDialogs().nodeDelete = nodes;
+    }
+
+    protected getRootFolder(): Node {
+        if (this.root === 'MY_FILES') {
+            return {
+                ref: {
+                    repo: HOME_REPOSITORY,
+                    id: RestConstants.USERHOME,
+                    isHomeRepo: true,
+                },
+                type: RestConstants.CCM_TYPE_MAP,
+            } as Node;
+        }
+        return null;
+    }
+
+    ngAfterViewInit(): void {
+        this.explorer?.node$.pipe(takeUntil(this.destroyed$)).subscribe((node) => {
+            this.sidebarParent = node || this.getRootFolder();
+        });
     }
 }
 

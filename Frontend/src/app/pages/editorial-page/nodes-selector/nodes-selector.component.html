@@ -5,7 +5,7 @@
   (selectedTabChange)="onTabChange($event)"
 >
   <!-- SEARCH TAB -->
-  <mat-tab [id]="idPrefix + TabType.SEARCH" *ngIf="selectionMode() === 'source'">
+  <mat-tab [id]="idPrefix + TabType.SEARCH" *ngIf="supportedTabs().includes(TabType.SEARCH)">
     <ng-template mat-tab-label>
       <i esIcon="search" class="tab-icon"></i>
       <span class="tab-label">{{ 'SIDEBAR.SEARCH_SHORT' | translate }}</span>
@@ -30,7 +30,10 @@
   </mat-tab>
 
   <!-- COLLECTIONS TAB -->
-  <mat-tab [id]="idPrefix + TabType.COLLECTIONS">
+  <mat-tab
+    [id]="idPrefix + TabType.COLLECTIONS"
+    *ngIf="supportedTabs().includes(TabType.COLLECTIONS)"
+  >
     <ng-template mat-tab-label>
       <i esIcon="layers" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TITLE' | translate }}</span>
@@ -58,7 +61,7 @@
   </mat-tab>
 
   <!-- UPLOAD TAB -->
-  <mat-tab [id]="idPrefix + TabType.UPLOAD" *ngIf="selectionMode() === 'source'">
+  <mat-tab [id]="idPrefix + TabType.UPLOAD" *ngIf="supportedTabs().includes(TabType.UPLOAD)">
     <ng-template mat-tab-label>
       <i esIcon="upload" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}</span>

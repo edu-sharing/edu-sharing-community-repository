@@ -4,7 +4,6 @@ import {
     computed,
     effect,
     input,
-    Input,
     model,
     OnInit,
     Signal,
@@ -142,7 +141,7 @@ export class NodesSelectorComponent implements OnInit {
     protected readonly idPrefix: string = 'nodes-selector-tab';
 
     option = input<OptionState<NodesSelectorConfig>>();
-    @Input() parent: Node;
+    parent = input<Node>();
     primaryMode = input<SidebarContext>();
 
     selectedTab: WritableSignal<TabType> = signal(null);
@@ -162,13 +161,19 @@ export class NodesSelectorComponent implements OnInit {
             return Object.values(value).some((data: MdsExtendedValueData) => data.enabled);
         });
     });
-    supportedTabs: Signal<TabType[]> = computed(() =>
-        this.selectionMode() === 'source'
-            ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
-            : this.allSelectedNodesFromHomeRepo()
-            ? [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE]
-            : [TabType.COLLECTIONS],
-    );
+    supportedTabs: Signal<TabType[]> = computed(() => {
+        if (this.selectionMode() === 'source') {
+            if (this.nodeHelperService.isNodeCollection(this.parent())) {
+                return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
+            } else {
+                return [TabType.WORKSPACE];
+            }
+        }
+        if (this.allSelectedNodesFromHomeRepo()) {
+            return [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
+        }
+        return [TabType.COLLECTIONS];
+    });
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
         // early return for empty or single selection
@@ -217,8 +222,8 @@ export class NodesSelectorComponent implements OnInit {
                 }
                 // only allow insert into collection when all have CCPublish
                 if (
-                    this.parent &&
-                    this.nodeHelperService.isNodeCollection(this.parent) &&
+                    this.parent() &&
+                    this.nodeHelperService.isNodeCollection(this.parent()) &&
                     !this.nodeHelperService.getNodesRight(
                         this.selectedNodes() as Node[],
                         RestConstants.ACCESS_CC_PUBLISH,
@@ -394,10 +399,10 @@ export class NodesSelectorComponent implements OnInit {
         // only allow copying collections if the target is a collection again
         this.treeNodeService.setCustomIsValidSourceCallback((node: Node) => {
             return (
-                (this.parent?.mediatype === 'collection' &&
+                (this.parent()?.mediatype === 'collection' &&
                     node?.mediatype === 'collection' &&
-                    this.parent?.ref.id !== node?.ref.id &&
-                    this.parent?.parent?.id !== node?.ref.id) ||
+                    this.parent()?.ref.id !== node?.ref.id &&
+                    this.parent()?.parent?.id !== node?.ref.id) ||
                 node?.type === RestConstants.CCM_TYPE_IO
             );
         });
@@ -615,12 +620,12 @@ export class NodesSelectorComponent implements OnInit {
         if (createdNodes?.length) {
             this.editorialSidebarService.applyNodeEmitted.emit({
                 nodes: createdNodes,
-                parent: this.parent,
+                parent: this.parent(),
             });
-            if (this.parent) {
+            if (this.parent()) {
                 try {
                     this.toast.showProgressSpinner();
-                    this.uiService.addToCollection(this.parent, createdNodes, false, () => {
+                    this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
                         this.toast.closeProgressSpinner();
                     });
                 } catch (e) {
@@ -866,9 +871,9 @@ export class NodesSelectorComponent implements OnInit {
         }
         this.editorialSidebarService.applyNodeEmitted.emit({
             nodes: this.selectedNodes() as Node[],
-            parent: this.parent,
+            parent: this.parent(),
         });
-        if (!this.parent) {
+        if (!this.parent()) {
             this.resetNodeEntriesSelections();
             return;
         }
@@ -876,9 +881,9 @@ export class NodesSelectorComponent implements OnInit {
         if (this.onlyFilesSelected()) {
             try {
                 this.toast.showProgressSpinner();
-                if (this.nodeHelperService.isNodeCollection(this.parent)) {
+                if (this.nodeHelperService.isNodeCollection(this.parent())) {
                     this.uiService.addToCollection(
-                        this.parent,
+                        this.parent(),
                         this.selectedNodes() as Node[],
                         false,
                         () => {
@@ -889,11 +894,11 @@ export class NodesSelectorComponent implements OnInit {
                 } else {
                     await this.uiService.copyOrMoveNodes(
                         this.selectedNodes() as Node[],
-                        this.parent,
+                        this.parent(),
                         'copy',
                     );
                     this.localEventsService.nodesCreated.emit(this.selectedNodes() as Node[]);
-                    this.localEventsService.nodesChanged.emit([this.parent]);
+                    this.localEventsService.nodesChanged.emit([this.parent()]);
                     this.resetNodeEntriesSelections();
                     this.toast.closeProgressSpinner();
                 }
@@ -940,7 +945,7 @@ export class NodesSelectorComponent implements OnInit {
                 const copyParams = {
                     repository: HOME_REPOSITORY,
                     sourceCollection: selectedNode.ref.id,
-                    targetCollection: this.parent.ref.id,
+                    targetCollection: this.parent().ref.id,
                     copyRoot: this.copyRoot(),
                     copyChildCollections: this.copyChildCollections(),
                     copyRefs: this.copyRefs(),
@@ -964,7 +969,7 @@ export class NodesSelectorComponent implements OnInit {
                 } else {
                     this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
                 }
-                this.localEventsService.nodesChanged.emit([this.parent]);
+                this.localEventsService.nodesChanged.emit([this.parent()]);
                 if (copyResponse?.root) {
                     this.localEventsService.nodesCreated.emit([copyResponse.root]);
                 }
