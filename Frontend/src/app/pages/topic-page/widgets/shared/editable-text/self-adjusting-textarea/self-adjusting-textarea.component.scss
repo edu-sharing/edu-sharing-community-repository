@@ -200,13 +200,3 @@
         font-size: 90% !important;
     }
 }
-
-// fix: toolbar overflows textarea placeholder
-//      calculation: 2 * form-field padding + height toolbar + 2 * toolbar-padding + margin-bottom
-:host ::ng-deep .text-form-field:not(.hidden-toolbar) {
-    .mdc-notched-outline {
-        &:not(.mdc-notched-outline--notched) label {
-            top: calc(2 * 14px + 24px + 2 * 5px + 8px);
-        }
-    }
-}
