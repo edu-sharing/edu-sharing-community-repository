@@ -176,13 +176,14 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
         const existingTextIndex: number = this.retrieveExistingValueForSelection(
             this.latestStoredTexts,
             this.selectedVariables(),
+            true,
         );
-        // a (partial) text match exists, use it
+        // if an exact full match exists, use it
         if (existingTextIndex !== -1) {
             this.resultString = this.latestStoredTexts?.[existingTextIndex]?.textValue?.text;
             this.aiGeneratedText.set(false);
         }
-        // no text match exists, request AI generation
+        // no exact full match exists, request AI generation
         if (existingTextIndex === -1 || !this.resultString) {
             await this.executePrompt();
             this.aiGeneratedText.set(true);

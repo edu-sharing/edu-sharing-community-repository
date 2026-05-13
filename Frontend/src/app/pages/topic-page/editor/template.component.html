@@ -61,8 +61,8 @@
             [selectedColor]="topicColor ?? initialTopicColor"
             [acceptLabel]="'APPLY'"
             [cancelLabel]="'CANCEL'"
-            [customClass]="'widget-color-picker'"
             [colorLabel]="i18nPrefix + 'WIDGET.COLOR'"
+            [customClass]="'widget-color-picker'"
             (colorChange)="updateTopicOrAnchorItemColor($event, true)"
           ></es-color-picker>
           <div class="template-header-wrapper">
@@ -289,6 +289,7 @@
                     [acceptLabel]="'APPLY'"
                     [cancelLabel]="'CANCEL'"
                     [customClass]="'widget-color-picker'"
+                    [customColor]="initialAnchorItemColor"
                     (colorChange)="updateTopicOrAnchorItemColor($event)"
                   ></es-color-picker>
                 </div>
@@ -420,21 +421,19 @@
                       #accordionItem="cdkAccordionItem"
                       class="topic-page-accordion-item"
                       [class.topic-page-accordion-item-expanded]="accordionItem.expanded"
-                      role="button"
-                      tabindex="0"
-                      [attr.id]="'accordion-header-' + i"
-                      [attr.aria-expanded]="accordionItem.expanded"
-                      [attr.aria-controls]="'accordion-body-' + i"
-                      expanded="false"
                     >
                       <ng-container *ngIf="accordionItem.expanded">
                         <ng-container
                           *ngTemplateOutlet="swimlaneShape; context: { swimlane }"
                         ></ng-container>
                       </ng-container>
-                      <div
+                      <button
+                        type="button"
                         class="topic-page-accordion-item-header"
-                        (click)="!editMode() ? accordionItem.toggle() : ''"
+                        (click)="!editMode() ? accordionItem.toggle() : null"
+                        [attr.id]="'accordion-header-' + i"
+                        [attr.aria-expanded]="accordionItem.expanded"
+                        [attr.aria-controls]="'accordion-body-' + i"
                       >
                         <ng-container
                           *ngTemplateOutlet="
@@ -446,7 +445,7 @@
                           <i *ngIf="accordionItem.expanded" esIcon="expand_less"></i>
                           <i *ngIf="!accordionItem.expanded" esIcon="expand_more"></i>
                         </span>
-                      </div>
+                      </button>
                       <div
                         class="topic-page-accordion-item-body"
                         role="region"
@@ -646,6 +645,7 @@
     [topicWidgets]="topicWidgets"
     (gridUpdated)="handleGridUpdate($event, index)"
     (searchHitsChanged)="updateGridItemSearchInputHits($event, index)"
+    (totalSearchResultCountChanged)="updateGridItemTotalSearchCount($event, index)"
     (visibleNodesChanged)="updateVisibleNodes($event, index)"
   ></es-swimlane>
 </ng-template>

@@ -1,9 +1,10 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, Input, signal, WritableSignal } from '@angular/core';
+import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     ClickSource,
+    CtrlClickBehavior,
     FetchEvent,
     GridConfig,
     InteractionType,
@@ -154,6 +155,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
     primaryInstance: boolean;
     singleClickHint: 'dynamic' | 'static';
+    ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
     scrollGradientColor: WritableSignal<string> = signal('fff');
@@ -165,12 +167,12 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     ) {}
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
-        if (event.ctrlKey || event.metaKey) {
+        if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {
             this.selection.toggle(data.element);
         } else if (event.shiftKey) {
             this.expandSelectionTo(data.element);
         } else {
-            this.clickItem.emit(data);
+            this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
         }
     }
 

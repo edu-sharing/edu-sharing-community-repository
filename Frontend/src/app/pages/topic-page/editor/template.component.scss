@@ -30,6 +30,11 @@
     align-items: center;
 }
 
+// fix: do not place color picker behind topic header
+es-color-picker {
+    z-index: 1;
+}
+
 // OFFCANVAS MENU
 // reserve space for close button + adjust color
 .side-menu-header {
@@ -311,10 +316,13 @@ es-side-menu-wrapper {
                     display: flex;
                     gap: 16px;
                     position: absolute;
-                    top: -4px;
+                    top: auto;
                     right: 32px; // align it with the accordion buttons
 
                     button {
+                        padding: 8px;
+                        width: 40px;
+                        height: 40px;
                         box-shadow: 0 4px 4px 0 #00000040;
                         background: topicPageVars.$surface-container-lowest;
                         color: topicPageVars.$primary-dark;
@@ -453,8 +461,14 @@ es-side-menu-wrapper {
 
                     .topic-page-accordion-item-header {
                         display: flex;
-                        align-content: center;
+                        align-items: center;
                         justify-content: space-between;
+                        width: 100%;
+                        min-height: 83px;
+                        background: none;
+                        border: none;
+                        text-align: left;
+                        cursor: pointer;
                         position: relative;
 
                         es-editable-text ::ng-deep {
@@ -492,8 +506,9 @@ es-side-menu-wrapper {
                         padding: 24px 32px;
                     }
 
+                    // hover state
                     .topic-page-accordion-item-header:hover {
-                        cursor: pointer;
+                        background-color: #eee;
                     }
                 }
             }
@@ -854,5 +869,10 @@ button.topic-page-edit-toggle-btn {
             width: 24px;
             height: 24px;
         }
+    }
+
+    // reset padding of edu-icons
+    .edu-icons {
+        padding: 0;
     }
 }

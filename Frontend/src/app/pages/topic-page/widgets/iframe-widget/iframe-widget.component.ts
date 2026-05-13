@@ -54,7 +54,7 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
         height: new FormControl<number | string>('450px'),
         title: new FormControl<string>(''),
         border: new FormControl<boolean>(false),
-        confirmation: new FormControl<boolean>(false),
+        confirmation: new FormControl<boolean>(true),
     });
     iframeConfig: IframeWidgetConfig | null = null;
     initialized: WritableSignal<boolean> = signal(false);

@@ -91,7 +91,7 @@
         "HEIGHT": "Höhe",
         "TITLE": "Titel (für Barrierefreiheit)",
         "SHOW_BORDER": "Rahmen anzeigen?",
-        "SHOW_CONFIRMATION": "Bestätigungsdialog anzeigen?",
+        "SHOW_CONFIRMATION": "Dialog zur Einbettung externer Inhalte anzeigen?",
         "SHOW_PREVIEW": "Vorschau anzeigen",
         "UPDATE_PREVIEW": "Vorschau aktualisieren",
         "PREVIEW_TITLE": "Vorschau des iFrames",
@@ -148,7 +148,8 @@
         "IMPORTANCE_LABEL": "Beschreibung der Wichtigkeit"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten"
+        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten",
+        "REFERENCES_LABEL": "Anzahl Materialien"
       },
       "EMBEDDING": {
         "LABEL": "Einbetten",
