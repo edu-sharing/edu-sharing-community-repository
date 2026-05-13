@@ -1,7 +1,14 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
-import { DefaultGroups, ElementType, OptionItem, UIConstants, UIService } from 'ngx-edu-sharing-ui';
+import {
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    OptionItem,
+    UIConstants,
+    UIService,
+} from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -60,6 +67,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         createAssignment.toolpermissions = [
             RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
         ];
+
+        createAssignment.toolpermissionsMode = HideMode.Hide;
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
