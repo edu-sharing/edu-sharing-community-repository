@@ -28,6 +28,10 @@ This agent assists with development tasks in this Angular frontend project.
 -   Location: `src/app/features/mds` and `src/app/features/mds/mds-editor/widgets`
 -   Handles widget definitions and dynamic frontend templating driven by metadata configurations
 
+### General notes
+
+-   use custom `esIcon` directive instead of `mat-icon`
+
 ### Global Styles
 
 -   Location: `projects/edu-sharing-ui/assets/scss`
