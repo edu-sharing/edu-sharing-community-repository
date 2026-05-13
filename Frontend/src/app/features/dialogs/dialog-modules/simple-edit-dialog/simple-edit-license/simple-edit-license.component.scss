@@ -16,3 +16,13 @@ es-info-message {
         font-weight: bold;
     }
 }
+
+mat-button-toggle-group {
+    overflow: visible;
+}
+
+.cdk-keyboard-focused {
+    margin-left: 5px;
+    margin-right: 5px;
+    @include setGlobalKeyboardFocus('outline');
+}

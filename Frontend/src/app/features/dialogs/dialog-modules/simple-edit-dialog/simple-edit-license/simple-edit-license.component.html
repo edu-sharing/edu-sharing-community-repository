@@ -12,10 +12,10 @@
       #modeGroup="matButtonToggleGroup"
       aria-labelledby="material-source-label"
     >
-      <mat-button-toggle [value]="'own'">{{
+      <mat-button-toggle [value]="'own'" cdkMonitorElementFocus>{{
         'SIMPLE_EDIT.LICENSE.SOURCE_OWN' | translate
       }}</mat-button-toggle>
-      <mat-button-toggle [value]="'foreign'">{{
+      <mat-button-toggle [value]="'foreign'" cdkMonitorElementFocus>{{
         'SIMPLE_EDIT.LICENSE.SOURCE_FOREIGN' | translate
       }}</mat-button-toggle>
     </mat-button-toggle-group>
@@ -26,9 +26,12 @@
       #licenseGroup="matButtonToggleGroup"
       aria-labelledby="material-license-label"
     >
-      <mat-button-toggle *ngFor="let license of allowedLicenses" [value]="license">{{
-        'SIMPLE_EDIT.LICENSE.LICENSES.' + license | translate
-      }}</mat-button-toggle>
+      <mat-button-toggle
+        *ngFor="let license of allowedLicenses"
+        [value]="license"
+        cdkMonitorElementFocus
+        >{{ 'SIMPLE_EDIT.LICENSE.LICENSES.' + license | translate }}</mat-button-toggle
+      >
     </mat-button-toggle-group>
   </div>
   <ng-container *ngIf="modeGroup.value === 'foreign'">
