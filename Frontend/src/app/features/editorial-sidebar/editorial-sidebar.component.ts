@@ -185,6 +185,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             'splitscreen_vertical_add',
             () => this.enabledOption.set({ trap: false, option: 'SORT_INTO' }),
         );
+        createAssignment.group = DefaultGroups.Primary;
         sortInto.customShowCallback = async () => {
             const validParent = this.parent() && ![ROOT].includes(this.parent().ref.id);
             const isMapOrFolder =
