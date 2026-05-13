@@ -1,4 +1,8 @@
-<h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }}</h1>
+<!---h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }} </h1-->
+<h1 esTitle class="cdk-visually-hidden">
+  {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
+</h1>
+
 <mat-sidenav-container
   [class.mat-sidenav-container-left-open]="sidenavLeft()"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
@@ -58,7 +62,7 @@
        </button>
      </mat-toolbar>
  -->
-    <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver">
+    <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver" role="main">
       <div class="top-area">
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
