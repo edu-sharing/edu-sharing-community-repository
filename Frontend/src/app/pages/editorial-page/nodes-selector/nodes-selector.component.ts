@@ -953,6 +953,8 @@ export class NodesSelectorComponent implements OnInit {
                     copyResponse?.entries?.filter(
                         (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
                     )?.length ?? 0;
+                const successCount =
+                    (copyResponse?.entries?.length ?? 0) - refsWithoutPublishPermission;
                 if (refsWithoutPublishPermission > 0) {
                     this.bridge.showTemporaryMessage(
                         MessageType.info,
@@ -1241,7 +1243,7 @@ export class NodesSelectorComponent implements OnInit {
             maxItems: RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             skipCount,
             propertyFilter: [PROPERTY_FILTER_ALL],
-            contentType: 'FILES',
+            contentType: searchForCollections ? 'COLLECTIONS' : 'FILES',
             metadataset: DEFAULT,
             sortProperties: [RestConstants.CM_MODIFIED_DATE],
             sortAscending: [false],

@@ -390,7 +390,7 @@
   </ng-container>
   <ng-container *ngIf="selectionMode() === 'source'">
     <ng-container *ngIf="!isSelectStep()">
-      <button mat-flat-button color="primary" class="back-btn" (click)="goBack()">
+      <button mat-button color="primary" class="back-btn" (click)="goBack()">
         <i esIcon="arrow_back"></i>
         {{ 'BACK' | translate }}
       </button>

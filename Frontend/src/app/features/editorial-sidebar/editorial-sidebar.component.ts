@@ -18,6 +18,7 @@ import {
     Constrain,
     DefaultGroups,
     ElementType,
+    HideMode,
     NodeHelperService,
     OptionItem,
     OptionsHelperDataService,
@@ -194,6 +195,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 );
             return validParent && isMapOrFolder;
         };
+        sortInto.permissions = [RestConstants.ACCESS_ADD_CHILDREN];
+        sortInto.permissionsMode = HideMode.Disable;
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections', 'workspace'];
         options.push(sortInto);

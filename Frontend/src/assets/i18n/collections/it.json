@@ -94,7 +94,7 @@
       "DUPLICATE_NAME": "Esiste già una raccolta con lo stesso nome",
       "CREATED": "La collezione è stata creata",
       "COPIED": "La collezione è stata copiata",
-      "COPIED_NO_PUBLISH_PERMISSION": "Collezione copiata – {{count}} contenuto/i ignorato/i (autorizzazione mancante)",
+      "COPIED_NO_PUBLISH_PERMISSION": "Collezione copiata ({{count}} ignorato/i (autorizzazione mancante)",
       "INVALID_NAME": "Il nome indicato non è valido. Non utilizzare caratteri speciali",
       "ERROR_IMAGE_APPLY": "Purtroppo non è stato possibile leggere l'immagine selezionata. Provare con un altro elemento.",
       "SORT_SAVED_TYPE": "L'ordinamento selezionato per \"{{type}}\" sarà applicato a tutti i visualizzatori della collezione in futuro.",

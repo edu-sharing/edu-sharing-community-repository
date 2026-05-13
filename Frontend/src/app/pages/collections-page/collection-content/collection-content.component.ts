@@ -170,7 +170,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     });
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
-        // void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
+        void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
         /*void this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
         })*/
