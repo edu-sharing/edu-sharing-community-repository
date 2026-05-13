@@ -226,7 +226,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
 
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {
-            this.firstActiveChip._elementRef.nativeElement.focus();
+            this.firstActiveChip.focus();
             event.stopPropagation();
             event.preventDefault();
         } else if (this.showOverlay.value && this.hasSuggestions) {

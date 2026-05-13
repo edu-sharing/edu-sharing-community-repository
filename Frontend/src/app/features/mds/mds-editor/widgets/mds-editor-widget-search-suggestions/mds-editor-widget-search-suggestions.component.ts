@@ -27,7 +27,8 @@ export class MdsEditorWidgetSearchSuggestionsComponent
         map((suggestions) => suggestions?.[this.widget.definition.id]),
     );
 
-    @ViewChild(MatChip, { read: ElementRef }) private firstSuggestionChip: ElementRef<HTMLElement>;
+    @ViewChild(MatChip) private firstSuggestionChip: MatChip;
+
     private tree: Tree;
 
     ngOnInit(): void {
@@ -43,7 +44,7 @@ export class MdsEditorWidgetSearchSuggestionsComponent
     }
 
     focus(): void {
-        this.firstSuggestionChip?.nativeElement.focus();
+        this.firstSuggestionChip?.focus();
     }
 
     private registerFilteredSuggestions(): void {
