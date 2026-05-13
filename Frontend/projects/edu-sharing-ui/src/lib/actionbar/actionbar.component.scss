@@ -59,6 +59,10 @@ button {
     .mdc-button {
         color: rgb(var(--palette-foreground-text-dark));
     }
+    .mat-mdc-outlined-button {
+        border-color: rgb(var(--palette-foreground-text-dark));
+    }
+
     .mat-mdc-unelevated-button {
         background-color: #fff;
         color: var(--primary);
