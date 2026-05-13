@@ -19,6 +19,8 @@
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
 
     // conditionally allow to align toolbar to the right
     &.absolute-positioning {
@@ -34,6 +36,7 @@
         border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         outline: none;
+        min-width: 0;
         max-width: 100%;
         overflow-x: auto;
 
@@ -73,6 +76,8 @@
         border-radius: 3px;
         display: inline-flex;
         gap: 4px;
+        min-width: 0;
+        flex-wrap: wrap;
 
         mat-checkbox ::ng-deep {
             padding: 0;
