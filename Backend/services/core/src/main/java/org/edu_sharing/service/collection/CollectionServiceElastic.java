@@ -1188,8 +1188,41 @@ public class CollectionServiceElastic implements CollectionService {
             throw new IllegalArgumentException("refs only can not be copied");
         }
         CopyResult copyResult = new CopyResult();
-        copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+        if(dst == null){
+            copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+        }else{
+            String pathSrc = getNodeIdPath(src);
+            String pathDst = getNodeIdPath(dst);
+            if(!pathDst.contains(pathSrc)){
+                copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+            }else{
+                //copy to an temp collection to prevent endless recursion
+                Collection temp = new Collection();
+                temp.setLevel0(true);
+                temp.setTitle("temp"+UUID.randomUUID());
+                temp = create(null,temp);
+
+                NodeRef tempNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,temp.nodeId);
+                copyInternal(copyResult,null,src, tempNodeRef, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+
+                for(ChildAssociationRef childAssociationRef : nodeService.getChildAssocs(tempNodeRef)){
+                    eduNodeService.moveNode(dst.getId(),CCConstants.CM_ASSOC_FOLDER_CONTAINS,childAssociationRef.getChildRef().getId());
+                }
+                eduNodeService.removeNode(temp.nodeId, null, false);
+                copyResult.root = dst;
+            }
+        }
         return copyResult;
+    }
+
+    private String getNodeIdPath(NodeRef nodeRef){
+        NodeRef tmp = nodeRef;
+        String result = null;
+        do{
+            result = (result == null) ? tmp.getId() : tmp.getId() + "/" + result;
+            tmp = nodeService.getPrimaryParent(tmp).getParentRef();
+        }while(tmp != null);
+        return result;
     }
 
     private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
