@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -31,6 +31,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
+import { TooltipAriaLabelDirective } from '../../../../shared/directives/tooltip-aria-label.directive';
 import { AiTagOption } from '../../../../shared/types/ai-tag-option';
 import { containsAiTags } from '../../../../shared/utils/ai-util';
 
@@ -41,11 +42,12 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
-        MatCheckbox,
+        MatButtonToggleModule,
         MatFormFieldModule,
         MatInputModule,
         MatTooltip,
         ReactiveFormsModule,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     templateUrl: './self-adjusting-textarea.component.html',
@@ -208,7 +210,19 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
      *
      * @param checked
      */
-    onGenerateWithAiChange = (checked: boolean): void => {
+    private onGenerateWithAiChange = (checked: boolean): void => {
         this.generateWithAiChanged.emit(checked);
     };
+
+    /**
+     * Applies the chosen AI mode ('text' or 'ai') from the toggle group and emits the change.
+     */
+    onAiModeChange(mode: 'text' | 'ai'): void {
+        const next: boolean = mode === 'ai';
+        if (this.generateWithAi() === next) {
+            return;
+        }
+        this.generateWithAi.set(next);
+        this.onGenerateWithAiChange(next);
+    }
 }
