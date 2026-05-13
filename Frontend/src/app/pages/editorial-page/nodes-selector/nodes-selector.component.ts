@@ -163,7 +163,7 @@ export class NodesSelectorComponent implements OnInit {
     });
     supportedTabs: Signal<TabType[]> = computed(() => {
         if (this.selectionMode() === 'source') {
-            if (this.nodeHelperService.isNodeCollection(this.parent())) {
+            if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
                 return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
             } else {
                 return [TabType.WORKSPACE];
