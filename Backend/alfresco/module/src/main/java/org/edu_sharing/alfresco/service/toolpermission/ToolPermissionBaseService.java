@@ -358,6 +358,7 @@ public class ToolPermissionBaseService {
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI);
         toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_EDITORIAL_SUGGESTIONS);
+        toInit.remove(CCConstants.CCM_VALUE_TOOLPERMISSION_METADATA_METHODOLOGY);
         return toInit;
     }
     public List<String> getAllPredefinedToolPermissions(){
@@ -413,6 +414,7 @@ public class ToolPermissionBaseService {
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_SIGNUP_GROUP);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI);
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_EDITORIAL_SUGGESTIONS);
+        toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_METADATA_METHODOLOGY);
 
         toInit.add(CCConstants.CCM_VALUE_TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS);
 

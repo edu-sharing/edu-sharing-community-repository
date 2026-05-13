@@ -167,7 +167,8 @@
     "TOOLPERMISSION_RATE_READ": "Le droit de consulter les revues de matériel",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Créer des autorisations à durée limitée.",
     "TOOLPERMISSION_SUGGESTION_READ": "Récupérer des suggestions de métadonnées sur les éléments.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Proposer des suggestions de métadonnées pour les éléments."
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Proposer des suggestions de métadonnées pour les éléments.",
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Afficher l'onglet méthodologie lors du classement des éléments."
   },
   "NO_WRITE_PERMISSIONS": "Aucune autorisation",
   "NODE_SEARCH": "Éléments de recherche...",

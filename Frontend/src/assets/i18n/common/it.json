@@ -167,7 +167,8 @@
     "TOOLPERMISSION_RATE_READ": "Il diritto di visionare le recensioni dei materiali",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Creare autorizzazioni limitate nel tempo.",
     "TOOLPERMISSION_SUGGESTION_READ": "Recupera suggerimenti per i metadati sugli elementi.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Crea suggerimenti per i metadati sugli elementi."
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Crea suggerimenti per i metadati sugli elementi.",
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Mostra la scheda metodologia quando si classificano gli elementi."
   },
   "NO_WRITE_PERMISSIONS": "Nessun permesso",
   "NODE_SEARCH": "Elementi di ricerca...",

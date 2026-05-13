@@ -18,7 +18,10 @@
   <!-- METHODOLOGY TAB -->
   <mat-tab
     [id]="idPrefix + TabType.METHODOLOGY"
-    *ngIf="supportedTabs().includes(TabType.METHODOLOGY)"
+    *ngIf="
+      supportedTabs().includes(TabType.METHODOLOGY) &&
+      ('TOOLPERMISSION_METADATA_METHODOLOGY' | esToolpermission | async)
+    "
   >
     <ng-template mat-tab-label>
       <i esIcon="dashboard" class="tab-icon"></i>

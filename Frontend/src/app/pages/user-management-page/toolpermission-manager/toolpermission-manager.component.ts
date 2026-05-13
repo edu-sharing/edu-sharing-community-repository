@@ -75,6 +75,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_MATERIAL_FEEDBACK,
                 RestConstants.TOOLPERMISSION_SUGGESTION_READ,
                 RestConstants.TOOLPERMISSION_SUGGESTION_WRITE,
+                RestConstants.TOOLPERMISSION_METADATA_METHODOLOGY,
             ],
         },
         {

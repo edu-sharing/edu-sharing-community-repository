@@ -178,7 +178,8 @@
     "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen.",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Zeitlich beschränkte Freigaben erstellen.",
     "TOOLPERMISSION_SUGGESTION_READ": "Vorschläge für Metadaten an Elementen abrufen.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen."
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",
   "NODE_SEARCH": "Elemente suchen...",
