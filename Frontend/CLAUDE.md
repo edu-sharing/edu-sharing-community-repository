@@ -55,3 +55,17 @@ This agent assists with development tasks in this Angular frontend project.
 -   Library: `@ngx-translate/core`
 -   Translation files: `src/assets/i18n/`
 -   Structure: grouped by component, then language (`de.json`, `en.json`, …)
+
+### Tool Permissions
+
+-   Frontend constants: `projects/edu-sharing-api/src/lib/rest-constants.ts` — add `TOOLPERMISSION_*` string constants here
+-   Backend constants mirror: `Backend/alfresco/common/src/main/java/org/edu_sharing/repository/client/tools/CCConstants.java` — add matching `CCM_VALUE_TOOLPERMISSION_*` constant
+-   Backend registration: `Backend/alfresco/module/src/main/java/org/edu_sharing/alfresco/service/toolpermission/ToolPermissionBaseService.java`
+    -   Add to `getAllPredefinedToolPermissions()` to register the permission
+    -   Add a `.remove()` call in `getAllDefaultAllowedToolpermissions()` to make it **disabled by default**
+-   UI management: `src/app/pages/user-management-page/toolpermission-manager/toolpermission-manager.component.ts` — add to the appropriate group in `GROUPS`
+-   Translations: add a `"TOOLPERMISSION_<NAME>"` key in each `src/assets/i18n/common/<lang>.json`
+-   Template evaluation: use the `esToolpermission` pipe with `async`, e.g.:
+    ```html
+    *ngIf="('TOOLPERMISSION_FOO' | esToolpermission | async)"
+    ```
