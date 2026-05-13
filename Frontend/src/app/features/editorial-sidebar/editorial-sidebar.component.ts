@@ -229,7 +229,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const options$ = new BehaviorSubject(
             await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar),
         );
-        void this.uiService.updateOptionEnabledState(options$);
+        void this.uiService.updateOptionEnabledState(
+            options$,
+            this.parent() ? [this.parent()] : null,
+        );
         this.options.set(options$.value);
         return options;
     }
