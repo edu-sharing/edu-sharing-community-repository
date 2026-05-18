@@ -103,7 +103,12 @@
         </mat-tab-group>
         <div class="option-area">
           <div class="options-left">
-            <button mat-stroked-button color="primary" (click)="sidenavLeft.set(!sidenavLeft())">
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="sidenavLeft.set(!sidenavLeft())"
+              [attr.aria-expanded]="sidenavLeft()"
+            >
               <i esIcon="filter_list" [aria]="false"></i>
               {{ 'SEARCH.FILTERS' | translate }}
             </button>
