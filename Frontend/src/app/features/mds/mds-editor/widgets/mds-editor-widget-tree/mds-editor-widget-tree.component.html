@@ -40,6 +40,7 @@
     <mat-chip-grid
       #chipList
       [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container?.labelId : null"
+      [class.is-expanded]="overlayIsVisible"
       (click)="$event.stopPropagation(); $event.preventDefault()"
       [formControl]="chipsControl"
       cdkDropList
@@ -74,10 +75,28 @@
       </mat-chip-row>
       <ng-container *ngIf="editorMode !== 'search' && (userProposalGroups$ | async)?.length">
         <div
+          esProposalChip
           class="mat-chip-suggestion"
-          *ngFor="let group of userProposalGroups$ | async"
-          [matTooltip]="'MDS.SUGGESTIONS.USER_PROPOSALS.LABEL' | translate"
+          *ngFor="let group of userProposalGroups$ | async; let i = index"
+          role="row"
+          [attr.tabindex]="i === 0 ? 0 : -1"
+          [matTooltip]="
+            ('MDS.SUGGESTIONS.USER_PROPOSALS.LABEL' | translate) +
+            ' (' +
+            ('MDS.DELETE_KEY_NOTICE' | translate) +
+            ')'
+          "
           matTooltipPosition="above"
+          (keydown)="onProposalKeydown($event)"
+          (keydown.enter)="
+            acceptUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+          "
+          (keydown.delete)="
+            declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+          "
+          (keydown.backspace)="
+            declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+          "
         >
           <span class="mat-chip-label">{{ group.displayValue.label }}</span>
           <span class="user-proposal-count">{{ group.count }}×</span>

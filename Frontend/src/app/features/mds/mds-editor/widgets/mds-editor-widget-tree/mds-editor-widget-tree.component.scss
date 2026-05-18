@@ -8,6 +8,18 @@
 mat-form-field {
     width: 100%;
 }
+mat-chip-grid {
+    max-height: 84px;
+    overflow: hidden;
+    transition: max-height 200ms ease;
+
+    &:focus-within,
+    &.is-expanded {
+        max-height: 210px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+}
 .mat-chip-label {
     @include limitLineLength(200px);
 }
@@ -94,6 +106,12 @@ mat-chip-row {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        border-radius: 50%;
+
+        &:focus-visible {
+            outline: 2px solid currentColor;
+            outline-offset: 2px;
+        }
     }
 
     .accept {

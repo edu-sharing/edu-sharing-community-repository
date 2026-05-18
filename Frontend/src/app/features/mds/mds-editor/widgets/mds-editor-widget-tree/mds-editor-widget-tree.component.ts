@@ -7,6 +7,7 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     Component,
+    Directive,
     ElementRef,
     OnDestroy,
     OnInit,
@@ -16,6 +17,7 @@ import {
     ViewChildren,
     WritableSignal,
 } from '@angular/core';
+import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom, Observable, ReplaySubject } from 'rxjs';
@@ -41,6 +43,17 @@ interface UserProposalGroup {
     displayValue: DisplayValue;
     count: number;
     suggestions: SuggestionResponseDto[];
+}
+
+@Directive({
+    selector: '[esProposalChip]',
+    standalone: false,
+})
+export class EsProposalChipDirective implements FocusableOption {
+    constructor(public elementRef: ElementRef<HTMLElement>) {}
+    focus(): void {
+        this.elementRef.nativeElement.focus();
+    }
 }
 
 @Component({
@@ -104,6 +117,8 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
     @ViewChildren('chip') chips: QueryList<MatChipRow>;
+    @ViewChildren(EsProposalChipDirective) proposalChips: QueryList<EsProposalChipDirective>;
+    proposalKeyManager: FocusKeyManager<EsProposalChipDirective>;
 
     userProposalGroups$: Observable<UserProposalGroup[]>;
     valueType: ValueType;
@@ -309,6 +324,11 @@ export class MdsEditorWidgetTreeComponent
             .subscribe((chips: QueryList<MatChipOption>) =>
                 chips.forEach((chip) => (chip.toggleSelected = () => true)),
             );
+        this.proposalKeyManager = new FocusKeyManager(this.proposalChips)
+            .withHorizontalOrientation('ltr')
+            .withVerticalOrientation()
+            .withWrap()
+            .withTypeAhead();
     }
 
     ngOnDestroy() {
@@ -453,7 +473,11 @@ export class MdsEditorWidgetTreeComponent
             this.treeRef.toggleNode(this.treeRef.selectedNode, true, true, true);
             this.inputElement?.nativeElement.focus();
         } else {
-            const selected = this.treeRef?.findNodeByKeyOrCaption(this.inputControl.value);
+            const trimmed = this.inputControl.value?.trim();
+            if (!trimmed) {
+                return;
+            }
+            const selected = this.treeRef?.findNodeByKeyOrCaption(trimmed);
             if (selected) {
                 this.treeRef?.toggleNode(selected, true, true, true);
             } else if (
@@ -462,8 +486,8 @@ export class MdsEditorWidgetTreeComponent
                 )
             ) {
                 this.add({
-                    key: this.inputControl.value,
-                    label: this.inputControl.value,
+                    key: trimmed,
+                    label: trimmed,
                 });
                 this.inputControl.reset();
             }
@@ -490,6 +514,14 @@ export class MdsEditorWidgetTreeComponent
         this.chipsControl.setValue(currentValue);
     }
 
+    onProposalKeydown(event: KeyboardEvent): void {
+        const navigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+        if (navigationKeys.includes(event.key)) {
+            this.proposalKeyManager?.onKeydown(event);
+            event.stopPropagation();
+        }
+    }
+
     async acceptUserProposalGroup(group: UserProposalGroup): Promise<void> {
         const values: DisplayValue[] = this.chipsControl.value;
         if (!values.some((v) => v.key === group.displayValue.key)) {
@@ -512,6 +544,5 @@ export class MdsEditorWidgetTreeComponent
         }
         this.mdsEditorInstance.updateHasChanges();
         this.widget.setSuggestions(allSuggestions);
-        setTimeout(() => console.log(this.chipsControl.value), 100);
     }
 }

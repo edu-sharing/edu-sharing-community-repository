@@ -42,7 +42,10 @@ import { MdsEditorWidgetTextComponent } from './mds-editor/widgets/mds-editor-wi
 import { HighlightPipe } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { MdsEditorWidgetTreeValueSelectionComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-value-section/mds-editor-widget-tree-value-selection.component';
-import { MdsEditorWidgetTreeComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
+import {
+    EsProposalChipDirective,
+    MdsEditorWidgetTreeComponent,
+} from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVCardComponent } from './mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetTinyMCEComponent } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
@@ -98,6 +101,7 @@ import { MdsEditorWidgetMultivalueButtonsComponent } from './mds-editor/widgets/
         MdsEditorWidgetTinyMCEComponent,
         MdsEditorWidgetTreeComponent,
         MdsEditorWidgetTreeCoreComponent,
+        EsProposalChipDirective,
         MdsEditorWidgetVCardComponent,
         MdsEditorWidgetVersionComponent,
         MdsEditorWrapperComponent,
