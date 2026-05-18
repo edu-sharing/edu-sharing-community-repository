@@ -80,6 +80,15 @@
         max-height: 1.5em;
         display: inline-flex;
         align-items: center;
+
+        &:has(span) {
+            padding-bottom: 2px;
+        }
+
+        a {
+            padding-bottom: 2px;
+        }
+
         &.cdk-drop-list-dragging {
             > *:first-child {
                 display: none;
@@ -162,6 +171,7 @@ button {
 
 .home-notice {
     color: $textLight;
+    padding-bottom: 2px;
 }
 
 .breadcrumb-arrow {
