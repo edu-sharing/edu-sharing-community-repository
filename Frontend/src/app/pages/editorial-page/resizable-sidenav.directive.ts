@@ -55,9 +55,19 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
                 await this.storage.get<number>(this.storageKey, defaultWidth, Store.LocalStorage),
             );
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
+            this.renderer.setAttribute(
+                this.resizer,
+                'aria-valuenow',
+                String(Math.round(lastValue)),
+            );
             this.sidenavContainer.updateContentMargins();
         } else {
             this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
+            this.renderer.setAttribute(
+                this.resizer,
+                'aria-valuenow',
+                String(Math.round(defaultWidth)),
+            );
             this.sidenavContainer.updateContentMargins();
         }
     }
@@ -70,12 +80,28 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         this.resizer = this.renderer.createElement('div');
         this.renderer.addClass(this.resizer, 'es-sidenav-resizer');
         this.renderer.addClass(this.resizer, this.position);
-        this.renderer.appendChild(this.el.nativeElement, this.resizer);
+        this.renderer.setAttribute(this.resizer, 'tabindex', '0');
+        this.renderer.setAttribute(this.resizer, 'role', 'separator');
+        this.renderer.setAttribute(this.resizer, 'aria-orientation', 'vertical');
+        const calculatedMin = Math.round(
+            Math.max(this.minWidthPx, window.innerWidth * this.minWidth),
+        );
+        this.renderer.setAttribute(this.resizer, 'aria-valuemin', String(calculatedMin));
+        const calculatedMax = Math.round(
+            Math.min(this.maxWidthPx, window.innerWidth * this.maxWidth),
+        );
+        this.renderer.setAttribute(this.resizer, 'aria-valuemax', String(calculatedMax));
+        this.renderer.insertBefore(
+            this.el.nativeElement,
+            this.resizer,
+            this.el.nativeElement.firstChild,
+        );
 
         this.resizer.addEventListener('mousedown', this.startResize);
         document.addEventListener('mousemove', this.onMouseMove);
         document.addEventListener('mouseup', this.stopResize);
         this.resizer.addEventListener('dblclick', this.resetToDefault);
+        this.resizer.addEventListener('keydown', this.onKeyDown);
     }
 
     private startResize = (event: MouseEvent) => {
@@ -114,6 +140,36 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             this.sidenavContainer.updateContentMargins();
         }
         this.dragging = false;
+    };
+
+    private onKeyDown = (event: KeyboardEvent) => {
+        const currentWidth = this.el.nativeElement.offsetWidth as number;
+        const step = event.shiftKey ? 50 : 10;
+        const growKey = this.position === 'start' ? 'ArrowRight' : 'ArrowLeft';
+        const shrinkKey = this.position === 'start' ? 'ArrowLeft' : 'ArrowRight';
+
+        let newWidth: number | null = null;
+        if (event.key === growKey) {
+            newWidth = currentWidth + step;
+        } else if (event.key === shrinkKey) {
+            newWidth = currentWidth - step;
+        } else if (event.key === 'Home') {
+            newWidth = this.applyWidthConstrains(0);
+        } else if (event.key === 'End') {
+            newWidth = this.applyWidthConstrains(Infinity);
+        } else if (event.key === 'Enter') {
+            void this.resetToDefault();
+            return;
+        } else {
+            return;
+        }
+
+        event.preventDefault();
+        newWidth = this.applyWidthConstrains(newWidth);
+        this.width$.next(newWidth);
+        this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
+        this.sidenavContainer?.updateContentMargins();
+        this.renderer.setAttribute(this.resizer, 'aria-valuenow', String(Math.round(newWidth)));
     };
 
     private resetToDefault = async () => {
