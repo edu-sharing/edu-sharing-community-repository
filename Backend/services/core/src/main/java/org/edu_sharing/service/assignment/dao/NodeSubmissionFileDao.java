@@ -19,6 +19,7 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.transform.RepresentationService;
 import org.edu_sharing.util.CheckedFunction;
@@ -187,26 +188,32 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
     }
 
     private void handleReferenceCopy(SubmissionFileRequest request) {
-        if (Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))) {
+
+        if (NodeServiceHelper.hasRestrictedAccess(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.originalFile()), CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
             log.debug("Skipping reference copy for restricted access document");
             return;
         }
 
-        if (!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
+        org.alfresco.service.cmr.repository.NodeRef originalNode = nodeService.getOriginalNode(request.originalFile());
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_READ_ALL)) {
+            throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_READ_ALL);
+        }
+
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
             throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
         }
 
         String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
-            log.debug("Copying reference node {}", request.originalFile());
-            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true, null);
+            log.debug("Copying reference node {}", originalNode.getId());
+            NodeRef contentNodeRef = nodeService.copyNode(originalNode.getId(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true, null);
             nodeService.setOwner(contentNodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
             log.debug("Copied reference node {}", contentNodeRef.getId());
 
 
             try {
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
-                    put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{request.originalFile()});
+                    put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{originalNode.getId()});
                 }};
                 nodeService.updateNode(contentNodeRef.getId(), contentProperties, false);
                 log.debug("Updated properties for new submission file {} with {}", nodeId, contentProperties);

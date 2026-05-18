@@ -14,7 +14,9 @@ import org.edu_sharing.restservices.assignment.v1.model.AssignmentFile;
 import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
 import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.NodeRef;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.util.CheckedFunction;
 import org.edu_sharing.util.LazyProvider;
@@ -58,10 +60,12 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
         validateCanChangeAssignment();
 
         log.debug("Creating new assignment file");
+
+        org.alfresco.service.cmr.repository.NodeRef originalNode = nodeService.getOriginalNode(request.refId());
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, UUID.randomUUID().toString());
             put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_DOCUMENT_TYPE, request.documentRole().name());
-            put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.refId()));
+            put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNode.getId()));
         }};
 
         nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getNodeId(), CCConstants.CCM_TYPE_ASSIGNMENT_FILE, CCConstants.CCM_ASSOC_ASSIGNMENT_FILES, properties);
@@ -140,13 +144,23 @@ final class NodeSubmissionAssignmentFileDao extends BasicNodeDaoImpl implements 
             nodeService.removeNode(currentReferNodeId, nodeId, false);
         }
 
-        if (Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), assignmentFileRequest.refId(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))) {
+        if (NodeServiceHelper.hasRestrictedAccess(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentFileRequest.refId()), CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
             log.debug("Skipping reference copy for restricted access document");
             return;
         }
 
-        log.debug("Copying reference node {}", assignmentFileRequest.refId());
-        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(assignmentFileRequest.refId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true, null);
+        org.alfresco.service.cmr.repository.NodeRef originalNode = nodeService.getOriginalNode(assignmentFileRequest.refId());
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_READ_ALL)) {
+            throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_READ_ALL);
+        }
+
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
+            throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
+        }
+
+
+        log.debug("Copying reference node {}", originalNode.getId());
+        org.alfresco.service.cmr.repository.NodeRef nodeRef = nodeService.copyNode(originalNode.getId(), nodeId, CCConstants.CCM_ASSOC_ASSIGNMENT_FILE_COPY, true, null);
         nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
         log.debug("Copied reference node {}", nodeRef.getId());
         properties.put(CCConstants.CCM_PROP_ASSIGNMENT_FILE_REFER_TO, nodeRef);

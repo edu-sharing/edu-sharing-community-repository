@@ -259,6 +259,12 @@ public class NodeServiceHelper {
 	}
 
 	public static void validatePermissionRestrictedAccess(NodeRef nodeRef, String... permissions) throws RestrictedAccessException {
+		if(hasRestrictedAccess(nodeRef, permissions)){
+			throw new RestrictedAccessException(nodeRef.getId());
+		}
+	}
+
+	public static boolean hasRestrictedAccess(NodeRef nodeRef, String... permissions) {
 		if(NodeServiceHelper.hasAspect(nodeRef,CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
 			String originalNodeId = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
 			Boolean restricted = (Boolean) AuthenticationUtil.runAsSystem(() -> NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), CCConstants.CCM_PROP_RESTRICTED_ACCESS));
@@ -275,18 +281,16 @@ public class NodeServiceHelper {
 					Map<String, String> permissionsMapped = new HashMap<>() {{
                         put(CCConstants.PERMISSION_READ_PREVIEW, CCConstants.PERMISSION_READ_ALL);
                     }};
-					if(Arrays.stream(permissions)
-							.filter((permission) -> !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), permission))
-							.map(permission -> permissionsMapped.getOrDefault(permission, permission))
-							.allMatch(restrictedPermissions::contains)) {
-						return;
-					}
-
-				}
-				throw new RestrictedAccessException(originalNodeId);
+                    return !Arrays.stream(permissions)
+                            .filter((permission) -> !PermissionServiceHelper.hasPermission(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, originalNodeId), permission))
+                            .map(permission -> permissionsMapped.getOrDefault(permission, permission))
+                            .allMatch(restrictedPermissions::contains);
+                }
 			}
 		}
+		return false;
 	}
+
 	public static void writeContent(NodeRef nodeRef,InputStream content,String mimetype) throws Throwable {
 		NodeServiceFactory.getInstance().getLocalService().writeContent(
 				nodeRef.getStoreRef(),
