@@ -816,7 +816,10 @@
       "TYPE_AI": "AI",
       "TYPE_USER": "User",
       "APPLY": "Accept",
-      "DECLINE": "Decline"
+      "DECLINE": "Decline",
+      "USER_PROPOSALS": {
+        "LABEL": "Community Metadata"
+      }
     }
   },
   "SIMPLE_EDIT": {

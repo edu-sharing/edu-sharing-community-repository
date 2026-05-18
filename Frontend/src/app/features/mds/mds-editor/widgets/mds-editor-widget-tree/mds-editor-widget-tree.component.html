@@ -70,8 +70,35 @@
         (removed)="remove(value)"
       >
         <span class="mat-chip-label">{{ getChipsValue(value).label }}</span>
-        <mat-icon matChipRemove>cancel</mat-icon>
+        <i esIcon="cancel" matChipRemove [aria]="false"></i>
       </mat-chip-row>
+      <ng-container *ngIf="editorMode !== 'search' && (userProposalGroups$ | async)?.length">
+        <div
+          class="mat-chip-suggestion"
+          *ngFor="let group of userProposalGroups$ | async"
+          [matTooltip]="'MDS.SUGGESTIONS.USER_PROPOSALS.LABEL' | translate"
+          matTooltipPosition="above"
+        >
+          <span class="mat-chip-label">{{ group.displayValue.label }}</span>
+          <span class="user-proposal-count">{{ group.count }}×</span>
+          <i
+            esIcon="check_circle"
+            class="accept"
+            role="button"
+            [attr.aria-label]="'MDS.SUGGESTIONS.APPLY' | translate"
+            (click)="acceptUserProposalGroup(group); $event.stopPropagation()"
+            [aria]="false"
+          ></i>
+          <i
+            esIcon="cancel"
+            class="decline"
+            role="button"
+            [attr.aria-label]="'MDS.SUGGESTIONS.DECLINE' | translate"
+            (click)="declineUserProposalGroup(group); $event.stopPropagation()"
+            [aria]="false"
+          ></i>
+        </div>
+      </ng-container>
       <div class="input-wrapper">
         <input
           autocomplete="off"

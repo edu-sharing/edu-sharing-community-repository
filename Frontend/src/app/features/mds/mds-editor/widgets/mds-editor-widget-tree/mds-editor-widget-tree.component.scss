@@ -64,32 +64,46 @@ mat-chip-row {
     // Use the button color which respects disabled state.
     color: unset;
 }
-.mat-chip-suggestions {
-    padding-left: 8px;
-    .mat-chip-suggestion {
-        ::ng-deep .mat-mdc-chip-action {
-            @include clickable();
-        }
+.mat-chip-suggestion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 16px;
+    padding: 0 8px 0 12px;
+    height: 32px;
+    font-size: 14px;
+    line-height: 1;
+    color: $textLight;
+    background: var(--palette-primary-50);
+    margin: 4px;
 
-        mat-icon {
-            line-height: normal;
-        }
+    .mat-chip-label {
+        line-height: 1;
+    }
 
-        color: $textLight;
-        background: repeating-linear-gradient(-45deg, #f2f2f2, #f2f2f2 5px, #fff 5px, #fff 10px);
+    .user-proposal-count {
+        font-size: 12px;
+        opacity: 0.7;
+    }
 
-        .accept {
-            @include clickable();
-            width: 25px;
+    i[esIcon] {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-            mat-icon {
-                color: $colorStatusPositive;
-            }
-        }
+    .accept {
+        @include clickable();
+        color: var(--colorStatusPositive);
+    }
 
-        .decline {
-            color: $colorStatusNegative !important;
-        }
+    .decline {
+        @include clickable();
+        color: $colorStatusNegative !important;
     }
 }
 .custom-toggle-button {

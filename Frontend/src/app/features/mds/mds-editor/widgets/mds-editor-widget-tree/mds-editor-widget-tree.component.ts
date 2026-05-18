@@ -18,8 +18,9 @@ import {
 } from '@angular/core';
 import { FormControl, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,13 @@ import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { Toast } from '../../../../../services/toast';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+
+interface UserProposalGroup {
+    value: string;
+    displayValue: DisplayValue;
+    count: number;
+    suggestions: SuggestionResponseDto[];
+}
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -97,6 +105,7 @@ export class MdsEditorWidgetTreeComponent
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
     @ViewChildren('chip') chips: QueryList<MatChipRow>;
 
+    userProposalGroups$: Observable<UserProposalGroup[]>;
     valueType: ValueType;
     tree: Tree;
     indeterminateValues$: BehaviorSubject<string[]>;
@@ -204,6 +213,38 @@ export class MdsEditorWidgetTreeComponent
         });
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
+        );
+        this.userProposalGroups$ = this.widget.getSuggestions().pipe(
+            map((suggestions) => {
+                if (!suggestions) return [];
+                const currentKeys = new Set<string>(
+                    (this.chipsControl?.value ?? [])
+                        .filter((v: DisplayValue) => v?.key)
+                        .map((v: DisplayValue) => v.key),
+                );
+                const grouped = new Map<string, UserProposalGroup>();
+                for (const s of suggestions.filter(
+                    (s) =>
+                        s.type === 'USER_PROPOSAL' &&
+                        s.status === 'PENDING' &&
+                        !currentKeys.has(s.value as string),
+                )) {
+                    const key = s.value as string;
+                    if (grouped.has(key)) {
+                        const group = grouped.get(key);
+                        group.count++;
+                        group.suggestions.push(s);
+                    } else {
+                        grouped.set(key, {
+                            value: key,
+                            displayValue: this.toDisplayValue(key),
+                            count: 1,
+                            suggestions: [s],
+                        });
+                    }
+                }
+                return Array.from(grouped.values()).sort((a, b) => b.count - a.count);
+            }),
         );
 
         this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
@@ -447,5 +488,30 @@ export class MdsEditorWidgetTreeComponent
         const currentValue = [...this.chipsControl.value];
         moveItemInArray(currentValue, event.previousIndex, event.currentIndex);
         this.chipsControl.setValue(currentValue);
+    }
+
+    async acceptUserProposalGroup(group: UserProposalGroup): Promise<void> {
+        const values: DisplayValue[] = this.chipsControl.value;
+        if (!values.some((v) => v.key === group.displayValue.key)) {
+            this.add(group.displayValue);
+        }
+        await this.applyUserProposalGroupStatus(group, 'ACCEPTED');
+    }
+
+    async declineUserProposalGroup(group: UserProposalGroup): Promise<void> {
+        await this.applyUserProposalGroupStatus(group, 'DECLINED');
+    }
+
+    private async applyUserProposalGroupStatus(
+        group: UserProposalGroup,
+        status: 'ACCEPTED' | 'DECLINED',
+    ): Promise<void> {
+        const allSuggestions = await firstValueFrom(this.widget.getSuggestions());
+        for (const s of group.suggestions) {
+            this.widget.setSuggestionState(new BehaviorSubject(s), status);
+        }
+        this.mdsEditorInstance.updateHasChanges();
+        this.widget.setSuggestions(allSuggestions);
+        setTimeout(() => console.log(this.chipsControl.value), 100);
     }
 }

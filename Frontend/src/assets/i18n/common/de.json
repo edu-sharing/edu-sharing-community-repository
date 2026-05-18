@@ -934,6 +934,9 @@
       "TOAST": {
         "DECLINED": "Der Vorschlag wurde abgelehnt",
         "INVALID_VALUE": "Der Vorschlagswert war ungültig und konnte nicht verwendet werden"
+      },
+      "USER_PROPOSALS": {
+        "LABEL": "Community Metadaten"
       }
     },
     "OPEN_CLOSE_EXTENDED": "Ansicht öffnen/schließen"
