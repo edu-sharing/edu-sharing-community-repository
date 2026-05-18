@@ -48,7 +48,8 @@ public class TrackingApi {
     	try {
 	    	if(Arrays.asList(
 					TrackingService.EventType.VIEW_MATERIAL_PLAY_MEDIA, TrackingService.EventType.VIEW_MATERIAL,
-					TrackingService.EventType.DOWNLOAD_MATERIAL, TrackingService.EventType.OPEN_EXTERNAL_LINK
+					TrackingService.EventType.DOWNLOAD_MATERIAL, TrackingService.EventType.OPEN_EXTERNAL_LINK,
+					TrackingService.EventType.VIEW_MATERIAL_GDPR_CONFIRMED
 			).contains(event)){
 				TrackingServiceFactory.getTrackingService().trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event);
 				return Response.status(Response.Status.OK).build();
