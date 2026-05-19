@@ -113,6 +113,8 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
+                RestConstants.TOOLPERMISSION_MANAGE_QA,
+                RestConstants.TOOLPERMISSION_BAPI,
             ],
         },
         {

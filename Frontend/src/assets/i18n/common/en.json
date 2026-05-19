@@ -174,7 +174,9 @@
     "TOOLPERMISSION_RATE_READ": "The right to view reviews of materials",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Create time-restricted invitations",
     "TOOLPERMISSION_SUGGESTION_READ": "Read metadata suggestions on materials",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials"
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
+    "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
+    "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",
   "NODE_SEARCH": "Search elements...",
