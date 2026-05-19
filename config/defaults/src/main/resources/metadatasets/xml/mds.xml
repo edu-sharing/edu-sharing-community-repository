@@ -2186,6 +2186,8 @@
       <property name="cclom:general_keyword">
         <multiple>true</multiple>
         <multiplejoin>AND</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.cclom:general_keyword.keyword":"${valueRaw}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"cclom:general_keyword"}},{"term":{"suggestions.value":"${valueRaw}"}},{"term":{"suggestions.createdBy":"${authority}"}}]}}}}],"minimum_should_match":1}}</statement>
+        <facets combineWithSuggestions="true"/>
       </property>
       <property name="ccm:classification_purpose"/>
       <property name="ccm:commonlicense_key"/>

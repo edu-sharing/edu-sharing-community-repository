@@ -115,8 +115,6 @@ import java.util.stream.Stream;
 public class SearchServiceElastic implements SearchService {
     public static final String WORKSPACE_INDEX = "workspace_11.0";
 
-    private static final String SUGGESTION_COMBINED_FACET_SCRIPT = loadScript("suggestion-combined-facet.painless");
-
     public static String loadScript(String resource) {
         try (java.io.InputStream is = SearchServiceElastic.class.getClassLoader().getResource(resource).openStream()) {
             return org.apache.commons.io.IOUtils.toString(is, java.nio.charset.StandardCharsets.UTF_8);
@@ -1890,7 +1888,7 @@ public class SearchServiceElastic implements SearchService {
             String property = sf.getProperty();
             aggregations.put(property, Aggregation.of(a -> a.terms(t -> t
                     .script(s -> s
-                            .source(SUGGESTION_COMBINED_FACET_SCRIPT)
+                            .source(MetadataElasticSearchHelper.COMBINED_SUGGESTION_FACET_SCRIPT)
                             .lang("painless")
                             .params(Map.of("property", JsonData.of(property)))
                     )

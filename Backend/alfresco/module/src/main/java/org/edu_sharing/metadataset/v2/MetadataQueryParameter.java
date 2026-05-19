@@ -99,6 +99,11 @@ public class MetadataQueryParameter implements Serializable {
 		 * When null, fields with missing values are ignored
 		 */
 		private String missing = null;
+		/**
+		 * When true, the facet aggregation combines indexed property values with
+		 * values from pending nested suggestions for the same property and the current user
+		 */
+		private boolean combineWithSuggestions = false;
 		private List<MetadataQueryFacetItem> items = new ArrayList<>();
 
 		public enum Type {
