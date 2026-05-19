@@ -20,7 +20,7 @@ import {
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { Subject } from 'rxjs';
 import { DialogsService } from '../dialogs/dialogs.service';
-import { Router } from '@angular/router';
+import { Params, Router } from '@angular/router';
 import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
 import { PreviewSidebarTemplateService } from './preview-sidebar-template.service';
@@ -65,12 +65,8 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     set node(node: Node) {
         this._node = node;
         this.renderNode.set(null);
-        const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
-            .filter((k) => !!k[1])
-            .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
-        this.allDetailsLink =
-            (this.nodeHelper.getNodeLink('routerLink', node) as string) +
-            (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
+        this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
+        this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
         void this.mdsRef?.reInit();
         if (this.actionbar) {
             void this.updateOptions();
@@ -89,6 +85,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     allDetailsLink: string;
+    allDetailsParams: Params;
 
     constructor(
         private nodeHelper: NodeHelperService,
@@ -137,7 +134,9 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void dialogRefPromise?.then((dialogRef) => dialogRef.close());
             });*/
         } else {
-            await this.router.navigateByUrl(this.allDetailsLink);
+            await this.router.navigate([this.allDetailsLink], {
+                queryParams: this.allDetailsParams,
+            });
         }
     }
 
