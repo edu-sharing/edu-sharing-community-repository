@@ -337,6 +337,7 @@
       "EDIT_MESSAGE": "However, you can select a page configuration that you want to use via the menu.",
       "SELECT_LABEL": "Page config",
       "SELECT_PLACEHOLDER": "Select page config",
+      "DEFAULT_TEMPLATE": "Default template",
       "CREATE_PAGE": "Create page",
       "MISSING_CONFIG_OR_VARIANTS": "The page configuration does not contain any page variants or no page variant could be selected.",
       "MISSING_VARIANTS": "The page configuration does not contain any page variants."

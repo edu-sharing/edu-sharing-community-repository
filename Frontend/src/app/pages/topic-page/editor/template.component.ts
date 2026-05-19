@@ -2107,14 +2107,23 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                               id: uuidv4(),
                               repo: HOME_REPOSITORY,
                           },
-                          name: 'DEFAULT TEMPLATE',
-                          title: 'DEFAULT TEMPLATE',
+                          name: this.translate.instant(
+                              this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                          ),
+                          title: this.translate.instant(
+                              this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                          ),
                           type: RestConstants.CCM_TYPE_MAP,
                           properties: {
                               [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: [
                                   '{"structure":{"swimlanes":[]}}',
                               ],
                               [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
+                              [RestConstants.LOM_PROP_TITLE]: [
+                                  this.translate.instant(
+                                      this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                                  ),
+                              ],
                           },
                       },
                   ] as Partial<Node>[]);
