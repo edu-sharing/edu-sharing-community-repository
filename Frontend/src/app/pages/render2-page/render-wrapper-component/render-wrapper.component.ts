@@ -12,9 +12,13 @@ import {
 import {
     ActionbarComponent,
     CombinedRenderData,
+    DefaultGroups,
+    ElementType,
     EduSharingUiModule,
+    OptionItem,
     OptionsHelperDataService,
     RenderHelperService,
+    Scope,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { CommonModule } from '@angular/common';
@@ -24,6 +28,7 @@ import { MdsModule } from '../../../features/mds/mds.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -67,10 +72,12 @@ export class RenderWrapperComponent implements OnChanges {
     data = signal<CombinedRenderData>(null);
     loading = signal(false);
     children = signal<Node[]>(null);
+    private parentNode = signal<Node>(null);
 
     constructor(
         private renderHelperService: RenderHelperService,
         private nodeService: NodeService,
+        private nodeHelper: NodeHelperService,
         private translations: TranslationsService,
         private optionsHelper: OptionsHelperDataService,
     ) {
@@ -82,6 +89,13 @@ export class RenderWrapperComponent implements OnChanges {
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
             if (this.showChildobjects) {
+                this.parentNode.set(
+                    await firstValueFrom(
+                        this.nodeService.getNode(changes.nodeId.currentValue, {
+                            repository: this.repository,
+                        }),
+                    ),
+                );
                 this.children.set(
                     (
                         await firstValueFrom(
@@ -104,6 +118,38 @@ export class RenderWrapperComponent implements OnChanges {
             await this.refresh();
         }
     }
+
+    /**
+     * zip download btn (series object)
+     * @param node
+     * @private
+     */
+    private addDownloadAllBtn(node: Node) {
+        const children = this.children();
+        if (!node || !children?.length) {
+            return;
+        }
+        const parent = this.parentNode();
+        const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
+            void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
+        });
+        downloadAll.elementType = [
+            ElementType.Node,
+            ElementType.NodeChild,
+            ElementType.NodePublishedCopy,
+        ];
+        downloadAll.group = DefaultGroups.View;
+        downloadAll.priority = 35;
+        this.optionsHelper.setData({
+            scope: Scope.Render,
+            activeObjects: [node],
+            parent: { ref: { id: node.parent.id } },
+            customOptions: {
+                useDefaultOptions: true,
+                addOptions: [downloadAll],
+            },
+        });
+    }
     async refresh() {
         await this.setNodeById(this.childId || this.nodeId);
     }
@@ -116,6 +162,7 @@ export class RenderWrapperComponent implements OnChanges {
             this.version,
             this.repository,
         );
+        this.addDownloadAllBtn(data.node);
         setTimeout(async () => {
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();

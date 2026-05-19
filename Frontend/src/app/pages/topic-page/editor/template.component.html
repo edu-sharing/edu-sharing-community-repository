@@ -61,8 +61,8 @@
             [selectedColor]="topicColor ?? initialTopicColor"
             [acceptLabel]="'APPLY'"
             [cancelLabel]="'CANCEL'"
+            [colorLabel]="i18nPrefix + 'WIDGET.COLOR'"
             [customClass]="'widget-color-picker'"
-            [colorLabel]="'TOPIC_PAGE.WIDGET.COLOR'"
             (colorChange)="updateTopicOrAnchorItemColor($event, true)"
           ></es-color-picker>
           <div class="template-header-wrapper">
@@ -102,12 +102,12 @@
           <es-side-menu-item
             icon="person"
             [selectedMenuItem]="selectedMenuItem"
-            [title]="'TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate"
+            [title]="i18nPrefix + 'SIDE_MENU.PROFILING.LABEL' | translate"
             (itemClicked)="collapsibleItemClicked($event)"
           ></es-side-menu-item>
           <es-side-menu-item
             [selectedMenuItem]="selectedMenuItem"
-            [title]="'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate"
+            [title]="i18nPrefix + 'SIDE_MENU.TOPIC_TREE.LABEL' | translate"
             (itemClicked)="collapsibleItemClicked($event)"
           ></es-side-menu-item>
           <ng-container *ngFor="let customItem of customSideMenuItemsAfter()">
@@ -139,9 +139,11 @@
             </ng-container>
           </ng-container>
           <!-- [hidden] is used to load the component, even when the menu item is not selected -->
-          <div [hidden]="selectedMenuItem !== ('TOPIC_PAGE.SIDE_MENU.PROFILING.LABEL' | translate)">
+          <div
+            [hidden]="selectedMenuItem !== (i18nPrefix + 'SIDE_MENU.PROFILING.LABEL' | translate)"
+          >
             <h2 class="side-menu-header mat-heading-4 font-bold">
-              {{ 'TOPIC_PAGE.SIDE_MENU.PROFILING.HEADING' | translate }}
+              {{ i18nPrefix + 'SIDE_MENU.PROFILING.HEADING' | translate }}
             </h2>
             <es-profiling
               (selectDimensionsChanged)="selectDimensionsChanged($event)"
@@ -149,10 +151,10 @@
           </div>
 
           <ng-container
-            *ngIf="selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.LABEL' | translate)"
+            *ngIf="selectedMenuItem === (i18nPrefix + 'SIDE_MENU.TOPIC_TREE.LABEL' | translate)"
           >
             <h2 class="side-menu-header mat-heading-4 font-bold">
-              {{ 'TOPIC_PAGE.SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
+              {{ i18nPrefix + 'SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
             </h2>
             <es-generic-widget
               *ngIf="topicCollectionID(); else loadingIndicator"
@@ -172,7 +174,7 @@
       <ng-template #editModeMenu>
         <es-side-menu-wrapper
           [closeDisabled]="
-            selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+            selectedMenuItem === (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
             !pageVariantSettingsValid()
           "
           [selectedMenuItem]="selectedMenuItem"
@@ -183,24 +185,26 @@
             <es-side-menu-item
               [disabled]="
                 selectedMenuItem ===
-                  ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
+                  (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate) &&
                 !pageVariantSettingsValid()
               "
               icon="manage_accounts"
               [selectedMenuItem]="selectedMenuItem"
-              [title]="'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
+              [title]="i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate"
               (itemClicked)="collapsibleItemClicked($event)"
             ></es-side-menu-item>
           </ng-container>
           <ng-container slot="content">
             <div
               *ngIf="
-                selectedMenuItem === ('TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate)
+                selectedMenuItem ===
+                (i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.LABEL' | translate)
               "
             >
               <h2 class="side-menu-header mat-heading-4 font-bold">
                 {{
-                  'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_' +
+                  i18nPrefix +
+                    'SIDE_MENU.CONFIG_PAGE_' +
                     (templateMode() ? 'TEMPLATE' : 'VARIANT') +
                     '.HEADING' | translate
                 }}
@@ -256,14 +260,27 @@
                     class="item-container"
                   >
                     <div class="item-text">
+                      <span class="cdk-visually-hidden">
+                        {{ i18nPrefix + 'ANCHOR_ARIA_HEADING' | translate }}
+                      </span>
                       {{
                         (anchor.heading
                           | aiTextPrompt
                             : editMode()
                             : swimlaneIdToPromptTextMapping.get(anchor.id)) ||
-                          ('TOPIC_PAGE.ANCHOR_FALLBACK_PREFIX' | translate) + ' ' + (i + 1)
+                          (i18nPrefix + 'ANCHOR_FALLBACK_PREFIX' | translate) + ' ' + (i + 1)
                       }}
                     </div>
+                    <ng-container
+                      *ngVar="anchor | swimlaneSearchCount : searchCountTrigger as searchCount"
+                    >
+                      <div class="total-count" *ngIf="searchCount > 0">
+                        <span class="cdk-visually-hidden">
+                          {{ i18nPrefix + 'ANCHOR_ARIA_SEARCH_COUNT' | translate }}
+                        </span>
+                        {{ searchCount }}
+                      </div>
+                    </ng-container>
                   </button>
                   <es-color-picker
                     *ngIf="editMode() && i === 0"
@@ -272,15 +289,9 @@
                     [acceptLabel]="'APPLY'"
                     [cancelLabel]="'CANCEL'"
                     [customClass]="'widget-color-picker'"
+                    [customColor]="initialAnchorItemColor"
                     (colorChange)="updateTopicOrAnchorItemColor($event)"
                   ></es-color-picker>
-                  <ng-container
-                    *ngVar="anchor | swimlaneSearchCount : searchCountTrigger as searchCount"
-                  >
-                    <div class="total-count" *ngIf="searchCount > 0">
-                      {{ searchCount }}
-                    </div>
-                  </ng-container>
                 </div>
               </div>
             </div>
@@ -292,7 +303,7 @@
             >
               <div class="topic-page-swimlane">
                 <es-info-message mode="info" class="no-search-hit-message">
-                  {{ 'TOPIC_PAGE.NO_SEARCH_RESULTS' | translate }}
+                  {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
                 </es-info-message>
               </div>
             </div>
@@ -355,7 +366,7 @@
                         class="action-btn"
                         [disabled]="i === 0 || requestInProgress()"
                         (click)="moveSwimlanePosition(i, i - 1)"
-                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_UP' | translate"
+                        [attr.aria-label]="i18nPrefix + 'SWIMLANE.POSITION_UP' | translate"
                       >
                         <i esIcon="arrow_upward"></i>
                       </button>
@@ -364,7 +375,7 @@
                         class="action-btn"
                         [disabled]="i === swimlanes.length - 1 || requestInProgress()"
                         (click)="moveSwimlanePosition(i, i + 1)"
-                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.POSITION_DOWN' | translate"
+                        [attr.aria-label]="i18nPrefix + 'SWIMLANE.POSITION_DOWN' | translate"
                       >
                         <i esIcon="arrow_downward"></i>
                       </button>
@@ -376,7 +387,7 @@
                         class="action-btn btn-modify"
                         [disabled]="requestInProgress()"
                         (click)="editSwimlane(swimlane, i)"
-                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.EDIT.ARIA_LABEL' | translate"
+                        [attr.aria-label]="i18nPrefix + 'SWIMLANE.EDIT.ARIA_LABEL' | translate"
                       >
                         <i esIcon="tune"></i>
                       </button>
@@ -385,7 +396,7 @@
                         class="action-btn"
                         [disabled]="requestInProgress()"
                         (click)="deleteSwimlane(i)"
-                        [attr.aria-label]="'TOPIC_PAGE.SWIMLANE.DELETE.LABEL' | translate"
+                        [attr.aria-label]="i18nPrefix + 'SWIMLANE.DELETE.LABEL' | translate"
                       >
                         <i esIcon="delete"></i>
                       </button>
@@ -410,21 +421,19 @@
                       #accordionItem="cdkAccordionItem"
                       class="topic-page-accordion-item"
                       [class.topic-page-accordion-item-expanded]="accordionItem.expanded"
-                      role="button"
-                      tabindex="0"
-                      [attr.id]="'accordion-header-' + i"
-                      [attr.aria-expanded]="accordionItem.expanded"
-                      [attr.aria-controls]="'accordion-body-' + i"
-                      expanded="false"
                     >
                       <ng-container *ngIf="accordionItem.expanded">
                         <ng-container
                           *ngTemplateOutlet="swimlaneShape; context: { swimlane }"
                         ></ng-container>
                       </ng-container>
-                      <div
+                      <button
+                        type="button"
                         class="topic-page-accordion-item-header"
-                        (click)="!editMode() ? accordionItem.toggle() : ''"
+                        (click)="!editMode() ? accordionItem.toggle() : null"
+                        [attr.id]="'accordion-header-' + i"
+                        [attr.aria-expanded]="accordionItem.expanded"
+                        [attr.aria-controls]="'accordion-body-' + i"
                       >
                         <ng-container
                           *ngTemplateOutlet="
@@ -436,7 +445,7 @@
                           <i *ngIf="accordionItem.expanded" esIcon="expand_less"></i>
                           <i *ngIf="!accordionItem.expanded" esIcon="expand_more"></i>
                         </span>
-                      </div>
+                      </button>
                       <div
                         class="topic-page-accordion-item-body"
                         role="region"
@@ -493,7 +502,7 @@
                 [applyTextareaPadding]="false"
                 [editable]="editMode()"
                 [headerElement]="'h2'"
-                [label]="'TOPIC_PAGE.SWIMLANE.HEADING_LABEL' | translate"
+                [label]="i18nPrefix + 'SWIMLANE.HEADING_LABEL' | translate"
                 [searchInput]="computedSearchInput()"
                 (searchResultsUpdated)="updateTitleSearchResults($event, swimlane.id)"
                 [text]="
@@ -505,7 +514,7 @@
               <div class="swimlane-heading-buttons" *ngIf="!editMode()">
                 <button
                   mat-icon-button
-                  [matTooltip]="'TOPIC_PAGE.SWIMLANE.QR_CODE.TOOLTIP' | translate"
+                  [matTooltip]="i18nPrefix + 'SWIMLANE.QR_CODE.TOOLTIP' | translate"
                   (click)="openQrCodeDialog(index)"
                 >
                   <i esIcon="qr_code_scanner"></i>
@@ -513,7 +522,7 @@
                 <button
                   mat-icon-button
                   [matMenuTriggerFor]="shareMenu"
-                  [matTooltip]="'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate"
+                  [matTooltip]="i18nPrefix + 'SWIMLANE.SHARE_CONTENT.HEADING' | translate"
                   (click)="$event.stopPropagation()"
                 >
                   <i esIcon="share"></i>
@@ -521,18 +530,18 @@
                 <!-- SHARE MENU -->
                 <mat-menu #shareMenu="matMenu" class="topic-page-menu">
                   <div class="mat-menu-header-container">
-                    {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.HEADING' | translate }}
+                    {{ i18nPrefix + 'SWIMLANE.SHARE_CONTENT.HEADING' | translate }}
                   </div>
                   <button mat-menu-item (click)="copySwimlaneLink(index)">
                     <i esIcon="content_copy"></i>
                     <span>
-                      {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.COPY_LINK' | translate }}
+                      {{ i18nPrefix + 'SWIMLANE.SHARE_CONTENT.COPY_LINK' | translate }}
                     </span>
                   </button>
                   <button mat-menu-item (click)="writeMail(index)">
                     <i esIcon="mail"></i>
                     <span>
-                      {{ 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.HEADING' | translate }}
+                      {{ i18nPrefix + 'SWIMLANE.SHARE_CONTENT.WRITE_MAIL.HEADING' | translate }}
                     </span>
                   </button>
                 </mat-menu>
@@ -560,7 +569,7 @@
                   *ngIf="editMode()"
                 ></es-add-swimlane-border-button>
                 <es-info-message mode="info">
-                  {{ 'TOPIC_PAGE.NO_SWIMLANES' | translate }}
+                  {{ i18nPrefix + 'NO_SWIMLANES' | translate }}
                 </es-info-message>
               </div>
             </div>
@@ -576,11 +585,11 @@
 <ng-template #pageConfigCheckFailedMessage>
   <div class="missing-page-config">
     <es-info-message mode="warning">
-      {{ 'TOPIC_PAGE.NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}
+      {{ i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}
       {{
         userHasEditRights()
-          ? ('TOPIC_PAGE.NO_PAGE_CONFIG.EDIT_MESSAGE' | translate)
-          : ('TOPIC_PAGE.NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
+          ? (i18nPrefix + 'NO_PAGE_CONFIG.EDIT_MESSAGE' | translate)
+          : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
 
@@ -590,7 +599,7 @@
         appearance="outline"
         subscriptSizing="dynamic"
       >
-        <mat-label>{{ 'TOPIC_PAGE.NO_PAGE_CONFIG.SELECT_PLACEHOLDER' | translate }}</mat-label>
+        <mat-label>{{ i18nPrefix + 'NO_PAGE_CONFIG.SELECT_PLACEHOLDER' | translate }}</mat-label>
         <mat-select
           [(ngModel)]="selectedDefaultConfigNode"
           [disabled]="createCustomConfigInProgress()"
@@ -599,7 +608,7 @@
             {{
               node.title && !node.title.includes(pageVariantConfigPrefix)
                 ? node.title
-                : ('TOPIC_PAGE.NO_PAGE_CONFIG.SELECT_LABEL' | translate) + ' ' + (i + 1)
+                : (i18nPrefix + 'NO_PAGE_CONFIG.SELECT_LABEL' | translate) + ' ' + (i + 1)
             }}
           </mat-option>
         </mat-select>
@@ -613,7 +622,7 @@
           [disabled]="!selectedDefaultConfigNode || createCustomConfigInProgress()"
           (click)="createCustomConfig()"
         >
-          {{ 'TOPIC_PAGE.NO_PAGE_CONFIG.CREATE_PAGE' | translate }}
+          {{ i18nPrefix + 'NO_PAGE_CONFIG.CREATE_PAGE' | translate }}
         </button>
       </div>
     </div>
@@ -636,6 +645,7 @@
     [topicWidgets]="topicWidgets"
     (gridUpdated)="handleGridUpdate($event, index)"
     (searchHitsChanged)="updateGridItemSearchInputHits($event, index)"
+    (totalSearchResultCountChanged)="updateGridItemTotalSearchCount($event, index)"
     (visibleNodesChanged)="updateVisibleNodes($event, index)"
   ></es-swimlane>
 </ng-template>
@@ -668,13 +678,13 @@
   >
     <ng-container *ngIf="!editMode(); else backToPreview">
       <i esIcon="edit"></i>
-      <span class="topic-page-btn-label">{{ 'TOPIC_PAGE.SIDE_MENU.EDIT_PAGE' | translate }}</span>
+      <span class="topic-page-btn-label">{{ i18nPrefix + 'SIDE_MENU.EDIT_PAGE' | translate }}</span>
     </ng-container>
     <ng-template #backToPreview>
       <i esIcon="visibility"></i>
-      <span class="topic-page-btn-label">{{
-        'TOPIC_PAGE.SIDE_MENU.BACK_TO_PREVIEW' | translate
-      }}</span>
+      <span class="topic-page-btn-label">
+        {{ i18nPrefix + 'SIDE_MENU.BACK_TO_PREVIEW' | translate }}
+      </span>
     </ng-template>
   </button>
 </ng-template>

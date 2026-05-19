@@ -40,8 +40,8 @@ import org.edu_sharing.restservices.collection.v1.model.CollectionReference;
 import org.edu_sharing.restservices.collection.v1.model.CollectionRelationReference;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
-import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.restservices.shared.NodeRef;
 import org.edu_sharing.restservices.shared.SearchResult;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -54,8 +54,8 @@ import org.edu_sharing.service.license.LicenseService;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.NodeRefImpl;
-import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.*;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.permission.HandleParam;
@@ -81,9 +81,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -177,6 +177,10 @@ public class NodeDao {
             }
         }
         return null;
+    }
+
+    public static boolean exists(RepositoryDao repoDao, String nodeId) {
+        return NodeServiceFactory.getNodeService(repoDao.getId()).exists(nodeId);
     }
 
     public org.edu_sharing.service.model.NodeRef getNodeRef() {
@@ -650,11 +654,13 @@ public class NodeDao {
      * create an empty, Node dummy interface
      *
      */
-    public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef, String nodeType) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         T node = clazz.getConstructor().newInstance();
         node.setRef(nodeRef);
+        node.setType(CCConstants.getValidLocalName(nodeType));
         node.setName(nodeRef.getId());
         node.setPreview(new Preview());
+        node.setProperties(Collections.emptyMap());
         // allow fetching as admin to properly resolve the url
         AuthenticationUtil.runAsSystem(() -> {
             try {
@@ -989,11 +995,17 @@ public class NodeDao {
                         // apply thread variables to keep state of thread
                         Context.setInstance(context);
                         NodeServiceInterceptor.setEduSharingScope(scope);
-                        NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
-                        if (transform != null) {
-                            nodeDao = transform.apply(nodeDao);
+                        try {
+                            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+                            if (transform != null) {
+                                nodeDao = transform.apply(nodeDao);
+                            }
+                            return nodeDao.asNode();
+                            // do not remove; might be thrown by interceptors
+                        } catch(DAOSecurityException e) {
+                            logger.debug(e.getMessage(), e);
+                            return NodeDao.createEmptyDummy(Node.class, nodeRef, CCConstants.CCM_TYPE_IO);
                         }
-                        return nodeDao.asNode();
                     } catch (DAOMissingException daoException) {
                         logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
                         return null;
@@ -1447,7 +1459,7 @@ public class NodeDao {
             result.addAll(reference.getAccessOriginal());
         }
         boolean restrictedAccess = reference.isOriginalRestrictedAccess();
-        result.addAll(PermissionServiceHelper.getEffectivePermissions(restrictedPermissions, restrictedAccess));
+        result.addAll(PermissionServiceHelper.getEffectivePermissions(reference.getOriginalId(), restrictedPermissions, restrictedAccess));
         return result;
     }
 

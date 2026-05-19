@@ -293,7 +293,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         return false;
     }
 
-    public static List<String> hasCollectionPermissions(String nodeId, List<String> permissions) {
+    public static List<String> hasCollectionPermissions(String nodeId, List<String> permissionsToValidate) {
         long test = System.currentTimeMillis();
         Provider providerByApp = ProviderHelper.getProviderByApp(ApplicationInfoList.getHomeRepository());
         if (!(providerByApp instanceof ElasticSearchProvider)) {
@@ -310,8 +310,26 @@ public class NodeServiceInterceptor implements MethodInterceptor {
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());
             return Collections.emptyList();
         }
-        List<String> result = ((SearchServiceElastic) providerByApp.getSearchService()).hasPermissions(nodeId, permissions);
+        List<String> result = ((SearchServiceElastic) providerByApp.getSearchService()).hasPermissions(nodeId, permissionsToValidate);
         logger.debug("collection permission check took:" + (System.currentTimeMillis() - test) + "ms");
+        result = handleCollectionPermissionsFromInterceptors(nodeId, permissionsToValidate, result);
         return result;
+    }
+
+    public static List<String> handleCollectionPermissionsFromInterceptors(String nodeId, List<String> permissionsToValidate, List<String> resultingPermissions) {
+        List<? extends NodeServiceInterceptorPermissions> permInterceptor = PropertiesInterceptorFactory.getNodeServiceInterceptorPermissions();
+        if(!permInterceptor.isEmpty()) {
+            // not ideal: In some scenarios, we're in an external runAsSystem block. But the intercpetor might need to do
+            // user specific permission checks so we need it to run as the regular user
+            return AuthenticationUtil.runAs(() -> {
+                List<String> p = resultingPermissions;
+                for (NodeServiceInterceptorPermissions c : permInterceptor) {
+                    p = c.hasCollectionPermissions(nodeId, permissionsToValidate, p);
+                }
+                return p;
+            }, AuthenticationUtil.getFullyAuthenticatedUser());
+        } else {
+            return resultingPermissions;
+        }
     }
 }

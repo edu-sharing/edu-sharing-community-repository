@@ -19,6 +19,8 @@
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 4px;
+    min-width: 0;
 
     // conditionally allow to align toolbar to the right
     &.absolute-positioning {
@@ -34,6 +36,7 @@
         border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         outline: none;
+        min-width: 0;
         max-width: 100%;
         overflow-x: auto;
 
@@ -67,24 +70,67 @@
         }
     }
 
-    .ai-buttons {
+    .ai-controls {
         padding: 4px 8px;
         border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         display: inline-flex;
+        align-items: center;
         gap: 4px;
+        min-width: 0;
+        flex-wrap: wrap;
 
-        mat-checkbox ::ng-deep {
-            padding: 0;
-            --mdc-checkbox-state-layer-size: 18px;
+        &.no-ai-buttons {
+            padding: 4px 0;
+            border: none;
+        }
 
-            .mat-internal-form-field {
-                --mat-checkbox-label-text-color: #{topicPageVars.$on-surface};
+        .ai-toggle-group ::ng-deep {
+            border: 1px solid topicPageVars.$outline-light;
+            border-radius: 3px;
+
+            .mat-button-toggle {
+                background: transparent;
+                color: topicPageVars.$on-surface;
+                border: none;
+
+                & + .mat-button-toggle {
+                    border-left: 1px solid topicPageVars.$outline-light;
+                }
             }
 
-            .mdc-label {
-                padding-left: 8px;
-                font-size: 15px;
+            .mat-button-toggle-button {
+                height: 24px;
+            }
+
+            .mat-button-toggle-label-content {
+                padding: 0 6px;
+                line-height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            // hide the selection indicator (checkmark) entirely
+            .mat-pseudo-checkbox,
+            .mat-button-toggle-checkbox-wrapper {
+                display: none !important;
+            }
+
+            .mat-button-toggle-checked {
+                color: topicPageVars.$primary;
+                background: rgba(0, 0, 0, 0.06);
+            }
+
+            .mat-button-toggle-disabled {
+                color: topicPageVars.$secondary-text;
+            }
+
+            .mat-icon,
+            .material-icons {
+                font-size: 16px;
+                height: 16px;
+                width: 16px;
             }
         }
 
@@ -146,6 +192,11 @@
         }
     }
 
+    // reserve space for the AI toggle button
+    &.reserve-padding-right::ng-deep .mat-mdc-form-field-infix {
+        padding-right: 64px;
+    }
+
     textarea {
         margin-bottom: 0;
         width: 100%;
@@ -198,15 +249,5 @@
     .mat-heading-6 {
         font-weight: bold !important;
         font-size: 90% !important;
-    }
-}
-
-// fix: toolbar overflows textarea placeholder
-//      calculation: 2 * form-field padding + height toolbar + 2 * toolbar-padding + margin-bottom
-:host ::ng-deep .text-form-field:not(.hidden-toolbar) {
-    .mdc-notched-outline {
-        &:not(.mdc-notched-outline--notched) label {
-            top: calc(2 * 14px + 24px + 2 * 5px + 8px);
-        }
     }
 }

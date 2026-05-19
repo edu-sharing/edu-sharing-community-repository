@@ -268,22 +268,24 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     click() {
-        if (this.getDefinition().link === '_BLANK') {
-            window.open(
-                this.mdsViewerService.getFormattedValue(
+        if (this.getDefinition().link) {
+            if (this.getDefinition().link === '_BLANK') {
+                window.open(
+                    this.mdsViewerService.getFormattedValue(
+                        this.value(),
+                        this.getDefinition(),
+                        'text',
+                    )[0],
+                );
+            } else if (this.getDefinition().link === '_SELF') {
+                window.location.href = this.mdsViewerService.getFormattedValue(
                     this.value(),
-                    this.getDefinition(),
+                    this.definition,
                     'text',
-                )[0],
-            );
-        } else if (this.getDefinition().link === '_SELF') {
-            window.location.href = this.mdsViewerService.getFormattedValue(
-                this.value(),
-                this.definition,
-                'text',
-            )[0];
-        } else {
-            console.warn('Unsupported link type ' + this.getDefinition().link);
+                )[0];
+            } else {
+                console.warn('Unsupported link type ' + this.getDefinition().link);
+            }
         }
     }
 

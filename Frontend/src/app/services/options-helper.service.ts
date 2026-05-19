@@ -1293,8 +1293,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         reportNode.elementType = [ElementType.Node, ElementType.NodePublishedCopy];
         reportNode.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         reportNode.scopes = [Scope.Search, Scope.CollectionsReferences, Scope.Render];
-        reportNode.customShowCallback = (objects) =>
-            this.configService.get('nodeReport', false).pipe(first()).toPromise();
+        reportNode.customShowCallback = async (objects) =>
+            objects?.every((n) => n.access !== null) &&
+            (await firstValueFrom(this.configService.get('nodeReport', false)));
         reportNode.group = DefaultGroups.View;
         reportNode.priority = 60;
 

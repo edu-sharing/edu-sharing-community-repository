@@ -27,6 +27,7 @@
         [swimlaneShape]="backgroundShape"
         [widgetType]="gridItem.item"
         (searchHitsChanged)="changeSearchHits($event, i)"
+        (totalSearchResultCountChanged)="changeTotalSearchResultCount($event, i)"
         (visibleNodesChanged)="changeVisibleNodes($event, i)"
       >
       </es-generic-widget>

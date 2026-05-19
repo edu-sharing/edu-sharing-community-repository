@@ -29,10 +29,9 @@
       <useCaching>false</useCaching>
       <createImage>
         {
-        "model": "dall-e-2",
+        "model": "gpt-image-2",
         "size": "256x256",
         "n": 3,
-        "response_format": "b64_json",
         "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
       </createImage>
@@ -54,10 +53,9 @@
       <id>topic_page_ai_create_image</id>
       <createImage>
         {
-        "model": "dall-e-3",
+        "model": "gpt-image-2",
         "size": "1024x1024",
         "n": 1,
-        "response_format": "b64_json"
         }
       </createImage>
     </aiConfig>
@@ -1106,22 +1104,22 @@
     <template>
       <id>topic_page_profiling</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group>
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="radioVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_configuration</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="checkboxVertical">
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="checkboxVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_search</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges">
-          <ccm:educationalcontext type="multivalueFixedBadges">
+          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges" isExtended="false">
+          <ccm:educationalcontext type="multivalueFixedBadges" isExtended="false">
       ]]></html>
     </template>
   </templates>

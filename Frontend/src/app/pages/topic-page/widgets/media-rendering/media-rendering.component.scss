@@ -59,12 +59,13 @@
     rs-root {
         // remove the margin from rendered content
         margin: 0 !important;
-        // adjust the containerHeight variable to be specific for the topic page
-        --containerHeight: 400px !important;
+        // setting the --renderWrapperHeight adjusts the --containerHeight
+        --renderWrapperHeight: 450px;
 
         // try to show all modules with the full width,
         // however, if the content becomes too high, scale it
-        .module {
+        // note: this does not work for the PDF, DOCUMENT and SPREADSHEET module, so exclude it
+        .module:not(.module-PDF, .module-DOCUMENT, .module-SPREADSHEET) {
             max-height: var(--containerHeight);
             width: auto !important;
             max-width: 100%;
@@ -79,8 +80,9 @@
             }
         }
 
-        // fix link-wrapper does not define a max-height + max-width
-        .link-wrapper {
+        // fix link-wrapper and rs-default-wrapper do not define a max-height + max-width
+        .link-wrapper,
+        .rs-default-wrapper {
             img {
                 max-height: var(--containerHeight);
                 max-width: 100%;
@@ -90,6 +92,11 @@
         // remove link to original content
         .url-wrapper .link-wrapper > a.mdc-button {
             display: none;
+        }
+
+        // fix eduHtml-wrapper does not properly calculate its height
+        .eduHtml-wrapper > * {
+            min-height: 0;
         }
     }
 }

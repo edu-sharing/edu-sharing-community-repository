@@ -23,8 +23,6 @@ import org.alfresco.repo.thumbnail.ThumbnailRegistry;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.action.Action;
-import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -547,9 +545,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         if (downloadAllowed) {
             // use the @PermissionService to allow intercepting for Usage Nodes & Temporary Access!
-            downloadAllowed = PermissionServiceFactory.getLocalService()
-                    .hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT})
-                    .values().stream().allMatch(v -> v);
+            try {
+                downloadAllowed = PermissionServiceFactory.getLocalService()
+                        .hasAllPermissions(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, new String[]{CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT})
+                        .values().stream().allMatch(v -> v);
+            } catch(AccessDeniedException ignored) {
+                downloadAllowed = false;
+            }
         }
         return downloadAllowed;
     }

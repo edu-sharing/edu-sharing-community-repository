@@ -19,7 +19,6 @@
       "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
       "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
       "SAVE_CONFIG_ERROR_MESSAGE": "Deine Änderungen konnten nicht gespeichert werden.",
-      "NODE_NOT_PUBLIC": "Der ausgewählte Inhalt ist nicht öffentlich.",
       "AI_WIDGET": {
         "HEADING": "Anfrage",
         "PROMPT_DESCRIPTION": "Formulieren Sie eine Anfrage an die KI.",
@@ -44,8 +43,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Zur Seiten-Vorlage"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Standard-Icon",
-        "UPLOADED_ICON": "Hochgeladenes Icon",
         "CONFIG_ARIA": "Wähle das Layout der Navigationspillen",
         "CHANGE_FILTER_OR_SEARCH": "Filter oder Suche ändern"
       },
@@ -56,7 +53,7 @@
         "SWITCH_INTO_VIEW_MODE": "In den Anzeigemodus wechseln",
         "POPUP_BLOCKED": "Popup wurde blockiert oder konnte nicht geöffnet werden.",
         "FILTER_EVENT_RECEIVED": "Filter-Event empfangen",
-        "NO_CONTENTS": "Noch keine Inhalte",
+        "NO_CONTENTS": "Es konnten keine Suchergebnisse gefunden werden.",
         "CHANGE_ON_INSPECTION_TABLE": "Objekt auf Prüftisch ändern",
         "REMOVE_FROM_WIDGET": "Objekt ausblenden",
         "ADD_TO_WIDGET": "Objekt einblenden"
@@ -71,8 +68,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Nicht sortierte Liste",
         "ORDERED_LIST": "Sortierte Liste",
+        "OUTPUT_TEXT": "Eingegebenen Text ausgeben",
         "GENERATE_WITH_AI": "Mit KI generieren",
-        "MISSING_TEXT": "Bitte geben Sie zuerst einen Text ein.",
+        "MISSING_TEXT": "Bitte geben Sie zuerst einen Text ein, um diesen mit KI auszuführen.",
         "AI_TAGS_EXIST": "Es wurden KI-Platzhalter gefunden, wodurch der Text automatisch generiert wird.",
         "TITLE": "Titel der Sammlung einfügen",
         "DESCRIPTION": "Beschreibung der Sammlung einfügen",
@@ -93,7 +91,7 @@
         "HEIGHT": "Höhe",
         "TITLE": "Titel (für Barrierefreiheit)",
         "SHOW_BORDER": "Rahmen anzeigen?",
-        "SHOW_CONFIRMATION": "Bestätigungsdialog anzeigen?",
+        "SHOW_CONFIRMATION": "Dialog zur Einbettung externer Inhalte anzeigen?",
         "SHOW_PREVIEW": "Vorschau anzeigen",
         "UPDATE_PREVIEW": "Vorschau aktualisieren",
         "PREVIEW_TITLE": "Vorschau des iFrames",
@@ -107,13 +105,10 @@
         "MISSING_SRC": "Es wurde keine Quelle angegeben, wodurch kein iFrame angezeigt werden kann."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Verschommener Hintergrund des Bilds",
-        "ALT": "Bild zur Motivation des Themas",
         "GENERATE": "Bild generieren",
         "REGENERATE": "Bild neu generieren",
         "UPLOAD": "Bild hochladen",
         "DELETE": "Bild löschen",
-        "NO_IMAGE_SELECTED": "Es wurde noch kein Bild ausgewählt.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Ich stimme zu, dass ich alle notwendigen Rechte an diesem Bild besitze, um es auf der Themenseite einzubinden."
       },
       "MEDIA_RENDERING": {
@@ -153,7 +148,8 @@
         "IMPORTANCE_LABEL": "Beschreibung der Wichtigkeit"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten"
+        "ERROR_RECEIVING_DATA": "Fehler beim Empfangen der Daten",
+        "REFERENCES_LABEL": "Anzahl Materialien"
       },
       "EMBEDDING": {
         "LABEL": "Einbetten",
@@ -242,6 +238,8 @@
       "RECOMMENDED": "Empfohlen"
     },
     "ANCHOR_FALLBACK_PREFIX": "Abschnitt",
+    "ANCHOR_ARIA_HEADING": "Springe zu Abschnitt: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Anzahl der Suchergebnisse: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Überschrift",
       "DEFAULT_HEADING": "Eine beispielhafte Überschrift",

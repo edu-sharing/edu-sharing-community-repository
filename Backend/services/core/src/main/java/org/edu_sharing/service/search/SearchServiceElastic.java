@@ -33,6 +33,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
@@ -45,7 +46,6 @@ import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -976,6 +976,7 @@ public class SearchServiceElastic extends SearchServiceImpl {
                 String restrictedAccess = (String) data.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_RESTRICTED_ACCESS));
                 List<String> restrictedAccessPermissions = (List<String>) data.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS));
                 return PermissionServiceHelper.getEffectivePermissions(
+                        nodeId,
                         restrictedAccessPermissions,
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());

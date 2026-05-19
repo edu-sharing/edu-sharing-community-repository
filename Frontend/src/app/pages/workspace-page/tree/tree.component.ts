@@ -28,7 +28,7 @@ export class WorkspaceTreeComponent {
     @Input() isSafe: boolean;
     @Input() selectedNode: string;
     @Input() set path(path: Node[]) {
-        const pathIds = path.map((node) => node.ref.id);
+        const pathIds = path?.map((node) => node?.ref?.id).filter((f) => !!f);
         this.currentPath = pathIds;
     }
     @Input() options: OptionItem[] = [];

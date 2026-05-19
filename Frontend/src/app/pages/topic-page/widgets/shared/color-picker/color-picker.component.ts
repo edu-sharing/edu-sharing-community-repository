@@ -36,6 +36,8 @@ export class ColorPickerComponent implements OnInit {
     @Input() cancelLabel: string = 'CANCEL';
     @Input() colorLabel: string;
     @Input() customClass: string = '';
+    @Input() customColor: string = '';
+    @Input() customColorPosition: 'start' | 'end' = 'end';
     @Output() colorChange: EventEmitter<string> = new EventEmitter<string>();
 
     get internalColor(): string {
@@ -75,6 +77,23 @@ export class ColorPickerComponent implements OnInit {
                 });
             });
         }
+        // add a custom color to the palette (if not already included)
+        if (this.customColor) {
+            const customColorIncluded = this.palette.find((c) => {
+                return (
+                    c === this.customColor ||
+                    c?.preview === this.customColor ||
+                    c?.variants?.includes(this.customColor)
+                );
+            });
+            if (!customColorIncluded) {
+                if (this.customColorPosition === 'start') {
+                    this.palette.unshift(this.customColor);
+                } else {
+                    this.palette.push(this.customColor);
+                }
+            }
+        }
         // workaround to reset the color to the default undefined color
         if (this.addTransparency && !this.palette.includes(undefined)) {
             this.palette.push(undefined);
@@ -83,13 +102,23 @@ export class ColorPickerComponent implements OnInit {
 
     /**
      * Emits the color change event when the color is changed.
-     * Only emits if the color actually changed from the initial value.
+     * Treats empty string / null / undefined as the same "transparent" state
+     * so that intermediate values emitted by ngx-colors (caused by duplicate internalColor)
+     * do not trigger a spurious second event.
+     *
+     * Hint: null/undefined/empty string are all interpreted as transparency.
      */
     onColorChange(): void {
-        if (this._initialColor !== null && this._selectedColor !== this._initialColor) {
-            this.colorChange.emit(this.selectedColor);
-            // update the initial value for further changes
-            this._initialColor = this._selectedColor;
+        const normalize = (v: string | null | undefined): string | null =>
+            v == null || v === '' ? null : v.toLowerCase();
+
+        const previous: string | null = normalize(this._initialColor);
+        const current: string | null = normalize(this._selectedColor);
+
+        if (previous === current) {
+            return;
         }
+        this.colorChange.emit(this._selectedColor);
+        this._initialColor = this._selectedColor;
     }
 }

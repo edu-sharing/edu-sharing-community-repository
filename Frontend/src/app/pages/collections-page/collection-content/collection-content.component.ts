@@ -12,10 +12,13 @@ import {
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
+    CollectionReference,
     ConfigService,
+    ConfigValues,
     MdsService,
     Node,
     NodeService,
@@ -50,7 +53,6 @@ import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
 import {
-    CollectionReference,
     ConfigurationHelper,
     LoginResult,
     NodeWrapper,
@@ -176,12 +178,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
+    config: ConfigValues;
 
     constructor(
         private authenticationService: AuthenticationService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
-        private configurationService: ConfigService,
+        public configurationService: ConfigService,
         private sessionStorageService: SessionStorageService,
         private dialogs: DialogsService,
         private infobar: InfobarService,
@@ -193,6 +196,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private nodeService: RestNodeService,
         private nodeServiceApi: NodeService,
         private optionsService: OptionsHelperDataService,
+        private platformLocation: PlatformLocation,
         private route: ActivatedRoute,
         private router: Router,
         private toast: Toast,
@@ -246,6 +250,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
         // check: this sometimes caused missing actionbar data, why is it here?
         //this.optionsService.clearComponents(this.actionbarReferences);
+        this.configurationService
+            .observeConfig()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((config) => (this.config = config));
         this.registerMainNav();
         this.mainNavUpdateTrigger.next();
     }
@@ -543,6 +551,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.contentNode = event.element;
         if (event.element.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             this.clickElementEvent(event);
+        } else if ((event.element as CollectionReference).accessEffective === null) {
+            // no metadata available
+            return;
         } else if ((event.element as CollectionReference).originalId == null) {
             const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'COLLECTIONS.ORIGINAL_MISSING',
@@ -568,6 +579,19 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
+            if (event.ctrlKey) {
+                window.open(
+                    this.platformLocation.getBaseHrefFromDOM() +
+                        this.router.serializeUrl(
+                            this.router.createUrlTree([
+                                UIConstants.ROUTER_PREFIX + 'render',
+                                event.element.ref.id,
+                            ]),
+                        ),
+                    '_blank',
+                );
+                return;
+            }
             this.nodeService
                 .getNodeMetadata(event.element.ref.id)
                 .subscribe((data: NodeWrapper) => {
@@ -988,7 +1012,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     canDelete(node: EduData.CollectionReference) {
-        return RestHelper.hasAccessPermission(node, 'Delete');
+        return RestHelper.hasAccessPermission(this.collection, 'Delete');
     }
 
     isDeleted(node: CollectionReference) {

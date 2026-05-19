@@ -25,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
+import { TooltipAriaLabelDirective } from '../../../shared/directives/tooltip-aria-label.directive';
 import { AiHelperService } from '../../../shared/services/ai-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { AiLabelComponent } from '../ai-label/ai-label.component';
@@ -37,6 +38,7 @@ import { AiLabelComponent } from '../ai-label/ai-label.component';
         EduSharingUiCommonModule,
         MatIconButton,
         MatTooltip,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     templateUrl: './image-wrapper.component.html',
@@ -86,6 +88,7 @@ export class ImageWrapperComponent implements OnInit {
     });
     private fileInput: HTMLInputElement;
     imagePath: SafeResourceUrl;
+    imageNode: Node;
     imageProcessing: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
 
@@ -132,19 +135,24 @@ export class ImageWrapperComponent implements OnInit {
         userUploadedNodeId: string,
         regenerateNecessary: boolean = false,
     ): Promise<void> {
+        const resetSources = () => {
+            this.imagePath = null;
+            this.imageNode = null;
+        };
         // user has uploaded a custom image
         if (userUploadedNodeId) {
             const uploadedNode: Node = await this.topicPageHelperService.getNode(
                 userUploadedNodeId,
             );
-            if (uploadedNode.preview.url) {
-                this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                    uploadedNode.preview.url,
-                );
+            if (uploadedNode.preview?.url) {
+                // reset both sources before loading the new one
+                resetSources();
+                this.imageNode = uploadedNode;
             }
+            return;
         }
         // user has selected an AI generated image
-        else if (aiGeneratedImage) {
+        if (aiGeneratedImage) {
             const imageData: ImageResult = regenerateNecessary
                 ? await this.aiHelperService.updateAiImage(
                       this.widgetNodeId(),
@@ -154,26 +162,27 @@ export class ImageWrapperComponent implements OnInit {
                       this.widgetNodeId(),
                       this.contextNodeId(),
                   );
+            // reset both sources before loading the new one
+            resetSources();
             this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
                 this.BASE_64_PREFIX + imageData.data[0].b64_json,
             );
+            return;
         }
         // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
-        else if (this.fallbackNode) {
-            this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                this.fallbackNode.preview.url,
-            );
+        if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
+            // reset both sources before loading the new one
+            resetSources();
+            this.imageNode = this.fallbackNode;
         }
-        // reset the image path
-        else {
-            this.imagePath = null;
-        }
+        // reset both sources, if no condition matches
+        resetSources();
     }
 
     /**
      * Triggers the process of generating an AI image when the related button is clicked.
      */
-    async generateImageClicked(): Promise<void> {
+    async generateImage(): Promise<void> {
         // set the image processing to true
         this.imageProcessing.set(true);
         // check, whether an AI generated image is already shown and a regeneration is requested

@@ -1,8 +1,10 @@
 <mat-form-field
   class="text-form-field"
   [class.hidden-toolbar]="hideToolbar"
+  [class.reserve-padding-right]="showAiCheckbox && !showAiButtons && hideToolbar"
   appearance="outline"
   subscriptSizing="dynamic"
+  floatLabel="always"
 >
   <mat-label>
     {{ label }}
@@ -74,20 +76,37 @@
         </md-ordered-list>
       </markdown-toolbar>
 
-      <div class="ai-buttons" *ngIf="showAiCheckbox || showAiButtons">
-        <div
+      <div
+        class="ai-controls"
+        [class.no-ai-buttons]="!showAiButtons"
+        *ngIf="showAiCheckbox || showAiButtons"
+      >
+        <mat-button-toggle-group
+          *ngIf="showAiCheckbox"
+          class="ai-toggle-group"
+          hideSingleSelectionIndicator
+          [value]="generateWithAi() ? 'ai' : 'text'"
+          [disabled]="disableAiCheckbox()"
           [matTooltip]="disableAiCheckboxReason() ? (disableAiCheckboxReason() | translate) : null"
+          (change)="onAiModeChange($event.value)"
         >
-          <mat-checkbox
-            *ngIf="showAiCheckbox"
-            [disabled]="disableAiCheckbox()"
-            [(ngModel)]="generateWithAi"
-            (ngModelChange)="onGenerateWithAiChange($event)"
-            [ngModelOptions]="{ standalone: true }"
+          <mat-button-toggle
+            value="text"
+            [matTooltip]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.OUTPUT_TEXT' | translate"
+            tooltipAriaLabel
+            (mousedown)="avoidSaveText()"
           >
-            {{ 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.GENERATE_WITH_AI' | translate }}
-          </mat-checkbox>
-        </div>
+            <i esIcon="text_fields"></i>
+          </mat-button-toggle>
+          <mat-button-toggle
+            value="ai"
+            [matTooltip]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.GENERATE_WITH_AI' | translate"
+            tooltipAriaLabel
+            (mousedown)="avoidSaveText()"
+          >
+            <i esIcon="auto_awesome"></i>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
 
         <div class="button-container" [class.separator]="showAiCheckbox" *ngIf="showAiButtons">
           <button

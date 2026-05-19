@@ -52,7 +52,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
 export class TopicHeaderComponent implements OnChanges, OnInit {
     // CONSTANTS
     private readonly DEFAULT_DESCRIPTION: string = '';
-    private readonly DEFAULT_HEADER_TEXT_BG_COLOR = '#FFFFFF';
+    readonly DEFAULT_HEADER_TEXT_BG_COLOR = '#FFFFFF';
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.TOPIC_HEADER.';
 
     private _collectionNode: Node = null;

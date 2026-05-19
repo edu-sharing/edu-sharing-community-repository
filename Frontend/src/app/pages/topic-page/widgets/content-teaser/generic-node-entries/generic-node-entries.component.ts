@@ -354,11 +354,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 const nodeToChange: Node =
                     node ?? this.nodeEntries.optionsHelper.getData()?.activeObjects?.[0] ?? null;
                 if (nodeToChange) {
-                    const url: string =
-                        this.topicPageHelperService.getBaseHref() +
-                        'components/editorial-desk?mode=audit&fromMds=true&viewType=Single&nodeId=' +
-                        nodeToChange.ref.id;
-                    window.open(url, '_blank');
+                    this.topicPageHelperService.openChangeOnInspectionTableLink(nodeToChange);
                 }
             },
         );
@@ -558,8 +554,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             this.searchService.search(request),
         );
 
-        this.totalSearchResultCountChanged.emit(searchResult.pagination.total);
-
         // avoid pushing potential duplicates
         // TODO: This duplicate check is currently necessary, as the same items might be requested again (and again)
         const existingNodeIds: string[] = this.allRequestedNodes
@@ -571,6 +565,16 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 existingNodeIds.push(node.ref.id);
             }
         });
+
+        // count the number of currently blacklisted nodes
+        const numberOfBlacklistedVisibleNodes =
+            this.allRequestedNodes.filter(
+                (n: Node) => n?.ref?.id && this.blacklistedNodeIds.includes(n.ref.id),
+            )?.length || 0;
+        // emit the total pagination number with removed blacklisted nodes
+        this.totalSearchResultCountChanged.emit(
+            searchResult.pagination.total - numberOfBlacklistedVisibleNodes,
+        );
 
         let customCardsCount: number;
         // in edit mode, display all requested nodes
@@ -606,14 +610,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         }
 
         // emit the currently loaded visible nodes
-        const emitNodes = (mappingNodes: Node[]): void => {
-            const visibleNodes: Node[] = mappingNodes.filter(
-                (n) => n?.ref?.id && !this.blacklistedNodeIds.includes(n.ref.id),
-            );
-            this.visibleNodesChanged.emit(visibleNodes);
-        };
-
-        emitNodes(this.allRequestedNodes);
+        const visibleNodes: Node[] = this.allRequestedNodes.filter(
+            (n: Node) => n?.ref?.id && !this.blacklistedNodeIds.includes(n.ref.id),
+        );
+        this.visibleNodesChanged.emit(visibleNodes);
     }
 
     /**

@@ -112,6 +112,7 @@ import { BapiConfigObject } from '../shared/types/bapi-config-object';
 import { ColorChangeEvent } from '../shared/types/color-change-event';
 import { GridTile } from '../shared/types/grid-tile';
 import { GridTileToHitsMapping } from '../shared/types/grid-tile-to-hits-mapping';
+import { GridTileToSearchCountMapping } from '../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../shared/types/grid-tile-to-search-results-mapping';
 import { PageConfig } from '../shared/types/page-config';
 import { PageVariantConfig } from '../shared/types/page-variant-config';
@@ -399,16 +400,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     searchEvent$: Observable<SearchEvent>;
     searchCountTrigger: number = 1;
     computedSearchInput: Signal<string> = computed((): string =>
-        this.editMode() ? '' : this.searchInput(),
+        this.editMode() ? '' : this.searchInput() ?? '',
     );
     computedSearchFilters: Signal<Values> = computed(
         (): Values => (this.editMode() ? {} : this.searchFilters()),
     );
     searchInputOrFiltersDefined: Signal<boolean> = computed(() => {
-        return (
-            this.computedSearchInput() !== '' ||
-            (this.computedSearchFilters() && Object.keys(this.computedSearchFilters())?.length > 0)
-        );
+        const filters = this.computedSearchFilters();
+        return !!this.computedSearchInput() || (filters && Object.keys(filters).length > 0);
     });
     private searchInput: WritableSignal<string> = signal('');
     private searchFilters: WritableSignal<Values> = signal({});
@@ -556,6 +555,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
                 this.searchEvent$ = instance.onSearchTriggered();
+                // startWith defines the initial value
                 this.searchEvent$
                     .pipe(
                         takeUntil(this.destroyed$),
@@ -834,6 +834,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 top: offsetPosition,
                 behavior: 'smooth',
             });
+
+            // set focus to element that was scrolled into view
+            if (!element.hasAttribute('tabindex')) {
+                element.setAttribute('tabindex', '-1');
+            }
+
+            window.setTimeout(() => {
+                element.focus({ preventScroll: true });
+            }, 500);
+
             return true;
         } else {
             return false;
@@ -1297,39 +1307,34 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         color: string,
         isTopicColor: boolean = false,
     ): Promise<void> {
-        const initialColor: string = isTopicColor
-            ? this.initialTopicColor
-            : this.initialAnchorItemColor;
-        if (color !== initialColor) {
-            if (isTopicColor) {
-                this.topicColor = color;
-            } else {
-                this.anchorItemColor = color;
-            }
-            this.startEditing();
-            try {
-                await this.checkForCustomPageNodeExistence();
-                const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                if (!pageVariant) {
-                    this.endEditing();
-                    return;
-                }
-                const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
-                pageVariant.structure[propertyName] = color;
-                this.pageVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(this.pageVariantNode),
-                        DEFAULT_PAGE_VARIANT_CONFIG_PROP,
-                        JSON.stringify(pageVariant),
-                    );
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
+        if (isTopicColor) {
+            this.topicColor = color;
+        } else {
+            this.anchorItemColor = color;
+        }
+        this.startEditing();
+        try {
+            await this.checkForCustomPageNodeExistence();
+            const pageVariant: PageVariantConfig = this.retrievePageVariant();
+            if (!pageVariant) {
                 this.endEditing();
-            } catch (err) {
-                console.error(err);
-                this.endEditing();
-                this.topicPageHelperService.displayErrorToast();
+                return;
             }
+            const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
+            pageVariant.structure[propertyName] = color;
+            this.pageVariantNode =
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(this.pageVariantNode),
+                    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+                    JSON.stringify(pageVariant),
+                );
+            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+            this.pageVariantReloadNecessary = false;
+            this.endEditing();
+        } catch (err) {
+            console.error(err);
+            this.endEditing();
+            this.topicPageHelperService.displayErrorToast();
         }
     }
 
@@ -1889,16 +1894,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Called by es-swimlane totalSearchResultCountChanged output event.
+     * Sets the search count and triggers an update.
+     *
+     * @param event
+     * @param swimlaneIndex
+     */
+    updateGridItemTotalSearchCount(event: GridTileToSearchCountMapping, swimlaneIndex: number) {
+        this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event?.count || 0;
+        this.searchCountTrigger++;
+    }
+
+    /**
      * Called by es-swimlane visibleNodesChanged output event.
-     * Sets the visible nodes in the global service and triggers the search count update and hit matching.
+     * Sets the visible nodes in the global service and triggers the hit matching.
      *
      * @param event
      * @param swimlaneIndex
      */
     updateVisibleNodes(event: GridTileToSearchResultsMapping, swimlaneIndex: number): void {
         this.topicPageGlobalService.updateVisibleNodes(swimlaneIndex, event.gridIndex, event.nodes);
-        this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event.nodes?.length || 0;
-        this.searchCountTrigger++;
         this.updateSwimlaneIdToHitMatching();
     }
 
@@ -2499,6 +2514,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private endEditing(): void {
         this.anchorTrigger++;
+        this.updateSwimlaneIdToHitMatching();
         this.requestInProgress.set(false);
         // wait for the swimlane to be loaded before checking whether all accordions are opened in edit mode
         setTimeout((): void => {

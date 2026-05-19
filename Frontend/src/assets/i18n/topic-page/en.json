@@ -19,7 +19,6 @@
       "SAVE_CONFIG_MESSAGE": "Your changes will be saved.",
       "SAVE_CONFIG_ERROR_ACTION": "Reload page",
       "SAVE_CONFIG_ERROR_MESSAGE": "Your changes could not be saved.",
-      "NODE_NOT_PUBLIC": "The selected content is not public.",
       "AI_WIDGET": {
         "HEADING": "Request",
         "PROMPT_DESCRIPTION": "Formulate a request to the AI.",
@@ -44,8 +43,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Default icon",
-        "UPLOADED_ICON": "Uploaded icon",
         "CONFIG_ARIA": "Choose the layout of the navigation pills",
         "CHANGE_FILTER_OR_SEARCH": "Change filter or search"
       },
@@ -56,7 +53,7 @@
         "SWITCH_INTO_VIEW_MODE": "Switch to view mode",
         "POPUP_BLOCKED": "Popup was blocked or could not be opened.",
         "FILTER_EVENT_RECEIVED": "Filter event received",
-        "NO_CONTENTS": "No contents yet",
+        "NO_CONTENTS": "No search results were found.",
         "CHANGE_ON_INSPECTION_TABLE": "Change object on inspection table",
         "REMOVE_FROM_WIDGET": "Hide object",
         "ADD_TO_WIDGET": "Show object"
@@ -71,8 +68,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Unordered list",
         "ORDERED_LIST": "Ordered list",
+        "OUTPUT_TEXT": "Output entered text",
         "GENERATE_WITH_AI": "Generate with AI",
-        "MISSING_TEXT": "Please enter a text first.",
+        "MISSING_TEXT": "Please enter a text first before being able to execute it with AI.",
         "AI_TAGS_EXIST": "AI placeholders were found, the text will be generated automatically.",
         "TITLE": "Add collection title",
         "DESCRIPTION": "Add collection description",
@@ -93,7 +91,7 @@
         "HEIGHT": "Height",
         "TITLE": "Title (for accessibility)",
         "SHOW_BORDER": "Show border?",
-        "SHOW_CONFIRMATION": "Show confirmation?",
+        "SHOW_CONFIRMATION": "Show dialog for embedding external content?",
         "SHOW_PREVIEW": "Show preview",
         "UPDATE_PREVIEW": "Update preview",
         "PREVIEW_TITLE": "iframe preview",
@@ -107,13 +105,10 @@
         "MISSING_SRC": "No source was specified, therefore no iframe can be displayed."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Blurred background of the image",
-        "ALT": "Image to motivate the topic",
         "GENERATE": "Generate image",
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
         "DELETE": "Delete image",
-        "NO_IMAGE_SELECTED": "No image has been selected yet.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
       "MEDIA_RENDERING": {
@@ -153,7 +148,8 @@
         "IMPORTANCE_LABEL": "Description of importance"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Error receiving data"
+        "ERROR_RECEIVING_DATA": "Error receiving data",
+        "REFERENCES_LABEL": "References count"
       },
       "EMBEDDING": {
         "LABEL": "Embed",
@@ -242,6 +238,8 @@
       "RECOMMENDED": "Recommended"
     },
     "ANCHOR_FALLBACK_PREFIX": "Section",
+    "ANCHOR_ARIA_HEADING": "Navigate to section: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Number of search results: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Heading",
       "DEFAULT_HEADING": "An example heading",

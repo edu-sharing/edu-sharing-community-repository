@@ -59,6 +59,8 @@ export interface ListDragGropConfig<T extends NodeEntriesDataType> {
     dropped?: (target: Node, source: DropSource<NodeEntriesDataType>) => void;
 }
 
+export type CtrlClickBehavior = 'multiselect' | 'emit';
+
 export enum ClickSource {
     Preview,
     Icon,
@@ -72,6 +74,7 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
     element: T;
     source: ClickSource;
     attribute?: ListItem; // only when source === Metadata
+    ctrlKey?: boolean;
 };
 export type FetchEvent = {
     offset: number;
