@@ -86,6 +86,7 @@ export class RenderHelperService {
             securedNode: securedNode.signedNode,
             signature: securedNode.signature,
             token: token,
+            renderingBaseUrl: securedNode.renderingBaseUrl,
         } as RenderDataRequestWithToken;
 
         return {
