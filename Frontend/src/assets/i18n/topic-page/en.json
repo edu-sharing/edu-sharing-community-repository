@@ -19,7 +19,6 @@
       "SAVE_CONFIG_MESSAGE": "Your changes will be saved.",
       "SAVE_CONFIG_ERROR_ACTION": "Reload page",
       "SAVE_CONFIG_ERROR_MESSAGE": "Your changes could not be saved.",
-      "NODE_NOT_PUBLIC": "The selected content is not public.",
       "AI_WIDGET": {
         "HEADING": "Request",
         "PROMPT_DESCRIPTION": "Formulate a request to the AI.",

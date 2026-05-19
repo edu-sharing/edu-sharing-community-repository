@@ -27,7 +27,6 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Toast } from '../../../../services/toast';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
@@ -129,7 +128,6 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         private highlightSearch: HighlightSearchPipe,
         private nodeTitlePipe: NodeTitlePipe,
         private previewSidebarService: PreviewSidebarService,
-        private toast: Toast,
         private topicPageHelperService: TopicPageHelperService,
     ) {
         // subscribe to changes on the selected node
@@ -185,11 +183,6 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             // check whether the node can be read
             const node: Node = await this.topicPageHelperService.getNode(selectedNode.ref.id);
             if (!node) {
-                return;
-            }
-            if (!node.isPublic) {
-                // inform user about the node not being public
-                this.toast.error(null, 'TOPIC_PAGE.WIDGET.NODE_NOT_PUBLIC');
                 return;
             }
             // workaround to properly update the selected node
