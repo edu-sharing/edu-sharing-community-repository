@@ -1,0 +1,103 @@
+{{- if .Values.global.backup.velero.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-backup
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+  backup-pre.sh: |-
+    #!/bin/bash
+    set -euo pipefail
+    trap 'echo "ERROR at line $LINENO, exit code $?"' ERR
+
+    BACKUP_ROOT="/opt/alfresco/backup/${HOSTNAME%-*}/${HOSTNAME##*-}"
+    mkdir -p "${BACKUP_ROOT}"
+
+    exec > >(tee -a "${BACKUP_ROOT}/backup-pre.log") 2>&1
+    set -x
+
+    SOLR_HOST="localhost:8080"
+    SOLR_URL="http://${SOLR_HOST}/solr"
+
+    echo "waiting for Solr"
+    until wait-for-it "${SOLR_HOST}" -t 3; do echo -n "."; sleep 5 ; done
+    until curl -fsS "${SOLR_URL}/admin/cores?action=STATUS" >/dev/null; do echo -n "."; sleep 5 ; done
+
+    cores=$(curl -fsS "${SOLR_URL}/admin/cores?action=STATUS&wt=json" | jq -r ".status | keys[]")
+
+    for core in $cores; do
+      mkdir -p "${BACKUP_ROOT}/${core}"
+      rm -rf "${BACKUP_ROOT:?}/${core:?}/"*
+      ln -snf "${BACKUP_ROOT}/${core}" "/opt/alfresco/solr/solrhome/${core}/${core}"
+
+      curl -fsS "${SOLR_URL}/${core}/replication?command=backup" >/dev/null
+    done
+
+    for core in $cores; do
+      until [[ $(curl -s "${SOLR_URL}/${core}/replication?command=details" | xmlstarlet sel -t -v "/response/lst[@name='details']/lst[@name='backup']/str[@name='status']") == "success" ]]; do
+        sleep 5s
+      done
+    done
+
+  restore-post.sh: |-
+    #!/bin/bash
+    set -euo pipefail
+    shopt -s nullglob
+    trap 'echo "ERROR at line $LINENO, exit code $?"' ERR
+
+    BACKUP_ROOT="/opt/alfresco/backup/${HOSTNAME%-*}/${HOSTNAME##*-}"
+    mkdir -p "${BACKUP_ROOT}"
+
+    exec > >(tee -a "${BACKUP_ROOT}/restore-post.log") 2>&1
+    set -x
+
+    SOLR_HOST="localhost:8080"
+    SOLR_URL="http://${SOLR_HOST}/solr"
+
+    echo "waiting for Solr"
+    until wait-for-it "${SOLR_HOST}" -t 3; do echo -n "."; sleep 5 ; done
+    until curl -fsS "${SOLR_URL}/admin/cores?action=STATUS" >/dev/null; do echo -n "."; sleep 5 ; done
+
+    curl_retry_404() {
+      local url="$1"
+      while true; do
+        local response code body
+        response="$(curl -sS -w "\n%{http_code}" "$url" || true)"
+        code="$(echo "$response" | tail -n1)"
+        body="$(echo "$response" | sed '$d')"
+        case "$code" in
+          200)
+            echo "$body"
+            return 0
+            ;;
+          404)
+            echo "Solr endpoint not ready yet: $url returned 404, retrying..." >&2
+            sleep 5
+            ;;
+          *)
+            echo "Solr request failed: $url returned HTTP $code" >&2
+            echo "$body" >&2
+            return 22
+            ;;
+        esac
+      done
+    }
+
+    cores=()
+    for dir in "${BACKUP_ROOT}"/*/; do
+      core="$(basename "$dir")"
+      cores+=("$core")
+
+      mkdir -p "/opt/alfresco/alf_data/${core}"
+      ln -snf "${BACKUP_ROOT}/${core}" "/opt/alfresco/solr/solr/server/${core}"
+      curl_retry_404 "${SOLR_URL}/${core}/replication?command=restore" >/dev/null
+    done
+
+    for core in "${cores[@]}"; do
+      until [[ $(curl_retry_404 "${SOLR_URL}/${core}/replication?command=restorestatus" | xmlstarlet sel -t -v "/response/lst[@name='restorestatus']/str[@name='status']") == "success" ]]; do
+        sleep 5s
+      done
+    done
+
+    touch "${BACKUP_ROOT}/velero.restore.completed"
+{{- end }}
