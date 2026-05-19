@@ -81,7 +81,8 @@
         }
 
         // fix link-wrapper and rs-default-wrapper do not define a max-height + max-width
-        .link-wrapper, .rs-default-wrapper {
+        .link-wrapper,
+        .rs-default-wrapper {
             img {
                 max-height: var(--containerHeight);
                 max-width: 100%;
