@@ -335,6 +335,7 @@
       "EDIT_MESSAGE": "Sie können jedoch über das Menü eine Seiten-Konfiguration auswählen, die Sie verwenden wollen.",
       "SELECT_LABEL": "Seiten-Konfiguration",
       "SELECT_PLACEHOLDER": "Seiten-Konfiguration auswählen",
+      "DEFAULT_TEMPLATE": "Standard-Vorlage",
       "CREATE_PAGE": "Seite anlegen",
       "MISSING_CONFIG_OR_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten oder es konnte keine Seiten-Variante gewählt werden.",
       "MISSING_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten."
