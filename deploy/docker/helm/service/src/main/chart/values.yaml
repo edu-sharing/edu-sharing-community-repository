@@ -8,6 +8,12 @@ global:
   ## @param global.annotations Define global annotations
   annotations: {}
 
+  backup:
+
+    velero:
+      ## @param global.backup.velero.enabled Enable velero backup
+      enabled: false
+
   cluster:
 
     cert:
