@@ -144,6 +144,10 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             // initialize the topic header component
             await this.initTopicHeader();
         }
+        if (!changes.editMode?.firstChange && changes.editMode?.currentValue === false) {
+            // regenerate texts of the topic header component
+            await this.regenerateTexts();
+        }
     }
 
     /**
@@ -166,6 +170,22 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         await this.readConfigFromJson(configJson, aiNodeId);
         // set the component to be initialized (further processing is done in the child component)
         this.initialized.set(true);
+    }
+
+    /**
+     * Regenerates collectionDescription and description via AI if they were cleared.
+     */
+    async regenerateTexts(): Promise<void> {
+        if (!this.collectionDescription) {
+            await this.generateCollectionDescription(retrieveNodeId(this._collectionNode));
+        }
+        if (!this.description) {
+            const aiNodeId: string = getNodeOrDefaultNodeId(
+                this.defaultTextNodeId,
+                this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
+            );
+            await this.generateDescription(aiNodeId);
+        }
     }
 
     /**
@@ -284,21 +304,11 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     private async readConfigFromJson(configString: string, nodeId: string): Promise<void> {
         const config: TopicHeaderConfig = JSON.parse(configString);
         // this is the case if a widgetNode for the header exists
-        if (config.description !== undefined) {
+        if (config.description) {
             this.description = config.description;
             this.aiGeneratedText.set(false);
-        } else if (await this.aiHelperService.hasAISupport()) {
-            const promptResponse: ChatCompletionResult =
-                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
-            const responseText: string = retrieveResultString(promptResponse) ?? '';
-            if (responseText !== '') {
-                this.configLocked = true;
-                this.description = responseText;
-                this.aiGeneratedText.set(true);
-                setTimeout((): void => {
-                    this.configLocked = false;
-                }, 1000);
-            }
+        } else {
+            await this.generateDescription(nodeId);
         }
         // check whether an AI-generated image is explicitly set to false
         if (config.aiGeneratedImage === false) {
@@ -314,6 +324,31 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         // check if an image was uploaded
         if (config.userUploadedNodeId) {
             this.userUploadedNodeId = config.userUploadedNodeId;
+        }
+    }
+
+    /**
+     * Helper function to generate the description text via AI.
+     *
+     * @param nodeId
+     */
+    private async generateDescription(nodeId: string): Promise<void> {
+        if (!(await this.aiHelperService.hasAISupport())) {
+            return;
+        }
+        const promptResponse: ChatCompletionResult = await this.aiHelperService.generateFromPrompt(
+            nodeId,
+            {},
+            this.contextNodeId,
+        );
+        const responseText: string = retrieveResultString(promptResponse) ?? '';
+        if (responseText !== '') {
+            this.configLocked = true;
+            this.description = responseText;
+            this.aiGeneratedText.set(true);
+            setTimeout((): void => {
+                this.configLocked = false;
+            }, 1000);
         }
     }
 
