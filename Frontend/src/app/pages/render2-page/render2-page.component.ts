@@ -18,6 +18,7 @@ import { takeUntil } from 'rxjs/operators';
 export class Render2PageComponent implements OnDestroy {
     private readonly destroyed$ = new Subject<void>();
     @Input() nodeId = signal<string>(null);
+    @Input() repository = signal<string>(null);
     @Input() childId = signal<string>(null);
     @ViewChild(RenderWrapperComponent) renderWrapper: RenderWrapperComponent;
     version = signal<string>(null);
@@ -37,6 +38,7 @@ export class Render2PageComponent implements OnDestroy {
             ([params, queryParams]) => {
                 this.nodeId.set(params.node);
                 this.childId.set(queryParams.childobject_id || null);
+                this.repository.set(queryParams.repository || queryParams.repo || null);
                 this.version.set(params.version || RestConstants.NODE_VERSION_CURRENT);
             },
         );
