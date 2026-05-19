@@ -19,7 +19,6 @@
       "SAVE_CONFIG_MESSAGE": "Deine Änderungen werden gespeichert.",
       "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
       "SAVE_CONFIG_ERROR_MESSAGE": "Deine Änderungen konnten nicht gespeichert werden.",
-      "NODE_NOT_PUBLIC": "Der ausgewählte Inhalt ist nicht öffentlich.",
       "AI_WIDGET": {
         "HEADING": "Anfrage",
         "PROMPT_DESCRIPTION": "Formulieren Sie eine Anfrage an die KI.",
