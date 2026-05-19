@@ -332,9 +332,9 @@
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
     "NO_PAGE_CONFIG": {
-      "DEFAULT_MESSAGE": "Für diese Seite konnte keine Seiten-Konfiguration gefunden werden.",
+      "DEFAULT_MESSAGE": "Für diese Sammlung wurde noch keine Themenseite erstellt.",
       "VIEW_MESSAGE": "Bitte wenden Sie sich an Ihren Systemadministrator.",
-      "EDIT_MESSAGE": "Sie können jedoch über das Menü eine Seiten-Konfiguration auswählen, die Sie verwenden wollen.",
+      "EDIT_MESSAGE": "Bitte wählen Sie im Menü eine Vorlage aus, um zu beginnen.",
       "SELECT_LABEL": "Seiten-Konfiguration",
       "SELECT_PLACEHOLDER": "Seiten-Konfiguration auswählen",
       "DEFAULT_TEMPLATE": "Standard-Vorlage",
