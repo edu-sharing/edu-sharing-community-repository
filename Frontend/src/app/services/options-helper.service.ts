@@ -1360,7 +1360,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 }
                 return (
                     await firstValueFrom(
-                        this.nodeService.getParents(objects[0].ref.id, { fullPath: false }),
+                        this.nodeService.getParents(objects[0].ref.id, {
+                            repository: objects[0].ref.repo,
+                            fullPath: false,
+                        }),
                     )
                 ).nodes.some(
                     (n) => n.properties[RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF]?.[0],
