@@ -330,9 +330,9 @@
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
     "NO_PAGE_CONFIG": {
-      "DEFAULT_MESSAGE": "No page configuration could be found for this page.",
+      "DEFAULT_MESSAGE": "No topic page has been created for this collection yet.",
       "VIEW_MESSAGE": "Please contact your system administrator.",
-      "EDIT_MESSAGE": "However, you can select a page configuration that you want to use via the menu.",
+      "EDIT_MESSAGE": "Please select a template from the menu to get started.",
       "SELECT_LABEL": "Page config",
       "SELECT_PLACEHOLDER": "Select page config",
       "DEFAULT_TEMPLATE": "Default template",
