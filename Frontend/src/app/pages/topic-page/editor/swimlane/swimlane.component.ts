@@ -47,6 +47,13 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Input() editMode: boolean;
     @Input() grid: GridTile[] = [];
     @Input() pageVariantNode?: Node;
+    @Input() set rendering2Supported(value: boolean) {
+        if (!value) {
+            this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
+                (widgetType) => widgetType !== WIDGETS.MEDIA_RENDERING,
+            );
+        }
+    }
     @Input() searchInput: string;
     @Input() searchFilters: Values;
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();

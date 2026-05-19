@@ -162,6 +162,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
+    rendering2Supported: WritableSignal<boolean> = signal(false);
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
     private updateSearchResultCount$: Subject<void> = new Subject<void>();
@@ -224,6 +225,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         this.viewInitialized = true;
 
         this.aiSupported.set(await this.aiHelperService.hasAISupport());
+        this.rendering2Supported.set(await this.aiHelperService.hasRendering2Support());
 
         // define a common embed configuration option to be used in every widget
         this.updateCommonConfigurationOptions();
@@ -842,10 +844,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.MEDIA_RENDERING:
-                const mediaRenderingModule = await import(
-                    '../media-rendering/media-rendering.component'
-                );
-                componentClass = mediaRenderingModule.MediaRenderingComponent;
+                if (this.rendering2Supported()) {
+                    const mediaRenderingModule = await import(
+                        '../media-rendering/media-rendering.component'
+                    );
+                    componentClass = mediaRenderingModule.MediaRenderingComponent;
+                }
                 break;
             case WIDGETS.TEXT_WIDGET:
                 const textWidgetModule = await import('../text-widget/text-widget.component');
