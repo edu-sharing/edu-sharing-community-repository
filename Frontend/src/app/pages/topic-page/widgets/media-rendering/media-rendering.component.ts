@@ -31,6 +31,7 @@ import { PreviewSidebarService } from '../../../../features/preview-sidebar/prev
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { LayoutOption } from '../../shared/types/layout-option';
@@ -128,6 +129,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         private highlightSearch: HighlightSearchPipe,
         private nodeTitlePipe: NodeTitlePipe,
         private previewSidebarService: PreviewSidebarService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
     ) {
         // subscribe to changes on the selected node
@@ -183,6 +185,12 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             // check whether the node can be read
             const node: Node = await this.topicPageHelperService.getNode(selectedNode.ref.id);
             if (!node) {
+                return;
+            }
+            // run any registered selection validator
+            // a validator may cancel the selection silently and inform the user itself
+            const isValid: boolean = await this.topicPageGlobalService.validateNodeSelection(node);
+            if (!isValid) {
                 return;
             }
             // workaround to properly update the selected node
