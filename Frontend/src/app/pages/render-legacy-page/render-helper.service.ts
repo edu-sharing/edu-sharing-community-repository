@@ -262,6 +262,12 @@ export class RenderHelperService {
         videoElement?.addEventListener('click', () => {
             this.tracking.trackEvent(EventType.OPEN_EXTERNAL_LINK, node.ref.id).subscribe(() => {});
         });
+        const gdprElement = document.querySelector('.dataProtectionRegulationsButton');
+        gdprElement?.addEventListener('click', () => {
+            this.tracking
+                .trackEvent(EventType.VIEW_MATERIAL_GDPR_CONFIRMED, node.ref.id)
+                .subscribe(() => {});
+        });
     }
     injectVideoControls(node: Node) {
         let videoElement: HTMLVideoElement;
