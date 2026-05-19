@@ -26,7 +26,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { NodeHelperService } from '../../../services/node-helper.service';
 
@@ -92,24 +92,30 @@ export class RenderWrapperComponent implements OnChanges {
                 this.parentNode.set(
                     await firstValueFrom(
                         this.nodeService.getNode(changes.nodeId.currentValue, {
-                            repository: this.repository,
+                            repository: this.repository || HOME_REPOSITORY,
                         }),
                     ),
                 );
-                this.children.set(
-                    (
-                        await firstValueFrom(
-                            this.nodeService.getChildren(changes.nodeId.currentValue, {
-                                repository: this.repository,
-                                filter: ['files'],
-                                sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
-                                sortAscending: [true],
-                                assocName: RestConstants.CCM_ASSOC_CHILDIO,
-                                maxItems: RestConstants.COUNT_UNLIMITED,
-                            }),
-                        )
-                    ).nodes,
-                );
+                try {
+                    this.children.set(
+                        (
+                            await firstValueFrom(
+                                this.nodeService.getChildren(changes.nodeId.currentValue, {
+                                    repository: this.repository || HOME_REPOSITORY,
+                                    filter: ['files'],
+                                    sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                                    sortAscending: [true],
+                                    assocName: RestConstants.CCM_ASSOC_CHILDIO,
+                                    maxItems: RestConstants.COUNT_UNLIMITED,
+                                }),
+                            )
+                        ).nodes,
+                    );
+                } catch (e) {
+                    this.children.set(null);
+                    e.preventDefault();
+                    console.warn('Could not fetch children', e);
+                }
             } else {
                 this.children.set(null);
             }
