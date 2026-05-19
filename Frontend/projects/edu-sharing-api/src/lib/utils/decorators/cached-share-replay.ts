@@ -41,7 +41,6 @@ export class KeyCache<T = unknown> {
         duration = 0,
     ): Observable<T> {
         const entry = this._data[key];
-        console.log('cache', this._data[key], key);
         if (!entry || (duration > 0 && Date.now() - entry.created > duration * 1000)) {
             this._data[key] = new KeyCacheEntry(getObservable, type);
         } else {
