@@ -25,7 +25,7 @@
         class="option option-{{ option | propertySlug }}"
       >
         <es-nodes-selector
-          *ngIf="option === 'SORT_INTO'"
+          *ngIf="option === 'SORT_INTO' || option === 'MANAGE_CONTENT'"
           [option]="enabledOption()"
           [parent]="parent()"
           [primaryMode]="primaryMode()"

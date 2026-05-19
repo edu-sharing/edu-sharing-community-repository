@@ -658,9 +658,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
          }
          */
 
-        const sortInto = new OptionItem('OPTIONS.SORT_INTO', 'layers', (object) =>
+        const sortInto = new OptionItem('OPTIONS.MANAGE_CONTENT', 'layers', (object) =>
             this.editorialSidebarService.showOption({
-                option: 'SORT_INTO',
+                option: 'MANAGE_CONTENT',
                 trap: true,
                 optionConfig: {
                     state: TabType.COLLECTIONS,

@@ -40,10 +40,10 @@
       "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },
     "OPTIONS": {
+      "MANAGE_CONTENT": "Einsortieren",
+      "MANAGE_CONTENT_DESCRIPTION": "Hier können Sie die gewählten Elemente einsortieren",
       "SORT_INTO": "Inhalt hinzufügen",
-      "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas hinzufügen.",
-      "MANAGE_CONTENT": "Inhalte zuordnen",
-      "MANAGE_CONTENT_DESCRIPTION": "Mit diesem Panel kannst du rechts eine beliebige andere Ansicht als Quelle für deinen Kooperationsort öffnen.",
+      "SORT_INTO_DESCRIPTION": "Mit diesem Panel kannst du rechts eine andere Ansicht als Quelle zum hinzufügen nutzen.",
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
       "MANAGE_SUBMISSION": "Abgabe bearbeiten",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",

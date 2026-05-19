@@ -46,7 +46,10 @@ export type EditorialSidebarOption =
     | 'WORKSPACE_METADATA'
     | 'SHARE_QR'
     | 'PREVIEW'
+    // sort into from right to left
     | 'SORT_INTO'
+    // manage content is sort into from left to right
+    | 'MANAGE_CONTENT'
     | 'MANAGE_SUBMISSION'
     | 'VIEW_ASSIGNMENT';
 
@@ -207,7 +210,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             () =>
                 this.enabledOption.set({
                     trap: false,
-                    option: 'SORT_INTO',
+                    option: 'MANAGE_CONTENT',
                     optionConfig: { nodes: this.editorialSidebarService.nodes() },
                 }),
         );
