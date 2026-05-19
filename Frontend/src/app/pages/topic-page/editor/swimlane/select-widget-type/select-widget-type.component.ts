@@ -30,11 +30,16 @@ export class SelectWidgetTypeComponent implements OnInit {
     constructor(private aiHelperService: AiHelperService, private dialogs: DialogsService) {}
 
     async ngOnInit(): Promise<void> {
-        if (!(await this.aiHelperService.hasAISupport())) {
-            this.widgetTypeOptions = WIDGET_TYPE_OPTIONS.filter(
-                (option) => option.value !== WIDGETS.AI_TEXT_WIDGET,
-            );
-        }
+        const [hasAI, hasRendering2] = await Promise.all([
+            this.aiHelperService.hasAISupport(),
+            this.aiHelperService.hasRendering2Support(),
+        ]);
+
+        this.widgetTypeOptions = WIDGET_TYPE_OPTIONS.filter(
+            ({ value }) =>
+                (hasAI || value !== WIDGETS.AI_TEXT_WIDGET) &&
+                (hasRendering2 || value !== WIDGETS.MEDIA_RENDERING),
+        );
     }
 
     /**
