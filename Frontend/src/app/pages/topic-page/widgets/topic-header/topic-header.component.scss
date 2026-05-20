@@ -21,6 +21,32 @@
         flex-direction: column;
         gap: 16px;
 
+        &.bright-color {
+            color: topicPageVars.$on-primary;
+
+            ::ng-deep {
+                .topic-header-title,
+                .mat-heading-3,
+                .ai-label,
+                .mat-icon.important-header-icon,
+                .text-content,
+                .mat-mdc-input-element,
+                .mdc-floating-label,
+                .mat-mdc-form-field.mat-focused .mdc-floating-label,
+                .mat-mdc-input-element::placeholder {
+                    color: topicPageVars.$on-primary;
+                }
+
+                .show-more-btn {
+                    color: topicPageVars.$textVeryLight;
+                }
+
+                .mat-mdc-input-element {
+                    caret-color: topicPageVars.$on-primary;
+                }
+            }
+        }
+
         .topic-header-color-picker {
             position: absolute;
             top: 10px;

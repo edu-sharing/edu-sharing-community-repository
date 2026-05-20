@@ -1,6 +1,10 @@
 <div class="es-topic-header-widget">
   <div class="template-header-content" *ngIf="initialized(); else loadingSpinner">
-    <div class="topic-text-wrapper" [style.background]="textBackgroundColor">
+    <div
+      class="topic-text-wrapper"
+      [class.bright-color]="isDarkColor(textBackgroundColor)"
+      [style.background]="textBackgroundColor"
+    >
       <es-color-picker
         *ngIf="editMode"
         class="topic-header-color-picker"
