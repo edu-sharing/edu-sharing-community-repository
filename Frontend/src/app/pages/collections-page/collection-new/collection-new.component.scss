@@ -303,7 +303,15 @@ $imagePath: '../../../../assets/images/collections/';
     textarea {
         background-color: transparent;
     }
+
+    --mdc-outlined-text-field-focus-outline-width: 3px;
+    .mat-form-field-dark {
+        mat-label {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+    }
 }
+
 .collection-new-bg {
     position: absolute;
     width: 100%;
