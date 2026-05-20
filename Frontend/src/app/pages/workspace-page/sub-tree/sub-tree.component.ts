@@ -1,6 +1,7 @@
 import { trigger } from '@angular/animations';
 import {
     Component,
+    ElementRef,
     EventEmitter,
     Input,
     OnDestroy,
@@ -51,6 +52,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
 
     @ViewChild('dropdown') dropdown: DropdownComponent;
     @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
+    @ViewChild('subTreeWrapper', { static: true }) subTreeWrapperRef: ElementRef<HTMLElement>;
     dropdownLeft: number;
     dropdownTop: number;
 
@@ -65,6 +67,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         this.expandCurrentPath();
     }
     @Input() depth = 0;
+    @Input() treeRoot: ElementRef<HTMLElement> | null = null;
     /** The node rendered by this sub tree. */
     @Input() set node(node: string) {
         this._node = node;
@@ -205,7 +208,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         this.clickElement.emit(node);
     }
 
-    toggleNodeExpansion(event: MouseEvent, node: Node): void {
+    toggleNodeExpansion(event: Event, node: Node): void {
         if (this._hasChildren[node.ref.id] === false) {
             return;
         }
@@ -216,6 +219,79 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
         } else {
             this.expandedNodes.splice(index, 1);
         }
+    }
+
+    getTabIndex(node: Node): 0 | -1 {
+        const focusTarget = this.getTreeFocusTarget();
+        if (focusTarget) {
+            return node.ref.id === focusTarget ? 0 : -1;
+        }
+        // Before first focus: first item at root level is the Tab entry point
+        if (this.depth === 0 && this._nodes?.[0]?.ref.id === node.ref.id) return 0;
+        return -1;
+    }
+
+    onTreeItemFocus(node: Node): void {
+        this.setTreeFocusTarget(node.ref.id);
+    }
+
+    onTreeItemKeydown(event: KeyboardEvent, node: Node): void {
+        switch (event.key) {
+            case 'Enter':
+                this.openOrCloseNode(node);
+                break;
+            case ' ':
+                event.preventDefault();
+                this.openOrCloseNode(node);
+                break;
+            case 'ArrowRight':
+                if (!this.isOpen(node)) this.toggleNodeExpansion(event, node);
+                break;
+            case 'ArrowLeft':
+                if (this.isOpen(node)) this.toggleNodeExpansion(event, node);
+                break;
+            case 'ArrowDown': {
+                event.preventDefault();
+                const items = this.getVisibleTreeItems();
+                const idx = items.indexOf(event.target as HTMLElement);
+                items[idx + 1]?.focus();
+                break;
+            }
+            case 'ArrowUp': {
+                event.preventDefault();
+                const items = this.getVisibleTreeItems();
+                const idx = items.indexOf(event.target as HTMLElement);
+                items[idx - 1]?.focus();
+                break;
+            }
+            case 'Home': {
+                event.preventDefault();
+                this.getVisibleTreeItems()[0]?.focus();
+                break;
+            }
+            case 'End': {
+                event.preventDefault();
+                const items = this.getVisibleTreeItems();
+                items[items.length - 1]?.focus();
+                break;
+            }
+        }
+    }
+
+    private getTreeRoot(): HTMLElement {
+        return (this.treeRoot ?? this.subTreeWrapperRef).nativeElement;
+    }
+
+    private getTreeFocusTarget(): string | null {
+        return this.getTreeRoot().dataset['focusTarget'] ?? null;
+    }
+
+    private setTreeFocusTarget(nodeId: string): void {
+        this.getTreeRoot().dataset['focusTarget'] = nodeId;
+    }
+
+    private getVisibleTreeItems(): HTMLElement[] {
+        return Array.from(this.getTreeRoot().querySelectorAll<HTMLElement>('[role="treeitem"]'));
     }
 
     refresh() {
