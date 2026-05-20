@@ -37,7 +37,7 @@
         [aiGenerated]="aiGeneratedDescription()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
-        [label]="'TOPIC_PAGE.WIDGET.TOPIC_HEADER.COLLECTION_DESCRIPTION_LABEL' | translate"
+        [label]="i18nPrefix + 'COLLECTION_DESCRIPTION_LABEL' | translate"
         [inputLimit]="1000"
         [nonEditText]="collectionDescription ?? ''"
         [prominentText]="true"
@@ -50,9 +50,7 @@
         <i esIcon="edu-lightbulb" class="important-header-icon"></i>
         <span
           [innerHTML]="
-            'TOPIC_PAGE.WIDGET.TOPIC_HEADER.IMPORTANCE_HEADER'
-              | translate
-              | highlightSearch : searchInput()
+            i18nPrefix + 'IMPORTANCE_HEADER' | translate | highlightSearch : searchInput()
           "
         ></span>
       </h2>
@@ -61,7 +59,7 @@
         [aiGenerated]="aiGeneratedText()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
-        [label]="'TOPIC_PAGE.WIDGET.TOPIC_HEADER.IMPORTANCE_LABEL' | translate"
+        [label]="i18nPrefix + 'IMPORTANCE_LABEL' | translate"
         [inputLimit]="1000"
         [nonEditText]="description"
         [searchInput]="searchInput()"
