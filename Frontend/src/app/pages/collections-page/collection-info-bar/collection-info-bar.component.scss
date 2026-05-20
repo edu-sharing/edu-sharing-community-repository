@@ -10,7 +10,7 @@
 }
 .collections-header {
     background-color: var(--primary);
-    color: #fff;
+    color: var(--textMain);
     left: 0;
     width: 100%;
     height: 100%;
@@ -27,9 +27,6 @@
         background-color: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(10px);
     }
-}
-.dark-color {
-    color: #000;
 }
 .collection-new-preview-headline {
     word-break: normal;
@@ -138,11 +135,10 @@
         outline-color: white;
     }
 }
+
 .collections-header-textarea {
-    background-color: rgba(0, 0, 0, 0.15);
-    &.collections-header-textarea-bright {
-        background-color: rgba(255, 255, 255, 0.15);
-    }
+    background-color: rgba(255, 255, 255, 0.8);
+
     .collection-label,
     .collection-metadata {
         margin: 18px 0 0;

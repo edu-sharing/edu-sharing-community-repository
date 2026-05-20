@@ -49,13 +49,6 @@ export class CollectionInfoBarComponent implements OnChanges {
         }
     }
 
-    isBrightColor() {
-        return (
-            ColorHelper.getPreferredColor(this.collection?.collection?.color) ===
-            PreferredColor.White
-        );
-    }
-
     hasNonIconPreview(): boolean {
         const preview = this.collection?.preview;
         return preview && !preview.isIcon;

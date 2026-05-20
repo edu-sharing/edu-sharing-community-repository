@@ -210,15 +210,10 @@
 
         <div
           class="collection-new-preview-infoarea"
-          [style.background-color]="currentCollection.collection.color"
-          [class.dark-color]="isBrightColor()"
+          [style.background-color]="currentCollection.collection.color + '33'"
         >
-          <div class="collection-new-bg"></div>
           <div class="dialog-basic-area dialog-input-area">
-            <mat-form-field
-              [class.mat-form-field-bright]="!isBrightColor()"
-              [class.mat-form-field-dark]="isBrightColor()"
-            >
+            <mat-form-field>
               <mat-label>{{ 'collectionNew_placeholderTitle' | translate }}</mat-label>
               <!-- Autofocus and autocomplete don't work well together here, because the
                     autocomplete list will open before the card animation finishes. -->
@@ -231,10 +226,7 @@
                 data-test="new-collection-name-input"
               />
             </mat-form-field>
-            <mat-form-field
-              [class.mat-form-field-bright]="!isBrightColor()"
-              [class.mat-form-field-dark]="isBrightColor()"
-            >
+            <mat-form-field>
               <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
               <textarea matInput [(ngModel)]="currentCollection.collection.description"></textarea>
             </mat-form-field>
@@ -256,10 +248,7 @@
             </ng-container>
             <ng-container *ngIf="authorFreetext">
               <i esIcon="person"></i>
-              <mat-form-field
-                class="mat-form-field-no-padding"
-                [class.mat-form-field-bright]="!isBrightColor()"
-              >
+              <mat-form-field class="mat-form-field-no-padding">
                 <mat-label id="collection-new-author-freetext-label">
                   {{ 'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
                 </mat-label>

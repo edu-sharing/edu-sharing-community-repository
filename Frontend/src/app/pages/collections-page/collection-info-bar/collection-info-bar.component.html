@@ -2,7 +2,6 @@
   role="complementary"
   [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
   class="collections-header"
-  [class.dark-color]="isBrightColor()"
   [style.background-color]="collection?.collection?.color"
 >
   <div
@@ -43,10 +42,7 @@
       class="big-edit-button"
     ></div>
   </div>
-  <div
-    class="collections-header-textarea"
-    [class.collections-header-textarea-bright]="isBrightColor()"
-  >
+  <div class="collections-header-textarea">
     <div class="collection-option">
       <es-actionbar
         #actionbar

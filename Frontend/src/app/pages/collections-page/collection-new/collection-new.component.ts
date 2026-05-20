@@ -795,12 +795,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             this.save3(collection);
         }
     }
-    public isBrightColor() {
-        return (
-            ColorHelper.getPreferredColor(this.currentCollection.collection.color) ===
-            PreferredColor.White
-        );
-    }
+
     private save3(collection: EduData.Node) {
         if (
             this.newCollectionType == RestConstants.COLLECTIONTYPE_EDITORIAL &&
