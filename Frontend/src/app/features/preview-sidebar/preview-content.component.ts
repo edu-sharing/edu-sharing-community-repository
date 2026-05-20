@@ -8,7 +8,7 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { AboutService, Node } from 'ngx-edu-sharing-api';
+import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -18,7 +18,7 @@ import {
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { DialogsService } from '../dialogs/dialogs.service';
 import { Params, Router } from '@angular/router';
 import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -73,9 +73,13 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         }
         this.about.hasPlugin('rendering-service-2').then(async (has) => {
             if (has) {
-                const module = await this.moduleInfoService.getModuleInfo(node);
+                let module = 'default';
+                if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
+                    // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
+                    module = (await this.moduleInfoService.getModuleInfo(node)).module;
+                }
                 console.info('rs module', module);
-                if (this.autoRender || this.AutoRenderModules.includes(module.module)) {
+                if (this.autoRender || this.AutoRenderModules.includes(module)) {
                     void this.onShowContentClick();
                 }
             } else {
@@ -93,6 +97,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         public optionsHelper: OptionsHelperDataService,
         public moduleInfoService: ModuleInfoService,
         public previewSidebarTemplateService: PreviewSidebarTemplateService,
+        public networkService: NetworkService,
         private renderHelperService: RenderHelperService,
         public router: Router,
         public about: AboutService,

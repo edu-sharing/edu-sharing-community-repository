@@ -334,6 +334,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     topic: WritableSignal<string> = signal('');
     topicCollectionID: WritableSignal<string> = signal(null);
     aiSupported: WritableSignal<boolean> = signal(false);
+    rendering2Supported: WritableSignal<boolean> = signal(false);
 
     collectionNode: Node;
     collectionNodePageConfigRef: string;
@@ -455,6 +456,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.searchUrl = this.retrieveSearchUrl();
         // retrieve the AI support state
         this.aiSupported.set(await this.aiHelperService.hasAISupport());
+        // retrieve the rendering 2 support state
+        this.rendering2Supported.set(await this.aiHelperService.hasRendering2Support());
         // check if the collectionId input is set
         if (this.collectionId) {
             // set the collection ID
@@ -2104,14 +2107,23 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                               id: uuidv4(),
                               repo: HOME_REPOSITORY,
                           },
-                          name: 'DEFAULT TEMPLATE',
-                          title: 'DEFAULT TEMPLATE',
+                          name: this.translate.instant(
+                              this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                          ),
+                          title: this.translate.instant(
+                              this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                          ),
                           type: RestConstants.CCM_TYPE_MAP,
                           properties: {
                               [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: [
                                   '{"structure":{"swimlanes":[]}}',
                               ],
                               [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
+                              [RestConstants.LOM_PROP_TITLE]: [
+                                  this.translate.instant(
+                                      this.i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+                                  ),
+                              ],
                           },
                       },
                   ] as Partial<Node>[]);

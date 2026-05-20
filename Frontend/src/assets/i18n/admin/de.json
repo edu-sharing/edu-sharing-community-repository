@@ -496,13 +496,6 @@
       "NODES_MEDIACENTER_INFO": "Die gezeigten Statistiken sind nur für den Abruf aktueller Daten vorgesehen. Für den Zugriff auf historische Daten nutzen Sie bitte die bereitgestellten Dateien unter \"Monatlich/Jährlich\".",
       "NODES_APPLY": "Auswertung starten",
       "CUSTOM_GROUPS": "Nach Kriterium",
-      "VIEWS": "Seitenaufrufe",
-      "VIEWS_EMBEDDED": "Einbettungen",
-      "VIEWS_COLLECTION": "Sammlungs-Aufrufe",
-      "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
-      "DOWNLOADS": "Downloads",
-      "VIEWS_PLAY_MEDIA": "Wiedergaben",
-      "USER_LOGINS": "Logins",
       "GROUP_BY": "Gruppieren nach",
       "FROM": "Start-Zeit",
       "TO": "End-Zeit",
@@ -554,7 +547,8 @@
         "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
         "VIEW_COLLECTION": "Sammlungs-Aufrufe",
         "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
-        "DOWNLOAD_MATERIAL": "Downloads"
+        "DOWNLOAD_MATERIAL": "Downloads",
+        "VIEW_MATERIAL_GDPR_CONFIRMED": "DSGVO-Bestätigungen"
       }
     },
     "MEDIACENTER": {
