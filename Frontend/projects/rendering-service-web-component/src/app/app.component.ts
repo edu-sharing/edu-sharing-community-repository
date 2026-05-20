@@ -80,7 +80,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.signature,
                 this.jwt,
                 this.render_url,
-                this.signature_algorithm ?? 'SHA1withRSA',
+                this.signature_algorithm ?? 'SHA512withRSA',
             );
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);
