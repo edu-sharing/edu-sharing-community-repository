@@ -15,7 +15,13 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
-import { EduSharingUiCommonModule, SpinnerComponent, UIConstants } from 'ngx-edu-sharing-ui';
+import {
+    ColorHelper,
+    EduSharingUiCommonModule,
+    PreferredColor,
+    SpinnerComponent,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
@@ -367,6 +373,15 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             headerConfig.textBackgroundColor = this.textBackgroundColor;
         }
         return headerConfig;
+    }
+
+    /**
+     * Checks whether a given color is dark.
+     *
+     * @param color
+     */
+    isDarkColor(color: string) {
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
     protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
