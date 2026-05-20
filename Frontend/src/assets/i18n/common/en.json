@@ -177,7 +177,6 @@
     "TOOLPERMISSION_SUGGESTION_READ": "Read metadata suggestions on materials",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
     "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
     "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },

@@ -183,7 +183,6 @@
     "TOOLPERMISSION_SUGGESTION_READ": "Vorschläge für Metadaten an Elementen abrufen.",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
     "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
     "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
