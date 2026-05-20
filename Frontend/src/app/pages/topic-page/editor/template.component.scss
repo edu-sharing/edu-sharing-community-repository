@@ -311,6 +311,24 @@ es-side-menu-wrapper {
                 margin: 0 auto;
                 max-width: var(--content-max-width);
                 position: relative;
+
+                &.bright-color {
+                    color: topicPageVars.$on-primary;
+
+                    ::ng-deep {
+                        .text-content,
+                        .mat-mdc-input-element,
+                        .mdc-floating-label,
+                        .mat-mdc-form-field.mat-focused .mdc-floating-label,
+                        .mat-mdc-input-element::placeholder {
+                            color: topicPageVars.$on-primary;
+                        }
+
+                        .mat-mdc-input-element {
+                            caret-color: topicPageVars.$on-primary;
+                        }
+                    }
+                }
             }
 
             .swimlane-heading-wrapper {

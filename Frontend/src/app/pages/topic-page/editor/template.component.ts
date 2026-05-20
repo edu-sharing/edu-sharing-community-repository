@@ -42,6 +42,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
+    ColorHelper,
     Constrain,
     CustomOptions,
     DefaultGroups,
@@ -49,6 +50,7 @@ import {
     Helper,
     OptionItem,
     OptionsHelperDataService,
+    PreferredColor,
     Scope,
     TranslationsService,
     UIConstants,
@@ -2343,6 +2345,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         } finally {
             this.endEditing();
         }
+    }
+
+    /**
+     * Checks whether a given color is dark.
+     *
+     * @param color
+     */
+    isDarkColor(color: string) {
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
     /**
