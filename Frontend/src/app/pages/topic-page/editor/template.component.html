@@ -348,6 +348,7 @@
                 </ng-container>
                 <div
                   class="topic-page-swimlane"
+                  [class.bright-color]="isDarkColor(swimlane.backgroundColor)"
                   [style.background-color]="
                     (swimlane.backgroundShape === undefined ||
                       swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
