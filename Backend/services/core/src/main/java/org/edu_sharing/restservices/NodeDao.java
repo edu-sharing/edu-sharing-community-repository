@@ -183,6 +183,10 @@ public class NodeDao {
         return null;
     }
 
+    public static boolean exists(RepositoryDao repoDao, String nodeId) {
+        return NodeServiceFactory.getNodeService(repoDao.getId()).exists(nodeId);
+    }
+
     public org.edu_sharing.service.model.NodeRef getNodeRef() {
         if (this.nodeRef != null) {
             return this.nodeRef;
@@ -667,11 +671,13 @@ public class NodeDao {
      * create an empty, Node dummy interface
      *
      */
-    public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    public static <T extends Node> T createEmptyDummy(Class<T> clazz, NodeRef nodeRef, String nodeType) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         T node = clazz.getConstructor().newInstance();
         node.setRef(nodeRef);
+        node.setType(CCConstants.getValidLocalName(nodeType));
         node.setName(nodeRef.getId());
         node.setPreview(new Preview());
+        node.setProperties(Collections.emptyMap());
         // allow fetching as admin to properly resolve the url
         AuthenticationUtil.runAsSystem(() -> {
             try {
@@ -1008,11 +1014,17 @@ public class NodeDao {
                         // apply thread variables to keep state of thread
                         Context.setInstance(context);
                         NodeServiceInterceptor.setEduSharingScope(scope);
-                        NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
-                        if (transform != null) {
-                            nodeDao = transform.apply(nodeDao);
+                        try {
+                            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeRef.getId(), propFilter);
+                            if (transform != null) {
+                                nodeDao = transform.apply(nodeDao);
+                            }
+                            return nodeDao.asNode();
+                            // do not remove; might be thrown by interceptors
+                        } catch(DAOSecurityException e) {
+                            logger.debug(e.getMessage(), e);
+                            return NodeDao.createEmptyDummy(Node.class, nodeRef, CCConstants.CCM_TYPE_IO);
                         }
-                        return nodeDao.asNode();
                     } catch (DAOMissingException daoException) {
                         logger.warn("Missing node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
                         return null;
@@ -1466,7 +1478,7 @@ public class NodeDao {
             result.addAll(reference.getAccessOriginal());
         }
         boolean restrictedAccess = reference.isOriginalRestrictedAccess();
-        result.addAll(PermissionServiceHelper.getEffectivePermissions(restrictedPermissions, restrictedAccess));
+        result.addAll(PermissionServiceHelper.getEffectivePermissions(reference.getOriginalId(), restrictedPermissions, restrictedAccess));
         return result;
     }
 

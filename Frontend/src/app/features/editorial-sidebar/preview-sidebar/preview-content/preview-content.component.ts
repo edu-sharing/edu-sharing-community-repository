@@ -8,7 +8,7 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { AboutService, Node } from 'ngx-edu-sharing-api';
+import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -17,6 +17,11 @@ import {
     OptionsHelperDataService,
     RenderHelperService,
 } from 'ngx-edu-sharing-ui';
+import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
+import { firstValueFrom, Subject } from 'rxjs';
+import { DialogsService } from '../dialogs/dialogs.service';
+import { Params, Router } from '@angular/router';
+import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
@@ -66,21 +71,21 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     set node(node: Node) {
         this._node = node;
         this.renderNode.set(null);
-        const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
-            .filter((k) => !!k[1])
-            .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
-        this.allDetailsLink =
-            (this.nodeHelper.getNodeLink('routerLink', node) as string) +
-            (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
+        this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
+        this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
         void this.mdsRef?.reInit();
         if (this.actionbar) {
             void this.updateOptions();
         }
         void this.about.hasPlugin('rendering-service-2').then(async (has) => {
             if (has) {
-                const module = await this.moduleInfoService.getModuleInfo(node);
+                let module = 'default';
+                if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
+                    // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
+                    module = (await this.moduleInfoService.getModuleInfo(node)).module;
+                }
                 console.info('rs module', module);
-                if (this.autoRender || this.AutoRenderModules.includes(module.module)) {
+                if (this.autoRender || this.AutoRenderModules.includes(module)) {
                     void this.onShowContentClick();
                 }
             } else {
@@ -90,6 +95,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     allDetailsLink: string;
+    allDetailsParams: Params;
 
     constructor(
         private nodeHelper: NodeHelperService,
@@ -98,6 +104,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         public moduleInfoService: ModuleInfoService,
         public previewSidebarTemplateService: PreviewSidebarTemplateService,
         public editorialSidebarService: EditorialSidebarService,
+        public networkService: NetworkService,
         private renderHelperService: RenderHelperService,
         public router: Router,
         public about: AboutService,
@@ -139,7 +146,9 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void dialogRefPromise?.then((dialogRef) => dialogRef.close());
             });*/
         } else {
-            await this.router.navigateByUrl(this.allDetailsLink);
+            await this.router.navigate([this.allDetailsLink], {
+                queryParams: this.allDetailsParams,
+            });
         }
     }
 

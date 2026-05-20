@@ -48,6 +48,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             ActivityOnNodeEventType.VIEW_MATERIAL,
             ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
             ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+            ActivityOnNodeEventType.VIEW_MATERIAL_GDPR_CONFIRMED,
             ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
             ActivityOnNodeEventType.DOWNLOAD_MATERIAL
     );
@@ -253,7 +254,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             if (isInterrupted()) {
                 return;
             }
-            if(!nodePropertiesFilters.isEmpty()) {
+            if(nodePropertiesFilters != null && !nodePropertiesFilters.isEmpty()) {
                 try {
                     boolean filter = false;
                     for (Map.Entry<String, String> filterEntry : nodePropertiesFilters.entrySet()) {

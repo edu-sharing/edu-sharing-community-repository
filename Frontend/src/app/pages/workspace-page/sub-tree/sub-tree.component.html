@@ -31,6 +31,7 @@
         [attr.aria-expanded]="_hasChildren[node.ref.id] === false ? null : isOpen(node)"
         [attr.aria-level]="depth + 1"
         (click)="openOrCloseNode(node)"
+        (dblclick)="openOrCloseNode(node)"
         (keydown)="onTreeItemKeydown($event, node)"
       >
         <button

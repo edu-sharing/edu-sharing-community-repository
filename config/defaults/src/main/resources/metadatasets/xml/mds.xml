@@ -1436,6 +1436,20 @@
       </views>
     </group>
     <group>
+        <id>topic_page_variant_configuration</id>
+        <rendering>angular</rendering>
+        <views>
+            <view>topic_page_variant_configuration</view>
+        </views>
+    </group>
+    <group>
+        <id>topic_page_variant_search</id>
+        <rendering>angular</rendering>
+        <views>
+            <view>topic_page_variant_search</view>
+        </views>
+    </group>
+    <group>
       <id>topic_page_variant_configuration</id>
       <rendering>angular</rendering>
       <views>

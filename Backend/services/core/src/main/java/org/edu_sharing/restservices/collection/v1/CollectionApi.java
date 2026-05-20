@@ -12,9 +12,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -310,7 +315,11 @@ public class CollectionApi {
 			filter.setProperties(propertyFilter);
 			CollectionBaseEntries base = CollectionDao.getCollectionsReferences(repoDao, parentId, filter, sortDefinition, skipCount == null ? 0 : skipCount, maxItems == null ? 500 : maxItems);
 			for (Node item : base.getEntries()) {
-				references.add((CollectionReference) item);
+				if(item instanceof CollectionReference) {
+					references.add((CollectionReference) item);
+				} else {
+					references.add(new CollectionReference(item));
+				}
 			}
 			response.setReferences(references);
 			response.setPagination(base.getPagination());
@@ -595,9 +604,13 @@ public class CollectionApi {
             CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
 					collectionId);
 
-            NodeDao nodeDao = NodeDao.getNode(repoDao, nodeId);
+            if (collectionDao == null) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
-            collectionDao.removeFromCollection(nodeDao);
+            if (!NodeDao.exists(repoDao, nodeId)) {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
 
 			return Response.status(Response.Status.OK).build();
 

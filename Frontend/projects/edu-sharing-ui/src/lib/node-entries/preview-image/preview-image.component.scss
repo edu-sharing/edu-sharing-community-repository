@@ -35,6 +35,10 @@
         @include blurImage(15px);
         opacity: 1;
     }
+    &.card-image-backdrop-no-permissions {
+        // white because text of icon is black
+        background-color: #fff;
+    }
 }
 
 :host > img,

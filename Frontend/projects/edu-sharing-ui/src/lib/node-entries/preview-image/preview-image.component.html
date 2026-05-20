@@ -1,4 +1,4 @@
-<div class="card-image-backdrop">
+<div class="card-image-backdrop" [class.card-image-backdrop-no-permissions]="!hasPreviewPermission">
   <!-- The blur filter does not work with canvas as it does with img on Chrome, so we go for a black
   background for now. -->
   <!-- <canvas *ngIf="showCanvas" #backdropCanvas role="presentation" aria-hidden="true"></canvas> -->

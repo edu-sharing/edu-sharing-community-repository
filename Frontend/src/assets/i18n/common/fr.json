@@ -273,7 +273,8 @@
       "DOWNLOAD_MATERIAL": "Téléchargements",
       "VIEW_MATERIAL_PLAY_MEDIA": "Lectures",
       "VIEW_COLLECTION": "Vues de la collection",
-      "OPEN_EXTERNAL_LINK": "Vues des liens externes"
+      "OPEN_EXTERNAL_LINK": "Vues des liens externes",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "Confirmations RGPD"
     },
     "cm:title": "titre",
     "ccm:replicationsource": "source",

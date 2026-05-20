@@ -65,7 +65,8 @@ public class TrackingApi {
                     ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
                     ActivityOnNodeEventType.VIEW_MATERIAL,
                     ActivityOnNodeEventType.DOWNLOAD_MATERIAL,
-                    ActivityOnNodeEventType.OPEN_EXTERNAL_LINK
+                    ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
+                    ActivityOnNodeEventType.VIEW_MATERIAL_GDPR_CONFIRMED
             ).contains(event)) {
                 activityEventService.trackActivityOnNode(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, event, AuthenticationUtil.getFullyAuthenticatedUser());
                 return Response.status(Response.Status.OK).build();

@@ -108,6 +108,9 @@
   "ORIGINAL_DELETE": "Remove",
   "ORIGINAL_DELETED": "Content deleted",
   "ORIGINAL_DELETED_INFO": "Only metadata accessable",
+  "ORIGINAL_ACCESS_DENIED": "Access denied",
+  "ORIGINAL_ACCESS_DENIED_INFO": "No permissions to view details of this material",
+  "ORIGINAL_ACCESS_DENIED_MORE": "More information",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details ({{date}})",
   "RENDERSERVICE_API_ERROR": "error while reaching rendering service. Please report this error an administrator.",
@@ -173,7 +176,10 @@
     "TOOLPERMISSION_INVITE_TIMEBASED": "Create time-restricted invitations",
     "TOOLPERMISSION_SUGGESTION_READ": "Read metadata suggestions on materials",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
-    "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials."
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
+    "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
+    "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",
   "NODE_SEARCH": "Search elements...",
@@ -303,7 +309,8 @@
       "DOWNLOAD_MATERIAL": "Downloads",
       "VIEW_MATERIAL_PLAY_MEDIA": "Playbacks",
       "VIEW_COLLECTION": "Collection views",
-      "OPEN_EXTERNAL_LINK": "External link views"
+      "OPEN_EXTERNAL_LINK": "External link views",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "GDPR confirmations"
     },
     "ccm:replicationsourcetimestamp": "last changed",
     "ccm:eaf_subtitle": "subtitle",

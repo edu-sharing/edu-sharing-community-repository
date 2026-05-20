@@ -82,7 +82,7 @@ const PROXY_CONFIG = [
         pathRewrite: { '^/rendering2': '/' },
         configure(proxy) {
             proxy.on('proxyReq', (proxyReq) => {
-                proxyReq.setHeader('Origin', process.env.BACKEND_URL);
+                proxyReq.removeHeader('Origin');
                 // only receive non-gzip results for patching
                 proxyReq.setHeader('Accept-Encoding', 'deflate');
             });

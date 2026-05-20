@@ -328,15 +328,13 @@
       : editMembers
       ? 'PERMISSIONS.EDIT_MEMBERS'
       : 'PERMISSIONS.EDIT_MEMBER_GROUPS'
-    ) | translate
+    )
+      | translate
+        : {
+            name: (addMembers || editMembers | authorityName)
+          }
   }}"
-  [subtitle]="
-    addMembers
-      ? $any(addMembers).profile.displayName
-      : editMembers
-      ? $any(editMembers).profile.displayName
-      : editGroups.authorityName
-  "
+  [subtitle]="addMembers || editMembers | authorityName"
   icon="person_add"
   width="xlarge"
   height="xlarge"

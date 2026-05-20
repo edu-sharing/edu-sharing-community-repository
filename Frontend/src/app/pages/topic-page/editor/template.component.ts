@@ -161,6 +161,7 @@ import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
 import { PreviewSidebarService } from '../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
+import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 
 @Component({
     imports: [

@@ -1,6 +1,7 @@
 <es-render-wrapper-component
   *ngIf="nodeId() && version()"
   [nodeId]="nodeId()"
+  [repository]="repository()"
   [version]="version()"
   [showChildobjects]="true"
   [childId]="childId()"

@@ -114,6 +114,9 @@
   "ORIGINAL_DELETE": "Entfernen",
   "ORIGINAL_DELETED": "Inhalt wurde gelöscht",
   "ORIGINAL_DELETED_INFO": "Nur Informationen sichtbar",
+  "ORIGINAL_ACCESS_DENIED": "Zugriff verweigert",
+  "ORIGINAL_ACCESS_DENIED_INFO": "Keine Berechtigungen, Details zum Material anzuzeigen",
+  "ORIGINAL_ACCESS_DENIED_MORE": "Weitere Informationen",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails ({{date}})",
   "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator.",
@@ -180,6 +183,9 @@
     "TOOLPERMISSION_SUGGESTION_READ": "Vorschläge für Metadaten an Elementen abrufen.",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen."
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
+    "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
+    "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",
   "NODE_SEARCH": "Elemente suchen...",
@@ -330,7 +336,8 @@
       "VIEW_COLLECTION": "Sammlungs-Aufrufe",
       "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
       "DOWNLOAD_MATERIAL": "Downloads",
-      "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
+      "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "DSGVO-Bestätigungen"
     }
   },
   "SHARE": {

@@ -1032,6 +1032,7 @@ public class SearchServiceElastic implements SearchService {
                 String restrictedAccess = (String) data.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_RESTRICTED_ACCESS));
                 List<String> restrictedAccessPermissions = (List<String>) data.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_RESTRICTED_ACCESS_PERMISSIONS));
                 return PermissionServiceHelper.getEffectivePermissions(
+                        nodeId,
                         restrictedAccessPermissions,
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());

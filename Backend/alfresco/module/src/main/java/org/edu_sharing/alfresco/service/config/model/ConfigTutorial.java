@@ -1,10 +1,10 @@
 package org.edu_sharing.alfresco.service.config.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 
 public class ConfigTutorial {
-    @JsonPropertyDescription("should the tutorial be triggered at all (default true)")
+    @Schema(description = "If true (default), show frontend tutorial with darkened area and highlighted elements")
     @XmlElement
     public boolean enabled;
 }

@@ -26,6 +26,9 @@ spec:
         {{- with merge .Values.podAnnotations .Values.global.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if .Values.global.backup.velero.enabled }}
+        backup.velero.io/backup-volumes: share-config,share-data
+        {{- end }}
     spec:
       {{- if (or (default .Values.global.cluster.storage.share.permission .Values.persistence.share.permission) .Values.ingress.admin.enabled) }}
       initContainers:

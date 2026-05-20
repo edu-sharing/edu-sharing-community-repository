@@ -272,7 +272,8 @@
       "DOWNLOAD_MATERIAL": "Download",
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
       "VIEW_COLLECTION": "Visualizzazioni della collezione",
-      "OPEN_EXTERNAL_LINK": "Visualizzazioni dei link esterni"
+      "OPEN_EXTERNAL_LINK": "Visualizzazioni dei link esterni",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "Conferme GDPR"
     },
     "cm:title": "titolo",
     "ccm:replicationsource": "fonte",

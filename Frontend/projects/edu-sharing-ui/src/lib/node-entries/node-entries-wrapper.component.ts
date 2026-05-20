@@ -32,6 +32,7 @@ import {
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesComponent } from './node-entries.component';
 import {
+    CtrlClickBehavior,
     FetchEvent,
     GridConfig,
     InteractionType,
@@ -155,6 +156,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     // TODO: Consider controlling the ui hints and the actual behavior with a single option.
     @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
+    /**
+     * behaviour when ctrl is pressed wy clicking
+     */
+    @Input() ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     /**
      * Do not load more data on scroll.
      */
@@ -308,6 +313,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.fetchData = this.fetchData;
         this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
+        this.entriesService.ctrlClickBehavior = this.ctrlClickBehavior;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);

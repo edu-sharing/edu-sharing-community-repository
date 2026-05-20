@@ -161,8 +161,10 @@
         "type": "object"
       },
       "Admin": {
+        "description": "Admin panel configuration",
         "properties": {
           "editorType": {
+            "description": "Code editor type for config file editing: Textarea or Monaco",
             "enum": [
               "Textarea",
               "Monaco"
@@ -173,6 +175,7 @@
             "$ref": "#/components/schemas/Statistics"
           },
           "wysiwygType": {
+            "description": "WYSIWYG editor type for message editing: Textarea or TinyMCE",
             "enum": [
               "Textarea",
               "TinyMCE"
@@ -529,31 +532,40 @@
         "type": "object"
       },
       "AvailableMds": {
+        "description": "Array of allowed metadata sets per repository",
         "properties": {
           "mds": {
+            "description": "Array of allowed metadata set IDs for this repository",
             "items": {
+              "description": "Array of allowed metadata set IDs for this repository",
               "type": "string"
             },
             "type": "array"
           },
           "repository": {
+            "description": "Repository ID ('-home-' for local, or app-id from properties file)",
             "type": "string"
           }
         },
         "type": "object"
       },
       "Banner": {
+        "description": "Banner configuration (URL, href link, components where shown)",
         "properties": {
           "components": {
+            "description": "Components where banner should appear: 'search', 'render', 'collections'",
             "items": {
+              "description": "Components where banner should appear: 'search', 'render', 'collections'",
               "type": "string"
             },
             "type": "array"
           },
           "href": {
+            "description": "Link to open on banner click",
             "type": "string"
           },
           "url": {
+            "description": "URL to banner image (fixed 150px height, wide width recommended)",
             "type": "string"
           }
         },
@@ -1139,9 +1151,12 @@
         "type": "object"
       },
       "Collections": {
+        "description": "Collections configuration (allowed colors, special types like editorial)",
         "properties": {
           "colors": {
+            "description": "Array of allowed color values for collections",
             "items": {
+              "description": "Array of allowed color values for collections",
               "type": "string"
             },
             "type": "array"
@@ -1162,6 +1177,7 @@
         "type": "object"
       },
       "CollectionsType": {
+        "description": "Special collection types configuration",
         "properties": {
           "editorial": {
             "$ref": "#/components/schemas/CollectionsTypeConfig"
@@ -1170,8 +1186,10 @@
         "type": "object"
       },
       "CollectionsTypeConfig": {
+        "description": "Configuration for editorial collections",
         "properties": {
           "invitationType": {
+            "description": "Type of invitation dialog",
             "enum": [
               "Default",
               "EditorialGroups"
@@ -1179,6 +1197,7 @@
             "type": "string"
           },
           "metadataGroup": {
+            "description": "Metadata group ID to display (null = no metadata shown)",
             "type": "string"
           }
         },
@@ -1287,6 +1306,7 @@
         "type": "object"
       },
       "ConfigFrontpage": {
+        "description": "Front page configuration",
         "properties": {
           "dashboard": {
             "$ref": "#/components/schemas/ConfigDashboard"
@@ -1298,6 +1318,7 @@
         "type": "object"
       },
       "ConfigPrivacy": {
+        "description": "Privacy settings",
         "properties": {
           "cookieDisclaimer": {
             "type": "boolean"
@@ -1306,6 +1327,7 @@
         "type": "object"
       },
       "ConfigPublish": {
+        "description": "Publishing configuration",
         "properties": {
           "authorMandatory": {
             "type": "boolean"
@@ -1317,8 +1339,10 @@
         "type": "object"
       },
       "ConfigRating": {
+        "description": "Rating configuration",
         "properties": {
           "mode": {
+            "description": "Rating display mode: none (disabled), likes (like button), or stars (star rating)",
             "enum": [
               "none",
               "likes",
@@ -1330,6 +1354,7 @@
         "type": "object"
       },
       "ConfigRemote": {
+        "description": "Remote repository configuration",
         "properties": {
           "rocketchat": {
             "$ref": "#/components/schemas/ConfigRemoteRocketchat"
@@ -1341,6 +1366,7 @@
         "type": "object"
       },
       "ConfigReportProblem": {
+        "description": "Problem reporting configuration",
         "properties": {
           "toolPermissions": {
             "items": {
@@ -1372,6 +1398,7 @@
         "type": "object"
       },
       "ConfigThemeColors": {
+        "description": "Theme color customization",
         "properties": {
           "color": {
             "items": {
@@ -1389,14 +1416,17 @@
         "type": "object"
       },
       "ConfigTutorial": {
+        "description": "Configuration for frontend tutorial (darkened area with highlighted element)",
         "properties": {
           "enabled": {
+            "description": "If true (default), show frontend tutorial with darkened area and highlighted elements",
             "type": "boolean"
           }
         },
         "type": "object"
       },
       "ConfigUpload": {
+        "description": "File upload configuration",
         "properties": {
           "postDialog": {
             "enum": [
@@ -1410,17 +1440,22 @@
         "type": "object"
       },
       "ConfigWorkflow": {
+        "description": "Workflow configuration (default receiver, default status, comment required, workflow states)",
         "properties": {
           "commentRequired": {
+            "description": "If true (default), comment is required in workflow dialog",
             "type": "boolean"
           },
           "defaultReceiver": {
+            "description": "Default group/user pre-filled as responsible party",
             "type": "string"
           },
           "defaultStatus": {
+            "description": "Default target status pre-filled in workflow dialog",
             "type": "string"
           },
           "workflows": {
+            "description": "Workflow status definitions",
             "items": {
               "$ref": "#/components/schemas/ConfigWorkflowList"
             },
@@ -1430,18 +1465,24 @@
         "type": "object"
       },
       "ConfigWorkflowList": {
+        "description": "Workflow status definitions",
         "properties": {
           "color": {
+            "description": "HTML color code for this status",
             "type": "string"
           },
           "hasReceiver": {
+            "description": "If true, receiver can be set for this status (false for release states)",
             "type": "boolean"
           },
           "id": {
+            "description": "Status identifier (typically numeric, e.g. '100_unchecked')",
             "type": "string"
           },
           "next": {
+            "description": "Array of status IDs allowed as next states (client-side validation only)",
             "items": {
+              "description": "Array of status IDs allowed as next states (client-side validation only)",
               "type": "string"
             },
             "type": "array"
@@ -1614,11 +1655,14 @@
         "type": "object"
       },
       "ContextMenuEntry": {
+        "description": "Custom options for the user menu (shown on username click in navigation bar)",
         "properties": {
           "ajax": {
+            "description": "If true, call URL via AJAX; if false, open in current window",
             "type": "boolean"
           },
           "changeStrategy": {
+            "description": "For modifications: 'update' to modify existing option, 'remove' to delete",
             "enum": [
               "update",
               "remove"
@@ -1626,50 +1670,66 @@
             "type": "string"
           },
           "group": {
+            "description": "Option grouping (e.g. 'Create', 'View', 'Edit')",
             "type": "string"
           },
           "icon": {
+            "description": "Material Design icon identifier",
             "type": "string"
           },
           "isDirectory": {
+            "description": "true = only for folders, false = only for files, null = both",
             "type": "boolean"
           },
           "isDisabled": {
+            "description": "If true, display grayed out with no function",
             "type": "boolean"
           },
           "isSeparate": {
+            "description": "If true, separate with line above",
             "type": "boolean"
           },
           "isSeparateBottom": {
+            "description": "If true, separate with line below",
             "type": "boolean"
           },
           "mode": {
+            "description": "When to show: 'nodes' (selected nodes), 'noNodes' (nothing selected), 'noNodesNotEmpty' (nothing selected but items available), 'always'",
             "type": "string"
           },
           "multiple": {
+            "description": "If true, action works on multiple selected nodes",
             "type": "boolean"
           },
           "name": {
+            "description": "Display name (can include language translation strings)",
             "type": "string"
           },
           "onlyDesktop": {
+            "description": "If true, only visible on desktop",
             "type": "boolean"
           },
           "onlyWeb": {
+            "description": "If true (default: false), hide in Cordova apps",
             "type": "boolean"
           },
           "openInNew": {
+            "description": "If true (default), open link in new tab",
             "type": "boolean"
           },
           "permission": {
+            "description": "Only show if node has this permission (e.g. 'Write', 'CCPublish')",
             "type": "string"
           },
           "position": {
+            "description": "Position in menu (negative = count from end)",
             "format": "int32",
             "type": "integer"
           },
           "scopes": {
+            "description": "Scopes where option appears (e.g. 'Render', 'Search', 'WorkspaceList'). Empty = all scopes",
             "items": {
+              "description": "Scopes where option appears (e.g. 'Render', 'Search', 'WorkspaceList'). Empty = all scopes",
               "enum": [
                 "Render",
                 "Search",
@@ -1685,12 +1745,15 @@
             "type": "array"
           },
           "showAsAction": {
+            "description": "If true, show as action in toolbar",
             "type": "boolean"
           },
           "toolpermission": {
+            "description": "Only show if user has this tool permission",
             "type": "string"
           },
           "url": {
+            "description": "URL to open on click",
             "type": "string"
           }
         },
@@ -2254,17 +2317,22 @@
         "type": "object"
       },
       "FontIcon": {
+        "description": "Array of icon identifier replacements (original identifier, replace with)",
         "properties": {
           "context": {
+            "description": "Context for this replacement (null = all contexts)",
             "type": "string"
           },
           "cssClass": {
+            "description": "CSS class name",
             "type": "string"
           },
           "original": {
+            "description": "Original Material Design icon identifier to replace",
             "type": "string"
           },
           "replace": {
+            "description": "Replacement icon identifier or CSS class",
             "type": "string"
           }
         },
@@ -2414,11 +2482,14 @@
         "type": "object"
       },
       "Gdpr": {
+        "description": "GDPR configuration",
         "properties": {
           "enabled": {
+            "description": "If true, enable GDPR-related features",
             "type": "boolean"
           },
           "entry": {
+            "description": "GDPR entry definitions",
             "items": {
               "$ref": "#/components/schemas/GdprEntry"
             },
@@ -2428,14 +2499,18 @@
         "type": "object"
       },
       "GdprEntry": {
+        "description": "GDPR entry definitions",
         "properties": {
           "name": {
+            "description": "Display name for this GDPR entry",
             "type": "string"
           },
           "ref": {
+            "description": "Reference identifier",
             "type": "string"
           },
           "regex": {
+            "description": "Regex pattern to match data types",
             "type": "string"
           }
         },
@@ -2643,14 +2718,18 @@
         "type": "object"
       },
       "HelpMenuOptions": {
+        "description": "Custom help menu options (key, icon, URL) - replaces helpUrl + whatsNewUrl",
         "properties": {
           "icon": {
+            "description": "Material Design icon identifier",
             "type": "string"
           },
           "key": {
+            "description": "Button ID (used in translation: HELP.key or related)",
             "type": "string"
           },
           "url": {
+            "description": "URL to open on button click",
             "type": "string"
           }
         },
@@ -2689,19 +2768,24 @@
         "type": "object"
       },
       "Icon": {
+        "description": "Navigation icon configuration",
         "properties": {
           "url": {
+            "description": "Icon URL (recommended size: 35x27)",
             "type": "string"
           }
         },
         "type": "object"
       },
       "Image": {
+        "description": "Array of image replacements (src match, replace with)",
         "properties": {
           "replace": {
+            "description": "Replacement image URL",
             "type": "string"
           },
           "src": {
+            "description": "Original image URL to match (matched with endsWith)",
             "type": "string"
           }
         },
@@ -3296,8 +3380,10 @@
         "type": "object"
       },
       "LicenseAgreement": {
+        "description": "License agreement display settings (node IDs with HTML content per language)",
         "properties": {
           "nodeId": {
+            "description": "Array of license agreement entries (one per language, with fallback)",
             "items": {
               "$ref": "#/components/schemas/LicenseAgreementNode"
             },
@@ -3307,14 +3393,17 @@
         "type": "object"
       },
       "LicenseAgreementNode": {
+        "description": "Array of license agreement entries (one per language, with fallback)",
         "properties": {
           "language": {
+            "description": "Language code for this agreement entry",
             "type": "string",
             "xml": {
               "attribute": true
             }
           },
           "value": {
+            "description": "HTML content of the license agreement",
             "type": "string"
           }
         },
@@ -3406,34 +3495,43 @@
         "type": "object"
       },
       "LogoutInfo": {
+        "description": "Logout configuration (URL, local/SSO-specific URLs, session destruction, AJAX)",
         "properties": {
           "ajax": {
+            "description": "If true, call URL via AJAX; if false, navigate via browser",
             "type": "boolean"
           },
           "destroySession": {
+            "description": "If true, destroy the edu-sharing session before navigating to URL",
             "type": "boolean"
           },
           "localUrl": {
+            "description": "URL for local users (overrides url if set)",
             "type": "string"
           },
           "next": {
+            "description": "URL to navigate to after AJAX call completes (only if ajax=true)",
             "type": "string"
           },
           "ssoUrl": {
+            "description": "URL for Shibboleth/SSO users (overrides url if set)",
             "type": "string"
           },
           "url": {
+            "description": "URL to navigate to on logout",
             "type": "string"
           }
         },
         "type": "object"
       },
       "Mainnav": {
+        "description": "Top navigation bar customization (icon, URL)",
         "properties": {
           "icon": {
             "$ref": "#/components/schemas/Icon"
           },
           "mainMenuStyle": {
+            "description": "Main menu style customization",
             "type": "string"
           }
         },
@@ -4125,42 +4223,55 @@
         "type": "object"
       },
       "MenuEntry": {
+        "description": "Additional custom menu entries in left sidebar (position, icon, name, URL/path, scope, etc.)",
         "properties": {
           "icon": {
+            "description": "Material Design icon identifier",
             "type": "string"
           },
           "isDisabled": {
+            "description": "If true, display grayed out with no function",
             "type": "boolean"
           },
           "isSeparate": {
+            "description": "If true, separate with line above",
             "type": "boolean"
           },
           "isSeparateBottom": {
+            "description": "If true, separate with line below",
             "type": "boolean"
           },
           "name": {
+            "description": "Display name (can include language translation strings)",
             "type": "string"
           },
           "onlyDesktop": {
+            "description": "If true, only visible on desktop",
             "type": "boolean"
           },
           "onlyWeb": {
+            "description": "If true (default: false), hide in Cordova apps",
             "type": "boolean"
           },
           "openInNew": {
+            "description": "If true (default), open link in new tab",
             "type": "boolean"
           },
           "path": {
+            "description": "Internal path (e.g. 'workspace', 'collections?scope=EDU_ALL'). Used instead of url for internal navigation",
             "type": "string"
           },
           "position": {
+            "description": "Position in menu (negative = count from end)",
             "format": "int32",
             "type": "integer"
           },
           "scope": {
+            "description": "Scope for highlighting (e.g. 'workspace')",
             "type": "string"
           },
           "url": {
+            "description": "URL to open on click",
             "type": "string"
           }
         },
@@ -6500,24 +6611,32 @@
         "type": "object"
       },
       "Register": {
+        "description": "Registration settings (local service, custom URLs, password recovery, required fields)",
         "properties": {
           "local": {
+            "description": "Whether local registration service is active (default: true)",
             "type": "boolean"
           },
           "loginUrl": {
+            "description": "URL to custom registration page (used if local=false)",
             "type": "string"
           },
           "recoverPassword": {
+            "description": "Whether local password recovery function is active",
             "type": "boolean"
           },
           "recoverUrl": {
+            "description": "URL to custom password recovery page (used if local=false)",
             "type": "string"
           },
           "recoverUrlSafe": {
+            "description": "Safe/alternative URL for password recovery",
             "type": "string"
           },
           "requiredFields": {
+            "description": "Required registration fields: firstName, lastName, organization",
             "items": {
+              "description": "Required registration fields: firstName, lastName, organization",
               "type": "string"
             },
             "type": "array"
@@ -6685,20 +6804,25 @@
         "type": "object"
       },
       "Rendering": {
+        "description": "Rendering settings (show preview, show download button, prerender content)",
         "properties": {
           "gdpr": {
+            "description": "GDPR configuration for rendering privacy",
             "items": {
               "$ref": "#/components/schemas/RenderingGdpr"
             },
             "type": "array"
           },
           "prerender": {
+            "description": "If true (default), prerender files automatically after upload (DEPRECATED: configure in backend)",
             "type": "boolean"
           },
           "showDownloadButton": {
+            "description": "If true (default: false), show download button in preview area",
             "type": "boolean"
           },
           "showPreview": {
+            "description": "If true (default), show preview area with image on gray background",
             "type": "boolean"
           }
         },
@@ -6724,14 +6848,18 @@
         "type": "object"
       },
       "RenderingGdpr": {
+        "description": "GDPR configuration for rendering privacy",
         "properties": {
           "matcher": {
+            "description": "Pattern to match against file types",
             "type": "string"
           },
           "name": {
+            "description": "Display name for privacy notice",
             "type": "string"
           },
           "privacyInformationUrl": {
+            "description": "URL to privacy information",
             "type": "string"
           }
         },
@@ -7526,6 +7654,7 @@
         "type": "object"
       },
       "Services": {
+        "description": "External services configuration",
         "properties": {
           "visualization": {
             "type": "string"
@@ -7534,6 +7663,7 @@
         "type": "object"
       },
       "SessionExpiredDialog": {
+        "description": "Session expiration dialog configuration",
         "type": "object"
       },
       "SetNodePermissionInheritanceRequest": {
@@ -7751,15 +7881,19 @@
         "type": "object"
       },
       "SimpleEdit": {
+        "description": "Quick edit dialog configuration",
         "properties": {
           "globalGroups": {
+            "description": "Global groups to offer in quick edit dialog",
             "items": {
               "$ref": "#/components/schemas/SimpleEditGlobalGroups"
             },
             "type": "array"
           },
           "licenses": {
+            "description": "Array of allowed license IDs for quick edit",
             "items": {
+              "description": "Array of allowed license IDs for quick edit",
               "type": "string"
             },
             "type": "array"
@@ -7768,29 +7902,37 @@
             "$ref": "#/components/schemas/SimpleEditOrganization"
           },
           "organizationFilter": {
+            "description": "Organization filter pattern",
             "type": "string"
           }
         },
         "type": "object"
       },
       "SimpleEditGlobalGroups": {
+        "description": "Global groups to offer in quick edit dialog",
         "properties": {
           "groups": {
+            "description": "Array of group IDs to offer in quick edit dialog",
             "items": {
+              "description": "Array of group IDs to offer in quick edit dialog",
               "type": "string"
             },
             "type": "array"
           },
           "toolpermission": {
+            "description": "Tool permission required for this group entry (optional, applies to all if not set)",
             "type": "string"
           }
         },
         "type": "object"
       },
       "SimpleEditOrganization": {
+        "description": "Organization configuration for quick edit",
         "properties": {
           "groupTypes": {
+            "description": "Group types to include",
             "items": {
+              "description": "Group types to include",
               "type": "string"
             },
             "type": "array"
@@ -8010,8 +8152,10 @@
         "type": "object"
       },
       "Stream": {
+        "description": "Stream/activity feed configuration (enabled)",
         "properties": {
           "enabled": {
+            "description": "If true, enable activity stream/feed feature (default: false)",
             "type": "boolean"
           }
         },
@@ -9293,26 +9437,36 @@
       },
       "Values": {
         "properties": {
+          "accessDeniedInfoUrl": {
+            "description": "Access denied URL for elements not accessible inside collections",
+            "type": "string"
+          },
           "admin": {
             "$ref": "#/components/schemas/Admin"
           },
           "allowedLicenses": {
+            "description": "Filter license dialog to set of allowed licenses (CC_BY, CC_BY_SA, CC_BY_ND, CC_BY_NC, CC_0, PDM, etc.)",
             "items": {
+              "description": "Filter license dialog to set of allowed licenses (CC_BY, CC_BY_SA, CC_BY_ND, CC_BY_NC, CC_0, PDM, etc.)",
               "type": "string"
             },
             "type": "array"
           },
           "appleTouchIcon": {
+            "description": "Apple touch icon URL for mobile home screen",
             "type": "string"
           },
           "availableMds": {
+            "description": "Array of allowed metadata sets per repository",
             "items": {
               "$ref": "#/components/schemas/AvailableMds"
             },
             "type": "array"
           },
           "availableRepositories": {
+            "description": "Array of allowed repository IDs. Use '-home-' for local repository",
             "items": {
+              "description": "Array of allowed repository IDs. Use '-home-' for local repository",
               "type": "string"
             },
             "type": "array"
@@ -9321,45 +9475,56 @@
             "$ref": "#/components/schemas/Banner"
           },
           "branding": {
+            "description": "If true (default), show edu-sharing logo top-left and 'Powered by edu-sharing' at login",
             "type": "boolean"
           },
           "collections": {
             "$ref": "#/components/schemas/Collections"
           },
           "customCSS": {
+            "description": "Custom CSS",
             "type": "string"
           },
           "customLicenses": {
+            "description": "Define custom licenses (id, position, URL)",
             "items": {
               "$ref": "#/components/schemas/License"
             },
             "type": "array"
           },
           "customOptions": {
+            "description": "Custom operations for right-click context menu/action bar (mode, icon, name, URL with placeholders, permissions)",
             "items": {
               "$ref": "#/components/schemas/ContextMenuEntry"
             },
             "type": "array"
           },
           "defaultLocation": {
+            "description": "Path to navigate to when accessing edu-sharing directly (default: 'login')",
             "type": "string"
           },
           "defaultPassword": {
+            "description": "Pre-fill login password for testing",
             "type": "string"
           },
           "defaultUsername": {
+            "description": "Pre-fill login username for testing",
             "type": "string"
           },
           "editProfile": {
+            "description": "Whether user profiles can be edited within edu-sharing (not used if editProfileUrl is set)",
             "type": "boolean"
           },
           "editProfileUrl": {
+            "description": "URL where users can edit their profile",
             "type": "string"
           },
           "extension": {
+            "description": "Currently a dummy string, not used",
             "type": "string"
           },
           "favicon": {
+            "description": "Favicon URL",
             "type": "string"
           },
           "frontpage": {
@@ -9369,36 +9534,44 @@
             "$ref": "#/components/schemas/Gdpr"
           },
           "helpMenuOptions": {
+            "description": "Custom help menu options (key, icon, URL) - replaces helpUrl + whatsNewUrl",
             "items": {
               "$ref": "#/components/schemas/HelpMenuOptions"
             },
             "type": "array"
           },
           "helpUrl": {
+            "description": "URL to custom help page (default is edu-sharing help). Empty string hides the button",
             "type": "string"
           },
           "hideMainMenu": {
+            "description": "Array of navigation items to hide (e.g. 'workspace', 'search', 'collections', 'login', 'permissions', 'safe', 'stream')",
             "items": {
+              "description": "Array of navigation items to hide (e.g. 'workspace', 'search', 'collections', 'login', 'permissions', 'safe', 'stream')",
               "type": "string"
             },
             "type": "array"
           },
           "icons": {
+            "description": "Array of icon identifier replacements (original identifier, replace with)",
             "items": {
               "$ref": "#/components/schemas/FontIcon"
             },
             "type": "array"
           },
           "images": {
+            "description": "Array of image replacements (src match, replace with)",
             "items": {
               "$ref": "#/components/schemas/Image"
             },
             "type": "array"
           },
           "imprintUrl": {
+            "description": "URL to imprint/legal page. Shows button if specified",
             "type": "string"
           },
           "itemsPerRequest": {
+            "description": "Number of elements fetched per request cycle (default: 25)",
             "format": "int32",
             "type": "integer"
           },
@@ -9406,21 +9579,27 @@
             "$ref": "#/components/schemas/LicenseAgreement"
           },
           "licenseDialogOnUpload": {
+            "description": "If true, show license dialog after file upload",
             "type": "boolean"
           },
           "loginAllowLocal": {
+            "description": "If loginUrl is set and true, local login mask is offered with link to loginUrl below for external + local logins",
             "type": "boolean"
           },
           "loginDefaultLocation": {
+            "description": "Default landing page after login (default: 'workspace'). Can include query parameters like 'collections?scope=EDU_ALL'",
             "type": "string"
           },
           "loginProviderTargetUrl": {
+            "description": "URL called when logging in with a provider. Supports placeholders: :target (server URL + loginUrl) and :entity (provider URL)",
             "type": "string"
           },
           "loginProvidersUrl": {
+            "description": "URL to a service providing a list of login providers (requires loginProviderTargetUrl to be set)",
             "type": "string"
           },
           "loginSilentMode": {
+            "description": "Silent login mode: 'none' (default), 'iframe', or 'redirect'",
             "enum": [
               "none",
               "iframe",
@@ -9429,6 +9608,7 @@
             "type": "string"
           },
           "loginUrl": {
+            "description": "URL to redirect when login fails (401) or on initial login (e.g. for Shibboleth)",
             "type": "string"
           },
           "logout": {
@@ -9438,18 +9618,21 @@
             "$ref": "#/components/schemas/Mainnav"
           },
           "menuEntries": {
+            "description": "Additional custom menu entries in left sidebar (position, icon, name, URL/path, scope, etc.)",
             "items": {
               "$ref": "#/components/schemas/MenuEntry"
             },
             "type": "array"
           },
           "nodeReport": {
+            "description": "If true, show 'Report problem' option in search results (requires backend mail.report.receivers configured)",
             "type": "boolean"
           },
           "privacy": {
             "$ref": "#/components/schemas/ConfigPrivacy"
           },
           "privacyInformationUrl": {
+            "description": "URL to privacy policy/data protection page. Shows button if specified",
             "type": "string"
           },
           "publish": {
@@ -9459,12 +9642,14 @@
             "$ref": "#/components/schemas/PublishingConfig"
           },
           "publishingNotice": {
+            "description": "If true, show confirmation message when publishing to everyone",
             "type": "boolean"
           },
           "rating": {
             "$ref": "#/components/schemas/ConfigRating"
           },
           "recoverPasswordUrl": {
+            "description": "URL for 'forgot password' link. Empty means button is not shown",
             "type": "string"
           },
           "register": {
@@ -9483,9 +9668,11 @@
             "$ref": "#/components/schemas/ConfigReportProblem"
           },
           "searchGroupResults": {
+            "description": "If true, show repositories separately as lists in 'All' view",
             "type": "boolean"
           },
           "searchPreviewMode": {
+            "description": "Right sidebar preview mode: show sidebar with optional preview, or jump directly to render page",
             "enum": [
               "Sidebar",
               "RenderingPage"
@@ -9493,9 +9680,11 @@
             "type": "string"
           },
           "searchSidenavMode": {
+            "description": "Metadata search sidebar mode: 'never' (default), 'always', or 'auto' (desktop only)",
             "type": "string"
           },
           "searchViewType": {
+            "description": "Default search view type: 0 = list, 1 = tiles (default)",
             "format": "int32",
             "type": "integer"
           },
@@ -9509,13 +9698,16 @@
             "$ref": "#/components/schemas/SimpleEdit"
           },
           "siteTitle": {
+            "description": "HTML page title (displayed after environment name). Used if branding is true. Default is 'edu-sharing'",
             "type": "string"
           },
           "stream": {
             "$ref": "#/components/schemas/Stream"
           },
           "supportedLanguages": {
+            "description": "List of supported languages (e.g. 'de', 'en'). First entry is the fallback. Only one entry means fallback for all",
             "items": {
+              "description": "List of supported languages (e.g. 'de', 'en'). First entry is the fallback. Only one entry means fallback for all",
               "type": "string"
             },
             "type": "array"
@@ -9530,36 +9722,45 @@
             "$ref": "#/components/schemas/ConfigUpload"
           },
           "userAffiliation": {
+            "description": "If true (default), show user type (teacher, student, etc.) in invite dialog",
             "type": "boolean"
           },
           "userDisplayName": {
+            "description": "User display name format: 'fullName' (default), 'email', 'firstName', 'lastName', or 'authorityName'",
             "type": "string"
           },
           "userMenuOverrides": {
+            "description": "Custom options for the user menu (shown on username click in navigation bar)",
             "items": {
               "$ref": "#/components/schemas/ContextMenuEntry"
             },
             "type": "array"
           },
           "userSecondaryDisplayName": {
+            "description": "Secondary user name shown below primary name: null (default), 'authorityName', 'email', or 'email-domain'",
             "type": "string"
           },
           "whatsNewUrl": {
+            "description": "URL to custom 'What's new' page (default is edu-sharing What's new). Empty string hides the button",
             "type": "string"
           },
           "workflow": {
             "$ref": "#/components/schemas/ConfigWorkflow"
           },
           "workspaceColumns": {
+            "description": "Default displayed columns in workspace",
             "items": {
+              "description": "Default displayed columns in workspace",
               "type": "string"
             },
             "type": "array"
           },
           "workspaceSharedToMeDefaultAll": {
+            "description": "Default view for shared materials: false = only direct shares, true = all shares",
             "type": "boolean"
           },
           "workspaceViewType": {
+            "description": "Default workspace view type: 0 = table (default), 1 = tiles",
             "format": "int32",
             "type": "integer"
           }

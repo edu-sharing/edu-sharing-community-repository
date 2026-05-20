@@ -423,6 +423,7 @@ export class AdminStatisticsComponent implements OnInit {
                           stat.counts.DOWNLOAD_MATERIAL || 0,
                           stat.counts.VIEW_COLLECTION || 0,
                           stat.counts.VIEW_MATERIAL_PLAY_MEDIA || 0,
+                          stat.counts.VIEW_MATERIAL_GDPR_CONFIRMED || 0,
                       ),
                   )
                   .reduce((a, b) => Math.max(a, b))
@@ -441,7 +442,7 @@ export class AdminStatisticsComponent implements OnInit {
                 labels: dataNode.map((stat) => stat.date),
                 datasets: [
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.VIEWS'),
+                        label: this.translate.instant('ADMIN.STATISTICS.ACTIONS.VIEW_MATERIAL'),
                         // yAxisID: 'y-axis-view',
                         backgroundColor: 'rgb(30,52,192)',
                         data: dataNode.map((stat) =>
@@ -449,7 +450,9 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.VIEWS_EMBEDDED'),
+                        label: this.translate.instant(
+                            'ADMIN.STATISTICS.ACTIONS.VIEW_MATERIAL_EMBEDDED',
+                        ),
                         // yAxisID: 'y-axis-view-collection',
                         backgroundColor: 'rgb(117,48,192)',
                         data: dataNode.map((stat) =>
@@ -459,7 +462,7 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.VIEWS_COLLECTION'),
+                        label: this.translate.instant('ADMIN.STATISTICS.ACTIONS.VIEW_COLLECTION'),
                         // yAxisID: 'y-axis-view-embedded',
                         backgroundColor: 'rgb(55,166,154)',
                         data: dataNode.map((stat) =>
@@ -467,7 +470,9 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.OPEN_EXTERNAL_LINK'),
+                        label: this.translate.instant(
+                            'ADMIN.STATISTICS.ACTIONS.OPEN_EXTERNAL_LINK',
+                        ),
                         // yAxisID: 'y-axis-view-embedded',
                         backgroundColor: 'rgb(197,96,73)',
                         data: dataNode.map((stat) =>
@@ -475,7 +480,7 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.DOWNLOADS'),
+                        label: this.translate.instant('ADMIN.STATISTICS.ACTIONS.DOWNLOAD_MATERIAL'),
                         // yAxisID: 'y-axis-download',
                         backgroundColor: 'rgb(40,146,192)',
                         data: dataNode.map((stat) =>
@@ -483,12 +488,25 @@ export class AdminStatisticsComponent implements OnInit {
                         ),
                     },
                     {
-                        label: this.translate.instant('ADMIN.STATISTICS.VIEWS_PLAY_MEDIA'),
+                        label: this.translate.instant(
+                            'ADMIN.STATISTICS.ACTIONS.VIEW_MATERIAL_PLAY_MEDIA',
+                        ),
                         // yAxisID: 'y-axis-download',
                         backgroundColor: 'rgb(192,173,40)',
                         data: dataNode.map((stat) =>
                             stat.counts.VIEW_MATERIAL_PLAY_MEDIA
                                 ? stat.counts.VIEW_MATERIAL_PLAY_MEDIA
+                                : 0,
+                        ),
+                    },
+                    {
+                        label: this.translate.instant(
+                            'ADMIN.STATISTICS.ACTIONS.VIEW_MATERIAL_GDPR_CONFIRMED',
+                        ),
+                        backgroundColor: 'rgb(120,192,80)',
+                        data: dataNode.map((stat) =>
+                            stat.counts.VIEW_MATERIAL_GDPR_CONFIRMED
+                                ? stat.counts.VIEW_MATERIAL_GDPR_CONFIRMED
                                 : 0,
                         ),
                     },
@@ -521,7 +539,7 @@ export class AdminStatisticsComponent implements OnInit {
         };*/
         if (dataUser) {
             chartGroupedData.datasets.push({
-                label: this.translate.instant('ADMIN.STATISTICS.USER_LOGINS'),
+                label: this.translate.instant('ADMIN.STATISTICS.ACTIONS.LOGIN_USER_SESSION'),
                 // yAxisID: 'y-axis-user',
                 backgroundColor: 'rgb(22,192,73)',
                 data: dataUser.map((stat) =>
@@ -882,6 +900,7 @@ export class AdminStatisticsComponent implements OnInit {
                     'VIEW_MATERIAL_EMBEDDED',
                     'VIEW_MATERIAL_PLAY_MEDIA',
                     'DOWNLOAD_MATERIAL',
+                    'VIEW_MATERIAL_GDPR_CONFIRMED',
                 ];
                 // fill up all non existing events per field group
                 [
@@ -938,6 +957,7 @@ export class AdminStatisticsComponent implements OnInit {
                     'OPEN_EXTERNAL_LINK',
                     'VIEW_MATERIAL_EMBEDDED',
                     'DOWNLOAD_MATERIAL',
+                    'VIEW_MATERIAL_GDPR_CONFIRMED',
                 ];
                 csvHeadersMapping = properties.concat(countHeaders);
                 csvHeadersTranslated = properties
@@ -1034,6 +1054,7 @@ export class AdminStatisticsComponent implements OnInit {
             new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
             new ListItem('NODE', 'counts.OPEN_EXTERNAL_LINK'),
             new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
+            new ListItem('NODE', 'counts.VIEW_MATERIAL_GDPR_CONFIRMED'),
         ]);
     }
 

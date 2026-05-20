@@ -1,8 +1,5 @@
 package org.edu_sharing.restservices;
 
-import java.io.InputStream;
-import java.util.*;
-
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -15,7 +12,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.restservices.collection.v1.model.*;
-import org.edu_sharing.restservices.collection.v1.model.Collection;
 import org.edu_sharing.restservices.node.v1.model.AbstractEntries;
 import org.edu_sharing.restservices.node.v1.model.NodeEntries;
 import org.edu_sharing.restservices.shared.*;
@@ -29,6 +25,11 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class CollectionDao {
 
@@ -187,7 +188,8 @@ public class CollectionDao {
                         try {
                             result.add(child);
                         } catch (ClassCastException e) {
-                            logger.error("Collection " + parentId + " contains a non-ref object: " + child.getRef().getId() + ". Please clean up the collection", e);
+								logger.debug("Collection " + parentId + " contains a non-ref object: " + child.getRef().getId(), e);
+								result.add(child);
                         }
                     }
                 }
@@ -340,7 +342,8 @@ public class CollectionDao {
                     proposal.setAccessible(true);
                 } catch (DAOSecurityException e) {
                     proposal = NodeDao.createEmptyDummy(NodeProposal.class,
-                            new org.edu_sharing.restservices.shared.NodeRef(repoDao.getId(), ref.getTargetRef().getId())
+							new org.edu_sharing.restservices.shared.NodeRef(repoDao.getId(),ref.getTargetRef().getId()),
+							CCConstants.CCM_TYPE_IO
                     );
                     proposal.setName(NodeServiceHelper.getProperty(ref.getSourceRef(), CCConstants.CM_NAME));
                     proposal.setAccessible(false);
@@ -389,11 +392,11 @@ public class CollectionDao {
         }
     }
 
-    public void removeFromCollection(NodeDao node) throws DAOException {
+	public void removeFromCollection(String nodeId) throws DAOException {
 
         try {
 
-            collectionClient.removeFromCollection(nodeDao.getRef().getId(), node.getRef().getId());
+			collectionClient.removeFromCollection(nodeDao.getRef().getId(), nodeId);
 
         } catch (Exception e) {
 
