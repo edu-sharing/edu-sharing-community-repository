@@ -265,6 +265,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .subscribe((isOpen: boolean): void => {
                 this.sidebarOpen.set(isOpen);
             });
+        if (!this.topicPageGlobalService.getCustomUrlFunction()) {
+            this.topicPageGlobalService.setCustomUrlFunction((node: Node): string => {
+                if (!retrieveNodeId(node)) {
+                    return '';
+                }
+                return (
+                    this.topicPageHelperService.getBaseHref() +
+                    this.router.serializeUrl(
+                        this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
+                            queryParams: { collectionId: retrieveNodeId(node) },
+                        }),
+                    )
+                );
+            });
+        }
         if (this.topicPageGlobalService.getCustomSideMenuItems()) {
             this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
         }
