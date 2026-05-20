@@ -597,7 +597,7 @@
         <i esIcon="layers"></i>
       </button>
     </h1>
-    <es-info-message mode="warning">
+    <es-info-message mode="info">
       {{ i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}
       {{
         userHasEditRights()
@@ -605,40 +605,9 @@
           : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
-
-    <div class="config-selection-container" *ngIf="userHasEditRights()">
-      <mat-form-field
-        *ngIf="defaultPageVariantNodes?.length"
-        appearance="outline"
-        subscriptSizing="dynamic"
-      >
-        <mat-label>{{ i18nPrefix + 'NO_PAGE_CONFIG.SELECT_PLACEHOLDER' | translate }}</mat-label>
-        <mat-select
-          [(ngModel)]="selectedDefaultConfigNode"
-          [disabled]="createCustomConfigInProgress()"
-        >
-          <mat-option *ngFor="let node of defaultPageVariantNodes; let i = index" [value]="node">
-            {{
-              node.title && !node.title.includes(pageVariantConfigPrefix)
-                ? node.title
-                : (i18nPrefix + 'NO_PAGE_CONFIG.SELECT_LABEL' | translate) + ' ' + (i + 1)
-            }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- the div is necessary for the button to be full height -->
-      <div class="create-button">
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="!selectedDefaultConfigNode || createCustomConfigInProgress()"
-          (click)="createCustomConfig()"
-        >
-          {{ i18nPrefix + 'NO_PAGE_CONFIG.CREATE_PAGE' | translate }}
-        </button>
-      </div>
-    </div>
+    <button mat-flat-button color="primary" (click)="createPageVariant()">
+      {{ createPageVariantTitle | translate }}
+    </button>
   </div>
 </ng-template>
 

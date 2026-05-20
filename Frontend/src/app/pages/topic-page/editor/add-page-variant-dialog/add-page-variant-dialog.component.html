@@ -16,11 +16,19 @@
   </es-info-message>
 
   <ng-template #noPageConfigRef>
-    <es-info-message mode="info" *ngIf="!pageConfigRef">
-      <strong>
-        {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_HEADING' | translate }}
-      </strong>
-      {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_TEXT' | translate }}
+    <es-info-message mode="info">
+      <ng-container *ngIf="!!pageVariantNode; else newTopicPage">
+        <strong>
+          {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_HEADING' | translate }}
+        </strong>
+        {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_TEXT' | translate }}
+      </ng-container>
+      <ng-template #newTopicPage>
+        <strong>
+          {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_HEADING' | translate }}
+        </strong>
+        {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_TEXT' | translate }}
+      </ng-template>
     </es-info-message>
   </ng-template>
 
@@ -33,7 +41,11 @@
       [value]="selectedOption"
       (change)="onCopyOptionChange($event)"
     >
-      <mat-button-toggle *ngFor="let option of copyOptions" [value]="option.value">
+      <mat-button-toggle
+        *ngFor="let option of copyOptions"
+        [value]="option.value"
+        [disabled]="!pageConfigRef && option.value === CopyOption.TopicPage"
+      >
         <i [esIcon]="option.icon" [aria]="false"></i>
         {{ i18nPrefix + option.viewValue | translate }}
       </mat-button-toggle>
