@@ -290,7 +290,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                         [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
                         [RestConstants.LOM_PROP_TITLE]: [defaultTemplateName],
                     },
-                } as Node);
+                } as Partial<Node> as Node);
             }
             nodes = searchResult.nodes;
         } else {
