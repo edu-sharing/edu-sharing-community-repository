@@ -1467,6 +1467,8 @@ public class CCConstants {
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_GDPR = "EDUSYSTEM_GDPR";
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_ASSIGNMENT = "EDUSYSTEM_ASSIGNMENT";
 
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOPIC_PAGE_TEMPLATES = "EDUSYSTEM_TOPIC_PAGE_TEMPLATES";
+
 
     public final static String CCM_ASPECT_GROUP_SIGNUP = "{http://www.campuscontent.de/model/1.0}group_signup";
 
@@ -1752,6 +1754,8 @@ public class CCConstants {
     public final static String I18n_SYSTEMFOLDER_GDPR = "systemfolder_gdpr";
 
     public final static String I18n_SYSTEMFOLDER_ASSIGNMENT = "systemfolder_assignment";
+
+    public final static String I18n_SYSTEMFOLDER_TOPIC_PAGE_TEMPLATES = "systemfolder_topic_page_templates";
 
 
     //Gruppen root Folder

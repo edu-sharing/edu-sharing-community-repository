@@ -2432,6 +2432,10 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
       </property>
+      <property name="virtual:page_variant_global">
+        <statement value="true">{"match":{"path":"${systemfolder}"}}</statement>
+        <statement>{"match_all": {}}</statement>
+      </property>
     </query>
 
   </queries>

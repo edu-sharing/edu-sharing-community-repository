@@ -43,6 +43,7 @@ public class UserEnvironmentTool {
             getEdu_SharingServiceFolder();
             getEdu_SharingTemplateFolder();
             getEdu_SharingValuespaceFolder();
+            getEdu_SharingTopicPageTemplatesFolder();
             return null;
         });
     }
@@ -133,7 +134,7 @@ public class UserEnvironmentTool {
         if (!mcBaseClient.isAdmin() && !AuthenticationUtil.isRunAsUserTheSystemUser()) {
             throw new NotAnAdminException();
         }
-        return getOrCreateSystemFolder(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_UPDATE, CCConstants.I18n_SYSTEMFOLDER_UPDATE);
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_UPDATE, CCConstants.I18n_SYSTEMFOLDER_UPDATE);
     }
 
     public String getEdu_SharingNotifyFolder() {
@@ -171,6 +172,10 @@ public class UserEnvironmentTool {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_REPORTS, CCConstants.I18n_SYSTEMFOLDER_REPORTS);
     }
 
+    public String getEdu_SharingTopicPageTemplatesFolder() {
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOPIC_PAGE_TEMPLATES, CCConstants.I18n_SYSTEMFOLDER_TOPIC_PAGE_TEMPLATES, true);
+    }
+
     public String getEdu_SharingServiceFolder() {
         return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE, CCConstants.I18n_SYSTEMFOLDER_SERVICE);
     }
@@ -193,10 +198,9 @@ public class UserEnvironmentTool {
 
 
     public String getOrCreateSystemFolderByName(String constantName, String i18nId) {
-        return getOrCreateSystemFolder(constantName, i18nId);
+        return getOrCreateSystemFolderByName(constantName, i18nId, false);
     }
-
-    private String getOrCreateSystemFolder(String mapType, String i18nFolderNameId)  {
+    public String getOrCreateSystemFolderByName(String mapType, String i18nFolderNameId, boolean publicRead) {
         String systemFolderId = getEdu_SharingSystemFolderBase();
         Map<String, Object> edu_SharingSystemFolderTemplate = mcBaseClient.getChild(systemFolderId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, mapType);
         if (edu_SharingSystemFolderTemplate != null) {
@@ -208,7 +212,15 @@ public class UserEnvironmentTool {
         newEdu_SharingSysMapProps.put(CCConstants.CM_NAME, systemFolderName);
         newEdu_SharingSysMapProps.put(CCConstants.CM_PROP_C_TITLE, getLocalizedProperties(i18nFolderNameId));
         newEdu_SharingSysMapProps.put(CCConstants.CCM_PROP_MAP_TYPE, mapType);
-        return mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
+        String folderId = mcBaseClient.createNode(systemFolderId, CCConstants.CCM_TYPE_MAP, newEdu_SharingSysMapProps);
+        if (publicRead) {
+            try {
+                nodeService.setPermissions(folderId, CCConstants.AUTHORITY_GROUP_EVERYONE, new String[]{CCConstants.PERMISSION_CONSUMER}, null);
+            } catch (Exception e) {
+                log.warn("Could not set public read permission on system folder {}", folderId, e);
+            }
+        }
+        return folderId;
     }
 
     /**
@@ -229,7 +241,7 @@ public class UserEnvironmentTool {
     }
 
     public String getEdu_SharingValuespaceFolder() {
-        return getOrCreateSystemFolder(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE, CCConstants.I18n_SYSTEMFOLDER_VALUESPACE);
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_VALUESPACE, CCConstants.I18n_SYSTEMFOLDER_VALUESPACE);
     }
 
 

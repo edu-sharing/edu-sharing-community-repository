@@ -661,6 +661,9 @@ public class NodeDao {
             if ("-saved_search-".equals(node)) {
                 node = repoDao.getUserSavedSearch(createIfNotExists);
             }
+            if ("-topic_page_templates-".equals(node)) {
+                node = AuthenticationUtil.runAsSystem(() -> new UserEnvironmentTool().getEdu_SharingTopicPageTemplatesFolder());
+            }
             return node;
         } catch (Exception e) {
             throw DAOException.mapping(e);
