@@ -355,6 +355,7 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
     "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
+    "NAVIGATE_TO_COLLECTION_PAGE": "Zur Sammlungsseite wechseln",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "EXISTING_VARIANT": {

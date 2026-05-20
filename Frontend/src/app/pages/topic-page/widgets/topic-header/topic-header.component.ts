@@ -18,6 +18,7 @@ import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
 import { EduSharingUiCommonModule, SpinnerComponent, UIConstants } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
@@ -43,6 +44,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
         ImageWrapperComponent,
         SharedModule,
         SpinnerComponent,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],

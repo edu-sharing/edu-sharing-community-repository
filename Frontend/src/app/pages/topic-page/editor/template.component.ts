@@ -75,6 +75,7 @@ import {
 } from '../../../main/navigation/search-field/search-field.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { VarDirective } from '../shared/directives/ng-var.directive';
+import { TooltipAriaLabelDirective } from '../shared/directives/tooltip-aria-label.directive';
 import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
 import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
@@ -186,6 +187,7 @@ import { PreviewSidebarService } from '../../../features/editorial-sidebar/previ
         SwimlaneConfigurationButtonsComponent,
         SwimlaneSearchCountPipe,
         SwimlaneSettingsDialogComponent,
+        TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
         TranslateModule,
@@ -347,7 +349,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     templateMode: WritableSignal<boolean> = signal(false);
 
     topic: WritableSignal<string> = signal('');
-    topicCollectionID: WritableSignal<string> = signal(null);
+    topicCollectionId: WritableSignal<string> = signal(null);
     aiSupported: WritableSignal<boolean> = signal(false);
     rendering2Supported: WritableSignal<boolean> = signal(false);
 
@@ -476,7 +478,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // check if the collectionId input is set
         if (this.collectionId) {
             // set the collection ID
-            this.topicCollectionID.set(this.collectionId);
+            this.topicCollectionId.set(this.collectionId);
             // initialize the component
             void this.initializeComponent(this.variantId);
         }
@@ -488,7 +490,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
-                    this.topicCollectionID.set(params.collectionId);
+                    this.topicCollectionId.set(params.collectionId);
                     // initialize the component
                     await this.initializeComponent(params.variantId);
                 }
@@ -517,7 +519,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.selectedVariantPosition = -1;
             this.pageConfigNode = null;
             // set the collection ID
-            this.topicCollectionID.set(changes.collectionId?.currentValue || this.collectionId);
+            this.topicCollectionId.set(changes.collectionId?.currentValue || this.collectionId);
             // initialize the component
             await this.initializeComponent(changes.variantId?.currentValue || this.variantId);
         }
@@ -611,12 +613,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         try {
             // fetch the collection node to set the topic name, color and check the user access
             this.collectionNode = await this.topicPageHelperService.getNode(
-                this.topicCollectionID(),
+                this.topicCollectionId(),
             );
             this.topic.set(this.collectionNode.title ?? 'No topic defined');
             // retrieve parent entries
             const parentEntries: ParentEntries = await this.topicPageHelperService.getNodeParents(
-                this.topicCollectionID(),
+                this.topicCollectionId(),
             );
             this.parentEntries.set(parentEntries);
             // check the user privileges for the collection node and initialize custom listeners
@@ -2210,7 +2212,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             await this.aiHelperService.generateFromPrompt(
                                 config,
                                 this.topicPageHelperService.getSelectedVariables() || {},
-                                this.topicCollectionID(),
+                                this.topicCollectionId(),
                             );
                         const promptToTextMapping = new PromptToTextMapping(
                             prompt,
@@ -2638,6 +2640,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
+    protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly WIDGETS = WIDGETS;
 }

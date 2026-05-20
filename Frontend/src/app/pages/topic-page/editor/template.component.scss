@@ -30,6 +30,15 @@
     align-items: center;
 }
 
+.topic-header-title {
+    display: flex;
+    gap: 16px;
+
+    span {
+        flex: unset;
+    }
+}
+
 // fix: do not place color picker behind topic header
 es-color-picker {
     z-index: 1;

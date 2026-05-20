@@ -23,7 +23,7 @@
     <div *ngIf="parentEntries()" class="template-breadcrumb">
       <div class="template-breadcrumb-wrapper">
         <es-topic-page-breadcrumb
-          [contextNodeId]="topicCollectionID()"
+          [contextNodeId]="topicCollectionId()"
           [editMode]="editMode()"
           [isProcessing]="requestInProgress()"
           [nodeId]="convertedBreadcrumbNodeId()"
@@ -69,7 +69,7 @@
             <div class="template-header-container">
               <es-topic-header
                 [collectionNode]="collectionNode"
-                [contextNodeId]="topicCollectionID()"
+                [contextNodeId]="topicCollectionId()"
                 [editMode]="editMode()"
                 [nodeId]="convertedHeaderNodeId()"
                 [parentEntries]="parentEntries()"
@@ -157,8 +157,8 @@
               {{ i18nPrefix + 'SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
             </h2>
             <es-generic-widget
-              *ngIf="topicCollectionID(); else loadingIndicator"
-              [contextNodeId]="topicCollectionID()"
+              *ngIf="topicCollectionId(); else loadingIndicator"
+              [contextNodeId]="topicCollectionId()"
               [height]="'400'"
               [sidebarEmbedding]="true"
               [widgetType]="WIDGETS.TOPICS_COLUMN_BROWSER"
@@ -584,6 +584,19 @@
 <!-- failed to load page config -> currently, no further action possible -->
 <ng-template #pageConfigCheckFailedMessage>
   <div class="missing-page-config">
+    <h1 class="mat-heading-1 topic-header-title">
+      <span [innerHTML]="topic()"></span>
+      <button
+        mat-flat-button
+        color="primary"
+        [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
+        [queryParams]="{ id: topicCollectionId() }"
+        [matTooltip]="i18nPrefix + 'NAVIGATE_TO_COLLECTION_PAGE' | translate"
+        tooltipAriaLabel
+      >
+        <i esIcon="layers"></i>
+      </button>
+    </h1>
     <es-info-message mode="warning">
       {{ i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}
       {{
@@ -634,7 +647,7 @@
     [aiSupported]="aiSupported()"
     [backgroundColor]="swimlane.backgroundColor"
     [backgroundShape]="swimlane.backgroundShape ?? SwimlaneBackgroundShape.None"
-    [contextNodeId]="topicCollectionID()"
+    [contextNodeId]="topicCollectionId()"
     [editMode]="editMode() && userHasEditRights()"
     [grid]="swimlane.grid"
     [pageVariantNode]="pageVariantNode"
