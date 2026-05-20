@@ -215,8 +215,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         (o) => o.viewValue === 'CONTAINER_ELEMENT',
     )?.value;
     readonly i18nPrefix: string = 'TOPIC_PAGE.';
-    private readonly createPageVariantTitle: string =
-        this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
+    readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
@@ -369,8 +368,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageConfigNode: Node;
     pageConfigCheckFailed: WritableSignal<boolean> = signal(false);
     defaultPageVariantNodes: Node[] | Partial<Node>[];
-    selectedDefaultConfigNode: Node;
-    createCustomConfigInProgress: WritableSignal<boolean> = signal(false);
     pageVariantConfigs: NodeEntries;
     private pageVariantDefaultPosition: number = -1;
     pageVariantNode: Node;
@@ -1063,6 +1060,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
             // create a child for the variant node
             this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
+            // special case for empty page variant configs
+            const emptyPageVariantConfigs: boolean = !this.pageVariantConfigs?.nodes?.length;
+            if (emptyPageVariantConfigs) {
+                await this.createCustomConfig();
+                return;
+            }
             // check for custom page node existence and create it if necessary
             await this.checkForCustomPageNodeExistence();
             // check for pageConfigNode existence
@@ -2229,11 +2232,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Helper function to create a custom page config from the selected default config node.
+     * Helper function to create a custom page config as a starting point.
      */
     async createCustomConfig(): Promise<void> {
         try {
-            this.createCustomConfigInProgress.set(true);
             // fake page variant config nodes
             this.pageVariantConfigs = {
                 nodes: [],
@@ -2244,17 +2246,35 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 },
             };
             this.selectedVariantPosition = 0;
-            this.pageVariantConfigs.nodes = [this.selectedDefaultConfigNode];
+            this.pageVariantConfigs.nodes = [this.pageVariantCreateDialogSelectedNode];
             // create config node + link
             await this.checkForCustomPageNodeExistence();
             // reset values + reinitialize the component
             this.pageConfigCheckFailed.set(false);
             await this.initializeComponent();
+            // switch into edit mode
+            this.editMode.set(true);
+            // end visual editing
+            this.endEditing();
+            this.topicPageHelperService.openSaveConfigToast(
+                this.i18nPrefix + 'CREATE_PAGE_VARIANT.SUCCESS_MESSAGE',
+            );
+            // wait for the variant load and automatically open the settings menu
+            setTimeout(async () => {
+                const queryParamsToAddOrOverwrite: Params = {
+                    openMenu: 'settings',
+                };
+                // on variant change, do not keep the fragments
+                await this.router.navigate([], {
+                    relativeTo: this.route,
+                    queryParams: queryParamsToAddOrOverwrite,
+                    queryParamsHandling: 'merge',
+                });
+            }, 500);
         } catch (err) {
             console.error(err);
+            this.endEditing();
             this.topicPageHelperService.displayErrorToast();
-        } finally {
-            this.createCustomConfigInProgress.set(false);
         }
     }
 
