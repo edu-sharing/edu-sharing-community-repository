@@ -353,6 +353,7 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Page template",
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
+    "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
       "EXISTING_VARIANT": {
