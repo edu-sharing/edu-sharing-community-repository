@@ -38,6 +38,7 @@
     color: $textLight;
     flex-shrink: 0;
     width: 25px;
+    cursor: pointer;
 }
 .moreOpen {
     left: math.div($workspaceSidebarWidth - $contextMenuWidth, 2);
