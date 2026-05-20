@@ -132,7 +132,12 @@
         [homeIcon]="breadcrumbs.homeIcon"
       ></es-breadcrumbs>
       <div class="change">
-        <button mat-button color="primary" (click)="chooseParent()">
+        <button
+          mat-button
+          color="primary"
+          (click)="chooseParent()"
+          [attr.aria-label]="'WORKSPACE.CHANGE_FILE_LOCATION' | translate"
+        >
           {{ 'CHANGE_STORAGE_LOCATION' | translate }}
         </button>
       </div>
