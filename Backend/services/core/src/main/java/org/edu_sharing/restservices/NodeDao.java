@@ -184,7 +184,7 @@ public class NodeDao {
     }
 
     public static boolean exists(RepositoryDao repoDao, String nodeId) {
-        return NodeServiceFactory.getNodeService(repoDao.getId()).exists(nodeId);
+        return NodeServiceFactory.getInstance().getService(repoDao.getId()).exists(nodeId);
     }
 
     public org.edu_sharing.service.model.NodeRef getNodeRef() {

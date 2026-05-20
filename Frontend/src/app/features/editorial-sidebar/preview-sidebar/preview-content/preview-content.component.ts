@@ -17,13 +17,8 @@ import {
     OptionsHelperDataService,
     RenderHelperService,
 } from 'ngx-edu-sharing-ui';
-import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { firstValueFrom, Subject } from 'rxjs';
-import { DialogsService } from '../dialogs/dialogs.service';
 import { Params, Router } from '@angular/router';
-import { MdsEditorWrapperComponent } from '../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
-import { Subject } from 'rxjs';
-import { Router } from '@angular/router';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
 import { PreviewSidebarTemplateService } from '../preview-sidebar-template.service';
 import { MdsEditorWrapperComponent } from '../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';

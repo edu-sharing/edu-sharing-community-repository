@@ -6,6 +6,7 @@ public enum ActivityOnNodeEventType {
     VIEW_MATERIAL,
     VIEW_COLLECTION,
     VIEW_MATERIAL_EMBEDDED,
+    VIEW_MATERIAL_GDPR_CONFIRMED, // when user confirms the gdpr dialog
     VIEW_MATERIAL_PLAY_MEDIA, // When a video or audio file is actually started playing
 
     // used in interceptors
