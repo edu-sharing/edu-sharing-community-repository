@@ -153,21 +153,25 @@ export class ImageWrapperComponent implements OnInit {
         }
         // user has selected an AI generated image
         if (aiGeneratedImage) {
-            const imageData: ImageResult = regenerateNecessary
-                ? await this.aiHelperService.updateAiImage(
-                      this.widgetNodeId(),
-                      this.contextNodeId(),
-                  )
-                : await this.aiHelperService.createAiImage(
-                      this.widgetNodeId(),
-                      this.contextNodeId(),
-                  );
-            // reset both sources before loading the new one
-            resetSources();
-            this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                this.BASE_64_PREFIX + imageData.data[0].b64_json,
-            );
-            return;
+            try {
+                const imageData: ImageResult = regenerateNecessary
+                    ? await this.aiHelperService.updateAiImage(
+                          this.widgetNodeId(),
+                          this.contextNodeId(),
+                      )
+                    : await this.aiHelperService.createAiImage(
+                          this.widgetNodeId(),
+                          this.contextNodeId(),
+                      );
+                // reset both sources before loading the new one
+                resetSources();
+                this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
+                    this.BASE_64_PREFIX + imageData.data[0].b64_json,
+                );
+                return;
+            } catch (error) {
+                console.error(error);
+            }
         }
         // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
         if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
