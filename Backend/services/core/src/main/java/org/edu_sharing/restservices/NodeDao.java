@@ -30,6 +30,7 @@ import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.repository.server.tools.security.JwtTokenUtil;
@@ -2364,9 +2365,13 @@ public class NodeDao {
     }
 
     public String getJWT() throws GeneralSecurityException {
-        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        String user;
+        if(ContextManagementFilter.accessTool.get() != null && ContextManagementFilter.accessTool.get().getUserId() != null) {
+            user = ContextManagementFilter.accessTool.get().getUserId();
+        } else{
+            user = AuthenticationUtil.getFullyAuthenticatedUser();
+        }
         UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
-
         Node node = asNode();
 
         java.util.Collection<String> permissions;
