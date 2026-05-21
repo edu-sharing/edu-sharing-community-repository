@@ -16,8 +16,8 @@
     min-height: var(--breadcrumb-min-height);
     box-sizing: border-box;
     font-size: 0.9375rem;
-    --breadcrumb-min-height: 68px;
-    --breadcrumb-padding-y: 4px;
+    --breadcrumb-min-height: 76px;
+    --breadcrumb-padding-y: 8px;
 
     // left aligned breadcrumb items
     .es-topic-page-breadcrumb-list {
@@ -43,9 +43,9 @@
                 margin-top: calc(-1 * var(--breadcrumb-padding-y) + 4px);
                 margin-bottom: calc(-1 * var(--breadcrumb-padding-y));
                 // reduce padding-top to avoid overlapping the breadcrumb
-                padding-top: 4px;
+                padding-top: var(--breadcrumb-padding-y);
                 // add padding-bottom to avoid uneven centered text
-                padding-bottom: 4px;
+                padding-bottom: var(--breadcrumb-padding-y);
                 --disabled-config-select-color: #999;
 
                 // color adjustments
@@ -105,12 +105,9 @@
     border-top: 1px solid #ccc;
 }
 
-// for extra small devices (portrait phones, less than 620px), reserve space for the bookmark
-// custom breakpoint
+// for extra small devices (portrait phones, less than 620px), wrap breadcrumb list
 @media (max-width: 619.98px) {
     .es-topic-page-breadcrumb {
-        margin-right: 116px;
-
         .es-topic-page-breadcrumb-list {
             flex-wrap: wrap;
 
@@ -120,10 +117,10 @@
                 margin-bottom: 0;
             }
         }
-    }
 
-    .es-topic-page-breadcrumb.edit-mode {
-        flex-wrap: wrap;
+        &.edit-mode {
+            flex-wrap: wrap;
+        }
     }
 }
 
