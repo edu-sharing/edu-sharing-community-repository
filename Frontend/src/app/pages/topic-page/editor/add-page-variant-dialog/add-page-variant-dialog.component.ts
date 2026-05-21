@@ -272,6 +272,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                 !this.searchValue?.trim() || this.searchValue?.includes(defaultTemplateName);
             if (noSearchFilterDefined && noSearchValueOrIncluded) {
                 searchResult.nodes.push({
+                    access: ['Coordinator'],
                     aspects: [],
                     ref: {
                         archived: false,
@@ -280,10 +281,12 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     },
                     name: defaultTemplateName,
                     title: defaultTemplateName,
-                    iconURL:
-                        location.origin +
-                        this.topicPageHelperService.getBaseHref() +
-                        '/themes/default/images/common/mime-types/svg/folder.svg',
+                    icon: {
+                        url:
+                            location.origin +
+                            this.topicPageHelperService.getBaseHref() +
+                            '/themes/default/images/common/mime-types/svg/folder.svg',
+                    },
                     mediatype: 'folder',
                     type: RestConstants.CCM_TYPE_MAP,
                     properties: {
