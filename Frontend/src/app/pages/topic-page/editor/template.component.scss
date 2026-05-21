@@ -648,6 +648,12 @@ es-side-menu-wrapper {
                 border-bottom-right-radius: unset;
             }
         }
+
+        // adjust position of topic color picker
+        .topic-color-picker {
+            top: -4px;
+            right: 50%;
+        }
     }
 
     // spacing adjustments when sidebar is hidden
