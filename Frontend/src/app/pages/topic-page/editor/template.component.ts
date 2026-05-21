@@ -2352,7 +2352,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      *
      * @param color
      */
-    isDarkColor(color: string) {
+    isDarkColor(color: string): boolean {
+        if (!color) {
+            return false;
+        }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
