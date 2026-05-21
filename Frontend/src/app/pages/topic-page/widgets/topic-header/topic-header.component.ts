@@ -380,7 +380,10 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      *
      * @param color
      */
-    isDarkColor(color: string) {
+    isDarkColor(color: string): boolean {
+        if (!color) {
+            return false;
+        }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
