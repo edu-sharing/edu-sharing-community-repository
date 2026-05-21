@@ -2,12 +2,13 @@
 
 ## Module Structure
 
-| Module            | Path                      | Purpose                                                                      |
-|-------------------|---------------------------|------------------------------------------------------------------------------|
-| `alfresco/common` | `Backend/alfresco/common` | Shared constants, DTOs, utilities used by all modules                        |
-| `alfresco/module` | `Backend/alfresco/module` | Alfresco AMP — policies, interceptors, metadata engine, MDS query processing |
-| `services/core`   | `Backend/services/core`   | REST layer, DAOs, search services, node services, admin tools                |
-| `config/defaults` | `config/defaults`         | Default MDS XML definitions, i18n properties, Lightbend config               |
+| Module               | Path                         | Purpose                                                                      |
+|----------------------|------------------------------|------------------------------------------------------------------------------|
+| `alfresco/common`    | `Backend/alfresco/common`    | Shared constants, DTOs, utilities used by all modules                        |
+| `alfresco/module`    | `Backend/alfresco/module`    | Alfresco AMP — policies, interceptors, metadata engine, MDS query processing |
+| `services/core`      | `Backend/services/core`      | REST layer, DAOs, search services, node services, admin tools                |
+| `services/rendering` | `Backend/services/rendering` | Rendering service                                                            |
+| `config/defaults`    | `config/defaults`            | Default MDS XML definitions, i18n properties, Lightbend config               |
 
 **Dependency direction:** `services/core` → `alfresco/module` → `alfresco/common`. Never import `services/core` classes from `alfresco/module`.
 
@@ -164,6 +165,91 @@ Searches for nodes with the `ccm:page_variant` aspect. Key properties:
 | `ccm:page_variant_profiling_target_group` | multi-value OR: `learner`, `teacher`, `general`       |
 | `ccm:educationalcontext`                  | multi-value OR                                        |
 | `virtual:page_variant_global`             | `"true"` → restricts to nodes under the system folder |
+
+---
+
+## Alfresco Caches
+
+Caches are declared in two places; both must stay in sync.
+
+**Bean declaration** — `Backend/alfresco/module/src/main/amp/config/alfresco/extension/custom-cache-context.xml`
+
+```xml
+<bean name="eduSharingTransformerCache" factory-bean="cacheFactory" factory-method="createCache">
+    <constructor-arg value="cache.eduSharingTransformerCache"/>
+</bean>
+```
+
+**Properties** — `config/defaults/src/main/resources/caches.properties`
+
+```properties
+cache.eduSharingTransformerCache.eviction-policy=LRU
+cache.eduSharingTransformerCache.maxIdleSeconds=0
+cache.eduSharingTransformerCache.maxItems=10000
+cache.eduSharingTransformerCache.timeToLiveSeconds=60
+```
+
+**Java lookup** — use `AlfAppContextGate` (same pattern as `ConfigServiceImpl`):
+
+```java
+private static final SimpleCache<String, String> transformerCache =
+    AlfAppContextGate.getApplicationContext().getBean("eduSharingTransformerCache", SimpleCache.class);
+```
+
+Naming convention: all cache beans use the `eduSharing*` prefix.
+
+---
+
+## BAPI Proxy Integration
+
+**Service**: `BApiProxyService.forwardRequest(path, body, headers, method)` — `headers` may be `null` (the service already guards against it).
+
+---
+
+## Node Annotation AOP System
+
+`@NodeManipulation` triggers `NodeOriginalAspect` which rewrites annotated parameters before the method body runs.
+
+| Annotation               | Dispatch                                   | Resolves                                                                     |
+|--------------------------|--------------------------------------------|------------------------------------------------------------------------------|
+| `@NodeOriginal`          | `nodeService.getOriginalNode(id)`          | Collection references **and** published copies (`ccm:io_published_original`) |
+| `@NodeReferenceOriginal` | `nodeService.getReferenceOriginalNode(id)` | Collection references only (`ccm:collection_io_reference → ccm:original`)    |
+
+Use `@NodeReferenceOriginal` when a published copy must retain its own identity (e.g. fulltext extraction — the copy may have different binary content than the original).
+
+`getOriginalNode` is implemented as: `getReferenceOriginalNode` first, then published-copy resolution on top.
+
+---
+
+## Alfresco Policy Patterns
+
+### OnContentPropertyUpdatePolicy vs OnContentUpdatePolicy
+
+Prefer `OnContentPropertyUpdatePolicy` when you need to react only to a specific content property (e.g. `cm:content`) and must **not** re-fire when other content properties are written (e.g. `ccm:fulltext_content`).
+
+`OnContentUpdatePolicy` fires for any content property on the type, which causes a self-triggering loop if the policy also writes a content property.
+
+---
+
+## Privileged Writes Inside Policies / Services
+
+Pattern for writes that need to bypass permission checks and run in their own transaction:
+
+```java
+AuthenticationUtil.runAsSystem(() ->
+    serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+        // write operations
+        return null;
+    })
+);
+```
+
+`serviceRegistry` is obtained via:
+
+```java
+static ServiceRegistry serviceRegistry =
+    (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
+```
 
 ---
 
