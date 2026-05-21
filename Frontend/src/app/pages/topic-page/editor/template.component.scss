@@ -90,11 +90,10 @@ es-side-menu-wrapper {
 }
 
 .template-breadcrumb {
-    padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
     box-sizing: border-box;
     width: 100%;
     position: sticky;
-    top: 0;
+    top: 70px;
     // overflow contents such as the image of the navbar or the AI labels
     z-index: 12;
 
