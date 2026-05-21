@@ -272,6 +272,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                 !this.searchValue?.trim() || this.searchValue?.includes(defaultTemplateName);
             if (noSearchFilterDefined && noSearchValueOrIncluded) {
                 searchResult.nodes.push({
+                    aspects: [],
                     ref: {
                         archived: false,
                         id: uuidv4(),
