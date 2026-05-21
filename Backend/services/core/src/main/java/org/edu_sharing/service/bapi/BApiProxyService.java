@@ -3,7 +3,9 @@ package org.edu_sharing.service.bapi;
 import co.elastic.clients.util.ContentType;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,9 +19,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BApiProxyService {
@@ -50,6 +54,7 @@ public class BApiProxyService {
         if (StringUtils.isBlank(bApiProxyConfig.getUri()) || StringUtils.isBlank(apiKey)) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .callTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
@@ -90,11 +95,41 @@ public class BApiProxyService {
         try (okhttp3.Response response = okHttpClient.newCall(requestBuilder.build()).execute()) {
             Response.ResponseBuilder result = Response.status(response.code());
             if (response.body() != null) {
-                result.entity(response.body().string());
-                if(response.body().contentType() != null) {
-                    result.type(String.valueOf(response.body().contentType()));
+
+                MediaType responseType = response.body().contentType();
+                boolean isSse = false;
+                if (responseType != null) {
+                    isSse = String.valueOf(responseType).equals("text/event-stream");
+                    if (!isSse) {
+                        result.type("text/event-stream");
+                        isSse = true;
+                    } else {
+                        result.type(String.valueOf(responseType));
+                    }
                 } else {
                     result.type(ContentType.APPLICATION_JSON);
+                }
+
+                if (isSse) {
+                    result.header("Cache-Control", "no-cache")
+                            .header("Connection", "keep-alive");
+
+                    StreamingOutput streamingOutput = outputStream -> {
+                        try (response; InputStream inputStream = response.body().byteStream()) {
+                            byte[] buffer = new byte[4096];
+                            int bytesRead;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead);
+                                outputStream.flush();
+                            }
+                        } catch (IOException ignore) {
+                            // Client disconnected or stream ended
+                            log.debug("Client disconnected or stream ended during response streaming");
+                        }
+                    };
+                    result.entity(streamingOutput);
+                }else {
+                    result.entity(response.body().string());
                 }
             }
             return result.build();
