@@ -319,7 +319,9 @@ es-side-menu-wrapper {
                         .mat-mdc-input-element,
                         .mdc-floating-label,
                         .mat-mdc-form-field.mat-focused .mdc-floating-label,
-                        .mat-mdc-input-element::placeholder {
+                        .mat-mdc-input-element::placeholder,
+                        .mdc-label,
+                        .mat-heading-4 {
                             color: topicPageVars.$on-primary;
                         }
 
