@@ -28,6 +28,7 @@
       <h1 class="mat-heading-1 topic-header-title">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
         <button
+          *ngIf="backToCollectionButtonVisible()"
           mat-flat-button
           color="primary"
           [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
