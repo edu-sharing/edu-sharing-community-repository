@@ -120,6 +120,13 @@ es-side-menu-wrapper {
         right: calc(50% - 26px);
     }
 
+    // check whether it includes a children with bright-color set in order to adjust the label of the topic-color-picker
+    &:has(es-topic-header .topic-text-wrapper.bright-color) {
+        ::ng-deep .color-picker-button .mdc-button__label {
+            color: topicPageVars.$on-primary;
+        }
+    }
+
     // reserve space for the anchor menu
     &.extra-padding-bottom {
         padding-bottom: calc(32px + var(--anchor-menu-height) / 2);
