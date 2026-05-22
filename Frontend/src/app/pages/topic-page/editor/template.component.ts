@@ -2352,12 +2352,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Checks whether a given color is dark.
+     * Checks whether the background color of a given swimlane is a dark color.
      *
-     * @param color
+     * @param swimlane
      */
-    isDarkColor(color: string): boolean {
-        if (!color) {
+    isDarkColor(swimlane: Swimlane): boolean {
+        const color = swimlane.backgroundColor;
+        if (
+            !color ||
+            ![undefined, SwimlaneBackgroundShape.None].includes(swimlane.backgroundShape)
+        ) {
             return false;
         }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
