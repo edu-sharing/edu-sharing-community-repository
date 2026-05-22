@@ -1613,6 +1613,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         try {
 
             return "" + getContentReader(storeProtocol, storeId, nodeId, version, contentProp).getContentData().hashCode();
+        } catch (AccessDeniedException e) {
+            // explicitly throw so the @NodeServiceInterceptor can check
+            throw e;
         } catch (Throwable t) {
             return null;
         }
