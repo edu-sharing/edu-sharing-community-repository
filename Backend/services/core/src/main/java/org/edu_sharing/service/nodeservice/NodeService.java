@@ -234,12 +234,25 @@ public interface NodeService {
 
 
 	/**
-	 * Returns the original NodeRef of the given node id
-	 * This is used to return the original node of a linked node
+	 * Returns the original NodeRef of the given node id.
+	 * Resolves both collection references (ccm:collection_io_reference) and published copies
+	 * (ccm:io_published_original). Use {@link #getReferenceOriginalNode(String)} to resolve
+	 * collection references only.
 	 * @param nodeId
 	 * @return
 	 */
     NodeRef getOriginalNode(String nodeId);
+
+	/**
+	 * Returns the original NodeRef of the given node id, resolving collection references
+	 * (ccm:collection_io_reference to ccm:original) only.
+	 * Published copies (ccm:io_published_original) are NOT followed, so the copy keeps its
+	 * own identity. Use this when a published copy must remain distinct from its origin,
+	 * for example for content-bound data such as fulltext.
+	 * @param nodeId
+	 * @return
+	 */
+    NodeRef getReferenceOriginalNode(String nodeId);
 
 	/**
 	 * revoke a published copy
