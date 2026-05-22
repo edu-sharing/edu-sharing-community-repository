@@ -289,6 +289,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.hasCustomBreadcrumbExtension.set(
             this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
         );
+        this.backToCollectionButtonVisible.set(
+            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
+        );
         // the sidebar should be hidden when it is configured and a touch event is detected
         // TODO: this only works if a touch event is detected
         // if (this.topicPageGlobalService.getSidebarMobileHidden()) {
@@ -403,6 +406,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private latestUrlFragment: string;
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
+    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     hasCustomBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     customSideMenuItems = signal<CustomSideMenuItem[]>([]);
     customSideMenuItemsBefore = computed(() =>

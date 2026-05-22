@@ -25,6 +25,7 @@ export type NodeSelectionValidator = (node: Node) => boolean | Promise<boolean>;
     providedIn: 'root',
 })
 export class TopicPageGlobalService {
+    private backToCollectionButtonVisible: boolean = true;
     private customBreadcrumbExtension: CustomBreadcrumbExtension = null;
     private customBreadcrumbRootLink: string = '';
     private customReurlComponent: string = '';
@@ -43,6 +44,13 @@ export class TopicPageGlobalService {
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
+
+    /**
+     * Updates the visibility of the back to collection button.
+     */
+    setBackToCollectionButtonVisible(visible: boolean) {
+        this.backToCollectionButtonVisible = visible;
+    }
 
     /**
      * Registers a custom breadcrumb extension.
@@ -185,6 +193,13 @@ export class TopicPageGlobalService {
      */
     setNodeSelectionValidator(validator: NodeSelectionValidator | null): void {
         this.nodeSelectionValidator = validator;
+    }
+
+    /**
+     * Retrieves the visibility state of the back to collection button.
+     */
+    getBackToCollectionButtonVisible(): boolean {
+        return this.backToCollectionButtonVisible;
     }
 
     /**

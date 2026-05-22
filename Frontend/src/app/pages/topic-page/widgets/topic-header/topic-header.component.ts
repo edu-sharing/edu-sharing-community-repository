@@ -28,6 +28,7 @@ import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
@@ -95,6 +96,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiGeneratedImage: boolean;
     aiGeneratedText: WritableSignal<boolean> = signal(false);
     aiSupported: WritableSignal<boolean> = signal(false);
+    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
     private configLocked: boolean = false;
     // description is used for the "description" of importance (stored in a "header" widget node)
@@ -107,8 +109,13 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     constructor(
         private aiHelperService: AiHelperService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
-    ) {}
+    ) {
+        this.backToCollectionButtonVisible.set(
+            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
+        );
+    }
 
     /**
      * Initializes the component.
