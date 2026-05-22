@@ -36,6 +36,7 @@
         border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
         outline: none;
+        background: topicPageVars.$surface;
         min-width: 0;
         max-width: 100%;
         overflow-x: auto;
@@ -74,6 +75,7 @@
         padding: 4px 8px;
         border: 1px solid topicPageVars.$outline-light;
         border-radius: 3px;
+        background: topicPageVars.$surface;
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -83,6 +85,11 @@
         &.no-ai-buttons {
             padding: 4px 0;
             border: none;
+            background: none;
+
+            .ai-toggle-group {
+                background: topicPageVars.$surface;
+            }
         }
 
         .ai-toggle-group ::ng-deep {

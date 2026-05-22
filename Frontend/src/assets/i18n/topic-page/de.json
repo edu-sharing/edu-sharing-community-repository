@@ -332,11 +332,8 @@
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "Für diese Sammlung wurde noch keine Themenseite erstellt.",
       "VIEW_MESSAGE": "Bitte wenden Sie sich an Ihren Systemadministrator.",
-      "EDIT_MESSAGE": "Bitte wählen Sie im Menü eine Vorlage aus, um zu beginnen.",
-      "SELECT_LABEL": "Seiten-Konfiguration",
-      "SELECT_PLACEHOLDER": "Seiten-Konfiguration auswählen",
+      "EDIT_MESSAGE": "Bitte nutzen Sie den nachfolgenden Button oder den \"Neu\"-Button, um eine neue Themenseiten-Variante zu erstellen.",
       "DEFAULT_TEMPLATE": "Standard-Vorlage",
-      "CREATE_PAGE": "Seite anlegen",
       "MISSING_CONFIG_OR_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten oder es konnte keine Seiten-Variante gewählt werden.",
       "MISSING_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten."
     },
@@ -353,8 +350,13 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
     "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
+    "NAVIGATE_TO_COLLECTION_PAGE": "Zur Sammlungsseite wechseln",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
+      "NEW_TOPIC_PAGE": {
+        "INFO_HEADING": "Es gibt noch keine Themenseite zu dieser Sammlung.",
+        "INFO_TEXT": "Wähle eine Vorlage aus, die als Grundlage für eine neue Themenseite-Variante verwendet werden soll."
+      },
       "EXISTING_VARIANT": {
         "INFO_HEADING": "Achtung: Es gibt bereits Varianten dieser Themenseite.",
         "INFO_LIST_TEXT": "Bevor du eine Neue anlegst, prüfe bitte:",
@@ -363,7 +365,7 @@
       },
       "EXISTING_TOPIC_PAGE": {
         "INFO_HEADING": "Es gibt bereits eine Themenseite zu dieser Sammlung.",
-        "INFO_TEXT": "Du kannst eine Kopie davon erstellen und anpassen, ihre Filter ablösen und eine andere Themenseite als Basis wählen oder eine neue Variante aus einer Vorlage erstellen."
+        "INFO_TEXT": "Du kannst diese anpassen, um eine Kopie davon zu erstellen oder eine neue Variante aus einer Vorlage erstellen."
       },
       "CREATE_COPY_OF_LABEL": "Erstelle Kopie von:",
       "COPY_OPTIONS": {

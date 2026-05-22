@@ -42,6 +42,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
+    ColorHelper,
     Constrain,
     CustomOptions,
     DefaultGroups,
@@ -49,6 +50,7 @@ import {
     Helper,
     OptionItem,
     OptionsHelperDataService,
+    PreferredColor,
     Scope,
     TranslationsService,
     UIConstants,
@@ -77,6 +79,7 @@ import {
 } from '../../../main/navigation/search-field/search-field.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { VarDirective } from '../shared/directives/ng-var.directive';
+import { TooltipAriaLabelDirective } from '../shared/directives/tooltip-aria-label.directive';
 import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
 import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
@@ -186,6 +189,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         SwimlaneConfigurationButtonsComponent,
         SwimlaneSearchCountPipe,
         SwimlaneSettingsDialogComponent,
+        TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
         TranslateModule,
@@ -213,8 +217,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         (o) => o.viewValue === 'CONTAINER_ELEMENT',
     )?.value;
     readonly i18nPrefix: string = 'TOPIC_PAGE.';
-    private readonly createPageVariantTitle: string =
-        this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
+    readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
@@ -265,11 +268,29 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .subscribe((isOpen: boolean): void => {
                 this.sidebarOpen.set(isOpen);
             });
+        if (!this.topicPageGlobalService.getCustomUrlFunction()) {
+            this.topicPageGlobalService.setCustomUrlFunction((node: Node): string => {
+                if (!retrieveNodeId(node)) {
+                    return '';
+                }
+                return (
+                    this.topicPageHelperService.getBaseHref() +
+                    this.router.serializeUrl(
+                        this.router.createUrlTree([UIConstants.ROUTER_PREFIX, 'topic-pages'], {
+                            queryParams: { collectionId: retrieveNodeId(node) },
+                        }),
+                    )
+                );
+            });
+        }
         if (this.topicPageGlobalService.getCustomSideMenuItems()) {
             this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
         }
         this.hasCustomBreadcrumbExtension.set(
             this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
+        );
+        this.backToCollectionButtonVisible.set(
+            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );
         // the sidebar should be hidden when it is configured and a touch event is detected
         // TODO: this only works if a touch event is detected
@@ -332,7 +353,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     templateMode: WritableSignal<boolean> = signal(false);
 
     topic: WritableSignal<string> = signal('');
-    topicCollectionID: WritableSignal<string> = signal(null);
+    topicCollectionId: WritableSignal<string> = signal(null);
     aiSupported: WritableSignal<boolean> = signal(false);
     rendering2Supported: WritableSignal<boolean> = signal(false);
 
@@ -352,8 +373,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageConfigNode: Node;
     pageConfigCheckFailed: WritableSignal<boolean> = signal(false);
     defaultPageVariantNodes: Node[] | Partial<Node>[];
-    selectedDefaultConfigNode: Node;
-    createCustomConfigInProgress: WritableSignal<boolean> = signal(false);
     pageVariantConfigs: NodeEntries;
     private pageVariantDefaultPosition: number = -1;
     pageVariantNode: Node;
@@ -387,6 +406,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private latestUrlFragment: string;
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
+    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     hasCustomBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     customSideMenuItems = signal<CustomSideMenuItem[]>([]);
     customSideMenuItemsBefore = computed(() =>
@@ -461,7 +481,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // check if the collectionId input is set
         if (this.collectionId) {
             // set the collection ID
-            this.topicCollectionID.set(this.collectionId);
+            this.topicCollectionId.set(this.collectionId);
             // initialize the component
             void this.initializeComponent(this.variantId);
         }
@@ -473,7 +493,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
-                    this.topicCollectionID.set(params.collectionId);
+                    this.topicCollectionId.set(params.collectionId);
                     // initialize the component
                     await this.initializeComponent(params.variantId);
                 }
@@ -502,7 +522,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.selectedVariantPosition = -1;
             this.pageConfigNode = null;
             // set the collection ID
-            this.topicCollectionID.set(changes.collectionId?.currentValue || this.collectionId);
+            this.topicCollectionId.set(changes.collectionId?.currentValue || this.collectionId);
             // initialize the component
             await this.initializeComponent(changes.variantId?.currentValue || this.variantId);
         }
@@ -596,12 +616,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         try {
             // fetch the collection node to set the topic name, color and check the user access
             this.collectionNode = await this.topicPageHelperService.getNode(
-                this.topicCollectionID(),
+                this.topicCollectionId(),
             );
             this.topic.set(this.collectionNode.title ?? 'No topic defined');
             // retrieve parent entries
             const parentEntries: ParentEntries = await this.topicPageHelperService.getNodeParents(
-                this.topicCollectionID(),
+                this.topicCollectionId(),
             );
             this.parentEntries.set(parentEntries);
             // check the user privileges for the collection node and initialize custom listeners
@@ -1046,6 +1066,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
             // create a child for the variant node
             this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
+            // special case for empty page variant configs
+            const emptyPageVariantConfigs: boolean = !this.pageVariantConfigs?.nodes?.length;
+            if (emptyPageVariantConfigs) {
+                await this.createCustomConfig();
+                return;
+            }
             // check for custom page node existence and create it if necessary
             await this.checkForCustomPageNodeExistence();
             // check for pageConfigNode existence
@@ -2195,7 +2221,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             await this.aiHelperService.generateFromPrompt(
                                 config,
                                 this.topicPageHelperService.getSelectedVariables() || {},
-                                this.topicCollectionID(),
+                                this.topicCollectionId(),
                             );
                         const promptToTextMapping = new PromptToTextMapping(
                             prompt,
@@ -2212,11 +2238,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Helper function to create a custom page config from the selected default config node.
+     * Helper function to create a custom page config as a starting point.
      */
     async createCustomConfig(): Promise<void> {
         try {
-            this.createCustomConfigInProgress.set(true);
             // fake page variant config nodes
             this.pageVariantConfigs = {
                 nodes: [],
@@ -2227,17 +2252,35 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 },
             };
             this.selectedVariantPosition = 0;
-            this.pageVariantConfigs.nodes = [this.selectedDefaultConfigNode];
+            this.pageVariantConfigs.nodes = [this.pageVariantCreateDialogSelectedNode];
             // create config node + link
             await this.checkForCustomPageNodeExistence();
             // reset values + reinitialize the component
             this.pageConfigCheckFailed.set(false);
             await this.initializeComponent();
+            // switch into edit mode
+            this.editMode.set(true);
+            // end visual editing
+            this.endEditing();
+            this.topicPageHelperService.openSaveConfigToast(
+                this.i18nPrefix + 'CREATE_PAGE_VARIANT.SUCCESS_MESSAGE',
+            );
+            // wait for the variant load and automatically open the settings menu
+            setTimeout(async () => {
+                const queryParamsToAddOrOverwrite: Params = {
+                    openMenu: 'settings',
+                };
+                // on variant change, do not keep the fragments
+                await this.router.navigate([], {
+                    relativeTo: this.route,
+                    queryParams: queryParamsToAddOrOverwrite,
+                    queryParamsHandling: 'merge',
+                });
+            }, 500);
         } catch (err) {
             console.error(err);
+            this.endEditing();
             this.topicPageHelperService.displayErrorToast();
-        } finally {
-            this.createCustomConfigInProgress.set(false);
         }
     }
 
@@ -2306,6 +2349,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         } finally {
             this.endEditing();
         }
+    }
+
+    /**
+     * Checks whether the background color of a given swimlane is a dark color.
+     *
+     * @param swimlane
+     */
+    isDarkColor(swimlane: Swimlane): boolean {
+        const color = swimlane.backgroundColor;
+        if (
+            !color ||
+            ![undefined, SwimlaneBackgroundShape.None].includes(swimlane.backgroundShape)
+        ) {
+            return false;
+        }
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
     /**
@@ -2623,6 +2682,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     protected readonly pageVariantConfigPrefix = DEFAULT_PAGE_VARIANT_NAME_PREFIX;
+    protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;
     protected readonly SwimlaneBackgroundShape = SwimlaneBackgroundShape;
     protected readonly WIDGETS = WIDGETS;
 }

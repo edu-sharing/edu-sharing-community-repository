@@ -1,6 +1,10 @@
 <div class="es-topic-header-widget">
   <div class="template-header-content" *ngIf="initialized(); else loadingSpinner">
-    <div class="topic-text-wrapper" [style.background]="textBackgroundColor">
+    <div
+      class="topic-text-wrapper"
+      [class.bright-color]="isDarkColor(textBackgroundColor)"
+      [style.background]="textBackgroundColor"
+    >
       <es-color-picker
         *ngIf="editMode"
         class="topic-header-color-picker"
@@ -21,13 +25,16 @@
         {{ i18nPrefix + 'TOPIC_PAGE_SUBJECT_PORTAL_LABEL' | translate }}
         {{ parentEntries().nodes[parentEntries().nodes.length - 2].title }}
       </div>
-      <h1 class="mat-heading-1 font-bold topic-header-title">
+      <h1 class="mat-heading-1 topic-header-title">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
         <button
+          *ngIf="backToCollectionButtonVisible()"
           mat-flat-button
           color="primary"
           [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
           [queryParams]="{ id: contextNodeId }"
+          [matTooltip]="'TOPIC_PAGE.NAVIGATE_TO_COLLECTION_PAGE' | translate"
+          tooltipAriaLabel
         >
           <i esIcon="layers"></i>
         </button>
@@ -37,7 +44,7 @@
         [aiGenerated]="aiGeneratedDescription()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
-        [label]="'TOPIC_PAGE.WIDGET.TOPIC_HEADER.COLLECTION_DESCRIPTION_LABEL' | translate"
+        [label]="i18nPrefix + 'COLLECTION_DESCRIPTION_LABEL' | translate"
         [inputLimit]="1000"
         [nonEditText]="collectionDescription ?? ''"
         [prominentText]="true"
@@ -50,9 +57,7 @@
         <i esIcon="edu-lightbulb" class="important-header-icon"></i>
         <span
           [innerHTML]="
-            'TOPIC_PAGE.WIDGET.TOPIC_HEADER.IMPORTANCE_HEADER'
-              | translate
-              | highlightSearch : searchInput()
+            i18nPrefix + 'IMPORTANCE_HEADER' | translate | highlightSearch : searchInput()
           "
         ></span>
       </h2>
@@ -61,7 +66,7 @@
         [aiGenerated]="aiGeneratedText()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
-        [label]="'TOPIC_PAGE.WIDGET.TOPIC_HEADER.IMPORTANCE_LABEL' | translate"
+        [label]="i18nPrefix + 'IMPORTANCE_LABEL' | translate"
         [inputLimit]="1000"
         [nonEditText]="description"
         [searchInput]="searchInput()"

@@ -15,12 +15,20 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
-import { EduSharingUiCommonModule, SpinnerComponent, UIConstants } from 'ngx-edu-sharing-ui';
+import {
+    ColorHelper,
+    EduSharingUiCommonModule,
+    PreferredColor,
+    SpinnerComponent,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
@@ -43,6 +51,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
         ImageWrapperComponent,
         SharedModule,
         SpinnerComponent,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -87,6 +96,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiGeneratedImage: boolean;
     aiGeneratedText: WritableSignal<boolean> = signal(false);
     aiSupported: WritableSignal<boolean> = signal(false);
+    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
     private configLocked: boolean = false;
     // description is used for the "description" of importance (stored in a "header" widget node)
@@ -99,8 +109,13 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     constructor(
         private aiHelperService: AiHelperService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
-    ) {}
+    ) {
+        this.backToCollectionButtonVisible.set(
+            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
+        );
+    }
 
     /**
      * Initializes the component.
@@ -365,6 +380,18 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             headerConfig.textBackgroundColor = this.textBackgroundColor;
         }
         return headerConfig;
+    }
+
+    /**
+     * Checks whether a given color is dark.
+     *
+     * @param color
+     */
+    isDarkColor(color: string): boolean {
+        if (!color) {
+            return false;
+        }
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
     protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;

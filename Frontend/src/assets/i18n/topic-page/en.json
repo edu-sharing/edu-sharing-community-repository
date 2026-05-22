@@ -332,11 +332,8 @@
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "No topic page has been created for this collection yet.",
       "VIEW_MESSAGE": "Please contact your system administrator.",
-      "EDIT_MESSAGE": "Please select a template from the menu to get started.",
-      "SELECT_LABEL": "Page config",
-      "SELECT_PLACEHOLDER": "Select page config",
+      "EDIT_MESSAGE": "Please use the following button or the \"New\" button to create a new topic page variant.",
       "DEFAULT_TEMPLATE": "Default template",
-      "CREATE_PAGE": "Create page",
       "MISSING_CONFIG_OR_VARIANTS": "The page configuration does not contain any page variants or no page variant could be selected.",
       "MISSING_VARIANTS": "The page configuration does not contain any page variants."
     },
@@ -353,8 +350,13 @@
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Page template",
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
+    "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
+      "NEW_TOPIC_PAGE": {
+        "INFO_HEADING": "There is no topic page for this collection yet.",
+        "INFO_TEXT": "Select a template to use as the basis for a new topic page variant."
+      },
       "EXISTING_VARIANT": {
         "INFO_HEADING": "Attention: There are already variants of this topic page.",
         "INFO_LIST_TEXT": "Before creating a new one, please check:",
@@ -363,7 +365,7 @@
       },
       "EXISTING_TOPIC_PAGE": {
         "INFO_HEADING": "There is already a topic page for this collection.",
-        "INFO_TEXT": "You can create and customize a copy of it, replace its filters, choose a different topic page as a basis, or create a new variant from a template."
+        "INFO_TEXT": "You can customize it to create a copy, or create a new variant from a template."
       },
       "CREATE_COPY_OF_LABEL": "Create copy of:",
       "COPY_OPTIONS": {
