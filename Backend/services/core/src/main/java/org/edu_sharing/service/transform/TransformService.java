@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +53,23 @@ public class TransformService {
      * @param <T>
      */
     public <T> T transform(NodeRef nodeRef, String targetMimetype, Class<T> clazz) {
-
+        InputStream is = getInputStream(nodeRef, targetMimetype);
+        if(is != null) {
+            try {
+                T value = jsonObjectMapper.readValue(is, clazz);
+                is.close();
+                return value;
+            } catch (IOException e) {
+                log.error(e.getMessage(),e);
+            }
+        }
+        return null;
+    }
+    public InputStream getInputStream(NodeRef nodeRef, String targetMimetype) {
         ContentReader reader = contentService.getReader(nodeRef, ContentModel.PROP_CONTENT);
+        if (reader == null) {
+            return null;
+        }
         String transformName = targetMimetype + '/' + reader.getMimetype();
         String renditionName = TransformDefinition.convertToRenditionName(transformName);
 
@@ -75,13 +91,7 @@ public class TransformService {
             ContentWriter writer = contentService.getTempWriter();
             writer.setMimetype(targetMimetype);
             localTransform.transform(reader,writer,renditionDefinition.getTransformOptions(),renditionName,nodeRef);
-            InputStream inputStream = writer.getReader().getContentInputStream();
-
-            try {
-                return jsonObjectMapper.readValue(inputStream, clazz);
-            } catch (IOException e) {
-                log.error(e.getMessage(),e);
-            }
+            return writer.getReader().getContentInputStream();
         }
         return null;
     }
@@ -116,6 +126,18 @@ public class TransformService {
         {
             log.error("Failed to read metadata from transform result", e);
             return null;
+        }
+    }
+
+    public String transformToText(NodeRef nodeRef) {
+        try (InputStream is = getInputStream(nodeRef, "text/plain")) {
+            if (is == null) {
+                return null;
+            }
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            log.error("Failed to transform node to plain text: {}", nodeRef.getId(), e);
+            throw new RuntimeException("Transform to text failed for node " + nodeRef.getId(), e);
         }
     }
 

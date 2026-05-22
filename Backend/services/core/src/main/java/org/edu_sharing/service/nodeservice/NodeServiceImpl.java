@@ -1967,22 +1967,34 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public NodeRef getOriginalNode(String nodeId) {
+        NodeRef refResolved = getReferenceOriginalNode(nodeId);
+        nodeId = refResolved.getId();
+        if (!nodeService.exists(refResolved)) {
+            return refResolved;
+        }
+        // handle copied nodes
+        NodeRef original = ((NodeRef) nodeServiceAlfresco.getProperty(refResolved, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
+        if (original != null) {
+            nodeId = original.getId();
+        }
+        return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+    }
+
+    /**
+     * Resolves collection references (ccm:collection_io_reference to ccm:original) only.
+     * Published copies are not followed.
+     *
+     * @param nodeId the source node to map
+     * @return the mapped node ref
+     */
+    @Override
+    public NodeRef getReferenceOriginalNode(String nodeId) {
         if (!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
             return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         }
-        // Handle io references (i.e. collection refs)
         // use the nodeServiceAlfresco since the nodeRef might be null if original was deleted
         if (hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
             nodeId = (String) nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-
-            if (!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
-                return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-            }
-        }
-        // handle copied nodes
-        NodeRef original = ((NodeRef) nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
-        if (original != null) {
-            nodeId = original.getId();
         }
         return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
     }

@@ -1231,6 +1231,9 @@ public class CCConstants {
 
 	public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
 
+	public static final String CCM_PROP_IO_FULLTEXT_CONTENT = "{http://www.campuscontent.de/model/1.0}fulltext_content";
+	public static final String CCM_PROP_IO_FULLTEXT_STATUS = "{http://www.campuscontent.de/model/1.0}fulltext_status";
+
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
 	public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";
