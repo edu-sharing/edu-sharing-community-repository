@@ -89,8 +89,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomReurlExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomReurlExtras() || {},
+                extras,
             );
         }
         extras.queryParams.reurl = 'WINDOW';
@@ -117,8 +117,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomApplyFilterExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomApplyFilterExtras() || {},
+                extras,
             );
         }
         extras.queryParams.action = 'applyFilter';
