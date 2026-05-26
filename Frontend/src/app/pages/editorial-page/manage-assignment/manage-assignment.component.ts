@@ -152,7 +152,12 @@ export class ManageAssignmentComponent {
                         this.assignment.set(this.EmptyAssignment);
                         this.submissions.set(null);
                         this.authorities.set(null);
-                        this.mainDataFormGroup.reset();
+                        this.mainDataFormGroup.reset({
+                            title: '',
+                            summary: '',
+                            useEndTime: false,
+                            allowAdditionalDocumentSubmissions: true,
+                        });
                         this.nodes.set(null);
                         return EMPTY;
                     }
@@ -168,7 +173,7 @@ export class ManageAssignmentComponent {
                     summary: assignment.summary,
                     useEndTime: assignment.endTime !== null,
                     allowAdditionalDocumentSubmissions:
-                        assignment.allowAdditionalDocumentSubmissions,
+                        assignment.allowAdditionalDocumentSubmissions ?? true,
                 });
                 this.nodes.set(
                     files.map((f) => {
