@@ -46,6 +46,7 @@ public class FulltextService {
     private final SimpleCache<String, String> eduSharingTransformerCache;
     private final RetryingTransactionHelper retryingTransactionHelper;
     private final BehaviourFilter behaviourFilter;
+    private final RepositoryCache repositoryCache;
 
     private static class ExternalTransformException extends RuntimeException {}
     private static class InternalTransformException extends RuntimeException {
@@ -182,7 +183,7 @@ public class FulltextService {
             throw new ExternalTransformException();
         }
 
-        try (Response response = bApiProxyService.forwardRequest(BAPI_FULLTEXT_PATH, body, null, HttpMethod.POST)) {
+        try (Response response = bApiProxyService.forwardRequest(BAPI_FULLTEXT_PATH, body, null, null, HttpMethod.POST)) {
             if (response.getStatus() < 200 || response.getStatus() >= 300) {
                 log.warn("BAPI fulltext request failed with status {} for node {}", response.getStatus(), nodeRef.getId());
                 throw new ExternalTransformException();
@@ -214,7 +215,7 @@ public class FulltextService {
                         nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_FULLTEXT_STATUS), status.name());
                     } finally {
                         behaviourFilter.enableBehaviour(nodeRef);
-                        new RepositoryCache().remove(nodeRef.getId());
+                        repositoryCache.remove(nodeRef.getId());
                     }
                     return null;
                 })

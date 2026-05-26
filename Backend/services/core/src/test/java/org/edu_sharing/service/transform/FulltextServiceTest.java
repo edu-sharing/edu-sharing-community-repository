@@ -18,7 +18,6 @@ import org.edu_sharing.service.bapi.BApiProxyService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +26,8 @@ import org.springframework.http.HttpMethod;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -45,12 +45,12 @@ class FulltextServiceTest {
     private SimpleCache<String, String> transformerCache;
     private RetryingTransactionHelper retryingTransactionHelper;
     private BehaviourFilter behaviourFilter;
+    private RepositoryCache repositoryCache;
     private ContentReader contentReader;
     private ContentWriter contentWriter;
 
     private MockedStatic<AlfAppContextGate> alfAppContextGateMock;
     private MockedStatic<AuthenticationUtil> authUtilMock;
-    private MockedConstruction<RepositoryCache> repositoryCacheMock;
 
     private FulltextService underTest;
 
@@ -65,6 +65,7 @@ class FulltextServiceTest {
         transformerCache = Mockito.mock(SimpleCache.class);
         retryingTransactionHelper = Mockito.mock(RetryingTransactionHelper.class);
         behaviourFilter = Mockito.mock(BehaviourFilter.class);
+        repositoryCache = Mockito.mock(RepositoryCache.class);
         contentReader = Mockito.mock(ContentReader.class);
         contentWriter = Mockito.mock(ContentWriter.class);
 
@@ -73,7 +74,6 @@ class FulltextServiceTest {
         alfAppContextGateMock = Mockito.mockStatic(AlfAppContextGate.class);
         alfAppContextGateMock.when(AlfAppContextGate::getApplicationContext).thenReturn(applicationContext);
 
-        repositoryCacheMock = Mockito.mockConstruction(RepositoryCache.class);
         authUtilMock = Mockito.mockStatic(AuthenticationUtil.class);
         authUtilMock.when(() -> AuthenticationUtil.runAsSystem(any())).thenAnswer(invocation ->
                 ((AuthenticationUtil.RunAsWork<?>) invocation.getArgument(0)).doWork()
@@ -82,12 +82,11 @@ class FulltextServiceTest {
                 ((RetryingTransactionHelper.RetryingTransactionCallback<?>) invocation.getArgument(0)).execute()
         );
 
-        underTest = new FulltextService(contentService, nodeService, transformService, bApiProxyConfig, bApiProxyService, transformerCache, retryingTransactionHelper, behaviourFilter);
+        underTest = new FulltextService(contentService, nodeService, transformService, bApiProxyConfig, bApiProxyService, transformerCache, retryingTransactionHelper, behaviourFilter, repositoryCache);
     }
 
     @AfterEach
     void afterEach() {
-        repositoryCacheMock.close();
         authUtilMock.close();
         alfAppContextGateMock.close();
     }
@@ -188,13 +187,13 @@ class FulltextServiceTest {
         Response response = Mockito.mock(Response.class);
         when(response.getStatus()).thenReturn(200);
         when(response.getEntity()).thenReturn("{\"text\":\"bapi extracted text\"}");
-        when(bApiProxyService.forwardRequest(anyString(), anyString(), isNull(), eq(HttpMethod.POST))).thenReturn(response);
+        when(bApiProxyService.forwardRequest(anyString(), anyString(), isNull(), isNull(), eq(HttpMethod.POST))).thenReturn(response);
         when(contentService.getWriter(any(), eq(CONTENT_QNAME), eq(true))).thenReturn(contentWriter);
 
         String result = underTest.getFulltext(nodeId, false);
 
         assertEquals("bapi extracted text", result);
-        verify(bApiProxyService).forwardRequest(contains("from-url"), contains(url), isNull(), eq(HttpMethod.POST));
+        verify(bApiProxyService).forwardRequest(contains("from-url"), contains(url), isNull(), isNull(), eq(HttpMethod.POST));
         verify(contentWriter).putContent("bapi extracted text");
     }
 
@@ -207,7 +206,7 @@ class FulltextServiceTest {
 
         assertNull(underTest.getFulltext(nodeId, false));
 
-        verify(bApiProxyService, never()).forwardRequest(any(), any(), any(), any());
+        verify(bApiProxyService, never()).forwardRequest(any(), any(), any(), any(), any());
         verify(nodeService).setProperty(any(), eq(STATUS_QNAME), eq(FulltextStatus.NO_CONTENT.name()));
     }
 
@@ -221,7 +220,7 @@ class FulltextServiceTest {
 
         Response errorResponse = Mockito.mock(Response.class);
         when(errorResponse.getStatus()).thenReturn(500);
-        when(bApiProxyService.forwardRequest(any(), any(), any(), any())).thenReturn(errorResponse);
+        when(bApiProxyService.forwardRequest(any(), any(), any(), any(), any())).thenReturn(errorResponse);
 
         assertNull(underTest.getFulltext(nodeId, false));
 
