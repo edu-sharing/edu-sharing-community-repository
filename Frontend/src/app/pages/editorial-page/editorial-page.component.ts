@@ -682,7 +682,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         }
     }
     select(event: NodeClickEvent<NodeEntriesDataType>) {
-        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event, Scope.EditorialPage);
+        const previewConfig =
+            this.params$.value?.primaryMode === 'suggestions'
+                ? { groupId: 'preview_sidebar_edit', editorMode: 'nodes' as const }
+                : undefined;
+        this.editorialSidebarService.handleSelect(
+            this.nodeEntriesRef,
+            event,
+            Scope.EditorialPage,
+            previewConfig,
+        );
     }
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {

@@ -16,6 +16,7 @@ import { PreviewContentComponent } from './preview-content/preview-content.compo
 
 import { PreviewSidebarService } from './preview-sidebar.service';
 import { CustomOptions, RestHelper } from 'ngx-edu-sharing-ui';
+import { EditorMode } from '../../mds/types/types';
 import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 import { GenericDialogData } from '../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../dialogs/dialogs.service';
@@ -41,6 +42,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
      * custom options to configure the actionbar
      */
     @Input() customOptions: CustomOptions;
+    /** Editor mode forwarded to the embedded mds-editor-wrapper. */
+    @Input() editorMode: EditorMode;
+    /** Group id forwarded to the embedded mds-editor-wrapper. */
+    @Input() groupId: string;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 

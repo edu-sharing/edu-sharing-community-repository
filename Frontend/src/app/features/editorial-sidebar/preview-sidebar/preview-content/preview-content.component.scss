@@ -6,7 +6,6 @@ $previewHeight: 400px;
 :host {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     flex: 1;
     min-height: 0;
     ::ng-deep {
@@ -74,10 +73,25 @@ es-render-wrapper-component {
     }
 }
 
+.sticky-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--backgroundColor, #fff);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+}
+
 .all-details-link {
-    align-self: flex-end;
-    margin: 8px 16px 16px;
     padding-right: 6px;
+    border-radius: 18px;
+}
+
+.save-button {
     border-radius: 18px;
 }
 

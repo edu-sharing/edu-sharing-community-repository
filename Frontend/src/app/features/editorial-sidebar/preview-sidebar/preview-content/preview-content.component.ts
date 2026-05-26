@@ -22,6 +22,7 @@ import { Params, Router } from '@angular/router';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
 import { PreviewSidebarTemplateService } from '../preview-sidebar-template.service';
 import { MdsEditorWrapperComponent } from '../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { EditorMode } from '../../../mds/types/types';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 import { EditorialSidebarService } from '../../editorial-sidebar.service';
 import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
@@ -50,12 +51,17 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     @Input() autoRender = false;
 
     @Input() customOptions: CustomOptions;
+    /** Editor mode for the embedded mds-editor-wrapper. */
+    @Input() editorMode: EditorMode = 'viewer';
+    /** Group id for the embedded mds-editor-wrapper. */
+    @Input() groupId: string = 'preview_sidebar';
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
     private readonly destroyed = new Subject<void>();
     private _node: Node;
     renderNode = signal<Node>(null);
+    mdsVisible = signal<boolean>(true);
 
     /** The node to preview. */
     @Input()
@@ -66,9 +72,10 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     set node(node: Node) {
         this._node = node;
         this.renderNode.set(null);
+        this.mdsVisible.set(false);
+        setTimeout(() => this.mdsVisible.set(true));
         this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
         this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
-        void this.mdsRef?.reInit();
         if (this.actionbar) {
             void this.updateOptions();
         }
@@ -149,6 +156,10 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
 
     private async openMediaDialog(): Promise<CardDialogRef> {
         return await this.dialogs.openPreviewMediaDialog({ node: this._node });
+    }
+
+    async onSaveMds(): Promise<void> {
+        await this.mdsRef?.onSave();
     }
 
     /**

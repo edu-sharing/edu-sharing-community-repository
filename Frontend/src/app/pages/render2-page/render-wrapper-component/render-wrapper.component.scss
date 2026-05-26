@@ -230,6 +230,12 @@ rs-root {
     }
 }
 ::ng-deep {
+    es-mds-editor-wrapper {
+        --mds-content-padding: 0 10px;
+    }
+    es-mds-editor-wrapper.mds-editor-mode-nodes {
+        --mds-content-padding: 25px 10px;
+    }
     es-mds-editor-wrapper es-mds-editor-core {
         display: grid;
         width: 100%;
@@ -247,9 +253,6 @@ rs-root {
             border-radius: 5px;
             overflow: hidden;
             .view-wrapper {
-                .content {
-                    padding: 0 10px;
-                }
                 .heading-container {
                     > h3 {
                         background-color: $workspaceMetadataBackground; //var(--palette-primary-50);
