@@ -104,6 +104,11 @@ export class ManageAssignmentComponent {
             !this.dateChooserRef?.isValid(this.now)
         ) {
             this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
+        } else if (
+            !this.mainDataFormGroup.get('allowAdditionalDocumentSubmissions').value &&
+            !(this.nodes() || []).some((n) => n.documentRole === 'SUBMITTABLE')
+        ) {
+            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.NO_SUBMITTABLE_FILE');
         } else {
             this.matStepper.next();
         }

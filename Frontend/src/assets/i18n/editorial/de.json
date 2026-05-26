@@ -175,6 +175,7 @@
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",
         "FIELD_SUMMARY": "Bitte Beschreibung eingeben",
+        "NO_SUBMITTABLE_FILE": "Bitte mindestens eine einreichbare Datei hinzufügen oder zusätzliche Abgaben erlauben",
         "OWN_AUTHORITY": "Sie können sich nicht selbst zuweisen",
         "MISSING_AUTHORITIES": "Bitte die Aufgabe zuweisen",
         "MISSING_AUTHORITIES_ASSIGNEE": "Für diesen Aufgabentyp muss mindestens eine Person oder Gruppe in der Rolle \"Erledigen\" eingeladen werden"
