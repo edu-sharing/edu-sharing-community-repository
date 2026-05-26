@@ -85,7 +85,7 @@
         class="references-wrapper"
         [class.wrapper-table]="referencesDisplayType === NodeEntriesDisplayType.Table"
         [class.wrapper-empty]="dataSourceReferences.isEmpty()"
-        [class.wrapper-edit]="isUserAllowedToEdit(collection)"
+        [class.wrapper-edit]="isAllowedToAddContent()"
       >
         <es-node-entries-wrapper
           #listReferences
@@ -116,7 +116,7 @@
           (clickItem)="onContentClick($event)"
           (sortChange)="setReferenceSort($event)"
           [globalOptions]="
-            isUserAllowedToEdit(collection)
+            isAllowedToAddContent()
               ? [addMaterialSearchOptionItem, addMaterialBinaryOptionItem]
               : []
           "

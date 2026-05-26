@@ -341,6 +341,20 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
         return RestHelper.hasAccessPermission(this.collection, RestConstants.PERMISSION_WRITE);
     }
+
+    isAllowedToAddContent(): boolean {
+        if (!this.isAllowedToEditCollection()) return false;
+        // In public collections, adding content requires INVITE_ALLAUTHORITIES tool permission.
+        // Sub-collection creation is handled separately via createAllowed() and is not affected.
+        if (this.collection.isPublic) {
+            return (
+                this.login?.toolPermissions?.includes(
+                    RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+                ) ?? false
+            );
+        }
+        return true;
+    }
     onCreateCollection() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             void this.router.navigate(
@@ -660,7 +674,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),
-                    allowBinary: !this.isRootLevel && (await this.isAllowedToEditCollection()),
+                    allowBinary: !this.isRootLevel && (await this.isAllowedToAddContent()),
                     parent: this.collection ?? null,
                 },
             });

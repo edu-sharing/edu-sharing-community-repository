@@ -289,6 +289,15 @@
     <constructor-arg name="repositoryCache" ref="repositoryCache"/>
   </bean>
 
+   	 <bean id="onFulltextContentUpdatePolicy" class="org.edu_sharing.alfresco.policy.OnFulltextContentUpdatePolicy" init-method="init">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+         <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+   	 </bean>
+
 
   <bean id="onCopyCollectionRefPolicy" class="org.edu_sharing.alfresco.policy.OnCopyCollectionRefPolicy"
         init-method="init">

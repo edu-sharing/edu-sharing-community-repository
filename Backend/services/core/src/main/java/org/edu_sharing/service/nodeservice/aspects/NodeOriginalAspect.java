@@ -8,6 +8,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.edu_sharing.service.AspectConstants;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.annotation.NodeOriginal;
+import org.edu_sharing.service.nodeservice.annotation.NodeReferenceOriginal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -32,8 +33,9 @@ public class NodeOriginalAspect {
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             if (parameter.getAnnotation(NodeOriginal.class) != null) {
-                Object arg = args[i];
-                args[i] = nodeService.getOriginalNode((String) arg).getId();
+                args[i] = nodeService.getOriginalNode((String) args[i]).getId();
+            } else if (parameter.getAnnotation(NodeReferenceOriginal.class) != null) {
+                args[i] = nodeService.getReferenceOriginalNode((String) args[i]).getId();
             }
         }
         return joinPoint.proceed(args);

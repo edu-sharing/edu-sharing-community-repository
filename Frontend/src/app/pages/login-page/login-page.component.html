@@ -10,10 +10,10 @@
     modal="auto"
     [isCancelable]="bridge.isRunningCordova()"
     (cancel)="appBack()"
-    [buttons]="showProviders ? [] : buttons"
-    [width]="showProviders ? 'xxlarge' : 'normal'"
-    [height]="showProviders ? '' : 'large'"
-    [attr.showProviders]="showProviders"
+    [buttons]="showProviders() ? [] : buttons"
+    [width]="showProviders() ? (providersOnlyMode() ? 'normal' : 'xxlarge') : 'normal'"
+    [height]="showProviders() ? '' : 'large'"
+    [attr.showProviders]="showProviders()"
   >
     <div class="login-content">
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
@@ -24,8 +24,8 @@
           alt="{{ 'LOGIN.APP_LOGO' | translate }}"
         />
       </div>
-      <div class="groups">
-        <div class="providers-select" *ngIf="showProviders">
+      <div class="groups" [class.providers-only]="providersOnlyMode()">
+        <div class="providers-select" *ngIf="showProviders()">
           <div class="group-heading">{{ 'LOGIN.PROVIDER_SELECT_GROUP' | translate }}</div>
           <div class="group-description">
             {{ 'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate }}
@@ -70,11 +70,11 @@
             </div>
           </div>
         </div>
-        <div class="login-form">
-          <div class="group-heading" *ngIf="showProviders">
+        <div class="login-form" *ngIf="!showProviders() || showLocalLogin()">
+          <div class="group-heading" *ngIf="showProviders()">
             {{ 'LOGIN.LOGIN_GROUP' | translate }}
           </div>
-          <div class="group-description" *ngIf="showProviders">
+          <div class="group-description" *ngIf="showProviders()">
             {{ 'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate }}
           </div>
           <form (ngSubmit)="login()" #loginForm>
@@ -128,14 +128,14 @@
               </div>
             </div>
           </form>
-          <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
+          <div class="useUrl" *ngIf="config.loginUrl && !showProviders() && !isSafeLogin">
             <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
             <es-mat-link (clickOnLink)="openLoginUrl()" class="goto">
               <span>{{ 'LOGIN.USE_URL_LINK' | translate }}</span>
               <i class="material-icons">arrow_forward</i>
             </es-mat-link>
           </div>
-          <div class="group-actions" *ngIf="showProviders">
+          <div class="group-actions" *ngIf="showProviders()">
             <button mat-button color="primary" *ngIf="canRegister()" (click)="register()">
               {{ 'LOGIN.REGISTER_TEXT' | translate }}
             </button>
@@ -166,7 +166,7 @@
         </div>
       </div>
     </div>
-    <div class="login-help" *ngIf="showProviders">
+    <div class="login-help" *ngIf="showProviders()">
       <div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div>
     </div>
   </es-card>

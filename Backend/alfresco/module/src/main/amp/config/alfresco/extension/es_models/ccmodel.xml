@@ -1339,6 +1339,15 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+
+        <!-- extracted plain text content from the binary (d:content); cleared on content update -->
+        <property name="ccm:fulltext_content">
+          <type>d:content</type>
+        </property>
+        <!-- status of fulltext extraction: CONTENT_AVAILABLE or NO_CONTENT -->
+        <property name="ccm:fulltext_status">
+          <type>d:text</type>
+        </property>
             </properties>
         </aspect>
 

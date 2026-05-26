@@ -8,11 +8,11 @@ public class Values implements Serializable {
 	@XmlElement public String[] supportedLanguages;
 	@Schema(description = "Currently a dummy string, not used")
 	@XmlElement public String extension;
-	@Schema(description = "URL to redirect when login fails (401) or on initial login (e.g. for Shibboleth)")
+	@Schema(description = "URL to redirect when login fails (401) or on initial login (e.g. for Shibboleth). Has no effect when loginProvidersUrl is set — the providers panel takes precedence.")
 	@XmlElement public String loginUrl;
-	@Schema(description = "If loginUrl is set and true, local login mask is offered with link to loginUrl below for external + local logins")
+	@Schema(description = "If loginUrl is set and true, the local login form is shown alongside the loginUrl link. When loginProvidersUrl is set and this is explicitly false, the login page shows only the providers panel (providers-only mode)")
 	@XmlElement public Boolean loginAllowLocal;
-	@Schema(description = "URL to a service providing a list of login providers (requires loginProviderTargetUrl to be set)")
+	@Schema(description = "URL to a service providing a list of login providers (requires loginProviderTargetUrl to be set). When set, the providers panel is always shown and loginUrl redirect is suppressed.")
 	@XmlElement public String loginProvidersUrl;
 	@Schema(description = "URL called when logging in with a provider. Supports placeholders: :target (server URL + loginUrl) and :entity (provider URL)")
 	@XmlElement public String loginProviderTargetUrl;
