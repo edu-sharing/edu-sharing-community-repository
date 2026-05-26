@@ -81,6 +81,11 @@
         // set full height
         height: 100%;
     }
+    &.option-PREVIEW {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
 }
 .entries {
     display: flex;

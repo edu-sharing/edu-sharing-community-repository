@@ -5,6 +5,7 @@ import {
     MULTISELECT_OPTIONS,
     OptionConfig,
     OptionState,
+    PreviewConfig,
 } from './editorial-sidebar.component';
 import {
     NodeClickEvent,
@@ -82,6 +83,7 @@ export class EditorialSidebarService {
         nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>,
         event: NodeClickEvent<NodeEntriesDataType>,
         scope: Scope,
+        previewConfig?: PreviewConfig,
     ) {
         this.scope.set(scope);
         if (
@@ -105,6 +107,7 @@ export class EditorialSidebarService {
             this.showOption({
                 option: 'PREVIEW',
                 trap: false,
+                optionConfig: previewConfig,
             });
         }
     }

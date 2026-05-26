@@ -37,6 +37,7 @@ import {
     AssignmentConfig,
     SubmissionConfig,
 } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
+import { EditorMode } from '../mds/types/types';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
@@ -58,7 +59,17 @@ export type EditorialSidebarOption =
  */
 export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['SORT_INTO'];
 
-export type OptionConfig = NodesSelectorConfig | SubmissionConfig | AssignmentConfig;
+export type PreviewConfig = {
+    /** override the editorMode of the embedded mds-editor-wrapper. Default: 'viewer'. */
+    editorMode?: EditorMode;
+    /** override the groupId of the embedded mds-editor-wrapper. Default: 'preview_sidebar'. */
+    groupId?: string;
+};
+export type OptionConfig =
+    | NodesSelectorConfig
+    | SubmissionConfig
+    | AssignmentConfig
+    | PreviewConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
     /**

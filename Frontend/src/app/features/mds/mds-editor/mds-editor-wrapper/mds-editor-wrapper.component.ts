@@ -1,6 +1,7 @@
 import {
     Component,
     EventEmitter,
+    HostBinding,
     Input,
     OnChanges,
     OnDestroy,
@@ -76,6 +77,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     @Input() priority = 1;
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
+    @HostBinding('class')
+    get editorModeClass(): string {
+        return this.editorMode ? `mds-editor-mode-${this.editorMode}` : '';
+    }
     @Input() setId: string;
     /**
      * Filters that should be applied in addition to the MDS's own values when fetching remote
@@ -118,7 +123,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
         return this.mdsEditorInstance;
     }
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.nodes) {
+        if (changes.nodes && !changes.nodes.firstChange) {
             this.ngOnInit();
         }
     }

@@ -102,6 +102,9 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
 
     async getValues(values: Values, node: Node): Promise<Values> {
+        if (!this.author) {
+            return {};
+        }
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = (node as Node)?.properties?.[

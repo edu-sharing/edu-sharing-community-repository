@@ -47,10 +47,10 @@
     <ng-container *ngIf="!previewSidebarTemplateService.metadata">
       <es-mds-editor-wrapper
         #mds
-        *ngIf="node?.properties"
+        *ngIf="node?.properties && mdsVisible()"
         [embedded]="true"
-        [editorMode]="'viewer'"
-        [groupId]="'preview_sidebar'"
+        [editorMode]="editorMode"
+        [groupId]="groupId"
         [nodes]="[node]"
       >
       </es-mds-editor-wrapper>
@@ -65,13 +65,24 @@
     </ng-container>
   </div>
 </div>
-<a
-  *ngIf="!previewSidebarTemplateService.metadata"
-  mat-stroked-button
-  [routerLink]="allDetailsLink"
-  class="all-details-link"
-  color="primary"
->
-  <span>{{ 'ALL_DETAILS' | translate }}</span>
-  <i esIcon="arrow_forward"></i>
-</a>
+<div class="sticky-bar" *ngIf="!previewSidebarTemplateService.metadata">
+  <a
+    *ngIf="editorMode === 'viewer'"
+    mat-stroked-button
+    [routerLink]="allDetailsLink"
+    class="all-details-link"
+    color="primary"
+  >
+    <span>{{ 'ALL_DETAILS' | translate }}</span>
+    <i esIcon="arrow_forward"></i>
+  </a>
+  <button
+    *ngIf="editorMode !== 'viewer'"
+    mat-flat-button
+    class="save-button"
+    color="primary"
+    (click)="onSaveMds()"
+  >
+    <span>{{ 'SAVE' | translate }}</span>
+  </button>
+</div>
