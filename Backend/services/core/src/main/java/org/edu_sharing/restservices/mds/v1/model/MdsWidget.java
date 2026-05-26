@@ -147,7 +147,7 @@ public class MdsWidget {
         if (widget.getAiConfigs() != null) {
             this.aiConfigs = widget.getAiConfigs()
                     .stream()
-                    .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getClearCache(), x.getChatCompletion(), x.getCreateImage()))
+                    .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getClearCache(), x.getPrompt()))
                     .collect(Collectors.toList());
         }
 

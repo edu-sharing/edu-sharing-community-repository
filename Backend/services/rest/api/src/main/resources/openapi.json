@@ -3660,16 +3660,13 @@
       },
       "MdsAiConfig": {
         "properties": {
-          "chatCompletion": {
-            "type": "string"
-          },
           "clearCache": {
             "type": "boolean"
           },
-          "createImage": {
+          "id": {
             "type": "string"
           },
-          "id": {
+          "prompt": {
             "type": "string"
           },
           "provider": {
@@ -5166,12 +5163,6 @@
       },
       "NodeText": {
         "properties": {
-          "html": {
-            "type": "string"
-          },
-          "raw": {
-            "type": "string"
-          },
           "text": {
             "type": "string"
           }
@@ -9091,6 +9082,7 @@
               "VIEW_MATERIAL",
               "VIEW_COLLECTION",
               "VIEW_MATERIAL_EMBEDDED",
+              "VIEW_MATERIAL_GDPR_CONFIRMED",
               "VIEW_MATERIAL_PLAY_MEDIA",
               "EDIT_MATERIAL",
               "CREATE_MATERIAL",
@@ -9583,7 +9575,7 @@
             "type": "boolean"
           },
           "loginAllowLocal": {
-            "description": "If loginUrl is set and true, local login mask is offered with link to loginUrl below for external + local logins",
+            "description": "If loginUrl is set and true, the local login form is shown alongside the loginUrl link. When loginProvidersUrl is set and this is explicitly false, the login page shows only the providers panel (providers-only mode)",
             "type": "boolean"
           },
           "loginDefaultLocation": {
@@ -9595,7 +9587,7 @@
             "type": "string"
           },
           "loginProvidersUrl": {
-            "description": "URL to a service providing a list of login providers (requires loginProviderTargetUrl to be set)",
+            "description": "URL to a service providing a list of login providers (requires loginProviderTargetUrl to be set). When set, the providers panel is always shown and loginUrl redirect is suppressed.",
             "type": "string"
           },
           "loginSilentMode": {
@@ -9608,7 +9600,7 @@
             "type": "string"
           },
           "loginUrl": {
-            "description": "URL to redirect when login fails (401) or on initial login (e.g. for Shibboleth)",
+            "description": "URL to redirect when login fails (401) or on initial login (e.g. for Shibboleth). Has no effect when loginProvidersUrl is set — the providers panel takes precedence.",
             "type": "string"
           },
           "logout": {
@@ -37132,7 +37124,7 @@
     },
     "/node/v1/nodes/{repository}/{node}/textContent": {
       "get": {
-        "description": "May fails with 500 if the node can not be read.",
+        "description": "Returns the extracted plain text for a ccm:io node. The result is cached in ccm:fulltext_content after the first extraction.\n\nFor file nodes, the text is extracted from the binary content via the local transform service.\nFor link nodes (ccm:wwwurl set), text is fetched from the URL via the BAPI text-extraction proxy. If extraction fails, null is returned.",
         "operationId": "getTextContent",
         "parameters": [
           {
@@ -37152,6 +37144,14 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Skip the fulltext cache and always re-extract. Requires admin.",
+            "in": "query",
+            "name": "forceUpdate",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -37217,7 +37217,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "Get the text content of a document.",
+        "summary": "Get the plain text content of a node.",
         "tags": [
           "NODE v1"
         ]
@@ -42627,6 +42627,7 @@
                   "VIEW_MATERIAL",
                   "VIEW_COLLECTION",
                   "VIEW_MATERIAL_EMBEDDED",
+                  "VIEW_MATERIAL_GDPR_CONFIRMED",
                   "VIEW_MATERIAL_PLAY_MEDIA",
                   "EDIT_MATERIAL",
                   "CREATE_MATERIAL",
@@ -46851,6 +46852,7 @@
                 "VIEW_MATERIAL",
                 "VIEW_COLLECTION",
                 "VIEW_MATERIAL_EMBEDDED",
+                "VIEW_MATERIAL_GDPR_CONFIRMED",
                 "VIEW_MATERIAL_PLAY_MEDIA",
                 "EDIT_MATERIAL",
                 "CREATE_MATERIAL",
