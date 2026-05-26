@@ -7,7 +7,7 @@
       <id>suggestion_ai</id>
       <provider>openai</provider>
       <useCaching>false</useCaching>
-      <chatCompletion>
+      <prompt>
         {
         "model": "gpt-4.1",
         "messages": [
@@ -21,20 +21,20 @@
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>image_ai</id>
       <provider>openai</provider>
       <useCaching>false</useCaching>
-      <createImage>
+      <prompt>
         {
         "model": "gpt-image-2",
         "size": "256x256",
         "n": 3,
         "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_default</id>
@@ -43,21 +43,21 @@
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_chat_completion</id>
-      <chatCompletion>
+      <prompt>
         {
         "model": "gpt-4.1-mini"
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_create_image</id>
-      <createImage>
+      <prompt>
         {
         "model": "gpt-image-2",
         "size": "1024x1024",
         "n": 1,
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_clear_cache</id>
@@ -65,15 +65,15 @@
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_image</id>
-      <createImage>
+      <prompt>
         {
         "prompt": "## Aufgabe\nErzeuge ein ansprechendes, realistisch wirkendes Vorschaubild zu einer Sammlung von Bildungsinhalten.  \n- Vermeide sämtliche Textelemente oder Logos im Bild.  \n- Nutze die zentralen Schlagwörter, um das Thema klar widerzuspiegeln.  \n- Richte Dich nach den folgenden Anforderungen und Stilvorgaben.\n## Anforderungen\n1. **Hauptmotiv**: Beschreibe das zentrale Element der Sammmlung (eine Szene oder ein Kernthema), das den Bildungsinhalt repräsentiert.  \n2. **Realismus**: Achte auf eine glaubwürdige Darstellung aller Objekte und Szenen, inklusiv und kulturell sensitiv.  \n3. **Minimalismus**: Reduziere Ablenkungen, konzentriere Dich auf das Wesentliche, um eine klare Botschaft zu vermitteln.  \n4. **Emotionale Ansprache**: Verwende warme Farben, natürliches Licht und eine einladende Atmosphäre.  \n5. **Keine Texte im Bild**: Verzichte gänzlich auf Schrift oder Logos, um Redundanz und visuelle Störungen zu vermeiden.  \n## Stilvorgaben\n- **Attribute**: hochdetailliert, scharfe Fokussierung, poliert, makellos, ansprechend, Symmetrie, kohärent, minimalistisch, sauber, aufgeräumt  \n- **Farben und Beleuchtung**: warme Farben, natürliches Licht  \n- **Designelemente**: klare Linien, einfache Formen, ausbalancierte Komposition  \n- **Qualität**: professionelle Qualität, hohe Auflösung  \n- **Ästhetik**: elegant, geradlinig, modern, klare visuelle Hierarchie  \n## Eingabedaten\n- **Beschreibung des Bildungsinhalts**: {{var(cm:name)|node(cm:name)|-}} ({{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}})  \n- **Wichtige Schlagwörter**: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\n**Integriere alle oben genannten Anforderungen und Stilvorgaben sowie die Eingabedaten 'Beschreibung des Bildungsinhalts' und 'Wichtige Schlagwörter'.**"
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_description</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
@@ -82,11 +82,11 @@
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_text</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
@@ -95,11 +95,11 @@
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_text_widget</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
@@ -108,7 +108,7 @@
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
   </aiConfigs>
   <widgets>
@@ -142,7 +142,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -151,7 +151,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
       <required>mandatoryForPublish</required>
@@ -191,7 +191,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -200,7 +200,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -232,7 +232,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -241,7 +241,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -271,7 +271,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -280,7 +280,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -294,7 +294,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -303,7 +303,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -328,7 +328,7 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
@@ -337,7 +337,7 @@
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>

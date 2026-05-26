@@ -1,21 +1,21 @@
 package org.edu_sharing.restservices;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.restservices.mds.v1.model.*;
-import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.restservices.shared.Mds;
+import org.edu_sharing.restservices.shared.MdsQueryCriteria;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactoryUtility;
 import org.edu_sharing.service.search.Suggestion;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MdsDao {
 
@@ -96,7 +96,7 @@ public class MdsDao {
     private List<MdsAiConfig> getAiConfigs() {
         return this.mds.getAiConfigs()
                 .stream()
-                .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getClearCache(), x.getChatCompletion(), x.getCreateImage()))
+                .map(x -> new MdsAiConfig(x.getId(), x.getProvider(), x.getUseCaching(), x.getClearCache(), x.getPrompt()))
                 .collect(Collectors.toList());
     }
 
