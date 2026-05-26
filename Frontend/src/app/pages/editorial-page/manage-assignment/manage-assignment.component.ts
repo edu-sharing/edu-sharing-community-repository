@@ -194,7 +194,7 @@ export class ManageAssignmentComponent {
                         .map((node) => {
                             return {
                                 ...node,
-                                documentRole: 'SUPPLEMENTARY',
+                                documentRole: 'SUBMITTABLE',
                             } as NodeWithRole;
                         }),
                 ),
