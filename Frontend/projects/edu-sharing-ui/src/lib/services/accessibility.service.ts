@@ -11,7 +11,30 @@ import { SessionStorageService } from 'ngx-edu-sharing-api';
 export class AccessibilityService {
     private static readonly STORAGE_PREFIX = 'accessibility_';
 
-    constructor(private storage: SessionStorageService) {}
+    constructor(private storage: SessionStorageService) {
+        const browserContrastPreference = this.getBrowserContrastPreference();
+
+        if (browserContrastPreference) {
+            this.storage.setValues({
+                [AccessibilityService.STORAGE_PREFIX + 'contrastMode']: browserContrastPreference,
+            });
+        }
+    }
+
+    private getBrowserContrastPreference(): boolean | null {
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            if (window.matchMedia('(prefers-contrast: more)').matches) {
+                return true;
+            }
+            if (
+                window.matchMedia('(prefers-contrast: less)').matches ||
+                window.matchMedia('(prefers-contrast: no-preference)').matches
+            ) {
+                return false;
+            }
+        }
+        return null;
+    }
 
     async set(accessibilitySettings: Partial<AccessibilitySettings>): Promise<void> {
         const currentValues = await this.observeAll().pipe(first()).toPromise();
