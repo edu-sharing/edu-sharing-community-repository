@@ -150,6 +150,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
         // copy and rename has a weird naming scheme
+        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren, null);
+    }
+
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy) throws Throwable {
+        // copy and rename has a weird naming scheme
 
         return serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
@@ -159,23 +164,33 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
             // copy and rename has a weird naming scheme
             String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+            String finalName = nameOfCopy;
+            if(StringUtils.isEmpty(nameOfCopy)){
+                finalName = originalName;
+            }
+            NodeRef parentRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId);
+            QName assocTypeQName = QName.createQName(assocType);
             NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
-                    new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
-                    QName.createQName(CCConstants.CM_ASSOC_FOLDER_CONTAINS),
-                    QName.createQName(originalName), copyChildren);
+                    parentRef,
+                    assocTypeQName,
+                    QName.createQName(finalName), copyChildren);
+
 
             int renameCounter = 1;
             while (true) {
-                try {
-                    String name = originalName;
-                    if (renameCounter > 1) {
+                String name = finalName;
+                if (renameCounter > 1) {
                         name = NodeServiceHelper.renameNode(originalName, renameCounter);
-                    }
-                    nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
-                    break;
-                } catch (DuplicateChildNodeNameException e) {
-                    renameCounter++;
                 }
+                // skip names already taken in the target folder
+                NodeRef existing = nodeServiceAlfresco.getChildByName(parentRef, assocTypeQName, name);
+                if (existing != null && !existing.equals(copyNodeRef)) {
+                    renameCounter++;
+                    continue;
+                }
+                nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+                break;
             }
             resetVersion(copyNodeRef);
             return copyNodeRef;
@@ -456,17 +471,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 				}
 			}
 			if (cmNameReadableName != null) {
-	
+
 				// replace ie fakepath like C:\fakepath\test.png
 				String replaceFakePathPrefixRegEx = "^[A-Za-z]:\\\\fakepath\\\\";
 				String fakePaceCleanedString = cmNameReadableName.replaceFirst(replaceFakePathPrefixRegEx, "");
 				if (fakePaceCleanedString.length() > 0) {
 					cmNameReadableName = fakePaceCleanedString;
 				}
-	
+
 				cmNameReadableName = NodeServiceHelper.cleanupCmName(cmNameReadableName);
-	
-				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);	
+
+				toSafe.put(CCConstants.CM_NAME, cmNameReadableName);
 			}
 		}
 		*/
