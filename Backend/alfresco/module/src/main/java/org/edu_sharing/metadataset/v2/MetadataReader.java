@@ -721,7 +721,11 @@ public class MetadataReader {
                         break;
                 }
             }
-            result.add(aiConfig);
+
+            if(aiConfig.getId() != null) {
+                result.add(aiConfig);
+            }
+
         }
         return result;
     }
