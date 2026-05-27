@@ -196,23 +196,28 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             if(StringUtils.isEmpty(nameOfCopy)){
                 finalName = originalName;
             }
+            NodeRef parentRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId);
+            QName assocTypeQName = QName.createQName(assocType);
             NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
-                    new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
-                    QName.createQName(assocType),
+                    parentRef,
+                    assocTypeQName,
                     QName.createQName(finalName), copyChildren);
+
 
             int renameCounter = 1;
             while (true) {
-                try {
-                    String name = finalName;
-                    if (renameCounter > 1) {
-                        name = NodeServiceHelper.renameNode(finalName, renameCounter);
-                    }
-                    nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
-                    break;
-                } catch (DuplicateChildNodeNameException e) {
-                    renameCounter++;
+                String name = finalName;
+                if (renameCounter > 1) {
+                    name = NodeServiceHelper.renameNode(finalName, renameCounter);
                 }
+                // skip names already taken in the target folder
+                NodeRef existing = nodeService.getChildByName(parentRef, assocTypeQName, name);
+                if (existing != null && !existing.equals(copyNodeRef)) {
+                    renameCounter++;
+                    continue;
+                }
+                nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+                break;
             }
             resetVersion(copyNodeRef);
             return copyNodeRef;
