@@ -413,6 +413,9 @@ export class TopicPageHelperService {
     private cleanPageVariantConfig(value: string): string {
         const blacklistedProperties: string[] = ['hasHits', 'searchCount', 'statistics'];
         const parsedValue: PageVariantConfig = JSON.parse(value);
+        // workaround to avoid keeping legacy properties
+        const legacyProperties: string[] = ['template', 'variables'];
+        legacyProperties.forEach((prop: string) => delete (parsedValue as any)[prop]);
         parsedValue.structure?.swimlanes?.forEach((swimlane: Swimlane): void => {
             swimlane.grid?.forEach((gridItem: GridTile): void => {
                 // @ts-ignore
@@ -564,12 +567,7 @@ export class TopicPageHelperService {
         customTitleSuffix: string = '',
         variantConfig?: PageVariantConfig,
     ) {
-        const variantTemplateRef: string = retrievePageVariantTemplateRef(node);
-        const variantTemplateNode: Node = variantTemplateRef.includes(retrieveNodeId(node))
-            ? node
-            : await this.getNode(convertNodeRefIntoNodeId(variantTemplateRef));
-        const variantTemplateVersion: string =
-            retrievePageVariantTemplateVersion(variantTemplateNode);
+        const variantTemplateVersion: string = retrievePageVariantTemplateVersion(node);
         const properties: { [p: string]: string | string[] } = {
             [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
             [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: retrievePageVariantTemplateRef(node),

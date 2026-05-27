@@ -20,12 +20,12 @@ import { retrieveNodeId } from '../../shared/utils/template-util';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
 @Component({
-    selector: 'es-configure-page-variant-dialog',
+    selector: 'es-configure-page-variant-or-template',
     imports: [SharedModule, MdsModule],
-    templateUrl: 'configure-page-variant.component.html',
-    styleUrls: ['configure-page-variant.component.scss'],
+    templateUrl: 'configure-page-variant-or-template.component.html',
+    styleUrls: ['configure-page-variant-or-template.component.scss'],
 })
-export class ConfigurePageVariantComponent implements AfterViewInit, OnInit {
+export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, OnInit {
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
 
@@ -35,6 +35,7 @@ export class ConfigurePageVariantComponent implements AfterViewInit, OnInit {
     @Input() pageVariantTitle: string;
     selectDimensions: InputSignal<Map<string, MdsWidget>> = input(new Map<string, MdsWidget>());
     templateMode: InputSignal<boolean> = input(false);
+    templateUpdateAvailable: InputSignal<boolean> = input(false);
     @Input() viewIcons: string[] = [];
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
@@ -43,9 +44,13 @@ export class ConfigurePageVariantComponent implements AfterViewInit, OnInit {
         Map<string, string | string[]>
     >();
     @Output() deletePageVariantClicked: EventEmitter<void> = new EventEmitter<void>();
+    @Output() regenerateClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() settingsValidityChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
     currentValues: Values = {};
+    dynamicI18nPrefix = computed(() =>
+        this.templateMode() ? this.templateI18nPrefix : this.i18nPrefix,
+    );
     variableInputValid: WritableSignal<boolean> = signal(true);
     furtherExistingPageVariants: Signal<Node[]> = computed(() =>
         this.pageVariantConfigNodes().filter(
@@ -101,6 +106,13 @@ export class ConfigurePageVariantComponent implements AfterViewInit, OnInit {
      */
     deletePageVariant(): void {
         this.deletePageVariantClicked.emit();
+    }
+
+    /**
+     * Emits the regenerate event to replace this variant with a fresh copy of its template.
+     */
+    triggerRegenerate(): void {
+        this.regenerateClicked.emit();
     }
 
     /**

@@ -205,6 +205,12 @@
         "TITLE_PLACEHOLDER": "Themenseiten-Variante für xyz",
         "EDUCATION_LEVEL_LABEL": "Bildungsstufe",
         "TARGET_GROUP_LABEL": "Zielgruppe",
+        "TEMPLATE_UPDATE": {
+          "TOOLTIP": "Eine neue Version der verwendeten Vorlage ist verfügbar.",
+          "HEADING": "Seiten-Variante aktualisieren",
+          "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? An der Seiten-Variante vorgenommene Änderungen gehen dabei verloren."
+        },
+        "REGENERATE_VARIANT": "Neu generieren",
         "DELETE_VARIANT": "Variante löschen",
         "DEFINE_PARAMETERS": "Definiere Parameter",
         "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
@@ -351,8 +357,14 @@
     "SAVE_CONFIG_ERROR_ACTION": "Seite neuladen",
     "SAVE_CONFIG_ERROR_MESSAGE": "Beim Laden einer Ressource ist ein Fehler aufgetreten. Bitte laden Sie die Seite neu.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Seiten-Vorlage",
+    "CREATE_PAGE_TEMPLATE": {
+      "HEADING": "Neue Themenseiten-Vorlage erstellen",
+      "PENDING_MESSAGE": "Eine neue Seiten-Vorlage wird erstellt und geladen.",
+      "SUCCESS_MESSAGE": "Die Seiten-Vorlage wurde erfolgreich erstellt"
+    },
     "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
     "NAVIGATE_TO_COLLECTION_PAGE": "Zur Sammlungsseite wechseln",
+    "COPY_SUFFIX": "Kopie",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "NEW_TOPIC_PAGE": {
@@ -375,12 +387,11 @@
         "TOPIC_PAGE": "Themenseite",
         "TEMPLATE": "Vorlage"
       },
-      "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Vorlagen",
+      "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",
       "EMPTY": "Es konnten keine Vorlagen gefunden werden.",
       "PENDING_MESSAGE": "Eine neue Seiten-Variante wird erstellt und geladen.",
-      "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt",
-      "COPY_SUFFIX": "Kopie"
+      "SUCCESS_MESSAGE": "Kopie der Themenseite erfolgreich erstellt"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Seiten-Variante löschen",
