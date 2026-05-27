@@ -25,6 +25,7 @@ import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
 import { Toast } from './abstract/toast.service';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
+import { NodeClickEvent } from '../node-entries/entries-model';
 
 @Injectable({
     providedIn: 'root',
@@ -57,6 +58,36 @@ export class NodeHelperService {
         protected toast: Toast,
         @Optional() protected router: Router,
     ) {}
+
+    /**
+     * Navigates to the primary action URL for the node carried in the click event.
+     * Ctrl/Meta-click and middle-click open in a new browser tab instead.
+     */
+    navigateToNode(clickEvent: NodeClickEvent<NodeEntriesDataType>): void {
+        const node = clickEvent.element as Node | Assignment;
+        if (clickEvent.ctrlKey) {
+            window.open(this.getNodeLink('plain', node) as string, '_blank');
+        } else {
+            const routerLink = this.getNodeLink('routerLink', node) as string;
+            const queryParams = this.getNodeLink('queryParams', node) as Params;
+            void this.router?.navigate([routerLink], { queryParams });
+        }
+    }
+
+    /**
+     * Returns true if a single click on the given node should immediately trigger its primary
+     * action instead of opening a selection/sidebar.
+     * Currently applies to assignments where the current user is not a coordinator.
+     */
+    directActionOnSingleClick(node: Node | Assignment): boolean {
+        if (this.isNodeAssignment(node)) {
+            return (
+                new AssignmentPipe().transform(node as Assignment, { mode: 'permissions' }) !==
+                'COORDINATOR'
+            );
+        }
+        return false;
+    }
 
     public getCollectionScopeInfo(node: Node): { icon: string; scopeName: string } {
         const scope = node.collection ? node.collection.scope : null;

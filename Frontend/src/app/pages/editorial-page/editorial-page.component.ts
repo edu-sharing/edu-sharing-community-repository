@@ -53,6 +53,7 @@ import {
     NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodeHelperService,
     OptionItem,
     OptionItemToggle,
     Scope,
@@ -175,6 +176,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private authenticationService: AuthenticationService,
         public editorialPageService: EditorialPageService,
         public editorialBreadcrumbService: EditorialBreadcrumbService,
+        private nodeHelperService: NodeHelperService,
     ) {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
@@ -681,7 +683,11 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 });
         }
     }
-    select(event: NodeClickEvent<NodeEntriesDataType>) {
+    click(event: NodeClickEvent<NodeEntriesDataType>) {
+        if (this.nodeHelperService.directActionOnSingleClick(event.element as Node)) {
+            this.nodeHelperService.navigateToNode(event);
+            return;
+        }
         const previewConfig =
             this.params$.value?.primaryMode === 'suggestions'
                 ? { groupId: 'preview_sidebar_edit', editorMode: 'nodes' as const }
@@ -757,8 +763,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
         }
     }
-    openItem(element: NodeEntriesDataType) {
-        void this.ui.openNode(element as Node, false);
+    openItem(element: NodeClickEvent<NodeEntriesDataType>) {
+        void this.nodeHelperService.navigateToNode(element);
     }
     private clearSelection() {
         this.nodeEntriesRef?.getSelection()?.clear();

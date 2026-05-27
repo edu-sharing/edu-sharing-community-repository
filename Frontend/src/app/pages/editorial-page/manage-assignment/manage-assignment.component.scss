@@ -4,7 +4,7 @@
 mat-stepper {
     max-width: 800px;
     width: 100%;
-    justify-self: center;
+    margin: 0 auto;
 }
 .step-label {
     display: flex;
@@ -21,7 +21,7 @@ mat-stepper {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    justify-self: center;
+    margin: 0 auto;
     > * {
         width: 100%;
     }

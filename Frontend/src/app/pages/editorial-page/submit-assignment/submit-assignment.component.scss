@@ -35,7 +35,7 @@ $maxWidth: 1200px;
 
 mat-tab-group {
     width: 100%;
-    justify-self: center;
+    margin: 0 auto;
     display: flex;
 }
 mat-tab-header {
@@ -51,7 +51,7 @@ es-render-wrapper-component {
 .assignment-submit {
     width: 100%;
     max-width: $maxWidth;
-    justify-self: center;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
