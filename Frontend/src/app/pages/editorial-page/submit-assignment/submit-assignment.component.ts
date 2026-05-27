@@ -6,6 +6,7 @@ import {
     OnDestroy,
     QueryList,
     signal,
+    Signal,
     ViewChild,
     ViewChildren,
 } from '@angular/core';
@@ -21,9 +22,25 @@ import {
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { combineLatest, filter, firstValueFrom, of, Subject, throwError } from 'rxjs';
+import {
+    combineLatest,
+    firstValueFrom,
+    interval,
+    of,
+    Subject,
+    Subscription,
+    throwError,
+} from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, distinctUntilChanged, map, switchMap, takeUntil } from 'rxjs/operators';
+import {
+    catchError,
+    distinctUntilChanged,
+    filter,
+    map,
+    switchMap,
+    takeUntil,
+    takeWhile,
+} from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
     ColumnType,
@@ -43,6 +60,7 @@ import {
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
+import { RestConnectorsService } from '../../../core-module/rest/services/rest-connectors.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.component';
@@ -151,6 +169,12 @@ export class SubmitAssignmentComponent implements OnDestroy {
     correctedFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
     language: string = 'de-DE';
+    private variantPolling = signal<
+        Map<string, { subscription: Subscription; win: Window | null; connectorId: string }>
+    >(new Map());
+    readonly pollingNodeIds: Signal<Set<string>> = computed(
+        () => new Set(this.variantPolling().keys()),
+    );
 
     constructor(
         private route: ActivatedRoute,
@@ -170,6 +194,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         private optionsHelperService: OptionsHelperService,
         private formBuilder: FormBuilder,
         private uiService: UIService,
+        private restConnectorsService: RestConnectorsService,
     ) {
         this.initOptions();
         this.language = this.translationsService.getLocale();
@@ -312,6 +337,129 @@ export class SubmitAssignmentComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.variantPolling().forEach(({ subscription }) => subscription.unsubscribe());
+    }
+
+    private async createVariantAndEdit(node: Node): Promise<void> {
+        this.toast.showProgressSpinner();
+        try {
+            const variantName = this.translateService.instant('NODE_VARIANT.DEFAULT_NAME', {
+                name: node.name,
+            });
+            const created = await firstValueFrom(
+                this.nodeService.forkNode(RestConstants.INBOX, node.ref.id, variantName),
+            );
+            const variantNode = created.node;
+
+            const assignmentFile =
+                this.files()?.find((f) => f.referNode.ref.id === node.ref.id) ?? null;
+            const newFiles = await this.saveSubmissionFiles([
+                {
+                    assignmentFile,
+                    content: variantNode,
+                    ref: variantNode.ref,
+                    validationStatus: 'NOT_STARTED',
+                } as SubmissionFile,
+            ]);
+            this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
+
+            // the connector edits the variant (fork); the submission file's content is what the
+            // list displays and what polling/overlay track
+            const connectorId = this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
+            const win = await this.uiService.editConnector(variantNode);
+            // register polling BEFORE rendering the list so the overlay's
+            // pollingNodeIds() check is already populated on first render
+            this.startVariantPolling(newFiles[0], variantNode, win, connectorId);
+            this.syncSubmissionDataSource();
+            this.selectedTabIndex.set(1);
+        } catch (e) {
+            this.toast.error(e, null);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+    }
+
+    /**
+     * poll the variant node (the one the connector edits) until its content version
+     * changes (write-back), then re-submit the variant so the submission file's content
+     * is synced with it, and stop polling
+     * @private
+     */
+    private startVariantPolling(
+        submissionFile: SubmissionFile,
+        variantNode: Node,
+        win: Window | null,
+        connectorId: string,
+    ): void {
+        const contentId = submissionFile.content.ref.id;
+        this.variantPolling().get(contentId)?.subscription.unsubscribe();
+        const initialVersion = variantNode.content?.version;
+        const sub = interval(5000)
+            .pipe(
+                takeUntil(this.destroyed$),
+                switchMap(() =>
+                    this.nodeService.getNode(variantNode.ref.id).pipe(catchError(() => of(null))),
+                ),
+                filter((updated): updated is Node => !!updated),
+                // emit while unchanged; emit the first changed variant too (inclusive), then complete
+                takeWhile((updated) => updated.content?.version === initialVersion, true),
+            )
+            .subscribe({
+                next: (updatedVariant) => {
+                    if (updatedVariant.content?.version === initialVersion) {
+                        return;
+                    }
+                    // the variant got a new version (connector wrote back) → re-submit it so
+                    // the submission file's content is synced with the new variant version
+                    void this.resubmitVariant(submissionFile, updatedVariant);
+                },
+                complete: () => {
+                    this.variantPolling.update((m) => {
+                        const next = new Map(m);
+                        next.delete(contentId);
+                        return next;
+                    });
+                },
+            });
+        this.variantPolling.update(
+            (m) => new Map([...m, [contentId, { subscription: sub, win, connectorId }]]),
+        );
+    }
+
+    /**
+     * replace an existing submission file with a fresh one created from the (updated) variant,
+     * so the submitted content reflects the latest variant version
+     * @private
+     */
+    private async resubmitVariant(oldFile: SubmissionFile, variantNode: Node): Promise<void> {
+        await this.deleteSubmissionFiles(oldFile);
+        const [newFile] = await this.saveSubmissionFiles([
+            {
+                assignmentFile: oldFile.assignmentFile,
+                content: variantNode,
+                ref: variantNode.ref,
+                validationStatus: 'NOT_STARTED',
+            } as SubmissionFile,
+        ]);
+        this.submissionFiles.set(
+            (this.submissionFiles() || [])
+                .filter((f) => f.ref?.id !== oldFile.ref?.id)
+                .concat(newFile),
+        );
+        this.syncSubmissionDataSource();
+    }
+
+    closeVariantWindow(element: Node) {
+        this.variantPolling().get(element.ref.id)?.win?.close();
+    }
+
+    isVariantWindowOpen(element: Node): boolean {
+        const win = this.variantPolling().get(element.ref.id)?.win;
+        return !!win && !win.closed;
+    }
+
+    pollingConnectorName(element: Node): string {
+        return this.variantPolling().get(element.ref.id)?.connectorId ?? '';
     }
     close() {
         void this.router.navigate([], {
@@ -348,14 +496,16 @@ export class SubmitAssignmentComponent implements OnDestroy {
     protected readonly InteractionType = InteractionType;
 
     private initOptions() {
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'launch', (node) => {
-            void this.uiService.editConnector(node);
+        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'edit', (node) => {
+            void this.createVariantAndEdit(node);
         });
         editConnectorNode.customShowCallback = async (nodes) => {
             return await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null);
         };
+        editConnectorNode.customEnabledCallback = async (nodes) =>
+            !this.hasSubmissionFor(nodes?.[0]);
         editConnectorNode.group = DefaultGroups.View;
-        editConnectorNode.priority = 30;
+        editConnectorNode.priority = 5;
         editConnectorNode.showAlways = true;
         editConnectorNode.constrains = [
             Constrain.Files,
@@ -403,7 +553,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.submittableConfigRO = {
             customOptions: {
                 useDefaultOptions: false,
-                addOptions: [download],
+                addOptions: [editConnectorNode, download],
             },
         };
 
@@ -429,6 +579,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     hasSubmissionFor(element: Node) {
+        if (!element) {
+            return undefined;
+        }
         return this.submissionFiles()?.find(
             (n) =>
                 n.assignmentFile?.referNode.ref.id === element.ref.id ||

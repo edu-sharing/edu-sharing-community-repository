@@ -21,6 +21,11 @@ This agent assists with development tasks in this Angular frontend project.
 -   **Test runner**: Jest / Playwright
 -   **Styling**: SCSS
 
+## Linting & Styles
+
+-   Obey the tslint rules
+-   if, loops and other containers should always have braces
+
 ## Key Areas
 
 ### Mds (Metadatasets)
@@ -31,6 +36,10 @@ This agent assists with development tasks in this Angular frontend project.
 ### General notes
 
 -   use custom `esIcon` directive instead of `mat-icon`
+-   Connector display names are translated via the `CONNECTOR.<id>.NAME` i18n key, where `<id>` is the connector id (e.g. `ONLYOFFICE`) from `RestConnectorsService.connectorSupportsEdit(node)?.id`. Translate it in the template, not in TS.
+-   Do NOT use spread syntax (`[...x]`, `{...x}`) in templates — it is only supported in Angular 21.1+ and this project is on an older version. A `Set`/`Map` won't serialize with the `json` pipe either (renders `{}`); convert to an array in the component if you need to inspect it.
+-   `UIService.editConnector(node, type?, win?, connectorType?)` and `openConnector(...)` return the opened `Window`. Pre-open the window in the user-gesture (synchronously) and pass it in if the connector call follows an `await`, to avoid popup blockers.
+-   Node list overlays: `es-node-entries-wrapper` projects an `<ng-template #overlay let-element="element">` (via `@ContentChild('overlay')`) rendered per card for `Grid`/`SmallGrid` display types. The card's `.card-overlay` provides the positioning context.
 
 ### Global Styles
 

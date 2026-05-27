@@ -170,6 +170,28 @@
               (clickItem)="selectSubmissionFile($event.element, 'submission')"
             >
               <ng-template #overlay let-element="element">
+                <div class="polling-overlay" *ngIf="pollingNodeIds().has(element.ref.id)">
+                  <es-spinner-small></es-spinner-small>
+                  <span *ngIf="isVariantWindowOpen(element)">{{
+                    'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR'
+                      | translate
+                        : {
+                            connector:
+                              'CONNECTOR.' + pollingConnectorName(element) + '.NAME' | translate
+                          }
+                  }}</span>
+                  <span *ngIf="!isVariantWindowOpen(element)">
+                    {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate }}
+                  </span>
+                  <button
+                    *ngIf="isVariantWindowOpen(element)"
+                    mat-button
+                    color="primary"
+                    (click)="closeVariantWindow(element); $event.stopPropagation()"
+                  >
+                    {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_CLOSE' | translate }}
+                  </button>
+                </div>
                 <div class="no-submission" *ngIf="!hasSubmissionFor(element)">
                   <button
                     mat-button
