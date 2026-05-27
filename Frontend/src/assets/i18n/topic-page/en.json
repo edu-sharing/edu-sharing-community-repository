@@ -203,6 +203,12 @@
         "TITLE_PLACEHOLDER": "Topic page variant for xyz",
         "EDUCATION_LEVEL_LABEL": "Educational level",
         "TARGET_GROUP_LABEL": "Target group",
+        "TEMPLATE_UPDATE": {
+          "TOOLTIP": "A new version of the template used is available.",
+          "HEADING": "Update page variant",
+          "MESSAGE": "Do you want to update the page variant based on the new template? Changes made to the page variant will be lost."
+        },
+        "REGENERATE_VARIANT": "Regenerate",
         "DELETE_VARIANT": "Delete variant",
         "DEFINE_PARAMETERS": "Define parameters",
         "DUPLICATE_PARAMETERS": "Duplicate in existing variant detected"
@@ -349,8 +355,14 @@
     "SAVE_CONFIG_ERROR_ACTION": "Reload page",
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Page template",
+    "CREATE_PAGE_TEMPLATE": {
+      "HEADING": "Create new topic page template",
+      "PENDING_MESSAGE": "A new page template is being created and loaded.",
+      "SUCCESS_MESSAGE": "The page template was created successfully"
+    },
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
     "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
+    "COPY_SUFFIX": "Copy",
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
       "NEW_TOPIC_PAGE": {
@@ -373,12 +385,11 @@
         "TOPIC_PAGE": "Topic page",
         "TEMPLATE": "Template"
       },
-      "SEARCH_PLACEHOLDER": "Search topic page templates",
+      "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",
       "EMPTY": "No templates could be found.",
       "PENDING_MESSAGE": "A new page variant is being created and loaded.",
-      "SUCCESS_MESSAGE": "Topic page copy created successfully",
-      "COPY_SUFFIX": "Copy"
+      "SUCCESS_MESSAGE": "Topic page copy created successfully"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Delete page variant",

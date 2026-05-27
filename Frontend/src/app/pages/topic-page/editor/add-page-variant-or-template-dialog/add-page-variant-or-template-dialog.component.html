@@ -1,36 +1,38 @@
-<div class="add-page-variant-dialog">
-  <es-info-message mode="warning" *ngIf="pageConfigRef; else noPageConfigRef">
-    <strong>
-      {{ i18nPrefix + 'EXISTING_VARIANT.INFO_HEADING' | translate }}
-    </strong>
-    <br />
-    {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_TEXT' | translate }}
-    <ul>
-      <li>
-        {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_ITEM_ONE' | translate }}
-      </li>
-      <li>
-        {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_ITEM_TWO' | translate }}
-      </li>
-    </ul>
-  </es-info-message>
-
-  <ng-template #noPageConfigRef>
-    <es-info-message mode="info">
-      <ng-container *ngIf="!!pageVariantNode; else newTopicPage">
-        <strong>
-          {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_HEADING' | translate }}
-        </strong>
-        {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_TEXT' | translate }}
-      </ng-container>
-      <ng-template #newTopicPage>
-        <strong>
-          {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_HEADING' | translate }}
-        </strong>
-        {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_TEXT' | translate }}
-      </ng-template>
+<div class="add-page-variant-or-template-dialog">
+  <ng-container *ngIf="!templateMode()">
+    <es-info-message mode="warning" *ngIf="pageConfigRef; else noPageConfigRef">
+      <strong>
+        {{ i18nPrefix + 'EXISTING_VARIANT.INFO_HEADING' | translate }}
+      </strong>
+      <br />
+      {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_TEXT' | translate }}
+      <ul>
+        <li>
+          {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_ITEM_ONE' | translate }}
+        </li>
+        <li>
+          {{ i18nPrefix + 'EXISTING_VARIANT.INFO_LIST_ITEM_TWO' | translate }}
+        </li>
+      </ul>
     </es-info-message>
-  </ng-template>
+
+    <ng-template #noPageConfigRef>
+      <es-info-message mode="info">
+        <ng-container *ngIf="!!pageVariantNode; else newTopicPage">
+          <strong>
+            {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_HEADING' | translate }}
+          </strong>
+          {{ i18nPrefix + 'EXISTING_TOPIC_PAGE.INFO_TEXT' | translate }}
+        </ng-container>
+        <ng-template #newTopicPage>
+          <strong>
+            {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_HEADING' | translate }}
+          </strong>
+          {{ i18nPrefix + 'NEW_TOPIC_PAGE.INFO_TEXT' | translate }}
+        </ng-template>
+      </es-info-message>
+    </ng-template>
+  </ng-container>
 
   <div class="select-copy-option">
     {{ i18nPrefix + 'CREATE_COPY_OF_LABEL' | translate }}

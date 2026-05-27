@@ -5,7 +5,7 @@
     min-width: 500px;
 }
 
-.config-page-variant {
+.config-page-variant-or-template {
     margin-top: 32px;
     display: flex;
     flex-direction: column;
@@ -55,7 +55,7 @@
     }
 }
 
-.delete-and-apply-buttons {
+.configuration-buttons {
     padding: 0 4px;
     display: flex;
     gap: 24px;

@@ -1,7 +1,9 @@
 import {
     Component,
     EventEmitter,
+    input,
     Input,
+    InputSignal,
     OnDestroy,
     OnInit,
     Output,
@@ -34,13 +36,13 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import {
+    DEFAULT_PAGE_TEMPLATE_ID,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
@@ -59,19 +61,21 @@ export enum CopyOption {
 }
 
 @Component({
-    selector: 'es-add-page-variant-dialog',
+    selector: 'es-add-page-variant-or-template-dialog',
     imports: [SharedModule, MdsModule],
-    templateUrl: 'add-page-variant-dialog.component.html',
-    styleUrls: ['add-page-variant-dialog.component.scss'],
+    templateUrl: 'add-page-variant-or-template-dialog.component.html',
+    styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
 })
-export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
+export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnInit {
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
+    readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
 
     @Input() dialogRef: CardDialogRef;
     @Input() pageVariantConfigNodes: Node[];
     @Input() pageConfigRef: string;
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
+    templateMode: InputSignal<boolean> = input(false);
     @Output() copyOptionChanged: EventEmitter<CopyOption> = new EventEmitter<CopyOption>();
     @Output() selectedNodeChange: EventEmitter<Node> = new EventEmitter<Node>();
 
@@ -275,7 +279,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     aspects: [],
                     ref: {
                         archived: false,
-                        id: uuidv4(),
+                        id: DEFAULT_PAGE_TEMPLATE_ID,
                         repo: HOME_REPOSITORY,
                     },
                     name: defaultTemplateName,
