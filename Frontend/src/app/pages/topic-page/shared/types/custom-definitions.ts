@@ -18,6 +18,14 @@ export const DEFAULT_PAGE_TEMPLATE_ID: string = '-default_template-';
 export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
 export const DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP: string = 'ccm:page_variant_is_template';
+export const DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP: string =
+    'ccm:educationalcontext';
+export const DEFAULT_PAGE_VARIANT_PROFILING_TARGET_GROUP_PROP: string =
+    'ccm:page_variant_profiling_target_group';
+export const DEFAULT_PAGE_VARIANT_PROFILING_PROPS: string[] = [
+    DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP,
+    DEFAULT_PAGE_VARIANT_PROFILING_TARGET_GROUP_PROP,
+];
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP: string = 'ccm:page_variant_template_ref';
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP: string =
     'ccm:page_variant_template_version';
