@@ -281,19 +281,24 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.defaultDescriptionNodeId,
             this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
         );
-        const promptResponse: ChatCompletionResult = await this.aiHelperService.generateFromPrompt(
-            mdsConfigId,
-            {},
-            this.contextNodeId || contextNodeId,
-        );
-        const responseText: string = retrieveResultString(promptResponse) ?? '';
-        if (responseText !== '') {
-            this.configLocked = true;
-            this.collectionDescription = responseText;
-            this.aiGeneratedDescription.set(true);
-            setTimeout((): void => {
-                this.configLocked = false;
-            }, 1000);
+        try {
+            const promptResponse: ChatCompletionResult =
+                await this.aiHelperService.generateFromPrompt(
+                    mdsConfigId,
+                    {},
+                    this.contextNodeId || contextNodeId,
+                );
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.configLocked = true;
+                this.collectionDescription = responseText;
+                this.aiGeneratedDescription.set(true);
+                setTimeout((): void => {
+                    this.configLocked = false;
+                }, 1000);
+            }
+        } catch {
+            // AI generation failed; fall back to no collection description
         }
     }
 
@@ -351,19 +356,20 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         if (!(await this.aiHelperService.hasAISupport())) {
             return;
         }
-        const promptResponse: ChatCompletionResult = await this.aiHelperService.generateFromPrompt(
-            nodeId,
-            {},
-            this.contextNodeId,
-        );
-        const responseText: string = retrieveResultString(promptResponse) ?? '';
-        if (responseText !== '') {
-            this.configLocked = true;
-            this.description = responseText;
-            this.aiGeneratedText.set(true);
-            setTimeout((): void => {
-                this.configLocked = false;
-            }, 1000);
+        try {
+            const promptResponse: ChatCompletionResult =
+                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.configLocked = true;
+                this.description = responseText;
+                this.aiGeneratedText.set(true);
+                setTimeout((): void => {
+                    this.configLocked = false;
+                }, 1000);
+            }
+        } catch {
+            // AI generation failed; fall back to no description text
         }
     }
 
