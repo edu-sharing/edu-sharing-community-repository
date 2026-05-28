@@ -114,6 +114,7 @@
           ctrlClickBehavior="emit"
           (selectionChange)="handleSelection($event)"
           (clickItem)="onContentClick($event)"
+          (dblClickItem)="openItem($event)"
           (sortChange)="setReferenceSort($event)"
           [globalOptions]="
             isAllowedToAddContent()

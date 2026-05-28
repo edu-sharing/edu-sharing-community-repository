@@ -1025,6 +1025,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
     }
 
+    openItem(event: NodeClickEvent<CollectionReference>) {
+        void this.nodeHelper.navigateToNode(event);
+    }
+
     canDelete(node: EduData.CollectionReference) {
         return RestHelper.hasAccessPermission(this.collection, 'Delete');
     }
