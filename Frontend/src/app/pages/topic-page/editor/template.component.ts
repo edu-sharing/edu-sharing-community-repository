@@ -1129,7 +1129,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(this.pageConfigNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name + '_' + uuidv4(),
+                this.createVariantOrTemplateSelectedNode.name.replace(
+                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
+                    '',
+                ) +
+                    '_' +
+                    uuidv4(),
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
@@ -2388,7 +2393,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(pageConfigPropagateNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name + '_' + uuidv4(),
+                this.createVariantOrTemplateSelectedNode.name.replace(
+                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
+                    '',
+                ) +
+                    '_' +
+                    uuidv4(),
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
