@@ -9,7 +9,7 @@
       <useCaching>false</useCaching>
       <prompt>
         {
-        "model": "gpt-4.1",
+        "model": "gemma-4-31b-it",
         "messages": [
         {
         "role":"system",
@@ -17,7 +17,7 @@
         },
         {
         "role": "user",
-        "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}"
+        "content": "Ich benötige Hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}\n\nVolltext/Inhalt:\n{{node(textContent)|-}}"
         }
         ]
         }
