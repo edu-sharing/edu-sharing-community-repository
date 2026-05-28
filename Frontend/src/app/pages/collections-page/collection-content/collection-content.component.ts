@@ -78,6 +78,7 @@ import { CollectionInfoBarComponent } from '../collection-info-bar/collection-in
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { GlobalCollectionsPageService } from '../global-collections-page.service';
 
 @Component({
     selector: 'es-collection-content',
@@ -190,6 +191,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         private editorialSidebarService: EditorialSidebarService,
         private bridge: BridgeService,
         private collectionService: RestCollectionService,
+        private globalCollectionsPageService: GlobalCollectionsPageService,
         public configurationService: ConfigService,
         private sessionStorageService: SessionStorageService,
         private dialogs: DialogsService,
@@ -494,6 +496,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             )
                             .subscribe(
                                 () => {
+                                    //this.globalCollectionsPageService.removeTemporaryCollections(source.element);
                                     this.toast.closeProgressSpinner();
                                     this.refreshContent();
                                 },

@@ -1,11 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import {
-    Node,
-    NodePermissions,
-    NodeService,
-    SessionStorageService,
-    Store,
-} from 'ngx-edu-sharing-api';
+import { Node, NodePermissions, NodeService, SessionStorageService } from 'ngx-edu-sharing-api';
 import { from, Observable, of } from 'rxjs';
 import { catchError, concatMap, map, switchMap, tap, toArray } from 'rxjs/operators';
 import {
@@ -22,6 +16,7 @@ import { ClipboardObject, LocalEventsService } from 'ngx-edu-sharing-ui';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DeleteNodesDialogData, DeleteNodesDialogResult } from './delete-nodes-dialog-data';
+import { GlobalCollectionsPageService } from '../../../../pages/collections-page/global-collections-page.service';
 
 @Component({
     selector: 'es-delete-nodes-dialog',
@@ -47,6 +42,7 @@ export class DeleteNodesDialogComponent implements OnInit {
         private nodeHelper: NodeHelperService,
         private nodeService: NodeService,
         private temporaryStorage: TemporaryStorageService,
+        private globalCollectionsPageService: GlobalCollectionsPageService,
         private sessionStorageService: SessionStorageService,
         private toast: Toast,
         private usageService: RestUsageService,
@@ -122,7 +118,7 @@ export class DeleteNodesDialogComponent implements OnInit {
 
     private onConfirm(): void {
         this.dialogRef.patchState({ isLoading: true });
-        void this.removeTemporaryCollections(this.data.nodes);
+        void this.globalCollectionsPageService.removeTemporaryCollections(this.data.nodes);
         from(
             this.data.nodes.map((node) =>
                 this.processNode(node).pipe(catchError((error) => of({ error }))),
@@ -205,18 +201,5 @@ export class DeleteNodesDialogComponent implements OnInit {
                 this.temporaryStorage.remove('workspace_clipboard');
             }
         }
-    }
-
-    private async removeTemporaryCollections(nodes: Node[]) {
-        const collections = await this.sessionStorageService.get<Node[]>(
-            SessionStorageService.KEY_ROOT_COLLECTIONS,
-            [],
-            Store.Session,
-        );
-        await this.sessionStorageService.set(
-            SessionStorageService.KEY_ROOT_COLLECTIONS,
-            collections.filter((c) => !nodes.find((n) => c.ref.id === n.ref.id)),
-            Store.Session,
-        );
     }
 }
