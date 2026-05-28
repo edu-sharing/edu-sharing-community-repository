@@ -1,5 +1,16 @@
 import { trigger } from '@angular/animations';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    HostBinding,
+    Input,
+    OnChanges,
+    OnDestroy,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIAnimation } from '../util/ui-animation';
 import { UIConstants } from '../util/ui-constants';
@@ -19,7 +30,7 @@ import { BehaviorSubject } from 'rxjs';
 /**
  * The action bar provides several icons, usually at the top right, with actions for a current context
  */
-export class ActionbarComponent implements OnChanges {
+export class ActionbarComponent implements OnChanges, AfterViewInit, OnDestroy {
     /**
      * The amount of options which are not hidden inside an overflow menu
      * (default: depending on mobile (1) or not (2))
@@ -28,10 +39,16 @@ export class ActionbarComponent implements OnChanges {
     @Input() numberOfAlwaysVisibleOptions = 2;
     @Input() numberOfAlwaysVisibleOptionsMobile = 1;
     /**
-     * show the captions of the action elements
-     * auto (default) uses the screen size
+     * Controls label visibility for always-visible buttons.
+     *
+     * - `'auto'` (default): labels shown on wide screens, hidden via CSS media query below ~900 px.
+     * - `true`: labels always shown regardless of screen size.
+     * - `false`: labels never shown (icon-only).
+     * - `'ifRoom'`: labels shown only when the actionbar container has enough horizontal space;
+     *   hides automatically when buttons would overflow, and reappears when space is available again.
+     *   Responds to the actual rendered width, not a fixed breakpoint.
      */
-    @Input() showCaptions: 'auto' | false | true = 'auto';
+    @Input() showCaptions: 'auto' | false | true | 'ifRoom' = 'auto';
     /**
      * Visual style of the actionbar
      *
@@ -72,6 +89,10 @@ export class ActionbarComponent implements OnChanges {
      * the position of the mat tooltips
      */
     @Input() tooltipPosition: TooltipPosition = 'below';
+    /**
+     * fixed button width (used for ifRoom caption calculation)
+     */
+    readonly FixedButtonWidth = 200;
 
     /**
      * Set the options, see @OptionItem
@@ -85,13 +106,23 @@ export class ActionbarComponent implements OnChanges {
      * breakpoint width at which point the mobile display count is used
      */
     @Input() mobileBreakpoint = UIConstants.MOBILE_WIDTH;
+    @HostBinding('class.labels-hidden-for-room') labelsHiddenForRoom = false;
+    @ViewChild('actionbarDiv') private actionbarDiv: ElementRef<HTMLElement>;
+
+    constructor(
+        private uiService: UIService,
+        private translate: TranslateService,
+        private cdr: ChangeDetectorRef,
+        private elementRef: ElementRef<HTMLElement>,
+    ) {}
+
     optionsIn: OptionItem[] = [];
     optionsAlways$ = new BehaviorSubject<OptionItem[]>([]);
     optionsMenu$ = new BehaviorSubject<OptionItem[]>([]);
     optionsToggleBefore: OptionItem[] = [];
     optionsToggleAfter: OptionItem[] = [];
 
-    constructor(private uiService: UIService, private translate: TranslateService) {}
+    private resizeObserver: ResizeObserver | null = null;
 
     private prepareOptions(options: OptionItem[]) {
         options = this.uiService.filterValidOptions(Helper.deepCopyArray(options));
@@ -202,8 +233,41 @@ export class ActionbarComponent implements OnChanges {
         }
     }
 
+    ngAfterViewInit(): void {
+        this.setupResizeObserver();
+    }
+
     ngOnChanges(changes: SimpleChanges): void {
         this.invalidate();
+        if (changes.showCaptions) {
+            this.setupResizeObserver();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.resizeObserver?.disconnect();
+    }
+
+    private setupResizeObserver(): void {
+        this.resizeObserver?.disconnect();
+        this.resizeObserver = null;
+        if (this.showCaptions !== 'ifRoom' || !this.actionbarDiv) {
+            this.labelsHiddenForRoom = false;
+            return;
+        }
+        // Observe the parent element, not the host — the host is content-sized and changes
+        // width when labels toggle, which would re-trigger the observer and cause flickering.
+        const parent = this.elementRef.nativeElement.parentElement;
+        this.resizeObserver = new ResizeObserver(() => this.checkLabelsRoom());
+        this.resizeObserver.observe(parent);
+    }
+
+    private checkLabelsRoom(): void {
+        const availableWidth =
+            this.elementRef.nativeElement.parentElement.getBoundingClientRect().width;
+        const requiredWidth = this.optionsAlways$.value.length * this.FixedButtonWidth;
+        this.labelsHiddenForRoom = availableWidth < requiredWidth;
+        this.cdr.markForCheck();
     }
 
     protected readonly UIService = UIService;

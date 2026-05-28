@@ -144,3 +144,9 @@ button {
 .actionbar-icon-button {
     @include icon-button();
 }
+
+:host(.labels-hidden-for-room) {
+    ::ng-deep .action-always-caption {
+        display: none;
+    }
+}
