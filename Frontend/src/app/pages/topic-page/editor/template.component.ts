@@ -106,6 +106,7 @@ import {
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_NAME_PREFIX,
+    DEFAULT_PAGE_VARIANT_PROFILING_PROPS,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -1132,19 +1133,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // depending on the copy option, certain variables should be added
-            // workaround: this currently has to be done separately as it crashes otherwise
-            const educationContextProp: string = 'ccm:educationalcontext';
-            if (
-                this.createVariantOrTemplateCopyOption === CopyOption.TopicPage &&
-                this.createVariantOrTemplateSelectedNode.properties?.[educationContextProp]?.length
-            ) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        educationContextProp,
-                        this.createVariantOrTemplateSelectedNode.properties[educationContextProp],
-                    );
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedVariantNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(pageConfigVariantNode),
+            );
+            if (updatedVariantNode) {
+                pageConfigVariantNode = updatedVariantNode;
             }
             // push it to the existing variants
             pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
@@ -2240,6 +2235,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.requestInProgress.set(true);
             // create config node + link
             await this.checkForCustomPageNodeExistence();
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedVariantNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(this.pageVariantNode()),
+            );
+            if (updatedVariantNode) {
+                this.pageVariantNode.set(updatedVariantNode);
+            }
             // after the page config + variant node were created from the template,
             // copy the widget nodes and persist the variant config without propagatedNodeIds
             const variantConfig: PageVariantConfig = retrievePageVariantConfig(
@@ -2383,18 +2386,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
                     );
             }
-            // workaround: copy educational context separately to avoid crashes
-            const educationContextProp: string = 'ccm:educationalcontext';
-            if (
-                this.createVariantOrTemplateCopyOption === CopyOption.TopicPage &&
-                this.createVariantOrTemplateSelectedNode.properties?.[educationContextProp]?.length
-            ) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        educationContextProp,
-                        this.createVariantOrTemplateSelectedNode.properties[educationContextProp],
-                    );
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedTemplateNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(pageConfigVariantNode),
+            );
+            if (updatedTemplateNode) {
+                pageConfigVariantNode = updatedTemplateNode;
             }
             // push new variant into the propagate page config
             pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
@@ -2452,6 +2450,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.pageConfigCreationInProgress.set(false);
             this.endEditing();
         }
+    }
+
+    /**
+     * Copies profiling properties from a source node to a target node if they are present.
+     */
+    private async copyProfilingProperties(
+        sourceNode: Node,
+        targetNodeId: string,
+    ): Promise<Node | null> {
+        let updatedNode: Node | null = null;
+        for (const prop of DEFAULT_PAGE_VARIANT_PROFILING_PROPS) {
+            if (sourceNode.properties?.[prop]?.length) {
+                updatedNode = await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    updatedNode ? retrieveNodeId(updatedNode) : targetNodeId,
+                    prop,
+                    sourceNode.properties[prop],
+                );
+            }
+        }
+        return updatedNode;
     }
 
     /**
