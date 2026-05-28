@@ -112,7 +112,7 @@ export class CreateVariantDialogComponent {
                     this.dialogRef.patchState({ isLoading: false });
                     this.localEvents.nodesCreated.emit([created.node]);
                     if (this._openViaConnector) {
-                        this.uiService.openConnector(created.node, null, win);
+                        void this.uiService.editConnector(created.node, { win });
                         UIHelper.goToWorkspaceFolder(
                             this.router,
                             this.connector.getCurrentLogin(),

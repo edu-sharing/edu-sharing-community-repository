@@ -521,7 +521,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         parameters: { [key in string]: string[] } = null,
         connectorType: Connector = null,
     ) {
-        this.uiService.openConnector(node, type, win, connectorType, true, parameters);
+        const preferEdit = parameters?.['preferEdit']?.[0] === 'true';
+        void this.uiService.editConnector(node, { type, win, connectorType, preferEdit });
     }
 
     pickMaterialFromSearch() {

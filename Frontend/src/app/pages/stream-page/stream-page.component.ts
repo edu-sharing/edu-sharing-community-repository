@@ -439,7 +439,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         win: any = null,
         connectorType: Connector = null,
     ) {
-        this.uiService.openConnector(node, type, win, connectorType);
+        void this.uiService.editConnector(node, { type, win, connectorType });
     }
 
     private searchRelevant() {

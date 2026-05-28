@@ -670,7 +670,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         if (RestToolService.isLtiObject(node)) {
             this.toolService.openLtiObject(node);
         } else {
-            this.uiService.openConnector(node, null, null, null, newWindow);
+            void this.uiService.editConnector(node);
         }
     }
 

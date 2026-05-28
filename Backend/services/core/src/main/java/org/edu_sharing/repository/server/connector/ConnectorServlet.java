@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server.connector;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -202,7 +201,8 @@ public class ConnectorServlet extends SpringHttpServlet {
 			if(toolInstanceNodeId != null && !toolInstanceNodeId.trim().equals("")) {
 				jsonObject.put("tool","LTI");
 			}
-
+			// hint that connector should start in edit mode (i.e. for onlyOffice read/preview mode skip)
+			jsonObject.put("preferEdit", Boolean.parseBoolean(req.getParameter("preferEdit")));
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
             jsonObject.put("sessionId", req.getSession().getId());
             try{

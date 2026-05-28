@@ -27,16 +27,13 @@ import {
     CanDrop,
     ClipboardObject,
     CustomOptions,
-    DefaultGroups,
     DragData,
     DropSource,
     DropTarget,
-    ElementType,
     LocalEventsService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeRoot,
-    OptionItemToggle,
     TemporaryStorageService,
     TranslationsService,
     UIAnimation,
@@ -44,7 +41,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, map, take, takeUntil } from 'rxjs/operators';
+import { delay, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -346,7 +343,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
         win: any = null,
         connectorType: Connector = null,
     ) {
-        this.ui.openConnector(this.getNodeList(node)[0], type, win, connectorType);
+        void this.ui.editConnector(this.getNodeList(node)[0], { type, win, connectorType });
     }
 
     async handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {

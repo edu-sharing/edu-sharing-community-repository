@@ -353,7 +353,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 const variantNode = await firstValueFrom(this.nodeService.getNode(originalId));
                 const connectorId =
                     this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
-                const win = await this.uiService.editConnector(variantNode);
+                const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
                 this.startVariantPolling(existing, variantNode, win, connectorId);
             } catch (e) {
                 this.toast.error(e, null);
@@ -387,7 +387,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             // the connector edits the variant (fork); the submission file's content is what the
             // list displays and what polling/overlay track
             const connectorId = this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
-            const win = await this.uiService.editConnector(variantNode);
+            const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
             // register polling BEFORE rendering the list so the overlay's
             // pollingNodeIds() check is already populated on first render
             this.startVariantPolling(newFiles[0], variantNode, win, connectorId);
@@ -537,6 +537,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
             return await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null);
         };
         editConnectorNode.customEnabledCallback = async (nodes) => {
+            if (!this.canSubmitMaterials()) {
+                return false;
+            }
             const node = nodes?.[0];
             const submission = this.hasSubmissionFor(node);
             if (!submission) {
@@ -544,7 +547,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             }
             // submit-tab: node is the existing variant content → allow re-editing it
             if (submission.content?.ref.id === node?.ref.id) {
-                return this.canSubmitMaterials();
+                return true;
             }
             // RO-tab: node is the original assignment file but a submission already exists
             return false;
@@ -557,20 +560,6 @@ export class SubmitAssignmentComponent implements OnDestroy {
             Constrain.NoBulk,
             Constrain.HomeRepository,
         ];
-        const uploadManually = new OptionItem(
-            'OPTIONS.ASSIGNMENT_SUBMIT_MANUALLY',
-            'cloud_upload',
-            (node) => {
-                void this.uiService.editConnector(node);
-            },
-        );
-        uploadManually.customShowCallback = async (nodes) => {
-            return !(await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null));
-        };
-        uploadManually.group = DefaultGroups.View;
-        uploadManually.priority = 30;
-        uploadManually.showAlways = true;
-        uploadManually.constrains = [Constrain.Files, Constrain.NoBulk, Constrain.HomeRepository];
         const download = this.optionsHelperService.getDownloadOption({} as OptionData);
         download.group = DefaultGroups.View;
         download.priority = 10;
