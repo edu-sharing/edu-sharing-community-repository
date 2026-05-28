@@ -98,7 +98,7 @@ export class RenderHelperService {
                 error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
             };
         }
-        this.prepareRootUrl();
+        const rootUrl = await this.prepareRootUrl();
         const token = securedNode.jwt;
         const request = {
             nodeId: node.ref.id,
@@ -107,7 +107,8 @@ export class RenderHelperService {
             signature: securedNode.signature,
             signatureAlgorithm: securedNode.signatureAlgorithm,
             token: token,
-            renderingBaseUrl: securedNode.renderingBaseUrl,
+            renderingBaseUrl:
+                rootUrl === securedNode.renderingBaseUrl ? null : securedNode.renderingBaseUrl,
         } as RenderDataRequestWithToken;
 
         return {
@@ -145,16 +146,15 @@ export class RenderHelperService {
 
     async prepareRootUrl() {
         const about = await firstValueFrom(this.aboutService.getAbout());
+        const rootUrl = about.renderingService2.url.replace(/\/$/g, '');
         if (this.configuration.production) {
-            this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
-                /\/$/g,
-                '',
-            );
+            this.injector.get(RSApiConfiguration).rootUrl = rootUrl;
         } else {
             console.info('dev mode active, routing rendering to proxy');
             this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
         }
         console.info(this.injector.get(RSApiConfiguration));
+        return rootUrl;
     }
 
     private base64ToUtf8(b64: string): string {
