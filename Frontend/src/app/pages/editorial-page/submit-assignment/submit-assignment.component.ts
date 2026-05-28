@@ -43,6 +43,7 @@ import {
 } from 'rxjs/operators';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
+    ActionbarComponent,
     ColumnType,
     Constrain,
     DefaultGroups,
@@ -55,7 +56,9 @@ import {
     NodeTitlePipe,
     OptionData,
     OptionItem,
+    OptionsHelperDataService,
     RepoUrlService,
+    Scope,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
@@ -91,6 +94,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         RenderWrapperComponent,
         NgxExtendedPdfViewerModule,
     ],
+    providers: [OptionsHelperDataService],
 })
 export class SubmitAssignmentComponent implements OnDestroy {
     @ViewChild('feedback') feedbackRef: ElementRef;
@@ -153,12 +157,22 @@ export class SubmitAssignmentComponent implements OnDestroy {
     canSendSubmission = computed(
         () =>
             this.canEditSubmissionNotes() &&
+            this.pollingNodeIds().size === 0 &&
             this.files().every(
                 (f) => f.documentRole === 'SUPPLEMENTARY' || this.hasSubmissionFor(f.referNode),
             ),
     );
     selectedTabIndex = signal(0);
     selectedAssignmentFile = signal<Node>(null);
+    selectedFileMode = signal<'assignment' | 'submission' | 'supplementary'>('assignment');
+    private _actionbarRef: ActionbarComponent | null = null;
+    @ViewChild('assignmentFileActionbar')
+    set actionbarRef(val: ActionbarComponent) {
+        this._actionbarRef = val;
+        if (val) {
+            void this.syncActionbar();
+        }
+    }
     selectedCorrectedFile = signal<Node>(null);
     selectedCorrectedFileUrl = signal<string>(undefined);
     submittableFiles = new NodeDataSource<Node>();
@@ -169,11 +183,15 @@ export class SubmitAssignmentComponent implements OnDestroy {
     correctedFiles = new NodeDataSource<Node>();
     supplementaryFiles = new NodeDataSource<Node>();
     language: string = 'de-DE';
-    private variantPolling = signal<
+    private readonly actionbarOptionData: OptionData = {
+        scope: Scope.EditorialPage,
+        activeObjects: [] as Node[],
+    };
+    private connectorPolling = signal<
         Map<string, { subscription: Subscription; win: Window | null; connectorId: string }>
     >(new Map());
     readonly pollingNodeIds: Signal<Set<string>> = computed(
-        () => new Set(this.variantPolling().keys()),
+        () => new Set(this.connectorPolling().keys()),
     );
 
     constructor(
@@ -192,11 +210,25 @@ export class SubmitAssignmentComponent implements OnDestroy {
         private toast: Toast,
         private repoUrlService: RepoUrlService,
         private optionsHelperService: OptionsHelperService,
+        private assignmentFileOptionsHelper: OptionsHelperDataService,
         private formBuilder: FormBuilder,
         private uiService: UIService,
         private restConnectorsService: RestConnectorsService,
     ) {
         this.initOptions();
+        effect(() => {
+            const node = this.selectedAssignmentFile();
+            const mode = this.selectedFileMode();
+            if (!node || !this._actionbarRef) {
+                return;
+            }
+            this.actionbarOptionData.activeObjects = [node];
+            this.assignmentFileOptionsHelper.setData({
+                ...this.actionbarOptionData,
+                customOptions: this.configForMode(mode)?.customOptions,
+            });
+            void this.assignmentFileOptionsHelper.refreshComponents();
+        });
         this.language = this.translationsService.getLocale();
         effect(() => {
             const file = this.selectedCorrectedFile();
@@ -337,7 +369,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
-        this.variantPolling().forEach(({ subscription }) => subscription.unsubscribe());
+        this.connectorPolling().forEach(({ subscription }) => subscription.unsubscribe());
     }
 
     private async createVariantAndEdit(node: Node): Promise<void> {
@@ -345,6 +377,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         // by assignment file or from the submission list by variant content), edit it rather than
         // forking a new variant
         this.selectedTabIndex.set(1);
+        this.selectedAssignmentFile.set(null);
         const existing = this.hasSubmissionFor(node);
         if (existing) {
             this.toast.showProgressSpinner();
@@ -355,7 +388,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 const connectorId =
                     this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
                 const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
-                this.startVariantPolling(existing, variantNode, win, connectorId);
+                this.startConnectorPolling(existing, variantNode, win, connectorId);
             } catch (e) {
                 this.toast.error(e, null);
             } finally {
@@ -391,7 +424,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
             // register polling BEFORE rendering the list so the overlay's
             // pollingNodeIds() check is already populated on first render
-            this.startVariantPolling(newFiles[0], variantNode, win, connectorId);
+            this.startConnectorPolling(newFiles[0], variantNode, win, connectorId);
             this.syncSubmissionDataSource();
         } catch (e) {
             this.toast.error(e, null);
@@ -406,14 +439,14 @@ export class SubmitAssignmentComponent implements OnDestroy {
      * is synced with it, and stop polling
      * @private
      */
-    private startVariantPolling(
+    private startConnectorPolling(
         submissionFile: SubmissionFile,
         variantNode: Node,
         win: Window | null,
         connectorId: string,
     ): void {
         const contentId = submissionFile.content.ref.id;
-        this.variantPolling().get(contentId)?.subscription.unsubscribe();
+        this.connectorPolling().get(contentId)?.subscription.unsubscribe();
         const initialVersion = variantNode.content?.version;
         const sub = interval(5000)
             .pipe(
@@ -435,14 +468,14 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     void this.resubmitVariant(submissionFile, updatedVariant);
                 },
                 complete: () => {
-                    this.variantPolling.update((m) => {
+                    this.connectorPolling.update((m) => {
                         const next = new Map(m);
                         next.delete(contentId);
                         return next;
                     });
                 },
             });
-        this.variantPolling.update(
+        this.connectorPolling.update(
             (m) => new Map([...m, [contentId, { subscription: sub, win, connectorId }]]),
         );
     }
@@ -470,30 +503,30 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.syncSubmissionDataSource();
     }
 
-    closeVariantWindow(element: Node) {
-        this.variantPolling().get(element.ref.id)?.win?.close();
+    closeConnectorWindow(element: Node) {
+        this.connectorPolling().get(element.ref.id)?.win?.close();
     }
 
-    cancelVariantPolling(element: Node) {
-        const entry = this.variantPolling().get(element.ref.id);
+    cancelConnectorPolling(element: Node) {
+        const entry = this.connectorPolling().get(element.ref.id);
         if (!entry) {
             return;
         }
         entry.subscription.unsubscribe();
-        this.variantPolling.update((m) => {
+        this.connectorPolling.update((m) => {
             const next = new Map(m);
             next.delete(element.ref.id);
             return next;
         });
     }
 
-    isVariantWindowOpen(element: Node): boolean {
-        const win = this.variantPolling().get(element.ref.id)?.win;
+    isConnectorWindowOpen(element: Node): boolean {
+        const win = this.connectorPolling().get(element.ref.id)?.win;
         return !!win && !win.closed;
     }
 
     pollingConnectorName(element: Node): string {
-        return this.variantPolling().get(element.ref.id)?.connectorId ?? '';
+        return this.connectorPolling().get(element.ref.id)?.connectorId ?? '';
     }
     close() {
         void this.router.navigate([], {
@@ -530,18 +563,17 @@ export class SubmitAssignmentComponent implements OnDestroy {
     protected readonly InteractionType = InteractionType;
 
     private initOptions() {
-        const editConnectorNode = new OptionItem('OPTIONS.EDIT_CONNECTOR', 'edit', (node) => {
-            void this.createVariantAndEdit(node);
-        });
+        const editConnectorNode = new OptionItem(
+            'OPTIONS.EDIT_CONNECTOR',
+            'edit',
+            (node, nodes) => {
+                void this.createVariantAndEdit(node ?? nodes?.[0]);
+            },
+        );
         editConnectorNode.customShowCallback = async (nodes) => {
             return await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null);
         };
-        editConnectorNode.customEnabledCallback = async (nodes) => {
-            if (!this.canSubmitMaterials()) {
-                return false;
-            }
-            return true;
-        };
+        editConnectorNode.customEnabledCallback = async () => this.canSubmitMaterials();
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 5;
         editConnectorNode.showAlways = true;
@@ -550,7 +582,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             Constrain.NoBulk,
             Constrain.HomeRepository,
         ];
-        const download = this.optionsHelperService.getDownloadOption({} as OptionData);
+        const download = this.optionsHelperService.getDownloadOption(this.actionbarOptionData);
         download.group = DefaultGroups.View;
         download.priority = 10;
         download.constrains = [];
@@ -559,11 +591,16 @@ export class SubmitAssignmentComponent implements OnDestroy {
         const remove = new OptionItem(
             'EDITORIAL.OPTIONS.SUBMISSION_REMOVE',
             'close',
-            async (node) => {
-                await this.deleteSubmissionFiles(this.hasSubmissionFor(node));
-                this.submissionFiles().splice(
-                    this.submissionFiles().indexOf(this.hasSubmissionFor(node)),
-                    1,
+            async (node, nodes) => {
+                const n = node ?? nodes?.[0];
+                const submission = this.hasSubmissionFor(n);
+                if (!submission) {
+                    return;
+                }
+                this.selectedAssignmentFile.set(null);
+                await this.deleteSubmissionFiles(submission);
+                this.submissionFiles.set(
+                    (this.submissionFiles() || []).filter((f) => f.ref?.id !== submission?.ref?.id),
                 );
                 this.syncSubmissionDataSource();
             },
@@ -632,7 +669,6 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     .filter((f) => !f.assignmentFile)
                     .map((f) => f.content),
             );
-        console.log('all', this.submittableFilesAll);
         this.submittableFilesAll.setData(nodes);
         this.correctedFiles.setData(
             this.submissionFiles()
@@ -766,14 +802,40 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     /**
-     *
-     * @param element
-     * @param mode
-     * Mode for the sidebar (tab context)
+     * Mode for the selected node (node entries component context)
      */
-    selectSubmissionFile(element: Node, mode: 'assignment' | 'submission' = 'assignment') {
+    private configForMode(mode: 'assignment' | 'submission' | 'supplementary') {
+        if (mode === 'submission') {
+            return this.submittableConfig;
+        }
+        if (mode === 'supplementary') {
+            return this.supplementaryConfig;
+        }
+        return this.submittableConfigRO;
+    }
+
+    private async syncActionbar() {
+        const node = this.selectedAssignmentFile();
+        const mode = this.selectedFileMode();
+        if (!node || !this._actionbarRef) {
+            return;
+        }
+        this.actionbarOptionData.activeObjects = [node];
+        this.assignmentFileOptionsHelper.setData({
+            ...this.actionbarOptionData,
+            customOptions: this.configForMode(mode)?.customOptions,
+        });
+        await this.assignmentFileOptionsHelper.initComponents(this._actionbarRef);
+        void this.assignmentFileOptionsHelper.refreshComponents();
+    }
+
+    selectSubmissionFile(
+        element: Node,
+        mode: 'assignment' | 'submission' | 'supplementary' = 'assignment',
+    ) {
         this.selectedAssignmentFile.set(element);
-        this.showSidebar(mode);
+        this.selectedFileMode.set(mode);
+        this.showSidebar(mode === 'submission' ? 'submission' : 'assignment');
     }
     selectCorrectionFile(element: Node) {
         this.selectedCorrectedFile.set(element);

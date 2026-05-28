@@ -31,11 +31,32 @@ mat-sidenav-container {
         mat-tab-group {
             padding: 0;
         }
+        &.has-main-component {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: calc(
+                100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+                    var(--mainnavCurrentHeight)
+            );
+            min-height: unset;
+        }
         .option-area {
             display: flex;
             padding: 15px var(--roundedContainerMargin) 10px var(--roundedContainerMargin);
             .options-left {
                 flex-grow: 1;
+            }
+        }
+    }
+    @media screen and (max-width: vars.$mobileTabSwitchWidth) {
+        .main-content {
+            margin-bottom: calc(var(--roundedContainerMargin) + #{vars.$mobileTabNavHeight});
+            &.has-main-component {
+                height: calc(
+                    100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+                        var(--mainnavCurrentHeight) - #{vars.$mobileTabNavHeight}
+                );
             }
         }
     }

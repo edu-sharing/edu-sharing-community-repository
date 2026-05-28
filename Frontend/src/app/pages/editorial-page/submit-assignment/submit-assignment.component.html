@@ -1,10 +1,20 @@
-<es-render-wrapper-component
-  *ngIf="selectedAssignmentFile()"
-  [showTopbar]="false"
-  [showMetadata]="false"
-  [nodeId]="selectedAssignmentFile().ref.id"
-  [repository]="selectedAssignmentFile().ref.repo"
-></es-render-wrapper-component>
+<div class="assignment-file-preview" *ngIf="selectedAssignmentFile()">
+  <div class="preview-scroll">
+    <es-render-wrapper-component
+      [showTopbar]="false"
+      [showMetadata]="false"
+      [nodeId]="selectedAssignmentFile().ref.id"
+      [repository]="selectedAssignmentFile().ref.repo"
+    ></es-render-wrapper-component>
+  </div>
+  <div class="preview-actionbar" (click)="$event.stopPropagation()">
+    <es-actionbar
+      #assignmentFileActionbar
+      [numberOfAlwaysVisibleOptions]="3"
+      appearance="button"
+    ></es-actionbar>
+  </div>
+</div>
 <ng-container *ngIf="selectedCorrectedFileUrl()">
   <ngx-extended-pdf-viewer
     [src]="selectedCorrectedFileUrl()"
@@ -91,7 +101,7 @@
               [elementInteractionType]="InteractionType.Emitter"
               [dataSource]="supplementaryFiles"
               [columns]="columns"
-              (clickItem)="selectSubmissionFile($event.element)"
+              (clickItem)="selectSubmissionFile($event.element, 'supplementary')"
             ></es-node-entries-wrapper>
           </div>
         </div>
@@ -170,9 +180,13 @@
               (clickItem)="selectSubmissionFile($event.element, 'submission')"
             >
               <ng-template #overlay let-element="element">
-                <div class="polling-overlay" *ngIf="pollingNodeIds().has(element.ref.id)">
+                <div
+                  class="polling-overlay"
+                  (click)="$event.stopPropagation()"
+                  *ngIf="pollingNodeIds().has(element.ref.id)"
+                >
                   <es-spinner-small></es-spinner-small>
-                  <ng-container *ngIf="isVariantWindowOpen(element)">
+                  <ng-container *ngIf="isConnectorWindowOpen(element)">
                     <span>{{
                       'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR'
                         | translate
@@ -184,19 +198,19 @@
                     <button
                       mat-button
                       color="primary"
-                      (click)="closeVariantWindow(element); $event.stopPropagation()"
+                      (click)="closeConnectorWindow(element); $event.stopPropagation()"
                     >
                       {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_CLOSE' | translate }}
                     </button>
                   </ng-container>
-                  <ng-container *ngIf="!isVariantWindowOpen(element)">
+                  <ng-container *ngIf="!isConnectorWindowOpen(element)">
                     <span>
                       {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate }}
                     </span>
                     <button
                       mat-button
                       color="primary"
-                      (click)="cancelVariantPolling(element); $event.stopPropagation()"
+                      (click)="cancelConnectorPolling(element); $event.stopPropagation()"
                     >
                       {{ 'CANCEL' | translate }}
                     </button>

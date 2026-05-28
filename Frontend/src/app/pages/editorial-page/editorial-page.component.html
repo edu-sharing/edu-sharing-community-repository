@@ -62,7 +62,13 @@
        </button>
      </mat-toolbar>
  -->
-    <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver" role="main">
+    <div
+      class="main-content"
+      esBorderBoxObserver
+      #observer="borderBoxObserver"
+      role="main"
+      [class.has-main-component]="mainComponent$ | async"
+    >
       <div class="top-area">
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"

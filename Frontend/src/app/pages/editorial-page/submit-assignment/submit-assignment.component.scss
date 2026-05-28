@@ -33,19 +33,59 @@ $maxWidth: 1200px;
     }
 }
 
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
 mat-tab-group {
     width: 100%;
     margin: 0 auto;
     display: flex;
+    flex: 1;
+    min-height: 0;
 }
 mat-tab-header {
     @include mixins.materialShadowBottom();
 }
-ngx-extended-pdf-viewer,
-es-render-wrapper-component {
+ngx-extended-pdf-viewer {
     display: block;
     padding: 40px var(--roundedContainerMargin) var(--roundedContainerMargin)
         var(--roundedContainerMargin);
+}
+.assignment-file-preview {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
+    .preview-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        justify-content: center;
+
+        es-render-wrapper-component {
+            display: block;
+            width: 100%;
+            padding: 20px var(--roundedContainerMargin) var(--roundedContainerMargin)
+                var(--roundedContainerMargin);
+        }
+    }
+
+    .preview-actionbar {
+        display: flex;
+        justify-content: center;
+        padding: 12px var(--roundedContainerMargin);
+        flex-shrink: 0;
+        border: 1px solid var(--palette-primary-100);
+        @include mixins.materialShadowSmall();
+        border-radius: var(--borderRadiusCards);
+    }
 }
 .assignment-view,
 .assignment-submit {

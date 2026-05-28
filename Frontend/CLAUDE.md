@@ -43,6 +43,17 @@ This agent assists with development tasks in this Angular frontend project.
 -   `UIService.editConnector(node, type?, win?, connectorType?)` and `openConnector(...)` return the opened `Window`. Pre-open the window in the user-gesture (synchronously) and pass it in if the connector call follows an `await`, to avoid popup blockers.
 -   Node list overlays: `es-node-entries-wrapper` projects an `<ng-template #overlay let-element="element">` (via `@ContentChild('overlay')`) rendered per card for `Grid`/`SmallGrid` display types. The card's `.card-overlay` provides the positioning context.
 
+### Layout — Editorial Page
+
+-   `.main-content` uses `min-height` (body scrolls) by default. When a full-screen sub-component is active, toggle `[class.has-main-component]="mainComponent$ | async"` on `.main-content`; the `.has-main-component` rule switches to `display: flex; flex-direction: column; overflow: hidden; height: calc(100vh - margins)` so inner `flex: 1` children can fill and scroll internally.
+-   For a component hosted inside `.main-content.has-main-component` to fill the available height and scroll internally: set `:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden }`, and give every flex child in the scroll chain `flex: 1; min-height: 0` (the `min-height: 0` override is required — flex items default to `min-height: auto` which prevents `overflow-y: auto` from activating).
+-   `mat-tab-group` inside such a component needs `flex: 1; min-height: 0` as well; Angular Material's `.mat-mdc-tab-body-content` already has `overflow-y: auto` and will scroll once it has a bounded height.
+
+### Layout — Mobile bottom bar
+
+-   `es-main-menu-bottom` becomes `position: fixed; bottom: 0; width: 100%` at `max-width: $mobileTabSwitchWidth` (= `$mobileWidth + $mobileStage * 2` = 900 px by default; see `projects/edu-sharing-ui/assets/scss/variables-scss.scss`). Its height is `$mobileTabNavHeight` (62 px).
+-   Any page whose content can reach the bottom of the viewport must add `margin-bottom` or reduce its height by `$mobileTabNavHeight` inside a `@media screen and (max-width: vars.$mobileTabSwitchWidth)` block to prevent the fixed bar from overlapping content.
+
 ### Global Styles
 
 -   Location: `projects/edu-sharing-ui/assets/scss`
@@ -55,6 +66,9 @@ This agent assists with development tasks in this Angular frontend project.
 
 -   Location: `src/app/services/options-helper.service.ts`
 -   Provides declarative options configuration, e.g. for the `actionbar`
+-   To bind a standalone `es-actionbar` to a node context (outside `es-node-entries-wrapper`): provide `OptionsHelperDataService` in the component's `providers`, use a `@ViewChild` **setter** (not field) to call `await initComponents(actionbar)` then `refreshComponents()` when the bar first enters the DOM (e.g. after `*ngIf` becomes true), and use an `effect()` to call `setData(…)` + `refreshComponents()` when the active node changes while the actionbar stays rendered. `OptionsHelperService` is already provided at `editorial-page` level — only `OptionsHelperDataService` needs to be added locally.
+-   `OptionsHelperDataService.setData()` calls `wrapOptionCallbacks()`, which replaces each `option.callback` so that when the actionbar calls it with no arguments the node is resolved from `data.activeObjects`. The original callback therefore receives `(undefined, [activeNode])` — write callbacks as `(node, nodes) => fn(node ?? nodes?.[0])` so they work correctly from both `es-node-entries-wrapper` (passes node as first arg) and the standalone actionbar.
+-   The `getDownloadOption(data)` callback closes over its `data` argument. When used with `OptionsHelperDataService`, pass a **shared `OptionData` object reference** and update `activeObjects` on it before each `setData` + `refreshComponents` call, so the download callback resolves the correct node via `getObjects(object, closureData)` even after wrapping.
 
 ### Notifications/Toasts/Snackbar
 
