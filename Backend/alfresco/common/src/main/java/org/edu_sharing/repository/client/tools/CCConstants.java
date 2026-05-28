@@ -488,6 +488,7 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_WIDGET = "{http://www.campuscontent.de/model/1.0}widget";
 	public final static String CCM_ASPECT_PAGE = "{http://www.campuscontent.de/model/1.0}page";
+    public final static String CCM_ASPECT_PAGE_VARIANT = "{http://www.campuscontent.de/model/1.0}page_variant";
 
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
