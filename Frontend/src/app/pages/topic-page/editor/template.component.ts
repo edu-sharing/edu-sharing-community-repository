@@ -388,7 +388,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     headerNodeId: WritableSignal<string> = signal(null);
     pageConfigNode: Node;
     pageConfigCheckFailed: WritableSignal<boolean> = signal(false);
-    reinitializingAfterConfigCreation: WritableSignal<boolean> = signal(false);
+    pageConfigCreationInProgress: WritableSignal<boolean> = signal(false);
     defaultPageVariantNodes: Node[] | Partial<Node>[];
     pageVariantConfigs: NodeEntries;
     private pageVariantDefaultPosition: number = -1;
@@ -417,7 +417,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     selectedVariantPosition: number = -1;
     showLoadingScreen: Signal<boolean> = computed(
         (): boolean =>
-            (!this.pageConfigCheckFailed() || this.reinitializingAfterConfigCreation()) &&
+            (!this.pageConfigCheckFailed() || this.pageConfigCreationInProgress()) &&
             (!this.initialLoadSuccessfully() || this.requestInProgress()),
     );
     anchorTrigger: number = 1;
@@ -2236,7 +2236,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.selectedVariantPosition = 0;
             this.pageVariantConfigs.nodes = [this.createVariantOrTemplateSelectedNode];
             // start reinitialization process
-            this.reinitializingAfterConfigCreation.set(true);
+            this.pageConfigCreationInProgress.set(true);
             this.requestInProgress.set(true);
             // create config node + link
             await this.checkForCustomPageNodeExistence();
@@ -2277,7 +2277,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.endEditing();
             this.topicPageHelperService.displayErrorToast();
         } finally {
-            this.reinitializingAfterConfigCreation.set(false);
+            this.pageConfigCreationInProgress.set(false);
             this.requestInProgress.set(false);
         }
     }
@@ -2308,6 +2308,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
 
         this.startEditing(this.i18nPrefix + 'CREATE_PAGE_TEMPLATE.PENDING_MESSAGE');
+        // when pageConfigCheckFailed() is true the showLoadingScreen first clause requires
+        // pageConfigCreationInProgress — startEditing alone is not enough in that state
+        if (this.pageConfigCheckFailed()) {
+            this.pageConfigCreationInProgress.set(true);
+        }
 
         try {
             this.closeSideMenus();
@@ -2444,6 +2449,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             console.error(err);
             this.topicPageHelperService.displayErrorToast();
         } finally {
+            this.pageConfigCreationInProgress.set(false);
             this.endEditing();
         }
     }
