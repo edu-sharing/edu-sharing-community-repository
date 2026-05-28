@@ -637,8 +637,19 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     referenceOriginalExists(node: Node | CollectionReference) {
-        if (node == null) return true;
+        if (node == null) {
+            return true;
+        }
         return node.hasOwnProperty('originalId') ? (node as any).originalId != null : true;
+    }
+
+    /**
+     * Returns the original node id for nodes carrying a `ccm:original` pointer
+     * (collection references, submission file contents, …). Falls back to the
+     * node's own ref id if the property is not set.
+     */
+    getOriginalId(node: Node): string {
+        return node?.properties?.[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0] ?? node?.ref?.id;
     }
 
     /**

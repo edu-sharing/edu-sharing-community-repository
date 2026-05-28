@@ -52,7 +52,6 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
-    NodeHelperService,
     NodeTitlePipe,
     OptionData,
     OptionItem,
@@ -76,6 +75,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { EditorialPageService } from '../editorial-page.service';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 /**
  * submits an individual assignment (for student)
@@ -341,6 +341,27 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     private async createVariantAndEdit(node: Node): Promise<void> {
+        // if the node carries a ccm:original pointer it already IS a forked variant
+        // → open the connector on it (no new fork) and restart polling
+        const existing = this.submissionFiles()?.find((f) => f.content?.ref.id === node.ref.id);
+        console.info('existing', existing);
+        if (existing) {
+            this.toast.showProgressSpinner();
+            try {
+                // fetch original id cause this contains the original element for a submitted file
+                const originalId = this.nodeHelperService.getOriginalId(existing.content);
+                const variantNode = await firstValueFrom(this.nodeService.getNode(originalId));
+                const connectorId =
+                    this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
+                const win = await this.uiService.editConnector(variantNode);
+                this.startVariantPolling(existing, variantNode, win, connectorId);
+            } catch (e) {
+                this.toast.error(e, null);
+            } finally {
+                this.toast.closeProgressSpinner();
+            }
+            return;
+        }
         this.toast.showProgressSpinner();
         try {
             const variantName = this.translateService.instant('NODE_VARIANT.DEFAULT_NAME', {
@@ -453,6 +474,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.variantPolling().get(element.ref.id)?.win?.close();
     }
 
+    cancelVariantPolling(element: Node) {
+        const entry = this.variantPolling().get(element.ref.id);
+        if (!entry) {
+            return;
+        }
+        entry.subscription.unsubscribe();
+        this.variantPolling.update((m) => {
+            const next = new Map(m);
+            next.delete(element.ref.id);
+            return next;
+        });
+    }
+
     isVariantWindowOpen(element: Node): boolean {
         const win = this.variantPolling().get(element.ref.id)?.win;
         return !!win && !win.closed;
@@ -502,8 +536,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
         editConnectorNode.customShowCallback = async (nodes) => {
             return await this.uiService.hasAvailableConnector(nodes ? nodes[0] : null);
         };
-        editConnectorNode.customEnabledCallback = async (nodes) =>
-            !this.hasSubmissionFor(nodes?.[0]);
+        editConnectorNode.customEnabledCallback = async (nodes) => {
+            const node = nodes?.[0];
+            const submission = this.hasSubmissionFor(node);
+            if (!submission) {
+                return true;
+            }
+            // submit-tab: node is the existing variant content → allow re-editing it
+            if (submission.content?.ref.id === node?.ref.id) {
+                return this.canSubmitMaterials();
+            }
+            // RO-tab: node is the original assignment file but a submission already exists
+            return false;
+        };
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 5;
         editConnectorNode.showAlways = true;
@@ -560,7 +605,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.submittableConfig = {
             customOptions: {
                 useDefaultOptions: false,
-                addOptions: [download, remove],
+                addOptions: [editConnectorNode, download, remove],
             },
         };
 
@@ -585,7 +630,8 @@ export class SubmitAssignmentComponent implements OnDestroy {
         return this.submissionFiles()?.find(
             (n) =>
                 n.assignmentFile?.referNode.ref.id === element.ref.id ||
-                n.content?.ref.id === element.ref.id,
+                n.content?.ref.id === element.ref.id ||
+                (n.content && this.nodeHelperService.getOriginalId(n.content) === element.ref.id),
         );
     }
 

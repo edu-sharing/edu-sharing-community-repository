@@ -170,6 +170,10 @@ es-render-wrapper-component {
     backdrop-filter: blur(2px);
     color: #fff;
     font-weight: bold;
+
+    button.mat-mdc-button {
+        --mdc-text-button-label-text-color: #fff;
+    }
 }
 :host ::ng-deep {
     .summary {

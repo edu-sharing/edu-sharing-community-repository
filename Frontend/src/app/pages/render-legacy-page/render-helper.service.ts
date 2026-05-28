@@ -28,13 +28,10 @@ import { MdsEditorWrapperComponent } from '../../features/mds/mds-editor/mds-edi
 import { VideoControlsComponent } from './video-controls/video-controls.component';
 import { CommentsListComponent } from 'src/app/features/mds/mds-editor/widgets/mds-editor-widget-comments/comments-list/comments-list.component';
 import { MdsNodeRelationsWidgetComponent } from '../../features/mds/mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
+import { NodeHelperService } from '../../services/node-helper.service';
 
 @Injectable()
 export class RenderHelperService {
-    private static isCollectionRef(node: Node) {
-        return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
-    }
-
     public videoControlsRef: ComponentRef<VideoControlsComponent>;
     private viewContainerRef: ViewContainerRef;
 
@@ -45,6 +42,7 @@ export class RenderHelperService {
         private optionsHelperService: OptionsHelperDataService,
         private networkService: NetworkService,
         private tracking: RestTrackingService,
+        private nodeHelperService: NodeHelperService,
     ) {}
 
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
@@ -180,7 +178,7 @@ export class RenderHelperService {
     }
 
     private getCollectionsContainingNode(node: Node): Observable<Node[]> {
-        let id = this.getOriginalId(node);
+        let id = this.nodeHelperService.getOriginalId(node);
         // a childobject can never be in a collection, but its parent may
         if (node.aspects?.includes(RestConstants.CCM_ASPECT_IO_CHILDOBJECT)) {
             id = node.parent?.id;
@@ -199,14 +197,6 @@ export class RenderHelperService {
                 }
             }),
         );
-    }
-
-    private getOriginalId(node: Node): string {
-        if (RenderHelperService.isCollectionRef(node)) {
-            return node.properties[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0];
-        } else {
-            return node.ref.id;
-        }
     }
 
     /**
