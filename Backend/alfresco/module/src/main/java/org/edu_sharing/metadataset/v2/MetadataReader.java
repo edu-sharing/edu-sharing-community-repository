@@ -716,15 +716,16 @@ public class MetadataReader {
                     case "clearCache":
                         aiConfig.setClearCache(Boolean.parseBoolean(innerNode.getTextContent()));
                         break;
-                    case "chatCompletion":
-                        aiConfig.setChatCompletion(innerNode.getTextContent());
-                        break;
-                    case "createImage":
-                        aiConfig.setCreateImage(innerNode.getTextContent());
+                    case "prompt":
+                        aiConfig.setPrompt(innerNode.getTextContent());
                         break;
                 }
             }
-            result.add(aiConfig);
+
+            if(aiConfig.getId() != null) {
+                result.add(aiConfig);
+            }
+
         }
         return result;
     }

@@ -1,13 +1,16 @@
 import {
     Component,
     EventEmitter,
+    input,
     Input,
+    InputSignal,
     OnDestroy,
     OnInit,
     Output,
     ViewChild,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
+import { TranslateService } from '@ngx-translate/core';
 import {
     CONTENT_TYPE_ALL,
     HOME_REPOSITORY,
@@ -37,7 +40,10 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import {
+    DEFAULT_PAGE_TEMPLATE_ID,
+    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
 } from '../../shared/types/custom-definitions';
@@ -55,19 +61,21 @@ export enum CopyOption {
 }
 
 @Component({
-    selector: 'es-add-page-variant-dialog',
+    selector: 'es-add-page-variant-or-template-dialog',
     imports: [SharedModule, MdsModule],
-    templateUrl: 'add-page-variant-dialog.component.html',
-    styleUrls: ['add-page-variant-dialog.component.scss'],
+    templateUrl: 'add-page-variant-or-template-dialog.component.html',
+    styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
 })
-export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
+export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnInit {
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
+    readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
 
     @Input() dialogRef: CardDialogRef;
     @Input() pageVariantConfigNodes: Node[];
     @Input() pageConfigRef: string;
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
+    templateMode: InputSignal<boolean> = input(false);
     @Output() copyOptionChanged: EventEmitter<CopyOption> = new EventEmitter<CopyOption>();
     @Output() selectedNodeChange: EventEmitter<Node> = new EventEmitter<Node>();
 
@@ -111,6 +119,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
 
     // whether the initial node was attempted to be selected
     private initialSelectionMade: boolean = false;
+    private initialized: boolean = false;
     private destroyed: Subject<void> = new Subject<void>();
 
     @ViewChild('nodeEntriesWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
@@ -119,6 +128,8 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
         public genericWidgetGlobalService: GenericWidgetGlobalService,
         private searchHelperService: SearchHelperService,
         private searchService: SearchService,
+        private topicPageHelperService: TopicPageHelperService,
+        private translate: TranslateService,
     ) {
         // setup search with debouncing
         this.searchSubject
@@ -135,6 +146,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
         this.copyOptionChanged.emit(this.selectedOption as CopyOption);
         // if no page config exists, retrieve page variant templates to be chosen by the user
         await this.updateList();
+        this.initialized = true;
     }
 
     ngOnDestroy(): void {
@@ -179,6 +191,9 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
      */
     onSearchFiltersChange(filters: Values): void {
         this.searchFilters = filters;
+        if (!this.initialized) {
+            return;
+        }
         void this.updateList();
     }
 
@@ -228,7 +243,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     values: [this.searchValue.trim()],
                 });
             }
-            if (Object.keys(this.searchFilters)?.length) {
+            if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
                 criteria.push(...this.searchHelperService.convertCritieria(this.searchFilters, []));
             }
             const searchResult: SearchResults = await firstValueFrom(
@@ -246,6 +261,42 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     },
                 }),
             );
+            // add default template if either no search term is defined or it includes the default template name
+            if (!searchResult.nodes) {
+                searchResult.nodes = [];
+            }
+            const defaultTemplateName: string = this.translate.instant(
+                'TOPIC_PAGE.NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+            );
+            const noSearchFilterDefined: boolean =
+                !this.searchFilters ||
+                !Object.keys(this.searchFilters)?.length ||
+                !this.searchHelperService.convertCritieria(this.searchFilters, [])?.length;
+            const noSearchValueOrIncluded: boolean =
+                !this.searchValue?.trim() || this.searchValue?.includes(defaultTemplateName);
+            if (noSearchFilterDefined && noSearchValueOrIncluded) {
+                searchResult.nodes.push({
+                    aspects: [],
+                    ref: {
+                        archived: false,
+                        id: DEFAULT_PAGE_TEMPLATE_ID,
+                        repo: HOME_REPOSITORY,
+                    },
+                    name: defaultTemplateName,
+                    title: defaultTemplateName,
+                    iconURL:
+                        location.origin +
+                        this.topicPageHelperService.getBaseHref() +
+                        '/themes/default/images/common/mime-types/svg/folder.svg',
+                    mediatype: 'folder',
+                    type: RestConstants.CCM_TYPE_MAP,
+                    properties: {
+                        [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: ['{"structure":{"swimlanes":[]}}'],
+                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
+                        [RestConstants.LOM_PROP_TITLE]: [defaultTemplateName],
+                    },
+                } as Partial<Node> as Node);
+            }
             nodes = searchResult.nodes;
         } else {
             // in topic page mode, display existing page variants
@@ -257,7 +308,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                 );
             }
             // manual properties filter
-            if (Object.keys(this.searchFilters)?.length) {
+            if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
                 const propertyFilters = Object.fromEntries(
                     Object.entries(this.searchFilters).filter(
                         ([, value]) => value && value.length > 0,
@@ -287,15 +338,18 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                 });
             }
         }
-        // select the page variant referred to as the template
+        // select the page variant referred to as the template (if one exists)
         let matchingVariantNode: Node;
         if (!this.initialSelectionMade) {
             this.initialSelectionMade = true;
             // retrieve either the template ref ID (copy mode: template) or the page variant ID (copy mode: topic page)
-            const nodeRefToReferTo: string =
-                this.selectedOption === CopyOption.Template
-                    ? retrievePageVariantTemplateRef(this.pageVariantNode)
-                    : retrieveNodeId(this.pageVariantNode);
+            let nodeRefToReferTo: string;
+            if (this.pageVariantNode) {
+                nodeRefToReferTo =
+                    this.selectedOption === CopyOption.Template
+                        ? retrievePageVariantTemplateRef(this.pageVariantNode)
+                        : retrieveNodeId(this.pageVariantNode);
+            }
             if (nodeRefToReferTo) {
                 const nodeIdToReferTo = convertNodeRefIntoNodeId(nodeRefToReferTo);
                 matchingVariantNode = nodes.find((n) => retrieveNodeId(n) === nodeIdToReferTo);
@@ -306,6 +360,8 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
                     );
                     nodes = [matchingVariantNode, ...filteredNodes];
                 }
+            } else {
+                matchingVariantNode = nodes[0];
             }
         }
         // update the data source
@@ -338,6 +394,7 @@ export class AddPageVariantDialogComponent implements OnDestroy, OnInit {
         this.dialogRef.patchConfig({ buttons });
     }
 
+    protected readonly CopyOption = CopyOption;
     protected readonly DisplayType = NodeEntriesDisplayType;
     protected readonly HOME_REPOSITORY = HOME_REPOSITORY;
     protected readonly InteractionType = InteractionType;

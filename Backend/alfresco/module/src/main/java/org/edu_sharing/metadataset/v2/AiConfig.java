@@ -1,7 +1,6 @@
 package org.edu_sharing.metadataset.v2;
 
 import lombok.Data;
-import org.apache.xpath.operations.Bool;
 
 import java.io.Serializable;
 
@@ -11,6 +10,5 @@ public class AiConfig implements Serializable {
     private String provider;
     private Boolean useCaching;
     private Boolean clearCache;
-    private String chatCompletion;
-    private String createImage;
+    private String prompt;
 }

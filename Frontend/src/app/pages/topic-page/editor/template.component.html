@@ -15,7 +15,7 @@
     {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
   </button>
 </es-info-message>
-<main *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage">
+<main>
   <ng-container *ngIf="initialLoadSuccessfully() && showBreadcrumb()">
     <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
     <div class="custom-breadcrumb-overflow-container" *ngIf="hasCustomBreadcrumbExtension()"></div>
@@ -23,13 +23,13 @@
     <div *ngIf="parentEntries()" class="template-breadcrumb">
       <div class="template-breadcrumb-wrapper">
         <es-topic-page-breadcrumb
-          [contextNodeId]="topicCollectionID()"
+          [contextNodeId]="topicCollectionId()"
           [editMode]="editMode()"
           [isProcessing]="requestInProgress()"
           [nodeId]="convertedBreadcrumbNodeId()"
           [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
-          [pageVariantNode]="pageVariantNode"
-          [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
+          [pageVariantNode]="pageVariantNode()"
+          [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
           [parentEntries]="parentEntries()"
           [templateMode]="templateMode()"
           (navigateToTemplate)="switchIntoTemplateMode()"
@@ -38,7 +38,10 @@
       </div>
     </div>
   </ng-container>
-  <div class="topic-page-outer-wrapper">
+  <div
+    class="topic-page-outer-wrapper"
+    *ngIf="!pageConfigCheckFailed(); else pageConfigCheckFailedMessage"
+  >
     <es-topic-page-filters-sidebar
       *ngIf="filterPanelOpen()"
       (closeFilterbar)="filterPanelOpen.set(false)"
@@ -69,11 +72,11 @@
             <div class="template-header-container">
               <es-topic-header
                 [collectionNode]="collectionNode"
-                [contextNodeId]="topicCollectionID()"
+                [contextNodeId]="topicCollectionId()"
                 [editMode]="editMode()"
                 [nodeId]="convertedHeaderNodeId()"
                 [parentEntries]="parentEntries()"
-                [pageVariantNode]="pageVariantNode"
+                [pageVariantNode]="pageVariantNode()"
                 [searchInput]="computedSearchInput()"
                 [topic]="topic()"
               ></es-topic-header>
@@ -157,8 +160,8 @@
               {{ i18nPrefix + 'SIDE_MENU.TOPIC_TREE.HEADING' | translate : { topic: topic() } }}
             </h2>
             <es-generic-widget
-              *ngIf="topicCollectionID(); else loadingIndicator"
-              [contextNodeId]="topicCollectionID()"
+              *ngIf="topicCollectionId(); else loadingIndicator"
+              [contextNodeId]="topicCollectionId()"
               [height]="'400'"
               [sidebarEmbedding]="true"
               [widgetType]="WIDGETS.TOPICS_COLUMN_BROWSER"
@@ -209,24 +212,28 @@
                     '.HEADING' | translate
                 }}
               </h2>
-              <es-configure-page-variant-dialog
+              <es-configure-page-variant-or-template
                 [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
                 [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
-                [pageVariantNode]="pageVariantNode"
+                [pageVariantNode]="pageVariantNode()"
                 [pageVariantTitle]="
-                  pageVariantNode.title && !pageVariantNode.title.includes(pageVariantConfigPrefix)
-                    ? (pageVariantNode | nodeTitle)
+                  pageVariantNode()?.title &&
+                  !pageVariantNode()?.title.includes(pageVariantConfigPrefix)
+                    ? (pageVariantNode() | nodeTitle)
                     : (i18nPrefix + 'WIDGET.BREADCRUMB.PAGE_VARIANT_LABEL' | translate) +
                       ' ' +
                       (pageVariantNodeIndex + 1)
                 "
                 [selectDimensions]="selectDimensions"
                 [templateMode]="templateMode()"
+                [templateNode]="templateVariantNode()"
+                [templateUpdateAvailable]="templateUpdateAvailable()"
                 [viewModes]="['checkbox', 'checkbox']"
                 (applyChangesClicked)="applyPageVariant($event)"
                 (deletePageVariantClicked)="deletePageVariant()"
+                (regenerateClicked)="regeneratePageVariant()"
                 (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
-              ></es-configure-page-variant-dialog>
+              ></es-configure-page-variant-or-template>
             </div>
           </ng-container>
         </es-side-menu-wrapper>
@@ -348,6 +355,7 @@
                 </ng-container>
                 <div
                   class="topic-page-swimlane"
+                  [class.bright-color]="isDarkColor(swimlane)"
                   [style.background-color]="
                     (swimlane.backgroundShape === undefined ||
                       swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
@@ -403,7 +411,7 @@
                     </div>
                     <div class="topic-page-color-shape-buttons">
                       <es-swimlane-configuration-buttons
-                        [pageVariantNode]="pageVariantNode"
+                        [pageVariantNode]="pageVariantNode()"
                         [swimlaneColor]="swimlane.backgroundColor"
                         [swimlaneIndex]="i"
                         [swimlaneShape]="swimlane.backgroundShape"
@@ -584,7 +592,21 @@
 <!-- failed to load page config -> currently, no further action possible -->
 <ng-template #pageConfigCheckFailedMessage>
   <div class="missing-page-config">
-    <es-info-message mode="warning">
+    <h1 class="mat-heading-1 topic-header-title">
+      <span [innerHTML]="topic()"></span>
+      <button
+        *ngIf="backToCollectionButtonVisible()"
+        mat-flat-button
+        color="primary"
+        [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
+        [queryParams]="{ id: topicCollectionId() }"
+        [matTooltip]="i18nPrefix + 'NAVIGATE_TO_COLLECTION_PAGE' | translate"
+        tooltipAriaLabel
+      >
+        <i esIcon="layers"></i>
+      </button>
+    </h1>
+    <es-info-message mode="info">
       {{ i18nPrefix + 'NO_PAGE_CONFIG.DEFAULT_MESSAGE' | translate }}
       {{
         userHasEditRights()
@@ -592,40 +614,9 @@
           : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
-
-    <div class="config-selection-container" *ngIf="userHasEditRights()">
-      <mat-form-field
-        *ngIf="defaultPageVariantNodes?.length"
-        appearance="outline"
-        subscriptSizing="dynamic"
-      >
-        <mat-label>{{ i18nPrefix + 'NO_PAGE_CONFIG.SELECT_PLACEHOLDER' | translate }}</mat-label>
-        <mat-select
-          [(ngModel)]="selectedDefaultConfigNode"
-          [disabled]="createCustomConfigInProgress()"
-        >
-          <mat-option *ngFor="let node of defaultPageVariantNodes; let i = index" [value]="node">
-            {{
-              node.title && !node.title.includes(pageVariantConfigPrefix)
-                ? node.title
-                : (i18nPrefix + 'NO_PAGE_CONFIG.SELECT_LABEL' | translate) + ' ' + (i + 1)
-            }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- the div is necessary for the button to be full height -->
-      <div class="create-button">
-        <button
-          mat-raised-button
-          color="primary"
-          [disabled]="!selectedDefaultConfigNode || createCustomConfigInProgress()"
-          (click)="createCustomConfig()"
-        >
-          {{ i18nPrefix + 'NO_PAGE_CONFIG.CREATE_PAGE' | translate }}
-        </button>
-      </div>
-    </div>
+    <button mat-flat-button color="primary" (click)="createPageVariant()">
+      {{ createPageVariantTitle | translate }}
+    </button>
   </div>
 </ng-template>
 
@@ -634,10 +625,11 @@
     [aiSupported]="aiSupported()"
     [backgroundColor]="swimlane.backgroundColor"
     [backgroundShape]="swimlane.backgroundShape ?? SwimlaneBackgroundShape.None"
-    [contextNodeId]="topicCollectionID()"
+    [contextNodeId]="topicCollectionId()"
     [editMode]="editMode() && userHasEditRights()"
     [grid]="swimlane.grid"
-    [pageVariantNode]="pageVariantNode"
+    [pageVariantNode]="pageVariantNode()"
+    [rendering2Supported]="rendering2Supported()"
     [searchInput]="computedSearchInput()"
     [searchFilters]="computedSearchFilters()"
     [selectDimensions]="selectDimensions"
@@ -654,15 +646,16 @@
   <es-swimlane-settings-dialog [form]="swimlaneToEditForm"></es-swimlane-settings-dialog>
 </ng-template>
 
-<ng-template #addPageVariantDialog>
-  <es-add-page-variant-dialog
-    [dialogRef]="pageVariantCreateDialogRef"
+<ng-template #addPageVariantOrTemplateDialog>
+  <es-add-page-variant-or-template-dialog
+    [dialogRef]="createVariantOrTemplateDialogRef"
     [pageConfigRef]="collectionNodePageConfigRef"
     [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
-    [pageVariantNode]="pageVariantNode"
-    [(selectedNode)]="pageVariantCreateDialogSelectedNode"
-    (copyOptionChanged)="pageVariantCreateDialogCopyOption = $event"
-  ></es-add-page-variant-dialog>
+    [pageVariantNode]="pageVariantNode()"
+    [(selectedNode)]="createVariantOrTemplateSelectedNode"
+    [templateMode]="createVariantOrTemplateMode() === 'template'"
+    (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
+  ></es-add-page-variant-or-template-dialog>
 </ng-template>
 
 <ng-template #showQrCodeDialog>

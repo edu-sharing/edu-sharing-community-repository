@@ -16,6 +16,7 @@ export type CustomSideMenuItem = {
     position: 'before' | 'after';
     templateRef: TemplateRef<unknown>;
 };
+export type NodeSelectionValidator = (node: Node) => boolean | Promise<boolean>;
 
 /**
  * This service is intended to add custom behavior to components of the topic page.
@@ -24,6 +25,7 @@ export type CustomSideMenuItem = {
     providedIn: 'root',
 })
 export class TopicPageGlobalService {
+    private backToCollectionButtonVisible: boolean = true;
     private customBreadcrumbExtension: CustomBreadcrumbExtension = null;
     private customBreadcrumbRootLink: string = '';
     private customReurlComponent: string = '';
@@ -38,9 +40,17 @@ export class TopicPageGlobalService {
     private customSideMenuItems: CustomSideMenuItem[] = [];
     private customUrlFunction: (node: Node) => string;
     private customUrlTarget: '_self' | '_blank' = '_self';
+    private nodeSelectionValidator: NodeSelectionValidator | null = null;
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
+
+    /**
+     * Updates the visibility of the back to collection button.
+     */
+    setBackToCollectionButtonVisible(visible: boolean) {
+        this.backToCollectionButtonVisible = visible;
+    }
 
     /**
      * Registers a custom breadcrumb extension.
@@ -176,6 +186,23 @@ export class TopicPageGlobalService {
     }
 
     /**
+     * Sets a callback invoked before a selected node is applied.
+     * The callback may cancel the selection.
+     *
+     * @param validator
+     */
+    setNodeSelectionValidator(validator: NodeSelectionValidator | null): void {
+        this.nodeSelectionValidator = validator;
+    }
+
+    /**
+     * Retrieves the visibility state of the back to collection button.
+     */
+    getBackToCollectionButtonVisible(): boolean {
+        return this.backToCollectionButtonVisible;
+    }
+
+    /**
      * Retrieves the custom reurl component, if available.
      */
     getCustomReurlComponent(): string {
@@ -288,6 +315,18 @@ export class TopicPageGlobalService {
      */
     hasCustomBreadcrumbExtension() {
         return !!this.customBreadcrumbExtension;
+    }
+
+    /**
+     * Runs the registered node selection validator against the given node.
+     *
+     * @param node
+     */
+    async validateNodeSelection(node: Node): Promise<boolean> {
+        if (!this.nodeSelectionValidator) {
+            return true;
+        }
+        return this.nodeSelectionValidator(node);
     }
 
     /**

@@ -33,6 +33,10 @@ spec:
         {{- with merge .Values.podAnnotations .Values.global.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+        {{- if .Values.global.backup.velero.enabled }}
+        checksum/configmap-backup: {{ include (print .Template.BasePath "/configmap-backup.yaml") . | sha256sum | trunc 63 }}
+        backup.velero.io/backup-volumes: share-data
+        {{- end }}
     spec:
       {{- if (default .Values.global.cluster.storage.data.permission .Values.persistence.data.permission) }}
       initContainers:
@@ -137,11 +141,30 @@ spec:
           mountPath: /opt/alfresco/solr/logs/log4j.properties
           subPath: logging-application
         {{- end }}
+        {{- if .Values.global.backup.velero.enabled }}
+        - name: share-data
+          mountPath: /opt/alfresco/backup
+        - name: backup
+          mountPath: /scripts/backup-pre.sh
+          subPath: backup-pre.sh
+        - name: backup
+          mountPath: /scripts/restore-post.sh
+          subPath: restore-post.sh
+        {{- end }}
         {{- with .Values.startupProbe }}
         startupProbe:
-          httpGet:
-            path: /solr
-            port: api
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                BACKUP_ROOT="/opt/alfresco/backup/${HOSTNAME%-*}/${HOSTNAME##*-}"
+                if [[ -f "${BACKUP_ROOT}/velero.restore.required" ]]; then
+                  [[ -f "${BACKUP_ROOT}/velero.restore.completed" ]] || exit 1
+                  rm -f "${BACKUP_ROOT}/velero.restore.required"
+                  rm -f "${BACKUP_ROOT}/velero.restore.completed"
+                fi
+                curl -fsS "http://localhost:8080/solr/admin/cores?action=STATUS" >/dev/null
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           periodSeconds: {{ .periodSeconds }}
@@ -160,7 +183,7 @@ spec:
         {{- with .Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /solr
+            path: /solr/admin/cores?action=STATUS
             port: api
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -218,6 +241,14 @@ spec:
         - name: file
           configMap:
             name: {{ include "edusharing_common_lib.names.name" . }}-file
+        {{- if .Values.global.backup.velero.enabled }}
+        - name: backup
+          configMap:
+            name: {{ include "edusharing_common_lib.names.name" . }}-backup
+            defaultMode: 0755
+        - name: share-data
+          {{ tpl .Values.persistence.share.data.type . | nindent 10 }}
+        {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -255,6 +286,10 @@ spec:
         sidecar.istio.io/inject: {{ $.Values.global.cluster.istio.enabled | quote }}
         {{- with merge $.Values.podAnnotations $.Values.global.annotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.global.backup.velero.enabled }}
+        checksum/configmap-backup: {{ include (print .Template.BasePath "/configmap-backup.yaml") . | sha256sum | trunc 63 }}
+        backup.velero.io/backup-volumes: share-data
         {{- end }}
     spec:
       {{- if (default $.Values.global.cluster.storage.data.permission $.Values.persistence.data.permission) }}
@@ -363,11 +398,30 @@ spec:
           mountPath: /opt/alfresco/solr/log4j.properties
           subPath: logging-application
         {{- end }}
+        {{- if .Values.global.backup.velero.enabled }}
+        - name: share-data
+          mountPath: /bitnami/backup
+        - name: backup
+          mountPath: /scripts/backup-pre.sh
+          subPath: backup-pre.sh
+        - name: backup
+          mountPath: /scripts/restore-post.sh
+          subPath: restore-post.sh
+        {{- end }}
         {{- with $.Values.startupProbe }}
         startupProbe:
-          httpGet:
-            path: /solr
-            port: api
+          exec:
+            command:
+              - "/bin/bash"
+              - "-ec"
+              - |
+                BACKUP_ROOT="/opt/alfresco/backup/${HOSTNAME%-*}/${HOSTNAME##*-}"
+                if [[ -f "${BACKUP_ROOT}/velero.restore.required" ]]; then
+                  [[ -f "${BACKUP_ROOT}/velero.restore.completed" ]] || exit 1
+                  rm -f "${BACKUP_ROOT}/velero.restore.required"
+                  rm -f "${BACKUP_ROOT}/velero.restore.completed"
+                fi
+                curl -fsS "http://localhost:8080/solr/admin/cores?action=STATUS" >/dev/null
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
           periodSeconds: {{ .periodSeconds }}
@@ -386,7 +440,7 @@ spec:
         {{- with $.Values.readinessProbe }}
         readinessProbe:
           httpGet:
-            path: /solr
+            path: /solr/admin/cores?action=STATUS
             port: api
           failureThreshold: {{ .failureThreshold }}
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -440,6 +494,14 @@ spec:
       - name: file
         configMap:
           name: {{ include "edusharing_common_lib.names.name" $ }}-file
+      {{- if .Values.global.backup.velero.enabled }}
+      - name: backup
+        configMap:
+          name: {{ include "edusharing_common_lib.names.name" . }}-backup
+          defaultMode: 0755
+      - name: share-data
+        {{ tpl .Values.persistence.share.data.type . | nindent 8 }}
+      {{- end }}
   volumeClaimTemplates:
   - metadata:
       name: data

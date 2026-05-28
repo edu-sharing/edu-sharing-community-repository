@@ -4,12 +4,16 @@ import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
     Component,
+    computed,
     ElementRef,
     OnDestroy,
     OnInit,
+    Signal,
+    signal,
     TemplateRef,
     ViewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { delay, filter, first, map, startWith, switchMap } from 'rxjs/operators';
@@ -73,7 +77,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     loginUrl: any;
     password = '';
     providerControl = new UntypedFormControl();
-    showProviders = false;
+    readonly showProviders = signal(false);
     username = '';
     loginSafeFailed = false;
 
@@ -81,6 +85,17 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     faConfirm = new FormGroup({
         code: new FormControl('', [Validators.required, Validators.pattern(/^\d{6}$/)]),
     });
+    readonly providersOnly = signal(false);
+    readonly queryParams: Signal<Params>;
+    readonly providersOnlyMode = computed(
+        () =>
+            this.showProviders() &&
+            this.providersOnly() &&
+            this.queryParams()?.['local'] !== 'true',
+    );
+    readonly showLocalLogin = computed(
+        () => !this.providersOnly() || this.queryParams()?.['local'] === 'true',
+    );
     private next = '';
     private providers: any;
     private scope = '';
@@ -102,6 +117,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         private loadingScreen: LoadingScreenService,
         private mainNav: MainNavService,
     ) {
+        this.queryParams = toSignal(this.route.queryParams, { initialValue: {} as Params });
         // reset the theme in case user was in safe previously
         this.themeService.initWithDefaults();
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
@@ -172,6 +188,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                             params.local !== 'true' &&
                             !allowLocal &&
                             this.loginUrl &&
+                            !configService.instant('loginProvidersUrl') &&
                             data.statusCode !== RestConstants.STATUS_CODE_OK
                         ) {
                             this.openLoginUrl();
@@ -180,7 +197,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.isLoading = false;
                         loadingTask.done();
                         if (configService.instant('loginProvidersUrl')) {
-                            this.showProviders = true;
+                            this.showProviders.set(true);
+                            this.providersOnly.set(!configService.instant('loginAllowLocal', true));
                             this.updateButtons();
                             // delay to make sure animation of card has finished
                             // otherwise, overlay gets aligned wrongly
@@ -413,7 +431,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private updateButtons() {
-        if (this.showProviders) {
+        if (this.showProviders()) {
             return;
         }
         const register = new DialogButton('LOGIN.REGISTER_TEXT', { color: 'standard' }, () =>

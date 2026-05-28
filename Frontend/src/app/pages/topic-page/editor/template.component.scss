@@ -30,6 +30,15 @@
     align-items: center;
 }
 
+.topic-header-title {
+    display: flex;
+    gap: 16px;
+
+    span {
+        flex: unset;
+    }
+}
+
 // fix: do not place color picker behind topic header
 es-color-picker {
     z-index: 1;
@@ -81,11 +90,10 @@ es-side-menu-wrapper {
 }
 
 .template-breadcrumb {
-    padding-right: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
     box-sizing: border-box;
     width: 100%;
     position: sticky;
-    top: 0;
+    top: 70px;
     // overflow contents such as the image of the navbar or the AI labels
     z-index: 12;
 
@@ -110,6 +118,13 @@ es-side-menu-wrapper {
         position: absolute;
         top: 16px;
         right: calc(50% - 26px);
+    }
+
+    // check whether it includes a children with bright-color set in order to adjust the label of the topic-color-picker
+    &:has(es-topic-header .topic-text-wrapper.bright-color) {
+        ::ng-deep .color-picker-button .mdc-button__label {
+            color: topicPageVars.$on-primary;
+        }
     }
 
     // reserve space for the anchor menu
@@ -302,6 +317,26 @@ es-side-menu-wrapper {
                 margin: 0 auto;
                 max-width: var(--content-max-width);
                 position: relative;
+
+                &.bright-color {
+                    color: topicPageVars.$on-primary;
+
+                    ::ng-deep {
+                        .text-content,
+                        .mat-mdc-input-element,
+                        .mdc-floating-label,
+                        .mat-mdc-form-field.mat-focused .mdc-floating-label,
+                        .mat-mdc-input-element::placeholder,
+                        .mdc-label,
+                        .mat-heading-4 {
+                            color: topicPageVars.$on-primary;
+                        }
+
+                        .mat-mdc-input-element {
+                            caret-color: topicPageVars.$on-primary;
+                        }
+                    }
+                }
             }
 
             .swimlane-heading-wrapper {
@@ -508,7 +543,7 @@ es-side-menu-wrapper {
 
                     // hover state
                     .topic-page-accordion-item-header:hover {
-                        background-color: #eee;
+                        background-color: rgb(0, 0, 0, 0.05);
                     }
                 }
             }
@@ -621,6 +656,12 @@ es-side-menu-wrapper {
                 border-top-right-radius: var(--border-radius);
                 border-bottom-right-radius: unset;
             }
+        }
+
+        // adjust position of topic color picker
+        .topic-color-picker {
+            top: -4px;
+            right: 50%;
         }
     }
 
@@ -846,6 +887,9 @@ button.topic-page-edit-toggle-btn {
 @media screen and (max-width: (topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1)) {
     .topic-page-btn-label {
         display: none;
+    }
+    button.topic-page-edit-toggle-btn {
+        padding-right: 15px;
     }
 }
 

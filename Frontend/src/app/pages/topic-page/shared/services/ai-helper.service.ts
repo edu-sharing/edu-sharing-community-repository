@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
+import { AboutService, FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
 import {
     ChatCompletionResult,
     EduSharingLlmService,
@@ -17,6 +17,7 @@ import { GlobalWidgetConfigService } from './global-widget-config.service';
 })
 export class AiHelperService {
     constructor(
+        private aboutService: AboutService,
         private eduSharingLlmService: EduSharingLlmService,
         private featuresHelperService: FeaturesHelperService,
         private genericWidgetGlobalService: GenericWidgetGlobalService,
@@ -29,6 +30,14 @@ export class AiHelperService {
      */
     async hasAISupport(): Promise<boolean> {
         return await this.featuresHelperService.hasUserAISupport();
+    }
+
+    /**
+     * Checks whether rendering service 2 is supported.
+     */
+    async hasRendering2Support(): Promise<boolean> {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        return !!about.renderingService2;
     }
 
     /**

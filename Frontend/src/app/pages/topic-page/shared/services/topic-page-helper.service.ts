@@ -89,8 +89,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomReurlExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomReurlExtras() || {},
+                extras,
             );
         }
         extras.queryParams.reurl = 'WINDOW';
@@ -117,8 +117,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomApplyFilterExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomApplyFilterExtras() || {},
+                extras,
             );
         }
         extras.queryParams.action = 'applyFilter';
@@ -362,6 +362,22 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Copies a node as a child of a given parent node.
+     */
+    async copyNodeAsChild(sourceNodeId: string, parentNodeId: string): Promise<Node> {
+        sourceNodeId = convertNodeRefIntoNodeId(sourceNodeId);
+        parentNodeId = convertNodeRefIntoNodeId(parentNodeId);
+        return await firstValueFrom(
+            this.nodeApi.createChildByCopying({
+                repository: HOME_REPOSITORY,
+                node: parentNodeId,
+                source: sourceNodeId,
+                withChildren: false,
+            }),
+        );
+    }
+
+    /**
      * Deletes a node with a given ID.
      */
     async deleteNode(nodeId: string): Promise<void> {
@@ -397,6 +413,9 @@ export class TopicPageHelperService {
     private cleanPageVariantConfig(value: string): string {
         const blacklistedProperties: string[] = ['hasHits', 'searchCount', 'statistics'];
         const parsedValue: PageVariantConfig = JSON.parse(value);
+        // workaround to avoid keeping legacy properties
+        const legacyProperties: string[] = ['template', 'variables'];
+        legacyProperties.forEach((prop: string) => delete (parsedValue as any)[prop]);
         parsedValue.structure?.swimlanes?.forEach((swimlane: Swimlane): void => {
             swimlane.grid?.forEach((gridItem: GridTile): void => {
                 // @ts-ignore
@@ -548,12 +567,7 @@ export class TopicPageHelperService {
         customTitleSuffix: string = '',
         variantConfig?: PageVariantConfig,
     ) {
-        const variantTemplateRef: string = retrievePageVariantTemplateRef(node);
-        const variantTemplateNode: Node = variantTemplateRef.includes(retrieveNodeId(node))
-            ? node
-            : await this.getNode(convertNodeRefIntoNodeId(variantTemplateRef));
-        const variantTemplateVersion: string =
-            retrievePageVariantTemplateVersion(variantTemplateNode);
+        const variantTemplateVersion: string = retrievePageVariantTemplateVersion(node);
         const properties: { [p: string]: string | string[] } = {
             [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
             [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: retrievePageVariantTemplateRef(node),

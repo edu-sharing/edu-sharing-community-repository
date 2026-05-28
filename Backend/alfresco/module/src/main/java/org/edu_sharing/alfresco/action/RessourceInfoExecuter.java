@@ -20,6 +20,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -132,6 +133,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 				if(zip!=null) {
 					String genericHtmlFile = null;
 					while ((current = zip.getNextEntry()) != null) {
+                        logger.debug("current:" + current.getName());
 						if (current.getName().equals("imsmanifest.xml")) {
 
 							boolean isScorm = processScorm(zip, contentreader, actionedUponNodeRef);
@@ -154,9 +156,11 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						}
 						// geogebra
 						if (current.getName().endsWith("geogebra.xml")) {
-							processGeogebra(zip, actionedUponNodeRef);
-							zip.close();
-							return;
+                            // prevent xml parser closes zipinputstream by using CloseShieldInputStream
+							if(processGeogebra(CloseShieldInputStream.wrap(zip), actionedUponNodeRef)){
+                                zip.close();
+                                return;
+                            }
 						}
 
 						if (current.getName().equals("moodle_backup.xml")) {
@@ -387,7 +391,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		}
 	}
 
-	void processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
+	boolean processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
 		// thumbnail is handled @org.edu_sharing.alfresco.transformer.GeogebraTransformerWorker
 		try {
 			Document doc = new RessourceInfoTool().loadFromStream(is);
@@ -405,10 +409,12 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						CCM_RESSOURCETYPE_GEOGEBRA);
 				nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 						schemaVers);
+                return true;
 			}
 		} catch(Throwable e) {
 			logger.info("Could not identify if file is a geogebra element: " + e.getMessage());
 		}
+        return false;
 	}
 
 	private void processMoodle(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {

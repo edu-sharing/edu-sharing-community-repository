@@ -488,6 +488,7 @@ public class CCConstants {
 
 	public final static String CCM_ASPECT_WIDGET = "{http://www.campuscontent.de/model/1.0}widget";
 	public final static String CCM_ASPECT_PAGE = "{http://www.campuscontent.de/model/1.0}page";
+    public final static String CCM_ASPECT_PAGE_VARIANT = "{http://www.campuscontent.de/model/1.0}page_variant";
 
 	public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
@@ -1230,6 +1231,9 @@ public class CCConstants {
 	public static final String CCM_PROP_IO_SCHOOLTOPIC = "{http://www.campuscontent.de/model/1.0}schooltopic";
 
 	public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
+
+	public static final String CCM_PROP_IO_FULLTEXT_CONTENT = "{http://www.campuscontent.de/model/1.0}fulltext_content";
+	public static final String CCM_PROP_IO_FULLTEXT_STATUS = "{http://www.campuscontent.de/model/1.0}fulltext_status";
 
 	public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 

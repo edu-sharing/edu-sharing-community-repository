@@ -28,6 +28,7 @@ public interface TrackingService {
         VIEW_COLLECTION,
         VIEW_MATERIAL_EMBEDDED,
         VIEW_MATERIAL_PLAY_MEDIA, // When a video or audio file is actually started playing
+        VIEW_MATERIAL_GDPR_CONFIRMED, // when user confirms the gdpr dialog
         LOGIN_USER_SESSION,
         LOGIN_USER_OAUTH_PASSWORD,
         LOGIN_USER_OAUTH_REFRESH_TOKEN,

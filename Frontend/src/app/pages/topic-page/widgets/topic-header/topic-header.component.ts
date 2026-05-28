@@ -15,12 +15,20 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
-import { EduSharingUiCommonModule, SpinnerComponent, UIConstants } from 'ngx-edu-sharing-ui';
+import {
+    ColorHelper,
+    EduSharingUiCommonModule,
+    PreferredColor,
+    SpinnerComponent,
+    UIConstants,
+} from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
@@ -43,6 +51,7 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
         ImageWrapperComponent,
         SharedModule,
         SpinnerComponent,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -87,6 +96,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiGeneratedImage: boolean;
     aiGeneratedText: WritableSignal<boolean> = signal(false);
     aiSupported: WritableSignal<boolean> = signal(false);
+    backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
     private configLocked: boolean = false;
     // description is used for the "description" of importance (stored in a "header" widget node)
@@ -99,8 +109,13 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     constructor(
         private aiHelperService: AiHelperService,
         private globalWidgetConfigService: GlobalWidgetConfigService,
+        private topicPageGlobalService: TopicPageGlobalService,
         private topicPageHelperService: TopicPageHelperService,
-    ) {}
+    ) {
+        this.backToCollectionButtonVisible.set(
+            this.topicPageGlobalService.getBackToCollectionButtonVisible(),
+        );
+    }
 
     /**
      * Initializes the component.
@@ -144,6 +159,10 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             // initialize the topic header component
             await this.initTopicHeader();
         }
+        if (!changes.editMode?.firstChange && changes.editMode?.currentValue === false) {
+            // regenerate texts of the topic header component
+            await this.regenerateTexts();
+        }
     }
 
     /**
@@ -166,6 +185,22 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         await this.readConfigFromJson(configJson, aiNodeId);
         // set the component to be initialized (further processing is done in the child component)
         this.initialized.set(true);
+    }
+
+    /**
+     * Regenerates collectionDescription and description via AI if they were cleared.
+     */
+    async regenerateTexts(): Promise<void> {
+        if (!this.collectionDescription) {
+            await this.generateCollectionDescription(retrieveNodeId(this._collectionNode));
+        }
+        if (!this.description) {
+            const aiNodeId: string = getNodeOrDefaultNodeId(
+                this.defaultTextNodeId,
+                this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
+            );
+            await this.generateDescription(aiNodeId);
+        }
     }
 
     /**
@@ -246,19 +281,24 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.defaultDescriptionNodeId,
             this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
         );
-        const promptResponse: ChatCompletionResult = await this.aiHelperService.generateFromPrompt(
-            mdsConfigId,
-            {},
-            this.contextNodeId || contextNodeId,
-        );
-        const responseText: string = retrieveResultString(promptResponse) ?? '';
-        if (responseText !== '') {
-            this.configLocked = true;
-            this.collectionDescription = responseText;
-            this.aiGeneratedDescription.set(true);
-            setTimeout((): void => {
-                this.configLocked = false;
-            }, 1000);
+        try {
+            const promptResponse: ChatCompletionResult =
+                await this.aiHelperService.generateFromPrompt(
+                    mdsConfigId,
+                    {},
+                    this.contextNodeId || contextNodeId,
+                );
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.configLocked = true;
+                this.collectionDescription = responseText;
+                this.aiGeneratedDescription.set(true);
+                setTimeout((): void => {
+                    this.configLocked = false;
+                }, 1000);
+            }
+        } catch {
+            // AI generation failed; fall back to no collection description
         }
     }
 
@@ -284,21 +324,11 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     private async readConfigFromJson(configString: string, nodeId: string): Promise<void> {
         const config: TopicHeaderConfig = JSON.parse(configString);
         // this is the case if a widgetNode for the header exists
-        if (config.description !== undefined) {
+        if (config.description) {
             this.description = config.description;
             this.aiGeneratedText.set(false);
-        } else if (await this.aiHelperService.hasAISupport()) {
-            const promptResponse: ChatCompletionResult =
-                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
-            const responseText: string = retrieveResultString(promptResponse) ?? '';
-            if (responseText !== '') {
-                this.configLocked = true;
-                this.description = responseText;
-                this.aiGeneratedText.set(true);
-                setTimeout((): void => {
-                    this.configLocked = false;
-                }, 1000);
-            }
+        } else {
+            await this.generateDescription(nodeId);
         }
         // check whether an AI-generated image is explicitly set to false
         if (config.aiGeneratedImage === false) {
@@ -318,6 +348,32 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     }
 
     /**
+     * Helper function to generate the description text via AI.
+     *
+     * @param nodeId
+     */
+    private async generateDescription(nodeId: string): Promise<void> {
+        if (!(await this.aiHelperService.hasAISupport())) {
+            return;
+        }
+        try {
+            const promptResponse: ChatCompletionResult =
+                await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
+            const responseText: string = retrieveResultString(promptResponse) ?? '';
+            if (responseText !== '') {
+                this.configLocked = true;
+                this.description = responseText;
+                this.aiGeneratedText.set(true);
+                setTimeout((): void => {
+                    this.configLocked = false;
+                }, 1000);
+            }
+        } catch {
+            // AI generation failed; fall back to no description text
+        }
+    }
+
+    /**
      * Helper function to retrieve a widget config from the currently set variables in the component.
      */
     private retrieveWidgetConfig(): TopicHeaderConfig {
@@ -330,6 +386,18 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             headerConfig.textBackgroundColor = this.textBackgroundColor;
         }
         return headerConfig;
+    }
+
+    /**
+     * Checks whether a given color is dark.
+     *
+     * @param color
+     */
+    isDarkColor(color: string): boolean {
+        if (!color) {
+            return false;
+        }
+        return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
     }
 
     protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;

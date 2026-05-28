@@ -6,6 +6,4 @@ import lombok.Data;
 public class NodeText {
 
     private String text;
-    private String html;
-    private String raw;
 }

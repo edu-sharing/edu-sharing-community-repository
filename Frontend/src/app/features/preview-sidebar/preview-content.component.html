@@ -59,7 +59,12 @@
     <p class="description">
       {{ node.properties['cclom:general_description'] }}
     </p -->
-    <a mat-flat-button [routerLink]="allDetailsLink" class="all-details-link">
+    <a
+      mat-flat-button
+      [routerLink]="allDetailsLink"
+      [queryParams]="allDetailsParams"
+      class="all-details-link"
+    >
       <span>{{ 'ALL_DETAILS' | translate }}</span>
       <i esIcon="arrow_forward"></i>
     </a>

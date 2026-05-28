@@ -374,10 +374,10 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
             (config: MdsAiConfig) => config.id === aiConfigId,
         );
         // parse the JSON string of chatCompletion
-        mdsAIConfig.chatCompletion =
-            typeof mdsAIConfig.chatCompletion === 'string'
-                ? JSON.parse(mdsAIConfig.chatCompletion)
-                : mdsAIConfig.chatCompletion;
+        mdsAIConfig.prompt =
+            typeof mdsAIConfig.prompt === 'string'
+                ? JSON.parse(mdsAIConfig.prompt)
+                : mdsAIConfig.prompt;
         if (mdsAIConfig) {
             const aiConfig: BapiConfigObject = {
                 prompt: mdsAIConfig as BapiConfig,
