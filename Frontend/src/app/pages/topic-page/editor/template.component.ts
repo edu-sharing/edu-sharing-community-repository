@@ -2333,14 +2333,29 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            // set the template version to the default
-            properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
-                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            // depending on the mode, set the template ref property
-            // * retrieved from topic page -> use template ref of page variant (already set)
-            // * retrieved from template -> use own ID as template ref for later reference (delete and set later)
-            if (this.createVariantOrTemplateCopyOption === CopyOption.Template) {
-                delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
+            // a "real" template source is any template except the default placeholder
+            const isRealTemplateSource: boolean =
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                retrieveNodeId(this.createVariantOrTemplateSelectedNode) !==
+                    DEFAULT_PAGE_TEMPLATE_ID;
+            // the default placeholder: template ref must be set to the new node's own ID after creation
+            const isDefaultTemplateSource: boolean =
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                !isRealTemplateSource;
+            if (isRealTemplateSource) {
+                // inherit template version from A; fall back to default if unset
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                    this.createVariantOrTemplateSelectedNode.properties?.[
+                        DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP
+                    ]?.[0] ?? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+                // set template ref to A's node ID
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP] = prependWorkspacePrefix(
+                    retrieveNodeId(this.createVariantOrTemplateSelectedNode),
+                );
+            } else {
+                // topic page source or default template placeholder: use default version
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
             }
             if (!properties[RestConstants.LOM_PROP_TITLE]) {
                 properties[RestConstants.LOM_PROP_TITLE] = this.translate.instant(
@@ -2377,8 +2392,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // edit the template ref, if necessary
-            if (this.createVariantOrTemplateCopyOption === CopyOption.Template) {
+            // for the default template placeholder, set the template ref to the new node's own ID
+            if (isDefaultTemplateSource) {
                 pageConfigVariantNode =
                     await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                         retrieveNodeId(pageConfigVariantNode),
