@@ -2805,6 +2805,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         ),
                     );
                     await this.updatePageVariantConfigs(true);
+                    // refresh pageVariantNode from the fully-loaded configs; the node returned by
+                    // setPropertyAndRetrieveUpdatedNode above only carries the written property, so
+                    // the effect re-running loadTemplateVariantNode would compare versions against a
+                    // stale/incomplete node and incorrectly re-enable the regenerate button
+                    const refreshedNode = this.pageVariantConfigs.nodes?.find(
+                        (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+                    );
+                    if (refreshedNode) {
+                        this.pageVariantNode.set(refreshedNode);
+                    }
                     // if the config was saved, delete the now-orphaned old widget nodes
                     for (const nodeId of oldNodeIds) {
                         await this.topicPageHelperService.deleteNode(
