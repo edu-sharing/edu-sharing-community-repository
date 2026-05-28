@@ -38,17 +38,17 @@
       <i esIcon="delete"></i>
       {{ dynamicI18nPrefix() + 'DELETE_VARIANT' | translate }}
     </button>
-    <button
-      *ngIf="templateUpdateAvailable()"
-      mat-stroked-button
-      [matTooltip]="i18nPrefix + 'TEMPLATE_UPDATE.TOOLTIP' | translate"
-      class="btn-outline-primary"
-      color="primary"
-      (click)="triggerRegenerate()"
-    >
-      <i esIcon="refresh"></i>
-      {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
-    </button>
+    <div [matTooltip]="regenerateTooltip()">
+      <button
+        mat-stroked-button
+        [color]="templateUpdateAvailable() ? 'warn' : 'primary'"
+        [disabled]="!templateUpdateAvailable()"
+        (click)="triggerRegenerate()"
+      >
+        <i esIcon="sync"></i>
+        {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
+      </button>
+    </div>
     <div
       [matTooltip]="
         !variableInputValid()

@@ -205,6 +205,8 @@
         "TARGET_GROUP_LABEL": "Target group",
         "TEMPLATE_UPDATE": {
           "TOOLTIP": "A new version of the template used is available.",
+          "TOOLTIP_AVAILABLE": "WARNING: new template from {{date}}",
+          "TOOLTIP_UP_TO_DATE": "Template up to date",
           "HEADING": "Update page variant",
           "MESSAGE": "Do you want to update the page variant based on the new template? Changes made to the page variant will be lost."
         },

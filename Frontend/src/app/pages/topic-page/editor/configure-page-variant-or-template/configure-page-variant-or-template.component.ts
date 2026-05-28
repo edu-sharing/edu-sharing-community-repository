@@ -3,6 +3,7 @@ import {
     Component,
     computed,
     EventEmitter,
+    inject,
     input,
     Input,
     InputSignal,
@@ -12,6 +13,7 @@ import {
     signal,
     WritableSignal,
 } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { DEFAULT, HOME_REPOSITORY, MdsWidget, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { Values } from 'ngx-edu-sharing-ui';
 import { MdsModule } from '../../../../features/mds/mds.module';
@@ -35,6 +37,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Input() pageVariantTitle: string;
     selectDimensions: InputSignal<Map<string, MdsWidget>> = input(new Map<string, MdsWidget>());
     templateMode: InputSignal<boolean> = input(false);
+    templateNode: InputSignal<Node> = input<Node>(null);
     templateUpdateAvailable: InputSignal<boolean> = input(false);
     @Input() viewIcons: string[] = [];
     @Input() viewLabels: string[] = [];
@@ -47,10 +50,32 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Output() regenerateClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() settingsValidityChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
+    private translateService = inject(TranslateService);
+
     currentValues: Values = {};
     dynamicI18nPrefix = computed(() =>
         this.templateMode() ? this.templateI18nPrefix : this.i18nPrefix,
     );
+    templateModifiedDate: Signal<string> = computed(() => {
+        const timestamp = this.templateNode()?.properties?.[RestConstants.CM_MODIFIED_DATE]?.[0];
+        if (!timestamp) return '';
+        return new Date(Number(timestamp)).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    });
+    regenerateTooltip: Signal<string> = computed(() => {
+        if (this.templateUpdateAvailable()) {
+            return this.translateService.instant(
+                `${this.i18nPrefix}TEMPLATE_UPDATE.TOOLTIP_AVAILABLE`,
+                { date: this.templateModifiedDate() },
+            );
+        }
+        return this.translateService.instant(
+            `${this.i18nPrefix}TEMPLATE_UPDATE.TOOLTIP_UP_TO_DATE`,
+        );
+    });
     variableInputValid: WritableSignal<boolean> = signal(true);
     furtherExistingPageVariants: Signal<Node[]> = computed(() =>
         this.pageVariantConfigNodes().filter(
