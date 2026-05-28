@@ -64,7 +64,9 @@ This agent assists with development tasks in this Angular frontend project.
 
 ### Options Helper
 
--   Location: `src/app/services/options-helper.service.ts`
+-   Location: `src/app/services/options-helper.service.ts`; individual option groups split into `src/app/services/options/` (`primary-options.ts`, `view-options.ts`, `reuse-options.ts`, `edit-options.ts`, `file-operations-options.ts`, `delete-options.ts`, `toggle-options.ts`).
+-   Each factory file exports a single `createXxxOptions({ service, management, components, data }: OptionsContext)` function. `OptionsContext` (in `options-context.ts`) uses `import type { OptionsHelperService }` to avoid a circular runtime module dependency — do not change it to a value import.
+-   Methods on `OptionsHelperService` called by factory files must be `protected` (e.g. `cutCopyNode`, `revokeNode`, `goToWorkspace`, `removeFromCollection`, `bookmarkNodes`, `unblockImportedNodes`); injected services accessed by factory files are `public`.
 -   Provides declarative options configuration, e.g. for the `actionbar`
 -   To bind a standalone `es-actionbar` to a node context (outside `es-node-entries-wrapper`): provide `OptionsHelperDataService` in the component's `providers`, use a `@ViewChild` **setter** (not field) to call `await initComponents(actionbar)` then `refreshComponents()` when the bar first enters the DOM (e.g. after `*ngIf` becomes true), and use an `effect()` to call `setData(…)` + `refreshComponents()` when the active node changes while the actionbar stays rendered. `OptionsHelperService` is already provided at `editorial-page` level — only `OptionsHelperDataService` needs to be added locally.
 -   `OptionsHelperDataService.setData()` calls `wrapOptionCallbacks()`, which replaces each `option.callback` so that when the actionbar calls it with no arguments the node is resolved from `data.activeObjects`. The original callback therefore receives `(undefined, [activeNode])` — write callbacks as `(node, nodes) => fn(node ?? nodes?.[0])` so they work correctly from both `es-node-entries-wrapper` (passes node as first arg) and the standalone actionbar.
