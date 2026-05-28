@@ -496,7 +496,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             )
                             .subscribe(
                                 () => {
-                                    //this.globalCollectionsPageService.removeTemporaryCollections(source.element);
+                                    this.globalCollectionsPageService.removeTemporaryCollections(
+                                        source.element,
+                                    );
                                     this.toast.closeProgressSpinner();
                                     this.refreshContent();
                                 },
