@@ -860,7 +860,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
     "ASSIGNMENT_FINISH": "Aufgabe abschließen",
     "ASSIGNMENT_FINISH_CONFIRM": "Möchten Sie diese Aufgabe wirklich abschließen? Dies kann nicht rückgängig gemacht werden.",
-    "MANAGE_CONTENT": "Einsortieren"
+    "MANAGE_CONTENT": "Einsortieren",
+    "EDIT_CONNECTOR": "Bearbeiten"
   },
   "LTI": {
     "REGISTERED": {

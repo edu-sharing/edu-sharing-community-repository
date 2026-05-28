@@ -754,7 +754,8 @@
     "ASSIGNMENT_CANCEL": "Cancel assignment",
     "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
     "ASSIGNMENT_FINISH": "Finish assignment",
-    "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone."
+    "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone.",
+    "EDIT_CONNECTOR": "Edit"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Version comment",

@@ -682,7 +682,8 @@
     "REVOKE": "Ritirare l'oggetto",
     "EDIT_REVOCATION": "Modifica motivo",
     "SELECT_ALL": "Seleziona tutto",
-    "DESELECT": "Deseleziona tutto"
+    "DESELECT": "Deseleziona tutto",
+    "EDIT_CONNECTOR": "Modifica nel connettore"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Commento versione",

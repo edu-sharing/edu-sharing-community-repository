@@ -341,10 +341,11 @@ export class SubmitAssignmentComponent implements OnDestroy {
     }
 
     private async createVariantAndEdit(node: Node): Promise<void> {
-        // if the node carries a ccm:original pointer it already IS a forked variant
-        // → open the connector on it (no new fork) and restart polling
-        const existing = this.submissionFiles()?.find((f) => f.content?.ref.id === node.ref.id);
-        console.info('existing', existing);
+        // if a submission file already exists for this node (whether looked up from the RO list
+        // by assignment file or from the submission list by variant content), edit it rather than
+        // forking a new variant
+        this.selectedTabIndex.set(1);
+        const existing = this.hasSubmissionFor(node);
         if (existing) {
             this.toast.showProgressSpinner();
             try {
@@ -392,7 +393,6 @@ export class SubmitAssignmentComponent implements OnDestroy {
             // pollingNodeIds() check is already populated on first render
             this.startVariantPolling(newFiles[0], variantNode, win, connectorId);
             this.syncSubmissionDataSource();
-            this.selectedTabIndex.set(1);
         } catch (e) {
             this.toast.error(e, null);
         } finally {
@@ -530,7 +530,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     protected readonly InteractionType = InteractionType;
 
     private initOptions() {
-        const editConnectorNode = new OptionItem('OPTIONS.OPEN', 'edit', (node) => {
+        const editConnectorNode = new OptionItem('OPTIONS.EDIT_CONNECTOR', 'edit', (node) => {
             void this.createVariantAndEdit(node);
         });
         editConnectorNode.customShowCallback = async (nodes) => {
@@ -540,17 +540,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             if (!this.canSubmitMaterials()) {
                 return false;
             }
-            const node = nodes?.[0];
-            const submission = this.hasSubmissionFor(node);
-            if (!submission) {
-                return true;
-            }
-            // submit-tab: node is the existing variant content → allow re-editing it
-            if (submission.content?.ref.id === node?.ref.id) {
-                return true;
-            }
-            // RO-tab: node is the original assignment file but a submission already exists
-            return false;
+            return true;
         };
         editConnectorNode.group = DefaultGroups.View;
         editConnectorNode.priority = 5;
