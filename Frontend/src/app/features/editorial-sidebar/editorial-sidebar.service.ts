@@ -72,7 +72,7 @@ export class EditorialSidebarService {
     }
 
     close() {
-        this._editorialSidebar.enabledOption.set(null);
+        this._editorialSidebar?.enabledOption?.set(null);
         this.sidebarOpened.set(false);
     }
 

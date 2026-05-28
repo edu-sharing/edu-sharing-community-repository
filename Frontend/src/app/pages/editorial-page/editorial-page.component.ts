@@ -87,6 +87,7 @@ import {
 } from '../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { UIService } from '../../core-module/rest/services/ui.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -120,7 +121,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
-    sidenavLeft = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -158,6 +158,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         maxItems: number;
     }>(null);
 
+    readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
+    readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
+
     constructor(
         private router: Router,
         private route: ActivatedRoute,
@@ -166,6 +169,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         private mdsService: MdsService,
         private mainNav: MainNavService,
         private searchFieldService: SearchFieldService,
+        private searchFieldInternalService: SearchFieldInternalService,
         private searchService: SearchService,
         public editorialSidebarService: EditorialSidebarService,
         private searchServiceUnwrapped: SearchServiceUnwrapped,
@@ -217,9 +221,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 first(),
             )
             .subscribe((instance) => {
-                instance
-                    .onFiltersButtonClicked()
-                    .subscribe(() => this.sidenavLeft.set(!this.sidenavLeft()));
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });

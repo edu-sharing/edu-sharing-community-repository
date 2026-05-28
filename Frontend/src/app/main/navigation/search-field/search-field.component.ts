@@ -65,6 +65,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly rawFilters$ = this.internal.rawFilters$;
     readonly categories$ = this.internal.categoriesSubject;
     readonly suggestions$ = this.internal.suggestions$;
+    readonly filterBarVisible = this.internal.filterBarVisible;
+
     showOverlay = new BehaviorSubject(false);
     inhibitOverlay = false;
     hasSuggestions = true;

@@ -50,6 +50,8 @@ export class SearchFieldInternalService implements EventListener {
     searchFieldComponent = new BehaviorSubject<SearchFieldComponent>(null);
     /** The user clicked the filters button inside the search field. */
     readonly filtersButtonClicked = new Subject<void>();
+    /** Whether the filter bar is visible. */
+    readonly filterBarVisible = new BehaviorSubject<boolean>(false);
     /** The user triggered a search using the search field. */
     readonly searchTriggered = new Subject<SearchEvent>();
     /** The user changed the search string by typing into the search field. */

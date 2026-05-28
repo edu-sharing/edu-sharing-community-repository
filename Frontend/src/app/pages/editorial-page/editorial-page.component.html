@@ -4,13 +4,13 @@
 </h1>
 
 <mat-sidenav-container
-  [class.mat-sidenav-container-left-open]="sidenavLeft()"
+  [class.mat-sidenav-container-left-open]="filterBarVisible | async"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
-    [opened]="sidenavLeft() && (mainComponent$ | async) === null"
+    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null"
     position="start"
     class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
@@ -106,8 +106,8 @@
             <button
               mat-stroked-button
               color="primary"
-              (click)="sidenavLeft.set(!sidenavLeft())"
-              [attr.aria-expanded]="sidenavLeft()"
+              (click)="filtersButtonClicked.next()"
+              [attr.aria-expanded]="filterBarVisible | async"
             >
               <i esIcon="filter_list" [aria]="false"></i>
               {{ 'SEARCH.FILTERS' | translate }}

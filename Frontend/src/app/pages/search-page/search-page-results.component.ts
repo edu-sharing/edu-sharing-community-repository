@@ -27,6 +27,7 @@ import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 export type SearchFilter = {
     propertyFilters: Values;
@@ -80,6 +81,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         private frameEventsService: FrameEventsService,
         private announcer: LiveAnnouncer,
         private translate: TranslateService,
+        private searchFieldInternalService: SearchFieldInternalService,
     ) {
         this.registerPrimaryActionOptions();
         // announce newly loaded elements to users using screen readers
@@ -127,8 +129,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     }
 
     toggleFilters(): void {
-        const filterBarIsVisible = this.searchPage.filterBarIsVisible;
-        filterBarIsVisible.setUserValue(!filterBarIsVisible.getValue());
+        this.searchFieldInternalService.filtersButtonClicked.next();
     }
 
     ngOnDestroy(): void {

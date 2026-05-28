@@ -7,6 +7,7 @@ import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { SearchPageService } from './search-page.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 @Component({
     selector: 'es-search-page-filters-sidebar',
@@ -30,6 +31,7 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
         private dialogs: DialogsService,
         private translate: TranslateService,
         private breakpointObserver: BreakpointObserver,
+        private searchFieldInternalService: SearchFieldInternalService,
     ) {}
 
     ngOnInit(): void {
@@ -45,7 +47,7 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
         let dialogRefPromise: Promise<CardDialogRef<unknown>>;
         let isMobileScreen: boolean;
         rxjs.combineLatest([
-            this.searchPage.filterBarIsVisible.observeValue(),
+            this.searchFieldInternalService.filterBarVisible,
             this.isMobileScreen.pipe(tap((value) => (isMobileScreen = value))),
         ])
             .pipe(takeUntil(this.destroyed))

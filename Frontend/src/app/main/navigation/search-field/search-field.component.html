@@ -17,6 +17,7 @@
           mat-icon-button
           type="button"
           [attr.aria-label]="'SEARCH.FILTERS' | translate"
+          [attr.aria-expanded]="filterBarVisible | async"
           matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
             totalFiltersCount > 0
               ? '(' +

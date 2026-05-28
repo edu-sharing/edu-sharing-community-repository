@@ -34,7 +34,7 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageResults } from './search-page-results.service';
-import { UserModifiableValuesService } from './user-modifiable-values';
+import { UserModifiableValue, UserModifiableValuesService } from './user-modifiable-values';
 import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { Sort } from '@angular/material/sort';
 
@@ -65,7 +65,7 @@ export class SearchPageService implements OnDestroy {
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
     readonly activeMetadataSet = this.userModifiableValues.createString();
     // Whether filters are visible---either as sidebar or dialog on mobile.
-    readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
+    filterBarIsVisible: UserModifiableValue<boolean> = null;
     readonly selection = new BehaviorSubject<Node[]>(null);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
@@ -189,7 +189,6 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerSessionStorage('search-page-filters');
         this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
     }
 
@@ -210,7 +209,7 @@ export class SearchPageService implements OnDestroy {
         this.showingAllRepositories.subscribe((showingAllRepositories) => {
             if (showingAllRepositories) {
                 this.activeRepository.setOverrideValue(null);
-                this.filterBarIsVisible.resetUserValue();
+                this.filterBarIsVisible?.resetUserValue();
             } else {
                 this.activeRepository.unsetOverrideValue();
             }
@@ -271,20 +270,17 @@ export class SearchPageService implements OnDestroy {
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
                 autoFocus: autoFocusSearchField,
+                filterBarVisibleStorageKey: 'search-page-filters',
             },
             this.destroyed,
         );
+        this.filterBarIsVisible = searchFieldInstance.filterBarIsVisible;
         this.showingAllRepositories.subscribe((showingAllRepositories) => {
             searchFieldInstance.patchConfig({
                 showFiltersButton: !showingAllRepositories,
                 enableFiltersAndSuggestions: !showingAllRepositories,
             });
         });
-        searchFieldInstance
-            .onFiltersButtonClicked()
-            .subscribe(() =>
-                this.filterBarIsVisible.setUserValue(!this.filterBarIsVisible.getValue()),
-            );
         searchFieldInstance
             .onSearchTriggered()
             .subscribe(({ searchString }) => this.searchString.setUserValue(searchString || null));

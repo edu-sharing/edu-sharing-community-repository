@@ -25,6 +25,7 @@ import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 @Component({
     selector: 'es-search-page',
@@ -55,7 +56,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
-    readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
@@ -77,6 +78,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         public searchPage: SearchPageService,
         private configService: ConfigService,
         private translate: TranslateService,
+        private searchFieldInternalService: SearchFieldInternalService,
     ) {
         this.registerSidebars();
         this.searchPage.init();
@@ -140,7 +142,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         let dialogRefPromise: Promise<CardDialogRef<unknown>>;
         let isMobileScreen: boolean;
         rxjs.combineLatest([
-            this.searchPage.filterBarIsVisible.observeValue().pipe(),
+            this.searchFieldInternalService.filterBarVisible.pipe(),
             this.isMobileScreen.pipe(tap((value) => (isMobileScreen = value))),
         ])
             .pipe(takeUntil(this.destroyed))
@@ -162,8 +164,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     private registerSidebars(): void {
         // Make filter- and preview bars mutually exclusive.
-        this.filterBarIsVisible
-            .observeValue()
+        this.searchFieldInternalService.filterBarVisible
             .pipe(takeUntil(this.destroyed), filter(isTrue))
             .subscribe(() => this.editorialSidebarService.close());
         effect(() => {
