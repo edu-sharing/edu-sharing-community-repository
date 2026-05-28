@@ -5,7 +5,7 @@
   <aiConfigs>
     <aiConfig>
       <id>suggestion_ai</id>
-      <provider>openai</provider>
+      <provider>academiccloud</provider>
       <useCaching>false</useCaching>
       <prompt>
         {
