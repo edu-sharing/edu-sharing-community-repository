@@ -207,6 +207,8 @@
         "TARGET_GROUP_LABEL": "Zielgruppe",
         "TEMPLATE_UPDATE": {
           "TOOLTIP": "Eine neue Version der verwendeten Vorlage ist verfügbar.",
+          "TOOLTIP_AVAILABLE": "ACHTUNG: neue Vorlage vom {{date}}",
+          "TOOLTIP_UP_TO_DATE": "Vorlage noch aktuell",
           "HEADING": "Seiten-Variante aktualisieren",
           "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? An der Seiten-Variante vorgenommene Änderungen gehen dabei verloren."
         },
