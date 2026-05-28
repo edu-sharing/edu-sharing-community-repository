@@ -2773,8 +2773,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (response === 'YES') {
                 this.startEditing();
                 try {
+                    // collect old widget nodeIds before overwriting so they can be
+                    // deleted only after the new config is successfully persisted
+                    const oldVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
+                    const oldNodeIds: string[] = [];
+                    oldVariantConfig?.structure?.swimlanes?.forEach((s) =>
+                        s.grid?.forEach((tile) => {
+                            if (tile.nodeId) oldNodeIds.push(tile.nodeId);
+                        }),
+                    );
+                    if (oldVariantConfig?.structure?.breadcrumbNodeId) {
+                        oldNodeIds.push(oldVariantConfig.structure.breadcrumbNodeId);
+                    }
+                    if (oldVariantConfig?.structure?.headerNodeId) {
+                        oldNodeIds.push(oldVariantConfig.structure.headerNodeId);
+                    }
                     const variantConfig = retrievePageVariantConfig(templateNode);
                     preparePageVariantConfig(variantConfig, true, true);
+                    // create new widget nodes + persist config
                     await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
                         syncLocalState: true,
                         collectionId: this.topicCollectionId(),
@@ -2789,6 +2805,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         ),
                     );
                     await this.updatePageVariantConfigs(true);
+                    // if the config was saved, delete the now-orphaned old widget nodes
+                    for (const nodeId of oldNodeIds) {
+                        await this.topicPageHelperService.deleteNode(
+                            convertNodeRefIntoNodeId(nodeId),
+                        );
+                    }
                 } catch (err) {
                     console.error('Failed to regenerate page variant', err);
                 } finally {
