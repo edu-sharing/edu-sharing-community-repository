@@ -36,7 +36,7 @@ export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 export const DEFAULT_BG_COLOR: string = '#F4F4F4';
 export const DEFAULT_PAGE_NAME_PREFIX: string = 'PAGE_';
 export const DEFAULT_PAGE_VARIANT_NAME_PREFIX: string = 'PAGE_VARIANT_';
-export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1.0.0';
+export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1';
 export const DEFAULT_ICON_PATH: string = 'assets/images/topic-page/';
 export const DEFAULT_WIDGET_NAME_PREFIX: string = 'WIDGET_';
 
