@@ -43,6 +43,7 @@ public class BApiProxyService {
 
     /**
      * forward including auth headers based on user
+     *
      * @param path bapi target path (without leading "/")
      */
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
@@ -63,7 +64,7 @@ public class BApiProxyService {
                 .readTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .build();
         String uri = bApiProxyConfig.getUri();
-        if(!uri.endsWith("/")) {
+        if (!uri.endsWith("/")) {
             uri = uri + "/";
         }
         String targetUrl = uri.concat(path);
@@ -100,12 +101,7 @@ public class BApiProxyService {
                 boolean isSse = false;
                 if (responseType != null) {
                     isSse = String.valueOf(responseType).equals("text/event-stream");
-                    if (!isSse) {
-                        result.type("text/event-stream");
-                        isSse = true;
-                    } else {
-                        result.type(String.valueOf(responseType));
-                    }
+                    result.type(String.valueOf(responseType));
                 } else {
                     result.type(ContentType.APPLICATION_JSON);
                 }
@@ -128,7 +124,7 @@ public class BApiProxyService {
                         }
                     };
                     result.entity(streamingOutput);
-                }else {
+                } else {
                     result.entity(response.body().string());
                 }
             }
