@@ -398,14 +398,27 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
     templateUpdateAvailable: Signal<boolean> = computed(() => {
-        const templateMode: boolean = this.templateMode();
         const templateNode: Node = this.templateVariantNode();
         const pageVariantNode: Node = this.pageVariantNode();
-        if (templateMode || !templateNode || !pageVariantNode) {
+        if (!templateNode || !pageVariantNode) {
             return false;
         }
         const currentTemplateVersion = retrievePageVariantTemplateVersion(templateNode);
         const variantTemplateVersion = retrievePageVariantTemplateVersion(pageVariantNode);
+        // Non-root templates store a compound version "{parent_sync}:{own_counter}".
+        // For a template, compare only the parent_sync part against the parent template's
+        // current version (the own_counter is this node's own revision, not the parent's).
+        const isTemplate =
+            pageVariantNode.properties?.[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]?.[0] === 'true';
+        if (isTemplate && variantTemplateVersion.includes(':')) {
+            const parentSyncVersion = variantTemplateVersion.slice(
+                0,
+                variantTemplateVersion.lastIndexOf(':'),
+            );
+            return currentTemplateVersion !== parentSyncVersion;
+        }
+        // Leaf page variants store their foundation's version verbatim, so compare the
+        // full version against the foundation's current version.
         return currentTemplateVersion !== variantTemplateVersion;
     });
     createVariantOrTemplateDialogRef: CardDialogRef;
@@ -2348,11 +2361,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.createVariantOrTemplateCopyOption === CopyOption.Template &&
                 !isRealTemplateSource;
             if (isRealTemplateSource) {
-                // inherit template version from A; fall back to default if unset
-                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                // inherit template version from A and append the default own_counter to
+                // form the compound "{parent_sync}:{own_counter}" format used by non-root
+                // templates
+                const parentVersion =
                     this.createVariantOrTemplateSelectedNode.properties?.[
                         DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP
                     ]?.[0] ?? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                    parentVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
                 // set template ref to A's node ID
                 properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP] = prependWorkspacePrefix(
                     retrieveNodeId(this.createVariantOrTemplateSelectedNode),
@@ -2771,10 +2788,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     private incrementPatchVersion(version: string): string {
-        const parts = version.split('.');
-        if (parts.length !== 3) return version;
-        const patch = parseInt(parts[2], 10);
-        return `${parts[0]}.${parts[1]}.${isNaN(patch) ? 1 : patch + 1}`;
+        const colonIdx = version.lastIndexOf(':');
+        if (colonIdx !== -1) {
+            // non-root template: increment the own_counter after the last ':'
+            const counter = parseInt(version.slice(colonIdx + 1), 10);
+            return version.slice(0, colonIdx + 1) + (isNaN(counter) ? 1 : counter + 1);
+        }
+        // root template: simple integer increment
+        const num = parseInt(version, 10);
+        return String(isNaN(num) ? 2 : num + 1);
     }
 
     /**
@@ -2783,7 +2805,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * compare versions. Skips loading when in template mode or when no template ref exists.
      */
     private async loadTemplateVariantNode(): Promise<void> {
-        if (this.templateMode() || !this.pageVariantNode()) {
+        if (!this.pageVariantNode()) {
             this.templateVariantNode.set(null);
             return;
         }
@@ -2848,13 +2870,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         syncLocalState: true,
                         collectionId: this.topicCollectionId(),
                     });
-                    // store the template version that was used so we know it's up to date
+                    // store the template version that was used so we know it's up to date;
+                    // in template mode the node is a non-root template, so append the default
+                    // own_counter to form the compound "{parent_sync}:{own_counter}" version
                     const templateVersion = retrievePageVariantTemplateVersion(templateNode);
+                    const syncedVersion = this.templateMode()
+                        ? templateVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+                        : templateVersion;
                     this.pageVariantNode.set(
                         await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                             retrieveNodeId(this.pageVariantNode()),
                             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
-                            templateVersion,
+                            syncedVersion,
                         ),
                     );
                     await this.updatePageVariantConfigs(true);

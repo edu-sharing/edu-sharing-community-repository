@@ -36,6 +36,7 @@ import { WidgetConfig } from '../types/widget-config/widget-config';
 import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
 import {
     convertNodeRefIntoNodeId,
+    prependWorkspacePrefix,
     retrieveNodeId,
     retrievePageVariantTemplateRef,
     retrievePageVariantTemplateVersion,
@@ -568,9 +569,19 @@ export class TopicPageHelperService {
         variantConfig?: PageVariantConfig,
     ) {
         const variantTemplateVersion: string = retrievePageVariantTemplateVersion(node);
+        // the new node is based on `node`: if `node` is itself a template, that template
+        // is the new node's foundation; otherwise the new node inherits `node`'s own
+        // foundation (a sibling copy shares the same template ref). Without this, a
+        // variant created from a non-root template would point at the template's parent
+        // instead of the template it was actually built on.
+        const isTemplateSource: boolean =
+            node.properties?.[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]?.[0] === 'true';
+        const templateRef: string = isTemplateSource
+            ? prependWorkspacePrefix(retrieveNodeId(node))
+            : retrievePageVariantTemplateRef(node);
         const properties: { [p: string]: string | string[] } = {
             [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
-            [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: retrievePageVariantTemplateRef(node),
+            [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: templateRef,
             [DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]: variantTemplateVersion,
         };
         // if a variant config is set, copy it as well
