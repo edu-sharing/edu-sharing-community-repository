@@ -187,36 +187,41 @@
                   (click)="$event.stopPropagation()"
                   *ngIf="pollingNodeIds().has(element.ref.id)"
                 >
-                  <es-spinner-small></es-spinner-small>
-                  <ng-container *ngIf="isConnectorWindowOpen(element)">
-                    <span>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR'
-                        | translate
-                          : {
-                              connector:
-                                'CONNECTOR.' + pollingConnectorName(element) + '.NAME' | translate
-                            }
-                    }}</span>
+                  <ng-container *ngIf="isConnectorWindowOpen(element); else writeback">
                     <button
-                      mat-button
-                      color="primary"
+                      mat-icon-button
+                      class="close-btn"
                       (click)="closeConnectorWindow(element); $event.stopPropagation()"
                     >
-                      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_CLOSE' | translate }}
+                      <i esIcon="close"></i>
                     </button>
+                    <es-spinner-small></es-spinner-small>
+                    <strong>{{
+                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR' | translate
+                    }}</strong>
+                    <span>{{
+                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_SUBTITLE' | translate
+                    }}</span>
+                    <div class="hint">
+                      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_HINT' | translate }}
+                    </div>
                   </ng-container>
-                  <ng-container *ngIf="!isConnectorWindowOpen(element)">
-                    <span>
-                      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate }}
-                    </span>
+                  <ng-template #writeback>
                     <button
-                      mat-button
-                      color="primary"
+                      mat-icon-button
+                      class="close-btn"
                       (click)="cancelConnectorPolling(element); $event.stopPropagation()"
                     >
-                      {{ 'CANCEL' | translate }}
+                      <i esIcon="close"></i>
                     </button>
-                  </ng-container>
+                    <es-spinner-small></es-spinner-small>
+                    <strong>{{
+                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate
+                    }}</strong>
+                    <span>{{
+                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK_SUBTITLE' | translate
+                    }}</span>
+                  </ng-template>
                 </div>
                 <div class="no-submission" *ngIf="!hasSubmissionFor(element)">
                   <button

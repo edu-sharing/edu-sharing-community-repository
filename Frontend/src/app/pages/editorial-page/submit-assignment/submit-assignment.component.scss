@@ -209,11 +209,34 @@ ngx-extended-pdf-viewer {
     background-color: vars.$darkenColor;
     backdrop-filter: blur(2px);
     color: #fff;
-    font-weight: bold;
     cursor: default;
+    padding: 40px 16px 16px;
+    text-align: center;
 
-    button.mat-mdc-button {
-        --mdc-text-button-label-text-color: #fff;
+    es-spinner-small {
+        --mdc-circular-progress-active-indicator-color: #fff;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        --mdc-icon-button-icon-color: #fff;
+    }
+
+    strong {
+        font-size: vars.$fontSizeLarge;
+        font-weight: bold;
+    }
+
+    .hint {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 16px;
+        background-color: rgba(0, 0, 0, 0.3);
+        font-size: vars.$fontSizeSmall;
     }
 }
 :host ::ng-deep {
