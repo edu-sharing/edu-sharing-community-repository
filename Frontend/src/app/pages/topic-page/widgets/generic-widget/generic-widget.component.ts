@@ -26,7 +26,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService, Values } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -373,7 +373,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
                     configName: 'headline',
                 };
-                const promptResponse: ChatCompletionResult =
+                const promptResponse: CreateChatCompletionResponse =
                     await this.aiHelperService.generateFromPrompt(
                         config,
                         this.topicPageHelperService.getSelectedVariables() || {},
@@ -396,7 +396,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
                     configName: 'description',
                 };
-                const promptResponse: ChatCompletionResult =
+                const promptResponse: CreateChatCompletionResponse =
                     await this.aiHelperService.generateFromPrompt(
                         config,
                         this.topicPageHelperService.getSelectedVariables() || {},

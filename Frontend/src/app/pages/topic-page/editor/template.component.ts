@@ -42,7 +42,7 @@ import {
     SearchResults,
     SearchService,
 } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
     ColorHelper,
     Constrain,
@@ -2199,7 +2199,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             ),
                             configName: swimlane.id,
                         };
-                        const result: ChatCompletionResult =
+                        const result: CreateChatCompletionResponse =
                             await this.aiHelperService.generateFromPrompt(
                                 config,
                                 this.topicPageHelperService.getSelectedVariables() || {},
