@@ -3,9 +3,11 @@ package org.edu_sharing.restservices;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import jakarta.servlet.http.HttpSession;
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
@@ -14,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -29,6 +32,7 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.authority.QRCode2Fa;
 import org.edu_sharing.service.dataprotection.FeatureInfoDataProtectionService;
 import org.edu_sharing.service.dataprotection.DataProtectionService;
@@ -47,7 +51,9 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DuplicateKeyException;
+
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -793,6 +799,53 @@ public class PersonDao {
 							status.name());
 		}
 	}
+
+    public static void setStatus(List<String> persons, PersonLifecycleService.PersonStatus status, boolean notifyMail){
+        if(!AuthorityServiceHelper.isAdmin()){
+            throw new DAOValidationException(
+                    new Exception("admin rights required!")
+            );
+        }
+
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        org.alfresco.service.cmr.repository.NodeService nodeService = (org.alfresco.service.cmr.repository.NodeService) applicationContext.getBean("alfrescoDefaultDbNodeService");
+
+        Map<org.alfresco.service.cmr.repository.NodeRef,String> oldStatusMap = new MCAlfrescoAPIClient().doInTransaction(() -> {
+            Map<org.alfresco.service.cmr.repository.NodeRef,String> currentStatus = new HashMap<>();
+            persons.forEach(person -> {
+                if(person.equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+                    throw new DAOValidationException(
+                            new Exception("Method not allowed to change status of the primary admin")
+                    );
+                }
+                org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = AuthorityServiceHelper.getAuthorityNodeRef(person);
+                if(notifyMail){
+                    currentStatus.put(authorityNodeRef, (String)nodeService.getProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS)));
+                }
+
+                nodeService.setProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS),status.name());
+                nodeService.setProperty(authorityNodeRef,QName.createQName(CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE),new Date());
+            });
+            return currentStatus;
+        });
+
+        if(notifyMail){
+            oldStatusMap.forEach((nodeRef, oldStatus) -> {
+                String email = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_EMAIL);
+                String lastName = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_LASTNAME);
+                String firstName = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME);;
+                if(email != null && !email.isEmpty()) {
+                    NotificationServiceFactoryUtility.getLocalService()
+                            .notifyPersonStatusChanged(
+                                    email,
+                                    firstName,
+                                    lastName,
+                                    oldStatus,
+                                    status.name());
+                }
+            });
+        }
+    }
 
 	public String generate2FaCode() {
 		if(Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")){

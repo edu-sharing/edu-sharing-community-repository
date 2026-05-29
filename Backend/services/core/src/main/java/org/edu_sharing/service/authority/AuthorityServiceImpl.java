@@ -571,13 +571,6 @@ public class AuthorityServiceImpl implements AuthorityService {
         if (!currentUser.equals(userName) && !AuthorityServiceFactory.getLocalService().isGlobalAdmin()) {
             throw new NotAnAdminException();
         }
-        if (!lightbendConfigLoader.getConfig().getIsNull("repository.personActiveStatus")) {
-            String personActiveStatus = lightbendConfigLoader.getConfig().getString("repository.personActiveStatus");
-            //if configured initialize with active status
-            if (personActiveStatus != null) {
-                userInfo.put(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, personActiveStatus);
-            }
-        }
 
         if (!lightbendConfigLoader.getConfig().getIsNull("repository.personActiveStatus")) {
             String personActiveStatus = lightbendConfigLoader.getConfig().getString("repository.personActiveStatus");

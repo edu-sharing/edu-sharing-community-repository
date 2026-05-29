@@ -266,21 +266,21 @@ public class GroupDao {
     }
 
     public void addMember(String member) throws DAOException {
+        this.addMember(Collections.singletonList(member));
+    }
+
+    public void addMember(List<String> members) throws DAOException {
 
         try {
             checkAdminAccess();
-            AuthenticationUtil.runAsSystem(new RunAsWork<Void>() {
-
-                @Override
-                public Void doWork() throws Exception {
-                    authorityService.addMemberships(groupName, new String[]{member});
+            AuthenticationUtil.runAsSystem((RunAsWork<Void>) () -> {
+                authorityService.addMemberships(groupName, members.toArray(new String[0]));
+                for (String member : members) {
                     PersonCache.reset(member);
-                    return null;
                 }
+                return null;
             });
-
         } catch (Exception e) {
-
             throw DAOException.mapping(e);
         }
     }
@@ -297,7 +297,7 @@ public class GroupDao {
         }
     }
 
-    public void deleteMember(String member) throws DAOException {
+    public void deleteMember(List<String> member) throws DAOException {
 
         try {
             checkAdminAccess();
@@ -305,8 +305,10 @@ public class GroupDao {
 
                 @Override
                 public Void doWork() throws Exception {
-                    authorityService.removeMemberships(groupName, new String[]{member});
-                    PersonCache.reset(member);
+                    authorityService.removeMemberships(groupName, member.toArray(new String[0]));
+                    for (String member : member) {
+                        PersonCache.reset(member);
+                    }
                     return null;
                 }
             });

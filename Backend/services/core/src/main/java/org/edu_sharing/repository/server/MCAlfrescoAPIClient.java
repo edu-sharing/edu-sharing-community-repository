@@ -1576,7 +1576,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
      *
      * @param callback the callback to run
      */
-    public Object doInTransaction(RetryingTransactionCallback<?> callback) {
+    public <R> R doInTransaction(RetryingTransactionCallback<R> callback) {
         TransactionService transactionService = serviceRegistry.getTransactionService();
         return transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
     }

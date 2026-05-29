@@ -519,6 +519,38 @@ public class IamApi {
         }
     }
 
+    @PUT
+    @Path("/people/{repository}/status/{status}")
+    @Operation(summary = "update the user status.", description = "update the user status. (admin rights are required.)")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response updateUserStatus(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "users", required = true) @QueryParam("users") List<String> users,
+            @Parameter(description = "the new status to set", required = true) @PathParam("status") PersonLifecycleService.PersonStatus status,
+            @Parameter(description = "notify the user via mail", required = true, schema = @Schema(defaultValue = "true")) @QueryParam("notify") Boolean notifyMail,
+            @Context HttpServletRequest req) {
+        try {
+            PersonDao.setStatus(users,status,notifyMail);
+            return Response.status(Response.Status.OK).build();
+        } catch (DAOValidationException t) {
+            logger.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+        } catch (Throwable e){
+            logger.error(e.getMessage(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(e)).build();
+        }
+    }
+
     @DELETE
 
     @Path("/people/{repository}/{person}")
@@ -1410,18 +1442,49 @@ public class IamApi {
             @Context HttpServletRequest req) {
 
         try {
-            new MCAlfrescoAPIClient().doInTransaction(() -> {
-                RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-                GroupDao groupDao = GroupDao.getGroup(repoDao, group);
-                groupDao.addMember(member);
-                return groupDao;
-            });
+            addMember(repository, group, List.of(member));
             return Response.status(Response.Status.OK).build();
 
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
     }
+
+    @PUT
+    @Path("/groups/{repository}/{group}/members")
+    @Operation(summary = "Add member to the group.", description = "Add member to the group. (admin rights are required.)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response addMembership(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "groupname", required = true) @PathParam("group") String group,
+            @Parameter(description = "authorityNames of member", required = true) @QueryParam("member") List<String> member,
+            @Context HttpServletRequest req) {
+        try {
+            addMember(repository, group, member);
+            return Response.status(Response.Status.OK).build();
+        }catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    private void addMember(String repository, String group, List<String> member) {
+        new MCAlfrescoAPIClient().doInTransaction(() -> {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+            groupDao.addMember(member);
+            return groupDao;
+        });
+    }
+
 
     @DELETE
     @Path("/groups/{repository}/{group}/members/{member}")
@@ -1442,16 +1505,46 @@ public class IamApi {
             @Context HttpServletRequest req) {
 
         try {
-            new MCAlfrescoAPIClient().doInTransaction(() -> {
-                RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-                GroupDao groupDao = GroupDao.getGroup(repoDao, group);
-                groupDao.deleteMember(member);
-                return groupDao;
-            });
+            deleteMember(repository, group, List.of(member));
             return Response.status(Response.Status.OK).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
+    }
+
+    @DELETE
+    @Path("/groups/{repository}/{group}/members")
+    @Operation(summary = "Delete member from the group.", description = "Delete member from the group. (admin rights are required.)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "OK.", content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = "Preconditions are not present.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Authorization failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = "Session user has insufficient rights to perform this operation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Ressources are not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Fatal error occured.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response deleteMembership(
+            @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "groupname", required = true) @PathParam("group") String group,
+            @Parameter(description = "authorityName of members", required = true) @QueryParam("member") List<String> member,
+            @Context HttpServletRequest req) {
+
+        try {
+            deleteMember(repository, group, member);
+            return Response.status(Response.Status.OK).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    private static void deleteMember(String repository, String group, List<String> member) {
+        new MCAlfrescoAPIClient().doInTransaction(() -> {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            GroupDao groupDao = GroupDao.getGroup(repoDao, group);
+            groupDao.deleteMember(member);
+            return groupDao;
+        });
     }
 
 
