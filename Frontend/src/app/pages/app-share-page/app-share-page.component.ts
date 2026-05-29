@@ -13,12 +13,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../services/toast';
 import {
     Connector,
-    ConnectorList,
     FrameEventsService,
     ParentList,
     RestCollectionService,
     RestConnectorService,
-    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestNodeService,
@@ -27,7 +25,8 @@ import {
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { ConnectorService, Node } from 'ngx-edu-sharing-api';
+import { take } from 'rxjs/operators';
 import { Component } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
@@ -64,7 +63,7 @@ export class AppSharePageComponent {
         private router: Router,
         private sanitizer: DomSanitizer,
         private node: RestNodeService,
-        private connectors: RestConnectorsService,
+        private connectorService: ConnectorService,
         private events: FrameEventsService,
         private uiService: UIService,
         private utilities: RestUtilitiesService,
@@ -300,14 +299,17 @@ export class AppSharePageComponent {
                     );
                 } else if (this.isTextSnippet()) {
                     this.globalProgress = false;
-                    this.connectors.list().subscribe(
-                        (list: ConnectorList) => {
-                            this.prepareTextSnippet(list.connectors);
-                        },
-                        (error: any) => {
-                            this.prepareTextSnippet(null);
-                        },
-                    );
+                    this.connectorService
+                        .observeConnectorList()
+                        .pipe(take(1))
+                        .subscribe(
+                            (list) => {
+                                this.prepareTextSnippet(list?.connectors);
+                            },
+                            (error: any) => {
+                                this.prepareTextSnippet(null);
+                            },
+                        );
                 } else {
                     if (
                         this.cordova.isRunningCordova() &&

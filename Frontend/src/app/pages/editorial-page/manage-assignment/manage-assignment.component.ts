@@ -213,6 +213,7 @@ export class ManageAssignmentComponent {
             option: 'SORT_INTO',
             optionConfig: {
                 upload: 'fast',
+                allowCreate: false,
                 applyLabel: 'EDITORIAL.ASSIGNMENT.SELECT_FILE',
                 applyCallback: (nodes) =>
                     nodes.every(

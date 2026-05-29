@@ -254,7 +254,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
             .subscribe(() => this.updateBreadcrumbs());
         this.editorialSidebarService.applyNodeEmitted
             .pipe(takeUntil(this.destroyed$))
-            .subscribe(async ({ nodes }) => {
+            .subscribe(async ({ nodes, connectorId, window: connectorWindow }) => {
                 if (this.submissionReplaceFile()) {
                 } else {
                     let newFiles = nodes.map((node) => {
@@ -267,6 +267,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     });
                     newFiles = await this.saveSubmissionFiles(newFiles);
                     this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
+                    // when the new file was created via a connector, poll the underlying node so
+                    // that write-back from the connector triggers a re-submission of the variant
+                    // (same flow as createVariantAndEdit)
+                    if (connectorId) {
+                        newFiles.forEach((file, idx) => {
+                            this.startConnectorPolling(
+                                file,
+                                nodes[idx],
+                                connectorWindow ?? null,
+                                connectorId,
+                            );
+                        });
+                    }
                     this.syncSubmissionDataSource();
                 }
                 this.editorialSidebarService.close();
@@ -447,7 +460,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     ): void {
         const contentId = submissionFile.content.ref.id;
         this.connectorPolling().get(contentId)?.subscription.unsubscribe();
-        const initialVersion = variantNode.content?.version;
+        const initialVersion = variantNode.content?.version || '1.0';
         const sub = interval(5000)
             .pipe(
                 takeUntil(this.destroyed$),

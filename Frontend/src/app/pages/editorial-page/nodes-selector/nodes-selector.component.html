@@ -280,6 +280,28 @@
           }"
           (dialogResult)="uploadMaterialDialogResult($event)"
         ></es-add-material-dialog>
+        <div
+          class="upload-create-row"
+          *ngIf="
+            inboxNode && connectorOptions().length && option()?.optionConfig?.allowCreate !== false
+          "
+        >
+          <es-dropdown
+            #connectorDropdown
+            [options]="connectorOptions()"
+            [showDisabled]="false"
+            position="right"
+          ></es-dropdown>
+          <button
+            mat-flat-button
+            color="primary"
+            [matMenuTriggerFor]="connectorDropdown.menu ? connectorDropdown.menu : null"
+            [attr.aria-label]="'CREATE' | translate"
+          >
+            <i esIcon="add"></i>
+            <span>{{ 'CREATE' | translate }}</span>
+          </button>
+        </div>
       </ng-container>
 
       <ng-template #noSearchResults let-dataSource="dataSource">

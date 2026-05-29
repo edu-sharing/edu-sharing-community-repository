@@ -27,7 +27,14 @@ export class EditorialSidebarService {
     /**
      * triggered when in the sidebar a copy / apply event was performed (mode SORT_INTO)
      */
-    applyNodeEmitted = new EventEmitter<{ nodes: Node[]; parent?: Node }>();
+    applyNodeEmitted = new EventEmitter<{
+        nodes: Node[];
+        parent?: Node;
+        // when a connector is used, otherwise null
+        connectorId?: string;
+        // only non-null when a connector is used
+        window?: Window;
+    }>();
     configChange$ = new EventEmitter<OptionConfig>();
     scope = signal(Scope.Search);
     private _editorialSidebar: EditorialSidebarComponent;

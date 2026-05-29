@@ -18,6 +18,7 @@ import {
     AboutService,
     AuthenticationService,
     CollectionService as ApiCollectionService,
+    Connector,
     Copy,
     CreateSuggestionRequestDto,
     DEFAULT,
@@ -52,6 +53,7 @@ import {
     NodeEntriesService,
     NodeEntriesWrapperComponent,
     NodesRightMode,
+    OptionItem,
     Scope,
     TreeConfig,
     TreeNodeService,
@@ -66,7 +68,14 @@ import {
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
+import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import {
+    AddWithConnectorDialogData,
+    AddWithConnectorDialogResult,
+} from '../../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
 import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
 import {
@@ -122,6 +131,10 @@ export type NodesSelectorConfig = {
      * custom label for the APPLY button
      */
     applyLabel?: string;
+    /**
+     * whether to show the connector "Create" button in the upload tab (default: true)
+     */
+    allowCreate?: boolean;
 };
 
 @Component({
@@ -356,6 +369,7 @@ export class NodesSelectorComponent implements OnInit {
 
     // upload tab
     inboxNode: Node;
+    connectorOptions: WritableSignal<OptionItem[]> = signal([]);
 
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
@@ -373,16 +387,22 @@ export class NodesSelectorComponent implements OnInit {
         public nodeHelperService: NodeHelperService,
         public editorialSidebarService: EditorialSidebarService,
         private nodeService: NodeService,
+        private restNodeService: RestNodeService,
         private suggestionsV1Service: SuggestionsV1Service,
         private uiService: UIService,
         private uploadDialogService: UploadDialogService,
         private authenticationService: AuthenticationService,
         private aboutService: AboutService,
+        private connectorOptionsService: ConnectorOptionsService,
+        private dialogs: DialogsService,
         private searchService: SearchService,
         private toast: Toast,
         private translate: TranslateService,
         private treeNodeService: TreeNodeService,
     ) {
+        this.connectorOptionsService
+            .buildOptions((connector) => void this.showCreateConnector({ connector }))
+            .subscribe((options) => this.connectorOptions.set(options));
         effect(() => {
             const option = this.option();
             if (option?.optionConfig?.state) {
@@ -1302,6 +1322,49 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsWrapper?.getSelection().clear();
         this.searchWrapper?.getSelection().clear();
         this.workspaceWrapper?.getSelection().clear();
+    }
+
+    /**
+     * Opens the AddWithConnectorDialog for the picked connector. On confirm, a node is created in
+     * the inbox, the connector edit window (pre-opened by the dialog as a user gesture) is
+     * navigated to the connector URL, and the new node is emitted via applyNodeEmitted with
+     * connectorId + window so consumers (e.g. submit-assignment) can poll for write-back.
+     */
+    async showCreateConnector(details: AddWithConnectorDialogData): Promise<void> {
+        const dialogRef = await this.dialogs.openAddWithConnectorDialog(details);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                void this.createConnector(details.connector, result);
+            }
+        });
+    }
+
+    private async createConnector(
+        connector: Connector,
+        event: AddWithConnectorDialogResult,
+    ): Promise<void> {
+        const props = this.nodeHelperService.propertiesFromConnector(event);
+        this.restNodeService
+            .createNode(this.inboxNode.ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
+            .subscribe(
+                (data) => {
+                    void this.uiService.editConnector(data.node, {
+                        type: event.type as any,
+                        win: event.window,
+                        connectorType: connector,
+                    });
+                    this.editorialSidebarService.applyNodeEmitted.emit({
+                        nodes: [data.node],
+                        parent: this.parent(),
+                        connectorId: connector.id,
+                        window: event.window,
+                    });
+                },
+                (error: any) => {
+                    event.window?.close();
+                    this.nodeHelperService.handleNodeError(event.name, error);
+                },
+            );
     }
 
     protected readonly DEFAULT = DEFAULT;

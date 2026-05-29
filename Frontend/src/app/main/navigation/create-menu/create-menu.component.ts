@@ -39,7 +39,6 @@ import {
     Filetype,
     FrameEventsService,
     RestConnectorService,
-    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestIamService,
@@ -65,6 +64,7 @@ import { CardComponent } from '../../../shared/components/card/card.component';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
+import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 
 @Component({
@@ -111,6 +111,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     _parent: Node = null;
 
     connectorList: Connector[];
+    connectorOptions: OptionItem[] = [];
     fileIsOver = false;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
@@ -128,9 +129,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private cardDialogService: CardDialogService,
         private connector: RestConnectorService,
         private connectorApi: ConnectorService,
+        private connectorOptionsService: ConnectorOptionsService,
         private configService: ConfigService,
         private mainNavService: MainNavService,
-        private connectors: RestConnectorsService,
         private dialogs: DialogsService,
         private event: FrameEventsService,
         private uiService: UIService,
@@ -153,13 +154,18 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             this.params = params;
             void this.updateOptions();
         });
-        this.connectorApi
-            .observeConnectorList()
+        this.connectorOptionsService
+            .observeConnectors()
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((list) => {
-                this.connectorList = this.connectors
-                    .filterConnectors(list?.connectors)
-                    .concat(this.connectors.filterConnectors(list?.simpleConnectors));
+            .subscribe((connectors) => {
+                this.connectorList = connectors;
+                void this.updateOptions();
+            });
+        this.connectorOptionsService
+            .buildOptions((connector) => void this.showCreateConnector({ connector }))
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((options) => {
+                this.connectorOptions = options;
                 void this.updateOptions();
             });
         this.connector.isLoggedIn(false).subscribe((login) => {
@@ -291,23 +297,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             upload.priority = 10;
             this.options.push(upload);
             // handle connectors
-            if (this.connectorList) {
-                this.options = this.options.concat(
-                    this.connectorList.map((connector, i) => {
-                        const option = new OptionItem(
-                            'CONNECTOR.' + connector.id + '.NAME',
-                            connector.icon,
-                            () =>
-                                this.showCreateConnector({
-                                    connector,
-                                }),
-                        );
-                        option.elementType = [ElementType.NoneOrUnknown];
-                        option.group = DefaultGroups.CreateConnector;
-                        option.priority = i;
-                        return option;
-                    }),
-                );
+            if (this.connectorOptions?.length) {
+                this.options = this.options.concat(this.connectorOptions);
             }
             // handle app
             if (this.bridge.isRunningCordova()) {

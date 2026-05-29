@@ -2,7 +2,7 @@ import { trigger } from '@angular/animations';
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import moment from 'moment';
-import { Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
+import { ConnectorService, Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
 import {
     CustomOptions,
     DefaultGroups,
@@ -15,7 +15,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { Observable, Subject, Subscription } from 'rxjs';
-import { filter, pairwise } from 'rxjs/operators';
+import { filter, pairwise, take } from 'rxjs/operators';
 import { CordovaService } from '../../services/cordova.service';
 import { BridgeService } from '../../services/bridge.service';
 import * as EduData from '../../core-module/core.module';
@@ -27,7 +27,6 @@ import {
     RequestObject,
     RestCollectionService,
     RestConnectorService,
-    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestIamService,
@@ -119,7 +118,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         private router: Router,
         private route: ActivatedRoute,
         private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
+        private connectorService: ConnectorService,
         private dialogs: DialogsService,
         private nodeService: RestNodeService,
         private cordova: CordovaService,
@@ -148,9 +147,12 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.createAllowed = data.statusCode == RestConstants.STATUS_CODE_OK;
                 loadingTask.done();
             });
-            this.connectors.list().subscribe((list) => {
-                this.connectorList = list;
-            });
+            this.connectorService
+                .observeConnectorList()
+                .pipe(take(1))
+                .subscribe((list) => {
+                    this.connectorList = list;
+                });
         });
         this.amountToRandomize = 4;
         this.setStreamMode();

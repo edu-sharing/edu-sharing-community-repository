@@ -42,6 +42,8 @@ This agent assists with development tasks in this Angular frontend project.
 -   Do NOT use spread syntax (`[...x]`, `{...x}`) in templates — it is only supported in Angular 21.1+ and this project is on an older version. A `Set`/`Map` won't serialize with the `json` pipe either (renders `{}`); convert to an array in the component if you need to inspect it.
 -   `UIService.editConnector(node, type?, win?, connectorType?)` and `openConnector(...)` return the opened `Window`. Pre-open the window in the user-gesture (synchronously) and pass it in if the connector call follows an `await`, to avoid popup blockers.
 -   Node list overlays: `es-node-entries-wrapper` projects an `<ng-template #overlay let-element="element">` (via `@ContentChild('overlay')`) rendered per card for `Grid`/`SmallGrid` display types. The card's `.card-overlay` provides the positioning context.
+-   `es-dropdown` (in `projects/edu-sharing-ui/.../dropdown`) exposes its `MatMenu` as a `@ViewChild('dropdown') menu` and renders only a hidden `matMenuTrigger`. To trigger it from an external button: `<button [matMenuTriggerFor]="ref.menu">…</button>` where `ref` is the `#templateRef` on `<es-dropdown>`. Mobile fallback: call `ref.triggerBottomSheet()`.
+-   `AddWithConnectorDialog` opens its popup `Window` synchronously inside the dialog's "Create" handler (user gesture) and returns it on `AddWithConnectorDialogResult.window`. Always forward that window to `UIService.editConnector(node, {win, connectorType})` — do not re-open one yourself, or the popup blocker will kill it.
 
 ### Layout — Editorial Page
 
@@ -71,6 +73,14 @@ This agent assists with development tasks in this Angular frontend project.
 -   To bind a standalone `es-actionbar` to a node context (outside `es-node-entries-wrapper`): provide `OptionsHelperDataService` in the component's `providers`, use a `@ViewChild` **setter** (not field) to call `await initComponents(actionbar)` then `refreshComponents()` when the bar first enters the DOM (e.g. after `*ngIf` becomes true), and use an `effect()` to call `setData(…)` + `refreshComponents()` when the active node changes while the actionbar stays rendered. `OptionsHelperService` is already provided at `editorial-page` level — only `OptionsHelperDataService` needs to be added locally.
 -   `OptionsHelperDataService.setData()` calls `wrapOptionCallbacks()`, which replaces each `option.callback` so that when the actionbar calls it with no arguments the node is resolved from `data.activeObjects`. The original callback therefore receives `(undefined, [activeNode])` — write callbacks as `(node, nodes) => fn(node ?? nodes?.[0])` so they work correctly from both `es-node-entries-wrapper` (passes node as first arg) and the standalone actionbar.
 -   The `getDownloadOption(data)` callback closes over its `data` argument. When used with `OptionsHelperDataService`, pass a **shared `OptionData` object reference** and update `activeObjects` on it before each `setData` + `refreshComponents` call, so the download callback resolves the correct node via `getObjects(object, closureData)` even after wrapping.
+
+### Connector Create Options
+
+-   `ConnectorOptionsService` (`src/app/services/connector-options.service.ts`) is the single source for "create-with-connector" `OptionItem[]`. Use `observeConnectors()` for the filtered list (regular + `simpleConnectors`, merged through `RestConnectorsService.filterConnectors`) and `buildOptions(onSelect)` for the menu options observable. Do not re-implement this list inline (was duplicated in `create-menu` and `nodes-selector`).
+
+### Editorial Sidebar
+
+-   `EditorialSidebarService.applyNodeEmitted` (`providedIn: 'root'`) is the channel for "the sidebar produced these nodes for the host". Payload: `{ nodes: Node[]; parent?: Node; connectorId?: string; window?: Window }`. When `connectorId`/`window` are set, the new node was created via a connector and the host can hand them to `startConnectorPolling`-style write-back logic. Multiple components (e.g. `manage-assignment`, `submit-assignment`) subscribe to the same emitter.
 
 ### Notifications/Toasts/Snackbar
 
