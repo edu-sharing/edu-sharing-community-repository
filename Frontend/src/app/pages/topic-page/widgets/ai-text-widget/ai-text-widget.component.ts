@@ -32,7 +32,7 @@ import { Toast, ToastType } from '../../../../services/toast';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import { BapiConfig } from '../../shared/types/bapi-config';
+import { BapiChatCompletionConfig } from '../../shared/types/bapi-chat-completion-config';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { TextVariant } from '../../shared/types/text-variant';
@@ -373,14 +373,14 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
         const mdsAIConfig: MdsAiConfig = mds.aiConfigs.find(
             (config: MdsAiConfig) => config.id === aiConfigId,
         );
-        // parse the JSON string of chatCompletion
+        // parse the JSON string of prompt
         mdsAIConfig.prompt =
             typeof mdsAIConfig.prompt === 'string'
                 ? JSON.parse(mdsAIConfig.prompt)
                 : mdsAIConfig.prompt;
         if (mdsAIConfig) {
             const aiConfig: BapiConfigObject = {
-                prompt: mdsAIConfig as BapiConfig,
+                prompt: mdsAIConfig as unknown as BapiChatCompletionConfig,
             };
             this.latestStoredPrompt = retrievePromptFromAiConfig(aiConfig, 'prompt');
             this.promptInput = this.latestStoredPrompt;

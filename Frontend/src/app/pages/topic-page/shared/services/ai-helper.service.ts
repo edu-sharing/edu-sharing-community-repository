@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AboutService, FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
 import {
-    ChatCompletionResult,
+    CreateChatCompletionResponse,
     EduSharingLlmService,
-    ImageResult,
+    ImagesResponse,
     MdsConfig,
     NodeConfig,
 } from 'ngx-edu-sharing-b-api';
@@ -51,7 +51,7 @@ export class AiHelperService {
         configId: string | NodeConfig,
         variables: { [key: string]: string[] } = {},
         contextNodeId: string,
-    ): Promise<ChatCompletionResult> {
+    ): Promise<CreateChatCompletionResponse> {
         const user: string = await this.getCurrentUser();
         let config: NodeConfig | MdsConfig;
         if (typeof configId === 'string') {
@@ -89,10 +89,10 @@ export class AiHelperService {
         widgetNodeId: string,
         contextNodeId: string,
         variables: { [key: string]: string[] } = {},
-    ): Promise<ImageResult> {
+    ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
                         retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),
@@ -121,10 +121,10 @@ export class AiHelperService {
         widgetNodeId: string,
         contextNodeId: string,
         variables: { [key: string]: string[] } = {},
-    ): Promise<ImageResult> {
+    ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
                         retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),

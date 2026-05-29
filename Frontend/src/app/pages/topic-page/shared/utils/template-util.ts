@@ -189,10 +189,7 @@ export const retrievePromptFromAiConfig = (
     aiConfig: BapiConfigObject,
     propertyName: keyof BapiConfigObject = 'description',
 ): string => {
-    return (
-        aiConfig[propertyName].chatCompletion?.messages?.find((m) => m?.role === 'user')?.content ??
-        ''
-    );
+    return aiConfig[propertyName].prompt?.messages?.find((m) => m?.role === 'user')?.content ?? '';
 };
 
 /**

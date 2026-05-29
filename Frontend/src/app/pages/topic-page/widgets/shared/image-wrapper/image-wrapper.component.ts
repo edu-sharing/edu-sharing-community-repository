@@ -19,7 +19,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { ImageResult } from 'ngx-edu-sharing-b-api';
+import { ImagesResponse } from 'ngx-edu-sharing-b-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { v4 as uuidv4 } from 'uuid';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -154,7 +154,7 @@ export class ImageWrapperComponent implements OnInit {
         // user has selected an AI generated image
         if (aiGeneratedImage) {
             try {
-                const imageData: ImageResult = regenerateNecessary
+                const imageData: ImagesResponse = regenerateNecessary
                     ? await this.aiHelperService.updateAiImage(
                           this.widgetNodeId(),
                           this.contextNodeId(),

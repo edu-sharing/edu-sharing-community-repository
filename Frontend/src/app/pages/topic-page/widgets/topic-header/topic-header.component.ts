@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse } from 'ngx-edu-sharing-b-api';
 import {
     ColorHelper,
     EduSharingUiCommonModule,
@@ -282,7 +282,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
         );
         try {
-            const promptResponse: ChatCompletionResult =
+            const promptResponse: CreateChatCompletionResponse =
                 await this.aiHelperService.generateFromPrompt(
                     mdsConfigId,
                     {},
@@ -357,7 +357,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             return;
         }
         try {
-            const promptResponse: ChatCompletionResult =
+            const promptResponse: CreateChatCompletionResponse =
                 await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
             const responseText: string = retrieveResultString(promptResponse) ?? '';
             if (responseText !== '') {
