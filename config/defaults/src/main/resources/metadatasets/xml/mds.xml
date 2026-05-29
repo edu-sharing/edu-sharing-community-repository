@@ -9,7 +9,7 @@
       <useCaching>false</useCaching>
       <prompt>
         {
-        "model": "mistral-large-3",
+        "model": "mistral-large-3-675b-instruct-2512",
         "messages": [
         {
         "role":"system",
