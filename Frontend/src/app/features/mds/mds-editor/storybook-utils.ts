@@ -1,20 +1,10 @@
-import { CommonModule } from '@angular/common';
 import {
     ApplicationConfig,
-    Component,
     EventEmitter,
     importProvidersFrom,
-    Inject,
     Injectable,
     NgModule,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import {
-    MAT_DIALOG_DATA,
-    MatDialog,
-    MatDialogModule,
-    MatDialogRef,
-} from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -53,7 +43,6 @@ import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     ColumnType,
-    EduSharingUiModule,
     Helper,
     I18N_CONFIG,
     I18nConfig,
@@ -731,17 +720,13 @@ export const DefaultMds: MdsDefinition = {
             id: 'suggestion_ai',
             provider: 'openai',
             useCaching: false,
-            chatCompletion:
-                '\n        {\n          "model": "gpt-4.1",\n          "messages": [\n            {\n              "role":"system",\n              "content": "Du bist ein Assistent für edu-sharing.\\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."\n            },\n            {\n              "role": "user",\n              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|-}}\\nDateiname: {{var.cm:name|-}}\\nLink: {{var.ccm:wwwwurl|-}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\\nSchlagworte: {{var.cclom:general_keyword|-}}\\nBeschreibung: {{var.cclom:general_description|-}}\\nFormat: {{node.cclom:format|-}}\\nMedientyp: {{node.virtual:mediatype|-}}"\n            }\n          ]\n        }\n      ',
-            createImage: null,
+            prompt: '\n        {\n          "model": "gpt-4.1",\n          "messages": [\n            {\n              "role":"system",\n              "content": "Du bist ein Assistent für edu-sharing.\\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."\n            },\n            {\n              "role": "user",\n              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|-}}\\nDateiname: {{var.cm:name|-}}\\nLink: {{var.ccm:wwwwurl|-}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\\nSchlagworte: {{var.cclom:general_keyword|-}}\\nBeschreibung: {{var.cclom:general_description|-}}\\nFormat: {{node.cclom:format|-}}\\nMedientyp: {{node.virtual:mediatype|-}}"\n            }\n          ]\n        }\n      ',
         },
         {
             id: 'image_ai',
             provider: 'openai',
             useCaching: false,
-            chatCompletion: null,
-            createImage:
-                '\n        {\n          "model": "dall-e-2",\n          "size": "256x256",\n          "n": 3,\n          "response_format": "b64_json",\n          "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"\n        }\n      ',
+            prompt: null,
         },
     ],
     widgets: [
@@ -828,23 +813,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge einen aussagekräftigen Titel"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge einen aussagekräftigen Titel"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -971,23 +952,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1143,23 +1120,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1276,23 +1249,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1337,23 +1306,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1590,23 +1555,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
