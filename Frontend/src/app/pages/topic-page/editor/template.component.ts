@@ -2484,17 +2484,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         sourceNode: Node,
         targetNodeId: string,
     ): Promise<Node | null> {
-        let updatedNode: Node | null = null;
+        let modified: boolean = false;
         for (const prop of DEFAULT_PAGE_VARIANT_PROFILING_PROPS) {
             if (sourceNode.properties?.[prop]?.length) {
-                updatedNode = await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                    updatedNode ? retrieveNodeId(updatedNode) : targetNodeId,
+                await this.topicPageHelperService.setProperty(
+                    targetNodeId,
                     prop,
                     sourceNode.properties[prop],
                 );
+                modified = true;
             }
         }
-        return updatedNode;
+        if (modified) {
+            return await this.topicPageHelperService.getNode(targetNodeId);
+        }
+        return null;
     }
 
     /**
