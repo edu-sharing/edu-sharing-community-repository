@@ -2443,6 +2443,12 @@
         <statement value="true">{"match":{"path":"${systemfolder}"}}</statement>
         <statement>{"match_all": {}}</statement>
       </property>
+      <property name="virtual:parent_recursive">
+        <statement>{"match":{"path":"${valueRaw}"}}</statement>
+      </property>
+      <property name="virtual:parent">
+        <statement>{"term":{"parentRef.id":"${valueRaw}"}}</statement>
+      </property>
     </query>
 
   </queries>

@@ -264,7 +264,8 @@
   "MAPTYPE": {
     "IMAGES": "Images",
     "USERDATAFOLDER": "Documents",
-    "INBOX": "Inbox"
+    "INBOX": "Inbox",
+    "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE": "Default"
   },
   "NODE": {
     "cm:name": "filename",

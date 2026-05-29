@@ -1411,7 +1411,8 @@
   "MAPTYPE": {
     "IMAGES": "Immagini",
     "USERDATAFOLDER": "Documenti",
-    "INBOX": "Posta in arrivo"
+    "INBOX": "Posta in arrivo",
+    "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE": "Predefinito"
   },
   "REVOKE_FEEDBACK": {
     "TITLE": "Contatta la redazione",

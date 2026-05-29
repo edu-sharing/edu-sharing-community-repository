@@ -502,6 +502,7 @@ public class CCConstants {
 
     public final static String CCM_ASPECT_WIDGET = "{http://www.campuscontent.de/model/1.0}widget";
     public final static String CCM_ASPECT_PAGE = "{http://www.campuscontent.de/model/1.0}page";
+    public final static String CCM_PROP_PAGE_VARIANT_IS_TEMPLATE = "{http://www.campuscontent.de/model/1.0}page_variant_is_template";
 
     public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
@@ -1455,6 +1456,10 @@ public class CCConstants {
 
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE = "EDUSYSTEM_TEMPLATE";
 
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE_DEFAULT = "EDUSYSTEM_TEMPLATE_DEFAULT";
+
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE = "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE";
+
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE = "EDUSYSTEM_SERVICE";
 
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER = "EDUSYSTEM_MEDIACENTER";
@@ -1747,6 +1752,7 @@ public class CCConstants {
     public final static String I18n_SYSTEMFOLDER_TOOLPERMISSIONS = "systemfolder_toolpermissions";
 
     public final static String I18n_SYSTEMFOLDER_TEMPLATE = "systemfolder_template";
+    public final static String I18n_SYSTEMFOLDER_TEMPLATE_DEFAULT = "systemfolder_template_default";
 
     public final static String I18n_SYSTEMFOLDER_SERVICE = "systemfolder_service";
 

@@ -181,7 +181,28 @@ public class UserEnvironmentTool {
     }
 
     public String getEdu_SharingTemplateFolder() {
-        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
+        String folderId = getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
+        getOrCreateChildMap(folderId, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE_DEFAULT,
+                Map.of(CCConstants.CCM_PROP_PAGE_VARIANT_IS_TEMPLATE, Boolean.TRUE));
+        return folderId;
+    }
+
+    private String getOrCreateChildMap(String parentId, String mapType, String i18nId) {
+        return getOrCreateChildMap(parentId, mapType, i18nId, Map.of());
+    }
+
+    private String getOrCreateChildMap(String parentId, String mapType, String i18nId, Map<String, Object> additionalProps) {
+        Map<String, Object> existing = mcBaseClient.getChild(parentId, CCConstants.CCM_TYPE_MAP, CCConstants.CCM_PROP_MAP_TYPE, mapType);
+        if (existing != null) {
+            return (String) existing.get(CCConstants.SYS_PROP_NODE_UID);
+        }
+        String name = I18nServer.getTranslationDefaultResourcebundle(i18nId);
+        Map<String, Object> props = new HashMap<>();
+        props.put(CCConstants.CM_NAME, name);
+        props.put(CCConstants.CM_PROP_C_TITLE, getLocalizedProperties(i18nId));
+        props.put(CCConstants.CCM_PROP_MAP_TYPE, mapType);
+        props.putAll(additionalProps);
+        return mcBaseClient.createNode(parentId, CCConstants.CCM_TYPE_MAP, props);
     }
 
     public String getEdu_SharingOrganizationDeleteProtocolFolder() {

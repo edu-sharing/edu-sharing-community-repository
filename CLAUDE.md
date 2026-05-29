@@ -103,6 +103,19 @@ Admin-managed folders that live under `Company Home / Edu_Sharing_System /`.
    ```
 4. Register it in `createAllSystemFolders()`.
 
+**Seeding default children inside a system folder** — if a folder needs a default child node at creation time, override the getter and call `getOrCreateChildMap` after `getOrCreateSystemFolderByName`. Add a `CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_<NAME>_DEFAULT` constant (value `EDUSYSTEM_<NAME>_DEFAULT`) and a matching `I18n_SYSTEMFOLDER_<NAME>_DEFAULT` key. Pass extra properties (e.g. aspect flags) via the `additionalProps` overload:
+```java
+public String getEdu_Sharing<Name>Folder() {
+    String folderId = getOrCreateSystemFolderByName(...);
+    getOrCreateChildMap(folderId, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_<NAME>_DEFAULT,
+        CCConstants.I18n_SYSTEMFOLDER_<NAME>_DEFAULT,
+        Map.of(CCConstants.CCM_PROP_PAGE_VARIANT_IS_TEMPLATE, true));
+    return folderId;
+}
+```
+
+**Non-mandatory aspects when creating nodes** — Alfresco automatically applies an aspect when any of its properties is written, so simply including a property from a non-mandatory aspect (e.g. `ccm:page_variant_is_template` from `ccm:page_variant`) in the props map is sufficient. If you need to apply an aspect without setting a property, call `nodeService.setAspects(...)` explicitly.
+
 ---
 
 ### Dynamic Node ID Mappings — `NodeDao.mapNodeConstants`
@@ -161,7 +174,7 @@ Searches for nodes with the `ccm:page_variant` aspect. Key properties:
 
 | Property                                  | Notes                                                 |
 |-------------------------------------------|-------------------------------------------------------|
-| `ccm:page_variant_is_template`            | `"true"` / `"false"`                                  |
+| `ccm:page_variant_is_template`            | `d:boolean` — pass `Boolean.TRUE`, **not** `"true"`   |
 | `ccm:page_variant_profiling_target_group` | multi-value OR: `learner`, `teacher`, `general`       |
 | `ccm:educationalcontext`                  | multi-value OR                                        |
 | `virtual:page_variant_global`             | `"true"` → restricts to nodes under the system folder |

@@ -1412,7 +1412,8 @@
   "MAPTYPE": {
     "IMAGES": "Images",
     "USERDATAFOLDER": "documents",
-    "INBOX": "Boîte de réception"
+    "INBOX": "Boîte de réception",
+    "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE": "Défaut"
   },
   "REVOKE_FEEDBACK": {
     "TITLE": "Rédaction contact",
