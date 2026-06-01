@@ -24,7 +24,6 @@ import {
     LoginResult,
     RestConnectorService,
     RestConstants,
-    RestHelper,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
@@ -328,7 +327,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
 
-    async login(password = this.password, code2Fa?: string) {
+    async login(password = this.password) {
         this.isLoading = true;
         if (this.scope) {
             // before we're converting to a safe session, we need to make sure all previous requests are finished
@@ -352,7 +351,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             }
         }
-        this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
+        this.connector.login(this.username, password, this.scope).subscribe(
             (data) => {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.goToNext(data);
@@ -373,10 +372,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_2FA) {
-                        if (code2Fa) {
-                            this.toast.error(null, 'LOGIN.2FA.WRONG_CODE');
-                        }
-                        void this.show2Fa(password);
+                        void this.show2Fa();
                     } else {
                         if (this.isSafeLogin) {
                             this.loginSafeFailed = true;
@@ -506,7 +502,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         login.disabled = this.disabled;
     }
 
-    private async show2Fa(password: string) {
+    private async show2Fa() {
         this.faConfirm.reset();
         this.show2FaDialog = await this.dialogs.openGenericDialog({
             title: 'LOGIN.2FA.TITLE',
@@ -535,9 +531,24 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         const result = await firstValueFrom(this.show2FaDialog.afterClosed());
         this.show2FaDialog = null;
         if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
-            // do login
             this.isLoading = true;
-            void this.login(password, this.faConfirm.get('code').value);
+            this.connector.verify2Fa(this.faConfirm.get('code').value).subscribe(
+                (data) => {
+                    if (data.statusCode === RestConstants.STATUS_CODE_OK) {
+                        this.goToNext(data);
+                    } else if (data.statusCode === RestConstants.STATUS_CODE_2FA) {
+                        this.toast.error(null, 'LOGIN.2FA.WRONG_CODE');
+                        this.isLoading = false;
+                    } else {
+                        this.toast.error(null, 'LOGIN.ERROR');
+                        this.isLoading = false;
+                    }
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.isLoading = false;
+                },
+            );
         }
     }
 

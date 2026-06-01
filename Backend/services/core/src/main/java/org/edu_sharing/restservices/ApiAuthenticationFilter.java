@@ -5,7 +5,6 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
@@ -68,11 +67,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                 logger.debug("auth is BASIC");
                 validatedAuth = httpBasicAuth(httpReq, authHdr);
                 if (validatedAuth != null) {
-                    String succsessfullAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
-                    String authMethod = ("alfrescoNtlm1".equals(succsessfullAuthMethod) || "alfinst".equals(succsessfullAuthMethod)) ? CCConstants.AUTH_TYPE_DEFAULT : CCConstants.AUTH_TYPE + succsessfullAuthMethod;
-                    String username = validatedAuth.get(CCConstants.AUTH_USERNAME);
-                    authTool.storeAuthInfoInSession(username, validatedAuth.get(CCConstants.AUTH_TICKET), authMethod, session);
-						CSRFConfig.csrfInitCookie(httpReq,httpResp);
+                    validatedAuth = applyValidatedAuth(authTool, validatedAuth, session, httpReq, httpResp);
                 }
             } else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
 
@@ -126,6 +121,23 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             }
 
         }
+
+        // Second step of 2FA: no Authorization header, but session has a pending-2FA username
+        // meaning the password was already validated in the first request
+        if (authHdr == null && validatedAuth == null) {
+            String pending2FaUsername = (String) session.getAttribute(CCConstants.SESSION_2FA_PENDING_USERNAME);
+            if (pending2FaUsername != null && httpReq.getHeader("X-2FA-Token") != null) {
+                int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
+                AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
+                if (authorityService.validate2Fa(pending2FaUsername, twoFaCode)) {
+                    session.removeAttribute(CCConstants.SESSION_2FA_PENDING_USERNAME);
+                    validatedAuth = applyValidatedAuth(authTool, pending2FaUsername, session, httpReq, httpResp);
+                } else {
+                    httpReq.setAttribute(CCConstants.AUTH_ERROR_STATUS, CCConstants.AUTH_ERROR_STATUS_2FA);
+                }
+            }
+        }
+
         Config accessConfig = LightbendConfigLoader.get().getConfig("security.access");
         List<String> AUTHLESS_ENDPOINTS = Arrays.asList(
                 "/authentication",
@@ -243,6 +255,22 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         chain.doFilter(req, resp);
     }
 
+    private Map<String, String> applyValidatedAuth(AuthenticationToolAPI authTool, Map<String, String> validatedAuth, HttpSession session, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+        String successfulAuthMethod = SubsystemChainingAuthenticationService.getSuccessFullAuthenticationMethod();
+        String authMethod = ("alfrescoNtlm1".equals(successfulAuthMethod) || "alfinst".equals(successfulAuthMethod))
+                ? CCConstants.AUTH_TYPE_DEFAULT
+                : CCConstants.AUTH_TYPE + successfulAuthMethod;
+        authTool.storeAuthInfoInSession(validatedAuth.get(CCConstants.AUTH_USERNAME), validatedAuth.get(CCConstants.AUTH_TICKET), authMethod, session);
+        CSRFConfig.csrfInitCookie(httpReq, httpResp);
+        return authTool.validateAuthentication(session);
+    }
+
+    private Map<String, String> applyValidatedAuth(AuthenticationToolAPI authTool, String username, HttpSession session, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+        authTool.authenticateUser(username, session, CCConstants.AUTH_TYPE_DEFAULT);
+        CSRFConfig.csrfInitCookie(httpReq, httpResp);
+        return authTool.validateAuthentication(session);
+    }
+
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr) {
         // auto-skip 2fa if the request port was from internal (non-exposed) network for script access
         return httpBasicAuth(httpReq, authHdr, String.valueOf(httpReq.getLocalPort()).equals(ApplicationInfoList.getHomeRepository().getPort()));
@@ -271,18 +299,21 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         }
 
         try {
-            //check 2FA
-            if(!ignore2FA) {
-                int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
+            // Authenticate the user first to validate the password
+            validatedAuth = authTool.createNewSession(username, password);
+
+            // Then check 2FA — password was already confirmed above
+            if (validatedAuth != null && !ignore2FA) {
                 AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
-                if (!authorityService.validate2Fa(username, twoFaCode)) {
+                if (authorityService.is2FaActive(username)) {
                     httpReq.setAttribute(CCConstants.AUTH_ERROR_STATUS, CCConstants.AUTH_ERROR_STATUS_2FA);
-                    throw new AuthenticationException("Invalid verification code for 2FA");
+                    // Store username so the second request can complete auth with just the 2FA code
+                    httpReq.getSession(true).setAttribute(CCConstants.SESSION_2FA_PENDING_USERNAME,
+                            validatedAuth.get(CCConstants.AUTH_USERNAME));
+                    Logger.getLogger(ApiAuthenticationFilter.class).debug("challenging 2fa for " + username);
+                    return null;
                 }
             }
-
-            // Authenticate the user
-            validatedAuth = authTool.createNewSession(username, password);
         } catch (Exception ex) {
             Logger.getLogger(ApiAuthenticationFilter.class).error(ex.getMessage(), ex);
         }

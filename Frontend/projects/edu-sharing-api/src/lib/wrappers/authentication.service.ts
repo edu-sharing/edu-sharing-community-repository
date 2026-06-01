@@ -29,7 +29,6 @@ type LoginAction =
           username: string;
           password: string;
           scope?: string;
-          code2Fa?: string;
       }
     | {
           // Logs the user in with the provided credentials.
@@ -52,6 +51,11 @@ type LoginAction =
     | {
           // Triggers a refresh of login information after the state was changed from outside.
           kind: 'forceRefresh';
+      }
+    | {
+          // Verifies a 2FA code against an already-authenticated session (no Basic auth).
+          kind: 'verify2Fa';
+          code2Fa: string;
       };
 
 type LoginActionResponse = {
@@ -137,23 +141,26 @@ export class AuthenticationService {
     }
 
     /**
+     * verify a 2fa code
+     * Note: Only valid if a session already started and user/password has been validated
+     */
+    verify2Fa(code2Fa: string): Observable<LoginInfo> {
+        this.loginActionTrigger.next({ kind: 'verify2Fa', code2Fa });
+        return this.loginInfo$.pipe(first());
+    }
+
+    /**
      * Logs in to the backend and returns the login information.
      *
      * The returned login information might be the result of a different action in case a different
      * action was triggered before the login could be completed.
      */
-    login(
-        username: string,
-        password: string,
-        scope?: string,
-        code2Fa?: string,
-    ): Observable<LoginInfo> {
+    login(username: string, password: string, scope?: string): Observable<LoginInfo> {
         this.loginActionTrigger.next({
             kind: 'login',
             username,
             password,
             scope,
-            code2Fa,
         });
         return this.loginInfo$.pipe(first());
     }
@@ -392,11 +399,7 @@ export class AuthenticationService {
                 if (action.scope) {
                     return this.loginToScope(action.username, action.password, action.scope);
                 } else {
-                    return this.loginWithBasicAuth(
-                        action.username,
-                        action.password,
-                        action.code2Fa,
-                    );
+                    return this.loginWithBasicAuth(action.username, action.password);
                 }
             case 'loginToken':
                 return this.loginWithToken(action.accessToken);
@@ -404,6 +407,8 @@ export class AuthenticationService {
                 return this.loginWithEduTicket(action.ticket);
             case 'logout':
                 return this.authentication.logout().pipe(switchMap(() => this.fetchLoginInfo()));
+            case 'verify2Fa':
+                return this.loginWith2FaOnly(action.code2Fa);
             case 'initial':
             case 'forceRefresh':
                 return this.fetchLoginInfo();
@@ -419,23 +424,23 @@ export class AuthenticationService {
     /**
      * request authentication by providing an username and password
      */
-    private loginWithBasicAuth(
-        username: string,
-        password: string,
-        code2Fa?: string,
-    ): Observable<LoginInfo> {
+    private loginWithBasicAuth(username: string, password: string): Observable<LoginInfo> {
         return rxjs.of(void 0).pipe(
             // Make `setBasicAuthForNextRequest` part of the observable, so it is guaranteed to
             // be run together with the login request.
             tap(() => {
                 this.apiRequestConfiguration.setBasicAuthForNextRequest({ username, password });
-                if (code2Fa) {
-                    this.apiRequestConfiguration.set2FaCodeForNextRequest(code2Fa);
-                }
             }),
             switchMap(() => this.authentication.login()),
         );
     }
+    private loginWith2FaOnly(code2Fa: string): Observable<LoginInfo> {
+        return rxjs.of(void 0).pipe(
+            tap(() => this.apiRequestConfiguration.set2FaCodeForNextRequest(code2Fa)),
+            switchMap(() => this.authentication.login()),
+        );
+    }
+
     /**
      * request authentication by providing an oauth token
      */

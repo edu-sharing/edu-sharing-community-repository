@@ -138,6 +138,12 @@ public class CCConstants {
     public final static String AUTH_ERROR_STATUS_2FA = "2FA";
 
     /**
+     * this var is set when the current session was already validated user/password
+     * but the user has yet to provide a valid 2FA token in the next request
+     */
+    public final static String SESSION_2FA_PENDING_USERNAME = "SESSION_2FA_PENDING_USERNAME";
+
+    /**
      * access on nodes that was validated by lms
      */
     public final static String AUTH_SINGLE_USE_NODEIDS = "AUTH_SINGLE_USE_NODEIDS";
