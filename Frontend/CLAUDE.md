@@ -97,6 +97,12 @@ This agent assists with development tasks in this Angular frontend project.
 -   Translation files: `src/assets/i18n/`
 -   Structure: grouped by component, then language (`de.json`, `en.json`, …)
 
+### Authentication State — `AuthenticationService` / `UserService`
+
+-   **`AuthenticationService.createUserChanges()`** detects login-state changes by tracking both `authorityName` **and** `isValidLogin`. This is necessary because the backend may return the real `authorityName` before authentication is fully complete (e.g. during multi-step flows), so a change in `authorityName` alone is not a reliable signal that the user is now logged in.
+-   **`UserService.createCurrentUser()`** merges `observeUserChanges()` with `observeLoginInfo().pipe(distinctUntilKeyChanged('isValidLogin'))` so that a flip of `isValidLogin` (e.g. 2FA completion) also triggers a user re-fetch — not just an `authorityName` change.
+-   The `switchMap(() => observeLoginInfo().pipe(take(1)))` inside `createCurrentUser` normalises heterogeneous trigger types (void / LoginInfo) into the current `LoginInfo` for the downstream `switchReplay`.
+
 ### Tool Permissions
 
 -   Frontend constants: `projects/edu-sharing-api/src/lib/rest-constants.ts` — add `TOOLPERMISSION_*` string constants here

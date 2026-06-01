@@ -65,6 +65,7 @@ CCConstants.getValidGlobalName(localName)   // prefix:prop  →  {ns}prop
 | `I18n_SYSTEMFOLDER_*`               | i18n lookup keys for system folder display names                                                              |
 | `NAMESPACE_*` / `NAMESPACE_SHORT_*` | Full namespace URIs and their short prefixes                                                                  |
 | `AUTH_*`                            | Authentication session / token keys                                                                           |
+| `SESSION_*`                         | HTTP session attribute keys — constant name equals value (e.g. `SESSION_RENDERING_DETAILS = "SESSION_RENDERING_DETAILS"`) |
 | `COMMON_LICENSE_*`                  | License type keys and Creative Commons URL templates                                                          |
 
 #### Virtual properties (`VIRT_PROP_*`)
@@ -263,6 +264,16 @@ AuthenticationUtil.runAsSystem(() ->
 static ServiceRegistry serviceRegistry =
     (ServiceRegistry) AlfAppContextGate.getApplicationContext().getBean(ServiceRegistry.SERVICE_REGISTRY);
 ```
+
+---
+
+## REST Authentication Filter — `ApiAuthenticationFilter`
+
+**File:** `Backend/services/core/src/main/java/org/edu_sharing/restservices/ApiAuthenticationFilter.java`
+
+Processes every `/rest/*` request. Supports Basic auth, Bearer (OAuth2), and EDU-Ticket auth. Key gotcha: `authTool.createNewSession(username, password)` sets the **Alfresco security-context thread-local** immediately — even if you do not subsequently call `storeAuthInfoInSession`. This means the backend endpoint may see the authenticated user's `authorityName` even if the HTTP session was never fully established (e.g. when 2FA is pending). Do not rely on `authorityName` alone to determine whether a session is fully valid; check `isValidLogin` in the returned `LoginInfo`.
+
+Internal Tomcat port detection uses `httpReq.getLocalPort()` compared to `ApplicationInfoList.getHomeRepository().getPort()` (returns `String`, not `int`). Requests arriving on the internal port bypass 2FA checks.
 
 ---
 
