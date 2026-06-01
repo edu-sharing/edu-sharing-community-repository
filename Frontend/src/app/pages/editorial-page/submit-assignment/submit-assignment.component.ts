@@ -744,7 +744,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                         { label: 'CANCEL', config: { color: 'standard' } },
                         {
                             label: 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMIT',
-                            config: { color: 'danger' },
+                            config: { color: 'primary' },
                         },
                     ],
                 })
@@ -791,6 +791,11 @@ export class SubmitAssignmentComponent implements OnDestroy {
             }),
         );
         this.submission.set(updated);
+        this.toast.show({
+            type: 'info',
+            subtype: ToastType.InfoSimple,
+            message: 'EDITORIAL.SUBMIT_ASSIGNMENT.NOTES_SAVED',
+        });
         this.loading.set(false);
     }
 
