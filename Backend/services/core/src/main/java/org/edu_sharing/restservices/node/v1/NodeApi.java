@@ -33,13 +33,12 @@ import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.github.GitHubService;
-import org.edu_sharing.service.authority.AuthorityServiceHelper;
-import org.edu_sharing.service.transform.FulltextService;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
@@ -54,6 +53,7 @@ import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.ShareInfoContextHolder;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.transform.FulltextService;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -1659,10 +1659,7 @@ public class NodeApi {
         try {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-            node = NodeDao.mapNodeConstants(repoDao, node);
-            source = NodeDao.mapNodeConstants(repoDao, source);
-            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-            NodeDao child = nodeDao.createChildByMove(source);
+            NodeDao child = NodeDao.createChildByMove(repoDao, node, source);
 
             NodeEntry response = new NodeEntry();
             response.setNode(child.asNode());

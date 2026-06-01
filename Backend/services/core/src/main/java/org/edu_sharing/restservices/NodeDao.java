@@ -60,6 +60,7 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.HandleParam;
+import org.edu_sharing.service.permission.PermissionChecking;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.permission.PermissionServiceHelper;
 import org.edu_sharing.service.rating.RatingDetails;
@@ -120,7 +121,6 @@ public class NodeDao {
     private final List<String> access;
     private final org.edu_sharing.service.model.NodeRef.Preview previewData;
     // true if the current Dao is the collection home folder
-    private final boolean isCollectionHomePath;
     private final String ownerUsername;
     private final Map<NodeRefImpl.Relation, NodeDao> relations = new HashMap<>();
     private Boolean inherited;
@@ -163,7 +163,6 @@ public class NodeDao {
         nodeProps = NodeServiceHelper.getProperties(nodeRef);
         previewData = null;
         ownerUsername = null;
-        isCollectionHomePath = false; // TODO do we need to resolve this here?
     }
 
     public static NodeStatsEntry.NodeStats getStats(NodeDao node) throws DAOException {
@@ -651,6 +650,8 @@ public class NodeDao {
     }
 
 
+    public static final String NODE_CONSTANT_COLLECTION_HOME = "-collectionhome-";
+
     public static String mapNodeConstants(RepositoryDao repoDao, String node, boolean createIfNotExists) throws DAOException {
         try {
             if ("-userhome-".equals(node)) {
@@ -664,6 +665,9 @@ public class NodeDao {
             }
             if ("-topic_page_templates-".equals(node)) {
                 node = AuthenticationUtil.runAsSystem(() -> new UserEnvironmentTool().getEdu_SharingTopicPageTemplatesFolder());
+            }
+            if (NODE_CONSTANT_COLLECTION_HOME.equals(node)) {
+                node = CollectionServiceFactory.getInstance().getLocalService().getHomePath();
             }
             return node;
         } catch (Exception e) {
@@ -766,13 +770,6 @@ public class NodeDao {
 
     NodeDao(RepositoryDao repoDao, org.edu_sharing.service.model.NodeRef nodeRef, Filter filter) throws DAOException {
         try {
-
-            if (nodeRef.getNodeId().equals("-collectionhome-")) {
-                isCollectionHomePath = true;
-                nodeRef.setNodeId(CollectionServiceFactory.getInstance().getLocalService().getHomePath());
-            } else {
-                isCollectionHomePath = false;
-            }
 
             this.nodeRef = nodeRef;
 
@@ -1116,23 +1113,30 @@ public class NodeDao {
 
     }
 
-    public NodeDao createChildByMove(String sourceId) throws DAOException {
-
+    public static NodeDao createChildByMove(RepositoryDao repoDao, String targetId, String sourceId) throws DAOException {
         try {
+            boolean targetIsCollectionHome = NODE_CONSTANT_COLLECTION_HOME.equals(targetId);
+            final String resolvedTargetId = mapNodeConstants(repoDao, targetId);
+            final String resolvedSourceId = mapNodeConstants(repoDao, sourceId);
 
-            nodeService.moveNode(nodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS,
-                    sourceId);
-            // set for the given collection level 0 to true to support search
-            if (isCollectionHomePath) {
-                NodeServiceHelper.setProperty(
-                        new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, sourceId),
-                        CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,
-                        true, false);
+            if (targetIsCollectionHome) {
+                // we will run as system, so make sure the current user has permissions to the source node
+                ApplicationContextFactory.getApplicationContext().getBean(PermissionChecking.class)
+                        .checkNodePermissions(resolvedSourceId, new String[]{CCConstants.PERMISSION_WRITE});
+                AuthenticationUtil.runAsSystem(() -> {
+                    NodeServiceFactory.getInstance().getService(repoDao.getId()).moveNode(resolvedTargetId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, resolvedSourceId);
+                    NodeServiceHelper.setProperty(
+                            new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, resolvedSourceId),
+                            CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0,
+                            true, false);
+                    return null;
+                });
+            } else {
+                NodeServiceFactory.getInstance().getService(repoDao.getId()).moveNode(resolvedTargetId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, resolvedSourceId);
             }
             return new NodeDao(repoDao, sourceId, Filter.createShowAllFilter());
 
         } catch (Throwable t) {
-
             throw DAOException.mapping(t);
         }
     }

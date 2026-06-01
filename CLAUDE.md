@@ -122,7 +122,29 @@ public String getEdu_Sharing<Name>Folder() {
 ### Dynamic Node ID Mappings — `NodeDao.mapNodeConstants`
 **File:** `Backend/services/core/src/main/java/org/edu_sharing/restservices/NodeDao.java`
 
-Symbolic node names (e.g. `-userhome-`, `-inbox-`) that REST callers can use instead of real node IDs. Resolved in `mapNodeConstants(RepositoryDao, String, boolean)`.
+Symbolic node names (e.g. `-userhome-`, `-inbox-`, `-collectionhome-`) that REST callers can use instead of real node IDs. Resolved in `mapNodeConstants(RepositoryDao, String, boolean)`. Every new symbolic constant must be declared as a `public static final String NODE_CONSTANT_*` field on `NodeDao` and resolved inside `mapNodeConstants` — **never** inline at the call site. When a method needs to know whether a caller originally passed a symbolic constant (e.g. to branch on it after resolution), capture the check **before** calling `mapNodeConstants`.
+
+---
+
+### Spring Application Contexts — Two Separate Roots
+
+There are two independent Spring application contexts; using the wrong one will fail to find the bean:
+
+| Context | Accessor | Contains |
+|---------|----------|---------|
+| Alfresco (AMP) | `AlfAppContextGate.getApplicationContext()` | Alfresco core beans — `ServiceRegistry`, caches, policies |
+| edu-sharing webapp | `ApplicationContextFactory.getApplicationContext()` | `services/core` Spring beans — `PermissionChecking`, `ActivityEventService`, `GlobalShareService`, … |
+
+---
+
+### `@NodePermission` on Static Methods
+
+The `@NodePermission` annotation is processed by `PermissionChecking` via AOP, which **does not intercept static methods**. On a static method, add the annotation to the parameter for documentation, then enforce it manually:
+
+```java
+ApplicationContextFactory.getApplicationContext().getBean(PermissionChecking.class)
+    .checkNodePermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
+```
 
 ---
 
