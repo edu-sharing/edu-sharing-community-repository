@@ -14,6 +14,8 @@ import {
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { SelectionChange } from '@angular/cdk/collections';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -43,6 +45,18 @@ export class EditorialSidebarService {
      * indicate that the sidebar should overlay a global progress spinner
      */
     readonly sidebarLoading = signal(false);
+
+    constructor(mainNavService: MainNavService) {
+        mainNavService
+            .observeMainNavConfig()
+            .pipe(
+                map((config) => config.currentScope),
+                distinctUntilChanged(),
+                skip(1),
+            )
+            .subscribe(() => this.close());
+    }
+
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
         if (this._editorialSidebar && this._editorialSidebar !== editorialSidebar) {
             console.error(
