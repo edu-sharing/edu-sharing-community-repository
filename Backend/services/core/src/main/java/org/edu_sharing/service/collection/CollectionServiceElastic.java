@@ -1191,8 +1191,8 @@ public class CollectionServiceElastic implements CollectionService {
         if(dst == null){
             copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
         }else{
-            String pathSrc = getNodeIdPath(src);
-            String pathDst = getNodeIdPath(dst);
+            String pathSrc = AuthenticationUtil.runAsSystem(() -> getNodeIdPath(src));
+            String pathDst = AuthenticationUtil.runAsSystem(() -> getNodeIdPath(dst));
             if(!pathDst.contains(pathSrc)){
                 copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
             }else{
