@@ -62,6 +62,7 @@
 }
 .sidebar-container {
     background-color: #fff;
+    overflow-x: hidden;
     overflow-y: auto;
     height: 0;
     flex-grow: 1;

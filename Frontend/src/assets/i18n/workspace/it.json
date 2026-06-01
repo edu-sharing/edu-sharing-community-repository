@@ -27,6 +27,7 @@
     "SELECT_COLLECTION": "Seleziona la collezione",
     "SELECT_ORG": "o",
     "SELECT_LINK": "Inserire l'URL",
+    "ADD_LINK": "Aggiungi link",
     "LINK_INVALID_INFO": "Non siamo riusciti a trovare un sito web per questo link.",
     "LINK_DUPLICATES_INFO": "Abbiamo trovato altri articoli simili a questo link. Si prega di controllare se questo articolo esiste già.",
     "RELOGIN": "Re-accesso",

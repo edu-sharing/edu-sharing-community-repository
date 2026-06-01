@@ -28,6 +28,7 @@
     "SELECT_COLLECTION": "Select collection",
     "SELECT_ORG": "or",
     "SELECT_LINK": "Enter URL",
+    "ADD_LINK": "Add link",
     "LINK_INVALID_INFO": "We could not find a website for this link.",
     "LINK_DUPLICATES_INFO": "We found other items that are similar to this link. Please check if this item already exists.",
     "RELOGIN": "Re-Login",

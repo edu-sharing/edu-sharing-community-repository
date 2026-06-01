@@ -66,6 +66,11 @@ import { CardDialogService } from '../../../features/dialogs/card-dialog/card-di
 import { BridgeService } from '../../../services/bridge.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import {
+    NodesSelectorConfig,
+    TabType,
+} from '../../../pages/editorial-page/nodes-selector/nodes-selector.component';
 
 @Component({
     selector: 'es-create-menu',
@@ -128,6 +133,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         private cardService: CardService,
         private cardDialogService: CardDialogService,
         private connector: RestConnectorService,
+        private editorialSidebarService: EditorialSidebarService,
         private connectorApi: ConnectorService,
         private connectorOptionsService: ConnectorOptionsService,
         private configService: ConfigService,
@@ -369,6 +375,19 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     async openUploadSelect(): Promise<void> {
+        if (this.editorialSidebarService.editorialSidebar) {
+            this.editorialSidebarService.showOption({
+                option: 'SORT_INTO',
+                trap: false,
+                optionConfig: {
+                    state: TabType.UPLOAD,
+                    allowCreate: false,
+                    autoClose: true,
+                    upload: 'default',
+                } as NodesSelectorConfig,
+            });
+            return;
+        }
         const nodes = await this.uploadDialog.openUploadDialog({
             parent: await this.getParent(),
             chooseParent: this.showPicker,

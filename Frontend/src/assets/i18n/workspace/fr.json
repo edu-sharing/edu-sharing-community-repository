@@ -27,6 +27,7 @@
     "SELECT_COLLECTION": "Sélectionner une collection",
     "SELECT_ORG": "ou",
     "SELECT_LINK": "Saisir l'URL",
+    "ADD_LINK": "Ajouter le lien",
     "LINK_INVALID_INFO": "Nous n'avons pas trouvé de site web pour ce lien.",
     "LINK_DUPLICATES_INFO": "Nous avons trouvé d'autres articles similaires à ce lien. Veuillez vérifier si cet article existe déjà.",
     "RELOGIN": "Reconnexion",

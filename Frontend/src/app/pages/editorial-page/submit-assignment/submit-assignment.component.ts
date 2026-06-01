@@ -252,38 +252,6 @@ export class SubmitAssignmentComponent implements OnDestroy {
         ])
             .pipe(takeUntil(this.destroyed$), distinctUntilChanged())
             .subscribe(() => this.updateBreadcrumbs());
-        this.editorialSidebarService.applyNodeEmitted
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe(async ({ nodes, connectorId, window: connectorWindow }) => {
-                if (this.submissionReplaceFile()) {
-                } else {
-                    let newFiles = nodes.map((node) => {
-                        return {
-                            assignmentFile: this.submissionAssignmentRefFile(),
-                            content: node,
-                            ref: node.ref,
-                            validationStatus: 'NOT_STARTED',
-                        } as SubmissionFile;
-                    });
-                    newFiles = await this.saveSubmissionFiles(newFiles);
-                    this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
-                    // when the new file was created via a connector, poll the underlying node so
-                    // that write-back from the connector triggers a re-submission of the variant
-                    // (same flow as createVariantAndEdit)
-                    if (connectorId) {
-                        newFiles.forEach((file, idx) => {
-                            this.startConnectorPolling(
-                                file,
-                                nodes[idx],
-                                connectorWindow ?? null,
-                                connectorId,
-                            );
-                        });
-                    }
-                    this.syncSubmissionDataSource();
-                }
-                this.editorialSidebarService.close();
-            });
         this.submitFormGroup = this.formBuilder.group({
             userNotes: [''],
         });
@@ -563,10 +531,38 @@ export class SubmitAssignmentComponent implements OnDestroy {
             optionConfig: {
                 state: TabType.UPLOAD,
                 upload: 'fast',
+                autoClose: true,
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
                     ),
+                onNodesUploaded: async ({ nodes, connectorId, window: connectorWindow }) => {
+                    if (this.submissionReplaceFile()) {
+                        return;
+                    }
+                    let newFiles = nodes.map(
+                        (node) =>
+                            ({
+                                assignmentFile: this.submissionAssignmentRefFile(),
+                                content: node,
+                                ref: node.ref,
+                                validationStatus: 'NOT_STARTED',
+                            } as SubmissionFile),
+                    );
+                    newFiles = await this.saveSubmissionFiles(newFiles);
+                    this.submissionFiles.set((this.submissionFiles() || []).concat(newFiles));
+                    if (connectorId) {
+                        newFiles.forEach((file, idx) => {
+                            this.startConnectorPolling(
+                                file,
+                                nodes[idx],
+                                connectorWindow ?? null,
+                                connectorId,
+                            );
+                        });
+                    }
+                    this.syncSubmissionDataSource();
+                },
             } as NodesSelectorConfig,
             trap: true,
         });

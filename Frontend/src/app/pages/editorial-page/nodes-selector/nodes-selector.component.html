@@ -66,8 +66,8 @@
   <!-- UPLOAD TAB -->
   <mat-tab [id]="idPrefix + TabType.UPLOAD" *ngIf="supportedTabs().includes(TabType.UPLOAD)">
     <ng-template mat-tab-label>
-      <i esIcon="upload" class="tab-icon"></i>
-      <span class="tab-label">{{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}</span>
+      <i esIcon="add" class="tab-icon"></i>
+      <span class="tab-label">{{ 'CREATE' | translate }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.UPLOAD }"
@@ -269,14 +269,15 @@
 
       <!-- UPLOAD TAB -->
       <ng-container *ngSwitchCase="TabType.UPLOAD">
+        <es-spinner *ngIf="!inboxNode"></es-spinner>
         <es-add-material-dialog
           *ngIf="inboxNode"
           [dialogData]="{
             childobject: false,
-            chooseParent: false,
+            chooseParent: !parent(),
             multiple: true,
             parent: inboxNode,
-            showLti: false
+            showLti: true
           }"
           (dialogResult)="uploadMaterialDialogResult($event)"
         ></es-add-material-dialog>

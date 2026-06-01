@@ -117,6 +117,12 @@
       ></div>
     </div>
   </div>
+  <!-- Embedded-mode submit button: in dialog mode the OK button lives in the wrapper -->
+  <div class="link-submit" *ngIf="!data && !selectedFiles.length">
+    <button mat-flat-button color="primary" [disabled]="!canSave()" (click)="setLink()">
+      {{ 'WORKSPACE.ADD_LINK' | translate }}
+    </button>
+  </div>
   <div *ngIf="currentData.chooseParent" class="location">
     <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
     <div class="picker-group">

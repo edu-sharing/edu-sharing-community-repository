@@ -135,6 +135,15 @@ export type NodesSelectorConfig = {
      * whether to show the connector "Create" button in the upload tab (default: true)
      */
     allowCreate?: boolean;
+    /**
+     * automatically close the sidebar after nodes are emitted
+     */
+    autoClose?: boolean;
+    /**
+     * called whenever nodes are produced (upload, copy, or connector create).
+     * Use this instead of subscribing to EditorialSidebarService.applyNodeEmitted globally to only listen to your current trigger session
+     */
+    onNodesUploaded?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
 };
 
 @Component({
@@ -260,6 +269,10 @@ export class NodesSelectorComponent implements OnInit {
     );
     // The nodes that are currently selected as source
     selectedSourceNodes: Signal<Node[]> = computed(() => {
+        // upload tab has no source nodes — always acts as source, never as target
+        if (this.option()?.optionConfig?.state === TabType.UPLOAD) {
+            return [];
+        }
         const selected = this.option()?.optionConfig?.selection?.selected as Node[];
         if (selected?.length) {
             return selected;
@@ -638,11 +651,8 @@ export class NodesSelectorComponent implements OnInit {
         // note: the nodes are added to the inbox node if the upload was successful,
         //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            this.editorialSidebarService.applyNodeEmitted.emit({
-                nodes: createdNodes,
-                parent: this.parent(),
-            });
-            if (this.parent()) {
+            this.emitNodes({ nodes: createdNodes, parent: this.parent() });
+            if (this.parent() && this.nodeHelperService.isNodeCollection(this.parent())) {
                 try {
                     this.toast.showProgressSpinner();
                     this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
@@ -889,10 +899,7 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.selectedNodes().length) {
             return;
         }
-        this.editorialSidebarService.applyNodeEmitted.emit({
-            nodes: this.selectedNodes() as Node[],
-            parent: this.parent(),
-        });
+        this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
         if (!this.parent()) {
             this.resetNodeEntriesSelections();
             return;
@@ -1330,6 +1337,23 @@ export class NodesSelectorComponent implements OnInit {
      * navigated to the connector URL, and the new node is emitted via applyNodeEmitted with
      * connectorId + window so consumers (e.g. submit-assignment) can poll for write-back.
      */
+    private emitNodes(payload: {
+        nodes: Node[];
+        parent?: Node;
+        connectorId?: string;
+        window?: Window;
+    }): void {
+        this.editorialSidebarService.applyNodeEmitted.emit(payload);
+        this.option()?.optionConfig?.onNodesUploaded?.({
+            nodes: payload.nodes,
+            connectorId: payload.connectorId,
+            window: payload.window,
+        });
+        if (this.option()?.optionConfig?.autoClose) {
+            this.editorialSidebarService.close();
+        }
+    }
+
     async showCreateConnector(details: AddWithConnectorDialogData): Promise<void> {
         const dialogRef = await this.dialogs.openAddWithConnectorDialog(details);
         dialogRef.afterClosed().subscribe((result) => {
@@ -1353,7 +1377,7 @@ export class NodesSelectorComponent implements OnInit {
                         win: event.window,
                         connectorType: connector,
                     });
-                    this.editorialSidebarService.applyNodeEmitted.emit({
+                    this.emitNodes({
                         nodes: [data.node],
                         parent: this.parent(),
                         connectorId: connector.id,
