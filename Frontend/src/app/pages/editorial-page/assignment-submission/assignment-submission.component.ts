@@ -7,11 +7,12 @@ import {
     filter,
     firstValueFrom,
     interval,
+    merge,
     Subject,
 } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { Assignment, AssignmentV1Service, Submission, SubmissionFile } from 'ngx-edu-sharing-api';
-import { map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
     AuthorityNamePipe,
@@ -64,6 +65,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
         ],
     } as ColumnType;
     private destroyed$ = new Subject<void>();
+    private sidebarClosed$ = new Subject<void>();
     assignment = signal<Assignment>(null);
     hasCorrectionChanges = signal(false);
     tabSelected = signal(0);
@@ -164,6 +166,8 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     ngOnDestroy() {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.sidebarClosed$.next();
+        this.sidebarClosed$.complete();
     }
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;
@@ -179,6 +183,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     }
 
     select(event: SubmissionWithAssignment) {
+        this.sidebarClosed$.next();
         this.nodeEntries.getSelection().setSelection(event);
         this.submission.set(event);
         this.editorialSidebarService.showOption({
@@ -194,10 +199,11 @@ export class AssignmentSubmissionComponent implements OnDestroy {
             } as SubmissionConfig,
         });
         this.editorialSidebarService.configChange$
-            .pipe(take(1))
+            .pipe(takeUntil(merge(this.sidebarClosed$, this.destroyed$)))
             .subscribe((config: SubmissionConfig) => {
                 this.dataSource.setData(config.submissionList);
-                this.select(config.submission);
+                this.nodeEntries?.getSelection()?.setSelection(config.submission);
+                this.submission.set(config.submission);
             });
     }
 

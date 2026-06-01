@@ -5,90 +5,97 @@
       <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_SUBMISSION' | translate }}</span>
     </ng-template>
     <div class="submission">
-      <div class="details">
-        <div class="left">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
-          <div class="from details">{{ submission().assignee | authorityName }}</div>
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
-          <div class="title details">{{ data().assignment?.title }}</div>
+      <div class="submission-content">
+        <div class="details">
+          <div class="left">
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_FROM' | translate }}</label>
+            <div class="from details">{{ submission().assignee | authorityName }}</div>
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_TITLE' | translate }}</label>
+            <div class="title details">{{ data().assignment?.title }}</div>
+          </div>
+          <es-user-avatar
+            size="large"
+            class="right"
+            [user]="submission().assignee"
+          ></es-user-avatar>
         </div>
-        <es-user-avatar size="large" class="right" [user]="submission().assignee"></es-user-avatar>
-      </div>
-      <div class="below">
-        <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
-        <div class="state details">
-          <es-list-node-assignment
-            [node]="submission()"
-            [item]="submissionStatus"
-          ></es-list-node-assignment>
-          <es-list-node-assignment
-            [node]="submission()"
-            [item]="validationStatus"
-          ></es-list-node-assignment>
-        </div>
-        <ng-container *ngIf="submission().submissionDate">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
-          <div class="details">
+        <div class="below">
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+          <div class="state details">
             <es-list-node-assignment
               [node]="submission()"
-              [item]="submissionDate"
+              [item]="submissionStatus"
             ></es-list-node-assignment>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="submission().returnDate">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.RETURN_DATE' | translate }}</label>
-          <div class="details">
             <es-list-node-assignment
               [node]="submission()"
-              [item]="returnDate"
+              [item]="validationStatus"
             ></es-list-node-assignment>
           </div>
+          <ng-container *ngIf="submission().submissionDate">
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
+            <div class="details">
+              <es-list-node-assignment
+                [node]="submission()"
+                [item]="submissionDate"
+              ></es-list-node-assignment>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="submission().returnDate">
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.RETURN_DATE' | translate }}</label>
+            <div class="details">
+              <es-list-node-assignment
+                [node]="submission()"
+                [item]="returnDate"
+              ></es-list-node-assignment>
+            </div>
+          </ng-container>
+        </div>
+        <es-info-message *ngIf="data().submission.submissionStatus === 'NOT_STARTED'">
+          {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NOT_STARTED' | translate }}
+        </es-info-message>
+        <ng-container *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
+          <div class="user-notes" *ngIf="submission().userNotes?.trim()">
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.USER_NOTES' | translate }}</label>
+            <div [innerHTML]="submission().userNotes"></div>
+          </div>
+          <div class="submissions">
+            <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
+            <es-manage-assignment-submissions
+              [data]="data()"
+              (nodeClick)="data().submissionFileCallback($event)"
+            ></es-manage-assignment-submissions>
+          </div>
         </ng-container>
-      </div>
-      <es-info-message *ngIf="data().submission.submissionStatus === 'NOT_STARTED'">
-        {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NOT_STARTED' | translate }}
-      </es-info-message>
-      <ng-container *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
-        <div class="user-notes" *ngIf="submission().userNotes?.trim()">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.USER_NOTES' | translate }}</label>
-          <div [innerHTML]="submission().userNotes"></div>
+        <div class="feedback">
+          <form [formGroup]="feedbackForm">
+            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
+            <editor [init]="editorConfig" formControlName="feedback"></editor>
+            <mat-slide-toggle
+              class="toggle-reverse show-notes"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="isReadOnly() || !!feedbackForm.get('validationNotes').value"
+              [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
+              (ngModelChange)="showValidationNotes.set($event)"
+            >
+              {{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE_SHOW' | translate }}
+            </mat-slide-toggle>
+            <mat-form-field
+              floatLabel="always"
+              *ngIf="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
+            >
+              <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
+              <textarea
+                matInput
+                formControlName="validationNotes"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="2"
+                cdkAutosizeMaxRows="6"
+              ></textarea>
+            </mat-form-field>
+          </form>
         </div>
-        <div class="submissions">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
-          <es-manage-assignment-submissions
-            [data]="data()"
-            (nodeClick)="data().submissionFileCallback($event)"
-          ></es-manage-assignment-submissions>
-        </div>
-      </ng-container>
-      <div class="feedback">
-        <form [formGroup]="feedbackForm">
-          <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
-          <editor [init]="editorConfig" formControlName="feedback"></editor>
-          <mat-slide-toggle
-            class="toggle-reverse show-notes"
-            [ngModelOptions]="{ standalone: true }"
-            [disabled]="isReadOnly() || !!feedbackForm.get('validationNotes').value"
-            [ngModel]="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
-            (ngModelChange)="showValidationNotes.set($event)"
-          >
-            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE_SHOW' | translate }}
-          </mat-slide-toggle>
-          <mat-form-field
-            floatLabel="always"
-            *ngIf="showValidationNotes() || !!feedbackForm.get('validationNotes').value"
-          >
-            <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.INTERNAL_NOTE' | translate }}</mat-label>
-            <textarea
-              matInput
-              formControlName="validationNotes"
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="2"
-              cdkAutosizeMaxRows="6"
-            ></textarea>
-          </mat-form-field>
-        </form>
       </div>
+      <!-- /submission-content -->
       <div class="actions">
         <button mat-button color="primary" (click)="stepElement(-1)" [disabled]="!canGoBack()">
           <i esIcon="arrow_back"></i>

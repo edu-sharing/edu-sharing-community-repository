@@ -72,7 +72,8 @@
     height: 100%;
     &.option-WORKSPACE_METADATA,
     &.option-PREVIEW,
-    &.option-SORT_INTO {
+    &.option-SORT_INTO,
+    &.option-MANAGE_SUBMISSION {
         // has own padding cause of tabs
         padding: 0;
     }
@@ -81,7 +82,8 @@
         // set full height
         height: 100%;
     }
-    &.option-PREVIEW {
+    &.option-PREVIEW,
+    &.option-MANAGE_SUBMISSION {
         display: flex;
         flex-direction: column;
         min-height: 100%;

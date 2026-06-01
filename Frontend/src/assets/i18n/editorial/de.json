@@ -138,6 +138,8 @@
       "TAB_SUBMIT": "Abgaben",
       "SUBMIT_CONFIRM_TITLE": "Aufgabe abgeben?",
       "SUBMIT_CONFIRM_INFO": "Soll die Aufgabe abgegeben werden?\n\nWichtig: Nach einer erfolgten Abgabe sind keine weiteren Änderungen mehr möglich!",
+      "REMOVE_FILE_CONFIRM_TITLE": "Abgabedatei entfernen?",
+      "REMOVE_FILE_CONFIRM_INFO": "Soll \"{{ title }}\" wirklich aus der Abgabe entfernt werden?",
       "SUBMITTED": "Die Aufgabe wurde abgegeben",
       "VALIDATION_READY": "Zu deiner Abgabe ist eine Rückmeldung verfügbar.",
       "VALIDATION_SCROLL": "Zur Rückmeldung",

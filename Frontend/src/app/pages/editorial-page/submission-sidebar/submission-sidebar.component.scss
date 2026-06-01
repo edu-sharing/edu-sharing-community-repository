@@ -2,23 +2,63 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use '../nodes-selector/nodes-selector.component' as ns;
 
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
 :host ::ng-deep {
     @include ns.tabLayout2Line();
+
+    .mat-mdc-tab-body {
+        overflow: hidden;
+    }
+
+    .mat-mdc-tab-body-content {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+}
+
+mat-tab-group {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .submission {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
+    .submission-content {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 20px;
+        @include mixins.materialScrollbarLight();
+    }
+
     .actions {
-        margin-top: 20px;
+        flex-shrink: 0;
+        background: #fff;
+        padding: 10px 20px;
         width: 100%;
         display: flex;
         justify-content: space-between;
+        box-sizing: border-box;
     }
     > .details {
         display: flex;
         flex-direction: row-reverse;
         gap: 20px;
     }
-    padding: 20px;
 
     .left {
         flex-grow: 1;
@@ -57,6 +97,9 @@
             flex-grow: 1;
             display: flex;
             justify-content: flex-end;
+        }
+        > *:empty {
+            display: none;
         }
     }
     .user-notes,

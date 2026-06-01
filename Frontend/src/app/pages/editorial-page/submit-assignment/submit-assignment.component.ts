@@ -610,6 +610,26 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 if (!submission) {
                     return;
                 }
+                const title = new NodeTitlePipe(this.translateService).transform(n);
+                const result = await firstValueFrom(
+                    (
+                        await this.dialogs.openGenericDialog({
+                            title: 'EDITORIAL.SUBMIT_ASSIGNMENT.REMOVE_FILE_CONFIRM_TITLE',
+                            message: 'EDITORIAL.SUBMIT_ASSIGNMENT.REMOVE_FILE_CONFIRM_INFO',
+                            messageParameters: { title },
+                            buttons: [
+                                { label: 'CANCEL', config: { color: 'standard' } },
+                                {
+                                    label: 'EDITORIAL.OPTIONS.SUBMISSION_REMOVE',
+                                    config: { color: 'primary' },
+                                },
+                            ],
+                        })
+                    ).afterClosed(),
+                );
+                if (result !== 'EDITORIAL.OPTIONS.SUBMISSION_REMOVE') {
+                    return;
+                }
                 this.selectedAssignmentFile.set(null);
                 await this.deleteSubmissionFiles(submission);
                 this.submissionFiles.set(
@@ -816,7 +836,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         }
     }
     scrollToFeedback() {
-        this.uiService.scrollSmooth(this.feedbackRef.nativeElement.getBoundingClientRect().top);
+        this.feedbackRef.nativeElement.scrollIntoView({ behavior: 'smooth' });
     }
 
     /**
