@@ -237,7 +237,7 @@
             "messages": [
             {
             "role": "user",
-            "content": "Erzeuge 5 bis 8 inhaltliche Schlagworte zum Thema, sortiert nach absteigender Relevanz (Kernthema zuerst).\n\nBeachte dabei folgende Vorgaben:\n\n- Verwende ausschließlich Substantive im Nominativ Singular.\n- Nutze etablierte Fachterminologie, die spezifisch und präzise ist (z. B. \"Bruchrechnung\" statt \"Mathematik\").\n- Vermeide Synonyme, Dopplungen sowie die gleichzeitige Nennung von Ober- und Unterbegriffen.\n- Schließe Materialtypen, Bildungsstufen, Markennamen, Personen (außer bei historischen oder literarischen Themen), Orte und irrelevante Kategorien aus.\n- Gib die Schlagworte als einfache, kommagetrennte Liste ohne zusätzliche Formatierungen aus.\n- Beispiel: \"Bruchrechnung, Dezimalzahlen, Prozentrechnung, Grundrechenarten, Mathematikunterricht\""
+            "content": "Erzeuge 5 bis 8 inhaltliche Schlagworte zum Thema, sortiert nach absteigender Relevanz (Kernthema zuerst).\n\nBeachte dabei folgende Vorgaben:\n\n- Verwende ausschließlich Substantive im Nominativ Singular.\n- Nutze etablierte Fachterminologie, die spezifisch und präzise ist (z. B. \"Bruchrechnung\" statt \"Mathematik\").\n- Vermeide Synonyme, Dopplungen sowie die gleichzeitige Nennung von Ober- und Unterbegriffen.\n- Schließe Materialtypen, Bildungsstufen, Markennamen, Personen (außer bei historischen oder literarischen Themen), Orte und irrelevante Kategorien aus.\n- Gib für jedes Schlagwort ein einzelnen Value samt Confidence im JSON-Modell zurück\""
             }
             ]
             }
