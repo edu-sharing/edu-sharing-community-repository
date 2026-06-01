@@ -28,4 +28,14 @@ const sidebar: Meta<PreviewSidebarComponent> = {
 export default sidebar;
 type Story = StoryObj<PreviewSidebarComponent>;
 
-export const PreviewStory: Story = {};
+export const NodesMode: Story = {
+    args: {
+        editorMode: 'nodes',
+    },
+};
+
+export const ViewerMode: Story = {
+    args: {
+        editorMode: 'viewer',
+    },
+};
