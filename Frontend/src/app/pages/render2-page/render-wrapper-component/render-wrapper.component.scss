@@ -231,10 +231,10 @@ rs-root {
 }
 ::ng-deep {
     es-mds-editor-wrapper {
-        --mds-content-padding: 0 10px;
+        --mds-content-padding: 10px;
     }
     es-mds-editor-wrapper.mds-editor-mode-nodes {
-        --mds-content-padding: 25px 10px;
+        --mds-content-padding: 25px;
     }
     es-mds-editor-wrapper es-mds-editor-core {
         display: grid;
