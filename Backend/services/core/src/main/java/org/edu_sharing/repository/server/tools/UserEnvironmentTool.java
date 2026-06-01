@@ -173,7 +173,10 @@ public class UserEnvironmentTool {
     }
 
     public String getEdu_SharingTopicPageTemplatesFolder() {
-        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOPIC_PAGE_TEMPLATES, CCConstants.I18n_SYSTEMFOLDER_TOPIC_PAGE_TEMPLATES, true);
+        String folderId = getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOPIC_PAGE_TEMPLATES, CCConstants.I18n_SYSTEMFOLDER_TOPIC_PAGE_TEMPLATES, true);
+        getOrCreateChildMap(folderId, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE_DEFAULT,
+                Map.of(CCConstants.CCM_PROP_PAGE_VARIANT_IS_TEMPLATE, Boolean.TRUE));
+        return folderId;
     }
 
     public String getEdu_SharingServiceFolder() {
@@ -181,10 +184,7 @@ public class UserEnvironmentTool {
     }
 
     public String getEdu_SharingTemplateFolder() {
-        String folderId = getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
-        getOrCreateChildMap(folderId, CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE_DEFAULT,
-                Map.of(CCConstants.CCM_PROP_PAGE_VARIANT_IS_TEMPLATE, Boolean.TRUE));
-        return folderId;
+        return getOrCreateSystemFolderByName(CCConstants.CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE, CCConstants.I18n_SYSTEMFOLDER_TEMPLATE);
     }
 
     private String getOrCreateChildMap(String parentId, String mapType, String i18nId) {
