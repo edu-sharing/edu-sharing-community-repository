@@ -13,6 +13,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.authentication.AuthenticationFilter;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
@@ -243,7 +244,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
     }
 
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr) {
-        return httpBasicAuth(httpReq, authHdr, false);
+        // auto-skip 2fa if the request port was from internal (non-exposed) network for script access
+        return httpBasicAuth(httpReq, authHdr, String.valueOf(httpReq.getLocalPort()).equals(ApplicationInfoList.getHomeRepository().getPort()));
     }
 
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr, boolean ignore2FA) {
