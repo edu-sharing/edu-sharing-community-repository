@@ -417,13 +417,19 @@ export class TopicPageHelperService {
         // workaround to avoid keeping legacy properties
         const legacyProperties: string[] = ['template', 'variables'];
         legacyProperties.forEach((prop: string) => delete (parsedValue as any)[prop]);
+        // render/copy breadcrumb/header markers are inheritance-only and must never be persisted
+        delete parsedValue.structure?.propagatedBreadcrumbNodeId;
+        delete parsedValue.structure?.propagatedHeaderNodeId;
+        delete parsedValue.structure?.temporaryBreadcrumbNodeId;
+        delete parsedValue.structure?.temporaryHeaderNodeId;
         parsedValue.structure?.swimlanes?.forEach((swimlane: Swimlane): void => {
             swimlane.grid?.forEach((gridItem: GridTile): void => {
                 // @ts-ignore
                 blacklistedProperties.forEach((prop) => delete gridItem[prop]);
-                // special case for propagatedNodeId
-                if (gridItem.nodeId && gridItem.propagatedNodeId) {
+                // render/copy markers must never be persisted alongside a real nodeId
+                if (gridItem.nodeId) {
                     delete gridItem.propagatedNodeId;
+                    delete gridItem.temporaryNodeId;
                 }
             });
         });
