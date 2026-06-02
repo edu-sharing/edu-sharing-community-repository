@@ -7,9 +7,9 @@
   (change)="closeWithFiles($any($event.target).files)"
 />
 
-<div *ngIf="!hideFileUpload" @openOverlay>
-  <div class="file-selection" *ngIf="selectedFiles.length" @openOverlay>
-    <div *ngFor="let file of selectedFiles">
+<div *ngIf="!hideFileUpload()" @openOverlay>
+  <div class="file-selection" *ngIf="selectedFiles().length" @openOverlay>
+    <div *ngFor="let file of selectedFiles()">
       <div class="name">{{ file.name }}</div>
       <div class="size">{{ file.size | formatSize }}</div>
       <button mat-icon-button color="primary">
@@ -18,7 +18,7 @@
     </div>
   </div>
   <div
-    *ngIf="!selectedFiles.length"
+    *ngIf="!selectedFiles().length"
     class="dropArea"
     [class.dropActive]="isFileOver"
     esFileDrop
@@ -42,11 +42,11 @@
   <div class="quota" *ngIf="userQuota?.enabled">
     <es-user-quota [quota]="userQuota"></es-user-quota>
   </div>
-  <div class="separator-line uppercase" *ngIf="!selectedFiles.length">
+  <div class="separator-line uppercase" *ngIf="!selectedFiles().length">
     {{ 'WORKSPACE.SELECT_ORG' | translate }}
   </div>
 </div>
-<div class="link" *ngIf="!selectedFiles.length" @openOverlay>
+<div class="link" *ngIf="!selectedFiles().length" @openOverlay>
   <div class="link-info">
     <mat-form-field>
       <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate }}</mat-label>
@@ -118,7 +118,7 @@
     </div>
   </div>
   <!-- Embedded-mode submit button: in dialog mode the OK button lives in the wrapper -->
-  <div class="link-submit" *ngIf="!data && !selectedFiles.length">
+  <div class="link-submit" *ngIf="!data && !selectedFiles().length">
     <button mat-flat-button color="primary" [disabled]="!canSave()" (click)="setLink()">
       {{ 'WORKSPACE.ADD_LINK' | translate }}
     </button>

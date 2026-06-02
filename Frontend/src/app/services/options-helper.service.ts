@@ -376,7 +376,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             return (
                 !!data.customDownloadUrl ||
                 nodes.some((n) =>
-                    n.properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
+                    (n as Node).properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
                         RestConstants.SAFE_SCOPE,
                     ),
                 ) === safe

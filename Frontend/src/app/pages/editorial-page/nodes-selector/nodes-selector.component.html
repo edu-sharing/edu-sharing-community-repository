@@ -79,12 +79,11 @@
   <div
     class="tab-content"
     [class.actionbar-visible]="selectedNodes().length || methodologyTabWithValue()"
-    *ngIf="tabType === selectedTab()"
   >
     <!-- search field + filter button -->
     <div
       class="tab-search-container"
-      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab()) && isSelectStep()"
+      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(tabType) && isSelectStep()"
     >
       <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
         <i esIcon="search" matPrefix></i>
@@ -92,11 +91,11 @@
           matInput
           [placeholder]="
             i18nPrefix +
-              (selectedTab() === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
+              (tabType === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
               | translate
           "
           [(ngModel)]="searchText"
-          [disabled]="isSearchTab() && dataSourceSearch.isLoading"
+          [disabled]="tabType === TabType.SEARCH && dataSourceSearch.isLoading"
           (keydown.enter)="executeSearch()"
         />
         <button
@@ -110,7 +109,7 @@
         </button>
       </mat-form-field>
     </div>
-    <ng-container [ngSwitch]="selectedTab()" *ngIf="isSelectStep(); else configureCopy">
+    <ng-container [ngSwitch]="tabType" *ngIf="isSelectStep(); else configureCopy">
       <!-- SEARCH TAB -->
       <ng-container *ngSwitchCase="TabType.SEARCH">
         <div class="search-container">
@@ -121,11 +120,7 @@
           ></es-actionbar>
           <es-node-entries-wrapper
             #searchWrapperRef
-            *ngIf="
-              selectedTab() === TabType.SEARCH &&
-              searchCompleted() &&
-              (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)
-            "
+            *ngIf="searchCompleted() && (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)"
             [dragDrop]="{
               dragAllowed: selectionMode() !== 'target',
               dropAllowed: canDropOnSearchRef,
@@ -192,10 +187,9 @@
         <es-node-entries-wrapper
           #collectionsWrapperRef
           *ngIf="
-            selectedTab() === TabType.COLLECTIONS &&
-            (collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
-              !dataSourceCollectionsFlat.isEmpty() ||
-              dataSourceCollectionsFlat.isLoading)
+            collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
+            !dataSourceCollectionsFlat.isEmpty() ||
+            dataSourceCollectionsFlat.isLoading
           "
           [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
           [columns]="
@@ -235,10 +229,7 @@
       <!-- WORKSPACE TAB -->
       <ng-container *ngSwitchCase="TabType.WORKSPACE">
         <mat-form-field *ngIf="selectionMode() === 'target'" class="workspace-action-select">
-          <mat-select
-            [(ngModel)]="workspaceAction"
-            [disabled]="selectedTab() === TabType.WORKSPACE && dataSourceWorkspace.isLoading"
-          >
+          <mat-select [(ngModel)]="workspaceAction" [disabled]="dataSourceWorkspace.isLoading">
             <mat-option value="copy">{{ 'WORKSPACE.COPY_MOVE.COPY' | translate }}</mat-option>
             <mat-option value="move" [disabled]="!canMoveWorkspaceNodes()">{{
               'WORKSPACE.COPY_MOVE.MOVE' | translate
@@ -247,7 +238,6 @@
         </mat-form-field>
         <es-node-entries-wrapper
           #workspaceWrapperRef
-          *ngIf="selectedTab() === TabType.WORKSPACE"
           [checkbox]="false"
           [dataSource]="dataSourceWorkspace"
           [displayType]="NodeEntriesDisplayType.Tree"
@@ -269,40 +259,44 @@
 
       <!-- UPLOAD TAB -->
       <ng-container *ngSwitchCase="TabType.UPLOAD">
-        <es-spinner *ngIf="!inboxNode"></es-spinner>
-        <es-add-material-dialog
-          *ngIf="inboxNode"
-          [dialogData]="{
-            childobject: false,
-            chooseParent: !parent(),
-            multiple: true,
-            parent: inboxNode,
-            showLti: true
-          }"
-          (dialogResult)="uploadMaterialDialogResult($event)"
-        ></es-add-material-dialog>
-        <div
-          class="upload-create-row"
-          *ngIf="
-            inboxNode && connectorOptions().length && option()?.optionConfig?.allowCreate !== false
-          "
-        >
-          <es-dropdown
-            #connectorDropdown
-            [options]="connectorOptions()"
-            [showDisabled]="false"
-            position="right"
-          ></es-dropdown>
-          <button
-            mat-flat-button
-            color="primary"
-            [matMenuTriggerFor]="connectorDropdown.menu ? connectorDropdown.menu : null"
-            [attr.aria-label]="'CREATE' | translate"
+        <es-spinner *ngIf="!inboxNode()"></es-spinner>
+        <ng-container *ngIf="inboxNode()">
+          <es-add-material-dialog
+            #material
+            [dialogData]="{
+              childobject: false,
+              chooseParent: chooseParent(),
+              multiple: true,
+              parent: chooseParent() ? inboxNode() : parent(),
+              showLti: true
+            }"
+            (dialogResult)="uploadMaterialDialogResult($event)"
+          ></es-add-material-dialog>
+          <div
+            class="upload-create-row"
+            *ngIf="
+              !material.selectedFiles()?.length &&
+              connectorOptions().length &&
+              option()?.optionConfig?.allowCreate !== false
+            "
           >
-            <i esIcon="add"></i>
-            <span>{{ 'CREATE' | translate }}</span>
-          </button>
-        </div>
+            <es-dropdown
+              #connectorDropdown
+              [options]="connectorOptions()"
+              [showDisabled]="false"
+              position="right"
+            ></es-dropdown>
+            <button
+              mat-flat-button
+              color="primary"
+              [matMenuTriggerFor]="connectorDropdown.menu ? connectorDropdown.menu : null"
+              [attr.aria-label]="'CREATE' | translate"
+            >
+              <i esIcon="add"></i>
+              <span>{{ 'CREATE' | translate }}</span>
+            </button>
+          </div>
+        </ng-container>
       </ng-container>
 
       <ng-template #noSearchResults let-dataSource="dataSource">
@@ -320,7 +314,7 @@
       </ng-template>
 
       <!-- FALLBACK -->
-      <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}.</ng-container>
+      <ng-container *ngSwitchDefault> No view defined for tab {{ tabType }}.</ng-container>
     </ng-container>
     <ng-template #configureCopy>
       <es-info-message mode="info">

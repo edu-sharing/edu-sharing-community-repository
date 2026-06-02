@@ -279,7 +279,9 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
      */
     private initMainNav(): void {
         this.localEvents.nodesCreated.subscribe((nodes) => {
-            const filtered = nodes.filter((n) => n.parent?.id === this.currentFolder?.ref?.id);
+            const filtered = nodes.filter(
+                (n) => n.parent?.id === this.currentFolder?.ref?.id || this.isRootFolder,
+            );
             if (filtered.length) {
                 this.explorer.nodeEntries.addVirtualNodes(filtered);
             }

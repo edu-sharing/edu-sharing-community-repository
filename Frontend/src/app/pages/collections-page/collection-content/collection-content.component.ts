@@ -79,6 +79,10 @@ import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { GlobalCollectionsPageService } from '../global-collections-page.service';
+import {
+    NodesSelectorConfig,
+    TabType,
+} from '../../editorial-page/nodes-selector/nodes-selector.component';
 
 @Component({
     selector: 'es-collection-content',
@@ -169,10 +173,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     });
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
-        void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
-        /*void this.editorialSidebarService.showOption({
+        this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
-        })*/
+            trap: false,
+            optionConfig: {
+                state: TabType.UPLOAD,
+                upload: 'default',
+                allowCreate: true,
+                autoClose: true,
+            } as NodesSelectorConfig,
+        });
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();

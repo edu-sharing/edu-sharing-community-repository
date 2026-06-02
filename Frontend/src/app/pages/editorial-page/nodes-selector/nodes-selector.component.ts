@@ -1,5 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import {
+    ChangeDetectorRef,
     Component,
     computed,
     effect,
@@ -165,6 +166,9 @@ export class NodesSelectorComponent implements OnInit {
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
     primaryMode = input<SidebarContext>();
+    chooseParent = computed(
+        () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
+    );
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -188,7 +192,7 @@ export class NodesSelectorComponent implements OnInit {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
                 return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
             } else {
-                return [TabType.WORKSPACE];
+                return [TabType.WORKSPACE, TabType.UPLOAD];
             }
         }
         if (this.allSelectedNodesFromHomeRepo()) {
@@ -381,7 +385,7 @@ export class NodesSelectorComponent implements OnInit {
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
-    inboxNode: Node;
+    inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
     connectorOptions: WritableSignal<OptionItem[]> = signal([]);
 
     // shared among tabs
@@ -394,6 +398,7 @@ export class NodesSelectorComponent implements OnInit {
         private apiCollectionService: ApiCollectionService,
         private bridge: BridgeService,
         private networkService: NetworkService,
+        private changeDetectorRef: ChangeDetectorRef,
         private collectionService: RestCollectionService,
         private localEventsService: LocalEventsService,
         private mdsHelperService: MdsHelperService,
@@ -458,7 +463,6 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
-        this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
     }
 
     /**
@@ -899,7 +903,6 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.selectedNodes().length) {
             return;
         }
-        this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
         if (!this.parent()) {
             this.resetNodeEntriesSelections();
             return;
@@ -936,6 +939,7 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
                 });
             }
+            this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
         }
         // when there are not the only files selected, switch to the configuration mode
         else if (this.currentStep() === StepType.SELECT) {
@@ -1002,6 +1006,7 @@ export class NodesSelectorComponent implements OnInit {
                 }
                 this.toast.closeProgressSpinner();
                 this.goBack();
+                this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
             } catch (e) {
                 this.toast.closeProgressSpinner();
                 setTimeout(() => {
@@ -1344,6 +1349,7 @@ export class NodesSelectorComponent implements OnInit {
         window?: Window;
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
+        this.localEventsService.nodesCreated.emit(payload.nodes);
         this.option()?.optionConfig?.onNodesUploaded?.({
             nodes: payload.nodes,
             connectorId: payload.connectorId,
@@ -1369,7 +1375,7 @@ export class NodesSelectorComponent implements OnInit {
     ): Promise<void> {
         const props = this.nodeHelperService.propertiesFromConnector(event);
         this.restNodeService
-            .createNode(this.inboxNode.ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
+            .createNode(this.inboxNode().ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
             .subscribe(
                 (data) => {
                     void this.uiService.editConnector(data.node, {

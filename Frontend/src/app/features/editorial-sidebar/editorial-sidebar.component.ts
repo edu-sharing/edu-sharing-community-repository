@@ -47,9 +47,9 @@ export type EditorialSidebarOption =
     | 'WORKSPACE_METADATA'
     | 'SHARE_QR'
     | 'PREVIEW'
-    // sort into from right to left
+    // sort into from right to left (i.e. also create or upload)
     | 'SORT_INTO'
-    // manage content is sort into from left to right
+    // manage content is sort into from left to right ("Einsortieren")
     | 'MANAGE_CONTENT'
     | 'MANAGE_SUBMISSION'
     | 'VIEW_ASSIGNMENT';

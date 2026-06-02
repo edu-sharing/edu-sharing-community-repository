@@ -12,6 +12,7 @@ import {
     NodesSelectorConfig,
     TabType,
 } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
+import { Node } from 'ngx-edu-sharing-api';
 
 export function createReuseOptions({
     service,
@@ -49,7 +50,7 @@ export function createReuseOptions({
     bookmarkNode.priority = 20;
     bookmarkNode.customShowCallback = async (nodes) => {
         if (nodes) {
-            return nodes.every((n) => service.nodeHelper.referenceOriginalExists(n));
+            return nodes.every((n) => service.nodeHelper.referenceOriginalExists(n as Node));
         }
         return true;
     };

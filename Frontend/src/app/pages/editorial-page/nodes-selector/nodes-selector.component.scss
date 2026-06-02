@@ -54,6 +54,7 @@
 
     .mat-mdc-tab-body-content {
         overflow-y: auto;
+        @include mixins.materialScrollbarLight();
     }
 }
 
