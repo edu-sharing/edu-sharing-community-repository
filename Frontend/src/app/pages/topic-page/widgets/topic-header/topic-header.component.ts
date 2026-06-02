@@ -228,6 +228,26 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     }
 
     /**
+     * Handles a manual change of the importance description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     */
+    async onDescriptionChanged(): Promise<void> {
+        this.aiGeneratedText.set(false);
+        await this.persistConfig();
+    }
+
+    /**
+     * Handles a manual change of the collection description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     *
+     * @param description
+     */
+    async onCollectionDescriptionChanged(description: string): Promise<void> {
+        this.aiGeneratedDescription.set(false);
+        await this.persistCollectionDescription(description);
+    }
+
+    /**
      * Persists the currently defined config.
      */
     async persistConfig(): Promise<void> {

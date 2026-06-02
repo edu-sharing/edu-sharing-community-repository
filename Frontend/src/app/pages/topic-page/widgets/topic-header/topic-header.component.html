@@ -51,7 +51,7 @@
         [searchInput]="searchInput()"
         [showMoreLimit]="650"
         [(text)]="collectionDescription"
-        (textChange)="persistCollectionDescription(collectionDescription)"
+        (textChange)="onCollectionDescriptionChanged(collectionDescription)"
       ></es-editable-text>
       <h2 class="mat-heading-3 font-bold" *ngIf="description || editMode">
         <i esIcon="edu-lightbulb" class="important-header-icon"></i>
@@ -72,7 +72,7 @@
         [searchInput]="searchInput()"
         [showMoreLimit]="650"
         [(text)]="description"
-        (textChange)="persistConfig()"
+        (textChange)="onDescriptionChanged()"
       ></es-editable-text>
     </div>
     <es-image-wrapper
