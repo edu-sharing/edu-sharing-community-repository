@@ -1065,10 +1065,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
                 return;
             }
-            // if page config was retrieved from parent,
-            // remove possible existing nodeIds from swimlane grids
-            if (!retrievePageConfigRef(this.collectionNode)) {
-                // inheriting from a parent collection: keep breadcrumb/header as propagated markers
+            // if the page config was inherited from a parent collection (the collection has no own
+            // page config ref), render the referenced nodes read-only via propagated markers.
+            // In template mode the template owns its nodes, so they must render/edit in place —
+            // never strip them, otherwise edits keep creating new nodes (e.g. the header).
+            if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
                 markForRender(pageVariant);
             }
             // set the anchorItemColor, topicColor, breadcrumbNodeId, headerNodeId and swimlanes
