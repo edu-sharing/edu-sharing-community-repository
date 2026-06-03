@@ -1,6 +1,5 @@
 <metadataset id="oersi" label="OERSI" hidden="false">
 	<name>OERSI</name>
-	<inherit>mds</inherit>
 	<i18n>mds</i18n>
 	<!-- Begin Widgets -->
 	<widgets>
