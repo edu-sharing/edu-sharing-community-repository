@@ -359,6 +359,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         // forking a new variant
         this.selectedTabIndex.set(1);
         this.selectedAssignmentFile.set(null);
+        this.editorialSidebarService.close();
         const existing = this.hasSubmissionFor(node);
         if (existing) {
             this.toast.showProgressSpinner();
