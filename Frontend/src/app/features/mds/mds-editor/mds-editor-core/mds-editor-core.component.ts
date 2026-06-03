@@ -84,7 +84,8 @@ export class MdsEditorCoreComponent {
             const widgets: WidgetAiConfigInfo[] = this.mdsEditorInstance.widgets.value
                 .filter(
                     (w) =>
-                        !w.getIsDirty() &&
+                        // fetch non-touched elements or multivalue elements
+                        (!w.getIsDirty() || w.isMultivalue()) &&
                         w.definition.aiConfigs?.length &&
                         this.mdsEditorInstance.nodes$.value?.length === 1,
                 )
@@ -98,6 +99,9 @@ export class MdsEditorCoreComponent {
                 console.info(
                     'No widget in the current mds template found that has an ai config. Check the mds and include one aiConfig with id default',
                 );
+                return;
+            }
+            if (!widgets.length) {
                 return;
             }
             console.info(widgets, this.mdsEditorInstance.nodes$.value?.length);

@@ -246,7 +246,20 @@ export class MdsEditorInstanceService
             );
             return this.mapParentValues(changedValues ?? this.initialValues.jointValues);
         }
-
+        isMultivalue(): boolean {
+            return [
+                'vcard',
+                'checkboxHorizontal',
+                'checkboxVertical',
+                'multivalueTree',
+                'multivalueBadges',
+                'multivalueFixedBadges',
+                'multivalueSuggestBadges',
+                'multivalueGroup',
+                'multioption',
+                'multivalueCombined',
+            ].includes(this.definition?.type);
+        }
         /**
          * replace variables from client.config inside parameters of the widget
          */
