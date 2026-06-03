@@ -115,6 +115,19 @@
 			<type>date</type>
 			<format>MM-yyyy</format>
 		</widget>
+        <widget>
+            <id>license</id>
+            <caption>ccm_prop_io_license</caption>
+            <type>license</type>
+            <valuespace_i18n_prefix>license_info_</valuespace_i18n_prefix>
+            <values>
+                <entry description="description_OPEN">OPEN</entry>
+                <entry description="description_OER">OER</entry>
+                <entry description="description_CC_BY_OPEN">CC_BY_OPEN</entry>
+                <entry description="description_CC_BY_RESTRICTED">CC_BY_RESTRICTED</entry>
+                <entry description="description_CC_BY_ALL">CC_BY_ALL</entry>
+            </values>
+        </widget>
 	</widgets>
 	<!-- End Widget  -->
 	<!-- Begin Templates -->
