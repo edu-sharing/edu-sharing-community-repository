@@ -27,7 +27,6 @@ import {
     NodeEntriesWrapperComponent,
     NodeHelperService,
     TreeConfig,
-    TreeNodeService,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
@@ -96,7 +95,6 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
-    providers: [TreeNodeService],
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
@@ -224,6 +222,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         showFileName: false,
         multipleSelection: true,
         selectParents: true,
+        showFiles: false,
+        includeResolveInheritedAccess: true,
+        initialSelectionAttribute: 'inherited',
+        selectionMode: 'target',
     };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     initiallySkippedNodeIds: string[] = [];
@@ -250,7 +252,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         public nodeHelperService: NodeHelperService,
         private toast: Toast,
         private translate: TranslateService,
-        private treeNodeService: TreeNodeService,
         private usageApi: RestUsageService,
     ) {
         //this.dataService=new SearchData(iam);
@@ -275,15 +276,6 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             },
             permissions: [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH],
         };
-        // do not show files in the node-entries-tree of the structure tab
-        this.treeNodeService.updateShowFiles(false);
-        // include resolve inherited access in the request
-        this.treeNodeService.updateIncludeResolveInheritedAccess(true);
-        // update attribute name for initial selection
-        this.treeNodeService.updateInitialSelectionAttribute('inherited');
-        // update the tree node service selection mode to control the selection behavior
-        this.treeNodeService.setSelectionMode('target');
-
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();

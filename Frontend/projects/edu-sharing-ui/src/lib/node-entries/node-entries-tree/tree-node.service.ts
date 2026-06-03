@@ -13,9 +13,7 @@ import { LocalEventsService } from '../../services/local-events.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { DynamicFlatNode } from './dynamic-flat-node';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable()
 export class TreeNodeService {
     // holds the already requested nodes
     private dataMap: Map<string, Partial<Node>[]> = new Map<string, Partial<Node>[]>();

@@ -51,13 +51,11 @@ import {
     NodeDataSource,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
-    NodeEntriesService,
     NodeEntriesWrapperComponent,
     NodesRightMode,
     OptionItem,
     Scope,
     TreeConfig,
-    TreeNodeService,
 } from 'ngx-edu-sharing-ui';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, firstValueFrom, map, of, switchMap } from 'rxjs';
@@ -157,7 +155,6 @@ export type NodesSelectorConfig = {
         MdsModule,
         MetadataTemplateManagementComponent,
     ],
-    providers: [NodeEntriesService, TreeNodeService],
 })
 export class NodesSelectorComponent implements OnInit {
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
@@ -379,9 +376,16 @@ export class NodesSelectorComponent implements OnInit {
 
     // workspace tab
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
-    workspaceTreeConfig: TreeConfig = {
+    workspaceTreeConfig = computed<TreeConfig>(() => ({
         showFileName: true,
-    };
+        selectionMode: this.selectionMode(),
+        isValidSourceCallback: (node: Node) =>
+            (this.parent()?.mediatype === 'collection' &&
+                node?.mediatype === 'collection' &&
+                this.parent()?.ref.id !== node?.ref.id &&
+                this.parent()?.parent?.id !== node?.ref.id) ||
+            node?.type === RestConstants.CCM_TYPE_IO,
+    }));
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
@@ -416,7 +420,6 @@ export class NodesSelectorComponent implements OnInit {
         private searchService: SearchService,
         private toast: Toast,
         private translate: TranslateService,
-        private treeNodeService: TreeNodeService,
     ) {
         this.connectorOptionsService
             .buildOptions((connector) => void this.showCreateConnector({ connector }))
@@ -427,22 +430,9 @@ export class NodesSelectorComponent implements OnInit {
                 this.selectedTab.set(option.optionConfig.state);
                 void this.refreshData(option.optionConfig.state);
             }
-            this.treeNodeService.setSelectionMode(
-                option?.optionConfig?.selection?.selected?.length > 0 ? 'target' : 'source',
-            );
             if (!this.canMoveWorkspaceNodes()) {
                 this.workspaceAction.set('copy');
             }
-        });
-        // only allow copying collections if the target is a collection again
-        this.treeNodeService.setCustomIsValidSourceCallback((node: Node) => {
-            return (
-                (this.parent()?.mediatype === 'collection' &&
-                    node?.mediatype === 'collection' &&
-                    this.parent()?.ref.id !== node?.ref.id &&
-                    this.parent()?.parent?.id !== node?.ref.id) ||
-                node?.type === RestConstants.CCM_TYPE_IO
-            );
         });
     }
 
@@ -506,7 +496,6 @@ export class NodesSelectorComponent implements OnInit {
         this.searchText.set('');
         this.searchCompleted.set(false);
         this.searchSent.set(false);
-        this.treeNodeService.resetData();
         // execute tab-specific actions
         switch (event.tab.id) {
             case this.idPrefix + TabType.SEARCH:
@@ -603,15 +592,16 @@ export class NodesSelectorComponent implements OnInit {
             // reset the flat datasource
             this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();
             this.dataSourceCollectionsFlat.isLoading = true;
+            const collectionsTreeService = this.collectionsWrapper?.treeNodeService;
             const deepestNode = this.findDeepestNodeFromDataMap(
-                this.treeNodeService.getDataMap(),
+                collectionsTreeService?.getDataMap(),
             )?.node;
             if (!deepestNode) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
             }
             // retrieve the children of the deepestNode to retrieve the level to be displayed
-            const nodes = this.treeNodeService.getDataMap().get(deepestNode.parent.id);
+            const nodes = collectionsTreeService?.getDataMap().get(deepestNode.parent.id);
             if (!nodes?.length) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
@@ -954,7 +944,8 @@ export class NodesSelectorComponent implements OnInit {
             // switch into the configuration step
             this.currentStep.set(StepType.CONFIGURE);
             // load the children of the selected node to be able to update the number of references
-            const selectedNodeChildren = await this.treeNodeService.getChildren(selectedNode);
+            const selectedNodeChildren =
+                (await this.collectionsWrapper?.treeNodeService.getChildren(selectedNode)) ?? [];
             this.selectedNodeChildren.set(selectedNodeChildren);
         }
         // configuration step for collections
@@ -1070,6 +1061,7 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.dataSourceCollectionsTree.isEmpty()) {
             return;
         }
+        console.log('update tree');
         this.dataSourceCollectionsTree.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const request = {

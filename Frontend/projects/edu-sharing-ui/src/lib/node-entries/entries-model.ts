@@ -120,6 +120,20 @@ export type TreeConfig = {
      * whether the parents should be selected as well when selecting a node
      */
     selectParents?: boolean;
+    /**
+     * whether the tree acts as source (pick nodes) or target (pick destination folder)
+     */
+    selectionMode?: 'source' | 'target';
+    /**
+     * callback to validate which nodes are valid drag sources
+     */
+    isValidSourceCallback?: (node: Node) => boolean;
+    /** whether to show file nodes in the tree (default: true) */
+    showFiles?: boolean;
+    /** whether to include resolved inherited access when loading children */
+    includeResolveInheritedAccess?: boolean;
+    /** node attribute used to determine the initial selection state */
+    initialSelectionAttribute?: string;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

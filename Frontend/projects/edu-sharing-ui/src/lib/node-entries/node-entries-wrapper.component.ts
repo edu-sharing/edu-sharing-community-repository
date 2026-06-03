@@ -68,6 +68,7 @@ import { PaginationStrategy } from './node-entries-global.service';
 import { NodeEntriesDataType } from './data-type';
 import { OptionsHelperService } from '../services/abstract/options-helper.service';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
+import { TreeNodeService } from './node-entries-tree/tree-node.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
@@ -75,7 +76,12 @@ import { OptionsHelperDataService } from '../services/options-helper-data.servic
         #nodeEntriesComponent
         *ngIf="!customNodeListComponent"
     ></es-node-entries>`,
-    providers: [NodeEntriesService, OptionsHelperDataService, NodeEntriesTemplatesService],
+    providers: [
+        NodeEntriesService,
+        OptionsHelperDataService,
+        NodeEntriesTemplatesService,
+        TreeNodeService,
+    ],
     standalone: false,
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
@@ -198,6 +204,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         private templatesService: NodeEntriesTemplatesService,
         private changeDetectorRef: ChangeDetectorRef,
         private elementRef: ElementRef,
+        public treeNodeService: TreeNodeService,
     ) {
         // regulary re-bind template since it might have updated without ngChanges trigger
         /*
@@ -288,6 +295,27 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         if (this.treeConfig) {
             this.entriesService.treeConfig = this.treeConfig;
+            if (this.treeConfig.selectionMode !== undefined) {
+                this.treeNodeService.setSelectionMode(this.treeConfig.selectionMode);
+            }
+            if (this.treeConfig.isValidSourceCallback !== undefined) {
+                this.treeNodeService.setCustomIsValidSourceCallback(
+                    this.treeConfig.isValidSourceCallback,
+                );
+            }
+            if (this.treeConfig.showFiles !== undefined) {
+                this.treeNodeService.updateShowFiles(this.treeConfig.showFiles);
+            }
+            if (this.treeConfig.includeResolveInheritedAccess !== undefined) {
+                this.treeNodeService.updateIncludeResolveInheritedAccess(
+                    this.treeConfig.includeResolveInheritedAccess,
+                );
+            }
+            if (this.treeConfig.initialSelectionAttribute !== undefined) {
+                this.treeNodeService.updateInitialSelectionAttribute(
+                    this.treeConfig.initialSelectionAttribute,
+                );
+            }
         }
         this.entriesService.options = this.options;
         if (this.globalOptions) {

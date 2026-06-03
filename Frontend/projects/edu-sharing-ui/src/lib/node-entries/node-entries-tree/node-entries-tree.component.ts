@@ -96,7 +96,6 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             .subscribe(async ([isLoading, data]) => {
                 this.isLoading = isLoading !== false;
                 if (!isLoading && data?.length && !this.treeInitialized()) {
-                    console.log('init', data);
                     await this.initializeTree();
                 }
             });

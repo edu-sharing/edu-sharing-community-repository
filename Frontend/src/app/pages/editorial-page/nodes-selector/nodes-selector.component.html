@@ -247,7 +247,7 @@
             dropAllowed: canDropOnCollection,
             dropped: dropOnCollection
           }"
-          [treeConfig]="workspaceTreeConfig"
+          [treeConfig]="workspaceTreeConfig()"
           (selectionChange)="onNodeSelectionChange($event)"
         >
           <ng-template #empty>
