@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse } from 'ngx-edu-sharing-b-api';
 import {
     ColorHelper,
     EduSharingUiCommonModule,
@@ -87,6 +87,9 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         this.setEditMode(val);
     }
     @Input() nodeId: string = '';
+    // propagated header node: only its text background color is taken over,
+    // other parameters fall back to defaults
+    @Input() propagatedNodeId: string = '';
     @Input() pageVariantNode: Node;
     parentEntries: InputSignal<ParentEntries> = input<ParentEntries>(null);
     searchInput: InputSignal<string> = input<string>(null);
@@ -138,15 +141,22 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
+        const nodeIdChanged: boolean =
+            !!changes.nodeId && changes.nodeId.currentValue !== changes.nodeId.previousValue;
+        const propagatedNodeIdChanged: boolean =
+            !!changes.propagatedNodeId &&
+            changes.propagatedNodeId.currentValue !== changes.propagatedNodeId.previousValue;
         if (
             changes.nodeId?.firstChange ||
-            changes.nodeId?.currentValue !== changes.nodeId?.previousValue ||
+            changes.propagatedNodeId?.firstChange ||
+            nodeIdChanged ||
+            propagatedNodeIdChanged ||
             topicChanged
         ) {
-            // reset several variables if an actual change was detected
+            // reset several variables if an actual (non-first) change was detected
             if (
-                (!changes.nodeId?.firstChange &&
-                    changes.nodeId?.currentValue !== changes.nodeId?.previousValue) ||
+                (!changes.nodeId?.firstChange && nodeIdChanged) ||
+                (!changes.propagatedNodeId?.firstChange && propagatedNodeIdChanged) ||
                 topicChanged
             ) {
                 this.aiGeneratedImage = this.aiSupported();
@@ -171,18 +181,22 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     async initTopicHeader(): Promise<void> {
         // retrieve a config node if one exists
         let configJson: string = '{}';
-        if (this.nodeId) {
-            const node: Node = await this.topicPageHelperService.getNode(this.nodeId);
+        // when only a propagated node exists, take over only its color attribute
+        let colorOnly: boolean = false;
+        const configNodeId: string = this.nodeId || this.propagatedNodeId;
+        if (configNodeId) {
+            const node: Node = await this.topicPageHelperService.getNode(configNodeId);
             if (node.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0]) {
                 configJson = node.properties[DEFAULT_WIDGET_CONFIG_PROP][0];
             }
+            colorOnly = !this.nodeId && !!this.propagatedNodeId;
         }
         // read config from this JSON string and generates an AI text if no description is found
         const aiNodeId: string = getNodeOrDefaultNodeId(
             this.defaultTextNodeId,
             this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
         );
-        await this.readConfigFromJson(configJson, aiNodeId);
+        await this.readConfigFromJson(configJson, aiNodeId, colorOnly);
         // set the component to be initialized (further processing is done in the child component)
         this.initialized.set(true);
     }
@@ -211,6 +225,26 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.textBackgroundColor = color;
             await this.persistConfig();
         }
+    }
+
+    /**
+     * Handles a manual change of the importance description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     */
+    async onDescriptionChanged(): Promise<void> {
+        this.aiGeneratedText.set(false);
+        await this.persistConfig();
+    }
+
+    /**
+     * Handles a manual change of the collection description text. The text is no longer
+     * AI-generated once edited by the user, so the AI label must be hidden before persisting.
+     *
+     * @param description
+     */
+    async onCollectionDescriptionChanged(description: string): Promise<void> {
+        this.aiGeneratedDescription.set(false);
+        await this.persistCollectionDescription(description);
     }
 
     /**
@@ -282,7 +316,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.globalWidgetConfigService.defaultTopicHeaderDescriptionWidgetNodeId,
         );
         try {
-            const promptResponse: ChatCompletionResult =
+            const promptResponse: CreateChatCompletionResponse =
                 await this.aiHelperService.generateFromPrompt(
                     mdsConfigId,
                     {},
@@ -320,9 +354,27 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      *
      * @param configString
      * @param nodeId
+     * @param colorOnly
      */
-    private async readConfigFromJson(configString: string, nodeId: string): Promise<void> {
+    private async readConfigFromJson(
+        configString: string,
+        nodeId: string,
+        colorOnly: boolean = false,
+    ): Promise<void> {
         const config: TopicHeaderConfig = JSON.parse(configString);
+        // check whether a text background color is explicitly set (taken over in all modes)
+        if (
+            config.textBackgroundColor &&
+            config.textBackgroundColor !== this.DEFAULT_HEADER_TEXT_BG_COLOR
+        ) {
+            this.textBackgroundColor = config.textBackgroundColor;
+        }
+        // colorOnly (propagated header): only the color is taken over; image and upload fall back
+        // to their defaults and the description is (re)generated by AI as the default
+        if (colorOnly) {
+            await this.generateDescription(nodeId);
+            return;
+        }
         // this is the case if a widgetNode for the header exists
         if (config.description) {
             this.description = config.description;
@@ -333,13 +385,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         // check whether an AI-generated image is explicitly set to false
         if (config.aiGeneratedImage === false) {
             this.aiGeneratedImage = false;
-        }
-        // check whether a text background color is explicitly set
-        if (
-            config.textBackgroundColor &&
-            config.textBackgroundColor !== this.DEFAULT_HEADER_TEXT_BG_COLOR
-        ) {
-            this.textBackgroundColor = config.textBackgroundColor;
         }
         // check if an image was uploaded
         if (config.userUploadedNodeId) {
@@ -357,7 +402,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             return;
         }
         try {
-            const promptResponse: ChatCompletionResult =
+            const promptResponse: CreateChatCompletionResponse =
                 await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
             const responseText: string = retrieveResultString(promptResponse) ?? '';
             if (responseText !== '') {

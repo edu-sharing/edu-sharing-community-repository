@@ -18,6 +18,14 @@ export const DEFAULT_PAGE_TEMPLATE_ID: string = '-default_template-';
 export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
 export const DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP: string = 'ccm:page_variant_is_template';
+export const DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP: string =
+    'ccm:educationalcontext';
+export const DEFAULT_PAGE_VARIANT_PROFILING_TARGET_GROUP_PROP: string =
+    'ccm:page_variant_profiling_target_group';
+export const DEFAULT_PAGE_VARIANT_PROFILING_PROPS: string[] = [
+    DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP,
+    DEFAULT_PAGE_VARIANT_PROFILING_TARGET_GROUP_PROP,
+];
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP: string = 'ccm:page_variant_template_ref';
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP: string =
     'ccm:page_variant_template_version';
@@ -28,7 +36,7 @@ export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 export const DEFAULT_BG_COLOR: string = '#F4F4F4';
 export const DEFAULT_PAGE_NAME_PREFIX: string = 'PAGE_';
 export const DEFAULT_PAGE_VARIANT_NAME_PREFIX: string = 'PAGE_VARIANT_';
-export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1.0.0';
+export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1';
 export const DEFAULT_ICON_PATH: string = 'assets/images/topic-page/';
 export const DEFAULT_WIDGET_NAME_PREFIX: string = 'WIDGET_';
 

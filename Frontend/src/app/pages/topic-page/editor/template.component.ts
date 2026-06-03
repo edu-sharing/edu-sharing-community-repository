@@ -42,7 +42,7 @@ import {
     SearchResults,
     SearchService,
 } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
     ColorHelper,
     Constrain,
@@ -106,6 +106,7 @@ import {
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_NAME_PREFIX,
+    DEFAULT_PAGE_VARIANT_PROFILING_PROPS,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -123,8 +124,10 @@ import { GridTileToHitsMapping } from '../shared/types/grid-tile-to-hits-mapping
 import { GridTileToSearchCountMapping } from '../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../shared/types/grid-tile-to-search-results-mapping';
 import { PageConfig } from '../shared/types/page-config';
+import { PageStructure } from '../shared/types/page-structure';
 import { PageVariantConfig } from '../shared/types/page-variant-config';
 import { PromptToTextMapping } from '../shared/types/prompt-to-text-mapping';
+import { TopicHeaderConfig } from '../shared/types/widget-config/topic-header-config';
 import { Swimlane } from '../shared/types/swimlane';
 import { SwimlaneBackgroundShape } from '../shared/types/swimlane-background-shape';
 import { WidgetConfigObject } from '../shared/types/widget-config-object';
@@ -138,7 +141,8 @@ import { checkUserAccess } from '../shared/utils/node-util';
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
-    preparePageVariantConfig,
+    markForCopy,
+    markForRender,
     prependWorkspacePrefix,
     retrieveAiConfigFromNode,
     retrieveNodeId,
@@ -149,6 +153,7 @@ import {
     retrievePageVariantTemplateVersion,
     retrievePromptFromAiConfig,
     retrieveTopicColor,
+    retrieveWidgetConfigFromNode,
 } from '../shared/utils/template-util';
 import { BreadcrumbComponent } from '../widgets/breadcrumb/breadcrumb.component';
 import { GenericWidgetComponent } from '../widgets/generic-widget/generic-widget.component';
@@ -384,8 +389,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     convertedHeaderNodeId: Signal<string> = computed((): string =>
         convertNodeRefIntoNodeId(this.headerNodeId()),
     );
+    convertedPropagatedBreadcrumbNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.propagatedBreadcrumbNodeId()),
+    );
+    convertedPropagatedHeaderNodeId: Signal<string> = computed((): string =>
+        convertNodeRefIntoNodeId(this.propagatedHeaderNodeId()),
+    );
     breadcrumbNodeId: WritableSignal<string> = signal(null);
     headerNodeId: WritableSignal<string> = signal(null);
+    propagatedBreadcrumbNodeId: WritableSignal<string> = signal(null);
+    propagatedHeaderNodeId: WritableSignal<string> = signal(null);
     pageConfigNode: Node;
     pageConfigCheckFailed: WritableSignal<boolean> = signal(false);
     pageConfigCreationInProgress: WritableSignal<boolean> = signal(false);
@@ -397,14 +410,27 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
     templateUpdateAvailable: Signal<boolean> = computed(() => {
-        const templateMode: boolean = this.templateMode();
         const templateNode: Node = this.templateVariantNode();
         const pageVariantNode: Node = this.pageVariantNode();
-        if (templateMode || !templateNode || !pageVariantNode) {
+        if (!templateNode || !pageVariantNode) {
             return false;
         }
         const currentTemplateVersion = retrievePageVariantTemplateVersion(templateNode);
         const variantTemplateVersion = retrievePageVariantTemplateVersion(pageVariantNode);
+        // Non-root templates store a compound version "{parent_sync}:{own_counter}".
+        // For a template, compare only the parent_sync part against the parent template's
+        // current version (the own_counter is this node's own revision, not the parent's).
+        const isTemplate =
+            pageVariantNode.properties?.[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]?.[0] === 'true';
+        if (isTemplate && variantTemplateVersion.includes(':')) {
+            const parentSyncVersion = variantTemplateVersion.slice(
+                0,
+                variantTemplateVersion.lastIndexOf(':'),
+            );
+            return currentTemplateVersion !== parentSyncVersion;
+        }
+        // Leaf page variants store their foundation's version verbatim, so compare the
+        // full version against the foundation's current version.
         return currentTemplateVersion !== variantTemplateVersion;
     });
     createVariantOrTemplateDialogRef: CardDialogRef;
@@ -1039,10 +1065,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
                 return;
             }
-            // if page config was retrieved from parent,
-            // remove possible existing nodeIds from swimlane grids
-            if (!retrievePageConfigRef(this.collectionNode)) {
-                preparePageVariantConfig(pageVariant, true);
+            // if the page config was inherited from a parent collection (the collection has no own
+            // page config ref), render the referenced nodes read-only via propagated markers.
+            // In template mode the template owns its nodes, so they must render/edit in place —
+            // never strip them, otherwise edits keep creating new nodes (e.g. the header).
+            if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
+                markForRender(pageVariant);
             }
             // set the anchorItemColor, topicColor, breadcrumbNodeId, headerNodeId and swimlanes
             if (pageVariant.structure.anchorItemColor) {
@@ -1051,6 +1079,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
             this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
             this.headerNodeId.set(pageVariant.structure.headerNodeId);
+            this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
+            this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
             this.swimlanes = pageVariant.structure.swimlanes ?? [];
         }
         // update the swimlane ID to prompt text mapping
@@ -1117,8 +1147,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const variantConfig: PageVariantConfig = retrievePageVariantConfig(
                 this.createVariantOrTemplateSelectedNode,
             );
-            // delete the nodeIds but keep them as propagatedNodeIds + remove certain variables
-            preparePageVariantConfig(variantConfig, true, true);
+            // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
+            markForCopy(variantConfig);
             // retrieve the page variant properties
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
@@ -1128,23 +1158,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(this.pageConfigNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name + '_' + uuidv4(),
+                this.createVariantOrTemplateSelectedNode.name.replace(
+                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
+                    '',
+                ) +
+                    '_' +
+                    uuidv4(),
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // depending on the copy option, certain variables should be added
-            // workaround: this currently has to be done separately as it crashes otherwise
-            const educationContextProp: string = 'ccm:educationalcontext';
-            if (
-                this.createVariantOrTemplateCopyOption === CopyOption.TopicPage &&
-                this.createVariantOrTemplateSelectedNode.properties?.[educationContextProp]?.length
-            ) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        educationContextProp,
-                        this.createVariantOrTemplateSelectedNode.properties[educationContextProp],
-                    );
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedVariantNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(pageConfigVariantNode),
+            );
+            if (updatedVariantNode) {
+                pageConfigVariantNode = updatedVariantNode;
             }
             // push it to the existing variants
             pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
@@ -2199,7 +2228,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             ),
                             configName: swimlane.id,
                         };
-                        const result: ChatCompletionResult =
+                        const result: CreateChatCompletionResponse =
                             await this.aiHelperService.generateFromPrompt(
                                 config,
                                 this.topicPageHelperService.getSelectedVariables() || {},
@@ -2240,6 +2269,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.requestInProgress.set(true);
             // create config node + link
             await this.checkForCustomPageNodeExistence();
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedVariantNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(this.pageVariantNode()),
+            );
+            if (updatedVariantNode) {
+                this.pageVariantNode.set(updatedVariantNode);
+            }
             // after the page config + variant node were created from the template,
             // copy the widget nodes and persist the variant config without propagatedNodeIds
             const variantConfig: PageVariantConfig = retrievePageVariantConfig(
@@ -2320,8 +2357,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const variantConfig: PageVariantConfig = retrievePageVariantConfig(
                 this.createVariantOrTemplateSelectedNode,
             );
-            // delete the nodeIds but keep them as propagatedNodeIds + remove certain variables
-            preparePageVariantConfig(variantConfig, true, true);
+            // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
+            markForCopy(variantConfig);
             // retrieve the page variant properties
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
@@ -2330,14 +2367,33 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            // set the template version to the default
-            properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
-                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            // depending on the mode, set the template ref property
-            // * retrieved from topic page -> use template ref of page variant (already set)
-            // * retrieved from template -> use own ID as template ref for later reference (delete and set later)
-            if (this.createVariantOrTemplateCopyOption === CopyOption.Template) {
-                delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
+            // a "real" template source is any template except the default placeholder
+            const isRealTemplateSource: boolean =
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                retrieveNodeId(this.createVariantOrTemplateSelectedNode) !==
+                    DEFAULT_PAGE_TEMPLATE_ID;
+            // the default placeholder: template ref must be set to the new node's own ID after creation
+            const isDefaultTemplateSource: boolean =
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                !isRealTemplateSource;
+            if (isRealTemplateSource) {
+                // inherit template version from A and append the default own_counter to
+                // form the compound "{parent_sync}:{own_counter}" format used by non-root
+                // templates
+                const parentVersion =
+                    this.createVariantOrTemplateSelectedNode.properties?.[
+                        DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP
+                    ]?.[0] ?? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                    parentVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+                // set template ref to A's node ID
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP] = prependWorkspacePrefix(
+                    retrieveNodeId(this.createVariantOrTemplateSelectedNode),
+                );
+            } else {
+                // topic page source or default template placeholder: use default version
+                properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
             }
             if (!properties[RestConstants.LOM_PROP_TITLE]) {
                 properties[RestConstants.LOM_PROP_TITLE] = this.translate.instant(
@@ -2370,12 +2426,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(pageConfigPropagateNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name + '_' + uuidv4(),
+                this.createVariantOrTemplateSelectedNode.name.replace(
+                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
+                    '',
+                ) +
+                    '_' +
+                    uuidv4(),
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // edit the template ref, if necessary
-            if (this.createVariantOrTemplateCopyOption === CopyOption.Template) {
+            // for the default template placeholder, set the template ref to the new node's own ID
+            if (isDefaultTemplateSource) {
                 pageConfigVariantNode =
                     await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                         retrieveNodeId(pageConfigVariantNode),
@@ -2383,18 +2444,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
                     );
             }
-            // workaround: copy educational context separately to avoid crashes
-            const educationContextProp: string = 'ccm:educationalcontext';
-            if (
-                this.createVariantOrTemplateCopyOption === CopyOption.TopicPage &&
-                this.createVariantOrTemplateSelectedNode.properties?.[educationContextProp]?.length
-            ) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        educationContextProp,
-                        this.createVariantOrTemplateSelectedNode.properties[educationContextProp],
-                    );
+            // workaround: copy profiling properties separately to avoid crashes
+            const updatedTemplateNode = await this.copyProfilingProperties(
+                this.createVariantOrTemplateSelectedNode,
+                retrieveNodeId(pageConfigVariantNode),
+            );
+            if (updatedTemplateNode) {
+                pageConfigVariantNode = updatedTemplateNode;
             }
             // push new variant into the propagate page config
             pageConfig.variants.push(prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)));
@@ -2452,6 +2508,30 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.pageConfigCreationInProgress.set(false);
             this.endEditing();
         }
+    }
+
+    /**
+     * Copies profiling properties from a source node to a target node if they are present.
+     */
+    private async copyProfilingProperties(
+        sourceNode: Node,
+        targetNodeId: string,
+    ): Promise<Node | null> {
+        let modified: boolean = false;
+        for (const prop of DEFAULT_PAGE_VARIANT_PROFILING_PROPS) {
+            if (sourceNode.properties?.[prop]?.length) {
+                await this.topicPageHelperService.setProperty(
+                    targetNodeId,
+                    prop,
+                    sourceNode.properties[prop],
+                );
+                modified = true;
+            }
+        }
+        if (modified) {
+            return await this.topicPageHelperService.getNode(targetNodeId);
+        }
+        return null;
     }
 
     /**
@@ -2520,9 +2600,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         );
                     }
                     // retrieve the page variant config and turn the existing node IDs into
-                    // propagatedNodeIds, so the referenced widget nodes can be copied below
+                    // temporaryNodeIds, so the referenced widget, breadcrumb and header nodes
+                    // can be copied/reduced below
                     const variantConfig: PageVariantConfig = retrievePageVariantConfig(variantNode);
-                    preparePageVariantConfig(variantConfig, true);
+                    markForCopy(variantConfig, true);
                     // check whether the function is called from the widget added event
                     // and select the correct variant to be adjusted
                     if (widget && retrieveNodeId(pageVariantNode) === retrieveNodeId(variantNode)) {
@@ -2542,7 +2623,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             null,
                             widgetProperties,
                         );
-                        // drop a possible propagatedNodeId on the targeted grid tile so the freshly
+                        // drop a possible temporaryNodeId on the targeted grid tile so the freshly
                         // created widget node is not overwritten by the node copy step below
                         if (
                             !isHeaderNode &&
@@ -2550,7 +2631,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             variantConfig.structure?.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex]
                         ) {
                             delete variantConfig.structure.swimlanes[swimlaneIndex].grid[gridIndex]
-                                .propagatedNodeId;
+                                .temporaryNodeId;
                         }
                         // add the widget node ID to the page variant config
                         addNodeIdToPageVariantConfig(
@@ -2724,10 +2805,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     private incrementPatchVersion(version: string): string {
-        const parts = version.split('.');
-        if (parts.length !== 3) return version;
-        const patch = parseInt(parts[2], 10);
-        return `${parts[0]}.${parts[1]}.${isNaN(patch) ? 1 : patch + 1}`;
+        const colonIdx = version.lastIndexOf(':');
+        if (colonIdx !== -1) {
+            // non-root template: increment the own_counter after the last ':'
+            const counter = parseInt(version.slice(colonIdx + 1), 10);
+            return version.slice(0, colonIdx + 1) + (isNaN(counter) ? 1 : counter + 1);
+        }
+        // root template: simple integer increment
+        const num = parseInt(version, 10);
+        return String(isNaN(num) ? 2 : num + 1);
     }
 
     /**
@@ -2736,7 +2822,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * compare versions. Skips loading when in template mode or when no template ref exists.
      */
     private async loadTemplateVariantNode(): Promise<void> {
-        if (this.templateMode() || !this.pageVariantNode()) {
+        if (!this.pageVariantNode()) {
             this.templateVariantNode.set(null);
             return;
         }
@@ -2795,19 +2881,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         oldNodeIds.push(oldVariantConfig.structure.headerNodeId);
                     }
                     const variantConfig = retrievePageVariantConfig(templateNode);
-                    preparePageVariantConfig(variantConfig, true, true);
+                    markForCopy(variantConfig);
                     // create new widget nodes + persist config
                     await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
                         syncLocalState: true,
                         collectionId: this.topicCollectionId(),
                     });
-                    // store the template version that was used so we know it's up to date
+                    // store the template version that was used so we know it's up to date;
+                    // in template mode the node is a non-root template, so append the default
+                    // own_counter to form the compound "{parent_sync}:{own_counter}" version
                     const templateVersion = retrievePageVariantTemplateVersion(templateNode);
+                    const syncedVersion = this.templateMode()
+                        ? templateVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+                        : templateVersion;
                     this.pageVariantNode.set(
                         await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                             retrieveNodeId(this.pageVariantNode()),
                             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
-                            templateVersion,
+                            syncedVersion,
                         ),
                     );
                     await this.updatePageVariantConfigs(true);
@@ -2948,9 +3039,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Helper that copies all widget nodes referenced by `propagatedNodeId` in
+     * Helper that copies all widget nodes referenced by `temporaryNodeId` in
      * the given variant config as children of the target page variant node and
-     * persists the resulting variant config (without propagatedNodeIds).
+     * persists the resulting variant config (without any temporary markers).
      *
      * @param variantConfig
      * @param targetVariantNode
@@ -2964,13 +3055,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (!variantConfig?.structure || !targetVariantNode) {
             return targetVariantNode;
         }
-        // copy widget nodes and replace propagatedNodeIds with new nodeIds
+        // copy widget nodes and replace temporaryNodeIds with new nodeIds
         await this.createAndRelinkPageVariantWidgets(
             variantConfig,
             targetVariantNode,
             options.collectionId,
         );
-        // persist the variant config without propagatedNodeIds
+        // materialize a temporary breadcrumb (full copy) and topic-header (reduced color-only copy)
+        await this.relinkTemporaryHeaderAndBreadcrumb(variantConfig.structure, targetVariantNode);
+        // persist the variant config without any temporary markers
         const updatedNode: Node =
             await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
                 retrieveNodeId(targetVariantNode),
@@ -2986,13 +3079,68 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (variantConfig.structure.headerNodeId) {
                 this.headerNodeId.set(variantConfig.structure.headerNodeId);
             }
+            // markers were materialized above, so clear the render (propagated) signals
+            this.propagatedBreadcrumbNodeId.set(
+                variantConfig.structure.propagatedBreadcrumbNodeId ?? null,
+            );
+            this.propagatedHeaderNodeId.set(variantConfig.structure.propagatedHeaderNodeId ?? null);
             await this.updatePageVariantConfigs(true);
         }
         return updatedNode;
     }
 
     /**
-     * Iterates through the page variant structure and relinks widgets based on propagated node IDs.
+     * Materializes temporary breadcrumb / topic-header copy-source markers as real child nodes of
+     * the target variant node. The breadcrumb node is copied in full (its editorial members are
+     * kept), whereas the topic-header is reduced to a node carrying only the text background color —
+     * uploaded image, AI-generated image flag and description fall back to their defaults.
+     *
+     * @param structure
+     * @param targetNode
+     */
+    private async relinkTemporaryHeaderAndBreadcrumb(
+        structure: PageStructure,
+        targetNode: Node,
+    ): Promise<void> {
+        if (!structure) {
+            return;
+        }
+        // breadcrumb: full copy of the temporary copy-source node
+        if (structure.temporaryBreadcrumbNodeId) {
+            const copiedBreadcrumb: Node = await this.topicPageHelperService.copyNodeAsChild(
+                structure.temporaryBreadcrumbNodeId,
+                retrieveNodeId(targetNode),
+            );
+            structure.breadcrumbNodeId = prependWorkspacePrefix(retrieveNodeId(copiedBreadcrumb));
+            delete structure.temporaryBreadcrumbNodeId;
+        }
+        // topic-header: create a reduced node carrying only the text background color
+        if (structure.temporaryHeaderNodeId) {
+            const sourceHeaderNode: Node = await this.topicPageHelperService.getNode(
+                convertNodeRefIntoNodeId(structure.temporaryHeaderNodeId),
+            );
+            const sourceConfig = retrieveWidgetConfigFromNode(
+                sourceHeaderNode,
+            ) as TopicHeaderConfig;
+            const textBackgroundColor: string = sourceConfig?.textBackgroundColor;
+            // only create a reduced header node when there is a custom color worth preserving
+            if (textBackgroundColor) {
+                const reducedConfig: TopicHeaderConfig = { textBackgroundColor };
+                const headerNode: Node = await this.topicPageHelperService.createChild(
+                    retrieveNodeId(targetNode),
+                    RestConstants.CCM_TYPE_MAP,
+                    DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
+                    null,
+                    { [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(reducedConfig) },
+                );
+                structure.headerNodeId = prependWorkspacePrefix(retrieveNodeId(headerNode));
+            }
+            delete structure.temporaryHeaderNodeId;
+        }
+    }
+
+    /**
+     * Iterates through the page variant structure and relinks widgets based on temporary node IDs.
      *
      * @param pageVariant
      * @param node
@@ -3005,13 +3153,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     ): Promise<void> {
         for (const swimlane of pageVariant.structure?.swimlanes ?? []) {
             for (const gridTile of swimlane.grid ?? []) {
-                if (gridTile.propagatedNodeId) {
+                if (gridTile.temporaryNodeId) {
                     const copiedNode: Node = await this.topicPageHelperService.copyNodeAsChild(
-                        gridTile.propagatedNodeId,
+                        gridTile.temporaryNodeId,
                         node.ref.id,
                     );
                     gridTile.nodeId = prependWorkspacePrefix(copiedNode.ref.id);
-                    delete gridTile.propagatedNodeId;
+                    delete gridTile.temporaryNodeId;
                     if (collectionId) {
                         await this.replaceWidgetCollectionId(copiedNode, collectionId);
                     }

@@ -1,5 +1,6 @@
 package org.edu_sharing.alfrescocontext;
 
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.domain.qname.QNameDAO;
 import org.alfresco.repo.i18n.MessageService;
@@ -408,5 +409,10 @@ public class AlfrescoBeanConfig {
     @Bean
     public TicketComponent  ticketComponent() {
         return applicationContext.getBean("ticketComponent", TicketComponent.class);
+    }
+
+    @Bean
+    public SimpleCache<String, String> eduSharingTransformerCache() {
+        return applicationContext.getBean("eduSharingTransformerCache", SimpleCache.class);
     }
 }

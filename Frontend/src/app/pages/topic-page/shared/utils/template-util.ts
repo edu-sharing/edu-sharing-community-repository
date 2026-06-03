@@ -189,10 +189,7 @@ export const retrievePromptFromAiConfig = (
     aiConfig: BapiConfigObject,
     propertyName: keyof BapiConfigObject = 'description',
 ): string => {
-    return (
-        aiConfig[propertyName].chatCompletion?.messages?.find((m) => m?.role === 'user')?.content ??
-        ''
-    );
+    return aiConfig[propertyName].prompt?.messages?.find((m) => m?.role === 'user')?.content ?? '';
 };
 
 /**
@@ -238,33 +235,68 @@ export const retrievePageVariantConfig = (variantNode: Node): PageVariantConfig 
 };
 
 /**
- * Helper function to prepare the page variant config by removing possible existing breadcrumbNodeId, headerNodeId and nodeIds + save propagated node IDs.
+ * Marks a page variant config for READ-ONLY RENDERING of an inherited (parent-collection) config.
+ * Each real nodeId is moved to a `propagated*` marker and the real id removed, so widgets,
+ * breadcrumb and header render read-only from the parent's nodes. The result is never persisted;
+ * the actual copy is deferred to markForCopy + persistRelinkedVariantConfig once the page is adjusted.
+ *
+ * @param pageVariant
  */
-export const preparePageVariantConfig = (
-    pageVariant: PageVariantConfig,
-    propagated: boolean = false,
-    deleteHeaderIds: boolean = true,
-): void => {
+export const markForRender = (pageVariant: PageVariantConfig): void => {
     pageVariant.structure.swimlanes?.forEach((swimlane: Swimlane): void => {
         swimlane.grid?.forEach((gridItem: GridTile): void => {
             if (gridItem.nodeId) {
-                // if the page config was propagated, store a propagatedNodeId to load existing settings
-                if (propagated) {
-                    gridItem.propagatedNodeId = gridItem.nodeId;
-                }
+                // store a propagatedNodeId to load existing settings
+                gridItem.propagatedNodeId = gridItem.nodeId;
                 delete gridItem.nodeId;
             }
         });
     });
-    if (!deleteHeaderIds) {
-        return;
-    }
     if (pageVariant.structure.breadcrumbNodeId) {
+        pageVariant.structure.propagatedBreadcrumbNodeId = pageVariant.structure.breadcrumbNodeId;
         delete pageVariant.structure.breadcrumbNodeId;
     }
     if (pageVariant.structure.headerNodeId) {
+        pageVariant.structure.propagatedHeaderNodeId = pageVariant.structure.headerNodeId;
         delete pageVariant.structure.headerNodeId;
     }
+};
+
+/**
+ * Marks a page variant config for COPYING into a freshly created variant node. Each real nodeId is
+ * moved to a `temporary*` copy-source pointer (consumed and deleted by persistRelinkedVariantConfig)
+ * and the real id removed. Widget nodes are always marked; breadcrumb/header are only marked when
+ * `includeHeaderAndBreadcrumb` is set (parent-collection materialization) — otherwise they are
+ * dropped (duplicate / create-template / regenerate).
+ *
+ * @param pageVariant
+ * @param includeHeaderAndBreadcrumb whether the breadcrumb/header nodes should be copied too
+ */
+export const markForCopy = (
+    pageVariant: PageVariantConfig,
+    includeHeaderAndBreadcrumb: boolean = false,
+): void => {
+    pageVariant.structure.swimlanes?.forEach((swimlane: Swimlane): void => {
+        swimlane.grid?.forEach((gridItem: GridTile): void => {
+            if (gridItem.nodeId) {
+                gridItem.temporaryNodeId = gridItem.nodeId;
+                delete gridItem.nodeId;
+            }
+        });
+    });
+    if (includeHeaderAndBreadcrumb) {
+        if (pageVariant.structure.breadcrumbNodeId) {
+            pageVariant.structure.temporaryBreadcrumbNodeId =
+                pageVariant.structure.breadcrumbNodeId;
+        }
+        if (pageVariant.structure.headerNodeId) {
+            pageVariant.structure.temporaryHeaderNodeId = pageVariant.structure.headerNodeId;
+        }
+    }
+    // the source breadcrumb/header references are always cleared on the copy: either re-created
+    // from the temporary pointers above, or dropped entirely
+    delete pageVariant.structure.breadcrumbNodeId;
+    delete pageVariant.structure.headerNodeId;
 };
 
 /**
@@ -285,10 +317,16 @@ export const addNodeIdToPageVariantConfig = (
     // modify header nodeId
     if (isHeaderNode) {
         pageVariant.structure.headerNodeId = widgetNodeId;
+        // the real node supersedes any render / copy marker
+        delete pageVariant.structure.propagatedHeaderNodeId;
+        delete pageVariant.structure.temporaryHeaderNodeId;
     }
-    // modify header nodeId
+    // modify breadcrumb nodeId
     else if (isBreadcrumbNode) {
         pageVariant.structure.breadcrumbNodeId = widgetNodeId;
+        // the real node supersedes any render / copy marker
+        delete pageVariant.structure.propagatedBreadcrumbNodeId;
+        delete pageVariant.structure.temporaryBreadcrumbNodeId;
     }
     // modify nodeId of swimlane grid tile
     else if (pageVariant.structure?.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex]) {
