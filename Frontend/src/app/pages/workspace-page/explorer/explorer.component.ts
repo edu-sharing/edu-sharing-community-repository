@@ -367,6 +367,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.initColumns();
         this.registerNodesChanged();
         this.registerNodesDeleted();
+        this.registerNodesMoved();
         combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
                 filter((v) => v[2] && (!!v[0] || !!v[1])),
@@ -524,6 +525,25 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                     offset: 0,
                     reset: true,
                 });
+            });
+    }
+
+    private registerNodesMoved(): void {
+        this.localEvents.nodesMoved
+            .pipe(
+                takeUntil(this.destroyed),
+                filter(({ source, target }) => {
+                    const currentId = this.node$.value?.ref?.id;
+                    console.log(currentId, source, target);
+                    return (
+                        [RestConstants.USERHOME, RestConstants.SHARED_FILES].includes(currentId) ||
+                        source?.ref?.id === currentId ||
+                        target?.ref?.id === currentId
+                    );
+                }),
+            )
+            .subscribe(() => {
+                void this.load({ offset: 0, reset: true });
             });
     }
 

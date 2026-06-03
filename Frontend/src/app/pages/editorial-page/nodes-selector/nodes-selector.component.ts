@@ -919,9 +919,11 @@ export class NodesSelectorComponent implements OnInit {
                         this.toast.closeProgressSpinner();
                     });
                 } else {
-                    await this.uiService.copyOrMoveNodes(nodesToEmit, this.parent(), 'copy');
-                    this.localEventsService.nodesCreated.emit(nodesToEmit);
-                    this.localEventsService.nodesChanged.emit([this.parent()]);
+                    await this.uiService.copyOrMoveNodes(
+                        nodesToEmit,
+                        this.parent(),
+                        this.workspaceAction(),
+                    );
                     this.resetNodeEntriesSelections();
                     this.toast.closeProgressSpinner();
                 }
