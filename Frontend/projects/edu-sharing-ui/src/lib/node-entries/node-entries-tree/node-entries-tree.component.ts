@@ -87,13 +87,16 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.entriesService.selection.changed
             .pipe(takeUntil(this.destroyed), debounceTime(0))
             .subscribe(() => this.changeDetectorRef.detectChanges());
-        // listening to the loading subject
-        this.entriesService.dataSource.isLoadingSubject
+        // initialize the tree once data is available and loading is done
+        combineLatest([
+            this.entriesService.dataSource.isLoadingSubject.pipe(startWith(false)),
+            this.entriesService.dataSource.connect().pipe(startWith([] as NodeEntriesDataType[])),
+        ])
             .pipe(takeUntil(this.destroyed))
-            .subscribe(async (isLoading) => {
+            .subscribe(async ([isLoading, data]) => {
                 this.isLoading = isLoading !== false;
-                // after initial load and when not already initialized, initialize the tree
-                if (!isLoading && !this.treeInitialized()) {
+                if (!isLoading && data?.length && !this.treeInitialized()) {
+                    console.log('init', data);
                     await this.initializeTree();
                 }
             });

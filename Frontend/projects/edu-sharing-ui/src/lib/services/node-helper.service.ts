@@ -475,7 +475,9 @@ export class NodeHelperService {
             };
         } else {
             const orderCollections =
-                collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+                collection?.properties?.[
+                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
+                ];
             return {
                 active: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
                 direction:

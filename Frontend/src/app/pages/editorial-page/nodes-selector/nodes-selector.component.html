@@ -163,9 +163,10 @@
           [disabled]="
             collectionsDisplayTypeToggleDisabled() ||
             (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-              (dataSourceCollectionsTree.isLoading || dataSourceCollectionsTree.isEmpty())) ||
+              ((dataSourceCollectionsTree.isLoadingSubject | async) ||
+                dataSourceCollectionsTree.isEmpty())) ||
             (collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsFlat.isLoading)
+              (dataSourceCollectionsFlat.isLoadingSubject | async))
           "
           hideSingleSelectionIndicator
           [value]="collectionsDisplayType()"
