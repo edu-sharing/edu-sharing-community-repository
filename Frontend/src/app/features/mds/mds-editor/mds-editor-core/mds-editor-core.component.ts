@@ -84,8 +84,8 @@ export class MdsEditorCoreComponent {
             const widgets: WidgetAiConfigInfo[] = this.mdsEditorInstance.widgets.value
                 .filter(
                     (w) =>
-                        // fetch non-touched elements or multivalue elements
-                        (!w.getIsDirty() || w.isMultivalue()) &&
+                        // fetch non-touched elements or multivalue elements or field is empty
+                        (!w.getIsDirty() || w.isMultivalue() || !w.getValue()?.join('')?.trim()) &&
                         w.definition.aiConfigs?.length &&
                         this.mdsEditorInstance.nodes$.value?.length === 1,
                 )
