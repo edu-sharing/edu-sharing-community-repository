@@ -6,6 +6,7 @@ import {
     DEFAULT_PAGE_CONFIG_REF_PROP,
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+    DEFAULT_PAGE_VARIANT_CONFIG_VALUE,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -228,10 +229,13 @@ export const retrievePageConfigPropagateRef = (node: Node): string => {
  * @param variantNode
  */
 export const retrievePageVariantConfig = (variantNode: Node): PageVariantConfig => {
-    if (variantNode.properties[DEFAULT_PAGE_VARIANT_CONFIG_PROP]?.[0]) {
-        return JSON.parse(variantNode.properties[DEFAULT_PAGE_VARIANT_CONFIG_PROP][0]);
-    }
-    return null;
+    // fall back to the default config for valid variant nodes that do not carry a
+    // `ccm:page_variant_config` (e.g. the default node auto-created when requesting
+    // the global page templates) so they still render as an empty page.
+    return JSON.parse(
+        variantNode.properties?.[DEFAULT_PAGE_VARIANT_CONFIG_PROP]?.[0] ??
+            DEFAULT_PAGE_VARIANT_CONFIG_VALUE,
+    );
 };
 
 /**

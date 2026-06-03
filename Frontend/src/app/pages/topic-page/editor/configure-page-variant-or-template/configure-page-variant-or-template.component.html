@@ -49,6 +49,16 @@
         {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
       </button>
     </div>
+    <button
+      *ngIf="addToGlobalTemplatesEnabled()"
+      mat-stroked-button
+      class="btn-outline-primary"
+      color="primary"
+      (click)="addToGlobalTemplates()"
+    >
+      <i esIcon="public"></i>
+      {{ dynamicI18nPrefix() + 'ADD_TO_GLOBAL_TEMPLATES' | translate }}
+    </button>
     <div
       [matTooltip]="
         !variableInputValid()

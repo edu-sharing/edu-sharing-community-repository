@@ -10,7 +10,6 @@ import {
     ViewChild,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
-import { TranslateService } from '@ngx-translate/core';
 import {
     CONTENT_TYPE_ALL,
     HOME_REPOSITORY,
@@ -40,11 +39,8 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import {
-    DEFAULT_PAGE_TEMPLATE_ID,
-    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
-    DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
+    DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
 } from '../../shared/types/custom-definitions';
 import { SelectOption } from '../../shared/types/select-option';
@@ -128,8 +124,6 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         public genericWidgetGlobalService: GenericWidgetGlobalService,
         private searchHelperService: SearchHelperService,
         private searchService: SearchService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
     ) {
         // setup search with debouncing
         this.searchSubject
@@ -230,10 +224,10 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         let pagination: Pagination;
         // distinguish between template and topic page mode
         if (this.selectedOption === CopyOption.Template) {
-            // in template mode, search for page variant templates
+            // in template mode, search for global page variant templates only
             const criteria: MdsQueryCriteria[] = [
                 {
-                    property: DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
+                    property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
                     values: ['true'],
                 },
             ];
@@ -261,46 +255,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
                     },
                 }),
             );
-            // add default template if either no search term is defined or it includes the default template name
-            if (!searchResult.nodes) {
-                searchResult.nodes = [];
-            }
-            const defaultTemplateName: string = this.translate.instant(
-                'TOPIC_PAGE.NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
-            );
-            const noSearchFilterDefined: boolean =
-                !this.searchFilters ||
-                !Object.keys(this.searchFilters)?.length ||
-                !this.searchHelperService.convertCritieria(this.searchFilters, [])?.length;
-            const noSearchValueOrIncluded: boolean =
-                !this.searchValue?.trim() || this.searchValue?.includes(defaultTemplateName);
-            if (noSearchFilterDefined && noSearchValueOrIncluded) {
-                searchResult.nodes.push({
-                    access: ['Coordinator'],
-                    aspects: [],
-                    ref: {
-                        archived: false,
-                        id: DEFAULT_PAGE_TEMPLATE_ID,
-                        repo: HOME_REPOSITORY,
-                    },
-                    name: defaultTemplateName,
-                    title: defaultTemplateName,
-                    icon: {
-                        url:
-                            location.origin +
-                            this.topicPageHelperService.getBaseHref() +
-                            '/themes/default/images/common/mime-types/svg/folder.svg',
-                    },
-                    mediatype: 'folder',
-                    type: RestConstants.CCM_TYPE_MAP,
-                    properties: {
-                        [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: ['{"structure":{"swimlanes":[]}}'],
-                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
-                        [RestConstants.LOM_PROP_TITLE]: [defaultTemplateName],
-                    },
-                } as Partial<Node> as Node);
-            }
-            nodes = searchResult.nodes;
+            nodes = searchResult.nodes ?? [];
         } else {
             // in topic page mode, display existing page variants
             nodes = this.pageVariantConfigNodes;

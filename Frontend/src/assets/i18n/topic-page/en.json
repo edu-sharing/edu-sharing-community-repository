@@ -214,6 +214,7 @@
         },
         "REGENERATE_VARIANT": "Regenerate",
         "DELETE_VARIANT": "Delete variant",
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
         "DEFINE_PARAMETERS": "Define parameters",
         "DUPLICATE_PARAMETERS": "Duplicate in existing variant detected"
       },
@@ -221,7 +222,8 @@
         "HEADING": "Settings of the topic page template",
         "TITLE": "Template title",
         "TITLE_PLACEHOLDER": "Topic page template for xyz",
-        "DELETE_VARIANT": "Delete template"
+        "DELETE_VARIANT": "Delete template",
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates"
       }
     },
     "ADD_PAGE_TEMPLATE": {
@@ -343,7 +345,6 @@
       "DEFAULT_MESSAGE": "No topic page has been created for this collection yet.",
       "VIEW_MESSAGE": "Please contact your system administrator.",
       "EDIT_MESSAGE": "Please use the following button or the \"New\" button to create a new topic page variant.",
-      "DEFAULT_TEMPLATE": "Default template",
       "MISSING_CONFIG_OR_VARIANTS": "The page configuration does not contain any page variants or no page variant could be selected.",
       "MISSING_VARIANTS": "The page configuration does not contain any page variants."
     },
@@ -367,6 +368,10 @@
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
     "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
     "COPY_SUFFIX": "Copy",
+    "ADD_TO_GLOBAL": {
+      "PENDING_MESSAGE": "The page is being added to the global templates.",
+      "SUCCESS_MESSAGE": "The page was successfully added to the global templates"
+    },
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
       "NEW_TOPIC_PAGE": {

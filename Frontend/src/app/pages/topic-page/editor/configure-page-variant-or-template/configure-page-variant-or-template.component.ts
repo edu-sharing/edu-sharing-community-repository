@@ -31,6 +31,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
 
+    addToGlobalTemplatesEnabled: InputSignal<boolean> = input(false);
     deleteVariantEnabled: InputSignal<boolean> = input(false);
     pageVariantConfigNodes: InputSignal<Node[]> = input([]);
     @Input() pageVariantNode: Node;
@@ -43,6 +44,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
 
+    @Output() addToGlobalTemplatesClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() applyChangesClicked: EventEmitter<Map<string, string | string[]>> = new EventEmitter<
         Map<string, string | string[]>
     >();
@@ -138,6 +140,13 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
      */
     triggerRegenerate(): void {
         this.regenerateClicked.emit();
+    }
+
+    /**
+     * Emits the event to publish the current variant/template into the global templates folder.
+     */
+    addToGlobalTemplates(): void {
+        this.addToGlobalTemplatesClicked.emit();
     }
 
     /**

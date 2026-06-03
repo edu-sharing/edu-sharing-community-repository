@@ -215,6 +215,7 @@
                 }}
               </h2>
               <es-configure-page-variant-or-template
+                [addToGlobalTemplatesEnabled]="canAddToGlobalTemplates()"
                 [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
                 [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
                 [pageVariantNode]="pageVariantNode()"
@@ -231,6 +232,7 @@
                 [templateNode]="templateVariantNode()"
                 [templateUpdateAvailable]="templateUpdateAvailable()"
                 [viewModes]="['checkbox', 'checkbox']"
+                (addToGlobalTemplatesClicked)="addCurrentVariantToGlobalTemplates()"
                 (applyChangesClicked)="applyPageVariant($event)"
                 (deletePageVariantClicked)="deletePageVariant()"
                 (regenerateClicked)="regeneratePageVariant()"

@@ -14,9 +14,9 @@ export const DEFAULT_PAGE_CONFIG_PROP: string = 'ccm:page_config';
 export const DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP: string =
     RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF;
 export const DEFAULT_PAGE_CONFIG_REF_PROP: string = RestConstants.CCM_PROP_PAGE_CONFIG_REF;
-export const DEFAULT_PAGE_TEMPLATE_ID: string = '-default_template-';
 export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
+export const DEFAULT_PAGE_VARIANT_GLOBAL_PROP: string = 'virtual:page_variant_global';
 export const DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP: string = 'ccm:page_variant_is_template';
 export const DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP: string =
     'ccm:educationalcontext';
@@ -30,6 +30,9 @@ export const DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP: string = 'ccm:page_variant_
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP: string =
     'ccm:page_variant_template_version';
 export const DEFAULT_PAGE_VARIANT_QUERY_ID: string = 'page_variant';
+// Fallback config for page variant nodes that do not carry a `ccm:page_variant_config`
+// (e.g. the default node auto-created when requesting the global page templates).
+export const DEFAULT_PAGE_VARIANT_CONFIG_VALUE: string = '{"structure":{"swimlanes":[]}}';
 export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 
 // GENERAL SETTINGS

@@ -214,6 +214,7 @@
         },
         "REGENERATE_VARIANT": "Neu generieren",
         "DELETE_VARIANT": "Variante löschen",
+        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
         "DEFINE_PARAMETERS": "Definiere Parameter",
         "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
       },
@@ -221,7 +222,8 @@
         "HEADING": "Einstellungen der Themenseiten-Vorlage",
         "TITLE": "Titel der Vorlage",
         "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
-        "DELETE_VARIANT": "Vorlage löschen"
+        "DELETE_VARIANT": "Vorlage löschen",
+        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen"
       }
     },
     "ADD_PAGE_TEMPLATE": {
@@ -343,7 +345,6 @@
       "DEFAULT_MESSAGE": "Für diese Sammlung wurde noch keine Themenseite erstellt.",
       "VIEW_MESSAGE": "Bitte wenden Sie sich an Ihren Systemadministrator.",
       "EDIT_MESSAGE": "Bitte nutzen Sie den nachfolgenden Button oder den \"Neu\"-Button, um eine neue Themenseiten-Variante zu erstellen.",
-      "DEFAULT_TEMPLATE": "Standard-Vorlage",
       "MISSING_CONFIG_OR_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten oder es konnte keine Seiten-Variante gewählt werden.",
       "MISSING_VARIANTS": "Die Seiten-Konfiguration enthält keine Seiten-Varianten."
     },
@@ -367,6 +368,10 @@
     "DEFAULT_PAGE_VARIANT_NAME": "Seiten-Variante",
     "NAVIGATE_TO_COLLECTION_PAGE": "Zur Sammlungsseite wechseln",
     "COPY_SUFFIX": "Kopie",
+    "ADD_TO_GLOBAL": {
+      "PENDING_MESSAGE": "Die Seite wird zu den globalen Vorlagen hinzugefügt.",
+      "SUCCESS_MESSAGE": "Die Seite wurde erfolgreich zu den globalen Vorlagen hinzugefügt"
+    },
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Neue Themenseiten-Variante erstellen",
       "NEW_TOPIC_PAGE": {
