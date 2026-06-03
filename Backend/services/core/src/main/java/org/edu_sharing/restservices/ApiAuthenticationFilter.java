@@ -124,11 +124,11 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
         // Second step of 2FA: no Authorization header, but session has a pending-2FA username
         // meaning the password was already validated in the first request
-        if (authHdr == null && validatedAuth == null) {
+        AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
+        if (authHdr == null && (validatedAuth == null || authorityService.isGuest())) {
             String pending2FaUsername = (String) session.getAttribute(CCConstants.SESSION_2FA_PENDING_USERNAME);
             if (pending2FaUsername != null && httpReq.getHeader("X-2FA-Token") != null) {
                 int twoFaCode = httpReq.getIntHeader("X-2FA-Token");
-                AuthorityService authorityService = AuthorityServiceFactory.getInstance().getLocalService();
                 if (authorityService.validate2Fa(pending2FaUsername, twoFaCode)) {
                     session.removeAttribute(CCConstants.SESSION_2FA_PENDING_USERNAME);
                     validatedAuth = applyValidatedAuth(authTool, pending2FaUsername, session, httpReq, httpResp);
