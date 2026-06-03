@@ -85,6 +85,7 @@ export class RenderHelperService {
             repoId: node.ref.repo,
             securedNode: securedNode.signedNode,
             signature: securedNode.signature,
+            signatureAlgorithm: securedNode.signatureAlgorithm,
             token: token,
             renderingBaseUrl: securedNode.renderingBaseUrl,
         } as RenderDataRequestWithToken;
@@ -101,7 +102,9 @@ export class RenderHelperService {
         signature: string,
         jwt: string,
         renderUrl: string,
+        signatureAlgorithm: string,
     ): Promise<CombinedRenderData> {
+        console.log('Fetching render data for LMS with signature algorithm:', signatureAlgorithm);
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
@@ -111,6 +114,7 @@ export class RenderHelperService {
             securedNode: encodedNode,
             signature: signature,
             token: jwt,
+            signatureAlgorithm: signatureAlgorithm,
         } as RenderDataRequestWithToken;
 
         return {

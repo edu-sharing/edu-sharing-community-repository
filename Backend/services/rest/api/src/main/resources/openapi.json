@@ -56,6 +56,9 @@
       },
       "About": {
         "properties": {
+          "defaultSignatureAlgorithm": {
+            "type": "string"
+          },
           "features": {
             "items": {
               "$ref": "#/components/schemas/FeatureInfo"
@@ -78,6 +81,12 @@
           "services": {
             "items": {
               "$ref": "#/components/schemas/AboutService"
+            },
+            "type": "array"
+          },
+          "signatureAlgorithms": {
+            "items": {
+              "type": "string"
             },
             "type": "array"
           },
@@ -7137,6 +7146,9 @@
             "type": "string"
           },
           "signature": {
+            "type": "string"
+          },
+          "signatureAlgorithm": {
             "type": "string"
           },
           "signedNode": {
