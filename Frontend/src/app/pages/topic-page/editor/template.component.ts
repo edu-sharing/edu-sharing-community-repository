@@ -39,6 +39,7 @@ import {
     NodeEntries,
     ParentEntries,
     PROPERTY_FILTER_ALL,
+    RestConstants as ApiRestConstants,
     SearchResults,
     SearchService,
 } from 'ngx-edu-sharing-api';
@@ -74,7 +75,12 @@ import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dial
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PreviewSidebarModule } from '../../../features/preview-sidebar/preview-sidebar.module';
 import { PreviewSidebarService } from '../../../features/preview-sidebar/preview-sidebar.service';
-import { MainNavService, TemplateSlot } from '../../../main/navigation/main-nav.service';
+import {
+    MainNavCreateConfig,
+    MainNavService,
+    TemplateSlot,
+} from '../../../main/navigation/main-nav.service';
+import { NodeHelperService } from '../../../services/node-helper.service';
 import {
     SearchEvent,
     SearchFieldService,
@@ -241,6 +247,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         private genericWidgetGlobalService: GenericWidgetGlobalService,
         private mainNavService: MainNavService,
         private mdsService: MdsService,
+        private nodeHelperService: NodeHelperService,
         private optionsHelperService: OptionsHelperDataService,
         private platformLocation: PlatformLocation,
         private previewSidebarService: PreviewSidebarService,
@@ -600,7 +607,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.mainNavService.setMainNavConfig({
             currentScope: Scope.TopicPage,
             title: 'TOPIC_PAGE.NAVIGATION.TITLE',
-            create: { allowed: true, allowBinary: true },
+            create: this.getCreateConfig(),
         });
         void this.addCustomMainNavOptions();
         // register the edit mode toggle button next to the create button
@@ -653,6 +660,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Builds the "create" config for the main nav based on the user's rights on the collection node.
+     * Returns `allowed: false` while the collection node has not been loaded yet.
+     */
+    private getCreateConfig(): MainNavCreateConfig {
+        return {
+            allowed:
+                !!this.collectionNode &&
+                this.nodeHelperService.getNodesRight(
+                    [this.collectionNode],
+                    ApiRestConstants.ACCESS_ADD_CHILDREN,
+                ),
+            allowBinary: true,
+        };
+    }
+
+    /**
      * On destruction, complete the subjects.
      */
     ngOnDestroy(): void {
@@ -682,6 +705,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.parentEntries.set(parentEntries);
             // check the user privileges for the collection node and initialize custom listeners
             this.userHasEditRights.set(checkUserAccess(this.collectionNode));
+            // update the "create" permission now that the collection node is loaded
+            this.mainNavService.patchMainNavConfig({ create: this.getCreateConfig() });
             if (this.userHasEditRights()) {
                 this.initializeCustomEventListeners();
             }
