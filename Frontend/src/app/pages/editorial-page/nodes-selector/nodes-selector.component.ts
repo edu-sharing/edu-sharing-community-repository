@@ -144,7 +144,7 @@ export type NodesSelectorConfig = {
      * called whenever nodes are produced (upload, copy, or connector create).
      * Use this instead of subscribing to EditorialSidebarService.applyNodeEmitted globally to only listen to your current trigger session
      */
-    onNodesUploaded?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
+    onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
 };
 
 @Component({
@@ -903,7 +903,9 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.selectedNodes().length) {
             return;
         }
+        const nodesToEmit = this.selectedNodes() as Node[];
         if (!this.parent()) {
+            this.emitNodes({ nodes: nodesToEmit, parent: this.parent() });
             this.resetNodeEntriesSelections();
             return;
         }
@@ -912,22 +914,13 @@ export class NodesSelectorComponent implements OnInit {
             try {
                 this.toast.showProgressSpinner();
                 if (this.nodeHelperService.isNodeCollection(this.parent())) {
-                    this.uiService.addToCollection(
-                        this.parent(),
-                        this.selectedNodes() as Node[],
-                        false,
-                        () => {
-                            this.resetNodeEntriesSelections();
-                            this.toast.closeProgressSpinner();
-                        },
-                    );
+                    this.uiService.addToCollection(this.parent(), nodesToEmit, false, () => {
+                        this.resetNodeEntriesSelections();
+                        this.toast.closeProgressSpinner();
+                    });
                 } else {
-                    await this.uiService.copyOrMoveNodes(
-                        this.selectedNodes() as Node[],
-                        this.parent(),
-                        'copy',
-                    );
-                    this.localEventsService.nodesCreated.emit(this.selectedNodes() as Node[]);
+                    await this.uiService.copyOrMoveNodes(nodesToEmit, this.parent(), 'copy');
+                    this.localEventsService.nodesCreated.emit(nodesToEmit);
                     this.localEventsService.nodesChanged.emit([this.parent()]);
                     this.resetNodeEntriesSelections();
                     this.toast.closeProgressSpinner();
@@ -939,7 +932,7 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
                 });
             }
-            this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
+            this.emitNodes({ nodes: nodesToEmit, parent: this.parent() });
         }
         // when there are not the only files selected, switch to the configuration mode
         else if (this.currentStep() === StepType.SELECT) {
@@ -1350,7 +1343,7 @@ export class NodesSelectorComponent implements OnInit {
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
         this.localEventsService.nodesCreated.emit(payload.nodes);
-        this.option()?.optionConfig?.onNodesUploaded?.({
+        this.option()?.optionConfig?.onNodesChoosen?.({
             nodes: payload.nodes,
             connectorId: payload.connectorId,
             window: payload.window,

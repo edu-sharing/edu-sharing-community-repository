@@ -536,7 +536,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
                     ),
-                onNodesUploaded: async ({ nodes, connectorId, window: connectorWindow }) => {
+                onNodesChoosen: async ({ nodes, connectorId, window: connectorWindow }) => {
                     if (this.submissionReplaceFile()) {
                         return;
                     }

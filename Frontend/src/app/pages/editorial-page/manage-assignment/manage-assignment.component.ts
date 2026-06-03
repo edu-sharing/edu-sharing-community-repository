@@ -191,21 +191,6 @@ export class ManageAssignmentComponent {
                     }),
                 );
             });
-        this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
-            this.nodes.set(
-                (this.nodes() || []).concat(
-                    nodes
-                        .filter((n) => !(this.nodes() || []).some((n2) => n2.ref?.id === n.ref?.id))
-                        .map((node) => {
-                            return {
-                                ...node,
-                                documentRole: 'SUBMITTABLE',
-                            } as NodeWithRole;
-                        }),
-                ),
-            );
-            this.editorialSidebarService.sidebarOpened.set(false);
-        });
     }
 
     showFileDialog() {
@@ -214,11 +199,32 @@ export class ManageAssignmentComponent {
             optionConfig: {
                 upload: 'fast',
                 allowCreate: false,
+                autoClose: true,
                 applyLabel: 'EDITORIAL.ASSIGNMENT.SELECT_FILE',
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
                     ),
+                onNodesChoosen: ({ nodes }) => {
+                    this.nodes.set(
+                        (this.nodes() || []).concat(
+                            nodes
+                                .filter(
+                                    (n) =>
+                                        !(this.nodes() || []).some(
+                                            (n2) => n2.ref?.id === n.ref?.id,
+                                        ),
+                                )
+                                .map(
+                                    (node) =>
+                                        ({
+                                            ...node,
+                                            documentRole: 'SUBMITTABLE',
+                                        } as NodeWithRole),
+                                ),
+                        ),
+                    );
+                },
             } as NodesSelectorConfig,
             trap: true,
         });

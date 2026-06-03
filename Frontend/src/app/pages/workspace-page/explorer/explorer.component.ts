@@ -517,6 +517,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             .pipe(
                 takeUntil(this.destroyed),
                 filter((n) => n.some((n1) => n1?.ref?.id === this.node$.value?.ref?.id)),
+                filter(() => !this.editorialSidebarService.sidebarOpened()),
             )
             .subscribe(() => {
                 void this.load({
