@@ -1,5 +1,6 @@
 <metadataset id="oersi" label="OERSI" hidden="false">
 	<name>OERSI</name>
+	<inherit>mds</inherit>
 	<i18n>mds</i18n>
 	<!-- Begin Widgets -->
 	<widgets>
@@ -204,41 +205,9 @@
 			</columns>
 		</sort>
 	</sorts>
-	<!--
-		Minimal lucene query block. The actual federated OERSI search uses the dsl query
-		below (SearchServiceOersiImpl builds the elasticsearch query from it). This lucene
-		block exists only so NodeDao's 0-result "slacking" fallback
-		(MetadataSet.findQuery(query, QUERY_SYNTAX_LUCENE), invoked for non-elastic search
-		services) finds an "ngsearch" query instead of throwing a NullPointerException.
-		slackCriteriasMap only reads the parameter names, so no statements are required here.
-	-->
-	<queries>
-		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
-		<query join="AND" id="ngsearch">
-			<property name="ngsearchword">
-				<multiple>true</multiple>
-				<multiplejoin>AND</multiplejoin>
-			</property>
-			<property name="ccm:taxonid">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:educationallearningresourcetype">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:lifecyclecontributer_author">
-				<multiple>true</multiple>
-				<multiplejoin>AND</multiplejoin>
-			</property>
-			<property name="license">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-		</query>
-	</queries>
 	<queries syntax="dsl">
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
+		<basequery> </basequery>
 		<query join="AND" id="ngsearch">
 			<basequery>{"term":{"type":"LearningResource"}}</basequery>
 			<property name="ngsearchword">

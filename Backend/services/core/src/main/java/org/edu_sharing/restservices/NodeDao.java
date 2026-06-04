@@ -440,15 +440,11 @@ public class NodeDao {
             if (result.getCount() == 0) {
                 // try to search for ignorable properties to be null
                 List<String> removed;
-                if (searchService instanceof SearchServiceElastic) {
-                    try {
-                        removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_DSL));
-                    } catch (IllegalArgumentException e) {
-                        // query not available via dsl, so no slacking is done
-                        return result;
-                    }
-                } else {
-                    removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+                try {
+                    removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_DSL));
+                } catch (IllegalArgumentException e) {
+                    // query not available via dsl, so no slacking is done
+                    return result;
                 }
                 result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
                 result.setIgnored(removed);

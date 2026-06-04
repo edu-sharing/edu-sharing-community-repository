@@ -394,58 +394,6 @@
 				]]></html>
 		</template>
 	</templates>
-	<queries>
-		<basequery>-TYPE:"ccm:toolpermission" AND NOT ASPECT:"ccm:metadataPresettingTemplate" AND NOT @cm\:name:"._*" AND NOT @cm\:name:".DS_Store*" AND NOT PATH:"/sys\:system/sys\:people//*" AND -ASPECT:"ccm:io_childobject"</basequery>
-		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>
-		<query join="AND"  id="collections">
-			<basequery>ASPECT:"ccm:collection"</basequery>
-			<basequery propertyNull="ngsearchword">ASPECT:"ccm:collection" AND @ccm\:educontextname:"${educontext}" AND @ccm\:collectionlevel0:true OR @ccm\:collection_pinned_status:true</basequery>
-			<property name="ngsearchword">
-				<statement>@ccm\:educontextname:"${educontext}" AND (@sys\:node-uuid:"${value}" OR @cm\:name:"*${value}*" OR @cclom\:title:"*${value}*" OR @cclom\:general_description:"*${value}*" OR @cclom\:general_keyword:"*${value}*" OR @ccm\:taxonentry:"*${value}*" OR @ccm\:classification_keyword:"*${value}*" OR @ccm\:educationallearningresourcetype:"*${value}*" OR @ccm\:educationalcontext:"*${value}*" OR @ccm\:learninggoal:"*${value}*" OR @ccm\:guidanceteachers:"*${value}*" OR @ccm\:guidancestudents:"*${value}*")</statement>
-				<exactMatching>false</exactMatching>
-				<multiple>true</multiple>
-				<multiplejoin>AND</multiplejoin>
-			</property>
-		</query>
-		<query join="AND" id="ngsearch">
-			<basequery>@cm\:edu_metadataset:"mds_oeh" AND ISNULL:@ccm\:tool_category</basequery>
-			<property name="ccm:replicationsource">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:taxonid">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:educationalintendedenduserrole">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:objecttype">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:educationalcontext">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:educationallearningresourcetype">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:sourceContentType">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:toolCategory">
-				<multiple>true</multiple>
-				<multiplejoin>OR</multiplejoin>
-			</property>
-			<property name="ccm:replicationsourceuuid">
-				<statement>@ccm\:replicationsourceuuid:"${value}"</statement>
-			</property>
-		</query>
-	</queries>
 	<queries syntax="dsl">
 		<basequery></basequery>
 		<allowSearchWithoutCriteria>true</allowSearchWithoutCriteria>

@@ -66,7 +66,7 @@ public class MetadataQueryParameter implements Serializable {
 			}catch(JSONException e){
 				throw new RuntimeException(e);
 			}
-		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
+		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}
 		throw new RuntimeException("Unsupported syntax for query language: " + syntax);
