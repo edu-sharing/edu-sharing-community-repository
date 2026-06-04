@@ -9,7 +9,7 @@
 <div class="preview-sidebar-image-container" *ngIf="!renderNode()">
   <img
     class="preview-sidebar-image"
-    [src]="node | esNodeImage | async"
+    [src]="node() | esNodeImage | async"
     alt=""
     draggable="false"
     (mousedown)="showContentButton.launch({ centered: true })"
@@ -30,8 +30,8 @@
 <div class="preview-sidebar-body">
   <div class="top-h-box" *ngIf="!previewSidebarTemplateService.actionsRow">
     <div class="stats-and-rating">
-      <es-node-stats-badges [node]="node" backgroundStyle="darken"></es-node-stats-badges>
-      <es-node-rating [node]="node"></es-node-rating>
+      <es-node-stats-badges [node]="node()" backgroundStyle="darken"></es-node-stats-badges>
+      <es-node-rating [node]="node()"></es-node-rating>
     </div>
     <es-actionbar appearance="icon-button"></es-actionbar>
   </div>
@@ -39,25 +39,26 @@
     <ng-container
       *ngTemplateOutlet="
         previewSidebarTemplateService.actionsRow;
-        context: { element: node, allDetailsLink, actionbar, autoRender }
+        context: { element: node(), allDetailsLink, actionbar, autoRender }
       "
     ></ng-container>
   </div>
   <ng-container *ngIf="!previewSidebarTemplateService.metadata">
+    TEST: {{ node()?.name | json }}
     <es-mds-editor-wrapper
       #mds
-      *ngIf="node?.properties"
+      *ngIf="node()?.properties"
       [embedded]="true"
       [editorMode]="'viewer'"
       [groupId]="'preview_sidebar'"
-      [nodes]="[node]"
+      [nodes]="[node()]"
     >
     </es-mds-editor-wrapper>
     <!-- h2 class="title">
-      {{ node.title ?? node.name }}
+      {{ node().title ?? node().name }}
     </h2>
     <p class="description">
-      {{ node.properties['cclom:general_description'] }}
+      {{ node().properties['cclom:general_description'] }}
     </p -->
     <a
       mat-flat-button
@@ -73,7 +74,7 @@
     <ng-container
       *ngTemplateOutlet="
         previewSidebarTemplateService.metadata;
-        context: { element: node, allDetailsLink, actionbar, autoRender }
+        context: { element: node(), allDetailsLink, actionbar, autoRender }
       "
     ></ng-container>
   </ng-container>
