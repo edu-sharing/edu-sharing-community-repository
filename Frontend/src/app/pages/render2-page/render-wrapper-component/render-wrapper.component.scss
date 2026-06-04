@@ -6,6 +6,8 @@ $horizontalScrollPadding: 1.5em;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
 es-spinner {
+    margin-top: 40px;
+    width: 100%;
     height: 100%;
     max-height: $maxHeight;
     display: flex;
