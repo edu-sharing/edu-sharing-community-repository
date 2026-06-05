@@ -21,6 +21,7 @@ import {
     LoginInfo,
     MdsService,
     MdsViewRelation,
+    NetworkService,
     Node,
     NodeSuggestionResponseDto,
     Suggestion,
@@ -32,6 +33,7 @@ import {
     BehaviorSubject,
     combineLatest,
     EMPTY,
+    firstValueFrom,
     from,
     Observable,
     of,
@@ -645,17 +647,25 @@ export class MdsEditorInstanceService
                 .toPromise();
         }
 
-        public getValuesForKeys(keys: string[]) {
-            const mdsvl = this.mdsEditorInstanceService.restMdsService
-                .getValuesForKeys(
-                    keys,
-                    this.mdsEditorInstanceService.mdsId,
-                    RestConstants.DEFAULT_QUERY_NAME,
-                    this.definition.id,
-                    RestConstants.HOME_REPOSITORY,
+        public async getValuesForKeys(keys: string[]) {
+            if (
+                await firstValueFrom(
+                    this.mdsEditorInstanceService.networkService.isHomeRepository(
+                        this.repositoryId,
+                    ),
                 )
-                .toPromise();
-            return mdsvl;
+            ) {
+                return await firstValueFrom(
+                    this.mdsEditorInstanceService.restMdsService.getValuesForKeys(
+                        keys,
+                        this.mdsEditorInstanceService.mdsId,
+                        RestConstants.DEFAULT_QUERY_NAME,
+                        this.definition.id,
+                        RestConstants.HOME_REPOSITORY,
+                    ),
+                );
+            }
+            return null;
         }
 
         private readNodeValue(node: Node, definition: MdsWidget): string[] {
@@ -843,6 +853,7 @@ export class MdsEditorInstanceService
         private ngZone: NgZone,
         private restMdsService: RestMdsService,
         private configService: ConfigurationService,
+        private networkService: NetworkService,
         private uiService: UIService,
         private authenticationService: AuthenticationService,
         private featuresHelperService: FeaturesHelperService,
