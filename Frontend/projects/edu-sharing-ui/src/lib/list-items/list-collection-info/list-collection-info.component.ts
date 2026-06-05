@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { combineLatest, map } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
 import { ListItem } from '../../types/list-item';
@@ -14,6 +14,10 @@ import { LocalEventsService } from '../../services/local-events.service';
     standalone: false,
 })
 export class ListCollectionInfoComponent extends ListWidget {
+    private accessibility = inject(AccessibilityService);
+    nodeHelper = inject(NodeHelperService);
+    private localEvents = inject(LocalEventsService);
+
     static supportedItems = [
         new ListItem('COLLECTION', 'info'),
         new ListItem('COLLECTION', 'scope'),
@@ -22,11 +26,7 @@ export class ListCollectionInfoComponent extends ListWidget {
     readonly indicatorIcons$;
     readonly nodeModified$;
 
-    constructor(
-        private accessibility: AccessibilityService,
-        public nodeHelper: NodeHelperService,
-        private localEvents: LocalEventsService,
-    ) {
+    constructor() {
         super();
         this.indicatorIcons$ = this.accessibility.observe('indicatorIcons');
         this.nodeModified$ = combineLatest([

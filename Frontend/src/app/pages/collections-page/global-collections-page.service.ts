@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { Injectable, TemplateRef, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, SessionStorageService, Store } from 'ngx-edu-sharing-api';
 
@@ -16,10 +16,10 @@ export interface CollectionsPageCustomTemplates {
     providedIn: 'root',
 })
 export class GlobalCollectionsPageService {
-    constructor(
-        private internal: GlobalCollectionsPageServiceInternal,
-        private sessionStorageService: SessionStorageService,
-    ) {}
+    private internal = inject(GlobalCollectionsPageServiceInternal);
+    private sessionStorageService = inject(SessionStorageService);
+
+    constructor() {}
 
     /**
      * Register custom templates to replace or extend standard components within the search page.

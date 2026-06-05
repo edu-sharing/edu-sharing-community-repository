@@ -7,6 +7,7 @@ import {
     OnInit,
     Output,
     TemplateRef,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -45,6 +46,14 @@ import {
     standalone: false,
 })
 export class CollectionChooserComponent implements OnInit {
+    private connector = inject(RestConnectorService);
+    private router = inject(Router);
+    private iam = inject(RestIamService);
+    private collectionApi = inject(RestCollectionService);
+    private searchService = inject(SearchService);
+    private node = inject(RestNodeService);
+    private toast = inject(Toast);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly COLLECTION_LATEST_DEFAULT_COUNT = 3;
@@ -96,15 +105,7 @@ export class CollectionChooserComponent implements OnInit {
     showMore = false;
     canCreate = false;
 
-    constructor(
-        private connector: RestConnectorService,
-        private router: Router,
-        private iam: RestIamService,
-        private collectionApi: RestCollectionService,
-        private searchService: SearchService,
-        private node: RestNodeService,
-        private toast: Toast,
-    ) {
+    constructor() {
         // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS)

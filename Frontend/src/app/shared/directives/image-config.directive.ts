@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Directive, ElementRef } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 import { ConfigurationService } from '../../core-module/core.module';
 
 @Directive({
@@ -10,8 +10,12 @@ import { ConfigurationService } from '../../core-module/core.module';
     standalone: false,
 })
 export class ImageConfigDirective {
+    private config = inject(ConfigurationService);
+
     private element: ElementRef;
-    constructor(element: ElementRef, private config: ConfigurationService) {
+    constructor() {
+        const element = inject(ElementRef);
+
         this.element = element;
         this.replace();
     }

@@ -5,7 +5,6 @@ import {
 } from './share-publish-motivation-dialog.component';
 import { Injectable } from '@angular/core';
 import { ConfigService, IamV1Service, UserStats } from 'ngx-edu-sharing-api';
-import { GetUserStats$Params } from '../../../../../../dist/edu-sharing-api/lib/api/fn/iam-v-1/get-user-stats';
 import { HttpContext } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { mdsStorybookProviders } from '../../../mds/mds-editor/storybook-utils';
@@ -22,10 +21,14 @@ class ConfigServiceMock extends ConfigService {
 }
 @Injectable()
 class IamV1ServiceMock extends IamV1Service {
+    // eslint-disable-next-line @angular-eslint/prefer-inject
     constructor(private count: number) {
         super(null, null);
     }
-    getUserStats(params: GetUserStats$Params, context?: HttpContext): Observable<UserStats> {
+    getUserStats(
+        params: Parameters<IamV1Service['getUserStats']>[0],
+        context?: HttpContext,
+    ): Observable<UserStats> {
         return of({
             allStats: null,
             publicStats: {

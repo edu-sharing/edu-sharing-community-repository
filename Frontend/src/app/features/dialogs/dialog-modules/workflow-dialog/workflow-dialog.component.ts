@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import {
@@ -38,6 +38,21 @@ type WorkflowReceiver = Authority;
     standalone: false,
 })
 export class WorkflowDialogComponent {
+    data = inject<WorkflowDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<WorkflowDialogData, WorkflowDialogResult>>(CardDialogRef);
+    private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private iam = inject(RestIamService);
+    private localEvents = inject(LocalEventsService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     @ViewChild('statusSelect') statusSelectRef: MatSelect;
     @ViewChild(AuthoritySearchInputComponent)
     authoritySearchInputComponentRef: AuthoritySearchInputComponent;
@@ -53,20 +68,9 @@ export class WorkflowDialogComponent {
     private initialStatus = WORKFLOW_STATUS_UNCHECKED;
     private nodes: Node[] = this.data.nodes;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: WorkflowDialogData,
-        private dialogRef: CardDialogRef<WorkflowDialogData, WorkflowDialogResult>,
-        private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private iam: RestIamService,
-        private localEvents: LocalEventsService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
-        private nodeApi: NodeService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
+        const toast = this.toast;
+
         this.updateButtons();
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH)
@@ -314,7 +318,7 @@ export class WorkflowDialogComponent {
             title: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION',
             message: 'WORKSPACE.WORKFLOW.USER_NO_PERMISSION_INFO',
             messageParameters: {
-                user: new AuthorityNamePipe(this.translate).transform(receiver, null),
+                user: this.authorityNamePipe.transform(receiver, null),
             },
             messageMode: 'html',
             buttons: [

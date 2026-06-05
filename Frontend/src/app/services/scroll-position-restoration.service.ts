@@ -1,5 +1,5 @@
 import { ViewportScroller } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router, Scroll } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -12,9 +12,10 @@ import { filter } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class ScrollPositionRestorationService {
-    private shouldSkipNextScrollEvent = false;
+    private router = inject(Router);
+    private viewportScroller = inject(ViewportScroller);
 
-    constructor(private router: Router, private viewportScroller: ViewportScroller) {}
+    private shouldSkipNextScrollEvent = false;
 
     /**
      * Sets up scroll position restoration.

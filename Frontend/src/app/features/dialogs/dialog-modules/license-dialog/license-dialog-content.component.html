@@ -1,21 +1,16 @@
 <!-- TODO: remove remaining h4 and h5 headings (misused as labels) -->
 
-<mat-slide-toggle
-  class="oerSelect switch toggle-reverse"
-  *ngIf="oerAvailable"
-  [(ngModel)]="oerMode"
-  >{{ 'WORKSPACE.LICENSE.ONLY_OER' | translate }}</mat-slide-toggle
->
-<mat-radio-group
-  class="oerLicenses"
-  [(ngModel)]="type"
-  name="oerLicenses mat-group-gap"
-  *ngIf="oerMode"
->
+@if (oerAvailable) {
+<mat-slide-toggle class="oerSelect switch toggle-reverse" [(ngModel)]="oerMode">{{
+  'WORKSPACE.LICENSE.ONLY_OER' | translate
+}}</mat-slide-toggle>
+} @if (oerMode) {
+<mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses mat-group-gap">
   <fieldset>
     <legend>{{ 'LICENSE.GROUPS.CC_0' | translate }}</legend>
     <div class="oerCC0">
-      <div *ngIf="isAllowedLicense('CC_0')">
+      @if (isAllowedLicense('CC_0')) {
+      <div>
         <mat-radio-button value="CC_0">
           <es-multi-line-label>
             <ng-container slot="label">
@@ -32,7 +27,8 @@
           }}</a>
         </div>
       </div>
-      <div *ngIf="isAllowedLicense('PDM')">
+      } @if (isAllowedLicense('PDM')) {
+      <div>
         <mat-radio-button value="PDM">
           <es-multi-line-label>
             <ng-container slot="label">
@@ -49,12 +45,14 @@
           }}</a>
         </div>
       </div>
+      }
     </div>
   </fieldset>
   <fieldset>
     <legend>{{ 'LICENSE.GROUPS.CC_BY' | translate }}</legend>
     <div class="oerCCBY">
-      <div *ngIf="isAllowedLicense('CC_BY')">
+      @if (isAllowedLicense('CC_BY')) {
+      <div>
         <mat-radio-button value="CC_BY" id="CC_BY">
           <es-multi-line-label>
             <ng-container slot="label">
@@ -74,7 +72,8 @@
           >
         </div>
       </div>
-      <div *ngIf="isAllowedLicense('CC_BY_SA')">
+      } @if (isAllowedLicense('CC_BY_SA')) {
+      <div>
         <mat-radio-button value="CC_BY_SA" id="CC_BY_SA">
           <es-multi-line-label>
             <ng-container slot="label">
@@ -94,19 +93,22 @@
           >
         </div>
       </div>
+      }
     </div>
   </fieldset>
 </mat-radio-group>
-<div class="allLicenses" *ngIf="!oerMode">
+} @if (!oerMode) {
+<div class="allLicenses">
   <mat-form-field class="licenseType">
     <mat-label>{{ 'WORKSPACE.LICENSE.TYPE' | translate }}</mat-label>
     <mat-select #selectLicense id="type" type="text" [(ngModel)]="primaryType">
-      <mat-option *ngFor="let license of licenseMainTypes" [value]="license">{{
-        'LICENSE.GROUPS.' + license | translate
-      }}</mat-option>
+      @for (license of licenseMainTypes; track license) {
+      <mat-option [value]="license">{{ 'LICENSE.GROUPS.' + license | translate }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
-  <div *ngIf="primaryType === 'CC_BY'" class="cc">
+  @if (primaryType === 'CC_BY') {
+  <div class="cc">
     <h5 class="ccAbout">
       <a
         class="focus-underline"
@@ -115,20 +117,23 @@
         >{{ 'WORKSPACE.LICENSE.CC.ABOUT' | translate }}</a
       >
     </h5>
-    <div *ngIf="isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')">
+    @if (isAllowedLicense('CC_BY_SA') || isAllowedLicense('CC_BY_ND')) {
+    <div>
       <h4>{{ 'WORKSPACE.LICENSE.CC.SHARE' | translate }}</h4>
       <h5>{{ 'WORKSPACE.LICENSE.CC.SHARE_INFO' | translate }}</h5>
       <mat-radio-group [(ngModel)]="ccShare">
         <mat-radio-button value="">{{ 'YES' | translate }}</mat-radio-button>
-        <mat-radio-button *ngIf="isAllowedLicense('CC_BY_SA')" value="SA">{{
+        @if (isAllowedLicense('CC_BY_SA')) {
+        <mat-radio-button value="SA">{{
           'WORKSPACE.LICENSE.CC.YES_ALIKE' | translate
         }}</mat-radio-button>
-        <mat-radio-button *ngIf="isAllowedLicense('CC_BY_ND')" value="ND">{{
-          'NO' | translate
-        }}</mat-radio-button>
+        } @if (isAllowedLicense('CC_BY_ND')) {
+        <mat-radio-button value="ND">{{ 'NO' | translate }}</mat-radio-button>
+        }
       </mat-radio-group>
     </div>
-    <div *ngIf="isAllowedLicense('CC_BY_NC')">
+    } @if (isAllowedLicense('CC_BY_NC')) {
+    <div>
       <h4>{{ 'WORKSPACE.LICENSE.CC.COMMERCIAL' | translate }}</h4>
       <h5>{{ 'WORKSPACE.LICENSE.CC.COMMERCIAL_INFO' | translate }}</h5>
       <mat-radio-group [(ngModel)]="ccCommercial">
@@ -136,13 +141,12 @@
         <mat-radio-button value="NC">{{ 'NO' | translate }}</mat-radio-button>
       </mat-radio-group>
     </div>
+    }
   </div>
-  <mat-radio-group
-    [(ngModel)]="type"
-    *ngIf="primaryType === 'COPYRIGHT'"
-    class="copyright mat-group-gap"
-  >
-    <div *ngIf="isAllowedLicense('COPYRIGHT_FREE')">
+  } @if (primaryType === 'COPYRIGHT') {
+  <mat-radio-group [(ngModel)]="type" class="copyright mat-group-gap">
+    @if (isAllowedLicense('COPYRIGHT_FREE')) {
+    <div>
       <mat-radio-button value="COPYRIGHT_FREE">
         <es-multi-line-label>
           <ng-container slot="label">
@@ -154,7 +158,8 @@
         </es-multi-line-label>
       </mat-radio-button>
     </div>
-    <div *ngIf="isAllowedLicense('COPYRIGHT_LICENSE')">
+    } @if (isAllowedLicense('COPYRIGHT_LICENSE')) {
+    <div>
       <mat-radio-button value="COPYRIGHT_LICENSE">
         <es-multi-line-label>
           <ng-container slot="label">
@@ -166,9 +171,12 @@
         </es-multi-line-label>
       </mat-radio-button>
     </div>
+    }
   </mat-radio-group>
-  <mat-radio-group [(ngModel)]="type" *ngIf="primaryType === 'CC_0'" class="cc">
-    <div *ngIf="isAllowedLicense('CC_0')">
+  } @if (primaryType === 'CC_0') {
+  <mat-radio-group [(ngModel)]="type" class="cc">
+    @if (isAllowedLicense('CC_0')) {
+    <div>
       <mat-radio-button value="CC_0">
         <es-multi-line-label>
           <ng-container slot="label">
@@ -185,7 +193,8 @@
         }}</a>
       </div>
     </div>
-    <div *ngIf="isAllowedLicense('PDM')">
+    } @if (isAllowedLicense('PDM')) {
+    <div>
       <mat-radio-button value="PDM">
         <es-multi-line-label>
           <ng-container slot="label">
@@ -202,26 +211,28 @@
         }}</a>
       </div>
     </div>
+    }
   </mat-radio-group>
+  }
   <!--<div *ngIf="primaryType=='EDU'" class="edu">
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
-                    <label for="P_NR">
-                      <h4>{{'WORKSPACE.LICENSE.EDU.P_NR' | translate}}</h4>
-                      <h5>{{'WORKSPACE.LICENSE.EDU.P_NR_INFO' | translate}}</h5>
-                    </label>
-                  </div>
-                  <div class="radio">
-                    <input type="radio" [(ngModel)]="eduType" value="NC" id="NC">
-                    <label for="NC">
-                      <h4>{{'WORKSPACE.LICENSE.EDU.NC' | translate}}</h4>
-                      <h5>{{'WORKSPACE.LICENSE.EDU.NC_INFO' | translate}}</h5>
-                    </label>
-                  </div>
-                  <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
-
-                </div>-->
-  <div *ngIf="primaryType === 'CUSTOM'" class="custom">
+            <div class="radio">
+              <input type="radio" [(ngModel)]="eduType" value="P_NR" id="P_NR">
+              <label for="P_NR">
+                <h4>{{'WORKSPACE.LICENSE.EDU.P_NR' | translate}}</h4>
+                <h5>{{'WORKSPACE.LICENSE.EDU.P_NR_INFO' | translate}}</h5>
+              </label>
+            </div>
+            <div class="radio">
+              <input type="radio" [(ngModel)]="eduType" value="NC" id="NC">
+              <label for="NC">
+                <h4>{{'WORKSPACE.LICENSE.EDU.NC' | translate}}</h4>
+                <h5>{{'WORKSPACE.LICENSE.EDU.NC_INFO' | translate}}</h5>
+              </label>
+            </div>
+            <input type="checkbox" class="filled-in" [(ngModel)]="eduDownload" id="DOWNLOAD"><label for="DOWNLOAD">{{'WORKSPACE.LICENSE.EDU.DOWNLOAD' | translate}}</label>
+          </div>-->
+  @if (primaryType === 'CUSTOM') {
+  <div class="custom">
     <mat-form-field>
       <mat-label>{{ 'LICENSE.GROUPS.CUSTOM' | translate }}</mat-label>
       <textarea
@@ -234,28 +245,37 @@
       ></textarea>
     </mat-form-field>
   </div>
+  }
 </div>
+}
 <es-mds-editor-widget-author
   #author
   [showContributorDialog]="!_properties"
 ></es-mds-editor-widget-author>
+@if (isCCAttributableLicense()) {
 <es-license-source
   class="cc-additional"
-  *ngIf="isCCAttributableLicense()"
   [(ccTitleOfWork)]="ccTitleOfWork"
   [(ccSourceUrl)]="ccSourceUrl"
   [(ccProfileUrl)]="ccProfileUrl"
 ></es-license-source>
+}
 <div class="ai-info">
   <button class="more clickable" (click)="aiOpen = !aiOpen">
     <span class="title">{{ 'WORKSPACE.LICENSE.AI.TITLE' | translate }}</span>
-    <i esIcon="keyboard_arrow_up" *ngIf="aiOpen"></i>
-    <i esIcon="keyboard_arrow_down" *ngIf="!aiOpen"></i>
+    @if (aiOpen) {
+    <i esIcon="keyboard_arrow_up"></i>
+    } @if (!aiOpen) {
+    <i esIcon="keyboard_arrow_down"></i>
+    }
   </button>
-  <div *ngIf="aiOpen" [@overlay]="aiOpen" class="ai-details">
-    <es-info-message mode="info" *ngIf="isPublic === false">
+  @if (aiOpen) {
+  <div [@overlay]="aiOpen" class="ai-details">
+    @if (isPublic === false) {
+    <es-info-message mode="info">
       {{ 'WORKSPACE.LICENSE.AI.NO_PUBLIC_NODE' | translate }}
     </es-info-message>
+    }
     <mat-checkbox
       [ngModel]="isPublic ? ai.allowUsage : false"
       [disabled]="!isPublic"
@@ -285,65 +305,72 @@
         </ng-container>
       </es-multi-line-label>
     </mat-checkbox>
-    <ng-container *ngIf="ai.generated !== false">
-      <mat-form-field>
-        <mat-label>
-          {{ 'WORKSPACE.LICENSE.AI.TOOL' | translate }}
-        </mat-label>
-        <mat-select [(ngModel)]="ai.tool" (ngModelChange)="updateAi()">
-          <mat-option value="">{{ 'WORKSPACE.LICENSE.AI.TOOL_NO_INFO' | translate }}</mat-option>
-          <mat-option value="custom">{{
-            'WORKSPACE.LICENSE.AI.TOOL_CUSTOM' | translate
-          }}</mat-option>
-          <mat-option value="indeterminate" *ngIf="ai.tool === 'indeterminate'">{{
-            'WORKSPACE.LICENSE.AI.TOOL_INDETERMINATE' | translate
-          }}</mat-option>
-          <mat-option *ngFor="let tool of aiTools" [value]="tool.id">{{ tool.caption }}</mat-option>
-        </mat-select>
-        <mat-hint>
-          {{ 'WORKSPACE.LICENSE.AI.TOOL_INFO' | translate }}
-        </mat-hint>
-      </mat-form-field>
-      <mat-form-field *ngIf="ai.tool === 'custom'">
-        <mat-label>
-          {{ 'WORKSPACE.LICENSE.AI.TOOL_CUSTOM_NAME' | translate }}
-        </mat-label>
-        <input matInput [(ngModel)]="ai.toolCustom" />
-      </mat-form-field>
-      <mat-checkbox
-        [(ngModel)]="ai.manuallyModified"
-        [indeterminate]="ai.manuallyModified === 'indeterminate'"
-        (ngModelChange)="updateAi()"
-      >
-        <es-multi-line-label>
-          <ng-container slot="label">
-            {{ 'WORKSPACE.LICENSE.AI.MANUALLY_MODIFIED' | translate }}
-          </ng-container>
-          <ng-container slot="description">
-            <span
-              innerHTML="{{ 'WORKSPACE.LICENSE.AI.MANUALLY_MODIFIED_INFO' | translate }}"
-            ></span>
-          </ng-container>
-        </es-multi-line-label>
-      </mat-checkbox>
-    </ng-container>
+    @if (ai.generated !== false) {
+    <mat-form-field>
+      <mat-label>
+        {{ 'WORKSPACE.LICENSE.AI.TOOL' | translate }}
+      </mat-label>
+      <mat-select [(ngModel)]="ai.tool" (ngModelChange)="updateAi()">
+        <mat-option value="">{{ 'WORKSPACE.LICENSE.AI.TOOL_NO_INFO' | translate }}</mat-option>
+        <mat-option value="custom">{{ 'WORKSPACE.LICENSE.AI.TOOL_CUSTOM' | translate }}</mat-option>
+        @if (ai.tool === 'indeterminate') {
+        <mat-option value="indeterminate">{{
+          'WORKSPACE.LICENSE.AI.TOOL_INDETERMINATE' | translate
+        }}</mat-option>
+        } @for (tool of aiTools; track tool) {
+        <mat-option [value]="tool.id">{{ tool.caption }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>
+        {{ 'WORKSPACE.LICENSE.AI.TOOL_INFO' | translate }}
+      </mat-hint>
+    </mat-form-field>
+    @if (ai.tool === 'custom') {
+    <mat-form-field>
+      <mat-label>
+        {{ 'WORKSPACE.LICENSE.AI.TOOL_CUSTOM_NAME' | translate }}
+      </mat-label>
+      <input matInput [(ngModel)]="ai.toolCustom" />
+    </mat-form-field>
+    }
+    <mat-checkbox
+      [(ngModel)]="ai.manuallyModified"
+      [indeterminate]="ai.manuallyModified === 'indeterminate'"
+      (ngModelChange)="updateAi()"
+    >
+      <es-multi-line-label>
+        <ng-container slot="label">
+          {{ 'WORKSPACE.LICENSE.AI.MANUALLY_MODIFIED' | translate }}
+        </ng-container>
+        <ng-container slot="description">
+          <span innerHTML="{{ 'WORKSPACE.LICENSE.AI.MANUALLY_MODIFIED_INFO' | translate }}"></span>
+        </ng-container>
+      </es-multi-line-label>
+    </mat-checkbox>
+    }
   </div>
+  }
 </div>
 <div class="currentLicense">
-  <h4 *ngIf="type !== 'MULTI'">{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
-  <img *ngIf="type !== 'MULTI'" class="currentLicenseIcon" src="{{ getLicenseIcon() }}" alt="" />
-  <div class="license-additional-data" *ngIf="type.startsWith('CC_BY')">
-    <div *ngIf="ccVersion !== '4.0'" class="licenseLocale">
+  @if (type !== 'MULTI') {
+  <h4>{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
+  } @if (type !== 'MULTI') {
+  <img class="currentLicenseIcon" src="{{ getLicenseIcon() }}" alt="" />
+  } @if (type.startsWith('CC_BY')) {
+  <div class="license-additional-data">
+    @if (ccVersion !== '4.0') {
+    <div class="licenseLocale">
       <mat-form-field>
         <mat-label>{{ 'WORKSPACE.LICENSE.LOCALE' | translate }}</mat-label>
         <mat-select id="localeCountry" [(ngModel)]="ccCountry">
           <mat-option value="">{{ 'COUNTRY_CODE.INTERNATIONAL' | translate }}</mat-option>
-          <mat-option *ngFor="let country of _ccCountries" value="{{ country.key }}">{{
-            country.name
-          }}</mat-option>
+          @for (country of _ccCountries; track country) {
+          <mat-option value="{{ country.key }}">{{ country.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>
+    }
     <div class="licenseVersion">
       <mat-form-field>
         <mat-label>{{ 'WORKSPACE.LICENSE.VERSION' | translate }}</mat-label>
@@ -355,43 +382,54 @@
       </mat-form-field>
     </div>
   </div>
+  }
   <div class="licenseName">
     <h4>{{ getLicenseName() }}</h4>
-    <div class="oerStatus" *ngIf="getLicenseProperty() !== 'MULTI'">
-      <span class="oer" *ngIf="isOerLicense()">{{ 'WORKSPACE.LICENSE.OER' | translate }}</span>
-      <span class="notOer" *ngIf="!isOerLicense()">{{
-        'WORKSPACE.LICENSE.NOT_OER' | translate
-      }}</span>
+    @if (getLicenseProperty() !== 'MULTI') {
+    <div class="oerStatus">
+      @if (isOerLicense()) {
+      <span class="oer">{{ 'WORKSPACE.LICENSE.OER' | translate }}</span>
+      } @if (!isOerLicense()) {
+      <span class="notOer">{{ 'WORKSPACE.LICENSE.NOT_OER' | translate }}</span>
+      }
     </div>
+    }
   </div>
   <div class="currentLicenseDescription">
-    <div class="customLicenseDescription" *ngIf="primaryType === 'CUSTOM'">
+    @if (primaryType === 'CUSTOM') {
+    <div class="customLicenseDescription">
       {{ rightsDescription }}
     </div>
-    <div
-      *ngIf="primaryType !== 'CUSTOM' && primaryType !== 'COPYRIGHT'"
-      innerHTML="{{ 'LICENSE.DESCRIPTION.' + primaryType | translate }}"
-    ></div>
-    <div *ngIf="primaryType === 'COPYRIGHT'">
+    } @if (primaryType !== 'CUSTOM' && primaryType !== 'COPYRIGHT') {
+    <div innerHTML="{{ 'LICENSE.DESCRIPTION.' + primaryType | translate }}"></div>
+    } @if (primaryType === 'COPYRIGHT') {
+    <div>
       <div innerHTML="{{ 'LICENSE.DESCRIPTION.' + copyrightType | translate }}"></div>
     </div>
-    <div *ngIf="primaryType === 'CC_BY'">
-      <div *ngIf="ccShare">
+    } @if (primaryType === 'CC_BY') {
+    <div>
+      @if (ccShare) {
+      <div>
         {{ 'LICENSE.DESCRIPTION.CC_SHARE_' + ccShare | translate }}
       </div>
-      <div *ngIf="ccCommercial">
+      } @if (ccCommercial) {
+      <div>
         {{ 'LICENSE.DESCRIPTION.CC_COMMERCIAL_' + ccCommercial | translate }}
       </div>
-      <div *ngIf="ccVersion !== '4.0'">
+      } @if (ccVersion !== '4.0') {
+      <div>
         {{ 'WORKSPACE.LICENSE.LOCALE' | translate : { locale: ccCountry } }}
         {{ 'COUNTRY_CODE.' + (ccCountry ? ccCountry : 'INTERNATIONAL') | uppercase | translate }}.
       </div>
+      }
     </div>
-    <div *ngIf="primaryType === 'CC_BY' || primaryType === 'CC_0'" class="licenseUrl">
+    } @if (primaryType === 'CC_BY' || primaryType === 'CC_0') {
+    <div class="licenseUrl">
       <a [href]="getLicenseUrl() | async" target="_blank">{{
         'WORKSPACE.LICENSE.MORE' | translate
       }}</a>
     </div>
+    }
     <div class="ai-info">{{ getAiProperties() | esLicenseAiInfo }}</div>
   </div>
 </div>

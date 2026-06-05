@@ -1,5 +1,5 @@
+@for (entry of entries$ | async; track entry) {
 <button
-  *ngFor="let entry of entries$ | async"
   mat-button
   color="primary"
   class="entry mat-button-no-uppercase"
@@ -10,6 +10,9 @@
   [class.disabled]="entry.isDisabled"
   title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
 >
-  <i *ngIf="entry.icon" class="align-icon" [esIcon]="entry.icon"></i>
+  @if (entry.icon) {
+  <i class="align-icon" [esIcon]="entry.icon"></i>
+  }
   <span>{{ entry.name | translate }}</span>
 </button>
+}

@@ -1,12 +1,4 @@
-import {
-    Directive,
-    ElementRef,
-    Input,
-    OnDestroy,
-    OnInit,
-    Optional,
-    Renderer2,
-} from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, OnInit, Renderer2, inject } from '@angular/core';
 import { MatSidenavContainer } from '@angular/material/sidenav';
 import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
@@ -16,6 +8,11 @@ import { debounceTime } from 'rxjs/operators';
     selector: '[esResizableSidenav]',
 })
 export class ResizableSidenavDirective implements OnInit, OnDestroy {
+    private el = inject(ElementRef);
+    private renderer = inject(Renderer2);
+    private storage = inject(SessionStorageService);
+    private sidenavContainer = inject(MatSidenavContainer, { optional: true });
+
     @Input() storageKey: string;
     @Input() position: 'start' | 'end' = 'start';
     @Input() minWidth = 0.2;
@@ -30,12 +27,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     private dragging = false;
     private width$ = new BehaviorSubject<number>(0);
 
-    constructor(
-        private el: ElementRef,
-        private renderer: Renderer2,
-        private storage: SessionStorageService,
-        @Optional() private sidenavContainer: MatSidenavContainer, // inject container
-    ) {
+    constructor() {
         this.width$.pipe(debounceTime(10)).subscribe((width) => {
             if (this.storageKey) {
                 void this.storage.set(this.storageKey, width, Store.LocalStorage);

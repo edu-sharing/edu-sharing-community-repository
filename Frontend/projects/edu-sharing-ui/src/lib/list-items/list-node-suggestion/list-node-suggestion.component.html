@@ -1,5 +1,5 @@
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'SUGGESTION'">
-  <span *ngSwitchCase="'count'">
-    {{ pendingCount$ | async }}
-  </span>
-</ng-container>
+@if (item.type === 'SUGGESTION') { @switch (item.name) { @case ('count') {
+<span>
+  {{ pendingCount$ | async }}
+</span>
+} } }

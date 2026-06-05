@@ -1,5 +1,5 @@
+@for (entry of entries$ | async; track entry) {
 <button
-  *ngFor="let entry of entries$ | async"
   (click)="entry.open()"
   (keydown.enter)="entry.open()"
   class="waves-effect"
@@ -10,6 +10,9 @@
   title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
   cdkMonitorElementFocus
 >
-  <i [esIcon]="entry.icon" *ngIf="entry.icon" aria-hidden="true" class="material-icons"></i>
+  @if (entry.icon) {
+  <i [esIcon]="entry.icon" aria-hidden="true" class="material-icons"></i>
+  }
   <span>{{ (entry.isCustom ? entry.name : entry.name + '_SHORT') | translate }}</span>
 </button>
+}

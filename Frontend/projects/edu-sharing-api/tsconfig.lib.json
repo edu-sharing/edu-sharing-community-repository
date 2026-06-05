@@ -8,11 +8,7 @@
     "inlineSources": true,
     "strict": true,
     "strictNullChecks": false,
-    "types": [],
-    "lib": [
-      "dom",
-      "es2018"
-    ]
+    "types": []
   },
   "exclude": [
     "src/test.ts",

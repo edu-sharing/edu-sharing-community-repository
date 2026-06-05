@@ -1,5 +1,5 @@
 import { PlatformLocation } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -48,24 +48,22 @@ import { TopicPageGlobalService } from './topic-page-global.service';
     providedIn: 'root',
 })
 export class TopicPageHelperService {
+    private collectionApi = inject(CollectionService);
+    private dialogs = inject(DialogsService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private nodeApi = inject(NodeService);
+    private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
+    private platformLocation = inject(PlatformLocation);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private topicPageEventsService = inject(TopicPageEventsService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private translate = inject(TranslateService);
+
     blobToUpload: Blob;
     private selectedVariablesSubject: BehaviorSubject<{ [key: string]: string[] }> =
         new BehaviorSubject<{ [key: string]: string[] }>({});
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
-
-    constructor(
-        private collectionApi: CollectionService,
-        private dialogs: DialogsService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private nodeApi: NodeService,
-        private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private platformLocation: PlatformLocation,
-        private router: Router,
-        private toast: Toast,
-        private topicPageEventsService: TopicPageEventsService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private translate: TranslateService,
-    ) {}
 
     /**
      * Retrieves the base href of the application.

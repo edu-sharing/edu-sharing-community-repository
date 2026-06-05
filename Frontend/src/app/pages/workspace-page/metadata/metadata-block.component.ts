@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import {
     ConfigurationHelper,
     NodePermissions,
@@ -7,9 +7,14 @@ import {
     RestConstants,
     RestNodeService,
 } from '../../../core-module/core.module';
-import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
-import { DurationHelper, FormatDatePipe, NodeImageSizePipe, VCard } from 'ngx-edu-sharing-ui';
+import {
+    DurationHelper,
+    FormatDatePipe,
+    NodeImageSizePipe,
+    NodePersonNamePipe,
+    VCard,
+} from 'ngx-edu-sharing-ui';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { SharedModule } from '../../../shared/shared.module';
 
@@ -23,6 +28,13 @@ declare var Chart: any;
     imports: [SharedModule],
 })
 export class WorkspaceMetadataBlockComponent {
+    connector = inject(RestConnectorService);
+    private nodeApi = inject(RestNodeService);
+    private configService = inject(ConfigService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private formatDatePipe = inject(FormatDatePipe);
+    private nodeHelper = inject(NodeHelperService);
+
     @Input() set node(node: Node) {
         void this.load(node);
     }
@@ -52,9 +64,9 @@ export class WorkspaceMetadataBlockComponent {
         // data["creator"]=node.properties[RestConstants.CM_CREATOR];
         data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(
             node.createdBy,
-            this.configService,
+            this.nodePersonNamePipe,
         );
-        data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
+        data.createDate = this.formatDatePipe.transform(node.createdAt);
         data.duration = DurationHelper.getDurationFormatted(
             node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION]?.[0],
         );
@@ -68,7 +80,7 @@ export class WorkspaceMetadataBlockComponent {
         data.mimetype = node.mimetype;
         data.size = node.size;
         if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL]) {
-            data.exifDate = new FormatDatePipe(this.translate).transform(
+            data.exifDate = this.formatDatePipe.transform(
                 node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0],
             );
         }
@@ -86,13 +98,6 @@ export class WorkspaceMetadataBlockComponent {
         }
         return data;
     }
-    constructor(
-        public connector: RestConnectorService,
-        private nodeApi: RestNodeService,
-        private translate: TranslateService,
-        private configService: ConfigService,
-        private nodeHelper: NodeHelperService,
-    ) {}
     isAnimated() {
         return this.nodeHelper.hasAnimatedPreview(this._node);
     }

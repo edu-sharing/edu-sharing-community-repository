@@ -1,18 +1,18 @@
 <!--<div *ngIf="(chipsSuggestionsSubject | async)?.length as count" class="suggestion-badge">
-  {{ count }}
+{{ count }}
 </div>-->
-<ng-container *ngIf="editorMode === valueSelection">
-  <h3 *ngIf="widget?.definition?.caption">
-    {{ widget.definition.caption | translate }}
-  </h3>
-  <es-mds-editor-widget-tree-value-selection
-    *ngIf="chipsControl?.value"
-    [selectedValues]="chipsControl.value"
-    [control]="chipsControl"
-    [widget]="widget"
-    (removed)="remove($event)"
-  ></es-mds-editor-widget-tree-value-selection>
-</ng-container>
+@if (editorMode === valueSelection) { @if (widget?.definition?.caption) {
+<h3>
+  {{ widget.definition.caption | translate }}
+</h3>
+} @if (chipsControl?.value) {
+<es-mds-editor-widget-tree-value-selection
+  [selectedValues]="chipsControl.value"
+  [control]="chipsControl"
+  [widget]="widget"
+  (removed)="remove($event)"
+></es-mds-editor-widget-tree-value-selection>
+} }
 <div
   cdkOverlayOrigin
   #trigger="cdkOverlayOrigin"
@@ -20,8 +20,8 @@
   #box
   #triggerBorderBox="borderBoxObserver"
 >
+  @if (editorMode !== valueSelection) {
   <es-mds-editor-widget-container
-    *ngIf="editorMode !== valueSelection; else toggleOverlay"
     #container
     [widget]="widget"
     [label]="false"
@@ -30,13 +30,13 @@
     [control]="chipsControl"
   >
     <!-- We use `chipsControl` as `formControl` of the chips list. This serves different purposes:
-    - The `formControl` of the chips list controls which chips are *selected*. Thus, by using
+      - The `formControl` of the chips list controls which chips are *selected*. Thus, by using
       `chipsControl`, which controls *all* chips, we automatically mark all chips as selected (see
       below for the reason).
-    - The chips list is the element controlling the form. By attaching `chipsControl` we:
+      - The chips list is the element controlling the form. By attaching `chipsControl` we:
       - get correct value readings for the required-state
       - pass the disabled state to chips and the input.
-    -->
+      -->
     <mat-chip-grid
       #chipList
       [attr.aria-labelledby]="chipsControl?.value?.length > 0 ? container?.labelId : null"
@@ -49,13 +49,13 @@
       (cdkDropListDropped)="reorderChip($event)"
     >
       <!-- @TODO removed in angular 15
-          [multiple]="true"
-    -->
+        [multiple]="true"
+        -->
       <!-- We mark all chips as selected because NVDA will announce "not selected" for each item
-      otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
+        otherwise. It announces nothing (!) for selected items. Same as MdsEditorWidgetChips. -->
+      @for (value of chipsControl?.value; track value) {
       <mat-chip-row
         #chip
-        *ngFor="let value of chipsControl?.value"
         [value]="value"
         [removable]="true"
         [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
@@ -73,51 +73,51 @@
         <span class="mat-chip-label">{{ getChipsValue(value).label }}</span>
         <i esIcon="cancel" matChipRemove [aria]="false"></i>
       </mat-chip-row>
-      <ng-container *ngIf="editorMode !== 'search' && (userProposalGroups$ | async)?.length">
-        <div
-          esProposalChip
-          class="mat-chip-suggestion"
-          *ngFor="let group of userProposalGroups$ | async; let i = index"
-          role="row"
-          [attr.tabindex]="i === 0 ? 0 : -1"
-          [matTooltip]="
-            ('MDS.SUGGESTIONS.USER_PROPOSALS.LABEL' | translate) +
-            ' (' +
-            ('MDS.DELETE_KEY_NOTICE' | translate) +
-            ')'
-          "
-          matTooltipPosition="above"
-          (keydown)="onProposalKeydown($event)"
-          (keydown.enter)="
-            acceptUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
-          "
-          (keydown.delete)="
-            declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
-          "
-          (keydown.backspace)="
-            declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
-          "
-        >
-          <span class="mat-chip-label">{{ group.displayValue.label }}</span>
-          <span class="user-proposal-count">{{ group.count }}×</span>
-          <i
-            esIcon="check_circle"
-            class="accept"
-            role="button"
-            [attr.aria-label]="'MDS.SUGGESTIONS.APPLY' | translate"
-            (click)="acceptUserProposalGroup(group); $event.stopPropagation()"
-            [aria]="false"
-          ></i>
-          <i
-            esIcon="cancel"
-            class="decline"
-            role="button"
-            [attr.aria-label]="'MDS.SUGGESTIONS.DECLINE' | translate"
-            (click)="declineUserProposalGroup(group); $event.stopPropagation()"
-            [aria]="false"
-          ></i>
-        </div>
-      </ng-container>
+      } @if (editorMode !== 'search' && (userProposalGroups$ | async)?.length) { @for (group of
+      userProposalGroups$ | async; track group; let i = $index) {
+      <div
+        esProposalChip
+        class="mat-chip-suggestion"
+        role="row"
+        [attr.tabindex]="i === 0 ? 0 : -1"
+        [matTooltip]="
+          ('MDS.SUGGESTIONS.USER_PROPOSALS.LABEL' | translate) +
+          ' (' +
+          ('MDS.DELETE_KEY_NOTICE' | translate) +
+          ')'
+        "
+        matTooltipPosition="above"
+        (keydown)="onProposalKeydown($event)"
+        (keydown.enter)="
+          acceptUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+        "
+        (keydown.delete)="
+          declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+        "
+        (keydown.backspace)="
+          declineUserProposalGroup(group); $event.preventDefault(); $event.stopPropagation()
+        "
+      >
+        <span class="mat-chip-label">{{ group.displayValue.label }}</span>
+        <span class="user-proposal-count">{{ group.count }}×</span>
+        <i
+          esIcon="check_circle"
+          class="accept"
+          role="button"
+          [attr.aria-label]="'MDS.SUGGESTIONS.APPLY' | translate"
+          (click)="acceptUserProposalGroup(group); $event.stopPropagation()"
+          [aria]="false"
+        ></i>
+        <i
+          esIcon="cancel"
+          class="decline"
+          role="button"
+          [attr.aria-label]="'MDS.SUGGESTIONS.DECLINE' | translate"
+          (click)="declineUserProposalGroup(group); $event.stopPropagation()"
+          [aria]="false"
+        ></i>
+      </div>
+      } }
       <div class="input-wrapper">
         <input
           autocomplete="off"
@@ -130,29 +130,28 @@
           (focus)="openOverlay($event)"
           (blur)="onBlurInput($event)"
         />
+        @if (showDropdownArrow) {
         <button
           matSuffix
           mat-icon-button
           class="mat-button-select-arrow"
           cdkMonitorElementFocus
           #openButton
-          *ngIf="showDropdownArrow"
           (click)="openOverlay()"
           [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
           [disabled]="chipsControl.disabled"
         >
           <!-- @TODO removed with angular 15
-                  (keydown.tab)="chipList._allowFocusEscape()"
-        -->
+              (keydown.tab)="chipList._allowFocusEscape()"
+              -->
           <i esIcon="keyboard_arrow_down" class="mat-select-arrow"></i>
         </button>
+        }
       </div>
     </mat-chip-grid>
   </es-mds-editor-widget-container>
-</div>
-<ng-template #toggleOverlay>
+  } @else { @if (showDropdownArrow) {
   <button
-    *ngIf="showDropdownArrow"
     mat-button
     class="custom-toggle-button"
     [class]="positionY() ? 'open-' + positionY() : ''"
@@ -165,7 +164,8 @@
     Auswahl bearbeiten
     <i [esIcon]="overlayIsVisible ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
   </button>
-</ng-template>
+  } }
+</div>
 <ng-template
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
@@ -179,13 +179,8 @@
   (overlayOutsideClick)="closeOverlay($event)"
 >
   <!--     *ngIf="overlayIsVisible" -->
-  <div
-    *ngIf="overlayIsVisible"
-    class="suggestion-card"
-    role="dialog"
-    #overlay
-    [attr.aria-labelledby]="container?.labelId"
-  >
+  @if (overlayIsVisible) {
+  <div class="suggestion-card" role="dialog" #overlay [attr.aria-labelledby]="container?.labelId">
     <es-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="false"
@@ -204,6 +199,7 @@
       (indeterminateValuesChange)="indeterminateValues$.next($event)"
     ></es-mds-editor-widget-tree-core>
   </div>
+  }
 </ng-template>
 
 <!-- Load styles for mat-select-arrow. -->

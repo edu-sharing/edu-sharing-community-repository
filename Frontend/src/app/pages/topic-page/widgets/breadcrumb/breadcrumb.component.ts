@@ -19,6 +19,7 @@ import {
     ViewChild,
     ViewContainerRef,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -60,6 +61,11 @@ export interface BreadcrumbExtensionInterface {
     styleUrls: ['./breadcrumb.component.scss'],
 })
 export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
+    private connector = inject(RestConnectorService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private uiService = inject(UIService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.BREADCRUMB.';
     readonly navigateToTemplateValue: string = 'NAVIGATE_TO_TEMPLATE';
@@ -103,12 +109,7 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     private customExtensionComponentRef: ComponentRef<any> | null = null;
     customExtensionInstance: BreadcrumbExtensionInterface;
 
-    constructor(
-        private connector: RestConnectorService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         effect((): void => {
             // update editMode of custom extension
             const currentEditMode: boolean = this.editMode();

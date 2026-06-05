@@ -10,6 +10,7 @@ import {
     Output,
     signal,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { CollectionEntries, Node } from 'ngx-edu-sharing-api';
@@ -49,6 +50,10 @@ const CHILD_ITEM_SELECTOR = ':scope > .child-list-item';
     styleUrls: ['./topics-column-browser.component.scss'],
 })
 export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.TOPICS_COLUMN_BROWSER.';
     private readonly MOBILE_WIDTH: number = 860;
@@ -79,11 +84,7 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
         this.width$.next(window.innerWidth);
     }
 
-    constructor(
-        private readonly elementRef: ElementRef<HTMLElement>,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
@@ -373,7 +374,7 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
      * @param parent TreeNode whose children form the new column
      */
     private focusAfterDrilldown(parent: TreeNode<Node>): void {
-        this.waitForColumnReady(parent).then((container: Element | null): void => {
+        void this.waitForColumnReady(parent).then((container: Element | null): void => {
             if (!container) {
                 return;
             }

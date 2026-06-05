@@ -6,6 +6,7 @@ import {
     Output,
     signal,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
@@ -19,11 +20,12 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
     imports: [SharedModule],
 })
 export class ManageSubmissionNodesComponent implements OnChanges {
+    private assignmentV1Service = inject(AssignmentV1Service);
+
     data = input.required<SubmissionConfig>();
     files = signal<SubmissionFile[]>(null);
     selected = signal<SubmissionFile>(null);
     @Output() nodeClick = new EventEmitter<SubmissionFile>();
-    constructor(private assignmentV1Service: AssignmentV1Service) {}
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.data) {

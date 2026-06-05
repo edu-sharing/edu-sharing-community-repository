@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
@@ -116,6 +116,11 @@ interface FacetUpdates {
     providedIn: 'root',
 })
 export class SearchService {
+    private mdsLabel = inject(MdsLabelService);
+    private network = inject(NetworkService);
+    private searchV1 = inject(SearchV1Service);
+    private assignmentV1Service = inject(AssignmentV1Service);
+
     private readonly completedRequestSubject = new BehaviorSubject<CompletedRequestRecord | null>(
         null,
     );
@@ -125,12 +130,7 @@ export class SearchService {
     private readonly subscribedFacetsSubject = new BehaviorSubject<string[][]>([]);
     private didYouMeanSuggestionsSubscribers = 0;
 
-    constructor(
-        private mdsLabel: MdsLabelService,
-        private network: NetworkService,
-        private searchV1: SearchV1Service,
-        private assignmentV1Service: AssignmentV1Service,
-    ) {
+    constructor() {
         this.registerFacetsSubject();
         this.registerDidYouMeanSuggestionSubject();
     }

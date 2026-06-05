@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -14,6 +14,10 @@ import { AccessibilityService } from '../../services/accessibility.service';
     standalone: false,
 })
 export class ListNodeLicenseComponent extends ListWidget {
+    private accessibility = inject(AccessibilityService);
+    private nodeHelper = inject(NodeHelperService);
+    private translate = inject(TranslateService);
+
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_LICENSE)];
 
     readonly licenseName$ = this.nodeSubject.pipe(
@@ -37,12 +41,4 @@ export class ListNodeLicenseComponent extends ListWidget {
     );
 
     readonly indicatorIcons$ = this.accessibility.observe('indicatorIcons');
-
-    constructor(
-        private accessibility: AccessibilityService,
-        private nodeHelper: NodeHelperService,
-        private translate: TranslateService,
-    ) {
-        super();
-    }
 }

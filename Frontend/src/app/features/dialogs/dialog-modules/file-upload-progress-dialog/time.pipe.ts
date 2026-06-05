@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { isNumeric } from 'ngx-edu-sharing-ui';
 
@@ -11,6 +11,8 @@ import { isNumeric } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class TimePipe implements PipeTransform {
+    private translate = inject(TranslateService);
+
     transform(value: number): string {
         if (!isNumeric(value)) return 'invalid value';
 
@@ -31,5 +33,4 @@ export class TimePipe implements PipeTransform {
         }
         return str.trim();
     }
-    constructor(private translate: TranslateService) {}
 }

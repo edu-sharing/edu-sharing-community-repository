@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import {
     distinctUntilChanged,
@@ -39,6 +39,9 @@ export const LANGUAGES: { [key: string]: Locale } = {
     providedIn: 'root',
 })
 export class ConfigService {
+    private configV1 = inject(ConfigV1Service);
+    private apiRequestConfiguration = inject(ApiRequestConfiguration);
+
     private readonly updateTrigger = new Subject<void>();
     private readonly updateTriggerMessages = new Subject<void>();
     private readonly localeSubject = new BehaviorSubject<{
@@ -85,11 +88,6 @@ export class ConfigService {
         map((language) => language.current ?? null),
         shareReplay(1),
     );
-
-    constructor(
-        private configV1: ConfigV1Service,
-        private apiRequestConfiguration: ApiRequestConfiguration,
-    ) {}
 
     /**
      * Returns the current system configuration.

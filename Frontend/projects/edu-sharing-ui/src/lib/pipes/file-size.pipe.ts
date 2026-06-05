@@ -1,13 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
     name: 'formatSize',
     standalone: false,
 })
 export class FormatSizePipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
-
     transform(value: any, args: string[] = null): string {
         let names = ['bytes', 'KB', 'MB', 'GB', 'TB'];
         let i = 0;

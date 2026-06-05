@@ -1,4 +1,5 @@
-<form *ngIf="!connector.mdsGroup">
+@if (!connector.mdsGroup) {
+<form>
   <mat-form-field>
     <mat-label>{{ 'CONNECTOR.' + connector.id + '.PLACEHOLDER' | translate }}</mat-label>
     <input matInput type="text" #input [(ngModel)]="name" name="filename" autofocus />
@@ -6,7 +7,8 @@
   <mat-form-field [class.hide]="connector.filetypes.length === 1">
     <mat-label>{{ 'CONNECTOR_FORMAT_LABEL' | translate }}</mat-label>
     <mat-select [(ngModel)]="type" name="filetype" [disabled]="connector.filetypes.length === 1">
-      <mat-option *ngFor="let filetype of connector.filetypes; let i = index" [value]="i">
+      @for (filetype of connector.filetypes; track filetype; let i = $index) {
+      <mat-option [value]="i">
         {{
           'CONNECTOR.MIMETYPE.' +
             (filetype.mimetype === 'application/zip'
@@ -17,16 +19,19 @@
               : filetype.mimetype) | translate
         }}</mat-option
       >
+      }
     </mat-select>
   </mat-form-field>
 </form>
+} @if (connector.mdsGroup) {
 <es-mds-editor-wrapper
-  *ngIf="connector.mdsGroup"
   editorMode="form"
   [groupId]="connector.mdsGroup"
   [currentValues]="data.data || {}"
   [embedded]="true"
 ></es-mds-editor-wrapper>
-<div class="name" *ngIf="name.trim() && !connector.mdsGroup">
+} @if (name.trim() && !connector.mdsGroup) {
+<div class="name">
   {{ 'CONNECTOR.' + connector.id + '.FILENAME' | translate }}: {{ name }}.{{ getType().filetype }}
 </div>
+}

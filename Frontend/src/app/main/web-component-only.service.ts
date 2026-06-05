@@ -1,4 +1,10 @@
-import { ApplicationRef, createComponent, EnvironmentInjector, Injectable } from '@angular/core';
+import {
+    ApplicationRef,
+    createComponent,
+    EnvironmentInjector,
+    Injectable,
+    inject,
+} from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { CustomGlobalExtensionsComponent } from 'edu-sharing-extension-dependencies/custom-global-component/custom-global-extensions.component';
 
@@ -7,11 +13,11 @@ import { CustomGlobalExtensionsComponent } from 'edu-sharing-extension-dependenc
  */
 @Injectable()
 export class WebComponentOnlyService {
-    constructor(
-        private translations: TranslationsService,
-        private environmentInjector: EnvironmentInjector,
-        private appRef: ApplicationRef,
-    ) {
+    private translations = inject(TranslationsService);
+    private environmentInjector = inject(EnvironmentInjector);
+    private appRef = inject(ApplicationRef);
+
+    constructor() {
         this.translations.initialize().subscribe();
         this.enableCustomGlobalComponents();
     }

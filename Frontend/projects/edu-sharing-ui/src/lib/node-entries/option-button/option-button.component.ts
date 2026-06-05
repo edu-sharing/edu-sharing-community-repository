@@ -5,6 +5,7 @@ import {
     Input,
     OnChanges,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OptionItem } from '../../types/option-item';
@@ -37,13 +38,11 @@ import { NodeEntriesDataType } from '../data-type';
 export class OptionButtonComponent<T extends NodeEntriesDataType>
     implements OnChanges, AfterViewInit
 {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+
     @Input() option: OptionItem;
     @Input() node: Node;
-
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef,
-        private entriesService: NodeEntriesService<T>,
-    ) {}
     isShown = false;
     isEnabled = false;
     async ngOnChanges(changes: SimpleChanges) {

@@ -8,27 +8,33 @@
   position="right"
 ></es-dropdown>
 
+@if (createToolType !== null) {
 <es-create-ltitool
-  *ngIf="createToolType !== null"
   [tool]="createToolType"
   [parent]="_parent"
   (cancel)="cancelLtiTool($event)"
   (create)="createLtiTool($event)"
 >
 </es-create-ltitool>
-
+} @if ((cardHasOpenModals$ | async) === false) {
 <div
-  *ngIf="(cardHasOpenModals$ | async) === false"
   esFileDrop
   [window]="true"
   (fileOver)="fileIsOver = $event"
   (fileDrop)="onFileDrop($event)"
 ></div>
-<div class="dialog darken drop-zone" *ngIf="fileIsOver && dropEnabled()">
+} @if (fileIsOver && dropEnabled()) {
+<div class="dialog darken drop-zone">
   <div>
-    <i class="material-icons" *ngIf="isDropAllowed()">cloud_upload</i>
-    <i class="material-icons" *ngIf="!isDropAllowed()">cloud_off</i>
-    <p *ngIf="isDropAllowed()">{{ 'WORKSPACE.DROP_FILES' | translate }}</p>
-    <p *ngIf="!isDropAllowed()">{{ 'WORKSPACE.DROP_FILES_DISABLED' | translate }}</p>
+    @if (isDropAllowed()) {
+    <i class="material-icons">cloud_upload</i>
+    } @if (!isDropAllowed()) {
+    <i class="material-icons">cloud_off</i>
+    } @if (isDropAllowed()) {
+    <p>{{ 'WORKSPACE.DROP_FILES' | translate }}</p>
+    } @if (!isDropAllowed()) {
+    <p>{{ 'WORKSPACE.DROP_FILES_DISABLED' | translate }}</p>
+    }
   </div>
 </div>
+}

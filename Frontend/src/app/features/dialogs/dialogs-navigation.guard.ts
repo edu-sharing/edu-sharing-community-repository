@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     ActivatedRouteSnapshot,
     CanDeactivate,
@@ -13,9 +13,13 @@ import { CardDialogService } from './card-dialog/card-dialog.service';
     providedIn: 'root',
 })
 export class DialogsNavigationGuard implements CanDeactivate<unknown> {
+    private cardDialog = inject(CardDialogService);
+
     private restoreState: NavigationStart['restoredState'] | null;
 
-    constructor(private cardDialog: CardDialogService, router: Router) {
+    constructor() {
+        const router = inject(Router);
+
         router.events
             .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
             .subscribe((event) => {

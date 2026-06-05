@@ -6,6 +6,7 @@ import {
     EventEmitter,
     Input,
     Output,
+    inject,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
 import { Values } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,10 @@ import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-ty
     styleUrls: ['./swimlane.component.scss'],
 })
 export class SwimlaneComponent implements AfterViewChecked {
+    private cdr = inject(ChangeDetectorRef);
+    private elementRef = inject(ElementRef);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+
     @Input() set aiSupported(value: boolean) {
         if (!value) {
             this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
@@ -69,12 +74,6 @@ export class SwimlaneComponent implements AfterViewChecked {
 
     supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map((option) => option.value);
     swimlaneColor: string;
-
-    constructor(
-        private cdr: ChangeDetectorRef,
-        private elementRef: ElementRef,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-    ) {}
 
     /**
      * After the view was checked, retrieve the swimlane color from the computed styles

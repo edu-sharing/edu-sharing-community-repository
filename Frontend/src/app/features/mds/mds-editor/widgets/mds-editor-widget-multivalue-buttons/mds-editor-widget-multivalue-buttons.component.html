@@ -1,8 +1,9 @@
-<ng-container *ngIf="mdsEditorInstance.editorMode === 'valueSelection' || true">
-  <h3 *ngIf="widget?.definition?.caption">
-    {{ widget.definition.caption | translate }}
-  </h3>
-</ng-container>
+@if (mdsEditorInstance.editorMode === 'valueSelection' || true) { @if (widget?.definition?.caption)
+{
+<h3>
+  {{ widget.definition.caption | translate }}
+</h3>
+} }
 <es-mds-editor-widget-container
   #container
   [widget]="widget"
@@ -11,26 +12,18 @@
   [control]="chipsControl"
   [wrapInFormField]="false"
 >
-  <div class="buttons-container" *ngIf="widget.definition?.values">
-    <ng-container *ngFor="let value of widget.definition.values; trackBy: trackByValue">
-      <button
-        *ngIf="isValueSelected(value)"
-        mat-flat-button
-        color="primary"
-        (click)="toggleValue(value)"
-        mat-button
-      >
-        {{ toDisplayValue(value).label }}
-      </button>
-      <button
-        *ngIf="!isValueSelected(value)"
-        mat-stroked-button
-        color="primary"
-        (click)="toggleValue(value)"
-        mat-button
-      >
-        {{ toDisplayValue(value).label }}
-      </button>
-    </ng-container>
+  @if (widget.definition?.values) {
+  <div class="buttons-container">
+    @for (value of widget.definition.values; track trackByValue($index, value)) { @if
+    (isValueSelected(value)) {
+    <button mat-flat-button color="primary" (click)="toggleValue(value)" mat-button>
+      {{ toDisplayValue(value).label }}
+    </button>
+    } @if (!isValueSelected(value)) {
+    <button mat-stroked-button color="primary" (click)="toggleValue(value)" mat-button>
+      {{ toDisplayValue(value).label }}
+    </button>
+    } }
   </div>
+  }
 </es-mds-editor-widget-container>

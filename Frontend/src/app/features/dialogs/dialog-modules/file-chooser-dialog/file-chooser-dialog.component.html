@@ -1,38 +1,44 @@
 <ng-template #bottomBarContent>
-  <div *ngIf="!data.collections && !path$.value.length && !canSelectHome" class="no-permissions">
+  @if (!data.collections && !path$.value.length && !canSelectHome) {
+  <div class="no-permissions">
     {{ 'WORKSPACE.FILE_CHOOSER.HOME_FOLDER_NO_PERMISSIONS' | translate }}
   </div>
-  <div *ngIf="!folderIsWritable()" class="no-permissions">
+  } @if (!folderIsWritable()) {
+  <div class="no-permissions">
     {{ 'WORKSPACE.FILE_CHOOSER.NO_WRITE_PERMISSIONS' | translate }}
   </div>
+  }
 </ng-template>
 
-<mat-tab-group
-  *ngIf="tabs; else tabContent"
-  mat-stretch-tabs
-  (selectedTabChange)="onTabChange($event)"
->
-  <mat-tab *ngFor="let tab of tabs">
+@if (tabs) {
+<mat-tab-group mat-stretch-tabs (selectedTabChange)="onTabChange($event)">
+  @for (tab of tabs; track tab) {
+  <mat-tab>
     <ng-template mat-tab-label>
       <i [esIcon]="tab.homeIcon" class="tab-icon"></i>
       <span class="tab-label">{{ tab.label | translate }}</span>
     </ng-template>
     <ng-container *ngTemplateOutlet="tabContent; context: tab"></ng-container>
   </mat-tab>
+  }
 </mat-tab-group>
+} @else {
+<ng-container *ngTemplateOutlet="tabContent"></ng-container>
+}
 
 <ng-template #tabContent let-homeIcon="homeIcon" let-label="label">
   <div class="tab-content">
+    @if (!searchMode) {
     <es-breadcrumbs
       class="breadcrumbFrame"
-      *ngIf="!searchMode"
       [createLink]="false"
       [showLanding]="false"
       (clickBreadcrumb)="selectBreadcrumb($event)"
       [home]="homeOverride ? homeOverride.label : (label | translate)"
       [homeIcon]="homeOverride ? homeOverride.icon : homeIcon"
     ></es-breadcrumbs>
-    <div *ngIf="searchMode" class="searchInputFrame">
+    } @if (searchMode) {
+    <div class="searchInputFrame">
       <form (ngSubmit)="search()" autocomplete="off">
         <mat-form-field floatLabel="always">
           <mat-label></mat-label>
@@ -47,6 +53,7 @@
         </mat-form-field>
       </form>
     </div>
+    }
 
     <es-node-entries-wrapper
       class="fileChooserList"
@@ -66,12 +73,15 @@
       (scrolled)="loadMore()"
     >
       <ng-template #empty>
-        <h5 class="noElements" *ngIf="!searchMode">
+        @if (!searchMode) {
+        <h5 class="noElements">
           {{ 'NO_MORE_ELEMENTS' | translate }}
         </h5>
-        <h5 class="noElements" *ngIf="searchMode">
+        } @if (searchMode) {
+        <h5 class="noElements">
           {{ 'NO_MATCHES' | translate }}
         </h5>
+        }
       </ng-template>
     </es-node-entries-wrapper>
   </div>

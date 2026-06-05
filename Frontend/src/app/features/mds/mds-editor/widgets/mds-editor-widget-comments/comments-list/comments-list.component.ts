@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { HOME_REPOSITORY, NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { OptionItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -29,6 +29,13 @@ import { isString } from 'lodash-es';
     ],
 })
 export class CommentsListComponent {
+    private commentsApi = inject(RestCommentsService);
+    private networkService = inject(NetworkService);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private iam = inject(RestIamService);
+    private toast = inject(Toast);
+
     public _node: Node;
     isGuest: boolean;
     user: User;
@@ -71,14 +78,7 @@ export class CommentsListComponent {
     @Output() changeComment = new EventEmitter<void>();
     dropdown = -1;
 
-    constructor(
-        private commentsApi: RestCommentsService,
-        private networkService: NetworkService,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private iam: RestIamService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isGuest = data.isGuest;
             if (!data.isGuest) {

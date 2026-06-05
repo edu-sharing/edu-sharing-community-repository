@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, signal } from '@angular/core';
+import { AfterViewInit, Component, signal, inject } from '@angular/core';
 import { AboutService } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { SpinnerComponent } from 'ngx-edu-sharing-ui';
@@ -17,9 +17,12 @@ import { ActivatedRoute, Params } from '@angular/router';
     imports: [CommonModule, RenderLegacyPageComponent, Render2PageComponent, SpinnerComponent],
 })
 export class RenderMainPageComponent implements AfterViewInit {
+    private about = inject(AboutService);
+    private route = inject(ActivatedRoute);
+
     renderer = signal<'legacy' | 'render2'>(null);
     private queryParams: Params;
-    constructor(private about: AboutService, private route: ActivatedRoute) {
+    constructor() {
         this.route.queryParams.subscribe((params) => (this.queryParams = params));
         return;
     }

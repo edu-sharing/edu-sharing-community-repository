@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { firstValueFrom, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -19,10 +19,8 @@ interface NetworkRepositories {
     providedIn: 'root',
 })
 export class NetworkService {
-    constructor(
-        private networkV1: NetworkV1Service,
-        private authentication: AuthenticationService,
-    ) {}
+    private networkV1 = inject(NetworkV1Service);
+    private authentication = inject(AuthenticationService);
 
     @shareReplayReturnValue()
     getRepositories(): Observable<Repository[]> {

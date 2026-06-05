@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AppService as AppServiceAbstract } from 'ngx-edu-sharing-ui';
 import { CordovaService } from './cordova.service';
 
@@ -6,9 +6,8 @@ declare var cordova: any;
 
 @Injectable({ providedIn: 'root' })
 export class AppService extends AppServiceAbstract {
-    constructor(private cordovaService: CordovaService) {
-        super();
-    }
+    private cordovaService = inject(CordovaService);
+
     isRunningApp(): boolean {
         return this.cordovaService.isRunningApp();
     }

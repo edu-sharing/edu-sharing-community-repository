@@ -1,15 +1,13 @@
 <mat-menu #menu="matMenu" class="mat-menu-template">
-  <button
-    mat-menu-item
-    *ngFor="let template of templates | keyvalue"
-    (click)="loadTemplate(template.key)"
-  >
+  @for (template of templates | keyvalue; track template) {
+  <button mat-menu-item (click)="loadTemplate(template.key)">
     {{ template.key }}
   </button>
+  }
 </mat-menu>
 
+@if (isNewTemplateDialogVisible) {
 <es-card
-  *ngIf="isNewTemplateDialogVisible"
   title="{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.NEW_BUTTON' | translate }}"
   (cancel)="closeNewTemplateDialog()"
   [buttons]="newTemplateDialogButtons"
@@ -29,6 +27,7 @@
     </mat-form-field>
   </div>
 </es-card>
+}
 
 <fieldset>
   <legend>{{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.GROUP_LABEL' | translate }}</legend>
@@ -45,9 +44,9 @@
       {{ 'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.LOAD_BUTTON' | translate }}
       <i esIcon="arrow_drop_down" class="drop-down-arrow"></i>
     </button>
+    @if (selectedTemplate && !templates[selectedTemplate].isDefault) {
     <button
       mat-raised-button
-      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
       (click)="confirmUpdateTemplate(selectedTemplate)"
       [disabled]="
         query === templates[selectedTemplate].query &&
@@ -59,16 +58,13 @@
           | translate : { template: selectedTemplate }
       }}
     </button>
-    <button
-      mat-raised-button
-      color="warn"
-      *ngIf="selectedTemplate && !templates[selectedTemplate].isDefault"
-      (click)="confirmDeleteTemplate(selectedTemplate)"
-    >
+    } @if (selectedTemplate && !templates[selectedTemplate].isDefault) {
+    <button mat-raised-button color="warn" (click)="confirmDeleteTemplate(selectedTemplate)">
       {{
         'ADMIN.BROWSER.LUCENE_TEMPLATE_MEMORY.DELETE_BUTTON'
           | translate : { template: selectedTemplate }
       }}
     </button>
+    }
   </div>
 </fieldset>

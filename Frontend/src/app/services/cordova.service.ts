@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, Injector, NgZone } from '@angular/core';
+import { Injectable, Injector, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, LoginInfo } from 'ngx-edu-sharing-api';
@@ -48,6 +48,14 @@ export type OAuthResult = {
 @Injectable({ providedIn: 'root' })
 // tslint:disable:no-console
 export class CordovaService {
+    private router = inject(Router);
+    private ngZone = inject(NgZone);
+    private http = inject(HttpClient);
+    private location = inject(Location);
+    private injector = inject(Injector);
+    private authenticationService = inject(AuthenticationService);
+    private events = inject(FrameEventsService);
+
     /**
      * cordova oauth storage
      */
@@ -103,15 +111,7 @@ export class CordovaService {
     /**
      * CONSTRUCTOR
      */
-    constructor(
-        private router: Router,
-        private ngZone: NgZone,
-        private http: HttpClient,
-        private location: Location,
-        private injector: Injector,
-        private authenticationService: AuthenticationService,
-        private events: FrameEventsService,
-    ) {
+    constructor() {
         const userAgent = navigator.userAgent;
         if (userAgent?.includes('ionic / edu-sharing-app')) {
             if (userAgent.includes('ios')) {

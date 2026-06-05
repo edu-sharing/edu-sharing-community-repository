@@ -1,64 +1,54 @@
-<ng-container [ngSwitch]="widgetType">
-  <ng-container *ngSwitchCase="'Custom'">
-    <ng-container
-      *ngTemplateOutlet="
-        customTemplate;
-        context: {
-          item: item,
-          node: node,
-          provideLabel: provideLabel,
-          forceText: forceText
-        }
-      "
-    >
-    </ng-container>
-  </ng-container>
-  <es-list-collection-info
-    *ngSwitchCase="'CollectionInfo'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-collection-info>
-  <es-list-text
-    *ngSwitchCase="'Text'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-text>
-  <es-list-counts
-    *ngSwitchCase="'NodeCounts'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-counts>
-  <es-list-node-assignment
-    *ngSwitchCase="'NodeAssignment'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-node-assignment>
-  <es-list-node-suggestion
-    *ngSwitchCase="'NodeSuggestion'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-node-suggestion>
-  <es-list-node-license
-    *ngSwitchCase="'NodeLicense'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-node-license>
-  <es-list-node-replication-source
-    *ngSwitchCase="'NodeReplicationSource'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-node-replication-source>
-  <es-list-node-workflow
-    *ngSwitchCase="'NodeWorkflow'"
-    [item]="item"
-    [node]="node"
-    [provideLabel]="provideLabel"
-  ></es-list-node-workflow>
+@switch (widgetType) { @case ('Custom') {
+<ng-container
+  *ngTemplateOutlet="
+    customTemplate;
+    context: {
+      item: item,
+      node: node,
+      provideLabel: provideLabel,
+      forceText: forceText
+    }
+  "
+>
 </ng-container>
+} @case ('CollectionInfo') {
+<es-list-collection-info
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-collection-info>
+} @case ('Text') {
+<es-list-text [item]="item" [node]="node" [provideLabel]="provideLabel"></es-list-text>
+} @case ('NodeCounts') {
+<es-list-counts [item]="item" [node]="node" [provideLabel]="provideLabel"></es-list-counts>
+} @case ('NodeAssignment') {
+<es-list-node-assignment
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-node-assignment>
+} @case ('NodeSuggestion') {
+<es-list-node-suggestion
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-node-suggestion>
+} @case ('NodeLicense') {
+<es-list-node-license
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-node-license>
+} @case ('NodeReplicationSource') {
+<es-list-node-replication-source
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-node-replication-source>
+} @case ('NodeWorkflow') {
+<es-list-node-workflow
+  [item]="item"
+  [node]="node"
+  [provideLabel]="provideLabel"
+></es-list-node-workflow>
+} }

@@ -14,6 +14,7 @@ import {
     signal,
     untracked,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -46,6 +47,11 @@ import { AiLabelComponent } from '../ai-label/ai-label.component';
     styleUrls: ['./image-wrapper.component.scss'],
 })
 export class ImageWrapperComponent implements OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private dialogsService = inject(DialogsService);
+    private sanitizer = inject(DomSanitizer);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     private readonly BASE_64_PREFIX: string = 'data:image/jpg;base64,';
     protected readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.IMAGE_WRAPPER.';
@@ -95,12 +101,7 @@ export class ImageWrapperComponent implements OnInit {
     imageProcessing: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private dialogsService: DialogsService,
-        private sanitizer: DomSanitizer,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         // listen to changes of the input variables (ensures that the image is created as a child of the widget node)
         effect((): void => {
             const parentId = this.uploadParentNodeId();

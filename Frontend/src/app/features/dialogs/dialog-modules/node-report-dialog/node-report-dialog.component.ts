@@ -4,9 +4,9 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
-    Inject,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -37,6 +37,15 @@ import { NodeReportDialogData } from 'ngx-rendering-service-lib';
     standalone: false,
 })
 export class NodeReportDialogComponent implements OnInit {
+    data = inject<NodeReportDialogData>(CARD_DIALOG_DATA);
+    private dialogRef = inject(CardDialogRef);
+    private authenticationService = inject(AuthenticationService);
+    private userService = inject(UserService);
+    private translate = inject(TranslateService);
+    private toast = inject(Toast);
+    private nodeApi = inject(NodeServiceUnwrapped);
+    private cdr = inject(ChangeDetectorRef);
+
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
 
@@ -46,16 +55,9 @@ export class NodeReportDialogComponent implements OnInit {
         email: new UntypedFormControl('', [Validators.email, Validators.required]),
     });
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodeReportDialogData,
-        private dialogRef: CardDialogRef,
-        private authenticationService: AuthenticationService,
-        private userService: UserService,
-        private translate: TranslateService,
-        private toast: Toast,
-        private nodeApi: NodeServiceUnwrapped,
-        private cdr: ChangeDetectorRef,
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.form.get('comment').clearValidators();
         this.form.get('reason').clearValidators();
         if (!data.showOptions) {

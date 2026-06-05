@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, NgZone, OnDestroy, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import {
     EventListener,
@@ -18,9 +18,8 @@ import { WIDGETS } from '../topic-page/shared/types/custom-definitions';
     selector: 'es-mds-embed',
     encapsulation: ViewEncapsulation.None,
     template: `
-        <ng-container *ngIf="!component">
-            Please append /&lt;component-name&gt; to your url
-        </ng-container>
+        @if (!component) { Please append /&lt;component-name&gt; to your url } @if (component ===
+        'mds') {
         <es-mds-editor-wrapper
             #mdsRef
             [embedded]="true"
@@ -28,25 +27,32 @@ import { WIDGETS } from '../topic-page/shared/types/custom-definitions';
             [currentValues]="data"
             [setId]="setId"
             [groupId]="groupId"
-            *ngIf="component === 'mds'"
         ></es-mds-editor-wrapper>
+        } @if (component === 'license') {
         <es-license-dialog-content
-            *ngIf="component === 'license'"
             #licenseRef
             [data]="{ kind: 'properties', properties: data }"
         ></es-license-dialog-content>
+        } @if (component === 'generic-widget') {
         <es-generic-widget
-            *ngIf="component === 'generic-widget'"
             [contextNodeId]="queryParams.contextNodeId"
             [widgetType]="queryParams.widgetType || WIDGETS.CONTENT_TEASER"
             [configOverwrite]="configOverwrite"
             [editMode]="queryParams.editMode === 'true'"
         ></es-generic-widget>
+        }
     `,
     styleUrls: ['embed-page.component.scss'],
     standalone: false,
 })
 export class EmbedPageComponent implements EventListener, OnDestroy {
+    private translations = inject(TranslationsService);
+    private mainNavService = inject(MainNavService);
+    private toast = inject(Toast);
+    private ngZone = inject(NgZone);
+    private route = inject(ActivatedRoute);
+    private event = inject(FrameEventsService);
+
     @ViewChild('mdsRef') mdsRef: MdsEditorWrapperComponent;
     @ViewChild('licenseRef') licenseRef: LicenseDialogContentComponent;
     readonly jsonConfig: any = {
@@ -62,14 +68,7 @@ export class EmbedPageComponent implements EventListener, OnDestroy {
     refresh: Boolean;
     private destroyed = new Subject<void>();
     queryParams: Params;
-    constructor(
-        private translations: TranslationsService,
-        private mainNavService: MainNavService,
-        private toast: Toast,
-        private ngZone: NgZone,
-        private route: ActivatedRoute,
-        private event: FrameEventsService,
-    ) {
+    constructor() {
         (window as any).ngEmbed = this;
         // disable the cookie info when in embedded context
         this.mainNavService.getCookieInfo().show = false;

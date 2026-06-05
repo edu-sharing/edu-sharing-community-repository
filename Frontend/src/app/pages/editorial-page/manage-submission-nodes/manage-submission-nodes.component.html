@@ -1,7 +1,9 @@
-<div class="empty" *ngIf="!files()?.length">
+@if (!files()?.length) {
+<div class="empty">
   {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
 </div>
-<div class="node-list" *ngIf="files()?.length">
+} @if (files()?.length) {
+<div class="node-list">
   @for (item of files(); track item) {
   <div
     tabindex="0"
@@ -16,3 +18,4 @@
   </div>
   }
 </div>
+}

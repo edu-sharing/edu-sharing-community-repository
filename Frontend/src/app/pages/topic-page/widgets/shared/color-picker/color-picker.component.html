@@ -1,5 +1,6 @@
 <!-- note: having ngx-colors-trigger and [(ngModel)] twice is necessary for the color picker
-           to work properly when combining both mat-button and ngx-colors -->
+to work properly when combining both mat-button and ngx-colors -->
+@if (palette.length > 0) {
 <button
   mat-button
   ngx-colors-trigger
@@ -13,7 +14,6 @@
   [hideTextInput]="true"
   [palette]="palette"
   [(ngModel)]="internalColor"
-  *ngIf="palette.length > 0"
 >
   <ngx-colors
     ngx-colors-trigger
@@ -21,7 +21,10 @@
     [(ngModel)]="internalColor"
     (change)="onColorChange()"
   ></ngx-colors>
-  <div *ngIf="colorLabel">
+  @if (colorLabel) {
+  <div>
     {{ colorLabel | translate }}
   </div>
+  }
 </button>
+}

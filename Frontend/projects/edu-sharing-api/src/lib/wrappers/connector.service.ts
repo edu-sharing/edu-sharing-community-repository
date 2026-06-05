@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
@@ -13,10 +13,8 @@ import { AuthenticationService } from './authentication.service';
     providedIn: 'root',
 })
 export class ConnectorService {
-    constructor(
-        private authentication: AuthenticationService,
-        private connectorV1: ConnectorV1Service,
-    ) {}
+    private authentication = inject(AuthenticationService);
+    private connectorV1 = inject(ConnectorV1Service);
 
     @shareReplayReturnValue()
     observeConnectorList({ repository = HOME_REPOSITORY } = {}): Observable<ConnectorList | null> {

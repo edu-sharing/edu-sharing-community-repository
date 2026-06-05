@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { OptionItem } from '../types/option-item';
 import { firstValueFrom } from 'rxjs';
@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
     standalone: false,
 })
 export class OptionTooltipPipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
+    private translate = inject(TranslateService);
 
     async transform(option: OptionItem, args: string[] = null) {
         return (

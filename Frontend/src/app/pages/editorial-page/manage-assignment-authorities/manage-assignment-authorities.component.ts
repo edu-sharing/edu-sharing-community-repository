@@ -1,4 +1,4 @@
-import { Component, computed, input, model } from '@angular/core';
+import { Component, computed, input, model, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { MatSelectChange } from '@angular/material/select';
@@ -17,6 +17,10 @@ type Role = 'ASSIGNEE' | 'COORDINATOR';
     imports: [SharedModule],
 })
 export class ManageAssignmentAuthoritiesComponent {
+    private translate = inject(TranslateService);
+    private authenticationService = inject(AuthenticationService);
+    nodeHelperService = inject(NodeHelperService);
+
     assignment = input.required<AssignmentBase>();
     authorities = model.required<Permission[]>();
     loginInfo = toSignal(this.authenticationService.observeLoginInfo());
@@ -27,11 +31,7 @@ export class ManageAssignmentAuthoritiesComponent {
     );
     readonly translateReady$ = new BehaviorSubject<boolean>(false);
 
-    constructor(
-        private translate: TranslateService,
-        private authenticationService: AuthenticationService,
-        public nodeHelperService: NodeHelperService,
-    ) {
+    constructor() {
         // dirty hack for https://github.com/angular/components/issues/7923
         this.translate.get('ANY').subscribe(() => this.translateReady$.next(true));
     }

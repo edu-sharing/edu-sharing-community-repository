@@ -1,4 +1,4 @@
-import { Component, effect, OnDestroy, signal, ViewChild } from '@angular/core';
+import { Component, effect, OnDestroy, signal, ViewChild, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
@@ -51,6 +51,19 @@ import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/ge
     imports: [SharedModule, TranslateModule, NgxExtendedPdfViewerModule, RenderWrapperComponent],
 })
 export class AssignmentSubmissionComponent implements OnDestroy {
+    private route = inject(ActivatedRoute);
+    private translate = inject(TranslateService);
+    private translationsService = inject(TranslationsService);
+    private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    editorialPageService = inject(EditorialPageService);
+    private repoUrlService = inject(RepoUrlService);
+    private pdfViewerService = inject(NgxExtendedPdfViewerService);
+    private toast = inject(Toast);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private assignmentService = inject(AssignmentV1Service);
+    private dialogs = inject(DialogsService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     @ViewChild(NgxExtendedPdfViewerComponent)
     pdfViewer: NgxExtendedPdfViewerComponent;
     @ViewChild(NodeEntriesWrapperComponent)
@@ -74,19 +87,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     selectedSubmissionFileUrl = signal<string>(undefined);
     corrected = signal(0);
     private submission = signal<Submission>(null);
-    constructor(
-        private route: ActivatedRoute,
-        private translate: TranslateService,
-        private translationsService: TranslationsService,
-        private editorialBreadcrumbService: EditorialBreadcrumbService,
-        public editorialPageService: EditorialPageService,
-        private repoUrlService: RepoUrlService,
-        private pdfViewerService: NgxExtendedPdfViewerService,
-        private toast: Toast,
-        public editorialSidebarService: EditorialSidebarService,
-        private assignmentService: AssignmentV1Service,
-        private dialogs: DialogsService,
-    ) {
+    constructor() {
         interval(500)
             .pipe(
                 takeUntil(this.destroyed$),
@@ -129,9 +130,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                         callback: () => this.selectedCorrectedFile.set(null),
                     },
                     {
-                        title: new AuthorityNamePipe(this.translate).transform(
-                            this.submission().assignee,
-                        ),
+                        title: this.authorityNamePipe.transform(this.submission().assignee),
                     },
                 ]);
             } else if (this.assignment()) {

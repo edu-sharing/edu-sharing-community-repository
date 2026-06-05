@@ -1,4 +1,4 @@
-import { Component, QueryList, ViewChildren } from '@angular/core';
+import { Component, QueryList, ViewChildren, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { filter, first, map } from 'rxjs/operators';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
@@ -18,6 +18,13 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
     standalone: false,
 })
 export class MdsEditorCoreComponent {
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    mdsEditorCommonService = inject(MdsEditorCommonService);
+    dialogs = inject(DialogsService);
+    toast = inject(Toast);
+    eduSharingLlmService = inject(EduSharingLlmService);
+    auth = inject(AuthenticationService);
+
     @ViewChildren('view') viewRef: QueryList<MdsEditorViewComponent>;
 
     views: MdsView[];
@@ -26,14 +33,7 @@ export class MdsEditorCoreComponent {
     readonly editorMode: EditorMode;
     readonly shouldShowExtendedWidgets$: BehaviorSubject<boolean>;
 
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        public mdsEditorCommonService: MdsEditorCommonService,
-        public dialogs: DialogsService,
-        public toast: Toast,
-        public eduSharingLlmService: EduSharingLlmService,
-        public auth: AuthenticationService,
-    ) {
+    constructor() {
         this.shouldShowExtendedWidgets$ = this.mdsEditorInstance.shouldShowExtendedWidgets$;
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.mdsEditorInstance.mdsInitDone.subscribe(() => this.init());

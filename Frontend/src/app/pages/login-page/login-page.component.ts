@@ -12,6 +12,7 @@ import {
     signal,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
@@ -40,7 +41,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo, OAuthEntry, PrimaryLogin } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
@@ -65,6 +66,23 @@ type WafyEntry = {
     standalone: false,
 })
 export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
+    private connector = inject(RestConnectorService);
+    private toast = inject(Toast);
+    private dialogs = inject(DialogsService);
+    private platformLocation = inject(PlatformLocation);
+    private ui = inject(UIService);
+    private router = inject(Router);
+    private http = inject(HttpClient);
+    private translations = inject(TranslationsService);
+    private configService = inject(ConfigurationService);
+    private route = inject(ActivatedRoute);
+    bridge = inject(BridgeService);
+    private cordova = inject(CordovaService);
+    private authentication = inject(AuthenticationService);
+    private themeService = inject(ThemeService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNav = inject(MainNavService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('faConfirmRef') faConfirmRef: TemplateRef<unknown>;
@@ -78,7 +96,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     currentProvider: any;
     disabled = false;
     isSafeLogin = false;
-    filteredProviders: any;
+    filteredProviders: Observable<any[]>;
     isLoading = true;
     loginUrl: any;
     password = '';
@@ -109,24 +127,9 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     // @TODO change model
     registeredOauthProviders: OAuthEntry[];
 
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private dialogs: DialogsService,
-        private platformLocation: PlatformLocation,
-        private ui: UIService,
-        private router: Router,
-        private http: HttpClient,
-        private translations: TranslationsService,
-        private configService: ConfigurationService,
-        private route: ActivatedRoute,
-        public bridge: BridgeService,
-        private cordova: CordovaService,
-        private authentication: AuthenticationService,
-        private themeService: ThemeService,
-        private loadingScreen: LoadingScreenService,
-        private mainNav: MainNavService,
-    ) {
+    constructor() {
+        const configService = this.configService;
+
         this.queryParams = toSignal(this.route.queryParams, { initialValue: {} as Params });
         // reset the theme in case user was in safe previously
         this.themeService.initWithDefaults();

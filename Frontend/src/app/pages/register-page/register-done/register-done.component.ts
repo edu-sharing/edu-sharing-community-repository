@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { ConfigurationService, RestLocatorService } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { PlatformLocation } from '@angular/common';
@@ -15,6 +15,15 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class RegisterDoneComponent {
+    private toast = inject(Toast);
+    private register = inject(RegisterService);
+    private platformLocation = inject(PlatformLocation);
+    private config = inject(ConfigurationService);
+    private cordova = inject(CordovaService);
+    private changes = inject(ChangeDetectorRef);
+    private locator = inject(RestLocatorService);
+    private router = inject(Router);
+
     @Output() modify = new EventEmitter<void>();
     @Output() stateChanged = new EventEmitter<void>();
     @Input() inputState: string;
@@ -64,16 +73,7 @@ export class RegisterDoneComponent {
             );
         }
     }
-    constructor(
-        private toast: Toast,
-        private register: RegisterService,
-        private platformLocation: PlatformLocation,
-        private config: ConfigurationService,
-        private cordova: CordovaService,
-        private changes: ChangeDetectorRef,
-        private locator: RestLocatorService,
-        private router: Router,
-    ) {
+    constructor() {
         setTimeout(() => this.checkStatus(), RegisterDoneComponent.STATUS_INTERVAL);
     }
 

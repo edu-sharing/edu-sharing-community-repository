@@ -1,80 +1,80 @@
-<ng-container *ngIf="!selectedCorrectedFile()">
-  <div class="list">
-    <es-node-entries-wrapper
-      [primaryInstance]="true"
-      [dataSource]="dataSource"
-      [checkbox]="false"
-      [elementInteractionType]="InteractionType.Emitter"
-      [scope]="Scope.EditorialPage"
-      singleClickHint="static"
-      (clickItem)="select($event.element)"
-      [columns]="columns"
-      [displayType]="editorialPageService.displayType()"
+@if (!selectedCorrectedFile()) {
+<div class="list">
+  <es-node-entries-wrapper
+    [primaryInstance]="true"
+    [dataSource]="dataSource"
+    [checkbox]="false"
+    [elementInteractionType]="InteractionType.Emitter"
+    [scope]="Scope.EditorialPage"
+    singleClickHint="static"
+    (clickItem)="select($event.element)"
+    [columns]="columns"
+    [displayType]="editorialPageService.displayType()"
+  >
+    <ng-template #empty>
+      <div class="empty">
+        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
+      </div>
+    </ng-template>
+  </es-node-entries-wrapper>
+  <div class="actions">
+    <span
+      >{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.CORRECTED' | translate }}: {{ corrected() }} /
+      {{ dataSource.getTotal() }}</span
     >
-      <ng-template #empty>
-        <div class="empty">
-          {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.EMPTY' | translate }}
-        </div>
-      </ng-template>
-    </es-node-entries-wrapper>
-    <div class="actions">
-      <span
-        >{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.CORRECTED' | translate }}: {{ corrected() }} /
-        {{ dataSource.getTotal() }}</span
-      >
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="
-          assignment()?.status === 'CORRECTED' ||
-          assignment()?.status === 'FINISHED' ||
-          assignment()?.status === 'CANCELED'
-        "
-        (click)="finishAll()"
-      >
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}
-      </button>
-    </div>
-  </div>
-</ng-container>
-<ng-container *ngIf="selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined">
-  <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
-  <mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
-    <mat-tab
-      *ngIf="
-        selectedSubmissionFileUrl() && selectedCorrectedFile().correction?.mediatype === 'file-pdf'
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="
+        assignment()?.status === 'CORRECTED' ||
+        assignment()?.status === 'FINISHED' ||
+        assignment()?.status === 'CANCELED'
       "
+      (click)="finishAll()"
     >
-      <ng-template mat-tab-label>
-        <i esIcon="check"></i>
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
-      </ng-template>
-      <ngx-extended-pdf-viewer
-        *ngIf="tabSelected() === 0"
-        [src]="selectedSubmissionFileUrl()"
-        [height]="'auto'"
-        [language]="language"
-        [textLayer]="true"
-        [customToolbar]="additionalButtons"
-        [zoom]="'page-fit'"
-        (annotationEditorEvent)="changeAnnotation()"
-      ></ngx-extended-pdf-viewer>
-    </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <i esIcon="preview"></i>
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
-      </ng-template>
-      <es-render-wrapper-component
-        *ngIf="tabSelected() === 1 && selectedCorrectedFile().content"
-        [showTopbar]="false"
-        [showMetadata]="false"
-        [nodeId]="selectedCorrectedFile().content.ref.id"
-        [repository]="selectedCorrectedFile().content.ref.repo"
-      ></es-render-wrapper-component>
-    </mat-tab>
-  </mat-tab-group>
-</ng-container>
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}
+    </button>
+  </div>
+</div>
+} @if (selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined) {
+<!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
+<mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
+  @if ( selectedSubmissionFileUrl() && selectedCorrectedFile().correction?.mediatype === 'file-pdf'
+  ) {
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="check"></i>
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
+    </ng-template>
+    @if (tabSelected() === 0) {
+    <ngx-extended-pdf-viewer
+      [src]="selectedSubmissionFileUrl()"
+      [height]="'auto'"
+      [language]="language"
+      [textLayer]="true"
+      [customToolbar]="additionalButtons"
+      [zoom]="'page-fit'"
+      (annotationEditorEvent)="changeAnnotation()"
+    ></ngx-extended-pdf-viewer>
+    }
+  </mat-tab>
+  }
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="preview"></i>
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
+    </ng-template>
+    @if (tabSelected() === 1 && selectedCorrectedFile().content) {
+    <es-render-wrapper-component
+      [showTopbar]="false"
+      [showMetadata]="false"
+      [nodeId]="selectedCorrectedFile().content.ref.id"
+      [repository]="selectedCorrectedFile().content.ref.repo"
+    ></es-render-wrapper-component>
+    }
+  </mat-tab>
+</mat-tab-group>
+}
 
 <ng-template #additionalButtons>
   <div

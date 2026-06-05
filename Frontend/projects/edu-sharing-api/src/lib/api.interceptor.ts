@@ -5,7 +5,7 @@ import {
     HttpRequest,
     HttpResponseBase,
 } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiRequestConfiguration } from './api-request-configuration';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
@@ -15,15 +15,14 @@ import { ApiStateService } from './api-state.service';
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
+    private apiRequestConfiguration = inject(ApiRequestConfiguration);
+    private configuration = inject(EduSharingApiConfiguration);
+    private apiStateService = inject(ApiStateService);
+
     /**
      * proxy target, only non-null in dev mode, will be set via interceptor
      */
     static proxyTarget: string | null;
-    constructor(
-        private apiRequestConfiguration: ApiRequestConfiguration,
-        private configuration: EduSharingApiConfiguration,
-        private apiStateService: ApiStateService,
-    ) {}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // We filter for requests that actually target the API since this interceptor will be called

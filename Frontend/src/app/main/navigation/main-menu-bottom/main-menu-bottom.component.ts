@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ConfigEntry } from '../../../services/node-helper.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
@@ -14,7 +14,9 @@ export class MainMenuBottomComponent {
 
     entries$: Observable<ConfigEntry[]>;
 
-    constructor(mainMenuEntries: MainMenuEntriesService) {
+    constructor() {
+        const mainMenuEntries = inject(MainMenuEntriesService);
+
         this.entries$ = mainMenuEntries.entries$;
     }
 }

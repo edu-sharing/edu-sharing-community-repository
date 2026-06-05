@@ -1,5 +1,4 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
 
 @Pipe({
     name: 'replaceChars',
@@ -20,5 +19,4 @@ export class ReplaceCharsPipe implements PipeTransform {
         }
         return value;
     }
-    constructor(private translate: TranslateService) {}
 }

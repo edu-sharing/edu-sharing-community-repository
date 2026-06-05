@@ -1,14 +1,15 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Group, RestConstants, User } from 'ngx-edu-sharing-api';
 import { VCard } from '../util/VCard';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'authorityName',
     standalone: false,
 })
 export class AuthorityNamePipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
+    private translate = inject(TranslateService);
 
     transform(authority: User | Group | any, args = { avatarShortcut: false }): string {
         if (!authority) return 'invalid';

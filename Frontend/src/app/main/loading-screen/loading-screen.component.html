@@ -1,9 +1,7 @@
 <!-- Initially show the non-animated image to prevent a short flicker. -->
-<img
-  *ngIf="!animationLoaded"
-  [src]="'assets/images/edu-sharing-loading.svg' | esAssetsPath"
-  alt=""
-/>
+@if (!animationLoaded) {
+<img [src]="'assets/images/edu-sharing-loading.svg' | esAssetsPath" alt="" />
+}
 
 <img
   [hidden]="!animationLoaded"

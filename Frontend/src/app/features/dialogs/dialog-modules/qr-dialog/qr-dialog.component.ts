@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
@@ -14,12 +14,10 @@ export interface QrDialogData {
     standalone: false,
 })
 export class QrDialogComponent implements OnInit {
-    url: string;
+    data = inject<QrDialogData>(CARD_DIALOG_DATA);
+    private nodeHelper = inject(NodeHelperService);
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: QrDialogData,
-        private nodeHelper: NodeHelperService,
-    ) {}
+    url: string;
 
     ngOnInit(): void {
         this.url = this.nodeHelper.getNodeUrl(this.data.node);

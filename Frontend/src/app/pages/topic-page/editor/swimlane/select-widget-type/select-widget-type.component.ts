@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { EduSharingUiCommonModule, Helper } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -21,13 +21,14 @@ import { WidgetSelectOption } from '../../../shared/types/widget-select-option';
     styleUrls: ['./select-widget-type.component.scss'],
 })
 export class SelectWidgetTypeComponent implements OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private dialogs = inject(DialogsService);
+
     @Input() grid: GridTile[] = [];
     @Input() tileIndex: number;
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
 
     widgetTypeOptions: WidgetSelectOption[] = WIDGET_TYPE_OPTIONS;
-
-    constructor(private aiHelperService: AiHelperService, private dialogs: DialogsService) {}
 
     async ngOnInit(): Promise<void> {
         const [hasAI, hasRendering2] = await Promise.all([

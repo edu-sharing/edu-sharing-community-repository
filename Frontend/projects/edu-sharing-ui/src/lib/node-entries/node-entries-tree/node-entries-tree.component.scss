@@ -8,7 +8,7 @@ $rowMinHeight: 48px;
     &.is-loading {
         width: 100%;
     }
-    --mdc-checkbox-state-layer-size: 28px;
+    --mat-checkbox-state-layer-size: 28px;
 }
 
 .dropdown-dummy {
@@ -16,7 +16,7 @@ $rowMinHeight: 48px;
 }
 
 :host ::ng-deep .search-field {
-    --mdc-outlined-text-field-container-shape: 28px;
+    --mat-form-field-outlined-container-shape: 28px;
 }
 
 .tree-toolbar {

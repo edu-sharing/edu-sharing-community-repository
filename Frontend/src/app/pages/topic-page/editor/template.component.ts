@@ -25,6 +25,7 @@ import {
     ViewChild,
     ViewChildren,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
@@ -37,6 +38,7 @@ import {
     NodeEntries,
     ParentEntries,
     RestConstants as ApiRestConstants,
+    SearchService,
 } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
@@ -212,6 +214,27 @@ import { PreviewSidebarService } from '../../../features/editorial-sidebar/previ
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private clipboard = inject(Clipboard);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private elementRef = inject(ElementRef);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private mainNavService = inject(MainNavService);
+    private mdsService = inject(MdsService);
+    private optionsHelperService = inject(OptionsHelperDataService);
+    private platformLocation = inject(PlatformLocation);
+    private previewSidebarService = inject(PreviewSidebarService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private searchFieldService = inject(SearchFieldService);
+    private topicPageEventsService = inject(TopicPageEventsService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private translate = inject(TranslateService);
+    private translationsService = inject(TranslationsService);
+    private nodeHelperService = inject(NodeHelperService);
+
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
     )?.value;
@@ -226,28 +249,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private clipboard: Clipboard,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private elementRef: ElementRef,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private mainNavService: MainNavService,
-        private mdsService: MdsService,
-        private nodeHelperService: NodeHelperService,
-        private optionsHelperService: OptionsHelperDataService,
-        private platformLocation: PlatformLocation,
-        private previewSidebarService: PreviewSidebarService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private searchFieldService: SearchFieldService,
-        private topicPageEventsService: TopicPageEventsService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
-        private translationsService: TranslationsService,
-    ) {
+    constructor() {
         // listening to changes on the page variant node
         effect((): void => {
             this.pageVariantNode();

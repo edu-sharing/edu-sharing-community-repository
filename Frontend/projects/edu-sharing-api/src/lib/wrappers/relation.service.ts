@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { RelationV1Service } from '../api/services/relation-v-1.service';
 import { HOME_REPOSITORY } from '../constants';
 import { Observable } from 'rxjs';
@@ -8,7 +8,8 @@ import { NodeRelationData } from '../api/models/node-relation-data';
     providedIn: 'root',
 })
 export class RelationService {
-    constructor(private relationV1Service: RelationV1Service) {}
+    private relationV1Service = inject(RelationV1Service);
+
     getRelations(
         nodeId: string,
         { repository = HOME_REPOSITORY } = {},

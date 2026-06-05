@@ -1,4 +1,4 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, inject, Input } from '@angular/core';
 import { EditorBulkMode, EditorMode } from '../types/types';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsEditorInstanceService, Widget } from './mds-editor-instance.service';
@@ -10,11 +10,10 @@ export abstract class MdsEditorWidgetCore {
     readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
     readonly editorMode: EditorMode;
     readonly editorBulkMode: EditorBulkMode;
+    public mdsEditorInstance = inject(MdsEditorInstanceService);
+    protected translate = inject(TranslateService);
 
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        protected translate: TranslateService,
-    ) {
+    constructor() {
         this.editorMode = this.mdsEditorInstance.editorMode;
         this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
     }

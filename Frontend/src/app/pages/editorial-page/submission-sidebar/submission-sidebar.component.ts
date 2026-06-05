@@ -1,4 +1,4 @@
-import { Component, computed, effect, model, signal } from '@angular/core';
+import { Component, computed, effect, model, signal, inject } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -62,6 +62,13 @@ export type SubmissionConfig = {
     providers: [NodeEntriesService, TreeNodeService],
 })
 export class SubmissionSidebarComponent {
+    editorialSidebarService = inject(EditorialSidebarService);
+    private translateService = inject(TranslateService);
+    private platformLocation = inject(PlatformLocation);
+    private assignmentV1Service = inject(AssignmentV1Service);
+    private commentV1Service = inject(CommentV1Service);
+    private formBuilder = inject(FormBuilder);
+
     //@ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
     readonly editorConfig = {
         ...AssignmentEditorConfig,
@@ -101,14 +108,7 @@ export class SubmissionSidebarComponent {
     readonly validationStatus = new ListItem('SUBMISSION', 'validationStatus');
     readonly submissionDate = new ListItem('SUBMISSION', 'submissionDate');
     readonly returnDate = new ListItem('SUBMISSION', 'returnDate');
-    constructor(
-        public editorialSidebarService: EditorialSidebarService,
-        private translateService: TranslateService,
-        private platformLocation: PlatformLocation,
-        private assignmentV1Service: AssignmentV1Service,
-        private commentV1Service: CommentV1Service,
-        private formBuilder: FormBuilder,
-    ) {
+    constructor() {
         this.submitFormGroup = this.formBuilder.group({
             submitComment: ['', [Validators.required]],
         });

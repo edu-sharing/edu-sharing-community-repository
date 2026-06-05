@@ -1,4 +1,5 @@
-<div *ngIf="initialized(); else loadingSpinner">
+@if (initialized()) {
+<div>
   <!-- content teaser entries -->
   <es-node-entries
     [blacklistedNodeIds]="blacklistedNodeIds"
@@ -18,10 +19,9 @@
     (totalSearchResultCountChanged)="changeTotalSearchResultCount($event)"
     (visibleNodesChanged)="changeVisibleNodes($event)"
   ></es-node-entries>
-
   <!-- color + configuration buttons -->
+  @if (editMode()) {
   <es-widget-configuration-buttons
-    *ngIf="editMode()"
     [ariaLabel]="'TOPIC_PAGE.WIDGET.CONTENT_TEASER.CONFIG_ARIA' | translate"
     [(layout)]="layout"
     [layoutOptions]="layoutOptions"
@@ -40,7 +40,8 @@
     (optionOneClicked)="openRepoContentUrl()"
     (optionTwoClicked)="embedWidget()"
   ></es-widget-configuration-buttons>
+  }
 </div>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}

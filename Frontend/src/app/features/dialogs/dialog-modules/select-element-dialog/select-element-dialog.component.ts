@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Inject, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import {
     HOME_REPOSITORY,
     IamV1Service,
@@ -21,14 +21,17 @@ import { SelectElementDialogData, SelectElementDialogResult } from './select-ele
     styleUrls: ['./select-element-dialog.component.scss'],
 })
 export class SelectElementDialogComponent implements AfterViewInit, OnDestroy {
+    data = inject<SelectElementDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<SelectElementDialogData, SelectElementDialogResult>>(CardDialogRef);
+    private iamApi = inject(IamV1Service);
+    private shortcutEntriesService = inject(ShortcutEntriesService);
+
     firstElement: boolean = false;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: SelectElementDialogData,
-        private dialogRef: CardDialogRef<SelectElementDialogData, SelectElementDialogResult>,
-        private iamApi: IamV1Service,
-        private shortcutEntriesService: ShortcutEntriesService,
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.firstElement = data.firstElement;
     }
 

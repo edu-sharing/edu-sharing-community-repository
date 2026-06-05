@@ -1,12 +1,16 @@
-<div class="childobject-wrapper" *ngIf="isSupported && mdsEditorValues.editorMode !== 'viewer'">
-  <div class="loading" *ngIf="loading$ | async">
+@if (isSupported && mdsEditorValues.editorMode !== 'viewer') {
+<div class="childobject-wrapper">
+  @if (loading$ | async) {
+  <div class="loading">
     <es-spinner-small [diameter]="30"></es-spinner-small>
   </div>
+  }
   <es-mds-editor-widget-container [label]="'MDS.ADD_CHILD_OBJECT' | translate">
     <div class="group">
       <label>{{ 'MDS.ADD_CHILD_OBJECT_DESCRIPTION' | translate }}</label>
       <div cdkDropList class="childobject-list" (cdkDropListDropped)="drop($event)">
-        <div class="childobject-entry" cdkDrag *ngFor="let child of children; let pos = index">
+        @for (child of children; track child; let pos = $index) {
+        <div class="childobject-entry" cdkDrag>
           <div class="icon"><img [src]="child.icon" /></div>
           <div class="name">{{ child.name }}</div>
           <button mat-icon-button class="license" (click)="editLicense(child)">
@@ -19,16 +23,20 @@
             <i esIcon="delete"></i>
           </button>
         </div>
+        }
         <button mat-button color="primary" class="add" (click)="openUploadSelectDialog()">
           <i esIcon="add"></i>
           {{ 'ADD' | translate }}
         </button>
       </div>
-      <div class="save" *ngIf="mdsEditorValues.editorMode === 'inline' && (hasChanges | async)">
+      @if (mdsEditorValues.editorMode === 'inline' && (hasChanges | async)) {
+      <div class="save">
         <button mat-flat-button color="primary" (click)="forceSave()">
           {{ 'SAVE' | translate }}
         </button>
       </div>
+      }
     </div>
   </es-mds-editor-widget-container>
 </div>
+}

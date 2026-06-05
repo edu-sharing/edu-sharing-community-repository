@@ -1,5 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
 
@@ -10,6 +10,8 @@ import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
     providedIn: 'root',
 })
 export class ApiRequestConfiguration {
+    private apiConfiguration = inject(EduSharingApiConfiguration);
+
     private authForNextRequest: string | null = null;
     private code2FaForNextRequest: string | null = null;
     private _locale: string | null = null;
@@ -17,8 +19,6 @@ export class ApiRequestConfiguration {
 
     /** Emits each time, an API request is performed. */
     readonly apiRequest = new EventEmitter<void>();
-
-    constructor(private apiConfiguration: EduSharingApiConfiguration) {}
 
     setLocale(locale: string): void {
         this._locale = locale;

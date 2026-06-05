@@ -6,6 +6,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -26,6 +27,7 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeImageSizePipe,
+    NodePersonNamePipe,
     TranslationsModule,
     UIConstants,
     VCard,
@@ -80,6 +82,19 @@ interface Stats {
     imports: [SharedModule, WorkspaceMetadataBlockComponent],
 })
 export class WorkspaceMetadataComponent implements OnInit {
+    private translate = inject(TranslateService);
+    private config = inject(ConfigService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private formatDatePipe = inject(FormatDatePipe);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private uiService = inject(UIService);
+    private iamApi = inject(RestIamService);
+    private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private searchApi = inject(RestSearchService);
+    private usageApi = inject(RestUsageService);
+
     private _canvas: ElementRef<HTMLCanvasElement>;
     private currentChart: Chart<ChartType, number[], string>;
     private canvasObserver: ResizeObserver;
@@ -137,18 +152,7 @@ export class WorkspaceMetadataComponent implements OnInit {
     private usages: Usage[];
     private nodeSubject = new BehaviorSubject<Node>(null);
 
-    constructor(
-        private translate: TranslateService,
-        private config: ConfigService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private uiService: UIService,
-        private iamApi: RestIamService,
-        private nodeApi: RestNodeService,
-        private nodeService: NodeService,
-        private searchApi: RestSearchService,
-        private usageApi: RestUsageService,
-    ) {
+    constructor() {
         this.canvasObserver = new ResizeObserver((entries) => {
             this.drawBarChart();
         });
@@ -318,9 +322,9 @@ export class WorkspaceMetadataComponent implements OnInit {
         //data["creator"]=node.properties[RestConstants.CM_CREATOR];
         data.creator = ConfigurationHelper.getPersonWithConfigDisplayName(
             node.createdBy,
-            this.config,
+            this.nodePersonNamePipe,
         );
-        data.createDate = new FormatDatePipe(this.translate).transform(node.createdAt);
+        data.createDate = this.formatDatePipe.transform(node.createdAt);
         data.duration = DurationHelper.getDurationFormatted(
             node.properties[RestConstants.LOM_PROP_TECHNICAL_DURATION]?.[0],
         );
@@ -334,7 +338,7 @@ export class WorkspaceMetadataComponent implements OnInit {
         data.mimetype = node.mimetype;
         data.size = node.size;
         if (node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL]) {
-            data.exifDate = new FormatDatePipe(this.translate).transform(
+            data.exifDate = this.formatDatePipe.transform(
                 node.properties[RestConstants.EXIF_PROP_DATE_TIME_ORIGINAL][0],
             );
         }

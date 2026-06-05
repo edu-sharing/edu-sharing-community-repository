@@ -10,6 +10,7 @@ import {
     SimpleChanges,
     ViewChildren,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
@@ -40,6 +41,14 @@ import { BehaviorSubject } from 'rxjs';
     standalone: false,
 })
 export class MdsViewerComponent implements OnChanges {
+    private mdsService = inject(MdsService);
+    private mdsViewerService = inject(MdsViewerService);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private injector = inject(Injector);
+    private containerRef = inject(ViewContainerRef);
+    private sanitizer = inject(DomSanitizer);
+    private viewInstance = inject(ViewInstanceService);
+
     @ViewChildren('container') container: QueryList<ElementRef>;
 
     @Input() mdsEditorInstanceService: any;
@@ -72,16 +81,6 @@ export class MdsViewerComponent implements OnChanges {
     get headingLevel() {
         return this.viewInstance.headingLevel;
     }
-
-    constructor(
-        private mdsService: MdsService,
-        private mdsViewerService: MdsViewerService,
-        private factoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        private containerRef: ViewContainerRef,
-        private sanitizer: DomSanitizer,
-        private viewInstance: ViewInstanceService,
-    ) {}
 
     getGroup() {
         return this.mds.groups.find((g: any) => g.id == this.groupId);

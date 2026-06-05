@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, NgZone, OnInit, Output, inject } from '@angular/core';
 import { LtiPlatformService, Node, Tool } from 'ngx-edu-sharing-api';
 import { DialogButton } from '../../../util/dialog-button';
 import { RestNodeService } from '../../../core-module/core.module';
@@ -11,6 +11,11 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     standalone: false,
 })
 export class CreateLtitoolComponent implements OnInit {
+    private ngZone = inject(NgZone);
+    private nodeService = inject(RestNodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private ltiPlatformService = inject(LtiPlatformService);
+
     public _tool: Tool;
     public _parent: Node;
     buttons: DialogButton[];
@@ -19,12 +24,7 @@ export class CreateLtitoolComponent implements OnInit {
     public _name = '';
     nodes: Node[] = [];
 
-    constructor(
-        private ngZone: NgZone,
-        private nodeService: RestNodeService,
-        private nodeHelper: NodeHelperService,
-        private ltiPlatformService: LtiPlatformService,
-    ) {
+    constructor() {
         this.buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.doCancel()),
             new DialogButton('CREATE', { color: 'primary' }, () => this.doCreate()),

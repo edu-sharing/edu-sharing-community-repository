@@ -2,7 +2,7 @@ import { LtiPlatformV13Service } from '../api/services';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { Tools } from '../api/models/tools';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService } from './authentication.service';
@@ -14,10 +14,8 @@ import { RestConstants } from '../rest-constants';
     providedIn: 'root',
 })
 export class LtiPlatformService {
-    constructor(
-        private authentication: AuthenticationService,
-        private ltiPlatformService: LtiPlatformV13Service,
-    ) {}
+    private authentication = inject(AuthenticationService);
+    private ltiPlatformService = inject(LtiPlatformV13Service);
 
     @shareReplayReturnValue()
     getTools(): Observable<Tools | null> {

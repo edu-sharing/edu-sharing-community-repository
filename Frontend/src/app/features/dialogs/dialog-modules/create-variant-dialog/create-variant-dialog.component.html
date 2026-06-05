@@ -2,22 +2,20 @@
   <mat-label for="variantName">{{ 'NODE_VARIANT.NEW_VARIANT' | translate }}</mat-label>
   <input matInput type="text" id="variantName" [(ngModel)]="variantName" />
 </mat-form-field>
+@if (licenseWarning) {
 <es-info-message
-  *ngIf="licenseWarning"
   mode="warning"
   message="{{ 'NODE_VARIANT.WARNING.' + licenseWarning | translate }}"
 >
   <div>
-    <button
-      mat-button
-      color="primary"
-      *ngIf="getLicenseUrl() | async as url"
-      (click)="openLicense(url)"
-    >
+    @if (getLicenseUrl() | async; as url) {
+    <button mat-button color="primary" (click)="openLicense(url)">
       {{ 'NODE_VARIANT.WARNING.LINK' | translate }}
     </button>
+    }
   </div>
 </es-info-message>
+}
 <div class="breadcrumb-style">
   <div class="group-left">
     <div class="breadcrumb-info">{{ 'NODE_VARIANT.BREADCRUMB_INFO' | translate }}</div>

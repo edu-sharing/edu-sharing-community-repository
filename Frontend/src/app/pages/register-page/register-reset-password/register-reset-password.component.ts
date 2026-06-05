@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Params, Router } from '@angular/router';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
@@ -12,6 +12,10 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class RegisterResetPasswordComponent {
+    private toast = inject(Toast);
+    private register = inject(RegisterService);
+    private router = inject(Router);
+
     @Output() stateChanged = new EventEmitter<void>();
     public new_password = '';
     @Input() params: Params;
@@ -44,5 +48,4 @@ export class RegisterResetPasswordComponent {
             },
         );
     }
-    constructor(private toast: Toast, private register: RegisterService, private router: Router) {}
 }

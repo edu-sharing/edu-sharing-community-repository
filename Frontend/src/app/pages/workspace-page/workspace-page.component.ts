@@ -8,6 +8,7 @@ import {
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -99,6 +100,41 @@ type NodeWrapper = { node: Node };
     standalone: false,
 })
 export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
+    private appContainer = inject(AppContainerService);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private card = inject(CardService);
+    private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
+    private connectors = inject(RestConnectorsService);
+    private dialogs = inject(DialogsService);
+    private event = inject(FrameEventsService);
+    private iam = inject(RestIamService);
+    private loadingScreen = inject(LoadingScreenService);
+    private localEvents = inject(LocalEventsService);
+    private mainNavService = inject(MainNavService);
+    private mds = inject(MdsService);
+    private ngZone = inject(NgZone);
+    private applicationRef = inject(ApplicationRef);
+    private node = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private optionsHelperService = inject(OptionsHelperService);
+    private searchField = inject(SearchFieldService);
+    private session = inject(SessionStorageService);
+    private storage = inject(TemporaryStorageService);
+    private userService = inject(UserService);
+    private toast = inject(Toast);
+    private toolService = inject(RestToolService);
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+    private configService = inject(ConfigService);
+    private themeService = inject(ThemeService);
+    private ui = inject(UIService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    workspace = inject(WorkspaceService);
+
     private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [
         RestConstants.USERHOME,
@@ -186,42 +222,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     private readonly destroyed$ = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
-    constructor(
-        private appContainer: AppContainerService,
-        private breadcrumbsService: BreadcrumbsService,
-        private card: CardService,
-        private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private dialogs: DialogsService,
-        private event: FrameEventsService,
-        private iam: RestIamService,
-        private loadingScreen: LoadingScreenService,
-        private localEvents: LocalEventsService,
-        private mainNavService: MainNavService,
-        private mds: MdsService,
-        private ngZone: NgZone,
-        private applicationRef: ApplicationRef,
-        private node: RestNodeService,
-        private nodeService: NodeService,
-        private nodeHelper: NodeHelperService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private optionsHelperService: OptionsHelperService,
-        private searchField: SearchFieldService,
-        private session: SessionStorageService,
-        private storage: TemporaryStorageService,
-        private userService: UserService,
-        private toast: Toast,
-        private toolService: RestToolService,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-        private configService: ConfigService,
-        private themeService: ThemeService,
-        private ui: UIService,
-        public editorialSidebarService: EditorialSidebarService,
-        public workspace: WorkspaceService,
-    ) {
+    constructor() {
         this.event.addListener(this, this.destroyed$);
         this.connector.setRoute(this.route, this.router);
         this.globalProgress = true;
@@ -253,7 +254,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
             // this.connector.logout().toPromise();
         }
     }
-    @HostListener('window:scroll', ['$event'])
+    @HostListener('window:scroll')
     scrollDocument() {
         this.treeOffset = Math.min(15, window.scrollY);
     }

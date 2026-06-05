@@ -1,34 +1,34 @@
-<div class="dialog darken" *ngIf="show" [@fade]="show" (click)="hide()"></div>
-
-<div class="sidebar" *ngIf="show" [@fromLeft]="show" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+@if (show) {
+<div class="dialog darken" [@fade]="show" (click)="hide()"></div>
+} @if (show) {
+<div class="sidebar" [@fromLeft]="show" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="main">
     <button mat-icon-button class="close" (click)="hide()">
       <i esIcon="close" [aria]="true"></i>
     </button>
     <!-- We should get loginInfo in any case, but it might not be ready from the start. -->
-    <div
-      *ngIf="loginInfo"
-      class="top"
-      style.background-color="{{ currentUser || null | authorityColor }}"
-    >
+    @if (loginInfo) {
+    <div class="top" style.background-color="{{ currentUser || null | authorityColor }}">
       <div class="profile-gradient"></div>
+      @if (currentUser?.profile?.avatar) {
       <img
-        *ngIf="currentUser?.profile?.avatar"
         class="blurred-image"
         [src]="currentUser.profile.avatar + '&crop=true&width=200&height=200'"
       />
-      <div *ngIf="currentUser" class="profile">
+      } @if (currentUser) {
+      <div class="profile">
         <ng-template #userAvatar>
           <es-user-avatar [user]="currentUser" size="medium"></es-user-avatar>
           <div id="main-menu-sidebar-username" class="username">
-            <ng-container *ngIf="currentUser && !loginInfo.isGuest">{{
-              currentUser | authorityName
-            }}</ng-container>
-            <ng-container *ngIf="loginInfo.isGuest">{{ 'USER_GUEST' | translate }}</ng-container>
+            @if (currentUser && !loginInfo.isGuest) {
+            {{ currentUser | authorityName }}
+            } @if (loginInfo.isGuest) {
+            {{ 'USER_GUEST' | translate }}
+            }
           </div>
         </ng-template>
+        @if (!loginInfo.isGuest) {
         <a
-          *ngIf="!loginInfo.isGuest; else userAvatar"
           cdkMonitorElementFocus
           [routerLink]="['/' + ROUTER_PREFIX + 'profiles', ME]"
           [attr.aria-label]="'PROFILES.TITLE_NAV' | translate"
@@ -36,8 +36,20 @@
           (click)="hide()"
           ><ng-container *ngTemplateOutlet="userAvatar"></ng-container
         ></a>
+        } @else {
+        <es-user-avatar [user]="currentUser" size="medium"></es-user-avatar>
+        <div id="main-menu-sidebar-username" class="username">
+          @if (currentUser && !loginInfo.isGuest) {
+          {{ currentUser | authorityName }}
+          } @if (loginInfo.isGuest) {
+          {{ 'USER_GUEST' | translate }}
+          }
+        </div>
+        }
       </div>
+      }
     </div>
+    }
     <es-main-menu-buttons
       [currentScope]="currentScope"
       (entryClicked)="hide()"
@@ -49,3 +61,4 @@
     </button>
   </div>
 </div>
+}

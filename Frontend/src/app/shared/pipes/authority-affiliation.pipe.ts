@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core-module/rest/data-object';
 
@@ -7,7 +7,8 @@ import { User } from '../../core-module/rest/data-object';
     standalone: false,
 })
 export class AuthorityAffiliationPipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
+    private translate = inject(TranslateService);
+
     transform(authority: any | User, args: string[] = null): string {
         if (!authority) return 'invalid';
         if (authority.profile && authority.profile.primaryAffiliation) {

@@ -1,11 +1,11 @@
 import {
     Component,
-    Inject,
     Injector,
     OnDestroy,
     OnInit,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Node, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -35,6 +35,14 @@ import { NodeDataSourceRemote } from 'src/app/pages/search-page/node-data-source
     standalone: false,
 })
 export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
+    data = inject<SavedSearchesDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<SavedSearchesDialogData, SavedSearchesDialogResult>>(CardDialogRef);
+    private dialogs = inject(DialogsService);
+    private savedSearchesService = inject(SavedSearchesService);
+    private nodeHelper = inject(NodeHelperService);
+    private injector = inject(Injector);
+
     /** Template that includes the "Save current search" button. */
     @ViewChild('saveCurrentSearch', { static: true })
     saveCurrentSearchRef: TemplateRef<HTMLElement>;
@@ -64,14 +72,7 @@ export class SavedSearchesDialogComponent implements OnInit, OnDestroy {
 
     private destroyed = new Subject<void>();
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: SavedSearchesDialogData,
-        private dialogRef: CardDialogRef<SavedSearchesDialogData, SavedSearchesDialogResult>,
-        private dialogs: DialogsService,
-        private savedSearchesService: SavedSearchesService,
-        private nodeHelper: NodeHelperService,
-        private injector: Injector,
-    ) {
+    constructor() {
         this.registerMySavedSearchesSource();
         this.registerSharedSavedSearchesSource();
     }

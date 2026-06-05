@@ -25,10 +25,12 @@
         [(ngModel)]="audienceMode"
         value="1"
       /><label for="audienceTypeCustom">{{ 'ADD_TO_STREAM.AUDIENCE_CUSTOM' | translate }}</label>
-      <div class="audienceEveryone" *ngIf="audienceMode === AUDIENCE_MODE_EVERYONE">
+      @if (audienceMode === AUDIENCE_MODE_EVERYONE) {
+      <div class="audienceEveryone">
         {{ 'ADD_TO_STREAM.AUDIENCE_EVERYONE_INFO' | translate }}
       </div>
-      <div class="audienceSearch" *ngIf="audienceMode === AUDIENCE_MODE_CUSTOM">
+      } @if (audienceMode === AUDIENCE_MODE_CUSTOM) {
+      <div class="audienceSearch">
         <div class="search">
           <es-authority-search-input
             [globalSearchAllowed]="false"
@@ -36,12 +38,15 @@
           ></es-authority-search-input>
         </div>
         <mat-chip-listbox class="toInvite">
-          <mat-chip-option *ngFor="let auth of invite" (removed)="removeInvite(auth)">
+          @for (auth of invite; track auth) {
+          <mat-chip-option (removed)="removeInvite(auth)">
             <span>{{ auth | authorityName }}</span>
             <i matChipRemove esIcon="cancel"></i>
           </mat-chip-option>
+          }
         </mat-chip-listbox>
       </div>
+      }
     </div>
   </div>
 </es-card>

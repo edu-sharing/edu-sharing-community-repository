@@ -5,8 +5,8 @@ import {
     HostBinding,
     OnDestroy,
     OnInit,
-    Optional,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
@@ -31,6 +31,15 @@ import { NodeEntriesDataType } from './data-type';
 export class NodeEntriesComponent<T extends NodeEntriesDataType>
     implements OnInit, AfterViewInit, OnDestroy
 {
+    changeDetectorRef = inject(ChangeDetectorRef);
+    entriesGlobalService = inject(NodeEntriesGlobalService);
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    templatesService = inject(NodeEntriesTemplatesService);
+    private globalKeyboardShortcuts = inject(KeyboardShortcutsService, { optional: true });
+    private route = inject(ActivatedRoute, { optional: true });
+    private translationsService = inject(TranslationsService);
+    private translate = inject(TranslateService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -41,17 +50,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
 
     private readonly destroyed = new Subject<void>();
     private readonly updateKeyboardShortcuts = new Subject<void>();
-
-    constructor(
-        public changeDetectorRef: ChangeDetectorRef,
-        public entriesGlobalService: NodeEntriesGlobalService,
-        public entriesService: NodeEntriesService<T>,
-        public templatesService: NodeEntriesTemplatesService,
-        @Optional() private globalKeyboardShortcuts: KeyboardShortcutsService,
-        @Optional() private route: ActivatedRoute,
-        private translationsService: TranslationsService,
-        private translate: TranslateService,
-    ) {}
 
     ngOnInit(): void {
         if (this.entriesService.primaryInstance) {

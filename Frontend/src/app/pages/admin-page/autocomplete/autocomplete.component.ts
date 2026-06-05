@@ -1,4 +1,12 @@
-import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import {
+    Component,
+    ContentChild,
+    EventEmitter,
+    Input,
+    Output,
+    TemplateRef,
+    inject,
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -9,6 +17,8 @@ import { TranslateService } from '@ngx-translate/core';
     standalone: false,
 })
 export class AutocompleteComponent {
+    private translate = inject(TranslateService);
+
     @ContentChild('icon') iconRef: TemplateRef<any>;
     @ContentChild('suggest') suggestRef: TemplateRef<any>;
     // replaces the whole content with own data
@@ -64,8 +74,6 @@ export class AutocompleteComponent {
     valueInput: string = '';
     showSuggestions: boolean = false;
     activeItem: number = -1;
-
-    constructor(private translate: TranslateService) {}
 
     addValue() {
         if (this.allowAny && this.valueInput) {

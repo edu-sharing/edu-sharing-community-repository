@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
     DialogButton,
@@ -24,23 +24,22 @@ import { CreateMapLinkDialogData, CreateMapLinkDialogResult } from './create-map
     providers: [BreadcrumbsService],
 })
 export class CreateMapLinkDialogComponent implements OnInit {
+    data = inject<CreateMapLinkDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>>(CardDialogRef);
+    private connector = inject(RestConnectorService);
+    private toast = inject(Toast);
+    private router = inject(Router);
+    private nodeApi = inject(RestNodeService);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private dialogs = inject(DialogsService);
+
     name: string;
 
     private readonly buttons = [
         new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
         new DialogButton('MAP_LINK.CREATE', { color: 'primary' }, () => this.createLink()),
     ];
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: CreateMapLinkDialogData,
-        private dialogRef: CardDialogRef<CreateMapLinkDialogData, CreateMapLinkDialogResult>,
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private router: Router,
-        private nodeApi: RestNodeService,
-        private breadcrumbsService: BreadcrumbsService,
-        private dialogs: DialogsService,
-    ) {}
 
     ngOnInit(): void {
         this.dialogRef.patchConfig({ buttons: this.buttons });

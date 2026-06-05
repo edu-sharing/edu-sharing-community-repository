@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { MatTabGroup } from '@angular/material/tabs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
@@ -29,6 +29,12 @@ enum DefaultTab {
     standalone: false,
 })
 export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
+    mdsEditorValues = inject(MdsEditorInstanceService);
+    private iamApi = inject(RestIamService);
+    private mainNavService = inject(MainNavService);
+    ui = inject(UIService);
+    private dialogs = inject(DialogsService);
+
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,
@@ -45,14 +51,6 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      */
     userAuthor: boolean;
     private initialAuthor: AuthorData;
-
-    constructor(
-        public mdsEditorValues: MdsEditorInstanceService,
-        private iamApi: RestIamService,
-        private mainNavService: MainNavService,
-        public ui: UIService,
-        private dialogs: DialogsService,
-    ) {}
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe((nodes) => {

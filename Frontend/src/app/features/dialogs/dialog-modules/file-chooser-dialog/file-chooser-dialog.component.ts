@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
@@ -40,6 +40,16 @@ const MULTI_COLUMN_WIDTH = 900;
     standalone: false,
 })
 export class FileChooserDialogComponent implements OnInit, AfterViewInit {
+    data = inject<FileChooserDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<FileChooserDialogData, FileChooserDialogResult>>(CardDialogRef);
+    private connector = inject(RestConnectorService);
+    private collectionApi = inject(RestCollectionService);
+    private nodeApi = inject(RestNodeService);
+    private toast = inject(Toast);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private translate = inject(TranslateService);
+
     @ViewChild('bottomBarContent') bottomBarContent: TemplateRef<HTMLElement>;
 
     readonly InteractionType = InteractionType;
@@ -89,19 +99,6 @@ export class FileChooserDialogComponent implements OnInit, AfterViewInit {
     private currentDirectory: string;
     canSelectHome: boolean;
     private loadDirectoryTrigger = new Subject<{ directory: string; reset: boolean }>();
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: FileChooserDialogData,
-        private dialogRef: CardDialogRef<FileChooserDialogData, FileChooserDialogResult>,
-        private connector: RestConnectorService,
-        private collectionApi: RestCollectionService,
-        private nodeApi: RestNodeService,
-        private toast: Toast,
-        private breadcrumbsService: BreadcrumbsService,
-        private translate: TranslateService,
-    ) {
-        // http://plnkr.co/edit/btpW3l0jr5beJVjohy1Q?p=preview
-    }
 
     ngOnInit(): void {
         this.processDialogData();

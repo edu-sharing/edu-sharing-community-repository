@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -45,6 +46,10 @@ import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sha
     standalone: false,
 })
 export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private toast = inject(Toast);
+    private search = inject(SearchService);
+
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     @Input() addWidget = false;
@@ -112,12 +117,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
 
     private destroyed$ = new Subject<void>();
     private values: Values;
-
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private toast: Toast,
-        private search: SearchService,
-    ) {}
 
     getInstanceService() {
         return this.mdsEditorInstance;

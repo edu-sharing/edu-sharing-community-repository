@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { SortDirection } from '@angular/material/sort';
 import {
@@ -63,6 +64,10 @@ export enum CopyOption {
     styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
 })
 export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnInit {
+    public genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private searchHelperService = inject(SearchHelperService);
+    private searchService = inject(SearchService);
+
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
 
@@ -120,11 +125,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
 
     @ViewChild('nodeEntriesWrapper') nodeEntries: NodeEntriesWrapperComponent<Node>;
 
-    constructor(
-        public genericWidgetGlobalService: GenericWidgetGlobalService,
-        private searchHelperService: SearchHelperService,
-        private searchService: SearchService,
-    ) {
+    constructor() {
         // setup search with debouncing
         this.searchSubject
             .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed))

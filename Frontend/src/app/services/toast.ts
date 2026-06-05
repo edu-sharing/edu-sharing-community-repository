@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, Injector, OnDestroy } from '@angular/core';
+import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -59,6 +59,13 @@ export type ToastMessage = {
 };
 @Injectable({ providedIn: 'root' })
 export class Toast extends ToastAbstract implements OnDestroy {
+    private accessibility = inject(AccessibilityService);
+    private dialogs = inject(DialogsService);
+    private injector = inject(Injector);
+    private overlay = inject(Overlay);
+    private router = inject(Router);
+    private snackBar = inject(MatSnackBar);
+
     private static MIN_TIME_BETWEEN_TOAST = 2000;
 
     private isInstanceVisible = false;
@@ -79,14 +86,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
         return duration.valueOf();
     }
 
-    constructor(
-        private accessibility: AccessibilityService,
-        private dialogs: DialogsService,
-        private injector: Injector,
-        private overlay: Overlay,
-        private router: Router,
-        private snackBar: MatSnackBar,
-    ) {
+    constructor() {
         super();
         this.messageQueue
             .pipe(takeUntil(this.destroyed.pipe(filter((d) => d === true))))

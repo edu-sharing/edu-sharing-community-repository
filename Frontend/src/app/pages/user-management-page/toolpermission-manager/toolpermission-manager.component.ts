@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import {
     DialogButton,
     RestAdminService,
@@ -24,6 +24,13 @@ import { AuthorityNamePipe, UIAnimation } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class ToolpermissionManagerComponent {
+    private toast = inject(Toast);
+    private admin = inject(RestAdminService);
+    private node = inject(RestNodeService);
+    private translate = inject(TranslateService);
+    private iam = inject(RestIamService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     isLoading = false;
     addName = '';
     creatingToolpermission = false;
@@ -174,7 +181,7 @@ export class ToolpermissionManagerComponent {
         if (authority == null) return;
         this._authority = authority;
         this.isLoading = true;
-        this.name = new AuthorityNamePipe(this.translate).transform(authority, null);
+        this.name = this.authorityNamePipe.transform(authority, null);
         this.refresh();
     }
     @Output() closeManager = new EventEmitter<void>();
@@ -184,13 +191,7 @@ export class ToolpermissionManagerComponent {
     deny: any;
     denyInit: any;
 
-    constructor(
-        private toast: Toast,
-        private admin: RestAdminService,
-        private node: RestNodeService,
-        private translate: TranslateService,
-        private iam: RestIamService,
-    ) {
+    constructor() {
         this.buttons = DialogButton.getSingleButton('CLOSE', () => this.close(), 'standard');
     }
     close() {
@@ -259,7 +260,7 @@ export class ToolpermissionManagerComponent {
             if (group.authorityType == RestConstants.AUTHORITY_TYPE_EVERYONE) {
                 names.push(this.translate.instant('PERMISSIONS.TOOLPERMISSIONS.EVERYONE_ALLOWED'));
             } else {
-                names.push(new AuthorityNamePipe(this.translate).transform(group, null));
+                names.push(this.authorityNamePipe.transform(group, null));
             }
         }
         return this.translate.instant('PERMISSIONS.TOOLPERMISSIONS.INHERIT_DETAIL', {

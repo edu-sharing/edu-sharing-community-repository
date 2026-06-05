@@ -8,9 +8,11 @@
     <h2>{{ 'OER.HEADING_DESCRIPTION' | translate }}</h2>
   </div>
   <div class="content">
-    <div class="collectionsGroup" *ngIf="nodes[COLLECTIONS] && nodes[COLLECTIONS].length">
+    @if (nodes[COLLECTIONS] && nodes[COLLECTIONS].length) {
+    <div class="collectionsGroup">
       <div class="caption">{{ 'OER.COLLECTIONS' | translate }}</div>
-      <div class="more" *ngIf="hasMore[COLLECTIONS] || true">
+      @if (hasMore[COLLECTIONS] || true) {
+      <div class="more">
         <a
           tabindex="0"
           class="clickable"
@@ -19,32 +21,33 @@
           >{{ (showMore[COLLECTIONS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}</a
         >
       </div>
-      <div
-        class="noResults collections"
-        *ngIf="!loading[COLLECTIONS] && !nodes[COLLECTIONS].length"
-      >
+      } @if (!loading[COLLECTIONS] && !nodes[COLLECTIONS].length) {
+      <div class="noResults collections">
         {{ 'OER.NO_COLLECTION_RESULTS' | translate }}
       </div>
+      }
       <div>TODO</div>
     </div>
+    }
     <div class="materials">
       <div class="caption">{{ 'OER.MATERIALS' | translate }}</div>
-      <div class="more" *ngIf="hasMore[MATERIALS]">
+      @if (hasMore[MATERIALS]) {
+      <div class="more">
         <a tabindex="0" class="clickable" (click)="goToSearch()">{{
           (showMore[MATERIALS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate
         }}</a>
       </div>
-      <div
-        class="noResults materials"
-        *ngIf="!(loading[MATERIALS] || (nodes[MATERIALS] && nodes[MATERIALS].length))"
-      >
+      } @if (!(loading[MATERIALS] || (nodes[MATERIALS] && nodes[MATERIALS].length))) {
+      <div class="noResults materials">
         {{ 'OER.NO_MATERIAL_RESULTS' | translate }}
       </div>
-      TODO
+      } TODO
     </div>
-    <div class="tools" *ngIf="false">
+    @if (false) {
+    <div class="tools">
       <div class="caption">{{ 'OER.TOOLS' | translate }}</div>
-      <div class="more" *ngIf="hasMore[TOOLS]">
+      @if (hasMore[TOOLS]) {
+      <div class="more">
         <a
           tabindex="0"
           class="clickable"
@@ -53,11 +56,13 @@
           >{{ (showMore[TOOLS] ? 'HIDE_MORE' : 'SHOW_MORE') | translate }}</a
         >
       </div>
-      <div class="noResults tools" *ngIf="!loading[TOOLS] && !nodes[TOOLS].length">
+      } @if (!loading[TOOLS] && !nodes[TOOLS].length) {
+      <div class="noResults tools">
         {{ 'OER.NO_TOOL_RESULTS' | translate }}
       </div>
-      TODO
+      } TODO
     </div>
+    }
   </div>
 </div>
 <es-footer [scope]="'oer'"></es-footer>

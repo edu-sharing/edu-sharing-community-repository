@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,8 @@ import { TranslateService } from '@ngx-translate/core';
     standalone: false,
 })
 export class ShareDialogUsageComponent {
+    private translation = inject(TranslateService);
+
     static ICON_MAP: any = {
         MOODLE: 'school',
         COLLECTION: 'layers',
@@ -56,5 +58,4 @@ export class ShareDialogUsageComponent {
             this.deleteListChange.emit(this.deleteList);
         }
     }
-    constructor(private translation: TranslateService) {}
 }

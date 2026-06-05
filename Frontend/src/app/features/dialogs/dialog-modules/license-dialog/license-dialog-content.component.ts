@@ -6,6 +6,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
 
@@ -147,6 +148,16 @@ const ALL_COUNTRIES = [
     standalone: false,
 })
 export class LicenseDialogContentComponent implements OnInit {
+    private connector = inject(RestConnectorService);
+    private translate = inject(TranslateService);
+    private config = inject(ConfigurationService);
+    private nodeHelper = inject(NodeHelperService);
+    private mdsEditorInstanceService = inject(MdsEditorInstanceService);
+    private iamApi = inject(RestIamService);
+    private toast = inject(Toast);
+    private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+
     @ViewChild('selectLicense') selectLicense: ElementRef;
     @ViewChild('author') author: MdsEditorWidgetAuthorComponent;
 
@@ -266,18 +277,6 @@ export class LicenseDialogContentComponent implements OnInit {
     private allowedLicenses: string[];
     private releaseMulti: string;
     aiOpen = false;
-
-    constructor(
-        private connector: RestConnectorService,
-        private translate: TranslateService,
-        private config: ConfigurationService,
-        private nodeHelper: NodeHelperService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private iamApi: RestIamService,
-        private toast: Toast,
-        private nodeApi: RestNodeService,
-        private nodeService: NodeService,
-    ) {}
 
     ngOnInit(): void {
         this.translateLicenseCountries(ALL_COUNTRIES);

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { HOME_REPOSITORY, Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     CanDrop,
@@ -24,6 +24,10 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     standalone: false,
 })
 export class WorkspaceTreeComponent {
+    private optionsHelperDataService = inject(OptionsHelperDataService);
+    private dialogsService = inject(DialogsService);
+    private translate = inject(TranslateService);
+
     @Input() root: NodeRoot;
     @Input() workspace: WorkspacePageComponent;
     @Input() isSafe: boolean;
@@ -50,11 +54,7 @@ export class WorkspaceTreeComponent {
 
     currentPath: string[] = [];
 
-    constructor(
-        private optionsHelperDataService: OptionsHelperDataService,
-        private dialogsService: DialogsService,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.optionsHelperDataService.setData({
             scope: Scope.WorkspaceTree,
         });

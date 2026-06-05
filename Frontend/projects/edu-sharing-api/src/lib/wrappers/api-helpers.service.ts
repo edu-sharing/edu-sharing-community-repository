@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { EduSharingApiConfiguration } from '../edu-sharing-api-configuration';
 import { ApiInterceptor } from '../api.interceptor';
 
@@ -6,7 +6,8 @@ import { ApiInterceptor } from '../api.interceptor';
     providedIn: 'root',
 })
 export class ApiHelpersService {
-    constructor(private configuration: EduSharingApiConfiguration) {}
+    private configuration = inject(EduSharingApiConfiguration);
+
     /**
      * Returns the full server url where the current api is located
      * In dev mode, it will obey the proxy url and return the "real" api url

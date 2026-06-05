@@ -7,6 +7,7 @@ import {
     NgZone,
     Type,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -18,6 +19,10 @@ import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class UIService {
+    protected componentFactoryResolver = inject(ComponentFactoryResolver);
+    protected injector = inject(Injector);
+    protected ngZone = inject(NgZone);
+
     isTouchSubject = new BehaviorSubject(false);
     private metaKeyPressedSubject = new BehaviorSubject(false);
     private shiftKeyPressedSubject = new BehaviorSubject(false);
@@ -27,11 +32,7 @@ export class UIService {
         return this.shiftKeyPressedSubject.value;
     }
 
-    constructor(
-        protected componentFactoryResolver: ComponentFactoryResolver,
-        protected injector: Injector,
-        protected ngZone: NgZone,
-    ) {
+    constructor() {
         // HostListener not working, so use window
         this.ngZone.runOutsideAngular(() => {
             window.addEventListener('keydown', (event) => {

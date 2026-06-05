@@ -25,39 +25,33 @@
       (registerDone)="onRegisterDone()"
       #registerForm
     ></es-register-form>
+    @if (state === 'done' || state === 'done-reset') {
     <es-register-done
-      *ngIf="state === 'done' || state === 'done-reset'"
       (stateChanged)="updateButtons()"
       (modify)="modifyData()"
       [inputState]="state"
       #registerDone
     ></es-register-done>
+    } @if (state === 'request') {
     <es-register-request
-      *ngIf="state === 'request'"
       (stateChanged)="updateButtons()"
       (done)="onPasswordRequested()"
       #request
     ></es-register-request>
+    } @if (state === 'reset-password') {
     <es-register-reset-password
-      *ngIf="state === 'reset-password'"
       (stateChanged)="updateButtons()"
       #resetPassword
       [params]="params"
     ></es-register-reset-password>
-    <div
-      *ngIf="
-        state !== 'register' &&
-        state !== 'done' &&
-        state !== 'done-reset' &&
-        state !== 'request' &&
-        canRegister()
-      "
-      class="register"
-    >
+    } @if ( state !== 'register' && state !== 'done' && state !== 'done-reset' && state !==
+    'request' && canRegister() ) {
+    <div class="register">
       {{ 'LOGIN.REGISTER_TEXT' | translate }}
       <button mat-button color="primary" (click)="linkRegister()">
         {{ 'LOGIN.REGISTER_LINK' | translate }} <i esIcon="arrow_forward"></i>
       </button>
     </div>
+    }
   </div>
 </es-card>

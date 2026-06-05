@@ -8,6 +8,7 @@ import {
     TemplateRef,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { DEFAULT, SessionStorageService } from 'ngx-edu-sharing-api';
 import { Helper, MdsExtendedValues, OptionItem } from 'ngx-edu-sharing-ui';
@@ -36,6 +37,9 @@ interface Template {
     imports: [SharedModule, MdsModule],
 })
 export class MetadataTemplateManagementComponent implements OnInit {
+    private dialogs = inject(DialogsService);
+    private storage = inject(SessionStorageService);
+
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     initialTemplates: Template[] = [
         {
@@ -74,8 +78,6 @@ export class MetadataTemplateManagementComponent implements OnInit {
     @Output() extendedValuesChange = new EventEmitter<MdsExtendedValues>();
     @ViewChild('mdsEditor') mdsEditor: MdsEditorWrapperComponent;
     @ViewChild('templateTitleDialog') templateTitleDialogRef: TemplateRef<undefined>;
-
-    constructor(private dialogs: DialogsService, private storage: SessionStorageService) {}
 
     async ngOnInit() {
         await this.updateCustomTemplates();

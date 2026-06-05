@@ -1,7 +1,5 @@
 <ng-template #suggestionsPanel>
-  <es-mds-editor-view
-    *ngFor="let view of views"
-    [view]="view"
-    [overrideWidget]="overrideWidget"
-  ></es-mds-editor-view>
+  @for (view of views; track view) {
+  <es-mds-editor-view [view]="view" [overrideWidget]="overrideWidget"></es-mds-editor-view>
+  }
 </ng-template>

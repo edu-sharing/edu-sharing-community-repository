@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LtiPlatformV13Service, ManualRegistrationData } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../services/toast';
@@ -10,6 +10,10 @@ import { Toast } from '../../../services/toast';
     standalone: false,
 })
 export class LtitoolAdminComponent implements OnInit {
+    sanitizer = inject(DomSanitizer);
+    private toast = inject(Toast);
+    private ltiPlatformService = inject(LtiPlatformV13Service);
+
     @Output() refreshAppList = new EventEmitter<void>();
 
     showIframe: boolean = false;
@@ -21,11 +25,7 @@ export class LtitoolAdminComponent implements OnInit {
 
     static staticRef: LtitoolAdminComponent;
 
-    constructor(
-        public sanitizer: DomSanitizer,
-        private toast: Toast,
-        private ltiPlatformService: LtiPlatformV13Service,
-    ) {
+    constructor() {
         LtitoolAdminComponent.staticRef = this;
     }
 

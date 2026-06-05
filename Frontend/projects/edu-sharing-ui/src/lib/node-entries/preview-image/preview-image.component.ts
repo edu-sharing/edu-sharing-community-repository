@@ -1,4 +1,12 @@
-import { Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    Input,
+    OnChanges,
+    SimpleChanges,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodesRightMode } from '../../types/option-item';
@@ -16,6 +24,8 @@ import { NodesRightMode } from '../../types/option-item';
     standalone: false,
 })
 export class PreviewImageComponent<T extends Node> implements OnChanges {
+    private nodeHelper = inject(NodeHelperService);
+
     @Input() node: T;
     @Input() playAnimation = false;
 
@@ -26,8 +36,6 @@ export class PreviewImageComponent<T extends Node> implements OnChanges {
     showCanvas: boolean = false;
     replacedWithStatic: boolean = false;
     hasPreviewPermission: boolean;
-
-    constructor(private nodeHelper: NodeHelperService) {}
     ngOnChanges(changes: SimpleChanges): void {
         this.hasPreviewPermission =
             this.node &&

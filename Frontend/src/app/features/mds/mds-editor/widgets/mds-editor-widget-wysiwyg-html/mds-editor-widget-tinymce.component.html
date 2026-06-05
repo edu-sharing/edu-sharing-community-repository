@@ -15,7 +15,7 @@
   ></angular-editor>
 
   <quill-editor #editor
-  (onContentChanged)="contentChanged($event)">
+    (onContentChanged)="contentChanged($event)">
 
   </quill-editor>
   <div class="NgxEditor__Wrapper">
@@ -28,11 +28,7 @@
       [placeholder]="widget.definition.placeholder"
     ></ngx-editor>
   </div>-->
-  <editor
-    #editor
-    *ngIf="editorConfig"
-    [init]="editorConfig"
-    [(ngModel)]="html"
-    (onBlur)="onBlur.emit()"
-  ></editor>
+  @if (editorConfig) {
+  <editor #editor [init]="editorConfig" [(ngModel)]="html" (onBlur)="onBlur.emit()"></editor>
+  }
 </es-mds-editor-widget-container>

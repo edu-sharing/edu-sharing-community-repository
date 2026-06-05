@@ -1,11 +1,9 @@
-<div class="media-rendering" *ngIf="initialized(); else loadingSpinner">
-  <div
-    class="render-content"
-    [class.selected]="sidebarOpen()"
-    *ngIf="selectedNode; else noMediaSelected"
-  >
+@if (initialized()) {
+<div class="media-rendering">
+  @if (selectedNode) {
+  <div class="render-content" [class.selected]="sidebarOpen()">
+    @if (layoutWithTitle()) {
     <div
-      *ngIf="layoutWithTitle()"
       #div
       class="render-title"
       esCheckTextOverflow
@@ -13,14 +11,15 @@
       [matTooltip]="text.hasTextOverflow() ? div.innerText : null"
       [innerHTML]="selectedNodeTitle()"
     ></div>
+    } @if (selectedNode) {
     <es-render-wrapper-component
-      *ngIf="selectedNode"
       [showTopbar]="false"
       [showMetadata]="false"
       [nodeId]="selectedNode.ref.id"
       [repository]="selectedNode.ref.repo"
     ></es-render-wrapper-component>
-    <div *ngIf="layout() === MediaRenderingLayout.TitlePreviewButtons" class="render-buttons">
+    } @if (layout() === MediaRenderingLayout.TitlePreviewButtons) {
+    <div class="render-buttons">
       <a
         mat-stroked-button
         color="primary"
@@ -38,15 +37,16 @@
         }}
       </button>
     </div>
+    }
   </div>
-  <ng-template #noMediaSelected>
-    <es-info-message mode="info" class="info-message">
-      {{ i18nPrefix + 'NO_ELEMENT_SELECTED' | translate }}
-    </es-info-message>
-  </ng-template>
+  } @else {
+  <es-info-message mode="info" class="info-message">
+    {{ i18nPrefix + 'NO_ELEMENT_SELECTED' | translate }}
+  </es-info-message>
+  }
   <!-- color + configuration buttons -->
+  @if (editMode()) {
   <es-widget-configuration-buttons
-    *ngIf="editMode()"
     [ariaLabel]="i18nPrefix + 'CONFIG_ARIA' | translate"
     [(layout)]="layout"
     [layoutOptions]="layoutOptions"
@@ -66,7 +66,8 @@
     (optionOneClicked)="openReurlLink()"
     (optionTwoClicked)="embedWidget()"
   ></es-widget-configuration-buttons>
+  }
 </div>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}

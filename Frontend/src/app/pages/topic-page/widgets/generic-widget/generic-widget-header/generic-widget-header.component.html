@@ -1,5 +1,5 @@
+@if (shouldShowHeadline()) {
 <es-editable-text
-  *ngIf="shouldShowHeadline()"
   class="generic-widget-headline"
   [aiGenerated]="headlineAiGenerated()"
   [alignCenter]="true"
@@ -14,9 +14,8 @@
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'headline')"
   (textChange)="onTextChange($event, true)"
 ></es-editable-text>
-
+} @if (shouldShowDescription()) {
 <es-editable-text
-  *ngIf="shouldShowDescription()"
   class="generic-widget-description"
   [aiGenerated]="descriptionAiGenerated()"
   [disabled]="updateInProgress()"
@@ -30,3 +29,4 @@
   (searchResultsUpdated)="onSearchResultsUpdated($event, 'description')"
   (textChange)="onTextChange($event)"
 ></es-editable-text>
+}

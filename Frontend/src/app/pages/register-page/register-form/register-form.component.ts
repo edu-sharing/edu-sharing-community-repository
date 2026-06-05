@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { Router } from '@angular/router';
 import { ConfigurationService, RegisterInformation } from '../../../core-module/core.module';
@@ -22,6 +22,14 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class RegisterFormComponent implements OnDestroy {
+    private toast = inject(Toast);
+    private platformLocation = inject(PlatformLocation);
+    private formBuilder = inject(UntypedFormBuilder);
+    private router = inject(Router);
+    private registerService = inject(RegisterService);
+    private translations = inject(TranslationsService);
+    private configService = inject(ConfigurationService);
+
     @Output() registerDone = new EventEmitter<void>();
     @Output() stateChanged = new EventEmitter<void>();
     password: string;
@@ -75,15 +83,7 @@ export class RegisterFormComponent implements OnDestroy {
         );
     }
 
-    constructor(
-        private toast: Toast,
-        private platformLocation: PlatformLocation,
-        private formBuilder: UntypedFormBuilder,
-        private router: Router,
-        private registerService: RegisterService,
-        private translations: TranslationsService,
-        private configService: ConfigurationService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {
             this.privacyUrl = this.configService.instant('privacyInformationUrl');
             this.requiredFields = this.configService.instant('register.requiredFields', [

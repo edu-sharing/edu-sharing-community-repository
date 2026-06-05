@@ -1,4 +1,5 @@
-<div *ngIf="editDisabled && !userAuthor">
+@if (editDisabled && !userAuthor) {
+<div>
   <es-info-message
     message="{{ 'WORKSPACE.CONTRIBUTOR.EDIT_DISABLED' | translate }}"
   ></es-info-message>
@@ -9,6 +10,7 @@
     </button>
   </div>
 </div>
+}
 <!-- FIXME: Using a tab group for choosing an option is misleading UI. -->
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="editType">
   <mat-tab label="{{ 'WORKSPACE.CONTRIBUTOR.MODE_PERSON' | translate }}">
@@ -59,21 +61,27 @@
           class="mat-autocomplete-person"
           (optionSelected)="useVCardSuggestion($event)"
         >
-          <mat-option *ngFor="let person of suggestionPersons$ | async" [value]="person.vcard">
+          @for (person of suggestionPersons$ | async; track person) {
+          <mat-option [value]="person.vcard">
             <div class="mat-option-primary">
               {{ person.vcard?.title }} {{ person.vcard?.givenname }} {{ person.vcard?.surname }}
             </div>
             <div class="mat-option-secondary">{{ person.vcard?.email }}</div>
           </mat-option>
+          }
         </mat-autocomplete>
       </div>
       <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
         <i esIcon="fingerprint"></i>
         <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
-        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        @if (showPersistentIds) {
+        <i esIcon="keyboard_arrow_down"></i>
+        } @if (!showPersistentIds) {
+        <i esIcon="keyboard_arrow_right"></i>
+        }
       </button>
-      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
+      @if (showPersistentIds) {
+      <div [@overlay]="more" class="persistent-id">
         <div class="table orcid">
           <mat-form-field floatLabel="always">
             <mat-label>{{ 'VCARD.X-ORCID' | translate }}</mat-label>
@@ -102,10 +110,13 @@
             <mat-hint innerHTML="{{ 'VCARD_HINT.X-GND-URI' | translate }}"></mat-hint>
           </mat-form-field>
         </div>
-        <es-info-message *ngIf="vCard.orcid || vCard.gnduri">{{
+        @if (vCard.orcid || vCard.gnduri) {
+        <es-info-message>{{
           'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
         }}</es-info-message>
+        }
       </div>
+      }
     </div>
   </mat-tab>
 
@@ -126,20 +137,26 @@
             #autoOrg="matAutocomplete"
             (optionSelected)="useVCardSuggestion($event)"
           >
-            <mat-option *ngFor="let org of suggestionOrgs$ | async" [value]="org.vcard">
+            @for (org of suggestionOrgs$ | async; track org) {
+            <mat-option [value]="org.vcard">
               <div class="mat-option-primary">{{ org.vcard?.org }}</div>
               <div class="mat-option-secondary">{{ org.vcard?.email }}</div>
             </mat-option>
+            }
           </mat-autocomplete>
         </mat-form-field>
       </div>
       <button mat-button color="primary" (click)="showPersistentIds = !showPersistentIds">
         <i esIcon="fingerprint"></i>
         <span>{{ 'WORKSPACE.CONTRIBUTOR.PERSISTENT_IDS' | translate }}</span>
-        <i esIcon="keyboard_arrow_down" *ngIf="showPersistentIds"></i>
-        <i esIcon="keyboard_arrow_right" *ngIf="!showPersistentIds"></i>
+        @if (showPersistentIds) {
+        <i esIcon="keyboard_arrow_down"></i>
+        } @if (!showPersistentIds) {
+        <i esIcon="keyboard_arrow_right"></i>
+        }
       </button>
-      <div *ngIf="showPersistentIds" [@overlay]="more" class="persistent-id">
+      @if (showPersistentIds) {
+      <div [@overlay]="more" class="persistent-id">
         <div class="table ror">
           <mat-form-field floatLabel="always">
             <mat-label>{{ 'VCARD.X-ROR' | translate }}</mat-label>
@@ -168,10 +185,13 @@
             <mat-hint innerHTML="{{ 'VCARD_HINT.X-Wikidata' | translate }}"></mat-hint>
           </mat-form-field>
         </div>
-        <es-info-message *ngIf="vCard.ror || vCard.wikidata">{{
+        @if (vCard.ror || vCard.wikidata) {
+        <es-info-message>{{
           'WORKSPACE.CONTRIBUTOR.PERSISTENT_ID_SET' | translate
         }}</es-info-message>
+        }
       </div>
+      }
     </div>
   </mat-tab>
 </mat-tab-group>
@@ -192,12 +212,11 @@
           (ngModelChange)="updateSubtitle()"
           panelClass="contributor-role-select"
         >
-          <mat-option
-            *ngFor="let role of roles"
-            value="{{ role }}"
-            ngClass="mat-option-role-{{ role }}"
-            >{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</mat-option
-          >
+          @for (role of roles; track role) {
+          <mat-option value="{{ role }}" ngClass="mat-option-role-{{ role }}">{{
+            'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate
+          }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>
@@ -210,11 +229,15 @@
     </div>
   </div>
   <button mat-button color="primary" class="more clickable" (click)="more = !more">
-    <i esIcon="keyboard_arrow_down" *ngIf="more"></i>
-    <i esIcon="keyboard_arrow_right" *ngIf="!more"></i>
+    @if (more) {
+    <i esIcon="keyboard_arrow_down"></i>
+    } @if (!more) {
+    <i esIcon="keyboard_arrow_right"></i>
+    }
     <span>{{ 'WORKSPACE.CONTRIBUTOR.MORE' | translate }}</span>
   </button>
-  <div *ngIf="more" [@overlay]="more" class="moreOpen">
+  @if (more) {
+  <div [@overlay]="more" class="moreOpen">
     <h2>{{ 'WORKSPACE.CONTRIBUTOR.ORG_INFO' | translate }}</h2>
     <div class="table">
       <mat-form-field>
@@ -275,4 +298,5 @@
       </div>
     </div>
   </div>
+  }
 </div>

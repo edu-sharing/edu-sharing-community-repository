@@ -3,8 +3,8 @@
   xmlns="http://www.w3.org/1999/html"
 ></ng-container>
 
+@if (addToCollectionMode.value; as addToCollection) {
 <es-small-collection
-  *ngIf="addToCollectionMode.value as addToCollection"
   class="add-to-collection-banner"
   [collection]="addToCollection.collection"
   [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
@@ -12,12 +12,14 @@
 >
   <es-actionbar backgroundType="primary"></es-actionbar>
 </es-small-collection>
-<div class="primary-action-banner" *ngIf="primaryAction | async as action">
+} @if (primaryAction | async; as action) {
+<div class="primary-action-banner">
   <div class="description">
     {{ 'SEARCH.ACTION.' + action.toUpperCase() + '_DESCRIPTION' | translate }}
   </div>
   <es-actionbar backgroundType="primary"></es-actionbar>
 </div>
+}
 
 <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
       initialize data fetching. -->
@@ -36,9 +38,9 @@
     <div class="title-container">
       <h2 class="mat-heading-2">
         {{ 'SEARCH.COLLECTIONS' | translate }}
-        <ng-container *ngIf="!collectionsDataSource.isLoading; else smallLoadingSpinner">
-          ({{ collectionsDataSource.getTotal() }})
-        </ng-container>
+        @if (!collectionsDataSource.isLoading) { ({{ collectionsDataSource.getTotal() }}) } @else {
+        <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
+        }
       </h2>
     </div>
   </ng-template>
@@ -68,16 +70,18 @@
     <div class="title-container title-container{{ getContainerClass() }}">
       <h2 class="mat-heading-2">
         {{ 'SEARCH.MATERIALS' | translate }}
-        <ng-container *ngIf="!resultsDataSource.isLoading; else smallLoadingSpinner">
-          <ng-container *ngIf="!resultsDataSource.isEmpty()">
-            <span class="count count{{ getContainerClass() }}">
-              &nbsp;({{ resultsDataSource.getTotal() }})
-            </span>
-          </ng-container>
-        </ng-container>
+        @if (!resultsDataSource.isLoading) { @if (!resultsDataSource.isEmpty()) {
+        <span class="count count{{ getContainerClass() }}">
+          &nbsp;({{ resultsDataSource.getTotal() }})
+        </span>
+        } } @else {
+        <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
+        }
       </h2>
       <div class="right">
-        <es-actionbar *ngIf="!addToCollectionMode.value"></es-actionbar>
+        @if (!addToCollectionMode.value) {
+        <es-actionbar></es-actionbar>
+        }
       </div>
     </div>
   </ng-template>

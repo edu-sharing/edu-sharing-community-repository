@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConnectorService } from '../../core-module/core.module';
 
@@ -10,13 +10,15 @@ import { RestConnectorService } from '../../core-module/core.module';
     standalone: false,
 })
 export class ToolpermissionCheckDirective implements OnChanges {
+    private element = inject(ElementRef);
+    private translate = inject(TranslateService);
+    private connector = inject(RestConnectorService);
+
     @Input() toolpermission: string;
     @Input() toolpermissionDisplayHint = true;
-    constructor(
-        private element: ElementRef,
-        private translate: TranslateService,
-        private connector: RestConnectorService,
-    ) {
+    constructor() {
+        const element = this.element;
+
         this.element = element;
     }
 

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Node, NodeListService, SortPolicy } from 'ngx-edu-sharing-api';
 import {
@@ -32,6 +32,13 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
     standalone: false,
 })
 export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, OnDestroy {
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private dialogRef = inject(CardDialogRef);
+    private nodeList = inject(NodeListService);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private ui = inject(UIService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
 
@@ -56,14 +63,7 @@ export class SearchNodeStoreDialogComponent implements OnInit, AfterViewInit, On
     private selected: Node[] = [];
     private readonly destroyed = new Subject<void>();
 
-    constructor(
-        private cardDialogUtils: CardDialogUtilsService,
-        private dialogRef: CardDialogRef,
-        private nodeList: NodeListService,
-        private router: Router,
-        private toast: Toast,
-        private ui: UIService,
-    ) {
+    constructor() {
         this.columns = {
             Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
         };

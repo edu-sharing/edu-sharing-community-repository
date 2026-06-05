@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, forkJoin as observableForkJoin, Observable } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -35,6 +35,14 @@ interface ChildobjectEdit {
     standalone: false,
 })
 export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidgetComponent {
+    mdsEditorValues = inject(MdsEditorInstanceService);
+    private nodeApi = inject(RestNodeService);
+    private connector = inject(RestConnectorService);
+    private utilities = inject(RestUtilitiesService);
+    private nodeHelper = inject(NodeHelperService);
+    toast = inject(Toast);
+    private dialogs = inject(DialogsService);
+
     static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
@@ -48,16 +56,6 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
     nodes: Node[];
     private initialChildren: Childobject[] = [];
     loading$ = new BehaviorSubject(false);
-
-    constructor(
-        public mdsEditorValues: MdsEditorInstanceService,
-        private nodeApi: RestNodeService,
-        private connector: RestConnectorService,
-        private utilities: RestUtilitiesService,
-        private nodeHelper: NodeHelperService,
-        public toast: Toast,
-        private dialogs: DialogsService,
-    ) {}
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$

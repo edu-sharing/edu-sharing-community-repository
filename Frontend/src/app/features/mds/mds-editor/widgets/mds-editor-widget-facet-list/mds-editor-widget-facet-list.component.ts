@@ -5,6 +5,7 @@ import {
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormArray, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -30,6 +31,10 @@ export class MdsEditorWidgetFacetListComponent
     extends MdsEditorWidgetBase
     implements OnInit, OnDestroy
 {
+    private search = inject(SearchService);
+    private ref = inject(ChangeDetectorRef);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
     readonly MAX_FACET_COUNT = 50;
     readonly MAX_FACET_INITIAL_COUNT = 5;
@@ -61,15 +66,8 @@ export class MdsEditorWidgetFacetListComponent
         );
     };
 
-    constructor(
-        toast: Toast,
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private search: SearchService,
-        private ref: ChangeDetectorRef,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
 
         this.filter.valueChanges
             .pipe(debounceTime(200))

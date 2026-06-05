@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, inject } from '@angular/core';
 import { AppContainerService, UIAnimation } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 
@@ -16,11 +16,12 @@ import { Subject } from 'rxjs';
     standalone: false,
 })
 export class ScrollToTopButtonComponent implements OnInit, OnDestroy {
+    private appContainer = inject(AppContainerService);
+    private ngZone = inject(NgZone);
+
     showScrollToTop = false;
 
     private readonly destroyed$ = new Subject<void>();
-
-    constructor(private appContainer: AppContainerService, private ngZone: NgZone) {}
 
     ngOnInit() {
         this.appContainer.scrollContainerChange.subscribe(() => this.registerScroll());

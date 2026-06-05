@@ -1,11 +1,11 @@
-<span *ngIf="indicatorIcons$ | async; else textRepresentation" [matTooltip]="tooltip$ | async">
+@if (indicatorIcons$ | async) {
+<span [matTooltip]="tooltip$ | async">
   <img
     [src]="replicationSource$ | async | appNodeSource : { mode: 'url' }"
     (error)="$any($event.target).style.display = 'none'"
     [alt]="tooltip$ | async"
   />
 </span>
-
-<ng-template #textRepresentation>
-  <span>{{ tooltip$ | async }}</span>
-</ng-template>
+} @else {
+<span>{{ tooltip$ | async }}</span>
+}

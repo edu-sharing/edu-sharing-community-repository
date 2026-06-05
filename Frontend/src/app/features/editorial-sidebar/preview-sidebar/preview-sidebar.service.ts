@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject } from 'rxjs';
@@ -16,11 +16,12 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     providedIn: 'root',
 })
 export class PreviewSidebarService {
+    private bridgeService = inject(BridgeService);
+    private nodeHelper = inject(NodeHelperService);
+
     private currentNode$ = new BehaviorSubject<Node | null>(null);
     private instance$ = new BehaviorSubject<PreviewSidebarComponent>(null);
     private sidebarOpen$ = new BehaviorSubject<boolean>(false);
-
-    constructor(private bridgeService: BridgeService, private nodeHelper: NodeHelperService) {}
 
     registerInstance(instance: PreviewSidebarComponent) {
         if (this.instance$.value) {

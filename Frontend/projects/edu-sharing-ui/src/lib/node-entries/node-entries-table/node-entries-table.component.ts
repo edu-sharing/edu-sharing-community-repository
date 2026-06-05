@@ -13,6 +13,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
@@ -58,6 +59,19 @@ import { NodeEntriesDataType } from '../data-type';
 export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     implements OnChanges, AfterViewInit, OnDestroy
 {
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    entriesGlobalService = inject(NodeEntriesGlobalService);
+    private applicationRef = inject(ApplicationRef);
+    private toast = inject(Toast);
+    templatesService = inject(NodeEntriesTemplatesService);
+    private translations = inject(TranslationsService);
+    private nodeHelperService = inject(NodeHelperService);
+    private nodesDragDropService = inject(NodesDragDropService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    ui = inject(UIService);
+    private ngZone = inject(NgZone);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     readonly InteractionType = InteractionType;
     readonly ClickSource = ClickSource;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -92,20 +106,7 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     private destroyed = new Subject<void>();
     containerWidth$ = new BehaviorSubject<number>(null);
 
-    constructor(
-        public entriesService: NodeEntriesService<T>,
-        public entriesGlobalService: NodeEntriesGlobalService,
-        private applicationRef: ApplicationRef,
-        private toast: Toast,
-        public templatesService: NodeEntriesTemplatesService,
-        private translations: TranslationsService,
-        private nodeHelperService: NodeHelperService,
-        private nodesDragDropService: NodesDragDropService,
-        private changeDetectorRef: ChangeDetectorRef,
-        public ui: UIService,
-        private ngZone: NgZone,
-        private elementRef: ElementRef<HTMLElement>,
-    ) {
+    constructor() {
         this.visibleDataColumns$ = this.getVisibleDataColumns();
         this.visibleColumnNames$ = this.getVisibleColumnNames();
         this.registerMaximumColumnsNumber();

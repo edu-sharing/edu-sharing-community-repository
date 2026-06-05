@@ -1,8 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
-@use '../nodes-selector/nodes-selector.component' as ns;
-@use '../submit-assignment/submit-assignment.component' as sa;
-@use '../manage-submission-nodes/manage-submission-nodes.component' as ms;
+@use '../submit-assignment/feedback-mixin' as fm;
+@use '../manage-submission-nodes/node-list-mixin' as ms;
 
 :host {
     overflow-y: auto;
@@ -25,7 +24,7 @@
     }
 
     .feedback {
-        @include sa.feedback();
+        @include fm.feedback();
         margin-bottom: 20px;
     }
     .node-list {

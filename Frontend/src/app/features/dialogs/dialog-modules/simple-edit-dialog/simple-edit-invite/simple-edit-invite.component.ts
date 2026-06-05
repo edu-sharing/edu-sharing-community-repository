@@ -1,5 +1,13 @@
 import { trigger } from '@angular/animations';
-import { ApplicationRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import {
+    ApplicationRef,
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { Ace, Acl, AuthenticationService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
@@ -39,6 +47,16 @@ class SimpleEditGroupConfig {
     standalone: false,
 })
 export class SimpleEditInviteComponent {
+    private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private connector = inject(RestConnectorService);
+    private applicationRef = inject(ApplicationRef);
+    private configService = inject(ConfigurationService);
+    private iamApi = inject(RestIamService);
+    private organizationApi = inject(RestOrganizationService);
+    authenticationService = inject(AuthenticationService);
+    private toast = inject(Toast);
+
     @ViewChild('orgGroup') orgGroup: MatButtonToggleGroup;
     @ViewChild('globalGroup') globalGroup: MatButtonToggleGroup;
     _nodes: Node[];
@@ -72,17 +90,7 @@ export class SimpleEditInviteComponent {
     @Output() initFinished = new EventEmitter<boolean>();
     @Output() errorEvent = new EventEmitter<any>();
 
-    constructor(
-        private nodeApi: RestNodeService,
-        private nodeService: NodeService,
-        private connector: RestConnectorService,
-        private applicationRef: ApplicationRef,
-        private configService: ConfigurationService,
-        private iamApi: RestIamService,
-        private organizationApi: RestOrganizationService,
-        public authenticationService: AuthenticationService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.configService
             .get('simpleEdit.organization.groupTypes', [RestConstants.GROUP_TYPE_ADMINISTRATORS])
             .subscribe(

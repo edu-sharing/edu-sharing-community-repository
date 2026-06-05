@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import {
     AboutService,
     AdminV1Service,
@@ -28,6 +28,16 @@ type variants = 'variables' | 'Language' | '';
     standalone: false,
 })
 export class AdminContextComponent implements OnInit {
+    private configService = inject(ConfigService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private configV1Service = inject(ConfigV1Service);
+    private adminV1Service = inject(AdminV1Service);
+    private aboutService = inject(AboutService);
+    private dialogsService = inject(DialogsService);
+    private uiService = inject(UIService);
+    private toast = inject(Toast);
+
     readonly ConfigVarians = ['values', 'language', 'variables'];
     @ViewChild('createFormRef') createFormRef: ElementRef;
     context: Context[];
@@ -50,17 +60,6 @@ export class AdminContextComponent implements OnInit {
     showValues = false;
     loading: boolean;
     currentId: string;
-    constructor(
-        private configService: ConfigService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private configV1Service: ConfigV1Service,
-        private adminV1Service: AdminV1Service,
-        private aboutService: AboutService,
-        private dialogsService: DialogsService,
-        private uiService: UIService,
-        private toast: Toast,
-    ) {}
 
     async ngOnInit() {
         this.aboutService.getOpenapiJson().subscribe((api) => {

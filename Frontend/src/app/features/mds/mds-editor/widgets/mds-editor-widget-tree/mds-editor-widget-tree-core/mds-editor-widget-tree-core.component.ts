@@ -11,6 +11,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
@@ -33,6 +34,11 @@ let nextUniqueId = 0;
     standalone: false,
 })
 export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
+    private toast = inject(Toast);
+    changeDetectorRef = inject(ChangeDetectorRef);
+    private mdsEditorInstanceService = inject(MdsEditorInstanceService);
+    private mdsService = inject(MdsV1Service);
+
     readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;
     @ViewChild('input') input: ElementRef;
     @Input() widget: Widget;
@@ -73,12 +79,6 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
     isTree: boolean;
     treeOpen: boolean;
-    constructor(
-        private toast: Toast,
-        public changeDetectorRef: ChangeDetectorRef,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private mdsService: MdsV1Service,
-    ) {}
 
     ngOnInit(): void {
         this.clearFilter();

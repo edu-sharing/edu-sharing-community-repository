@@ -7,18 +7,22 @@
   (change)="closeWithFiles($any($event.target).files)"
 />
 
-<div *ngIf="!hideFileUpload()" @openOverlay>
-  <div class="file-selection" *ngIf="selectedFiles().length" @openOverlay>
-    <div *ngFor="let file of selectedFiles()">
+@if (!hideFileUpload()) {
+<div @openOverlay>
+  @if (selectedFiles().length) {
+  <div class="file-selection" @openOverlay>
+    @for (file of selectedFiles(); track file) {
+    <div>
       <div class="name">{{ file.name }}</div>
       <div class="size">{{ file.size | formatSize }}</div>
       <button mat-icon-button color="primary">
         <i esIcon="clear" (click)="removeFile(file)"></i>
       </button>
     </div>
+    }
   </div>
+  } @if (!selectedFiles().length) {
   <div
-    *ngIf="!selectedFiles().length"
     class="dropArea"
     [class.dropActive]="isFileOver"
     esFileDrop
@@ -39,14 +43,18 @@
       >
     </div>
   </div>
-  <div class="quota" *ngIf="userQuota?.enabled">
+  } @if (userQuota?.enabled) {
+  <div class="quota">
     <es-user-quota [quota]="userQuota"></es-user-quota>
   </div>
-  <div class="separator-line uppercase" *ngIf="!selectedFiles().length">
+  } @if (!selectedFiles().length) {
+  <div class="separator-line uppercase">
     {{ 'WORKSPACE.SELECT_ORG' | translate }}
   </div>
+  }
 </div>
-<div class="link" *ngIf="!selectedFiles().length" @openOverlay>
+} @if (!selectedFiles().length) {
+<div class="link" @openOverlay>
   <div class="link-info">
     <mat-form-field>
       <mat-label>{{ 'WORKSPACE.SELECT_LINK' | translate }}</mat-label>
@@ -62,43 +70,40 @@
       />
     </mat-form-field>
   </div>
-  <es-spinner-small
-    *ngIf="loadingWebsiteInformation"
-    class="loading-website-information-spinner"
-  ></es-spinner-small>
-  <div class="link-details" *ngIf="websiteInformation?.page">
+  @if (loadingWebsiteInformation) {
+  <es-spinner-small class="loading-website-information-spinner"></es-spinner-small>
+  } @if (websiteInformation?.page) {
+  <div class="link-details">
     <div class="page-infos">
       <div class="title">
-        <ng-container *ngIf="websiteInformation.title">
-          {{ websiteInformation.title }} -
-        </ng-container>
+        @if (websiteInformation.title) {
+        {{ websiteInformation.title }} - }
         {{ websiteInformation.page }}
       </div>
       <div class="description">{{ websiteInformation.description }}</div>
     </div>
-    <ng-container *ngIf="websiteInformation.duplicateNodes?.length">
-      <es-info-message mode="warning">
-        {{ 'WORKSPACE.LINK_DUPLICATES_INFO' | translate }}
-      </es-info-message>
-      <div class="duplicate-nodes">
-        <es-node-url
-          *ngFor="let node of websiteInformation.duplicateNodes"
-          [node]="node"
-          [queryParams]="{ closeOnBack: true }"
-          target="_blank"
-        >
-          <es-node-row [node]="node" [columns]="columns"></es-node-row>
-        </es-node-url>
-      </div>
-    </ng-container>
+    @if (websiteInformation.duplicateNodes?.length) {
+    <es-info-message mode="warning">
+      {{ 'WORKSPACE.LINK_DUPLICATES_INFO' | translate }}
+    </es-info-message>
+    <div class="duplicate-nodes">
+      @for (node of websiteInformation.duplicateNodes; track node) {
+      <es-node-url [node]="node" [queryParams]="{ closeOnBack: true }" target="_blank">
+        <es-node-row [node]="node" [columns]="columns"></es-node-row>
+      </es-node-url>
+      }
+    </div>
+    }
   </div>
-  <div class="lti" *ngIf="currentData.showLti && ltiEnabled">
+  } @if (currentData.showLti && ltiEnabled) {
+  <div class="lti">
     <div>
       <mat-slide-toggle class="toggle-reverse" [(ngModel)]="ltiActivated">{{
         'WORKSPACE.ADD_OBJECT_LTI' | translate
       }}</mat-slide-toggle>
     </div>
-    <div class="lti-data" *ngIf="ltiActivated">
+    @if (ltiActivated) {
+    <div class="lti-data">
       <div class="heading">{{ 'WORKSPACE.LTI_HEADING' | translate }}</div>
       <div class="info">{{ 'WORKSPACE.LTI_INFO' | translate }}</div>
       <div class="inputs">
@@ -116,27 +121,33 @@
         innerHTML="{{ 'WORKSPACE.LTI_INFO_PRIVACY' | translate }}"
       ></div>
     </div>
+    }
   </div>
+  }
   <!-- Embedded-mode submit button: in dialog mode the OK button lives in the wrapper -->
-  <div class="link-submit" *ngIf="!data && !selectedFiles().length">
+  @if (!data && !selectedFiles().length) {
+  <div class="link-submit">
     <button mat-flat-button color="primary" [disabled]="!canSave()" (click)="setLink()">
       {{ 'WORKSPACE.ADD_LINK' | translate }}
     </button>
   </div>
-  <div *ngIf="currentData.chooseParent" class="location">
+  } @if (currentData.chooseParent) {
+  <div class="location">
     <div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
     <div class="picker-group">
-      <div class="no-breadcrumbs" *ngIf="(parent$ | async) === null">
+      @if ((parent$ | async) === null) {
+      <div class="no-breadcrumbs">
         {{ 'STORAGE_LOCATION_UNSET' | translate }}
       </div>
+      } @if (breadcrumbs) {
       <es-breadcrumbs
-        *ngIf="breadcrumbs"
         short="always"
         [clickable]="false"
         [showLanding]="false"
         [home]="breadcrumbs.homeLabel"
         [homeIcon]="breadcrumbs.homeIcon"
       ></es-breadcrumbs>
+      }
       <div class="change">
         <button
           mat-button
@@ -148,19 +159,19 @@
         </button>
       </div>
     </div>
-    <mat-checkbox
-      *ngIf="showSaveParent"
-      [(ngModel)]="saveParent"
-      (ngModelChange)="setSaveParent($event)"
+    @if (showSaveParent) {
+    <mat-checkbox [(ngModel)]="saveParent" (ngModelChange)="setSaveParent($event)"
       >{{ 'STORAGE_LOCATION_SAVE' | translate }}
     </mat-checkbox>
+    }
   </div>
+  }
 </div>
-<ng-container *ngIf="dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow)">
-  <ng-container
-    *ngTemplateOutlet="
-      dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow);
-      context: { dialog: this, data }
-    "
-  ></ng-container>
-</ng-container>
+} @if (dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow)) {
+<ng-container
+  *ngTemplateOutlet="
+    dialogs.getCustomTemplateSlot(DialogTemplate.AddMaterialDialogBelow);
+    context: { dialog: this, data }
+  "
+></ng-container>
+}

@@ -1,12 +1,13 @@
 <div class="es-topic-header-widget">
-  <div class="template-header-content" *ngIf="initialized(); else loadingSpinner">
+  @if (initialized()) {
+  <div class="template-header-content">
     <div
       class="topic-text-wrapper"
       [class.bright-color]="isDarkColor(textBackgroundColor)"
       [style.background]="textBackgroundColor"
     >
+      @if (editMode) {
       <es-color-picker
-        *ngIf="editMode"
         class="topic-header-color-picker"
         [selectedColor]="textBackgroundColor"
         [acceptLabel]="'APPLY'"
@@ -16,19 +17,22 @@
         [customColor]="DEFAULT_HEADER_TEXT_BG_COLOR"
         (colorChange)="changeTextBackgroundColor($event)"
       ></es-color-picker>
+      }
       <!-- order of parent entries: -->
       <!-- * topic page node (e.g., Optik), -->
       <!-- * portal page node (e.g., Physik), -->
       <!-- * general portals node (e.g., Portale) -->
       <!-- note: at least three nodes have to be present (e.g., Optik -> Physik) -->
-      <div *ngIf="parentEntries()?.nodes?.length > 2" class="topic-page-subject-portal-label">
+      @if (parentEntries()?.nodes?.length > 2) {
+      <div class="topic-page-subject-portal-label">
         {{ i18nPrefix + 'TOPIC_PAGE_SUBJECT_PORTAL_LABEL' | translate }}
         {{ parentEntries().nodes[parentEntries().nodes.length - 2].title }}
       </div>
+      }
       <h1 class="mat-heading-1 topic-header-title">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
+        @if (backToCollectionButtonVisible()) {
         <button
-          *ngIf="backToCollectionButtonVisible()"
           mat-flat-button
           color="primary"
           [routerLink]="['/' + ROUTER_PREFIX + 'collections']"
@@ -38,9 +42,10 @@
         >
           <i esIcon="layers"></i>
         </button>
+        }
       </h1>
+      @if (collectionDescription || editMode) {
       <es-editable-text
-        *ngIf="collectionDescription || editMode"
         [aiGenerated]="aiGeneratedDescription()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
@@ -53,7 +58,8 @@
         [(text)]="collectionDescription"
         (textChange)="onCollectionDescriptionChanged(collectionDescription)"
       ></es-editable-text>
-      <h2 class="mat-heading-3 font-bold" *ngIf="description || editMode">
+      } @if (description || editMode) {
+      <h2 class="mat-heading-3 font-bold">
         <i esIcon="edu-lightbulb" class="important-header-icon"></i>
         <span
           [innerHTML]="
@@ -61,8 +67,8 @@
           "
         ></span>
       </h2>
+      } @if (description || editMode) {
       <es-editable-text
-        *ngIf="description || editMode"
         [aiGenerated]="aiGeneratedText()"
         [applyTextareaPadding]="false"
         [editable]="editMode"
@@ -74,6 +80,7 @@
         [(text)]="description"
         (textChange)="onDescriptionChanged()"
       ></es-editable-text>
+      }
     </div>
     <es-image-wrapper
       [(aiGeneratedImage)]="aiGeneratedImage"
@@ -87,7 +94,7 @@
       (persistConfig)="persistConfig()"
     ></es-image-wrapper>
   </div>
-  <ng-template #loadingSpinner>
-    <es-spinner></es-spinner>
-  </ng-template>
+  } @else {
+  <es-spinner></es-spinner>
+  }
 </div>

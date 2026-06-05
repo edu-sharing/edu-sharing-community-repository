@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RestConnectorService, RestConstants } from '../../../../../../core-module/core.module';
@@ -12,6 +12,10 @@ import { Values } from '../../../../types/types';
     standalone: false,
 })
 export class LicenseDetailsComponent implements OnChanges {
+    private connector = inject(RestConnectorService);
+    private translate = inject(TranslateService);
+    private nodeHelper = inject(NodeHelperService);
+
     static PROPERTIES_MAPPING_GRAPHQL: { [key: string]: string } = {
         [RestConstants.CCM_PROP_LICENSE]: 'lom.rights.internal',
         [RestConstants.LOM_PROP_RIGHTS_DESCRIPTION]: 'lom.rights.description',
@@ -35,12 +39,6 @@ export class LicenseDetailsComponent implements OnChanges {
     copyrightType: string;
     eduDownload: boolean;
     rightsDescription: string;
-
-    constructor(
-        private connector: RestConnectorService,
-        private translate: TranslateService,
-        private nodeHelper: NodeHelperService,
-    ) {}
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.
         if (changes.nodes?.currentValue || changes.properties?.currentValue) {

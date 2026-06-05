@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
@@ -13,6 +13,9 @@ import { Toast } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComponent {
+    mdsEditorValues = inject(MdsEditorInstanceService);
+    private toast = inject(Toast);
+
     static readonly constraints: Constraints = {
         requiresNode: true,
         supportsBulk: false,
@@ -24,8 +27,6 @@ export class MdsEditorWidgetVersionComponent implements OnInit, NativeWidgetComp
     comment: string;
     file: File;
     show: boolean;
-
-    constructor(public mdsEditorValues: MdsEditorInstanceService, private toast: Toast) {}
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$

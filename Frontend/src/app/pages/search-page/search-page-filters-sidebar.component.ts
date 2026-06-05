@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
@@ -16,6 +16,12 @@ import { SearchFieldInternalService } from '../../main/navigation/search-field/s
     standalone: false,
 })
 export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
+    private searchPage = inject(SearchPageService);
+    private dialogs = inject(DialogsService);
+    private translate = inject(TranslateService);
+    private breakpointObserver = inject(BreakpointObserver);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
@@ -25,14 +31,6 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
-
-    constructor(
-        private searchPage: SearchPageService,
-        private dialogs: DialogsService,
-        private translate: TranslateService,
-        private breakpointObserver: BreakpointObserver,
-        private searchFieldInternalService: SearchFieldInternalService,
-    ) {}
 
     ngOnInit(): void {
         this.registerFilterDialog();

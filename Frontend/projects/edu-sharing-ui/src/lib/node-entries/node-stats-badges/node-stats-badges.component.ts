@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input, Optional } from '@angular/core';
+import { Component, HostBinding, Input, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { ClickSource } from '../entries-model';
 import { NodeEntriesService } from '../../services/node-entries.service';
@@ -10,6 +10,8 @@ import { NodeEntriesService } from '../../services/node-entries.service';
     standalone: false,
 })
 export class NodeStatsBadgesComponent {
+    entriesService = inject<NodeEntriesService<Node>>(NodeEntriesService, { optional: true });
+
     readonly ClickSource = ClickSource;
 
     childObjectCount = 0;
@@ -27,11 +29,6 @@ export class NodeStatsBadgesComponent {
     @HostBinding('attr.backgroundStyle')
     @Input()
     backgroundStyle: 'darken' | 'lighten' = 'lighten';
-
-    constructor(
-        @Optional()
-        public entriesService: NodeEntriesService<Node>,
-    ) {}
 
     private getChildObjectCount(node: Node): number {
         const value = node.properties?.['virtual:childobjectcount']?.[0];

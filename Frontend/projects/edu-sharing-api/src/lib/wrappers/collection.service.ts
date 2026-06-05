@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { CollectionV1Service } from '../api/services';
@@ -13,10 +13,10 @@ import { Copy } from '../api/models/copy';
     providedIn: 'root',
 })
 export class CollectionService {
+    private collectionV1 = inject(CollectionV1Service);
+
     private static readonly collectionCache = new KeyCache();
     private static readonly subCollectionsCache = new KeyCache();
-
-    constructor(private collectionV1: CollectionV1Service) {}
 
     getCollection(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         // TODO: Wrap other endpoints and reset not on get, but on modifying actions.

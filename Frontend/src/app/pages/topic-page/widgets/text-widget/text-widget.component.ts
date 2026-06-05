@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     Component,
     CUSTOM_ELEMENTS_SCHEMA,
@@ -21,7 +20,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
 @Component({
     selector: 'es-text-widget',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [CommonModule, SpinnerComponent, TranslateModule, WidgetConfigurationButtonsComponent],
+    imports: [SpinnerComponent, TranslateModule, WidgetConfigurationButtonsComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
     templateUrl: './text-widget.component.html',
     styleUrls: ['./text-widget.component.scss'],

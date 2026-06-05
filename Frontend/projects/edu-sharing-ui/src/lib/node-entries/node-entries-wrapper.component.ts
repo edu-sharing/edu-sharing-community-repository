@@ -18,6 +18,7 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
@@ -72,10 +73,9 @@ import { TreeNodeService } from './node-entries-tree/tree-node.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: `<es-node-entries
-        #nodeEntriesComponent
-        *ngIf="!customNodeListComponent"
-    ></es-node-entries>`,
+    template: `@if (!customNodeListComponent) {
+        <es-node-entries #nodeEntriesComponent></es-node-entries>
+        }`,
     providers: [
         NodeEntriesService,
         OptionsHelperDataService,
@@ -87,6 +87,22 @@ import { TreeNodeService } from './node-entries-tree/tree-node.service';
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    private viewContainerRef = inject(ViewContainerRef);
+    private temporaryStorageService = inject(TemporaryStorageService);
+    private ngZone = inject(NgZone);
+    private entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    private nodeService = inject(NodeService);
+    optionsHelper = inject(OptionsHelperDataService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private nodeHelperService = inject(NodeHelperService);
+    private uiService = inject(UIService);
+    private templatesService = inject(NodeEntriesTemplatesService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private elementRef = inject(ElementRef);
+    public treeNodeService = inject(TreeNodeService);
+    // @TODO
+    // private mainNav = inject(MainNavService);
+
     /**
      * title (above) the table/grid
      */
@@ -189,23 +205,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private dataSourceDestroy$ = new Subject<void>();
     private destroyed = new Subject<void>();
 
-    constructor(
-        private viewContainerRef: ViewContainerRef,
-        private temporaryStorageService: TemporaryStorageService,
-        private ngZone: NgZone,
-        private entriesService: NodeEntriesService<T>,
-        private nodeService: NodeService,
-        public optionsHelper: OptionsHelperDataService,
-        private optionsHelperService: OptionsHelperService,
-        private nodeHelperService: NodeHelperService,
-        private uiService: UIService,
-        // @TODO
-        // private mainNav: MainNavService,
-        private templatesService: NodeEntriesTemplatesService,
-        private changeDetectorRef: ChangeDetectorRef,
-        private elementRef: ElementRef,
-        public treeNodeService: TreeNodeService,
-    ) {
+    constructor() {
         // regulary re-bind template since it might have updated without ngChanges trigger
         /*
         ngZone.runOutsideAngular(() =>

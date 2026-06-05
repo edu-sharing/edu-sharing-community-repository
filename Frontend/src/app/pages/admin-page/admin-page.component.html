@@ -13,12 +13,8 @@
     <tr mat-row *matRowDef="let row; columns: ['key', 'value']"></tr>
   </table>
 </ng-template>
-<es-card
-  *ngIf="cancelJobInfo"
-  [title]="'ADMIN.JOBS.CANCEL_TITLE' | translate"
-  [buttons]="cancelJobButtons"
-  height="auto"
->
+@if (cancelJobInfo) {
+<es-card [title]="'ADMIN.JOBS.CANCEL_TITLE' | translate" [buttons]="cancelJobButtons" height="auto">
   <div class="card-content-padding">
     <div class="cancel-job-message">{{ 'ADMIN.JOBS.CANCEL_MESSAGE' | translate }}</div>
     <mat-checkbox [(ngModel)]="jobForceCancel" [ngModelOptions]="{ standalone: true }">
@@ -33,13 +29,14 @@
     </mat-checkbox>
   </div>
 </es-card>
+}
 <div class="main">
   <div class="main-nav">
     <div>
+      @for (button of buttons; track button) {
       <div
         matRipple
         matRippleColor="primary"
-        *ngFor="let button of buttons"
         class="button clickable"
         [class.active]="mode === button.id"
         tabindex="0"
@@ -48,6 +45,7 @@
       >
         <i [esIcon]="button.icon"></i><span>{{ 'ADMIN.MODE.' + button.id | translate }}</span>
       </div>
+      }
     </div>
   </div>
   <div
@@ -57,8 +55,10 @@
   >
     <h1 esTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
     <!-- for dynamically added components from extensions -->
-    <ng-template *ngIf="getModeButton() && getModeButton().factory" #dynamic></ng-template>
-    <div *ngIf="modeIsActive('INFO')" class="content info">
+    @if (getModeButton() && getModeButton().factory) {
+    <ng-template #dynamic></ng-template>
+    } @if (modeIsActive('INFO')) {
+    <div class="content info">
       <div class="heading">{{ 'ADMIN.INFO.REPOSITORY' | translate }}</div>
       <div class="version">{{ repositoryVersion }}</div>
       <div class="heading">{{ 'ADMIN.INFO.SYSTEM_CHECKS' | translate }}</div>
@@ -66,8 +66,8 @@
         <div class="reload">
           <i class="material-icons clickable" (click)="runChecks()">refresh</i>
         </div>
+        @for (check of getChecks(systemChecks); track check) {
         <div
-          *ngFor="let check of getChecks(systemChecks)"
           class="check"
           [class.check-fail]="check.status === 'FAIL'"
           [class.check-ok]="check.status === 'OK'"
@@ -84,15 +84,16 @@
                   | translate : check.translate
               }}
             </div>
-            <div *ngIf="check.status !== 'OK' && check.status !== 'INFO'" class="solution">
+            @if (check.status !== 'OK' && check.status !== 'INFO') {
+            <div class="solution">
               <i class="material-icons">forward</i>
               <div>
                 {{ 'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION' | translate : check.translate }}
                 <div>
+                  @if (check.status !== 'OK' && check.callback) {
                   <button
                     mat-button
                     color="primary"
-                    *ngIf="check.status !== 'OK' && check.callback"
                     class="solution-link clickable"
                     (click)="check.callback()"
                   >
@@ -101,12 +102,15 @@
                         | translate : check.translate
                     }}
                   </button>
+                  }
                 </div>
               </div>
             </div>
+            }
           </div>
           <i class="material-icons">{{ check.status === 'OK' ? 'check' : 'error_outline' }}</i>
         </div>
+        }
       </div>
       <div class="heading">{{ 'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate }}</div>
       <div class="checks-toolpermissions">
@@ -114,8 +118,8 @@
           <i class="material-icons clickable" (click)="runTpChecks()">refresh</i>
         </div>
         <div class="info">{{ 'ADMIN.INFO.TP_CHECK.INFO' | translate }}</div>
+        @for (check of getChecks(tpChecks); track check) {
         <div
-          *ngFor="let check of getChecks(tpChecks)"
           class="check"
           [class.check-fail]="check.status === 'FAIL'"
           [class.check-ok]="check.status === 'OK'"
@@ -125,7 +129,8 @@
           <div class="data">
             <div class="title">{{ 'TOOLPERMISSION.' + check.name | translate }}</div>
             <div class="tp-name">{{ check.name | translate }}</div>
-            <div *ngIf="check.status !== 'OK' && check.status !== 'INFO'" class="solution">
+            @if (check.status !== 'OK' && check.status !== 'INFO') {
+            <div class="solution">
               <div>
                 {{ 'ADMIN.INFO.TP_CHECK.AUTO_FIX' | translate }}
                 <div>
@@ -140,25 +145,30 @@
                 </div>
               </div>
             </div>
+            }
           </div>
           <i class="material-icons">{{ check.status === 'OK' ? 'check' : 'error_outline' }}</i>
         </div>
+        }
       </div>
     </div>
-    <div *ngIf="modeIsActive('MESSAGES')" class="content messages">
+    } @if (modeIsActive('MESSAGES')) {
+    <div class="content messages">
       <es-admin-messages></es-admin-messages>
     </div>
-
-    <div *ngIf="modeIsActive('CONFIG')" class="content config">
+    } @if (modeIsActive('CONFIG')) {
+    <div class="content config">
       <div class="heading">
         <i class="material-icons">build</i><span>{{ 'ADMIN.CONFIG.XML_CONFIG' | translate }}</span>
       </div>
       <div class="group xml">
-        <div *ngFor="let xml of editableXmls">
+        @for (xml of editableXmls; track xml) {
+        <div>
           <button mat-raised-button color="primary" (click)="editApp(xml)">
             {{ 'ADMIN.APPLICATIONS.EDIT_APP' | translate : { xml: xml.file } }}
           </button>
         </div>
+        }
       </div>
       <div class="heading">
         <i class="material-icons">mail</i><span>{{ 'ADMIN.CONFIG.TEST_MAIL' | translate }}</span>
@@ -177,9 +187,9 @@
             <mat-form-field>
               <mat-label>{{ 'ADMIN.CONFIG.TEST_MAIL_TEMPLATE_LABEL' | translate }}</mat-label>
               <mat-select name="template" [(ngModel)]="mailTemplate">
-                <mat-option *ngFor="let template of mailTemplates" [value]="template">{{
-                  template
-                }}</mat-option>
+                @for (template of mailTemplates; track template) {
+                <mat-option [value]="template">{{ template }}</mat-option>
+                }
               </mat-select>
             </mat-form-field>
           </div>
@@ -193,25 +203,32 @@
         </form>
       </div>
     </div>
-    <div *ngIf="modeIsActive('STATISTICS')" class="content statistics">
+    } @if (modeIsActive('STATISTICS')) {
+    <div class="content statistics">
       <es-admin-statistics (openNode)="openNodeRender($event)"></es-admin-statistics>
     </div>
-    <div *ngIf="modeIsActive('MEDIACENTER')" class="content mediacenter">
+    } @if (modeIsActive('MEDIACENTER')) {
+    <div class="content mediacenter">
       <es-admin-mediacenter (openNode)="openNodeRender($event)"></es-admin-mediacenter>
     </div>
-    <div *ngIf="modeIsActive('FRONTPAGE')" class="content frontpage">
+    } @if (modeIsActive('FRONTPAGE')) {
+    <div class="content frontpage">
       <es-admin-frontpage (openNode)="openNodeRender($event)"></es-admin-frontpage>
     </div>
-    <div *ngIf="modeIsActive('CONTEXT')" class="content context">
+    } @if (modeIsActive('CONTEXT')) {
+    <div class="content context">
       <es-admin-context-editor></es-admin-context-editor>
     </div>
-    <div *ngIf="modeIsActive('GLOBAL_CONFIG')" class="content global-config">
+    } @if (modeIsActive('GLOBAL_CONFIG')) {
+    <div class="content global-config">
       <es-admin-config></es-admin-config>
     </div>
-    <div *ngIf="modeIsActive('PLUGINS')" class="content plugins">
+    } @if (modeIsActive('PLUGINS')) {
+    <div class="content plugins">
       <es-admin-plugins></es-admin-plugins>
     </div>
-    <div *ngIf="modeIsActive('APPLICATIONS')" class="content applications">
+    } @if (modeIsActive('APPLICATIONS')) {
+    <div class="content applications">
       <input
         #xmlSelect
         type="file"
@@ -283,7 +300,8 @@
         <span>{{ 'ADMIN.APPLICATIONS.LIST' | translate }}</span>
       </h4>
       <mat-accordion [multi]="true">
-        <mat-expansion-panel *ngFor="let type of getAppTypes()" [expanded]="true">
+        @for (type of getAppTypes(); track type) {
+        <mat-expansion-panel [expanded]="true">
           <mat-expansion-panel-header>
             <mat-panel-title>{{ type }} ({{ getApplications(type).length }})</mat-panel-title>
           </mat-expansion-panel-header>
@@ -299,21 +317,19 @@
               <div class="download">&nbsp;</div>
               <div class="delete">&nbsp;</div>
             </div>
-            <div *ngFor="let app of getApplications(type)">
+            @for (app of getApplications(type); track app) {
+            <div>
               <div class="id">{{ app.id }}</div>
               <div class="title">{{ app.title }}</div>
               <div class="file">{{ app.file }}</div>
               <div class="repoType">{{ app.repositoryType }}</div>
               <div class="subtype">{{ app.subtype }}</div>
               <div class="config">
-                <button
-                  mat-icon-button
-                  color="primary"
-                  *ngIf="app.configUrl"
-                  (click)="configApp(app)"
-                >
+                @if (app.configUrl) {
+                <button mat-icon-button color="primary" (click)="configApp(app)">
                   <i esIcon="settings" class="clickable"></i>
                 </button>
+                }
               </div>
               <div class="edit">
                 <button mat-icon-button color="primary" (click)="editApp(app)">
@@ -331,11 +347,14 @@
                 </button>
               </div>
             </div>
+            }
           </div>
         </mat-expansion-panel>
+        }
       </mat-accordion>
     </div>
-    <div *ngIf="modeIsActive('UPDATE')" class="content update">
+    } @if (modeIsActive('UPDATE')) {
+    <div class="content update">
       <div class="hint">
         {{ 'ADMIN.UPDATE.HINT' | translate }}
       </div>
@@ -347,17 +366,17 @@
           <div class="test">{{ 'ADMIN.UPDATE.TEST' | translate }}</div>
           <div class="run">{{ 'ADMIN.UPDATE.RUN' | translate }}</div>
         </div>
-        <div
-          *ngFor="let update of updates"
-          class="tableRow"
-          [class.table-not-executed]="!update.executedAt"
-        >
+        @for (update of updates; track update) {
+        <div class="tableRow" [class.table-not-executed]="!update.executedAt">
           <div class="id">{{ update.id }}</div>
           <div class="description">{{ update.description }}</div>
-          <div class="date" *ngIf="!update.executedAt">
+          @if (!update.executedAt) {
+          <div class="date">
             {{ 'ADMIN.UPDATE.NOT_EXECUTED' | translate }}
           </div>
-          <div class="date" *ngIf="update.executedAt">{{ update.executedAt | formatDate }}</div>
+          } @if (update.executedAt) {
+          <div class="date">{{ update.executedAt | formatDate }}</div>
+          }
           <div class="test">
             <button mat-button color="primary" (click)="runUpdate(update, false)">
               {{ 'ADMIN.UPDATE.TEST' | translate }}
@@ -373,10 +392,14 @@
             </button>
           </div>
         </div>
+        }
       </div>
-      <es-spinner class="updates-loading" *ngIf="updates.length === 0"></es-spinner>
+      @if (updates.length === 0) {
+      <es-spinner class="updates-loading"></es-spinner>
+      }
     </div>
-    <div *ngIf="modeIsActive('IMPORT')" class="content import">
+    } @if (modeIsActive('IMPORT')) {
+    <div class="content import">
       <div class="heading">
         <i class="material-icons">layers</i><span>{{ 'ADMIN.IMPORT.COLLECTION' | translate }}</span>
       </div>
@@ -403,16 +426,18 @@
             'ADMIN.IMPORT.PARENT_COLLECTION_CHOOSE' | translate
           }}</mat-radio-button>
         </mat-radio-group>
-        <div class="inputGroup" *ngIf="parentCollectionType === 'choose'">
+        @if (parentCollectionType === 'choose') {
+        <div class="inputGroup">
           <button mat-raised-button (click)="chooseCollection()">
             {{ 'ADMIN.IMPORT.CHOOSE_COLLECTION' | translate }}
           </button>
           <div class="directory">
-            <div *ngIf="parentCollection">
-              {{ parentCollection.title }} ({{ parentCollection.ref.id }})
-            </div>
+            @if (parentCollection) {
+            <div>{{ parentCollection.title }} ({{ parentCollection.ref.id }})</div>
+            }
           </div>
         </div>
+        }
         <button mat-raised-button color="primary" (click)="importCollections()">
           {{ 'ADMIN.IMPORT.COLLECTION_START' | translate }}
         </button>
@@ -440,7 +465,9 @@
             {{ 'ADMIN.IMPORT.CHOOSE_DIRECTORY' | translate }}
           </button>
           <div class="directory">
-            <div *ngIf="parentNode">{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+            @if (parentNode) {
+            <div>{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+            }
           </div>
         </div>
         <div class="inputGroup">
@@ -470,7 +497,8 @@
           </button>
           <div class="file">{{ uploadOaiFile ? uploadOaiFile.name : '' }}</div>
         </div>
-        <div *ngIf="!uploadOaiFile">
+        @if (!uploadOaiFile) {
+        <div>
           <mat-form-field>
             <mat-label>{{ 'ADMIN.IMPORT.OAI_URL' | translate }}</mat-label>
             <input matInput type="text" [(ngModel)]="oai.url" />
@@ -511,12 +539,13 @@
           <mat-form-field>
             <mat-label>{{ 'ADMIN.IMPORT.OAI_CLASS_NAME' | translate }}</mat-label>
             <mat-select [(ngModel)]="oai.className">
-              <mat-option *ngFor="let option of oaiClasses" [value]="option">{{
-                option
-              }}</mat-option>
+              @for (option of oaiClasses; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
+        }
         <mat-form-field>
           <mat-label>{{ 'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate }}</mat-label>
           <input matInput type="text" [(ngModel)]="oai.importerClassName" />
@@ -544,39 +573,40 @@
           }}</mat-hint>
         </mat-form-field>
         <!--
-        <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
-    <input type="text" id="OAI_URL" [(ngModel)]="oai.url">
-    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</div>
-    <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_SET' | translate}}</label>
-    <input type="text" id="OAI_SET" [(ngModel)]="oai.set">
-      <label for="OAI_PREFIX">{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}</label>
-      <input type="text" id="OAI_PREFIX" [(ngModel)]="oai.prefix">
-      <label for="OAI_METADATA">{{'ADMIN.IMPORT.OAI_METADATA' | translate}}</label>
-      <input type="text" id="OAI_METADATA" [(ngModel)]="oai.metadata">
-      <label for="OAI_FILE">{{'ADMIN.IMPORT.OAI_FILE' | translate}}</label>
-      <input type="text" id="OAI_FILE" [(ngModel)]="oai.file">
-      <label for="OAI_IDS">{{'ADMIN.IMPORT.OAI_IDS' | translate}}</label>
-      <input type="text" id="OAI_IDS" [(ngModel)]="oai.ids">
-      <label for="OAI_CLASS_NAME">{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</label>
-      <select id="OAI_CLASS_NAME" [(ngModel)]="oai.className">
-        <option *ngFor="let option of oaiClasses" [value]="option">{{ option }}</option>
-      </select>
-      <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</label>
-      <input type="text" id="OAI_IMPORTER_CLASS_NAME" [(ngModel)]="oai.importerClassName">
-    </div>
-    <label for="OAI_RECORD_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</label>
-    <input type="text" id="OAI_RECORD_HANDLER_CLASS_NAME" [(ngModel)]="oai.recordHandlerClassName">
-    <div class="input-hint-bottom"></div>
-
-    <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
-    <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
-    <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
-    -->
-        <div class="oaiForce" *ngIf="!uploadOaiFile">
+          <label for="OAI_URL">{{'ADMIN.IMPORT.OAI_URL' | translate}}</label>
+          <input type="text" id="OAI_URL" [(ngModel)]="oai.url">
+          <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_URL_EXAMPLE' | translate}}</div>
+          <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_SET' | translate}}</label>
+          <input type="text" id="OAI_SET" [(ngModel)]="oai.set">
+          <label for="OAI_PREFIX">{{'ADMIN.IMPORT.OAI_PREFIX' | translate}}</label>
+          <input type="text" id="OAI_PREFIX" [(ngModel)]="oai.prefix">
+          <label for="OAI_METADATA">{{'ADMIN.IMPORT.OAI_METADATA' | translate}}</label>
+          <input type="text" id="OAI_METADATA" [(ngModel)]="oai.metadata">
+          <label for="OAI_FILE">{{'ADMIN.IMPORT.OAI_FILE' | translate}}</label>
+          <input type="text" id="OAI_FILE" [(ngModel)]="oai.file">
+          <label for="OAI_IDS">{{'ADMIN.IMPORT.OAI_IDS' | translate}}</label>
+          <input type="text" id="OAI_IDS" [(ngModel)]="oai.ids">
+          <label for="OAI_CLASS_NAME">{{'ADMIN.IMPORT.OAI_CLASS_NAME' | translate}}</label>
+          <select id="OAI_CLASS_NAME" [(ngModel)]="oai.className">
+            <option *ngFor="let option of oaiClasses" [value]="option">{{ option }}</option>
+          </select>
+          <label for="OAI_SET">{{'ADMIN.IMPORT.OAI_IMPORTER_CLASS_NAME' | translate}}</label>
+          <input type="text" id="OAI_IMPORTER_CLASS_NAME" [(ngModel)]="oai.importerClassName">
+        </div>
+        <label for="OAI_RECORD_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_RECORD_HANDLER_CLASS_NAME' | translate}}</label>
+        <input type="text" id="OAI_RECORD_HANDLER_CLASS_NAME" [(ngModel)]="oai.recordHandlerClassName">
+        <div class="input-hint-bottom"></div>
+        <label for="OAI_BINARY_HANDLER_CLASS_NAME">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME' | translate}}</label>
+        <input type="text" id="OAI_BINARY_HANDLER_CLASS_NAME" [(ngModel)]="oai.binaryHandlerClassName">
+        <div class="input-hint-bottom">{{'ADMIN.IMPORT.OAI_BINARY_HANDLER_CLASS_NAME_EXAMPLE' | translate}}</div>
+        -->
+        @if (!uploadOaiFile) {
+        <div class="oaiForce">
           <mat-checkbox [(ngModel)]="oai.forceUpdate">{{
             'ADMIN.IMPORT.OAI_FORCE_UPDATE' | translate
           }}</mat-checkbox>
         </div>
+        }
         <div class="oaiSave">
           <mat-checkbox [(ngModel)]="oaiSave">{{
             'ADMIN.IMPORT.OAI_SAVE' | translate
@@ -592,11 +622,14 @@
         </div>
       </div>
     </div>
-    <div *ngIf="modeIsActive('JOBS')" class="content jobs">
-      <div class="heading" *ngIf="jobs !== null">
+    } @if (modeIsActive('JOBS')) {
+    <div class="content jobs">
+      @if (jobs !== null) {
+      <div class="heading">
         <i class="material-icons">done</i><span>{{ 'ADMIN.JOBS.START_JOB' | translate }}</span>
       </div>
-      <section class="group" *ngIf="jobs !== null">
+      } @if (jobs !== null) {
+      <section class="group">
         <form>
           <div class="inputGroupGrow">
             <div class="info">{{ 'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
@@ -610,39 +643,46 @@
                 (addItem)="setJob($event)"
                 (addAny)="job.name = ''; job.class = $event"
               ></es-autocomplete>
-              <div class="job-title" *ngIf="job && job.name">{{ job.name | translate }}</div>
-              <div class="job-class" *ngIf="job && job.class">{{ job.class }}</div>
+              @if (job && job.name) {
+              <div class="job-title">{{ job.name | translate }}</div>
+              } @if (job && job.class) {
+              <div class="job-class">{{ job.class }}</div>
+              }
             </div>
           </div>
-          <div class="inputGroupRow params" *ngIf="job.object?.params?.length">
+          @if (job.object?.params?.length) {
+          <div class="inputGroupRow params">
             <h5 class="mat-heading-5">{{ 'ADMIN.JOBS.PARAMETERS' | translate }}</h5>
             <div class="param-table">
-              <div class="param-row" *ngFor="let param of job.object.params">
+              @for (param of job.object.params; track param) {
+              <div class="param-row">
                 <div class="param-name">
                   {{ param.name }}
-                  <span *ngIf="param.array">[]</span>
-                  <span *ngIf="param.file">(file)</span>
+                  @if (param.array) {
+                  <span>[]</span>
+                  } @if (param.file) {
+                  <span>(file)</span>
+                  }
                 </div>
                 <div>{{ param.description }}</div>
                 <div class="param-value">
-                  <ng-container *ngIf="param.values">
-                    <div class="param-table">
-                      <div class="param-row" *ngFor="let value of param.values">
-                        <div>
-                          {{ value.name }}
-                        </div>
-                        <div>{{ value.description }}</div>
+                  @if (param.values) {
+                  <div class="param-table">
+                    @for (value of param.values; track value) {
+                    <div class="param-row">
+                      <div>
+                        {{ value.name }}
                       </div>
+                      <div>{{ value.description }}</div>
                     </div>
-                  </ng-container>
-                  <ng-container *ngIf="!param.values">
-                    <ng-container *ngIf="param.file"> File </ng-container>
-                    <ng-container *ngIf="!param.file">
-                      {{ param.type.replace('java.lang.', '') }}
-                    </ng-container>
-                  </ng-container>
+                    }
+                  </div>
+                  } @if (!param.values) { @if (param.file) { File } @if (!param.file) {
+                  {{ param.type.replace('java.lang.', '') }}
+                  } }
                 </div>
               </div>
+              }
             </div>
             <div>
               <button mat-raised-button (click)="setJobParamsTemplate()">
@@ -650,6 +690,7 @@
               </button>
             </div>
           </div>
+          }
           <es-code-editor
             [options]="jobCodeOptions"
             [(ngModel)]="job.params"
@@ -657,7 +698,8 @@
             name="jobParams"
             class="jobParams materialize-textarea"
           ></es-code-editor>
-          <div class="inputGroupGrow" *ngIf="supportsUpload(job.object)">
+          @if (supportsUpload(job.object)) {
+          <div class="inputGroupGrow">
             <input
               #uploadJobSelect
               type="file"
@@ -672,26 +714,33 @@
               <div class="file">{{ uploadJobsFile?.name }}</div>
             </div>
           </div>
+          }
           <button mat-raised-button (click)="startJob()" [disabled]="jobs === null">
             {{ 'ADMIN.JOBS.START_JOB' | translate }}
           </button>
         </form>
       </section>
+      }
       <div class="heading">
         <i class="material-icons">history</i><span>{{ 'ADMIN.JOBS.LIST' | translate }}</span>
       </div>
       <div class="group">
         <div class="reload">
-          <es-spinner-small *ngIf="jobsLoading"></es-spinner-small>
+          @if (jobsLoading) {
+          <es-spinner-small></es-spinner-small>
+          }
           <i class="material-icons clickable" (click)="reloadJobs()">refresh</i>
         </div>
-        <es-info-message *ngIf="jobs === null">
+        @if (jobs === null) {
+        <es-info-message>
           {{ 'ADMIN.JOBS.CLUSTER_NOT_SUPPORTED' | translate }}
         </es-info-message>
-        <div class="no-jobs" *ngIf="jobs?.length === 0">
+        } @if (jobs?.length === 0) {
+        <div class="no-jobs">
           {{ 'ADMIN.JOBS.NO_JOBS' | translate }}
         </div>
-        <div *ngFor="let job of jobs; let i = index" class="job">
+        } @for (job of jobs; track job; let i = $index) {
+        <div class="job">
           <div class="job-col">
             <div
               class="job-row job-main"
@@ -707,29 +756,28 @@
               <div class="job-col col-time">
                 <div class="date">
                   {{ job.startTime | formatDate : { time: true, relative: false } }}
-                  <span *ngIf="job.finishTime">
+                  @if (job.finishTime) {
+                  <span>
                     - {{ job.finishTime | formatDate : { time: true, relative: false } }}
                   </span>
+                  }
                 </div>
                 <div class="job-status {{ job.status.toLowerCase() }}">
                   <span>
                     {{ 'ADMIN.JOBS.' + job.status | translate }}
-                    <span *ngIf="job.worstLevel.syslogEquivalent === 4">{{
-                      'ADMIN.JOBS.WITH_WARNINGS' | translate
-                    }}</span>
-                    <span *ngIf="job.worstLevel.syslogEquivalent < 4">{{
-                      'ADMIN.JOBS.WITH_ERRORS' | translate
-                    }}</span>
+                    @if (job.worstLevel.syslogEquivalent === 4) {
+                    <span>{{ 'ADMIN.JOBS.WITH_WARNINGS' | translate }}</span>
+                    } @if (job.worstLevel.syslogEquivalent < 4) {
+                    <span>{{ 'ADMIN.JOBS.WITH_ERRORS' | translate }}</span>
+                    }
                   </span>
-                  <es-spinner-small *ngIf="job.status === 'Running'"></es-spinner-small>
-                  <button
-                    mat-icon-button
-                    *ngIf="job.status === 'Running'"
-                    (click)="cancelJob(job)"
-                    class="close"
-                  >
+                  @if (job.status === 'Running') {
+                  <es-spinner-small></es-spinner-small>
+                  } @if (job.status === 'Running') {
+                  <button mat-icon-button (click)="cancelJob(job)" class="close">
                     <i esIcon="close"></i>
                   </button>
+                  }
                 </div>
               </div>
               <div
@@ -741,13 +789,17 @@
                     : null
                 "
               >
-                <i class="material-icons" *ngIf="job.log === null || job.log?.length">{{
+                @if (job.log === null || job.log?.length) {
+                <i class="material-icons">{{
                   jobsOpen[i] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'
                 }}</i>
+                }
               </div>
             </div>
-            <div class="job-col row-detail" *ngIf="jobsOpen[i]">
-              <div class="job-row log-filters" *ngIf="jobsLogData[i] !== null">
+            @if (jobsOpen[i]) {
+            <div class="job-col row-detail">
+              @if (jobsLogData[i] !== null) {
+              <div class="job-row log-filters">
                 <mat-form-field class="job-row log-filter">
                   <mat-label>{{ 'ADMIN.JOBS.LOG_FILTER' | translate }}</mat-label>
                   <input
@@ -770,11 +822,12 @@
                   </mat-select>
                 </mat-form-field>
               </div>
+              }
               <div class="job-col">
                 <div class="log">{{ 'ADMIN.JOBS.LOG' | translate }}</div>
                 <div class="log-data">
+                  @for (entry of jobsLogData[i]; track entry) {
                   <div
-                    *ngFor="let entry of jobsLogData[i]"
                     class="job-row"
                     [class.status-error]="entry.level.syslogEquivalent <= 3"
                     [class.status-warning]="entry.level.syslogEquivalent <= 4"
@@ -790,14 +843,18 @@
                     </div>
                     <div class="log-message">{{ entry.message }}</div>
                   </div>
+                  }
                 </div>
               </div>
             </div>
+            }
           </div>
         </div>
+        }
       </div>
     </div>
-    <div *ngIf="modeIsActive('TOOLKIT')" class="content toolkit">
+    } @if (modeIsActive('TOOLKIT')) {
+    <div class="content toolkit">
       <div class="heading">
         <i class="material-icons">refresh</i
         ><span>{{ 'ADMIN.TOOLKIT.REFRESH_APP' | translate }}</span>
@@ -821,10 +878,12 @@
           (chooseAuthority)="authenticateAuthority = $event"
         ></es-authority-search-input>
         <mat-chip-listbox>
-          <mat-chip-option *ngIf="authenticateAuthority" (removed)="authenticateAuthority = null">
+          @if (authenticateAuthority) {
+          <mat-chip-option (removed)="authenticateAuthority = null">
             <span>{{ authenticateAuthority | authorityName }}</span>
             <i matChipRemove esIcon="cancel"></i>
           </mat-chip-option>
+          }
         </mat-chip-listbox>
         <button
           mat-raised-button
@@ -860,7 +919,9 @@
             {{ 'ADMIN.TOOLKIT.CACHE_ROOT_FOLDER' | translate }}
           </button>
           <div class="directory">
-            <div *ngIf="parentNode">{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+            @if (parentNode) {
+            <div>{{ parentNode.name }} ({{ parentNode.ref.id }})</div>
+            }
           </div>
         </div>
         <div class="group">
@@ -909,16 +970,17 @@
         </button>
       </div>
       <!--
-      <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
-      <div class="group catalina">
-        <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
-        <mat-form-field>
-          <textarea matInput id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
-        </mat-form-field>
-      </div>
-      -->
+            <div class="heading"><i class="material-icons">textsms</i><span>{{'ADMIN.TOOLKIT.CATALINA' | translate}}</span></div>
+            <div class="group catalina">
+              <button mat-raised-button (click)="refreshCatalina()"><i class="material-icons">refresh</i></button>
+              <mat-form-field>
+                <textarea matInput id="catalina" #catalinaRef [ngModel]="catalina" readonly></textarea>
+              </mat-form-field>
+            </div>
+            -->
     </div>
-    <div *ngIf="modeIsActive('BROWSER')" class="content browser">
+    } @if (modeIsActive('BROWSER')) {
+    <div class="content browser">
       <div class="heading">
         <i class="material-icons">search</i
         ><span>{{ 'ADMIN.BROWSER.NODE_BROWSER' | translate }}</span>
@@ -933,7 +995,8 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div *ngIf="lucene.mode === 'NODEREF'" class="group">
+      @if (lucene.mode === 'NODEREF') {
+      <div class="group">
         <div class="inputGroupGrow">
           <mat-form-field>
             <mat-label>{{ 'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
@@ -950,9 +1013,11 @@
           {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
         </button>
       </div>
-      <div *ngIf="lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC'" class="group">
+      } @if (lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC') {
+      <div class="group">
         <div class="inputGroupGrow">
-          <mat-form-field *ngIf="lucene.mode === 'SOLR'">
+          @if (lucene.mode === 'SOLR') {
+          <mat-form-field>
             <mat-label>{{ 'ADMIN.BROWSER.LUCENE_QUERY' | translate }}</mat-label>
             <textarea
               matInput
@@ -964,12 +1029,12 @@
               placeholder='@cm\:name:"*"'
             ></textarea>
           </mat-form-field>
-          <div *ngIf="lucene.mode === 'ELASTIC'" class="dsl-query">
+          } @if (lucene.mode === 'ELASTIC') {
+          <div class="dsl-query">
             <mat-form-field class="dsl-index">
               <mat-label>Elastic Index</mat-label>
               <input matInput placeholder="workspace_9.1" value="" [(ngModel)]="lucene.index" />
             </mat-form-field>
-
             <label for="dslQuery">{{ 'ADMIN.BROWSER.DSL_QUERY' | translate }}</label>
             <es-code-editor
               [options]="dslCodeOptions"
@@ -978,28 +1043,23 @@
               id="dslQuery"
             ></es-code-editor>
           </div>
+          }
         </div>
-        <div
-          class="inputGroupGrow"
-          *ngIf="lucene.mode === 'ELASTIC' && lucene.outputMode === 'view'"
-        >
+        @if (lucene.mode === 'ELASTIC' && lucene.outputMode === 'view') {
+        <div class="inputGroupGrow">
           <mat-label>raw elastic mode:</mat-label>
           <mat-checkbox [(ngModel)]="lucene.elasticRaw" name="elasticRawMode"></mat-checkbox>
         </div>
-        <div
-          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
-          class="inputGroupGrow"
-        >
+        } @if (lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)) {
+        <div class="inputGroupGrow">
           <div class="info">{{ 'ADMIN.BROWSER.STORE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.store">
             <mat-radio-button name="solrStore" value="Workspace">Workspace</mat-radio-button>
             <mat-radio-button name="solrStore" value="Archive">Archive</mat-radio-button>
           </mat-radio-group>
         </div>
-        <div
-          class="inputGroupGrow"
-          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
-        >
+        } @if (lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)) {
+        <div class="inputGroupGrow">
           <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
           <mat-radio-group [(ngModel)]="lucene.outputMode">
             <mat-radio-button name="solrMode" value="view">{{
@@ -1010,92 +1070,85 @@
             }}</mat-radio-button>
           </mat-radio-group>
         </div>
-
-        <ng-container *ngIf="lucene.outputMode === 'export'">
-          <div class="inputGroupGrow">
-            <mat-form-field>
-              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
-              <textarea
-                matInput
-                cdkTextareaAutosize
-                cdkAutosizeMinRows="2"
-                cdkAutosizeMaxRows="5"
-                class="export-properties"
-                [(ngModel)]="lucene.properties"
-              ></textarea>
-              <mat-hint>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-            </mat-form-field>
+        } @if (lucene.outputMode === 'export') {
+        <div class="inputGroupGrow">
+          <mat-form-field>
+            <mat-label>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES' | translate }}</mat-label>
+            <textarea
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+              cdkAutosizeMaxRows="5"
+              class="export-properties"
+              [(ngModel)]="lucene.properties"
+            ></textarea>
+            <mat-hint>{{ 'ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="inputGroupGrow">
+          <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+          <div>
+            <mat-radio-group [(ngModel)]="lucene.exportFormat">
+              <mat-radio-button name="exportFormat" value="csv">{{
+                'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate
+              }}</mat-radio-button>
+              <mat-radio-button name="exportFormat" value="json">{{
+                'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate
+              }}</mat-radio-button>
+            </mat-radio-group>
           </div>
-          <div class="inputGroupGrow">
-            <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
-            <div>
-              <mat-radio-group [(ngModel)]="lucene.exportFormat">
-                <mat-radio-button name="exportFormat" value="csv">{{
-                  'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate
-                }}</mat-radio-button>
-                <mat-radio-button name="exportFormat" value="json">{{
-                  'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate
-                }}</mat-radio-button>
-              </mat-radio-group>
-            </div>
+        </div>
+        <div class="inputGroupGrow">
+          <div>
+            <button mat-flat-button color="primary" (click)="exportLucene()">
+              {{ 'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate }}
+            </button>
           </div>
-          <div class="inputGroupGrow">
-            <div>
-              <button mat-flat-button color="primary" (click)="exportLucene()">
-                {{ 'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate }}
-              </button>
-            </div>
-          </div>
-        </ng-container>
-        <ng-container
-          *ngIf="lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)"
-        >
-          <div class="inputGroupGrow">
-            <div class="info">{{ 'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
-            <es-authority-search-input
-              [globalSearchAllowed]="true"
-              [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'"
-              [allowAny]="true"
-              (chooseAuthority)="addLuceneAuthority($event)"
-            ></es-authority-search-input>
-          </div>
-          <div
-            class="inputGroupGrow luceneAuthorities"
-            *ngIf="lucene.authorities && lucene.authorities.length"
-          >
-            <div></div>
-            <mat-chip-listbox>
-              <mat-chip-option
-                *ngFor="let authority of lucene.authorities"
-                (removed)="removeLuceneAuthority(authority)"
-              >
-                <span>{{ authority | authorityName }}</span>
-                <i matChipRemove esIcon="cancel"></i>
-              </mat-chip-option>
-            </mat-chip-listbox>
-          </div>
-        </ng-container>
-        <div class="inputGroupGrow lucenePaging" *ngIf="lucene.outputMode === 'view'">
-          <ng-container
-            *ngIf="(lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC') && !lucene.elasticRaw"
-          >
-            <mat-form-field>
-              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
-              <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset" />
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
-              <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count" />
-            </mat-form-field>
-          </ng-container>
+        </div>
+        } @if (lucene.mode === 'SOLR' || (lucene.mode === 'ELASTIC' && !lucene.elasticRaw)) {
+        <div class="inputGroupGrow">
+          <div class="info">{{ 'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
+          <es-authority-search-input
+            [globalSearchAllowed]="true"
+            [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'"
+            [allowAny]="true"
+            (chooseAuthority)="addLuceneAuthority($event)"
+          ></es-authority-search-input>
+        </div>
+        @if (lucene.authorities && lucene.authorities.length) {
+        <div class="inputGroupGrow luceneAuthorities">
+          <div></div>
+          <mat-chip-listbox>
+            @for (authority of lucene.authorities; track authority) {
+            <mat-chip-option (removed)="removeLuceneAuthority(authority)">
+              <span>{{ authority | authorityName }}</span>
+              <i matChipRemove esIcon="cancel"></i>
+            </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+        } } @if (lucene.outputMode === 'view') {
+        <div class="inputGroupGrow lucenePaging">
+          @if ((lucene.mode === 'SOLR' || lucene.mode === 'ELASTIC') && !lucene.elasticRaw) {
+          <mat-form-field>
+            <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+            <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+            <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count" />
+          </mat-form-field>
+          }
           <div>
             <button mat-flat-button color="primary" (click)="searchNodes()">
               {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
             </button>
           </div>
         </div>
+        }
       </div>
-      <div *ngIf="lucene.mode === 'ELASTIC' && elasticResponse" class="elastic-response">
+      } @if (lucene.mode === 'ELASTIC' && elasticResponse) {
+      <div class="elastic-response">
         <label for="elasticResponseLabel">{{ 'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
         <es-code-editor
           [options]="elasticResponseCodeOptions"
@@ -1104,7 +1157,8 @@
           id="elasticResponseLabel"
         ></es-code-editor>
       </div>
-      <div *ngIf="lucene.mode === 'NODEREF' || lucene.outputMode === 'view'" class="search-list">
+      } @if (lucene.mode === 'NODEREF' || lucene.outputMode === 'view') {
+      <div class="search-list">
         <es-actionbar #actionbarComponent></es-actionbar>
         <es-node-entries-wrapper
           #searchResults
@@ -1123,12 +1177,14 @@
           </ng-template>
         </es-node-entries-wrapper>
       </div>
+      }
       <es-lucene-template-memory
         [(query)]="lucene.query"
         [(properties)]="lucene.properties"
       ></es-lucene-template-memory>
     </div>
-    <div *ngIf="mode === 'FOLDERTEMPLATES'" class="content foldertemplates">
+    } @if (mode === 'FOLDERTEMPLATES') {
+    <div class="content foldertemplates">
       <form>
         <es-autocomplete
           [inputMinLength]="2"
@@ -1138,17 +1194,19 @@
           (updateInput)="updateEduGroupSuggestions($event)"
         ></es-autocomplete>
         <div class="eduGroupsSelected">
-          <div class="badge" *ngFor="let eduGroup of eduGroupsSelected">
+          @for (eduGroup of eduGroupsSelected; track eduGroup) {
+          <div class="badge">
             <span>{{ eduGroup.title }}</span>
             <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
           </div>
+          }
         </div>
         <div class="inputGroupGrow">
           <mat-form-field>
             <mat-select [(ngModel)]="selectedTemplate" name="template">
-              <mat-option *ngFor="let option of templates" [value]="option">{{
-                option
-              }}</mat-option>
+              @for (option of templates; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
           <div>
@@ -1187,6 +1245,9 @@
         <div class="upload-hint">{{ 'ADMIN.FOLDERTEMPLATES.UPLOAD_HINT' | translate }}</div>
       </div>
     </div>
+    }
   </div>
 </div>
-<es-global-progress *ngIf="globalProgress"></es-global-progress>
+@if (globalProgress) {
+<es-global-progress></es-global-progress>
+}

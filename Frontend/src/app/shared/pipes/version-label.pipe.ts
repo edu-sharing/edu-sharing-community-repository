@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Version } from '../../core-module/rest/data-object';
@@ -11,6 +11,8 @@ import { Version } from '../../core-module/rest/data-object';
     standalone: false,
 })
 export class VersionLabelPipe implements PipeTransform {
+    private translate = inject(TranslateService);
+
     transform(node: Node | Version | any, args: any = null): string {
         let comment: string;
         if (node.properties?.[RestConstants.CCM_PROP_LIFECYCLE_VERSION_COMMENT]?.[0]) {
@@ -48,5 +50,4 @@ export class VersionLabelPipe implements PipeTransform {
         }
         return comment;
     }
-    constructor(private translate: TranslateService) {}
 }

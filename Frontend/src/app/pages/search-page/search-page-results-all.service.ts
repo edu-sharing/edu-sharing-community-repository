@@ -1,4 +1,4 @@
-import { Injectable, Injector, OnDestroy } from '@angular/core';
+import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     MdsDefinition,
@@ -37,22 +37,23 @@ interface RepoData {
 
 @Injectable()
 export class SearchPageResultsAllService extends SearchPageResults implements OnDestroy {
+    private _injector = inject(Injector);
+    private _search = inject(SearchService);
+    private _searchPageRestore = inject(SearchPageRestoreService);
+    private _mds = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private _translate = inject(TranslateService);
+
     readonly repoData = new BehaviorSubject<RepoData[]>(null);
     readonly loadingProgress = new BehaviorSubject<number>(0);
 
     private readonly _destroyed = new Subject<void>();
 
-    constructor(
-        private _injector: Injector,
-        private _search: SearchService,
-        _nodeHelper: NodeHelperService,
-        _router: Router,
-        _searchPage: SearchPageService,
-        private _searchPageRestore: SearchPageRestoreService,
-        private _mds: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private _translate: TranslateService,
-    ) {
+    constructor() {
+        const _nodeHelper = inject(NodeHelperService);
+        const _router = inject(Router);
+        const _searchPage = inject(SearchPageService);
+
         super(_router, _searchPage, _nodeHelper);
         this._initRepoData();
         this._registerPageRestore();

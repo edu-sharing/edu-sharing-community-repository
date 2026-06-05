@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Data, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
@@ -10,16 +10,16 @@ import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class ErrorPageComponent {
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+
     public message: string;
     public messageDetail: string;
     public messageText: string;
     public error: string;
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {
             this.route.params.subscribe(async (data: Params) => {
                 this.setMessage(data);

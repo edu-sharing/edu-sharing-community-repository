@@ -4,15 +4,7 @@
 
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { HttpClient } from '@angular/common/http';
-import {
-    Directive,
-    ElementRef,
-    Input,
-    OnDestroy,
-    OnInit,
-    Optional,
-    Renderer2,
-} from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, OnInit, Renderer2, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
@@ -43,6 +35,12 @@ type IconsConfig = Array<{
     selector: 'i[esIcon], i.material-icons',
 })
 export class IconDirective implements OnInit, OnDestroy {
+    private element = inject<ElementRef<HTMLElement>>(ElementRef);
+    private http = inject(HttpClient);
+    private translate = inject(TranslateService);
+    private renderer = inject(Renderer2);
+    private config = inject(ConfigService, { optional: true });
+
     private originalId$ = new BehaviorSubject<string>(null);
     private iconContext$ = new BehaviorSubject<string>(null);
     private _id: string;
@@ -81,13 +79,7 @@ export class IconDirective implements OnInit, OnDestroy {
     }
     @Input() path?: string;
 
-    constructor(
-        private element: ElementRef<HTMLElement>,
-        private http: HttpClient,
-        private translate: TranslateService,
-        private renderer: Renderer2,
-        @Optional() private config: ConfigService,
-    ) {
+    constructor() {
         combineLatest([
             this.originalId$.pipe(filter(notNull)),
             this.iconContext$,

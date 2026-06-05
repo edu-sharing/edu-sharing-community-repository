@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
@@ -15,6 +14,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -50,7 +50,6 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
     selector: 'es-content-teaser',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         FormsModule,
         GenericNodeEntriesComponent,
@@ -72,6 +71,12 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
     styleUrls: ['./content-teaser.component.scss'],
 })
 export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private scrollHelperService = inject(ScrollHelperService);
+    private searchHelperService = inject(SearchHelperService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private translate = inject(TranslateService);
+
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     @Input() defaultNodeId: string = '';
@@ -204,13 +209,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
 
-    constructor(
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private scrollHelperService: ScrollHelperService,
-        private searchHelperService: SearchHelperService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         if (
             this.genericWidgetGlobalService.hasCustomDisplayType(
                 GenericNodeEntriesDisplayType.MapView,

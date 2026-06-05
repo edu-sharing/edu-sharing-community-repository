@@ -1,4 +1,4 @@
-import { ElementRef, Injectable, NgZone } from '@angular/core';
+import { ElementRef, Injectable, NgZone, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, pairwise } from 'rxjs/operators';
@@ -12,6 +12,10 @@ import { UIService } from './ui.service';
     providedIn: 'root',
 })
 export class NodesDragDropService {
+    private ngZone = inject(NgZone);
+    private toast = inject(Toast);
+    private uiService = inject(UIService);
+
     /** The node(s) currently being dragged. */
     private draggedNodesSubject = new BehaviorSubject<Node[]>(null);
     /** The drop target that something is currently dragged above. */
@@ -41,7 +45,7 @@ export class NodesDragDropService {
         return this.canDropSubject.value;
     }
 
-    constructor(private ngZone: NgZone, private toast: Toast, private uiService: UIService) {
+    constructor() {
         this.registerDropTarget();
         this.registerCanDrop();
         this.registerDropActionSubject();

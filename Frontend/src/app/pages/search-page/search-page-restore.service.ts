@@ -1,5 +1,5 @@
 import { ViewportScroller } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -28,12 +28,15 @@ class RestoreEntry {
     providedIn: 'root',
 })
 export class SearchPageRestoreService {
+    private _router = inject(Router);
+    private _viewportScroller = inject(ViewportScroller);
+
     private readonly _entries: RestoreEntry[] = [];
     private readonly _restoreScrollTrigger = new Subject<RestoreEntry>();
 
     private _currentNavigationId = 1;
 
-    constructor(private _router: Router, private _viewportScroller: ViewportScroller) {
+    constructor() {
         this._registerRouterEvents();
         this._registerRestoreScrollTrigger();
     }

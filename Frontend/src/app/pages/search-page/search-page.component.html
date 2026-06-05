@@ -13,41 +13,42 @@
   "
 ></mat-progress-bar>
 
-<ng-container *ngIf="tabBarIsVisible">
-  <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-    <a
-      mat-tab-link
-      *ngIf="availableRepositories.getValue().length > 1"
-      [routerLink]="['./all']"
-      [queryParams]="queryParamsAllRepositories"
-      (click)="goToAll()"
-      routerLinkActive
-      #routerLinkActive="routerLinkActive"
-      [active]="routerLinkActive.isActive"
-    >
-      {{ 'SEARCH.REPOSITORY_ALL' | translate }}
-    </a>
-    <a
-      mat-tab-link
-      *ngFor="let repository of availableRepositories.getValue()"
-      (click)="goToRepository(repository)"
-      [active]="repository.id === activeRepository.getValue()"
-    >
-      <div class="repository-icon">
-        <img [src]="repository | repositoryIcon" alt="" />
-      </div>
-      {{ repository.title }}
-    </a>
-  </nav>
-  <mat-tab-nav-panel #tabPanel>
-    <ng-container *ngTemplateOutlet="tabBody"></ng-container>
-  </mat-tab-nav-panel>
-</ng-container>
+@if (tabBarIsVisible) {
+<nav mat-tab-nav-bar [tabPanel]="tabPanel">
+  @if (availableRepositories.getValue().length > 1) {
+  <a
+    mat-tab-link
+    [routerLink]="['./all']"
+    [queryParams]="queryParamsAllRepositories"
+    (click)="goToAll()"
+    routerLinkActive
+    #routerLinkActive="routerLinkActive"
+    [active]="routerLinkActive.isActive"
+  >
+    {{ 'SEARCH.REPOSITORY_ALL' | translate }}
+  </a>
+  } @for (repository of availableRepositories.getValue(); track repository) {
+  <a
+    mat-tab-link
+    (click)="goToRepository(repository)"
+    [active]="repository.id === activeRepository.getValue()"
+  >
+    <div class="repository-icon">
+      <img [src]="repository | repositoryIcon" alt="" />
+    </div>
+    {{ repository.title }}
+  </a>
+  }
+</nav>
+<mat-tab-nav-panel #tabPanel>
+  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
+</mat-tab-nav-panel>
+}
 <!-- Explicitly check if `tabBarIsVisible === false`, so we don't insert the body before we know
 where. -->
-<ng-container *ngIf="tabBarIsVisible === false">
-  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
-</ng-container>
+@if (tabBarIsVisible === false) {
+<ng-container *ngTemplateOutlet="tabBody"></ng-container>
+}
 
 <es-footer scope="search"></es-footer>
 

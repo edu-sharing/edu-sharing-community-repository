@@ -1,21 +1,14 @@
-import { fakeAsync } from '@angular/core/testing';
+import { fakeAsync, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { ConfigService } from 'ngx-edu-sharing-api';
+import { ConfigService, SessionStorageService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { TranslationsService } from './translations.service';
-import { Injector, ProviderToken } from '@angular/core';
 
 class BridgeServiceStub {
     isRunningCordova() {
         return false;
-    }
-}
-class InjectorStub {
-    sessionStorageServiceStub = new SessionStorageServiceStub();
-    get<T>(service: ProviderToken<T>): T {
-        return this.sessionStorageServiceStub as unknown as T;
     }
 }
 class ConfigServiceStub {
@@ -51,7 +44,7 @@ describe('TranslationsService', () => {
         let translationsService: TranslationsService;
         let translateServiceSpy: any;
         let bridgeServiceStub: BridgeServiceStub;
-        let injectorStub: InjectorStub;
+        let sessionStorageServiceStub: SessionStorageServiceStub;
         let configurationServiceStub: ConfigServiceStub;
         let activatedRouteStub: ActivatedRouteStub;
 
@@ -66,18 +59,19 @@ describe('TranslationsService', () => {
             translateServiceSpy.getTranslation.and.callFake(() => rxjs.of(null));
             translateServiceSpy.use.and.callFake(() => rxjs.of(null));
             bridgeServiceStub = new BridgeServiceStub();
-            injectorStub = new InjectorStub();
+            sessionStorageServiceStub = new SessionStorageServiceStub();
             configurationServiceStub = new ConfigServiceStub();
             activatedRouteStub = new ActivatedRouteStub();
-            translationsService = new TranslationsService(
-                configurationServiceStub as unknown as ConfigService,
-                injectorStub as Injector,
-                activatedRouteStub as any as ActivatedRoute,
-                null,
-                translateServiceSpy as TranslateService,
-                null,
-                null,
-            );
+            TestBed.configureTestingModule({
+                providers: [
+                    TranslationsService,
+                    { provide: ConfigService, useValue: configurationServiceStub },
+                    { provide: SessionStorageService, useValue: sessionStorageServiceStub },
+                    { provide: ActivatedRoute, useValue: activatedRouteStub },
+                    { provide: TranslateService, useValue: translateServiceSpy },
+                ],
+            });
+            translationsService = TestBed.inject(TranslationsService);
         });
 
         function callInitialize(): Promise<string> {
@@ -132,10 +126,9 @@ describe('TranslationsService', () => {
         it('should use sessionStorage', async () => {
             // Should be overridden by sessionStorage
             translateServiceSpy.getBrowserLang.and.returnValue('de');
-            const storageGetSpy = spyOn(
-                injectorStub.sessionStorageServiceStub,
-                'get',
-            ).and.returnValue(rxjs.of('en'));
+            const storageGetSpy = spyOn(sessionStorageServiceStub, 'get').and.returnValue(
+                rxjs.of('en'),
+            );
             const lang = await callInitialize();
             expect(storageGetSpy.calls.count()).toBe(1, 'storage.get was called once');
             expect(storageGetSpy.calls.mostRecent().args).toEqual(['language']);
@@ -144,7 +137,7 @@ describe('TranslationsService', () => {
 
         it('should store used language in sessionStorage', async () => {
             translateServiceSpy.getBrowserLang.and.returnValue('en');
-            const storageSetSpy = spyOn(injectorStub.sessionStorageServiceStub, 'set');
+            const storageSetSpy = spyOn(sessionStorageServiceStub, 'set');
             await callInitialize();
             expect(storageSetSpy.calls.count()).toBe(1, 'storage.set was called once');
             expect(storageSetSpy.calls.mostRecent().args).toEqual(['language', 'en']);
@@ -154,10 +147,9 @@ describe('TranslationsService', () => {
             // Should be overridden by queryParams
             translateServiceSpy.getBrowserLang.and.returnValue('de');
             // Should also be overridden by queryParams
-            const storageGetSpy = spyOn(
-                injectorStub.sessionStorageServiceStub,
-                'get',
-            ).and.returnValue(rxjs.of('de'));
+            const storageGetSpy = spyOn(sessionStorageServiceStub, 'get').and.returnValue(
+                rxjs.of('de'),
+            );
             activatedRouteStub.queryParams = rxjs.of({ locale: 'en' });
             const lang = await callInitialize();
             expect(lang).toBe('en');

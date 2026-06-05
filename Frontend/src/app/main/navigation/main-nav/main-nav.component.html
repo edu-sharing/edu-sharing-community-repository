@@ -1,57 +1,58 @@
-<ng-container *ngIf="visible">
-  <es-skip-nav></es-skip-nav>
-  <es-banner [scope]="mainNavConfig.currentScope" (update)="refreshBanner()"></es-banner>
-
-  <div class="navigation-container" role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
-    <ng-container *ngIf="mainNavConfig.showNavigation">
-      <es-user-profile *ngIf="showProfile" (cancelProfile)="showProfile = false"></es-user-profile>
-
-      <es-global-progress *ngIf="globalProgress"></es-global-progress>
-      <es-tutorial
-        [element]="tutorialElement"
-        [heading]="'USER_TUTORIAL_HEADING'"
-        [description]="'USER_TUTORIAL_DESCRIPTION'"
-        [showSkip]="false"
-      ></es-tutorial>
-    </ng-container>
-    <es-top-bar
-      class="topBar {{ 'topBar-' + mainNavConfig.currentScope }}"
-      [class.noUser]="!showUser"
-      [autoLogoutTimeout$]="autoLogoutTimeout$"
-      [canOpen]="canOpen"
-      [chatCount]="getChatCount()"
-      [config]="config"
-      [create]="mainNavConfig.create"
-      [show]="mainNavConfig.showNavigation"
+@if (visible) {
+<es-skip-nav></es-skip-nav>
+<es-banner [scope]="mainNavConfig.currentScope" (update)="refreshBanner()"></es-banner>
+<div class="navigation-container" role="navigation" [attr.aria-label]="'NAV.MAIN' | translate">
+  @if (mainNavConfig.showNavigation) { @if (showProfile) {
+  <es-user-profile (cancelProfile)="showProfile = false"></es-user-profile>
+  } @if (globalProgress) {
+  <es-global-progress></es-global-progress>
+  }
+  <es-tutorial
+    [element]="tutorialElement"
+    [heading]="'USER_TUTORIAL_HEADING'"
+    [description]="'USER_TUTORIAL_DESCRIPTION'"
+    [showSkip]="false"
+  ></es-tutorial>
+  }
+  <es-top-bar
+    class="topBar {{ 'topBar-' + mainNavConfig.currentScope }}"
+    [class.noUser]="!showUser"
+    [autoLogoutTimeout$]="autoLogoutTimeout$"
+    [canOpen]="canOpen"
+    [chatCount]="getChatCount()"
+    [config]="config"
+    [create]="mainNavConfig.create"
+    [show]="mainNavConfig.showNavigation"
+    [currentScope]="mainNavConfig.currentScope"
+    [currentUser]="currentUser"
+    [isCreateAllowed]="isCreateAllowed()"
+    [isSafe]="isSafe()"
+    [mainMenuStyle]="mainMenuStyle"
+    [searchEnabled]="searchFieldEnabled"
+    [showChat]="showChat()"
+    [showScope]="mainNavConfig.showScope"
+    [showUser]="showUser"
+    [title]="mainNavConfig.title"
+    [userMenuOptions]="userMenuOptions"
+    (created)="mainNavConfig.onCreate && mainNavConfig.onCreate($event)"
+    (createNotAllowed)="mainNavConfig.onCreateNotAllowed && mainNavConfig.onCreateNotAllowed()"
+    (openChat)="openChat()"
+    (showLicenses)="showLicenses()"
+  >
+    @if (searchFieldEnabled && !mainNavConfig.hideSearchField) {
+    <es-search-field data-selector-search-field></es-search-field>
+    }</es-top-bar
+  >
+  @if (canOpen && mainNavConfig.currentScope !== 'render') {
+  <div #tabNav class="tab-nav">
+    <es-main-menu-bottom
+      class="mobile-move-bottom"
       [currentScope]="mainNavConfig.currentScope"
-      [currentUser]="currentUser"
-      [isCreateAllowed]="isCreateAllowed()"
-      [isSafe]="isSafe()"
-      [mainMenuStyle]="mainMenuStyle"
-      [searchEnabled]="searchFieldEnabled"
-      [showChat]="showChat()"
-      [showScope]="mainNavConfig.showScope"
-      [showUser]="showUser"
-      [title]="mainNavConfig.title"
-      [userMenuOptions]="userMenuOptions"
-      (created)="mainNavConfig.onCreate && mainNavConfig.onCreate($event)"
-      (createNotAllowed)="mainNavConfig.onCreateNotAllowed && mainNavConfig.onCreateNotAllowed()"
-      (openChat)="openChat()"
-      (showLicenses)="showLicenses()"
-    >
-      <es-search-field
-        data-selector-search-field
-        *ngIf="searchFieldEnabled && !mainNavConfig.hideSearchField"
-      ></es-search-field
-    ></es-top-bar>
-    <div *ngIf="canOpen && mainNavConfig.currentScope !== 'render'" #tabNav class="tab-nav">
-      <es-main-menu-bottom
-        class="mobile-move-bottom"
-        [currentScope]="mainNavConfig.currentScope"
-      ></es-main-menu-bottom>
-    </div>
+    ></es-main-menu-bottom>
   </div>
-</ng-container>
+  }
+</div>
+}
 <!-- shown in bottom-sheet -->
 <ng-template #userMenuMobile let-option="option">
   <div class="user-menu-mobile">

@@ -8,7 +8,7 @@ import {
     MdsWidget,
     RestConstants,
 } from 'ngx-edu-sharing-api';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ListItem, ListItemType } from '../types/list-item';
 import { isArray } from 'lodash';
 import { firstValueFrom } from 'rxjs';
@@ -17,6 +17,10 @@ type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
 export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
 @Injectable()
 export class MdsHelperService {
+    private authentication = inject(AuthenticationService);
+    private mdsService = inject(MdsService);
+    private translate = inject(TranslateService);
+
     static getSortInfo(mdsSet: MdsDefinition, name: string): MdsSort {
         if (mdsSet) {
             if (mdsSet.sorts) {
@@ -136,12 +140,6 @@ export class MdsHelperService {
         }
         return null;
     }
-
-    constructor(
-        private authentication: AuthenticationService,
-        private mdsService: MdsService,
-        private translate: TranslateService,
-    ) {}
 
     /**
      * Find a template by id in the given mds

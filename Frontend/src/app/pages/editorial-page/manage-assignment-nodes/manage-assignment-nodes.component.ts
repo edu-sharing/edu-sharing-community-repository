@@ -1,4 +1,4 @@
-import { Component, input, model } from '@angular/core';
+import { Component, input, model, inject } from '@angular/core';
 import { AssignmentFile, Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -22,6 +22,9 @@ export type NodeWithRole = Node &
     imports: [SharedModule],
 })
 export class ManageAssignmentNodesComponent {
+    private translate = inject(TranslateService);
+    nodeHelperService = inject(NodeHelperService);
+
     readonly ChangePermissions = RestConstants.ACCESS_CHANGE_PERMISSIONS;
     readonly = input<boolean>(false);
     assignment = model.required<AssignmentBase>();
@@ -33,7 +36,7 @@ export class ManageAssignmentNodesComponent {
         this.nodes.set(this.nodes());
     }
 
-    constructor(private translate: TranslateService, public nodeHelperService: NodeHelperService) {
+    constructor() {
         // dirty hack for https://github.com/angular/components/issues/7923
         this.translate.get('ANY').subscribe(() => this.translateReady$.next(true));
     }

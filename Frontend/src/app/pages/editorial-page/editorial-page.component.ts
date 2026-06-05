@@ -6,6 +6,7 @@ import {
     OnInit,
     signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     Assignment,
@@ -101,6 +102,27 @@ type RouteConfig = {
     standalone: false,
 })
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private breakpointObserver = inject(BreakpointObserver);
+    private dialogs = inject(DialogsService);
+    private mdsService = inject(MdsService);
+    private mainNav = inject(MainNavService);
+    private searchFieldService = inject(SearchFieldService);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+    private searchService = inject(SearchService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private searchServiceUnwrapped = inject(SearchServiceUnwrapped);
+    private configService = inject(ConfigService);
+    private searchHelperService = inject(SearchHelperService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private ui = inject(UIService);
+    private authenticationService = inject(AuthenticationService);
+    editorialPageService = inject(EditorialPageService);
+    editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    private nodeHelperService = inject(NodeHelperService);
+    private toolpermissionPipe = inject(ToolpermissionPipe);
+
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
     /**
@@ -161,27 +183,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
     readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
 
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private breakpointObserver: BreakpointObserver,
-        private dialogs: DialogsService,
-        private mdsService: MdsService,
-        private mainNav: MainNavService,
-        private searchFieldService: SearchFieldService,
-        private searchFieldInternalService: SearchFieldInternalService,
-        private searchService: SearchService,
-        public editorialSidebarService: EditorialSidebarService,
-        private searchServiceUnwrapped: SearchServiceUnwrapped,
-        private configService: ConfigService,
-        private searchHelperService: SearchHelperService,
-        private optionsHelperService: OptionsHelperService,
-        private ui: UIService,
-        private authenticationService: AuthenticationService,
-        public editorialPageService: EditorialPageService,
-        public editorialBreadcrumbService: EditorialBreadcrumbService,
-        private nodeHelperService: NodeHelperService,
-    ) {
+    constructor() {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
         });*/
@@ -402,9 +404,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         this.TabWidgetAssignment,
                     );
                 } else {
-                    const canCreate = await new ToolpermissionPipe(
-                        this.authenticationService,
-                    ).transform(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS);
+                    const canCreate = await this.toolpermissionPipe.transform(
+                        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+                    );
                     // hide created tab if user can not create assignments
                     this.editorialPageService.registerTabs(
                         this.editorialPageService
@@ -461,8 +463,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 debounceTime(50),
             )
             .subscribe(([_, search, tab, pagination, mainComponent, values]) => {
-                console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
-
                 const queryParams = {
                     q: search?.searchString,
                     offset: pagination?.skipCount || null,

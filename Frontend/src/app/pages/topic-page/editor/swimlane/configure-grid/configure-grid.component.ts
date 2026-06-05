@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Helper } from 'ngx-edu-sharing-ui';
 import { firstValueFrom } from 'rxjs';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -16,10 +16,10 @@ import { SelectOption } from '../../../shared/types/select-option';
     styleUrls: ['./configure-grid.component.scss'],
 })
 export class ConfigureGridComponent {
+    private dialogs = inject(DialogsService);
+
     @Input() grid: GridTile[] = [];
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
-
-    constructor(private dialogs: DialogsService) {}
 
     /**
      * Configures the swimlane grid based on a selected grid option value.

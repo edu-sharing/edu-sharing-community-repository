@@ -2,7 +2,8 @@
   <h3 class="mat-heading-3 mat-heading-underline">{{ 'ADMIN.PLUGINS.TITLE' | translate }}</h3>
   <es-info-message mode="info">{{ 'ADMIN.PLUGINS.INFO' | translate }}</es-info-message>
   <ul class="plugin-list">
-    <li *ngFor="let p of plugins">
+    @for (p of plugins; track p) {
+    <li>
       <i esIcon="extension"></i>
       <div>
         <div class="name-wrapper">
@@ -24,6 +25,7 @@
         </div>
       </div>
     </li>
+    }
   </ul>
   <div class="more">
     <p>{{ 'ADMIN.PLUGINS.MORE' | translate }}</p>

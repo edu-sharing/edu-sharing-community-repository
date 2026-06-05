@@ -1,4 +1,4 @@
-import { Injectable, Injector, Optional } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
@@ -25,15 +25,13 @@ export type CombinedRenderData = {
 };
 @Injectable({ providedIn: 'root' })
 export class RenderHelperService {
-    constructor(
-        private injector: Injector,
-        private aboutService: AboutService,
-        private configService: ConfigService,
-        private nodeService: NodeService,
-        private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private configuration: EduSharingUiConfiguration,
-        @Optional() private optionsHelperDataService: OptionsHelperDataService,
-    ) {}
+    private injector = inject(Injector);
+    private aboutService = inject(AboutService);
+    private configService = inject(ConfigService);
+    private nodeService = inject(NodeService);
+    private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
+    private configuration = inject(EduSharingUiConfiguration);
+    private optionsHelperDataService = inject(OptionsHelperDataService, { optional: true });
 
     async getRenderData(
         nodeId: string,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { AboutService, FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
 import {
     CreateChatCompletionResponse,
@@ -16,14 +16,12 @@ import { GlobalWidgetConfigService } from './global-widget-config.service';
     providedIn: 'root',
 })
 export class AiHelperService {
-    constructor(
-        private aboutService: AboutService,
-        private eduSharingLlmService: EduSharingLlmService,
-        private featuresHelperService: FeaturesHelperService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private userService: UserService,
-    ) {}
+    private aboutService = inject(AboutService);
+    private eduSharingLlmService = inject(EduSharingLlmService);
+    private featuresHelperService = inject(FeaturesHelperService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private userService = inject(UserService);
 
     /**
      * Checks whether AI is supported.

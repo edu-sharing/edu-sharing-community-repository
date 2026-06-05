@@ -1,16 +1,14 @@
-<es-info-message *ngIf="openedInModal()" mode="info">
-  <ng-container *ngIf="!nodeIncluded(); else nodeAlreadyIncluded">
-    <ng-container *ngIf="entries.length < maxItems; else nodeReplace">
-      {{ i18nPrefix + 'MODAL_HINT_ADD_REPLACE' | translate }}
-    </ng-container>
-    <ng-template #nodeReplace>
-      {{ i18nPrefix + 'MODAL_HINT_REPLACE' | translate }}
-    </ng-template>
-  </ng-container>
-  <ng-template #nodeAlreadyIncluded>
-    {{ i18nPrefix + 'MODAL_HINT_INCLUDED' | translate }}
-  </ng-template>
+@if (openedInModal()) {
+<es-info-message mode="info">
+  @if (!nodeIncluded()) { @if (entries.length < maxItems) {
+  {{ i18nPrefix + 'MODAL_HINT_ADD_REPLACE' | translate }}
+  } @else {
+  {{ i18nPrefix + 'MODAL_HINT_REPLACE' | translate }}
+  } } @else {
+  {{ i18nPrefix + 'MODAL_HINT_INCLUDED' | translate }}
+  }
 </es-info-message>
+}
 
 <div #entriesContainer class="entries-container">
   <div
@@ -22,101 +20,88 @@
     (cdkDropListDropped)="drop($event)"
     (click)="mobileEditMode = false"
   >
-    <ng-container *ngIf="entries.length < maxItems && entriesOverflow()">
-      <ng-container *ngTemplateOutlet="addNewEntry"></ng-container>
-    </ng-container>
-    <ng-container *ngFor="let entry of entries; let i = index">
-      <mat-card
-        *ngIf="i < maxItems"
-        role="button"
-        class="entry-card"
-        [class.drag-indicator]="!entriesOverflow() || viewExpanded()"
-        [class.mobile-edit-mode]="mobileEditMode"
-        [class.selected-entry]="i === selectedEntryIndex"
-        cdkDrag
-        [cdkDragDisabled]="entriesOverflow() && !viewExpanded()"
-        (cdkDragEnded)="onDragEnd()"
-        (cdkDragStarted)="onDragStart($event)"
-        (touchstart)="onPressStart()"
-        (touchend)="onPressEnd()"
-        (mousedown)="onPressStart()"
-        (mouseup)="onPressEnd()"
-        (contextmenu)="openContextMenu(i, $event)"
-        (click)="entryClicked(entry, i, $event)"
+    @if (entries.length < maxItems && entriesOverflow()) {
+    <ng-container *ngTemplateOutlet="addNewEntry"></ng-container>
+    } @for (entry of entries; track entry; let i = $index) { @if (i < maxItems) {
+    <mat-card
+      role="button"
+      class="entry-card"
+      [class.drag-indicator]="!entriesOverflow() || viewExpanded()"
+      [class.mobile-edit-mode]="mobileEditMode"
+      [class.selected-entry]="i === selectedEntryIndex"
+      cdkDrag
+      [cdkDragDisabled]="entriesOverflow() && !viewExpanded()"
+      (cdkDragEnded)="onDragEnd()"
+      (cdkDragStarted)="onDragStart($event)"
+      (touchstart)="onPressStart()"
+      (touchend)="onPressEnd()"
+      (mousedown)="onPressStart()"
+      (mouseup)="onPressEnd()"
+      (contextmenu)="openContextMenu(i, $event)"
+      (click)="entryClicked(entry, i, $event)"
+    >
+      <button
+        mat-icon-button
+        class="entry-menu-button"
+        [matMenuTriggerFor]="dropdown.menu"
+        (click)="setSelectedMenuIndex(i, $event)"
+        [attr.aria-label]="
+          i18nPrefix + 'OPTIONS_FOR'
+            | translate : { element: (entry | shortcutEntryTitle : i : i18nPrefix | async) }
+        "
       >
-        <button
-          mat-icon-button
-          class="entry-menu-button"
-          [matMenuTriggerFor]="dropdown.menu"
-          (click)="setSelectedMenuIndex(i, $event)"
-          [attr.aria-label]="
-            i18nPrefix + 'OPTIONS_FOR'
-              | translate : { element: (entry | shortcutEntryTitle : i : i18nPrefix | async) }
-          "
-        >
-          <i esIcon="more_vert"></i>
-        </button>
-        <div class="entry-badge" *ngIf="entry.updates > 0">
-          {{ entry.updates }}
-        </div>
-        <div class="entry-icon-wrapper" cdkDragHandle>
-          <i
-            *ngIf="entry.node?.icon?.fontGlyphId || entry.icon; else previewNode"
-            [esIcon]="entry.node?.icon?.fontGlyphId || entry.icon"
-            class="entry-icon"
-          ></i>
-          <ng-template #previewNode>
-            <img
-              *ngIf="entry.node"
-              class="entry-icon"
-              [src]="entry.node.icon?.url"
-              aria-hidden="true"
+        <i esIcon="more_vert"></i>
+      </button>
+      @if (entry.updates > 0) {
+      <div class="entry-badge">
+        {{ entry.updates }}
+      </div>
+      }
+      <div class="entry-icon-wrapper" cdkDragHandle>
+        @if (entry.node?.icon?.fontGlyphId || entry.icon) {
+        <i [esIcon]="entry.node?.icon?.fontGlyphId || entry.icon" class="entry-icon"></i>
+        } @else { @if (entry.node) {
+        <img class="entry-icon" [src]="entry.node.icon?.url" aria-hidden="true" />
+        } }
+      </div>
+      <div
+        class="entry-title-wrapper"
+        [class.reset-padding]="renameEntryVisible && i === selectedEntryIndex"
+        cdkDragHandle
+      >
+        <a class="entry-title" tabindex="0">
+          @if (!renameEntryVisible || i !== selectedEntryIndex) {
+          {{ entry | shortcutEntryTitle : i : i18nPrefix | async }}
+          } @else {
+          <mat-form-field appearance="outline" class="rename-node-title">
+            <mat-label>
+              {{ i18nPrefix + 'CHANGE_TITLE' | translate }}
+            </mat-label>
+            <input
+              #editInput
+              matInput
+              [(ngModel)]="editTitle"
+              (keydown.enter)="renameEntry()"
+              (blur)="renameEntry()"
+              (click)="$event.stopPropagation()"
+              autofocus
             />
-          </ng-template>
-        </div>
-        <div
-          class="entry-title-wrapper"
-          [class.reset-padding]="renameEntryVisible && i === selectedEntryIndex"
-          cdkDragHandle
-        >
-          <a class="entry-title" tabindex="0">
-            <ng-container
-              *ngIf="!renameEntryVisible || i !== selectedEntryIndex; else renameNodeTitle"
-            >
-              {{ entry | shortcutEntryTitle : i : i18nPrefix | async }}
-            </ng-container>
-            <ng-template #renameNodeTitle>
-              <mat-form-field appearance="outline" class="rename-node-title">
-                <mat-label>
-                  {{ i18nPrefix + 'CHANGE_TITLE' | translate }}
-                </mat-label>
-                <input
-                  #editInput
-                  matInput
-                  [(ngModel)]="editTitle"
-                  (keydown.enter)="renameEntry()"
-                  (blur)="renameEntry()"
-                  (click)="$event.stopPropagation()"
-                  autofocus
-                />
-              </mat-form-field>
-            </ng-template>
-          </a>
-        </div>
-      </mat-card>
-    </ng-container>
-    <ng-container *ngIf="entries.length < maxItems && !entriesOverflow()">
-      <ng-container *ngTemplateOutlet="addNewEntry"></ng-container>
-    </ng-container>
+          </mat-form-field>
+          }
+        </a>
+      </div>
+    </mat-card>
+    } } @if (entries.length < maxItems && !entriesOverflow()) {
+    <ng-container *ngTemplateOutlet="addNewEntry"></ng-container>
+    }
   </div>
   <!-- fade overlay (only visible if scrollable) -->
-  <div class="scroll-fade" *ngIf="entriesOverflow() && !viewExpanded()"></div>
+  @if (entriesOverflow() && !viewExpanded()) {
+  <div class="scroll-fade"></div>
+  }
   <!-- expand button -->
-  <button
-    class="entries-expand-btn"
-    *ngIf="entriesOverflow() && !openedInModal()"
-    (click)="isExpanded.set(!isExpanded())"
-  >
+  @if (entriesOverflow() && !openedInModal()) {
+  <button class="entries-expand-btn" (click)="isExpanded.set(!isExpanded())">
     <span class="line"></span>
     <span class="icon-text">
       <span class="icon">
@@ -129,6 +114,7 @@
     </span>
     <span class="line"></span>
   </button>
+  }
 </div>
 
 <!-- dropdown and dummy dropdown trigger to open it on specific positions -->
@@ -155,8 +141,8 @@
 <!-- button to add new entries -->
 <ng-template #addNewEntry>
   <!-- when opened within a modal, execute a click event and when not, use the mat menu trigger -->
+  @if (entries.length < maxItems) {
   <button
-    *ngIf="entries.length < maxItems"
     class="entry-card empty"
     [class.disabled]="nodeIncluded()"
     [matMenuTriggerFor]="newEntryDropdown.menu"
@@ -166,4 +152,5 @@
       <i esIcon="add" class="entry-icon"></i>
     </div>
   </button>
+  }
 </ng-template>

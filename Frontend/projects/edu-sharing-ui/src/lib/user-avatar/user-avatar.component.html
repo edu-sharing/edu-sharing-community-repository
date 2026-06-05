@@ -2,49 +2,48 @@
 with the W3C spec. -->
 <span class="avatar size_{{ size }}" role="presentation">
   <span class="avatarOuter sizable">
-    <ng-container *ngIf="_user?.authorityType === 'GROUP'">
-      <span
-        *ngFor="let i of [0, 1, 2]"
-        class="avatarCircle sizable avatarCircleGroup"
-        style.border-color="{{ _user | authorityColor }}"
-      ></span>
-    </ng-container>
+    @if (_user?.authorityType === 'GROUP') { @for (i of [0, 1, 2]; track i) {
+    <span
+      class="avatarCircle sizable avatarCircleGroup"
+      style.border-color="{{ _user | authorityColor }}"
+    ></span>
+    } } @if (isEditorialUser()) {
     <img
-      *ngIf="isEditorialUser()"
       class="editorial-badge"
       [src]="'assets/images/editorial-badge.svg' | esAssetsPath"
       alt=""
     />
+    }
     <span
       class="avatarCircle sizable"
       style.border-color="{{ _user | authorityColor }}"
       [class.clickable]="link"
       (click)="link ? openProfile() : null"
     >
-      <span *ngIf="_customImage">
+      @if (_customImage) {
+      <span>
         <img [src]="_customImage" class="userImage sizable" alt="user image" />
       </span>
-      <span *ngIf="!_customImage">
+      } @if (!_customImage) {
+      <span>
+        @if (_user?.profile?.avatar && (isSafe() | async) === false) {
         <img
-          *ngIf="_user?.profile?.avatar && (isSafe() | async) === false"
           [src]="_user.profile.avatar + '&crop=true&width=200&height=200'"
           class="userImage sizable"
           alt=""
         />
+        } @if (!icon && _user && !(_user?.profile?.avatar && (isSafe() | async) === false)) {
         <span
           class="user-letter"
           aria-hidden="true"
           [style.background-color]="_user | authorityColor"
-          *ngIf="!icon && _user && !(_user?.profile?.avatar && (isSafe() | async) === false)"
           >{{ getLetter(_user) | async }}</span
         >
-        <i
-          class="user-icon"
-          [esIcon]="icon"
-          [style.background-color]="_user | authorityColor"
-          *ngIf="icon"
-        ></i>
+        } @if (icon) {
+        <i class="user-icon" [esIcon]="icon" [style.background-color]="_user | authorityColor"></i>
+        }
       </span>
+      }
     </span>
   </span>
 </span>

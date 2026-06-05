@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
     CollectionService,
@@ -15,6 +15,11 @@ import { DynamicFlatNode } from './dynamic-flat-node';
 
 @Injectable()
 export class TreeNodeService {
+    private collectionService = inject(CollectionService);
+    private localEventsService = inject(LocalEventsService);
+    private nodeHelperService = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
+
     // holds the already requested nodes
     private dataMap: Map<string, Partial<Node>[]> = new Map<string, Partial<Node>[]>();
     // holds the IDs of already clicked, but empty folders
@@ -52,12 +57,7 @@ export class TreeNodeService {
     // callback registered by components to define a custom isValidTarget check
     private isValidTargetCallback: ((node: Node) => boolean) | null = null;
 
-    constructor(
-        private collectionService: CollectionService,
-        private localEventsService: LocalEventsService,
-        private nodeHelperService: NodeHelperService,
-        private nodeService: NodeService,
-    ) {
+    constructor() {
         this.localEventsService.nodesChanged
             .pipe(takeUntilDestroyed())
             .subscribe((nodes: Node[]) => this.refreshTree(nodes));

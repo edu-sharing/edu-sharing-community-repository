@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     Component,
     CUSTOM_ELEMENTS_SCHEMA,
@@ -11,6 +10,7 @@ import {
     SimpleChanges,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
@@ -43,7 +43,6 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
     selector: 'es-topic-header',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         ColorPickerComponent,
         EditableTextComponent,
@@ -59,6 +58,11 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
     styleUrls: ['./topic-header.component.scss'],
 })
 export class TopicHeaderComponent implements OnChanges, OnInit {
+    private aiHelperService = inject(AiHelperService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     private readonly DEFAULT_DESCRIPTION: string = '';
     readonly DEFAULT_HEADER_TEXT_BG_COLOR = '#FFFFFF';
@@ -109,12 +113,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     userUploadedNodeId: string = null;
     widgetNodeId: string = null;
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         this.backToCollectionButtonVisible.set(
             this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );

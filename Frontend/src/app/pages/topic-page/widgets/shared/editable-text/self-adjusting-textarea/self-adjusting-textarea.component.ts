@@ -18,6 +18,7 @@ import {
     SimpleChanges,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -55,6 +56,8 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
+    private ngZone = inject(NgZone);
+
     aiGenerated: InputSignal<boolean> = input(false);
     @Input() alignCenter: boolean = false;
     @Input() disabled: boolean = false;
@@ -89,7 +92,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
         return null;
     });
 
-    constructor(private ngZone: NgZone) {
+    constructor() {
         effect((): void => {
             this.generateWithAi.set(this.aiGenerated());
         });

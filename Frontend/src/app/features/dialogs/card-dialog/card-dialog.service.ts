@@ -1,7 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { filter, map, pairwise, switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -27,6 +27,10 @@ export type BeforeDialogCallback = (
     providedIn: 'root',
 })
 export class CardDialogService {
+    private injector = inject(Injector);
+    private overlay = inject(Overlay);
+    private breakpointObserver = inject(BreakpointObserver);
+
     private readonly openDialogsBeforeClosedSubject = new BehaviorSubject<readonly CardDialogRef[]>(
         [],
     );
@@ -50,11 +54,7 @@ export class CardDialogService {
         this.beforeDialogCallbacks.push(callback);
     }
 
-    constructor(
-        private injector: Injector,
-        private overlay: Overlay,
-        private breakpointObserver: BreakpointObserver,
-    ) {
+    constructor() {
         this.registerViewMode();
     }
 

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ColumnType,
@@ -11,6 +11,7 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodePersonNamePipe,
     OPEN_URL_MODE,
     OptionItem,
     Scope,
@@ -44,6 +45,20 @@ import { OptionsHelperService } from '../../services/options-helper.service';
     standalone: false,
 })
 export class SharingPageComponent {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private connector = inject(RestConnectorService);
+    private nodeService = inject(RestNodeService);
+    private optionsHelper = inject(OptionsHelperService);
+    private sharingService = inject(RestSharingService);
+    private bridge = inject(BridgeService);
+    private nodeHelperService = inject(NodeHelperService);
+    private storage = inject(TemporaryStorageService);
+    private toast = inject(Toast);
+    private config = inject(ConfigService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private translations = inject(TranslationsService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -64,20 +79,7 @@ export class SharingPageComponent {
         useDefaultOptions: false,
         addOptions: [],
     };
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private connector: RestConnectorService,
-        private nodeService: RestNodeService,
-        private optionsHelper: OptionsHelperService,
-        private sharingService: RestSharingService,
-        private bridge: BridgeService,
-        private nodeHelperService: NodeHelperService,
-        private storage: TemporaryStorageService,
-        private toast: Toast,
-        private config: ConfigService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.columns = {
             Default: [
                 new ListItem('NODE', RestConstants.CM_NAME),
@@ -220,7 +222,7 @@ export class SharingPageComponent {
         return Helper.objectEquals(this.sharingInfo.invitedBy, this.sharingInfo.node.createdBy);
     }
     getPersonName(person: Person) {
-        return ConfigurationHelper.getPersonWithConfigDisplayName(person, this.config);
+        return ConfigurationHelper.getPersonWithConfigDisplayName(person, this.nodePersonNamePipe);
     }
 
     childCount() {

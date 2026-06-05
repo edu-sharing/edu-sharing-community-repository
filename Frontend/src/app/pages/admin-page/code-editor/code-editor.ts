@@ -1,4 +1,4 @@
-import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, inject } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { NgxMonacoEditorConfig } from 'ngx-monaco-editor-v2';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -17,12 +17,14 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     standalone: false,
 })
 export class CodeEditorComponent implements ControlValueAccessor {
+    private configService = inject(ConfigService);
+
     @Input() options: NgxMonacoEditorConfig | any;
     @Input() ngModel: string;
     @Output() ngModelChange = new EventEmitter<string>();
     editorType: 'Textarea' | 'Monaco' | undefined;
 
-    constructor(private configService: ConfigService) {
+    constructor() {
         this.configService.observeConfig().subscribe((config) => {
             this.editorType = config.admin?.editorType || 'Monaco';
         });

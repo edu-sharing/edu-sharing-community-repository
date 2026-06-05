@@ -1,7 +1,7 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LocationStrategy } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
-import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
+import { ApplicationRef, DoBootstrap, Injector, NgModule, inject } from '@angular/core';
 import { MAT_CHECKBOX_DEFAULT_OPTIONS } from '@angular/material/checkbox';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_RADIO_DEFAULT_OPTIONS } from '@angular/material/radio';
@@ -131,7 +131,7 @@ export const Providers = [
     schemas: [].concat(extensionSchemas),
 })
 export class AppModule implements DoBootstrap {
-    constructor(private injector: Injector) {}
+    private injector = inject(Injector);
 
     ngDoBootstrap(appRef: ApplicationRef): void {
         appRef.bootstrap(AppComponent);

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
@@ -15,12 +15,12 @@ import { InputDialogData, InputDialogResult } from './input-dialog-data';
     standalone: false,
 })
 export class InputDialogComponent {
+    data = inject<InputDialogData>(CARD_DIALOG_DATA);
+    private dialogRef = inject<CardDialogRef<InputDialogData, InputDialogResult>>(CardDialogRef);
+
     control = new FormControl('');
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: InputDialogData,
-        private dialogRef: CardDialogRef<InputDialogData, InputDialogResult>,
-    ) {
+    constructor() {
         this.initButtons();
     }
 

@@ -1,5 +1,5 @@
+@if (nodeSidebar()) {
 <es-workspace-metadata
-  *ngIf="nodeSidebar()"
   @fromRight
   class="metadata-sidebar"
   [node]="nodeSidebar()"
@@ -7,3 +7,4 @@
   (display)="goToNode($event)"
   (editMetadata)="openMdsEditor([$event])"
 ></es-workspace-metadata>
+}

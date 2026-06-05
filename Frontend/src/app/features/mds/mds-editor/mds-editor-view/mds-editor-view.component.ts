@@ -12,12 +12,12 @@ import {
     OnChanges,
     OnDestroy,
     OnInit,
-    Optional,
     signal,
     SimpleChanges,
     Type,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -89,6 +89,18 @@ type NativeWidgetClass = {
 export class MdsEditorViewComponent
     implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface
 {
+    private sanitizer = inject(DomSanitizer);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private containerRef = inject(ViewContainerRef);
+    private applicationRef = inject(ApplicationRef);
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+    private mdsEditorGlobalService = inject(MdsEditorGlobalService);
+    private ngZone = inject(NgZone);
+    private viewInstance = inject(ViewInstanceService);
+    private uiService = inject(UIService);
+    injector = inject(Injector);
+    private jumpMarks = inject(JumpMarksService, { optional: true });
+
     private static readonly nativeWidgets = NativeWidgets;
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
@@ -118,19 +130,7 @@ export class MdsEditorViewComponent
     private allWidgetsHidden = false;
     private expandContentDone = new Subject<void>();
 
-    constructor(
-        private sanitizer: DomSanitizer,
-        private factoryResolver: ComponentFactoryResolver,
-        private containerRef: ViewContainerRef,
-        private applicationRef: ApplicationRef,
-        private mdsEditorInstance: MdsEditorInstanceService,
-        private mdsEditorGlobalService: MdsEditorGlobalService,
-        private ngZone: NgZone,
-        private viewInstance: ViewInstanceService,
-        private uiService: UIService,
-        public injector: Injector,
-        @Optional() private jumpMarks: JumpMarksService,
-    ) {
+    constructor() {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
             ...Object.values(NativeWidgetType),

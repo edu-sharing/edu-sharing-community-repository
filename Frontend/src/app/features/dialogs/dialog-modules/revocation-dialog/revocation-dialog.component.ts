@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { RevocationDialogData, RevocationDialogResult } from './revocation-dialog-data';
@@ -17,15 +17,18 @@ import { firstValueFrom } from 'rxjs';
     styleUrls: ['./revocation-dialog.component.scss'],
 })
 export class RevocationDialogComponent {
+    data = inject<RevocationDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<RevocationDialogData, RevocationDialogResult>>(CardDialogRef);
+    private nodeHelperService = inject(NodeHelperService);
+    private nodeService = inject(NodeServiceUnwrapped);
+
     reasonControl = new FormControl('', Validators.required);
     edit: boolean;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: RevocationDialogData,
-        private dialogRef: CardDialogRef<RevocationDialogData, RevocationDialogResult>,
-        private nodeHelperService: NodeHelperService,
-        private nodeService: NodeServiceUnwrapped,
-    ) {
+    constructor() {
+        const data = this.data;
+
         if (this.nodeHelperService.isNodeRevoked(data.node)) {
             this.edit = true;
             this.reasonControl.setValue(

@@ -1,9 +1,10 @@
 <div class="topic-page">
+  @if (topicPageLoaded()) {
   <es-template-page
-    *ngIf="topicPageLoaded()"
     #templateComponent
     [collectionId]="topicCollectionId()"
     [variantId]="topicVariantId()"
   ></es-template-page>
+  }
   <es-footer></es-footer>
 </div>

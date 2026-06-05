@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
@@ -19,17 +19,14 @@ import { Node, NodeService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class MdsEditorWidgetNodefilterComponent extends MdsEditorWidgetBase implements OnInit {
+    private nodeService = inject(NodeService);
+
     readonly valueType: ValueType = ValueType.String;
     hidden$ = new BehaviorSubject(true);
     node$ = new BehaviorSubject<Node>(null);
     columns = [new ListItem('NODE', RestConstants.CM_PROP_TITLE)];
-    constructor(
-        toast: Toast,
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private nodeService: NodeService,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
     async ngOnInit(): Promise<void> {
         const values = (await this.widget.getInitalValuesAsync())?.jointValues;

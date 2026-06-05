@@ -1,5 +1,5 @@
+@if (savedSearchesButtonIsVisible) {
 <button
-  *ngIf="savedSearchesButtonIsVisible"
   mat-stroked-button
   color="primary"
   class="saved-searches-button"
@@ -9,18 +9,19 @@
   <i esIcon="bookmark"></i>
   {{ 'SEARCH.SAVED_SEARCHES.TITLE' | translate }}
 </button>
-
-<mat-form-field appearance="fill" *ngIf="(availableMetadataSets | async)?.length > 1">
+} @if ((availableMetadataSets | async)?.length > 1) {
+<mat-form-field appearance="fill">
   <mat-label>{{ 'SEARCH.METADATASET' | translate }}</mat-label>
   <mat-select [formControl]="activeMdsForm">
-    <mat-option *ngFor="let mds of availableMetadataSets | async" [value]="mds.id">
+    @for (mds of availableMetadataSets | async; track mds) {
+    <mat-option [value]="mds.id">
       {{ mds.name }}
     </mat-option>
+    }
   </mat-select>
 </mat-form-field>
-
+} @if (mdsParams) {
 <es-mds-editor-wrapper
-  *ngIf="mdsParams"
   class="mds-editor"
   groupId="ngsearch"
   [repository]="mdsParams.repository"
@@ -31,5 +32,6 @@
   [externalFilters]="mdsExternalFilters"
 >
 </es-mds-editor-wrapper>
+}
 
 <ng-container *ngTemplateOutlet="customTemplates.value.filterBarBottom"></ng-container>

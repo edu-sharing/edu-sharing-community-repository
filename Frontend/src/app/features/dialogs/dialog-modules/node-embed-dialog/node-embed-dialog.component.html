@@ -3,7 +3,8 @@
     <div class="preview" [innerHTML]="embedCode | safeHtml"></div>
   </div>
   <div class="preferences-container">
-    <es-info-message *ngIf="showNotPublicWarning" mode="warning">
+    @if (showNotPublicWarning) {
+    <es-info-message mode="warning">
       <p class="not-public-warning-message">{{ 'EMBED.NOT_PUBLIC_WARNING' | translate }}</p>
       <!--<div>
         <button mat-button (click)="openInviteDialog()">
@@ -12,6 +13,7 @@
         </button>
       </div>-->
     </es-info-message>
+    }
     <div class="not-public-warning-container"></div>
     <mat-form-field class="embed-code-field" appearance="fill">
       <!-- <mat-label>{{ 'EMBED.CODE_LABEL' | translate }}</mat-label> -->
@@ -29,8 +31,8 @@
       >
     </mat-form-field>
     <form class="preferences-form" [formGroup]="form">
+      @if (!isCollectionReference()) {
       <mat-radio-group
-        *ngIf="!isCollectionReference()"
         class="version-radio-group"
         [attr.aria-label]="'EMBED.VERSION' | translate"
         formControlName="version"
@@ -42,6 +44,7 @@
           'EMBED.VERSION_OPTION.NEWEST' | translate
         }}</mat-radio-button>
       </mat-radio-group>
+      }
       <div class="size-fields-container">
         <mat-form-field class="size-field">
           <mat-label>{{ 'EMBED.WIDTH' | translate }}</mat-label>

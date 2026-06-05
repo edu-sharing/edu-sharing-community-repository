@@ -10,6 +10,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
@@ -91,6 +92,31 @@ import {
     standalone: false,
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
+    private authenticationService = inject(AuthenticationService);
+    private localEventsService = inject(LocalEventsService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private bridge = inject(BridgeService);
+    private collectionService = inject(RestCollectionService);
+    configurationService = inject(ConfigService);
+    private sessionStorageService = inject(SessionStorageService);
+    private dialogs = inject(DialogsService);
+    private infobar = inject(InfobarService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNavService = inject(MainNavService);
+    private mdsService = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(RestNodeService);
+    private nodeServiceApi = inject(NodeService);
+    private optionsService = inject(OptionsHelperDataService);
+    private platformLocation = inject(PlatformLocation);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translation = inject(TranslateService);
+    private uiService = inject(UIService);
+    private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+
     private static DEFAULT_REQUEST = {
         sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -195,32 +221,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     login: LoginResult;
     config: ConfigValues;
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private localEventsService: LocalEventsService,
-        private editorialSidebarService: EditorialSidebarService,
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        private globalCollectionsPageService: GlobalCollectionsPageService,
-        public configurationService: ConfigService,
-        private sessionStorageService: SessionStorageService,
-        private dialogs: DialogsService,
-        private infobar: InfobarService,
-        private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
-        private mdsService: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
-        private nodeServiceApi: NodeService,
-        private optionsService: OptionsHelperDataService,
-        private platformLocation: PlatformLocation,
-        private route: ActivatedRoute,
-        private router: Router,
-        private toast: Toast,
-        private translation: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -506,7 +507,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             )
                             .subscribe(
                                 () => {
-                                    this.globalCollectionsPageService.removeTemporaryCollections(
+                                    void this.globalCollectionsPageService.removeTemporaryCollections(
                                         source.element,
                                     );
                                     this.toast.closeProgressSpinner();

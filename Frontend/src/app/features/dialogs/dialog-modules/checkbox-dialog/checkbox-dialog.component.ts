@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -14,12 +14,13 @@ import { SharedModule } from '../../../../shared/shared.module';
     styleUrls: ['./checkbox-dialog.component.scss'],
 })
 export class CheckboxDialogComponent {
+    data = inject<CheckboxDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<CheckboxDialogData, CheckboxDialogResult>>(CardDialogRef);
+
     control = new FormControl(false);
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: CheckboxDialogData,
-        private dialogRef: CardDialogRef<CheckboxDialogData, CheckboxDialogResult>,
-    ) {
+    constructor() {
         this.control.valueChanges.subscribe((value) => (this.data.state = value));
     }
 }

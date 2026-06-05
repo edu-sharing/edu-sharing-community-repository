@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { TranslationsService, UIService } from 'ngx-edu-sharing-ui';
 import {
     ConfigurationService,
@@ -26,6 +26,18 @@ import { PlatformLocation } from '@angular/common';
     standalone: false,
 })
 export class UserManagementPageComponent implements OnInit, OnDestroy {
+    private toast = inject(Toast);
+    private router = inject(Router);
+    private platformLocation = inject(PlatformLocation);
+    private config = inject(ConfigurationService);
+    private translations = inject(TranslationsService);
+    private organization = inject(RestOrganizationService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNav = inject(MainNavService);
+    private connector = inject(RestConnectorService);
+    private searchField = inject(SearchFieldService);
+    private ui = inject(UIService);
+
     public tab: number = 0;
     public searchQuery: string;
     selected: Organization;
@@ -35,19 +47,7 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     TABS = ['ORG', 'GROUP', 'USER', 'DELETE'];
     private destroyed = new Subject<void>();
 
-    constructor(
-        private toast: Toast,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-        private config: ConfigurationService,
-        private translations: TranslationsService,
-        private organization: RestOrganizationService,
-        private loadingScreen: LoadingScreenService,
-        private mainNav: MainNavService,
-        private connector: RestConnectorService,
-        private searchField: SearchFieldService,
-        private ui: UIService,
-    ) {
+    constructor() {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe(

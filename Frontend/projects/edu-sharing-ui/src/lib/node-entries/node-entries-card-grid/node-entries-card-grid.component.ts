@@ -11,6 +11,7 @@ import {
     TemplateRef,
     ViewChild,
     ViewChildren,
+    inject,
 } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
@@ -42,6 +43,15 @@ let displayedWarnings: string[] = [];
     standalone: false,
 })
 export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnDestroy {
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    entriesGlobalService = inject(NodeEntriesGlobalService);
+    elementRef = inject(ElementRef);
+    templatesService = inject(NodeEntriesTemplatesService);
+    nodeHelperService = inject(NodeHelperService);
+    private nodesDragDropService = inject(NodesDragDropService);
+    ui = inject(UIService);
+    private ngZone = inject(NgZone);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
     /**
@@ -94,16 +104,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     private globalCursorStyle: HTMLStyleElement;
     private destroyed = new Subject<void>();
 
-    constructor(
-        public entriesService: NodeEntriesService<T>,
-        public entriesGlobalService: NodeEntriesGlobalService,
-        public elementRef: ElementRef,
-        public templatesService: NodeEntriesTemplatesService,
-        public nodeHelperService: NodeHelperService,
-        private nodesDragDropService: NodesDragDropService,
-        public ui: UIService,
-        private ngZone: NgZone,
-    ) {
+    constructor() {
         this.nodes$ = this.entriesService.dataSource$.pipe(
             switchMap((dataSource) => dataSource?.connect()),
         );

@@ -4,15 +4,14 @@ import {
     ApplicationRef,
     Component,
     EventEmitter,
-    Inject,
     Input,
     OnInit,
-    Optional,
     Output,
     signal,
     TemplateRef,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -98,6 +97,30 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
+    dataCard = inject<ShareDialogData>(CARD_DIALOG_DATA, { optional: true });
+    private dialogRef = inject<CardDialogRef<ShareDialogData, ShareDialogResult>>(CardDialogRef, {
+        optional: true,
+    });
+    private applicationRef = inject(ApplicationRef);
+    private authenticationService = inject(AuthenticationService);
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private collectionService = inject(RestCollectionService);
+    private config = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private connector = inject(RestConnectorService);
+    private localEvents = inject(LocalEventsService);
+    private dialogs = inject(DialogsService);
+    private aboutService = inject(AboutService);
+    private iam = inject(RestIamService);
+    private iamV1Service = inject(IamV1Service);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeApiLegacy = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    nodeHelperService = inject(NodeHelperService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private usageApi = inject(RestUsageService);
+
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;
     @ViewChild(ShareDialogRestrictedAccessComponent)
     restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
@@ -231,29 +254,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     initiallySkippedNodeIds: string[] = [];
     private readonly inheritanceChange$ = new Subject<NodePermissionInheritance[]>();
 
-    constructor(
-        @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
-        @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
-        private applicationRef: ApplicationRef,
-        private authenticationService: AuthenticationService,
-        private cardDialogUtils: CardDialogUtilsService,
-        private collectionService: RestCollectionService,
-        private config: ConfigurationService,
-        private configService: ConfigService,
-        private connector: RestConnectorService,
-        private localEvents: LocalEventsService,
-        private dialogs: DialogsService,
-        private aboutService: AboutService,
-        private iam: RestIamService,
-        private iamV1Service: IamV1Service,
-        private mdsHelperService: MdsHelperService,
-        private nodeApiLegacy: RestNodeService,
-        private nodeApi: NodeService,
-        public nodeHelperService: NodeHelperService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private usageApi: RestUsageService,
-    ) {
+    constructor() {
         //this.dataService=new SearchData(iam);
         this.linkEnabled = {
             authority: {

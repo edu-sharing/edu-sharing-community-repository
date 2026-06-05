@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     ApiHelpersService,
     Assignment,
@@ -31,6 +31,16 @@ import { NodeClickEvent } from '../node-entries/entries-model';
     providedIn: 'root',
 })
 export class NodeHelperService {
+    protected translate = inject(TranslateService);
+    protected apiHelpersService = inject(ApiHelpersService);
+    protected networkService = inject(NetworkService);
+    protected configService = inject(ConfigService);
+    protected configuration = inject(EduSharingUiConfiguration);
+    protected repoUrlService = inject(RepoUrlService);
+    protected platformLocation = inject(PlatformLocation);
+    protected toast = inject(Toast);
+    protected router = inject(Router, { optional: true });
+
     readonly LICENSE_URLS = {
         CC_BY_ABOUT: 'https://creativecommons.org/licenses/list.{{language}}',
         CC_BY: 'https://creativecommons.org/licenses/by/{{version}}/{{locale}}deed.{{language}}',
@@ -47,17 +57,8 @@ export class NodeHelperService {
         CC_0: 'https://creativecommons.org/publicdomain/zero/1.0/legalcode.{{language}}',
         PDM: 'https://creativecommons.org/public-domain/pdm/',
     } as { [key: string]: string };
-    constructor(
-        protected translate: TranslateService,
-        protected apiHelpersService: ApiHelpersService,
-        protected networkService: NetworkService,
-        protected configService: ConfigService,
-        protected configuration: EduSharingUiConfiguration,
-        protected repoUrlService: RepoUrlService,
-        protected platformLocation: PlatformLocation,
-        protected toast: Toast,
-        @Optional() protected router: Router,
-    ) {}
+
+    constructor() {}
 
     /**
      * Navigates to the primary action URL for the node carried in the click event.

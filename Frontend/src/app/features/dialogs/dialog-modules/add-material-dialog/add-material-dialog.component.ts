@@ -3,13 +3,12 @@ import {
     Component,
     ElementRef,
     EventEmitter,
-    Inject,
     Input,
     OnInit,
-    Optional,
     Output,
     signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
@@ -53,6 +52,20 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
     standalone: false,
 })
 export class AddMaterialDialogComponent implements OnInit {
+    data = inject<AddMaterialDialogData | null>(CARD_DIALOG_DATA, { optional: true });
+    private dialogRef = inject<CardDialogRef<
+        AddMaterialDialogData,
+        AddMaterialDialogResult
+    > | null>(CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>, { optional: true });
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private clientUtils = inject(ClientutilsV1Service);
+    private configService = inject(ConfigurationService);
+    dialogs = inject(DialogsService);
+    private nodeService = inject(RestNodeService);
+    private storageService = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private userService = inject(UserService);
+
     readonly DialogTemplate = DialogTemplate;
     @Input() dialogData?: AddMaterialDialogData;
     @Output() dialogResult: EventEmitter<AddMaterialDialogResult> =
@@ -89,19 +102,7 @@ export class AddMaterialDialogComponent implements OnInit {
         return this.data || this.dialogData;
     }
 
-    constructor(
-        @Optional() @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData | null,
-        @Optional()
-        private dialogRef: CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult> | null,
-        private breadcrumbsService: BreadcrumbsService,
-        private clientUtils: ClientutilsV1Service,
-        private configService: ConfigurationService,
-        public dialogs: DialogsService,
-        private nodeService: RestNodeService,
-        private storageService: SessionStorageService,
-        private toast: Toast,
-        private userService: UserService,
-    ) {
+    constructor() {
         this.registerParentListener();
         this.userService
             .observeCurrentUser()

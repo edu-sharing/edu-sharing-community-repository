@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, TemplateRef } from '@angular/core';
+import { computed, Injectable, signal, TemplateRef, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, forkJoin, Observable, of, startWith, Subject } from 'rxjs';
 import { debounceTime, filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
@@ -106,6 +106,14 @@ export enum TemplateSlot {
     providedIn: 'root',
 })
 export class MainNavService {
+    private managementDialogs = inject(ManagementDialogsService);
+    private event = inject(FrameEventsService);
+    private skipNav = inject(SkipNavService);
+    private dialogs = inject(DialogsService);
+    private sessionStorageService = inject(SessionStorageService);
+    private user = inject(UserService);
+    private configServiceApi = inject(ConfigService);
+
     readonly DefaultHeight = 70;
     private mainnav: MainNavComponent;
     private cookieInfo: CookieInfoComponent;
@@ -123,16 +131,6 @@ export class MainNavService {
     showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
     readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
     private customScopes: string[];
-
-    constructor(
-        private managementDialogs: ManagementDialogsService,
-        private event: FrameEventsService,
-        private skipNav: SkipNavService,
-        private dialogs: DialogsService,
-        private sessionStorageService: SessionStorageService,
-        private user: UserService,
-        private configServiceApi: ConfigService,
-    ) {}
 
     /**
      * register a template to be used in the top bar instead of the default one

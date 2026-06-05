@@ -24,8 +24,8 @@
 
     &::ng-deep {
         // remove border from search form field
-        --mdc-outlined-text-field-outline-width: 0;
-        --mdc-outlined-text-field-focus-outline-width: 0;
+        --mat-form-field-outlined-outline-width: 0;
+        --mat-form-field-outlined-focus-outline-width: 0;
         .mat-mdc-notch-piece {
             border: none;
         }

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
@@ -23,14 +23,15 @@ import { filter, first } from 'rxjs/operators';
     standalone: false,
 })
 export class ShareLinkDialogComponent implements OnInit {
+    data = inject<ShareLinkDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<ShareLinkDialogData, ShareLinkDialogResult>>(CardDialogRef);
+    private nodeService = inject(RestNodeService);
+    private translate = inject(TranslateService);
+    private toast = inject(Toast);
+
     loading$ = new BehaviorSubject<boolean>(false);
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: ShareLinkDialogData,
-        private dialogRef: CardDialogRef<ShareLinkDialogData, ShareLinkDialogResult>,
-        private nodeService: RestNodeService,
-        private translate: TranslateService,
-        private toast: Toast,
-    ) {
+    constructor() {
         // Set `isLoading` before `ngOnInit`, so it won't cause a changed-after-checked error.
         this.dialogRef.patchState({ isLoading: true });
     }

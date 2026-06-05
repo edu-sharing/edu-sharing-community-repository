@@ -14,8 +14,8 @@
     [attr.aria-describedby]="container.descriptionId"
     [class]="mode"
   >
+    @for (value of values.values; track value) {
     <mat-radio-button
-      *ngFor="let value of values.values"
       [class.isAiSuggestion]="
         (aiSuggestion$ | async)?.value === value.key &&
         (aiSuggestion$ | async)?.status === 'ACCEPTED'
@@ -25,5 +25,6 @@
     >
       {{ value.label }}
     </mat-radio-button>
+    }
   </mat-radio-group>
 </es-mds-editor-widget-container>
