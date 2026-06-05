@@ -17,8 +17,8 @@
     }
 
     // hover and focuses are applied via ::before, so disable via opacity
-    --mdc-list-list-item-focus-state-layer-opacity: 0;
-    --mdc-list-list-item-hover-state-layer-opacity: 0;
+    --mat-list-list-item-focus-state-layer-opacity: 0;
+    --mat-list-list-item-hover-state-layer-opacity: 0;
 
     // define variables to be used by both list components (for both parents and children)
     --column-browser-hover-color: #{topicPageVars.$surface-alt};
@@ -223,7 +223,7 @@ es-node-url ::ng-deep > a {
 
         .child-list-item {
             padding: 0 20px;
-            height: var(--mdc-list-list-item-one-line-container-height);
+            height: var(--mat-list-list-item-one-line-container-height);
             flex-shrink: 0;
             display: flex;
             justify-content: space-between;
@@ -273,11 +273,11 @@ es-node-url ::ng-deep > a {
 
             // adjust font style to match the selection list
             .item-link {
-                font-family: var(--mdc-list-list-item-label-text-font);
-                line-height: var(--mdc-list-list-item-label-text-line-height);
-                font-size: var(--mdc-list-list-item-label-text-size);
-                font-weight: var(--mdc-list-list-item-label-text-weight);
-                letter-spacing: var(--mdc-list-list-item-label-text-tracking);
+                font-family: var(--mat-list-list-item-label-text-font);
+                line-height: var(--mat-list-list-item-label-text-line-height);
+                font-size: var(--mat-list-list-item-label-text-size);
+                font-weight: var(--mat-list-list-item-label-text-weight);
+                letter-spacing: var(--mat-list-list-item-label-text-tracking);
             }
         }
     }

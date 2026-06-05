@@ -1,14 +1,14 @@
+@if ((this.entriesService.globalOptionsSubject | async)?.length) {
 <div
-  *ngIf="(this.entriesService.globalOptionsSubject | async)?.length"
   role="listitem"
   class="global-options"
   [class.global-options-small]="displayType === NodeEntriesDisplayType.SmallGrid"
   [class.global-options-table]="displayType === NodeEntriesDisplayType.Table"
 >
+  @for (option of this.entriesService.globalOptionsSubject | async; track option) {
   <button
     mat-button
     [disabled]="!option.isEnabled"
-    *ngFor="let option of this.entriesService.globalOptionsSubject | async"
     (click)="option.callback()"
     class="global-option-btn"
     attr.data-test="card-button-{{ option.name }}"
@@ -16,7 +16,9 @@
   >
     <ng-container *ngTemplateOutlet="globalOption; context: { option: option }"></ng-container>
   </button>
+  }
 </div>
+}
 <ng-template #globalOption let-option="option">
   <span class="global-option">
     <i [esIcon]="option.icon"></i>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { LTIRegistrationToken, LTIRegistrationTokens } from '../../../core-module/rest/data-object';
 import { RestLtiService } from '../../../core-module/rest/services/rest-lti.service';
 import { Toast } from '../../../services/toast';
@@ -13,6 +13,10 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     standalone: false,
 })
 export class LtiAdminComponent implements OnInit {
+    private dialogs = inject(DialogsService);
+    private ltiService = inject(RestLtiService);
+    private toast = inject(Toast);
+
     @Output() refreshAppList = new EventEmitter<void>();
 
     /**
@@ -32,12 +36,6 @@ export class LtiAdminComponent implements OnInit {
     keysetUrl: string;
     keyId: string;
     authTokenUrl: string;
-
-    constructor(
-        private dialogs: DialogsService,
-        private ltiService: RestLtiService,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         this.refresh();

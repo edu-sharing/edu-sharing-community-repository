@@ -6,6 +6,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Node, ProposalNode } from 'ngx-edu-sharing-api';
 import {
@@ -36,6 +37,10 @@ import { MainNavService } from '../../../main/navigation/main-nav.service';
     standalone: false,
 })
 export class CollectionProposalsComponent implements OnChanges {
+    private collectionService = inject(RestCollectionService);
+    private mainNavService = inject(MainNavService);
+    private optionsHelperService = inject(OptionsHelperService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -55,11 +60,7 @@ export class CollectionProposalsComponent implements OnChanges {
 
     @Output() contentClick = new EventEmitter<ProposalNode>();
 
-    constructor(
-        private collectionService: RestCollectionService,
-        private mainNavService: MainNavService,
-        private optionsHelperService: OptionsHelperService,
-    ) {
+    constructor() {
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
                 this.refreshProposals();

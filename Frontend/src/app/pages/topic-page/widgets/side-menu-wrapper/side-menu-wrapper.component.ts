@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     Component,
     EventEmitter,
@@ -15,7 +14,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 @Component({
     selector: 'es-side-menu-wrapper',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [CommonModule, EduSharingUiCommonModule, MatIconButton, TranslateModule],
+    imports: [EduSharingUiCommonModule, MatIconButton, TranslateModule],
     templateUrl: './side-menu-wrapper.component.html',
     styleUrls: ['./side-menu-wrapper.component.scss'],
 })

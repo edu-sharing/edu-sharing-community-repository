@@ -7,6 +7,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -81,6 +82,33 @@ import {
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
+    public bridge = inject(BridgeService);
+    private cardService = inject(CardService);
+    private cardDialogService = inject(CardDialogService);
+    private connector = inject(RestConnectorService);
+    private connectorApi = inject(ConnectorService);
+    private configService = inject(ConfigService);
+    private mainNavService = inject(MainNavService);
+    private dialogs = inject(DialogsService);
+    private event = inject(FrameEventsService);
+    private uiService = inject(UIService);
+    private iam = inject(RestIamService);
+    private iamService = inject(RestIamService);
+    private ltiPlatformService = inject(LtiPlatformService);
+    private nodeHelper = inject(NodeHelperService);
+    private localEventsService = inject(LocalEventsService);
+    private nodeService = inject(RestNodeService);
+    private optionsService = inject(OptionsHelperDataService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private paste = inject(PasteService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private uploadDialog = inject(UploadDialogService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private connectorOptionsService = inject(ConnectorOptionsService);
+
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     /**
@@ -128,34 +156,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private destroyed = new BehaviorSubject(false);
     private destroyed$ = this.destroyed.pipe(filter((d) => d === true));
 
-    constructor(
-        public bridge: BridgeService,
-        private cardService: CardService,
-        private cardDialogService: CardDialogService,
-        private connector: RestConnectorService,
-        private editorialSidebarService: EditorialSidebarService,
-        private connectorApi: ConnectorService,
-        private connectorOptionsService: ConnectorOptionsService,
-        private configService: ConfigService,
-        private mainNavService: MainNavService,
-        private dialogs: DialogsService,
-        private event: FrameEventsService,
-        private uiService: UIService,
-        private iam: RestIamService,
-        private iamService: RestIamService,
-        private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
-        private nodeHelper: NodeHelperService,
-        private localEventsService: LocalEventsService,
-        private nodeService: RestNodeService,
-        private optionsService: OptionsHelperDataService,
-        private optionsHelperService: OptionsHelperService,
-        private paste: PasteService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-        private uploadDialog: UploadDialogService,
-    ) {
+    constructor() {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
             void this.updateOptions();

@@ -1,13 +1,9 @@
-<div class="empty" *ngIf="!nodes()?.length">
+@if (!nodes()?.length) {
+<div class="empty">
   {{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_EMPTY' | translate }}
 </div>
-<div
-  class="node-list"
-  *ngIf="assignment() && nodes()?.length"
-  cdkDropList
-  [cdkDropListData]="nodes()"
-  (cdkDropListDropped)="drop($event)"
->
+} @if (assignment() && nodes()?.length) {
+<div class="node-list" cdkDropList [cdkDropListData]="nodes()" (cdkDropListDropped)="drop($event)">
   @for (item of nodes(); track item) {
   <div cdkDrag [cdkDragDisabled]="readonly()">
     <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
@@ -20,45 +16,41 @@
         (selectionChange)="setRole(item, $event)"
         [disabled]="readonly()"
       >
-        <ng-container *ngIf="translateReady$ | async">
-          <mat-option [value]="role" *ngFor="let role of ['SUBMITTABLE', 'SUPPLEMENTARY']"
-            >{{ 'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate : { fallback: role } }}
-          </mat-option>
-        </ng-container>
+        @if (translateReady$ | async) { @for (role of ['SUBMITTABLE', 'SUPPLEMENTARY']; track role)
+        {
+        <mat-option [value]="role"
+          >{{ 'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate : { fallback: role } }}
+        </mat-option>
+        } }
       </mat-select>
     </mat-form-field>
     <div class="warn-area">
+      @if ( !item.isPublic && assignment().type !== 'SUBMISSION' &&
+      nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective) ) {
       <div
         class="not-public-invite"
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_INVITE' | translate }}"
-        *ngIf="
-          !item.isPublic &&
-          assignment().type !== 'SUBMISSION' &&
-          nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
-        "
       >
         <i esIcon="group_add"></i>
       </div>
+      }
       <!-- @TODO: To define if node rights are required or we may do a copy? -->
+      @if ( !item.isPublic && !isLicenseMedia(item) && assignment().type !== 'SUBMISSION' &&
+      !nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective) ) {
       <div
         class="not-public-no-invite"
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_NO_ACCESS' | translate }}"
-        *ngIf="
-          !item.isPublic &&
-          !isLicenseMedia(item) &&
-          assignment().type !== 'SUBMISSION' &&
-          !nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective)
-        "
       >
         <i esIcon="warning"></i>
       </div>
+      } @if (!item.isPublic && isLicenseMedia(item)) {
       <div
         class="not-public-no-invite"
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_LICENSE_MEDIA' | translate }}"
-        *ngIf="!item.isPublic && isLicenseMedia(item)"
       >
         <i esIcon="warning"></i>
       </div>
+      }
     </div>
     <button
       mat-icon-button
@@ -72,3 +64,4 @@
   </div>
   }
 </div>
+}

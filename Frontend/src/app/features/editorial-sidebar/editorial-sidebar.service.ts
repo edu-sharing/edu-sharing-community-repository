@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, signal } from '@angular/core';
+import { EventEmitter, Injectable, signal, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EditorialSidebarComponent,
@@ -21,6 +21,8 @@ import { distinctUntilChanged, map, skip } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class EditorialSidebarService {
+    mainNavService = inject(MainNavService);
+
     /**
      * currently selected nodes
      * (handled via handleSelection() and used by the component for displaying the item)
@@ -46,8 +48,8 @@ export class EditorialSidebarService {
      */
     readonly sidebarLoading = signal(false);
 
-    constructor(mainNavService: MainNavService) {
-        mainNavService
+    constructor() {
+        this.mainNavService
             .observeMainNavConfig()
             .pipe(
                 map((config) => config.currentScope),

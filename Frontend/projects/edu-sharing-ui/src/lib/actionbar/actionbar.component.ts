@@ -10,6 +10,7 @@ import {
     OnDestroy,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIAnimation } from '../util/ui-animation';
@@ -31,6 +32,10 @@ import { BehaviorSubject } from 'rxjs';
  * The action bar provides several icons, usually at the top right, with actions for a current context
  */
 export class ActionbarComponent implements OnChanges, AfterViewInit, OnDestroy {
+    private uiService = inject(UIService);
+    private translate = inject(TranslateService);
+    private cdr = inject(ChangeDetectorRef);
+    private elementRef = inject(ElementRef<HTMLElement>);
     /**
      * The amount of options which are not hidden inside an overflow menu
      * (default: depending on mobile (1) or not (2))
@@ -108,13 +113,6 @@ export class ActionbarComponent implements OnChanges, AfterViewInit, OnDestroy {
     @Input() mobileBreakpoint = UIConstants.MOBILE_WIDTH;
     @HostBinding('class.labels-hidden-for-room') labelsHiddenForRoom = false;
     @ViewChild('actionbarDiv') private actionbarDiv: ElementRef<HTMLElement>;
-
-    constructor(
-        private uiService: UIService,
-        private translate: TranslateService,
-        private cdr: ChangeDetectorRef,
-        private elementRef: ElementRef<HTMLElement>,
-    ) {}
 
     optionsIn: OptionItem[] = [];
     optionsAlways$ = new BehaviorSubject<OptionItem[]>([]);

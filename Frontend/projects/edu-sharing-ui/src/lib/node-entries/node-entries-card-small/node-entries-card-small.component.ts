@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Target } from '../../types/option-item';
 import { ClickSource, InteractionType } from '../entries-model';
 
@@ -17,17 +17,15 @@ import { AssignmentPipe } from '../../pipes/assignment.pipe';
     standalone: false,
 })
 export class NodeEntriesCardSmallComponent<T extends Node> {
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    nodeHelper = inject(NodeHelperService);
+    templatesService = inject(NodeEntriesTemplatesService);
+
     readonly ClickSource = ClickSource;
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     @Input() node: T;
     @Input() dropdown: DropdownComponent;
-
-    constructor(
-        public entriesService: NodeEntriesService<T>,
-        public nodeHelper: NodeHelperService,
-        public templatesService: NodeEntriesTemplatesService,
-    ) {}
 
     optionsOnCard() {
         const options = this.entriesService.options[Target.List];

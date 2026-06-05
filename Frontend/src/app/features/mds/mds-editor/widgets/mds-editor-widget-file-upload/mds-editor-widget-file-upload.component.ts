@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { InputStatus, Values } from '../../../types/types';
@@ -10,6 +10,8 @@ import { InputStatus, Values } from '../../../types/types';
     standalone: false,
 })
 export class MdsEditorWidgetFileUploadComponent implements NativeWidgetComponent {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,
@@ -29,8 +31,6 @@ export class MdsEditorWidgetFileUploadComponent implements NativeWidgetComponent
     status = new BehaviorSubject<InputStatus>('INVALID');
 
     @Output() setLink = new EventEmitter<string>();
-
-    constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
     doSetLink() {
         this.setLink.emit(this.link);

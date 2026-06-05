@@ -1,30 +1,31 @@
 <!--
-   Use another div, so the sidebar's margin is included in the component's dimensions, which makes
-   positioning easier for outer components.
+Use another div, so the sidebar's margin is included in the component's dimensions, which makes
+positioning easier for outer components.
 -->
-<ng-container *ngIf="node">
-  <div *ngIf="(isMobileScreen | async) === false" class="preview-sidebar mat-elevation-z3">
-    <ng-container *ngTemplateOutlet="content"></ng-container>
-  </div>
-  <ng-template #content>
+@if (node) { @if ((isMobileScreen | async) === false) {
+<div class="preview-sidebar mat-elevation-z3">
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+</div>
+}
+<ng-template #content>
+  <es-preview-content
+    #preview
+    [node]="node"
+    [customOptions]="customOptions"
+    [editorMode]="editorMode"
+    [groupId]="groupId"
+  ></es-preview-content>
+</ng-template>
+<ng-template #modal>
+  <div class="preview-sidebar-rendering-modal">
     <es-preview-content
-      #preview
       [node]="node"
       [customOptions]="customOptions"
       [editorMode]="editorMode"
       [groupId]="groupId"
+      [autoRender]="true"
+      class="modal"
     ></es-preview-content>
-  </ng-template>
-  <ng-template #modal>
-    <div class="preview-sidebar-rendering-modal">
-      <es-preview-content
-        [node]="node"
-        [customOptions]="customOptions"
-        [editorMode]="editorMode"
-        [groupId]="groupId"
-        [autoRender]="true"
-        class="modal"
-      ></es-preview-content>
-    </div>
-  </ng-template>
-</ng-container>
+  </div>
+</ng-template>
+}

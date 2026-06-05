@@ -6,6 +6,7 @@ import {
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslationsService, UIConstants } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,18 @@ import { ConfigService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class RegisterPageComponent implements OnInit, OnDestroy {
+    private connector = inject(RestConnectorService);
+    private toast = inject(Toast);
+    private platformLocation = inject(PlatformLocation);
+    private router = inject(Router);
+    private translations = inject(TranslationsService);
+    private uiService = inject(UIService);
+    private configService = inject(ConfigService);
+    private configServiceLegacy = inject(ConfigurationService);
+    private changes = inject(ChangeDetectorRef);
+    private loadingScreen = inject(LoadingScreenService);
+    private route = inject(ActivatedRoute);
+
     @ViewChild('registerForm') registerForm: RegisterFormComponent;
     @ViewChild('registerDone') registerDone: RegisterDoneComponent;
     @ViewChild('request') request: RegisterRequestComponent;
@@ -56,20 +69,6 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
     public newPassword() {
         this.resetPassword.newPassword();
     }
-
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private platformLocation: PlatformLocation,
-        private router: Router,
-        private translations: TranslationsService,
-        private uiService: UIService,
-        private configService: ConfigService,
-        private configServiceLegacy: ConfigurationService,
-        private changes: ChangeDetectorRef,
-        private loadingScreen: LoadingScreenService,
-        private route: ActivatedRoute,
-    ) {}
 
     ngOnDestroy(): void {
         this.destroyed.next();

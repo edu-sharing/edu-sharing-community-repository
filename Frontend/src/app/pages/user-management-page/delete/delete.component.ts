@@ -1,4 +1,4 @@
-import { ApplicationRef, Component, DoCheck, OnInit, ViewChild } from '@angular/core';
+import { ApplicationRef, Component, DoCheck, OnInit, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { SessionStorageService, User } from 'ngx-edu-sharing-api';
 import {
@@ -34,6 +34,15 @@ import { BehaviorSubject } from 'rxjs';
     standalone: false,
 })
 export class PermissionsDeleteComponent implements OnInit, DoCheck {
+    private admin = inject(RestAdminService);
+    private dialogs = inject(DialogsService);
+    private iam = inject(RestIamService);
+    private storage = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private applicationRef = inject(ApplicationRef);
+    private translate = inject(TranslateService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly AuthoritySearchMode = AuthoritySearchMode;
@@ -52,15 +61,7 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
     jobs: JobDescription[];
     job: JobDescription | 'NONE' = 'NONE';
 
-    constructor(
-        private admin: RestAdminService,
-        private dialogs: DialogsService,
-        private iam: RestIamService,
-        private storage: SessionStorageService,
-        private toast: Toast,
-        private applicationRef: ApplicationRef,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         // send list of target users + options for these specific users
         const defaultOptions = {
             // change this value if the config needs to be reset to default
@@ -178,21 +179,18 @@ export class PermissionsDeleteComponent implements OnInit, DoCheck {
     async prepareStart() {
         let message = this.translate.instant('PERMISSIONS.DELETE.CONFIRM.USERS');
         for (const user of this.nodeEntriesWrapperComponent.getSelection().selected) {
-            message += '\n' + new AuthorityNamePipe(this.translate).transform(user, null);
+            message += '\n' + this.authorityNamePipe.transform(user, null);
         }
         if (this.hasAssigning()) {
             message +=
                 '\n\n' +
                 this.translate.instant('PERMISSIONS.DELETE.CONFIRM.RECEIVER', {
-                    user: new AuthorityNamePipe(this.translate).transform(this.receiver, null),
+                    user: this.authorityNamePipe.transform(this.receiver, null),
                 });
             message +=
                 '\n\n' +
                 this.translate.instant('PERMISSIONS.DELETE.CONFIRM.RECEIVER_GROUP', {
-                    group: new AuthorityNamePipe(this.translate).transform(
-                        this.receiverGroup,
-                        null,
-                    ),
+                    group: this.authorityNamePipe.transform(this.receiverGroup, null),
                 });
         }
         message += '\n\n' + this.translate.instant('PERMISSIONS.DELETE.CONFIRM.FINAL');

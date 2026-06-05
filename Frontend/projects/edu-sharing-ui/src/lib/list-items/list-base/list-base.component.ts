@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, TemplateRef } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, TemplateRef, inject } from '@angular/core';
 import { AVAILABLE_LIST_WIDGETS, ListWidgetType } from '../available-widgets';
 import { ListWidget } from '../list-widget';
 import { NodeEntriesGlobalService } from '../../node-entries/node-entries-global.service';
@@ -10,13 +10,15 @@ import { Node } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class ListBaseComponent extends ListWidget implements OnChanges {
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+
     /**
      * use text only widgets (for table)
      */
     @Input() forceText = false;
     widgetType: ListWidgetType;
     customTemplate: TemplateRef<unknown>;
-    constructor(private nodeEntriesGlobalService: NodeEntriesGlobalService) {
+    constructor() {
         super();
     }
 

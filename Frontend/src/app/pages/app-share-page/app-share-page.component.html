@@ -1,20 +1,25 @@
-<es-global-progress *ngIf="globalProgress"></es-global-progress>
-<div class="content" *ngIf="!globalProgress">
+@if (globalProgress) {
+<es-global-progress></es-global-progress>
+} @if (!globalProgress) {
+<div class="content">
   <div class="preview">
     <img [src]="previewUrl" />
     <div class="info">
       <div class="type">{{ 'MEDIATYPE.' + getType() | translate }}</div>
       <div class="label">{{ title ? title : uri }}</div>
-      <div class="description" *ngIf="description">{{ description }}</div>
+      @if (description) {
+      <div class="description">{{ description }}</div>
+      }
     </div>
   </div>
   <div class="location">
-    {{ 'SHARE_APP.WILL_BE_SAVED_AT' | translate }}:
-    <div class="breadcrumbs" *ngIf="inbox">
+    {{ 'SHARE_APP.WILL_BE_SAVED_AT' | translate }}: @if (inbox) {
+    <div class="breadcrumbs">
       <i class="material-icons">home</i>
       <div>&rsaquo;</div>
       <div>{{ inbox.name }}</div>
     </div>
+    }
   </div>
   <div class="save">
     <button mat-flat-button color="primary" (click)="saveFile()">
@@ -34,3 +39,4 @@
     ></es-node-entries-wrapper>
   </div>
 </div>
+}

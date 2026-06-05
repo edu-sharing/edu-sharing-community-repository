@@ -7,6 +7,7 @@ import {
     Input,
     Output,
     TemplateRef,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -63,6 +64,19 @@ export interface ManagementEvent {
     standalone: false,
 })
 export class WorkspaceManagementDialogsComponent {
+    private bridge = inject(BridgeService);
+    private collectionService = inject(RestCollectionService);
+    private dialogs = inject(DialogsService);
+    private errorProcessing = inject(ErrorProcessingService);
+    private localEvents = inject(LocalEventsService);
+    private uiService = inject(UIService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(RestNodeService);
+    private nodeServiceApi = inject(NodeService);
+    private router = inject(Router);
+    private temporaryStorage = inject(TemporaryStorageService);
+    private toast = inject(Toast);
+
     @ContentChild('collectionChooserBeforeRecent')
     collectionChooserBeforeRecentRef: TemplateRef<any>;
     @Input() addToCollection: Node[];
@@ -109,20 +123,6 @@ export class WorkspaceManagementDialogsComponent {
             }
         }
     }
-    public constructor(
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        private dialogs: DialogsService,
-        private errorProcessing: ErrorProcessingService,
-        private localEvents: LocalEventsService,
-        private uiService: UIService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
-        private nodeServiceApi: NodeService,
-        private router: Router,
-        private temporaryStorage: TemporaryStorageService,
-        private toast: Toast,
-    ) {}
 
     public closeStream() {
         this.addNodesStream = null;

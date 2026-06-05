@@ -1,4 +1,4 @@
-import { Injectable, Injector, OnDestroy } from '@angular/core';
+import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
@@ -76,6 +76,15 @@ export interface SearchPageState {
 
 @Injectable()
 export class SearchPageResultsService extends SearchPageResults implements OnDestroy {
+    private _injector = inject(Injector);
+    private _mds = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private _search = inject(SearchService);
+    private _searchPageRestore = inject(SearchPageRestoreService);
+    private _translate = inject(TranslateService);
+    private _route = inject(ActivatedRoute);
+    private _userModifiableValues = inject(UserModifiableValuesService);
+
     readonly searchSort = this._userModifiableValues.createMapped<Sort>({
         fromString: (v) => JSON.parse(v),
         toString: (v) => JSON.stringify(v),
@@ -98,19 +107,11 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
 
     private readonly _destroyed = new Subject<void>();
 
-    constructor(
-        private _injector: Injector,
-        private _mds: MdsService,
-        private mdsHelperService: MdsHelperService,
-        _nodeHelper: NodeHelperService,
-        _router: Router,
-        private _search: SearchService,
-        _searchPage: SearchPageService,
-        private _searchPageRestore: SearchPageRestoreService,
-        private _translate: TranslateService,
-        private _route: ActivatedRoute,
-        private _userModifiableValues: UserModifiableValuesService,
-    ) {
+    constructor() {
+        const _nodeHelper = inject(NodeHelperService);
+        const _router = inject(Router);
+        const _searchPage = inject(SearchPageService);
+
         super(_router, _searchPage, _nodeHelper);
         this._registerPageRestore();
         this._registerSearchObservables();

@@ -2,8 +2,8 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
-    Inject,
     OnInit,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import {
@@ -56,6 +56,19 @@ enum Relations {
     standalone: false,
 })
 export class NodeRelationsDialogComponent implements OnInit {
+    data = inject<NodeRelationsDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>>(CardDialogRef);
+    private bridgeService = inject(BridgeService);
+    private cdr = inject(ChangeDetectorRef);
+    private localEvents = inject(LocalEventsService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
+    private relationService = inject(RelationService);
+    private toast = inject(Toast);
+    private userService = inject(UserService);
+    private configService = inject(ConfigService);
+
     readonly RelationsInverted: { [key: string]: NodeRelationData['reverseType'] } = {
         [Relations.isPartOf]: 'hasPart',
         [Relations.isBasedOn]: 'isBasisFor',
@@ -84,19 +97,7 @@ export class NodeRelationsDialogComponent implements OnInit {
         new DialogButton('SAVE', DialogButton.TYPE_PRIMARY, () => this.save()),
     ];
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodeRelationsDialogData,
-        private dialogRef: CardDialogRef<NodeRelationsDialogData, NodeRelationsDialogResult>,
-        private bridgeService: BridgeService,
-        private cdr: ChangeDetectorRef,
-        private localEvents: LocalEventsService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        private relationService: RelationService,
-        private toast: Toast,
-        private userService: UserService,
-        private configService: ConfigService,
-    ) {
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
     }
 

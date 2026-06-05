@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     combineLatest,
     EMPTY,
@@ -35,6 +35,9 @@ import { AuthenticationService } from './authentication.service';
  */
 @Injectable({ providedIn: 'root' })
 export class SessionStorageService {
+    private userService = inject(UserService);
+    private authentication = inject(AuthenticationService);
+
     static readonly KEY_WORKSPACE_SORT = 'workspace_sort';
     static readonly KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM = 'workspace_safe_download_confirm';
     static readonly KEY_ROOT_COLLECTIONS = 'collections_root';
@@ -49,7 +52,7 @@ export class SessionStorageService {
     /** Refresh user preferences to reflect changes on the backend from outside this app. */
     private readonly triggerRefresh = new Subject<void>();
 
-    constructor(private userService: UserService, private authentication: AuthenticationService) {
+    constructor() {
         // The currently logged in user. `null` for guest or no/invalid login.
         const currentUser = this.authentication.observeLoginInfo().pipe(
             filter((login) => login !== null),

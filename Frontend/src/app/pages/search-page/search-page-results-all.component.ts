@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { debounceTime, map } from 'rxjs/operators';
 import { SearchPageResultsAllService } from './search-page-results-all.service';
 import { SearchPageService } from './search-page.service';
@@ -21,6 +21,11 @@ import { SelectionChange } from '@angular/cdk/collections';
     standalone: false,
 })
 export class SearchPageResultsAllComponent implements OnInit {
+    searchPage = inject(SearchPageService);
+    private _results = inject(SearchPageResultsAllService);
+    private configService = inject(ConfigService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+
     readonly Scope = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -34,13 +39,6 @@ export class SearchPageResultsAllComponent implements OnInit {
     private readonly _searchString = this.searchPage.searchString;
     private readonly _activeRepository = this.searchPage.activeRepository;
     previewMode: string | 'Sidebar' | 'RenderingPage';
-
-    constructor(
-        public searchPage: SearchPageService,
-        private _results: SearchPageResultsAllService,
-        private configService: ConfigService,
-        private editorialSidebarService: EditorialSidebarService,
-    ) {}
 
     async ngOnInit() {
         setTimeout(() => {
@@ -59,7 +57,6 @@ export class SearchPageResultsAllComponent implements OnInit {
     }
 
     onClick(ref: NodeEntriesWrapperComponent<Node>, event: NodeClickEvent<Node>) {
-        console.log(ref, ref.getSelection()?.selected.length);
         this.editorialSidebarService.handleSelect(ref, event, Scope.Search);
         this._results.onClick(event.element);
     }

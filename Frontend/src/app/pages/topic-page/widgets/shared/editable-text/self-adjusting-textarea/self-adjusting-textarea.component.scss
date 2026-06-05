@@ -7,7 +7,7 @@
 // set different border-radius to form field
 // https://stackoverflow.com/a/66484682
 :host ::ng-deep .mdc-text-field--outlined {
-    --mdc-outlined-text-field-container-shape: 8px;
+    --mat-form-field-outlined-container-shape: 8px;
 }
 
 .markdown-form {

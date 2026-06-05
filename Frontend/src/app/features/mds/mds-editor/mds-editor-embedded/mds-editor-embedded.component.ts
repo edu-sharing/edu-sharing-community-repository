@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
 
 @Component({
@@ -8,7 +8,9 @@ import { MdsEditorInstanceService } from '../mds-editor-instance.service';
     standalone: false,
 })
 export class MdsEditorEmbeddedComponent {
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+
+    constructor() {
         this.mdsEditorInstance.isEmbedded = true;
     }
 }

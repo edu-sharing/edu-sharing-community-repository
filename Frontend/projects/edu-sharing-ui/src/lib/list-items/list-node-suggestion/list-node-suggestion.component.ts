@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { MdsService, NodeSuggestion } from 'ngx-edu-sharing-api';
@@ -11,13 +11,11 @@ import { BehaviorSubject } from 'rxjs';
     standalone: false,
 })
 export class ListNodeSuggestionComponent extends ListWidget implements OnInit {
+    private mds = inject(MdsService);
+
     static supportedItems = [new ListItem('SUGGESTION', '*')];
 
     readonly pendingCount$ = new BehaviorSubject<number>(0);
-
-    constructor(private mds: MdsService) {
-        super();
-    }
 
     async ngOnInit() {
         this.nodeSubject.subscribe(async (node: NodeSuggestion) => {

@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -21,12 +21,12 @@ import { SelectWidgetTypeComponent } from '../select-widget-type/select-widget-t
     styleUrls: ['./swimlane-settings-dialog.component.scss'],
 })
 export class SwimlaneSettingsDialogComponent implements OnInit {
+    private dialogs = inject(DialogsService);
+
     gridItems: GridTile[];
     widgetTypeToTextMap: Map<string, string> = new Map<string, string>();
 
     @Input() form: UntypedFormGroup;
-
-    constructor(private dialogs: DialogsService) {}
 
     ngOnInit(): void {
         // created a parsed copy of the grid items to work with in the view

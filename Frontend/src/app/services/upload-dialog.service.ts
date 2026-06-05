@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
@@ -24,14 +24,12 @@ import { FileUploadProgressDialogData } from '../features/dialogs/dialog-modules
     providedIn: 'root',
 })
 export class UploadDialogService {
-    constructor(
-        private config: ConfigurationService,
-        private dialogs: DialogsService,
-        private localEvents: LocalEventsService,
-        private nodeService: RestNodeService,
-        private nodeApi: NodeService,
-        private toast: Toast,
-    ) {}
+    private config = inject(ConfigurationService);
+    private dialogs = inject(DialogsService);
+    private localEvents = inject(LocalEventsService);
+    private nodeService = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    private toast = inject(Toast);
 
     /**
      * Opens an upload dialog that allows the user to either upload new files or provide a web link.

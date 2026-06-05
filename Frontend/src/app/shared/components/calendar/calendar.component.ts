@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DateHelper, UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
@@ -15,6 +15,9 @@ import { DateAdapter } from '@angular/material/core';
  * An edu-sharing sidebar dialog for adding data to a collection
  */
 export class CalendarComponent {
+    private translate = inject(TranslateService);
+    private _adapter = inject<DateAdapter<any>>(DateAdapter);
+
     showDatepicker = false;
     @Input() date: Date;
     @Input() label: string;
@@ -29,7 +32,7 @@ export class CalendarComponent {
         this.dateChange.emit(date);
         this.showDatepicker = false;
     }
-    constructor(private translate: TranslateService, private _adapter: DateAdapter<any>) {
+    constructor() {
         this.translate.currentLang;
         this._adapter.setLocale(this.translate.currentLang.split('-')[0]);
     }

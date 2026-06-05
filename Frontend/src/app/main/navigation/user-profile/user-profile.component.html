@@ -1,5 +1,6 @@
 <div class="dialog darken">
-  <div class="card center-card card-action card-high" *ngIf="user">
+  @if (user) {
+  <div class="card center-card card-action card-high">
     <div class="card-content">
       <div tabindex="0" class="card-cancel" (click)="cancel()" (keyup.enter)="cancel()">
         <i esIcon="close" [aria]="true"></i>
@@ -43,16 +44,16 @@
           />
           <div class="changePassword">
             <div class="clickable" (click)="changePassword = !changePassword">
-              <i aria-hidden="true" class="material-icons" *ngIf="!changePassword"
-                >keyboard_arrow_right</i
-              >
-              <i aria-hidden="true" class="material-icons" *ngIf="changePassword"
-                >keyboard_arrow_down</i
-              >
+              @if (!changePassword) {
+              <i aria-hidden="true" class="material-icons">keyboard_arrow_right</i>
+              } @if (changePassword) {
+              <i aria-hidden="true" class="material-icons">keyboard_arrow_down</i>
+              }
               {{ 'CHANGE_PASSWORD' | translate }}
             </div>
           </div>
-          <div *ngIf="changePassword" class="password" [@overlay]="changePassword">
+          @if (changePassword) {
+          <div class="password" [@overlay]="changePassword">
             <label for="oldPassword">{{ 'OLD_PASSWORD' | translate }}</label>
             <input
               type="password"
@@ -78,6 +79,7 @@
               required="true"
             />
           </div>
+          }
         </form>
       </div>
     </div>
@@ -95,4 +97,5 @@
       }}</a>
     </div>
   </div>
+  }
 </div>

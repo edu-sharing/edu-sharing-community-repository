@@ -7,6 +7,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -24,6 +25,10 @@ import moment from 'moment';
     imports: [SharedModule],
 })
 export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
+    private toast = inject(Toast);
+    private translationsService = inject(TranslationsService);
+    private dateAdapter = inject<DateAdapter<any>>(DateAdapter);
+
     @ViewChild(MatDatepicker) matDatepicker: MatDatepicker<any>;
     @ViewChild(MatInput) matInput: MatInput;
     @Input() dateTime: number;
@@ -32,11 +37,7 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     @Output() dateTimeChange = new EventEmitter<number>();
 
     timeControl = new FormControl('', [Validators.pattern(/\d\d?:\d\d/)]);
-    constructor(
-        private toast: Toast,
-        private translationsService: TranslationsService,
-        private dateAdapter: DateAdapter<any>,
-    ) {
+    constructor() {
         if (this.translationsService.getLocale()) {
             this.dateAdapter.setLocale(this.translationsService.getLocale());
         } else {
@@ -52,7 +53,6 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
                 const date = this.toDate(this.dateTime);
                 const valueSplit = value.split(':');
                 date.setHours(parseInt(valueSplit[0]), parseInt(valueSplit[1]));
-                console.log('new', date, valueSplit);
                 this.dateTime = date.getTime();
                 this.dateTimeChange.emit(this.dateTime);
             }

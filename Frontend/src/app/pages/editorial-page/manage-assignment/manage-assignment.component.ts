@@ -1,4 +1,4 @@
-import { Component, computed, signal, ViewChild } from '@angular/core';
+import { Component, computed, signal, ViewChild, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -65,6 +65,20 @@ export const AssignmentEditorConfig = {
     ],
 })
 export class ManageAssignmentComponent {
+    private formBuilder = inject(FormBuilder);
+    private toast = inject(Toast);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private authenticationService = inject(AuthenticationService);
+    private dialogsService = inject(DialogsService);
+    private assignmentService = inject(AssignmentV1Service);
+    private nodeHelperService = inject(NodeHelperService);
+    private platformLocation = inject(PlatformLocation);
+    private translateService = inject(TranslateService);
+    private editorialPageService = inject(EditorialPageService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+
     readonly editorConfig = {
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
@@ -114,21 +128,7 @@ export class ManageAssignmentComponent {
         }
     }
 
-    constructor(
-        private formBuilder: FormBuilder,
-        private toast: Toast,
-        private router: Router,
-        private route: ActivatedRoute,
-        private authenticationService: AuthenticationService,
-        private dialogsService: DialogsService,
-        private assignmentService: AssignmentV1Service,
-        private nodeHelperService: NodeHelperService,
-        private platformLocation: PlatformLocation,
-        private translateService: TranslateService,
-        private editorialPageService: EditorialPageService,
-        private editorialSidebarService: EditorialSidebarService,
-        private editorialBreadcrumbService: EditorialBreadcrumbService,
-    ) {
+    constructor() {
         this.mainDataFormGroup = this.formBuilder.group({
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],

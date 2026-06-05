@@ -1,4 +1,4 @@
-import { Component, signal, ViewChild, WritableSignal } from '@angular/core';
+import { Component, signal, ViewChild, WritableSignal, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,10 @@ import { TemplateComponent } from './editor/template.component';
     standalone: false,
 })
 export class TopicPageComponent {
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private translate = inject(TranslateService);
+
     // defaults to the main collection of physics
     topicCollectionId: WritableSignal<string> = signal(null);
     topicVariantId: WritableSignal<string> = signal('');
@@ -18,11 +22,7 @@ export class TopicPageComponent {
 
     @ViewChild('templateComponent') templateComponent: TemplateComponent;
 
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.route.queryParams
             .pipe(takeUntilDestroyed())
             .subscribe(async (params: Params): Promise<void> => {

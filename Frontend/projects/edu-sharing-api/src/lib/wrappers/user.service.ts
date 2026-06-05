@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -30,6 +30,9 @@ export interface CurrentUserInfo {
     providedIn: 'root',
 })
 export class UserService {
+    private authentication = inject(AuthenticationService);
+    private iamApi = inject(IamV1Service);
+
     /**
      * Triggers when the profile of the current user is edited.
      *
@@ -39,7 +42,7 @@ export class UserService {
     /** The currently logged in user. */
     private readonly currentUser$;
 
-    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {
+    constructor() {
         this.currentUser$ = this.createCurrentUser();
     }
 

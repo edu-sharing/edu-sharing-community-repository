@@ -2,6 +2,7 @@ import {
     ApplicationConfig,
     EventEmitter,
     importProvidersFrom,
+    inject,
     Injectable,
     NgModule,
 } from '@angular/core';
@@ -76,8 +77,9 @@ import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 export class translateProvider {
     private translation$: Observable<any> | null = null;
     cache$ = new BehaviorSubject(null);
+    private httpClient = inject(HttpClient);
 
-    constructor(private httpClient: HttpClient) {}
+    constructor() {}
 
     instant(v: string, args: any = {}) {
         let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
@@ -124,12 +126,16 @@ export class translateProvider {
 
 @Injectable()
 export class TranslationsServiceMock {
-    constructor(private translateProvider: TranslateService) {}
+    private translateProvider = inject(TranslateService);
+    constructor() {}
     waitForInit(): Observable<void> {
         return (this.translateProvider as unknown as translateProvider).cache$.pipe(
             first((languageLoaded: any) => !!languageLoaded),
             map(() => undefined as void),
         );
+    }
+    getLocale(): string {
+        return this.translateProvider.currentLang ?? 'de';
     }
 }
 @Injectable()
@@ -511,12 +517,12 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: NodeService, useClass: NodeServiceMock },
     { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
-    { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
+    { provide: MdsService, useClass: MdsServiceMock },
     ViewInstanceService,
     CordovaService,
     { provide: Toast, useClass: ToastMock },
     { provide: CARD_DIALOG_DATA, useValue: {} },
-    { provide: CardDialogRef, useValue: {} },
+    { provide: CardDialogRef, useValue: null },
     { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,

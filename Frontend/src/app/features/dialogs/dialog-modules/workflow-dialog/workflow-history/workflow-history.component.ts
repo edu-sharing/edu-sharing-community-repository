@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { WorkflowDefinition } from 'ngx-edu-sharing-ui';
 import { WorkflowEntry } from '../../../../../core-module/rest/data-object';
 import { NodeHelperService } from '../../../../../services/node-helper.service';
@@ -10,10 +10,12 @@ import { NodeHelperService } from '../../../../../services/node-helper.service';
     standalone: false,
 })
 export class WorkflowListComponent {
+    private nodeHelper = inject(NodeHelperService);
+
     @Input() history: WorkflowEntry[];
     defaultStatus: WorkflowDefinition;
 
-    constructor(private nodeHelper: NodeHelperService) {
+    constructor() {
         ({ initial: this.defaultStatus } = this.nodeHelper.getDefaultWorkflowStatus(false));
     }
 

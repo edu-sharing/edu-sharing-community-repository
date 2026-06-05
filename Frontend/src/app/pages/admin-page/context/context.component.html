@@ -6,8 +6,8 @@
   <mat-form-field floatLabel="always">
     <mat-label>{{ 'ADMIN.CONTEXT.CONTEXT_DOMAIN' | translate }}</mat-label>
     <mat-chip-grid #chipList formControlName="domain">
+      @for (cid of createForm.get('domain').value; track cid) {
       <mat-chip
-        *ngFor="let cid of createForm.get('domain').value"
         (removed)="
           createForm
             .get('domain')
@@ -17,6 +17,7 @@
         {{ cid }}
         <i esIcon="cancel" matChipRemove></i>
       </mat-chip>
+      }
 
       <input
         matInput
@@ -40,9 +41,12 @@
 <h4 class="mat-heading-4 mat-heading-underline">
   <i esIcon="settings"></i>{{ 'ADMIN.CONTEXT.CURRENT' | translate }}
 </h4>
-<es-spinner *ngIf="loading"></es-spinner>
-<div *ngIf="!loading" class="current">
-  <div *ngFor="let c of context">
+@if (loading) {
+<es-spinner></es-spinner>
+} @if (!loading) {
+<div class="current">
+  @for (c of context; track c) {
+  <div>
     <div
       class="open-close clickable context"
       tabindex="0"
@@ -51,19 +55,13 @@
     >
       <i esIcon="public"></i>
       <span>{{ c.domain.join(', ') }}</span>
-      <i
-        *ngIf="c.id === currentId"
-        class="active"
-        esIcon="home"
-        matTooltip="{{ 'ADMIN.CONTEXT.ACTIVE' | translate }}"
-      ></i>
+      @if (c.id === currentId) {
+      <i class="active" esIcon="home" matTooltip="{{ 'ADMIN.CONTEXT.ACTIVE' | translate }}"></i>
+      }
       <i [esIcon]="openCloseContext[c.id] ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"></i>
     </div>
-    <div
-      class="context-details"
-      *ngIf="openCloseContext[c.id]"
-      [@openOverlay]="openCloseContext[c.id]"
-    >
+    @if (openCloseContext[c.id]) {
+    <div class="context-details" [@openOverlay]="openCloseContext[c.id]">
       <form [formGroup]="contextForm[c.id]" class="edit">
         <mat-form-field>
           <mat-label>{{ 'ADMIN.CONTEXT.CONTEXT_ID' | translate }}</mat-label>
@@ -72,8 +70,8 @@
         <mat-form-field floatLabel="always">
           <mat-label>{{ 'ADMIN.CONTEXT.CONTEXT_DOMAIN' | translate }}</mat-label>
           <mat-chip-grid #chipList formControlName="domain">
+            @for (cid of contextForm[c.id].get('domain').value; track cid) {
             <mat-chip
-              *ngFor="let cid of contextForm[c.id].get('domain').value"
               (removed)="
                 contextForm[c.id]
                   .get('domain')
@@ -83,7 +81,7 @@
               {{ cid }}
               <i esIcon="cancel" matChipRemove></i>
             </mat-chip>
-
+            }
             <input
               matInput
               #domainInput
@@ -106,25 +104,26 @@
           <button mat-flat-button (click)="asTemplate(c)">
             <i esIcon="assignment_turned_in"></i>{{ 'ADMIN.CONTEXT.TEMPLATE' | translate }}
           </button>
-          <button
-            *ngIf="c.id !== currentId"
-            mat-flat-button
-            color="primary"
-            (click)="enableContext(c)"
-          >
+          @if (c.id !== currentId) {
+          <button mat-flat-button color="primary" (click)="enableContext(c)">
             <i esIcon="swap_horiz"></i>
             {{ 'ADMIN.CONTEXT.ACTIVATE' | translate }}
           </button>
+          }
           <button mat-flat-button color="warn" (click)="deleteContext(c)">
             <i esIcon="delete"></i>{{ 'ADMIN.CONTEXT.DELETE' | translate }}
           </button>
         </div>
       </form>
     </div>
+    }
   </div>
+  }
 </div>
+}
 <ng-template #editors let-context="context" let-form="form">
-  <div *ngFor="let variant of ConfigVarians" [formGroup]="form">
+  @for (variant of ConfigVarians; track variant) {
+  <div [formGroup]="form">
     <div
       class="open-close clickable"
       [class.opened]="openCloseEditors[context?.id + variant]"
@@ -138,11 +137,8 @@
         "
       ></i>
     </div>
-    <div
-      class="editor editor-values"
-      *ngIf="openCloseEditors[context?.id + variant]"
-      [@openOverlay]="openCloseEditors[context?.id + variant]"
-    >
+    @if (openCloseEditors[context?.id + variant]) {
+    <div class="editor editor-values" [@openOverlay]="openCloseEditors[context?.id + variant]">
       <es-code-editor [formControlName]="variant" [options]="editorOptions"></es-code-editor>
       <label for="{{ variant }}-sample">{{ 'ADMIN.CONTEXT.VALUES_SAMPLE' | translate }}</label>
       <!-- TODO getSpec -->
@@ -154,5 +150,7 @@
         [options]="editorOptionsRO"
       ></es-code-editor>
     </div>
+    }
   </div>
+  }
 </ng-template>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
@@ -67,6 +67,9 @@ type LoginActionResponse = {
     providedIn: 'root',
 })
 export class AuthenticationService {
+    private authentication = inject(AuthenticationApiService);
+    private apiRequestConfiguration = inject(ApiRequestConfiguration);
+
     /** Triggers requests concerning the login state. */
     // We funnel login actions through this subject, so rapidly requested actions will not update
     // `loginInfoSubject` uncontrolled but unfinished actions will be canceled cleanly.
@@ -132,10 +135,7 @@ export class AuthenticationService {
     /** Timeout for scheduled logout-time checks. */
     private logoutCheckTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(
-        private authentication: AuthenticationApiService,
-        private apiRequestConfiguration: ApiRequestConfiguration,
-    ) {
+    constructor() {
         this.registerLoginActionResponseSubject();
         this.registerAutoLogoutSubjects();
     }

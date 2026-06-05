@@ -1,4 +1,5 @@
-<form (ngSubmit)="register()" #loginForm *ngIf="registerForm" [formGroup]="registerForm">
+@if (registerForm) {
+<form (ngSubmit)="register()" #loginForm [formGroup]="registerForm">
   <div class="name-input">
     <mat-form-field class="title">
       <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
@@ -13,7 +14,6 @@
       <input matInput type="text" formControlName="lastName" />
     </mat-form-field>
   </div>
-
   <mat-form-field>
     <mat-label>{{ 'USER.email' | translate }}</mat-label>
     <input matInput type="email" formControlName="email" />
@@ -35,11 +35,14 @@
   </mat-form-field>
   <div class="accept">
     <mat-checkbox formControlName="agree">{{ 'REGISTER.ACCEPT' | translate }}</mat-checkbox>
-    <a class="clickable imprint" *ngIf="privacyUrl" (click)="openPrivacy()">{{
+    @if (privacyUrl) {
+    <a class="clickable imprint" (click)="openPrivacy()">{{
       'REGISTER.PRIVACY-LINK' | translate
     }}</a>
+    }
   </div>
   <mat-checkbox formControlName="allowNotifications">{{
     'REGISTER.NEWSLETTER' | translate
   }}</mat-checkbox>
 </form>
+}

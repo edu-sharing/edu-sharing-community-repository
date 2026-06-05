@@ -1,4 +1,4 @@
-import { Directive, ElementRef } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 
 // From https://stackoverflow.com/a/61065054
 /**
@@ -13,7 +13,9 @@ import { Directive, ElementRef } from '@angular/core';
     standalone: false,
 })
 export class ElementRefDirective<T> extends ElementRef<T> {
-    constructor(elementRef: ElementRef<T>) {
+    constructor() {
+        const elementRef = inject<ElementRef<T>>(ElementRef);
+
         super(elementRef.nativeElement);
     }
 }

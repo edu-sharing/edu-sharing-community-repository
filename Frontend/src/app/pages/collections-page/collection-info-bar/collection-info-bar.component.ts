@@ -6,6 +6,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Node, NodeService, NodeStats } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -28,18 +29,16 @@ import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-e
     standalone: false,
 })
 export class CollectionInfoBarComponent implements OnChanges {
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
+    mdsEditorInstanceService = inject(MdsEditorInstanceService);
+
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('mds') mds: MdsViewerComponent;
     @Input() collection: Node;
     @Input() permissions: Permission[];
     @Output() edit = new EventEmitter<void>();
     stats: NodeStats;
-
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        public mdsEditorInstanceService: MdsEditorInstanceService,
-    ) {}
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.collection?.currentValue) {

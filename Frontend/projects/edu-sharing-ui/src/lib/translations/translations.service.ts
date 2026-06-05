@@ -1,4 +1,4 @@
-import { ApplicationRef, Inject, Injectable, Injector, Optional } from '@angular/core';
+import { ApplicationRef, Injectable, Injector, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, from, Observable, of, of as observableOf } from 'rxjs';
@@ -20,19 +20,18 @@ const DEFAULT_SUPPORTED_LANGUAGES = [
 
 @Injectable({ providedIn: 'root' })
 export class TranslationsService {
+    private config = inject(ConfigService);
+    private injector = inject(Injector);
+    private route = inject(ActivatedRoute, { optional: true });
+    private i18nConfig = inject<I18nConfig>(I18N_CONFIG, { optional: true });
+    private translate = inject(TranslateService);
+    private ref = inject(ApplicationRef);
+    private appService = inject(AppService, { optional: true });
+
     private language: string;
     private languageLoaded = new BehaviorSubject(false);
 
-    constructor(
-        private config: ConfigService,
-        private injector: Injector,
-        // optional, some web components may don't have it!
-        @Optional() private route: ActivatedRoute,
-        @Optional() @Inject(I18N_CONFIG) private i18nConfig: I18nConfig,
-        private translate: TranslateService,
-        private ref: ApplicationRef,
-        @Optional() private appService: AppService,
-    ) {
+    constructor() {
         if (!this.i18nConfig) {
             this.i18nConfig = new I18nConfig();
         }

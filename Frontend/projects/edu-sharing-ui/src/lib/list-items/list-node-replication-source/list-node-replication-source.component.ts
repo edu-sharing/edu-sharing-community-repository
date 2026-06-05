@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -15,6 +15,11 @@ import { ListItem } from '../../types/list-item';
     standalone: false,
 })
 export class ListNodeReplicationSourceComponent extends ListWidget {
+    private accessibility = inject(AccessibilityService);
+    private nodeSource = inject(NodeSourcePipe);
+    private translate = inject(TranslateService);
+    private networkService = inject(NetworkService);
+
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCE)];
 
     readonly replicationSource$ = this.nodeSubject.pipe(
@@ -48,14 +53,4 @@ export class ListNodeReplicationSourceComponent extends ListWidget {
     );
 
     readonly indicatorIcons$ = this.accessibility.observe('indicatorIcons');
-
-    constructor(
-        private accessibility: AccessibilityService,
-
-        private nodeSource: NodeSourcePipe,
-        private translate: TranslateService,
-        private networkService: NetworkService,
-    ) {
-        super();
-    }
 }

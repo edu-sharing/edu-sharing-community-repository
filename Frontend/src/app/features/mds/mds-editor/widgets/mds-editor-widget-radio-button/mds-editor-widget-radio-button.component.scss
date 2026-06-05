@@ -26,7 +26,7 @@ mat-radio-button.mat-mdc-radio-button {
     margin-right: $button-margin-horizontal;
     ::ng-deep {
         .mdc-radio {
-            --mdc-radio-state-layer-size: 32px;
+            --mat-radio-state-layer-size: 32px;
         }
     }
 }

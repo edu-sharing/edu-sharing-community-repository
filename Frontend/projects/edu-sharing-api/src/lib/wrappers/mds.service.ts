@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MdsV1Service } from '../api/services';
@@ -15,7 +15,7 @@ export interface MdsIdentifier {
     providedIn: 'root',
 })
 export class MdsService {
-    constructor(private mdsV1: MdsV1Service) {}
+    private mdsV1 = inject(MdsV1Service);
 
     @shareReplayReturnValue()
     getAvailableMetadataSets(

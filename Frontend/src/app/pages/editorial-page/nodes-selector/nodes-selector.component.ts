@@ -11,6 +11,7 @@ import {
     signal,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -157,6 +158,28 @@ export type NodesSelectorConfig = {
     ],
 })
 export class NodesSelectorComponent implements OnInit {
+    private apiCollectionService = inject(ApiCollectionService);
+    private bridge = inject(BridgeService);
+    private networkService = inject(NetworkService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private collectionService = inject(RestCollectionService);
+    private localEventsService = inject(LocalEventsService);
+    private mdsHelperService = inject(MdsHelperService);
+    nodeHelperService = inject(NodeHelperService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private nodeService = inject(NodeService);
+    private restNodeService = inject(RestNodeService);
+    private suggestionsV1Service = inject(SuggestionsV1Service);
+    private uiService = inject(UIService);
+    private uploadDialogService = inject(UploadDialogService);
+    private authenticationService = inject(AuthenticationService);
+    private aboutService = inject(AboutService);
+    private connectorOptionsService = inject(ConnectorOptionsService);
+    private dialogs = inject(DialogsService);
+    private searchService = inject(SearchService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
 
@@ -398,29 +421,7 @@ export class NodesSelectorComponent implements OnInit {
     // Is this component acting as the target our source?
     selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
 
-    constructor(
-        private apiCollectionService: ApiCollectionService,
-        private bridge: BridgeService,
-        private networkService: NetworkService,
-        private changeDetectorRef: ChangeDetectorRef,
-        private collectionService: RestCollectionService,
-        private localEventsService: LocalEventsService,
-        private mdsHelperService: MdsHelperService,
-        public nodeHelperService: NodeHelperService,
-        public editorialSidebarService: EditorialSidebarService,
-        private nodeService: NodeService,
-        private restNodeService: RestNodeService,
-        private suggestionsV1Service: SuggestionsV1Service,
-        private uiService: UIService,
-        private uploadDialogService: UploadDialogService,
-        private authenticationService: AuthenticationService,
-        private aboutService: AboutService,
-        private connectorOptionsService: ConnectorOptionsService,
-        private dialogs: DialogsService,
-        private searchService: SearchService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.connectorOptionsService
             .buildOptions((connector) => void this.showCreateConnector({ connector }))
             .subscribe((options) => this.connectorOptions.set(options));
@@ -1061,7 +1062,6 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.dataSourceCollectionsTree.isEmpty()) {
             return;
         }
-        console.log('update tree');
         this.dataSourceCollectionsTree.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const request = {

@@ -1,4 +1,4 @@
-import { ElementRef, Injectable } from '@angular/core';
+import { ElementRef, Injectable, inject } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { delay, map, take, takeUntil } from 'rxjs/operators';
@@ -146,13 +146,13 @@ export class SearchFieldInstance {
     providedIn: 'root',
 })
 export class SearchFieldService {
+    private _internal = inject(SearchFieldInternalService);
+    private _userModifiableValues = inject(UserModifiableValuesService);
+
     private _currentInstance: SearchFieldInstance | null = null;
     private _resetInstance = new Subject<void>();
 
-    constructor(
-        private _internal: SearchFieldInternalService,
-        private _userModifiableValues: UserModifiableValuesService,
-    ) {
+    constructor() {
         this._resetInstance.subscribe(() => {
             this._currentInstance = null;
             this._internal.config.next(null);

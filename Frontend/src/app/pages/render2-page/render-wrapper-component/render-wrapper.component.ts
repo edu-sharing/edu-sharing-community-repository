@@ -8,6 +8,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     ActionbarComponent,
@@ -21,7 +22,7 @@ import {
     Scope,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
@@ -35,7 +36,6 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     templateUrl: 'render-wrapper.component.html',
     styleUrls: ['render-wrapper.component.scss'],
     imports: [
-        CommonModule,
         EduSharingUiModule,
         MatButtonModule,
         RenderComponent,
@@ -47,6 +47,12 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     providers: [OptionsHelperDataService, RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {
+    private renderHelperService = inject(RenderHelperService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private translations = inject(TranslationsService);
+    private optionsHelper = inject(OptionsHelperDataService);
+
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() showTopbar = true;
     @Input() showMetadata = true;
@@ -74,13 +80,7 @@ export class RenderWrapperComponent implements OnChanges {
     children = signal<Node[]>(null);
     private parentNode = signal<Node>(null);
 
-    constructor(
-        private renderHelperService: RenderHelperService,
-        private nodeService: NodeService,
-        private nodeHelper: NodeHelperService,
-        private translations: TranslationsService,
-        private optionsHelper: OptionsHelperDataService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {});
         this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.data.set(undefined);

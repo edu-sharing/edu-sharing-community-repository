@@ -1,3 +1,4 @@
+import { provideZoneChangeDetection } from '@angular/core';
 declare let __webpack_public_path__: string;
 declare global {
     interface Window {
@@ -29,7 +30,7 @@ function bootstrapOnce() {
     if (!window.edusharingAngularBootstrapped) {
         window.edusharingAngularBootstrapped = true;
         platformBrowserDynamic()
-            .bootstrapModule(AppModule)
+            .bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()] })
             .catch((err) => console.error(err));
     }
 }

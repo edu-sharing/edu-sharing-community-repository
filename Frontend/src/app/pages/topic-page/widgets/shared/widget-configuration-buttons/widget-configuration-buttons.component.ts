@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, input, Input, InputSignal, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -16,7 +15,6 @@ import { MediaRenderingDisplayType } from '../../../shared/types/media-rendering
 @Component({
     selector: 'es-widget-configuration-buttons',
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         FormsModule,
         MatButton,

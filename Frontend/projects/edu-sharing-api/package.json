@@ -18,7 +18,7 @@
     "generate-api-dev:generate-code": "ng-openapi-gen --ignoreUnusedModels false --modelIndex false --input ../../../Backend/services/rest/api/src/main/resources/openapi.json --output src/lib/api",
     "generate-api-dev": "npm run generate-api-dev:generate-code && npm run generate-api:prettify-code && npm run generate-api:cleanup",
     "generate-api:cleanup": "cd src/lib/api && rm -f models/response-entity-void.ts",
-    "update": "npm i && npm run copy-api-spec && npm run generate-api",
+    "update": "npm run copy-api-spec && npm run generate-api",
     "update-if-needed": "npm run check-if-up-to-date || npm run update",
     "publish": "ng build && cd ../../dist/edu-sharing-api && npm publish --tag next"
   },
@@ -30,9 +30,5 @@
   },
   "dependencies": {
     "tslib": "^2.3.0"
-  },
-  "devDependencies": {
-    "prettier": "^2.8.8",
-    "ng-openapi-gen": "^0.53.0"
   }
 }

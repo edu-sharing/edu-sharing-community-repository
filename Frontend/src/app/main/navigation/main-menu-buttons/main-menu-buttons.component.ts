@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 
 @Component({
@@ -8,10 +8,10 @@ import { MainMenuEntriesService } from '../main-menu-entries.service';
     standalone: false,
 })
 export class MainMenuButtonsComponent {
+    private mainMenuEntries = inject(MainMenuEntriesService);
+
     @Input() currentScope: string;
     @Output() entryClicked = new EventEmitter<void>();
 
     readonly entries$ = this.mainMenuEntries.entries$;
-
-    constructor(private mainMenuEntries: MainMenuEntriesService) {}
 }

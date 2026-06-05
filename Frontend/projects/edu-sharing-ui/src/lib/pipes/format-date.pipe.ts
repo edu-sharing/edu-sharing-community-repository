@@ -1,16 +1,17 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DateHelper, FormatOptions } from '../util/DateHelper';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'formatDate',
     standalone: false,
 })
 export class FormatDatePipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
+    private translate = inject(TranslateService);
 
     transform(
         value: Date | number | string,

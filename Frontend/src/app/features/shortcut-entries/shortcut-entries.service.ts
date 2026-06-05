@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HOME_REPOSITORY, IamV1Service, ME } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { DefaultOrRefShortcut, ExtendedShortcutEntry } from './shortcut-entries-types';
@@ -7,7 +7,7 @@ import { DefaultOrRefShortcut, ExtendedShortcutEntry } from './shortcut-entries-
     providedIn: 'root',
 })
 export class ShortcutEntriesService {
-    constructor(private iamApi: IamV1Service) {}
+    private iamApi = inject(IamV1Service);
 
     /**
      * Retrieves the dashboard shortcut entries of the current user.

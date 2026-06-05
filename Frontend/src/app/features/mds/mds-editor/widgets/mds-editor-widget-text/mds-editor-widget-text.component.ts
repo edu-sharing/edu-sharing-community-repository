@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
@@ -22,19 +22,16 @@ import { BehaviorSubject } from 'rxjs';
     standalone: false,
 })
 export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements OnInit {
+    private uiService = inject(UIService);
+
     @ViewChild('inputElement') inputElement: ElementRef;
     @ViewChild('textAreaElement') textAreaElement: ElementRef;
     readonly valueType: ValueType = ValueType.String;
     formControl: UntypedFormControl;
     fileNameChecker: FileNameChecker;
     aiSuggestion$ = new BehaviorSubject<SuggestionResponseDto>(null);
-    constructor(
-        toast: Toast,
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private uiService: UIService,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getValidators());

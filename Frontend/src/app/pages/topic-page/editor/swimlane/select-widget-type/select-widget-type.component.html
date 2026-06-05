@@ -4,19 +4,16 @@
   color="primary"
   [matMenuTriggerFor]="selectWidgetTypeMenu"
 >
-  <ng-container *ngIf="!grid[tileIndex].item; else changeExistingTypeTemplate">
-    <i esIcon="add"></i> {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.HEADING' | translate }}
-  </ng-container>
-  <ng-template #changeExistingTypeTemplate>
-    <i esIcon="edit"></i> {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CHANGE_TYPE' | translate }}
-  </ng-template>
+  @if (!grid[tileIndex].item) {
+  <i esIcon="add"></i> {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.HEADING' | translate }}
+  } @else {
+  <i esIcon="edit"></i> {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CHANGE_TYPE' | translate }}
+  }
 </button>
 <mat-menu #selectWidgetTypeMenu="matMenu" class="topic-page-menu">
-  <button
-    mat-menu-item
-    *ngFor="let option of widgetTypeOptions"
-    (click)="selectWidgetType(option.value, tileIndex)"
-  >
+  @for (option of widgetTypeOptions; track option) {
+  <button mat-menu-item (click)="selectWidgetType(option.value, tileIndex)">
     {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' + option.viewValue | translate }}
   </button>
+  }
 </mat-menu>

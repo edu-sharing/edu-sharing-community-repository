@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, Optional } from '@angular/core';
+import { Component, Input, OnChanges, inject } from '@angular/core';
 import { Assignment, GenericAuthority, Node, Submission } from 'ngx-edu-sharing-api';
 import { CustomFieldSpecialType, NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -17,6 +17,10 @@ import { NodeEntriesDataType } from '../data-type';
     standalone: false,
 })
 export class NodeTypeBadgeComponent implements OnChanges {
+    nodeHelper = inject(NodeHelperService);
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+    nodeEntriesService = inject<NodeEntriesService<Node>>(NodeEntriesService, { optional: true });
+
     @Input() node: NodeEntriesDataType;
     /**
      * when true, collection icons will resolve based on their type (editorial, private...)
@@ -25,12 +29,6 @@ export class NodeTypeBadgeComponent implements OnChanges {
     @Input() collectionIcons = true;
 
     isCollection: boolean;
-
-    constructor(
-        public nodeHelper: NodeHelperService,
-        private nodeEntriesGlobalService: NodeEntriesGlobalService,
-        @Optional() public nodeEntriesService: NodeEntriesService<Node>,
-    ) {}
 
     ngOnChanges(): void {
         this.isCollection = this.nodeHelper.isNodeCollection(this.node as Node);

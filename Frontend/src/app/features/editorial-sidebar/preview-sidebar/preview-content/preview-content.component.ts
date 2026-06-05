@@ -7,6 +7,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
@@ -40,6 +41,17 @@ import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
     standalone: false,
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChanges {
+    private nodeHelper = inject(NodeHelperService);
+    private dialogs = inject(DialogsService);
+    optionsHelper = inject(OptionsHelperDataService);
+    moduleInfoService = inject(ModuleInfoService);
+    previewSidebarTemplateService = inject(PreviewSidebarTemplateService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    networkService = inject(NetworkService);
+    private renderHelperService = inject(RenderHelperService);
+    router = inject(Router);
+    about = inject(AboutService);
+
     /**
      all modules in this list will be automatically rendered without confirmation
      */
@@ -99,18 +111,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     allDetailsLink: string;
     allDetailsParams: Params;
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private dialogs: DialogsService,
-        public optionsHelper: OptionsHelperDataService,
-        public moduleInfoService: ModuleInfoService,
-        public previewSidebarTemplateService: PreviewSidebarTemplateService,
-        public editorialSidebarService: EditorialSidebarService,
-        public networkService: NetworkService,
-        private renderHelperService: RenderHelperService,
-        public router: Router,
-        public about: AboutService,
-    ) {
+    constructor() {
         void this.renderHelperService.prepareRootUrl();
     }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Connector, ConnectorService } from 'ngx-edu-sharing-api';
 import { DefaultGroups, ElementType, OptionItem, UIService } from 'ngx-edu-sharing-ui';
 import { Observable } from 'rxjs';
@@ -10,7 +10,8 @@ import { map } from 'rxjs/operators';
  */
 @Injectable({ providedIn: 'root' })
 export class ConnectorOptionsService {
-    constructor(private connectorApi: ConnectorService, private ui: UIService) {}
+    private connectorApi = inject(ConnectorService);
+    private ui = inject(UIService);
 
     /** Observe the filtered list of regular + simple connectors. */
     observeConnectors(): Observable<Connector[]> {

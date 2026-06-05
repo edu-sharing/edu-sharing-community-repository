@@ -1,6 +1,7 @@
 import {
     effect,
     EventEmitter,
+    inject,
     Injectable,
     Injector,
     OnDestroy,
@@ -82,6 +83,33 @@ import { createToggleOptions } from './options/toggle-options';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
+    nodeHelperService = inject(NodeHelperServiceUi);
+    authenticationService = inject(AuthenticationService);
+    storage = inject(TemporaryStorageService);
+    networkService = inject(NetworkService);
+    route = inject(ActivatedRoute);
+    public nodeHelper = inject(NodeHelperService);
+    private bridge = inject(BridgeService);
+    private collectionService = inject(RestCollectionService);
+    public configService = inject(ConfigurationService);
+    private globalOptionsService = inject(GlobalOptionsService);
+    public nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+    public connector = inject(RestConnectorService);
+    public connectors = inject(RestConnectorsService);
+    public dialogs = inject(DialogsService);
+    public localEvents = inject(LocalEventsService);
+    private mainNavService = inject(MainNavService);
+    public editorialSidebarService = inject(EditorialSidebarService);
+    private injector = inject(Injector);
+    private nodeList = inject(NodeListService);
+    public nodeService = inject(NodeService);
+    public nodeServiceLegacy = inject(RestNodeService);
+    public router = inject(Router);
+    public toast = inject(Toast);
+    public assignmentV1Service = inject(AssignmentV1Service);
+    private translate = inject(TranslateService);
+    public uiService = inject(UIService);
+
     static DownloadElementTypes = [
         ElementType.Node,
         ElementType.NodeChild,
@@ -96,34 +124,12 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     private subscriptions: Subscription[] = [];
     private destroyed = new Subject<void>();
 
-    constructor(
-        nodeHelperService: NodeHelperServiceUi,
-        authenticationService: AuthenticationService,
-        storage: TemporaryStorageService,
-        networkService: NetworkService,
-        route: ActivatedRoute,
-        public nodeHelper: NodeHelperService,
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        public configService: ConfigurationService,
-        private globalOptionsService: GlobalOptionsService,
-        public nodeEntriesGlobalService: NodeEntriesGlobalService,
-        public connector: RestConnectorService,
-        public connectors: RestConnectorsService,
-        public dialogs: DialogsService,
-        public localEvents: LocalEventsService,
-        private mainNavService: MainNavService,
-        public editorialSidebarService: EditorialSidebarService,
-        private injector: Injector,
-        private nodeList: NodeListService,
-        public nodeService: NodeService,
-        public nodeServiceLegacy: RestNodeService,
-        public router: Router,
-        public toast: Toast,
-        public assignmentV1Service: AssignmentV1Service,
-        private translate: TranslateService,
-        public uiService: UIService,
-    ) {
+    constructor() {
+        const nodeHelperService = inject(NodeHelperServiceUi);
+        const authenticationService = inject(AuthenticationService);
+        const storage = inject(TemporaryStorageService);
+        const networkService = inject(NetworkService);
+        const route = inject(ActivatedRoute);
         super(nodeHelperService, authenticationService, storage, networkService, route);
     }
 
@@ -364,7 +370,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     });
                     return;
                 }
-                this.nodeHelper.downloadNodes(this.getObjects(object, data));
+                void this.nodeHelper.downloadNodes(this.getObjects(object, data));
             },
         );
         downloadNode.elementType = OptionsHelperService.DownloadElementTypes;

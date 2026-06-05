@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Toast } from '../../services/toast';
 
 @Injectable({ providedIn: 'root' })
 export class ErrorProcessingService {
-    constructor(private toast: Toast) {}
+    private toast = inject(Toast);
 
     /**
      * handle a rest request including automatically showing and cancelling progress dialogs

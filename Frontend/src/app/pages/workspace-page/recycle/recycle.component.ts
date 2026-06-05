@@ -6,6 +6,7 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -66,6 +67,13 @@ type RestoreResults = {
     standalone: false,
 })
 export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
+    private archiveV1Service = inject(ArchiveV1Service);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private service = inject(TemporaryStorageService);
+    private searchField = inject(SearchFieldService);
+    private dialogs = inject(DialogsService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -115,15 +123,6 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
     private destroyed = new Subject<void>();
-
-    constructor(
-        private archiveV1Service: ArchiveV1Service,
-        private toast: Toast,
-        private translate: TranslateService,
-        private service: TemporaryStorageService,
-        private searchField: SearchFieldService,
-        private dialogs: DialogsService,
-    ) {}
 
     ngOnInit(): void {
         const restoreOption = new OptionItem(

@@ -6,6 +6,7 @@ import {
     Input,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Assignment, Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../services/node-helper.service';
@@ -24,6 +25,9 @@ const NODE_URL_TAG_NAME = 'es-node-url';
     standalone: false,
 })
 export class NodeUrlComponent implements AfterViewInit {
+    private nodeHelper = inject(NodeHelperService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     @ViewChild('link') link: ElementRef<HTMLAnchorElement>;
 
     @Input() node: Node | Assignment;
@@ -64,11 +68,6 @@ export class NodeUrlComponent implements AfterViewInit {
     // of the outer `NodeUrl`. If we don't need that, it would be easier to attach a pseudo `:after`
     // element to the inner `NodeUrl` that expands its click area.
     isNested: boolean;
-
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private elementRef: ElementRef<HTMLElement>,
-    ) {}
 
     ngAfterViewInit(): void {
         setTimeout(() => {

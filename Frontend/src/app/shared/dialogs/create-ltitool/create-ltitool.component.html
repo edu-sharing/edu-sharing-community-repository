@@ -1,4 +1,5 @@
-<div *ngIf="_tool">
+@if (_tool) {
+<div>
   <es-card
     title="{{ 'WORKSPACE.LTI_V13_PLATFORM.NODE.CREATE.TITLE' | translate }}"
     subtitle="{{
@@ -13,7 +14,8 @@
     <div class="card-content-padding">
       <form (ngSubmit)="doCreate()">
         <ul>
-          <li *ngFor="let el of nodes; let i = index">
+          @for (el of nodes; track el; let i = $index) {
+          <li>
             <mat-form-field style="width: 100%">
               <mat-label>{{ 'NODE.cm:name' | translate }} </mat-label>
               <input
@@ -27,11 +29,10 @@
               />
             </mat-form-field>
           </li>
+          }
         </ul>
-        <mat-form-field
-          style="width: 100%"
-          *ngIf="_tool.customContentOption && (!nodes || nodes.length === 0)"
-        >
+        @if (_tool.customContentOption && (!nodes || nodes.length === 0)) {
+        <mat-form-field style="width: 100%">
           <mat-label>{{ 'NODE.cm:name' | translate }} </mat-label>
           <input
             matInput
@@ -43,6 +44,7 @@
             autofocus
           />
         </mat-form-field>
+        }
       </form>
       <!--button mat-button color="primary" (click)="open()" *ngIf="nodes && nodes.length == 0">
         {{ 'LTI Tool öffnen' | translate }}
@@ -51,3 +53,4 @@
     </div>
   </es-card>
 </div>
+}

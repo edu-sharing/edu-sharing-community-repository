@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { forkJoin, from, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
@@ -20,6 +20,9 @@ import { BulkBehavior } from '../../../../../features/mds/types/types';
     standalone: false,
 })
 export class SimpleEditMetadataComponent {
+    private nodeApi = inject(RestNodeService);
+    private toast = inject(Toast);
+
     readonly BulkBehaviour = BulkBehavior;
 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
@@ -38,8 +41,6 @@ export class SimpleEditMetadataComponent {
     }
     @Input() fromUpload: boolean;
     @Output() errorEvent = new EventEmitter<void>();
-
-    constructor(private nodeApi: RestNodeService, private toast: Toast) {}
 
     isDirty() {
         return this.mds.mdsEditorInstance.getHasUserChanges();

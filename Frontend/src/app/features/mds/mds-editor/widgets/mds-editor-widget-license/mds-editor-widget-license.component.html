@@ -1,52 +1,50 @@
-<es-mds-editor-widget-container
-  [widget]="widget"
-  [label]="false"
-  *ngIf="
-    mdsEditorValues.editorMode === 'nodes' ||
-    mdsEditorValues.editorMode === 'inline' ||
-    mdsEditorValues.editorMode === 'viewer'
-  "
->
-  <ng-container *ngIf="!isSafe">
-    <es-license-details [nodes]="nodes"></es-license-details>
-    <div class="link" *ngIf="mdsEditorValues.editorMode !== 'viewer'">
-      <div>
-        <button
-          mat-button
-          (click)="openLicense()"
-          class="link"
-          color="primary"
-          esToolpermissionCheck
-          toolpermission="TOOLPERMISSION_LICENSE"
-        >
-          <span>{{ 'MDS.LICENSE_LINK' | translate }}</span>
-          <i esIcon="arrow_forward"></i>
-        </button>
-      </div>
+@if ( mdsEditorInstance.editorMode === 'nodes' || mdsEditorInstance.editorMode === 'inline' ||
+mdsEditorInstance.editorMode === 'viewer' ) {
+<es-mds-editor-widget-container [widget]="widget" [label]="false">
+  @if (!isSafe) {
+  <es-license-details [nodes]="nodes"></es-license-details>
+  @if (mdsEditorInstance.editorMode !== 'viewer') {
+  <div class="link">
+    <div>
+      <button
+        mat-button
+        (click)="openLicense()"
+        class="link"
+        color="primary"
+        esToolpermissionCheck
+        toolpermission="TOOLPERMISSION_LICENSE"
+      >
+        <span>{{ 'MDS.LICENSE_LINK' | translate }}</span>
+        <i esIcon="arrow_forward"></i>
+      </button>
     </div>
-  </ng-container>
-  <es-info-message mode="warning" *ngIf="isSafe">{{
+  </div>
+  } } @if (isSafe) {
+  <es-info-message mode="warning">{{
     'MDS.LICENSE_NO_PERMISSIONS_SAFE' | translate
   }}</es-info-message>
+  }
 </es-mds-editor-widget-container>
-<es-mds-editor-widget-container
-  [widget]="widget"
-  label="{{ 'MDS.LICENSE' | translate }}"
-  *ngIf="mdsEditorValues.editorMode === 'search'"
->
+} @if (mdsEditorInstance.editorMode === 'search') {
+<es-mds-editor-widget-container [widget]="widget" label="{{ 'MDS.LICENSE' | translate }}">
   <div class="license-list">
-    <div *ngFor="let license of licenses">
+    @for (license of licenses; track license) {
+    <div>
       <mat-checkbox
         [ngModel]="checked.indexOf(license.id) !== -1"
         (ngModelChange)="updateValue(license, $event)"
       >
         <es-multi-line-label>
           <div class="checkbox-label" slot="label">
-            <img *ngIf="license.imageUrl" [src]="license.imageUrl" alt="" /> {{ license.caption }}
+            @if (license.imageUrl) {
+            <img [src]="license.imageUrl" alt="" />
+            } {{ license.caption }}
           </div>
           <ng-container slot="description">{{ license.description }}</ng-container>
         </es-multi-line-label>
       </mat-checkbox>
     </div>
+    }
   </div>
 </es-mds-editor-widget-container>
+}

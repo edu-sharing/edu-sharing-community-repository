@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RestConnectorService } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -10,13 +10,13 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
     standalone: false,
 })
 export class ThirdPartyLicensesDialogComponent implements OnInit {
+    private dialogRef = inject(CardDialogRef);
+    private toast = inject(Toast);
+    private connector = inject(RestConnectorService);
+
     licenseDetails: { component: string; plugin: string; details: string }[] = [];
 
-    constructor(
-        private dialogRef: CardDialogRef,
-        private toast: Toast,
-        private connector: RestConnectorService,
-    ) {
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
     }
 

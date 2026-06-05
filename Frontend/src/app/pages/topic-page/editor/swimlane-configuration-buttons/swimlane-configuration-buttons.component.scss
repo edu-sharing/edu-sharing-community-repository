@@ -34,8 +34,7 @@
         padding: 0;
         width: 48px;
         border-radius: 0;
-        border-left: solid 1px
-            var(--mat-standard-button-toggle-divider-color, var(--mat-sys-outline));
+        border-left: solid 1px var(--mat-button-toggle-divider-color, var(--mat-sys-outline));
 
         .display-button-content {
             display: flex;
@@ -62,6 +61,6 @@
 
     // match button disabled label text color
     &.disabled-text {
-        color: var(--mdc-text-button-disabled-label-text-color, topicPageVars.$secondary);
+        color: var(--mat-button-text-disabled-label-text-color, topicPageVars.$secondary);
     }
 }

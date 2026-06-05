@@ -6,6 +6,7 @@ import {
     HostListener,
     NgZone,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
@@ -29,6 +30,15 @@ import { RocketChatService } from './rocket-chat.service';
  * An edu-sharing file-picker modal dialog
  */
 export class RocketchatComponent implements EventListener {
+    private sanitizer = inject(DomSanitizer);
+    private connector = inject(RestConnectorService);
+    private configuration = inject(ConfigurationService);
+    private ngZone = inject(NgZone);
+    private changes = inject(ChangeDetectorRef);
+    private events = inject(FrameEventsService);
+    private loadingScreen = inject(LoadingScreenService);
+    rocketChat = inject(RocketChatService);
+
     onEvent(event: string, data: any): void {
         if (
             event == FrameEventsService.EVENT_USER_LOGGED_IN ||
@@ -49,16 +59,7 @@ export class RocketchatComponent implements EventListener {
     src: SafeResourceUrl;
     fullscreen = false;
     loaded = false;
-    constructor(
-        private sanitizer: DomSanitizer,
-        private connector: RestConnectorService,
-        private configuration: ConfigurationService,
-        private ngZone: NgZone,
-        private changes: ChangeDetectorRef,
-        private events: FrameEventsService,
-        private loadingScreen: LoadingScreenService,
-        public rocketChat: RocketChatService,
-    ) {
+    constructor() {
         this.events.addSelfListener(this);
         void this.initalize();
         this.ngZone.runOutsideAngular(() => {

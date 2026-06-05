@@ -8,6 +8,7 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -43,6 +44,22 @@ import { SearchFieldInternalService } from '../../main/navigation/search-field/s
     standalone: false,
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private breakpointObserver = inject(BreakpointObserver);
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private navigationScheduler = inject(NavigationScheduler);
+    private router = inject(Router);
+    private optionsHelperService = inject(OptionsHelperService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private route = inject(ActivatedRoute);
+    private nodeService = inject(NodeService);
+    private savedSearchesService = inject(SavedSearchesService);
+    searchPage = inject(SearchPageService);
+    private configService = inject(ConfigService);
+    private translate = inject(TranslateService);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+
     readonly Scope = Scope;
 
     @ViewChild('filtersDialogResetButton', { static: true })
@@ -63,23 +80,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
 
-    constructor(
-        private breadcrumbsService: BreadcrumbsService,
-        private breakpointObserver: BreakpointObserver,
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private navigationScheduler: NavigationScheduler,
-        private router: Router,
-        private optionsHelperService: OptionsHelperService,
-        public editorialSidebarService: EditorialSidebarService,
-        private route: ActivatedRoute,
-        private nodeService: NodeService,
-        private savedSearchesService: SavedSearchesService,
-        public searchPage: SearchPageService,
-        private configService: ConfigService,
-        private translate: TranslateService,
-        private searchFieldInternalService: SearchFieldInternalService,
-    ) {
+    constructor() {
         this.registerSidebars();
         this.searchPage.init();
         this.searchPage.sidebarOption.next(

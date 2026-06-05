@@ -28,6 +28,8 @@ import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic
     styleUrls: ['configure-page-variant-or-template.component.scss'],
 })
 export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, OnInit {
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
 
@@ -92,7 +94,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     };
     titleInput: string;
 
-    constructor(private genericWidgetGlobalService: GenericWidgetGlobalService) {
+    constructor() {
         this.mdsParams.setId = this.genericWidgetGlobalService.getDefaultMds();
     }
 

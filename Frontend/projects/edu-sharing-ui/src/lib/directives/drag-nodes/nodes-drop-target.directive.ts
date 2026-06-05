@@ -6,6 +6,7 @@ import {
     NgZone,
     OnDestroy,
     Output,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -21,6 +22,10 @@ const ACTIVE_DROP_TARGET_DENY_CLASS = 'es-nodes-active-drop-target-deny';
     standalone: false,
 })
 export class NodesDropTargetDirective<T = unknown> implements OnDestroy {
+    private ngZone = inject(NgZone);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private nodesDragDrop = inject(NodesDragDropService);
+
     @Input('esNodesDropTarget') target: T;
     @Input() canDropNodes: (dragData: DragData<T>) => CanDrop;
     @Output() nodeDropped = new EventEmitter<DragData<T>>();
@@ -32,11 +37,7 @@ export class NodesDropTargetDirective<T = unknown> implements OnDestroy {
     private activeDropTargetSubject = new BehaviorSubject<DropTargetState | null>(null);
     private destroyed = new Subject<void>();
 
-    constructor(
-        private ngZone: NgZone,
-        private elementRef: ElementRef<HTMLElement>,
-        private nodesDragDrop: NodesDragDropService,
-    ) {
+    constructor() {
         this.registerMouseEnterLeave();
         this.registerActiveDropTarget();
     }

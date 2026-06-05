@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
@@ -9,13 +9,15 @@ import { SessionStorageService } from 'ngx-edu-sharing-api';
     providedIn: 'root',
 })
 export class AccessibilityService {
+    private storage = inject(SessionStorageService);
+
     private static readonly STORAGE_PREFIX = 'accessibility_';
 
-    constructor(private storage: SessionStorageService) {
+    constructor() {
         const browserContrastPreference = this.getBrowserContrastPreference();
 
         if (browserContrastPreference) {
-            this.storage.setValues({
+            void this.storage.setValues({
                 [AccessibilityService.STORAGE_PREFIX + 'contrastMode']: browserContrastPreference,
             });
         }

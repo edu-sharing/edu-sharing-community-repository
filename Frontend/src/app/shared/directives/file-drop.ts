@@ -7,6 +7,7 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -20,6 +21,9 @@ export interface Options {
     standalone: false,
 })
 export class FileDropDirective implements OnInit, OnDestroy {
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private ngZone = inject(NgZone);
+
     @Input() options: Options;
     /**
      * catch drag/drop of whole window
@@ -38,8 +42,6 @@ export class FileDropDirective implements OnInit, OnDestroy {
     private dragEnterCount = 0;
     private destroyed = new Subject<void>();
     private fileOverSubject = new BehaviorSubject(false);
-
-    constructor(private elementRef: ElementRef<HTMLElement>, private ngZone: NgZone) {}
 
     ngOnInit(): void {
         this.registerEvents();

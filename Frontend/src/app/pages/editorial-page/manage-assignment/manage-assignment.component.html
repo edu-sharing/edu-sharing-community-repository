@@ -28,9 +28,11 @@
       ></editor>
       <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
       <div class="files">
-        <es-info-message class="submissions" *ngIf="submissionsWithContent()?.length > 0">{{
+        @if (submissionsWithContent()?.length > 0) {
+        <es-info-message class="submissions">{{
           'EDITORIAL.ASSIGNMENT.FORM.HAS_SUBMISSIONS' | translate
         }}</es-info-message>
+        }
         <es-manage-assignment-nodes
           [assignment]="assignment()"
           [readonly]="submissionsWithContent()?.length > 0"
@@ -69,13 +71,15 @@
           </ng-container>
         </es-multi-line-label>
       </mat-slide-toggle>
-      <div *ngIf="mainDataFormGroup.get('useEndTime').value === true">
+      @if (mainDataFormGroup.get('useEndTime').value === true) {
+      <div>
         <es-share-dialog-choose-date
           #dateChooser
           [from]="now"
           [(dateTime)]="dateTime"
         ></es-share-dialog-choose-date>
       </div>
+      }
       <div class="navigation">
         <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>
         <button mat-flat-button color="primary" (click)="validateMainForm()">
@@ -99,35 +103,36 @@
       ></es-manage-assignment-authorities>
     </div>
     <div class="navigation">
-      <es-spinner-small *ngIf="saving()"></es-spinner-small>
+      @if (saving()) {
+      <es-spinner-small></es-spinner-small>
+      }
       <button mat-button color="primary" matStepperPrevious [disabled]="saving()">
         {{ 'BACK' | translate }}
       </button>
-      <ng-container *ngIf="assignment().status !== 'DRAFT'">
-        <button
-          mat-flat-button
-          color="primary"
-          matStepperNext
-          (click)="submit('INPROGRESS')"
-          [disabled]="saving()"
-        >
-          {{ 'SAVE' | translate }}
-        </button>
-      </ng-container>
+      @if (assignment().status !== 'DRAFT') {
+      <button
+        mat-flat-button
+        color="primary"
+        matStepperNext
+        (click)="submit('INPROGRESS')"
+        [disabled]="saving()"
+      >
+        {{ 'SAVE' | translate }}
+      </button>
+      } @if (assignment().status === 'DRAFT') {
       <button
         mat-button
         color="primary"
         matStepperNext
         (click)="submit('DRAFT')"
-        *ngIf="assignment().status === 'DRAFT'"
         [disabled]="saving()"
       >
         <i esIcon="draft"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SAVE_DRAFT' | translate }}
       </button>
+      } @if (assignment().status === 'DRAFT') {
       <button
         mat-flat-button
-        *ngIf="assignment().status === 'DRAFT'"
         color="primary"
         matStepperNext
         (click)="submit('INPROGRESS')"
@@ -136,6 +141,7 @@
         <i esIcon="send"></i>
         {{ 'EDITORIAL.ASSIGNMENT.SUBMIT' | translate }}
       </button>
+      }
     </div>
   </mat-step>
   <ng-template matStepperIcon="main">

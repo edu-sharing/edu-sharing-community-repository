@@ -12,6 +12,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
 import {
@@ -94,6 +95,12 @@ export type OptionState<T extends OptionConfig> = {
     animations: [trigger('overlay', UIAnimation.openOverlay())],
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
+    private dialogs = inject(DialogsService);
+    private uiService = inject(UIService);
+    private nodeHelperService = inject(NodeHelperService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private optionsHelperDataService = inject(OptionsHelperDataService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
     /**
@@ -119,13 +126,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
      */
     @Output() showComponent = new EventEmitter<MainComponentType>();
 
-    constructor(
-        private dialogs: DialogsService,
-        private uiService: UIService,
-        private nodeHelperService: NodeHelperService,
-        public editorialSidebarService: EditorialSidebarService,
-        private optionsHelperDataService: OptionsHelperDataService,
-    ) {
+    constructor() {
         this.editorialSidebarService.registerSidebar(this);
         effect(() => {
             this.editorialSidebarService.nodes();

@@ -9,10 +9,10 @@ import {
     OnChanges,
     OnDestroy,
     OnInit,
-    Optional,
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MatRipple } from '@angular/material/core';
@@ -145,6 +145,14 @@ export enum ValueType {
     ],
 })
 export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
+    mdsEditorInstance = inject(MdsEditorInstanceServiceAbstract, { optional: true });
+    translate = inject(TranslateService);
+    private ui = inject(UIService);
+    private viewInstance = inject(ViewInstanceService);
+    private mdsViewerService = inject(MdsViewerService);
+    private injector = inject(Injector);
+    private nodeHelper = inject(NodeHelperService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly focusTrigger = new Subject<void>();
     readonly destroyed$ = new Subject<void>();
@@ -200,18 +208,6 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     value = signal<string[]>(undefined);
     private temporaryValue: string[] = undefined;
-
-    constructor(
-        @Optional() public mdsEditorInstance: MdsEditorInstanceServiceAbstract,
-        public translate: TranslateService,
-        private ui: UIService,
-        private viewInstance: ViewInstanceService,
-        private mdsViewerService: MdsViewerService,
-        private injector: Injector,
-        private nodeHelper: NodeHelperService,
-    ) {
-        // super(toast, null, translate);
-    }
 
     ngOnDestroy(): void {
         this.destroyed$.next();

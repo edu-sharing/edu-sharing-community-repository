@@ -1,5 +1,5 @@
 import { FocusableOption } from '@angular/cdk/a11y';
-import { Directive, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
+import { Directive, ElementRef, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Directive({
@@ -7,14 +7,14 @@ import { Subject } from 'rxjs';
     standalone: false,
 })
 export class FocusableOptionDirective implements FocusableOption, OnInit, OnDestroy {
+    private _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     @Input() disabled?: boolean;
     @Input() customFocusFunction?: () => void;
 
     readonly focused = new Subject<FocusableOptionDirective>();
 
     private _onFocus = () => this.focused.next(this);
-
-    constructor(private _elementRef: ElementRef<HTMLElement>) {}
 
     ngOnInit(): void {
         this._elementRef.nativeElement.addEventListener('focus', this._onFocus);

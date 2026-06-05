@@ -14,6 +14,7 @@ import {
     ViewChild,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -71,6 +72,13 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     styleUrls: ['./ai-text-widget.component.scss'],
 })
 export class AiTextWidgetComponent implements WidgetComponentInterface {
+    private aiHelperService = inject(AiHelperService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private mdsService = inject(MdsService);
+    private toast = inject(Toast);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.AI_WIDGET.';
 
@@ -110,14 +118,7 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
     selectedVariables: Signal<{ [property: string]: string[] }>;
     updateInProgress: WritableSignal<boolean> = signal(false);
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private mdsService: MdsService,
-        private toast: Toast,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         this.selectedVariables = toSignal(this.topicPageHelperService.getSelectedVariables$(), {
             initialValue: {},
         });

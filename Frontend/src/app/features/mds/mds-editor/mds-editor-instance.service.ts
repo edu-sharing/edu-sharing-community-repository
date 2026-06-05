@@ -6,9 +6,9 @@ import {
     Injector,
     NgZone,
     OnDestroy,
-    Optional,
     Type,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import {
     AboutService,
@@ -139,6 +139,23 @@ export class MdsEditorInstanceService
     extends MdsEditorInstanceServiceAbstract
     implements OnDestroy
 {
+    private mdsEditorCommonService = inject(MdsEditorCommonService);
+    private mdsService = inject(MdsService);
+    private aboutService = inject(AboutService);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private injector = inject(Injector);
+    private containerRef = inject(ViewContainerRef, { optional: true });
+    private ngZone = inject(NgZone);
+    private restMdsService = inject(RestMdsService);
+    private configService = inject(ConfigurationService);
+    private uiService = inject(UIService);
+    private authenticationService = inject(AuthenticationService);
+    private featuresHelperService = inject(FeaturesHelperService);
+    searchHelperService = inject(SearchHelperService);
+    private suggestionsService = inject(SuggestionsV1Service);
+    private restConnector = inject(RestConnectorService);
+    private config = inject(ConfigService);
+
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
@@ -845,25 +862,7 @@ export class MdsEditorInstanceService
     private state$ = new BehaviorSubject<MdsState>({ widgets: {} });
     widgetLocations = [] as WidgetLocation[];
 
-    constructor(
-        private mdsEditorCommonService: MdsEditorCommonService,
-        private mdsService: MdsService,
-        private aboutService: AboutService,
-        private factoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        // not supported/available in storybook
-        @Optional() private containerRef: ViewContainerRef,
-        private ngZone: NgZone,
-        private restMdsService: RestMdsService,
-        private configService: ConfigurationService,
-        private uiService: UIService,
-        private authenticationService: AuthenticationService,
-        private featuresHelperService: FeaturesHelperService,
-        public searchHelperService: SearchHelperService,
-        private suggestionsService: SuggestionsV1Service,
-        private restConnector: RestConnectorService,
-        private config: ConfigService,
-    ) {
+    constructor() {
         super();
         this.registerInitMds();
         this.registerLoginInfo();

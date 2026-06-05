@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { DialogButton, Node } from '../../../../core-module/core.module';
@@ -15,6 +15,11 @@ import { LicenseDialogData, LicenseDialogResult } from './license-dialog-data';
     standalone: false,
 })
 export class LicenseDialogComponent implements OnInit {
+    data = inject<LicenseDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<LicenseDialogData, LicenseDialogResult>>(CardDialogRef);
+    private localEvents = inject(LocalEventsService);
+
     @ViewChild(LicenseDialogContentComponent) content: LicenseDialogContentComponent;
 
     readonly canSave = new BehaviorSubject(true);
@@ -22,12 +27,6 @@ export class LicenseDialogComponent implements OnInit {
     private readonly saveButton = new DialogButton('SAVE', { color: 'primary' }, () =>
         this.content.saveLicense(),
     );
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: LicenseDialogData,
-        private dialogRef: CardDialogRef<LicenseDialogData, LicenseDialogResult>,
-        private localEvents: LocalEventsService,
-    ) {}
 
     ngOnInit(): void {
         this.initButtons();

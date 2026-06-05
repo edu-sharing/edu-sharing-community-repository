@@ -12,12 +12,13 @@
   <form class="markdown-form" [formGroup]="markdownForm">
     <!-- note: the markdown-toolbar is currently limited to specific functions used in GitHub, -->
     <!--       resulting in strike-through and horizontal lines being supported but not included -->
+    @if (!hideToolbar || showAiButtons || showAiCheckbox) {
     <div
       class="toolbars"
       [class.absolute-positioning]="(showAiButtons || showAiCheckbox) && hideToolbar"
-      *ngIf="!hideToolbar || showAiButtons || showAiCheckbox"
     >
-      <markdown-toolbar [attr.for]="controlId" *ngIf="!hideToolbar">
+      @if (!hideToolbar) {
+      <markdown-toolbar [attr.for]="controlId">
         <md-bold
           [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
           [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
@@ -75,14 +76,10 @@
           </button>
         </md-ordered-list>
       </markdown-toolbar>
-
-      <div
-        class="ai-controls"
-        [class.no-ai-buttons]="!showAiButtons"
-        *ngIf="showAiCheckbox || showAiButtons"
-      >
+      } @if (showAiCheckbox || showAiButtons) {
+      <div class="ai-controls" [class.no-ai-buttons]="!showAiButtons">
+        @if (showAiCheckbox) {
         <mat-button-toggle-group
-          *ngIf="showAiCheckbox"
           class="ai-toggle-group"
           hideSingleSelectionIndicator
           [value]="generateWithAi() ? 'ai' : 'text'"
@@ -107,10 +104,10 @@
             <i esIcon="auto_awesome"></i>
           </mat-button-toggle>
         </mat-button-toggle-group>
-
-        <div class="button-container" [class.separator]="showAiCheckbox" *ngIf="showAiButtons">
+        } @if (showAiButtons) {
+        <div class="button-container" [class.separator]="showAiCheckbox">
+          @for (option of aiTagOptions; track option) {
           <button
-            *ngFor="let option of aiTagOptions"
             [disabled]="disabled"
             [matTooltip]="option.tooltip | translate"
             mat-icon-button
@@ -120,9 +117,13 @@
           >
             <i [esIcon]="option.icon" [attr.aria-label]="option.ariaLabel | translate"></i>
           </button>
+          }
         </div>
+        }
       </div>
+      }
     </div>
+    }
 
     <textarea
       [id]="controlId"

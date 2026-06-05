@@ -1,8 +1,10 @@
 <ng-template #overlayTemplate>
   <div class="preview-overlay-container">
-    <div class="loading" *ngIf="aiLoading()">
+    @if (aiLoading()) {
+    <div class="loading">
       <es-spinner-small [diameter]="70"></es-spinner-small>
     </div>
+    }
     <div class="preview-overlay-header">
       <p>
         {{ 'MDS.AI.DRAWING_STYLES.HEADING' | translate }}
@@ -22,7 +24,8 @@
           [(ngModel)]="selectedStyleId"
           (ngModelChange)="generatePreviews(selectedStyleId)"
         >
-          <mat-option *ngFor="let style of aiDrawingStyles.values" [value]="style.id">
+          @for (style of aiDrawingStyles.values; track style) {
+          <mat-option [value]="style.id">
             <div class="preview-image-style-option">
               <img [src]="IMAGES_PREFIX + style.id + IMAGES_SUFFIX" [alt]="style.caption" />
               <span>
@@ -30,33 +33,30 @@
               </span>
             </div>
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
-      <div
-        *ngFor="let image of previewImages; let i = index"
-        class="preview-image mat-elevation-z2"
-        [class.selected]="selectedImageIndex === i"
-      >
-        <img
-          *ngIf="image !== ''"
-          [src]="image"
-          alt="Image option {{ i + 1 }}"
-          role="button"
-          (click)="selectImage(i)"
-        />
+      @for (image of previewImages; track image; let i = $index) {
+      <div class="preview-image mat-elevation-z2" [class.selected]="selectedImageIndex === i">
+        @if (image !== '') {
+        <img [src]="image" alt="Image option {{ i + 1 }}" role="button" (click)="selectImage(i)" />
+        }
       </div>
+      }
     </div>
-    <div class="preview-overlay-actions" *ngIf="previewImages?.length > 0">
-      <button
-        *ngIf="selectedImageIndex !== -1; else regenerateButton"
-        mat-raised-button
-        color="primary"
-        (click)="confirmSelection()"
-      >
+    @if (previewImages?.length > 0) {
+    <div class="preview-overlay-actions">
+      @if (selectedImageIndex !== -1) {
+      <button mat-raised-button color="primary" (click)="confirmSelection()">
         {{ 'APPLY' | translate }}
       </button>
-
+      } @else {
+      <button mat-flat-button color="primary" (click)="generatePreviews(selectedStyleId, true)">
+        <i esIcon="refresh"></i>
+        {{ 'MDS.AI.DRAWING_STYLES.REGENERATE' | translate }}
+      </button>
+      }
       <ng-template #regenerateButton>
         <button mat-flat-button color="primary" (click)="generatePreviews(selectedStyleId, true)">
           <i esIcon="refresh"></i>
@@ -64,5 +64,6 @@
         </button>
       </ng-template>
     </div>
+    }
   </div>
 </ng-template>

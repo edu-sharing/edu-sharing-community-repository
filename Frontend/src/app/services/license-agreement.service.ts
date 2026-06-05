@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     AuthenticationService,
     ClientConfig,
@@ -36,20 +36,18 @@ const LICENSE_AGREEMENT_STORAGE_KEY = 'licenseAgreement';
     providedIn: 'root',
 })
 export class LicenseAgreementService {
+    private authentication = inject(AuthenticationService);
+    private config = inject(ConfigService);
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private nodeService = inject(RestNodeService);
+    private session = inject(SessionStorageService);
+    private translations = inject(TranslationsService);
+
     /** Whether the agreement (if any) is accepted for the current user. */
     private agreementClearedSubject = new rxjs.BehaviorSubject<
         LicenseAgreementDialogResult | 'pending' | 'dialog-not-shown'
     >('pending');
-
-    constructor(
-        private authentication: AuthenticationService,
-        private config: ConfigService,
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private nodeService: RestNodeService,
-        private session: SessionStorageService,
-        private translations: TranslationsService,
-    ) {}
 
     /**
      * Returns an Observable that emits once the license agreement has either been agreed to by the

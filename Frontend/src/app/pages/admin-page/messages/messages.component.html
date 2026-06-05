@@ -5,16 +5,14 @@
   <form class="create" [formGroup]="createForm">
     <mat-form-field>
       <mat-chip-grid #chipGridComponent>
-        <mat-chip-row
-          (removed)="removeComponent($event)"
-          [value]="item"
-          *ngFor="let item of selectedComponents()"
-        >
+        @for (item of selectedComponents(); track item) {
+        <mat-chip-row (removed)="removeComponent($event)" [value]="item">
           {{ 'SIDEBAR.' + item.toUpperCase() | translate }}
           <button matChipRemove>
             <i esIcon="cancel"></i>
           </button>
         </mat-chip-row>
+        }
         <!-- Input with autocomplete -->
         <input
           [value]="componentFilter()"
@@ -30,24 +28,25 @@
         (optionSelected)="selectComponent($event)"
         [autoSelectActiveOption]="false"
       >
-        <mat-option *ngFor="let option of availableComponents()" [value]="option">
+        @for (option of availableComponents(); track option) {
+        <mat-option [value]="option">
           {{ 'SIDEBAR.' + option.toUpperCase() | translate }}
         </mat-option>
+        }
       </mat-autocomplete>
       <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_COMPONENT_HINT' | translate }}</mat-hint>
     </mat-form-field>
-    <mat-form-field *ngIf="contexts()?.length">
+    @if (contexts()?.length) {
+    <mat-form-field>
       <mat-chip-grid #chipGrid>
-        <mat-chip-row
-          (removed)="removeContext($event)"
-          [value]="item"
-          *ngFor="let item of selectedContexts()"
-        >
+        @for (item of selectedContexts(); track item) {
+        <mat-chip-row (removed)="removeContext($event)" [value]="item">
           {{ item | esContextName }}
           <button matChipRemove>
             <i esIcon="cancel"></i>
           </button>
         </mat-chip-row>
+        }
         <!-- Input with autocomplete -->
         <input
           [value]="contextsFilter()"
@@ -57,24 +56,26 @@
           [matAutocomplete]="auto"
         />
       </mat-chip-grid>
-
       <mat-autocomplete
         #auto="matAutocomplete"
         (optionSelected)="selectContext($event)"
         [autoSelectActiveOption]="false"
       >
-        <mat-option *ngFor="let option of availableContexts()" [value]="option">
+        @for (option of availableContexts(); track option) {
+        <mat-option [value]="option">
           {{ option | esContextName }}
         </mat-option>
+        }
       </mat-autocomplete>
       <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_CONTEXT_HINT' | translate }}</mat-hint>
     </mat-form-field>
+    }
     <mat-form-field>
       <mat-chip-grid #chipGrid>
+        @for (item of selectedTp(); track item) {
         <mat-chip-row
           (removed)="removeTp($event)"
           [value]="item"
-          *ngFor="let item of selectedTp()"
           matTooltip="{{ 'TOOLPERMISSION.' + item | translate }}"
         >
           {{ item }}
@@ -82,6 +83,7 @@
             <i esIcon="cancel"></i>
           </button>
         </mat-chip-row>
+        }
         <!-- Input with autocomplete -->
         <input
           placeholder="{{ 'ADMIN.MESSAGES.SELECT_TP' | translate }}"
@@ -97,8 +99,8 @@
         (optionSelected)="selectTp($event)"
         [autoSelectActiveOption]="false"
       >
+        @for (option of availableTp(); track option) {
         <mat-option
-          *ngFor="let option of availableTp()"
           [value]="option"
           matTooltip="{{ 'TOOLPERMISSION.' + option | translate }}"
           class="select-toolpermission"
@@ -110,6 +112,7 @@
             {{ 'TOOLPERMISSION.' + option | translate : { fallback: '' } }}
           </div>
         </mat-option>
+        }
       </mat-autocomplete>
       <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_TP_HINT' | translate }}</mat-hint>
     </mat-form-field>
@@ -121,24 +124,26 @@
         <mat-slide-toggle formControlName="fromEnabled"
           >{{ 'ADMIN.MESSAGES.TIME_FROM_ENABLED' | translate }}
         </mat-slide-toggle>
+        @if (createForm.get('fromEnabled').value === true) {
         <es-share-dialog-choose-date
-          *ngIf="createForm.get('fromEnabled').value === true"
           [dateTime]="fromDate()"
           (dateTimeChange)="fromDate.set($event)"
           [to]="createForm.get('toEnabled').value === true ? toDate() : null"
         ></es-share-dialog-choose-date>
+        }
       </div>
 
       <div>
         <mat-slide-toggle formControlName="toEnabled"
           >{{ 'ADMIN.MESSAGES.TIME_TO_ENABLED' | translate }}
         </mat-slide-toggle>
+        @if (createForm.get('toEnabled').value === true) {
         <es-share-dialog-choose-date
-          *ngIf="createForm.get('toEnabled').value === true"
           [dateTime]="toDate()"
           (dateTimeChange)="toDate.set($event)"
           [from]="createForm.get('fromEnabled').value === true ? fromDate() : null"
         ></es-share-dialog-choose-date>
+        }
       </div>
     </div>
     <label class="mat-heading-5">
@@ -201,43 +206,43 @@
         </es-multi-line-label>
       </mat-radio-button>
     </mat-radio-group>
-    <ng-container *ngIf="createForm.get('mode').value === 'bar'">
-      <label class="mat-heading-5">
-        {{ 'ADMIN.MESSAGES.SEVERITIES' | translate }}
-      </label>
-      <mat-radio-group formControlName="severity">
-        <mat-radio-button value="info">
-          <es-multi-line-label>
-            <ng-container slot="label">
-              {{ 'ADMIN.MESSAGES.SEVERITY.INFO_TITLE' | translate }}
-            </ng-container>
-            <ng-container slot="description">
-              {{ 'ADMIN.MESSAGES.SEVERITY.INFO_DESCRIPTION' | translate }}
-            </ng-container>
-          </es-multi-line-label>
-        </mat-radio-button>
-        <mat-radio-button value="warning">
-          <es-multi-line-label>
-            <ng-container slot="label">
-              {{ 'ADMIN.MESSAGES.SEVERITY.WARNING_TITLE' | translate }}
-            </ng-container>
-            <ng-container slot="description">
-              {{ 'ADMIN.MESSAGES.SEVERITY.WARNING_DESCRIPTION' | translate }}
-            </ng-container>
-          </es-multi-line-label>
-        </mat-radio-button>
-        <mat-radio-button value="error">
-          <es-multi-line-label>
-            <ng-container slot="label">
-              {{ 'ADMIN.MESSAGES.SEVERITY.ERROR_TITLE' | translate }}
-            </ng-container>
-            <ng-container slot="description">
-              {{ 'ADMIN.MESSAGES.SEVERITY.ERROR_DESCRIPTION' | translate }}
-            </ng-container>
-          </es-multi-line-label>
-        </mat-radio-button>
-      </mat-radio-group>
-    </ng-container>
+    @if (createForm.get('mode').value === 'bar') {
+    <label class="mat-heading-5">
+      {{ 'ADMIN.MESSAGES.SEVERITIES' | translate }}
+    </label>
+    <mat-radio-group formControlName="severity">
+      <mat-radio-button value="info">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'ADMIN.MESSAGES.SEVERITY.INFO_TITLE' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'ADMIN.MESSAGES.SEVERITY.INFO_DESCRIPTION' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-radio-button>
+      <mat-radio-button value="warning">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'ADMIN.MESSAGES.SEVERITY.WARNING_TITLE' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'ADMIN.MESSAGES.SEVERITY.WARNING_DESCRIPTION' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-radio-button>
+      <mat-radio-button value="error">
+        <es-multi-line-label>
+          <ng-container slot="label">
+            {{ 'ADMIN.MESSAGES.SEVERITY.ERROR_TITLE' | translate }}
+          </ng-container>
+          <ng-container slot="description">
+            {{ 'ADMIN.MESSAGES.SEVERITY.ERROR_DESCRIPTION' | translate }}
+          </ng-container>
+        </es-multi-line-label>
+      </mat-radio-button>
+    </mat-radio-group>
+    }
     <label class="mat-heading-5">
       {{ 'ADMIN.MESSAGES.REPEATS' | translate }}
     </label>
@@ -262,7 +267,8 @@
           </ng-container>
         </es-multi-line-label>
       </mat-radio-button>
-      <mat-radio-button value="always" *ngIf="createForm.get('mode').value === 'bar'">
+      @if (createForm.get('mode').value === 'bar') {
+      <mat-radio-button value="always">
         <es-multi-line-label>
           <ng-container slot="label">
             {{ 'ADMIN.MESSAGES.REPEAT.ALWAYS_TITLE' | translate }}
@@ -272,9 +278,11 @@
           </ng-container>
         </es-multi-line-label>
       </mat-radio-button>
+      }
     </mat-radio-group>
 
-    <mat-form-field *ngIf="!editorConfig">
+    @if (!editorConfig) {
+    <mat-form-field>
       <mat-label>
         {{ 'ADMIN.MESSAGES.MESSAGE' | translate }}
       </mat-label>
@@ -287,37 +295,43 @@
         cdkAutosizeMaxRows="5"
       ></textarea>
     </mat-form-field>
-    <label class="mat-heading-5" *ngIf="editorConfig">
+    } @if (editorConfig) {
+    <label class="mat-heading-5">
       {{ 'ADMIN.MESSAGES.MESSAGE' | translate }}
     </label>
+    } @if (editorConfig) {
     <editor
       #editor
-      *ngIf="editorConfig"
       [init]="editorConfig"
       [(ngModel)]="message"
       [ngModelOptions]="{ standalone: true }"
     ></editor>
+    }
     <div class="actions">
-      <button mat-button color="primary" (click)="reset()" *ngIf="editId()">
+      @if (editId()) {
+      <button mat-button color="primary" (click)="reset()">
         {{ 'CANCEL' | translate }}
       </button>
+      }
       <button mat-flat-button color="primary" (click)="addMessage()" [disabled]="!message">
         {{ 'ADMIN.MESSAGES.CREATE_SAVE' | translate }}
       </button>
     </div>
   </form>
 
+  @if (config()?.messages?.length) {
   <div
     class="list"
-    *ngIf="config()?.messages?.length; else empty"
     cdkDropList
     [cdkDropListData]="config()?.messages"
     (cdkDropListDropped)="drop($event)"
   >
-    <es-info-message *ngIf="config().messages.length > 1">
+    @if (config().messages.length > 1) {
+    <es-info-message>
       {{ 'ADMIN.MESSAGES.MULTIPLE_ORDER_HINT' | translate }}
     </es-info-message>
-    <div class="message-card" *ngFor="let msg of config().messages" cdkDrag>
+    } @for (msg of config().messages; track msg) {
+    <div class="message-card" cdkDrag>
       <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
       <div class="attributes">
         <div class="main-config">
@@ -341,12 +355,14 @@
             <label>{{ 'ADMIN.MESSAGES.TIME_TO_ENABLED' | translate }}</label>
             <div>{{ msg.to ? (msg.to | formatDate : { relative: false, time: true }) : '-' }}</div>
           </div>
-          <div class="severity" *ngIf="msg.mode === 'bar'">
+          @if (msg.mode === 'bar') {
+          <div class="severity">
             <label>{{ 'ADMIN.MESSAGES.SEVERITIES' | translate }}</label>
             <div>
               {{ 'ADMIN.MESSAGES.SEVERITY.' + msg.severity?.toUpperCase() + '_TITLE' | translate }}
             </div>
           </div>
+          }
           <div class="repeat">
             <label>{{ 'ADMIN.MESSAGES.REPEATS' | translate }}</label>
             <div>
@@ -356,23 +372,19 @@
         </div>
         <div class="chips">
           <mat-chip-set>
-            <mat-chip class="components" *ngFor="let c of msg.components">
+            @for (c of msg.components; track c) {
+            <mat-chip class="components">
               {{ 'SIDEBAR.' + c.toUpperCase() | translate }}
             </mat-chip>
-            <mat-chip
-              class="contexts"
-              *ngFor="let c of msg.contexts"
-              matTooltip="{{ getContext(c)?.domain }}"
-            >
+            } @for (c of msg.contexts; track c) {
+            <mat-chip class="contexts" matTooltip="{{ getContext(c)?.domain }}">
               {{ c }}
             </mat-chip>
-            <mat-chip
-              class="tp"
-              *ngFor="let t of msg.toolpermissions"
-              matTooltip="{{ 'TOOLPERMISSION.' + t | translate }}"
-            >
+            } @for (t of msg.toolpermissions; track t) {
+            <mat-chip class="tp" matTooltip="{{ 'TOOLPERMISSION.' + t | translate }}">
               {{ t }}
             </mat-chip>
+            }
           </mat-chip-set>
         </div>
         <div>
@@ -380,12 +392,11 @@
           <div class="message" [innerHTML]="msg.message | safeHtml : { purify: true }"></div>
         </div>
       </div>
-
       <!-- message html -->
       <div class="actions">
         <!-- <button mat-icon-button color="primary" (click)="editMessage(msg)">
-           <i esIcon="edit"></i>
-         </button>-->
+            <i esIcon="edit"></i>
+          </button>-->
         <button mat-icon-button color="primary" (click)="editMessage(msg)">
           <i esIcon="edit"></i>
         </button>
@@ -394,9 +405,9 @@
         </button>
       </div>
     </div>
+    }
   </div>
-
-  <ng-template #empty>
-    <p class="empty">{{ 'ADMIN.MESSAGES.NO_MESSAGES' | translate }}</p>
-  </ng-template>
+  } @else {
+  <p class="empty">{{ 'ADMIN.MESSAGES.NO_MESSAGES' | translate }}</p>
+  }
 </div>

@@ -16,6 +16,7 @@ import {
     ViewChild,
     ViewChildren,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
 import { FormControl, UntypedFormControl } from '@angular/forms';
@@ -50,7 +51,8 @@ interface UserProposalGroup {
     standalone: false,
 })
 export class EsProposalChipDirective implements FocusableOption {
-    constructor(public elementRef: ElementRef<HTMLElement>) {}
+    elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     focus(): void {
         this.elementRef.nativeElement.focus();
     }
@@ -66,6 +68,9 @@ export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetChipsSuggestionBase
     implements OnInit, AfterViewInit, OnDestroy
 {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    uiService = inject(UIService);
+
     inputControl = new FormControl('');
     private hasFocus = true;
     isTree: boolean;
@@ -151,14 +156,8 @@ export class MdsEditorWidgetTreeComponent
     positionY: WritableSignal<string> = signal(null);
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        toast: Toast,
-        private changeDetectorRef: ChangeDetectorRef,
-        public uiService: UIService,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
 
     async ngOnInit() {

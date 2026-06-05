@@ -6,6 +6,7 @@ import {
     OnDestroy,
     OnInit,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { combineLatest, forkJoin, Subject } from 'rxjs';
@@ -26,6 +27,10 @@ import { ConfigurationService } from '../../core-module/core.module';
     standalone: false,
 })
 export class TitleDirective implements OnInit, OnChanges, OnDestroy {
+    private elementRef = inject(ElementRef);
+    private documentTitle = inject(Title);
+    private translations = inject(TranslationsService);
+
     /**
      * Use a title that differs from the h1 heading.
      *
@@ -48,12 +53,9 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
     /** The combined result of pageHeading and titleOverride. */
     private pageTitle = new Subject<string>();
 
-    constructor(
-        private elementRef: ElementRef,
-        private documentTitle: Title,
-        private translations: TranslationsService,
-        configuration: ConfigurationService,
-    ) {
+    constructor() {
+        const configuration = inject(ConfigurationService);
+
         this.mutationObserver = new MutationObserver(() => this.updatePageHeading());
         this.mutationObserver.observe(this.elementRef.nativeElement, {
             characterData: true,

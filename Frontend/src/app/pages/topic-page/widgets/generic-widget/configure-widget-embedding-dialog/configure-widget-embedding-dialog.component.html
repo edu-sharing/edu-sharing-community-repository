@@ -35,15 +35,17 @@
         </h3>
         <p>
           {{ i18nPrefix + 'OPTION_NODE_ID_DESCRIPTION' | translate }}
-          <ng-container *ngIf="!nodeId && !propagatedNodeId">
-            <br /><br />
-            {{ i18nPrefix + 'OPTION_NODE_ID_NOT_FOUND' | translate }}
-          </ng-container>
+          @if (!nodeId && !propagatedNodeId) {
+          <br /><br />
+          {{ i18nPrefix + 'OPTION_NODE_ID_NOT_FOUND' | translate }}
+          }
         </p>
       </div>
-      <div class="recommended-label" *ngIf="nodeId || propagatedNodeId">
+      @if (nodeId || propagatedNodeId) {
+      <div class="recommended-label">
         {{ i18nPrefix + 'RECOMMENDED' | translate }}
       </div>
+      }
     </button>
     <button mat-stroked-button class="option-button" (click)="selectMode('configOverwrite')">
       <div class="option-icon">

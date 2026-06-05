@@ -1,25 +1,27 @@
 <mat-menu #menu="matMenu" class="sort-dropdown-menu">
   <div class="collection-item-title">{{ 'SORT_BY' | translate }}</div>
+  @for (item of columns; track item) {
   <button
-    *ngFor="let item of columns"
     mat-menu-item
     (click)="setSort(item)"
     class="collection-item"
     [class.active]="sortBy === item.name"
   >
-    <span class="title" *ngIf="item.label">{{ item.label }}</span>
-    <span class="title" *ngIf="!item.label">{{
+    @if (item.label) {
+    <span class="title">{{ item.label }}</span>
+    } @if (!item.label) {
+    <span class="title">{{
       item.type + '_SORT.' + item.name
         | translate : { fallback: (item.type + '.' + item.name | translate) }
     }}</span>
-    <ng-container *ngIf="sortBy === item.name && item.name !== 'ccm:collection_ordered_position'">
-      <i class="material-icons" *ngIf="sortAscending" [altText]="'ASCENDING' | translate">
-        arrow_upward
-      </i>
-      <i class="material-icons" *ngIf="!sortAscending" [altText]="'DESCENDING' | translate">
-        arrow_downward
-      </i>
-      <span class="cdk-visually-hidden">{{ 'SELECTED' | translate }}</span>
-    </ng-container>
+    } @if (sortBy === item.name && item.name !== 'ccm:collection_ordered_position') { @if
+    (sortAscending) {
+    <i class="material-icons" [altText]="'ASCENDING' | translate"> arrow_upward </i>
+    } @if (!sortAscending) {
+    <i class="material-icons" [altText]="'DESCENDING' | translate"> arrow_downward </i>
+    }
+    <span class="cdk-visually-hidden">{{ 'SELECTED' | translate }}</span>
+    }
   </button>
+  }
 </mat-menu>

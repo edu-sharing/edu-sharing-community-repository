@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SkipNavService, SkipTarget } from './skip-nav.service';
 
@@ -16,9 +16,9 @@ import { SkipNavService, SkipTarget } from './skip-nav.service';
     standalone: false,
 })
 export class SkipNavComponent implements OnInit {
-    availableTargets: Observable<SkipTarget[]>;
+    private skipNav = inject(SkipNavService);
 
-    constructor(private skipNav: SkipNavService) {}
+    availableTargets: Observable<SkipTarget[]>;
 
     ngOnInit(): void {
         this.availableTargets = this.skipNav.getAvailableTargets();

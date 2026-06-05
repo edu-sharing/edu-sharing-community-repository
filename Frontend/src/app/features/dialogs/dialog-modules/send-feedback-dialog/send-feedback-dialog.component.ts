@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { delay, first } from 'rxjs/operators';
 import { DialogButton, RestConstants } from '../../../../core-module/core.module';
@@ -18,14 +18,15 @@ import { SendFeedbackDialogData, SendFeedbackDialogResult } from './send-feedbac
     standalone: false,
 })
 export class SendFeedbackDialogComponent implements OnInit {
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: SendFeedbackDialogData,
-        private dialogRef: CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>,
-        private route: ActivatedRoute,
-        private feedbackService: FeedbackV1Service,
-        private toast: Toast,
-        private mdsEditorInstance: MdsEditorInstanceService,
-    ) {
+    data = inject<SendFeedbackDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>>(CardDialogRef);
+    private route = inject(ActivatedRoute);
+    private feedbackService = inject(FeedbackV1Service);
+    private toast = inject(Toast);
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
     }
 

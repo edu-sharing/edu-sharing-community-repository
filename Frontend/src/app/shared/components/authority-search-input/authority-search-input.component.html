@@ -1,20 +1,22 @@
 <!--<es-autocomplete
-  [id]="'searchAuthority'"
-  [inputMinLength]="2"
-  (addItem)="addSuggestion($event)"
-  (addAny)="addAny($event)"
-  [disabled]="disabled"
-  [allowAny]="allowAny"
-  [maxSuggestions]="maxSuggestions"
-  [placeholder]="placeholder"
-  [hintBottom]="hintBottom"
-  [suggestions]="authoritySuggestions"
-  (updateInput)="updateSuggestions($event)"
+[id]="'searchAuthority'"
+[inputMinLength]="2"
+(addItem)="addSuggestion($event)"
+(addAny)="addAny($event)"
+[disabled]="disabled"
+[allowAny]="allowAny"
+[maxSuggestions]="maxSuggestions"
+[placeholder]="placeholder"
+[hintBottom]="hintBottom"
+[suggestions]="authoritySuggestions"
+(updateInput)="updateSuggestions($event)"
 ></es-autocomplete>
 -->
 <form (ngSubmit)="onSubmit()">
   <mat-form-field class="authority-search-input" floatLabel="always">
-    <i matPrefix [esIcon]="inputIcon" *ngIf="inputIcon"></i>
+    @if (inputIcon) {
+    <i matPrefix [esIcon]="inputIcon"></i>
+    }
     <mat-label>{{ label || placeholder | translate }}</mat-label>
     <input
       type="text"
@@ -25,32 +27,34 @@
       name="authoritySearch"
       [formControl]="input"
     />
-    <es-spinner-small *ngIf="suggestionLoading | async" matSuffix></es-spinner-small>
-    <mat-hint *ngIf="hint">{{ hint }}</mat-hint>
+    @if (suggestionLoading | async) {
+    <es-spinner-small matSuffix></es-spinner-small>
+    } @if (hint) {
+    <mat-hint>{{ hint }}</mat-hint>
+    }
     <mat-autocomplete
       #autoGroup="matAutocomplete"
       class="mat-autocomplete-high"
       (optionSelected)="setOption($event)"
     >
-      <ng-container *ngIf="suggestionGroups$ | async as groups">
-        <mat-option *ngIf="groups === 'NO_RECENT' || groups === 'NO_MATCHES'" [disabled]="true">
-          <div class="no-match">{{ 'NODE_SEARCH_SELECTOR.' + groups | translate }}</div>
+      @if (suggestionGroups$ | async; as groups) { @if (groups === 'NO_RECENT' || groups ===
+      'NO_MATCHES') {
+      <mat-option [disabled]="true">
+        <div class="no-match">{{ 'NODE_SEARCH_SELECTOR.' + groups | translate }}</div>
+      </mat-option>
+      } @if (!(groups === 'NO_RECENT' || groups === 'NO_MATCHES')) { @for (group of groups; track
+      group) {
+      <mat-optgroup label="{{ group.label | translate }}">
+        @for (suggestion of group.values; track suggestion) {
+        <mat-option class="authority-search-input-option" [value]="suggestion">
+          <es-authority-row
+            [authority]="suggestion.originalObject"
+            [secondaryTitle]="suggestion.secondaryTitle"
+          ></es-authority-row>
         </mat-option>
-        <ng-container *ngIf="!(groups === 'NO_RECENT' || groups === 'NO_MATCHES')">
-          <mat-optgroup *ngFor="let group of groups" label="{{ group.label | translate }}">
-            <mat-option
-              class="authority-search-input-option"
-              *ngFor="let suggestion of group.values"
-              [value]="suggestion"
-            >
-              <es-authority-row
-                [authority]="suggestion.originalObject"
-                [secondaryTitle]="suggestion.secondaryTitle"
-              ></es-authority-row>
-            </mat-option>
-          </mat-optgroup>
-        </ng-container>
-      </ng-container>
+        }
+      </mat-optgroup>
+      } } }
     </mat-autocomplete>
   </mat-form-field>
 </form>

@@ -1,4 +1,5 @@
-<div class="node-row" *ngIf="node">
+@if (node) {
+<div class="node-row">
   <div class="icon-bg">
     <img
       [src]="node | esNodeIcon | async"
@@ -19,13 +20,11 @@
       <es-list-text [node]="node" [item]="columns[0]"> </es-list-text>
     </div>
     <div class="node-data-secondary">
-      <es-list-text
-        *ngFor="let column of columns.slice(1)"
-        [node]="node"
-        [item]="column"
-        [provideLabel]="true"
-      ></es-list-text>
+      @for (column of columns.slice(1); track column) {
+      <es-list-text [node]="node" [item]="column" [provideLabel]="true"></es-list-text>
+      }
       <ng-container *ngTemplateOutlet="customMetadataRef; context: { node: node }"></ng-container>
     </div>
   </div>
 </div>
+}

@@ -1,51 +1,53 @@
-<div *ngIf="widget?.getInternalError()" class="internal-error">
-  {{ widget.definition.id }}: {{ widget.getInternalError() }}
-</div>
-<mat-expansion-panel
-  *ngIf="(expandedState$ | async) !== 'disabled' && isVisible()"
-  [expanded]="(expandedState$ | async) === 'expanded'"
-  class="mat-elevation-z0"
->
+@if (widget?.getInternalError()) {
+<div class="internal-error">{{ widget.definition.id }}: {{ widget.getInternalError() }}</div>
+} @if ((expandedState$ | async) !== 'disabled' && isVisible()) {
+<mat-expansion-panel [expanded]="(expandedState$ | async) === 'expanded'" class="mat-elevation-z0">
   <mat-expansion-panel-header>
     <mat-panel-title>
-      <i *ngIf="widget.definition.icon" [esIcon]="widget.definition.icon" esIconContext="mds"></i>
+      @if (widget.definition.icon) {
+      <i [esIcon]="widget.definition.icon" esIconContext="mds"></i>
+      }
       {{ label }}
     </mat-panel-title>
-    <es-spinner-small *ngIf="showSpinner"></es-spinner-small>
+    @if (showSpinner) {
+    <es-spinner-small></es-spinner-small>
+    }
   </mat-expansion-panel-header>
   <ng-container *ngTemplateOutlet="body"></ng-container>
 </mat-expansion-panel>
-
+} @if (!widget || (expandedState$ | async) === 'disabled') {
 <div
-  *ngIf="!widget || (expandedState$ | async) === 'disabled'"
   class="widget-container"
   [class.read-only]="
     widget?.definition.interactionType === 'None' || mdsEditorInstance.editorMode === 'viewer'
   "
 >
   <!-- FIXME: The mat-ripple class applies 'overflow: hidden' to the container, which cuts off
-  ripple effects of content elements. -->
+    ripple effects of content elements. -->
   <div matRipple [matRippleDisabled]="true" class="ripple-container" #nativeElement>
     <div class="header-container">
-      <label *ngIf="label" [id]="labelId">{{ label }}</label>
+      @if (label) {
+      <label [id]="labelId">{{ label }}</label>
+      }
       <div class="spacer"></div>
       <!-- A small changes notice mainly for debugging purposes, but could also be used in the product
-      -->
+        -->
       <!-- <span *ngIf="widget?.getHasChanged()" class="changes-notice">{{
         'MDS.HAS_CHANGES' | translate
       }}</span> -->
-      <mat-slide-toggle
-        *ngIf="shouldShowBulkEditToggle()"
-        (change)="onBulkEditToggleChange($event)"
-        >{{ 'MDS.BULK_EDIT' | translate }}</mat-slide-toggle
-      >
+      @if (shouldShowBulkEditToggle()) {
+      <mat-slide-toggle (change)="onBulkEditToggleChange($event)">{{
+        'MDS.BULK_EDIT' | translate
+      }}</mat-slide-toggle>
+      }
     </div>
     <ng-container *ngTemplateOutlet="body"></ng-container>
   </div>
 </div>
+}
 <ng-template #body>
+  @if (!wrapInFormField) {
   <div
-    *ngIf="!wrapInFormField"
     [attr.role]="wrapInGroup ? 'group' : null"
     [attr.aria-labelledby]="wrapInGroup ? labelId : null"
     [attr.aria-describedby]="
@@ -53,30 +55,20 @@
     "
   >
     <ng-container *ngTemplateOutlet="content"></ng-container>
-    <p
-      *ngIf="
-        mdsEditorInstance.editorMode !== 'viewer' &&
-        showBottomCaption &&
-        widget?.definition.bottomCaption &&
-        !shouldShowError()
-      "
-      class="mat-hint subscript"
-      [id]="descriptionId"
-    >
+    @if ( mdsEditorInstance.editorMode !== 'viewer' && showBottomCaption &&
+    widget?.definition.bottomCaption && !shouldShowError() ) {
+    <p class="mat-hint subscript" [id]="descriptionId">
       {{ widget.definition.bottomCaption }}
     </p>
-    <p
-      *ngIf="shouldShowError()"
-      class="mat-error subscript"
-      [class.warn]="missingRequired === 'mandatoryForPublish'"
-    >
+    } @if (shouldShowError()) {
+    <p class="mat-error subscript" [class.warn]="missingRequired === 'mandatoryForPublish'">
       <ng-container *ngTemplateOutlet="error"></ng-container>
     </p>
+    }
   </div>
-
+  } @if (wrapInFormField) {
   <mat-form-field
     esRegisterFormField
-    *ngIf="wrapInFormField"
     [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
     class="widget-form-field-{{ widget.definition.id.replace(':', '-') }}"
     [class.warn]="missingRequired === 'mandatoryForPublish'"
@@ -85,19 +77,15 @@
     <mat-label [id]="labelId">
       {{ widget.definition.caption }}
       <!-- We use our own required marker to show it even on disabled controls for bulk editing.
-    -->
-      <span
-        *ngIf="
-          widget.definition.isRequired === 'mandatory' && mdsEditorInstance.editorMode !== 'search'
-        "
-        class="required-marker"
-        aria-hidden="true"
-        >*</span
-      >
+        -->
+      @if ( widget.definition.isRequired === 'mandatory' && mdsEditorInstance.editorMode !==
+      'search' ) {
+      <span class="required-marker" aria-hidden="true">*</span>
+      }
     </mat-label>
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <!-- Use [hidden] instead of *ngIf to avoid changed-after-checked errors when setting
-  bottomCaption. -->
+        bottomCaption. -->
     <mat-hint [hidden]="!widget.definition.bottomCaption || !showBottomCaption">{{
       widget.definition.bottomCaption
     }}</mat-hint>
@@ -105,15 +93,15 @@
       <ng-container *ngTemplateOutlet="error"></ng-container>
     </mat-error>
   </mat-form-field>
+  }
 </ng-template>
 
 <ng-template #content><ng-content></ng-content></ng-template>
 
 <ng-template #error>
-  <ng-container *ngIf="missingRequired === 'mandatory'">
-    {{ 'MDS.REQUIRED_MESSAGE' | translate }}
-  </ng-container>
-  <ng-container *ngIf="missingRequired === 'mandatoryForPublish'">
-    {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
-  </ng-container>
+  @if (missingRequired === 'mandatory') {
+  {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+  } @if (missingRequired === 'mandatoryForPublish') {
+  {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+  }
 </ng-template>

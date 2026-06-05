@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
+import { Pipe, PipeTransform, SecurityContext, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { marked, MarkedOptions } from 'marked';
 
@@ -7,6 +7,8 @@ import { marked, MarkedOptions } from 'marked';
     standalone: true,
 })
 export class MarkdownPipe implements PipeTransform {
+    private sanitizer = inject(DomSanitizer);
+
     // note: disabling the following options seems not to have any effect,
     //       so keep them to be sure.
     // * br
@@ -24,7 +26,7 @@ export class MarkdownPipe implements PipeTransform {
     ];
     md: typeof marked;
 
-    constructor(private sanitizer: DomSanitizer) {
+    constructor() {
         const renderer = new marked.Renderer();
         // handle custom renderings
         // parse heading as plain text (forEach due to link breaks)

@@ -108,6 +108,19 @@ export interface WidgetComponentInterface {
     styleUrls: ['./generic-widget.component.scss'],
 })
 export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestroy {
+    private aiHelperService = inject(AiHelperService);
+    private clipboard = inject(Clipboard);
+    private dialogs = inject(DialogsService);
+    private injector = inject(Injector);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private platformLocation = inject(PlatformLocation);
+    private toast = inject(Toast);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private translate = inject(TranslateService);
+    private uiService = inject(UIService);
+
     @ViewChild('widgetContainer', { read: ViewContainerRef, static: true })
     widgetContainer!: ViewContainerRef;
     @ViewChild('widgetContainer') widgetContainerElement!: ElementRef<HTMLElement>;
@@ -171,20 +184,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     widgetInstance: WidgetComponentInterface | null = null;
     private widgetNode: Node;
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private clipboard: Clipboard,
-        private dialogs: DialogsService,
-        private injector: Injector,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private platformLocation: PlatformLocation,
-        private toast: Toast,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.updateSearchResultCount$
             .pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {

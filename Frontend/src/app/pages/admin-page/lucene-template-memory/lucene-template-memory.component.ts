@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
@@ -20,6 +20,11 @@ type LuceneTemplates = { [key: string]: LuceneTemplate };
     standalone: false,
 })
 export class LuceneTemplateMemoryComponent {
+    private dialogs = inject(DialogsService);
+    private storage = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     private static readonly STORAGE_KEY = 'admin_lucene_templates';
     private static readonly DEFAULT_TEMPLATES: LuceneTemplates = {
         GROUPS: {
@@ -114,12 +119,7 @@ export class LuceneTemplateMemoryComponent {
         ),
     ];
 
-    constructor(
-        private dialogs: DialogsService,
-        private storage: SessionStorageService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         void this.storage
             .get<LuceneTemplates>(LuceneTemplateMemoryComponent.STORAGE_KEY)
             .then((templates) => {

@@ -17,33 +17,30 @@
           (valueChange)="setStatus($event)"
           [style.--status-color]="status.color"
         >
-          <mat-option
-            *ngFor="let option of validStatus"
-            [value]="option"
-            [disabled]="!isAllowedAsNext(option)"
-          >
+          @for (option of validStatus; track option) {
+          <mat-option [value]="option" [disabled]="!isAllowedAsNext(option)">
             <span class="workflow-dialog-status-option" [style.--status-color]="option.color">
               {{ 'WORKFLOW.' + option.id | translate }}
             </span>
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>
     <div class="receivers">
-      <mat-chip-listbox *ngIf="status.hasReceiver">
-        <mat-chip-option
-          *ngFor="let receiver of receivers"
-          [selectable]="false"
-          (removed)="removeReceiver(receiver)"
-          class="badge"
-        >
+      @if (status.hasReceiver) {
+      <mat-chip-listbox>
+        @for (receiver of receivers; track receiver) {
+        <mat-chip-option [selectable]="false" (removed)="removeReceiver(receiver)" class="badge">
           <div class="mat-chip-group">
             <span class="primary">{{ receiver | authorityName }}</span>
             <span class="secondary">{{ receiver | permissionName : { field: 'secondary' } }}</span>
           </div>
           <i matChipRemove esIcon="cancel"></i>
         </mat-chip-option>
+        }
       </mat-chip-listbox>
+      }
     </div>
   </div>
   <es-info-message>{{ 'WORKSPACE.WORKFLOW.INFO_MESSAGE' | translate }}</es-info-message>
@@ -52,8 +49,10 @@
     <input matInput [(ngModel)]="comment" />
     <mat-hint>{{ 'WORKSPACE.WORKFLOW.COMMENT_INFO' | translate }}</mat-hint>
   </mat-form-field>
-  <div class="historyLabel" *ngIf="history?.length">
+  @if (history?.length) {
+  <div class="historyLabel">
     {{ 'WORKSPACE.WORKFLOW.HISTORY' | translate }}
   </div>
+  }
 </div>
 <es-workflow-list [history]="history"></es-workflow-list>

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Node } from 'ngx-edu-sharing-api';
@@ -18,6 +18,13 @@ import { AiPreviewImagesOverlayComponent } from './ai-preview-images-overlay/ai-
     standalone: false,
 })
 export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private nodeService = inject(RestNodeService);
+    private repoUrlService = inject(RepoUrlService);
+    private sanitizer = inject(DomSanitizer);
+    private toast = inject(Toast);
+
     @ViewChild('overlayRef') overlayRef: ElementRef<HTMLElement>;
     @ViewChild('aiPreviewImagesOverlay') aiPreviewImagesOverlay: AiPreviewImagesOverlayComponent;
 
@@ -37,14 +44,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     loading$ = new BehaviorSubject(false);
     overlayVisible$ = new BehaviorSubject(false);
 
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private nodeService: RestNodeService,
-        private repoUrlService: RepoUrlService,
-        private sanitizer: DomSanitizer,
-        private toast: Toast,
-    ) {
+    constructor() {
         forkJoin([this.mdsEditorInstance.nodes$.pipe(take(1))])
             .pipe(takeUntilDestroyed())
             .subscribe(([nodes]) => {

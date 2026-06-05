@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { DialogButton, RestConstants } from '../../../core-module/core.module';
 import { Toast } from '../../../services/toast';
 import { FeedbackData, FeedbackV1Service, Node } from 'ngx-edu-sharing-api';
@@ -10,6 +10,9 @@ import { FeedbackData, FeedbackV1Service, Node } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class ViewMaterialFeedbackComponent {
+    private feedbackService = inject(FeedbackV1Service);
+    private toast = inject(Toast);
+
     @Input()
     set node(node: Node) {
         this._node = node;
@@ -19,7 +22,7 @@ export class ViewMaterialFeedbackComponent {
     _node: Node;
     feedbacks: FeedbackData[];
     feedbackViewButtons: DialogButton[];
-    constructor(private feedbackService: FeedbackV1Service, private toast: Toast) {
+    constructor() {
         this.feedbackViewButtons = DialogButton.getSingleButton(
             'CLOSE',
             () => this.closeFeedback.emit(),

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     ClientConfig,
@@ -59,6 +59,17 @@ interface AddToCollectionMode {
 
 @Injectable()
 export class SearchPageService implements OnDestroy {
+    private collection = inject(CollectionService);
+    private config = inject(ConfigService);
+    private mainNavService = inject(MainNavService);
+    private mds = inject(MdsService);
+    private navigationScheduler = inject(NavigationScheduler);
+    private network = inject(NetworkService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private searchField = inject(SearchFieldService);
+    private userModifiableValues = inject(UserModifiableValuesService);
+
     readonly availableRepositories = new BehaviorSubject<Repository[]>(null);
     readonly activeRepository = this.userModifiableValues.createString();
     readonly showingAllRepositories = new BehaviorSubject<boolean>(null);
@@ -119,19 +130,6 @@ export class SearchPageService implements OnDestroy {
     }
 
     private readonly destroyed = new Subject<void>();
-
-    constructor(
-        private collection: CollectionService,
-        private config: ConfigService,
-        private mainNavService: MainNavService,
-        private mds: MdsService,
-        private navigationScheduler: NavigationScheduler,
-        private network: NetworkService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private searchField: SearchFieldService,
-        private userModifiableValues: UserModifiableValuesService,
-    ) {}
 
     ngOnDestroy(): void {
         this.destroyed.next();

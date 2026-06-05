@@ -1,5 +1,6 @@
 <es-mds-editor-widget-container [label]="'MDS.AUTHOR_LABEL' | translate">
-  <mat-tab-group mat-stretch-tabs *ngIf="author" [(selectedIndex)]="authorTab" class="author-tabs">
+  @if (author) {
+  <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab" class="author-tabs">
     <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
       <mat-form-field class="authorFreetext">
         <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
@@ -57,17 +58,18 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="contributors" *ngIf="showContributorDialog && mdsEditorValues.nodes$.value">
-        <button
-          mat-button
-          color="primary"
-          (click)="openContributorDialog()"
-          *ngIf="_nodes?.length === 1 && !ui.isMobile()"
-        >
+      @if (showContributorDialog && mdsEditorValues.nodes$.value) {
+      <div class="contributors">
+        @if (_nodes?.length === 1 && !ui.isMobile()) {
+        <button mat-button color="primary" (click)="openContributorDialog()">
           {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i esIcon="arrow_forward"></i>
         </button>
+        }
       </div>
+      }
     </mat-tab>
   </mat-tab-group>
-  <es-spinner-small *ngIf="!author"></es-spinner-small>
+  } @if (!author) {
+  <es-spinner-small></es-spinner-small>
+  }
 </es-mds-editor-widget-container>

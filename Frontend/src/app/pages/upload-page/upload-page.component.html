@@ -1,3 +1,5 @@
-<es-global-progress *ngIf="loading"></es-global-progress>
+@if (loading) {
+<es-global-progress></es-global-progress>
+}
 <!-- FIXME: Is this part of a page that already has a level 1 heading? -->
 <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.ADD_OBJECT_TITLE' | translate }}</h1>

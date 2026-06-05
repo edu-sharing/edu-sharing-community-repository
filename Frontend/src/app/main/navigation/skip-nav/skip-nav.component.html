@@ -1,9 +1,7 @@
 <div role="navigation" [attr.aria-label]="'NAV.SKIP' | translate">
-  <a
-    *ngFor="let target of availableTargets | async"
-    class="skip-link"
-    href
-    (click)="skipTo($event, target)"
-    >{{ 'SKIP_LINKS.' + target | translate }}</a
-  >
+  @for (target of availableTargets | async; track target) {
+  <a class="skip-link" href (click)="skipTo($event, target)">{{
+    'SKIP_LINKS.' + target | translate
+  }}</a>
+  }
 </div>

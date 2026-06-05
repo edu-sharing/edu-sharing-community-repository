@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Content, ContentText, TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -17,13 +17,12 @@ pdfMake.vfs = pdfFonts.vfs;
 
 @Injectable()
 export class PdfService {
-    constructor(
-        private injector: Injector,
-        private translate: TranslateService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private mdsViewerService: MdsViewerService,
-        private http: HttpClient,
-    ) {}
+    private injector = inject(Injector);
+    private translate = inject(TranslateService);
+    private mdsEditorInstanceService = inject(MdsEditorInstanceService);
+    private mdsViewerService = inject(MdsViewerService);
+    private http = inject(HttpClient);
+    private nodeLicensePipe = inject(NodeLicensePipe);
 
     public async triggerMetaDataPdfDownload(node: Node): Promise<void> {
         const title =
@@ -303,9 +302,7 @@ export class PdfService {
     private async getLicenseRow(node: Node): Promise<string[]> {
         return [
             await firstValueFrom(this.translate.get('MDS.LICENSE')),
-            await firstValueFrom(
-                new NodeLicensePipe(this.translate).transform(node, { type: 'name' }),
-            ),
+            await firstValueFrom(this.nodeLicensePipe.transform(node, { type: 'name' })),
         ];
     }
 }

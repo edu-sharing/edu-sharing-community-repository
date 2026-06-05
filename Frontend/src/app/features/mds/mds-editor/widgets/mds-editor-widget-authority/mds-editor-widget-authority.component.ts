@@ -1,5 +1,5 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -25,6 +25,10 @@ import { Toast } from '../../../../../services/toast';
     standalone: false,
 })
 export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase implements OnInit {
+    private conntector = inject(RestConnectorService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private authorityAffiliationPipe = inject(AuthorityAffiliationPipe);
+
     @ViewChild('authoritySearchInputComponent')
     authoritySearchInputComponent: AuthoritySearchInputComponent;
     @ViewChild(MatAutocompleteTrigger, { read: MatAutocompleteTrigger })
@@ -51,14 +55,8 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
     })();
     globalSearchAllowed: boolean;
 
-    constructor(
-        toast: Toast,
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        private conntector: RestConnectorService,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
 
     ngOnInit(): void {
@@ -123,8 +121,8 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
             console.warn('Authority widget does currently not support state handling');
         } else {
             const displayValue: DisplayValue = {
-                label: new AuthorityNamePipe(this.translate).transform(value),
-                hint: new AuthorityAffiliationPipe(this.translate).transform(value),
+                label: this.authorityNamePipe.transform(value),
+                hint: this.authorityAffiliationPipe.transform(value),
                 key: (value as Authority).authorityName,
             };
             if (!this.chipsControl.value.some((v: DisplayValue) => v.key === displayValue.key)) {

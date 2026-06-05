@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA, CardDialogConfig } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -14,6 +14,12 @@ import {
     standalone: false,
 })
 export class LicenseAgreementDialogComponent implements OnInit {
+    data = inject<LicenseAgreementDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<LicenseAgreementDialogData, LicenseAgreementDialogResult>>(
+            CardDialogRef,
+        );
+
     licenseAgreementHTML: string;
     acceptLicenseAgreement = false;
     readonly contentPadding = new CardDialogConfig().contentPadding;
@@ -24,11 +30,6 @@ export class LicenseAgreementDialogComponent implements OnInit {
         new DialogButton('LICENSE_AGREEMENT.DECLINE', { color: 'standard' }, () => this.decline()),
         this.acceptButton,
     ];
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: LicenseAgreementDialogData,
-        private dialogRef: CardDialogRef<LicenseAgreementDialogData, LicenseAgreementDialogResult>,
-    ) {}
 
     ngOnInit(): void {
         this.updateButtons();

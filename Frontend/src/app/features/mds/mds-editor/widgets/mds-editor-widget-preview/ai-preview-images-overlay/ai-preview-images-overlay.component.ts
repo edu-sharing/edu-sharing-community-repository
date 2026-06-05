@@ -11,6 +11,7 @@ import {
     ViewChild,
     ViewContainerRef,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthenticationService, MdsWidget, Node } from 'ngx-edu-sharing-api';
@@ -26,6 +27,14 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
     standalone: false,
 })
 export class AiPreviewImagesOverlayComponent implements OnInit {
+    private auth = inject(AuthenticationService);
+    private eduSharingLlmService = inject(EduSharingLlmService);
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private overlay = inject(Overlay);
+    private sanitizer = inject(DomSanitizer);
+    private toast = inject(Toast);
+    private viewContainerRef = inject(ViewContainerRef);
+
     protected readonly IMAGES_PREFIX: string = 'assets/images/ai/previews/';
     protected readonly IMAGES_SUFFIX: string = '.jpg';
     static readonly WIDGET_ID_DRAWING_STYLE = 'preview.drawingStyle';
@@ -47,16 +56,6 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
     selectedStyleId: string | null = null;
     styleIdToPreviewImagesMap: Map<string, Image[]> = new Map<string, Image[]>();
     private readonly BASE_64_PREFIX: string = 'data:image/jpg;base64,';
-
-    constructor(
-        private auth: AuthenticationService,
-        private eduSharingLlmService: EduSharingLlmService,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private overlay: Overlay,
-        private sanitizer: DomSanitizer,
-        private toast: Toast,
-        private viewContainerRef: ViewContainerRef,
-    ) {}
 
     /**
      * Initializes the component by retrieving the AI drawing styles from the mds definition.

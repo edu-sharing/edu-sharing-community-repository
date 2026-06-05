@@ -296,7 +296,7 @@ $imagePath: '../../../../assets/images/collections/';
     color: #000;
     transition: $transitionNormal all;
 
-    --mdc-outlined-text-field-hover-label-text-color: #333;
+    --mat-form-field-outlined-hover-label-text-color: #333;
 
     @include placeholder {
         color: #333;

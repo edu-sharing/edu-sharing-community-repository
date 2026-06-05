@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { CordovaService } from './cordova.service';
 import { MessageType } from '../util/message-type';
@@ -16,7 +16,9 @@ import { DialogsService } from '../features/dialogs/dialogs.service';
  */
 @Injectable({ providedIn: 'root' })
 export class BridgeService {
-    constructor(private injector: Injector, private cordova: CordovaService) {}
+    private injector = inject(Injector);
+    private cordova = inject(CordovaService);
+
     showTemporaryMessage(
         type: MessageType,
         message: string | any,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { RegisterV1Service } from '../api/services/register-v-1.service';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -10,10 +10,8 @@ import { RegisterInformation } from '../api/models/register-information';
     providedIn: 'root',
 })
 export class RegisterService {
-    constructor(
-        private registerV1Service: RegisterV1Service,
-        private authenticationService: AuthenticationService,
-    ) {}
+    private registerV1Service = inject(RegisterV1Service);
+    private authenticationService = inject(AuthenticationService);
 
     /**
      * Activate a new user (by using a supplied key).

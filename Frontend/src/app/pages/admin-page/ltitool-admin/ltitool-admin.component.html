@@ -17,7 +17,9 @@
           {{ 'ADMIN.LTITOOL.REGISTER' | translate }}
         </button>
       </div>
-      <iframe [src]="ltiToolDynRegUrlSafe" *ngIf="showIframe"></iframe>
+      @if (showIframe) {
+      <iframe [src]="ltiToolDynRegUrlSafe"></iframe>
+      }
     </div>
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.LTI.ADVANCED' | translate }}">

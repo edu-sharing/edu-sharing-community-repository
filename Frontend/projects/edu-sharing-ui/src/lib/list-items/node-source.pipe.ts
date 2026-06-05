@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { NetworkService, Repository } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../services/node-helper.service';
 
@@ -7,9 +7,12 @@ import { NodeHelperService } from '../services/node-helper.service';
     standalone: false,
 })
 export class NodeSourcePipe implements PipeTransform {
+    private nodeHelper = inject(NodeHelperService);
+    private networkApi = inject(NetworkService);
+
     private homeRepository: Repository;
 
-    constructor(private nodeHelper: NodeHelperService, private networkApi: NetworkService) {
+    constructor() {
         this.networkApi.getHomeRepository().subscribe((homeRepository) => {
             this.homeRepository = homeRepository;
         });

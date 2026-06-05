@@ -1,6 +1,9 @@
-<es-global-progress *ngIf="loading"></es-global-progress>
+@if (loading) {
+<es-global-progress></es-global-progress>
+}
 <h1 esTitle class="cdk-visually-hidden">{{ 'SHARING.TITLE' | translate }}</h1>
-<div *ngIf="!loading && sharingInfo" class="container">
+@if (!loading && sharingInfo) {
+<div class="container">
   <div class="container-inside">
     <div class="branding">
       <img [src]="'assets/images/logo.svg' | esAssetsPath" esImageConfig alt="logo" />
@@ -13,19 +16,22 @@
         <img class="icon" [src]="sharingInfo.node | esNodeIcon | async" />
         <div>
           <div class="name">{{ sharingInfo.node.name }}</div>
-          <div class="subobjects" *ngIf="childCount() > 0">
+          @if (childCount() > 0) {
+          <div class="subobjects">
             {{
               'SHARING.SUBELEMENT_' + (childCount() === 1 ? 'SINGLE' : 'MULTI')
                 | translate : { count: childCount() }
             }}
           </div>
-          <div *ngIf="inviterIsAuthor()">
+          } @if (inviterIsAuthor()) {
+          <div>
             {{
               'SHARING.INVITED_AND_CREATED_BY'
                 | translate : { inviter: getPersonName(sharingInfo.invitedBy) }
             }}
           </div>
-          <div *ngIf="!inviterIsAuthor()">
+          } @if (!inviterIsAuthor()) {
+          <div>
             {{
               'SHARING.INVITED_PLUS_CREATED_BY'
                 | translate
@@ -35,10 +41,12 @@
                     }
             }}
           </div>
+          }
         </div>
       </div>
     </div>
-    <div *ngIf="!(!sharingInfo.password || sharingInfo.passwordMatches)" class="password-required">
+    @if (!(!sharingInfo.password || sharingInfo.passwordMatches)) {
+    <div class="password-required">
       <form (ngsubmit)="validatePassword()">
         <es-input-password
           label="{{ 'SHARING.PASSWORD' | translate }}"
@@ -53,19 +61,21 @@
         </button>
       </form>
     </div>
-    <div *ngIf="!sharingInfo.password || sharingInfo.passwordMatches" class="password-valid">
-      <div
-        *ngIf="sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory"
-        class="password-correct"
-      >
+    } @if (!sharingInfo.password || sharingInfo.passwordMatches) {
+    <div class="password-valid">
+      @if (sharingInfo.password && sharingInfo.passwordMatches && !sharingInfo.node.isDirectory) {
+      <div class="password-correct">
         <i esIcon="done"></i>{{ 'SHARING.PASSWORD_CORRECT' | translate }}
       </div>
-      <div *ngIf="sharingInfo.node.isDirectory">
-        <div class="download-top" *ngIf="!nodesDataSource?.isEmpty()">
+      } @if (sharingInfo.node.isDirectory) {
+      <div>
+        @if (!nodesDataSource?.isEmpty()) {
+        <div class="download-top">
           <button mat-raised-button color="primary" (click)="download()">
             <i esIcon="cloud_download"></i>{{ 'SHARING.DOWNLOAD_ZIP' | translate }}
           </button>
         </div>
+        }
         <div class="folder">
           <es-node-entries-wrapper
             #nodeEntries
@@ -84,7 +94,8 @@
           </es-node-entries-wrapper>
         </div>
       </div>
-      <div class="download" *ngIf="!sharingInfo.node.isDirectory || !nodesDataSource?.isEmpty()">
+      } @if (!sharingInfo.node.isDirectory || !nodesDataSource?.isEmpty()) {
+      <div class="download">
         <button mat-raised-button color="primary" (click)="download()">
           <i esIcon="cloud_download"></i
           >{{
@@ -97,7 +108,10 @@
           }}
         </button>
       </div>
+      }
     </div>
+    }
   </div>
   <es-powered-by mode="color"></es-powered-by>
 </div>
+}

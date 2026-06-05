@@ -1,4 +1,6 @@
-<img [src]="'/assets/images/motivation/' + img() + '.svg'" alt="" *ngIf="img() !== null" />
+@if (img() !== null) {
+<img [src]="'/assets/images/motivation/' + img() + '.svg'" alt="" />
+}
 
 <h3>{{ 'WORKSPACE.SHARE.PUBLISH.MOTIVATION.TITLE' | translate }}</h3>
 <div class="message">

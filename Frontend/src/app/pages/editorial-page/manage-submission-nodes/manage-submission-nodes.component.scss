@@ -1,29 +1,5 @@
-@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
-@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
-@use '../manage-assignment-nodes/manage-assignment-nodes.component' as man;
+@use './node-list-mixin' as *;
 
-@mixin nodeList() {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    > div {
-        @include man.container();
-        @include mixins.clickable();
-        padding: 10px 20px;
-        .title {
-            @include mixins.limitLineCount(2, 1.25);
-        }
-        &:hover {
-            background-color: var(--palette-primary-50);
-        }
-        &.selected {
-            background: var(--listItemSelectedBackgroundEffect);
-        }
-        &.new .title {
-            font-weight: bold;
-        }
-    }
-}
 .empty {
     color: var(--textLight);
 }

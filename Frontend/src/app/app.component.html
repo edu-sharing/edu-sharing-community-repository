@@ -11,4 +11,6 @@
   role="navigation"
   [attr.aria-label]="'GO_TO_TOP' | translate"
 ></es-scroll-to-top-button>
-<es-loading-screen *ngIf="isLoading | async"></es-loading-screen>
+@if (isLoading | async) {
+<es-loading-screen></es-loading-screen>
+}

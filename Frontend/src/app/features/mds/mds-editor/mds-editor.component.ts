@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import { EditorMode, Values } from '../types/types';
@@ -24,6 +24,8 @@ interface InitInfo {
     standalone: false,
 })
 export class MdsEditorComponent implements OnInit {
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+
     /** The repository to which the metadata set to be used belongs. */
     @Input() set repository(repository: string) {
         this.updateInitInfo({ repository });
@@ -46,12 +48,6 @@ export class MdsEditorComponent implements OnInit {
     /** The mode in which to run the editor. */
 
     private readonly initInfoSubject = new rxjs.BehaviorSubject<Partial<InitInfo>>({});
-
-    constructor(
-        // Please do not make this public. If there is any need to do so, we should find a way to
-        // solve it without sacrificing encapsulation. In the meantime, there is `MdsEditorWrapper`.
-        private mdsEditorInstance: MdsEditorInstanceService,
-    ) {}
 
     ngOnInit(): void {
         this.initInfoSubject.subscribe((info) => this.init(info));

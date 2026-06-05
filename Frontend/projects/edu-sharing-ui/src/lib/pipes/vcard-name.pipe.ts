@@ -7,7 +7,6 @@ import { VCard } from '../util/VCard';
     standalone: false,
 })
 export class VCardNamePipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
     transform(authority: string | string[], args: string[] = null): string {
         if (Array.isArray(authority)) {
             return authority

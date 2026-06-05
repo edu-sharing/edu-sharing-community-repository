@@ -8,6 +8,7 @@ import {
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
@@ -101,6 +102,38 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     standalone: false,
 })
 export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
+    private collectionService = inject(RestCollectionService);
+    private nodeService = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    private connector = inject(RestConnectorService);
+    private nodeHelper = inject(NodeHelperService);
+    private uiService = inject(UIService);
+    private iamService = inject(RestIamService);
+    private mediacenterService = inject(RestMediacenterService);
+    private route = inject(ActivatedRoute);
+    private mdsService = inject(RestMdsService);
+    private eventService = inject(FrameEventsService);
+    private localEvents = inject(LocalEventsService);
+    private router = inject(Router);
+    private platformLocation = inject(PlatformLocation);
+    private toast = inject(Toast);
+    private bridge = inject(BridgeService);
+    private temporaryStorage = inject(TemporaryStorageService);
+    private sessionStorageService = inject(SessionStorageService);
+    private zone = inject(NgZone);
+    private sanitizer = inject(DomSanitizer);
+    private configLegacy = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private optionsHelper = inject(OptionsHelperService);
+    private optionsHelperDataService = inject(OptionsHelperDataService);
+    private ref = inject(ApplicationRef);
+    private translations = inject(TranslationsService);
+    private translationService = inject(TranslateService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNav = inject(MainNavService);
+    private dialogs = inject(DialogsService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
     @ViewChild('imageActionbar') imageActionbar: ActionbarComponent;
@@ -228,38 +261,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    constructor(
-        private collectionService: RestCollectionService,
-        private nodeService: RestNodeService,
-        private nodeApi: NodeService,
-        private connector: RestConnectorService,
-        private nodeHelper: NodeHelperService,
-        private uiService: UIService,
-        private iamService: RestIamService,
-        private mediacenterService: RestMediacenterService,
-        private route: ActivatedRoute,
-        private mdsService: RestMdsService,
-        private eventService: FrameEventsService,
-        private localEvents: LocalEventsService,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-        private toast: Toast,
-        private bridge: BridgeService,
-        private temporaryStorage: TemporaryStorageService,
-        private sessionStorageService: SessionStorageService,
-        private zone: NgZone,
-        private sanitizer: DomSanitizer,
-        private configLegacy: ConfigurationService,
-        private configService: ConfigService,
-        private optionsHelper: OptionsHelperService,
-        private optionsHelperDataService: OptionsHelperDataService,
-        private ref: ApplicationRef,
-        private translations: TranslationsService,
-        private translationService: TranslateService,
-        private loadingScreen: LoadingScreenService,
-        private mainNav: MainNavService,
-        private dialogs: DialogsService,
-    ) {
+    constructor() {
         this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
@@ -999,9 +1001,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER,
         );
         this.authorFreetext = true;
-        this.currentCollection.collection.authorFreetext = new AuthorityNamePipe(
-            this.translationService,
-        ).transform(
+        this.currentCollection.collection.authorFreetext = this.authorityNamePipe.transform(
             this.newCollectionType === RestConstants.COLLECTIONTYPE_MEDIA_CENTER ||
                 this.currentCollection.collection.type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER
                 ? this.mediacenter

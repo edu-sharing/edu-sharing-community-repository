@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import {
     AuthorityProfile,
     DialogButton,
@@ -27,6 +27,10 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class AddStreamComponent {
+    private connector = inject(RestConnectorService);
+    private streamApi = inject(RestStreamService);
+    private toast = inject(Toast);
+
     private streamEntry: any = {};
     reloadMds = new Boolean(true);
     AUDIENCE_MODE_EVERYONE = '0';
@@ -41,11 +45,7 @@ export class AddStreamComponent {
     @Output() cancelStream = new EventEmitter<void>();
     @Output() loading = new EventEmitter<boolean>();
     @Output() done = new EventEmitter<void>();
-    constructor(
-        private connector: RestConnectorService,
-        private streamApi: RestStreamService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.buttons = [
             new DialogButton('CANCEL', { color: 'standard' }, () => this.cancel()),
             new DialogButton('SAVE', { color: 'primary' }, () => this.save()),

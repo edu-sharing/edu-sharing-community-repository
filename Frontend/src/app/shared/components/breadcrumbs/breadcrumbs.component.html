@@ -1,119 +1,102 @@
 <nav aria-label="breadcrumbs" class="breadcrumbs-wrapper">
-  <ng-container *ngIf="clickable">
-    <!-- Full (not short) breadcrumbs -->
-    <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
-      <ng-container *ngIf="showLanding">
-        <ng-container *ngTemplateOutlet="landingBreadcrumbElement"></ng-container>
-        <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-      </ng-container>
-      <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
-      <ng-container *ngIf="nodes.length === 0 && showHomeNotice">
-        <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-        <span class="home-notice">{{ 'BREADCRUMBS.YOU_ARE_HOME' | translate }}</span>
-      </ng-container>
-      <ng-container *ngFor="let node of nodes; let index = index; let last = last">
-        <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-        <ng-container
-          *ngTemplateOutlet="
-            nodeBreadcrumbElement;
-            context: { node: node, index: index, currentPos: last }
-          "
-        ></ng-container>
-      </ng-container>
-    </div>
-
-    <!-- Short breadcrumbs
-
+  @if (clickable) {
+  <!-- Full (not short) breadcrumbs -->
+  <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
+    @if (showLanding) {
+    <ng-container *ngTemplateOutlet="landingBreadcrumbElement"></ng-container>
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    }
+    <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
+    @if (nodes.length === 0 && showHomeNotice) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="home-notice">{{ 'BREADCRUMBS.YOU_ARE_HOME' | translate }}</span>
+    } @for (node of nodes; track node; let index = $index; let last = $last) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <ng-container
+      *ngTemplateOutlet="
+        nodeBreadcrumbElement;
+        context: { node: node, index: index, currentPos: last }
+      "
+    ></ng-container>
+    }
+  </div>
+  <!-- Short breadcrumbs
     Show only the last breadcrumbs and either a back- or a home button.
     -->
-    <div class="breadcrumb breadcrumb-short" [attr.role]="nodes.length > 0 ? 'list' : null">
-      <!-- root / home breadcrumb -->
-      <ng-container *ngIf="nodes.length <= 1">
-        <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
-        <i
-          *ngIf="nodes.length === 1"
-          aria-hidden="true"
-          esIcon="keyboard_arrow_right"
-          class="breadcrumb-arrow"
-        ></i>
-      </ng-container>
-      <!-- back / level-up breadcrumb -->
-      <ng-container *ngIf="nodes.length > 1">
-        <ng-container
-          *ngTemplateOutlet="
-            nodeBreadcrumbElement;
-            context: { node: nodes[nodes.length - 2], index: nodes.length - 2, inner: backInner }
-          "
-        ></ng-container>
-      </ng-container>
-      <!-- breadcrumb for current node -->
-      <ng-container *ngIf="nodes.length > 0">
-        <div *ngIf="invisibleDescription" class="cdk-visually-hidden">
-          {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
-        </div>
-        <ng-container
-          *ngTemplateOutlet="
-            nodeBreadcrumbElement;
-            context: { node: nodes[nodes.length - 1], index: nodes.length - 1, currentPos: true }
-          "
-        ></ng-container>
-      </ng-container>
+  <div class="breadcrumb breadcrumb-short" [attr.role]="nodes.length > 0 ? 'list' : null">
+    <!-- root / home breadcrumb -->
+    @if (nodes.length <= 1) {
+    <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
+    @if (nodes.length === 1) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    } }
+    <!-- back / level-up breadcrumb -->
+    @if (nodes.length > 1) {
+    <ng-container
+      *ngTemplateOutlet="
+        nodeBreadcrumbElement;
+        context: { node: nodes[nodes.length - 2], index: nodes.length - 2, inner: backInner }
+      "
+    ></ng-container>
+    }
+    <!-- breadcrumb for current node -->
+    @if (nodes.length > 0) { @if (invisibleDescription) {
+    <div class="cdk-visually-hidden">
+      {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
     </div>
-  </ng-container>
+    }
+    <ng-container
+      *ngTemplateOutlet="
+        nodeBreadcrumbElement;
+        context: { node: nodes[nodes.length - 1], index: nodes.length - 1, currentPos: true }
+      "
+    ></ng-container>
+    }
+  </div>
+  }
 
   <!-- Read-only breadcrumbs.
 
   Short version works only with `short="always"`.
   -->
-  <div
-    *ngIf="!clickable"
-    class="breadcrumb breadcrumb-readonly"
-    [attr.role]="nodes.length > 0 ? 'list' : null"
-  >
+  @if (!clickable) {
+  <div class="breadcrumb breadcrumb-readonly" [attr.role]="nodes.length > 0 ? 'list' : null">
     <span class="breadcrumb-element" [class.breadcrumb-element-active]="nodes.length === 0">
-      <ng-container *ngIf="homeIcon"><i class="home-icon" [esIcon]="homeIcon"></i></ng-container>
-      <ng-container *ngIf="home">{{ home | translate }}</ng-container>
-      <ng-container *ngIf="!home && !homeIcon"
-        ><i class="home-icon" esIcon="home"></i
-      ></ng-container>
+      @if (homeIcon) {
+      <i class="home-icon" [esIcon]="homeIcon"></i>
+      } @if (home) {
+      {{ home | translate }}
+      } @if (!home && !homeIcon) {
+      <i class="home-icon" esIcon="home"></i>
+      }
     </span>
-    <ng-container *ngIf="nodes.length === 0 && showHomeNotice">
-      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-      <span class="home-notice">{{ 'BREADCRUMBS.IN_HOME' | translate }}</span>
-    </ng-container>
-    <ng-container *ngIf="short === 'always' && nodes.length > 1">
-      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-      <span class="folder">...</span>
-    </ng-container>
-    <ng-container
-      *ngFor="
-        let node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes;
-        let last = last
-      "
-    >
-      <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-      <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
-        node ? (node | nodeTitle : { type: preferredName }) : ''
-      }}</span>
-    </ng-container>
+    @if (nodes.length === 0 && showHomeNotice) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="home-notice">{{ 'BREADCRUMBS.IN_HOME' | translate }}</span>
+    } @if (short === 'always' && nodes.length > 1) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="folder">...</span>
+    } @for ( node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes;
+    track node; let last = $last) {
+    <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
+    <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
+      node ? (node | nodeTitle : { type: preferredName }) : ''
+    }}</span>
+    }
   </div>
+  }
 
   <ng-template #homeInner>
     <div class="breadcrumb-inner">
-      <ng-container *ngIf="homeIcon">
-        <i [esIcon]="homeIcon" class="home-icon"></i>
-      </ng-container>
-      <ng-container *ngIf="home">
-        {{ home | translate }}
-      </ng-container>
-      <ng-container *ngIf="!home && !homeIcon">
-        <i esIcon="home" class="home-icon"></i>
-      </ng-container>
-      <i
-        *ngIf="nodes.length < 1"
-        esIcon="keyboard_arrow_down"
-        class="dropdown-icon mobile-only"
-      ></i>
+      @if (homeIcon) {
+      <i [esIcon]="homeIcon" class="home-icon"></i>
+      } @if (home) {
+      {{ home | translate }}
+      } @if (!home && !homeIcon) {
+      <i esIcon="home" class="home-icon"></i>
+      } @if (nodes.length < 1) {
+      <i esIcon="keyboard_arrow_down" class="dropdown-icon mobile-only"></i>
+      }
     </div>
   </ng-template>
 
@@ -122,8 +105,8 @@
   </ng-template>
 
   <ng-template #homeBreadcrumbElement>
+    @if (homeRouterLink) {
     <div
-      *ngIf="homeRouterLink"
       role="listitem"
       [esNodesDropTarget]="HOME"
       [canDropNodes]="canDropNodes"
@@ -142,8 +125,8 @@
         <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
       </a>
     </div>
+    } @if (!homeRouterLink) {
     <div
-      *ngIf="!homeRouterLink"
       role="listitem"
       [esNodesDropTarget]="HOME"
       [canDropNodes]="canDropNodes"
@@ -160,6 +143,7 @@
         <div mat-ripple [matRippleTrigger]="trigger" matRippleColor="primary"></div>
       </button>
     </div>
+    }
   </ng-template>
   <ng-template #landingBreadcrumbElement>
     <div role="listitem" class="breadcrumb-element">
@@ -212,12 +196,15 @@
               : null
           "
         >
-          <span *ngIf="currentPos && invisibleDescription" class="cdk-visually-hidden">
+          @if (currentPos && invisibleDescription) {
+          <span class="cdk-visually-hidden">
             {{ 'BREADCRUMB_LOCATION_PREFIX' | translate }}
           </span>
-          <ng-container *ngIf="!inner; else inner">
-            {{ node ? (node | nodeTitle : { type: preferredName }) : '' }}
-          </ng-container>
+          } @if (!inner) {
+          {{ node ? (node | nodeTitle : { type: preferredName }) : '' }}
+          } @else {
+          <ng-template [ngTemplateOutlet]="inner"></ng-template>
+          }
         </span>
       </span>
       <!-- <div mat-ripple [matRippleTrigger]="$any(trigger)" matRippleColor="primary"></div> -->

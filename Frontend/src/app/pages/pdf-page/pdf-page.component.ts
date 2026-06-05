@@ -1,5 +1,13 @@
 import { PlatformLocation } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, OnInit, signal, WritableSignal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    OnDestroy,
+    OnInit,
+    signal,
+    WritableSignal,
+    inject,
+} from '@angular/core';
 import { HOME_REPOSITORY, Node, NodeService } from 'ngx-edu-sharing-api';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { NgxExtendedPdfViewerService } from 'ngx-extended-pdf-viewer';
@@ -17,6 +25,13 @@ import { Toast } from '../../services/toast';
     standalone: false,
 })
 export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
+    private dialogsService = inject(DialogsService);
+    private nodeApi = inject(NodeService);
+    private pdfViewerService = inject(NgxExtendedPdfViewerService);
+    private platformLocation = inject(PlatformLocation);
+    private toast = inject(Toast);
+    private translations = inject(TranslationsService);
+
     static readonly DEFAULT_PDF_MIMETYPE: string = 'application/pdf';
     static readonly DEFAULT_PDF_PREFIX: string = '/eduservlet/download?nodeId=';
 
@@ -31,15 +46,6 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
     private pdfPrefix: string = PdfPageComponent.DEFAULT_PDF_PREFIX;
     renderNodeId: string;
     private windowRef: any;
-
-    constructor(
-        private dialogsService: DialogsService,
-        private nodeApi: NodeService,
-        private pdfViewerService: NgxExtendedPdfViewerService,
-        private platformLocation: PlatformLocation,
-        private toast: Toast,
-        private translations: TranslationsService,
-    ) {}
 
     /**
      * Initializes the component by defining the language.

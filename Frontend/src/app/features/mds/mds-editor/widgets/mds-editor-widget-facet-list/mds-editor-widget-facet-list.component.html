@@ -8,12 +8,15 @@
   [wrapInFormField]="false"
   [showSpinner]="isInitState$ | async"
 >
-  <mat-form-field *ngIf="hasFilter()" class="filter-field">
+  @if (hasFilter()) {
+  <mat-form-field class="filter-field">
     <mat-label>{{ 'MDS.FILTER_FACET' | translate }}</mat-label>
     <input matInput [formControl]="filter" type="search" />
   </mat-form-field>
-  <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group">
-    <li *ngFor="let control of formArray.controls; let i = index">
+  } @if (formArray) {
+  <ul [formGroup]="$any(formArray)" class="checkboxes-group">
+    @for (control of formArray.controls; track control; let i = $index) {
+    <li>
       <mat-checkbox [formControlName]="i">
         <span class="label">
           <span
@@ -28,11 +31,11 @@
         </span>
       </mat-checkbox>
     </li>
+    }
   </ul>
+  } @if ( (facetAggregationSubject | async)?.hasMore && facetValuesFiltered?.length <
+  MAX_FACET_COUNT ) {
   <button
-    *ngIf="
-      (facetAggregationSubject | async)?.hasMore && facetValuesFiltered?.length < MAX_FACET_COUNT
-    "
     mat-button
     color="primary"
     (click)="onLoadMore()"
@@ -40,7 +43,11 @@
     class="load-more-button"
   >
     {{ 'LOAD_MORE' | translate }}
-    <i *ngIf="!isLoading" esIcon="keyboard_arrow_down"></i>
-    <es-spinner-small *ngIf="isLoading" class="spinner"></es-spinner-small>
+    @if (!isLoading) {
+    <i esIcon="keyboard_arrow_down"></i>
+    } @if (isLoading) {
+    <es-spinner-small class="spinner"></es-spinner-small>
+    }
   </button>
+  }
 </es-mds-editor-widget-container>

@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } from '@angular/core';
 import { MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { UIAnimation, VCard } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
@@ -28,6 +28,14 @@ import { Values } from '../../../../mds/types/types';
     standalone: false,
 })
 export class SimpleEditLicenseComponent implements OnInit {
+    private nodeApi = inject(RestNodeService);
+    private connector = inject(RestConnectorService);
+    private configService = inject(ConfigurationService);
+    private iamApi = inject(RestIamService);
+    private nodeHelper = inject(NodeHelperService);
+    private organizationApi = inject(RestOrganizationService);
+    private toast = inject(Toast);
+
     @ViewChild('modeGroup') modeGroup: MatButtonToggleGroup;
     @ViewChild('licenseGroup') licenseGroup: MatButtonToggleGroup;
     @Input() fromUpload: boolean;
@@ -52,15 +60,7 @@ export class SimpleEditLicenseComponent implements OnInit {
             this.prepare(true);
         }
     }
-    constructor(
-        private nodeApi: RestNodeService,
-        private connector: RestConnectorService,
-        private configService: ConfigurationService,
-        private iamApi: RestIamService,
-        private nodeHelper: NodeHelperService,
-        private organizationApi: RestOrganizationService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.configService
             .get('simpleEdit.licenses', ['NONE', 'COPYRIGHT_FREE', 'CC_BY', 'CC_0'])
             .subscribe((licenses) => (this.allowedLicenses = licenses));

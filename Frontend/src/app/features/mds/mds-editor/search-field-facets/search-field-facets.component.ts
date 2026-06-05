@@ -8,6 +8,7 @@ import {
     Output,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { FacetsDict } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -33,6 +34,8 @@ interface InitInfo {
     standalone: false,
 })
 export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+
     @ViewChild('suggestionsPanel', { static: true }) suggestionsPanel: TemplateRef<any>;
 
     /** The repository to which the metadata set to be used belongs. */
@@ -70,8 +73,6 @@ export class SearchFieldFacetsComponent implements OnInit, OnDestroy {
     views: MdsView[];
     private readonly initInfoSubject = new rxjs.BehaviorSubject<Partial<InitInfo>>({});
     private readonly destroyed$ = new Subject<void>();
-
-    constructor(private mdsEditorInstance: MdsEditorInstanceService) {}
 
     ngOnInit(): void {
         this.mdsEditorInstance._new_valuesChange.subscribe((values) => {

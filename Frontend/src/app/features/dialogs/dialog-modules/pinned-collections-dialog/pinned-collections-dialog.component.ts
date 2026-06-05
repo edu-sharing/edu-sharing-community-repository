@@ -1,5 +1,5 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DialogButton,
@@ -27,21 +27,21 @@ import {
     standalone: false,
 })
 export class PinnedCollectionsDialogComponent {
+    data = inject<PinnedCollectionsDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<PinnedCollectionsDialogData, PinnedCollectionsDialogResult>>(
+            CardDialogRef,
+        );
+    private collection = inject(RestCollectionService);
+    private node = inject(RestNodeService);
+    private search = inject(RestSearchService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     pinnedCollections: Node[];
     checked: string[] = [];
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: PinnedCollectionsDialogData,
-        private dialogRef: CardDialogRef<
-            PinnedCollectionsDialogData,
-            PinnedCollectionsDialogResult
-        >,
-        private collection: RestCollectionService,
-        private node: RestNodeService,
-        private search: RestSearchService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.init();
         this.initButtons();
     }

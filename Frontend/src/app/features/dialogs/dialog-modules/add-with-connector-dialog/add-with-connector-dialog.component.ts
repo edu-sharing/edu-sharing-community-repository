@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { Connector } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { delay, filter, first } from 'rxjs/operators';
@@ -21,6 +21,16 @@ import { CordovaService } from '../../../../services/cordova.service';
     standalone: false,
 })
 export class AddWithConnectorDialogComponent {
+    data = inject<AddWithConnectorDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<AddWithConnectorDialogData, AddWithConnectorDialogResult>>(
+            CardDialogRef,
+        );
+    private cordova = inject(CordovaService);
+    private translate = inject(TranslateService);
+    private uiService = inject(UIService);
+    private formatDatePipe = inject(FormatDatePipe);
+
     @ViewChild(MdsEditorWrapperComponent) mdsEditorRef: MdsEditorWrapperComponent;
     readonly connector = this.processConnector(this.data.connector);
     private nameSubject = new BehaviorSubject<string>(this.data.name ?? '');
@@ -32,13 +42,7 @@ export class AddWithConnectorDialogComponent {
     }
     type = 0;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: AddWithConnectorDialogData,
-        private dialogRef: CardDialogRef<AddWithConnectorDialogData, AddWithConnectorDialogResult>,
-        private cordova: CordovaService,
-        private translate: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         void this.initDialogConfig();
     }
 
@@ -63,7 +67,7 @@ export class AddWithConnectorDialogComponent {
                         this.connector.mdsGroup +
                         ' requires exactly one required widget to be used for the name/title!',
                 );
-                this.name = new FormatDatePipe(this.translate).transform(new Date(), {
+                this.name = this.formatDatePipe.transform(new Date(), {
                     relative: false,
                     time: true,
                     date: true,

@@ -1,12 +1,12 @@
 import {
     Component,
     ElementRef,
-    Inject,
     Input,
     OnDestroy,
     signal,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -41,11 +41,12 @@ import { RenderWrapperComponent } from '../../../../pages/render2-page/render-wr
     standalone: true,
 })
 export class NodePreviewMediaDialogComponent {
+    data = inject<NodePreviewMediaDialogData>(CARD_DIALOG_DATA);
+
     node = signal<Node>(null);
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodePreviewMediaDialogData,
-        viewContainerRef: ViewContainerRef,
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.node.set(data.node);
     }
 }

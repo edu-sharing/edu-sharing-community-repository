@@ -8,6 +8,7 @@ import {
     NgZone,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
@@ -41,6 +42,24 @@ import { PlatformLocation } from '@angular/common';
     standalone: false,
 })
 export class AppComponent implements OnInit, DoCheck, AfterViewInit {
+    private appContainer = inject(AppContainerService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private mainNavService = inject(MainNavService);
+    private dialogs = inject(ManagementDialogsService);
+    private ngZone = inject(NgZone);
+    private bridge = inject(BridgeService);
+    private injector = inject(Injector);
+    private accessibilityService = inject(AccessibilityService);
+    private ui = inject(UIService);
+    private translations = inject(TranslationsService);
+    private loadingScreen = inject(LoadingScreenService);
+    private licenseAgreement = inject(LicenseAgreementService);
+    private themeService = inject(ThemeService);
+    private authentication = inject(AuthenticationService);
+    private configuration = inject(ConfigurationService);
+    private scrollPositionRestoration = inject(ScrollPositionRestorationService);
+    private legacyRestService = inject(RestNetworkService);
+
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
     static history = new BehaviorSubject<string[]>([]);
@@ -94,25 +113,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
         // console.log(event);
     }
 
-    constructor(
-        private appContainer: AppContainerService,
-        private elementRef: ElementRef<HTMLElement>,
-        private mainNavService: MainNavService,
-        private dialogs: ManagementDialogsService,
-        private ngZone: NgZone,
-        private bridge: BridgeService,
-        private injector: Injector,
-        private accessibilityService: AccessibilityService,
-        private ui: UIService,
-        private translations: TranslationsService,
-        private loadingScreen: LoadingScreenService,
-        private licenseAgreement: LicenseAgreementService,
-        private themeService: ThemeService,
-        private authentication: AuthenticationService,
-        private configuration: ConfigurationService,
-        private scrollPositionRestoration: ScrollPositionRestorationService,
-        private legacyRestService: RestNetworkService,
-    ) {
+    constructor() {
         this.injector.get(Router).events.subscribe((event) => {
             // if (event instanceof NavigationStart) {
             //     console.log('NavigationStart', event.url);

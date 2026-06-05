@@ -9,6 +9,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -46,6 +47,14 @@ type SuggestionResult = SuggestionGroup[] | 'NO_RECENT' | 'NO_MATCHES';
     standalone: false,
 })
 export class AuthoritySearchInputComponent implements AfterViewInit, OnChanges {
+    private iam = inject(RestIamService);
+    private organization = inject(RestOrganizationService);
+    private restConnector = inject(RestConnectorService);
+    private namePipe = inject(PermissionNamePipe);
+    private authenticationService = inject(AuthenticationService);
+    private nodeHelper = inject(NodeHelperService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     @ViewChild('inputElement') inputElement: ElementRef<HTMLInputElement>;
 
     private _globalSearchAllowed = false;
@@ -91,15 +100,7 @@ export class AuthoritySearchInputComponent implements AfterViewInit, OnChanges {
     suggestionGroups$: Observable<SuggestionResult>;
     suggestionLoading = new BehaviorSubject<boolean>(false);
 
-    constructor(
-        private iam: RestIamService,
-        private organization: RestOrganizationService,
-        private restConnector: RestConnectorService,
-        private namePipe: PermissionNamePipe,
-        private authenticationService: AuthenticationService,
-        private nodeHelper: NodeHelperService,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {
+    constructor() {
         this.suggestionGroups$ = this.input.valueChanges.pipe(
             startWith(''),
             debounceTime(500),

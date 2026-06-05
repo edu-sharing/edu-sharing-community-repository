@@ -9,6 +9,7 @@ import {
     Signal,
     ViewChild,
     ViewChildren,
+    inject,
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
@@ -97,6 +98,27 @@ import { NodeHelperService } from '../../../services/node-helper.service';
     providers: [OptionsHelperDataService],
 })
 export class SubmitAssignmentComponent implements OnDestroy {
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private editorialPageService = inject(EditorialPageService);
+    private nodeHelperService = inject(NodeHelperService);
+    private translateService = inject(TranslateService);
+    private platformLocation = inject(PlatformLocation);
+    private nodeService = inject(NodeService);
+    private assignmentService = inject(AssignmentV1Service);
+    private dialogs = inject(DialogsService);
+    private translationsService = inject(TranslationsService);
+    private toast = inject(Toast);
+    private repoUrlService = inject(RepoUrlService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private formBuilder = inject(FormBuilder);
+    private uiService = inject(UIService);
+    private restConnectorsService = inject(RestConnectorsService);
+    private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
+    private nodeTitlePipe = inject(NodeTitlePipe);
+
     @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
@@ -194,27 +216,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         () => new Set(this.connectorPolling().keys()),
     );
 
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private editorialBreadcrumbService: EditorialBreadcrumbService,
-        private editorialSidebarService: EditorialSidebarService,
-        private editorialPageService: EditorialPageService,
-        private nodeHelperService: NodeHelperService,
-        private translateService: TranslateService,
-        private platformLocation: PlatformLocation,
-        private nodeService: NodeService,
-        private assignmentService: AssignmentV1Service,
-        private dialogs: DialogsService,
-        private translationsService: TranslationsService,
-        private toast: Toast,
-        private repoUrlService: RepoUrlService,
-        private optionsHelperService: OptionsHelperService,
-        private assignmentFileOptionsHelper: OptionsHelperDataService,
-        private formBuilder: FormBuilder,
-        private uiService: UIService,
-        private restConnectorsService: RestConnectorsService,
-    ) {
+    constructor() {
         this.initOptions();
         effect(() => {
             const node = this.selectedAssignmentFile();
@@ -330,7 +332,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                     },
                 },
                 {
-                    title: new NodeTitlePipe(this.translateService).transform(
+                    title: this.nodeTitlePipe.transform(
                         this.selectedCorrectedFile() || this.selectedAssignmentFile(),
                     ),
                 },
@@ -607,7 +609,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 if (!submission) {
                     return;
                 }
-                const title = new NodeTitlePipe(this.translateService).transform(n);
+                const title = this.nodeTitlePipe.transform(n);
                 const result = await firstValueFrom(
                     (
                         await this.dialogs.openGenericDialog({

@@ -3,7 +3,7 @@
 
 @mixin tabLayout2Line() {
     mat-tab-header {
-        --mdc-secondary-navigation-tab-container-height: 55px;
+        --mat-tab-container-height: 55px;
     }
     .mdc-tab__text-label {
         display: flex;
@@ -92,7 +92,7 @@
 
 // search tab related styles
 :host ::ng-deep .search-field {
-    --mdc-outlined-text-field-container-shape: 28px;
+    --mat-form-field-outlined-container-shape: 28px;
     width: 100%;
 }
 

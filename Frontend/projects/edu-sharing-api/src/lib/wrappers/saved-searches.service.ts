@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, startWith, switchMap, take, tap } from 'rxjs/operators';
 import { SearchV1Service } from '../api/services';
@@ -31,14 +31,16 @@ export interface SavedSearch {
     providedIn: 'root',
 })
 export class SavedSearchesService {
+    private search = inject(SearchService);
+    private node = inject(NodeService);
+    private searchV1 = inject(SearchV1Service);
+
     private readonly updateMySavedSearchesTrigger = new Subject<void>();
     private readonly mySavedSearches = this.getMySavedSearchesObservable();
 
-    constructor(
-        private search: SearchService,
-        private node: NodeService,
-        private searchV1: SearchV1Service,
-    ) {
+    constructor() {
+        const node = this.node;
+
         node.nodesChanged.subscribe(() => this.updateMySavedSearchesTrigger.next());
     }
 

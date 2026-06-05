@@ -1,6 +1,9 @@
-<es-info-message *ngIf="$any(editorType) === 'legacy'" mode="warning"
-  >Legacy mds not supported anymore</es-info-message
->
-<es-mds-editor-embedded *ngIf="editorType === 'angular' && embedded"></es-mds-editor-embedded>
-<es-spinner *ngIf="isLoading && embedded"></es-spinner>
-<es-global-progress *ngIf="isLoading && !embedded"></es-global-progress>
+@if ($any(editorType) === 'legacy') {
+<es-info-message mode="warning">Legacy mds not supported anymore</es-info-message>
+} @if (editorType === 'angular' && embedded) {
+<es-mds-editor-embedded></es-mds-editor-embedded>
+} @if (isLoading && embedded) {
+<es-spinner></es-spinner>
+} @if (isLoading && !embedded) {
+<es-global-progress></es-global-progress>
+}

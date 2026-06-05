@@ -14,9 +14,11 @@
     [currentValues]="templateNode?.properties ?? {}"
     [class.display-none]="!enabled"
   ></es-mds-editor-wrapper>
-  <div *ngIf="!enabled" class="template-disabled">
+  @if (!enabled) {
+  <div class="template-disabled">
     <div class="disabled-info" data-i18n="[html]content.body">
       {{ 'WORKSPACE.NODE_TEMPLATE.STATUS_DISABLED' | translate }}
     </div>
   </div>
+  }
 </div>

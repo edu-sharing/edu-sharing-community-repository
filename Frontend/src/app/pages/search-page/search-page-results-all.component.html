@@ -6,8 +6,8 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
 
 <!-- [initConfig]="{ actionbar, customOptions: { removeOptions: ['OPTIONS.SWITCH_TO_LIST_VIEW']} }" -->
 
+@if (addToCollectionMode.value; as addToCollection) {
 <es-small-collection
-  *ngIf="addToCollectionMode.value as addToCollection"
   class="add-to-collection-banner"
   [collection]="addToCollection.collection"
   [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
@@ -18,10 +18,9 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
     backgroundType="primary"
   ></es-actionbar>
 </es-small-collection>
-
+} @for (repo of repoData | async; track repo) {
 <es-node-entries-wrapper
   #wrapper
-  *ngFor="let repo of repoData | async"
   [class.display-none]="repo.dataSource.isEmpty()"
   class="entries-wrapper"
   [dataSource]="repo.dataSource"
@@ -43,30 +42,24 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
     <div class="title-container">
       <h2 class="mat-heading-2">
         {{ repo.title }}
-        <ng-container *ngIf="!repo.dataSource.isLoading; else smallLoadingSpinner">
-          ({{ repo.dataSource.getTotal() }})
-        </ng-container>
+        @if (!repo.dataSource.isLoading) { ({{ repo.dataSource.getTotal() }}) } @else {
+        <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
+        }
       </h2>
-      <a
-        *ngIf="repo.dataSource.getTotal() > repo.dataSource.getData().length"
-        mat-button
-        [routerLink]="['..']"
-        [queryParams]="getShowMoreQueryParams(repo.id)"
-      >
+      @if (repo.dataSource.getTotal() > repo.dataSource.getData().length) {
+      <a mat-button [routerLink]="['..']" [queryParams]="getShowMoreQueryParams(repo.id)">
         {{ 'SHOW_MORE' | translate }}
         <i esIcon="keyboard_arrow_right"></i>
       </a>
+      }
     </div>
   </ng-template>
 </es-node-entries-wrapper>
-
-<es-spinner *ngIf="(loadingProgress | async) < 100"></es-spinner>
-
-<div *ngIf="allEmpty" class="no-search-results-message">
+} @if ((loadingProgress | async) < 100) {
+<es-spinner></es-spinner>
+} @if (allEmpty) {
+<div class="no-search-results-message">
   <i esIcon="search"></i>
   {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
 </div>
-
-<ng-template #smallLoadingSpinner>
-  <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>
-</ng-template>
+}

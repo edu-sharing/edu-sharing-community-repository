@@ -15,6 +15,7 @@ import {
     Output,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -104,6 +105,45 @@ export type SpecialRenderTemplate = 'revoked' | null;
     animations: [trigger('fadeFast', UIAnimation.fade(UIAnimation.ANIMATION_TIME_FAST))],
 })
 export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+    private uiService = inject(UIService);
+    private nodeHelper = inject(NodeHelperService);
+    private renderHelper = inject(RenderHelperService);
+    private location = inject(Location);
+    private mdsEditorInstanceService = inject(MdsEditorInstanceService);
+    private viewInstanceService = inject(ViewInstanceService);
+    private connector = inject(RestConnectorService);
+    private connectors = inject(RestConnectorsService);
+    private iam = inject(RestIamService);
+    private mdsService = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private searchApi = inject(RestSearchService);
+    private toolService = inject(RestToolService);
+    private injector = inject(Injector);
+    private cardServcie = inject(CardService);
+    private viewContainerRef = inject(ViewContainerRef);
+    private componentFactoryResolver = inject(ComponentFactoryResolver);
+    private cardDialogService = inject(CardDialogService);
+    private dialogsService = inject(DialogsService);
+    private frame = inject(FrameEventsService);
+    private toast = inject(Toast);
+    private configLegacy = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private route = inject(ActivatedRoute);
+    private networkServiceLegacy = inject(RestNetworkService);
+    private networkService = inject(NetworkService);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private router = inject(Router);
+    private platformLocation = inject(PlatformLocation);
+    private optionsHelper = inject(OptionsHelperDataService);
+    private loadingScreen = inject(LoadingScreenService);
+    mainNavService = inject(MainNavService);
+    private temporaryStorageService = inject(TemporaryStorageService);
+    private localEvents = inject(LocalEventsService);
+
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     specialTemplate: SpecialRenderTemplate;
@@ -113,47 +153,9 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
         this._nodeId = id;
         void this.loadRenderData();
     }
-    constructor(
-        private translate: TranslateService,
-        private translations: TranslationsService,
-        private uiService: UIService,
-        private nodeHelper: NodeHelperService,
-        private renderHelper: RenderHelperService,
-        private location: Location,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-        private viewInstanceService: ViewInstanceService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private iam: RestIamService,
-        private mdsService: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private nodeApi: RestNodeService,
-        private nodeService: NodeService,
-        private searchApi: RestSearchService,
-        private toolService: RestToolService,
-        private injector: Injector,
-        private cardServcie: CardService,
-        private viewContainerRef: ViewContainerRef,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private cardDialogService: CardDialogService,
-        private dialogsService: DialogsService,
-        private frame: FrameEventsService,
-        private toast: Toast,
-        private configLegacy: ConfigurationService,
-        private configService: ConfigService,
-        private route: ActivatedRoute,
-        private networkServiceLegacy: RestNetworkService,
-        private networkService: NetworkService,
-        private breadcrumbsService: BreadcrumbsService,
-        _ngZone: NgZone,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-        private optionsHelper: OptionsHelperDataService,
-        private loadingScreen: LoadingScreenService,
-        public mainNavService: MainNavService,
-        private temporaryStorageService: TemporaryStorageService,
-        private localEvents: LocalEventsService,
-    ) {
+    constructor() {
+        const _ngZone = inject(NgZone);
+
         (window as any).nodeRenderComponentRef = { component: this, zone: _ngZone };
         (window as any).ngRender = {
             setDownloadUrl: (url: string) => {

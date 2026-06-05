@@ -1,43 +1,55 @@
-<div *ngFor="let item of progress" class="group">
+@for (item of progress; track item) {
+<div class="group">
   <div class="icon">
     <i class="material-icons">upload</i>
   </div>
   <div class="center">
     <div class="fileName">{{ item.name }}</div>
-    <div class="loading" *ngIf="item.progress.progress >= 0 && item.progress.progress < 100"></div>
-    <div class="progress" *ngIf="item">
+    @if (item.progress.progress >= 0 && item.progress.progress < 100) {
+    <div class="loading"></div>
+    } @if (item) {
+    <div class="progress">
       <div
         class="determinate"
         [class.determinate-finished]="item.progress.progress >= 100"
         [style.width]="item.progress.progress + '%'"
       ></div>
     </div>
+    }
     <div class="info" [style.visibility]="item.progress.loaded || item.error ? '' : 'hidden'">
-      <span class="info-error" *ngIf="item.error">{{
+      @if (item.error) {
+      <span class="info-error">{{
         'WORKSPACE.UPLOAD_ERROR.' + item.error.key | translate : item.error.variables
       }}</span>
-      <div *ngIf="item.progress.loaded">
-        <span *ngIf="item.progress.remaining > 1">{{
+      } @if (item.progress.loaded) {
+      <div>
+        @if (item.progress.remaining > 1) {
+        <span>{{
           'WORKSPACE.UPLOAD_REMAINING' | translate : { time: item.progress.remaining | formatTime }
         }}</span>
-        <span *ngIf="item.progress.remaining <= 1">{{
-          'WORKSPACE.UPLOAD_FINISHING' | translate
-        }}</span>
+        } @if (item.progress.remaining <= 1) {
+        <span>{{ 'WORKSPACE.UPLOAD_FINISHING' | translate }}</span>
+        }
         <span class="size"
           >({{ item.progress.loaded | formatSize }} / {{ item.progress.total | formatSize }})</span
         >
       </div>
+      }
     </div>
   </div>
   <div class="right">
-    <div class="done success" *ngIf="!item.progress.loaded && item.progress.progress >= 100">
+    @if (!item.progress.loaded && item.progress.progress >= 100) {
+    <div class="done success">
       <i class="material-icons">done</i>
     </div>
-    <div class="done failed" *ngIf="!item.progress.loaded && item.progress.progress < 0">
+    } @if (!item.progress.loaded && item.progress.progress < 0) {
+    <div class="done failed">
       <i class="material-icons">close</i>
     </div>
+    }
   </div>
 </div>
+}
 
 <ng-template #existingFiles let-multiple>
   <mat-radio-group class="existing-radio-group" [(ngModel)]="keep">

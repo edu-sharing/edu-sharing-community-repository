@@ -1,5 +1,5 @@
+@if (request() && node()) {
 <rs-root
-  *ngIf="request() && node()"
   [node]="node()"
   [request]="request()"
   [serviceWorkerUrl]="serviceWorkerUrl"
@@ -8,22 +8,20 @@
   [isWebComponent]="true"
 >
 </rs-root>
-<div class="inline-metadata" *ngIf="display_mode === 'inline' && node()">
+} @if (display_mode === 'inline' && node()) {
+<div class="inline-metadata">
   <div>
     <a [href]="resourceUrl" [target]="targetBlank ? '_blank' : '_self'">{{
       node().title || node().name
     }}</a>
     {{ 'RENDERING.AUTHORED_BY' | translate }} {{ getAuthors() }}
-    <ng-container *ngIf="node().license as license">
-      <ng-container *ngIf="license.url; else noLink">
-        <a [href]="license.url" target="_blank" rel="noopener">
-          <img class="license-img" [src]="license.icon" alt="License icon" />
-        </a>
-      </ng-container>
-      <ng-template #noLink>
-        <img class="license-img" [src]="license.icon" alt="License icon" />
-      </ng-template>
-    </ng-container>
+    @if (node().license; as license) { @if (license.url) {
+    <a [href]="license.url" target="_blank" rel="noopener">
+      <img class="license-img" [src]="license.icon" alt="License icon" />
+    </a>
+    } @else {
+    <img class="license-img" [src]="license.icon" alt="License icon" />
+    } }
   </div>
   <button
     mat-icon-button
@@ -58,4 +56,5 @@
     </div>
   </ng-template>
 </div>
+}
 <!-- <rs-module-pdf #pdf></rs-module-pdf> -->

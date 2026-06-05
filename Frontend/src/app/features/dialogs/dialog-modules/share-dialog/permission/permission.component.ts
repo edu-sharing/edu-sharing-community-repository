@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/core.module';
 import { ExtendedAce } from '../share-dialog.component';
@@ -12,13 +12,14 @@ import { Helper, Toast } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class ShareDialogPermissionComponent implements OnInit {
+    private authenticationService = inject(AuthenticationService);
+    private toast = inject(Toast);
+
     public _permission: ExtendedAce = null;
     public invalidPermission = false;
     public isEveryone: boolean;
     permissionTimebased: boolean;
     timebased: ExtendedAce;
-
-    constructor(private authenticationService: AuthenticationService, private toast: Toast) {}
 
     async ngOnInit() {
         this.permissionTimebased = await this.authenticationService.hasToolpermission(

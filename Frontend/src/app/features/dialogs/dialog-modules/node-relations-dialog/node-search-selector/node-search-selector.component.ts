@@ -8,6 +8,7 @@ import {
     Output,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
 import { UntypedFormControl } from '@angular/forms';
@@ -41,6 +42,14 @@ type Status = {
     standalone: false,
 })
 export class NodeSearchSelectorComponent implements AfterViewInit {
+    private searchApi = inject(RestSearchService);
+    private mdsService = inject(MdsService);
+    private translate = inject(TranslateService);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeHelper = inject(NodeHelperService);
+    private searchHelperService = inject(SearchHelperService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     @ContentChild('noPermissions') noPermissionsRef: TemplateRef<any>;
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;
     /**
@@ -80,16 +89,6 @@ export class NodeSearchSelectorComponent implements AfterViewInit {
     showMds = false;
     private values: { [p: string]: string[] };
     hasMds = false;
-
-    constructor(
-        private searchApi: RestSearchService,
-        private mdsService: MdsService,
-        private translate: TranslateService,
-        private mdsHelperService: MdsHelperService,
-        private nodeHelper: NodeHelperService,
-        private searchHelperService: SearchHelperService,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {}
 
     setOption(event: MatAutocompleteSelectedEvent) {
         this.selectNode.emit(event.option.value);

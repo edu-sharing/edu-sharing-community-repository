@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { LocalEventsService, ValueType } from 'ngx-edu-sharing-ui';
@@ -20,6 +20,9 @@ export class MdsEditorWidgetLinkComponent
     extends MdsEditorWidgetBase
     implements OnInit, NativeWidgetComponent
 {
+    private dialogs = inject(DialogsService);
+    private localEvents = inject(LocalEventsService);
+
     static readonly constraints: Constraints = {
         supportsInlineEditing: true,
         requiresNode: true,
@@ -33,14 +36,8 @@ export class MdsEditorWidgetLinkComponent
     // caption: string; // Could use as label.
     linkLabel: string;
 
-    constructor(
-        public toast: Toast,
-        public translate: TranslateService,
-        public mdsEditorValues: MdsEditorInstanceService,
-        private dialogs: DialogsService,
-        private localEvents: LocalEventsService,
-    ) {
-        super(toast, mdsEditorValues, translate);
+    constructor() {
+        super();
     }
     ngOnInit(): void {
         switch (this.widgetName) {
@@ -55,16 +52,16 @@ export class MdsEditorWidgetLinkComponent
 
     async onClick() {
         if (this.widgetName === 'maptemplate') {
-            const nodes = await this.mdsEditorValues.save();
+            const nodes = await this.mdsEditorInstance.save();
             if (Array.isArray(nodes)) {
                 this.localEvents.nodesChanged.emit(nodes);
             }
             void this.dialogs.openNodeTemplateDialog({
-                node: this.mdsEditorValues.nodes$.value[0],
+                node: this.mdsEditorInstance.nodes$.value[0],
             });
         } else if (this.widgetName === 'contributor') {
             await MdsEditorWidgetAuthorComponent.openContributorDialog(
-                this.mdsEditorValues,
+                this.mdsEditorInstance,
                 this.dialogs,
             );
         } else {

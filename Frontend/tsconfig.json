@@ -34,7 +34,7 @@
       // import { Node } from 'ngx-edu-sharing-api'; // Yes!
       // ```
       "projects/*": [
-        "",
+        ""
       ],
       "@angular/*": [
         "./node_modules/@angular/*"
@@ -49,9 +49,13 @@
     "esModuleInterop": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
     "module": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "target": "es2022",

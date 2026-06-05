@@ -8,6 +8,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import * as rxjs from 'rxjs';
@@ -47,6 +48,12 @@ import { canDropOnNode } from '../workspace-utils';
     standalone: false,
 })
 export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
+    private nodeApi = inject(RestNodeService);
+    private optionsService = inject(OptionsHelperDataService);
+    entriesService = inject<NodeEntriesService<Node>>(NodeEntriesService);
+    private localEvents = inject(LocalEventsService);
+    ui = inject(UIService);
+
     readonly Target = Target;
     private static MAX_FOLDER_COUNT = 100;
 
@@ -94,14 +101,6 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     /** IDs of child nodes of the node rendered by this sub tree, that should be expanded. */
     private expandedNodes: string[] = [];
     private destroyed = new Subject<void>();
-
-    constructor(
-        private nodeApi: RestNodeService,
-        private optionsService: OptionsHelperDataService,
-        public entriesService: NodeEntriesService<Node>,
-        private localEvents: LocalEventsService,
-        public ui: UIService,
-    ) {}
 
     ngOnInit(): void {
         rxjs.merge(this.localEvents.nodesChanged, this.localEvents.nodesDeleted)

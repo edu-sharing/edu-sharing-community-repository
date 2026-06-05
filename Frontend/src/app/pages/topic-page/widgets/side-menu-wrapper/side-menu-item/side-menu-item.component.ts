@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     Component,
     EventEmitter,
@@ -14,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
     selector: 'es-side-menu-item',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [CommonModule, MatIcon, MatTooltipModule],
+    imports: [MatIcon, MatTooltipModule],
     templateUrl: './side-menu-item.component.html',
     styleUrls: ['./side-menu-item.component.scss'],
 })

@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { Node } from '../../../../../core-module/rest/data-object';
 import { Notification } from 'ngx-edu-sharing-api';
@@ -15,6 +15,8 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     standalone: false,
 })
 export class NotificationListEntryComponent {
+    private uiService = inject(UIService);
+
     static readonly icons = {
         AddToCollectionEvent: 'layers',
         ProposeForCollectionEvent: 'layers',
@@ -37,7 +39,6 @@ export class NotificationListEntryComponent {
         timestamp: new Date().getTime(),
     };*/
     @Output() statusChange = new EventEmitter<'PENDING' | 'SENT' | 'READ'>();
-    constructor(private uiService: UIService) {}
 
     getIcon() {
         return (NotificationListEntryComponent.icons as any)[this.entry._class];

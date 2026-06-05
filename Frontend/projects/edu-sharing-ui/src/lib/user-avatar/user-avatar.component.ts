@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -20,6 +20,12 @@ import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
     imports: [TranslateModule, EduSharingUiCommonModule, CommonModule],
 })
 export class UserAvatarComponent {
+    private router = inject(Router);
+    private translate = inject(TranslateService);
+    private authenticationService = inject(AuthenticationService);
+    private sanitizer = inject(DomSanitizer);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     /**
      * Automatically link to the given user profile
      * @type {boolean}
@@ -57,12 +63,6 @@ export class UserAvatarComponent {
         }
         this._customImage = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(customImage));
     }
-    constructor(
-        private router: Router,
-        private translate: TranslateService,
-        private authenticationService: AuthenticationService,
-        private sanitizer: DomSanitizer,
-    ) {}
     isEditorialUser() {
         return (
             this._user &&
@@ -84,7 +84,7 @@ export class UserAvatarComponent {
             map((info) =>
                 info?.isGuest
                     ? 'G'
-                    : new AuthorityNamePipe(this.translate).transform(user, {
+                    : this.authorityNamePipe.transform(user, {
                           avatarShortcut: true,
                       }),
             ),

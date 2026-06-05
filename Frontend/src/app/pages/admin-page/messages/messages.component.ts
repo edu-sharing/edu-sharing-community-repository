@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, OnInit, signal, ViewChild, inject } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PluginStatus, RestConstants, UIService } from '../../../core-module/core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -34,6 +34,17 @@ import { Toast } from 'ngx-edu-sharing-ui';
     imports: [SharedModule, ContextNamePipe, EditorModule, ShareDialogModule],
 })
 export class AdminMessagesComponent implements OnInit {
+    private configV1Service = inject(ConfigV1Service);
+    private configService = inject(ConfigService);
+    private uiService = inject(UIService);
+    private platformLocation = inject(PlatformLocation);
+    private mainNavService = inject(MainNavService);
+    private translate = inject(TranslateService);
+    private dialogs = inject(DialogsService);
+    private toast = inject(Toast);
+    private sanitizer = inject(DomSanitizer);
+    private adminV1Service = inject(AdminV1Service);
+
     @ViewChild('heading') headingRef: ElementRef;
     selectedContexts = signal<Context[]>([]);
     contexts = signal<Context[]>([]);
@@ -88,18 +99,6 @@ export class AdminMessagesComponent implements OnInit {
     });
     editorConfig: any;
     message: string;
-    constructor(
-        private configV1Service: ConfigV1Service,
-        private configService: ConfigService,
-        private uiService: UIService,
-        private platformLocation: PlatformLocation,
-        private mainNavService: MainNavService,
-        private translate: TranslateService,
-        private dialogs: DialogsService,
-        private toast: Toast,
-        private sanitizer: DomSanitizer,
-        private adminV1Service: AdminV1Service,
-    ) {}
 
     async ngOnInit() {
         this.components.set(this.mainNavService.getAvailableScopes());

@@ -1,7 +1,5 @@
-<div
-  class="topBar fixed"
-  *ngIf="showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()"
->
+@if (showTopBar && !mainNavService.getMainNav()?.topBar?.isSidenavOpen()) {
+<div class="topBar fixed">
   <div class="displayBar">
     <div class="left">
       <button mat-button title="{{ 'BACK' | translate }}" (click)="close()">
@@ -10,14 +8,15 @@
       </button>
     </div>
     <div class="center">
+      @if (_node) {
       <button
         mat-button
-        *ngIf="_node"
         (click)="showDetails()"
         title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
       >
         <i esIcon="info"></i> <span class="hidemobile">{{ 'INFO' | translate }}</span>
       </button>
+      }
     </div>
     <div class="right">
       <es-actionbar
@@ -29,33 +28,32 @@
     </div>
   </div>
 </div>
-<div *ngIf="getPosition() !== -1">
-  <button
-    class="previous"
-    *ngIf="canSwitchBack()"
-    cdkMonitorElementFocus
-    (click)="switchPosition(-1)"
-  >
+} @if (getPosition() !== -1) {
+<div>
+  @if (canSwitchBack()) {
+  <button class="previous" cdkMonitorElementFocus (click)="switchPosition(-1)">
     <i esIcon="keyboard_arrow_left" [aria]="true"></i>
   </button>
-  <button
-    class="next"
-    *ngIf="canSwitchForward()"
-    cdkMonitorElementFocus
-    (click)="switchPosition(+1)"
-  >
+  } @if (canSwitchForward()) {
+  <button class="next" cdkMonitorElementFocus (click)="switchPosition(+1)">
     <i esIcon="keyboard_arrow_right" [aria]="true"></i>
   </button>
+  }
 </div>
+}
 <div>
   <div id="nodeRenderContentWrapper">
-    <div *ngIf="specialTemplate !== null" class="specialTemplate">
-      <div *ngIf="specialTemplate === 'revoked'" class="revoked">
+    @if (specialTemplate !== null) {
+    <div class="specialTemplate">
+      @if (specialTemplate === 'revoked') {
+      <div class="revoked">
         <h1>{{ _node | nodeTitle }}</h1>
         <rs-revoked [node]="_node"> </rs-revoked>
       </div>
+      }
     </div>
-    <div *ngIf="sequence" id="sequence" #sequencediv>
+    } @if (sequence) {
+    <div id="sequence" #sequencediv>
       <div
         class="wrapperouter clickable"
         tabindex="0"
@@ -67,8 +65,8 @@
           <img src="{{ sequenceParent.preview.url }}&crop=true&width=100&height=75" />
         </div>
       </div>
+      @for (item of sequence.nodes; track item; let i = $index) {
       <div
-        *ngFor="let item of sequence.nodes; let i = index"
         tabindex="0"
         class="wrapperouter clickable"
         (click)="viewChildobject(item, i)"
@@ -79,18 +77,17 @@
           <img src="{{ item.preview.url }}&crop=true&width=100&height=75" />
         </div>
       </div>
+      }
     </div>
-    <div class="scroller left clickable" *ngIf="canScrollLeft" (click)="scroll('left')" id="left">
+    } @if (canScrollLeft) {
+    <div class="scroller left clickable" (click)="scroll('left')" id="left">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </div>
-    <div
-      class="scroller right clickable"
-      *ngIf="canScrollRight"
-      (click)="scroll('right')"
-      id="right"
-    >
+    } @if (canScrollRight) {
+    <div class="scroller right clickable" (click)="scroll('right')" id="right">
       <i esIcon="keyboard_arrow_right" [aria]="true"></i>
     </div>
+    }
     <!-- Ideally, we would be be using the actual h1 headings for [esTitle], but since these are
     injected by the rendering service, we use a completely hidden element here. -->
     <h1 esTitle hidden class="display-none">{{ getNodeTitle(_node) }}</h1>
@@ -101,11 +98,12 @@
       (ngSwipeRight)="canSwitchBack() ? switchPosition(getPosition() - 1) : null"
       (ngSwipeLeft)="canSwitchForward() ? switchPosition(getPosition() + 1) : null"
     ></div>
-    <div class="nodeRenderLoading" *ngIf="isLoading">
+    @if (isLoading) {
+    <div class="nodeRenderLoading">
       <es-spinner></es-spinner>
     </div>
-
-    <div class="similarNodes" *ngIf="!similarNodes.isEmpty()">
+    } @if (!similarNodes.isEmpty()) {
+    <div class="similarNodes">
       <div class="caption">Ähnliche Objekte</div>
       <es-node-entries-wrapper
         [dataSource]="similarNodes"
@@ -116,6 +114,7 @@
       >
       </es-node-entries-wrapper>
     </div>
+    }
     <es-imprint-privacy [separator]="'/'"></es-imprint-privacy>
   </div>
 </div>

@@ -1,11 +1,11 @@
+@if (currentValue) {
 <es-mds-editor-widget-container
-  *ngIf="currentValue"
   [widget]="widget"
   [label]="widget.definition.caption"
   [valueType]="valueType"
 >
+  @if (isRange) {
   <ngx-slider
-    *ngIf="isRange"
     class="ngx-slider-small mds-slider"
     [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
     [value]="currentValue[0]"
@@ -13,11 +13,13 @@
     [options]="sliderOptions"
     (userChange)="updateValue($event)"
   ></ngx-slider>
+  } @if (!isRange) {
   <ngx-slider
-    *ngIf="!isRange"
     class="ngx-slider-small"
     [value]="currentValue[0]"
     [options]="sliderOptions"
     (userChange)="updateValue($event)"
   ></ngx-slider>
+  }
 </es-mds-editor-widget-container>
+}

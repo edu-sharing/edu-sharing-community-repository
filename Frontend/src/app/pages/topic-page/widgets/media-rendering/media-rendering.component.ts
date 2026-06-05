@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
@@ -16,6 +15,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -46,7 +46,6 @@ import { PreviewSidebarService } from '../../../../features/editorial-sidebar/pr
     selector: 'es-media-rendering',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
@@ -64,6 +63,12 @@ import { PreviewSidebarService } from '../../../../features/editorial-sidebar/pr
     styleUrls: ['./media-rendering.component.scss'],
 })
 export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
+    private highlightSearch = inject(HighlightSearchPipe);
+    private nodeTitlePipe = inject(NodeTitlePipe);
+    private previewSidebarService = inject(PreviewSidebarService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.';
 
@@ -127,13 +132,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
 
-    constructor(
-        private highlightSearch: HighlightSearchPipe,
-        private nodeTitlePipe: NodeTitlePipe,
-        private previewSidebarService: PreviewSidebarService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         // subscribe to changes on the selected node
         this.previewSidebarService
             .getCurrentNode()

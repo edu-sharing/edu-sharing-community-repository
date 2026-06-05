@@ -3,9 +3,11 @@
 </div>
 
 <!-- Manually hide the table to also hide the header when there are no elements. -->
-<div class="noElementsInfo noElements" *ngIf="list.isEmpty()">
+@if (list.isEmpty()) {
+<div class="noElementsInfo noElements">
   {{ 'SEARCH.NODE_STORE.LIST_EMPTY' | translate }}
 </div>
+}
 
 <es-node-entries-wrapper
   [class.display-none]="list.isEmpty()"

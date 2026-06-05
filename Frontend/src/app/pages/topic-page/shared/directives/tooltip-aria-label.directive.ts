@@ -6,6 +6,7 @@ import {
     OnInit,
     Renderer2,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 
 /**
@@ -18,12 +19,10 @@ import {
     standalone: true,
 })
 export class TooltipAriaLabelDirective implements OnInit, OnChanges {
-    @Input() matTooltip: string = '';
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private readonly renderer = inject(Renderer2);
 
-    constructor(
-        private readonly elementRef: ElementRef<HTMLElement>,
-        private readonly renderer: Renderer2,
-    ) {}
+    @Input() matTooltip: string = '';
 
     ngOnInit(): void {
         this.applyAriaLabel(this.matTooltip);

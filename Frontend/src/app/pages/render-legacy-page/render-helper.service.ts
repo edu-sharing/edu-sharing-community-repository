@@ -4,6 +4,7 @@ import {
     Injectable,
     SimpleChange,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
@@ -32,18 +33,20 @@ import { NodeHelperService } from '../../services/node-helper.service';
 
 @Injectable()
 export class RenderHelperService {
+    private componentFactoryResolver = inject(ComponentFactoryResolver);
+    private usageApi = inject(RestUsageService);
+    private uiService = inject(UIService);
+    private optionsHelperService = inject(OptionsHelperDataService);
+    private networkService = inject(NetworkService);
+    private tracking = inject(RestTrackingService);
+    private nodeHelperService = inject(NodeHelperService);
+
+    private static isCollectionRef(node: Node) {
+        return node.aspects.indexOf(RestConstants.CCM_ASPECT_IO_REFERENCE) !== -1;
+    }
+
     public videoControlsRef: ComponentRef<VideoControlsComponent>;
     private viewContainerRef: ViewContainerRef;
-
-    constructor(
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private usageApi: RestUsageService,
-        private uiService: UIService,
-        private optionsHelperService: OptionsHelperDataService,
-        private networkService: NetworkService,
-        private tracking: RestTrackingService,
-        private nodeHelperService: NodeHelperService,
-    ) {}
 
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;

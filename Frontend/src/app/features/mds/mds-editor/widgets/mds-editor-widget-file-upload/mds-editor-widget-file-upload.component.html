@@ -15,25 +15,31 @@
     (click)="link ? null : fileSelect.click()"
     (fileOver)="isFileOver = $event"
   >
-    <div *ngIf="selectedFiles.value?.length > 0">
+    @if (selectedFiles.value?.length > 0) {
+    <div>
       <div class="filename"><mat-icon>description</mat-icon> {{ selectedFiles.value[0].name }}</div>
       <es-mat-link (clickOnLink)="clearFile()">{{
         'WORKSPACE.ADD_OBJECT_RESET' | translate
       }}</es-mat-link>
     </div>
-    <div *ngIf="!selectedFiles.value && !link">
+    } @if (!selectedFiles.value && !link) {
+    <div>
       <div><i esIcon="cloud_upload"></i></div>
-      <div *ngIf="supportsDrop">
+      @if (supportsDrop) {
+      <div>
         {{ 'WORKSPACE.ADD_OBJECT_MESSAGE' | translate }}
         <es-mat-link (clickOnLink)="fileSelect.click()">{{
           'WORKSPACE.ADD_OBJECT_BROWSE' | translate
         }}</es-mat-link>
       </div>
+      }
     </div>
-    <div *ngIf="link">
+    } @if (link) {
+    <div>
       <div><i esIcon="cloud_off"></i></div>
       <div>{{ 'WORKSPACE.ADD_OBJECT_LINK_SELECTED' | translate }}</div>
     </div>
+    }
   </div>
   <div class="separator-line uppercase">{{ 'WORKSPACE.SELECT_ORG' | translate }}</div>
   <div class="link">

@@ -6,8 +6,10 @@
   [control]="formArray"
   [wrapInFormField]="false"
 >
-  <ul *ngIf="formArray" [formGroup]="$any(formArray)" class="checkboxes-group" [class]="mode">
-    <li *ngFor="let control of formArray.controls; let i = index">
+  @if (formArray) {
+  <ul [formGroup]="$any(formArray)" class="checkboxes-group" [class]="mode">
+    @for (control of formArray.controls; track control; let i = $index) {
+    <li>
       <mat-checkbox
         [formControlName]="i"
         [indeterminate]="indeterminateValues[i]"
@@ -23,5 +25,7 @@
         </span>
       </mat-checkbox>
     </li>
+    }
   </ul>
+  }
 </es-mds-editor-widget-container>

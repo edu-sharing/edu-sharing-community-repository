@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Values } from 'ngx-edu-sharing-ui';
 import { RestConstants } from 'src/app/core-module/core.module';
@@ -10,10 +10,9 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
     standalone: false,
 })
 export class LicenseAiPipe implements PipeTransform {
-    constructor(
-        private translate: TranslateService,
-        private mdsEditorInstanceService: MdsEditorInstanceService,
-    ) {}
+    private translate = inject(TranslateService);
+    private mdsEditorInstanceService = inject(MdsEditorInstanceService);
+
     transform(properties: Values) {
         let value = [];
         if (properties[RestConstants.CCM_PROP_LICENSE_AI_ALLOW_USAGE]?.[0] === 'false') {

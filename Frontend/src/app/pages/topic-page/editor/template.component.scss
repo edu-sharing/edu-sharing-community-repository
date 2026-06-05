@@ -13,7 +13,7 @@
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
     // overwrite border radius for template page
-    --mdc-fab-small-container-shape: 4px;
+    --mat-fab-small-container-shape: 4px;
     display: flex;
     flex-direction: column;
 }
@@ -65,9 +65,9 @@ es-side-menu-wrapper {
         }
 
         mat-radio-button.mat-mdc-radio-button .mdc-radio {
-            --mdc-radio-state-layer-size: 36px;
+            --mat-radio-state-layer-size: 36px;
         }
-        --mdc-checkbox-state-layer-size: 36px;
+        --mat-checkbox-state-layer-size: 36px;
     }
 }
 

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { FormatSizePipe } from 'ngx-edu-sharing-ui';
 import {
@@ -31,6 +31,17 @@ import { Node, NodeService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class FileUploadProgressDialogComponent implements OnInit {
+    data = inject<FileUploadProgressDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<FileUploadProgressDialogData, FileUploadProgressDialogResult>>(
+            CardDialogRef,
+        );
+    private nodeService = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    private dialogs = inject(DialogsService);
+    private translate = inject(TranslateService);
+    private formatSizePipe = inject(FormatSizePipe);
+
     progress: {
         name: string;
         progress: UploadProgress;
@@ -42,18 +53,6 @@ export class FileUploadProgressDialogComponent implements OnInit {
     processed = 0;
     keep = true;
     @ViewChild('existingFiles') existingFilesRef: TemplateRef<undefined>;
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: FileUploadProgressDialogData,
-        private dialogRef: CardDialogRef<
-            FileUploadProgressDialogData,
-            FileUploadProgressDialogResult
-        >,
-        private nodeService: RestNodeService,
-        private nodeApi: NodeService,
-        private dialogs: DialogsService,
-        private translate: TranslateService,
-    ) {}
 
     ngOnInit(): void {
         this.dialogRef.patchConfig({
@@ -282,12 +281,8 @@ export class FileUploadProgressDialogComponent implements OnInit {
             try {
                 const errorData = JSON.parse(error.response);
                 variables = {
-                    actualSize: new FormatSizePipe(this.translate).transform(
-                        errorData.details.actualSize,
-                    ),
-                    maxSize: new FormatSizePipe(this.translate).transform(
-                        errorData.details.maxSize,
-                    ),
+                    actualSize: this.formatSizePipe.transform(errorData.details.actualSize),
+                    maxSize: this.formatSizePipe.transform(errorData.details.maxSize),
                 };
             } catch (e) {
                 console.warn(e);

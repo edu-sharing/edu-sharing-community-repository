@@ -1,4 +1,4 @@
-import { ApplicationRef, DoBootstrap, Injector, NgModule } from '@angular/core';
+import { ApplicationRef, DoBootstrap, Injector, NgModule, inject } from '@angular/core';
 import { ActionbarComponent, SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { extensionSchemas } from './extension/extension-schemas';
 import { WrapperComponent } from './web-components/wrapper/app/wrapper.component';
@@ -17,13 +17,11 @@ import { PreviewSidebarComponent } from './features/editorial-sidebar/preview-si
     schemas: [].concat(extensionSchemas),
 })
 export class WebComponentModule implements DoBootstrap {
-    constructor(
-        private injector: Injector,
-        /**
-         * make sure that it is always injected
-         */
-        private webComponentOnlyService: WebComponentOnlyService,
-    ) {}
+    private injector = inject(Injector);
+    /**
+     * make sure that it is always injected
+     */
+    private webComponentOnlyService = inject(WebComponentOnlyService);
 
     ngDoBootstrap(_: ApplicationRef): void {
         console.info('web component __env', (window as any).__env);

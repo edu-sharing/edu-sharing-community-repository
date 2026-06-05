@@ -1,4 +1,4 @@
-import { HttpClient, HttpHandler, HttpXhrBackend } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { applicationConfig, type Preview } from '@storybook/angular';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
@@ -27,11 +27,7 @@ const preview: Preview = {
     decorators: [
         applicationConfig({
             providers: [
-                HttpClient,
-                {
-                    provide: HttpHandler,
-                    useValue: new HttpXhrBackend({ build: () => new XMLHttpRequest() }),
-                },
+                provideHttpClient(),
                 importProvidersFrom(
                     EduSharingApiModule.forRoot({
                         rootUrl: '/api',

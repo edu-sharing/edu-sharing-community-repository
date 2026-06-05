@@ -4,7 +4,9 @@
 
     <es-shortcut-entries></es-shortcut-entries>
     <div class="swimlanes">
-      <es-dashboard-swimlane *ngFor="let s of swimlanes()" [swimlane]="s"></es-dashboard-swimlane>
+      @for (s of swimlanes(); track s) {
+      <es-dashboard-swimlane [swimlane]="s"></es-dashboard-swimlane>
+      }
     </div>
   </div>
   <es-footer [scope]="landingPageScope"></es-footer>

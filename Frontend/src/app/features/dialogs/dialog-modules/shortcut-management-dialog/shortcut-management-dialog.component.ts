@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, signal, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, signal, ViewContainerRef, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -13,8 +13,12 @@ import { ShortcutManagementDialogData } from './shortcut-management-dialog-data'
     styleUrls: ['./shortcut-management-dialog.component.scss'],
 })
 export class ShortcutManagementDialogComponent implements OnDestroy {
+    data = inject<ShortcutManagementDialogData>(CARD_DIALOG_DATA);
+
     node = signal<Node>(null);
-    constructor(@Inject(CARD_DIALOG_DATA) public data: ShortcutManagementDialogData) {
+    constructor() {
+        const data = this.data;
+
         this.node.set(data.node);
     }
 

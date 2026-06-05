@@ -4,9 +4,9 @@
 .tree {
     .tree-node.is-suggestion-ai {
         mat-checkbox {
-            --mdc-checkbox-selected-icon-color: var(--aiColor);
-            --mdc-checkbox-selected-hover-icon-color: var(--aiColor);
-            --mdc-checkbox-selected-focus-icon-color: var(--aiColor);
+            --mat-checkbox-selected-icon-color: var(--aiColor);
+            --mat-checkbox-selected-hover-icon-color: var(--aiColor);
+            --mat-checkbox-selected-focus-icon-color: var(--aiColor);
         }
         span {
             @include mds.highlightAiText();
@@ -26,12 +26,12 @@
         .suggestion-chip {
             @include clickable();
             &.suggestion-ai-chip {
-                --mdc-chip-label-text-color: var(--aiColorChipText);
-                --mdc-chip-with-icon-icon-color: var(--aiColorChipText);
+                --mat-chip-label-text-color: var(--aiColorChipText);
+                --mat-chip-with-icon-icon-color: var(--aiColorChipText);
             }
             --primary: var(--aiColorChipRemove);
             --palette-primary-100: var(--aiColorChip);
-            --mdc-chip-container-height: 40px;
+            --mat-chip-container-height: 40px;
             border: 1px dashed var(--aiColorChipBorder);
             ::ng-deep {
                 .mdc-evolution-chip__action {

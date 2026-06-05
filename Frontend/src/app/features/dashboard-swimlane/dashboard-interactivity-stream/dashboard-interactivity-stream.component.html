@@ -1,37 +1,38 @@
 <div class="events-wrapper" role="list">
-  <es-node-url class="event" [node]="event" *ngFor="let event of events()" role="listitem">
+  @for (event of events(); track event) {
+  <es-node-url class="event" [node]="event" role="listitem">
     <div class="node-title">
       {{ event | nodeTitle }}
     </div>
     <div class="action-text">
       {{ 'DASHBOARD_SWIMLANE.ACTIVITY.ACTION_TEXT_PREFIX' | translate }}
       <span>
-        <ng-container *ngIf="type() === 'activity'">
-          {{
-            'EVENT.TYPE.' + $any(event).event.eventType
-              | translate : { fallback: $any(event).event.eventType }
-          }}
-        </ng-container>
-
-        <ng-container *ngIf="type() === 'share'">
-          {{ 'DASHBOARD_SWIMLANE.SHARE.INFO_MESSAGE' | translate }}
-        </ng-container>
+        @if (type() === 'activity') {
+        {{
+          'EVENT.TYPE.' + $any(event).event.eventType
+            | translate : { fallback: $any(event).event.eventType }
+        }}
+        } @if (type() === 'share') {
+        {{ 'DASHBOARD_SWIMLANE.SHARE.INFO_MESSAGE' | translate }}
+        }
       </span>
       {{ 'DASHBOARD_SWIMLANE.ACTIVITY.ACTION_TEXT_SUFFIX' | translate }}
       {{
         ($any(event).event || $any(event).share).timestamp
-          | formatDate
-          : {
-            async: true,
-            relative: false,
-            time: 'auto',
-          }
-          | async
+        | formatDate
+        : {
+        async: true,
+        relative: false,
+        time: 'auto',
+      }
+      | async
       }}
     </div>
     <i class="forward-btn" esIcon="chevron_forward"></i>
   </es-node-url>
-  <div class="empty" *ngIf="events().length < 1">
+  } @if (events().length < 1) {
+  <div class="empty">
     {{ 'DASHBOARD_SWIMLANE.' + type().toUpperCase() + '.EMPTY' | translate }}
   </div>
+  }
 </div>

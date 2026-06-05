@@ -8,6 +8,7 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { RenderHelperService, TranslationsService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
@@ -20,6 +21,9 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
     standalone: false,
 })
 export class AppComponent implements OnChanges, AfterViewInit, OnInit {
+    private renderHelperService = inject(RenderHelperService);
+    private translations = inject(TranslationsService);
+
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
     @Input() signature: string;
@@ -45,10 +49,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     previewUrl: string;
     targetBlank: boolean;
 
-    constructor(
-        private renderHelperService: RenderHelperService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.translations.initialize().subscribe(() => {});
     }
 
@@ -65,7 +66,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
         this.targetBlank = this.target_blank;
-        console.log('setting height');
         if (this.component_height !== null && this.component_height > 0) {
             const containerHeight = this.component_height - this.footer_height;
             document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);

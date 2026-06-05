@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,11 +10,14 @@ import { TopicPageGlobalService } from '../../../shared/services/topic-page-glob
 
 @Component({
     selector: 'es-color-picker',
-    imports: [CommonModule, FormsModule, MatButton, NgxColorsModule, TranslateModule],
+    imports: [FormsModule, MatButton, NgxColorsModule, TranslateModule],
     templateUrl: './color-picker.component.html',
     styleUrls: ['./color-picker.component.scss'],
 })
 export class ColorPickerComponent implements OnInit {
+    private configService = inject(ConfigService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+
     private _selectedColor: string = '#ffffff';
     private _initialColor: string | null = null;
 
@@ -47,11 +49,6 @@ export class ColorPickerComponent implements OnInit {
         this._selectedColor = value;
     }
     protected palette: any[] = [];
-
-    constructor(
-        private configService: ConfigService,
-        private topicPageGlobalService: TopicPageGlobalService,
-    ) {}
 
     /**
      * Initializes the component by retrieving a defined color palette or the default colors and generating the palette.

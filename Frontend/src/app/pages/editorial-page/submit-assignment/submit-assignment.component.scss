@@ -1,37 +1,10 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
-@use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/node-entries-card-small.component'
-    as card;
+@use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/assignment-mixins' as
+    card;
+@use './feedback-mixin' as fm;
 
 $maxWidth: 1200px;
-
-@mixin feedback() {
-    background: linear-gradient(
-            to right,
-            var(--primary) 0,
-            var(--primary) 5px,
-            var(--palette-primary-50) 5px,
-            var(--palette-primary-50) 5px
-        )
-        no-repeat;
-    padding: 20px;
-    > label {
-        font-size: vars.$fontSizeXLarge;
-        font-weight: bold;
-    }
-    > div {
-        > div {
-            padding: 20px 0;
-            &:not(:last-child) {
-                border-bottom: 1px solid vars.$cardSeparatorLineColor;
-            }
-        }
-        label {
-            font-size: vars.$fontSizeLarge;
-            font-weight: bold;
-        }
-    }
-}
 
 :host {
     display: flex;
@@ -40,6 +13,7 @@ $maxWidth: 1200px;
     min-height: 0;
     overflow: hidden;
 }
+
 mat-tab-group {
     width: 100%;
     margin: 0 auto;
@@ -143,7 +117,7 @@ ngx-extended-pdf-viewer {
             }
         }
         &.feedback {
-            @include feedback();
+            @include fm.feedback();
         }
     }
     .submit,

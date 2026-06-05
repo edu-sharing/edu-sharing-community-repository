@@ -1,24 +1,28 @@
 <ng-container [ngTemplateOutlet]="additionalContent"></ng-container>
-<div class="card-dialog-button-box button-box-left" *ngIf="buttonsLeft && buttonsLeft.length > 0">
+@if (buttonsLeft && buttonsLeft.length > 0) {
+<div class="card-dialog-button-box button-box-left">
+  @for (button of buttonsLeft; track button) {
   <ng-container
-    *ngFor="let button of buttonsLeft"
     [ngTemplateOutlet]="buttonsTemplate"
     [ngTemplateOutletContext]="{ $implicit: button }"
   >
   </ng-container>
+  }
 </div>
+}
 <div class="card-dialog-button-box card-dialog-button-box-right">
+  @for (button of buttonsRight; track button) {
   <ng-container
-    *ngFor="let button of buttonsRight"
     [ngTemplateOutlet]="buttonsTemplate"
     [ngTemplateOutletContext]="{ $implicit: button }"
   >
   </ng-container>
+  }
 </div>
 
 <ng-template #buttonsTemplate let-button>
+  @if (button.color === 'primary') {
   <button
-    *ngIf="button.color === 'primary'"
     mat-flat-button
     color="primary"
     [disabled]="button.disabled"
@@ -27,8 +31,8 @@
   >
     {{ button.label | translate }}
   </button>
+  } @if (button.color === 'standard') {
   <button
-    *ngIf="button.color === 'standard'"
     mat-button
     color="primary"
     [disabled]="button.disabled"
@@ -37,8 +41,8 @@
   >
     {{ button.label | translate }}
   </button>
+  } @if (button.color === 'danger') {
   <button
-    *ngIf="button.color === 'danger'"
     mat-flat-button
     color="warn"
     [disabled]="button.disabled"
@@ -47,4 +51,5 @@
   >
     {{ button.label | translate }}
   </button>
+  }
 </ng-template>

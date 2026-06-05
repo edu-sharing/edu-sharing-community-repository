@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
@@ -41,12 +41,13 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
+    private nodeV1 = inject(NodeV1Service);
+    private searchV1 = inject(SearchV1Service);
+
     private static readonly parentsCache = new KeyCache<ParentEntries>();
     private static readonly nodesCache = new KeyCache<Node>();
     private readonly _nodesChanged = new Subject<void>();
     readonly nodesChanged = this._nodesChanged.asObservable();
-
-    constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
     @cachedApiReplay(NodeService.nodesCache, getNodeCacheKey, 1)
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {

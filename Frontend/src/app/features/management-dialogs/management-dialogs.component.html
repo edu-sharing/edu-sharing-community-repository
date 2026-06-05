@@ -1,18 +1,18 @@
+@if (addNodesStream) {
 <es-add-stream
-  *ngIf="addNodesStream"
   [nodes]="addNodesStream"
   (loading)="globalProgress = $event"
   (cancelStream)="closeStream()"
   (done)="closeStream()"
 ></es-add-stream>
+} @if (materialViewFeedback) {
 <es-view-material-feedback
-  *ngIf="materialViewFeedback"
   [node]="materialViewFeedback"
   (closeFeedback)="closeMaterialViewFeedback()"
 ></es-view-material-feedback>
+} @if (addToCollection) {
 <es-collection-chooser
   class="dialog-right"
-  *ngIf="addToCollection"
   [@fromRight]="addToCollection"
   [title]="'WORKSPACE.SELECT_COLLECTION'"
   (cancel)="cancelAddToCollection()"
@@ -26,3 +26,4 @@
     ></ng-container>
   </ng-template>
 </es-collection-chooser>
+}

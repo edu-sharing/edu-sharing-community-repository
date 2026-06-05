@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Params, Router } from '@angular/router';
 import { ScrollPositionRestorationService } from '../../services/scroll-position-restoration.service';
 
@@ -6,6 +6,10 @@ import { ScrollPositionRestorationService } from '../../services/scroll-position
     providedIn: 'root',
 })
 export class NavigationScheduler {
+    private ngZone = inject(NgZone);
+    private router = inject(Router);
+    private scrollPositionRestoration = inject(ScrollPositionRestorationService);
+
     private readonly appendTimeout = 500;
 
     private timeout: ReturnType<typeof setTimeout> = null;
@@ -19,12 +23,6 @@ export class NavigationScheduler {
     private skipScrollToTop = true;
     /** While true, navigation actions will be appended to the previous navigation in history. */
     private shouldAppend = false;
-
-    constructor(
-        private ngZone: NgZone,
-        private router: Router,
-        private scrollPositionRestoration: ScrollPositionRestorationService,
-    ) {}
 
     /**
      * Schedules the given parameters for navigation.

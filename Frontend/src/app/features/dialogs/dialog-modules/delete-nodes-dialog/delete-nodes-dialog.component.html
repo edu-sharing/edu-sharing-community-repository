@@ -1,5 +1,6 @@
 {{ message | translate : messageParams }}
-<div *ngIf="canBlockImport" class="block-import-checkbox">
+@if (canBlockImport) {
+<div class="block-import-checkbox">
   <mat-checkbox [(ngModel)]="shouldBlockImport">
     <es-multi-line-label>
       <ng-container slot="label">
@@ -11,3 +12,4 @@
     </es-multi-line-label>
   </mat-checkbox>
 </div>
+}

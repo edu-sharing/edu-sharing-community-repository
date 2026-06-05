@@ -10,11 +10,15 @@
     data-test="add-folder-name-input"
   />
 </mat-form-field>
-<div *ngIf="mdsSets && mdsSets.length > 1">
+@if (mdsSets && mdsSets.length > 1) {
+<div>
   <mat-form-field>
     <mat-label>{{ 'WORKSPACE.ADD_FOLDER_METADATASET' | translate }}</mat-label>
     <mat-select id="mdsSet" [(ngModel)]="mdsSet">
-      <mat-option *ngFor="let mds of mdsSets" [value]="mds.id">{{ mds.name }}</mat-option>
+      @for (mds of mdsSets; track mds) {
+      <mat-option [value]="mds.id">{{ mds.name }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
 </div>
+}

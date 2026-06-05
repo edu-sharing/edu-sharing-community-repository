@@ -14,6 +14,7 @@ import {
     TemplateRef,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ConfigService, Node, SessionStorageService, User } from 'ngx-edu-sharing-api';
@@ -34,6 +35,13 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     standalone: false,
 })
 export class TopBarComponent implements AfterViewInit {
+    connector = inject(RestConnectorService);
+    private configService = inject(ConfigService);
+    mainNavService = inject(MainNavService);
+    dialogs = inject(DialogsService);
+    private sessionStorageService = inject(SessionStorageService);
+    elementRef = inject(ElementRef);
+
     readonly TemplateSlot = TemplateSlot;
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
@@ -79,15 +87,7 @@ export class TopBarComponent implements AfterViewInit {
 
     toggleSidebar = () => this.mainMenuSidebar.toggle();
 
-    constructor(
-        // FIXME: Required values should be passed as inputs.
-        public connector: RestConnectorService,
-        private configService: ConfigService,
-        public mainNavService: MainNavService,
-        public dialogs: DialogsService,
-        private sessionStorageService: SessionStorageService,
-        public elementRef: ElementRef,
-    ) {
+    constructor() {
         this.registerSystemMessages();
         this.configService
             .observeConfig()

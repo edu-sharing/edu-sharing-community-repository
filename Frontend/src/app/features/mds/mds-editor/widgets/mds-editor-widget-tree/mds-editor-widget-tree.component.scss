@@ -39,8 +39,8 @@ mat-chip-grid {
 }
 .chip-is-suggestion {
     &.chip-is-suggestion-ai {
-        --mdc-chip-label-text-color: var(--aiColor);
-        --mdc-chip-with-icon-icon-color: var(aiColor);
+        --mat-chip-label-text-color: var(--aiColor);
+        --mat-chip-with-icon-icon-color: var(aiColor);
         --primary: var(--aiColor);
         --palette-primary-100: var(--aiColorChipBg);
     }

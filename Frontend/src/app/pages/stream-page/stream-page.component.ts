@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router, RoutesRecognized } from '@angular/router';
 import moment from 'moment';
 import { ConnectorService, Node, StreamEntry, StreamV1Service } from 'ngx-edu-sharing-api';
@@ -57,6 +57,29 @@ import {
     standalone: false,
 })
 export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private connector = inject(RestConnectorService);
+    private connectorService = inject(ConnectorService);
+    private dialogs = inject(DialogsService);
+    private nodeService = inject(RestNodeService);
+    private cordova = inject(CordovaService);
+    private searchService = inject(RestSearchService);
+    private event = inject(FrameEventsService);
+    private streamService = inject(StreamV1Service);
+    private optionsHelper = inject(OptionsHelperDataService);
+    private iam = inject(RestIamService);
+    private storage = inject(TemporaryStorageService);
+    private toast = inject(Toast);
+    private uiService = inject(UIService);
+    private bridge = inject(BridgeService);
+    private nodeHelper = inject(NodeHelperService);
+    private collectionService = inject(RestCollectionService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNavService = inject(MainNavService);
+    private translations = inject(TranslationsService);
+    private searchField = inject(SearchFieldService);
+
     connectorList: ConnectorList;
     createAllowed: boolean;
     showCreate = false;
@@ -114,30 +137,7 @@ export class StreamPageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.searchQuery = event.searchString;
         // TODO: Search for the given query doch nicht erledigt
     }
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private connector: RestConnectorService,
-        private connectorService: ConnectorService,
-        private dialogs: DialogsService,
-        private nodeService: RestNodeService,
-        private cordova: CordovaService,
-        private searchService: RestSearchService,
-        private event: FrameEventsService,
-        private streamService: StreamV1Service,
-        private optionsHelper: OptionsHelperDataService,
-        private iam: RestIamService,
-        private storage: TemporaryStorageService,
-        private toast: Toast,
-        private uiService: UIService,
-        private bridge: BridgeService,
-        private nodeHelper: NodeHelperService,
-        private collectionService: RestCollectionService,
-        private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
-        private translations: TranslationsService,
-        private searchField: SearchFieldService,
-    ) {
+    constructor() {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {

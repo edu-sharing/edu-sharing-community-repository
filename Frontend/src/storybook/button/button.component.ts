@@ -13,30 +13,19 @@ export enum ButtonType {
     selector: 'es-storybook-button',
     standalone: true,
     template: `
-        <button
-            *ngIf="type === ButtonType.default"
-            mat-button
-            [color]="color"
-            [disabled]="disabled"
-        >
+        @if (type === ButtonType.default) {
+        <button mat-button [color]="color" [disabled]="disabled">
             {{ caption }}
         </button>
-        <button
-            *ngIf="type === ButtonType.flat"
-            mat-flat-button
-            [color]="color"
-            [disabled]="disabled"
-        >
+        } @if (type === ButtonType.flat) {
+        <button mat-flat-button [color]="color" [disabled]="disabled">
             {{ caption }}
         </button>
-        <button
-            *ngIf="type === ButtonType.raised"
-            mat-raised-button
-            [color]="color"
-            [disabled]="disabled"
-        >
+        } @if (type === ButtonType.raised) {
+        <button mat-raised-button [color]="color" [disabled]="disabled">
             {{ caption }}
         </button>
+        }
     `,
     imports: [MatButtonModule, CommonModule],
 })

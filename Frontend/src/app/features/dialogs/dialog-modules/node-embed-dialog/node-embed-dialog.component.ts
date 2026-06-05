@@ -4,11 +4,11 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
-    Inject,
     NgZone,
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -38,6 +38,16 @@ export interface NodeEmbedDialogData {
     standalone: false,
 })
 export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
+    data = inject<NodeEmbedDialogData>(CARD_DIALOG_DATA);
+    private dialogRef = inject(CardDialogRef);
+    private dialogs = inject(DialogsService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private location = inject(Location);
+    private mainNav = inject(MainNavService);
+    private ngZone = inject(NgZone);
+    private router = inject(Router);
+    private toast = inject(Toast);
+
     @ViewChild('textarea') textareaRef: ElementRef<HTMLTextAreaElement>;
 
     readonly buttons = [new DialogButton('OPTIONS.COPY', { color: 'primary' }, () => this.copy())];
@@ -63,18 +73,6 @@ export class NodeEmbedDialogComponent implements OnInit, OnDestroy {
     showNotPublicWarning = false;
 
     private readonly destroyed$ = new Subject<void>();
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodeEmbedDialogData,
-        private dialogRef: CardDialogRef,
-        private dialogs: DialogsService,
-        private changeDetectorRef: ChangeDetectorRef,
-        private location: Location,
-        private mainNav: MainNavService,
-        private ngZone: NgZone,
-        private router: Router,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         this.dialogRef.patchConfig({ buttons: this.buttons });

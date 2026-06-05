@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
 import {
@@ -35,6 +35,13 @@ export type SwimlaneEntry = {
     standalone: false,
 })
 export class LandingPageComponent implements OnInit, OnDestroy {
+    private authenticationService = inject(AuthenticationService);
+    private configService = inject(ConfigService);
+    private mainNav = inject(MainNavService);
+    private router = inject(Router);
+    private searchFieldService = inject(SearchFieldService);
+    private ui = inject(UIService);
+
     private readonly destroyed$ = new Subject<void>();
     readonly i18nPrefix: string = 'LANDING_PAGE.';
     landingPageScope: string = 'landing';
@@ -46,14 +53,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
      */
     swimlanes = signal<SwimlaneEntry[]>([]);
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private configService: ConfigService,
-        private mainNav: MainNavService,
-        private router: Router,
-        private searchFieldService: SearchFieldService,
-        private ui: UIService,
-    ) {
+    constructor() {
         const createAssignment = new OptionItem('EDITORIAL.OPTIONS.CREATE_ASSIGNMENT', 'task', () =>
             this.router.navigate([UIConstants.ROUTER_PREFIX, 'editorial', 'assignment'], {
                 queryParams: {

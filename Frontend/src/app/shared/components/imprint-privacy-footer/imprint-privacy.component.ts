@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { ImprintPrivacyService } from './imprint-privacy-service';
 
 @Component({
@@ -8,6 +8,7 @@ import { ImprintPrivacyService } from './imprint-privacy-service';
     standalone: false,
 })
 export class ImprintPrivacyComponent {
+    service = inject(ImprintPrivacyService);
+
     @Input() separator: string = '';
-    constructor(public service: ImprintPrivacyService) {}
 }

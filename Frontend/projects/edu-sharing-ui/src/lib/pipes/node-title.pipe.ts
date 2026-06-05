@@ -1,15 +1,18 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Assignment, AssignmentFile, Node, RestConstants } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../util/rest-helper';
 import { NodeRoot } from '../node-entries/entries-model';
 import { isString } from 'lodash-es';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'nodeTitle',
     standalone: false,
 })
 export class NodeTitlePipe implements PipeTransform {
+    private translate = inject(TranslateService);
+
     transform(
         node: Node | Assignment | AssignmentFile | NodeRoot | 'HOME',
         args?: { type: 'name' | 'title' },
@@ -37,5 +40,4 @@ export class NodeTitlePipe implements PipeTransform {
         }
         return value;
     }
-    constructor(private translate: TranslateService) {}
 }

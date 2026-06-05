@@ -1,5 +1,5 @@
+@if (nodeId() && version()) {
 <es-render-wrapper-component
-  *ngIf="nodeId() && version()"
   [nodeId]="nodeId()"
   [repository]="repository()"
   [version]="version()"
@@ -7,3 +7,4 @@
   [childId]="childId()"
   (childIdChange)="setChildId($event)"
 ></es-render-wrapper-component>
+}

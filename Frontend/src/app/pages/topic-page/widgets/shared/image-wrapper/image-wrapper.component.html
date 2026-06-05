@@ -1,72 +1,75 @@
-<ng-container *ngIf="initialized(); else loadingSpinner">
-  <ng-container *ngIf="imagePath || imageNode; else defaultCollectionImage">
-    <!-- the actual image -->
-    <div class="image-wrapper">
-      <div class="image-backdrop" aria-hidden="true">
-        <img [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath" alt="" />
-      </div>
-      <img
-        class="topic-image"
-        [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath"
-        alt=""
-      />
-      <!-- displays an AI label, if the image is generated and has not been uploaded by the user -->
-      <es-ai-label
-        *ngIf="aiGeneratedImage() && !userUploadedNodeId() && !imageProcessing()"
-        [imageContainer]="aiGeneratedImage()"
-      ></es-ai-label>
-    </div>
-  </ng-container>
-  <!-- displays a spinner while the image is being processed -->
-  <div class="image-loading" *ngIf="imageProcessing()">
-    <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
+@if (initialized()) { @if (imagePath || imageNode) {
+<!-- the actual image -->
+<div class="image-wrapper">
+  <div class="image-backdrop" aria-hidden="true">
+    <img [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath" alt="" />
   </div>
-  <!-- edit buttons to generate, upload or delete an image -->
-  <div class="image-buttons" *ngIf="editMode && atLeastOneEditOptionSupported()">
-    <button
-      *ngIf="aiGenerationSupportedAndValid()"
-      mat-icon-button
-      color="primary"
-      [disabled]="imageProcessing()"
-      [matTooltip]="
-        aiGeneratedImage() && !userUploadedNodeId()
-          ? (i18nPrefix + 'REGENERATE' | translate)
-          : (i18nPrefix + 'GENERATE' | translate)
-      "
-      tooltipAriaLabel
-      (click)="generateImage()"
-    >
-      <i esIcon="magic_button"></i>
-    </button>
-    <button
-      *ngIf="userUploadSupportedAndValid()"
-      mat-icon-button
-      color="primary"
-      [disabled]="imageProcessing()"
-      [matTooltip]="i18nPrefix + 'UPLOAD' | translate"
-      tooltipAriaLabel
-      (click)="uploadImageClicked(fileInput)"
-    >
-      <i esIcon="publish"></i>
-    </button>
-    <button
-      mat-icon-button
-      color="primary"
-      [matTooltip]="i18nPrefix + 'DELETE' | translate"
-      tooltipAriaLabel
-      [disabled]="deleteImageDisabled() || imageProcessing()"
-      (click)="deleteImage()"
-    >
-      <i esIcon="delete"></i>
-    </button>
-    <input #fileInput type="file" accept="image/*" (change)="imageChanged($event)" hidden />
-  </div>
-  <ng-template #defaultCollectionImage>
-    <div class="card-image-icon-circle">
-      <i esIcon="layers"></i>
-    </div>
-  </ng-template>
-</ng-container>
+  <img
+    class="topic-image"
+    [src]="imageNode ? (imageNode | esNodeImage | async) : imagePath"
+    alt=""
+  />
+  <!-- displays an AI label, if the image is generated and has not been uploaded by the user -->
+  @if (aiGeneratedImage() && !userUploadedNodeId() && !imageProcessing()) {
+  <es-ai-label [imageContainer]="aiGeneratedImage()"></es-ai-label>
+  }
+</div>
+} @else {
+<div class="card-image-icon-circle">
+  <i esIcon="layers"></i>
+</div>
+}
+<!-- displays a spinner while the image is being processed -->
+@if (imageProcessing()) {
+<div class="image-loading">
+  <ng-template *ngTemplateOutlet="loadingSpinner"></ng-template>
+</div>
+}
+<!-- edit buttons to generate, upload or delete an image -->
+@if (editMode && atLeastOneEditOptionSupported()) {
+<div class="image-buttons">
+  @if (aiGenerationSupportedAndValid()) {
+  <button
+    mat-icon-button
+    color="primary"
+    [disabled]="imageProcessing()"
+    [matTooltip]="
+      aiGeneratedImage() && !userUploadedNodeId()
+        ? (i18nPrefix + 'REGENERATE' | translate)
+        : (i18nPrefix + 'GENERATE' | translate)
+    "
+    tooltipAriaLabel
+    (click)="generateImage()"
+  >
+    <i esIcon="magic_button"></i>
+  </button>
+  } @if (userUploadSupportedAndValid()) {
+  <button
+    mat-icon-button
+    color="primary"
+    [disabled]="imageProcessing()"
+    [matTooltip]="i18nPrefix + 'UPLOAD' | translate"
+    tooltipAriaLabel
+    (click)="uploadImageClicked(fileInput)"
+  >
+    <i esIcon="publish"></i>
+  </button>
+  }
+  <button
+    mat-icon-button
+    color="primary"
+    [matTooltip]="i18nPrefix + 'DELETE' | translate"
+    tooltipAriaLabel
+    [disabled]="deleteImageDisabled() || imageProcessing()"
+    (click)="deleteImage()"
+  >
+    <i esIcon="delete"></i>
+  </button>
+  <input #fileInput type="file" accept="image/*" (change)="imageChanged($event)" hidden />
+</div>
+} } @else {
+<es-spinner></es-spinner>
+}
 <ng-template #loadingSpinner>
   <es-spinner></es-spinner>
 </ng-template>

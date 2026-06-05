@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { DialogButton, RestConstants, RestNodeService } from '../../../../core-module/core.module';
 import { Node } from 'ngx-edu-sharing-api';
@@ -23,22 +23,21 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
     standalone: false,
 })
 export class ContributorsDialogComponent implements OnInit {
+    data = inject<ContributorsDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<ContributorsDialogData, ContributorsDialogResult>>(CardDialogRef);
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private dialogs = inject(DialogsService);
+    private localEvents = inject(LocalEventsService);
+    private nodeService = inject(RestNodeService);
+    private toast = inject(Toast);
+
     readonly rolesLifecycle = RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
     readonly rolesMetadata = RestConstants.CONTRIBUTOR_ROLES_METADATA;
     contributorLifecycle: { [role: string]: VCard[] } = {};
     contributorMetadata: { [role: string]: VCard[] } = {};
 
     node: Node;
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: ContributorsDialogData,
-        private dialogRef: CardDialogRef<ContributorsDialogData, ContributorsDialogResult>,
-        private cardDialogUtils: CardDialogUtilsService,
-        private dialogs: DialogsService,
-        private localEvents: LocalEventsService,
-        private nodeService: RestNodeService,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         this.initButtons();

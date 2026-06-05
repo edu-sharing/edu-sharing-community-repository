@@ -1,4 +1,4 @@
-import { Component, Inject, NgZone, OnDestroy, OnInit, Optional, signal } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, signal, inject } from '@angular/core';
 import { ConfigService, HOME_REPOSITORY, IamV1Service, Node, UserStats } from 'ngx-edu-sharing-api';
 import { firstValueFrom, Subject } from 'rxjs';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -30,21 +30,24 @@ export const ConfigMotivationDefaultConfig: MotivationConfig = {
     styleUrls: ['./share-publish-motivation-dialog.component.scss'],
 })
 export class SharePublishMotivationDialogComponent implements OnInit, OnDestroy {
+    private config = inject(ConfigService);
+    private iamV1Service = inject(IamV1Service);
+    private ngZone = inject(NgZone);
+    private dialogRef = inject<CardDialogRef<ShareDialogData, ShareDialogResult>>(CardDialogRef, {
+        optional: true,
+    });
+    data = inject<SharePublishMotivationDialogComponentData>(CARD_DIALOG_DATA, { optional: true });
+
     randomMessage = signal<number>(Math.floor(Math.random() * 31) + 1);
     nodes = signal<Node[]>(null);
     img = signal<string>('1');
 
     stats = signal<UserStats>(null);
 
-    constructor(
-        private config: ConfigService,
-        private iamV1Service: IamV1Service,
-        private ngZone: NgZone,
-        @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
-        @Optional()
-        @Inject(CARD_DIALOG_DATA)
-        public data: SharePublishMotivationDialogComponentData,
-    ) {
+    constructor() {
+        const dialogRef = this.dialogRef;
+        const data = this.data;
+
         this.dialogRef?.patchConfig({
             buttons: DialogButton.getSingleButton('CLOSE', () => dialogRef.close(), 'standard'),
         });

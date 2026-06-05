@@ -1,4 +1,4 @@
-import { Injectable, TemplateRef } from '@angular/core';
+import { Injectable, TemplateRef, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 /**
@@ -16,7 +16,7 @@ export interface SearchPageCustomTemplates {
     providedIn: 'root',
 })
 export class GlobalSearchPageService {
-    constructor(private internal: GlobalSearchPageServiceInternal) {}
+    private internal = inject(GlobalSearchPageServiceInternal);
 
     /**
      * Register custom templates to replace or extend standard components within the search page.

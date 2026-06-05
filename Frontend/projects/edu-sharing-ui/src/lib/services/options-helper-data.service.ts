@@ -1,7 +1,7 @@
 import type { DropdownComponent } from '../dropdown/dropdown.component';
 import type { ActionbarComponent } from '../actionbar/actionbar.component';
 import type { ListEventInterface, NodeEntriesDisplayType } from '../node-entries/entries-model';
-import { EventEmitter, Injectable, NgZone, OnDestroy, Optional } from '@angular/core';
+import { EventEmitter, Injectable, NgZone, OnDestroy, inject } from '@angular/core';
 import { AuthenticationService, ME, NetworkService, Node, UserService } from 'ngx-edu-sharing-api';
 import { take, takeUntil } from 'rxjs/operators';
 import { CustomOptions, OptionItem, Scope, Target } from '../types/option-item';
@@ -41,6 +41,17 @@ export interface OptionData {
 }
 @Injectable()
 export class OptionsHelperDataService implements OnDestroy {
+    private ngZone = inject(NgZone);
+    private route = inject(ActivatedRoute, { optional: true });
+    private localEvents = inject(LocalEventsService);
+    private authenticationService = inject(AuthenticationService);
+    private toast = inject(Toast);
+    private userService = inject(UserService);
+    private networkService = inject(NetworkService);
+    private globalStateService = inject(GlobalStateService);
+    private keyboardShortcutsService = inject(KeyboardShortcutsService, { optional: true });
+    private optionsHelperService = inject(OptionsHelperService, { optional: true });
+
     private components: OptionsHelperComponents;
     private data: OptionData;
     private keyboardShortcutsSubscription: Subscription;
@@ -52,18 +63,7 @@ export class OptionsHelperDataService implements OnDestroy {
     readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
-    constructor(
-        private ngZone: NgZone,
-        @Optional() private route: ActivatedRoute,
-        private localEvents: LocalEventsService,
-        private authenticationService: AuthenticationService,
-        private toast: Toast,
-        private userService: UserService,
-        private networkService: NetworkService,
-        private globalStateService: GlobalStateService,
-        @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
-        @Optional() private optionsHelperService: OptionsHelperService,
-    ) {
+    constructor() {
         this.registerStaticSubscriptions();
         this.globalStateService.downloadUrl$.pipe(takeUntil(this.destroyed)).subscribe(() => {
             if (this.data) {

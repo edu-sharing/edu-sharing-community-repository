@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DialogButton } from '../../../../core-module/core.module';
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
@@ -11,10 +11,8 @@ import { GenericDialogData } from './generic-dialog-data';
     standalone: false,
 })
 export class GenericDialogComponent<R extends string> implements OnInit {
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: GenericDialogData<R>,
-        private dialogRef: CardDialogRef<GenericDialogData<R>, R>,
-    ) {}
+    data = inject<GenericDialogData<R>>(CARD_DIALOG_DATA);
+    private dialogRef = inject<CardDialogRef<GenericDialogData<R>, R>>(CardDialogRef);
 
     ngOnInit(): void {
         this.initButtons();

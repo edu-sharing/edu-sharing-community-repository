@@ -11,6 +11,7 @@ import {
     Output,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UniversalNode } from '../../../core-module/rest/definitions';
@@ -39,6 +40,12 @@ import { JumpMark, JumpMarksService } from '../../../services/jump-marks.service
     standalone: false,
 })
 export class CardComponent implements AfterContentInit, OnDestroy {
+    private uiService = inject(UIService);
+    private translate = inject(TranslateService);
+    private cardService = inject(CardService);
+    private jumpMarksService = inject(JumpMarksService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
+
     @ViewChild('cardContainer') cardContainer: ElementRef<HTMLElement>;
     @ViewChild('jumpmarksRef') jumpmarksRef: ElementRef;
     @ViewChild('cardActions') cardActions: ElementRef<HTMLElement>;
@@ -112,7 +119,7 @@ export class CardComponent implements AfterContentInit, OnDestroy {
                 // Group
                 if ((nodes[0] as any).profile) {
                     this.icon = 'group';
-                    this.subtitle = new AuthorityNamePipe(this.translate).transform(nodes[0]);
+                    this.subtitle = this.authorityNamePipe.transform(nodes[0]);
                 } else {
                     this.avatar = nodes[0].icon?.url;
                     this.subtitle = RestHelper.getTitle(nodes[0]);
@@ -185,12 +192,10 @@ export class CardComponent implements AfterContentInit, OnDestroy {
         return CardComponent.modalCards.length;
     }
 
-    constructor(
-        private uiService: UIService,
-        private translate: TranslateService,
-        private cardService: CardService,
-        private jumpMarksService: JumpMarksService,
-    ) {
+    constructor() {
+        const uiService = this.uiService;
+        const cardService = this.cardService;
+
         CardComponent.modalCards.splice(0, 0, this);
         cardService.setNumberModalCards(CardComponent.modalCards.length);
         document.body.style.overflow = 'hidden';

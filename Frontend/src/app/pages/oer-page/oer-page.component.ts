@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -33,6 +33,20 @@ import { Node } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class OerPageComponent implements OnInit, OnDestroy {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private connector = inject(RestConnectorService);
+    private nodeService = inject(RestNodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private searchService = inject(RestSearchService);
+    private mdsService = inject(RestMdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private storage = inject(TemporaryStorageService);
+    private translations = inject(TranslationsService);
+    private mainNav = inject(MainNavService);
+    private translate = inject(TranslateService);
+    private searchField = inject(SearchFieldService);
+
     readonly SCOPES = Scope;
     public COLLECTIONS = 0;
     public MATERIALS = 1;
@@ -55,21 +69,7 @@ export class OerPageComponent implements OnInit, OnDestroy {
     public nodes: Node[][] = [];
     private destroyed = new Subject<void>();
 
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private connector: RestConnectorService,
-        private nodeService: RestNodeService,
-        private nodeHelper: NodeHelperService,
-        private searchService: RestSearchService,
-        private mdsService: RestMdsService,
-        private mdsHelperService: MdsHelperService,
-        private storage: TemporaryStorageService,
-        private translations: TranslationsService,
-        private mainNav: MainNavService,
-        private translate: TranslateService,
-        private searchField: SearchFieldService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {
             for (let i = 0; i < this.TYPE_COUNT; i++) {
                 this.columns.push({ Default: [] });

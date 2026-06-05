@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { LocalEventsService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
@@ -29,27 +29,28 @@ import { firstValueFrom, Observable } from 'rxjs';
     providers: [BreadcrumbsService],
 })
 export class CreateVariantDialogComponent {
+    data = inject<CreateVariantDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>>(CardDialogRef);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private connector = inject(RestConnectorService);
+    private connectors = inject(RestConnectorsService);
+    private localEvents = inject(LocalEventsService);
+    private dialogs = inject(DialogsService);
+    private uiService = inject(UIService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     variantName: string;
     licenseWarning: string;
 
     private _openViaConnector: Connector;
     private _directory: string;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: CreateVariantDialogData,
-        private dialogRef: CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>,
-        private breadcrumbsService: BreadcrumbsService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private localEvents: LocalEventsService,
-        private dialogs: DialogsService,
-        private uiService: UIService,
-        private nodeService: NodeService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         void this._initNode();
         this._updateButtons();
     }

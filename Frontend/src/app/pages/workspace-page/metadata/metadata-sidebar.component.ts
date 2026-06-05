@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, input } from '@angular/core';
+import { Component, input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { LocalEventsService, UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
 import {
@@ -14,7 +14,6 @@ import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dial
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { BulkBehavior } from '../../../features/mds/types/types';
 import { WorkspaceMetadataComponent } from './metadata.component';
-import { CommonModule } from '@angular/common';
 
 /**
  * Container Component for the workspace's metadata sidebar.
@@ -27,18 +26,16 @@ import { CommonModule } from '@angular/common';
     templateUrl: './metadata-sidebar.component.html',
     styleUrls: ['./metadata-sidebar.component.scss'],
     animations: [trigger('fromRight', UIAnimation.fromRight())],
-    imports: [CommonModule, WorkspaceMetadataComponent],
+    imports: [WorkspaceMetadataComponent],
 })
 export class MetadataSidebarComponent {
-    nodeSidebar = input.required<Node>();
+    private dialogs = inject(DialogsService);
+    private localEvents = inject(LocalEventsService);
+    private node = inject(RestNodeService);
+    private router = inject(Router);
+    private toast = inject(Toast);
 
-    constructor(
-        private dialogs: DialogsService,
-        private localEvents: LocalEventsService,
-        private node: RestNodeService,
-        private router: Router,
-        private toast: Toast,
-    ) {}
+    nodeSidebar = input.required<Node>();
 
     async restoreVersion(restore: { version: Version; node: Node }) {
         const dialogRef = await this.dialogs.openGenericDialog({

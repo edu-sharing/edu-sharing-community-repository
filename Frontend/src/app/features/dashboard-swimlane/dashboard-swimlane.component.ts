@@ -7,6 +7,7 @@ import {
     input,
     signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     ColumnType,
@@ -78,6 +79,18 @@ type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; param
     ],
 })
 export class DashboardSwimlaneComponent {
+    private storage = inject(SessionStorageService);
+    private translate = inject(TranslateService);
+    private ref = inject(ApplicationRef);
+    private router = inject(Router);
+    private authenticationService = inject(AuthenticationService);
+    private searchService = inject(SearchService);
+    private uiService = inject(UIService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private nodeService = inject(NodeService);
+    private assignmentService = inject(AssignmentV1Service);
+    private mdsHelperService = inject(MdsHelperService);
+
     /**
      * @param {SwimlaneEntry} swimlane - The required SwimlaneEntry.
      * @description
@@ -115,19 +128,7 @@ export class DashboardSwimlaneComponent {
         maxRows: 1,
     };
     private nodes = signal<NodeEntriesData>(null);
-    constructor(
-        private storage: SessionStorageService,
-        private translate: TranslateService,
-        private ref: ApplicationRef,
-        private router: Router,
-        private authenticationService: AuthenticationService,
-        private searchService: SearchService,
-        private uiService: UIService,
-        private optionsHelperService: OptionsHelperService,
-        private nodeService: NodeService,
-        private assignmentService: AssignmentV1Service,
-        private mdsHelperService: MdsHelperService,
-    ) {
+    constructor() {
         this.open
             .pipe(
                 filter((o) => !!o),

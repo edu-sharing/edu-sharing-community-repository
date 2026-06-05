@@ -1,63 +1,57 @@
 <div class="topic-page-grid topic-page-grid-cols-6 topic-page-gap">
-  <ng-container *ngIf="grid?.length >= 1; else configureGrid">
-    <div
-      class="topic-page-grid-content"
-      [class.topic-page-col-span-2]="gridItem.cols === 2"
-      [class.topic-page-col-span-3]="gridItem.cols === 3"
-      [class.topic-page-col-span-4]="gridItem.cols === 4"
-      [class.topic-page-col-span-6]="gridItem.cols === 6 || grid.length === 1"
-      *ngFor="let gridItem of grid; let i = index"
+  @if (grid?.length >= 1) { @for (gridItem of grid; track gridItem; let i = $index) {
+  <div
+    class="topic-page-grid-content"
+    [class.topic-page-col-span-2]="gridItem.cols === 2"
+    [class.topic-page-col-span-3]="gridItem.cols === 3"
+    [class.topic-page-col-span-4]="gridItem.cols === 4"
+    [class.topic-page-col-span-6]="gridItem.cols === 6 || grid.length === 1"
+  >
+    @if ( gridItem.item !== '' && isSupportedWidget(gridItem.item)) {
+    <es-generic-widget
+      [contextNodeId]="contextNodeId"
+      [editMode]="editMode"
+      [gridIndex]="i"
+      [nodeId]="convertNodeRefIntoNodeId(gridItem.nodeId)"
+      [pageVariantNode]="pageVariantNode"
+      [propagatedNodeId]="convertNodeRefIntoNodeId(gridItem.propagatedNodeId)"
+      [searchInput]="searchInput"
+      [searchFilters]="searchFilters"
+      [selectDimensions]="selectDimensions"
+      [swimlaneColor]="backgroundColor ?? swimlaneColor"
+      [swimlaneIndex]="swimlaneIndex"
+      [swimlaneShape]="backgroundShape"
+      [widgetType]="gridItem.item"
+      (searchHitsChanged)="changeSearchHits($event, i)"
+      (totalSearchResultCountChanged)="changeTotalSearchResultCount($event, i)"
+      (visibleNodesChanged)="changeVisibleNodes($event, i)"
     >
-      <es-generic-widget
-        *ngIf="
-          gridItem.item !== '' && isSupportedWidget(gridItem.item);
-          else selectWidgetTypeDialog
-        "
-        [contextNodeId]="contextNodeId"
-        [editMode]="editMode"
-        [gridIndex]="i"
-        [nodeId]="convertNodeRefIntoNodeId(gridItem.nodeId)"
-        [pageVariantNode]="pageVariantNode"
-        [propagatedNodeId]="convertNodeRefIntoNodeId(gridItem.propagatedNodeId)"
-        [searchInput]="searchInput"
-        [searchFilters]="searchFilters"
-        [selectDimensions]="selectDimensions"
-        [swimlaneColor]="backgroundColor ?? swimlaneColor"
-        [swimlaneIndex]="swimlaneIndex"
-        [swimlaneShape]="backgroundShape"
-        [widgetType]="gridItem.item"
-        (searchHitsChanged)="changeSearchHits($event, i)"
-        (totalSearchResultCountChanged)="changeTotalSearchResultCount($event, i)"
-        (visibleNodesChanged)="changeVisibleNodes($event, i)"
-      >
-      </es-generic-widget>
-
-      <!-- no (valid) widget type has been selected yet -->
-      <ng-template #selectWidgetTypeDialog>
-        <!-- display a form to select it when being in edit mode -->
-        <div *ngIf="editMode" class="w-100">
-          <div class="topic-page-grid-border-container">
-            <es-select-widget-type
-              [grid]="grid"
-              [tileIndex]="i"
-              (gridUpdated)="updatedGrid($event)"
-            ></es-select-widget-type>
-          </div>
-        </div>
-        <es-info-message mode="warning" *ngIf="!editMode">
-          {{
-            ('TOPIC_PAGE.SWIMLANE.INVALID_OR_UNKNOWN_WIDGET' | translate) + (gridItem.item || '')
-          }}
-        </es-info-message>
-      </ng-template>
-    </div>
-  </ng-container>
-  <!-- no grid has been defined yet -->
-  <ng-template #configureGrid>
-    <div class="topic-page-col-span-6 w-100">
+    </es-generic-widget>
+    } @else {
+    <!-- display a form to select it when being in edit mode -->
+    @if (editMode) {
+    <div class="w-100">
       <div class="topic-page-grid-border-container">
-        <es-configure-grid [grid]="grid" (gridUpdated)="updatedGrid($event)"></es-configure-grid>
+        <es-select-widget-type
+          [grid]="grid"
+          [tileIndex]="i"
+          (gridUpdated)="updatedGrid($event)"
+        ></es-select-widget-type>
       </div>
     </div>
-  </ng-template>
+    } @if (!editMode) {
+    <es-info-message mode="warning">
+      {{ ('TOPIC_PAGE.SWIMLANE.INVALID_OR_UNKNOWN_WIDGET' | translate) + (gridItem.item || '') }}
+    </es-info-message>
+    } }
+    <!-- no (valid) widget type has been selected yet -->
+  </div>
+  } } @else {
+  <div class="topic-page-col-span-6 w-100">
+    <div class="topic-page-grid-border-container">
+      <es-configure-grid [grid]="grid" (gridUpdated)="updatedGrid($event)"></es-configure-grid>
+    </div>
+  </div>
+  }
+  <!-- no grid has been defined yet -->
 </div>

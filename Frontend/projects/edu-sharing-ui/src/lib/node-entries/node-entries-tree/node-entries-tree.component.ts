@@ -10,6 +10,7 @@ import {
     signal,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
@@ -39,6 +40,14 @@ import { NodeEntriesDataType } from '../data-type';
 export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnDestroy
 {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    nodeHelper = inject(NodeHelperService);
+    private elementRef = inject(ElementRef);
+    private nodesDragDropService = inject(NodesDragDropService);
+    private translations = inject(TranslationsService);
+    private treeNodeService = inject(TreeNodeService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
     readonly UIService = UIService;
@@ -74,15 +83,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     // 28px (toggle, checkbox, icon) + 8px (gap)
     protected readonly treeNodeIndent: number = 36;
 
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef,
-        public entriesService: NodeEntriesService<T>,
-        public nodeHelper: NodeHelperService,
-        private elementRef: ElementRef,
-        private nodesDragDropService: NodesDragDropService,
-        private translations: TranslationsService,
-        private treeNodeService: TreeNodeService,
-    ) {
+    constructor() {
         // listening to the selection changed subject
         this.entriesService.selection.changed
             .pipe(takeUntil(this.destroyed), debounceTime(0))

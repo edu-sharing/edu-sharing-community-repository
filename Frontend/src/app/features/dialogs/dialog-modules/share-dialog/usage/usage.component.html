@@ -15,16 +15,20 @@
       }}</i>
     </div>
     <!--<div class="remove clickable" tabindex="0" (keyup.enter)="removeAll()" (click)="removeAll()" [class.opacity-invisible]="!showDelete">
-            <i class="material-icons">cancel</i>
-        </div>-->
+      <i class="material-icons">cancel</i>
+    </div>-->
   </div>
-  <div class="all" *ngIf="showAll" [@cardAnimation]="showAll">
-    <div class="single" *ngFor="let usage of usages">
-      <div class="deleted-info" *ngIf="isDeleted(usage)">
+  @if (showAll) {
+  <div class="all" [@cardAnimation]="showAll">
+    @for (usage of usages; track usage) {
+    <div class="single">
+      @if (isDeleted(usage)) {
+      <div class="deleted-info">
         <div class="line"><hr /></div>
         <div class="info">{{ 'WORKSPACE.SHARE.DELETED' | translate }}</div>
         <div class="line"><hr /></div>
       </div>
+      }
       <div>
         <div class="name">
           <span class="primary">{{ getName(usage) }}</span>
@@ -40,10 +44,15 @@
           [class.disabled]="usage.type === 'INDIRECT'"
           [class.opacity-invisible]="!showDelete"
         >
-          <i class="material-icons" *ngIf="!isDeleted(usage)">cancel</i>
-          <i class="material-icons" *ngIf="isDeleted(usage)">undo</i>
+          @if (!isDeleted(usage)) {
+          <i class="material-icons">cancel</i>
+          } @if (isDeleted(usage)) {
+          <i class="material-icons">undo</i>
+          }
         </div>
       </div>
     </div>
+    }
   </div>
+  }
 </div>

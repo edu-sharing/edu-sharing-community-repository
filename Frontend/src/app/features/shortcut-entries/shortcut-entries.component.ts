@@ -11,6 +11,7 @@ import {
     Signal,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
@@ -65,6 +66,17 @@ import { ShortcutEntryTitlePipe } from './shortcut-entry-title.pipe';
     ],
 })
 export class ShortcutEntriesComponent implements OnInit {
+    private accessibility = inject(AccessibilityService);
+    private configService = inject(ConfigService);
+    private dialogs = inject(DialogsService);
+    private entriesService = inject<NodeEntriesService<Node>>(NodeEntriesService);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private shortcutEntriesService = inject(ShortcutEntriesService);
+    private shortcutEntryTitlePipe = inject(ShortcutEntryTitlePipe);
+    private translations = inject(TranslationsService);
+    private ui = inject(UIService);
+
     readonly i18nPrefix: string = 'SHORTCUT_ENTRIES.';
     readonly mobileDragStartDelay: number = 1300;
 
@@ -100,20 +112,6 @@ export class ShortcutEntriesComponent implements OnInit {
     @ViewChild('editInput') editInput!: ElementRef;
     @ViewChild('entriesContainer') entriesContainerRef!: ElementRef;
     @ViewChild('entriesWrapper') entriesWrapperRef!: ElementRef;
-
-    // Note: Adding OptionsHelperDataService might be a suitable extension to remove workarounds
-    constructor(
-        private accessibility: AccessibilityService,
-        private configService: ConfigService,
-        private dialogs: DialogsService,
-        private entriesService: NodeEntriesService<Node>,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private shortcutEntriesService: ShortcutEntriesService,
-        private shortcutEntryTitlePipe: ShortcutEntryTitlePipe,
-        private translations: TranslationsService,
-        private ui: UIService,
-    ) {}
 
     /**
      * Initializes the component by defining the shortcut entry options and retrieving the client config.

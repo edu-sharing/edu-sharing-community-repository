@@ -3,12 +3,13 @@
     <div class="info-left">
       <div class="heading">{{ 'WORKSPACE.SHARE_LINK.EXPIRY_TITLE' | translate }}</div>
       <p>{{ 'WORKSPACE.SHARE_LINK.EXPIRY_INFO' | translate }}</p>
+      @if (expiry) {
       <es-calendar
-        *ngIf="expiry"
         label="{{ 'WORKSPACE.SHARE_LINK.EXPIRY_LABEL' | translate }}"
         [(date)]="expiryDate"
         [minDate]="today"
       ></es-calendar>
+      }
     </div>
     <div class="info-right">
       <mat-slide-toggle
@@ -31,8 +32,8 @@
         [disabled]="!enabled"
       ></mat-slide-toggle>
     </div>
+    @if (passwordEnabled) {
     <es-input-password
-      *ngIf="passwordEnabled"
       (change)="setPassword()"
       [displayStrength]="true"
       [(value)]="passwordString"
@@ -49,6 +50,7 @@
       }}"
     >
     </es-input-password>
+    }
   </div>
 </div>
 
@@ -90,18 +92,21 @@
   <div class="link-info">
     {{ 'WORKSPACE.SHARE_LINK.LINK_INFO' + (_node.isDirectory ? '_FOLDER' : '') | translate }}
   </div>
-  <div class="link-downloads" *ngIf="enabled">
+  @if (enabled) {
+  <div class="link-downloads">
     {{ 'WORKSPACE.SHARE_LINK.LINK_DOWNLOADS' | translate : { count: currentShare.downloadCount } }}
   </div>
+  }
 </div>
 
 <div class="qr-code">
+  @if (enabled && currentShare.url && (loading$ | async) === false) {
   <qrcode
-    *ngIf="enabled && currentShare.url && (loading$ | async) === false"
     elementType="img"
     errorCorrectionLevel="M"
     [qrdata]="currentShare.url"
     [width]="156"
     [margin]="4"
   ></qrcode>
+  }
 </div>

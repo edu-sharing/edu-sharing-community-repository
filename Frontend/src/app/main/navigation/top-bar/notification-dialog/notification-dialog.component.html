@@ -22,7 +22,8 @@
         </es-multi-line-label>
       </mat-radio-button>
     </mat-radio-group>
-    <div class="extended-group" *ngIf="notificationForm.get('configMode').value === 'uniformly'">
+    @if (notificationForm.get('configMode').value === 'uniformly') {
+    <div class="extended-group">
       <ng-container
         *ngTemplateOutlet="
           interval;
@@ -30,11 +31,10 @@
         "
       ></ng-container>
     </div>
-    <div
-      class="extended-group notification-individual"
-      *ngIf="notificationForm.get('configMode').value === 'individual'"
-    >
-      <div *ngFor="let group of getGroups()">
+    } @if (notificationForm.get('configMode').value === 'individual') {
+    <div class="extended-group notification-individual">
+      @for (group of getGroups(); track group) {
+      <div>
         <h6 class="mat-heading-6">{{ 'NOTIFICATION.GROUP.' + group | translate }}</h6>
         <ng-container
           *ngTemplateOutlet="
@@ -43,7 +43,9 @@
           "
         ></ng-container>
       </div>
+      }
     </div>
+    }
   </form>
 </ng-container>
 <ng-template #interval let-formControl="formControl">

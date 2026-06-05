@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -12,11 +12,11 @@ import { take } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class AppContainerService {
+    private ngZone = inject(NgZone);
+
     private scrollContainer?: HTMLElement;
 
     public scrollContainerChange = new Subject<HTMLElement>();
-
-    constructor(private ngZone: NgZone) {}
 
     init(appElement: HTMLElement): void {
         this.registerScrollContainer(appElement);

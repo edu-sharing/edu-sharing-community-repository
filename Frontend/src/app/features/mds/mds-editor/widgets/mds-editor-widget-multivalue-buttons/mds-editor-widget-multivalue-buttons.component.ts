@@ -60,7 +60,6 @@ export class MdsEditorWidgetMultivalueButtonsComponent
 
     remove(toBeRemoved: DisplayValue): void {
         const values: DisplayValue[] = this.chipsControl.value;
-        console.log(values, toBeRemoved, values.includes(toBeRemoved));
         this.chipsControl.setValue(values.filter((value) => value.key !== toBeRemoved.key));
     }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PdfService } from '../../services/pdf.service';
 import { MdsEditorInstanceService } from '../../features/mds/mds-editor/mds-editor-instance.service';
@@ -14,12 +14,10 @@ import { MdsViewerService } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class PdfMetadataPageComponent implements OnInit {
-    constructor(
-        private route: ActivatedRoute,
-        private location: Location,
-        private nodeService: NodeService,
-        private pdfService: PdfService,
-    ) {}
+    private route = inject(ActivatedRoute);
+    private location = inject(Location);
+    private nodeService = inject(NodeService);
+    private pdfService = inject(PdfService);
 
     async ngOnInit() {
         const nodeId = this.route.snapshot.paramMap.get('nodeId');

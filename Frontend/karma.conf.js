@@ -11,7 +11,6 @@ module.exports = function (config) {
             require('karma-verbose-reporter'),
             require('karma-jasmine-html-reporter'),
             require('karma-coverage'),
-            require('@angular-devkit/build-angular/plugins/karma'),
         ],
         client: {
             jasmine: {

@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
+import { EventEmitter, Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
@@ -49,22 +49,22 @@ export class CustomSelectionModel<T> extends SelectionModel<T> {
     );
     deselect(...values: T[]) {
         this._clickSource = null;
-        super.deselect(...values);
+        return super.deselect(...values);
     }
 
     toggle(value: T) {
         this._clickSource = null;
-        super.toggle(value);
+        return super.toggle(value);
     }
 
     clear() {
         this._clickSource = null;
-        super.clear();
+        return super.clear();
     }
 
     select(...values: T[]) {
         this._clickSource = null;
-        super.select(...values);
+        return super.select(...values);
     }
 
     /**
@@ -78,6 +78,10 @@ export class CustomSelectionModel<T> extends SelectionModel<T> {
 
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
+    private uiService = inject(UIService);
+    private toast = inject(Toast);
+    private entriesGlobal = inject(NodeEntriesGlobalService);
+
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
     readonly paginationStrategy$ = new BehaviorSubject<PaginationStrategy | null>(null);
@@ -174,12 +178,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
-
-    constructor(
-        private uiService: UIService,
-        private toast: Toast,
-        private entriesGlobal: NodeEntriesGlobalService,
-    ) {}
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
         if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {

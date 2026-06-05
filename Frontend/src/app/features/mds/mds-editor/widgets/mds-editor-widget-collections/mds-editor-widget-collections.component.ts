@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 import { NetworkService, Node, RestConstants, UsageV1Service } from 'ngx-edu-sharing-api';
@@ -18,6 +18,10 @@ import {
     standalone: false,
 })
 export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidgetComponent {
+    private mdsEditorValues = inject(MdsEditorInstanceService);
+    private usageService = inject(UsageV1Service);
+    private networkService = inject(NetworkService);
+
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     static readonly constraints = {
@@ -32,12 +36,6 @@ export class MdsEditorWidgetCollectionsComponent implements OnInit, NativeWidget
         map((_) => this.dataSource.isEmpty()),
     );
     columns = { Default: ListItem.getCollectionDefaults() };
-
-    constructor(
-        private mdsEditorValues: MdsEditorInstanceService,
-        private usageService: UsageV1Service,
-        private networkService: NetworkService,
-    ) {}
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$

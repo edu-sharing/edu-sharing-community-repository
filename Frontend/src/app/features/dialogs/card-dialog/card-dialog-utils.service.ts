@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CardDialogConfig } from './card-dialog-config';
 import { RestHelper } from '../../../core-module/core.module';
 import { Group, Node, User } from 'ngx-edu-sharing-api';
@@ -9,7 +9,9 @@ import { TranslateService } from '@ngx-translate/core';
     providedIn: 'root',
 })
 export class CardDialogUtilsService {
-    constructor(private repoUrlService: RepoUrlService, private translate: TranslateService) {}
+    private repoUrlService = inject(RepoUrlService);
+    private translate = inject(TranslateService);
+    private authorityNamePipe = inject(AuthorityNamePipe);
 
     async configForNode(node: Node | User | Group): Promise<Partial<CardDialogConfig<unknown>>> {
         if ((node as User).profile) {
@@ -18,7 +20,7 @@ export class CardDialogUtilsService {
                     kind: 'icon',
                     icon: (node as User).authorityType === 'GROUP' ? 'group' : 'person',
                 },
-                subtitle: new AuthorityNamePipe(this.translate).transform(node),
+                subtitle: this.authorityNamePipe.transform(node),
             };
         }
         return {

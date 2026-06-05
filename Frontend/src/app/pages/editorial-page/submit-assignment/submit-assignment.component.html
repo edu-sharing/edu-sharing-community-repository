@@ -1,4 +1,5 @@
-<div class="assignment-file-preview" *ngIf="selectedAssignmentFile()">
+@if (selectedAssignmentFile()) {
+<div class="assignment-file-preview">
   <div class="preview-scroll">
     <es-render-wrapper-component
       [showTopbar]="false"
@@ -17,16 +18,16 @@
     ></es-actionbar>
   </div>
 </div>
-<ng-container *ngIf="selectedCorrectedFileUrl()">
-  <ngx-extended-pdf-viewer
-    [src]="selectedCorrectedFileUrl()"
-    [height]="'auto'"
-    [language]="language"
-    [textLayer]="true"
-    [customToolbar]="additionalButtons"
-    [zoom]="'page-fit'"
-  ></ngx-extended-pdf-viewer>
-</ng-container>
+} @if (selectedCorrectedFileUrl()) {
+<ngx-extended-pdf-viewer
+  [src]="selectedCorrectedFileUrl()"
+  [height]="'auto'"
+  [language]="language"
+  [textLayer]="true"
+  [customToolbar]="additionalButtons"
+  [zoom]="'page-fit'"
+></ngx-extended-pdf-viewer>
+}
 <ng-template #additionalButtons>
   <div
     id="toolbarViewer"
@@ -43,12 +44,12 @@
     <pdf-zoom-toolbar></pdf-zoom-toolbar>
   </div>
 </ng-template>
+@if (!selectedCorrectedFileUrl() && !selectedAssignmentFile()) {
 <mat-tab-group
   class="mat-tab-group-shadow"
   [mat-stretch-tabs]="true"
   [selectedIndex]="selectedTabIndex()"
   (selectedIndexChange)="selectedTabIndex.set($event)"
-  *ngIf="!selectedCorrectedFileUrl() && !selectedAssignmentFile()"
 >
   <mat-tab>
     <ng-template mat-tab-label>
@@ -56,8 +57,10 @@
       {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.TAB_ASSIGNMENT' | translate }}
     </ng-template>
     <ng-template matTabContent>
-      <div *ngIf="assignment()" class="assignment-view">
-        <es-info-message *ngIf="submission().validationStatus === 'FINISHED'">
+      @if (assignment()) {
+      <div class="assignment-view">
+        @if (submission().validationStatus === 'FINISHED') {
+        <es-info-message>
           {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.VALIDATION_READY' | translate }}
           <div>
             <button mat-button (click)="scrollToFeedback()">
@@ -66,6 +69,7 @@
             </button>
           </div>
         </es-info-message>
+        }
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
@@ -107,14 +111,17 @@
             ></es-node-entries-wrapper>
           </div>
         </div>
-        <div class="block feedback" *ngIf="submission().validationStatus === 'FINISHED'" #feedback>
+        @if (submission().validationStatus === 'FINISHED') {
+        <div class="block feedback" #feedback>
           <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
           <div>
-            <div *ngIf="submission().feedback?.trim() as feedback">
+            @if (submission().feedback?.trim(); as feedback) {
+            <div>
               <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.FEEDBACK' | translate }}</label>
               <div [innerHTML]="feedback"></div>
             </div>
-            <div *ngIf="correctedFiles.getTotal() > 0">
+            } @if (correctedFiles.getTotal() > 0) {
+            <div>
               <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
               <es-node-entries-wrapper
                 [displayType]="NodeEntriesDisplayType.Grid"
@@ -127,9 +134,12 @@
                 [columns]="columns"
               ></es-node-entries-wrapper>
             </div>
+            }
           </div>
         </div>
+        }
       </div>
+      }
     </ng-template>
   </mat-tab>
   <mat-tab>
@@ -138,7 +148,8 @@
       {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.TAB_SUBMIT' | translate }}
     </ng-template>
     <ng-template matTabContent>
-      <div *ngIf="assignment()" class="assignment-submit">
+      @if (assignment()) {
+      <div class="assignment-submit">
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup">
@@ -162,9 +173,11 @@
             {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label
           >
           <div>
-            <es-info-message *ngIf="!isOpenForSubmission() && !isBeforeEndDate()">
+            @if (!isOpenForSubmission() && !isBeforeEndDate()) {
+            <es-info-message>
               {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ASSIGNMENT_CLOSED_OR_ENDED' | translate }}
             </es-info-message>
+            }
             <es-node-entries-wrapper
               [displayType]="NodeEntriesDisplayType.Grid"
               [checkbox]="false"
@@ -182,48 +195,43 @@
               (clickItem)="selectSubmissionFile($event.element, 'submission')"
             >
               <ng-template #overlay let-element="element">
-                <div
-                  class="polling-overlay"
-                  (click)="$event.stopPropagation()"
-                  *ngIf="pollingNodeIds().has(element.ref.id)"
-                >
-                  <ng-container *ngIf="isConnectorWindowOpen(element); else writeback">
-                    <button
-                      mat-icon-button
-                      class="close-btn"
-                      (click)="closeConnectorWindow(element); $event.stopPropagation()"
-                    >
-                      <i esIcon="close"></i>
-                    </button>
-                    <es-spinner-small></es-spinner-small>
-                    <strong>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR' | translate
-                    }}</strong>
-                    <span>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_SUBTITLE' | translate
-                    }}</span>
-                    <div class="hint">
-                      {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_HINT' | translate }}
-                    </div>
-                  </ng-container>
-                  <ng-template #writeback>
-                    <button
-                      mat-icon-button
-                      class="close-btn"
-                      (click)="cancelConnectorPolling(element); $event.stopPropagation()"
-                    >
-                      <i esIcon="close"></i>
-                    </button>
-                    <es-spinner-small></es-spinner-small>
-                    <strong>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate
-                    }}</strong>
-                    <span>{{
-                      'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK_SUBTITLE' | translate
-                    }}</span>
-                  </ng-template>
+                @if (pollingNodeIds().has(element.ref.id)) {
+                <div class="polling-overlay" (click)="$event.stopPropagation()">
+                  @if (isConnectorWindowOpen(element)) {
+                  <button
+                    mat-icon-button
+                    class="close-btn"
+                    (click)="closeConnectorWindow(element); $event.stopPropagation()"
+                  >
+                    <i esIcon="close"></i>
+                  </button>
+                  <es-spinner-small></es-spinner-small>
+                  <strong>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR' | translate }}</strong>
+                  <span>{{
+                    'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_SUBTITLE' | translate
+                  }}</span>
+                  <div class="hint">
+                    {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_HINT' | translate }}
+                  </div>
+                  } @else {
+                  <button
+                    mat-icon-button
+                    class="close-btn"
+                    (click)="cancelConnectorPolling(element); $event.stopPropagation()"
+                  >
+                    <i esIcon="close"></i>
+                  </button>
+                  <es-spinner-small></es-spinner-small>
+                  <strong>{{
+                    'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK' | translate
+                  }}</strong>
+                  <span>{{
+                    'EDITORIAL.SUBMIT_ASSIGNMENT.POLLING_CONNECTOR_WRITEBACK_SUBTITLE' | translate
+                  }}</span>
+                  }
                 </div>
-                <div class="no-submission" *ngIf="!hasSubmissionFor(element)">
+                } @if (!hasSubmissionFor(element)) {
+                <div class="no-submission">
                   <button
                     mat-button
                     class="overlay"
@@ -238,6 +246,7 @@
                     </div>
                   </button>
                 </div>
+                }
               </ng-template>
             </es-node-entries-wrapper>
           </div>
@@ -245,7 +254,9 @@
 
         <div class="block submit">
           <div>
-            <es-spinner-small *ngIf="loading()"></es-spinner-small>
+            @if (loading()) {
+            <es-spinner-small></es-spinner-small>
+            }
             <button
               mat-flat-button
               color="primary"
@@ -258,9 +269,11 @@
           </div>
         </div>
       </div>
+      }
     </ng-template>
   </mat-tab>
 </mat-tab-group>
+}
 <ng-template #heading>
   <div class="heading">
     <span>{{ assignment() | nodeTitle }}</span>
@@ -284,14 +297,16 @@
         {{ assignment().created | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
-    <div class="time end-time" *ngIf="assignment().endTime as endTime">
+    @if (assignment().endTime; as endTime) {
+    <div class="time end-time">
       <label for="endTime">{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.END_TIME' | translate }}</label>
       <div id="endTime" class="badge">
         <i esIcon="alarm"></i>
         {{ endTime | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
-    <div class="time submit-time" *ngIf="submission()?.submissionDate as submissionDate">
+    } @if (submission()?.submissionDate; as submissionDate) {
+    <div class="time submit-time">
       <label for="submitTime">{{
         'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMISSION_TIME' | translate
       }}</label>
@@ -299,5 +314,6 @@
         {{ submissionDate | formatDate : { relative: false, time: true, date: true } }}
       </div>
     </div>
+    }
   </div>
 </ng-template>

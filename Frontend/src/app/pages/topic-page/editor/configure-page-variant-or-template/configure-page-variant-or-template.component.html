@@ -1,7 +1,10 @@
-<div class="config-page-variant-or-template" *ngIf="initialized(); else loadingSpinner">
-  <es-info-message mode="error" class="info-message" *ngIf="!variableInputValid()">
+@if (initialized()) {
+<div class="config-page-variant-or-template">
+  @if (!variableInputValid()) {
+  <es-info-message mode="error" class="info-message">
     {{ i18nPrefix + (isDuplicate() ? 'DUPLICATE_WARN_TEXT' : 'WARN_TEXT') | translate }}
   </es-info-message>
+  }
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>
       {{ dynamicI18nPrefix() + 'TITLE' | translate }}
@@ -13,7 +16,6 @@
       [(ngModel)]="titleInput"
     />
   </mat-form-field>
-
   <es-mds-editor-wrapper
     class="page-variant-config-editor"
     [currentValues]="currentValues"
@@ -26,10 +28,9 @@
     (currentValuesChange)="onCurrentValuesChange($event)"
   >
   </es-mds-editor-wrapper>
-
   <div class="configuration-buttons">
+    @if (deleteVariantEnabled()) {
     <button
-      *ngIf="deleteVariantEnabled()"
       mat-stroked-button
       class="btn-outline-primary"
       color="primary"
@@ -38,6 +39,7 @@
       <i esIcon="delete"></i>
       {{ dynamicI18nPrefix() + 'DELETE_VARIANT' | translate }}
     </button>
+    }
     <div [matTooltip]="regenerateTooltip()">
       <button
         mat-stroked-button
@@ -49,8 +51,8 @@
         {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
       </button>
     </div>
+    @if (addToGlobalTemplatesEnabled()) {
     <button
-      *ngIf="addToGlobalTemplatesEnabled()"
       mat-stroked-button
       class="btn-outline-primary"
       color="primary"
@@ -59,6 +61,7 @@
       <i esIcon="public"></i>
       {{ dynamicI18nPrefix() + 'ADD_TO_GLOBAL_TEMPLATES' | translate }}
     </button>
+    }
     <div
       [matTooltip]="
         !variableInputValid()
@@ -78,6 +81,6 @@
     </div>
   </div>
 </div>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}

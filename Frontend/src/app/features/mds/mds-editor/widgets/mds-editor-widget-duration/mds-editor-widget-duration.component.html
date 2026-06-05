@@ -1,5 +1,5 @@
+@if (currentValue !== undefined) {
 <es-mds-editor-widget-container
-  *ngIf="currentValue !== undefined"
   [widget]="widget"
   [label]="widget.definition.caption"
   [valueType]="valueType"
@@ -40,3 +40,4 @@
     ></ngx-slider>
   </div>
 </es-mds-editor-widget-container>
+}

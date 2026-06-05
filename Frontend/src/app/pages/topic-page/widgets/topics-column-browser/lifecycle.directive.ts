@@ -1,4 +1,4 @@
-import { AfterViewInit, Directive, ElementRef, EventEmitter, Output } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, EventEmitter, Output, inject } from '@angular/core';
 
 /**
  * Provide event emitters for Angular lifecycle events.
@@ -8,9 +8,9 @@ import { AfterViewInit, Directive, ElementRef, EventEmitter, Output } from '@ang
     standalone: true,
 })
 export class LifecycleDirective<T> implements AfterViewInit {
-    @Output() afterViewInit: EventEmitter<ElementRef<T>> = new EventEmitter();
+    private elementRef = inject<ElementRef<T>>(ElementRef);
 
-    constructor(private elementRef: ElementRef<T>) {}
+    @Output() afterViewInit: EventEmitter<ElementRef<T>> = new EventEmitter();
 
     ngAfterViewInit(): void {
         this.afterViewInit.emit(this.elementRef);

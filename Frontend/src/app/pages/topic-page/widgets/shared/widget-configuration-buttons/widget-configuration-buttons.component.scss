@@ -92,7 +92,7 @@
             display: flex;
             justify-content: center;
             flex-direction: column;
-            height: var(--mat-standard-button-toggle-height);
+            height: var(--mat-button-toggle-height);
         }
         div {
             font-size: 62.5%;
@@ -108,7 +108,7 @@
 
     // match button disabled label text color
     &.disabled-text {
-        color: var(--mdc-text-button-disabled-label-text-color, topicPageVars.$secondary);
+        color: var(--mat-button-text-disabled-label-text-color, topicPageVars.$secondary);
     }
 }
 

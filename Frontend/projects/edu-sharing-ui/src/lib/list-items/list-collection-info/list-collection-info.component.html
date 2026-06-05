@@ -1,63 +1,51 @@
-<ng-container [ngSwitch]="item.name">
-  <ng-container *ngSwitchCase="'info'">
-    <ng-container *ngIf="nodeModified$ | async as nodeModified; else notModified">
-      <ng-container
-        *ngTemplateOutlet="infoContent; context: { modified: nodeModified }"
-      ></ng-container>
-    </ng-container>
-    <ng-template #notModified>
-      <ng-container *ngTemplateOutlet="infoContent; context: { modified: false }"></ng-container>
-    </ng-template>
-    <ng-template #infoContent let-modified="modified">
-      <ng-container *ngIf="indicatorIcons$ | async; else textRepresentation">
-        <i
-          esIcon="layers"
-          [altText]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
-          [matTooltip]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
-        ></i>
-        <span [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
-          {{ modified ? '-' : $any(node).collection?.childCollectionsCount }}
-        </span>
-        <i
-          esIcon="insert_drive_file"
-          [altText]="'collections_content' | translate"
-          [matTooltip]="'collections_content' | translate"
-        ></i>
-        <span [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
-          {{ modified ? '-' : $any(node).collection?.childReferencesCount }}
-        </span>
-      </ng-container>
-      <ng-template #textRepresentation>
-        <div class="rows">
-          <p [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
-            {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}:
-            {{ modified ? '-' : $any(node).collection?.childCollectionsCount }}
-          </p>
-          <p [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
-            {{ 'collections_content' | translate }}:
-            {{ modified ? '-' : $any(node).collection?.childReferencesCount }}
-          </p>
-        </div>
-      </ng-template>
-    </ng-template>
-  </ng-container>
-  <ng-container *ngSwitchCase="'scope'">
-    <i
-      *ngIf="indicatorIcons$ | async; else textRepresentation"
-      class="collectionScope"
-      [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
-      esIconContext="collection-scope"
-      [matTooltip]="
-        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-      "
-      [altText]="
-        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-      "
-    ></i>
-    <ng-template #textRepresentation>
-      {{
-        'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-      }}
-    </ng-template>
-  </ng-container>
-</ng-container>
+@switch (item.name) { @case ('info') { @if (nodeModified$ | async; as nodeModified) {
+<ng-container *ngTemplateOutlet="infoContent; context: { modified: nodeModified }"></ng-container>
+} @else {
+<ng-container *ngTemplateOutlet="infoContent; context: { modified: false }"></ng-container>
+}
+<ng-template #infoContent let-modified="modified">
+  @if (indicatorIcons$ | async) {
+  <i
+    esIcon="layers"
+    [altText]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
+    [matTooltip]="'COLLECTION.INFO_REFERENCES_MULTI' | translate"
+  ></i>
+  <span [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
+    {{ modified ? '-' : $any(node).collection?.childCollectionsCount }}
+  </span>
+  <i
+    esIcon="insert_drive_file"
+    [altText]="'collections_content' | translate"
+    [matTooltip]="'collections_content' | translate"
+  ></i>
+  <span [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
+    {{ modified ? '-' : $any(node).collection?.childReferencesCount }}
+  </span>
+  } @else {
+  <div class="rows">
+    <p [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
+      {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}:
+      {{ modified ? '-' : $any(node).collection?.childCollectionsCount }}
+    </p>
+    <p [matTooltip]="modified ? ('COLLECTION.INFO_UPDATING' | translate) : null">
+      {{ 'collections_content' | translate }}:
+      {{ modified ? '-' : $any(node).collection?.childReferencesCount }}
+    </p>
+  </div>
+  }
+</ng-template>
+} @case ('scope') { @if (indicatorIcons$ | async) {
+<i
+  class="collectionScope"
+  [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+  esIconContext="collection-scope"
+  [matTooltip]="
+    'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+  "
+  [altText]="
+    'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+  "
+></i>
+} @else {
+{{ 'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate }}
+} } }

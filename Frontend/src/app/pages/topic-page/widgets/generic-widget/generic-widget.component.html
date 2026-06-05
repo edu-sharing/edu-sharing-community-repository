@@ -1,6 +1,6 @@
 <!-- Common widget header -->
+@if (initialized()) {
 <es-generic-widget-header
-  *ngIf="initialized(); else loadingSpinner"
   [aiSupported]="aiSupported()"
   [description]="description"
   [descriptionAiGenerated]="descriptionAiGenerated()"
@@ -17,10 +17,9 @@
   (textChange)="onHeaderTextChange($event)"
   (searchResultsUpdated)="onSearchResultsUpdated($event)"
 ></es-generic-widget-header>
-
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}
 
 <!-- Individual widget content -->
 <div #widgetContainer class="es-widget-content" [class.edit-mode]="editMode()"></div>

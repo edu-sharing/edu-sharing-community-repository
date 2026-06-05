@@ -8,6 +8,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     ConfigurationService,
@@ -76,6 +77,19 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     standalone: false,
 })
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
+    private connector = inject(RestConnectorService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private translate = inject(TranslateService);
+    private storage = inject(SessionStorageService);
+    private userService = inject(UserService);
+    private temporaryStorage = inject(TemporaryStorageService);
+    private config = inject(ConfigurationService);
+    private search = inject(SearchService);
+    private toast = inject(Toast);
+    ui = inject(UIService);
+    private nodeApi = inject(NodeService);
+    private localEvents = inject(LocalEventsService);
+
     public readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -349,20 +363,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             this.dataSource.setPagination(data.pagination);
         }
     }
-    constructor(
-        private connector: RestConnectorService,
-        private editorialSidebarService: EditorialSidebarService,
-        private translate: TranslateService,
-        private storage: SessionStorageService,
-        private userService: UserService,
-        private temporaryStorage: TemporaryStorageService,
-        private config: ConfigurationService,
-        private search: SearchService,
-        private toast: Toast,
-        public ui: UIService,
-        private nodeApi: NodeService,
-        private localEvents: LocalEventsService,
-    ) {
+    constructor() {
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
         this.registerNodesChanged();
@@ -534,7 +535,6 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 takeUntil(this.destroyed),
                 filter(({ source, target }) => {
                     const currentId = this.node$.value?.ref?.id;
-                    console.log(currentId, source, target);
                     return (
                         [RestConstants.USERHOME, RestConstants.SHARED_FILES].includes(currentId) ||
                         source?.ref?.id === currentId ||

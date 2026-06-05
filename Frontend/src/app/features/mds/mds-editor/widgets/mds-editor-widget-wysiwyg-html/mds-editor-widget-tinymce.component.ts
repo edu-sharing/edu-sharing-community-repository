@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
 import { TranslateService } from '@ngx-translate/core';
@@ -26,6 +26,9 @@ import { ValueType } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {
+    private platformLocation = inject(PlatformLocation);
+    cardService = inject(CardDialogService);
+
     @ViewChild(EditorComponent) editorComponent: EditorComponent;
     @ViewChild(MdsEditorWidgetContainerComponent)
     containerComponent: MdsEditorWidgetContainerComponent;
@@ -52,14 +55,8 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         this._html = html;
         this.setValue([html]);
     }
-    constructor(
-        toast: Toast,
-        private platformLocation: PlatformLocation,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        public cardService: CardDialogService,
-        protected translate: TranslateService,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
 
     onIndeterminateChange(isIndeterminate: boolean): void {

@@ -18,6 +18,7 @@ import {
     ViewContainerRef,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -92,6 +93,15 @@ export enum CustomCardRole {
     styleUrls: ['./generic-node-entries.component.scss'],
 })
 export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit {
+    private elementRef = inject(ElementRef);
+    genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private mdsHelperService = inject(MdsHelperService);
+    private mdsService = inject(MdsService);
+    private previewSidebarService = inject(PreviewSidebarService);
+    private searchService = inject(SearchService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private uiService = inject(UIService);
+
     @ViewChild('customType', { read: ViewContainerRef, static: false })
     customType!: ViewContainerRef;
     @ViewChild('customType') customTypeElement!: ElementRef<HTMLElement>;
@@ -265,16 +275,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         return this.selectedNodeIds?.length > 0;
     }
 
-    constructor(
-        private elementRef: ElementRef,
-        public genericWidgetGlobalService: GenericWidgetGlobalService,
-        private mdsHelperService: MdsHelperService,
-        private mdsService: MdsService,
-        private previewSidebarService: PreviewSidebarService,
-        private searchService: SearchService,
-        private topicPageHelperService: TopicPageHelperService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         // subscribe to changes on the selected node
         this.previewSidebarService
             .getCurrentNode()

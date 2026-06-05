@@ -1,5 +1,5 @@
 @use '../../../../assets/scss/mixins' as mixins;
-@use '../../node-entries/node-entries-card-small/node-entries-card-small.component' as badges;
+@use '../../node-entries/node-entries-card-small/assignment-mixins' as badges;
 :host {
     > span {
         display: flex;
