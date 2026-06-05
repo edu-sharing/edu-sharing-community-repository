@@ -45,7 +45,6 @@
     ></ng-container>
   </div>
   <ng-container *ngIf="!previewSidebarTemplateService.metadata">
-    TEST: {{ node()?.name | json }}
     <es-mds-editor-wrapper
       #mds
       *ngIf="node()?.properties"
