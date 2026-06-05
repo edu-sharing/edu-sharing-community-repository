@@ -1,7 +1,8 @@
-import { Pipe, PipeTransform, inject } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { User } from '../../core-module/rest/data-object';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'authorityAffiliation',
     standalone: false,
