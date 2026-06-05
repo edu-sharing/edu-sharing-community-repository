@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, signal, inject } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EditorialSidebarComponent,
@@ -143,7 +143,8 @@ export class EditorialSidebarService {
             selection.source.selected.length !== 1 &&
             !MULTISELECT_OPTIONS.includes(this._editorialSidebar.enabledOption()?.option)
         ) {
-            this.close();
+            this._editorialSidebar.enabledOption.set(null);
+            //this.close();
         } else {
             //this.selection.set(selection.source.
         }

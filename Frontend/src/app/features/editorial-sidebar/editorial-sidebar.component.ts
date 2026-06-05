@@ -3,6 +3,7 @@ import {
     computed,
     effect,
     EventEmitter,
+    inject,
     input,
     OnChanges,
     OnDestroy,
@@ -12,7 +13,6 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
 import {
@@ -58,7 +58,7 @@ export type EditorialSidebarOption =
 /**
  * list of options that support multi selection
  */
-export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['SORT_INTO'];
+export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['MANAGE_CONTENT'];
 
 export type PreviewConfig = {
     /** override the editorMode of the embedded mds-editor-wrapper. Default: 'viewer'. */

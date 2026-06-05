@@ -4,11 +4,11 @@ import {
     ApplicationRef,
     Component,
     HostListener,
+    inject,
     NgZone,
     OnDestroy,
     OnInit,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -279,14 +279,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
      * - mainnav
      */
     private initMainNav(): void {
-        this.localEvents.nodesCreated.subscribe((nodes) => {
-            const filtered = nodes.filter(
-                (n) => n.parent?.id === this.currentFolder?.ref?.id || this.isRootFolder,
-            );
-            if (filtered.length) {
-                this.explorer.nodeEntries.addVirtualNodes(filtered);
-            }
-        });
         this.mainNavService.setMainNavConfig({
             title: this.isSafe ? 'WORKSPACE.TITLE_SAFE' : 'WORKSPACE.TITLE',
             currentScope: this.isSafe ? 'safe' : 'workspace',

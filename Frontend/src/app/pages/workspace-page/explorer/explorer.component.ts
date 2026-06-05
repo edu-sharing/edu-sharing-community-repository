@@ -2,13 +2,13 @@ import {
     AfterViewInit,
     Component,
     EventEmitter,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     Output,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import {
     ConfigurationService,
@@ -367,6 +367,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         // super(temporaryStorage,['_node','_nodes','sortBy','sortAscending','columns','totalCount','hasMoreToLoad']);
         this.initColumns();
         this.registerNodesChanged();
+        this.registerNodesCreated();
         this.registerNodesDeleted();
         this.registerNodesMoved();
         combineLatest([this.node$, this.searchQuery$, this.sortReady])
@@ -522,10 +523,11 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                 filter(() => !this.editorialSidebarService.sidebarOpened()),
             )
             .subscribe(() => {
-                void this.load({
+                // not necessary since nodesCreated triggers it already
+                /*void this.load({
                     offset: 0,
                     reset: true,
-                });
+                });*/
             });
     }
 
@@ -545,6 +547,24 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
             .subscribe(() => {
                 void this.load({ offset: 0, reset: true });
             });
+    }
+
+    private registerNodesCreated(): void {
+        this.localEvents.nodesCreated.pipe(takeUntil(this.destroyed)).subscribe((nodes) => {
+            const currentId = this.node$.value?.ref?.id;
+            if (!currentId) {
+                return;
+            }
+            const filtered = nodes.filter(
+                (n) =>
+                    [RestConstants.USERHOME, RestConstants.SHARED_FILES].includes(currentId) ||
+                    n.parent?.id === currentId,
+            );
+            if (filtered.length) {
+                console.log('filtered', filtered.length);
+                this.nodeEntries?.addVirtualNodes(filtered, { select: false });
+            }
+        });
     }
 
     private registerNodesDeleted(): void {
