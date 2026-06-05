@@ -50,6 +50,11 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
      */
     @Input() autoRender = false;
 
+    /**
+     * whether this content is displayed inside the fullscreen modal rather than the sidebar
+     */
+    @Input() modal = false;
+
     @Input() customOptions: CustomOptions;
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
