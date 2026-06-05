@@ -62,8 +62,8 @@
   @if (supportedTabs().includes(TabType.UPLOAD)) {
   <mat-tab [id]="idPrefix + TabType.UPLOAD">
     <ng-template mat-tab-label>
-      <i esIcon="add" class="tab-icon"></i>
-      <span class="tab-label">{{ 'CREATE' | translate }}</span>
+      <i esIcon="add_circle_outline" class="tab-icon"></i>
+      <span class="tab-label">{{ i18nPrefix + 'UPLOAD.TITLE' | translate }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.UPLOAD }"
