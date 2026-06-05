@@ -1,15 +1,11 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import { Assignment, Group, Permission, RestConstants, User } from 'ngx-edu-sharing-api';
-import { VCard } from '../util/VCard';
+import { Assignment, Permission } from 'ngx-edu-sharing-api';
 
 @Pipe({
     name: 'assignment',
     standalone: false,
 })
 export class AssignmentPipe implements PipeTransform {
-    constructor() {}
-
     transform(
         assignment: Assignment,
         args: {

@@ -1,7 +1,7 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { VCard } from '../util/VCard';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'vcardName',
     standalone: false,
