@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server.importer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.repository.server.tools.VCardPIDMapper;
+import org.edu_sharing.service.license.LicenseService;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -26,18 +29,27 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 	
 	String metadataSetId = null;
 	Map<String, Object> toSafeMap = new HashMap<>();
+
+    List<String> toRemoveList = new ArrayList<>();
 	
 	int counter = 0;
+
+    LicenseService licenseService = new LicenseService();
 	
 	@Override
 	public Map<String, Object> getProperties() {
 		return toSafeMap;
 	}
-	
-	public RecordHandlerDublinCoreDMG(String metadataSetId) {
+
+    @Override
+    public List<String> getPropertiesToRemove() {
+        return toRemoveList;
+    }
+
+    public RecordHandlerDublinCoreDMG(String metadataSetId) {
 		logger.info("initializing...");
 		
-		if(metadataSetId == null || metadataSetId.trim().equals("")){
+		if(metadataSetId == null || metadataSetId.trim().isEmpty()){
 			metadataSetId = "default";
 		}
 		this.metadataSetId = metadataSetId;
@@ -53,28 +65,6 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 		}
 		
 		String replicationId = (String) xpath.evaluate("header/identifier", nodeRecord, XPathConstants.STRING);
-		
-		
-		String lrt = "data";
-		if("doc-type:image".equals(set)){
-			lrt = "image";
-		}
-		if("doc-type:manim".equals(set)){
-			lrt = "animation";
-		}
-		if("doc-type:iactm".equals(set)){
-			lrt = "role_play";
-		}
-		if("doc-type:video".equals(set)){
-			lrt = "video";
-		}
-		if("doc-type:biogr".equals(set)){
-			lrt = "literature";
-		}
-		
-		
-		toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, lrt);
-		
 		
 		String lomCatalogId = null;
 		if(replicationId != null){
@@ -107,24 +97,53 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 			logger.info("safeTitle:"+safeTitle);
 			toSafeMap.put(CCConstants.CM_NAME, safeTitle);
 			toSafeMap.put(CCConstants.LOM_PROP_GENERAL_TITLE, title);
-			
-			String keywords = title;
-			keywords = keywords.replaceAll(",", " ");
-			String[] splittetTitle = keywords.split(" ");
-			ArrayList<String> listTitle = new ArrayList<>();
-			if(splittetTitle != null && splittetTitle.length > 0){
-				for(String titleEle : splittetTitle){
-					titleEle = titleEle.trim();
-					if(titleEle.length() > 3){
-						listTitle.add(titleEle);
-					}
-				}
-			}
-			
-			toSafeMap.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, listTitle);
-			
-			
 		}
+
+        // subjects
+        List<String> taxonIds = new ArrayList<>();
+        List<String> keywords = new ArrayList<>();
+        NodeList subjects = (NodeList) xpath.evaluate("metadata/dc/subject", nodeRecord, XPathConstants.NODESET);
+        for(int i = 0; i < subjects.getLength(); i++){
+            Node subjectNode = subjects.item(i);
+            String subject = (String)xpath.evaluate(".", subjectNode, XPathConstants.STRING);
+            if(subject != null && !subject.trim().startsWith("https://w3id.org/kim/hochschulfaechersystematik")){
+                keywords.add(subject);
+            }else{
+                taxonIds.add(subject);
+            }
+        }
+
+        if(keywords.isEmpty()){
+            toRemoveList.add(CCConstants.LOM_PROP_GENERAL_KEYWORD);
+        }else{
+            toSafeMap.put(CCConstants.LOM_PROP_GENERAL_KEYWORD, keywords);
+        }
+
+        if(taxonIds.isEmpty()){
+            toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
+        }else {
+            toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_TAXON_ID, taxonIds);
+        }
+
+
+
+        // types
+        List<String> lrts = new ArrayList<>();
+        NodeList types = (NodeList) xpath.evaluate("metadata/dc/type", nodeRecord, XPathConstants.NODESET);
+        for(int i = 0; i < types.getLength(); i++){
+            Node subjectNode = types.item(i);
+            String subject = (String)xpath.evaluate(".", subjectNode, XPathConstants.STRING);
+            if(subject != null && !subject.trim().isEmpty()){
+                lrts.add(subject);
+            }
+        }
+
+        if(lrts.isEmpty()){
+            toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE);
+        }else {
+            toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE, lrts);
+        }
+
 		
 		NodeList descriptionList = (NodeList) xpath.evaluate("metadata/dc/description", nodeRecord, XPathConstants.NODESET);
 		
@@ -145,40 +164,41 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 		if(description  != null){
 			toSafeMap.put(CCConstants.LOM_PROP_GENERAL_DESCRIPTION, description);
 		}
-		
+
+        List<String> creators = new ArrayList<>();
 		NodeList metadataCreator =  (NodeList) xpath.evaluate("metadata/dc/creator", nodeRecord, XPathConstants.NODESET);
 		for(int i = 0; i < metadataCreator.getLength(); i++){
 			Node metadataCreatorNode = metadataCreator.item(i);
 			String metadataCreatorString = ((String)xpath.evaluate(".", metadataCreatorNode, XPathConstants.STRING)).trim();
-			if(!metadataCreatorString.equals("")){
-				Map<String,String> vcardMap = new HashMap<>();
-				vcardMap.put(CCConstants.VCARD_SURNAME, metadataCreatorString);
+			if(!metadataCreatorString.isEmpty()){
+				Map<String,String> vcardMap = VCardPIDMapper.build(metadataCreatorString);
 				String vcardString = VCardTool.hashMap2VCard(vcardMap);
-				
-				Map<String,Object> contributerMetadataCreator = new HashMap<>();
-				contributerMetadataCreator.put(CCConstants.LOM_PROP_CONTRIBUTE_ENTITY, vcardString);
-				contributerMetadataCreator.put(CCConstants.LOM_PROP_CONTRIBUTE_ROLE, "creator");
-				toSafeMap.put("TYPE#" + CCConstants.LOM_TYPE_CONTRIBUTE + "#" + CCConstants.LOM_ASSOC_META_METADATA_CONTRIBUTE, contributerMetadataCreator);
-				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, vcardString);
+                creators.add(vcardString);
 			}
 		}
-		
+        if(creators.isEmpty()){
+            toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR);
+        }else{
+            toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_METADATACONTRIBUTER_CREATOR, creators);
+        }
+
+        List<String> publisher = new ArrayList<>();
 		NodeList contributerPublisher = (NodeList) xpath.evaluate("metadata/dc/publisher", nodeRecord, XPathConstants.NODESET);
 		for(int i = 0; i < contributerPublisher.getLength(); i++){
 			Node contributerPublisherNode= contributerPublisher.item(i);
 			String contributerPublisherString = ((String)xpath.evaluate(".", contributerPublisherNode, XPathConstants.STRING)).trim();
-			if(!contributerPublisherString.equals("")){
-				Map<String,String> vcardMap = new HashMap<>();
-				vcardMap.put(CCConstants.VCARD_SURNAME, contributerPublisherString);
+			if(!contributerPublisherString.isEmpty()){
+				Map<String,String> vcardMap =  VCardPIDMapper.build(contributerPublisherString);
 				String vcardString = VCardTool.hashMap2VCard(vcardMap);
-				
-				Map<String,Object> contributerPublisherMap  = new HashMap<>();
-				contributerPublisherMap.put(CCConstants.LOM_PROP_CONTRIBUTE_ENTITY, vcardString);
-				contributerPublisherMap.put(CCConstants.LOM_PROP_CONTRIBUTE_ROLE, "publisher");
-				toSafeMap.put("TYPE#" + CCConstants.LOM_TYPE_CONTRIBUTE + "#" + CCConstants.LOM_ASSOC_LIFECYCLE_CONTRIBUTE, contributerPublisherMap);
-				toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER, vcardString);
+                publisher.add(vcardString);
 			}
 		}
+
+        if(publisher.isEmpty()){
+            toRemoveList.add(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
+        }else {
+            toSafeMap.put(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER, publisher);
+        }
 		
 		NodeList identifierList = (NodeList) xpath.evaluate("metadata/dc/identifier", nodeRecord, XPathConstants.NODESET);
 		String technicalLocation = null;
@@ -205,7 +225,19 @@ public class RecordHandlerDublinCoreDMG implements RecordHandlerInterface {
 		}
 		
 		String lomRights = (String) xpath.evaluate("metadata/dc/rights", nodeRecord, XPathConstants.STRING);
-		toSafeMap.put(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION, lomRights);	
+		toSafeMap.put(CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION, lomRights);
+
+        if(lomRights != null && !lomRights.trim().isEmpty()) {
+            try {
+                LicenseService.LicenseUrl licenseUrl = licenseService.parseLicenseUrl(lomRights.trim());
+                toSafeMap.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY, licenseUrl.licenseKey());
+                toSafeMap.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION,licenseUrl.version());
+                toSafeMap.put(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_LOCALE,licenseUrl.language());
+
+            } catch (IllegalArgumentException e) {
+                logger.info("can not parse url: " + lomRights + " - " + e.getMessage());
+            }
+        }
 		
 		counter++;
 	}
