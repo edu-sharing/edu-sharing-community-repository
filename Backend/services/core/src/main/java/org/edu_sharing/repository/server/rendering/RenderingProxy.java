@@ -7,12 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.*;
 
+import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
 
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.RenderingDetailsEntry;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -133,6 +135,7 @@ public class RenderingProxy extends HttpServlet {
 		String ts = req.getParameter("ts");
 		//some lms may tell an own signed string to validate?
 		String signed = req.getParameter("signed");
+        String signedAlg = req.getParameter("signedAlg");
 		String app_id = req.getParameter("app_id");
 		//the proxy Repository
 		String proxyRepId = req.getParameter("proxyRepId");
@@ -143,7 +146,7 @@ public class RenderingProxy extends HttpServlet {
 		ApplicationInfo appInfoApplication = ApplicationInfoList.getRepositoryInfoById(app_id);
 		if(appInfoApplication != null){
 
-			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts);
+			SignatureVerifier.Result result = new SignatureVerifier().verify(app_id, sig, signed, ts, signedAlg);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				logger.warn("Signature failed for app " + app_id + ": " + result.getMessage() + " (" + result.getStatuscode()+")");
 				throw new RenderingException(result.getStatuscode(),result.getMessage(),RenderingException.I18N.encryption);
@@ -153,7 +156,7 @@ public class RenderingProxy extends HttpServlet {
 				throw new RenderingException(HttpServletResponse.SC_BAD_REQUEST,"missing proxyRepId",RenderingException.I18N.invalid_parameters);
 			}
 
-			SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
+			SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts, signedAlg);
 			if(result.getStatuscode() != HttpServletResponse.SC_OK){
 				throw new RenderingException(result.getStatuscode(),result.getMessage(),RenderingException.I18N.encryption);
 			}
@@ -327,8 +330,14 @@ public class RenderingProxy extends HttpServlet {
 		long timestamp = System.currentTimeMillis();
 		contentUrl = UrlTool.setParam(contentUrl, "ts", timestamp + "");
 		try {
+
+            String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+            ApplicationInfo appInfoRs1 = ApplicationInfoList.getRenderService();
+            String alg = StringUtils.isNullOrEmpty( appInfoRs1.getSignatureAlgorithm())  ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
+
 			contentUrl = UrlTool.setParam(contentUrl, "sig",
-					RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp));
+					RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp,alg));
+            contentUrl = UrlTool.setParam(contentUrl, "signedAlg", alg);
 		} catch (GeneralSecurityException e) {
 			throw new RenderingException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 					"Error building signature " + rep_id + " " + nodeId, RenderingException.I18N.encryption, e);

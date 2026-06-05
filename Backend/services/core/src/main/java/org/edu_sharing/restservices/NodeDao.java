@@ -297,9 +297,9 @@ public class NodeDao {
 
             Signing signing = new Signing();
             PrivateKey privateKey = signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM);
-            byte[] signedNodeData = signing.sign(privateKey, serializedNode, CCConstants.SECURITY_SIGN_ALGORITHM);
-
-            return new SignedNode(serializedNode, signedNodeData);
+            String alg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+            byte[] signedNodeData = signing.sign(privateKey, serializedNode, alg);
+            return new SignedNode(serializedNode, signedNodeData,alg);
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -440,15 +440,11 @@ public class NodeDao {
             if (result.getCount() == 0) {
                 // try to search for ignorable properties to be null
                 List<String> removed;
-                if (searchService instanceof SearchServiceElastic) {
-                    try {
-                        removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_DSL));
-                    } catch (IllegalArgumentException e) {
-                        // query not available via dsl, so no slacking is done
-                        return result;
-                    }
-                } else {
-                    removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_LUCENE));
+                try {
+                    removed = slackCriteriasMap(criteriasMap, mdsDao.getMds().findQuery(query, MetadataReader.QUERY_SYNTAX_DSL));
+                } catch (IllegalArgumentException e) {
+                    // query not available via dsl, so no slacking is done
+                    return result;
                 }
                 result = transform(repoDao, searchService.search(mdsDao.getMds(), query, criteriasMap, token), filter, transform);
                 result.setIgnored(removed);
@@ -2371,7 +2367,7 @@ public class NodeDao {
         } else{
             user = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        UserProfile userProfile = PersonDao.getPerson(repoDao, user).asPerson().getProfile();
+        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
         Node node = asNode();
 
         java.util.Collection<String> permissions;

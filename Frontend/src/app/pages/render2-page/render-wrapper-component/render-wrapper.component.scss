@@ -6,6 +6,8 @@ $horizontalScrollPadding: 1.5em;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
 es-spinner {
+    margin-top: 40px;
+    width: 100%;
     height: 100%;
     max-height: $maxHeight;
     display: flex;
@@ -118,8 +120,6 @@ es-spinner {
     }
 }
 rs-root {
-    //height: $minHeight;
-    //max-height: $maxHeight;
     margin: $rsPaddingVertical $rsPaddingHorizontal;
     padding: 0;
     --containerHeight: var(--renderWrapperHeight, #{$maxHeight});
@@ -179,6 +179,29 @@ rs-root {
                     width: 90%;
                 }
             }
+        }
+    }
+}
+:host(.full-width) rs-root {
+    margin-left: 0;
+    margin-right: 0;
+    flex-grow: 1;
+    ::ng-deep .module {
+        &.module-JUPYTER,
+        &.module-EDUHTML,
+        &.module-BINDER,
+        &.module-SPREADSHEET,
+        &.module-MOODLE,
+        &.module-HTML,
+        &.module-url,
+        &.module-VIDEO,
+        &.module-AUDIO,
+        &.module-IMAGE,
+        &.module-DDB,
+        &.module-DOCUMENT,
+        &.module-PDF,
+        &.module-H5P {
+            width: 100%;
         }
     }
 }

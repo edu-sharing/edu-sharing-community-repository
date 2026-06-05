@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class MetadataSearchHelper {
 	
 	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
-	private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_LUCENE);
+	private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
 	public static Map<String, String[]> convertCriterias(List<MdsQueryCriteria> criterias){
 		Map<String,String[]> criteriasMap=new HashMap<>();
@@ -322,7 +322,7 @@ public class MetadataSearchHelper {
 		return result;
 	}
 	public static String getLuceneString(String queryId,Map<String,String[]> parameters) throws Exception {
-		MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
+		MetadataQueries queries = MetadataHelper.getLocalDefaultMetadataset().getQueries(MetadataReader.QUERY_SYNTAX_DSL);
 		return getLuceneString(queries, queries.findQuery(queryId), null, parameters);
 	}
 	public static String getLuceneString(MetadataQueries queries,MetadataQuery query, SearchCriterias searchCriterias,Map<String,String[]> parameters) throws IllegalArgumentException {

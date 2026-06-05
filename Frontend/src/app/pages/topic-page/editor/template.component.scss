@@ -156,7 +156,8 @@ es-side-menu-wrapper {
             // image-wrapper, even though it has margin-right set
             ::ng-deep es-topic-header {
                 es-image-wrapper,
-                es-image-wrapper .image-wrapper {
+                es-image-wrapper .image-wrapper,
+                es-image-wrapper .image-loading {
                     border-top-right-radius: var(--border-radius);
                     border-bottom-right-radius: var(--border-radius);
                 }
@@ -652,7 +653,8 @@ es-side-menu-wrapper {
         // adjust border-radius set by workaround for keeping overflow: hidden
         .template-header-wrapper .template-header-container ::ng-deep es-topic-header {
             es-image-wrapper,
-            es-image-wrapper .image-wrapper {
+            es-image-wrapper .image-wrapper,
+            es-image-wrapper .image-loading {
                 border-top-right-radius: var(--border-radius);
                 border-bottom-right-radius: unset;
             }

@@ -84,7 +84,7 @@ public class SearchServiceYouTubeImpl extends SearchServiceAdapter{
 			search.setType("video");
 
 			// To increase efficiency, only retrieve the fields that the application uses.
-			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/publishedAt,snippet/thumbnails/default/url,snippet/channelTitle)");
+			search.setFields("items(id/kind,id/videoId,snippet/title,snippet/description,snippet/publishedAt,snippet/thumbnails/default/url,snippet/channelTitle),pageInfo");
 			// youtube api only supports max. 50
 			search.setMaxResults(Math.min((long) token.getFrom()+token.getMaxResult(),50));
 			

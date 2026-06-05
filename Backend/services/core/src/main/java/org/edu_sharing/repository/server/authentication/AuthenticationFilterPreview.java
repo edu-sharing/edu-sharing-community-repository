@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.authentication;
 
+import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,6 +9,7 @@ import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
@@ -105,6 +108,8 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 			 * when an remote LMS wants to get an object preview from this repo the proxy repo sends signed data
 			 */
 			String signed = req.getParameter("signed");
+            String signedAlg = req.getParameter("signedAlg");
+
 			if(signed == null) signed = appId + ts;
 
 			if(repoId == null || repoId.trim().equals("")){
@@ -118,7 +123,7 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 			ApplicationInfo tAppInfo = ApplicationInfoList.getRepositoryInfoById(appId);
 			if (tAppInfo != null) {
 
-				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts);
+				SignatureVerifier.Result result = new SignatureVerifier().verify(appId, sig, signed, ts, signedAlg);
 				if(result.getStatuscode() != HttpServletResponse.SC_OK){
 					httpServletResponse.sendError(result.getStatuscode(),result.getMessage());
 					return;
@@ -131,7 +136,7 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 					return;
 				}
 
-				SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts);
+				SignatureVerifier.Result result = new SignatureVerifier().verify(proxyRepId, sig, signed, ts, signedAlg);
 				if(result.getStatuscode() != HttpServletResponse.SC_OK){
 					httpServletResponse.sendError(result.getStatuscode(), result.getMessage());
 					return;
@@ -297,10 +302,14 @@ public class AuthenticationFilterPreview implements jakarta.servlet.Filter {
 				
 				try {
 					if(privateKey != null){
-						byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, CCConstants.SECURITY_SIGN_ALGORITHM);
+                        String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+                        String alg = StringUtils.isNullOrEmpty( appInfo.getSignatureAlgorithm())  ? defaultAlg : appInfo.getSignatureAlgorithm();
+
+                        byte[] signature = sigTool.sign(sigTool.getPemPrivateKey(privateKey, CCConstants.SECURITY_KEY_ALGORITHM), data, alg);
 							
 						String urlSig = URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(signature));
 						url = UrlTool.setParam(url, "sig",urlSig);
+                        url = UrlTool.setParam(url, "signedAlg",alg);
 					}
 				} catch (GeneralSecurityException e) {
 					e.printStackTrace();
