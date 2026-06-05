@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     effect,
+    inject,
     input,
     model,
     OnInit,
@@ -11,7 +12,6 @@ import {
     signal,
     ViewChild,
     WritableSignal,
-    inject,
 } from '@angular/core';
 import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -77,7 +77,10 @@ import {
     AddWithConnectorDialogResult,
 } from '../../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
-import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+import {
+    AddMaterialDialogComponent,
+    AddMaterialDialogModule,
+} from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
 import {
     OptionState,
     SidebarContext,
@@ -182,6 +185,8 @@ export class NodesSelectorComponent implements OnInit {
 
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
+
+    @ViewChild(AddMaterialDialogComponent) addMaterialDialogComponent: AddMaterialDialogComponent;
 
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
@@ -659,6 +664,7 @@ export class NodesSelectorComponent implements OnInit {
                 }
             }
         }
+        this.addMaterialDialogComponent.selectedFiles.set([]);
     }
 
     // DRAG-AND-DROP RELATED FUNCTIONS
