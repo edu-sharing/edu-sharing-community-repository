@@ -154,16 +154,6 @@
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup">
           <editor [init]="editorConfig" formControlName="userNotes"></editor>
-          <div class="add-notes">
-            <button
-              mat-stroked-button
-              color="primary"
-              [disabled]="!(canEditSubmissionNotes() || loading())"
-              (click)="saveUserNotes()"
-            >
-              {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SAVE_NOTES' | translate }}
-            </button>
-          </div>
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
 

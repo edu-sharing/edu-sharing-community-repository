@@ -3,13 +3,13 @@ import {
     computed,
     effect,
     ElementRef,
+    inject,
     OnDestroy,
     QueryList,
     signal,
     Signal,
     ViewChild,
     ViewChildren,
-    inject,
 } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import {
@@ -35,6 +35,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     catchError,
+    debounceTime,
     distinctUntilChanged,
     filter,
     map,
@@ -257,6 +258,20 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.submitFormGroup = this.formBuilder.group({
             userNotes: [''],
         });
+        this.submitFormGroup
+            .get('userNotes')
+            .valueChanges.pipe(
+                distinctUntilChanged(),
+                debounceTime(2000),
+                // only save when the content actually differs from the stored state
+                filter(
+                    (value) =>
+                        this.canEditSubmissionNotes() &&
+                        value !== (this.submission()?.userNotes ?? ''),
+                ),
+                takeUntil(this.destroyed$),
+            )
+            .subscribe(() => void this.saveUserNotes(true));
 
         this.route.queryParams
             .pipe(
@@ -306,7 +321,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 this.assignment.set(assignment);
                 this.files.set(files);
                 this.submission.set(submission);
-                this.submitFormGroup.get('userNotes').setValue(submission?.userNotes ?? '');
+                this.submitFormGroup
+                    .get('userNotes')
+                    .setValue(submission?.userNotes ?? '', { emitEvent: false });
                 this.submissionFiles.set(submissionFiles);
                 this.syncSubmissionDataSource();
                 this.supplementaryFiles.setData(
@@ -796,7 +813,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         }
     }
 
-    async saveUserNotes() {
+    async saveUserNotes(silent = false) {
         this.loading.set(true);
         await this.prepareSubmission();
         const updated = await firstValueFrom(
@@ -810,11 +827,13 @@ export class SubmitAssignmentComponent implements OnDestroy {
             }),
         );
         this.submission.set(updated);
-        this.toast.show({
-            type: 'info',
-            subtype: ToastType.InfoSimple,
-            message: 'EDITORIAL.SUBMIT_ASSIGNMENT.NOTES_SAVED',
-        });
+        if (!silent) {
+            this.toast.show({
+                type: 'info',
+                subtype: ToastType.InfoSimple,
+                message: 'EDITORIAL.SUBMIT_ASSIGNMENT.NOTES_SAVED',
+            });
+        }
         this.loading.set(false);
     }
 

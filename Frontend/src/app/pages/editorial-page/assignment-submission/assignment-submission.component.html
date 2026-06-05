@@ -38,7 +38,7 @@
 </div>
 } @if (selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined) {
 <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
-<mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
+<mat-tab-group [selectedIndex]="tabSelected()" (selectedTabChange)="onTabChange($event)">
   @if ( selectedSubmissionFileUrl() && selectedCorrectedFile().correction?.mediatype === 'file-pdf'
   ) {
   <mat-tab>
@@ -102,9 +102,10 @@
         color="primary"
         class="save"
         (click)="saveCorrection()"
-        [disabled]="correctionSaving() || !hasCorrectionChanges()"
+        [disabled]="correctionSaving()"
       >
-        <i esIcon="save"></i>{{ 'SAVE' | translate }}
+        <!-- [disabled]="correctionSaving() || !hasCorrectionChanges()" -->
+        <i esIcon="save"></i>{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_EDIT' | translate }}
       </button>
     </div>
   </div>
