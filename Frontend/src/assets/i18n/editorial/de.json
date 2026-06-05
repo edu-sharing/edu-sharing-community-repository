@@ -143,8 +143,8 @@
       "SUBMITTED": "Die Aufgabe wurde abgegeben",
       "VALIDATION_READY": "Zu deiner Abgabe ist eine Rückmeldung verfügbar.",
       "VALIDATION_SCROLL": "Zur Rückmeldung",
-      "SAVE_NOTES": "Bemerkung zur Abgabe speichern",
       "NOTES_SAVED": "Bemerkung wurde gespeichert",
+      "USER_NOTES": "Bemerkung zur Abgabe",
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
@@ -200,7 +200,10 @@
         "FINISH_ALL_CONFIRM_MESSAGE": "Alle Abgaben wurden korrigiert.\nDie Rückmeldungen werden jetzt für alle Schüler sichtbar.",
         "FINISH_ALL_MISSING_MESSAGE": "{{ count }} Abgaben wurden noch nicht korrigiert.\nDiese Schüler erhalten keine Rückmeldung.\nDieser Schritt kann nicht rückgängig gemacht werden.",
         "FINISH_ALL_CONFIRM_BUTTON": "Korrektur zurückgeben",
-        "FINISH_ALL_MISSING_CONFIRM_BUTTON": "Trotzdem zurückgeben"
+        "FINISH_ALL_MISSING_CONFIRM_BUTTON": "Trotzdem zurückgeben",
+        "SAVE_EDIT": "Änderungen speichern",
+        "UNSAVED_CHANGES_TITLE": "Ungespeicherte Änderungen",
+        "UNSAVED_CHANGES_MESSAGE": "Sie haben ungespeicherte Änderungen an der Korrektur vorgenommen. Möchten Sie diese jetzt speichern?"
       },
       "FORM": {
         "TITLE": "Titel",

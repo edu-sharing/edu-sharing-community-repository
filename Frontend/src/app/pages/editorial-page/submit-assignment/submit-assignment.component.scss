@@ -77,15 +77,15 @@ ngx-extended-pdf-viewer {
         display: flex;
         gap: 20px;
         align-items: center;
-        padding-bottom: 20px;
+        padding-bottom: 10px;
 
         > span {
             flex-grow: 1;
-            font-size: vars.$fontSizeXLarge;
+            font-size: 170%;
             font-weight: bold;
         }
 
-        border-bottom: 1px solid vars.$cardSeparatorLineColor;
+        border-bottom: 2px solid var(--primary);
     }
     .block {
         display: flex;
@@ -93,7 +93,7 @@ ngx-extended-pdf-viewer {
         gap: 10px;
         padding-bottom: 20px;
         &:not(:last-child) {
-            border-bottom: 1px solid vars.$cardSeparatorLineColor;
+            border-bottom: 1px solid var(--palette-primary-300);
         }
         > label {
             font-size: vars.$fontSizeLarge;

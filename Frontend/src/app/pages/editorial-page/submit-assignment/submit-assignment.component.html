@@ -152,7 +152,8 @@
       <div class="assignment-submit">
         <ng-container *ngTemplateOutlet="heading"></ng-container>
         <ng-container *ngTemplateOutlet="summary"></ng-container>
-        <form [formGroup]="submitFormGroup">
+        <form [formGroup]="submitFormGroup" class="block">
+          <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.USER_NOTES' | translate }}</label>
           <editor [init]="editorConfig" formControlName="userNotes"></editor>
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>

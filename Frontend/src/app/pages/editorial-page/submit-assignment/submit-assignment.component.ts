@@ -271,7 +271,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 ),
                 takeUntil(this.destroyed$),
             )
-            .subscribe(() => void this.saveUserNotes(true));
+            .subscribe(() => void this.saveUserNotes());
 
         this.route.queryParams
             .pipe(
@@ -813,7 +813,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         }
     }
 
-    async saveUserNotes(silent = false) {
+    async saveUserNotes() {
         this.loading.set(true);
         await this.prepareSubmission();
         const updated = await firstValueFrom(
@@ -827,13 +827,11 @@ export class SubmitAssignmentComponent implements OnDestroy {
             }),
         );
         this.submission.set(updated);
-        if (!silent) {
-            this.toast.show({
-                type: 'info',
-                subtype: ToastType.InfoSimple,
-                message: 'EDITORIAL.SUBMIT_ASSIGNMENT.NOTES_SAVED',
-            });
-        }
+        this.toast.show({
+            type: 'info',
+            subtype: ToastType.InfoSimple,
+            message: 'EDITORIAL.SUBMIT_ASSIGNMENT.NOTES_SAVED',
+        });
         this.loading.set(false);
     }
 
