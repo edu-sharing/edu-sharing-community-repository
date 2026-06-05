@@ -1,4 +1,5 @@
 import { Component, effect, OnDestroy, signal, ViewChild, inject } from '@angular/core';
+import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { SharedModule } from '../../../shared/shared.module';
 import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-breadcrumb.service';
 import {
@@ -68,6 +69,8 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     pdfViewer: NgxExtendedPdfViewerComponent;
     @ViewChild(NodeEntriesWrapperComponent)
     nodeEntries: NodeEntriesWrapperComponent<SubmissionWithAssignment>;
+    @ViewChild(MatTabGroup)
+    tabGroup: MatTabGroup;
     dataSource = new NodeDataSource<SubmissionWithAssignment>();
     language: string = 'de-DE';
 
@@ -127,7 +130,11 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 this.editorialBreadcrumbService.path.set([
                     {
                         title: this.assignment().title,
-                        callback: () => this.selectedCorrectedFile.set(null),
+                        callback: async () => {
+                            if (await this.confirmUnsavedChanges()) {
+                                this.selectedCorrectedFile.set(null);
+                            }
+                        },
                     },
                     {
                         title: this.authorityNamePipe.transform(this.submission().assignee),
@@ -192,8 +199,12 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 assignment: this.assignment(),
                 submission: event,
                 submissionList: this.dataSource.getData(),
-                submissionFileCallback: (submission) => {
+                submissionFileCallback: async (submission) => {
+                    if (!(await this.confirmUnsavedChanges())) {
+                        return false;
+                    }
                     this.selectedCorrectedFile.set(submission);
+                    return true;
                 },
             } as SubmissionConfig,
         });
@@ -204,6 +215,49 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 this.nodeEntries?.getSelection()?.setSelection(config.submission);
                 this.submission.set(config.submission);
             });
+    }
+
+    async onTabChange(event: MatTabChangeEvent): Promise<void> {
+        if (event.index !== 0 && this.tabSelected() === 0 && this.hasCorrectionChanges()) {
+            // revert synchronously to keep the pdf viewer (and its annotations) alive while asking
+            this.tabGroup.selectedIndex = 0;
+            if (await this.confirmUnsavedChanges()) {
+                this.tabSelected.set(event.index);
+                this.tabGroup.selectedIndex = event.index;
+            }
+            return;
+        }
+        this.tabSelected.set(event.index);
+    }
+
+    private async confirmUnsavedChanges(): Promise<boolean> {
+        if (!this.hasCorrectionChanges()) {
+            return true;
+        }
+        const SAVE = 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_EDIT';
+        const buttons: GenericDialogButton<string>[] = [
+            { label: 'DISCARD', config: { color: 'standard' } },
+            { label: SAVE, config: { color: 'primary' } },
+        ];
+        const result = await firstValueFrom(
+            (
+                await this.dialogs.openGenericDialog({
+                    title: 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.UNSAVED_CHANGES_TITLE',
+                    message: 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.UNSAVED_CHANGES_MESSAGE',
+                    buttons,
+                })
+            ).afterClosed(),
+        );
+        if (result === SAVE) {
+            // save and stay on the editor
+            await this.saveCorrection();
+            return false;
+        }
+        if (result === 'DISCARD') {
+            this.hasCorrectionChanges.set(false);
+            return true;
+        }
+        return false;
     }
 
     changeAnnotation() {
@@ -229,9 +283,13 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                 }),
             );
             this.toast.toast('EDITORIAL.ASSIGNMENT.SUBMISSIONS.CHANGES_SAVED');
+            // clear the pdf.js dirty flag, otherwise the interval check re-flags unsaved changes
+            const pdf = (this.pdfViewerService as any)
+                ?.PDFViewerApplication as IPDFViewerApplication;
+            (pdf?.pdfDocument?.annotationStorage as any)?.resetModified?.();
+            this.hasCorrectionChanges.set(false);
         } catch (e) {}
         this.correctionSaving.set(false);
-        this.hasCorrectionChanges.set(false);
     }
 
     async finishAll() {

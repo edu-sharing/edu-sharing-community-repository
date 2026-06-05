@@ -44,7 +44,11 @@ export type SubmissionConfig = {
      */
     submissionList: SubmissionWithAssignment[];
     assignment: Assignment;
-    submissionFileCallback: (selected: SubmissionFile) => void;
+    /**
+     * called when a submission file is clicked; return false to veto the selection
+     * (e.g. unsaved correction changes)
+     */
+    submissionFileCallback: (selected: SubmissionFile) => void | boolean | Promise<void | boolean>;
 };
 
 @Component({

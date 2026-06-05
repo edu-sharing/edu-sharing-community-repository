@@ -1,13 +1,4 @@
-import {
-    Component,
-    EventEmitter,
-    input,
-    OnChanges,
-    Output,
-    signal,
-    SimpleChanges,
-    inject,
-} from '@angular/core';
+import { Component, input, OnChanges, signal, SimpleChanges, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -25,7 +16,6 @@ export class ManageSubmissionNodesComponent implements OnChanges {
     data = input.required<SubmissionConfig>();
     files = signal<SubmissionFile[]>(null);
     selected = signal<SubmissionFile>(null);
-    @Output() nodeClick = new EventEmitter<SubmissionFile>();
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.data) {
@@ -40,7 +30,11 @@ export class ManageSubmissionNodesComponent implements OnChanges {
         }
     }
 
-    click(item: SubmissionFile) {
+    async click(item: SubmissionFile) {
+        // let the parent veto the switch (e.g. unsaved correction changes)
+        if ((await this.data().submissionFileCallback?.(item)) === false) {
+            return;
+        }
         void firstValueFrom(
             this.assignmentV1Service.updateSubmissionFileValidation({
                 assignmentId: this.data().assignment.ref.id,
@@ -60,6 +54,5 @@ export class ManageSubmissionNodesComponent implements OnChanges {
             }),
         );
         this.selected.set(item);
-        this.nodeClick.emit(item);
     }
 }

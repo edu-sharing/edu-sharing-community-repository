@@ -2,10 +2,27 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
+}
+
+mat-tab-group {
+    flex: 1;
+    min-height: 0;
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        min-height: 0;
+    }
+}
+
+:host ::ng-deep ngx-extended-pdf-viewer {
+    display: block;
+    height: 100%;
+    // match the pdf.js viewer background so the scrollbar gutter doesn't show as a white stripe
+    background-color: #d4d4d7;
 }
 
 :host ::ng-deep {
@@ -17,6 +34,9 @@
 .list {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     gap: 20px;
     padding: 0 var(--roundedContainerMargin) var(--roundedContainerMargin) 20px;
     .actions {

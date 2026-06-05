@@ -63,10 +63,7 @@
         }
         <div class="submissions">
           <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
-          <es-manage-assignment-submissions
-            [data]="data()"
-            (nodeClick)="data().submissionFileCallback($event)"
-          ></es-manage-assignment-submissions>
+          <es-manage-assignment-submissions [data]="data()"></es-manage-assignment-submissions>
         </div>
         }
         <div class="feedback">
