@@ -26,6 +26,7 @@ import {
     DropdownComponent,
     ElementType,
     LocalEventsService,
+    NodeEntriesGlobalService,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -108,6 +109,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private uploadDialog = inject(UploadDialogService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private connectorOptionsService = inject(ConnectorOptionsService);
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
 
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
@@ -377,13 +379,14 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     async openUploadSelect(): Promise<void> {
         if (this.editorialSidebarService.editorialSidebar) {
+            this.nodeEntriesGlobalService.getPrimaryInstance()?.selection.clear();
             this.editorialSidebarService.showOption({
                 option: 'SORT_INTO',
                 trap: false,
                 optionConfig: {
                     state: TabType.UPLOAD,
                     allowCreate: false,
-                    autoClose: true,
+                    autoClose: false,
                     upload: 'default',
                 } as NodesSelectorConfig,
             });

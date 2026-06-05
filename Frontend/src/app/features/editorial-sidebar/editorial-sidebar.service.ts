@@ -1,8 +1,8 @@
 import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
+    EDITORIAL_SIDEBAR_OPTIONS,
     EditorialSidebarComponent,
-    MULTISELECT_OPTIONS,
     OptionConfig,
     OptionState,
     PreviewConfig,
@@ -137,16 +137,15 @@ export class EditorialSidebarService {
 
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {
         this.nodes.set(selection.source.selected);
+        const option = this._editorialSidebar.enabledOption()?.option;
+        const selectionMode = option ? EDITORIAL_SIDEBAR_OPTIONS[option].selectionMode : 'none';
         if (selection.source.selected.length === 0) {
             this.close();
         } else if (
-            selection.source.selected.length !== 1 &&
-            !MULTISELECT_OPTIONS.includes(this._editorialSidebar.enabledOption()?.option)
+            (selection.source.selected.length === 1 && selectionMode === 'none') ||
+            (selection.source.selected.length >= 1 && selectionMode !== 'multi')
         ) {
             this._editorialSidebar.enabledOption.set(null);
-            //this.close();
-        } else {
-            //this.selection.set(selection.source.
         }
     }
 }

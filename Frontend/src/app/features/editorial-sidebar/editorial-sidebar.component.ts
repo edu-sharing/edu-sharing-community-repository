@@ -44,21 +44,25 @@ export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
-export type EditorialSidebarOption =
-    | 'WORKSPACE_METADATA'
-    | 'SHARE_QR'
-    | 'PREVIEW'
-    // sort into from right to left (i.e. also create or upload)
-    | 'SORT_INTO'
-    // manage content is sort into from left to right ("Einsortieren")
-    | 'MANAGE_CONTENT'
-    | 'MANAGE_SUBMISSION'
-    | 'VIEW_ASSIGNMENT';
+export type SelectionMode = 'none' | 'single' | 'multi';
 
-/**
- * list of options that support multi selection
- */
-export const MULTISELECT_OPTIONS: EditorialSidebarOption[] = ['MANAGE_CONTENT'];
+export type EditorialSidebarOptionDescriptor = {
+    selectionMode: SelectionMode;
+};
+
+export const EDITORIAL_SIDEBAR_OPTIONS = {
+    WORKSPACE_METADATA: { selectionMode: 'single' },
+    SHARE_QR: { selectionMode: 'single' },
+    PREVIEW: { selectionMode: 'single' },
+    /** sort into from right to left (i.e. also create or upload) */
+    SORT_INTO: { selectionMode: 'none' },
+    /** manage content is sort into from left to right ("Einsortieren") */
+    MANAGE_CONTENT: { selectionMode: 'multi' },
+    MANAGE_SUBMISSION: { selectionMode: 'single' },
+    VIEW_ASSIGNMENT: { selectionMode: 'single' },
+} as const satisfies Record<string, EditorialSidebarOptionDescriptor>;
+
+export type EditorialSidebarOption = keyof typeof EDITORIAL_SIDEBAR_OPTIONS;
 
 export type PreviewConfig = {
     /** override the editorMode of the embedded mds-editor-wrapper. Default: 'viewer'. */
