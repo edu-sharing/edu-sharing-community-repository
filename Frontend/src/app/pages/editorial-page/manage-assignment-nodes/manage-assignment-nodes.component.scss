@@ -46,6 +46,11 @@
         opacity: 0.7;
         flex-shrink: 0;
     }
+    @media screen and (max-width: vars.$mobileWidth - vars.$mobileStage*1) {
+        mat-form-field {
+            max-width: 20vw;
+        }
+    }
 }
 .cdk-drag-preview {
     @include container();
