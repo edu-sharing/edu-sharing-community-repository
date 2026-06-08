@@ -39,12 +39,14 @@
       [canDropNodes]="canDrop"
       (nodeDropped)="drop($event)"
     >
+      @if (entriesService?.columns?.[0]) {
       <es-drag-preview
         *cdkDragPreview
         [node]="node.item"
-        [selected]="entriesService.selection.selected"
+        [selected]="entriesService.selection?.selected"
         [item]="entriesService.columns[0]"
       ></es-drag-preview>
+      }
       <div class="child-tree-node-container">
         <ng-container *ngTemplateOutlet="checkboxTemplate; context: { node: node }"></ng-container>
         <div
