@@ -23,6 +23,19 @@ mat-tab-group {
     height: 100%;
     // match the pdf.js viewer background so the scrollbar gutter doesn't show as a white stripe
     background-color: #d4d4d7;
+
+    // override ngx-extended-pdf-viewer's dynamic CSS that hides toolbar elements
+    .body :is(input, button, select, a),
+    #outerContainer .hiddenTinyView * {
+        display: revert !important;
+    }
+    @media screen and (max-width: vars.$mobileWidth - vars.$mobileStage*2) {
+        .editorParamsToolbar {
+            position: absolute !important;
+            left: 10% !important;
+            right: 10% !important;
+        }
+    }
 }
 
 :host ::ng-deep {
@@ -52,8 +65,7 @@ mat-tab-group {
     align-items: center;
     justify-content: space-between;
     #toolbarViewerRight {
-        //flex-grow: 1;
-        justify-self: flex-end;
+        margin-left: auto;
     }
     &.medium {
         pdf-zoom-toolbar {
@@ -61,7 +73,6 @@ mat-tab-group {
         }
     }
     &.small {
-        justify-content: flex-end;
         #toolbarViewerLeft {
             display: none;
         }

@@ -83,6 +83,7 @@ export class SubmissionSidebarComponent {
     data = model.required<SubmissionConfig>();
     showValidationNotes = signal(false);
     submissionFiles = signal<SubmissionFile[]>(null);
+    selectedFile = signal<SubmissionFile>(null);
     readonly filesWithOriginal = computed(() =>
         this.submissionFiles()?.filter((f) => !!f.assignmentFile),
     );
@@ -127,6 +128,7 @@ export class SubmissionSidebarComponent {
             const subId = this.submission()?.ref?.id;
             const assignmentId = this.data()?.assignment?.ref?.id;
             this.submissionFiles.set(null);
+            this.selectedFile.set(null);
             if (subId && assignmentId) {
                 void firstValueFrom(
                     this.assignmentV1Service.getSubmissionFiles({

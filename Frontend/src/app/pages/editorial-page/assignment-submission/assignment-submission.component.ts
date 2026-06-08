@@ -39,6 +39,7 @@ import {
 } from 'ngx-extended-pdf-viewer';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
@@ -221,6 +222,9 @@ export class AssignmentSubmissionComponent implements OnDestroy {
                         return false;
                     }
                     this.selectedCorrectedFile.set(submission);
+                    if (UIService.isMobileWidth()) {
+                        this.editorialSidebarService.close();
+                    }
                     return true;
                 },
             } as SubmissionConfig,

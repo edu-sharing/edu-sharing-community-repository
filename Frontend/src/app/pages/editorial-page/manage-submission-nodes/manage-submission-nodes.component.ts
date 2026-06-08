@@ -1,4 +1,4 @@
-import { Component, effect, input, signal, inject } from '@angular/core';
+import { Component, effect, input, model, signal, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -16,7 +16,7 @@ export class ManageSubmissionNodesComponent {
     data = input.required<SubmissionConfig>();
     files = input<SubmissionFile[]>(null);
     localFiles = signal<SubmissionFile[]>(null);
-    selected = signal<SubmissionFile>(null);
+    selected = model<SubmissionFile>(null);
 
     constructor() {
         effect(() => {

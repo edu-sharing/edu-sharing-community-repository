@@ -72,6 +72,7 @@
           <es-manage-assignment-submissions
             [data]="data()"
             [files]="filesWithOriginal()"
+            [(selected)]="selectedFile"
           ></es-manage-assignment-submissions>
           }
         </div>
@@ -81,6 +82,7 @@
           <es-manage-assignment-submissions
             [data]="data()"
             [files]="filesWithoutOriginal()"
+            [(selected)]="selectedFile"
           ></es-manage-assignment-submissions>
         </div>
 
