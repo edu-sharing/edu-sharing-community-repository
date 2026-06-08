@@ -2038,8 +2038,8 @@
           "flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
           "fields": [
           "properties.cm:name^2",
-          "properties.cclom:title^5",
-          "properties.cclom:general_description^2"
+          "properties.cm:title^5",
+          "properties.cm:description^2"
           ],
           "default_operator": "and"
           }
