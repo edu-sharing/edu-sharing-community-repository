@@ -118,7 +118,7 @@
     </mat-cell>
   </ng-container>
   <!-- Data Columns -->
-  @for (column of visibleDataColumns$ | async; track column; let first = $first) {
+  @for (column of visibleDataColumns$ | async; track column.name; let first = $first) {
   <ng-container [matColumnDef]="column.name" [sticky]="first && isScroll">
     <ng-container>
       <mat-header-cell

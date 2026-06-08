@@ -100,8 +100,8 @@
   }
 </div>
 <ng-template #toggle let-optionsToggle="optionsToggle">
-  @for (option of optionsToggle; track option) { @if (option.isToggleVisible && option.toggleType
-  === 'default') {
+  @for (option of optionsToggle; track option.name) { @if (option.isToggleVisible &&
+  option.toggleType === 'default') {
   <button
     mat-icon-button
     matTooltip="{{
