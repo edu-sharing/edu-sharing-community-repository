@@ -12,6 +12,7 @@ import {
     Output,
     Signal,
     signal,
+    untracked,
     WritableSignal,
 } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
@@ -19,7 +20,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
-import { ImageResult } from 'ngx-edu-sharing-b-api';
+import { ImagesResponse } from 'ngx-edu-sharing-b-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { v4 as uuidv4 } from 'uuid';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -89,6 +90,8 @@ export class ImageWrapperComponent implements OnInit {
     private fileInput: HTMLInputElement;
     imagePath: SafeResourceUrl;
     imageNode: Node;
+    // last uploaded node id that was loaded, to avoid fetching the same image twice
+    private lastLoadedUploadId: string | null = null;
     imageProcessing: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
 
@@ -104,6 +107,25 @@ export class ImageWrapperComponent implements OnInit {
             if (parentId) {
                 this.imageProcessing.set(true);
                 void this.handleUploadBlob();
+            }
+        });
+        // (re)load the uploaded image whenever its node id changes after init — the parent may set
+        // userUploadedNodeId after this component was created (e.g. when switching to a page
+        // template), and loadImage in ngOnInit only runs once. Guarded by lastLoadedUploadId so the
+        // same id is never fetched twice (e.g. right after the ngOnInit load). Only the uploaded
+        // branch runs here (a plain getNode, no AI generation); aiGeneratedImage is read untracked.
+        effect((): void => {
+            const uploadedNodeId = this.userUploadedNodeId();
+            if (
+                this.initialized() &&
+                uploadedNodeId &&
+                uploadedNodeId !== this.lastLoadedUploadId
+            ) {
+                this.lastLoadedUploadId = uploadedNodeId;
+                void this.loadImage(
+                    untracked(() => this.aiGeneratedImage()),
+                    uploadedNodeId,
+                );
             }
         });
     }
@@ -141,6 +163,8 @@ export class ImageWrapperComponent implements OnInit {
         };
         // user has uploaded a custom image
         if (userUploadedNodeId) {
+            // remember the loaded id so the reactive effect does not fetch it again
+            this.lastLoadedUploadId = userUploadedNodeId;
             const uploadedNode: Node = await this.topicPageHelperService.getNode(
                 userUploadedNodeId,
             );
@@ -153,21 +177,25 @@ export class ImageWrapperComponent implements OnInit {
         }
         // user has selected an AI generated image
         if (aiGeneratedImage) {
-            const imageData: ImageResult = regenerateNecessary
-                ? await this.aiHelperService.updateAiImage(
-                      this.widgetNodeId(),
-                      this.contextNodeId(),
-                  )
-                : await this.aiHelperService.createAiImage(
-                      this.widgetNodeId(),
-                      this.contextNodeId(),
-                  );
-            // reset both sources before loading the new one
-            resetSources();
-            this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                this.BASE_64_PREFIX + imageData.data[0].b64_json,
-            );
-            return;
+            try {
+                const imageData: ImagesResponse = regenerateNecessary
+                    ? await this.aiHelperService.updateAiImage(
+                          this.widgetNodeId(),
+                          this.contextNodeId(),
+                      )
+                    : await this.aiHelperService.createAiImage(
+                          this.widgetNodeId(),
+                          this.contextNodeId(),
+                      );
+                // reset both sources before loading the new one
+                resetSources();
+                this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
+                    this.BASE_64_PREFIX + imageData.data[0].b64_json,
+                );
+                return;
+            } catch (error) {
+                console.error(error);
+            }
         }
         // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
         if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {

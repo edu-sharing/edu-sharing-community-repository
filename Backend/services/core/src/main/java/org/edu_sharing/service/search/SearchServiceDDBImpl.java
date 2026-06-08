@@ -149,7 +149,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
     public List<? extends Suggestion> getSuggestions(MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) {
         List<Suggestion> result = new ArrayList<>();
 
-		List<String> facets = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_LUCENE).findParameterByName(parameterId).getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
+		List<String> facets = mds.findQuery(queryId, MetadataReader.QUERY_SYNTAX_DSL).findParameterByName(parameterId).getFacet().getItems().stream().map(MetadataQueryParameter.MetadataQueryFacetItem::getValue).collect(Collectors.toList());
         //String url = getUrl("/search",parameterId +":("+value+")",facets, 0, 0);
         String url = getUrl("/search", "*", facets, 0, 0);
         System.out.println("url:" + url);
@@ -248,7 +248,7 @@ public class SearchServiceDDBImpl extends SearchServiceAdapter {
         if (searchWord.equals("*")) {
             searchWord = "";
         }
-        MetadataQuery mdsQuery = mds.findQuery(MetadataSet.DEFAULT_CLIENT_QUERY, MetadataReader.QUERY_SYNTAX_LUCENE);
+        MetadataQuery mdsQuery = mds.findQuery(MetadataSet.DEFAULT_CLIENT_QUERY, MetadataReader.QUERY_SYNTAX_DSL);
         List<String> extendedFilters = new ArrayList<>();
         Map.of(
                 "virtual:title", "title",

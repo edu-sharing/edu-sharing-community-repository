@@ -7,6 +7,7 @@
     align-items: center;
     background: topicPageVars.$surface-container-lowest;
     position: relative;
+    min-height: 200px;
     --image-button-size: 48px;
 
     &.edit-mode {
@@ -18,7 +19,7 @@
         margin-right: 0 !important;
 
         .image-wrapper {
-            max-height: var(--mobile-max-height);
+            max-height: var(--mobile-max-height, 350px);
             background-color: #000;
         }
 

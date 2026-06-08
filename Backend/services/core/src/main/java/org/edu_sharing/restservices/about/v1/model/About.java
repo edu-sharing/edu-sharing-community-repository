@@ -19,6 +19,8 @@ public class About  {
 
   private List<PluginInfo> plugins = new ArrayList<>();
   private List<FeatureInfo> features = new ArrayList<>();
+  private List<String> signatureAlgorithms = new ArrayList<>();
+  private String defaultSignatureAlgorithm;
   private String themesUrl;
   private long lastCacheUpdate;
 

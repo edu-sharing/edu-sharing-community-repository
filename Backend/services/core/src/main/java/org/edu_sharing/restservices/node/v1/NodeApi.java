@@ -13,15 +13,12 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -36,6 +33,8 @@ import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.github.GitHubService;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.transform.FulltextService;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
@@ -70,6 +69,9 @@ public class NodeApi  {
 
 	@Autowired
 	private GitHubService gitHubService;
+
+	@Autowired
+	private FulltextService fulltextService;
 
 	  @GET
 	    @Path("/nodes/{repository}/{node}/workflow")
@@ -453,6 +455,7 @@ public class NodeApi  {
 			response.setJwt(nodeDao.getJWT());
 			response.setSignedNode(encodedSignedNode);
 			response.setSignature(encodedSignature);
+            response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
 			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
 			if (rs != null) {
 				response.setRenderingBaseUrl(rs.getContentUrl());
@@ -529,7 +532,7 @@ public class NodeApi  {
     @GET
     @Path("/nodes/{repository}/{node}/textContent")
 
-    @Operation(summary = "Get the text content of a document.", description = "May fails with 500 if the node can not be read.")
+    @Operation(summary = "Get the plain text content of a node.", description = "Returns the extracted plain text for a ccm:io node. The result is cached in ccm:fulltext_content after the first extraction.\n\nFor file nodes, the text is extracted from the binary content via the local transform service.\nFor link nodes (ccm:wwwurl set), text is fetched from the URL via the BAPI text-extraction proxy. If extraction fails, null is returned.")
 
     @ApiResponses(
     	value = {
@@ -544,23 +547,18 @@ public class NodeApi  {
     public Response getTextContent(
     	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
     	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    	@Parameter(description = "Skip the fulltext cache and always re-extract. Requires admin.", required = false) @QueryParam("forceUpdate") Boolean forceUpdate,
 		@Context HttpServletRequest req) {
 
     	try {
-
 	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			if (forceUpdate != null && forceUpdate && !AuthorityServiceHelper.isAdmin()) {
+	    		throw new SecurityException("Admin required for forceUpdate");
+	    	}
 
 	    	NodeText response = new NodeText();
-	    	response.setText(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_TEXT_PLAIN));
-	    	try{
-	    		response.setHtml(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_HTML));
-	    	}catch(Throwable ignored){}
-	    	try{
-	    		InputStream is=((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node);
-	    		if(is.available()<1024*1024*5)
-	    			response.setRaw(IOUtils.toString(is, StandardCharsets.UTF_8));
-	    	}catch(Throwable ignored){}
-
+	    	response.setText(fulltextService.getFulltext(nodeDao.getNodeRef().getNodeId(), forceUpdate != null && forceUpdate));
 	    	return Response.status(Response.Status.OK).entity(response).build();
 
     	} catch (Throwable t) {

@@ -148,5 +148,6 @@ export class SwimlaneComponent implements AfterViewChecked {
             this.genericWidgetGlobalService.hasCustomWidget(name)
         );
     }
+
     protected readonly convertNodeRefIntoNodeId = convertNodeRefIntoNodeId;
 }

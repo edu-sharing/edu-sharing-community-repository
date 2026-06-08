@@ -31,6 +31,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() assets_url: string = '';
     @Input() resource_url: string = '';
     @Input() preview_url: string = '';
+    @Input() signature_algorithm: string | null = null;
     @Input() component_height: number | null = null;
     @Input() footer_height: number = 100;
     @Input() target_blank: boolean = false;
@@ -79,6 +80,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.signature,
                 this.jwt,
                 this.render_url,
+                this.signature_algorithm ?? 'SHA512withRSA',
             );
             data.node.preview.url = this.previewUrl;
             this.node.set(data.node);

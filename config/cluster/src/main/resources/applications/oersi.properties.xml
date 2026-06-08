@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>OERSI federated search connector (https://oersi.org)</comment>
+
+	<!--
+		Sample configuration for the OERSI federated search repository.
+
+		This file is a TEMPLATE and is NOT active by default. To enable it, add
+		"oersi.properties.xml" to the "applicationfiles" entry in
+		ccapp-registry.properties.xml, restart the repository and configure an
+		MDS query for this remote repository.
+	-->
+
+	<entry key="type">REPOSITORY</entry>
+	<entry key="repositorytype">OERSI</entry>
+	<entry key="appid">oersi</entry>
+	<entry key="appcaption">OERSI</entry>
+
+	<!-- can be searched as a federated source -->
+	<entry key="searchable">true</entry>
+
+	<!-- metadata set used for this repository (config/defaults/.../metadatasets/xml/mds_oersi.xml) -->
+	<entry key="metadatasetsV2">mds_oersi</entry>
+
+	<!-- wires up SearchServiceOersiImpl / NodeServiceOersiImpl via OersiProvider -->
+	<entry key="remote_provider">org.edu_sharing.service.provider.OersiProvider</entry>
+
+	<!--
+		OERSI public API endpoint (Elasticsearch proxy).
+		Defaults to https://oersi.org/api/search/ , index oer_data.
+	-->
+	<entry key="host">oersi.org</entry>
+	<entry key="port">443</entry>
+	<entry key="protocol">https</entry>
+	<entry key="pathprefix">/api/search</entry>
+	<entry key="index">oer_data</entry>
+
+	<!--
+		The OERSI API requires a meaningful, recurring User-Agent header.
+		Adjust the contact information to your installation.
+	-->
+	<entry key="useragent">edu-sharing federated-search (https://www.edu-sharing.com)</entry>
+    <entry key="metadatasetsV2">mds_oersi</entry>
+</properties>

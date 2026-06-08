@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthenticationService, MdsWidget, Node } from 'ngx-edu-sharing-api';
-import { EduSharingLlmService, Image, ImageResult, MdsConfig } from 'ngx-edu-sharing-b-api';
+import { EduSharingLlmService, Image, ImagesResponse, MdsConfig } from 'ngx-edu-sharing-b-api';
 import { firstValueFrom } from 'rxjs';
 import { Toast } from '../../../../../../services/toast';
 import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
@@ -131,7 +131,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
         // check, whether a map value exist or the regeneration is requested
         if (!this.styleIdToPreviewImagesMap.has(styleId) || regenerateRequested) {
             try {
-                const result: ImageResult = await this.createAiImages(styleId);
+                const result: ImagesResponse = await this.createAiImages(styleId);
                 this.styleIdToPreviewImagesMap.set(styleId, result.data);
             } catch (e) {
                 this.toast.error(e);
@@ -198,7 +198,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
      *
      * @param styleId
      */
-    private async createAiImages(styleId: string): Promise<ImageResult> {
+    private async createAiImages(styleId: string): Promise<ImagesResponse> {
         const user: string =
             (await firstValueFrom(this.auth.observeLoginInfo()))?.authorityName ?? 'guest';
         const values = await this.mdsEditorInstance.getValues(null, false);
@@ -207,7 +207,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
             id: 'image_ai',
         };
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [mdsConfig],
                     metadataSet: this.mdsEditorInstance.mdsId,

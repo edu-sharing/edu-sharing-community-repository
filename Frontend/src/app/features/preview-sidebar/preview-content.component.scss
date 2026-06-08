@@ -1,7 +1,7 @@
 @use 'variables-scss' as *;
 @use 'mixins' as *;
 
-$previewHeight: 400px;
+$previewHeight: 500px;
 
 :host {
     overflow-y: auto;
@@ -16,31 +16,21 @@ $previewHeight: 400px;
         es-mds-editor-wrapper es-mds-editor-core {
             display: grid;
         }
-
-        es-render-wrapper-component rs-root {
-            width: 100%;
-            height: auto;
-            min-height: $previewHeight;
-            max-height: $previewHeight;
-            margin: 0;
-            > div {
-                width: 100% !important;
-            }
-
-            .module.module-PDF ngx-extended-pdf-viewer .zoom {
-                height: $previewHeight !important;
-            }
-        }
     }
 }
-::ng-deep {
-    .preview-sidebar-rendering-modal es-render-wrapper-component rs-root {
-        min-height: calc(100vh - 200px);
-    }
-}
-es-render-wrapper-component {
+// content mode only: make the host a flex row so the full-width render wrapper's
+// flex-grow can claim the available width, and drive its --containerHeight from
+// the preview height instead of the default viewport-based calculation.
+// In modal mode the render wrapper keeps its default layout (block host, no
+// fullWidth, viewport-based height).
+:host(:not(.modal)) es-render-wrapper-component {
     display: flex;
-    min-height: $previewHeight;
+    //min-height: $previewHeight;
+    --renderWrapperHeight: #{$previewHeight};
+    // drop the render wrapper's default rs-root margin in content mode
+    ::ng-deep rs-root {
+        margin: 0;
+    }
 }
 
 .preview-sidebar-image-container {

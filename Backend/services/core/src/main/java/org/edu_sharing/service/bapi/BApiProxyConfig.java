@@ -4,6 +4,8 @@ import com.typesafe.config.Optional;
 import lombok.Data;
 import org.edu_sharing.lightbend.ConfigurationProperties;
 
+import java.util.List;
+
 @Data
 @ConfigurationProperties( prefix = "repository.bapi")
 public class BApiProxyConfig {
@@ -14,4 +16,6 @@ public class BApiProxyConfig {
    private String guestUserApiKey;
    @Optional
    private String callTimeout = "PT1m";
+   @Optional
+   private List<String> features = List.of();
 }

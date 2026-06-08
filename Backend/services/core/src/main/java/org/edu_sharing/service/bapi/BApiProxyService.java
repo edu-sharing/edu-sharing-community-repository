@@ -37,6 +37,10 @@ public class BApiProxyService {
             "host"
     );
 
+    /**
+     * forward including auth headers based on user
+     * @param path bapi target path (without leading "/")
+     */
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
     public Response forwardRequest(String path, String body, HttpHeaders headers, HttpMethod method) {
         String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
@@ -53,8 +57,12 @@ public class BApiProxyService {
                 .writeTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .readTimeout(Duration.parse(bApiProxyConfig.getCallTimeout()))
                 .build();
+        String uri = bApiProxyConfig.getUri();
+        if(!uri.endsWith("/")) {
+            uri = uri + "/";
+        }
         Request.Builder requestBuilder = new Request.Builder();
-        requestBuilder.url(bApiProxyConfig.getUri().concat(path));
+        requestBuilder.url(uri.concat(path));
 
         RequestBody requestBody = null;
         if (StringUtils.isNotBlank(body)) {
@@ -62,12 +70,14 @@ public class BApiProxyService {
         }
 
         requestBuilder.method(method.name(), requestBody);
-        headers.getRequestHeaders().forEach((key, values) -> {
-            if (ignoreHeader.stream().anyMatch(key::equalsIgnoreCase)) {
-                return;
-            }
-            values.forEach(value -> requestBuilder.header(key, value));
-        });
+        if (headers != null) {
+            headers.getRequestHeaders().forEach((key, values) -> {
+                if (ignoreHeader.stream().anyMatch(key::equalsIgnoreCase)) {
+                    return;
+                }
+                values.forEach(value -> requestBuilder.header(key, value));
+            });
+        }
 
         requestBuilder.header("X-API-KEY", apiKey);
         requestBuilder.header("X-Edu-User-Id", authenticatedUser);

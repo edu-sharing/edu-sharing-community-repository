@@ -390,7 +390,7 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResultNodeRef search(MetadataSet mds, String query, Map<String,String[]> criterias,
 									  SearchToken searchToken) throws Throwable {
-		MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_LUCENE);
+		MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
 		searchToken.setMetadataQuery(queries,query,criterias);
 		SearchCriterias scParam = new SearchCriterias();
 		scParam.setRepositoryId(mds.getRepositoryId());
@@ -427,7 +427,7 @@ public class SearchServiceImpl implements SearchService {
 			searchParameters.setLanguage(org.alfresco.service.cmr.search.SearchService.LANGUAGE_LUCENE);
 
 			if(searchToken.getQuery() != null && !searchToken.getQuery().getSpecialFilter().isEmpty()) {
-				throw new RuntimeException("specialFilter is not supported for query syntax " + MetadataReader.QUERY_SYNTAX_LUCENE);
+				throw new RuntimeException("specialFilter is not supported for query syntax " + MetadataReader.QUERY_SYNTAX_DSL);
 			}
 			searchParameters.setQuery(searchToken.getLuceneString());
 			logger.info("query: "+searchParameters.getQuery());

@@ -2,15 +2,17 @@
 
 :host {
     display: block;
-    min-width: 500px;
+    width: 500px;
+    max-width: 100%;
 }
 
-.config-page-variant {
+.config-page-variant-or-template {
     margin-top: 32px;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    max-width: 500px;
+    width: 500px;
+    max-width: 100%;
 }
 
 .info-message {
@@ -55,10 +57,16 @@
     }
 }
 
-.delete-and-apply-buttons {
+.configuration-buttons {
     padding: 0 4px;
     display: flex;
-    gap: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
     align-items: center;
     justify-content: flex-end;
+
+    button,
+    div > button {
+        white-space: nowrap;
+    }
 }

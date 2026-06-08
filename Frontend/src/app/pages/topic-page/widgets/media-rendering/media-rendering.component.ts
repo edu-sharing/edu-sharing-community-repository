@@ -22,6 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { NavigationExtras } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
@@ -34,6 +35,7 @@ import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-display-type';
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
@@ -208,7 +210,15 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      * Opens a new window with the Re-URL parameter set.
      */
     openReurlLink(): void {
-        this.windowRef = this.topicPageHelperService.openReurlLink();
+        // set filter to collection ID
+        const mediaRenderingExtra: NavigationExtras = {
+            queryParams: {
+                filters: {
+                    [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+                },
+            },
+        };
+        this.windowRef = this.topicPageHelperService.openReurlLink(mediaRenderingExtra);
     }
 
     /**

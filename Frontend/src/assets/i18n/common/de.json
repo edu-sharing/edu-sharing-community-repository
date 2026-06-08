@@ -1499,7 +1499,7 @@
   },
   "DOWNLOAD_METADATA": {
     "TITLE": "Metadaten herunterladen",
-    "MESSAGE": "In welchen Format möchten Sie die Metadaten herunterladen?",
+    "MESSAGE": "In welchem Format möchten Sie die Metadaten herunterladen?",
     "TYPE_PDF": "PDF-Datei",
     "TYPE_TEXT": "Textdatei"
   },

@@ -17,5 +17,7 @@ public class SignedNodeEntry {
     @JsonProperty(required = true)
     private String signature;
     @JsonProperty
+    private String signatureAlgorithm;
+    @JsonProperty
     private String renderingBaseUrl;
 }

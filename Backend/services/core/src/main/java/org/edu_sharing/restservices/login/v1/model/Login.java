@@ -3,6 +3,7 @@ package org.edu_sharing.restservices.login.v1.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -98,7 +99,7 @@ public class Login {
                 // not logged in
             }
         }
-        this.statusCode = service.isGuest() ? STATUS_CODE_GUEST : statusCode;
+        this.statusCode = !Objects.equals(statusCode, STATUS_CODE_2FA) && service.isGuest() ? STATUS_CODE_GUEST : statusCode;
         this.authorityName = service.isGuest() ? null : AuthenticationUtil.getFullyAuthenticatedUser();
         this.isAdmin = service.isGlobalAdmin();
         this.isValidLogin = isValidLogin;

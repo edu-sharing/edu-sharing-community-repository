@@ -5,6 +5,7 @@
     display: flex;
     align-items: center;
     position: fixed;
+    max-width: 100%;
     max-height: calc(100vh - 100px);
     top: calc(50% + 50px);
     transform: translateY(-50%);

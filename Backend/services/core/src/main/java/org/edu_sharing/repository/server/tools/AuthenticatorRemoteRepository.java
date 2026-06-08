@@ -28,23 +28,21 @@
 package org.edu_sharing.repository.server.tools;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import io.opentelemetry.api.internal.StringUtils;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.namespace.QName;
-import org.alfresco.webservice.authentication.AuthenticationFault;
-import org.apache.axis.client.Stub;
-import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -186,7 +184,10 @@ public class AuthenticatorRemoteRepository {
 		String timestamp = ""+System.currentTimeMillis();
 		String signData = username + localAppId + timestamp;
 
-		byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData, CCConstants.SECURITY_SIGN_ALGORITHM);
+        String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+        String alg = StringUtils.isNullOrEmpty( appInfoRemoteApp.getSignatureAlgorithm())  ? defaultAlg : appInfoRemoteApp.getSignatureAlgorithm();
+
+		byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData,alg);
 		signature = new Base64().encode(signature);
 
 		java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -201,6 +202,7 @@ public class AuthenticatorRemoteRepository {
 				.header("X-Edu-App-Id", localAppId)
 				.header("X-Edu-App-Sig",new String(signature))
 				.header("X-Edu-App-Signed",signData)
+                .header("X-Edu-App-SignedAlg",alg)
 				.header("X-Edu-App-Ts",timestamp)
 				.post(Entity.entity(userProfile, MediaType.APPLICATION_JSON));
 
