@@ -49,7 +49,7 @@
       </div>
       } @if (!enabledOption()) {
       <div class="entries">
-        @if (options()?.length) { @for (option of options(); track option) {
+        @if (options()?.length) { @for (option of options(); track option.name) {
         <div
           class="entry"
           [tabindex]="option.isEnabled ? 0 : -1"
