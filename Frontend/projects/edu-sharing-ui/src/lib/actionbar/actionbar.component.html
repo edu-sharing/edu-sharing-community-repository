@@ -19,8 +19,8 @@
       *ngTemplateOutlet="toggle; context: { optionsToggle: optionsToggleBefore }"
     ></ng-container>
   </div>
-  } @for (option of optionsAlways$ | async; track option; let i = $index) { @if (shouldHighlight(i,
-  option)) {
+  } @for (option of optionsAlways$ | async; track option.name; let i = $index) { @if
+  (shouldHighlight(i, option)) {
   <button
     mat-flat-button
     [color]="option.color"
