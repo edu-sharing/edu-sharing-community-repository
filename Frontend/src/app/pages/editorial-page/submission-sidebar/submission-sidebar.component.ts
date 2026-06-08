@@ -1,4 +1,4 @@
-import { Component, computed, effect, model, signal, inject } from '@angular/core';
+import { Component, computed, effect, model, signal, inject, untracked } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -82,6 +82,13 @@ export class SubmissionSidebarComponent {
     submitFormGroup: FormGroup;
     data = model.required<SubmissionConfig>();
     showValidationNotes = signal(false);
+    submissionFiles = signal<SubmissionFile[]>(null);
+    readonly filesWithOriginal = computed(() =>
+        this.submissionFiles()?.filter((f) => !!f.assignmentFile),
+    );
+    readonly filesWithoutOriginal = computed(() =>
+        this.submissionFiles()?.filter((f) => !f.assignmentFile),
+    );
     readonly feedbackForm = new FormGroup({
         validationNotes: new FormControl('', Validators.nullValidator),
         feedback: new FormControl('', Validators.nullValidator),
@@ -115,6 +122,19 @@ export class SubmissionSidebarComponent {
     constructor() {
         this.submitFormGroup = this.formBuilder.group({
             submitComment: ['', [Validators.required]],
+        });
+        effect(() => {
+            const subId = this.submission()?.ref?.id;
+            const assignmentId = this.data()?.assignment?.ref?.id;
+            this.submissionFiles.set(null);
+            if (subId && assignmentId) {
+                void firstValueFrom(
+                    this.assignmentV1Service.getSubmissionFiles({
+                        submissionId: subId,
+                        assignmentId,
+                    }),
+                ).then((files) => untracked(() => this.submissionFiles.set(files)));
+            }
         });
         effect(() => {
             this.feedbackForm.setValue({
@@ -204,6 +224,7 @@ export class SubmissionSidebarComponent {
             await this.stepElement(+1);
         } else {
             this.editorialSidebarService.close();
+            this.data()?.submissionFileCallback(null);
         }
     }
 

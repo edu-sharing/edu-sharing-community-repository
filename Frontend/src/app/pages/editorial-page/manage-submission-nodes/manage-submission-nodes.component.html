@@ -1,10 +1,5 @@
-@if (!files()?.length) {
-<div class="empty">
-  {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
-</div>
-} @if (files()?.length) {
 <div class="node-list">
-  @for (item of files(); track item) {
+  @for (item of localFiles(); track item) {
   <div
     tabindex="0"
     (click)="click(item)"
@@ -18,4 +13,3 @@
   </div>
   }
 </div>
-}

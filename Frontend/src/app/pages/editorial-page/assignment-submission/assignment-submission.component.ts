@@ -114,6 +114,16 @@ export class AssignmentSubmissionComponent implements OnDestroy {
             });
         this.language = this.translationsService.getLocale();
         effect(() => {
+            if (this.selectedCorrectedFile()) {
+                this.editorialPageService.close.set({
+                    show: true,
+                    callback: () => void this.closeDocument(),
+                });
+            } else {
+                this.editorialPageService.close.set(null);
+            }
+        });
+        effect(() => {
             const file = this.selectedCorrectedFile();
             this.selectedSubmissionFileUrl.set(undefined);
             const correction = file?.correction;
@@ -174,6 +184,13 @@ export class AssignmentSubmissionComponent implements OnDestroy {
         this.destroyed$.complete();
         this.sidebarClosed$.next();
         this.sidebarClosed$.complete();
+        this.editorialPageService.close.set(null);
+    }
+
+    private async closeDocument() {
+        if (await this.confirmUnsavedChanges()) {
+            this.selectedCorrectedFile.set(null);
+        }
     }
     protected readonly InteractionType = InteractionType;
     protected readonly Scope = Scope;

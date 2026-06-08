@@ -1,4 +1,4 @@
-import { Component, input, OnChanges, signal, SimpleChanges, inject } from '@angular/core';
+import { Component, effect, input, signal, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -10,24 +10,18 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
     styleUrls: ['manage-submission-nodes.component.scss'],
     imports: [SharedModule],
 })
-export class ManageSubmissionNodesComponent implements OnChanges {
+export class ManageSubmissionNodesComponent {
     private assignmentV1Service = inject(AssignmentV1Service);
 
     data = input.required<SubmissionConfig>();
-    files = signal<SubmissionFile[]>(null);
+    files = input<SubmissionFile[]>(null);
+    localFiles = signal<SubmissionFile[]>(null);
     selected = signal<SubmissionFile>(null);
 
-    async ngOnChanges(changes: SimpleChanges) {
-        if (changes.data) {
-            this.files.set(
-                await firstValueFrom(
-                    this.assignmentV1Service.getSubmissionFiles({
-                        submissionId: this.data().submission.ref.id,
-                        assignmentId: this.data().assignment.ref.id,
-                    }),
-                ),
-            );
-        }
+    constructor() {
+        effect(() => {
+            this.localFiles.set(this.files());
+        });
     }
 
     async click(item: SubmissionFile) {
@@ -45,8 +39,8 @@ export class ManageSubmissionNodesComponent implements OnChanges {
                 },
             }),
         );
-        this.files.set(
-            this.files().map((f) => {
+        this.localFiles.set(
+            this.localFiles().map((f) => {
                 if (f === item) {
                     f.validationStatus = 'PENDING';
                 }

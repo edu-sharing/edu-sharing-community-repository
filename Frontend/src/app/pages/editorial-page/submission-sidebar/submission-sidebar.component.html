@@ -62,10 +62,29 @@
         </div>
         }
         <div class="submissions">
-          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
-          <es-manage-assignment-submissions [data]="data()"></es-manage-assignment-submissions>
+          @if (submissionFiles() !== null && !filesWithoutOriginal()?.length &&
+          !filesWithOriginal()?.length) {
+          <div class="empty">
+            {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
+          </div>
+          } @if (filesWithOriginal()?.length) {
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.ASSIGNMENT_MATERIAL' | translate }}</label>
+          <es-manage-assignment-submissions
+            [data]="data()"
+            [files]="filesWithOriginal()"
+          ></es-manage-assignment-submissions>
+          }
         </div>
-        }
+        @if (filesWithoutOriginal()?.length) {
+        <div class="submissions">
+          <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_ATTACHMENT' | translate }}</label>
+          <es-manage-assignment-submissions
+            [data]="data()"
+            [files]="filesWithoutOriginal()"
+          ></es-manage-assignment-submissions>
+        </div>
+
+        } }
         <div class="feedback">
           <form [formGroup]="feedbackForm">
             <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
@@ -109,29 +128,29 @@
           {{ 'EDITORIAL.SIDEBAR.SUBMISSION.SEND_BACK' | translate }}
         </button>
         <button mat-button color="primary" (click)="stepElement(+1)" [disabled]="!canGoForward()">
-          <i esIcon="arrow_forward"></i>
           {{ 'EDITORIAL.SIDEBAR.SUBMISSION.NEXT' | translate }}
+          <i esIcon="arrow_forward"></i>
         </button>
       </div>
     </div>
   </mat-tab>
   <!--<mat-tab *ngIf="data().submission.submissionStatus !== 'NOT_STARTED'">
-    <ng-template mat-tab-label>
-      <i esIcon="comment" class="tab-icon"></i>
-      <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_DISCUSSION' | translate }}</span>
-    </ng-template>
-    <form [formGroup]="submitFormGroup" class="comments">
-      <es-comments-list
-        *ngIf="submission()?.ref?.id"
-        mode="view"
-        text="html"
-        [node]="submission()?.ref?.id"
-      ></es-comments-list>
-      <editor [init]="editorConfig" formControlName="submitComment"></editor>
-      <button mat-flat-button color="primary" [disabled]="isReadOnly()" (click)="addComment()">
-        {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
-      </button>
-    </form>
-  </mat-tab>-->
+      <ng-template mat-tab-label>
+        <i esIcon="comment" class="tab-icon"></i>
+        <span class="tab-label">{{ 'EDITORIAL.SIDEBAR.SUBMISSION.TAB_DISCUSSION' | translate }}</span>
+      </ng-template>
+      <form [formGroup]="submitFormGroup" class="comments">
+        <es-comments-list
+          *ngIf="submission()?.ref?.id"
+          mode="view"
+          text="html"
+          [node]="submission()?.ref?.id"
+        ></es-comments-list>
+        <editor [init]="editorConfig" formControlName="submitComment"></editor>
+        <button mat-flat-button color="primary" [disabled]="isReadOnly()" (click)="addComment()">
+          {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
+        </button>
+      </form>
+    </mat-tab>-->
 </mat-tab-group>
 }
