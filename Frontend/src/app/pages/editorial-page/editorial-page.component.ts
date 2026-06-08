@@ -487,6 +487,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
         this.searchFieldService.getCurrentInstance().patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
+            showFiltersButton: !params.mainComponent,
         });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}') as Values;
