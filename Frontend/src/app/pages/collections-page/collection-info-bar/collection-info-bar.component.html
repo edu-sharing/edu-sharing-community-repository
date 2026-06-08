@@ -114,14 +114,14 @@
       }
     </div>
 
-    @if (collection?.access?.indexOf('ChangePermissions') !== -1 && permissions) {
+    @if (collection?.access?.indexOf('ChangePermissions') !== -1 && permissions()) {
     <div>
       <div data-test="collection-info-permissions">
         <h2 class="collection-permissions collection-label">
           {{ 'COLLECTIONS.PERMISSIONS' | translate }}
         </h2>
         <div class="collection-permissions collection-content">
-          @for (permission of permissions; track permission) { @if (
+          @for (permission of uniquePermissions(); track permission) { @if (
           permission.authority.authorityType !== 'EVERYONE' && permission.authority.authorityName
           !== 'System' ) {
           <div>

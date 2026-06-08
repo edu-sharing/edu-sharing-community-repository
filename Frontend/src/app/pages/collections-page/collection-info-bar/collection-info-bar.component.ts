@@ -1,7 +1,9 @@
 import {
     Component,
+    computed,
     EventEmitter,
     Input,
+    input,
     OnChanges,
     Output,
     SimpleChanges,
@@ -36,7 +38,13 @@ export class CollectionInfoBarComponent implements OnChanges {
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('mds') mds: MdsViewerComponent;
     @Input() collection: Node;
-    @Input() permissions: Permission[];
+    permissions = input<Permission[]>();
+    readonly uniquePermissions = computed(() =>
+        this.permissions()?.filter(
+            (p, i, arr) =>
+                arr.findIndex((q) => q.authority.authorityName === p.authority.authorityName) === i,
+        ),
+    );
     @Output() edit = new EventEmitter<void>();
     stats: NodeStats;
 
