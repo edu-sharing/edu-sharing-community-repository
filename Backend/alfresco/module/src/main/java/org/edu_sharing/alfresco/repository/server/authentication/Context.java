@@ -4,6 +4,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.log4j.Logger;
@@ -18,12 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Context {
 
     /**
      * max number of nodes that are stored in the session for a temporary access via usage
      */
-    private static final int MAX_SINGLE_USE_NODEIDS = 25;
+    private static final int MAX_SINGLE_USE_NODEIDS = 50;
     private static final ThreadLocal<Context> instance = new ThreadLocal<>();
     private static ServletContext globalContext;
 
@@ -217,20 +219,25 @@ public class Context {
      */
     public synchronized void addSingleUseNode(String nodeId) {
         List<String> list = null;
-        if(this.getRequest() != null && this.getRequest().getSession() != null){
-            list = (List<String>) this.getRequest().getSession().getAttribute(CCConstants.AUTH_SINGLE_USE_NODEIDS);
-        }
-        if(list == null) {
-            list = new ArrayList<>();
-        }
-        if(list.contains(nodeId)){
+        if (this.getRequest() == null) {
+            log.error("addSingleUseNode was called without context; can not store id in session");
             return;
         }
-        list.add(nodeId);
-        while(list.size() > MAX_SINGLE_USE_NODEIDS) {
-            list.remove(0);
+        HttpSession session = this.getRequest().getSession();
+        synchronized (session) {
+            list = (List<String>) session.getAttribute(CCConstants.AUTH_SINGLE_USE_NODEIDS);
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+            if (list.contains(nodeId)) {
+                return;
+            }
+            list.add(nodeId);
+            while (list.size() > MAX_SINGLE_USE_NODEIDS) {
+                list.remove(0);
+            }
+            session.setAttribute(CCConstants.AUTH_SINGLE_USE_NODEIDS, list);
         }
-        this.getRequest().getSession().setAttribute(CCConstants.AUTH_SINGLE_USE_NODEIDS, list);
     }
 
     @Nullable
