@@ -1,0 +1,395 @@
+{
+  "TOPIC_PAGE": {
+    "NAVIGATION": {
+      "NEW_PAGE_VARIANT": "Nuova variante di pagina tematica",
+      "NEW_PAGE_TEMPLATE": "Nuovo modello di pagina tematica",
+      "TITLE": "Pagina tematica",
+      "SEARCH_PLACEHOLDER": "Cerca contenuti nella pagina tematica ..."
+    },
+    "AI": {
+      "GENERATED": "Generato dall'IA",
+      "INVALID_PROMPT": "Prompt non valido"
+    },
+    "WIDGET": {
+      "SUB_HEADING_LABEL_OPTIONAL": "Sottotitolo (facoltativo)",
+      "DESCRIPTION_LABEL": "Descrizione",
+      "DESCRIPTION_LABEL_OPTIONAL": "Descrizione (facoltativo)",
+      "NO_SUBCOLLECTIONS": "Non è stata trovata alcuna sottocollezione per questa collezione.",
+      "SAVE_CONFIG_ACTION": "Chiudi",
+      "SAVE_CONFIG_MESSAGE": "Le vostre modifiche verranno salvate.",
+      "SAVE_CONFIG_ERROR_ACTION": "Ricarica la pagina",
+      "SAVE_CONFIG_ERROR_MESSAGE": "Non è stato possibile salvare le vostre modifiche.",
+      "NODE_NOT_PUBLIC": "Il contenuto selezionato non è pubblico.",
+      "AI_WIDGET": {
+        "HEADING": "Richiesta",
+        "PROMPT_DESCRIPTION": "Formulate una richiesta all'IA.",
+        "PLACEHOLDER_DESCRIPTION": "Potete utilizzare i seguenti segnaposto, che verranno automaticamente sostituiti dai rispettivi valori impostati nella pagina:",
+        "AND": "e",
+        "PROMPT_LABEL": "Prompt per l'IA",
+        "PROMPT_PLACEHOLDER": "Prompt IA",
+        "PROMPT_ADJUSTED_HINT": "Il prompt è stato modificato, ma le risposte non sono ancora state aggiornate.",
+        "SEND_HINT": "Quando fate clic su «Invia», la richiesta attualmente salvata viene sovrascritta e tutti i testi precedentemente definiti vengono reimpostati.",
+        "SEND": "Invia",
+        "ANSWERS_LABEL": "Risposte",
+        "ANSWERS_DESCRIPTION": "Qui avete la possibilità di definire risposte per diverse combinazioni di valori dei segnaposto. Potete inoltre far generare un testo tramite l'IA per la selezione attuale.",
+        "SELECT_PLACEHOLDER": "-- Selezionare --",
+        "GENERATE_TEXT": "Genera un nuovo testo con l'IA",
+        "GENERATE_TEXT_HINT": "Viene generato un testo tramite l'IA. Questa operazione può richiedere del tempo.",
+        "CURRENT_SELECTION_ANSWER_LABEL": "Risposta per la selezione attuale",
+        "NO_ANSWER_DEFINED": "Per la selezione non è ancora stato definito alcun testo."
+      },
+      "BREADCRUMB": {
+        "DEFAULT_ROOT_NAME": "Portali tematici",
+        "PAGE_VARIANT_LABEL": "Variante di pagina",
+        "NAVIGATE_TO_PAGE_TEMPLATE": "Vai al modello di pagina"
+      },
+      "COLLECTION_CHIPS": {
+        "CONFIG_ARIA": "Scegliete il layout dei pulsanti di navigazione",
+        "CHANGE_FILTER_OR_SEARCH": "Modifica filtro o ricerca"
+      },
+      "CONTENT_TEASER": {
+        "CONFIG_ARIA": "Scegliete il layout dell'anteprima dei contenuti",
+        "CHANGE_FILTER_OR_SEARCH": "Modifica filtro o ricerca",
+        "SWITCH_INTO_EDIT_MODE": "Passa alla modalità di modifica",
+        "SWITCH_INTO_VIEW_MODE": "Passa alla modalità di visualizzazione",
+        "POPUP_BLOCKED": "Il popup è stato bloccato o non è stato possibile aprirlo.",
+        "FILTER_EVENT_RECEIVED": "Evento di filtro ricevuto",
+        "NO_CONTENTS": "Non è stato trovato alcun risultato di ricerca.",
+        "CHANGE_ON_INSPECTION_TABLE": "Modifica l'oggetto sul tavolo di verifica",
+        "REMOVE_FROM_WIDGET": "Nascondi oggetto",
+        "ADD_TO_WIDGET": "Mostra oggetto"
+      },
+      "EDITABLE_TEXT": {
+        "SHOW_MORE": "mostra di più",
+        "SHOW_LESS": "mostra di meno",
+        "BOLD": "Grassetto",
+        "ITALIC": "Corsivo",
+        "QUOTE": "Citazione",
+        "CODE": "Codice",
+        "LINK": "Link",
+        "UNORDERED_LIST": "Elenco non ordinato",
+        "ORDERED_LIST": "Elenco ordinato",
+        "GENERATE_WITH_AI": "Genera con l'IA",
+        "MISSING_TEXT": "Inserite prima un testo.",
+        "AI_TAGS_EXIST": "Sono stati trovati segnaposto IA, pertanto il testo verrà generato automaticamente.",
+        "TITLE": "Inserisci il titolo della collezione",
+        "DESCRIPTION": "Inserisci la descrizione della collezione",
+        "TARGET_GROUP": "Inserisci il gruppo target dell'utente",
+        "EDUCATIONAL_LEVEL": "Inserisci il livello di istruzione dell'utente"
+      },
+      "GENERIC_WIDGET": {
+        "NO_WIDGET_CONTAINER": "Non è stato possibile trovare alcun contenitore di widget.",
+        "ERROR_LOADING_WIDGET": "Errore durante il caricamento del componente widget.",
+        "WIDGET_TYPE": "Tipo di widget",
+        "STACK_TRACE": "Stack trace",
+        "PARSE_OVERWRITE_ERROR": "Errore durante l'analisi di configOverwrite.",
+        "WIDGET_NOT_FOUND_IN_MODULE_OR_UNKNOWN": "Non è stato possibile trovare il widget nel modulo oppure è sconosciuto ({{type}})."
+      },
+      "IFRAME_WIDGET": {
+        "SOURCE": "Sorgente (src)",
+        "WIDTH": "Larghezza",
+        "HEIGHT": "Altezza",
+        "TITLE": "Titolo (per l'accessibilità)",
+        "SHOW_BORDER": "Mostrare il bordo?",
+        "SHOW_CONFIRMATION": "Mostrare la finestra di conferma?",
+        "SHOW_PREVIEW": "Mostra anteprima",
+        "UPDATE_PREVIEW": "Aggiorna anteprima",
+        "PREVIEW_TITLE": "Anteprima dell'iFrame",
+        "SAVE_CONFIG": "Salva configurazione",
+        "SHOW_EXTERNAL_CONTENT": {
+          "HEADING": "Sì, mostra il contenuto esterno",
+          "MESSAGE": "State per caricare e visualizzare contenuti esterni. Ciò potrebbe comportare la trasmissione di dati personali a servizi esterni e il loro trattamento da parte di questi ultimi.",
+          "BUTTON": "Accetta e continua"
+        },
+        "NOT_SUPPORTED": "Il vostro browser non supporta gli iFrame.",
+        "MISSING_SRC": "Non è stata indicata alcuna sorgente, pertanto non è possibile visualizzare alcun iFrame."
+      },
+      "IMAGE_WRAPPER": {
+        "GENERATE": "Genera immagine",
+        "REGENERATE": "Rigenera immagine",
+        "UPLOAD": "Carica immagine",
+        "DELETE": "Elimina immagine",
+        "IMAGE_UPLOAD_CONFIRMATION_TEXT": "Confermo di possedere tutti i diritti necessari su questa immagine per integrarla nella pagina tematica."
+      },
+      "MEDIA_RENDERING": {
+        "NO_ELEMENT_SELECTED": "Non è ancora stato selezionato alcun elemento da visualizzare.",
+        "TO_ORIGINAL_PAGE": "Alla pagina originale",
+        "SHOW_DETAILS": "Mostra dettagli",
+        "HIDE_DETAILS": "Nascondi dettagli",
+        "CONFIG_ARIA": "Scegliete il layout del widget multimediale",
+        "CHANGE_CONTENT": "Modifica contenuto",
+        "SELECT_CONTENT": "Seleziona contenuto",
+        "SELECT_CONTENT_TOOLTIP": "Nota: selezionate un contenuto pubblico tramite l'ambiente redazionale e fate quindi clic su «Applica»."
+      },
+      "PROFILING": {
+        "CHANGES_SAVED": "Profilo salvato – ora vi verranno mostrati contenuti pertinenti!",
+        "CHANGES_RESET": "La vostra profilazione è stata reimpostata."
+      },
+      "SEARCH_WIDGET": {
+        "SEARCH": "Ricerca",
+        "SEARCH_PLACEHOLDER": "Cerca contenuti nella pagina tematica ..."
+      },
+      "SHARE_OPTIONS": {
+        "COPY_LINK": "Copia link",
+        "COPY_LINK_TO_CONTENT": "Copia il link al contenuto",
+        "WRITE_MAIL": {
+          "HEADING": "Scrivi e-mail",
+          "SUBJECT_SHARED_CONTENT": "Contenuto condiviso: {{title}}",
+          "BODY_SHARED_CONTENT": "Salve,\n\nvorrei condividere questo contenuto con voi:\n\n{{url}}\n\nCordiali saluti",
+          "NO_TITLE": "Senza titolo",
+          "ERROR_NO_URL": "Nessun URL disponibile nel nodo:"
+        }
+      },
+      "SIDE_MENU": "Menu laterale",
+      "TOPIC_HEADER": {
+        "TOPIC_PAGE_SUBJECT_PORTAL_LABEL": "Portale tematico della pagina tematica",
+        "COLLECTION_DESCRIPTION_LABEL": "Descrizione della collezione",
+        "IMPORTANCE_HEADER": "Perché è importante?",
+        "IMPORTANCE_LABEL": "Descrizione dell'importanza"
+      },
+      "TOPICS_COLUMN_BROWSER": {
+        "ERROR_RECEIVING_DATA": "Errore durante la ricezione dei dati"
+      },
+      "EMBEDDING": {
+        "LABEL": "Incorpora",
+        "CODE_COPIED": "Il codice per incorporare il contenuto è stato copiato negli appunti."
+      },
+      "CHOOSE_LAYOUT": "Scegli layout",
+      "COLOR": "Colore",
+      "LAYOUT": {
+        "PREVIEW": "Anteprima",
+        "PREVIEW_ARIA": "Mostra come semplice anteprima",
+        "PREVIEW_TITLE": "Con titolo",
+        "PREVIEW_TITLE_ARIA": "Mostra come anteprima con titolo",
+        "PREVIEW_TITLE_BUTTONS": "Esteso",
+        "PREVIEW_TITLE_BUTTONS_ARIA": "Mostra come anteprima con titolo e pulsanti",
+        "SINGLE_VIEW": "Semplice",
+        "SINGLE_VIEW_ARIA": "Vista semplice",
+        "SPLIT_VIEW": "Diviso",
+        "SPLIT_VIEW_ARIA": "Vista divisa",
+        "STANDARD_VIEW": "Standard",
+        "STANDARD_VIEW_ARIA": "Vista standard",
+        "COMPACT_VIEW": "Compatto",
+        "COMPACT_VIEW_ARIA": "Vista compatta",
+        "LIST_VIEW": "Elenco",
+        "LIST_VIEW_ARIA": "Vista a elenco",
+        "MAP_VIEW": "Mappa",
+        "MAP_VIEW_ARIA": "Vista mappa",
+        "BUTTONS": "Pulsanti",
+        "BUTTONS_ARIA": "Visualizza come pulsanti",
+        "GRID": "Riquadri",
+        "GRID_ARIA": "Visualizza come riquadri"
+      }
+    },
+    "SIDE_MENU": {
+      "EDIT_PAGE": "Modifica pagina",
+      "BACK_TO_PREVIEW": "Anteprima",
+      "NEW": "Nuovo",
+      "PROFILING": {
+        "LABEL": "Profilazione",
+        "HEADING": "Chi siete?"
+      },
+      "TOPIC_TREE": {
+        "LABEL": "Albero tematico",
+        "HEADING": "Albero tematico di {{topic}}"
+      },
+      "CONFIG_PAGE_VARIANT": {
+        "LABEL": "Impostazioni",
+        "HEADING": "Impostazioni della variante di pagina tematica",
+        "WARN_TEXT": "Non tutti i campi dei parametri obbligatori sono stati compilati. Non potete annullare l'operazione.",
+        "DUPLICATE_WARN_TEXT": "Esiste già una variante di pagina tematica con gli stessi parametri.",
+        "TITLE": "Titolo della variante",
+        "TITLE_PLACEHOLDER": "Variante di pagina tematica per xyz",
+        "EDUCATION_LEVEL_LABEL": "Livello di istruzione",
+        "TARGET_GROUP_LABEL": "Gruppo target",
+        "DELETE_VARIANT": "Elimina variante",
+        "DEFINE_PARAMETERS": "Definisci parametri",
+        "DUPLICATE_PARAMETERS": "Rilevato duplicato in una variante esistente"
+      },
+      "CONFIG_PAGE_TEMPLATE": {
+        "HEADING": "Impostazioni del modello di pagina tematica",
+        "TITLE": "Titolo del modello",
+        "TITLE_PLACEHOLDER": "Modello di pagina tematica per xyz",
+        "DELETE_VARIANT": "Elimina modello"
+      }
+    },
+    "ADD_PAGE_TEMPLATE": {
+      "LABEL": "Crea modello di pagina tematica",
+      "MESSAGE": "Non esiste ancora alcun modello. Volete creare un modello vuoto e passare ad esso?"
+    },
+    "CONFIG_WIDGET_EMBEDDING": {
+      "HEADING": "Incorpora widget",
+      "DEFAULT": {
+        "TITLE": "Incorporamento standard (LMS/CMS)",
+        "INFO": "Tramite questa finestra di dialogo potete incorporare il vostro widget in un LMS/CMS. Dopo aver selezionato un'opzione, il codice viene copiato automaticamente negli appunti.",
+        "HINT": "Nota: per una corretta integrazione, il LMS/CMS deve avere installato l'estensione Edu-Sharing."
+      },
+      "ADVANCED": {
+        "TITLE": "Incorporamento avanzato (sito web)",
+        "INFO": "Tramite questa finestra di dialogo potete incorporare il vostro widget in una pagina esterna. Dopo aver selezionato un'opzione, il codice viene copiato automaticamente negli appunti.",
+        "HINT": "Nota: per una corretta integrazione, il dominio di destinazione deve essere abilitato da Edu-Sharing."
+      },
+      "OPTION_NODE_ID_LABEL": "Incorporamento tramite ID nodo",
+      "OPTION_NODE_ID_DESCRIPTION": "Il widget viene incorporato con il suo ID individuale. Tutte le modifiche successive al widget vengono applicate automaticamente.",
+      "OPTION_NODE_ID_NOT_FOUND": "Nota: questa opzione non può essere selezionata perché non è ancora stata apportata alcuna modifica al widget.",
+      "OPTION_OVERWRITE_LABEL": "Incorporamento tramite oggetto di configurazione statico",
+      "OPTION_OVERWRITE_DESCRIPTION": "Il widget viene incorporato nella sua configurazione attuale nella pagina esterna.",
+      "RECOMMENDED": "Consigliato"
+    },
+    "ANCHOR_FALLBACK_PREFIX": "Sezione",
+    "ANCHOR_ARIA_HEADING": "Vai alla sezione: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Numero di risultati di ricerca: ",
+    "SWIMLANE": {
+      "HEADING_LABEL": "Titolo",
+      "DEFAULT_HEADING": "Un titolo di esempio",
+      "POSITION_UP": "Sposta la sezione verso l'alto",
+      "POSITION_DOWN": "Sposta la sezione verso il basso",
+      "SELECT_ELEMENT": {
+        "HEADING": "Aggiungi elemento di contenuto",
+        "CONTAINER_ELEMENT": "Elemento area",
+        "ACCORDION_ELEMENT": "Elemento a fisarmonica",
+        "ANCHOR_MENU": "Menu di ancoraggio"
+      },
+      "SELECT_BACKGROUND": {
+        "HEADING": "Scegli lo sfondo",
+        "COLOR": "Colore",
+        "SHAPE": "Forma",
+        "NONE": "Nessuno",
+        "ARROW_LARGE": "Freccia (grande)",
+        "ARROW_SMALL": "Freccia (piccola)",
+        "FLAG_LARGE": "Bandiera (grande)",
+        "FLAG_SMALL": "Bandiera (piccola)",
+        "ROUND_LARGE": "Arrotondato (grande)",
+        "ROUND_SMALL": "Arrotondato (piccolo)",
+        "MIRROR": "Specchia"
+      },
+      "SELECT_LAYOUT": {
+        "HEADING": "Seleziona layout",
+        "ONE_COLUMN": "Una colonna",
+        "TWO_COLUMNS": "Due colonne",
+        "THREE_COLUMNS": "Tre colonne",
+        "LEFT_SIDE_PANEL": "Barra laterale sinistra",
+        "RIGHT_SIDE_PANEL": "Barra laterale destra"
+      },
+      "CHANGE_GRID": {
+        "CONFIGURE": "Configura griglia",
+        "ADJUST": "Adatta griglia",
+        "CONFIGURED_WIDGET_WARNING": "Con questa modifica eliminate un widget già configurato. Siete sicuri di voler continuare?",
+        "UNCONFIGURED_WIDGET_WARNING": "Uno o più widget aggiunti ma non ancora configurati andranno persi a causa di questa modifica. Siete sicuri di voler continuare?"
+      },
+      "NO_WIDGET_AVAILABLE": "Nessun widget ancora disponibile",
+      "SELECT_WIDGET": {
+        "HEADING": "Aggiungi widget",
+        "CURRENT_TYPE": "Tipo di widget attuale",
+        "CONFIG_EXISTS": "già configurato",
+        "CHANGE_TYPE": "Cambia tipo di widget",
+        "CHANGE_TYPE_WARNING": "Volete davvero sostituire un widget già configurato? La configurazione di questo widget andrà persa.",
+        "DELETE": "Elimina widget",
+        "DELETE_WARNING": "Volete davvero eliminare un widget già configurato? La configurazione di questo widget andrà persa.",
+        "COLLECTION_CHIPS": "Pulsanti di navigazione",
+        "TOPICS_COLUMN_BROWSER": "Albero tematico (espandibile)",
+        "CONTENT_TEASER": "Anteprima dei contenuti",
+        "MEDIA_RENDERING": "Widget multimediale",
+        "TEXT_WIDGET": "Widget di testo",
+        "IFRAME_WIDGET": "Widget iFrame",
+        "AI_TEXT_WIDGET": "Widget IA",
+        "undefined": "Tipo specifico dell'applicazione"
+      },
+      "QR_CODE": {
+        "HEADING": "Link al contenuto",
+        "TOOLTIP": "Mostra codice QR"
+      },
+      "SHARE_CONTENT": {
+        "HEADING": "Condividi contenuto",
+        "COPY_LINK": "Copia link",
+        "COPY_LINK_SUCCESS": "Il link è stato copiato negli appunti.",
+        "WRITE_MAIL": {
+          "HEADING": "Scrivi e-mail",
+          "SUBJECT_SHARED_CONTENT": "Contenuto condiviso: {{title}}",
+          "BODY_SHARED_CONTENT": "Salve,\n\nvorrei condividere questo contenuto con voi:\n\n{{url}}\n\nCordiali saluti",
+          "NO_TITLE": "Senza titolo",
+          "ERROR_NO_URL": "Nessun URL disponibile"
+        }
+      },
+      "EDIT": {
+        "ARIA_LABEL": "Modifica sezione",
+        "HEADING": "Configura {{heading}}",
+        "HEADING_LABEL": "Titolo",
+        "HEADING_PLACEHOLDER": "Titolo della sezione",
+        "SWIMLANE_DEFAULT": "Sezione",
+        "TYPE_LABEL": "Tipo",
+        "GRID_DEFINITION_LABEL": "Definizione della griglia",
+        "CHANGE_GRID_HINT": "Se modificate il tipo di griglia, i widget aggiunti in posizioni che non esisteranno più alla fine della griglia potrebbero andare persi. Spostate quindi prima i rispettivi widget prima di procedere con la modifica della griglia."
+      },
+      "DELETE": {
+        "LABEL": "Elimina sezione",
+        "MESSAGE": "Volete davvero eliminare questa sezione?"
+      },
+      "INVALID_OR_UNKNOWN_WIDGET": "Il widget non è definito o è sconosciuto."
+    },
+    "NO_SWIMLANES": "Non è ancora stata creata alcuna sezione con contenuti.",
+    "NO_PAGE_CONFIG": {
+      "DEFAULT_MESSAGE": "Non è stato possibile trovare alcuna configurazione di pagina per questa pagina.",
+      "VIEW_MESSAGE": "Contattate il vostro amministratore di sistema.",
+      "EDIT_MESSAGE": "Potete tuttavia selezionare tramite il menu una configurazione di pagina che volete utilizzare.",
+      "SELECT_LABEL": "Configurazione di pagina",
+      "SELECT_PLACEHOLDER": "Seleziona configurazione di pagina",
+      "CREATE_PAGE": "Crea pagina",
+      "MISSING_CONFIG_OR_VARIANTS": "La configurazione di pagina non contiene varianti di pagina oppure non è stato possibile selezionare alcuna variante di pagina.",
+      "MISSING_VARIANTS": "La configurazione di pagina non contiene varianti di pagina."
+    },
+    "NO_PAGE_VARIANT": {
+      "DEFAULT_MESSAGE": "Non è stato possibile trovare alcuna variante di pagina per questa pagina.",
+      "NO_SELECTED_VARIANT": "Non è stato possibile trovare alcuna variante di pagina selezionata.",
+      "NO_SELECTED_VARIANT_NODE": "Non è stato possibile trovare alcun nodo di variante di pagina selezionato.",
+      "VARIANT_OR_STRUCTURE_MISSING": "Non è stato possibile trovare né una variante di pagina né una struttura al suo interno.",
+      "MISSING_IN_PAGE_CONFIG": "La configurazione di pagina non contiene varianti."
+    },
+    "NO_SEARCH_RESULTS": "Non è stato possibile trovare alcun risultato di ricerca nelle sezioni.",
+    "SAVE_CONFIG_MESSAGE": "Le vostre modifiche sono in fase di salvataggio.",
+    "SAVE_CONFIG_ERROR_ACTION": "Ricarica la pagina",
+    "SAVE_CONFIG_ERROR_MESSAGE": "Si è verificato un errore durante il caricamento di una risorsa. Ricaricate la pagina.",
+    "DEFAULT_PAGE_TEMPLATE_NAME": "Modello di pagina",
+    "DEFAULT_PAGE_VARIANT_NAME": "Variante di pagina",
+    "CREATE_PAGE_VARIANT": {
+      "HEADING": "Crea nuova variante di pagina tematica",
+      "EXISTING_VARIANT": {
+        "INFO_HEADING": "Attenzione: esistono già varianti di questa pagina tematica.",
+        "INFO_LIST_TEXT": "Prima di crearne una nuova, verificate:",
+        "INFO_LIST_ITEM_ONE": "Esiste già una variante adatta?",
+        "INFO_LIST_ITEM_TWO": "È possibile adattare un modello esistente?"
+      },
+      "EXISTING_TOPIC_PAGE": {
+        "INFO_HEADING": "Esiste già una pagina tematica per questa collezione.",
+        "INFO_TEXT": "Potete crearne una copia e adattarla, rimuovere i suoi filtri e scegliere un'altra pagina tematica come base, oppure creare una nuova variante a partire da un modello."
+      },
+      "CREATE_COPY_OF_LABEL": "Crea copia di:",
+      "COPY_OPTIONS": {
+        "ARIA": "Selezione della base di copia",
+        "TOPIC_PAGE": "Pagina tematica",
+        "TEMPLATE": "Modello"
+      },
+      "SEARCH_PLACEHOLDER": "Cerca modelli di pagina tematica",
+      "SEARCH": "Ricerca",
+      "EMPTY": "Non è stato possibile trovare alcun modello.",
+      "PENDING_MESSAGE": "Una nuova variante di pagina è in fase di creazione e caricamento.",
+      "SUCCESS_MESSAGE": "Copia della pagina tematica creata con successo",
+      "COPY_SUFFIX": "Copia"
+    },
+    "DELETE_PAGE_VARIANT": {
+      "HEADING": "Elimina variante di pagina",
+      "MESSAGE": "Volete davvero eliminare la variante selezionata? Questa azione non può essere annullata.",
+      "PENDING_MESSAGE": "La variante di pagina viene eliminata insieme a tutte le sue personalizzazioni."
+    },
+    "DELETE_PAGE_TEMPLATE": {
+      "HEADING": "Elimina modello di pagina",
+      "MESSAGE": "Volete davvero eliminare il modello selezionato? Questa azione non può essere annullata.",
+      "PENDING_MESSAGE": "Il modello di pagina viene eliminato insieme a tutte le sue personalizzazioni."
+    },
+    "TEMPLATE_MODE_ACTIVE": {
+      "VIEW": "Vi trovate attualmente nella modalità di visualizzazione del modello.",
+      "EDIT": "Vi trovate attualmente nella modalità di modifica del modello.",
+      "END": "Esci dalla modalità modello"
+    }
+  }
+}
