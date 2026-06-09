@@ -8,15 +8,18 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-
 import java.util.List;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 
 public class SignatureVerifier {
 
 	Logger logger = Logger.getLogger(SignatureVerifier.class);
 
     com.typesafe.config.Config config = LightbendConfigLoader.get();
-	
+
 	public class Result{
 		int statuscode;
 		String message;
@@ -113,7 +116,7 @@ public class SignatureVerifier {
 
 
 
-				
+
 				verified = signing.verify(signing.getPemPublicKey(appInfo.getPublicKey(), "RSA"),decoded, signed, algorithm);
 				
 				
@@ -182,6 +185,11 @@ public class SignatureVerifier {
 		String value = httpReq.getHeader(key);
 		if(value == null){
 			value = httpReq.getParameter(key);
+		} else {
+			// header spec does not allow special utf chars
+			if(key.equals("X-Edu-User-Id")) {
+				value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+			}
 		}
 		return value;
 	}
