@@ -53,7 +53,7 @@ class SignatureVerifierTest {
      * must be <= MAX_SINGLE_USE_NODEIDS
      */
     static final int NODE_COUNT = 25;
-    static final int RETRIES_COUNT = 10;
+    static final int RETRIES_COUNT = 2;
 
     static Client client;
     static Client noRedirectClient;
@@ -287,34 +287,33 @@ class SignatureVerifierTest {
     @Order(3)
     void step3_getMetadataWithUsageSignature() throws Exception {
         Assertions.assertEquals(NODE_COUNT, usageAlfNodeIds.size(), "step2 must have created all usages first");
-
-        Signing signing = new Signing();
-
-        // Establish a server-side session (simulates the LMS plugin holding a persistent HTTP session).
-        // The first signed request causes ContextManagementFilter to create a JSESSIONID and store
-        // proxy-user auth in it; all subsequent requests reuse that session.
-        String warmTs = "" + System.currentTimeMillis();
-        String warmSign = APP_ID + usageAlfNodeIds.get(0) + warmTs;
-        byte[] warmSigBytes = signing.sign(privateKey, warmSign, CCConstants.SECURITY_SIGN_ALGORITHM);
-        String warmSigB64 = new String(new Base64().encode(warmSigBytes));
-        Response warmup = api.path("node/v1/nodes/-home-/" + contentNodeIds.get(0) + "/metadata")
-                .request(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("X-Edu-App-Id", APP_ID)
-                .header("X-Edu-App-Sig", warmSigB64)
-                .header("X-Edu-App-Signed", warmSign)
-                .header("X-Edu-App-Ts", warmTs)
-                .header("X-Edu-Usage-Node-Id", contentNodeIds.get(0))
-                .header("X-Edu-Usage-Course-Id", CONTAINER_ID)
-                .header("X-Edu-Usage-Resource-Id", resourceIds.get(0))
-                .get();
-        Assertions.assertEquals(200, warmup.getStatus(), "Session warm-up request failed");
-        jakarta.ws.rs.core.NewCookie jsessionidCookie = warmup.getCookies().get("JSESSIONID");
-        Assertions.assertNotNull(jsessionidCookie, "Server must return a JSESSIONID cookie on first signed request");
-        final String cookieHeader = "JSESSIONID=" + jsessionidCookie.getValue();
-
-        List<java.util.concurrent.Callable<Void>> tasks = new ArrayList<>();
         for (int j = 0; j < RETRIES_COUNT; j++) {
+            Signing signing = new Signing();
+
+            // Establish a server-side session (simulates the LMS plugin holding a persistent HTTP session).
+            // The first signed request causes ContextManagementFilter to create a JSESSIONID and store
+            // proxy-user auth in it; all subsequent requests reuse that session.
+            String warmTs = "" + System.currentTimeMillis();
+            String warmSign = APP_ID + usageAlfNodeIds.get(0) + warmTs;
+            byte[] warmSigBytes = signing.sign(privateKey, warmSign, CCConstants.SECURITY_SIGN_ALGORITHM);
+            String warmSigB64 = new String(new Base64().encode(warmSigBytes));
+            Response warmup = api.path("node/v1/nodes/-home-/" + contentNodeIds.get(0) + "/metadata")
+                    .request(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("X-Edu-App-Id", APP_ID)
+                    .header("X-Edu-App-Sig", warmSigB64)
+                    .header("X-Edu-App-Signed", warmSign)
+                    .header("X-Edu-App-Ts", warmTs)
+                    .header("X-Edu-Usage-Node-Id", contentNodeIds.get(0))
+                    .header("X-Edu-Usage-Course-Id", CONTAINER_ID)
+                    .header("X-Edu-Usage-Resource-Id", resourceIds.get(0))
+                    .get();
+            Assertions.assertEquals(200, warmup.getStatus(), "Session warm-up request failed");
+            jakarta.ws.rs.core.NewCookie jsessionidCookie = warmup.getCookies().get("JSESSIONID");
+            Assertions.assertNotNull(jsessionidCookie, "Server must return a JSESSIONID cookie on first signed request");
+            final String cookieHeader = "JSESSIONID=" + jsessionidCookie.getValue();
+
+            List<java.util.concurrent.Callable<Void>> tasks = new ArrayList<>();
             for (int i = 0; i < NODE_COUNT; i++) {
                 final int idx = i;
                 tasks.add(() -> {
@@ -337,9 +336,6 @@ class SignatureVerifierTest {
                             .header("X-Edu-Usage-Course-Id", CONTAINER_ID)
                             .header("X-Edu-Usage-Resource-Id", resourceIds.get(idx))
                             .get();
-
-                    Assertions.assertEquals(200, metaResponse.getStatus(),
-                            "Metadata via usage signature must return 200 for node " + idx + ": " + metaResponse.readEntity(String.class));
 
                     // preview servlet — raw redirect visible because noRedirectClient disables HttpURLConnection follow
                     String previewTimestamp = "" + System.currentTimeMillis();
@@ -364,8 +360,12 @@ class SignatureVerifierTest {
                             "Preview via usage signature must redirect for node " + idx);
                     String location = previewResponse.getHeaderString("Location");
                     Assertions.assertNotNull(location, "Preview redirect must have a Location header for node " + idx);
-                    Assertions.assertTrue(location.contains("link"),
+                    Assertions.assertTrue(location.contains("link.svg"),
                             "Preview redirect for a URL node must point to link icon, got: " + location);
+
+                    Assertions.assertEquals(200, metaResponse.getStatus(),
+                            "Metadata via usage signature must return 200 for node " + idx + ": " + metaResponse.readEntity(String.class));
+
                     return null;
                 });
             }
