@@ -66,7 +66,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
         this.targetBlank = this.target_blank;
-        console.log('setting height');
         if (this.component_height !== null && this.component_height > 0) {
             const containerHeight = this.component_height - this.footer_height;
             document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
@@ -82,7 +81,9 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.render_url,
                 this.signature_algorithm ?? 'SHA512withRSA',
             );
-            data.node.preview.url = this.previewUrl;
+            if (this.previewUrl !== '') {
+                data.node.preview.url = this.previewUrl;
+            }
             this.node.set(data.node);
             this.request.set(data.request);
         }
