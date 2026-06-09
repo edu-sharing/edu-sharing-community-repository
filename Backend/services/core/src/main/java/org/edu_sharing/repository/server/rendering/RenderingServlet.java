@@ -105,6 +105,7 @@ public class RenderingServlet extends HttpServlet {
             }
 
             if (rs2 != null) {
+                String webComponentBase = URLHelper.getBaseUrlFromRequest(req) + "/web-components/rendering-service/";
                 NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), node_id);
                 SignedNode signedNode = nodeDao.getSignedNode();
                 String encodedNode = Base64.getEncoder().encodeToString(signedNode.getNode().getBytes());
@@ -115,7 +116,7 @@ public class RenderingServlet extends HttpServlet {
                         + " signature=\"" + encodedSignature + "\""
                         + " jwt=\"" + jwt + "\""
                         + " render_url=\"" + rs2.getContentUrl() + "\""
-                        + " assets_url=\"/edu-sharing/web-components/rendering-service/assets\""
+                        + " assets_url=\"" + webComponentBase + "/assets\""
                         + " signature_algorithm=\"" + signedNode.getSignatureAlgorithm() + "\""
                         + "></edu-sharing-render>";
             } else {
