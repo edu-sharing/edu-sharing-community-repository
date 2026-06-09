@@ -1,22 +1,14 @@
 package org.edu_sharing.repository.server.tools.security;
 
-import java.util.Map;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.stream.StreamService;
-import org.edu_sharing.service.stream.StreamServiceFactory;
-import org.edu_sharing.service.stream.StreamServiceHelper;
-import org.edu_sharing.service.permission.PermissionService;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class SignatureVerifier {
 
@@ -165,6 +157,11 @@ public class SignatureVerifier {
 		String value = httpReq.getHeader(key);
 		if(value == null){
 			value = httpReq.getParameter(key);
+		} else {
+			// header spec does not allow special utf chars
+			if(key.equals("X-Edu-User-Id")) {
+				value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+			}
 		}
 		return value;
 	}
