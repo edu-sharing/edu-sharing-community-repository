@@ -268,8 +268,10 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         submissionDao.validateCanCoordinatorChangeSubmission();
 
         refresh();
-
-        nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+            return null;
+        });
         refresh();
     }
 
@@ -311,7 +313,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
 
     @Override
     public Submission.Status getValidationStatus() {
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         } else {
             return null;
