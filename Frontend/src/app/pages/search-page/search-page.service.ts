@@ -184,7 +184,10 @@ export class SearchPageService implements OnDestroy {
         this.showingAllRepositories.subscribe((showingAllRepositories) => {
             if (showingAllRepositories) {
                 this.activeRepository.setOverrideValue(null);
-                this.filterBarIsVisible.resetUserValue();
+                // Filters are repository specific and not available across all repositories, so
+                // force the filter bar closed (overriding a `true` system default) when switching
+                // to the all-repositories view.
+                this.filterBarIsVisible.setUserValue(false);
             } else {
                 this.activeRepository.unsetOverrideValue();
             }
