@@ -157,7 +157,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             NodeRef alfrescoCorrectionNodeRef = getAlfrescoCorrectionNodeRef();
             if (alfrescoCorrectionNodeRef == null) {
                 log.debug("Creating new correction node for {}", nodeId);
-                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
                 nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
                 alfrescoCorrectionNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             }
