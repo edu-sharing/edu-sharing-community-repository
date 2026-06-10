@@ -4,6 +4,10 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONObject;
 
 public interface TrackingServiceCustomInterface {
-    JSONObject buildJson(ActivityOnNodeEvent event);
-    JSONObject buildJson(UserActivityEvent event);
+    default JSONObject buildJson(ActivityOnNodeEvent event) {
+        return null;
+    }
+    default JSONObject buildJson(UserActivityEvent event) {
+        return null;
+    }
 }
