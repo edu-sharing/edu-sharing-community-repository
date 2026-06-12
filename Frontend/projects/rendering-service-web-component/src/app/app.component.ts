@@ -36,6 +36,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() footer_height: number = 100;
     @Input() target_blank: boolean = false;
     showInlineMetadata = false;
+    overlayHeight = '300px';
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
 
@@ -69,6 +70,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         if (this.component_height !== null && this.component_height > 0) {
             const containerHeight = this.component_height - this.footer_height;
             document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
+            this.overlayHeight = `${Math.min(300, containerHeight)}px`;
         }
     }
 
