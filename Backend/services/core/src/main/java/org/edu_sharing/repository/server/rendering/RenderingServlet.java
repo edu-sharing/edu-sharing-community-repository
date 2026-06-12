@@ -60,14 +60,15 @@ public class RenderingServlet extends HttpServlet {
         resp.getWriter().write("<html>");
         resp.getWriter().write("<head>");
         try {
+            resp.getWriter().write("<style>");
             String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
             if(!StringUtils.isBlank(customCSS)) {
                 resp.getWriter().write(customCSS);
             }
+            resp.getWriter().write("</style>");
         } catch (Exception e) {
             logger.warn("Could not resolve config", e);
         }
-        resp.getWriter().write("</style>");
 
         if (rs2 != null) {
             String webComponentBase = URLHelper.getBaseUrlFromRequest(req) + "/web-components/rendering-service/";
