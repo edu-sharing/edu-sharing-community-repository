@@ -58,6 +58,13 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- this is the parent at alfresco project examples get all dependencies by import scope,
            for plugins we need to define separately -->
             <dependency>
