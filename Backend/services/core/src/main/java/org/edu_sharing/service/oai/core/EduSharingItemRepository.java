@@ -146,6 +146,10 @@ public class EduSharingItemRepository implements ItemRepository {
                 new OAILOMExporterHSOER().write(os, nodeRef.getNodeId());
             }
 
+            if (os.size() == 0) {
+                throw new IdDoesNotExistException("No metadata produced for node " + nodeRef.getNodeId()
+                        + " in format " + format.getPrefix());
+            }
 
             return new EduItem(getIdentifier(nodeRef), os.toString());
         } catch (InvalidNodeRefException e) {
