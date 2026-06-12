@@ -141,7 +141,18 @@
 <!-- button to add new entries -->
 <ng-template #addNewEntry>
   <!-- when opened within a modal, execute a click event and when not, use the mat menu trigger -->
-  @if (entries.length < maxItems) {
+  @if (entries.length < maxItems) { @if (openedInModal()) {
+  <button
+    class="entry-card empty"
+    [class.disabled]="nodeIncluded()"
+    (click)="addEntryClicked()"
+    [attr.aria-label]="i18nPrefix + 'ADD_ENTRY' | translate"
+  >
+    <div class="entry-icon-wrapper">
+      <i esIcon="add" class="entry-icon"></i>
+    </div>
+  </button>
+  } @else {
   <button
     class="entry-card empty"
     [class.disabled]="nodeIncluded()"
@@ -152,5 +163,5 @@
       <i esIcon="add" class="entry-icon"></i>
     </div>
   </button>
-  }
+  } }
 </ng-template>

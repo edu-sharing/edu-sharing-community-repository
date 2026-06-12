@@ -55,6 +55,7 @@ import {
 } from '../../shared/utils/template-util';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export enum CopyOption {
     TopicPage = 'topicPage',

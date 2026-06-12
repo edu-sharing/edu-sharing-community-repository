@@ -157,7 +157,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             NodeRef alfrescoCorrectionNodeRef = getAlfrescoCorrectionNodeRef();
             if (alfrescoCorrectionNodeRef == null) {
                 log.debug("Creating new correction node for {}", nodeId);
-                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
                 nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
                 alfrescoCorrectionNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             }
@@ -268,8 +268,10 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         submissionDao.validateCanCoordinatorChangeSubmission();
 
         refresh();
-
-        nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+            return null;
+        });
         refresh();
     }
 
@@ -311,7 +313,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
 
     @Override
     public Submission.Status getValidationStatus() {
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         } else {
             return null;

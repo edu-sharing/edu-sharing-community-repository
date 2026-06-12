@@ -2,6 +2,7 @@ import {
     AfterViewInit,
     Component,
     effect,
+    inject,
     Input,
     input,
     OnChanges,
@@ -9,9 +10,6 @@ import {
     signal,
     SimpleChanges,
     ViewChild,
-    inject,
-    effect,
-    input,
 } from '@angular/core';
 import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {

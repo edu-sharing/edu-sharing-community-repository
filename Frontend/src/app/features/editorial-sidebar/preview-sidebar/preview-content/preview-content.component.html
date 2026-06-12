@@ -11,7 +11,7 @@
   <div class="preview-sidebar-image-container">
     <img
       class="preview-sidebar-image"
-      [src]="node | esNodeImage | async"
+      [src]="node() | esNodeImage | async"
       alt=""
       draggable="false"
       (mousedown)="showContentButton.launch({ centered: true })"
@@ -34,8 +34,8 @@
     @if (!previewSidebarTemplateService.actionsRow) {
     <div class="top-h-box">
       <div class="stats-and-rating">
-        <es-node-stats-badges [node]="node" backgroundStyle="darken"></es-node-stats-badges>
-        <es-node-rating [node]="node"></es-node-rating>
+        <es-node-stats-badges [node]="node()" backgroundStyle="darken"></es-node-stats-badges>
+        <es-node-rating [node]="node()"></es-node-rating>
       </div>
       <es-actionbar appearance="icon-button"></es-actionbar>
     </div>
@@ -44,24 +44,24 @@
       <ng-container
         *ngTemplateOutlet="
           previewSidebarTemplateService.actionsRow;
-          context: { element: node, allDetailsLink, actionbar, autoRender }
+          context: { element: node(), allDetailsLink, actionbar, autoRender }
         "
       ></ng-container>
     </div>
-    } @if (!previewSidebarTemplateService.metadata) { @if (node?.properties && mdsVisible()) {
+    } @if (!previewSidebarTemplateService.metadata) { @if (node()?.properties && mdsVisible()) {
     <es-mds-editor-wrapper
       #mds
       [embedded]="true"
       [editorMode]="editorMode"
       [groupId]="groupId"
-      [nodes]="[node]"
+      [nodes]="[node()]"
     >
     </es-mds-editor-wrapper>
     } } @if (previewSidebarTemplateService.metadata) {
     <ng-container
       *ngTemplateOutlet="
         previewSidebarTemplateService.metadata;
-        context: { element: node, allDetailsLink, actionbar, autoRender }
+        context: { element: node(), allDetailsLink, actionbar, autoRender }
       "
     ></ng-container>
     }
