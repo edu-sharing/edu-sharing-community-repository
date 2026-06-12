@@ -1,24 +1,18 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.*;
 
 /**
@@ -38,6 +32,8 @@ public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
     public static String ID = "ID";
     public static String NAME = "NAME";
     public static String SYNONYMS = "SYNONYMS";
+    public static String URL = "URL";
+    public static String LANGUAGES = "LANGUAGES";
 
     public RecordHandlerKeywordsDNBMarc(String metadataSetId){
 
@@ -90,11 +86,41 @@ public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
             synonyms.add(synonym);
         }
 
+        //url
+        String url = null;
+        String url35 = (String)xpath.evaluate("datafield[@tag='035']/subfield[@code='a']",root,XPathConstants.STRING);
+        if(StringUtils.isNotBlank(url35)){
+            if(url35.startsWith("(DE-588)")){
+                url = "http://d-nb.info/gnd/" + url35.replace("(DE-588)","").trim();
+            }
+        }
+        if(url == null){
+            String url24 = (String)xpath.evaluate("datafield[@tag='024']/subfield[@code='0']",root,XPathConstants.STRING);
+            if(StringUtils.isNotBlank(url24)){
+                url = url24;
+            }
+        }
+
+        //languages
+        Map<String,Set<String>> languages = new HashMap<>();
+        NodeList nodeListLanguage = (NodeList)xpath.evaluate("datafield[@tag='750']",root,XPathConstants.NODESET);
+        if(nodeListLanguage != null){
+            for(int i = 0; i < nodeListLanguage.getLength(); i++){
+               String langKey = (String)xpath.evaluate("subfield[@code='9']",nodeListLanguage.item(i),XPathConstants.STRING);
+               String langValue = (String)xpath.evaluate("subfield[@code='a']",nodeListLanguage.item(i),XPathConstants.STRING);
+               if(StringUtils.isNotBlank(langKey)  && StringUtils.isNotBlank(langValue)){
+                   languages.computeIfAbsent(langKey,k -> new LinkedHashSet<>()).add(langValue);
+               }
+            }
+        }
+
         logger.info("id:"+ id + " name:"+name.trim() +" synonyms:"+synonyms);
 
         toSafeMap.put(ID,id);
         toSafeMap.put(NAME,name);
         toSafeMap.put(SYNONYMS,synonyms);
+        toSafeMap.put(URL,url);
+        toSafeMap.put(LANGUAGES,languages);
     }
 
     public static void main(String[] args) throws Throwable {

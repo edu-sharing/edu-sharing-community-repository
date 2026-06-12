@@ -16,9 +16,9 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
     static String STATEMENT_EXISTS = "SELECT * from edu_factual_term WHERE factual_term_ident=?";
 
-    static String STATEMENT_INSERT = "INSERT INTO edu_factual_term(factual_term_ident, factual_term_value, factual_term_synonyms) VALUES(?, ?, ?)";
+    static String STATEMENT_INSERT = "INSERT INTO edu_factual_term(factual_term_ident, factual_term_value, factual_term_synonyms, factual_term_url, factual_term_locale_en, factual_term_locale_it, factual_term_locale_es, factual_term_locale_fr) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
-    static String STATEMENT_UPDATE = "UPDATE edu_factual_term SET factual_term_ident=?, factual_term_value=?, factual_term_synonyms=? WHERE factual_term_ident=?";
+    static String STATEMENT_UPDATE = "UPDATE edu_factual_term SET factual_term_ident=?, factual_term_value=?, factual_term_synonyms=?, factual_term_url=?, factual_term_locale_en=?, factual_term_locale_it=?, factual_term_locale_es=?, factual_term_locale_fr=? WHERE factual_term_ident=?";
 
     static String STATEMENT_MATCHES = "select CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where lower(factual_term_value) like ? order by char_length(factual_term_value) limit 10";
 
@@ -38,6 +38,11 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
     static String COL_IDENT = "factual_term_ident";
     static String COL_VALUE = "factual_term_value";
     static String COL_SYNONYMS = "factual_term_synonyms";
+    static String COL_URL = "factual_term_url";
+    static String COL_LOCALE_EN = "factual_term_locale_en";
+    static String COL_LOCALE_IT = "factual_term_locale_it";
+    static String COL_LOCALE_ES = "factual_term_locale_es";
+    static String COL_LOCALE_FR = "factual_term_locale_fr";
 
     Logger logger = Logger.getLogger(PersistenHandlerKeywordsDNBMarc.class);
 
@@ -73,6 +78,13 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
             synonyms = "{"+synonyms+"}";
         }
 
+        String url = (String) props.get(RecordHandlerKeywordsDNBMarc.URL);
+        HashMap<String,Set<String>> languages = (HashMap<String,Set<String>>)props.get(RecordHandlerKeywordsDNBMarc.LANGUAGES);
+        String lEn = toDatabaseArray(languages.get("L:eng"));
+        String lIt = toDatabaseArray(languages.get("L:ita"));
+        String lEs = toDatabaseArray(languages.get("L:spa"));
+        String lFr = toDatabaseArray(languages.get("L:fra"));
+
         Map<String,Object> cols = get(id);
         if(cols == null){
             logger.info("creating:" + id);
@@ -90,6 +102,11 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                // statement.setString(3,jsArray.toString());
 
                 statement.setObject(3,synonyms,java.sql.Types.OTHER);
+                statement.setString(4, url);
+                statement.setObject(5, lEn,java.sql.Types.OTHER);
+                statement.setObject(6, lIt,java.sql.Types.OTHER);
+                statement.setObject(7, lEs,java.sql.Types.OTHER);
+                statement.setObject(8, lFr,java.sql.Types.OTHER);
 
                 statement.executeUpdate();
                 con.commit();
@@ -101,8 +118,28 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
             List<String> existingSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
             List<String> newSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
+
+            List<String> existingLangEn = (cols.get(COL_LOCALE_EN) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_LOCALE_EN));
+            List<String> newLangEn = (languages.get("L:eng") == null) ? new ArrayList<>() : new ArrayList<>(languages.get("L:eng"));
+
+            List<String> existingLangIt = (cols.get(COL_LOCALE_IT) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_LOCALE_IT));
+            List<String> newLangIt = (languages.get("L:ita") == null) ? new ArrayList<>() : new ArrayList<>(languages.get("L:ita"));
+
+            List<String> existingLangEs = (cols.get(COL_LOCALE_ES) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_LOCALE_ES));
+            List<String> newLangEs = (languages.get("L:spa") == null) ? new ArrayList<>() : new ArrayList<>(languages.get("L:spa"));
+
+            List<String> existingLangFr = (cols.get(COL_LOCALE_FR) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_LOCALE_FR));
+            List<String> newLangFr = (languages.get("L:fra") == null) ? new ArrayList<>() : new ArrayList<>(languages.get("L:fra"));
+
+
             if(value.equals(cols.get(COL_VALUE))
-                    && CollectionUtils.isEqualCollection(existingSyn,newSyn) ){
+                    && CollectionUtils.isEqualCollection(existingSyn,newSyn)
+                    && java.util.Objects.equals(url, cols.get(COL_URL))
+                    && CollectionUtils.isEqualCollection(existingLangEn,newLangEn)
+                    && CollectionUtils.isEqualCollection(existingLangIt,newLangIt)
+                    && CollectionUtils.isEqualCollection(existingLangEs,newLangEs)
+                    && CollectionUtils.isEqualCollection(existingLangFr,newLangFr)
+            ){
                 logger.info(id +" didn't change");
                 return null;
             }
@@ -128,7 +165,12 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                 statement.setString(1, id);
                 statement.setString(2, value);
                 statement.setObject(3,synonyms,java.sql.Types.OTHER);
-                statement.setString(4, id);
+                statement.setString(4, url);
+                statement.setObject(5, lEn,java.sql.Types.OTHER);
+                statement.setObject(6, lIt,java.sql.Types.OTHER);
+                statement.setObject(7, lEs,java.sql.Types.OTHER);
+                statement.setObject(8, lFr,java.sql.Types.OTHER);
+                statement.setString(9, id);
 
                 statement.executeUpdate();
                 con.commit();
@@ -138,6 +180,18 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
 
         return null;
+    }
+
+    private String toDatabaseArray(Set<String> collection) {
+        if(collection == null || collection.isEmpty()){
+            return null;
+        }
+
+        collection = collection.stream().map(s -> fixCombiningDiaresis(s)).collect(Collectors.toSet());
+        collection = collection.stream().map(s -> s.replace("\"","\\\"")).collect(Collectors.toSet());
+        String result = collection.stream().collect(Collectors.joining("\",\"", "\"", "\""));
+        result = "{"+result+"}";
+        return result;
     }
 
     private String displayFormat(String value, List<String> synonyms){
@@ -181,6 +235,21 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                 result.put(COL_ID,resultSet.getString(COL_ID));
                 result.put(COL_IDENT,resultSet.getString(COL_IDENT));
                 result.put(COL_VALUE,resultSet.getString(COL_VALUE));
+                String url = resultSet.getString(COL_URL);
+                if(url != null) result.put(COL_URL,url);
+                Array arrEn = resultSet.getArray(COL_LOCALE_EN);
+                if(arrEn != null) result.put(COL_LOCALE_EN,Arrays.asList((String[])arrEn.getArray()));
+                Array arrIt = resultSet.getArray(COL_LOCALE_IT);
+                if(arrIt != null) result.put(COL_LOCALE_IT,Arrays.asList((String[])arrIt.getArray()));
+                Array arrEs = resultSet.getArray(COL_LOCALE_ES);
+                if(arrEs != null) result.put(COL_LOCALE_ES,Arrays.asList((String[])arrEs.getArray()));
+                Array arrFr = resultSet.getArray(COL_LOCALE_FR);
+                if(arrFr != null) result.put(COL_LOCALE_FR,Arrays.asList((String[])arrFr.getArray()));
+
+                result.put(COL_LOCALE_EN,resultSet.getString(COL_LOCALE_EN));
+                result.put(COL_LOCALE_IT,resultSet.getString(COL_LOCALE_IT));
+                result.put(COL_LOCALE_ES,resultSet.getString(COL_LOCALE_ES));
+                result.put(COL_LOCALE_FR,resultSet.getString(COL_LOCALE_FR));
                 Array array = resultSet.getArray(COL_SYNONYMS);
                 if(array != null){
                     List<String> synonyms = Arrays.asList((String[])array.getArray());
