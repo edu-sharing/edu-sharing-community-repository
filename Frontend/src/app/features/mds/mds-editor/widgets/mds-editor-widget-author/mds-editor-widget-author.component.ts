@@ -10,6 +10,7 @@ import { VCard } from 'ngx-edu-sharing-ui';
 import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Attributes } from '../../util/parse-attributes';
+import { authorIsEmpty } from '../../util/native-widget-completion';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
 import { InputStatus, Values } from '../../../types/types';
@@ -89,12 +90,12 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
 
     /**
-     * whether the widget currently holds an author value (freetext or person).
-     * Uses `VCard.isValid()` instead of `getDisplayName()` because the latter falls back to the
-     * stale `FN` line and would not reset when the user clears the name fields.
+     * Live emptiness of the current (possibly edited) author value. Delegates to the shared
+     * {@link authorIsEmpty} predicate (also used for the unrendered/publish case via
+     * `nativeWidgetEmptyCheckers`) so there is a single source of truth.
      */
-    private isFilled(): boolean {
-        return !!this.author?.freetext?.trim() || !!this.author?.author?.isValid();
+    private get isEmptyValue(): boolean {
+        return authorIsEmpty(this.author?.freetext, this.author?.author);
     }
 
     /**
@@ -102,10 +103,9 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      * `mandatory` blocks saving (INVALID), `mandatoryForPublish` is only a warning (stays VALID).
      */
     private updateStatus(): void {
-        const filled = this.isFilled();
-        this.isEmpty.next(!filled);
-        const status: InputStatus =
-            this.isRequired === 'mandatory' && !filled ? 'INVALID' : 'VALID';
+        const empty = this.isEmptyValue;
+        this.isEmpty.next(empty);
+        const status: InputStatus = this.isRequired === 'mandatory' && empty ? 'INVALID' : 'VALID';
         this.status.next(status);
     }
 
@@ -125,7 +125,7 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      * whether the missing-required hint/marker should currently be shown to the user
      */
     get isMissingRequired(): boolean {
-        return !!this.isRequired && !this.isFilled();
+        return !!this.isRequired && this.isEmptyValue;
     }
 
     /**

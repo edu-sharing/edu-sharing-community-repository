@@ -88,6 +88,7 @@ import {
     MdsEditorViewComponent,
     NativeWidgetComponent,
 } from './mds-editor-view/mds-editor-view.component';
+import { nativeWidgetEmptyCheckers } from './util/native-widget-completion';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { Helper } from '../../../core-module/rest/helper';
@@ -112,7 +113,8 @@ export interface CompletionStatusField {
     isCompleted: boolean;
 }
 interface NativeWidgetCompletion {
-    component: NativeWidgetComponent;
+    /** `mandatory` / `mandatoryForPublish` if the native widget is required, else null/undefined. */
+    isRequired: MdsWidget['isRequired'] | null;
     isEmpty: boolean;
 }
 export interface CompletionStatusEntry {
@@ -968,15 +970,36 @@ export class MdsEditorInstanceService
                                 true,
                             ),
                         );
-                    // native widgets (e.g. author) may declare themselves required and then
-                    // contribute to the completion status via their `isEmpty` observable.
-                    // We combine all native widgets (not just the currently-required ones) so the
-                    // stream stays live; whether they count is decided at calculation time based on
-                    // their `isRequired`, which is set right before `isEmpty` emits.
+                    // Native widgets (e.g. author) may declare themselves required and contribute
+                    // to the completion status from one of two mutually exclusive sources:
+                    //  1. RENDERED (editor dialog): the registered component reports a live
+                    //     `isEmpty`; whether it counts is decided from its `isRequired`.
+                    //  2. UNRENDERED (e.g. the publish dialog, which only calls `initWithNodes`
+                    //     and never instantiates the components): derive emptiness from the editor
+                    //     values via `nativeWidgetEmptyCheckers`, using `definition.isRequired`
+                    //     parsed onto the model widget.
                     const nativeWidgets = widgets.filter(
                         (widget): widget is NativeWidget =>
                             !(widget instanceof MdsEditorInstanceService.Widget),
                     );
+                    // Only consider the unrendered path when no native components are registered;
+                    // when they are (editor dialog) the component path is authoritative and the
+                    // model widgets must not be counted again.
+                    const unrenderedNativeWidgets: Widget[] = nativeWidgets.length
+                        ? []
+                        : widgets.filter(
+                              (widget): widget is Widget =>
+                                  widget instanceof MdsEditorInstanceService.Widget &&
+                                  typeof nativeWidgetEmptyCheckers[
+                                      widget.definition.id as NativeWidgetType
+                                  ] === 'function' &&
+                                  this.meetsCondition(
+                                      widget.definition,
+                                      this.nodes$.value,
+                                      this.values$.value,
+                                      true,
+                                  ),
+                          );
                     const regularWidgets$ = filteredWidgets.length
                         ? combineLatest(
                               filteredWidgets.map((widget) =>
@@ -989,15 +1012,38 @@ export class MdsEditorInstanceService
                               nativeWidgets.map((nativeWidget) =>
                                   (nativeWidget.component.isEmpty ?? of(false)).pipe(
                                       map((isEmpty) => ({
-                                          component: nativeWidget.component,
+                                          isRequired: nativeWidget.component.isRequired ?? null,
                                           isEmpty,
                                       })),
                                   ),
                               ),
                           )
                         : of([] as NativeWidgetCompletion[]);
-                    return combineLatest([regularWidgets$, nativeWidgets$]).pipe(
-                        map(([ws, natives]) => this.calculateCompletionStatus(ws, natives)),
+                    // Re-evaluate when either value source changes. `initWithNodes` only populates
+                    // `nodes$` (not `values$`); a node's `properties` are themselves a `Values`
+                    // map, so we feed whichever is available into the `isEmpty(values)` helper.
+                    const unrenderedNativeWidgets$ = unrenderedNativeWidgets.length
+                        ? combineLatest([this.nodes$, this.values$]).pipe(
+                              map(([nodes, values]) => {
+                                  const effectiveValues = nodes?.[0]?.properties ?? values ?? {};
+                                  return unrenderedNativeWidgets.map((widget) => ({
+                                      isRequired: widget.definition.isRequired ?? null,
+                                      isEmpty:
+                                          nativeWidgetEmptyCheckers[
+                                              widget.definition.id as NativeWidgetType
+                                          ]?.(effectiveValues) ?? false,
+                                  }));
+                              }),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    return combineLatest([
+                        regularWidgets$,
+                        nativeWidgets$,
+                        unrenderedNativeWidgets$,
+                    ]).pipe(
+                        map(([ws, natives, unrendered]) =>
+                            this.calculateCompletionStatus(ws, [...natives, ...unrendered]),
+                        ),
                     );
                 }),
             )
@@ -2085,6 +2131,12 @@ export class MdsEditorInstanceService
                 isCompleted: !!widget.getValue()?.[0],
             };
         });
+        // native widgets (e.g. author) declare their required mode via `isRequired`, whose string
+        // values match `RequiredMode`. A non-empty native widget counts as completed.
+        const nativeCompletion: CompletionStatusField[] = nativeWidgets
+            .filter((nativeWidget) => nativeWidget.isRequired === requiredMode)
+            .map((nativeWidget) => ({ isCompleted: !nativeWidget.isEmpty }));
+        const fields = [...widgetCompletion, ...nativeCompletion];
         return {
             total: fields.length,
             completed: fields.filter((field) => field.isCompleted).length,
