@@ -1,4 +1,7 @@
-<es-mds-editor-widget-container [label]="'MDS.AUTHOR_LABEL' | translate">
+<es-mds-editor-widget-container
+  [label]="'MDS.AUTHOR_LABEL' | translate"
+  [widget]="$any(requiredWidget)"
+>
   <mat-tab-group mat-stretch-tabs *ngIf="author" [(selectedIndex)]="authorTab" class="author-tabs">
     <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
       <mat-form-field class="authorFreetext">
@@ -9,10 +12,12 @@
           id="authorFreetext"
           [(ngModel)]="author.freetext"
           (ngModelChange)="onChange()"
+          (blur)="onBlur()"
           cdkAutosizeMinRows="2"
           cdkAutosizeMaxRows="5"
         ></textarea>
       </mat-form-field>
+      <ng-container *ngTemplateOutlet="requiredHint"></ng-container>
     </mat-tab>
     <mat-tab label="{{ 'MDS.AUTHOR_PERSON' | translate }}">
       <div class="author-checkbox">
@@ -29,6 +34,7 @@
               matInput
               [(ngModel)]="author.author.title"
               (ngModelChange)="onChange()"
+              (blur)="onBlur()"
               [disabled]="userAuthor"
             />
           </mat-form-field>
@@ -41,6 +47,7 @@
               matInput
               [(ngModel)]="author.author.givenname"
               (ngModelChange)="onChange()"
+              (blur)="onBlur()"
               [disabled]="userAuthor"
             />
           </mat-form-field>
@@ -52,11 +59,13 @@
               matInput
               [(ngModel)]="author.author.surname"
               (ngModelChange)="onChange()"
+              (blur)="onBlur()"
               [disabled]="userAuthor"
             />
           </mat-form-field>
         </div>
       </div>
+      <ng-container *ngTemplateOutlet="requiredHint"></ng-container>
       <div class="contributors" *ngIf="showContributorDialog && mdsEditorValues.nodes$.value">
         <button
           mat-button
@@ -71,3 +80,15 @@
   </mat-tab-group>
   <es-spinner-small *ngIf="!author"></es-spinner-small>
 </es-mds-editor-widget-container>
+
+<ng-template #requiredHint>
+  @if (isMissingRequired && (showMissingRequiredHint || isRequired === 'mandatoryForPublish')) {
+  <p class="mat-error subscript" [class.warn]="isRequired === 'mandatoryForPublish'">
+    @if (isRequired === 'mandatory') {
+    {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+    } @if (isRequired === 'mandatoryForPublish') {
+    {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+    }
+  </p>
+  }
+</ng-template>

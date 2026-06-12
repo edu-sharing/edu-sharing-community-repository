@@ -107,8 +107,13 @@ import {
 } from 'ngx-edu-sharing-ui';
 
 export interface CompletionStatusField {
-    widget: Widget;
+    /** Undefined for native widgets (e.g. `author`) that contribute to completion. */
+    widget?: Widget;
     isCompleted: boolean;
+}
+interface NativeWidgetCompletion {
+    component: NativeWidgetComponent;
+    isEmpty: boolean;
 }
 export interface CompletionStatusEntry {
     completed: number;
@@ -791,6 +796,23 @@ export class MdsEditorInstanceService
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /**
+     * Whether all native widgets currently report a valid status. Native widgets (e.g. `author`)
+     * may declare themselves as required and emit `INVALID` to block saving.
+     */
+    private nativeWidgetsValid$ = this.nativeWidgets.pipe(
+        switchMap((widgets) =>
+            widgets.length
+                ? combineLatest(widgets.map((widget) => widget.status))
+                : of<InputStatus[]>([]),
+        ),
+        map((statuses) => statuses.every((status) => status !== 'INVALID')),
+        startWith(true),
+        distinctUntilChanged(),
+        shareReplay(1),
+    );
+    /** Synchronous mirror of {@link nativeWidgetsValid$} for `getIsValid()`. */
+    private nativeWidgetsValidValue = true;
     /** Input to `MdsEditorWrapper`. */
     externalFilters: Values;
 
@@ -876,16 +898,26 @@ export class MdsEditorInstanceService
             this.hasProgrammaticChanges$,
             this.hasSuggestionChanges$,
             this.isValid$,
+            this.nativeWidgetsValid$,
         ])
             .pipe(
                 map(
-                    ([hasUserChanges, hasProgrammaticChanges, hasSuggestionChanges, isValid]) =>
+                    ([
+                        hasUserChanges,
+                        hasProgrammaticChanges,
+                        hasSuggestionChanges,
+                        isValid,
+                        nativeWidgetsValid,
+                    ]) =>
                         (this.editorMode === 'nodes'
                             ? hasUserChanges || hasProgrammaticChanges || hasSuggestionChanges
-                            : true) && isValid,
+                            : true) &&
+                        isValid &&
+                        nativeWidgetsValid,
                 ),
             )
             .subscribe(this.canSave$);
+        this.nativeWidgetsValid$.subscribe((valid) => (this.nativeWidgetsValidValue = valid));
         // Updated list of widgets that meet dynamic conditions and should be considered when saving
         // values and counting completion status.
         const activeWidgets = combineLatest([this.widgets, this.nativeWidgets]).pipe(
@@ -936,20 +968,46 @@ export class MdsEditorInstanceService
                                 true,
                             ),
                         );
-                    return combineLatest(
-                        filteredWidgets.map((widget) =>
-                            widget.observeHasChanged().pipe(map(() => widget)),
-                        ),
-                    ).pipe(map((ws) => this.calculateCompletionStatus(ws)));
+                    // native widgets (e.g. author) may declare themselves required and then
+                    // contribute to the completion status via their `isEmpty` observable.
+                    // We combine all native widgets (not just the currently-required ones) so the
+                    // stream stays live; whether they count is decided at calculation time based on
+                    // their `isRequired`, which is set right before `isEmpty` emits.
+                    const nativeWidgets = widgets.filter(
+                        (widget): widget is NativeWidget =>
+                            !(widget instanceof MdsEditorInstanceService.Widget),
+                    );
+                    const regularWidgets$ = filteredWidgets.length
+                        ? combineLatest(
+                              filteredWidgets.map((widget) =>
+                                  widget.observeHasChanged().pipe(map(() => widget)),
+                              ),
+                          )
+                        : of([] as Widget[]);
+                    const nativeWidgets$ = nativeWidgets.length
+                        ? combineLatest(
+                              nativeWidgets.map((nativeWidget) =>
+                                  (nativeWidget.component.isEmpty ?? of(false)).pipe(
+                                      map((isEmpty) => ({
+                                          component: nativeWidget.component,
+                                          isEmpty,
+                                      })),
+                                  ),
+                              ),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    return combineLatest([regularWidgets$, nativeWidgets$]).pipe(
+                        map(([ws, natives]) => this.calculateCompletionStatus(ws, natives)),
+                    );
                 }),
             )
             .subscribe((c) => {
                 this.completionStatus$.next(c);
-                if (this.editorBulkMode.isBulk) {
+                if (this.editorBulkMode?.isBulk) {
                     // disable required fields validation in bulk since they might be filled with individual values
                     this.isValid$.next(
                         c.mandatory.fields.every(
-                            (f) => f.isCompleted || f.widget.getBulkMode() !== 'replace',
+                            (f) => f.isCompleted || f.widget?.getBulkMode() !== 'replace',
                         ),
                     );
                 } else {
@@ -959,7 +1017,7 @@ export class MdsEditorInstanceService
         activeWidgets
             .pipe(
                 map((widgets) =>
-                    this.views.filter((view) =>
+                    this.views?.filter((view) =>
                         widgets.some((widget) => widget.viewId === view.id),
                     ),
                 ),
@@ -1421,6 +1479,10 @@ export class MdsEditorInstanceService
      * through all widgets when called multiple times.
      */
     showMissingRequiredWidgets(shouldScrollIntoView = true): void {
+        // native widgets (e.g. author) handle their own required hint display
+        for (const { component } of this.nativeWidgets.value) {
+            component.showMissingRequired?.();
+        }
         if (this.lastScrolledIntoViewIndex === null) {
             // No widget was scrolled into view yet. We need to touch all widgets so they will
             // display the required hint and tell them to scroll into view until we found a missing
@@ -1521,7 +1583,7 @@ export class MdsEditorInstanceService
     }
 
     getIsValid() {
-        return this.isValid$.value;
+        return this.isValid$.value && this.nativeWidgetsValidValue;
     }
     getCompletitonStatus() {
         return this.completionStatus$.value;
@@ -1529,7 +1591,7 @@ export class MdsEditorInstanceService
 
     async getValues(node?: Node, validate = true): Promise<Values> {
         // same behaviour as old mds, do not return values until it is valid
-        if (validate && !this.isValid$.value) {
+        if (validate && !this.getIsValid()) {
             this.showMissingRequiredWidgets(true);
             return null;
         }
@@ -1991,11 +2053,18 @@ export class MdsEditorInstanceService
         }
     }
 
-    private calculateCompletionStatus(widgets: Widget[]): CompletionStatus {
+    private calculateCompletionStatus(
+        widgets: Widget[],
+        nativeWidgets: NativeWidgetCompletion[] = [],
+    ): CompletionStatus {
         return Object.values(RequiredMode)
             .filter((requiredMode) => requiredMode !== RequiredMode.Ignore)
             .reduce((acc, requiredMode) => {
-                acc[requiredMode] = this.getCompletionStatusEntry(widgets, requiredMode);
+                acc[requiredMode] = this.getCompletionStatusEntry(
+                    widgets,
+                    requiredMode,
+                    nativeWidgets,
+                );
                 return acc;
             }, {} as CompletionStatus);
     }
@@ -2003,13 +2072,13 @@ export class MdsEditorInstanceService
     private getCompletionStatusEntry(
         widgets: Widget[],
         requiredMode: RequiredMode,
+        nativeWidgets: NativeWidgetCompletion[] = [],
     ): CompletionStatusEntry {
         const total = widgets.filter(
             (widget) =>
                 widget.definition.isRequired === requiredMode &&
                 this.meetsCondition(widget.definition, this.nodes$.value, this.values$.value, true),
         );
-        const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
             return {
                 widget,
@@ -2017,9 +2086,9 @@ export class MdsEditorInstanceService
             };
         });
         return {
-            total: total.length,
-            completed: completed.length,
-            fields: widgetCompletion,
+            total: fields.length,
+            completed: fields.filter((field) => field.isCompleted).length,
+            fields,
         };
     }
 

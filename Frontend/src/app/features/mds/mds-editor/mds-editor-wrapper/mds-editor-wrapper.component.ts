@@ -240,7 +240,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnDestroy {
                         this.mdsEditorInstance
                             .getCompletitonStatus()
                             .mandatory.fields.filter((f) => !f.isCompleted)
-                            .map((f) => f.widget.definition.id),
+                            .map((f) => f.widget?.definition.id ?? 'author'),
                     );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }
