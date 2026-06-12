@@ -2,6 +2,7 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    HostBinding,
     Input,
     OnChanges,
     Output,
@@ -64,6 +65,10 @@ export class RenderWrapperComponent implements OnChanges {
     @Input() repository: string;
     @Input() version: string;
     @Input() childId: string = null;
+    /**
+     * if set, modules ignore their per-type width settings and render full width (edge-to-edge)
+     */
+    @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
 
     @ViewChild('childobjects') childobjects: ElementRef;

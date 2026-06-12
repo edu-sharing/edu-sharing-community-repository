@@ -300,8 +300,10 @@ export class MdsEditorWidgetTreeComponent
                     .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
             } else {
                 const values: DisplayValue[] = this.chipsControl.value;
+                const initialValues = this.widget.initialValuesSubject.value?.jointValues ?? [];
                 suggestions
                     ?.filter((s) => s.type === 'AI' && s.status === 'ACCEPTED')
+                    .filter((s) => !initialValues.includes(s.value as string))
                     .forEach((s) => {
                         void this.remove(
                             values.find((v) => v.key === s.value),
@@ -494,17 +496,16 @@ export class MdsEditorWidgetTreeComponent
     }
 
     isSuggestion(value: DisplayValue | TreeNode) {
-        return this.widget
-            .getSuggestions()
-            .pipe(
-                map((suggestions) =>
-                    suggestions?.find(
-                        (s) =>
-                            s.value === ((value as DisplayValue).key || (value as TreeNode).id) &&
-                            s.status === 'ACCEPTED',
-                    ),
-                ),
-            );
+        const initialValues = this.widget.initialValuesSubject.value?.jointValues ?? [];
+        return this.widget.getSuggestions().pipe(
+            map((suggestions) => {
+                const key = (value as DisplayValue).key || (value as TreeNode).id;
+                if (initialValues.includes(key)) {
+                    return null;
+                }
+                return suggestions?.find((s) => s.value === key && s.status === 'ACCEPTED');
+            }),
+        );
     }
 
     reorderChip(event: CdkDragDrop<any>) {

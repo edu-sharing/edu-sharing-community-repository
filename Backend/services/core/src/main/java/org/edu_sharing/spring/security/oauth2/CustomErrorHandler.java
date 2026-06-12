@@ -25,7 +25,7 @@ public class CustomErrorHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        log.info("authentication failure. url: {}", request.getRequestURI(), exception);
+        log.debug("authentication failure. url: {}", request.getRequestURI(), exception);
         try {
             if(silentLoginModeRedirect.processError(request,response)){
                 return;

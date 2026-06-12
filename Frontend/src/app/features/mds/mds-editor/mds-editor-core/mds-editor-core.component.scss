@@ -45,6 +45,11 @@ $toggleHeight: 39px;
             font-weight: bold;
         }
     }
+    es-spinner-small {
+        --mdc-circular-progress-active-indicator-color: var(--aiColorText);
+        margin-left: 10px;
+        display: flex;
+    }
     mat-slide-toggle {
         display: flex;
         --textLight: var(--aiColorText);

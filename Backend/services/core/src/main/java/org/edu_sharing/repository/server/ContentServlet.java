@@ -50,6 +50,7 @@ public class ContentServlet extends SpringHttpServlet {
 		
 		//signature(nodeId+timestamp)=authToken
 		String authToken = req.getParameter("authToken");
+        String signedAlg = req.getParameter("signedAlg");
 		
 		
 		if(appId == null || appId.trim().equals("")){
@@ -68,7 +69,7 @@ public class ContentServlet extends SpringHttpServlet {
 		}
 		
 		
-		SignatureVerifier.Result result = new SignatureVerifier().verify(appId, authToken,  nodeId+timestamp, timestamp);
+		SignatureVerifier.Result result = new SignatureVerifier().verify(appId, authToken,  nodeId+timestamp, timestamp, signedAlg);
 		if(result.getStatuscode() != HttpServletResponse.SC_OK){
 			resp.sendError(result.getStatuscode(),result.getMessage());
 			return;

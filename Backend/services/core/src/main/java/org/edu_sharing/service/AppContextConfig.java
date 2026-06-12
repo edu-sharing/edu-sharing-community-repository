@@ -122,6 +122,12 @@ public class AppContextConfig {
                 .defineBean(AuthenticationTool.class, AuthenticationToolYouTube.class)
                 .done()
 
+                .addAppContext("org.edu_sharing.service.provider.OersiProvider")
+                .defineBean(NodeService.class, NodeServiceOersiImpl.class)
+                .defineBean(PermissionService.class, PermissionServiceCCPublish.class)
+                .defineBean(SearchService.class, SearchServiceOersiImpl.class)
+                .done()
+
                 // TODO is this obsolete?
 //                .addAppContext("commons.wikimedia.org")
 //                .defineBean(AuthenticationTool.class, AuthenticationToolWikimedia.class)

@@ -1,13 +1,17 @@
 import {
     AfterViewInit,
     Component,
+    effect,
     Input,
+    input,
     OnChanges,
     OnDestroy,
     signal,
     SimpleChanges,
     ViewChild,
     inject,
+    effect,
+    input,
 } from '@angular/core';
 import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
@@ -62,6 +66,11 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
      */
     @Input() autoRender = false;
 
+    /**
+     * whether this content is displayed inside the fullscreen modal rather than the sidebar
+     */
+    @Input() modal = false;
+
     @Input() customOptions: CustomOptions;
     /** Editor mode for the embedded mds-editor-wrapper. */
     @Input() editorMode: EditorMode = 'viewer';
@@ -71,48 +80,44 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
     private readonly destroyed = new Subject<void>();
-    private _node: Node;
+    readonly node = input<Node>();
     renderNode = signal<Node>(null);
     mdsVisible = signal<boolean>(true);
-
-    /** The node to preview. */
-    @Input()
-    get node(): Node {
-        return this._node;
-    }
-
-    set node(node: Node) {
-        this._node = node;
-        this.renderNode.set(null);
-        this.mdsVisible.set(false);
-        setTimeout(() => this.mdsVisible.set(true));
-        this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
-        this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
-        if (this.actionbar) {
-            void this.updateOptions();
-        }
-        void this.about.hasPlugin('rendering-service-2').then(async (has) => {
-            if (has) {
-                let module = 'default';
-                if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
-                    // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
-                    module = (await this.moduleInfoService.getModuleInfo(node)).module;
-                }
-                console.info('rs module', module);
-                if (this.autoRender || this.AutoRenderModules.includes(module)) {
-                    void this.onShowContentClick();
-                }
-            } else {
-                console.info('rs2 not present');
-            }
-        });
-    }
 
     allDetailsLink: string;
     allDetailsParams: Params;
 
     constructor() {
         void this.renderHelperService.prepareRootUrl();
+        effect(() => {
+            const node = this.node();
+            this.renderNode.set(null);
+            this.mdsVisible.set(false);
+            setTimeout(() => this.mdsVisible.set(true));
+            this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
+            this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
+            queueMicrotask(() => void this.mdsRef?.reInit());
+            if (this.actionbar) {
+                void this.updateOptions();
+            }
+            if (node) {
+                void this.about.hasPlugin('rendering-service-2').then(async (has) => {
+                    if (has) {
+                        let module = 'default';
+                        if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
+                            // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
+                            module = (await this.moduleInfoService.getModuleInfo(node)).module;
+                        }
+                        console.info('rs module', module);
+                        if (this.autoRender || this.AutoRenderModules.includes(module)) {
+                            void this.onShowContentClick();
+                        }
+                    } else {
+                        console.info('rs2 not present');
+                    }
+                });
+            }
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -122,7 +127,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     ngAfterViewInit(): void {
-        if (this.node) {
+        if (this.node()) {
             void this.updateOptions();
         }
     }
@@ -134,7 +139,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
 
     async onShowContentClick(): Promise<void> {
         if (await this.about.hasPlugin('rendering-service-2')) {
-            this.renderNode.set(this.node);
+            this.renderNode.set(this.node());
             /*let dialogRefPromise: Promise<CardDialogRef>;
 
             dialogRefPromise = this.openMediaDialog();
@@ -156,7 +161,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     private async openMediaDialog(): Promise<CardDialogRef> {
-        return await this.dialogs.openPreviewMediaDialog({ node: this._node });
+        return await this.dialogs.openPreviewMediaDialog({ node: this.node() });
     }
 
     async onSaveMds(): Promise<void> {

@@ -42,6 +42,9 @@ import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import {
     DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+    DEFAULT_PAGE_TEMPLATE_ID,
+    DEFAULT_PAGE_VARIANT_CONFIG_PROP,
+    DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
 } from '../../shared/types/custom-definitions';
 import { SelectOption } from '../../shared/types/select-option';
@@ -51,6 +54,7 @@ import {
     retrievePageVariantTemplateRef,
 } from '../../shared/utils/template-util';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 
 export enum CopyOption {
     TopicPage = 'topicPage',
@@ -67,6 +71,8 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     public genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     private searchHelperService = inject(SearchHelperService);
     private searchService = inject(SearchService);
+    private translate = inject(TranslateService);
+    private topicPageHelperService = inject(TopicPageHelperService);
 
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
@@ -256,7 +262,43 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
                     },
                 }),
             );
-            nodes = searchResult.nodes ?? [];
+            // add default template if either no search term is defined or it includes the default template name
+            if (!searchResult.nodes) {
+                searchResult.nodes = [];
+            }
+            const defaultTemplateName: string = this.translate.instant(
+                'TOPIC_PAGE.NO_PAGE_CONFIG.DEFAULT_TEMPLATE',
+            );
+            const noSearchFilterDefined: boolean =
+                !this.searchFilters ||
+                !Object.keys(this.searchFilters)?.length ||
+                !this.searchHelperService.convertCritieria(this.searchFilters, [])?.length;
+            const noSearchValueOrIncluded: boolean =
+                !this.searchValue?.trim() || this.searchValue?.includes(defaultTemplateName);
+            if (noSearchFilterDefined && noSearchValueOrIncluded) {
+                searchResult.nodes.push({
+                    aspects: [],
+                    ref: {
+                        archived: false,
+                        id: DEFAULT_PAGE_TEMPLATE_ID,
+                        repo: HOME_REPOSITORY,
+                    },
+                    name: defaultTemplateName,
+                    title: defaultTemplateName,
+                    iconURL:
+                        location.origin +
+                        this.topicPageHelperService.getBaseHref() +
+                        '/themes/default/images/common/mime-types/svg/folder.svg',
+                    mediatype: 'folder',
+                    type: RestConstants.CCM_TYPE_MAP,
+                    properties: {
+                        [DEFAULT_PAGE_VARIANT_CONFIG_PROP]: ['{"structure":{"swimlanes":[]}}'],
+                        [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: ['true'],
+                        [RestConstants.LOM_PROP_TITLE]: [defaultTemplateName],
+                    },
+                } as Partial<Node> as Node);
+            }
+            nodes = searchResult.nodes;
         } else {
             // in topic page mode, display existing page variants
             nodes = this.pageVariantConfigNodes;

@@ -21,6 +21,7 @@ import {
     LoginInfo,
     MdsService,
     MdsViewRelation,
+    NetworkService,
     Node,
     NodeSuggestionResponseDto,
     Suggestion,
@@ -32,6 +33,7 @@ import {
     BehaviorSubject,
     combineLatest,
     EMPTY,
+    firstValueFrom,
     from,
     Observable,
     of,
@@ -155,6 +157,7 @@ export class MdsEditorInstanceService
     private suggestionsService = inject(SuggestionsV1Service);
     private restConnector = inject(RestConnectorService);
     private config = inject(ConfigService);
+    private networkService = inject(NetworkService);
 
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
@@ -270,7 +273,20 @@ export class MdsEditorInstanceService
             );
             return this.mapParentValues(changedValues ?? this.initialValues.jointValues);
         }
-
+        isMultivalue(): boolean {
+            return [
+                'vcard',
+                'checkboxHorizontal',
+                'checkboxVertical',
+                'multivalueTree',
+                'multivalueBadges',
+                'multivalueFixedBadges',
+                'multivalueSuggestBadges',
+                'multivalueGroup',
+                'multioption',
+                'multivalueCombined',
+            ].includes(this.definition?.type);
+        }
         /**
          * replace variables from client.config inside parameters of the widget
          */
@@ -672,17 +688,25 @@ export class MdsEditorInstanceService
                 .toPromise();
         }
 
-        public getValuesForKeys(keys: string[]) {
-            const mdsvl = this.mdsEditorInstanceService.restMdsService
-                .getValuesForKeys(
-                    keys,
-                    this.mdsEditorInstanceService.mdsId,
-                    RestConstants.DEFAULT_QUERY_NAME,
-                    this.definition.id,
-                    RestConstants.HOME_REPOSITORY,
+        public async getValuesForKeys(keys: string[]) {
+            if (
+                await firstValueFrom(
+                    this.mdsEditorInstanceService.networkService.isHomeRepository(
+                        this.repositoryId,
+                    ),
                 )
-                .toPromise();
-            return mdsvl;
+            ) {
+                return await firstValueFrom(
+                    this.mdsEditorInstanceService.restMdsService.getValuesForKeys(
+                        keys,
+                        this.mdsEditorInstanceService.mdsId,
+                        RestConstants.DEFAULT_QUERY_NAME,
+                        this.definition.id,
+                        RestConstants.HOME_REPOSITORY,
+                    ),
+                );
+            }
+            return null;
         }
 
         private readNodeValue(node: Node, definition: MdsWidget): string[] {
@@ -890,22 +914,24 @@ export class MdsEditorInstanceService
         // Updated list of widgets that meet dynamic conditions and should be considered when saving
         // values and counting completion status.
         const activeWidgets = combineLatest([this.widgets, this.nativeWidgets]).pipe(
-            switchMap(([widgets, nativeWidgets]) =>
-                combineLatest([
+            switchMap(([widgets, nativeWidgets]) => {
+                const sources = [
                     ...(widgets?.map((widget) =>
                         widget.meetsDynamicCondition.pipe(
                             map((meetsCondition) => ({ widget, meetsCondition })),
                         ),
                     ) ?? []),
                     ...(nativeWidgets?.map((widget) => of({ widget, meetsCondition: true })) ?? []),
-                ]).pipe(
+                ];
+                // combineLatest([]) never emits in RxJS; use of([]) to handle the no-widgets case
+                return (sources.length > 0 ? combineLatest(sources) : of([])).pipe(
                     map((entry) =>
                         entry
                             .filter(({ meetsCondition }) => meetsCondition)
                             .map(({ widget }) => widget),
                     ),
-                ),
-            ),
+                );
+            }),
         );
         activeWidgets
             .pipe(
@@ -972,41 +998,44 @@ export class MdsEditorInstanceService
                     map(() => widgets),
                 ),
             ),
-            switchMap((widgets) =>
+            switchMap((widgets) => {
                 // FIXME: The mappings below are a bit hacky. We take take the raw `value`
                 // observable for regular widgets and the `hasChanges` observable for native widgets
                 // and extract the actual values later in the pipe.
                 //
                 // TODO: Provide observables for the mapped values by the widgets themselves, so
                 // they can be trivially combined here.
-                combineLatest([
-                    // regular widgets
-                    combineLatest(
-                        widgets
-                            .filter(
-                                (widget): widget is Widget =>
-                                    widget instanceof MdsEditorInstanceService.Widget,
-                            )
-                            .filter((widget) => widget.meetsDynamicCondition.value)
-                            .map((widget) => widget.observeValue().pipe(map((value) => widget))),
-                    ).pipe(map((regularWidgets) => this.mapWidgetValues(regularWidgets))),
-                    // native widgets
-                    ...widgets
-                        .filter(
-                            (widget): widget is NativeWidget =>
-                                !(widget instanceof MdsEditorInstanceService.Widget),
-                        )
-                        .map((nativeWidget) =>
-                            nativeWidget.component.hasChanges.pipe(
-                                switchMap((hasChanges) =>
-                                    nativeWidget.component.getValues
-                                        ? from(nativeWidget.component.getValues({}, null))
-                                        : of({}),
-                                ),
+                const regularWidgetObservables = widgets
+                    .filter(
+                        (widget): widget is Widget =>
+                            widget instanceof MdsEditorInstanceService.Widget,
+                    )
+                    .filter((widget) => widget.meetsDynamicCondition.value)
+                    .map((widget) => widget.observeValue().pipe(map((value) => widget)));
+                const nativeWidgetObservables = widgets
+                    .filter(
+                        (widget): widget is NativeWidget =>
+                            !(widget instanceof MdsEditorInstanceService.Widget),
+                    )
+                    .map((nativeWidget) =>
+                        nativeWidget.component.hasChanges.pipe(
+                            switchMap((hasChanges) =>
+                                nativeWidget.component.getValues
+                                    ? from(nativeWidget.component.getValues({}, null))
+                                    : of({}),
                             ),
                         ),
-                ]).pipe(takeUntil(this.mdsInflated.pipe(filter((isInflated) => !isInflated)))),
-            ),
+                    );
+                // combineLatest([]) never emits in RxJS; use of([]) to handle the no-widgets case
+                const regularValues = (
+                    regularWidgetObservables.length > 0
+                        ? combineLatest(regularWidgetObservables)
+                        : of([] as Widget[])
+                ).pipe(map((regularWidgets) => this.mapWidgetValues(regularWidgets)));
+                return combineLatest([regularValues, ...nativeWidgetObservables]).pipe(
+                    takeUntil(this.mdsInflated.pipe(filter((isInflated) => !isInflated))),
+                );
+            }),
             map((values) =>
                 values.reduce((acc, v) => ({ ...acc, ...v }), {} as { [id: string]: string[] }),
             ),

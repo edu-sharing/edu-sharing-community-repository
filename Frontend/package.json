@@ -87,7 +87,7 @@
     "ngx-extended-pdf-viewer": "^26.0.0",
     "ngx-monaco-editor-v2": "^21.1.4",
     "ngx-rendering-service-api": "^0.0.65",
-    "ngx-rendering-service-lib": "^0.0.67024",
+    "ngx-rendering-service-lib": "^0.0.67031",
     "pdfmake": "^0.2.21",
     "rxjs": "^7.8.1",
     "tinymce": "^7.6.0",

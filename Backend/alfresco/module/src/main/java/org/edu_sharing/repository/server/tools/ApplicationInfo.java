@@ -118,6 +118,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_CERTIFICATE = "certificate";
 
+    public static final String KEY_SIGNATURE_ALGORITHM = "signature_algorithm";
+
 	public static final String KEY_KEYSTORE_PW = "keystore_pw";
 	
 	public static final String KEY_MESSAGE_OFFSET_MILLISECONDS = "message_offset_ms";
@@ -355,6 +357,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String privateKey = null;
 
 	private String certificate;
+
+    private String signatureAlgorithm;
 	
 	private String messageOffsetMs = null;
 	
@@ -553,6 +557,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		privateKey = properties.getProperty(KEY_PRIVATE_KEY);
 
 		certificate = properties.getProperty(KEY_CERTIFICATE);
+
+        signatureAlgorithm = properties.getProperty(KEY_SIGNATURE_ALGORITHM);
 		
 		messageOffsetMs = properties.getProperty(KEY_MESSAGE_OFFSET_MILLISECONDS);
 		
@@ -1010,8 +1016,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getPrivateKey() {
 		return privateKey;
 	}
-	
-	public long getMessageOffsetMs() {
+
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+
+    public long getMessageOffsetMs() {
 		if(messageOffsetMs!=null && !messageOffsetMs.isEmpty())
 			return new Long(messageOffsetMs);
 		return DEFAULT_OFFSET_MS;

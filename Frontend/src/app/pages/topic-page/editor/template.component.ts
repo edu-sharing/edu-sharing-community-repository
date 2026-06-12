@@ -2334,9 +2334,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            // any template source is a "real" template (the default placeholder no longer exists)
+            // a "real" template source is any template except the default placeholder
             const isRealTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template;
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                retrieveNodeId(this.createVariantOrTemplateSelectedNode) !==
+                    DEFAULT_PAGE_TEMPLATE_ID;
+            // the default placeholder: template ref must be set to the new node's own ID after creation
+            const isDefaultTemplateSource: boolean =
+                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
+                !isRealTemplateSource;
             if (isRealTemplateSource) {
                 // inherit template version from A and append the default own_counter to
                 // form the compound "{parent_sync}:{own_counter}" format used by non-root
@@ -2396,6 +2402,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
+            // for the default template placeholder, set the template ref to the new node's own ID
+            if (isDefaultTemplateSource) {
+                pageConfigVariantNode =
+                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                        retrieveNodeId(pageConfigVariantNode),
+                        DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
+                        prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
+                    );
+            }
             // workaround: copy profiling properties separately to avoid crashes
             const updatedTemplateNode = await this.copyProfilingProperties(
                 this.createVariantOrTemplateSelectedNode,
@@ -2780,7 +2795,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         const templateRef: string =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
-        if (!templateRef) {
+        if (!templateRef || convertNodeRefIntoNodeId(templateRef) === DEFAULT_PAGE_TEMPLATE_ID) {
             this.templateVariantNode.set(null);
             return;
         }
@@ -3117,126 +3132,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Publishes the currently loaded page variant (or template) into the global topic-page
-     * templates folder (`-topic_page_templates-`). A full copy is created — including relinked
-     * widget, breadcrumb and topic-header nodes plus their uploaded image children — so the
-     * resulting template is self-contained. The source variant is left untouched except for its
-     * template reference (repointed to the new global template) and its template version (reset).
-     */
-    async addCurrentVariantToGlobalTemplates(): Promise<void> {
-        const sourceNode: Node = this.pageVariantNode();
-        if (!sourceNode || !this.canAddToGlobalTemplates()) {
-            return;
-        }
-        this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
-        try {
-            // build the properties of the new global template based on the source variant
-            const properties: { [key: string]: string | string[] } =
-                await this.topicPageHelperService.retrievePageVariantProperties(
-                    sourceNode,
-                    '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
-                );
-            // mark as a (root) template with an initial version; the template ref is set to the
-            // new node's own ID once it has been created
-            properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
-                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
-            // create the global template node as a child of the global templates folder
-            let globalTemplateNode: Node = await this.topicPageHelperService.createChild(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-                RestConstants.CCM_TYPE_MAP,
-                sourceNode.name.replace(
-                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
-                    '',
-                ) +
-                    '_' +
-                    uuidv4(),
-                DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
-                properties,
-            );
-            // set the template ref to the new node's own ID (root template self-reference)
-            globalTemplateNode =
-                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                    retrieveNodeId(globalTemplateNode),
-                    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                    prependWorkspacePrefix(retrieveNodeId(globalTemplateNode)),
-                );
-            // workaround: copy profiling properties separately to avoid crashes
-            const updatedTemplateNode = await this.copyProfilingProperties(
-                sourceNode,
-                retrieveNodeId(globalTemplateNode),
-            );
-            if (updatedTemplateNode) {
-                globalTemplateNode = updatedTemplateNode;
-            }
-            // copy + relink the swimlane widget nodes and persist the config. A public template
-            // is a clean skeleton: editorial members (breadcrumb) and topic header are dropped, and
-            // all custom colors (anchorItemColor, topicColor) are removed — only the swimlane colors
-            // remain. The breadcrumb/header are NOT propagated here (unlike parent-collection inheritance).
-            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
-            markForCopy(variantConfig);
-            delete variantConfig.structure.breadcrumbNodeId;
-            delete variantConfig.structure.headerNodeId;
-            delete variantConfig.structure.propagatedBreadcrumbNodeId;
-            delete variantConfig.structure.propagatedHeaderNodeId;
-            delete variantConfig.structure.anchorItemColor;
-            delete variantConfig.structure.topicColor;
-            await this.persistRelinkedVariantConfig(variantConfig, globalTemplateNode);
-            // update the source variant: repoint its template ref to the new global template and
-            // reset its template version so it tracks the new foundation
-            await this.topicPageHelperService.setProperty(
-                retrieveNodeId(sourceNode),
-                DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                prependWorkspacePrefix(retrieveNodeId(globalTemplateNode)),
-            );
-            // leaf variants store the foundation version verbatim; a template stores the compound
-            // "{parent_sync}:{own_counter}" form (same logic as regeneratePageVariant)
-            const syncedVersion: string = this.templateMode()
-                ? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION +
-                  ':' +
-                  DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
-                : DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            this.pageVariantNode.set(
-                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                    retrieveNodeId(sourceNode),
-                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
-                    syncedVersion,
-                ),
-            );
-            await this.updatePageVariantConfigs(false);
-            this.topicPageHelperService.openSaveConfigToast(
-                this.i18nPrefix + 'ADD_TO_GLOBAL.SUCCESS_MESSAGE',
-            );
-        } catch (err) {
-            console.error('Failed to add variant to global templates', err);
-            this.topicPageHelperService.displayErrorToast();
-        } finally {
-            this.endEditing();
-        }
-    }
-
-    /**
-     * Updates whether the current user is allowed to add nodes to the global templates folder.
-     */
-    private async updateGlobalTemplatesPermission(): Promise<void> {
-        try {
-            const folderNode: Node = await this.topicPageHelperService.getNode(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-            );
-            this.canAddToGlobalTemplates.set(
-                this.nodeHelperService.getNodesRight(
-                    [folderNode],
-                    ApiRestConstants.ACCESS_ADD_CHILDREN,
-                ),
-            );
-        } catch {
-            // folder missing or no access
-            this.canAddToGlobalTemplates.set(false);
         }
     }
 
