@@ -226,7 +226,7 @@ export class SubmissionSidebarComponent {
             await this.stepElement(+1);
         } else {
             this.editorialSidebarService.close();
-            this.data()?.submissionFileCallback(null);
+            void this.data()?.submissionFileCallback(null);
         }
     }
 
