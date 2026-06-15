@@ -13,6 +13,13 @@
             display: grid;
         }
     }
+    @media screen and (max-width: ($mobileTabSwitchWidth)) {
+        // mobile layout: full height, so we use same logic as in single view
+        // and keep some space to see the metadata line
+        --previewHeight: calc(
+            var(--editorialSidebarHeight) - var(--editorialHeaderHeight) - 90px
+        ) !important;
+    }
 }
 // content mode only: make the host a flex row so the full-width render wrapper's
 // flex-grow can claim the available width, and drive its --containerHeight from

@@ -8,6 +8,7 @@
     align-items: center;
     padding: 20px;
     gap: 5px;
+    height: var(--editorialHeaderHeight);
     > div {
         font-size: vars.$fontSizeXLarge;
         @include mixins.limitLineCount(1, 1.25);
@@ -23,13 +24,20 @@
     }
 }
 :host {
+    --editorialHeaderHeight: 88px;
     @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
         position: fixed;
         z-index: vars.$dialogZIndex - 10;
         left: var(--roundedContainerMargin);
         top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
         right: var(--roundedContainerMargin);
-        bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
+        --editorialSidebarHeight: calc(
+            100vh - #{vars.$mobileTabNavHeight} - var(--mainnavCurrentHeight) - var(
+                    --roundedContainerMargin
+                ) * 2
+        );
+        height: var(--editorialSidebarHeight);
+        //bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
         isolation: isolate;
         border-radius: var(--borderRadiusCards);
         overflow: hidden;
