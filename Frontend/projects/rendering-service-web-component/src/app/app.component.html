@@ -39,13 +39,14 @@
     [cdkConnectedOverlayMinWidth]="350"
     [cdkConnectedOverlayHasBackdrop]="true"
     [cdkConnectedOverlayBackdropClass]="'mds-inline-backdrop'"
-    [cdkConnectedOverlayHeight]="300"
+    [cdkConnectedOverlayHeight]="overlayHeight"
+    [cdkConnectedOverlayPush]="false"
     [cdkConnectedOverlayPositions]="[
     {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
     },
   ]"
     (backdropClick)="showInlineMetadata = false"

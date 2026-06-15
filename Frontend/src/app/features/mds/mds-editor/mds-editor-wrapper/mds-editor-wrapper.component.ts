@@ -2,13 +2,13 @@ import {
     Component,
     EventEmitter,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
     SimpleChanges,
-    inject,
 } from '@angular/core';
 import { Node, SearchService } from 'ngx-edu-sharing-api';
 import { Subject } from 'rxjs';
@@ -262,7 +262,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
                         this.mdsEditorInstance
                             .getCompletitonStatus()
                             .mandatory.fields.filter((f) => !f.isCompleted)
-                            .map((f) => f.widget.definition.id),
+                            .map((f) => f.widget?.definition.id ?? 'author'),
                     );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }

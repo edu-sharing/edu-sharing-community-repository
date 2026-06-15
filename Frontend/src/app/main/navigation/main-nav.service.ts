@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, TemplateRef, inject } from '@angular/core';
+import { computed, inject, Injectable, signal, TemplateRef } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, forkJoin, Observable, of, startWith, Subject } from 'rxjs';
 import { debounceTime, filter, map, pairwise, switchMap, take, tap } from 'rxjs/operators';
@@ -8,7 +8,6 @@ import {
     RepositoryMessage,
     SessionStorageService,
     Store,
-    UserEntry,
     UserService,
 } from 'ngx-edu-sharing-api';
 import { FrameEventsService } from '../../core-module/core.module';
@@ -131,6 +130,20 @@ export class MainNavService {
     showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
     readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
     private customScopes: string[];
+    /** the `currentScope` that was active right before the current one */
+    private lastScope = new BehaviorSubject<string>(null);
+    /** the most recent distinct `currentScope` value */
+    private currentScope = new BehaviorSubject<string>(null);
+
+    constructor() {
+        this.mainNavConfigSubject.subscribe((config) => {
+            const scope = config?.currentScope;
+            if (scope && scope !== this.currentScope.value) {
+                this.lastScope.next(this.currentScope.value);
+                this.currentScope.next(scope);
+            }
+        });
+    }
 
     /**
      * register a template to be used in the top bar instead of the default one

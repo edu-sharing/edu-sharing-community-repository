@@ -1,4 +1,4 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Content, ContentText, TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -267,7 +267,10 @@ export class PdfService {
 
     private async getMetadataTableContent(node: Node): Promise<string[][]> {
         const content = [];
-        await this.mdsEditorInstanceService.initWithNodes([node], { groupId: 'io_text_pdf' });
+        await this.mdsEditorInstanceService.initWithNodes([node], {
+            groupId: 'io_text_pdf',
+            editorMode: 'viewer',
+        });
         const widgets = this.mdsEditorInstanceService.widgets.value;
         for (const widget of widgets) {
             if (widget.getValue && widget.getValue().length > 0) {

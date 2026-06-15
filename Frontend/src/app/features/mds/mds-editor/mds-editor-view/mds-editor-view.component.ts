@@ -6,6 +6,7 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     HostBinding,
+    inject,
     Injector,
     Input,
     NgZone,
@@ -17,7 +18,6 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
-    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -34,7 +34,7 @@ import {
     NativeWidgetType,
     Values,
 } from '../../types/types';
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import { Attributes, getAttributesArray } from '../util/parse-attributes';
@@ -43,7 +43,6 @@ import { MdsEditorWidgetSuggestionChipsComponent } from '../widgets/mds-editor-w
 import { JumpMark, JumpMarksService } from '../../../../services/jump-marks.service';
 import { MdsEditInterface } from '../mds-editor-single-widget/mds-editor-single-widget.component';
 import {
-    MdsViewerComponent,
     MdsViewerService,
     MdsWidgetComponent,
     MdsWidgetType,
@@ -61,6 +60,13 @@ export interface NativeWidgetComponent {
     status?: Observable<InputStatus>;
     isEmpty?: Observable<boolean>;
     focus?: () => void;
+    /** Called when the user tries to save while required fields are missing. */
+    showMissingRequired?: () => void;
+    /**
+     * If set, the native widget participates in the completion status (e.g. `author`).
+     * Combined with `isEmpty` to determine whether the required value is provided.
+     */
+    isRequired?: MdsWidget['isRequired'];
 }
 
 type NativeWidgetClass = {

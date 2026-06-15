@@ -4,11 +4,11 @@ import {
     Component,
     effect,
     HostBinding,
+    inject,
     OnDestroy,
     OnInit,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -130,6 +130,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     goToRepository(repository: Repository): void {
         this.activeRepository.setUserValue(repository.id);
+        // Filters are repository specific, so reset them (clears the `filters` query param)
+        // when switching to another repository.
+        this.searchFilters.resetUserValue();
+        this.previewNode.next(null);
         this.navigationScheduler.scheduleNavigation({
             route: [UIConstants.ROUTER_PREFIX, 'search'],
         });

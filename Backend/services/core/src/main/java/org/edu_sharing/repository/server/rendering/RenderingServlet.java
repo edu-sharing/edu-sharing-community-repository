@@ -24,7 +24,6 @@ import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingTool;
-import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
@@ -66,14 +65,15 @@ public class RenderingServlet extends SpringHttpServlet {
         resp.getWriter().write("<html>");
         resp.getWriter().write("<head>");
         try {
+            resp.getWriter().write("<style>");
             String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
             if (!StringUtils.isBlank(customCSS)) {
                 resp.getWriter().write(customCSS);
             }
+            resp.getWriter().write("</style>");
         } catch (Exception e) {
             logger.warn("Could not resolve config", e);
         }
-        resp.getWriter().write("</style>");
 
         if (rs2 != null) {
             String webComponentBase = URLHelper.getBaseUrlFromRequest(req) + "/web-components/rendering-service/";

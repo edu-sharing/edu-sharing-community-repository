@@ -2,13 +2,13 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
+    inject,
     Injectable,
     Injector,
     NgZone,
     OnDestroy,
     Type,
     ViewContainerRef,
-    inject,
 } from '@angular/core';
 import {
     AboutService,
@@ -87,6 +87,7 @@ import {
     MdsEditorViewComponent,
     NativeWidgetComponent,
 } from './mds-editor-view/mds-editor-view.component';
+import { nativeWidgetEmptyCheckers } from './util/native-widget-completion';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { Helper } from '../../../core-module/rest/helper';
@@ -110,8 +111,14 @@ import {
 import { mapExtendedValues } from './mds-editor-wrapper/extended-values-mapper';
 
 export interface CompletionStatusField {
-    widget: Widget;
+    /** Undefined for native widgets (e.g. `author`) that contribute to completion. */
+    widget?: Widget;
     isCompleted: boolean;
+}
+interface NativeWidgetCompletion {
+    /** `mandatory` / `mandatoryForPublish` if the native widget is required, else null/undefined. */
+    isRequired: MdsWidget['isRequired'] | null;
+    isEmpty: boolean;
 }
 export interface CompletionStatusEntry {
     completed: number;
@@ -834,6 +841,23 @@ export class MdsEditorInstanceService
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /**
+     * Whether all native widgets currently report a valid status. Native widgets (e.g. `author`)
+     * may declare themselves as required and emit `INVALID` to block saving.
+     */
+    private nativeWidgetsValid$ = this.nativeWidgets.pipe(
+        switchMap((widgets) =>
+            widgets.length
+                ? combineLatest(widgets.map((widget) => widget.status))
+                : of<InputStatus[]>([]),
+        ),
+        map((statuses) => statuses.every((status) => status !== 'INVALID')),
+        startWith(true),
+        distinctUntilChanged(),
+        shareReplay(1),
+    );
+    /** Synchronous mirror of {@link nativeWidgetsValid$} for `getIsValid()`. */
+    private nativeWidgetsValidValue = true;
     /** Input to `MdsEditorWrapper`. */
     externalFilters: Values;
 
@@ -901,16 +925,26 @@ export class MdsEditorInstanceService
             this.hasProgrammaticChanges$,
             this.hasSuggestionChanges$,
             this.isValid$,
+            this.nativeWidgetsValid$,
         ])
             .pipe(
                 map(
-                    ([hasUserChanges, hasProgrammaticChanges, hasSuggestionChanges, isValid]) =>
+                    ([
+                        hasUserChanges,
+                        hasProgrammaticChanges,
+                        hasSuggestionChanges,
+                        isValid,
+                        nativeWidgetsValid,
+                    ]) =>
                         (this.editorMode === 'nodes'
                             ? hasUserChanges || hasProgrammaticChanges || hasSuggestionChanges
-                            : true) && isValid,
+                            : true) &&
+                        isValid &&
+                        nativeWidgetsValid,
                 ),
             )
             .subscribe(this.canSave$);
+        this.nativeWidgetsValid$.subscribe((valid) => (this.nativeWidgetsValidValue = valid));
         // Updated list of widgets that meet dynamic conditions and should be considered when saving
         // values and counting completion status.
         const activeWidgets = combineLatest([this.widgets, this.nativeWidgets]).pipe(
@@ -961,20 +995,90 @@ export class MdsEditorInstanceService
                                 true,
                             ),
                         );
-                    return combineLatest(
-                        filteredWidgets.map((widget) =>
-                            widget.observeHasChanged().pipe(map(() => widget)),
+                    // Native widgets (e.g. author) may declare themselves required and contribute
+                    // to the completion status from one of two mutually exclusive sources:
+                    //  1. RENDERED (editor dialog): the registered component reports a live
+                    //     `isEmpty`; whether it counts is decided from its `isRequired`.
+                    //  2. UNRENDERED (e.g. the publish dialog, which only calls `initWithNodes`
+                    //     and never instantiates the components): derive emptiness from the editor
+                    //     values via `nativeWidgetEmptyCheckers`, using `definition.isRequired`
+                    //     parsed onto the model widget.
+                    const nativeWidgets = widgets.filter(
+                        (widget): widget is NativeWidget =>
+                            !(widget instanceof MdsEditorInstanceService.Widget),
+                    );
+                    // Only consider the unrendered path when no native components are registered;
+                    // when they are (editor dialog) the component path is authoritative and the
+                    // model widgets must not be counted again.
+                    const unrenderedNativeWidgets: Widget[] = nativeWidgets.length
+                        ? []
+                        : widgets.filter(
+                              (widget): widget is Widget =>
+                                  widget instanceof MdsEditorInstanceService.Widget &&
+                                  typeof nativeWidgetEmptyCheckers[
+                                      widget.definition.id as NativeWidgetType
+                                  ] === 'function' &&
+                                  this.meetsCondition(
+                                      widget.definition,
+                                      this.nodes$.value,
+                                      this.values$.value,
+                                      true,
+                                  ),
+                          );
+                    const regularWidgets$ = filteredWidgets.length
+                        ? combineLatest(
+                              filteredWidgets.map((widget) =>
+                                  widget.observeHasChanged().pipe(map(() => widget)),
+                              ),
+                          )
+                        : of([] as Widget[]);
+                    const nativeWidgets$ = nativeWidgets.length
+                        ? combineLatest(
+                              nativeWidgets.map((nativeWidget) =>
+                                  (nativeWidget.component.isEmpty ?? of(false)).pipe(
+                                      map((isEmpty) => ({
+                                          isRequired: nativeWidget.component.isRequired ?? null,
+                                          isEmpty,
+                                      })),
+                                  ),
+                              ),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    // Re-evaluate when either value source changes. `initWithNodes` only populates
+                    // `nodes$` (not `values$`); a node's `properties` are themselves a `Values`
+                    // map, so we feed whichever is available into the `isEmpty(values)` helper.
+                    const unrenderedNativeWidgets$ = unrenderedNativeWidgets.length
+                        ? combineLatest([this.nodes$, this.values$]).pipe(
+                              map(([nodes, values]) => {
+                                  const effectiveValues = nodes?.[0]?.properties ?? values ?? {};
+                                  return unrenderedNativeWidgets.map((widget) => ({
+                                      isRequired: widget.definition.isRequired ?? null,
+                                      isEmpty:
+                                          nativeWidgetEmptyCheckers[
+                                              widget.definition.id as NativeWidgetType
+                                          ]?.(effectiveValues) ?? false,
+                                  }));
+                              }),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    return combineLatest([
+                        regularWidgets$,
+                        nativeWidgets$,
+                        unrenderedNativeWidgets$,
+                    ]).pipe(
+                        map(([ws, natives, unrendered]) =>
+                            this.calculateCompletionStatus(ws, [...natives, ...unrendered]),
                         ),
-                    ).pipe(map((ws) => this.calculateCompletionStatus(ws)));
+                    );
                 }),
             )
             .subscribe((c) => {
                 this.completionStatus$.next(c);
-                if (this.editorBulkMode.isBulk) {
+                if (this.editorBulkMode?.isBulk) {
                     // disable required fields validation in bulk since they might be filled with individual values
                     this.isValid$.next(
                         c.mandatory.fields.every(
-                            (f) => f.isCompleted || f.widget.getBulkMode() !== 'replace',
+                            (f) => f.isCompleted || f.widget?.getBulkMode() !== 'replace',
                         ),
                     );
                 } else {
@@ -984,7 +1088,7 @@ export class MdsEditorInstanceService
         activeWidgets
             .pipe(
                 map((widgets) =>
-                    this.views.filter((view) =>
+                    this.views?.filter((view) =>
                         widgets.some((widget) => widget.viewId === view.id),
                     ),
                 ),
@@ -1466,6 +1570,10 @@ export class MdsEditorInstanceService
      * through all widgets when called multiple times.
      */
     showMissingRequiredWidgets(shouldScrollIntoView = true): void {
+        // native widgets (e.g. author) handle their own required hint display
+        for (const { component } of this.nativeWidgets.value) {
+            component.showMissingRequired?.();
+        }
         if (this.lastScrolledIntoViewIndex === null) {
             // No widget was scrolled into view yet. We need to touch all widgets so they will
             // display the required hint and tell them to scroll into view until we found a missing
@@ -1566,7 +1674,7 @@ export class MdsEditorInstanceService
     }
 
     getIsValid() {
-        return this.isValid$.value;
+        return this.isValid$.value && this.nativeWidgetsValidValue;
     }
     getCompletitonStatus() {
         return this.completionStatus$.value;
@@ -1574,7 +1682,7 @@ export class MdsEditorInstanceService
 
     async getValues(node?: Node, validate = true): Promise<Values> {
         // same behaviour as old mds, do not return values until it is valid
-        if (validate && !this.isValid$.value) {
+        if (validate && !this.getIsValid()) {
             this.showMissingRequiredWidgets(true);
             return null;
         }
@@ -2052,11 +2160,18 @@ export class MdsEditorInstanceService
         }
     }
 
-    private calculateCompletionStatus(widgets: Widget[]): CompletionStatus {
+    private calculateCompletionStatus(
+        widgets: Widget[],
+        nativeWidgets: NativeWidgetCompletion[] = [],
+    ): CompletionStatus {
         return Object.values(RequiredMode)
             .filter((requiredMode) => requiredMode !== RequiredMode.Ignore)
             .reduce((acc, requiredMode) => {
-                acc[requiredMode] = this.getCompletionStatusEntry(widgets, requiredMode);
+                acc[requiredMode] = this.getCompletionStatusEntry(
+                    widgets,
+                    requiredMode,
+                    nativeWidgets,
+                );
                 return acc;
             }, {} as CompletionStatus);
     }
@@ -2064,23 +2179,29 @@ export class MdsEditorInstanceService
     private getCompletionStatusEntry(
         widgets: Widget[],
         requiredMode: RequiredMode,
+        nativeWidgets: NativeWidgetCompletion[] = [],
     ): CompletionStatusEntry {
         const total = widgets.filter(
             (widget) =>
                 widget.definition.isRequired === requiredMode &&
                 this.meetsCondition(widget.definition, this.nodes$.value, this.values$.value, true),
         );
-        const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
             return {
                 widget,
                 isCompleted: !!widget.getValue()?.[0],
             };
         });
+        // native widgets (e.g. author) declare their required mode via `isRequired`, whose string
+        // values match `RequiredMode`. A non-empty native widget counts as completed.
+        const nativeCompletion: CompletionStatusField[] = nativeWidgets
+            .filter((nativeWidget) => nativeWidget.isRequired === requiredMode)
+            .map((nativeWidget) => ({ isCompleted: !nativeWidget.isEmpty }));
+        const fields = [...widgetCompletion, ...nativeCompletion];
         return {
-            total: total.length,
-            completed: completed.length,
-            fields: widgetCompletion,
+            total: fields.length,
+            completed: fields.filter((field) => field.isCompleted).length,
+            fields,
         };
     }
 

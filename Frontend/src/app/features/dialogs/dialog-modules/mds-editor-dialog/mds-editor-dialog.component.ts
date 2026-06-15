@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
@@ -133,13 +133,13 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         ])
             .pipe(
                 map(([activeViews]) =>
-                    activeViews.map((view) =>
+                    activeViews?.map((view) =>
                         this.mdsEditorCore.viewRef?.find((v) => v.view.id === view.id),
                     ),
                 ),
                 map((viewRef) =>
                     viewRef
-                        .filter((v) => v && !v.isInHiddenState() && v.view.caption)
+                        ?.filter((v) => v && !v.isInHiddenState() && v.view.caption)
                         .map(
                             (v) =>
                                 new JumpMark(

@@ -1,7 +1,19 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../mds-editor-widget-vcard/vcard' as *;
 
 :host ::ng-deep .mat-tab-labels {
     background-color: transparent;
+}
+
+.subscript {
+    font-size: 75%;
+    margin-top: 5px;
+    padding: 0 10px;
+    color: $colorStatusNegative;
+
+    &.warn {
+        color: $colorStatusWarning;
+    }
 }
 
 es-spinner-small {

@@ -2,13 +2,13 @@ import { Node } from 'ngx-edu-sharing-api';
 import {
     AfterViewInit,
     Component,
+    inject,
     Input,
     OnChanges,
     OnInit,
     signal,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { RenderHelperService, TranslationsService } from 'ngx-edu-sharing-ui';
 import { RenderDataRequestWithToken } from 'ngx-rendering-service-api';
@@ -40,6 +40,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() footer_height: number = 100;
     @Input() target_blank: boolean = false;
     showInlineMetadata = false;
+    overlayHeight = '300px';
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
 
@@ -70,6 +71,7 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         if (this.component_height !== null && this.component_height > 0) {
             const containerHeight = this.component_height - this.footer_height;
             document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
+            this.overlayHeight = `${Math.min(300, containerHeight)}px`;
         }
     }
 
@@ -82,7 +84,9 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.render_url,
                 this.signature_algorithm ?? 'SHA512withRSA',
             );
-            data.node.preview.url = this.previewUrl;
+            if (this.previewUrl !== '') {
+                data.node.preview.url = this.previewUrl;
+            }
             this.node.set(data.node);
             this.request.set(data.request);
         }

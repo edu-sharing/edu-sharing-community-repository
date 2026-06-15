@@ -1,4 +1,4 @@
-@if (widget?.getInternalError()) {
+@if (widget?.getInternalError?.()) {
 <div class="internal-error">{{ widget.definition.id }}: {{ widget.getInternalError() }}</div>
 } @if ((expandedState$ | async) !== 'disabled' && isVisible()) {
 <mat-expansion-panel [expanded]="(expandedState$ | async) === 'expanded'" class="mat-elevation-z0">
@@ -27,7 +27,14 @@
   <div matRipple [matRippleDisabled]="true" class="ripple-container" #nativeElement>
     <div class="header-container">
       @if (label) {
-      <label [id]="labelId">{{ label }}</label>
+      <label [id]="labelId"
+        >{{ label }}@if ( widget?.definition?.isRequired === 'mandatory' &&
+        mdsEditorInstance.editorMode !== 'search' ) {<span
+          class="required-marker"
+          aria-hidden="true"
+          >*</span
+        >}</label
+      >
       }
       <div class="spacer"></div>
       <!-- A small changes notice mainly for debugging purposes, but could also be used in the product

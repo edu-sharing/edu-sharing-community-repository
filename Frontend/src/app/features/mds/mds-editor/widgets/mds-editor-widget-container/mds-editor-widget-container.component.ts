@@ -6,13 +6,13 @@ import {
     ContentChild,
     ElementRef,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { MatRipple } from '@angular/material/core';
@@ -200,7 +200,7 @@ export class MdsEditorWidgetContainerComponent
                 this.expandedState$.next(this.widget.definition?.expandable);
             }
             this.widget.focusTrigger
-                .pipe(takeUntil(this.destroyed$))
+                ?.pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
         }
     }
