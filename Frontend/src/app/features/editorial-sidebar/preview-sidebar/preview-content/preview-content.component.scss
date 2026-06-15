@@ -1,9 +1,9 @@
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as *;
 
-$previewHeight: 500px;
-
 :host {
+    // default fallback; will be set via scale observer in ts!
+    --previewHeight: 500px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -21,8 +21,8 @@ $previewHeight: 500px;
 // fullWidth, viewport-based height).
 :host(:not(.modal)) es-render-wrapper-component {
     display: flex;
-    //min-height: $previewHeight;
-    --renderWrapperHeight: #{$previewHeight};
+    //min-height: var(--previewHeight);
+    --renderWrapperHeight: var(--previewHeight);
     // drop the render wrapper's default rs-root margin in content mode
     ::ng-deep rs-root {
         margin: 0;
@@ -43,15 +43,15 @@ $previewHeight: 500px;
 
 es-render-wrapper-component {
     display: flex;
-    min-height: $previewHeight;
+    min-height: var(--previewHeight);
 }
 
 .preview-sidebar-image-container {
     position: relative;
     display: grid;
     place-items: center;
-    height: $previewHeight;
-    min-height: $previewHeight;
+    height: var(--previewHeight);
+    min-height: var(--previewHeight);
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     & > * {
@@ -60,7 +60,7 @@ es-render-wrapper-component {
     .preview-sidebar-image {
         width: 100%;
         cursor: pointer;
-        height: $previewHeight;
+        height: var(--previewHeight);
         //@include blurImage(3px);
         filter: brightness(0.8);
         object-fit: cover;

@@ -2,6 +2,7 @@ import {
     AfterViewInit,
     Component,
     effect,
+    ElementRef,
     inject,
     Input,
     input,
@@ -43,6 +44,7 @@ import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
     standalone: false,
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChanges {
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     private nodeHelper = inject(NodeHelperService);
     private dialogs = inject(DialogsService);
     optionsHelper = inject(OptionsHelperDataService);
@@ -133,6 +135,14 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    /**
+     * Keeps the preview height at 3/2 of the available content width.
+     */
+    onContentResize({ width }: { width: number; height: number }): void {
+        // 3:2 aspect
+        this.elementRef.nativeElement.style.setProperty('--previewHeight', `${(width * 2) / 3}px`);
     }
 
     async onShowContentClick(): Promise<void> {

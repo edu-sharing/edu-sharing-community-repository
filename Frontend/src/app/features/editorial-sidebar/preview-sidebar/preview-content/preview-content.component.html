@@ -1,4 +1,4 @@
-<div class="preview-sidebar-scroll">
+<div class="preview-sidebar-scroll" (esBorderBoxObserver)="onContentResize($event)">
   @if (renderNode()) {
   <es-render-wrapper-component
     [showTopbar]="false"
