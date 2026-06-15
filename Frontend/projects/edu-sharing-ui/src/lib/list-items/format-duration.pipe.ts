@@ -1,6 +1,7 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform } from '@angular/core';
 import { DurationFormat, DurationHelper } from '../util/duration-helper';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'formatDuration',
     standalone: false,
