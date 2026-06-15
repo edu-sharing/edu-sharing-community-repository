@@ -146,6 +146,35 @@ export class MainNavService {
     }
 
     /**
+     * Returns the `currentScope` that was active before the current scope.
+     * Useful to determine where the user came from (e.g. for "go back" labels).
+     */
+    getLastScope(): string {
+        return this.lastScope.value;
+    }
+
+    /**
+     * Observe the `currentScope` that was active before the current scope.
+     */
+    observeLastScope(): Observable<string> {
+        return this.lastScope.asObservable();
+    }
+
+    /**
+     * Returns the most recent distinct `currentScope` value.
+     */
+    getCurrentScope(): string {
+        return this.currentScope.value;
+    }
+
+    /**
+     * Observe the most recent distinct `currentScope` value.
+     */
+    observeCurrentScope(): Observable<string> {
+        return this.currentScope.asObservable();
+    }
+
+    /**
      * register a template to be used in the top bar instead of the default one
      */
     registerCustomTemplateSlot(slot: TemplateSlot, template: TemplateRef<any>) {
