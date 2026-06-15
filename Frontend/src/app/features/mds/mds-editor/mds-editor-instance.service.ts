@@ -1050,7 +1050,8 @@ export class MdsEditorInstanceService
                     const unrenderedNativeWidgets$ = unrenderedNativeWidgets.length
                         ? combineLatest([this.nodes$, this.values$]).pipe(
                               map(([nodes, values]) => {
-                                  const effectiveValues = nodes?.[0]?.properties ?? values ?? {};
+                                  const effectiveValues =
+                                      nodes?.[0]?.properties ?? (values as Values) ?? {};
                                   return unrenderedNativeWidgets.map((widget) => ({
                                       isRequired: widget.definition.isRequired ?? null,
                                       isEmpty:

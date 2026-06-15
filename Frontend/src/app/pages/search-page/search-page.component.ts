@@ -133,7 +133,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         // Filters are repository specific, so reset them (clears the `filters` query param)
         // when switching to another repository.
         this.searchFilters.resetUserValue();
-        this.previewNode.next(null);
+        this.editorialSidebarService.close();
         this.navigationScheduler.scheduleNavigation({
             route: [UIConstants.ROUTER_PREFIX, 'search'],
         });
