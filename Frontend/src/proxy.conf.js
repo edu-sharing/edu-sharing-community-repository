@@ -79,9 +79,10 @@ const PROXY_CONFIG = [
         target: process.env.RS2_URL || 'http://127.0.0.1.nip.io:8080',
         secure: false,
         changeOrigin: true,
-        pathRewrite: { '^/rendering2': '/' },
+        pathRewrite: { '^/rendering2': '' },
         configure(proxy) {
             proxy.on('proxyReq', (proxyReq) => {
+                console.log(proxyReq);
                 proxyReq.removeHeader('Origin');
                 // only receive non-gzip results for patching
                 proxyReq.setHeader('Accept-Encoding', 'deflate');
