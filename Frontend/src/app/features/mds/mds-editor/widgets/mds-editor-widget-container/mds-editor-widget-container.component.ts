@@ -199,7 +199,7 @@ export class MdsEditorWidgetContainerComponent
                 this.expandedState$.next(this.widget.definition?.expandable);
             }
             this.widget.focusTrigger
-                .pipe(takeUntil(this.destroyed$))
+                ?.pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
         }
     }

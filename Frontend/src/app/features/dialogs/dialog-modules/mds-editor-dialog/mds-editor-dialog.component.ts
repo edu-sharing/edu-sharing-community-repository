@@ -132,13 +132,13 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         ])
             .pipe(
                 map(([activeViews]) =>
-                    activeViews.map((view) =>
+                    activeViews?.map((view) =>
                         this.mdsEditorCore.viewRef?.find((v) => v.view.id === view.id),
                     ),
                 ),
                 map((viewRef) =>
                     viewRef
-                        .filter((v) => v && !v.isInHiddenState() && v.view.caption)
+                        ?.filter((v) => v && !v.isInHiddenState() && v.view.caption)
                         .map(
                             (v) =>
                                 new JumpMark(
