@@ -13,6 +13,20 @@ describe('H5pComponent', () => {
 
         fixture = TestBed.createComponent(H5pComponent);
         component = fixture.componentInstance;
+        // Provide data so ngOnInit produces a real SafeResourceUrl for the iframe src;
+        // without it the component's placeholder value triggers NG0904 (unsafe resource URL).
+        component.data = {
+            module: 'H5P',
+            items: [
+                {
+                    link: 'https://example.com/h5p',
+                    progress: 100,
+                    height: 0,
+                    width: 0,
+                    status: 'FINISHED',
+                },
+            ],
+        };
         fixture.detectChanges();
     });
 
