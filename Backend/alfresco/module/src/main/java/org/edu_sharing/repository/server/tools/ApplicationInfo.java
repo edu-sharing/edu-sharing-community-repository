@@ -69,6 +69,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
     public static final String KEY_TRUSTEDCLIENT = "trustedclient";
 
+    public static final String KEY_ALLOW_ADMIN_LOGIN = "allow_admin_login";
+
     public static final String KEY_SEARCHABLE = "searchable";
 
     public static final String KEY_APPCAPTION = "appcaption";
@@ -325,6 +327,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
     private final String trustedclient;
 
     @Getter
+    private final boolean allowAdminLogin;
+    @Getter
     private final String type;
     private final String authenticationwebservice;
     @Getter
@@ -560,6 +564,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
         appId = properties.getProperty(KEY_APPID);
 
         trustedclient = properties.getProperty(KEY_TRUSTEDCLIENT);
+
+        allowAdminLogin = Boolean.parseBoolean(properties.getProperty(KEY_ALLOW_ADMIN_LOGIN));
 
         type = properties.getProperty(KEY_TYPE);
 

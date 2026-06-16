@@ -165,6 +165,11 @@ public class SSOAuthorityMapper {
             return authority;
         }
 
+        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+        if (appInfo != null && appInfo.isAllowAdminLogin()) {
+            return authority;
+        }
+
         return AuthenticationUtil.runAsSystem(() -> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
