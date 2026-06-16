@@ -1,5 +1,7 @@
 package org.edu_sharing.repository.server.importer;
 
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
@@ -19,9 +21,9 @@ import java.util.*;
  * - run with file using job class
  * -
  */
+@Slf4j
 public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
 
-    Logger logger = Logger.getLogger(RecordHandlerKeywordsDNBMarc.class);
     XPathFactory pfactory = XPathFactory.newInstance();
     XPath xpath = pfactory.newXPath();
 
@@ -34,6 +36,35 @@ public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
     public static String SYNONYMS = "SYNONYMS";
     public static String URL = "URL";
     public static String LANGUAGES = "LANGUAGES";
+
+    Map<String, String> languageMap = Map.of(
+            "L:ben", "bn",   // Bengali
+            "L:chi", "zh",   // Chinese
+            "L:eng", "en",   // English
+            "L:fre", "fr",   // French
+            "L:ita", "it",   // Italian
+            "L:spa", "es"    // Spanish
+    );
+
+
+
+    @Getter
+    @EqualsAndHashCode
+    public static class Languages{
+        Map<String,Set<LanguageValue>> values = new HashMap<>();
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class LanguageValue{
+        @Getter
+        @Setter
+        private String value;
+        @Getter
+        @Setter
+        private  String url;
+    }
 
     public RecordHandlerKeywordsDNBMarc(String metadataSetId){
 
@@ -102,19 +133,36 @@ public class RecordHandlerKeywordsDNBMarc implements RecordHandlerInterface{
         }
 
         //languages
-        Map<String,Set<String>> languages = new HashMap<>();
+        Languages languages = new Languages();
         NodeList nodeListLanguage = (NodeList)xpath.evaluate("datafield[@tag='750']",root,XPathConstants.NODESET);
         if(nodeListLanguage != null){
             for(int i = 0; i < nodeListLanguage.getLength(); i++){
                String langKey = (String)xpath.evaluate("subfield[@code='9']",nodeListLanguage.item(i),XPathConstants.STRING);
-               String langValue = (String)xpath.evaluate("subfield[@code='a']",nodeListLanguage.item(i),XPathConstants.STRING);
-               if(StringUtils.isNotBlank(langKey)  && StringUtils.isNotBlank(langValue)){
-                   languages.computeIfAbsent(langKey,k -> new LinkedHashSet<>()).add(langValue);
+               if(StringUtils.isBlank(langKey)){
+                    continue;
                }
+               if(!languageMap.containsKey(langKey)){
+                   log.warn("Language key {} not found in languageMap",langKey);
+                   continue;
+               }
+
+               String langValue = (String)xpath.evaluate("subfield[@code='a']",nodeListLanguage.item(i),XPathConstants.STRING);
+               NodeList lang0 = (NodeList)xpath.evaluate("subfield[@code='0']",nodeListLanguage.item(i),XPathConstants.NODESET);
+               String langUrl = null;
+               for(int j = 0; j < lang0.getLength(); j++){
+                   String tmp = (String)xpath.evaluate(".",lang0.item(j),XPathConstants.STRING);
+                   if(StringUtils.isNotBlank(tmp) && (tmp.trim().startsWith("http://") || tmp.trim().startsWith("https://"))){
+                       langUrl = tmp;
+                       break;
+                   }
+               }
+
+                languages.getValues().computeIfAbsent(languageMap.get(langKey),
+                               k -> new HashSet<>()).add(new LanguageValue(langValue, langUrl));
             }
         }
 
-        logger.info("id:"+ id + " name:"+name.trim() +" synonyms:"+synonyms);
+        log.info("id:"+ id + " name:"+name.trim() +" synonyms:"+synonyms);
 
         toSafeMap.put(ID,id);
         toSafeMap.put(NAME,name);

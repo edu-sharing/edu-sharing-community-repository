@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -114,6 +115,28 @@ public class MetadataSearchHelper {
     private static List<? extends Suggestion> getSuggestionsSql(MetadataWidget widget,
                                                                 String value) throws IllegalArgumentException {
         String query = widget.getSuggestionQuery();
+
+        //default is english, german not present in dnb factual terms
+        String locale = "en";
+        Context context = Context.getCurrentInstance();
+        if(context != null){
+            String ctxLocale = null;
+            if(context.getRequest() != null){
+                String tmp = context.getRequest().getHeader("locale");
+                if(StringUtils.isNotBlank(tmp)){
+                    ctxLocale = tmp.split("_")[0];
+                }
+            }
+            if(StringUtils.isBlank(ctxLocale) && (StringUtils.isNotBlank(context.getLocale()))){
+                ctxLocale = context.getLocale().split("_")[0];;
+            }
+            if(StringUtils.isNotBlank(ctxLocale)){
+                locale = ctxLocale;
+            }
+        }
+        query = query.replace("{{locale}}", locale);
+
+
         List<Suggestion> result = new ArrayList<>();
         Connection con;
         PreparedStatement statement;
@@ -146,6 +169,13 @@ public class MetadataSearchHelper {
                     String displayString = resultSet.getString(2);
                     sqlKw.setDisplayString(displayString);
                 } catch (SQLException e) {
+                    //no display string in result
+                }
+
+                try{
+                    String translation = resultSet.getString(3);
+                    sqlKw.setTranslation(translation);
+                }catch (SQLException e) {
                     //no display string in result
                 }
 

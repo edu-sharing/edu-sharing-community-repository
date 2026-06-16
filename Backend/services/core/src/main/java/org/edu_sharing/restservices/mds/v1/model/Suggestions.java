@@ -21,6 +21,8 @@ public class Suggestions {
 
 		@JsonProperty(required = true)
 		private String displayString;
+
+		private String translation;
 		private String key;
 	}
 }
