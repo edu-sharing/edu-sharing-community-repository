@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    Input,
+    signal,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -13,13 +21,13 @@ import { TrackingService } from '../../../tracking.service';
     styleUrl: './audio.component.scss',
 })
 export class AudioComponent implements RenderModule, AfterViewInit {
+    private trackingService = inject(TrackingService);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     previewUrl: String = '';
     private hasBeenPlayed: Boolean = false;
     activeObject = signal<AssetStateItem | undefined>(undefined);
-
-    constructor(private trackingService: TrackingService) {}
 
     ngAfterViewInit(): void {
         this.previewUrl = this.node?.preview?.url ?? '';

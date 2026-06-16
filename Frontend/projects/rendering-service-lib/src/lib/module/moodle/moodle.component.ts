@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -15,14 +15,14 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrl: './moodle.component.scss',
 })
 export class MoodleComponent implements RenderModule, OnInit {
+    private sanitizer = inject(DomSanitizer);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() isWebComponent: boolean = false;
     previewUrl: string = '';
     sanitizedUrl: SafeResourceUrl | null = null;
     sanitizedLinkUrl: SafeResourceUrl | null = null;
-
-    constructor(private sanitizer: DomSanitizer) {}
 
     ngOnInit() {
         if (this.data?.items !== undefined && this.data.items[0].link) {

@@ -1,4 +1,4 @@
-import { Component, Input, Optional } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { DialogsService } from '../../services/abstract/dialogs.service';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
@@ -14,8 +14,9 @@ import { MatButton, MatButtonModule } from '@angular/material/button';
     imports: [MatButtonModule, EduSharingUiCommonModule, TranslateModule],
 })
 export class RevokedComponent {
+    dialogsService = inject(DialogsService, { optional: true });
+
     @Input() node: Node | undefined;
-    constructor(@Optional() public dialogsService: DialogsService) {}
     reportRevokeFeedback() {
         void this.dialogsService.openNodeReportDialog({
             node: this.node!!,

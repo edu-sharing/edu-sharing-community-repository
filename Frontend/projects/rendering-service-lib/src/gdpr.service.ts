@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { GdprConfig } from './lib/dto/GdprConfig';
 
 @Injectable({ providedIn: 'root' })
 export class GdprService {
-    constructor(private configService: ConfigService) {}
+    private configService = inject(ConfigService);
 
     async getGdprConfig(node: Node): Promise<GdprConfig | null> {
         const result = await this.configService.get('gdpr');

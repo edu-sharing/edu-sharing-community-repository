@@ -3,13 +3,12 @@ import {
     createEnvironmentInjector,
     DestroyRef,
     EnvironmentInjector,
-    Inject,
     Injector,
     Input,
     OnChanges,
     OnInit,
-    Optional,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RenderingModule } from './rendering.module';
@@ -96,6 +95,17 @@ import { CurrentRenderRootUrlService } from './current-render-root-url.service';
     styleUrl: './render.component.scss',
 })
 export class RenderComponent implements OnChanges, OnInit {
+    private platformLocation = inject(PlatformLocation);
+    private trackingService = inject(TrackingService);
+    private injector = inject(Injector);
+    private envInjector = inject(EnvironmentInjector);
+    private destroyRef = inject(DestroyRef);
+    private currentRootUrl = inject(CurrentRenderRootUrlService);
+    nodeHelperService = inject(NodeHelperService);
+    configuration = inject<RenderingServiceLibConfiguration>(RENDERING_SERVICE_LIB_CONFIG, {
+        optional: true,
+    });
+
     @Input() request: RenderDataRequestWithToken | undefined;
     @Input() node: Node | undefined;
     @Input() serviceWorkerUrl: string | undefined;
@@ -110,18 +120,7 @@ export class RenderComponent implements OnChanges, OnInit {
     someButNotAllFinished = new Subject<Boolean>();
     progress$ = new BehaviorSubject<{ module: string; progress?: number } | null>(null);
 
-    constructor(
-        private platformLocation: PlatformLocation,
-        private trackingService: TrackingService,
-        private injector: Injector,
-        private envInjector: EnvironmentInjector,
-        private destroyRef: DestroyRef,
-        private currentRootUrl: CurrentRenderRootUrlService,
-        public nodeHelperService: NodeHelperService,
-        @Optional()
-        @Inject(RENDERING_SERVICE_LIB_CONFIG)
-        public configuration: RenderingServiceLibConfiguration,
-    ) {
+    constructor() {
         this.loadData
             .pipe(
                 filter(() => this.node !== undefined && this.serviceWorkerReady),

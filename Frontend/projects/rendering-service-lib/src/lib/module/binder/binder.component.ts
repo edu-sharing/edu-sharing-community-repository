@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, signal, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, signal, SimpleChanges, inject } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -15,13 +15,13 @@ import { MatAnchor } from '@angular/material/button';
     styleUrl: './binder.component.scss',
 })
 export class BinderComponent implements RenderModule, OnChanges {
+    private sanitizer = inject(DomSanitizer);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     binderItem = signal<AssetStateItem | undefined>(undefined);
     previewUrl = signal<SafeResourceUrl | undefined>(undefined);
     hasPreview = signal<boolean>(false);
-
-    constructor(private sanitizer: DomSanitizer) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         const binderJobData = this.data?.items?.find((item) => item.additionalData === null);

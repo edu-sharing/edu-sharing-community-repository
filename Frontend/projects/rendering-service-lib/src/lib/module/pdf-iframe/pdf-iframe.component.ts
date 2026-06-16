@@ -1,12 +1,11 @@
 import {
     Component,
     ElementRef,
-    Inject,
     Input,
     OnChanges,
-    Optional,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -27,19 +26,21 @@ import { PdfComponent } from '../pdf/pdf.component';
     styleUrl: './pdf-iframe.component.scss',
 })
 export class PdfIframeComponent implements RenderModule, OnChanges {
+    private nodeHelper = inject(NodeHelperService);
+    private elementRef = inject(ElementRef);
+    configuration = inject<RenderingServiceLibConfiguration>(RENDERING_SERVICE_LIB_CONFIG, {
+        optional: true,
+    });
+
     @ViewChild('iframe') iframe!: ElementRef<HTMLIFrameElement>;
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
 
     private componentBaseUrl: string = '';
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private elementRef: ElementRef,
-        @Optional()
-        @Inject(RENDERING_SERVICE_LIB_CONFIG)
-        public configuration: RenderingServiceLibConfiguration,
-    ) {
+    constructor() {
+        const configuration = this.configuration;
+
         if (configuration && configuration.assetsUrl) {
             pdfDefaultOptions.assetsFolder =
                 (configuration?.assetsUrl || '') + '/ngx-extended-pdf-viewer';

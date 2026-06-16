@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ModuleInfoControllerService } from 'ngx-rendering-service-api';
 import { firstValueFrom } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
@@ -11,14 +11,14 @@ import { ModuleInfo } from './lib/dto/ModuleInfo';
 
 @Injectable({ providedIn: 'root' })
 export class ModuleInfoService {
+    private service = inject(ModuleInfoControllerService);
+
     private availableMediaTypes: Map<string, string> = new Map<string, string>();
     private availableMimeTypes: Map<string, string> = new Map<string, string>();
     private availableMimeTypePrefixes: Map<string, string> = new Map<string, string>();
     private availableReplicationSources: Map<string, string> = new Map<string, string>();
     private availableResourceTypes: Map<string, string> = new Map<string, string>();
     private availableRemoteRepositories: Map<string, string> = new Map<string, string>();
-
-    constructor(private service: ModuleInfoControllerService) {}
 
     async getModuleInfo(node: Node): Promise<ModuleInfo> {
         const backendModule = await this.getAvailableBackendModule(node);

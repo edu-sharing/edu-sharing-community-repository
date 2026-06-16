@@ -1,4 +1,4 @@
-import { Injector, Optional, Pipe, PipeTransform } from '@angular/core';
+import { Injector, Pipe, PipeTransform, inject } from '@angular/core';
 import { RSApiConfiguration } from 'ngx-rendering-service-api';
 import { CurrentRenderRootUrlService } from './current-render-root-url.service';
 
@@ -11,10 +11,8 @@ import { CurrentRenderRootUrlService } from './current-render-root-url.service';
     standalone: false,
 })
 export class AssetLinkPipe implements PipeTransform {
-    constructor(
-        private injector: Injector,
-        @Optional() private current: CurrentRenderRootUrlService | null,
-    ) {}
+    private injector = inject(Injector);
+    private current = inject(CurrentRenderRootUrlService, { optional: true });
 
     transform(value: string | undefined) {
         if (value) {

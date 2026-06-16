@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    Input,
+    signal,
+    inject,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -13,10 +21,11 @@ import { RenderData, AssetStateItem } from '../../dto/RenderData';
     styleUrl: './image.component.scss',
 })
 export class ImageComponent implements RenderModule, AfterViewInit {
+    element = inject(ElementRef);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     activeObject = signal<AssetStateItem | undefined>(undefined);
-    constructor(public element: ElementRef) {}
     ngAfterViewInit(): void {
         this.loadOptimalSize();
     }

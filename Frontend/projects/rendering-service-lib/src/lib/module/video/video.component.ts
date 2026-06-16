@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, Input, signal, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    Input,
+    signal,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -26,14 +34,14 @@ import { TrackingService } from '../../../tracking.service';
     styleUrl: './video.component.scss',
 })
 export class VideoComponent implements RenderModule, AfterViewInit {
+    private trackingService = inject(TrackingService);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @ViewChild('video') videoRef: ElementRef<HTMLVideoElement> | undefined;
     activeObject = signal<AssetStateItem | undefined>(undefined);
     hasMultipleResolutions: Boolean = true;
     private hasBeenPlayed: Boolean = false;
-
-    constructor(private trackingService: TrackingService) {}
 
     get filteredItems(): AssetStateItem[] {
         return this.data?.items?.filter((item) => item.status !== 'FAILED') || [];

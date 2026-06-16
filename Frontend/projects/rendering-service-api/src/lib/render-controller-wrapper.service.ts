@@ -1,7 +1,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { delay, Observable, ReplaySubject, switchMap, tap, timer } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { RenderControllerService } from './api/services';
@@ -21,7 +21,10 @@ export class RenderControllerWrapperService extends RenderControllerService {
     private firstRequestCompleted$ = new ReplaySubject<void>(1);
     private firstRequestStarted = false;
 
-    constructor(config: ApiConfiguration, http: HttpClient) {
+    constructor() {
+        const config = inject(ApiConfiguration);
+        const http = inject(HttpClient);
+
         super(config, http);
     }
 

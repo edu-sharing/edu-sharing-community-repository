@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -15,12 +15,12 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrl: './eduHtml.component.scss',
 })
 export class EduHtmlComponent implements RenderModule, OnInit {
+    private sanitizer = inject(DomSanitizer);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     sanitizedUrl: SafeResourceUrl = new (class implements SafeResourceUrl {})();
     url: string = '';
-
-    constructor(private sanitizer: DomSanitizer) {}
 
     ngOnInit() {
         if (this.data?.items !== undefined && this.data.items[0].link) {

@@ -5,8 +5,8 @@ import {
     Input,
     OnDestroy,
     OnInit,
-    Optional,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -41,6 +41,14 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
     styleUrl: './url.component.scss',
 })
 export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDestroy {
+    private sanitizer = inject(DomSanitizer);
+    private trackingService = inject(TrackingService);
+    private gdprService = inject(GdprService);
+    private translate = inject(TranslateService);
+    private apiConfig = inject(EduSharingApiConfiguration);
+    private accessibilityService = inject(AccessibilityService);
+    private globalStateService = inject(GlobalStateService);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() isWebComponent: boolean = false;
@@ -58,16 +66,6 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
     static readonly LTI_PATH =
         '/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=';
     static readonly LTI_QUERY = '&editMode=false&launchPresentation=iframe';
-
-    constructor(
-        private sanitizer: DomSanitizer,
-        private trackingService: TrackingService,
-        private gdprService: GdprService,
-        private translate: TranslateService,
-        private apiConfig: EduSharingApiConfiguration,
-        private accessibilityService: AccessibilityService,
-        private globalStateService: GlobalStateService,
-    ) {}
 
     ngAfterViewInit(): void {
         if (!this.isWebComponent && this.ltiFrame !== undefined) {

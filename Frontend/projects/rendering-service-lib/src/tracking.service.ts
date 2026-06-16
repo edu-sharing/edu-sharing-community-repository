@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     EduTrackingControllerService,
     EduTrackingControllerWrapperService,
@@ -6,10 +6,8 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class TrackingService {
-    constructor(
-        private trackingControllerService: EduTrackingControllerService,
-        private trackingControllerServiceToken: EduTrackingControllerWrapperService,
-    ) {}
+    private trackingControllerService = inject(EduTrackingControllerService);
+    private trackingControllerServiceToken = inject(EduTrackingControllerWrapperService);
 
     trackViewedWithToken(nodeId: string, repoId: string, isWebComponent: boolean, token: string) {
         this.trackingControllerServiceToken

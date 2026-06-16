@@ -2,13 +2,12 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
-    Inject,
     Input,
     OnInit,
-    Optional,
     Renderer2,
     ViewChild,
     DOCUMENT,
+    inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -30,6 +29,14 @@ import {
     styleUrl: './h5p.component.scss',
 })
 export class H5pComponent implements RenderModule, OnInit, AfterViewInit {
+    private renderer = inject(Renderer2);
+    private sanitizer = inject(DomSanitizer);
+    private document = inject<Document>(DOCUMENT);
+    private platformLocation = inject(PlatformLocation);
+    configuration = inject<RenderingServiceLibConfiguration>(RENDERING_SERVICE_LIB_CONFIG, {
+        optional: true,
+    });
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @ViewChild('iframeEl', { static: false }) iframeEl?: ElementRef<HTMLIFrameElement>;
@@ -37,15 +44,9 @@ export class H5pComponent implements RenderModule, OnInit, AfterViewInit {
 
     sanitizedUrl: SafeResourceUrl = new (class implements SafeResourceUrl {})();
 
-    constructor(
-        private renderer: Renderer2,
-        private sanitizer: DomSanitizer,
-        @Inject(DOCUMENT) private document: Document,
-        private platformLocation: PlatformLocation,
-        @Optional()
-        @Inject(RENDERING_SERVICE_LIB_CONFIG)
-        public configuration: RenderingServiceLibConfiguration,
-    ) {
+    constructor() {
+        const configuration = this.configuration;
+
         if (configuration && configuration.assetsUrl) {
             this.assetsUrl = (configuration?.assetsUrl || '').replace('assets', '');
         } else {

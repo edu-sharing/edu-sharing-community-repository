@@ -2,7 +2,7 @@
 /* eslint-disable */
 import { TrackingRequest } from './api/models/tracking-request';
 import { EduTrackingControllerService } from './api/services/edu-tracking-controller.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApiConfiguration } from './api/api-configuration';
 import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,7 +14,10 @@ export type TrackingRequestWithToken = TrackingRequest & { token: string };
 
 @Injectable({ providedIn: 'root' })
 export class EduTrackingControllerWrapperService extends EduTrackingControllerService {
-    constructor(config: ApiConfiguration, http: HttpClient) {
+    constructor() {
+        const config = inject(ApiConfiguration);
+        const http = inject(HttpClient);
+
         super(config, http);
     }
 

@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    Input,
+    signal,
+    inject,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -14,11 +22,11 @@ import { RenderData } from '../../dto/RenderData';
     styleUrl: './ddb.component.scss',
 })
 export class DdbComponent implements RenderModule, AfterViewInit {
+    element = inject(ElementRef);
+
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     activeObject = signal<string | undefined>(undefined);
-
-    constructor(public element: ElementRef) {}
 
     ngAfterViewInit(): void {
         this.loadOptimalSize();

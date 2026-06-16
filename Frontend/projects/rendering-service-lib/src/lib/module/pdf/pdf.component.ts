@@ -1,12 +1,11 @@
 import {
     Component,
     HostListener,
-    Inject,
     Input,
     OnChanges,
-    Optional,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -33,20 +32,18 @@ import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
     styleUrl: './pdf.component.scss',
 })
 export class PdfComponent implements RenderModule, OnChanges {
+    private assetControllerService = inject(AssetControllerService);
+    private nodeHelper = inject(NodeHelperService);
+    configuration = inject<RenderingServiceLibConfiguration>(RENDERING_SERVICE_LIB_CONFIG, {
+        optional: true,
+    });
+
     @ViewChild(NgxExtendedPdfViewerComponent) pdfViewer!: NgxExtendedPdfViewerComponent;
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() assetUrl: string | undefined;
     restrictedView: boolean = false;
     fileData: Uint8Array | string | undefined;
-
-    constructor(
-        private assetControllerService: AssetControllerService,
-        private nodeHelper: NodeHelperService,
-        @Optional()
-        @Inject(RENDERING_SERVICE_LIB_CONFIG)
-        public configuration: RenderingServiceLibConfiguration,
-    ) {}
 
     ngOnChanges(changes: SimpleChanges) {
         if (this.configuration && this.configuration.assetsUrl) {

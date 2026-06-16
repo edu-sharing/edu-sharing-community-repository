@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfiguration } from './api/api-configuration';
 
 @Injectable()
 export class RenderingServiceApiInterceptor implements HttpInterceptor {
-    constructor(private configuration: ApiConfiguration) {}
+    private configuration = inject(ApiConfiguration);
+
     private nextAuthHeader?: string;
     private nextAuthValue?: string;
 
