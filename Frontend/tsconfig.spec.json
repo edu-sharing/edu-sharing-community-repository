@@ -20,6 +20,14 @@
       "ngx-edu-sharing-b-api": [
         "dist/b-api/b-api",
         "dist/b-api"
+      ],
+      "ngx-rendering-service-api": [
+        "dist/rendering-service-api/rendering-service-api",
+        "dist/rendering-service-api"
+      ],
+      "ngx-rendering-service-lib": [
+        "dist/rendering-service-lib/rendering-service-lib",
+        "dist/rendering-service-lib"
       ]
     }
   },
