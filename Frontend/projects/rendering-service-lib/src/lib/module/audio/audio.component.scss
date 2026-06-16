@@ -4,6 +4,7 @@
 
     video {
         width: 100%;
+        height: var(--containerHeight);
         display: block;
         object-fit: cover;
         aspect-ratio: 8/3;
