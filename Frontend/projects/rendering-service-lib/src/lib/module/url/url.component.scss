@@ -46,10 +46,11 @@
         > iframe {
             width: 100%;
             height: 0;
-            flex-grow: 0;
+            flex-grow: 1;
             border: none;
             // audio has fixed height in sodix frame
             &.sodix-type-file-audio {
+                flex-grow: 0;
                 height: 30px;
             }
         }

@@ -59,7 +59,16 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     /**
      all modules in this list will be automatically rendered without confirmation
      */
-    readonly AutoRenderModules = ['default', 'image', 'video', 'audio', 'document', 'pdf', 'url'];
+    readonly AutoRenderModules = [
+        'default',
+        'image',
+        'video',
+        'audio',
+        'document',
+        'pdf',
+        'url',
+        'sodix',
+    ];
 
     /**
      * always render the node, do not wait for click
