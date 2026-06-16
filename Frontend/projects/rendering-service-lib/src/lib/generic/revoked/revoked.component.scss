@@ -1,4 +1,4 @@
-@use 'ngx-edu-sharing-ui/assets/scss/variables' as vars;
+@use 'variables' as vars;
 
 :host ::ng-deep {
     .revoked es-info-message {

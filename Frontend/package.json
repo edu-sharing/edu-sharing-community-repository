@@ -4,7 +4,7 @@
   "license": "GPL-3.0-or-later",
   "angular-cli": {},
   "scripts": {
-    "prestart": "(npm run build:edu-sharing-api:dev & PID1=$!; npm run build:b-api:dev & PID2=$!; npm run build:rendering-service-api:dev & PID3=$!; wait $PID1 || exit 1; wait $PID2 || exit 1; wait $PID3 || exit 1) && npm run build:edu-sharing-ui && npm run build:rendering-service-lib:dev && ln -sfn $(pwd)/dist/edu-sharing-api node_modules/ngx-edu-sharing-api && ln -sfn $(pwd)/dist/edu-sharing-ui node_modules/ngx-edu-sharing-ui && ln -sfn $(pwd)/dist/rendering-service-api node_modules/ngx-rendering-service-api && ln -sfn $(pwd)/dist/rendering-service-lib node_modules/ngx-rendering-service-lib",
+    "prestart": "(npm run build:edu-sharing-api:dev & PID1=$!; npm run build:b-api & PID2=$!; npm run build:rendering-service-api:dev & PID3=$!; wait $PID1 || exit 1; wait $PID2 || exit 1; wait $PID3 || exit 1) && npm run build:edu-sharing-ui && npm run build:rendering-service-lib:dev && ln -sfn $(pwd)/dist/edu-sharing-api node_modules/ngx-edu-sharing-api && ln -sfn $(pwd)/dist/edu-sharing-ui node_modules/ngx-edu-sharing-ui && ln -sfn $(pwd)/dist/rendering-service-api node_modules/ngx-rendering-service-api && ln -sfn $(pwd)/dist/rendering-service-lib node_modules/ngx-rendering-service-lib",
     "start": "ng serve",
     "start-app": "npm run prestart && ng serve -c=app",
     "start-public": "npm run prestart && ng serve --host 0.0.0.0 --disable-host-check",
