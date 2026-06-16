@@ -121,6 +121,32 @@ Vorhandenes Javadoc des Setters wird mit der `-- SETTER --`-Konvention an die An
 korrekt `isX()` — bestehende Aufrufer wie `appInfo.isAllowAdminLogin()` funktionieren
 unverändert.
 
+**`@Data` für vollständige POJOs.** Hat eine Klasse fast nur Felder mit trivialen Accessoren,
+ersetzt `@Data` an der Klasse die einzelnen `@Getter`/`@Setter` (z. B. `ACE`-Objekt). `@Data`
+bündelt `@Getter` + `@Setter` + `@ToString` + `@EqualsAndHashCode` + `@RequiredArgsConstructor`.
+
+> **Nur für reine DTO-/Wert-Klassen einsetzen.** `@Data` erzeugt zusätzlich
+> `equals`/`hashCode`/`toString` — bei Entities mit Identitätssemantik oder Klassen, die in
+> Sets/Maps als Schlüssel landen, kann das das Verhalten ändern. Im Zweifel bei
+> `@Getter`/`@Setter` bleiben.
+
+**`boolean`-Feld-Naming `isX` → `x`.** Boolean-Felder ohne `is`-Präfix benennen. Lombok
+`@Getter` erzeugt daraus weiterhin `isX()`, `@Setter` erzeugt `setX(boolean)` — Aufrufer
+bleiben kompatibel.
+
+**Vorher**
+```java
+private boolean isInherited;
+public boolean isInherited() { return isInherited; }
+public void setInherited(boolean isInherited) { this.isInherited = isInherited; }
+```
+
+**Nachher**
+```java
+@Getter @Setter
+private boolean inherited;   // erzeugt isInherited() / setInherited(boolean)
+```
+
 ### 5. Dekorative Block-Kommentare → Zeilenkommentare
 
 `/** ... */`-Blöcke, die nur Codeabschnitte gliedern (kein echtes Javadoc an einem
@@ -167,17 +193,119 @@ String repoUsername = AuthenticationUtil.runAsSystem(() -> {
 });
 ```
 
-### 7. Import-Hygiene
+### 7. Konkrete Map-Implementierung → `Map`-Interface
+
+Felder, lokale Variablen, Methoden-Signaturen und Casts auf das Interface (`Map` /
+`ConcurrentMap`) abstützen statt auf die Implementierung (`HashMap` / `ConcurrentHashMap`).
+Die Konstruktion bleibt `new HashMap<>()` — nur der deklarierte bzw. referenzierte Typ wird
+zum Interface. Dabei den Diamond-Operator nutzen.
+
+**Vorher**
+```java
+HashMap<Long, CacheEntry> m = new HashMap<Long, CacheEntry>();
+ConcurrentHashMap<Long, Long> added = (ConcurrentHashMap<Long, Long>) cache.lookup(KEY);
+```
+
+**Nachher**
+```java
+Map<Long, CacheEntry> m = new HashMap<>();
+ConcurrentMap<Long, Long> added = (ConcurrentMap<Long, Long>) cache.lookup(KEY);
+```
+
+Wird nach der Umstellung nur noch der Interface-Typ referenziert, den Import
+`java.util.concurrent.ConcurrentHashMap` auf `java.util.concurrent.ConcurrentMap` umstellen
+(bzw. `java.util.Map` ergänzen). Gilt analog für Rückgabe- und Parametertypen öffentlicher
+Methoden — diese bleiben kompatibel, weil `HashMap` das `Map`-Interface implementiert.
+
+### 8. Nullability-Annotationen → `org.jetbrains.annotations`
+
+`@Nullable`/`@NotNull` auf Return-Typen und Parameter setzen, wo Null-(Un)zulässigkeit
+dokumentiert werden soll. Verbindlich die JetBrains-Variante verwenden.
+
+**Vorher**
+```java
+import com.drew.lang.annotations.Nullable;
+```
+
+**Nachher**
+```java
+import org.jetbrains.annotations.Nullable;
+```
+
+> **Verbindlich `org.jetbrains.annotations.{Nullable,NotNull}` importieren.**
+> Fehlerhaft eingeschlichene Varianten wie `com.drew.lang.annotations.*` beim Aufräumen einer
+> Klasse umstellen — dieselbe Vereinheitlichungsregel wie bei `StringUtils` (Muster 3). Die
+> `org.jetbrains:annotations`-Dependency muss im jeweiligen Modul-`pom.xml` vorhanden sein
+> (in `alfresco/module` bereits ergänzt); bei Bedarf dort eintragen.
+
+### 9. Import- & Dead-Code-Hygiene
 
 - Ungenutzte Imports entfernen (z. B. den alten `org.apache.log4j.Logger` nach Muster 1).
 - Gruppierung: Lombok- und Drittanbieter-Imports zuerst, `java.*`/`javax.*` zuletzt.
 - Keine Wildcard-Imports neu einführen.
+- Ungenutzte lokale Variablen entfernen.
+- Redundante Methodenaufrufe ohne Wirkung entfernen (z. B. ein `getX()`, dessen Rückgabe
+  verworfen wird und der keinen Seiteneffekt hat).
+- Überflüssige `throws Exception`/`throws Throwable` aus Signaturen entfernen, wenn keine
+  geprüfte Exception (mehr) geworfen wird — dabei Interface-Deklarationen und alle Aufrufer
+  mitziehen.
+
+> **Vor dem Entfernen prüfen:** Ein Aufruf darf nur weg, wenn er nachweislich seiteneffektfrei
+> ist; ein `throws` nur, wenn kein Aufrufer die geprüfte Exception erwartet. Im Zweifel den
+> Diff gegen das Original prüfen.
+
+### 10. Felder finalisieren & ordnen
+
+**`final`, wo möglich.** Felder, die nach der Konstruktion nie neu zugewiesen werden, `final`
+machen — insbesondere injizierte Service-Felder (`@RequiredArgsConstructor`-Injection) und
+Konstanten. Das dokumentiert Unveränderlichkeit und lässt den Compiler versehentliche
+Neuzuweisungen verhindern. Nur Felder, die tatsächlich nach der Initialisierung neu gesetzt
+werden, bleiben veränderlich.
+
+**Felder gruppieren — gleiche Art ohne Leerzeilen zusammen, Gruppen durch eine Leerzeile
+getrennt.** Reihenfolge der Gruppen:
+
+1. `static`-Felder (Konstanten, statische Logger usw.)
+2. Injizierte Service-/Abhängigkeits-Felder
+3. Übrige Instanzfelder (Zustand)
+
+Innerhalb jeder Gruppe `public` vor `private` (und `protected` dazwischen).
+
+**Vorher**
+```java
+private NodeService nodeService;
+
+public static final String PREFIX = "ccm";
+
+private PermissionService permissionService;
+
+private static Logger logger = Logger.getLogger(Foo.class);
+
+private String state;
+```
+
+**Nachher**
+```java
+public static final String PREFIX = "ccm";
+private static final Logger logger = LoggerFactory.getLogger(Foo.class);
+
+private final NodeService nodeService;
+private final PermissionService permissionService;
+
+private String state;
+```
+
+Wird der Logger ohnehin auf `@Slf4j` umgestellt (Muster 1), entfällt das statische
+Logger-Feld ganz. Bei der Umsortierung keine Initialisierer oder Annotationen an Feldern
+verlieren — nur Reihenfolge, Leerzeilen und `final` ändern, sonst nichts.
 
 ## Vorgehen bei einer Klasse
 
-1. Datei lesen, Muster 1–6 identifizieren.
-2. Änderungen anwenden, dabei jede entfernte Methode/jedes Feld auf verbleibende
-   Verwendungen prüfen.
-3. Imports bereinigen (Muster 7).
-4. Sicherstellen, dass keine Verhaltensänderung entstanden ist — bei Unsicherheit den
+1. Datei lesen, Muster 1–6 sowie die mechanischen Cleanups (Muster 7 Map-Interface,
+   Muster 8 Nullability-Imports) identifizieren.
+2. Änderungen anwenden, dabei jede entfernte Methode/jedes Feld/jeden `throws` auf
+   verbleibende Verwendungen und Aufrufer prüfen.
+3. Imports und toten Code bereinigen (Muster 9).
+4. Felder finalisieren und ordnen (Muster 10).
+5. Sicherstellen, dass keine Verhaltensänderung entstanden ist — bei Unsicherheit den
    Diff gegen das Original prüfen.
