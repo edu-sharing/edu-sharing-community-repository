@@ -13,6 +13,7 @@
     "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api --module RenderingServiceModule",
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "generate-api-if-needed": "(test -d src/lib/api) || npm run generate-api",
     "fetch-api": "curl -L -o build/openapi.json http://localhost:10100/rendering/v3/api-docs",
     "publish": "npm run build && cd dist && npm publish",
     "build": "ng build"
