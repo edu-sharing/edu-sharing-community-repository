@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { Toast } from 'ngx-edu-sharing-ui';
 import { RenderComponent } from './render.component';
 
-describe('AppComponent', () => {
+describe('RenderComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [RenderComponent],
+            imports: [RenderComponent, TranslateModule.forRoot()],
+            providers: [
+                { provide: Toast, useValue: { toast: (): void => {}, error: (): void => {} } },
+            ],
         }).compileComponents();
     });
 
@@ -14,10 +19,8 @@ describe('AppComponent', () => {
         expect(app).toBeTruthy();
     });
 
-    it('should render title', () => {
+    it('should render without a node', () => {
         const fixture = TestBed.createComponent(RenderComponent);
-        fixture.detectChanges();
-        const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.querySelector('h1')?.textContent).toContain('Hello, rendering-service');
+        expect(() => fixture.detectChanges()).not.toThrow();
     });
 });
