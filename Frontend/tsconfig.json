@@ -20,6 +20,16 @@
         "dist/b-api/b-api",
         "dist/b-api"
       ],
+      //paths for idea
+      "ngx-rendering-service-api": [
+        "dist/rendering-service-api/rendering-service-api",
+        "dist/rendering-service-api"
+      ],
+      //paths for idea
+      "ngx-rendering-service-lib": [
+        "dist/rendering-service-lib/rendering-service-lib",
+        "dist/rendering-service-lib"
+      ],
       "ngx-edu-sharing-ui": [
         "dist/edu-sharing-ui/edu-sharing-ui",
         "dist/edu-sharing-ui"

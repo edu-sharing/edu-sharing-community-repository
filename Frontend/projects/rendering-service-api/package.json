@@ -1,0 +1,32 @@
+{
+  "name": "ngx-rendering-service-api",
+  "version": "0.0.65",
+  "license": "GNU GPL v2",
+  "description": "Angular bindings for Edu-Sharing's rendering API",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edu-sharing/Edu-Sharing.git",
+    "directory": "projects/rendering-service-api"
+  },
+  "homepage": "https://edu-sharing-network.org/",
+  "scripts": {
+    "generate-api:generate-code": "ng-openapi-gen --input build/openapi.json --output src/lib/api --module RenderingServiceModule",
+    "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
+    "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code",
+    "fetch-api": "curl -L -o build/openapi.json http://localhost:10100/rendering/v3/api-docs",
+    "publish": "npm run build && cd dist && npm publish",
+    "build": "ng build"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=18.0.0",
+    "@angular/core": ">=18.0.0",
+    "rxjs": "^7.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.4.1",
+    "ng-openapi-gen": "^0.51.0"
+  }
+}

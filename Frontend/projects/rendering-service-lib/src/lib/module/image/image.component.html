@@ -1,0 +1,12 @@
+@if (activeObject()) {
+<div class="image-wrapper">
+  <img #image [src]="activeObject()?.link | rsAssetLink" [alt]="node?.title || node?.name || ''" />
+  <!--
+    translate aria label
+    if button has visible text -> must be in aria-label
+    -->
+  <button mat-icon-button aria-label="fullscreen" (click)="toggleFullscreen()">
+    <mat-icon>fullscreen</mat-icon>
+  </button>
+</div>
+}

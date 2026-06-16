@@ -1,0 +1,161 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-height: var(--containerHeight);
+}
+.url-wrapper {
+    width: 100%;
+    max-height: var(--containerHeight);
+
+    .audio-wrapper {
+        video[poster] {
+            object-fit: cover;
+        }
+    }
+
+    .vimeoFrame,
+    .preziFrame,
+    .eduUrlFrame {
+        width: 100%;
+        aspect-ratio: 16/9;
+        border: none;
+    }
+
+    .image-wrapper > img {
+        width: 100%;
+        height: auto;
+    }
+
+    .sodixFrame {
+        border: none;
+        width: 100%;
+        height: var(--containerHeight);
+        display: flex;
+        flex-direction: column;
+        > img {
+            height: 0;
+            flex-grow: 1;
+            min-height: 0;
+            width: 100%;
+            object-fit: contain;
+            object-position: center;
+            // we're using the same color as the sodix webplayer
+            background-color: #1e242c;
+        }
+        > iframe {
+            width: 100%;
+            height: 0;
+            flex-grow: 0;
+            border: none;
+            // audio has fixed height in sodix frame
+            &.sodix-type-file-audio {
+                height: 30px;
+            }
+        }
+    }
+
+    .ltiFrame {
+        border: none;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .gdpr-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .gdpr-image-container {
+            position: relative;
+            width: 100%;
+            display: inline-block;
+
+            img {
+                width: 100%;
+                height: auto;
+                max-height: var(--containerHeight);
+                display: block;
+            }
+
+            .gdpr-overlay {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background-color: rgba(0, 0, 0, 0.6);
+
+                &.contrast-mode {
+                    background-color: black;
+                }
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .gdpr-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.5em;
+                    color: white;
+                    text-align: center;
+                    padding-bottom: 1em;
+                    a {
+                        color: white;
+                    }
+
+                    a[mat-button='outlined'] {
+                        border: 1px solid white;
+                    }
+
+                    span,
+                    a {
+                        font-size: 0.875rem;
+                    }
+                    button {
+                        background-color: green;
+                        color: white;
+                    }
+                }
+            }
+        }
+    }
+
+    .link-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1em;
+
+        img {
+            width: 100%;
+            height: auto;
+            max-height: calc(var(--containerHeight) - 60px);
+            object-fit: contain;
+            display: block;
+        }
+        .link-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+    }
+
+    .youtube-wrapper {
+        width: 100%;
+        height: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .video-wrapper video {
+        width: 100%;
+        height: auto;
+        max-height: calc(var(--containerHeight) - 60px);
+        object-fit: contain;
+    }
+}

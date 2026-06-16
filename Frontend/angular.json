@@ -289,6 +289,123 @@
         }
       }
     },
+    "rendering-service-api": {
+      "projectType": "library",
+      "root": "projects/rendering-service-api",
+      "sourceRoot": "projects/rendering-service-api/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/rendering-service-api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/rendering-service-api/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/rendering-service-api/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/rendering-service-api/tsconfig.spec.json",
+            "karmaConfig": "projects/rendering-service-api/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/rendering-service-api/**/*.ts",
+              "projects/rendering-service-api/**/*.html"
+            ],
+            "cache": true
+          }
+        }
+      }
+    },
+    "rendering-service-lib": {
+      "projectType": "library",
+      "root": "projects/rendering-service-lib",
+      "sourceRoot": "projects/rendering-service-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/rendering-service-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/rendering-service-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/rendering-service-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "build-pdf-web-component": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "projects/rendering-service-lib/dist/assets/pdf",
+            "index": "projects/rendering-service-lib/src/lib/module/pdf/index.html",
+            "main": "projects/rendering-service-lib/src/lib/module/pdf/pdf.main",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/rendering-service-lib/tsconfig.pdf.lib.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets",
+                "output": "/assets"
+              }
+            ],
+            "optimization": {
+              "scripts": false,
+              "styles": false
+            },
+            "sourceMap": true,
+            "buildOptimizer": false,
+            "extractLicenses": false,
+            "vendorChunk": true,
+            "namedChunks": true,
+            "styles": [],
+            "scripts": []
+          }
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/rendering-service-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/rendering-service-lib/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/rendering-service-lib/**/*.ts",
+              "projects/rendering-service-lib/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "b-api": {
       "projectType": "library",
       "root": "projects/b-api",

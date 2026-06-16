@@ -1,0 +1,29 @@
+:host {
+    width: 100%;
+}
+
+.video-wrapper {
+    width: 100%;
+    position: relative;
+    video {
+        width: 100%;
+        display: block;
+    }
+    button {
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin: 5px;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+.menu-item-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.resolution-container {
+    padding-left: 0.5em;
+}

@@ -1,0 +1,25 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-height: var(--containerHeight, none);
+    overflow: hidden;
+    ::ng-deep {
+        ngx-extended-pdf-viewer,
+        ngx-extended-pdf-viewer .zoom {
+            max-height: var(--containerHeight, none);
+        }
+    }
+}
+.pdf-wrapper {
+    width: 100%;
+    height: 100%;
+    max-height: var(--containerHeight, none);
+}
+
+@media print {
+    .hide-all * {
+        display: none !important;
+    }
+}

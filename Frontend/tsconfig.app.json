@@ -11,6 +11,16 @@
         "dist/b-api/b-api",
         "dist/b-api"
       ],
+      "ngx-rendering-service-api": [
+        "dist/rendering-service-api/rendering-service-api",
+        "dist/rendering-service-api"
+      ],
+      "ngx-rendering-service-lib": [
+        "projects/rendering-service-lib/src"
+      ],
+      "ngx-rendering-service-lib/*": [
+        "projects/rendering-service-lib/src/*"
+      ],
       "ngx-edu-sharing-ui": [
         "projects/edu-sharing-ui/src/lib"
       ],

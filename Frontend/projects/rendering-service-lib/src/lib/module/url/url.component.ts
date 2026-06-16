@@ -1,0 +1,236 @@
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    Input,
+    OnDestroy,
+    OnInit,
+    Optional,
+    ViewChild,
+} from '@angular/core';
+import { RenderingModule } from '../../rendering.module';
+import { RenderModule } from '../RenderModule';
+import { Node } from 'ngx-edu-sharing-api';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { YouTubePlayer } from '@angular/youtube-player';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { NgOptimizedImage } from '@angular/common';
+import { RenderData } from '../../dto/RenderData';
+import { UrlEmbeddings } from '../../dto/FrontendModuleConfig';
+import { AccessibilityService, EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { TrackingService } from '../../../tracking.service';
+import { GdprService } from '../../../gdpr.service';
+import { GdprConfig } from '../../dto/GdprConfig';
+import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { EduSharingApiConfiguration } from 'ngx-edu-sharing-api';
+import { GlobalStateService } from 'ngx-rendering-service-api';
+
+@Component({
+    selector: 'rs-module-url',
+    imports: [
+        RenderingModule,
+        MatButtonModule,
+        MatIconModule,
+        YouTubePlayer,
+        NgOptimizedImage,
+        EduSharingUiModule,
+    ],
+    templateUrl: './url.component.html',
+    styleUrl: './url.component.scss',
+})
+export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDestroy {
+    @Input() data: RenderData | undefined;
+    @Input() node: Node | undefined;
+    @Input() isWebComponent: boolean = false;
+    @ViewChild('ltiFrame') ltiFrame: ElementRef<HTMLIFrameElement> | undefined;
+    gdpr: GdprConfig | null = null;
+    embedding?: UrlEmbeddings;
+    externalId?: string;
+    sanitizedUrl: SafeResourceUrl | null = null;
+    url: string = '';
+    previewUrl: string = '';
+    gdprInfoText: string = '';
+    isContrastMode: boolean = false;
+    private hasBeenClicked: boolean = false;
+    private contrastModeSubscription?: Subscription;
+    static readonly LTI_PATH =
+        '/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=';
+    static readonly LTI_QUERY = '&editMode=false&launchPresentation=iframe';
+
+    constructor(
+        private sanitizer: DomSanitizer,
+        private trackingService: TrackingService,
+        private gdprService: GdprService,
+        private translate: TranslateService,
+        private apiConfig: EduSharingApiConfiguration,
+        private accessibilityService: AccessibilityService,
+        private globalStateService: GlobalStateService,
+    ) {}
+
+    ngAfterViewInit(): void {
+        if (!this.isWebComponent && this.ltiFrame !== undefined) {
+            const ltiIFrame = this.ltiFrame.nativeElement;
+            const targetHeight = window.innerHeight - ltiIFrame.getBoundingClientRect().top;
+            const height = targetHeight < 300 ? window.innerHeight : targetHeight;
+            ltiIFrame.height = height + 'px';
+        }
+    }
+
+    async ngOnInit() {
+        if (this.data?.module === 'SODIX') {
+            this.processSodix();
+        } else {
+            this.embedding = this.data?.frontendModuleConfig?.urlModuleConfig?.embedding;
+            this.url = this.node?.properties?.['ccm:wwwurl']?.[0] || '';
+        }
+        this.contrastModeSubscription = this.accessibilityService
+            .observe('contrastMode')
+            .subscribe((value) => {
+                this.isContrastMode = value;
+            });
+        if (this.node) {
+            this.gdpr = await this.gdprService.getGdprConfig(this.node);
+            await this.getGdprText();
+        }
+        this.previewUrl = this.node?.preview?.url ?? '';
+        this.externalId = this.data?.frontendModuleConfig?.urlModuleConfig?.externalId;
+        if (this.embedding === UrlEmbeddings.VIMEO) {
+            this.sanitizedUrl = this.getVimeoUri();
+        } else if (this.embedding === UrlEmbeddings.PREZI) {
+            this.sanitizedUrl = this.getPreziUrl();
+        } else if (this.embedding === UrlEmbeddings.LEARNINGAPPS) {
+            this.sanitizedUrl = this.getLearningAppsUrl();
+        } else if (this.embedding === UrlEmbeddings.LTI13TOOL) {
+            this.sanitizedUrl = this.getLtiUrl();
+        } else if (this.embedding === UrlEmbeddings.SODIX) {
+            this.sanitizedUrl = this.getSodixUrl();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.contrastModeSubscription?.unsubscribe();
+    }
+
+    consentToGdprWarning() {
+        if (this.isGdprGeneric()) {
+            window.open(this.url, '_blank');
+        }
+        this.gdpr = null;
+        if (this.node?.ref.id && this.node?.ref.repo) {
+            this.trackingService.trackGdprConsent(this.node.ref.id, this.node.ref.repo);
+        }
+    }
+
+    getVimeoUri(): SafeResourceUrl {
+        const vimeoUrl = new URL(`https://player.vimeo.com/video/${this.externalId ?? ''}`);
+        const externalId = this.externalId ?? '';
+        const [videoId, queryString] = externalId.split('?', 2);
+        vimeoUrl.pathname = `/video/${videoId}`;
+
+        if (queryString) {
+            const params = new URLSearchParams(queryString);
+            const h = params.get('h');
+            if (h !== null) {
+                vimeoUrl.searchParams.set('h', h);
+            }
+        }
+
+        return this.sanitizer.bypassSecurityTrustResourceUrl(vimeoUrl.toString());
+    }
+
+    getPreziUrl(): SafeResourceUrl {
+        const preziUrl =
+            this.url.slice(-1) === '/' ? this.url.substring(0, this.url.length - 1) : this.url;
+        return this.sanitizer.bypassSecurityTrustResourceUrl(preziUrl);
+    }
+
+    getLearningAppsUrl(): SafeResourceUrl {
+        const learningAppsUrl = this.url.replace(
+            'https://learningapps.org/',
+            'https://learningapps.org/view',
+        );
+        return this.sanitizer.bypassSecurityTrustResourceUrl(learningAppsUrl);
+    }
+
+    getLtiUrl(): SafeResourceUrl {
+        const ltiUrl =
+            this.apiConfig.rootUrl +
+            UrlComponent.LTI_PATH +
+            this.node?.ref.id +
+            UrlComponent.LTI_QUERY;
+        return this.sanitizer.bypassSecurityTrustResourceUrl(ltiUrl);
+    }
+
+    getSodixUrl(): SafeResourceUrl {
+        return this.sanitizer.bypassSecurityTrustResourceUrl(this.data?.items?.[0].link || '');
+    }
+
+    onLinkClick() {
+        if (this.node?.ref.id && this.node?.ref.repo && !this.hasBeenClicked) {
+            this.trackingService.trackClicked(this.node.ref.id, this.node.ref.repo);
+        }
+        this.hasBeenClicked = true;
+    }
+
+    isGdprGeneric(): boolean {
+        return this.embedding === UrlEmbeddings.LINK;
+    }
+
+    async getGdprText() {
+        if (this.gdpr !== null) {
+            if (this.isGdprGeneric()) {
+                this.gdprInfoText = await firstValueFrom(
+                    this.translate.get('RENDERING.GDPR.EXTERNAL_SITE_INFO'),
+                );
+            } else {
+                const name =
+                    this.gdpr.name === 'EXTERNAL_SOURCES'
+                        ? await firstValueFrom(this.translate.get('RENDERING.GDPR.EXTERNAL_SOURCE'))
+                        : this.gdpr.name;
+                const template = await firstValueFrom(
+                    this.translate.get('RENDERING.GDPR.EXTERNAL_CONTENT_INFO'),
+                );
+                this.gdprInfoText = template.replace('{{EXTERNAL_RESOURCE}}', name);
+            }
+        }
+    }
+
+    private processSodix(): void {
+        const jobData = this.data?.items?.[0];
+        const isPaidMedia =
+            (this.node?.properties?.['ccm:editorial_state']?.[0] || '').toLowerCase() ===
+            'restricted_mz';
+        const additionalData = jobData?.additionalData;
+        const downloadUrl = additionalData?.['downloadUrl'] ?? undefined;
+        this.globalStateService.setDownloadUrl(downloadUrl);
+        const checkIfIframeAllowed = (): boolean => {
+            if (isPaidMedia) {
+                return false;
+            }
+            const playoutMimetypes = additionalData?.['playoutMimetypes'] ?? '';
+            if (
+                playoutMimetypes !== '' &&
+                !new RegExp(playoutMimetypes).test(this.node?.mimetype || '')
+            ) {
+                return false;
+            }
+            const allowExternalFrameSrc =
+                additionalData?.['allowExternalFrameSrc']?.toLowerCase() === 'true';
+            if (!allowExternalFrameSrc) {
+                return new RegExp('playout\\.sodix\\.de').test(jobData?.link || '');
+            }
+            return true;
+        };
+        if (!checkIfIframeAllowed()) {
+            this.embedding = UrlEmbeddings.LINK;
+            this.url = jobData?.link || '';
+            return;
+        }
+
+        this.embedding = UrlEmbeddings.SODIX;
+    }
+
+    protected readonly UrlEmbeddings = UrlEmbeddings;
+}

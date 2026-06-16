@@ -1,0 +1,12 @@
+@if (data?.items !== undefined) {
+<div class="moodle-wrapper">
+  @if (!isWebComponent) {
+  <iframe class="frame" [src]="sanitizedUrl"></iframe>
+  } @if (isWebComponent) {
+  <img [src]="previewUrl" alt="preview" />
+  }
+  <a mat-button="filled" [href]="sanitizedLinkUrl" target="_blank">{{
+    'RENDERING.GO_TO_COURSE' | translate
+  }}</a>
+</div>
+}

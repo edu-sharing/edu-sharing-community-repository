@@ -9,6 +9,7 @@ import {
     NodeService,
     NodeServiceUnwrapped,
     RestConstants,
+    UserEvent,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -37,6 +38,7 @@ export class RenderHelperService {
         nodeId: string,
         version: string = null,
         repository = HOME_REPOSITORY,
+        eventType: NonNullable<UserEvent['eventType']> = 'VIEW_MATERIAL',
     ): Promise<CombinedRenderData> {
         const about = await firstValueFrom(this.aboutService.getAbout());
         const securedNode = await firstValueFrom(
@@ -79,6 +81,7 @@ export class RenderHelperService {
         const rootUrl = await this.prepareRootUrl();
         const token = securedNode.jwt;
         const request = {
+            eventType,
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: securedNode.signedNode,
@@ -102,12 +105,14 @@ export class RenderHelperService {
         jwt: string,
         renderUrl: string,
         signatureAlgorithm: string,
+        eventType: NonNullable<UserEvent['eventType']> = 'VIEW_MATERIAL_EMBEDDED',
     ): Promise<CombinedRenderData> {
         console.log('Fetching render data for LMS with signature algorithm:', signatureAlgorithm);
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
         const request = {
+            eventType,
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: encodedNode,

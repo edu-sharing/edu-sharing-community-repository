@@ -1,0 +1,11 @@
+.audio-wrapper {
+    width: 100%;
+    position: relative;
+
+    video {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+        aspect-ratio: 8/3;
+    }
+}

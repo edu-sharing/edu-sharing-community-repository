@@ -1,0 +1,7 @@
+@if (activeObject()) {
+<div class="audio-wrapper">
+  <video [poster]="previewUrl" controls (play)="onVideoPlay()">
+    <source [src]="activeObject()?.link | rsAssetLink" />
+  </video>
+</div>
+}

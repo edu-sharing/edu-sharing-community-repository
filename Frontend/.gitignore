@@ -57,3 +57,5 @@ src/app/rest
 /playwright/.cache/
 /playwright/storage/*.json
 /playwright/out
+
+/Frontend/projects/rendering-service-lib/dist/

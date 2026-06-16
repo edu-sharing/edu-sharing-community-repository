@@ -1,0 +1,21 @@
+{
+  "extends": "../../.eslintrc.json",
+  "ignorePatterns": [
+    "dist/**",
+    "src/environments/**"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.ts"
+      ],
+      "parserOptions": {
+        "project": [
+          "projects/rendering-service-lib/tsconfig.lib.json",
+          "projects/rendering-service-lib/tsconfig.spec.json"
+        ],
+        "createDefaultProgram": true
+      }
+    }
+  ]
+}

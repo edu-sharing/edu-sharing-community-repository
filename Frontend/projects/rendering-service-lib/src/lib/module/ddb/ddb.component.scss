@@ -1,0 +1,19 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.ddb-wrapper {
+    width: 100%;
+    img {
+        width: 100%;
+        position: relative;
+    }
+
+    button {
+        position: absolute;
+        right: 0;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}

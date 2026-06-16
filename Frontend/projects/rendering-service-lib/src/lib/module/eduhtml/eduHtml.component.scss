@@ -1,0 +1,24 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    max-height: var(--containerHeight);
+}
+.eduHtml-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    max-height: var(--containerHeight);
+
+    .frame {
+        border: 2px solid lightgray;
+        width: 100%;
+        height: 100%;
+    }
+}

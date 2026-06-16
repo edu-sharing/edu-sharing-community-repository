@@ -1,0 +1,50 @@
+@if (activeObject()) {
+<div class="video-wrapper">
+  <video controls #video (play)="onVideoPlay()">
+    <source [src]="activeObject()?.link | rsAssetLink" />
+  </video>
+  @if (hasMultipleResolutions) {
+  <button aria-label="resolution" mat-icon-button [matMenuTriggerFor]="resolutionMenu">
+    <mat-icon>settings</mat-icon>
+  </button>
+  }
+  <mat-menu #resolutionMenu="matMenu" xPosition="before">
+    @for (item of filteredItems; track item) {
+    <button
+      mat-menu-item
+      [disabled]="item.link === ''"
+      (click)="item.height !== activeObject()?.height && switchResolution(item)"
+    >
+      <ng-container
+        [ngTemplateOutlet]="item.link !== '' ? ready : loading"
+        [ngTemplateOutletContext]="{ item: item }"
+      >
+      </ng-container>
+    </button>
+    }
+  </mat-menu>
+</div>
+}
+
+<ng-template #ready let-item="item">
+  <div class="menu-item-content">
+    @if (item.height === activeObject()?.height) {
+    <mat-icon> done </mat-icon>
+    } @if (item.height !== activeObject()?.height) {
+    <div></div>
+    }
+    <div>{{ item.height }}p</div>
+  </div>
+</ng-template>
+
+<ng-template #loading let-item="item">
+  <div class="menu-item-content">
+    <div>
+      @if (item.status === 'PROCESSING') {
+      {{ 'RENDERING.CONVERTING' | translate }}: {{ item.progress }}% } @else {
+      {{ 'RENDERING.QUEUED' | translate }}: {{ item.progress }}
+      }
+    </div>
+    <div class="resolution-container">{{ item.height }}p</div>
+  </div>
+</ng-template>
