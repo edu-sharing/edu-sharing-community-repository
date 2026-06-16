@@ -28,9 +28,9 @@ export class RenderingServiceApiInterceptor implements HttpInterceptor {
         // We filter for requests that actually target the API since this interceptor will be called
         // on all HTTP requests by the application, not limited to this library. (See notes in
         // `edu-sharing-api.module.ts`.)
-
         const isApiRequest = req.url.startsWith(this.configuration.rootUrl);
         if (isApiRequest) {
+            headers['X-Client-Trace-Id'] = this.generateTraceId();
             if (this.nextAuthHeader) {
                 headers[this.nextAuthHeader] = this.nextAuthValue;
             }
@@ -45,5 +45,9 @@ export class RenderingServiceApiInterceptor implements HttpInterceptor {
                 withCredentials: true,
             }),
         );
+    }
+
+    private generateTraceId(): string {
+        return crypto.randomUUID();
     }
 }

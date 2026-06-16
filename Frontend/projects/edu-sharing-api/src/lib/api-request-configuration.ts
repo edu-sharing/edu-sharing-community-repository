@@ -1,6 +1,5 @@
 import { HttpRequest } from '@angular/common/http';
 import { EventEmitter, Injectable, inject } from '@angular/core';
-import { v4 as uuidv4 } from 'uuid';
 import { EduSharingApiConfiguration } from './edu-sharing-api-configuration';
 
 /**
@@ -90,6 +89,6 @@ export class ApiRequestConfiguration {
     }
 
     private generateTraceId(): string {
-        return uuidv4();
+        return crypto.randomUUID();
     }
 }
