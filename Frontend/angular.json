@@ -392,7 +392,12 @@
               "zone.js/testing"
             ],
             "tsConfig": "projects/rendering-service-lib/tsconfig.spec.json",
-            "karmaConfig": "projects/rendering-service-lib/karma.conf.js"
+            "karmaConfig": "projects/rendering-service-lib/karma.conf.js",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss"
+              ]
+            }
           }
         },
         "lint": {
