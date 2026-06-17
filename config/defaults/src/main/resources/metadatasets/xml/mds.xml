@@ -2241,9 +2241,15 @@
           "path": "collections",
           "query":
           {"bool":{
+          "must":[
+          {"bool":{
           "should":[
           {"match":{"collections.path": "${valueRaw}"}},
           {"match":{"collections.nodeRef.id": "${valueRaw}"}}
+          ],
+          "minimum_should_match": 1
+          }},
+          {"match":{"collections.relation.type": "ccm:usage"}}
           ]
           }}
           }}
