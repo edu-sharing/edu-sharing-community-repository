@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
 import { TranslateService } from '@ngx-translate/core';
@@ -6,9 +6,9 @@ import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 import { DateHelper, UIService, ValueType } from 'ngx-edu-sharing-ui';
 import { filter } from 'rxjs/operators';
 import { Toast } from '../../../../../services/toast';
-import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
+import { Widget } from '../../mds-editor-instance.service';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, timer } from 'rxjs';
 
 @Component({
     selector: 'es-mds-editor-widget-text',
@@ -65,10 +65,19 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
                 this.translate,
             );
         }
-        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
+        this.widget.getShowAiSuggestions().subscribe(async ([show, suggestions]) => {
             const suggestion = suggestions?.find((s) => s.type === 'AI' && s.status === 'PENDING');
             if (this.aiSuggestion$.value?.status !== 'DECLINED') {
                 if (!this.formControl.value?.trim() && suggestion && show) {
+                    // Delay so the form control's own `valueChanges` (e.g. from the external value
+                    // init via `registerValueChanges`) can fire first. Otherwise that emission runs
+                    // after the suggestion was applied, flips it to 'DECLINED', and the suggestion
+                    // never shows. Same pattern as the duration widget. Re-check emptiness after the
+                    // delay so we don't clobber a value the control received in the meantime.
+                    await firstValueFrom(timer(1));
+                    if (this.formControl.value?.trim()) {
+                        return;
+                    }
                     this.aiSuggestion$.next(suggestion);
                     this.applySuggestion(this.aiSuggestion$);
                 } else if (!initialValue[0] && !show && this.aiSuggestion$.value) {
