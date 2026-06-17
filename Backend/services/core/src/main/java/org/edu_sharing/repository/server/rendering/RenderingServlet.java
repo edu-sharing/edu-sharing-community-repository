@@ -60,7 +60,7 @@ public class RenderingServlet extends HttpServlet {
         resp.getWriter().write("<html>");
         resp.getWriter().write("<head>");
         try {
-            resp.getWriter().write("<style>");
+            resp.getWriter().write("<style nonce=\"" + nonce + "\">");
             String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
             if(!StringUtils.isBlank(customCSS)) {
                 resp.getWriter().write(customCSS);
