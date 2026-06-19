@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.RestrictedAccessException;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -550,6 +551,9 @@ public class PersonDao {
 	}
 
 	public String[] getType() {
+		if(!LightbendConfigLoader.get().getBoolean("repository.users.inheritTypes")) {
+			return new String[0];
+		}
 		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
 			@Override
 			public String[] doWork() throws Exception {
