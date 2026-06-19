@@ -1282,8 +1282,8 @@ public class IamApi {
             for (String member : search.getData()) {
                 result.add(
                         member.startsWith(PermissionService.GROUP_PREFIX) ?
-                                new GroupDao(repoDao, member).asGroup() :
-                                new PersonDao(repoDao, member).asPerson());
+                                new GroupDao(repoDao, member).asGroup(false) :
+                                new PersonDao(repoDao, member).asPersonSimple(false));
             }
             response.setList(result);
             response.setPagination(new Pagination(search));
