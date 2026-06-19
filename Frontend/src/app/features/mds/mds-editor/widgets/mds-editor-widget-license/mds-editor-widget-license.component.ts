@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
@@ -24,6 +24,12 @@ export class MdsEditorWidgetLicenseComponent
     extends MdsEditorWidgetBase
     implements OnInit, NativeWidgetComponent
 {
+    private connector = inject(RestConnectorService);
+    private mainnav = inject(MainNavService);
+    private sanitizer = inject(DomSanitizer);
+    private nodeHelper = inject(NodeHelperService);
+    private dialogs = inject(DialogsService);
+
     static readonly constraints: Constraints = {
         supportsInlineEditing: true,
         requiresNode: false,
@@ -38,23 +44,15 @@ export class MdsEditorWidgetLicenseComponent
     /** IDs of checked licenses. */
     checked: string[] = [];
 
-    constructor(
-        toast: Toast,
-        private connector: RestConnectorService,
-        private mainnav: MainNavService,
-        private sanitizer: DomSanitizer,
-        public translate: TranslateService,
-        private nodeHelper: NodeHelperService,
-        public mdsEditorValues: MdsEditorInstanceService,
-        private dialogs: DialogsService,
-    ) {
-        super(toast, mdsEditorValues, translate);
+    constructor() {
+        super();
+
         this.isSafe = this.connector.getCurrentLogin()?.currentScope === RestConstants.SAFE_SCOPE;
     }
 
     ngOnInit(): void {
-        this.nodes = this.mdsEditorValues.nodes$.value;
-        this.mdsEditorValues.nodes$.subscribe((n) => (this.nodes = n));
+        this.nodes = this.mdsEditorInstance.nodes$.value;
+        this.mdsEditorInstance.nodes$.subscribe((n) => (this.nodes = n));
         this.licenses = this.widget?.definition?.values.map((v) => {
             const url = this.nodeHelper.getLicenseIconByString(v.id, false);
             const license: License = v;
@@ -68,7 +66,7 @@ export class MdsEditorWidgetLicenseComponent
 
     async getValues(values: Values) {
         // nodes mode is read-only, so do not change anything
-        if (this.mdsEditorValues.editorMode === 'nodes') {
+        if (this.mdsEditorInstance.editorMode === 'nodes') {
             return values;
         }
         values[this.widget.definition.id] = this.checked;
@@ -89,12 +87,12 @@ export class MdsEditorWidgetLicenseComponent
     async openLicense(): Promise<void> {
         const dialogRef = await this.dialogs.openLicenseDialog({
             kind: 'nodes',
-            nodes: this.mdsEditorValues.nodes$.value,
+            nodes: this.mdsEditorInstance.nodes$.value,
         });
         dialogRef.afterClosed().subscribe((updatedNodes) => {
             if (updatedNodes) {
                 this.nodes = updatedNodes;
-                this.mdsEditorValues.updateNodes(this.nodes);
+                this.mdsEditorInstance.updateNodes(this.nodes);
             }
         });
     }

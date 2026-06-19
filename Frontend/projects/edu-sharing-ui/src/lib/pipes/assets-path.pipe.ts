@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 
 /**
@@ -11,7 +11,7 @@ import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
     standalone: false,
 })
 export class AssetsPathPipe implements PipeTransform {
-    constructor(private configuration: EduSharingUiConfiguration) {}
+    private configuration = inject(EduSharingUiConfiguration);
 
     transform(path: string): string {
         if (this.configuration.assetsBasePath && path.startsWith('assets/')) {

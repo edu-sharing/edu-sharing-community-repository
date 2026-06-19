@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Node, NodeService, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    NodePersonNamePipe,
     OptionsHelperDataService,
     Scope,
     UIConstants,
@@ -47,6 +48,20 @@ type RawPermissions = {
  * A node info dialog (useful primary for admin stuff)
  */
 export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
+    data = inject<NodeInfoDialogData>(CARD_DIALOG_DATA);
+    private dialogRef = inject(CardDialogRef);
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private config = inject(ConfigService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private nodeServiceUnwrapped = inject(NodeServiceUnwrapped);
+    private router = inject(Router);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private optionsHelperDataService = inject(OptionsHelperDataService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     @ViewChild('contextActionbar') contextActionbarComponent: ActionbarComponent;
     @ViewChild('allActionbar') allActionbarComponent: ActionbarComponent;
     _nodes: Node[];
@@ -59,21 +74,6 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     saving: boolean;
     customProperty: string[] = [];
     editMode: boolean;
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodeInfoDialogData,
-        private dialogRef: CardDialogRef,
-        private cardDialogUtils: CardDialogUtilsService,
-        private config: ConfigService,
-        private nodeApi: RestNodeService,
-        private nodeService: NodeService,
-        private nodeServiceUnwrapped: NodeServiceUnwrapped,
-        private router: Router,
-        private breadcrumbsService: BreadcrumbsService,
-        private optionsHelperDataService: OptionsHelperDataService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {}
 
     async ngAfterViewInit() {
         void this.updateOptions();
@@ -114,7 +114,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
             const node = nodes[0];
             this._creator = ConfigurationHelper.getPersonWithConfigDisplayName(
                 node.createdBy,
-                this.config,
+                this.nodePersonNamePipe,
             );
             this._json = JSON.stringify(node, null, 4);
             this.nodeApi.getNodeParents(node.ref.id, true).subscribe((data: NodeList) => {

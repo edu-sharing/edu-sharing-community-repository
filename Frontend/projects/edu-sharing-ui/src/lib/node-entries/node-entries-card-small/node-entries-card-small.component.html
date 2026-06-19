@@ -16,8 +16,8 @@
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
 >
+  @if (templatesService.overlay) {
   <div
-    *ngIf="templatesService.overlay"
     class="card-overlay"
     (click)="
       entriesService.clickItem.emit({
@@ -30,13 +30,8 @@
       *ngTemplateOutlet="templatesService.overlay; context: { element: node }"
     ></ng-container>
   </div>
-  <es-node-url
-    *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
-    mode="wrapper"
-    [node]="node"
-    esFocusState
-    #cardFocusState="esFocusState"
-  >
+  } @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
+  <es-node-url mode="wrapper" [node]="node" esFocusState #cardFocusState="esFocusState">
     <ng-container
       *ngTemplateOutlet="
         image;
@@ -45,12 +40,13 @@
     ></ng-container>
     <ng-container *ngTemplateOutlet="meta"></ng-container>
   </es-node-url>
-  <ng-container *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
-    <ng-container *ngTemplateOutlet="image"></ng-container>
-    <ng-container *ngTemplateOutlet="meta"></ng-container>
-  </ng-container>
+  } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
+  <ng-container *ngTemplateOutlet="image"></ng-container>
+  <ng-container *ngTemplateOutlet="meta"></ng-container>
+  }
 </div>
 <ng-template #image let-playAnimation="playAnimation">
+  @if (!nodeHelper.isNodeAssignment(node)) {
   <div
     class="card-image-area"
     (click)="
@@ -59,24 +55,20 @@
         source: ClickSource.Preview,
       })
     "
-    *ngIf="!nodeHelper.isNodeAssignment(node)"
   >
-    <div *ngIf="nodeHelper.isNodeCollection(node) && node.collection.pinned" class="collection-pin">
+    @if (nodeHelper.isNodeCollection(node) && node.collection.pinned) {
+    <div class="collection-pin">
       <i esIcon="edu-pin"></i>
     </div>
-
-    <es-preview-image
-      *ngIf="!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)"
-      [node]="node"
-      [playAnimation]="playAnimation"
-    ></es-preview-image>
-    <div
-      *ngIf="nodeHelper.isNodeCollection(node) && node.preview.isIcon"
-      class="card-collection-image"
-    >
+    } @if (!(nodeHelper.isNodeCollection(node) && node.preview.isIcon)) {
+    <es-preview-image [node]="node" [playAnimation]="playAnimation"></es-preview-image>
+    } @if (nodeHelper.isNodeCollection(node) && node.preview.isIcon) {
+    <div class="card-collection-image">
       <i esIcon="layers"></i>
     </div>
+    }
   </div>
+  }
 </ng-template>
 <ng-template #meta>
   <div
@@ -88,93 +80,76 @@
       })
     "
   >
-    <div *ngIf="nodeHelper.isNodeAssignment(node)" class="card-assignment">
+    @if (nodeHelper.isNodeAssignment(node)) {
+    <div class="card-assignment">
       <div class="type">
         <i esIcon="task"></i>
         <span>{{ 'ASSIGNMENT.CARD_TYPE' | translate }}</span>
-        <ng-container *ngIf="dropdown">
-          <button
-            *ngIf="!UIService.isMobileWidth()"
-            mat-icon-button
-            (click)="openMenu($event, node)"
-            [matMenuTriggerFor]="dropdown.menu"
-            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
-            data-test="card-options-button"
-          >
-            <i esIcon="more_vert"></i>
-          </button>
-          <button
-            *ngIf="UIService.isMobileWidth()"
-            mat-icon-button
-            (click)="openMenu($event, node)"
-            [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
-            data-test="card-options-button"
-          >
-            <i esIcon="more_vert"></i>
-          </button>
-        </ng-container>
+        @if (dropdown) { @if (!UIService.isMobileWidth()) {
+        <button
+          mat-icon-button
+          (click)="openMenu($event, node)"
+          [matMenuTriggerFor]="dropdown.menu"
+          [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+          data-test="card-options-button"
+        >
+          <i esIcon="more_vert"></i>
+        </button>
+        } @if (UIService.isMobileWidth()) {
+        <button
+          mat-icon-button
+          (click)="openMenu($event, node)"
+          [attr.aria-label]="'OPTIONS_FOR' | translate : { element: (node | nodeTitle) }"
+          data-test="card-options-button"
+        >
+          <i esIcon="more_vert"></i>
+        </button>
+        } }
       </div>
       <div class="title">
         {{ node | nodeTitle }}
       </div>
       <div class="summary" [innerHTML]="$any(node).summary"></div>
-      <div class="badges" *ngIf="$any(node).type === 'SUBMISSION'">
-        <div
-          *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR'"
-          class="status status-{{ assignmentStatus($any(node)) }}"
-        >
+      @if ($any(node).type === 'SUBMISSION') {
+      <div class="badges">
+        @if (($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR') {
+        <div class="status status-{{ assignmentStatus($any(node)) }}">
           <!--<i [esIcon]="$any(AssignmentStatusIcon)[$any(node).status]"></i>-->
           {{ 'ASSIGNMENT.STATUS.' + assignmentStatus($any(node)) | translate }}
         </div>
-        <div
-          *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE'"
-          class="submission-status validation-status-{{ ($any(node).submissions?.[0]?.validationStatus || 'NOT_STARTED')}} submission-status-{{ ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') }}"
-        >
-          <ng-container *ngIf="$any(node).submissions?.[0]?.validationStatus === 'FINISHED'">
-            <!--<i
-              [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
-            ></i>-->
-            {{ 'ASSIGNMENT.VALIDATION_STATUS.' + ($any(node).submissions?.[0]?.validationStatus || 'NOT_STARTED') | translate }}
-          </ng-container>
-          <ng-container *ngIf="$any(node).submissions?.[0]?.validationStatus !== 'FINISHED'">
-            <!--<i
-              [esIcon]="$any(AssignmentSubmissionStatusIcon)[($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED')]"
-            ></i>-->
-            {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
-          </ng-container>
+        } @if (($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE') {
+        <div class="submission-status status-{{ assignmentStatusAssignee($any(node)) }}">
+          {{ 'ASSIGNMENT.STATUS.' + assignmentStatusAssignee($any(node)) | translate }}
         </div>
+        } @if ($any(node).endTime; as endTime) {
         <div
-          class="endTime endTime-{{ assignmentEndTimePriority($any(node)) }}"
-          *ngIf="$any(node).endTime as endTime"
+          class="endTime endTime-{{ $any(node) | assignment : { mode: 'endTimePriority' } }}"
           [matTooltip]="endTime | formatDate : { relative: false, date: true, time: true }"
         >
-          <i esIcon="timer"></i
-          >{{ endTime | formatDate : { relative: false, date: 'auto', time: 'auto' } }}
+          <!--<i esIcon="timer"></i
+                >-->{{ endTime | formatDate : { relative: false, date: true, time: 'auto' } }}
         </div>
+        }
       </div>
+      }
     </div>
-    <ng-container *ngIf="!nodeHelper.isNodeAssignment(node)">
-      <div
-        *ngFor="let displayPart of entriesService.columns; let first = first"
-        class="card-meta-row"
-      >
-        <ng-container *ngIf="first">
-          <es-node-url
-            *ngIf="entriesService.elementInteractionType === InteractionType.DefaultActionLink"
-            [node]="node"
-            #link
-          >
-            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-          </es-node-url>
-          <div *ngIf="entriesService.elementInteractionType !== InteractionType.DefaultActionLink">
-            <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="!first">
-          <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
-        </ng-container>
+    } @if (!nodeHelper.isNodeAssignment(node)) { @for (displayPart of entriesService.columns; track
+    displayPart; let first = $first) {
+    <div class="card-meta-row">
+      @if (first) { @if (entriesService.elementInteractionType ===
+      InteractionType.DefaultActionLink) {
+      <es-node-url [node]="node" #link>
+        <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+      </es-node-url>
+      } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
+      <div>
+        <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
       </div>
-    </ng-container>
+      } } @if (!first) {
+      <es-list-base [item]="displayPart" [node]="node" [provideLabel]="false"> </es-list-base>
+      }
+    </div>
+    } }
   </div>
   <ng-container
     *ngTemplateOutlet="templatesService.actionArea; context: { element: node }"

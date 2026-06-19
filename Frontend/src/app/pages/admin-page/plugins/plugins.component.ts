@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { PluginStatus } from '../../../core-module/core.module';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 
@@ -12,8 +12,10 @@ declare var Chart: any;
     standalone: false,
 })
 export class AdminPluginsComponent {
+    private adminService = inject(RestAdminService);
+
     plugins: PluginStatus[];
-    constructor(private adminService: RestAdminService) {
+    constructor() {
         this.adminService.getPlugins().subscribe((plugins) => {
             this.plugins = plugins;
         });

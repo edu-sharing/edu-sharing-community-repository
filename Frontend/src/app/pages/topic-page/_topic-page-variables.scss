@@ -20,7 +20,7 @@ $on-surface: if(
     var(--palette-foreground-text, #1a1c1c)
 );
 $outline: var(
-    --mdc-outlined-text-field-outline-color,
+    --mat-form-field-outlined-outline-color,
     var(--mat-app-outline)
 ); // $inputBorderColor is not equal to the border color of form-fields
 $primary: var(--primary, #003b7c);

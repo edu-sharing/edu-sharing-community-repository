@@ -27,12 +27,13 @@
  */
 package org.edu_sharing.repository.server.tools;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
+import io.opentelemetry.api.internal.StringUtils;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.ServiceRegistry;
@@ -40,7 +41,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
@@ -53,12 +54,11 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.springframework.context.ApplicationContext;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 @Slf4j
 public class AuthenticatorRemoteRepository {
@@ -124,7 +124,7 @@ public class AuthenticatorRemoteRepository {
         } else {
             personData = AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(username);
             esuid = (String) personData.get(CCConstants.PROP_USER_ESUID);
-            if (StringUtils.isBlank(esuid)) {
+            if (org.apache.commons.lang3.StringUtils.isBlank(esuid)) {
                 throw new Exception("missing esuid for user!!! (Note: Admin doesn't have a esuid!)");
             }
         }
@@ -165,7 +165,10 @@ public class AuthenticatorRemoteRepository {
         String timestamp = "" + System.currentTimeMillis();
         String signData = username + localAppId + timestamp;
 
-        byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData, CCConstants.SECURITY_SIGN_ALGORITHM);
+        String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
+        String alg = StringUtils.isNullOrEmpty( appInfoRemoteApp.getSignatureAlgorithm())  ? defaultAlg : appInfoRemoteApp.getSignatureAlgorithm();
+
+		byte[] signature = signing.sign(signing.getPemPrivateKey(ApplicationInfoList.getHomeRepository().getPrivateKey(), CCConstants.SECURITY_KEY_ALGORITHM), signData,alg);
         signature = new Base64().encode(signature);
 
         java.util.logging.Logger jaxlogger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -180,6 +183,7 @@ public class AuthenticatorRemoteRepository {
                     .header("X-Edu-App-Id", localAppId)
                     .header("X-Edu-App-Sig", new String(signature))
                     .header("X-Edu-App-Signed", signData)
+                    .header("X-Edu-App-SignedAlg",alg)
                     .header("X-Edu-App-Ts", timestamp)
                     .post(Entity.entity(userProfile, MediaType.APPLICATION_JSON))) {
 

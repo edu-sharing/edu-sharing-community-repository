@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     DEFAULT_AI_CHAT_COMPLETION_CONFIG_ID,
     DEFAULT_AI_CLEAR_CACHE_CONFIG_ID,
@@ -23,30 +23,37 @@ export class GlobalWidgetConfigService {
     private _defaultTopicHeaderImageWidgetNodeId: string;
     private _defaultTopicHeaderTextWidgetNodeId: string;
 
-    constructor(
-        @Optional() @Inject('DEFAULT_AI_CONFIG_ID') defaultAiConfigId?: string,
-        @Optional()
-        @Inject('DEFAULT_AI_CHAT_COMPLETION_CONFIG_ID')
-        defaultAiChatCompletionConfigId?: string,
-        @Optional()
-        @Inject('DEFAULT_AI_IMAGE_CREATE_CONFIG_ID')
-        defaultAiImageCreateConfigId?: string,
-        @Optional()
-        @Inject('DEFAULT_AI_CLEAR_CACHE_CONFIG_ID')
-        defaultAiClearCacheConfigId?: string,
-        @Optional()
-        @Inject('DEFAULT_AI_TEXT_WIDGET_CONFIG_ID')
-        defaultAiTextWidgetConfigId?: string,
-        @Optional()
-        @Inject('DEFAULT_TOPIC_HEADER_DESCRIPTION_WIDGET_CONFIG_ID')
-        defaultTopicHeaderDescriptionWidgetNodeId?: string,
-        @Optional()
-        @Inject('DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID')
-        defaultTopicHeaderImageWidgetNodeId?: string,
-        @Optional()
-        @Inject('DEFAULT_TOPIC_HEADER_TEXT_WIDGET_CONFIG_ID')
-        defaultTopicHeaderTextWidgetNodeId?: string,
-    ) {
+    constructor() {
+        const defaultAiConfigId = inject<string>('DEFAULT_AI_CONFIG_ID' as any, { optional: true });
+        const defaultAiChatCompletionConfigId = inject<string>(
+            'DEFAULT_AI_CHAT_COMPLETION_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultAiImageCreateConfigId = inject<string>(
+            'DEFAULT_AI_IMAGE_CREATE_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultAiClearCacheConfigId = inject<string>(
+            'DEFAULT_AI_CLEAR_CACHE_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultAiTextWidgetConfigId = inject<string>(
+            'DEFAULT_AI_TEXT_WIDGET_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultTopicHeaderDescriptionWidgetNodeId = inject<string>(
+            'DEFAULT_TOPIC_HEADER_DESCRIPTION_WIDGET_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultTopicHeaderImageWidgetNodeId = inject<string>(
+            'DEFAULT_TOPIC_HEADER_IMAGE_WIDGET_CONFIG_ID' as any,
+            { optional: true },
+        );
+        const defaultTopicHeaderTextWidgetNodeId = inject<string>(
+            'DEFAULT_TOPIC_HEADER_TEXT_WIDGET_CONFIG_ID' as any,
+            { optional: true },
+        );
+
         // IDs for the global AI configs
         this._defaultAiConfigId = defaultAiConfigId || DEFAULT_AI_CONFIG_ID;
         this._defaultAiChatCompletionConfigId =

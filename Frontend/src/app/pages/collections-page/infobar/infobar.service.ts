@@ -1,15 +1,15 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DialogButton } from '../../../util/dialog-button';
 import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { InfobarComponent } from './infobar.component';
 
 @Injectable({ providedIn: 'root' })
 export class InfobarService {
-    overlayRef: OverlayRef | null;
+    private overlay = inject(Overlay);
 
-    constructor(private overlay: Overlay) {}
+    overlayRef: OverlayRef | null;
 
     /**
      * Shows an info bar with the given configuration.

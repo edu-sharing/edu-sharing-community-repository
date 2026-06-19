@@ -19,12 +19,12 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
-        <spring.boot.version>3.4.7</spring.boot.version>
-        <spring.version>6.2.8</spring.version>
+        <spring.boot.version>3.5.15</spring.boot.version>
+        <spring.version>6.2.16</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <alfresco.transform-core.version>5.2.0</alfresco.transform-core.version>
+        <alfresco.transform-core.version>5.2.4</alfresco.transform-core.version>
     </properties>
 
     <build>
@@ -58,6 +58,13 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- this is the parent at alfresco project examples get all dependencies by import scope,
            for plugins we need to define separately -->
             <dependency>
@@ -141,7 +148,7 @@
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
-            <version>2.9.2</version>
+            <version>3.2.3</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -176,6 +183,10 @@
             <groupId>org.xhtmlrenderer</groupId>
             <artifactId>flying-saucer-pdf</artifactId>
             <version>9.1.22</version>
+        </dependency>
+        <dependency>
+            <groupId>org.edu_sharing</groupId>
+            <artifactId>edu_sharing-community-repository-backend-services-core</artifactId>
         </dependency>
     </dependencies>
 

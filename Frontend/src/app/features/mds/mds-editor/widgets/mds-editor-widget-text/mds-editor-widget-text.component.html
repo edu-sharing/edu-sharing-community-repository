@@ -1,37 +1,37 @@
 <!-- There is a bug that causes changed-after-checked errors when there is an *ngIf on a matInput:
-  https://github.com/angular/components/issues/16209. To avoid that, we put the *ngIf on
-  mat-form-field and have a little code duplication. -->
+https://github.com/angular/components/issues/16209. To avoid that, we put the *ngIf on
+mat-form-field and have a little code duplication. -->
 
-<ng-container *ngIf="widget.definition.type !== 'textarea'">
-  <es-mds-editor-widget-container
-    #container
-    [injectedView]="this"
-    [widget]="widget"
-    [label]="false"
-    [valueType]="valueType"
-    [control]="formControl"
-  >
-    <input
-      matInput
-      #inputElement
-      [type]="widget.definition.type"
-      [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
-      [placeholder]="
-        showBulkMixedValues() ? ('MDS.DIFFERENT_VALUES' | translate) : widget.definition.placeholder
-      "
-      [formControl]="formControl"
-      (focus)="fieldGotFocus(inputElement)"
-      (blur)="blur()"
-      (keydown.enter)="submit()"
-    />
-  </es-mds-editor-widget-container>
-  <!--<ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>-->
-</ng-container>
-
-<!-- es-mds-editor-widget-container causes issues with textarea -->
+@if (widget.definition.type !== 'textarea') {
 <es-mds-editor-widget-container
   #container
-  *ngIf="widget.definition.type === 'textarea'"
+  [injectedView]="this"
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="formControl"
+>
+  <input
+    matInput
+    #inputElement
+    [type]="widget.definition.type"
+    [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
+    [placeholder]="
+      showBulkMixedValues() ? ('MDS.DIFFERENT_VALUES' | translate) : widget.definition.placeholder
+    "
+    [formControl]="formControl"
+    (focus)="fieldGotFocus(inputElement)"
+    (blur)="blur()"
+    (keydown.enter)="submit()"
+  />
+</es-mds-editor-widget-container>
+<!--<ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>-->
+}
+
+<!-- es-mds-editor-widget-container causes issues with textarea -->
+@if (widget.definition.type === 'textarea') {
+<es-mds-editor-widget-container
+  #container
   [injectedView]="this"
   [widget]="widget"
   [label]="false"
@@ -48,21 +48,17 @@
     <mat-label>
       {{ widget.definition.caption }}
       <!-- We use our own required marker to show it even on disabled controls for bulk editing.
-    -->
-      <span
-        *ngIf="widget.definition.isRequired === 'mandatory'"
-        class="required-marker"
-        aria-hidden="true"
-        >*</span
-      >
+        -->
+      @if (widget.definition.isRequired === 'mandatory') {
+      <span class="required-marker" aria-hidden="true">*</span>
+      }
     </mat-label>
-    <textarea matInput #textAreaElement *ngIf="showBulkMixedValues()" disabled>{{
-      'MDS.DIFFERENT_VALUES' | translate
-    }}</textarea>
+    @if (showBulkMixedValues()) {
+    <textarea matInput #textAreaElement disabled>{{ 'MDS.DIFFERENT_VALUES' | translate }}</textarea>
+    } @if (!showBulkMixedValues()) {
     <textarea
       matInput
       #textAreaElement
-      *ngIf="!showBulkMixedValues()"
       [placeholder]="widget.definition.placeholder"
       [formControl]="formControl"
       [class.isAiSuggestion]="(aiSuggestion$ | async)?.status === 'ACCEPTED'"
@@ -70,6 +66,7 @@
       (blur)="blur()"
       (keydown.enter)="submit()"
     ></textarea>
+    }
     <mat-hint [hidden]="!widget.definition.bottomCaption">{{
       widget.definition.bottomCaption
     }}</mat-hint>
@@ -79,54 +76,54 @@
   </mat-form-field>
   <!--<ng-container *ngTemplateOutlet="suggestions; context: { container }"></ng-container>-->
 </es-mds-editor-widget-container>
+}
 
 <!--
-<ng-template #suggestions let-container="container">
-  <div class="suggestions" *ngIf="(widget.getSuggestions() | async)?.length && !container.isHidden">
-    <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
-    <div class="suggestion" *ngFor="let suggestion of widget.getSuggestions() | async">
-      <div class="info">
-        <es-user-avatar [user]="suggestion.createdBy" size="xxsmall"></es-user-avatar>
-        {{ suggestion.createdBy | authorityName }}
-        <i
-          [esIcon]="suggestion.type === 'AI' ? 'settings' : 'person'"
+  <ng-template #suggestions let-container="container">
+    <div class="suggestions" *ngIf="(widget.getSuggestions() | async)?.length && !container.isHidden">
+      <h5 class="mat-heading-5">{{ 'MDS.SUGGESTIONS.LIST_TITLE' | translate }}</h5>
+      <div class="suggestion" *ngFor="let suggestion of widget.getSuggestions() | async">
+        <div class="info">
+          <es-user-avatar [user]="suggestion.createdBy" size="xxsmall"></es-user-avatar>
+          {{ suggestion.createdBy | authorityName }}
+          <i
+            [esIcon]="suggestion.type === 'AI' ? 'settings' : 'person'"
           [matTooltip]="
             (suggestion.type === 'AI' ? 'MDS.SUGGESTIONS.TYPE_AI' : 'MDS.SUGGESTIONS.TYPE_USER')
               | translate
           "
-        ></i>
-      </div>
-      <div class="content-wrapper">
-        <div class="content">{{ suggestion.value }}</div>
-        <div class="actions">
-          <button
-            mat-icon-button
-            color="primary"
-            class="apply"
-            (click)="applySuggestion(suggestion)"
-            matTooltip="{{ 'MDS.SUGGESTIONS.APPLY' | translate }}"
-          >
-            <i esIcon="check"></i>
-          </button>
-          <button
-            mat-icon-button
-            color="warn"
-            (click)="setSuggestionState(suggestion, 'DECLINED')"
-            matTooltip="{{ 'MDS.SUGGESTIONS.DECLINE' | translate }}"
-          >
-            <i esIcon="close"></i>
-          </button>
+          ></i>
+        </div>
+        <div class="content-wrapper">
+          <div class="content">{{ suggestion.value }}</div>
+          <div class="actions">
+            <button
+              mat-icon-button
+              color="primary"
+              class="apply"
+              (click)="applySuggestion(suggestion)"
+              matTooltip="{{ 'MDS.SUGGESTIONS.APPLY' | translate }}"
+              >
+              <i esIcon="check"></i>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="setSuggestionState(suggestion, 'DECLINED')"
+              matTooltip="{{ 'MDS.SUGGESTIONS.DECLINE' | translate }}"
+              >
+              <i esIcon="close"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</ng-template>
--->
+  </ng-template>
+  -->
 <ng-template #error>
-  <ng-container *ngIf="widget.definition.isRequired === 'mandatory'">
-    {{ 'MDS.REQUIRED_MESSAGE' | translate }}
-  </ng-container>
-  <ng-container *ngIf="widget.definition.isRequired === 'mandatoryForPublish'">
-    {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
-  </ng-container>
+  @if (widget.definition.isRequired === 'mandatory') {
+  {{ 'MDS.REQUIRED_MESSAGE' | translate }}
+  } @if (widget.definition.isRequired === 'mandatoryForPublish') {
+  {{ 'MDS.REQUIRED_FOR_PUBLISH_MESSAGE' | translate }}
+  }
 </ng-template>

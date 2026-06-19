@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import * as Constants from 'ngx-edu-sharing-api';
 import {
     InviteEvent,
@@ -23,6 +23,10 @@ import { MdsHelperService } from '../../mds/mds-helper.service';
     standalone: false,
 })
 export class ListTextComponent extends ListWidget implements OnInit {
+    private nodeHelper = inject(NodeHelperService);
+    private mds = inject(MdsService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     static supportedItems = [
         new ListItem('NODE', '*'),
         new ListItem('NODE_PROPOSAL', '*'),
@@ -36,14 +40,6 @@ export class ListTextComponent extends ListWidget implements OnInit {
     readonly DATE_FIELDS = RestConstants.DATE_FIELDS;
     readonly VCARD_FIELDS = RestConstants.getAllVCardFields();
     displayName$ = new BehaviorSubject<string>(null);
-
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private mds: MdsService,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {
-        super();
-    }
 
     async ngOnInit() {
         merge([this.nodeSubject, this.itemSubject])
@@ -102,7 +98,8 @@ export class ListTextComponent extends ListWidget implements OnInit {
         try {
             const mds = await this.mds
                 .getMetadataSet({
-                    repository: node.ref?.repo || Constants.HOME_REPOSITORY,
+                    repository:
+                        node.remote?.repository?.id || node.ref?.repo || Constants.HOME_REPOSITORY,
                     metadataSet: node.metadataset || Constants.DEFAULT,
                 })
                 .toPromise();

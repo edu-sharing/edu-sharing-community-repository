@@ -9,21 +9,26 @@
     "SIDEBAR": {
       "TITLE_SHARE": "Freigaben",
       "TITLE_ASSIGNMENT": "Aufgaben",
+      "TITLE_WORKSPACE": "Aktionen & Optionen",
+      "TITLE_SEARCH": "Aktionen & Optionen",
+      "TITLE_COLLECTIONS": "Aktionen & Optionen",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
       "SUBMISSION": {
         "TAB_SUBMISSION": "Abgabe",
         "TAB_DISCUSSION": "Diskussion",
         "SUBMISSION_FROM": "Von",
-        "SUBMISSION_TITLE": "Titel",
+        "SUBMISSION_TITLE": "Aufgabe",
         "SUBMISSION_STATE": "Status",
         "SUBMISSION_DATE": "Abgabedatum",
         "NOT_STARTED": "Für diese Abgabe wurde noch nichts eingereicht",
         "RETURN_DATE": "Korrekturdatum",
         "PREVIOUS": "Vorherige",
         "NEXT": "Nächste",
-        "SEND_BACK": "Zurückgeben",
+        "SEND_BACK": "Speichern",
         "SUBMISSION_ATTACHMENT": "Angehängte Dateien",
+        "ASSIGNMENT_MATERIAL": "Arbeitsmaterial",
+        "USER_NOTES": "Bemerkung zur Abgabe",
         "INTERNAL_NOTE_SHOW": "Persönliche Notizen ergänzen",
         "INTERNAL_NOTE": "Persönliche Notiz",
         "FEEDBACK": "Feedback geben",
@@ -36,19 +41,22 @@
       "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },
     "OPTIONS": {
-      "SORT_INTO": "Mit Splitscreen einsortieren",
-      "SORT_INTO_DESCRIPTION": "Hier können Sie über die Suche, aus Sammlungen und Workspace oder durch Upload etwas einsortieren.",
-      "MANAGE_CONTENT": "Inhalte zuordnen & freigeben",
-      "MANAGE_CONTENT_DESCRIPTION": "Mit diesem Panel kannst du rechts eine beliebige andere Ansicht als Quelle für deinen Kooperationsort öffnen.",
+      "MANAGE_CONTENT": "Einsortieren",
+      "MANAGE_CONTENT_DESCRIPTION": "Hier können Sie die gewählten Elemente einsortieren",
+      "SORT_INTO": "Inhalt hinzufügen",
+      "SORT_INTO_DESCRIPTION": "Mit diesem Panel kannst du rechts eine andere Ansicht als Quelle zum hinzufügen nutzen.",
       "CREATE_ASSIGNMENT": "Neue Aufgabe",
       "MANAGE_SUBMISSION": "Abgabe bearbeiten",
       "CREATE_ASSIGNMENT_DESCRIPTION": "Anlegen einer neuen Aufgabe",
-      "PREVIEW": "Vorschau anzeigen",
+      "PREVIEW": "Vorschau",
       "SUBMISSION_REMOVE": "Element entfernen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
       "WORKSPACE_METADATA": "Statistik, Versionen & Details",
       "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
       "NODES_SELECTOR": {
+        "UPLOAD": {
+          "TITLE": "Neu Hinzufügen"
+        },
         "METHODOLOGY": {
           "TITLE": "Pädagogik",
           "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
@@ -75,12 +83,14 @@
           "PLACEHOLDER": "Suche nach Inhalten"
         },
         "COLLECTIONS": {
+          "EMPTY_MESSAGE": "Du hast bisher weder eine eigene Sammlung angelegt oder Zugriff auf eine Sammlung erhalten.",
           "PLACEHOLDER": "Suche nach Sammlungen",
           "RECENT_COLLECTIONS": "Zuletzt verwendet",
           "MY_COLLECTIONS": "Meine Sammlungen",
           "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
         },
         "WORKSPACE": {
+          "EMPTY_MESSAGE": "Du hast bisher weder eigene noch gemeinsame Inhalte angelegt.",
           "MY_CONTENTS": "Meine Inhalte",
           "SHARED_CONTENTS": "Gemeinsame Inhalte"
         },
@@ -89,6 +99,12 @@
           "MULTIPLE": "Gewählte Inhalte kopieren",
           "TARGET": "Hier einsortieren",
           "ERROR": "Beim Kopieren der Inhalte ist ein Fehler aufgetreten."
+        },
+        "INVALID_SELECTION_REASON": {
+          "invalidCombination": "Die ausgewählten Inhalte können nicht (zusammen) kopiert werden.",
+          "invalidSelection": "Die aktuelle Auswahl ist ungültig.",
+          "missingPrivileges": "Du hast nicht die erforderlichen Berechtigungen, um diese Inhalte zu kopieren.",
+          "atLeastRootOrChildrenSelected": "Zum Kopieren muss entweder die Checkbox für den Haupt- oder die Untersammlungen gesetzt sein."
         },
         "CONFIGURE_CONFIG": {
           "INFO_HEADING": "Wie wir Speicherplatz sparen:",
@@ -126,19 +142,34 @@
       "TAB_SUBMIT": "Abgaben",
       "SUBMIT_CONFIRM_TITLE": "Aufgabe abgeben?",
       "SUBMIT_CONFIRM_INFO": "Soll die Aufgabe abgegeben werden?\n\nWichtig: Nach einer erfolgten Abgabe sind keine weiteren Änderungen mehr möglich!",
-      "SBMITTED": "Die Aufgabe wurde abgegeben",
-      "ADD_COMMENT": "Kommentar hinzufügen",
+      "REMOVE_FILE_CONFIRM_TITLE": "Abgabedatei entfernen?",
+      "REMOVE_FILE_CONFIRM_INFO": "Soll \"{{ title }}\" wirklich aus der Abgabe entfernt werden?",
+      "SUBMITTED": "Die Aufgabe wurde abgegeben",
+      "VALIDATION_READY": "Zu deiner Abgabe ist eine Rückmeldung verfügbar.",
+      "VALIDATION_SCROLL": "Zur Rückmeldung",
+      "NOTES_SAVED": "Bemerkung wurde gespeichert",
+      "USER_NOTES": "Bemerkung zur Abgabe",
       "SUBMIT_DETAILS": "Abgabeinformationen",
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
       "SUBMISSION_TIME": "Abgegeben",
       "SUBMISSION_SENT": "Diese Aufgabe wurde bereits abgegeben",
-      "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material anfügen",
+      "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material hinzufügen",
       "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
+      "POLLING_CONNECTOR": "Dokument wird bearbeitet...",
+      "POLLING_CONNECTOR_SUBTITLE": "Änderungen werden automatisch gespeichert.",
+      "POLLING_CONNECTOR_HINT": "Wenn Sie fertig sind, schließen Sie einfach den Dokument-Tab.",
+      "POLLING_CONNECTOR_WRITEBACK": "Dokument wird gespeichert...",
+      "POLLING_CONNECTOR_WRITEBACK_SUBTITLE": "Bitte warten Sie einen Moment.",
+      "SUBMITTABLE_SUBMIT": "Material(ien)",
       "SUBMITTABLE": "Arbeitsmaterial",
-      "SUBMITTED": "Erfolgreich abgegeben",
       "SUPPLEMENTARY": "Begleitmaterial",
-      "SUBMIT": "Abgabe einreichen"
+      "SUBMIT": "Abgabe einreichen",
+      "FEEDBACK": {
+        "TITLE": "Rückmeldung zur Abgabe",
+        "FEEDBACK": "Rückmeldung",
+        "CORRECTED": "Korrigiertes Arbeitsmaterial"
+      }
     },
     "ASSIGNMENT": {
       "STEP": {
@@ -150,8 +181,6 @@
       "MAIN_TITLE_EDIT": "Aufgabe bearbeiten",
       "PERMISSIONS_TITLE": "Aufgabe zuweisen",
       "SAVE_DRAFT": "Entwurf speichern",
-      "SAVE_RESET_DRAFT": "Aufgabe zurückziehen",
-      "SAVE_FINISH": "Aufgabe abschließen",
       "SUBMIT": "Aufgabe austeilen",
       "SELECT_FILE": "Anhängen",
       "RESET_DRAFT_MESSAGE": "Die Aufgabe wird für alle Lernenden zurückgezogen und wieder in einen Entwurf umgewandelt. Dies ist nur möglich, solange noch keine Einreichung erfolgt ist.",
@@ -159,6 +188,7 @@
       "ERROR": {
         "FIELD_TITLE": "Bitte Titel eingeben",
         "FIELD_SUMMARY": "Bitte Beschreibung eingeben",
+        "NO_SUBMITTABLE_FILE": "Bitte mindestens eine einreichbare Datei hinzufügen oder zusätzliche Abgaben erlauben",
         "OWN_AUTHORITY": "Sie können sich nicht selbst zuweisen",
         "MISSING_AUTHORITIES": "Bitte die Aufgabe zuweisen",
         "MISSING_AUTHORITIES_ASSIGNEE": "Für diesen Aufgabentyp muss mindestens eine Person oder Gruppe in der Rolle \"Erledigen\" eingeladen werden"
@@ -167,7 +197,18 @@
         "EMPTY": "Für diese Aufgabe wurden noch keine Abgaben angelegt",
         "VIEW_ORIGINAL": "Originaldatei",
         "VIEW_CORRECT": "Korrigieren",
-        "CHANGES_SAVED": "Korrektur gespeichert"
+        "CORRECTED": "Korrigiert",
+        "SAVE_CORRECTED": "Korrektur zurückgeben",
+        "ALL_CORRECTED": "Die Aufgabe wurde als vollständig korrigiert markiert",
+        "CHANGES_SAVED": "Korrektur gespeichert",
+        "FINISH_ALL_CONFIRM_TITLE": "Korrektur zurückgeben",
+        "FINISH_ALL_CONFIRM_MESSAGE": "Alle Abgaben wurden korrigiert.\nDie Rückmeldungen werden jetzt für alle Schüler sichtbar.",
+        "FINISH_ALL_MISSING_MESSAGE": "{{ count }} Abgaben wurden noch nicht korrigiert.\nDiese Schüler erhalten keine Rückmeldung.\nDieser Schritt kann nicht rückgängig gemacht werden.",
+        "FINISH_ALL_CONFIRM_BUTTON": "Korrektur zurückgeben",
+        "FINISH_ALL_MISSING_CONFIRM_BUTTON": "Trotzdem zurückgeben",
+        "SAVE_EDIT": "Änderungen speichern",
+        "UNSAVED_CHANGES_TITLE": "Ungespeicherte Änderungen",
+        "UNSAVED_CHANGES_MESSAGE": "Sie haben ungespeicherte Änderungen an der Korrektur vorgenommen. Möchten Sie diese jetzt speichern?"
       },
       "FORM": {
         "TITLE": "Titel",

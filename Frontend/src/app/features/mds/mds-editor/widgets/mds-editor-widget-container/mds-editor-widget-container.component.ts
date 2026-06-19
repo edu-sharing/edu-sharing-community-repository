@@ -6,6 +6,7 @@ import {
     ContentChild,
     ElementRef,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
@@ -71,6 +72,13 @@ import { UIAnimation, ValueType, ViewInstanceService } from 'ngx-edu-sharing-ui'
 export class MdsEditorWidgetContainerComponent
     implements OnInit, OnChanges, AfterContentInit, OnDestroy
 {
+    private elementRef = inject(ElementRef);
+    private uiService = inject(UIService);
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private cdr = inject(ChangeDetectorRef);
+    private formFieldRegistration = inject(FormFieldRegistrationService);
+    private viewInstance = inject(ViewInstanceService);
+
     readonly ValueType = ValueType;
     @ViewChild(MatRipple) ripple: MatRipple;
     @ViewChild('nativeElement') nativeElement: ElementRef;
@@ -129,14 +137,7 @@ export class MdsEditorWidgetContainerComponent
      */
     @Input() hasValues: () => boolean;
 
-    constructor(
-        private elementRef: ElementRef,
-        private uiService: UIService,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private cdr: ChangeDetectorRef,
-        private formFieldRegistration: FormFieldRegistrationService,
-        private viewInstance: ViewInstanceService,
-    ) {
+    constructor() {
         this.editorBulkMode = this.mdsEditorInstance.editorBulkMode;
         const id = Math.random().toString(36).substr(2);
         this.labelId = id + '_label';
@@ -199,7 +200,7 @@ export class MdsEditorWidgetContainerComponent
                 this.expandedState$.next(this.widget.definition?.expandable);
             }
             this.widget.focusTrigger
-                .pipe(takeUntil(this.destroyed$))
+                ?.pipe(takeUntil(this.destroyed$))
                 .subscribe(() => this.injectedView?.focus());
         }
     }

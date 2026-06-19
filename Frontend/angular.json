@@ -9,7 +9,7 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": {
               "base": "dist",
@@ -35,12 +35,12 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/tinymce",
-                "output": "/tinymce/"
+                "output": "/assets/tinymce/"
               },
               {
                 "glob": "**/*",
                 "input": "node_modules/tinymce-i18n/langs5",
-                "output": "/tinymce/langs/"
+                "output": "/assets/tinymce/langs/"
 
               },
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets" },
@@ -50,7 +50,10 @@
               "includePaths": [
                 "projects/edu-sharing-ui/assets/scss",
                 "."
-              ]
+              ],
+              "sass": {
+                "silenceDeprecations": ["if-function"]
+              }
             },
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
@@ -71,7 +74,10 @@
               "qrcode",
               "uuid",
               "lodash",
-              "moment"
+              "moment",
+              "jquery",
+              "pdfmake/build/pdfmake",
+              "pdfmake/build/vfs_fonts"
             ],
             "preserveSymlinks": false,
             "browser": "src/main.ts"
@@ -149,7 +155,7 @@
           "defaultConfiguration": ""
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "options": {
             "proxyConfig": "src/proxy.conf.js",
             "buildTarget": "angular-edusharing:build"
@@ -164,13 +170,13 @@
           }
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "angular-edusharing:build"
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -186,8 +192,12 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "projects/edu-sharing-ui/assets/scss"
-              ]
+                "projects/edu-sharing-ui/assets/scss",
+                "."
+              ],
+              "sass": {
+                "silenceDeprecations": ["if-function"]
+              }
             },
             "styles": [
               "src/app/core-ui-module/styles/core-base.scss",
@@ -242,7 +252,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/edu-sharing-api/ng-package.json"
           },
@@ -257,7 +267,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -279,6 +289,128 @@
         }
       }
     },
+    "rendering-service-api": {
+      "projectType": "library",
+      "root": "projects/rendering-service-api",
+      "sourceRoot": "projects/rendering-service-api/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/rendering-service-api/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/rendering-service-api/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/rendering-service-api/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/rendering-service-api/tsconfig.spec.json",
+            "karmaConfig": "projects/rendering-service-api/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/rendering-service-api/**/*.ts",
+              "projects/rendering-service-api/**/*.html"
+            ],
+            "cache": true
+          }
+        }
+      }
+    },
+    "rendering-service-lib": {
+      "projectType": "library",
+      "root": "projects/rendering-service-lib",
+      "sourceRoot": "projects/rendering-service-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/rendering-service-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/rendering-service-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/rendering-service-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "build-pdf-web-component": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "projects/rendering-service-lib/dist/assets/pdf",
+            "index": "projects/rendering-service-lib/src/lib/module/pdf/index.html",
+            "main": "projects/rendering-service-lib/src/lib/module/pdf/pdf.main",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/rendering-service-lib/tsconfig.pdf.lib.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets",
+                "output": "/assets"
+              }
+            ],
+            "optimization": {
+              "scripts": false,
+              "styles": false
+            },
+            "sourceMap": true,
+            "buildOptimizer": false,
+            "extractLicenses": false,
+            "vendorChunk": true,
+            "namedChunks": true,
+            "styles": [],
+            "scripts": []
+          }
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/rendering-service-lib/tsconfig.spec.json",
+            "karmaConfig": "projects/rendering-service-lib/karma.conf.js",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/edu-sharing-ui/assets/scss"
+              ]
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/rendering-service-lib/**/*.ts",
+              "projects/rendering-service-lib/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "b-api": {
       "projectType": "library",
       "root": "projects/b-api",
@@ -286,7 +418,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/b-api/ng-package.json"
           },
@@ -301,7 +433,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -339,7 +471,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": {
               "base": "dist/embed"
@@ -394,7 +526,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "embed:build:production"
@@ -406,15 +538,15 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "embed:build"
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
-            "polyfills": "projects/embed/src/polyfills.ts",
+            "polyfills": ["projects/embed/src/polyfills.ts"],
             "tsConfig": "projects/embed/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -446,7 +578,7 @@
       "prefix": "lib",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/edu-sharing-ui/ng-package.json"
           },
@@ -461,7 +593,7 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
               "zone.js",
@@ -504,7 +636,11 @@
             "outputPath": "dist/web-components/rendering-service-amd",
             "index": "projects/rendering-service-web-component/src/index.html",
             "main": "projects/rendering-service-web-component/src/main.ts",
+            "polyfills": "projects/rendering-service-web-component/src/polyfills.ts",
             "tsConfig": "projects/rendering-service-web-component/tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "lodash"
+            ],
             "styles": [
               "projects/rendering-service-web-component/src/styles.scss",
               "src/app/core-ui-module/styles/fonts.scss"
@@ -563,7 +699,7 @@
       "prefix": "edu",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "deployUrl": "",
             "outputHashing": "none",
@@ -580,13 +716,20 @@
             "stylePreprocessorOptions": {
               "includePaths": [
                 "projects/edu-sharing-ui/assets/scss"
-              ]
+              ],
+              "sass": {
+                "silenceDeprecations": ["if-function"]
+              }
             },
             "assets": [
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets/ngx-extended-pdf-viewer" },
               { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
             ],
-            "browser": "projects/rendering-service-web-component/src/main.ts"
+            "browser": "projects/rendering-service-web-component/src/main.ts",
+            "polyfills": ["projects/rendering-service-web-component/src/polyfills.ts"],
+            "allowedCommonJsDependencies": [
+              "lodash"
+            ]
           },
           "configurations": {
             "production": {
@@ -616,16 +759,36 @@
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "es",
-      "style": "scss"
+      "style": "scss",
+      "type": "component"
     },
     "@schematics/angular:directive": {
-      "prefix": "es"
+      "prefix": "es",
+      "type": "directive"
     },
     "@angular-eslint/schematics:application": {
       "setParserOptionsProject": true
     },
     "@angular-eslint/schematics:library": {
       "setParserOptionsProject": true
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
     }
   },
   "cli": {

@@ -103,6 +103,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         FormatDatePipe,
         FormatSizePipe,
         MdsDurationPipe,
+        OptionTooltipPipe,
         IconDirective,
         HtmlTextPipe,
         InfiniteScrollDirective,

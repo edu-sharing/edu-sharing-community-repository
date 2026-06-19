@@ -1,8 +1,10 @@
 <mat-form-field
   class="text-form-field"
   [class.hidden-toolbar]="hideToolbar"
+  [class.reserve-padding-right]="showAiCheckbox && !showAiButtons && hideToolbar"
   appearance="outline"
   subscriptSizing="dynamic"
+  floatLabel="always"
 >
   <mat-label>
     {{ label }}
@@ -10,12 +12,13 @@
   <form class="markdown-form" [formGroup]="markdownForm">
     <!-- note: the markdown-toolbar is currently limited to specific functions used in GitHub, -->
     <!--       resulting in strike-through and horizontal lines being supported but not included -->
+    @if (!hideToolbar || showAiButtons || showAiCheckbox) {
     <div
       class="toolbars"
       [class.absolute-positioning]="(showAiButtons || showAiCheckbox) && hideToolbar"
-      *ngIf="!hideToolbar || showAiButtons || showAiCheckbox"
     >
-      <markdown-toolbar [attr.for]="controlId" *ngIf="!hideToolbar">
+      @if (!hideToolbar) {
+      <markdown-toolbar [attr.for]="controlId">
         <md-bold
           [title]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
           [attr.aria-label]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.BOLD' | translate"
@@ -73,25 +76,38 @@
           </button>
         </md-ordered-list>
       </markdown-toolbar>
-
-      <div class="ai-buttons" *ngIf="showAiCheckbox || showAiButtons">
-        <div
+      } @if (showAiCheckbox || showAiButtons) {
+      <div class="ai-controls" [class.no-ai-buttons]="!showAiButtons">
+        @if (showAiCheckbox) {
+        <mat-button-toggle-group
+          class="ai-toggle-group"
+          hideSingleSelectionIndicator
+          [value]="generateWithAi() ? 'ai' : 'text'"
+          [disabled]="disableAiCheckbox()"
           [matTooltip]="disableAiCheckboxReason() ? (disableAiCheckboxReason() | translate) : null"
+          (change)="onAiModeChange($event.value)"
         >
-          <mat-checkbox
-            *ngIf="showAiCheckbox"
-            [disabled]="disableAiCheckbox()"
-            [(ngModel)]="generateWithAi"
-            (ngModelChange)="onGenerateWithAiChange($event)"
-            [ngModelOptions]="{ standalone: true }"
+          <mat-button-toggle
+            value="text"
+            [matTooltip]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.OUTPUT_TEXT' | translate"
+            tooltipAriaLabel
+            (mousedown)="avoidSaveText()"
           >
-            {{ 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.GENERATE_WITH_AI' | translate }}
-          </mat-checkbox>
-        </div>
-
-        <div class="button-container" [class.separator]="showAiCheckbox" *ngIf="showAiButtons">
+            <i esIcon="text_fields"></i>
+          </mat-button-toggle>
+          <mat-button-toggle
+            value="ai"
+            [matTooltip]="'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.GENERATE_WITH_AI' | translate"
+            tooltipAriaLabel
+            (mousedown)="avoidSaveText()"
+          >
+            <i esIcon="auto_awesome"></i>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        } @if (showAiButtons) {
+        <div class="button-container" [class.separator]="showAiCheckbox">
+          @for (option of aiTagOptions; track option) {
           <button
-            *ngFor="let option of aiTagOptions"
             [disabled]="disabled"
             [matTooltip]="option.tooltip | translate"
             mat-icon-button
@@ -101,9 +117,13 @@
           >
             <i [esIcon]="option.icon" [attr.aria-label]="option.ariaLabel | translate"></i>
           </button>
+          }
         </div>
+        }
       </div>
+      }
     </div>
+    }
 
     <textarea
       [id]="controlId"

@@ -26,7 +26,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
-import { ChatCompletionResult, NodeConfig } from 'ngx-edu-sharing-b-api';
+import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService, Values } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -108,6 +108,19 @@ export interface WidgetComponentInterface {
     styleUrls: ['./generic-widget.component.scss'],
 })
 export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestroy {
+    private aiHelperService = inject(AiHelperService);
+    private clipboard = inject(Clipboard);
+    private dialogs = inject(DialogsService);
+    private injector = inject(Injector);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private platformLocation = inject(PlatformLocation);
+    private toast = inject(Toast);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private translate = inject(TranslateService);
+    private uiService = inject(UIService);
+
     @ViewChild('widgetContainer', { read: ViewContainerRef, static: true })
     widgetContainer!: ViewContainerRef;
     @ViewChild('widgetContainer') widgetContainerElement!: ElementRef<HTMLElement>;
@@ -143,6 +156,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     // OUTPUTS
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
     @Output() searchHitsChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     @ViewChild('configureWidgetEmbeddingTemplate')
@@ -161,6 +175,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
+    rendering2Supported: WritableSignal<boolean> = signal(false);
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
     private updateSearchResultCount$: Subject<void> = new Subject<void>();
@@ -169,20 +184,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     widgetInstance: WidgetComponentInterface | null = null;
     private widgetNode: Node;
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private clipboard: Clipboard,
-        private dialogs: DialogsService,
-        private injector: Injector,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private platformLocation: PlatformLocation,
-        private toast: Toast,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.updateSearchResultCount$
             .pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {
@@ -223,6 +225,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         this.viewInitialized = true;
 
         this.aiSupported.set(await this.aiHelperService.hasAISupport());
+        this.rendering2Supported.set(await this.aiHelperService.hasRendering2Support());
 
         // define a common embed configuration option to be used in every widget
         this.updateCommonConfigurationOptions();
@@ -370,7 +373,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
                     configName: 'headline',
                 };
-                const promptResponse: ChatCompletionResult =
+                const promptResponse: CreateChatCompletionResponse =
                     await this.aiHelperService.generateFromPrompt(
                         config,
                         this.topicPageHelperService.getSelectedVariables() || {},
@@ -393,7 +396,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     nodeId: convertNodeRefIntoNodeId(this.nodeId || this.propagatedNodeId),
                     configName: 'description',
                 };
-                const promptResponse: ChatCompletionResult =
+                const promptResponse: CreateChatCompletionResponse =
                     await this.aiHelperService.generateFromPrompt(
                         config,
                         this.topicPageHelperService.getSelectedVariables() || {},
@@ -646,7 +649,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     }
 
     /**
-     * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
+     * Handles the update of the generic widget search results.
      *
      * @param count
      * @param type
@@ -841,10 +844,12 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 break;
 
             case WIDGETS.MEDIA_RENDERING:
-                const mediaRenderingModule = await import(
-                    '../media-rendering/media-rendering.component'
-                );
-                componentClass = mediaRenderingModule.MediaRenderingComponent;
+                if (this.rendering2Supported()) {
+                    const mediaRenderingModule = await import(
+                        '../media-rendering/media-rendering.component'
+                    );
+                    componentClass = mediaRenderingModule.MediaRenderingComponent;
+                }
                 break;
             case WIDGETS.TEXT_WIDGET:
                 const textWidgetModule = await import('../text-widget/text-widget.component');
@@ -957,6 +962,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         instance.visibleNodesChanged?.subscribe((nodes: Node[] = []) => {
             this.updateSearchResults(nodes.length, 'nodes');
             this.visibleNodesChanged.emit(nodes);
+        });
+        instance.totalSearchResultCountChanged?.subscribe((count: number) => {
+            this.totalSearchResultCountChanged.emit(count);
         });
     }
 

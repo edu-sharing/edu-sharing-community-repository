@@ -3,8 +3,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "types": [],
-    "moduleResolution": "node",
-    "module": "AMD",
+    "moduleResolution": "bundler",
+    "module": "ES2022",
     "target": "ESNext",
     "useDefineForClassFields": true
   },

@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     ApiHelpersService,
     Assignment,
@@ -25,11 +25,22 @@ import { Sort } from '@angular/material/sort';
 import { NodeEntriesDataType } from '../node-entries/data-type';
 import { Toast } from './abstract/toast.service';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
+import { NodeClickEvent } from '../node-entries/entries-model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class NodeHelperService {
+    protected translate = inject(TranslateService);
+    protected apiHelpersService = inject(ApiHelpersService);
+    protected networkService = inject(NetworkService);
+    protected configService = inject(ConfigService);
+    protected configuration = inject(EduSharingUiConfiguration);
+    protected repoUrlService = inject(RepoUrlService);
+    protected platformLocation = inject(PlatformLocation);
+    protected toast = inject(Toast);
+    protected router = inject(Router, { optional: true });
+
     readonly LICENSE_URLS = {
         CC_BY_ABOUT: 'https://creativecommons.org/licenses/list.{{language}}',
         CC_BY: 'https://creativecommons.org/licenses/by/{{version}}/{{locale}}deed.{{language}}',
@@ -46,17 +57,38 @@ export class NodeHelperService {
         CC_0: 'https://creativecommons.org/publicdomain/zero/1.0/legalcode.{{language}}',
         PDM: 'https://creativecommons.org/public-domain/pdm/',
     } as { [key: string]: string };
-    constructor(
-        protected translate: TranslateService,
-        protected apiHelpersService: ApiHelpersService,
-        protected networkService: NetworkService,
-        protected configService: ConfigService,
-        protected configuration: EduSharingUiConfiguration,
-        protected repoUrlService: RepoUrlService,
-        protected platformLocation: PlatformLocation,
-        protected toast: Toast,
-        @Optional() protected router: Router,
-    ) {}
+
+    constructor() {}
+
+    /**
+     * Navigates to the primary action URL for the node carried in the click event.
+     * Ctrl/Meta-click and middle-click open in a new browser tab instead.
+     */
+    navigateToNode(clickEvent: NodeClickEvent<NodeEntriesDataType>): void {
+        const node = clickEvent.element as Node | Assignment;
+        if (clickEvent.ctrlKey) {
+            window.open(this.getNodeLink('plain', node) as string, '_blank');
+        } else {
+            const routerLink = this.getNodeLink('routerLink', node) as string;
+            const queryParams = this.getNodeLink('queryParams', node) as Params;
+            void this.router?.navigate([routerLink], { queryParams });
+        }
+    }
+
+    /**
+     * Returns true if a single click on the given node should immediately trigger its primary
+     * action instead of opening a selection/sidebar.
+     * Currently applies to assignments where the current user is not a coordinator.
+     */
+    directActionOnSingleClick(node: Node | Assignment): boolean {
+        if (this.isNodeAssignment(node)) {
+            return (
+                new AssignmentPipe().transform(node as Assignment, { mode: 'permissions' }) !==
+                'COORDINATOR'
+            );
+        }
+        return false;
+    }
 
     public getCollectionScopeInfo(node: Node): { icon: string; scopeName: string } {
         const scope = node.collection ? node.collection.scope : null;
@@ -273,15 +305,22 @@ export class NodeHelperService {
         }
         let data: { routerLink: string; queryParams: Params } = null;
         if (this.isNodeAssignment(node)) {
+            let mainComponent = 'submitAssignment';
+            if (
+                new AssignmentPipe().transform(node as Assignment, {
+                    mode: 'permissions',
+                }) === 'COORDINATOR'
+            ) {
+                if ((node as Assignment).status === 'DRAFT') {
+                    mainComponent = 'manageAssignment';
+                } else {
+                    mainComponent = 'assignmentSubmission';
+                }
+            }
             data = {
                 routerLink: UIConstants.ROUTER_PREFIX + 'editorial/assignment',
                 queryParams: {
-                    mainComponent:
-                        new AssignmentPipe().transform(node as Assignment, {
-                            mode: 'permissions',
-                        }) === 'COORDINATOR'
-                            ? 'manageAssignment'
-                            : 'submitAssignment',
+                    mainComponent,
                     assignment: node.ref.id,
                 },
             };
@@ -437,7 +476,9 @@ export class NodeHelperService {
             };
         } else {
             const orderCollections =
-                collection.properties[RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE];
+                collection?.properties?.[
+                    RestConstants.CCM_PROP_COLLECTION_SUBCOLLECTION_ORDER_MODE
+                ];
             return {
                 active: orderCollections?.[0] || RestConstants.CM_MODIFIED_DATE,
                 direction:

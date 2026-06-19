@@ -1,20 +1,20 @@
 <!--
-    <div
-      *ngIf="node.aspects?.includes('ccm:published')"
-      class="card-top-bar-published-copy"
-    >
-      <div class="node-published-copy">
-        <i
-          esIcon="content_copy"
-          [matTooltip]="'PUBLISHED_COPY_TOOLTIP' | translate"
-        ></i>
-      </div>
-    </div>
-    -->
+<div
+  *ngIf="node.aspects?.includes('ccm:published')"
+  class="card-top-bar-published-copy"
+  >
+  <div class="node-published-copy">
+    <i
+      esIcon="content_copy"
+      [matTooltip]="'PUBLISHED_COPY_TOOLTIP' | translate"
+    ></i>
+  </div>
+</div>
+-->
 <div class="card-top-bar-comments">
+  @if (node.type === 'ccm:io') {
   <div
     class="node-comments"
-    *ngIf="node.type === 'ccm:io'"
     (click)="
       entriesService?.onClicked({
         event: $event,
@@ -27,8 +27,10 @@
     <i esIcon="comment"></i>
     <span>{{ node.commentCount }}</span>
   </div>
+  }
 </div>
-<div class="card-top-bar-childobjects" *ngIf="childObjectCount > 0">
+@if (childObjectCount > 0) {
+<div class="card-top-bar-childobjects">
   <div
     class="childobject-count"
     matTooltip="{{ 'CHILDOBJECT_COUNT' | translate : { count: childObjectCount + 1 } }}"
@@ -37,3 +39,4 @@
     ><i esIcon="filter_none"></i>
   </div>
 </div>
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     combineLatest,
     EMPTY,
@@ -18,7 +18,6 @@ import {
     shareReplay,
     startWith,
     switchMap,
-    tap,
 } from 'rxjs/operators';
 import { RestConstants } from '../rest-constants';
 import { UserService } from './user.service';
@@ -36,6 +35,9 @@ import { AuthenticationService } from './authentication.service';
  */
 @Injectable({ providedIn: 'root' })
 export class SessionStorageService {
+    private userService = inject(UserService);
+    private authentication = inject(AuthenticationService);
+
     static readonly KEY_WORKSPACE_SORT = 'workspace_sort';
     static readonly KEY_WORKSPACE_SAFE_DOWNLOAD_CONFIRM = 'workspace_safe_download_confirm';
     static readonly KEY_ROOT_COLLECTIONS = 'collections_root';
@@ -50,7 +52,7 @@ export class SessionStorageService {
     /** Refresh user preferences to reflect changes on the backend from outside this app. */
     private readonly triggerRefresh = new Subject<void>();
 
-    constructor(private userService: UserService, private authentication: AuthenticationService) {
+    constructor() {
         // The currently logged in user. `null` for guest or no/invalid login.
         const currentUser = this.authentication.observeLoginInfo().pipe(
             filter((login) => login !== null),
@@ -117,6 +119,8 @@ export class SessionStorageService {
             switch (store) {
                 case Store.UserProfile:
                     return this.observeFromUserProfile(key, fallback);
+                case Store.LocalStorage:
+                    return this.localStorage.observe(key, fallback);
                 case Store.Session:
                     return this.sessionStorage.observe(key, fallback);
             }
@@ -137,11 +141,14 @@ export class SessionStorageService {
     // Use a promise for `set` since an observable needs to be subscribed to to have an effect,
     // which users are likely to forget.
     async set(key: string, value: any, store = Store.UserProfile): Promise<void> {
+        const obj: any = {};
         switch (store) {
             case Store.UserProfile:
-                const obj: any = {};
                 obj[key] = value;
                 return this.setToUserProfile(obj);
+            case Store.LocalStorage:
+                obj[key] = value;
+                return this.storeInLocalStorage(obj);
             case Store.Session:
                 return this.sessionStorage.set(key, value);
         }
@@ -166,6 +173,8 @@ export class SessionStorageService {
         switch (store) {
             case Store.UserProfile:
                 return this.deleteFromUserProfile(key);
+            case Store.LocalStorage:
+                return this.localStorage.delete(key);
             case Store.Session:
                 return this.sessionStorage.delete(key);
         }
@@ -203,14 +212,18 @@ export class SessionStorageService {
                             }),
                         );
                     } else {
-                        for (const [key, value] of Object.entries(values)) {
-                            this.localStorage.set(key, value);
-                        }
+                        this.storeInLocalStorage(values);
                         return EMPTY;
                     }
                 }),
             )
             .toPromise();
+    }
+
+    private storeInLocalStorage(values: { [p: string]: any }) {
+        for (const [key, value] of Object.entries(values)) {
+            this.localStorage.set(key, value);
+        }
     }
 
     private deleteFromUserProfile(key: string): Promise<void> {
@@ -244,6 +257,8 @@ export enum Store {
     UserProfile,
     /** Only the current running session (via sessionStorage). */
     Session,
+    /** Only browser local storage */
+    LocalStorage,
 }
 export type StorageWithTime<T> = {
     expiry: number;

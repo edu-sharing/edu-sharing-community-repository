@@ -1,4 +1,5 @@
-<ng-container *ngIf="!selectedSubmissionFile()">
+@if (!selectedCorrectedFile()) {
+<div class="list">
   <es-node-entries-wrapper
     [primaryInstance]="true"
     [dataSource]="dataSource"
@@ -16,45 +17,64 @@
       </div>
     </ng-template>
   </es-node-entries-wrapper>
-</ng-container>
-<ng-container *ngIf="selectedSubmissionFile() && selectedSubmissionFileUrl() !== undefined">
-  <!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
-  <mat-tab-group (selectedTabChange)="tabSelected.set($event.index)">
-    <mat-tab
-      *ngIf="
-        selectedSubmissionFileUrl() && selectedSubmissionFile().correction?.mediatype === 'file-pdf'
-      "
+  <div class="actions">
+    <span
+      >{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.CORRECTED' | translate }}: {{ corrected() }} /
+      {{ dataSource.getTotal() }}</span
     >
-      <ng-template mat-tab-label>
-        <i esIcon="check"></i>
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
-      </ng-template>
-      <ngx-extended-pdf-viewer
-        *ngIf="tabSelected() === 0"
-        [src]="selectedSubmissionFileUrl()"
-        [height]="'auto'"
-        [language]="language"
-        [textLayer]="true"
-        [customToolbar]="additionalButtons"
-        [zoom]="'page-fit'"
-        (annotationEditorEvent)="changeAnnotation()"
-      ></ngx-extended-pdf-viewer>
-    </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <i esIcon="preview"></i>
-        {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
-      </ng-template>
-      <es-render-wrapper-component
-        *ngIf="tabSelected() === 1 && selectedSubmissionFile().content"
-        [showTopbar]="false"
-        [showMetadata]="false"
-        [nodeId]="selectedSubmissionFile().content.ref.id"
-        [repository]="selectedSubmissionFile().content.ref.repo"
-      ></es-render-wrapper-component>
-    </mat-tab>
-  </mat-tab-group>
-</ng-container>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="
+        assignment()?.status === 'CORRECTED' ||
+        assignment()?.status === 'FINISHED' ||
+        assignment()?.status === 'CANCELED'
+      "
+      (click)="finishAll()"
+    >
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_CORRECTED' | translate }}
+    </button>
+  </div>
+</div>
+} @if (selectedCorrectedFile() && selectedSubmissionFileUrl() !== undefined) {
+<!-- dirty hack via tabSelected: we need to fully unload the ngx-extended-pdf-viewer component since it can't be registered twice -->
+<mat-tab-group [selectedIndex]="tabSelected()" (selectedTabChange)="onTabChange($event)">
+  @if ( selectedSubmissionFileUrl() && selectedCorrectedFile().correction?.mediatype === 'file-pdf'
+  ) {
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="check"></i>
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_CORRECT' | translate }}
+    </ng-template>
+    @if (tabSelected() === 0) {
+    <ngx-extended-pdf-viewer
+      [src]="selectedSubmissionFileUrl()"
+      [height]="'100%'"
+      [language]="language"
+      [textLayer]="true"
+      [customToolbar]="additionalButtons"
+      [zoom]="'page-fit'"
+      (annotationEditorEvent)="changeAnnotation()"
+    ></ngx-extended-pdf-viewer>
+    }
+  </mat-tab>
+  }
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="preview"></i>
+      {{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.VIEW_ORIGINAL' | translate }}
+    </ng-template>
+    @if (tabSelected() === 1 && selectedCorrectedFile().content) {
+    <es-render-wrapper-component
+      [showTopbar]="false"
+      [showMetadata]="false"
+      [nodeId]="selectedCorrectedFile().content.ref.id"
+      [repository]="selectedCorrectedFile().content.ref.repo"
+    ></es-render-wrapper-component>
+    }
+  </mat-tab>
+</mat-tab-group>
+}
 
 <ng-template #additionalButtons>
   <div
@@ -72,9 +92,9 @@
     <pdf-zoom-toolbar></pdf-zoom-toolbar>
     <div id="toolbarViewerRight">
       <pdf-hand-tool></pdf-hand-tool>
-      <pdf-draw-editor></pdf-draw-editor>
-      <pdf-highlight-editor></pdf-highlight-editor>
-      <pdf-text-editor></pdf-text-editor>
+      <pdf-draw-editor [show]="true"></pdf-draw-editor>
+      <pdf-highlight-editor [show]="true"></pdf-highlight-editor>
+      <pdf-text-editor [show]="true"></pdf-text-editor>
 
       <div class="verticalToolbarSeparator hiddenSmallView"></div>
       <button
@@ -82,9 +102,10 @@
         color="primary"
         class="save"
         (click)="saveCorrection()"
-        [disabled]="correctionSaving() || !hasCorrectionChanges()"
+        [disabled]="correctionSaving()"
       >
-        <i esIcon="save"></i>{{ 'SAVE' | translate }}
+        <!-- [disabled]="correctionSaving() || !hasCorrectionChanges()" -->
+        <i esIcon="save"></i>{{ 'EDITORIAL.ASSIGNMENT.SUBMISSIONS.SAVE_EDIT' | translate }}
       </button>
     </div>
   </div>

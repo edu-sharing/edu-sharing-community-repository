@@ -1,11 +1,11 @@
-import { SecurityContext, Pipe, PipeTransform } from '@angular/core';
+import { SecurityContext, Pipe, PipeTransform, inject } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Pipe({
     name: 'highlightSearch',
 })
 export class HighlightSearchPipe implements PipeTransform {
-    constructor(private sanitizer: DomSanitizer) {}
+    private sanitizer = inject(DomSanitizer);
 
     transform(content: string, query: string): string {
         // return, if no content or search query is provided

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { FacetValue, SearchService } from 'ngx-edu-sharing-api';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, shareReplay, startWith, takeUntil } from 'rxjs/operators';
@@ -12,6 +12,9 @@ import { mapExtendedValues } from '../../mds-editor-wrapper/extended-values-mapp
     standalone: false,
 })
 export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestroy {
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+    private search = inject(SearchService);
+
     @Input() widget: Widget;
 
     filteredSuggestions$: Observable<FacetValue[]>;
@@ -19,11 +22,6 @@ export class MdsEditorWidgetSuggestionChipsComponent implements OnInit, OnDestro
     /** The widget controlling the property that this widget is displaying suggestions for. */
     private primaryWidget: Widget;
     private destroyed$ = new Subject<void>();
-
-    constructor(
-        private mdsEditorInstance: MdsEditorInstanceService,
-        private search: SearchService,
-    ) {}
 
     ngOnInit(): void {
         this.primaryWidget = this.mdsEditorInstance.getPrimaryWidget(this.widget.definition.id);

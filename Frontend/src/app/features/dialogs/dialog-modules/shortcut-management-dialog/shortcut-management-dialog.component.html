@@ -1,1 +1,3 @@
-<es-shortcut-entries [node]="node()" *ngIf="!!node()"></es-shortcut-entries>
+@if (!!node()) {
+<es-shortcut-entries [node]="node()"></es-shortcut-entries>
+}

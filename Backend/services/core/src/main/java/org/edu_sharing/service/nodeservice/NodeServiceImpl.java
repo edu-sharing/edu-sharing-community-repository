@@ -19,7 +19,10 @@ import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
-import org.alfresco.service.namespace.*;
+import org.alfresco.service.namespace.NamespaceService;
+import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.QNamePattern;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -177,34 +180,44 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
 
     public NodeRef copyNode(String nodeId, String toNodeId, boolean copyChildren) throws Throwable {
         // copy and rename has a weird naming scheme
-        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren);
+        return copyNode(nodeId, toNodeId, CCConstants.CM_ASSOC_FOLDER_CONTAINS, copyChildren, null);
     }
 
     @Override
-    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy) {
         return retryingTransactionHelper.doInTransaction(() -> {
             NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             throwIfRestrictedAccessPresent(nodeRef);
 
             // copy and rename has a weird naming scheme
             String originalName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+
+            String finalName = nameOfCopy;
+            if(StringUtils.isEmpty(nameOfCopy)){
+                finalName = originalName;
+            }
+            NodeRef parentRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId);
+            QName assocTypeQName = QName.createQName(assocType);
             NodeRef copyNodeRef = copyService.copyAndRename(nodeRef,
-                    new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, toNodeId),
-                    QName.createQName(assocType),
-                    QName.createQName(originalName), copyChildren);
+                    parentRef,
+                    assocTypeQName,
+                    QName.createQName(finalName), copyChildren);
+
 
             int renameCounter = 1;
             while (true) {
-                try {
-                    String name = originalName;
-                    if (renameCounter > 1) {
-                        name = NodeServiceHelper.renameNode(originalName, renameCounter);
-                    }
-                    nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
-                    break;
-                } catch (DuplicateChildNodeNameException e) {
-                    renameCounter++;
+                String name = finalName;
+                if (renameCounter > 1) {
+                    name = NodeServiceHelper.renameNode(finalName, renameCounter);
                 }
+                // skip names already taken in the target folder
+                NodeRef existing = nodeService.getChildByName(parentRef, assocTypeQName, name);
+                if (existing != null && !existing.equals(copyNodeRef)) {
+                    renameCounter++;
+                    continue;
+                }
+                nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+                break;
             }
             resetVersion(copyNodeRef);
             return copyNodeRef;
@@ -234,11 +247,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     @Override
-    public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds)
+    public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds, String[] aspects)
             throws Throwable {
         Map<String, Object> toSafeProps;
         if (obeyMds) {
-            toSafeProps = getToSafeProps(props, obeyMds, nodeType, null, null, parentId, null);
+            toSafeProps = getToSafeProps(props, obeyMds, nodeType, aspects, null, parentId, null);
         } else {
             toSafeProps = props.entrySet().stream()
                     .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), validatePropertyByDefinition(QName.createQName(entry.getKey()), entry.getValue())))
@@ -1796,6 +1809,9 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         try {
 
             return "" + getContentReader(storeProtocol, storeId, nodeId, version, contentProp).getContentData().hashCode();
+        } catch (AccessDeniedException e) {
+            // explicitly throw so the @NodeServiceInterceptor can check
+            throw e;
         } catch (Throwable t) {
             return null;
         }
@@ -1931,6 +1947,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                 return (Serializable) Array.get(value, 0);
             }
             return value;
+        } else if(value.getClass().isArray()) {
+            return new ArrayList<>(List.of((Serializable[]) value));
         }
         return value;
     }
@@ -2018,22 +2036,34 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      */
     @Override
     public NodeRef getOriginalNode(String nodeId) {
+        NodeRef refResolved = getReferenceOriginalNode(nodeId);
+        nodeId = refResolved.getId();
+        if (!nodeService.exists(refResolved)) {
+            return refResolved;
+        }
+        // handle copied nodes
+        NodeRef original = ((NodeRef) nodeService.getProperty(refResolved, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
+        if (original != null) {
+            nodeId = original.getId();
+        }
+        return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+    }
+
+    /**
+     * Resolves collection references (ccm:collection_io_reference to ccm:original) only.
+     * Published copies are not followed.
+     *
+     * @param nodeId the source node to map
+     * @return the mapped node ref
+     */
+    @Override
+    public NodeRef getReferenceOriginalNode(String nodeId) {
         if (!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
             return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
         }
-        // Handle io references (i.e. collection refs)
         // use the nodeServiceAlfresco since the nodeRef might be null if original was deleted
         if (hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
             nodeId = (String) nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
-
-            if (!nodeService.exists(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId))) {
-                return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-            }
-        }
-        // handle copied nodes
-        NodeRef original = ((NodeRef) nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
-        if (original != null) {
-            nodeId = original.getId();
         }
         return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
     }

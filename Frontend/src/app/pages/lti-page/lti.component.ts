@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { OK } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -11,11 +11,9 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
     standalone: false,
 })
 export class LtiPageComponent implements OnInit {
-    constructor(
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private translations: TranslationsService,
-    ) {}
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private translations = inject(TranslationsService);
 
     ngOnInit(): void {
         this.mainNav.setMainNavConfig({ currentScope: 'lti', title: '', show: false });

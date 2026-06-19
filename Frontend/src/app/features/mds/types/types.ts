@@ -139,6 +139,13 @@ export interface NativeWidgetComponent {
     status?: Observable<InputStatus>;
     isEmpty?: Observable<boolean>;
     focus?: () => void;
+    /** Called when the user tries to save while required fields are missing. */
+    showMissingRequired?: () => void;
+    /**
+     * If set, the native widget participates in the completion status (e.g. `author`).
+     * Combined with `isEmpty` to determine whether the required value is provided.
+     */
+    isRequired?: MdsWidget['isRequired'];
 }
 
 export type NativeWidgetClass = {

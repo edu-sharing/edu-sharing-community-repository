@@ -1,13 +1,15 @@
 import {
     CdkConnectedOverlay,
-    ConnectedPosition,
     ConnectedOverlayPositionChange,
+    ConnectedPosition,
 } from '@angular/cdk/overlay';
 import {
     AfterViewInit,
     ChangeDetectorRef,
     Component,
+    Directive,
     ElementRef,
+    inject,
     OnDestroy,
     OnInit,
     QueryList,
@@ -16,11 +18,11 @@ import {
     ViewChildren,
     WritableSignal,
 } from '@angular/core';
+import { FocusableOption, FocusKeyManager } from '@angular/cdk/a11y';
 import { FormControl, UntypedFormControl } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, ReplaySubject, timer } from 'rxjs';
 import { debounceTime, filter, map, startWith, takeUntil } from 'rxjs/operators';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
 import { MdsWidget, MdsWidgetValue } from '../../../types/types';
 import { MdsWidgetType, ValueType } from 'ngx-edu-sharing-ui';
 import { DisplayValue } from '../DisplayValues';
@@ -32,8 +34,27 @@ import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
 import { UIHelper } from '../../../../../core-ui-module/ui-helper';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
-import { Toast } from '../../../../../services/toast';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { validate as uuidValidate } from 'uuid';
+
+interface UserProposalGroup {
+    value: string;
+    displayValue: DisplayValue;
+    count: number;
+    suggestions: SuggestionResponseDto[];
+}
+
+@Directive({
+    selector: '[esProposalChip]',
+    standalone: false,
+})
+export class EsProposalChipDirective implements FocusableOption {
+    elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
+    focus(): void {
+        this.elementRef.nativeElement.focus();
+    }
+}
 
 @Component({
     selector: 'es-mds-editor-widget-tree',
@@ -45,6 +66,9 @@ export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetChipsSuggestionBase
     implements OnInit, AfterViewInit, OnDestroy
 {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    uiService = inject(UIService);
+
     inputControl = new FormControl('');
     private hasFocus = true;
     isTree: boolean;
@@ -60,6 +84,7 @@ export class MdsEditorWidgetTreeComponent
         }
         const values: DisplayValue[] = this.chipsControl.value;
         this.chipsControl.setValue([...values, value]);
+        console.log('set value', value);
         this.preventOverlayOpen = true;
         setTimeout(() => {
             this.preventOverlayOpen = false;
@@ -96,7 +121,10 @@ export class MdsEditorWidgetTreeComponent
     @ViewChild(MdsEditorWidgetTreeCoreComponent)
     treeCoreComponent: MdsEditorWidgetTreeCoreComponent;
     @ViewChildren('chip') chips: QueryList<MatChipRow>;
+    @ViewChildren(EsProposalChipDirective) proposalChips: QueryList<EsProposalChipDirective>;
+    proposalKeyManager: FocusKeyManager<EsProposalChipDirective>;
 
+    userProposalGroups$: Observable<UserProposalGroup[]>;
     valueType: ValueType;
     tree: Tree;
     indeterminateValues$: BehaviorSubject<string[]>;
@@ -127,14 +155,8 @@ export class MdsEditorWidgetTreeComponent
     positionY: WritableSignal<string> = signal(null);
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
-    constructor(
-        mdsEditorInstance: MdsEditorInstanceService,
-        translate: TranslateService,
-        toast: Toast,
-        private changeDetectorRef: ChangeDetectorRef,
-        public uiService: UIService,
-    ) {
-        super(toast, mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
 
     async ngOnInit() {
@@ -205,57 +227,129 @@ export class MdsEditorWidgetTreeComponent
         this.indeterminateValues$.subscribe((indeterminateValues) =>
             this.widget.setIndeterminateValues(indeterminateValues),
         );
+        this.userProposalGroups$ = this.widget.getSuggestions().pipe(
+            map((suggestions) => {
+                if (!suggestions) return [];
+                const currentKeys = new Set<string>(
+                    (this.chipsControl?.value ?? [])
+                        .filter((v: DisplayValue) => v?.key)
+                        .map((v: DisplayValue) => v.key),
+                );
+                const grouped = new Map<string, UserProposalGroup>();
+                for (const s of suggestions.filter(
+                    (s) =>
+                        s.type === 'USER_PROPOSAL' &&
+                        s.status === 'PENDING' &&
+                        !currentKeys.has(s.value as string),
+                )) {
+                    const key = s.value as string;
+                    if (grouped.has(key)) {
+                        const group = grouped.get(key);
+                        group.count++;
+                        group.suggestions.push(s);
+                    } else {
+                        grouped.set(key, {
+                            value: key,
+                            displayValue: this.toDisplayValue(key),
+                            count: 1,
+                            suggestions: [s],
+                        });
+                    }
+                }
+                return Array.from(grouped.values()).sort((a, b) => b.count - a.count);
+            }),
+        );
 
-        this.widget.getShowAiSuggestions().subscribe(([show, suggestions]) => {
-            if (show) {
-                suggestions
-                    ?.filter(
-                        (s) =>
-                            s.type === 'AI' &&
-                            s.status === 'PENDING' &&
-                            !this.widget.getValue().includes(s.value as string),
-                    )
-                    .filter(
-                        // filter for non duplicate values
-                        (obj, index, self) =>
-                            index === self.findIndex((o) => o.value === obj.value),
-                    )
-                    .filter(
-                        // validate valuespace
-                        (obj) => {
-                            if (this.widget.definition.values) {
-                                if (
-                                    !this.widget.definition.values.some((v) => v.id === obj.value)
-                                ) {
-                                    console.warn(
-                                        'Invalid suggestion "' +
-                                            obj.value +
-                                            '" received for ' +
-                                            this.widget.definition.id +
-                                            ', not in valuespace',
-                                        obj,
-                                        this.widget.definition.values,
-                                    );
-                                    return false;
+        this.widget
+            .getShowAiSuggestions()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe(async ([show, suggestions]) => {
+                // The editor might gets re-initialized, which
+                // pushes fresh `Widget` models into `widgets.value` but does NOT destroy the old
+                // widget components. Those stale components stay subscribed to the shared
+                // `showAiSuggestions` and would mutate their orphaned model
+                if (!this.mdsEditorInstance.widgets.value?.includes(this.widget)) {
+                    return;
+                }
+                if (show) {
+                    // Delay so the chip control's own `valueChanges` (e.g. the external value init
+                    // via `registerValueChanges`) can fire first. Otherwise that emission lands
+                    // after the suggestions were added and either overwrites the freshly added
+                    // chips (field not updating) or leaves `getValue()` stale so the dedup filter
+                    // below misses an already-present value (duplicate keys).
+                    await firstValueFrom(timer(1));
+                    suggestions
+                        ?.filter(
+                            (s) =>
+                                s.type === 'AI' &&
+                                s.status !== 'DECLINED' &&
+                                !this.widget.getValue().includes(s.value as string),
+                        )
+                        .filter(
+                            // filter for non duplicate values
+                            (obj, index, self) =>
+                                index === self.findIndex((o) => o.value === obj.value),
+                        )
+                        .map((obj) => {
+                            // The suggestion may deliver only the bare uuid of an entry while the
+                            // valuespace holds fully qualified ids (e.g. vocab URIs ending in that
+                            // uuid). In that case rewrite the suggestion to the real valuespace id
+                            // via a right-side match, so the validation below accepts it.
+                            const values = this.widget.definition.values;
+                            if (
+                                values &&
+                                !values.some((v) => v.id === obj.value) &&
+                                uuidValidate(obj.value as string)
+                            ) {
+                                const matched = values.find((v) =>
+                                    v.id.endsWith(obj.value as string),
+                                );
+                                if (matched) {
+                                    obj.value = matched.id;
                                 }
                             }
-                            return true;
-                        },
-                    )
-                    .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
-            } else {
-                const values: DisplayValue[] = this.chipsControl.value;
-                suggestions
-                    ?.filter((s) => s.type === 'AI' && s.status === 'ACCEPTED')
-                    .forEach((s) => {
-                        void this.remove(
-                            values.find((v) => v.key === s.value),
-                            false,
-                        );
-                        void this.updateSuggestionState(new BehaviorSubject(s), 'PENDING');
-                    });
-            }
-        });
+                            return obj;
+                        })
+                        .filter(
+                            // validate valuespace
+                            (obj) => {
+                                if (this.widget.definition.values) {
+                                    if (
+                                        !this.widget.definition.values.some(
+                                            (v) => v.id === obj.value,
+                                        )
+                                    ) {
+                                        console.warn(
+                                            'Invalid suggestion "' +
+                                                obj.value +
+                                                '" received for ' +
+                                                this.widget.definition.id +
+                                                ', not in valuespace',
+                                            obj,
+                                            this.widget.definition.values,
+                                        );
+                                        return false;
+                                    }
+                                }
+                                return true;
+                            },
+                        )
+                        .forEach((s) => this.addSuggestion(new BehaviorSubject(s)));
+                } else {
+                    const values: DisplayValue[] = this.chipsControl.value;
+                    const initialValues = this.widget.initialValuesSubject.value?.jointValues ?? [];
+                    suggestions
+                        ?.filter((s) => s.type === 'AI' && s.status === 'ACCEPTED')
+                        .filter((s) => !initialValues.includes(s.value as string))
+                        .forEach((s) => {
+                            const value = values.find((v) => v.key === s.value);
+                            if (value) {
+                                void this.remove(value, false);
+                            }
+                            void this.updateSuggestionState(new BehaviorSubject(s), 'PENDING');
+                        });
+                }
+            });
 
         this.registerValueChanges(this.chipsControl);
     }
@@ -268,6 +362,11 @@ export class MdsEditorWidgetTreeComponent
             .subscribe((chips: QueryList<MatChipOption>) =>
                 chips.forEach((chip) => (chip.toggleSelected = () => true)),
             );
+        this.proposalKeyManager = new FocusKeyManager(this.proposalChips)
+            .withHorizontalOrientation('ltr')
+            .withVerticalOrientation()
+            .withWrap()
+            .withTypeAhead();
     }
 
     ngOnDestroy() {
@@ -351,6 +450,9 @@ export class MdsEditorWidgetTreeComponent
     }
 
     async remove(toBeRemoved: DisplayValue, removeSuggestion = true): Promise<void> {
+        if (!toBeRemoved) {
+            return;
+        }
         const treeNode = this.tree.findById(toBeRemoved.key);
         // old values are may not available in tree, so check for null
         if (treeNode) {
@@ -412,7 +514,11 @@ export class MdsEditorWidgetTreeComponent
             this.treeRef.toggleNode(this.treeRef.selectedNode, true, true, true);
             this.inputElement?.nativeElement.focus();
         } else {
-            const selected = this.treeRef?.findNodeByKeyOrCaption(this.inputControl.value);
+            const trimmed = this.inputControl.value?.trim();
+            if (!trimmed) {
+                return;
+            }
+            const selected = this.treeRef?.findNodeByKeyOrCaption(trimmed);
             if (selected) {
                 this.treeRef?.toggleNode(selected, true, true, true);
             } else if (
@@ -421,8 +527,8 @@ export class MdsEditorWidgetTreeComponent
                 )
             ) {
                 this.add({
-                    key: this.inputControl.value,
-                    label: this.inputControl.value,
+                    key: trimmed,
+                    label: trimmed,
                 });
                 this.inputControl.reset();
             }
@@ -430,22 +536,53 @@ export class MdsEditorWidgetTreeComponent
     }
 
     isSuggestion(value: DisplayValue | TreeNode) {
-        return this.widget
-            .getSuggestions()
-            .pipe(
-                map((suggestions) =>
-                    suggestions?.find(
-                        (s) =>
-                            s.value === ((value as DisplayValue).key || (value as TreeNode).id) &&
-                            s.status === 'ACCEPTED',
-                    ),
-                ),
-            );
+        const initialValues = this.widget.initialValuesSubject.value?.jointValues ?? [];
+        return this.widget.getSuggestions().pipe(
+            map((suggestions) => {
+                const key = (value as DisplayValue).key || (value as TreeNode).id;
+                if (initialValues.includes(key)) {
+                    return null;
+                }
+                return suggestions?.find((s) => s.value === key && s.status === 'ACCEPTED');
+            }),
+        );
     }
 
     reorderChip(event: CdkDragDrop<any>) {
         const currentValue = [...this.chipsControl.value];
         moveItemInArray(currentValue, event.previousIndex, event.currentIndex);
         this.chipsControl.setValue(currentValue);
+    }
+
+    onProposalKeydown(event: KeyboardEvent): void {
+        const navigationKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+        if (navigationKeys.includes(event.key)) {
+            this.proposalKeyManager?.onKeydown(event);
+            event.stopPropagation();
+        }
+    }
+
+    async acceptUserProposalGroup(group: UserProposalGroup): Promise<void> {
+        const values: DisplayValue[] = this.chipsControl.value;
+        if (!values.some((v) => v.key === group.displayValue.key)) {
+            this.add(group.displayValue);
+        }
+        await this.applyUserProposalGroupStatus(group, 'ACCEPTED');
+    }
+
+    async declineUserProposalGroup(group: UserProposalGroup): Promise<void> {
+        await this.applyUserProposalGroupStatus(group, 'DECLINED');
+    }
+
+    private async applyUserProposalGroupStatus(
+        group: UserProposalGroup,
+        status: 'ACCEPTED' | 'DECLINED',
+    ): Promise<void> {
+        const allSuggestions = await firstValueFrom(this.widget.getSuggestions());
+        for (const s of group.suggestions) {
+            this.widget.setSuggestionState(new BehaviorSubject(s), status);
+        }
+        this.mdsEditorInstance.updateHasChanges();
+        this.widget.setSuggestions(allSuggestions);
     }
 }

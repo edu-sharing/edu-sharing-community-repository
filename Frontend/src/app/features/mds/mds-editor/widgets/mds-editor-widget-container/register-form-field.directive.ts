@@ -1,4 +1,4 @@
-import { Directive } from '@angular/core';
+import { Directive, inject } from '@angular/core';
 import { MatFormField } from '@angular/material/form-field';
 import { FormFieldRegistrationService } from './form-field-registration.service';
 
@@ -7,7 +7,10 @@ import { FormFieldRegistrationService } from './form-field-registration.service'
     standalone: false,
 })
 export class RegisterFormFieldDirective {
-    constructor(formField: MatFormField, formFieldRegistration: FormFieldRegistrationService) {
+    constructor() {
+        const formField = inject(MatFormField);
+        const formFieldRegistration = inject(FormFieldRegistrationService);
+
         formFieldRegistration.register(formField);
     }
 }

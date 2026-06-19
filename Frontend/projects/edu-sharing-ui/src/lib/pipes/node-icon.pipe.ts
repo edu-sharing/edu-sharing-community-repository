@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { RepoUrlService } from '../services/repo-url.service';
 
@@ -7,7 +7,8 @@ import { RepoUrlService } from '../services/repo-url.service';
     standalone: false,
 })
 export class NodeIconPipe implements PipeTransform {
-    constructor(private repoUrlService: RepoUrlService) {}
+    private repoUrlService = inject(RepoUrlService);
+
     transform(node: Node) {
         return this.repoUrlService.getRepoUrl((node.relations?.Original || node).icon.url, node);
     }

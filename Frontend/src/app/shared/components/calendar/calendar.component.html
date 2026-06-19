@@ -10,17 +10,14 @@
       placeholder="{{ 'CHOOSE_DATE' | translate }}"
     />
   </mat-form-field>
-  <button
-    mat-button
-    color="primary"
-    *ngIf="isResettable && date"
-    class="reset"
-    (click)="setDate(null)"
-  >
+  @if (isResettable && date) {
+  <button mat-button color="primary" class="reset" (click)="setDate(null)">
     <i esIcon="clear"></i>
   </button>
+  }
   <!--<button mat-button color="primary" (click)="showDatepicker=!showDatepicker"><i esIcon="event"></i></button>-->
-  <div *ngIf="showDatepicker" class="picker" [@overlay]="showDatepicker">
+  @if (showDatepicker) {
+  <div class="picker" [@overlay]="showDatepicker">
     <mat-calendar
       [minDate]="minDate"
       [maxDate]="maxDate"
@@ -28,11 +25,12 @@
       [selected]="date"
     ></mat-calendar>
   </div>
+  } @if (showDatepicker) {
   <div
-    *ngIf="showDatepicker"
     [@overlay]="showDatepicker"
     class="dialog picker-background"
     (click)="showDatepicker = false"
     (contextmenu)="showDatepicker = false"
   ></div>
+  }
 </div>

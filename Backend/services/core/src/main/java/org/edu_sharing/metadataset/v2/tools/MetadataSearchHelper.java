@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -30,6 +31,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class MetadataSearchHelper {
+
+	static Logger logger = Logger.getLogger(MetadataSearchHelper.class);
+	private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
     public static Map<String, String[]> convertCriterias(List<MdsQueryCriteria> criterias) {
         Map<String, String[]> criteriasMap = new HashMap<>();
@@ -175,5 +179,37 @@ public class MetadataSearchHelper {
         }
         return result;
     }
+	private static String getSearchString(String field,String[] types) {
+		String result = "(";
+		
+		Iterator<String> iter = Arrays.asList(types).iterator();
+		while (iter.hasNext()) {
+			String key = iter.next();
+			result = result +field+":\"" + key + "\"";
+			if (iter.hasNext())
+				result = result + " OR ";
+
+		}
+		result = result + ")";
+		return result;
+	}
+
+	private static String applyCondition(MetadataQueryBase query, String lucene) {
+		for(MetadataQueryCondition condition : query.getConditions()){
+			boolean conditionState= MetadataHelper.checkConditionTrue(condition.getCondition());
+			if(conditionState && condition.getQueryTrue()!=null) {
+				String conditionString = condition.getQueryTrue();
+				conditionString = replaceCommonQueryVariables(conditionString);
+				lucene += " AND (" + conditionString + ")";
+			}
+			if(!conditionState && condition.getQueryFalse()!=null) {
+				String conditionString =condition.getQueryFalse();
+				conditionString = replaceCommonQueryVariables(conditionString);
+				lucene += " AND (" + conditionString + ")";
+			}
+		}
+
+		return lucene;
+	}
 
 }

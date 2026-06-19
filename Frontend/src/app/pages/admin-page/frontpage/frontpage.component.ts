@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -26,6 +26,17 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     standalone: false,
 })
 export class AdminFrontpageComponent implements AfterViewInit {
+    private adminService = inject(RestAdminService);
+    private collectionService = inject(RestCollectionService);
+    private dialogs = inject(DialogsService);
+    private formBuilder = inject(UntypedFormBuilder);
+    private mdsService = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeService = inject(RestNodeService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    configService = inject(ConfigurationService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
 
@@ -45,18 +56,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
     codeOptions = { minimap: { enabled: false }, language: 'json' };
     toolpermissions: any;
 
-    constructor(
-        private adminService: RestAdminService,
-        private collectionService: RestCollectionService,
-        private dialogs: DialogsService,
-        private formBuilder: UntypedFormBuilder,
-        private mdsService: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private nodeService: RestNodeService,
-        private toast: Toast,
-        private translate: TranslateService,
-        public configService: ConfigurationService,
-    ) {
+    constructor() {
         this.form = this.formBuilder.group(
             {
                 totalCount: [

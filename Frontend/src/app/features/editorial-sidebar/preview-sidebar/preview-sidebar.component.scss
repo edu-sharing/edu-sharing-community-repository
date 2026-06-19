@@ -2,12 +2,17 @@
 
 :host {
     display: flex;
+    flex: 1;
+    min-height: 0;
 }
 
 .preview-sidebar {
     display: flex;
     flex-direction: column;
     width: 100%;
+    flex: 1;
+    min-height: 0;
+    --mat-app-elevation-shadow-level-3: none;
 }
 
 .preview-sidebar-header {

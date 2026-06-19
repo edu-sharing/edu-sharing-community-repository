@@ -34,7 +34,7 @@ public class StreamDao {
 			}
 			for(String node : newEntry.getNodes()) {
 				NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-				if(!nodeDao.access.contains(CCConstants.PERMISSION_CC_PUBLISH)) {
+				if(!nodeDao.getAccess().contains(CCConstants.PERMISSION_CC_PUBLISH)) {
 					throw new AccessDeniedException("No "+CCConstants.PERMISSION_CC_PUBLISH+" for node "+node);
 				}
 				// TODO: We need to set an usage to these node so they can be accessed from the stream user

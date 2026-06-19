@@ -1,18 +1,16 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
+import { LocalEventsService, OPEN_URL_MODE } from 'ngx-edu-sharing-ui';
 import {
     Connector,
     DialogButton,
     RestConnectorService,
     RestConnectorsService,
     RestConstants,
-    RestHelper,
-    RestNodeService,
     UIService,
 } from '../../../../core-module/core.module';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { Toast } from '../../../../services/toast';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -21,44 +19,57 @@ import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/br
 import { CARD_DIALOG_DATA } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { CreateVariantDialogData, CreateVariantDialogResult } from './create-variant-dialog-data';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 @Component({
     selector: 'es-create-variant-dialog',
     templateUrl: './create-variant-dialog.component.html',
     styleUrls: ['./create-variant-dialog.component.scss'],
     standalone: false,
+    providers: [BreadcrumbsService],
 })
 export class CreateVariantDialogComponent {
+    data = inject<CreateVariantDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>>(CardDialogRef);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private connector = inject(RestConnectorService);
+    private connectors = inject(RestConnectorsService);
+    private localEvents = inject(LocalEventsService);
+    private dialogs = inject(DialogsService);
+    private uiService = inject(UIService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     variantName: string;
     licenseWarning: string;
 
     private _openViaConnector: Connector;
+    private _directory: string;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: CreateVariantDialogData,
-        private dialogRef: CardDialogRef<CreateVariantDialogData, CreateVariantDialogResult>,
-        private breadcrumbsService: BreadcrumbsService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private dialogs: DialogsService,
-        private uiService: UIService,
-        private nodeApi: RestNodeService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
-        this._initNode();
-        this._updateBreadcrumbs(RestConstants.INBOX);
+    constructor() {
+        void this._initNode();
         this._updateButtons();
     }
 
-    private _initNode() {
+    private async _initNode() {
         const node = this.data.node;
         this.variantName = this.translate.instant('NODE_VARIANT.DEFAULT_NAME', {
             name: this.data.node.name,
         });
+        this._directory = RestConstants.INBOX;
+        try {
+            const parent = await firstValueFrom(this.nodeService.getNode(node.parent.id));
+            if (this.nodeHelper.getNodesRight([parent], RestConstants.ACCESS_ADD_CHILDREN)) {
+                this._directory = parent.ref.id;
+            }
+        } catch (e) {
+            e.preventDefault();
+        }
+        this._updateBreadcrumbs();
         this._openViaConnector = this.connectors.connectorSupportsEdit(node);
         let license = node.properties[RestConstants.CCM_PROP_LICENSE]
             ? node.properties[RestConstants.CCM_PROP_LICENSE][0]
@@ -89,71 +100,55 @@ export class CreateVariantDialogComponent {
             win = UIHelper.getNewWindow(this.connector);
         }
         this.dialogRef.patchState({ isLoading: true });
-        this.nodeApi
+        this.nodeService
             .forkNode(
                 this.breadcrumbsService.breadcrumbs$.value[
                     this.breadcrumbsService.breadcrumbs$.value.length - 1
                 ].ref.id,
                 this.data.node.ref.id,
+                this.variantName,
             )
             .subscribe(
                 (created) => {
-                    this.nodeApi
-                        .editNodeMetadata(
-                            created.node.ref.id,
-                            RestHelper.createNameProperty(this.variantName),
-                        )
-                        .subscribe(
-                            (edited) => {
-                                this.dialogRef.patchState({ isLoading: false });
-                                if (this._openViaConnector) {
-                                    this.uiService.openConnector(edited.node, null, win);
+                    this.dialogRef.patchState({ isLoading: false });
+                    this.localEvents.nodesCreated.emit([created.node]);
+                    if (this._openViaConnector) {
+                        void this.uiService.editConnector(created.node, { win });
+                        UIHelper.goToWorkspaceFolder(
+                            this.router,
+                            this.connector.getCurrentLogin(),
+                            this.breadcrumbsService.breadcrumbs$.value[
+                                this.breadcrumbsService.breadcrumbs$.value.length - 1
+                            ].ref.id,
+                        );
+                    } else {
+                        let additional = {
+                            link: {
+                                caption: 'NODE_VARIANT.CREATED_LINK',
+                                callback: () => {
                                     UIHelper.goToWorkspaceFolder(
-                                        this.nodeApi,
                                         this.router,
                                         this.connector.getCurrentLogin(),
                                         this.breadcrumbsService.breadcrumbs$.value[
                                             this.breadcrumbsService.breadcrumbs$.value.length - 1
                                         ].ref.id,
                                     );
-                                } else {
-                                    let additional = {
-                                        link: {
-                                            caption: 'NODE_VARIANT.CREATED_LINK',
-                                            callback: () => {
-                                                UIHelper.goToWorkspaceFolder(
-                                                    this.nodeApi,
-                                                    this.router,
-                                                    this.connector.getCurrentLogin(),
-                                                    this.breadcrumbsService.breadcrumbs$.value[
-                                                        this.breadcrumbsService.breadcrumbs$.value
-                                                            .length - 1
-                                                    ].ref.id,
-                                                );
-                                            },
-                                        },
-                                    };
-                                    this.toast.toast(
-                                        'NODE_VARIANT.CREATED',
-                                        {
-                                            folder: this.breadcrumbsService.breadcrumbs$.value[
-                                                this.breadcrumbsService.breadcrumbs$.value.length -
-                                                    1
-                                            ].name,
-                                        },
-                                        null,
-                                        null,
-                                        additional,
-                                    );
-                                }
-                                this._done();
+                                },
                             },
-                            (error) => {
-                                this.dialogRef.patchState({ isLoading: false });
-                                this.nodeHelper.handleNodeError(this.variantName, error);
-                                if (win) win.close();
+                        };
+                        this.toast.toast(
+                            'NODE_VARIANT.CREATED',
+                            {
+                                folder: this.breadcrumbsService.breadcrumbs$.value[
+                                    this.breadcrumbsService.breadcrumbs$.value.length - 1
+                                ].name,
                             },
+                            null,
+                            null,
+                            additional,
                         );
+                    }
+                    this._done();
                 },
                 (error) => {
                     this.dialogRef.patchState({ isLoading: false });
@@ -182,11 +177,12 @@ export class CreateVariantDialogComponent {
     }
 
     private _setDirectory(event: Node[]) {
-        this._updateBreadcrumbs(event[0].ref.id);
+        this._directory = event[0].ref.id;
+        this._updateBreadcrumbs();
     }
 
-    private _updateBreadcrumbs(id: string) {
-        this.nodeApi.getNodeParents(id, false).subscribe((parents) => {
+    private _updateBreadcrumbs() {
+        this.nodeService.getParents(this._directory, { fullPath: false }).subscribe((parents) => {
             this.breadcrumbsService.setNodePath(parents.nodes.reverse());
         });
     }

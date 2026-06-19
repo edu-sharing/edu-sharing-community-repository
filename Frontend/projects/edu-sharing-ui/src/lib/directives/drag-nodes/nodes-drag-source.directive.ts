@@ -7,6 +7,7 @@ import {
     OnChanges,
     Output,
     SimpleChanges,
+    inject,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { clearDraggedNodes, dragNodesTransferType, saveDraggedNodes } from './drag-nodes';
@@ -24,6 +25,8 @@ import { clearDraggedNodes, dragNodesTransferType, saveDraggedNodes } from './dr
     standalone: false,
 })
 export class NodesDragSourceDirective implements OnChanges {
+    private elementRef = inject<ElementRef<Element>>(ElementRef);
+
     /**
      * The nodes to be dragged.
      *
@@ -42,8 +45,6 @@ export class NodesDragSourceDirective implements OnChanges {
      * Triggered when processing the dragend event.
      */
     @Output() nodesDragEnd = new EventEmitter<DragEvent>();
-
-    constructor(private elementRef: ElementRef<Element>) {}
 
     ngOnChanges(changes: SimpleChanges) {
         // Set the `draggable` attribute when this directive is active.

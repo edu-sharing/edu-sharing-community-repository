@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
@@ -13,10 +13,8 @@ import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
     providedIn: 'root',
 })
 export class RepoUrlService {
-    private constructor(
-        private networkService: NetworkService,
-        private configuration: EduSharingUiConfiguration,
-    ) {}
+    private networkService = inject(NetworkService);
+    private configuration = inject(EduSharingUiConfiguration);
 
     /**
      * Replaces the given URL if the given node belongs to the home repository.

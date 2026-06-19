@@ -99,13 +99,13 @@ form.create {
         }
         .chips {
             .components {
-                --mdc-chip-elevated-container-color: #cdbeda;
+                --mat-chip-elevated-container-color: #cdbeda;
             }
             .contexts {
-                --mdc-chip-elevated-container-color: #bedabe;
+                --mat-chip-elevated-container-color: #bedabe;
             }
             .tp {
-                --mdc-chip-elevated-container-color: #eae4ce;
+                --mat-chip-elevated-container-color: #eae4ce;
             }
         }
     }

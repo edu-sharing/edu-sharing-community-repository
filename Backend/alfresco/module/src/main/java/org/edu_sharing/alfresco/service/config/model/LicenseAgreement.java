@@ -1,17 +1,18 @@
 package org.edu_sharing.alfresco.service.config.model;
 
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlValue;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.xml.bind.annotation.*;
+
 import java.io.Serializable;
 
 public class LicenseAgreement implements Serializable {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	private static class LicenseAgreementNode implements Serializable{
+		@Schema(description = "Language code for this agreement entry")
 		@XmlAttribute public String language;
+		@Schema(description = "HTML content of the license agreement")
 		@XmlValue public String value;
 	}
-	@XmlElement	public LicenseAgreementNode[] nodeId;
+	@Schema(description = "Array of license agreement entries (one per language, with fallback)")
+	@XmlElement public LicenseAgreementNode[] nodeId;
 }

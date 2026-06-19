@@ -12,17 +12,19 @@
   (fetchData)="refresh($event)"
 >
   <ng-template #empty>
-    <h3 *ngIf="!!searchQuery" class="empty mat-heading-3">
+    @if (!!searchQuery) {
+    <h3 class="empty mat-heading-3">
       {{ 'RECYCLE.NO_RESULTS_MESSAGE' | translate }}
     </h3>
-    <h3 *ngIf="!searchQuery" class="empty mat-heading-3">
-      <ng-container *ngIf="(dataSource.connectPagination() | async).total === 0">
-        {{ 'RECYCLE.ARCHIVE_EMPTY' | translate }}
-      </ng-container>
-      <ng-container *ngIf="(dataSource.connectPagination() | async).total !== 0">
-        {{ 'RECYCLE.ARCHIVE_REORDERING' | translate }}
-      </ng-container>
+    } @if (!searchQuery) {
+    <h3 class="empty mat-heading-3">
+      @if ((dataSource.connectPagination() | async).total === 0) {
+      {{ 'RECYCLE.ARCHIVE_EMPTY' | translate }}
+      } @if ((dataSource.connectPagination() | async).total !== 0) {
+      {{ 'RECYCLE.ARCHIVE_REORDERING' | translate }}
+      }
     </h3>
+    }
   </ng-template>
 </es-node-entries-wrapper>
 
@@ -38,26 +40,35 @@
 </ng-template>
 
 <ng-template #restoreDialog let-restoreResult>
-  <div *ngIf="restoreResult.hasDuplicateNames">
+  @if (restoreResult.hasDuplicateNames) {
+  <div>
     <p>{{ 'RECYCLE.RESTORE.LIST_DUPLICATE_NAMES' | translate }}</p>
-    <div *ngFor="let result of restoreResult.results">
-      <div *ngIf="result.restoreStatus === 'DUPLICATENAME'">
+    @for (result of restoreResult.results; track result) {
+    <div>
+      @if (result.restoreStatus === 'DUPLICATENAME') {
+      <div>
         {{ result.name }} <span class="restore-message">({{ result.message }})</span>
       </div>
+      }
     </div>
+    }
   </div>
-  <div *ngIf="restoreResult.hasParentFolderMissing">
-    <hr *ngIf="restoreResult.hasDuplicateNames" />
+  } @if (restoreResult.hasParentFolderMissing) {
+  <div>
+    @if (restoreResult.hasDuplicateNames) {
+    <hr />
+    }
     <p>{{ 'RECYCLE.RESTORE.LIST_PARENT_FOLDER_MISSING' | translate }}</p>
-    <div *ngFor="let result of restoreResult.results">
-      <div
-        *ngIf="
-          result.restoreStatus === 'FALLBACK_PARENT_NOT_EXISTS' ||
-          result.restoreStatus === 'FALLBACK_PARENT_NO_PERMISSION'
-        "
-      >
+    @for (result of restoreResult.results; track result) {
+    <div>
+      @if ( result.restoreStatus === 'FALLBACK_PARENT_NOT_EXISTS' || result.restoreStatus ===
+      'FALLBACK_PARENT_NO_PERMISSION' ) {
+      <div>
         {{ result.name }} <span class="restore-message">({{ result.message }})</span>
       </div>
+      }
     </div>
+    }
   </div>
+  }
 </ng-template>

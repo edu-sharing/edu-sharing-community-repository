@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { AboutService as AboutApiService } from '../api/services';
@@ -10,13 +10,13 @@ import { HttpClient } from '@angular/common/http';
     providedIn: 'root',
 })
 export class AboutService {
+    private about = inject(AboutApiService);
+    private config = inject(ApiConfiguration);
+    private http = inject(HttpClient);
+
     private readonly about$;
 
-    constructor(
-        private about: AboutApiService,
-        private config: ApiConfiguration,
-        private http: HttpClient,
-    ) {
+    constructor() {
         this.about$ = this.about.about().pipe(shareReplay(1));
     }
 

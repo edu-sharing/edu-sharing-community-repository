@@ -11,6 +11,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
@@ -34,6 +35,11 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     styleUrls: ['./collection-chips.component.scss'],
 })
 export class CollectionChipsComponent implements WidgetComponentInterface {
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     protected readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.COLLECTION_CHIPS.';
 
     // INPUTS + OUTPUTS
@@ -50,6 +56,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
 
     // VARIABLES
+    customCollectionChipsTileColor: string;
     customUrl: (node: Node) => string;
     layout: CollectionListDisplayType = CollectionListDisplayType.Chips;
     layoutOptions: LayoutOption[] = [
@@ -78,15 +85,12 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
             : this.list.slice(0, this.displayLimit),
     );
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         if (this.topicPageGlobalService.getCustomUrlFunction()) {
             this.customUrl = this.topicPageGlobalService.getCustomUrlFunction();
         }
+        this.customCollectionChipsTileColor =
+            this.topicPageGlobalService.getCustomCollectionChipsTileColor();
     }
 
     /**

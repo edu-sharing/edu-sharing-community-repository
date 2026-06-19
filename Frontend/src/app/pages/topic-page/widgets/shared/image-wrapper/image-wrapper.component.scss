@@ -7,6 +7,7 @@
     align-items: center;
     background: topicPageVars.$surface-container-lowest;
     position: relative;
+    min-height: 200px;
     --image-button-size: 48px;
 
     &.edit-mode {
@@ -18,7 +19,7 @@
         margin-right: 0 !important;
 
         .image-wrapper {
-            max-height: var(--mobile-max-height);
+            max-height: var(--mobile-max-height, 350px);
             background-color: #000;
         }
 
@@ -76,6 +77,8 @@
     min-height: 100%;
     max-height: 512px;
     flex-shrink: 0;
+    object-fit: cover;
+    object-position: center;
 }
 
 // vertically centered buttons to change or delete the image
@@ -120,4 +123,24 @@
     align-items: center;
     background: rgba(0, 0, 0, 0.45);
     z-index: 3;
+}
+
+.card-image-icon-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+
+    > i.mat-icon {
+        color: #fff;
+        font-size: 45px;
+        width: 1em;
+        height: 1em;
+    }
 }

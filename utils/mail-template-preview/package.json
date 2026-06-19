@@ -1,0 +1,7 @@
+{
+  "name": "mail-template-preview",
+  "description": "generate a html preview how a mail template looks like",
+  "dependencies": {
+    "fast-xml-parser": "^5.3.7"
+  }
+}

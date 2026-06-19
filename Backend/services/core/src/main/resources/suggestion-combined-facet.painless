@@ -1,0 +1,17 @@
+List values = new ArrayList();
+def prop = params.property;
+def props = params._source['properties'];
+if (props != null) {
+    def v = props[prop];
+    if (v instanceof List) { for (def e : v) { if (e != null) values.add(e.toString()); } }
+    else if (v != null) { values.add(v.toString()); }
+}
+def suggestions = params._source['suggestions'];
+if (suggestions != null) {
+    for (def s : suggestions) {
+        if (prop.equals(s['propertyId']) && s['value'] != null) {
+            values.add(s['value'].toString());
+        }
+    }
+}
+return values;

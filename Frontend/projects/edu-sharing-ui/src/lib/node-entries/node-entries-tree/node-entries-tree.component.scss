@@ -1,10 +1,14 @@
 @use 'sass:color';
+@use '../../../../assets/scss/mixins' as mixins;
 @use '../../../../assets/scss/variables-scss' as vars;
 
+$rowMinHeight: 48px;
+
 :host {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    &.is-loading {
+        width: 100%;
+    }
+    --mat-checkbox-state-layer-size: 28px;
 }
 
 .dropdown-dummy {
@@ -12,7 +16,7 @@
 }
 
 :host ::ng-deep .search-field {
-    --mdc-outlined-text-field-container-shape: 28px;
+    --mat-form-field-outlined-container-shape: 28px;
 }
 
 .tree-toolbar {
@@ -21,8 +25,22 @@
     justify-content: end;
 }
 
-mat-tree-node.selected {
-    background: #f2fafe;
+mat-tree-node {
+    min-height: $rowMinHeight;
+    transition: background-color 0.15s ease;
+
+    &:not(.selected):hover {
+        background-color: rgb(var(--palette-primary-50));
+    }
+
+    &.selected {
+        background: var(--listItemSelectedBackground, #f2fafe);
+        box-shadow: inset 2px 0 0 0 var(--listItemSelectedBackgroundEffect, transparent);
+    }
+
+    &.selected-when-dragging {
+        opacity: 0.5;
+    }
 }
 
 .load-more-container {
@@ -31,25 +49,60 @@ mat-tree-node.selected {
     width: 100%;
 }
 
+.child-tree-node-container,
+.parent-tree-node-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: $rowMinHeight;
+
+    .node-checkbox {
+        flex-shrink: 0;
+    }
+
+    .tree-node-indent {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 .parent-tree-node {
     flex-wrap: wrap;
 
     .parent-tree-node-container {
-        display: flex;
-        align-items: center;
-        gap: 4px;
         width: 100%;
-        min-height: 48px;
 
         .toggle-button {
             cursor: pointer;
             color: inherit;
+            width: 28px;
+            height: 28px;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            border-radius: 50%;
+            transition: background-color 0.15s ease;
+
+            &:hover:not(:disabled) {
+                background-color: rgba(0, 0, 0, 0.06);
+            }
+
+            &:disabled {
+                cursor: default;
+                opacity: 0.5;
+                color: vars.$textVeryLight;
+            }
 
             &.fade {
                 opacity: 1;
-                transition: opacity 0.5s ease; /* Smooth fade */
+                transition: opacity 0.5s ease, background-color 0.15s ease;
 
                 &.hidden {
                     opacity: 0 !important;
@@ -63,9 +116,32 @@ mat-tree-node.selected {
         height: 0;
     }
 
+    .loading-row {
+        margin-bottom: 8px;
+
+        // decrease size of spinner
+        es-spinner::ng-deep {
+            .spinnercontainer {
+                margin: 8px 0;
+                height: $rowMinHeight;
+
+                .inner {
+                    // keep the same ratio between width and height as before (30 / 50)
+                    width: 24px;
+                    height: 40px;
+
+                    > div {
+                        background-size: 40px;
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+            }
+        }
+    }
+
     .placeholder-container {
         margin: 16px 0 8px;
-        padding-left: 40px;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -74,15 +150,21 @@ mat-tree-node.selected {
         .placeholder {
             background: #eee;
             height: 20px;
+            border-radius: 4px;
         }
     }
 }
 
-// for children, reverse the same space that the toggle button takes (24px icon width + 4px gap)
+// for children (no toggle button), reverse the same space that the toggle button
+// takes (24px icon width + 4px gap) on the CONTENT wrapper so the checkbox still
+// sits at the very start of the line.
 .child-tree-node-container {
-    padding-left: 28px;
     width: 100%;
     max-width: 100%;
+
+    > .tree-node-indent {
+        padding-left: 28px;
+    }
 }
 
 .node-information {
@@ -96,6 +178,7 @@ mat-tree-node.selected {
     flex: 1;
     // allow shrinking
     min-width: 0;
+    border-radius: 4px;
 
     &.cursor-pointer {
         cursor: pointer;
@@ -105,6 +188,10 @@ mat-tree-node.selected {
         color: vars.$textVeryLight;
     }
 
+    .node-checkbox {
+        flex-shrink: 0;
+    }
+
     .general-information {
         // take up remaining space
         flex: 1;
@@ -112,8 +199,7 @@ mat-tree-node.selected {
         min-width: 0;
     }
 
-    .action-buttons {
-        // do not allow buttons to shrink
+    .node-options {
         flex-shrink: 0;
     }
 
@@ -144,6 +230,11 @@ mat-tree-node.selected {
                 height: 14px;
                 font-size: 14px;
             }
+        }
+
+        // unify box-shadow of both node-entries-table and tree
+        es-node-type-badge {
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
         }
     }
 }

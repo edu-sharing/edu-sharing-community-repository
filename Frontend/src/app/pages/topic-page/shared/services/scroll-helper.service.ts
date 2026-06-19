@@ -1,10 +1,12 @@
-import { Injectable, OnDestroy, Renderer2, RendererFactory2 } from '@angular/core';
+import { Injectable, OnDestroy, Renderer2, RendererFactory2, inject } from '@angular/core';
 import { getBodyHeight } from '../utils/dom-util';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ScrollHelperService implements OnDestroy {
+    private rendererFactory = inject(RendererFactory2);
+
     private _changeLayoutPending: boolean = false;
     get changeLayoutPending(): boolean {
         return this._changeLayoutPending;
@@ -23,7 +25,7 @@ export class ScrollHelperService implements OnDestroy {
     // https://medium.com/claritydesignsystem/four-ways-of-listening-to-dom-events-in-angular-part-3-renderer2-listen-14c6fe052b59
     private unlistener: () => void;
 
-    constructor(private rendererFactory: RendererFactory2) {
+    constructor() {
         // get an instance of Renderer2 inside the service (https://stackoverflow.com/a/47924814)
         this.renderer = this.rendererFactory.createRenderer(null, null);
 

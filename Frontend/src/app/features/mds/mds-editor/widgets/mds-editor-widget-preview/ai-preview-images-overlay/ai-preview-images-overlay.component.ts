@@ -11,10 +11,11 @@ import {
     ViewChild,
     ViewContainerRef,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AuthenticationService, MdsWidget, Node } from 'ngx-edu-sharing-api';
-import { EduSharingLlmService, Image, ImageResult, MdsConfig } from 'ngx-edu-sharing-b-api';
+import { EduSharingLlmService, Image, ImagesResponse, MdsConfig } from 'ngx-edu-sharing-b-api';
 import { firstValueFrom } from 'rxjs';
 import { Toast } from '../../../../../../services/toast';
 import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
@@ -26,6 +27,14 @@ import { MdsEditorInstanceService } from '../../../mds-editor-instance.service';
     standalone: false,
 })
 export class AiPreviewImagesOverlayComponent implements OnInit {
+    private auth = inject(AuthenticationService);
+    private eduSharingLlmService = inject(EduSharingLlmService);
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private overlay = inject(Overlay);
+    private sanitizer = inject(DomSanitizer);
+    private toast = inject(Toast);
+    private viewContainerRef = inject(ViewContainerRef);
+
     protected readonly IMAGES_PREFIX: string = 'assets/images/ai/previews/';
     protected readonly IMAGES_SUFFIX: string = '.jpg';
     static readonly WIDGET_ID_DRAWING_STYLE = 'preview.drawingStyle';
@@ -47,16 +56,6 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
     selectedStyleId: string | null = null;
     styleIdToPreviewImagesMap: Map<string, Image[]> = new Map<string, Image[]>();
     private readonly BASE_64_PREFIX: string = 'data:image/jpg;base64,';
-
-    constructor(
-        private auth: AuthenticationService,
-        private eduSharingLlmService: EduSharingLlmService,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private overlay: Overlay,
-        private sanitizer: DomSanitizer,
-        private toast: Toast,
-        private viewContainerRef: ViewContainerRef,
-    ) {}
 
     /**
      * Initializes the component by retrieving the AI drawing styles from the mds definition.
@@ -131,7 +130,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
         // check, whether a map value exist or the regeneration is requested
         if (!this.styleIdToPreviewImagesMap.has(styleId) || regenerateRequested) {
             try {
-                const result: ImageResult = await this.createAiImages(styleId);
+                const result: ImagesResponse = await this.createAiImages(styleId);
                 this.styleIdToPreviewImagesMap.set(styleId, result.data);
             } catch (e) {
                 this.toast.error(e);
@@ -198,7 +197,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
      *
      * @param styleId
      */
-    private async createAiImages(styleId: string): Promise<ImageResult> {
+    private async createAiImages(styleId: string): Promise<ImagesResponse> {
         const user: string =
             (await firstValueFrom(this.auth.observeLoginInfo()))?.authorityName ?? 'guest';
         const values = await this.mdsEditorInstance.getValues(null, false);
@@ -207,7 +206,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
             id: 'image_ai',
         };
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [mdsConfig],
                     metadataSet: this.mdsEditorInstance.mdsId,

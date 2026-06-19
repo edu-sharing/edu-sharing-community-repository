@@ -20,6 +20,7 @@ const PROXY_CONFIG = [
             '/edu-sharing/eduservlet',
             '/edu-sharing/preview',
             '/edu-sharing/themes',
+            '/edu-sharing/share',
             '/edu-sharing/ccimages',
             '/edu-sharing/oauth2/',
             '/edu-sharing/oauth2server/',
@@ -31,6 +32,12 @@ const PROXY_CONFIG = [
         target: process.env.BACKEND_URL,
         secure: false,
         changeOrigin: true,
+        bypass(req, res, proxyOptions) {
+            if (req.method !== 'POST' && req.url.startsWith('/edu-sharing/share')) {
+                // proxy only the post request to the backend, not any other paths
+                return req.url;
+            }
+        },
         onProxyRes: function (proxyRes, req, res) {
             proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
             const cookies = proxyRes.headers['set-cookie'];
@@ -61,6 +68,7 @@ const PROXY_CONFIG = [
                         .replace('; Path=/edu-sharing', '; Path=/')
                         // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
                         .replace('; Secure', '')
+                        .replace('; Partitioned', '')
                         // 'SameSite=None' is only allowed on 'Secure' cookies.
                         .replace('; SameSite=None', ''),
                 );
@@ -72,10 +80,10 @@ const PROXY_CONFIG = [
         target: process.env.RS2_URL || 'http://127.0.0.1.nip.io:8080',
         secure: false,
         changeOrigin: true,
-        pathRewrite: { '^/rendering2': '/' },
+        pathRewrite: { '^/rendering2': '' },
         configure(proxy) {
             proxy.on('proxyReq', (proxyReq) => {
-                proxyReq.setHeader('Origin', process.env.BACKEND_URL);
+                proxyReq.removeHeader('Origin');
                 // only receive non-gzip results for patching
                 proxyReq.setHeader('Accept-Encoding', 'deflate');
             });
@@ -89,6 +97,7 @@ const PROXY_CONFIG = [
                             .replace('; Secure', '')
                             .replace(/;\s*Domain=[^;]+/gi, '')
                             .replace(/;\s*Path=[^;]+/gi, '')
+                            .replace('; Partitioned', '')
                             // 'SameSite=None' is only allowed on 'Secure' cookies.
                             .replace('; SameSite=None', ''),
                     );
@@ -111,7 +120,7 @@ const PROXY_CONFIG = [
                         `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
                         'g',
                     );
-                    body = body.replace(regex, 'http://localhost:4200/rendering2/');
+                    body = body.replace(regex, 'http://localhost:4200/rendering2');
                     res.setHeader('content-length', Buffer.byteLength(body));
                     res.end(body);
                 });

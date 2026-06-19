@@ -23,6 +23,7 @@ import { MdsEditorWidgetDurationComponent } from '../mds-editor/widgets/mds-edit
 import { MdsEditorWidgetTreeComponent } from '../mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetFacetListComponent } from '../mds-editor/widgets/mds-editor-widget-facet-list/mds-editor-widget-facet-list.component';
 import { MdsEditorWidgetCollectionsComponent } from '../mds-editor/widgets/mds-editor-widget-collections/mds-editor-widget-collections.component';
+import { MdsEditorWidgetMultivalueButtonsComponent } from '../mds-editor/widgets/mds-editor-widget-multivalue-buttons/mds-editor-widget-multivalue-buttons.component';
 import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetCommentsComponent } from '../mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
 import { MdsEditorWidgetRelationsComponent } from '../mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
@@ -89,6 +90,7 @@ export const WidgetComponents: {
     [MdsWidgetType.MultiValueSuggestBadges]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.MultiValueFixedBadges]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
+    [MdsWidgetType.MultiValueButtons]: MdsEditorWidgetMultivalueButtonsComponent,
     [MdsWidgetType.Nodefilter]: MdsEditorWidgetNodefilterComponent,
     [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
     [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,

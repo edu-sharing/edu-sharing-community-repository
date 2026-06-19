@@ -1,38 +1,46 @@
 <div class="widget-configuration-buttons">
   <!-- option 1, e.g., link -->
+  @if (optionOne?.isVisible) {
   <button
-    *ngIf="optionOne?.isVisible"
     mat-button
     class="widget-option"
     [disabled]="updateInProgress()"
     [matTooltip]="optionOne.tooltip"
     (click)="clickOptionOne()"
   >
-    <i *ngIf="optionOne.icon" [esIcon]="optionOne.icon"></i>
-    <span *ngIf="optionOne.text && optionOne.text !== ''" class="widget-label">
+    @if (optionOne.icon) {
+    <i [esIcon]="optionOne.icon"></i>
+    } @if (optionOne.text && optionOne.text !== '') {
+    <span class="widget-label">
       {{ optionOne.text }}
     </span>
+    }
   </button>
+  }
   <!-- option 2, e.g., embed -->
+  @if (optionTwo?.isVisible) {
   <button
-    *ngIf="optionTwo?.isVisible"
     mat-button
     class="widget-option"
     [disabled]="updateInProgress()"
     [matTooltip]="optionTwo.tooltip"
     (click)="clickOptionTwo()"
   >
-    <i *ngIf="optionTwo.icon" [esIcon]="optionTwo.icon"></i>
-    <span *ngIf="optionTwo.text && optionTwo.text !== ''" class="widget-label">
+    @if (optionTwo.icon) {
+    <i [esIcon]="optionTwo.icon"></i>
+    } @if (optionTwo.text && optionTwo.text !== '') {
+    <span class="widget-label">
       {{ optionTwo.text }}
     </span>
+    }
   </button>
+  }
   <!-- display configuration (color + layout) -->
-  <div class="widget-display-config-buttons" *ngIf="layoutOptions.length > 0">
+  @if (layoutOptions.length > 0) {
+  <div class="widget-display-config-buttons">
     <label class="widget-display-config-label" [class.disabled-text]="updateInProgress()">
       {{ 'TOPIC_PAGE.WIDGET.CHOOSE_LAYOUT' | translate }}:
     </label>
-
     <!-- layout selection -->
     <mat-button-toggle-group
       [attr.aria-label]="ariaLabel"
@@ -41,17 +49,21 @@
       (change)="changeLayout()"
       [(ngModel)]="layout"
     >
+      @for (option of layoutOptions; track option) {
       <mat-button-toggle
-        *ngFor="let option of layoutOptions"
         class="display-button"
         [value]="option.value"
         [attr.aria-label]="'TOPIC_PAGE.WIDGET.LAYOUT.' + option.ariaLabel | translate"
       >
-        <i *ngIf="option.icon" [esIcon]="option.icon"></i>
+        @if (option.icon) {
+        <i [esIcon]="option.icon"></i>
+        }
         <div>
           {{ 'TOPIC_PAGE.WIDGET.LAYOUT.' + option.viewValue | translate }}
         </div>
       </mat-button-toggle>
+      }
     </mat-button-toggle-group>
   </div>
+  }
 </div>

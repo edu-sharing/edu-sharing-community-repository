@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ConfigurationService, DialogButton } from '../../core-module/core.module';
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { CordovaService } from '../../services/cordova.service';
@@ -15,6 +15,9 @@ import { CordovaService } from '../../services/cordova.service';
     standalone: false,
 })
 export class CookieInfoComponent implements OnInit {
+    private cordova = inject(CordovaService);
+    private config = inject(ConfigurationService);
+
     readonly buttons = [
         new DialogButton('COOKIE_INFO.DECLINE', { color: 'standard' }, () => window.history.back()),
         new DialogButton('COOKIE_INFO.ACCEPT', { color: 'primary' }, () => this.accept()),
@@ -23,8 +26,6 @@ export class CookieInfoComponent implements OnInit {
     details = false;
 
     private readonly storageKey = 'COOKIE_INFO_ACCEPTED';
-
-    constructor(private cordova: CordovaService, private config: ConfigurationService) {}
 
     async ngOnInit() {
         this.show =

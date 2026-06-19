@@ -1,20 +1,13 @@
 <es-mds-editor-widget-container [label]="false">
-  <button
-    *ngIf="!$any(widget?.definition)?.button || $any(widget?.definition)?.button === 'mat-button'"
-    mat-button
-    color="primary"
-    (click)="onClick()"
-  >
+  @if (!$any(widget?.definition)?.button || $any(widget?.definition)?.button === 'mat-button') {
+  <button mat-button color="primary" (click)="onClick()">
     <ng-container *ngTemplateOutlet="link"></ng-container>
   </button>
-  <button
-    *ngIf="$any(widget?.definition)?.button === 'mat-flat-button'"
-    mat-flat-button
-    color="primary"
-    (click)="onClick()"
-  >
+  } @if ($any(widget?.definition)?.button === 'mat-flat-button') {
+  <button mat-flat-button color="primary" (click)="onClick()">
     <ng-container *ngTemplateOutlet="link"></ng-container>
   </button>
+  }
 </es-mds-editor-widget-container>
 <ng-template #link>
   <span>{{ linkLabel | translate }}</span>

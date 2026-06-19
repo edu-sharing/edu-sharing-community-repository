@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import {
     DialogButton,
     Group,
@@ -27,6 +27,13 @@ enum Step {
     standalone: false,
 })
 export class JoinGroupDialogComponent implements OnInit {
+    data = inject<JoinGroupDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<JoinGroupDialogData, JoinGroupDialogResult>>(CardDialogRef);
+    private connector = inject(RestConnectorService);
+    private iam = inject(RestIamService);
+    private toast = inject(Toast);
+
     @ViewChild('searchControl') searchControl: ElementRef<HTMLInputElement>;
     readonly STEP = Step;
     dialogStep: Step = Step.selectGroup;
@@ -40,13 +47,7 @@ export class JoinGroupDialogComponent implements OnInit {
         search: new FormControl(''),
     });
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: JoinGroupDialogData,
-        private dialogRef: CardDialogRef<JoinGroupDialogData, JoinGroupDialogResult>,
-        private connector: RestConnectorService,
-        private iam: RestIamService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.updateButtons();
         this.searchForm.valueChanges
             .pipe(takeUntilDestroyed())

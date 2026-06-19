@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, Output, inject } from '@angular/core';
 import { Params, QueryParamsHandling } from '@angular/router';
 import {
     CanDrop,
@@ -22,6 +22,10 @@ import { BreadcrumbsService } from './breadcrumbs.service';
     standalone: false,
 })
 export class BreadcrumbsComponent {
+    private node = inject(RestNodeService);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private nodesDragDrop = inject(NodesDragDropService);
+
     /**
      * Caption of the home, if not set, a default icon is used.
      */
@@ -105,11 +109,7 @@ export class BreadcrumbsComponent {
 
     private _searchQuery: string;
 
-    constructor(
-        private node: RestNodeService,
-        private breadcrumbsService: BreadcrumbsService,
-        private nodesDragDrop: NodesDragDropService,
-    ) {
+    constructor() {
         this.breadcrumbsService.breadcrumbs$.subscribe((nodes) => {
             if (nodes == null) {
                 return;

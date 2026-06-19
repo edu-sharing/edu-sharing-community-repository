@@ -1,7 +1,7 @@
-import { Component, Inject, NgZone } from '@angular/core';
+import { Component, NgZone, DOCUMENT, inject } from '@angular/core';
 import { AuthenticationService, PrimaryLogin, RestConstants } from 'ngx-edu-sharing-api';
 import { UIHelper } from '../../core-ui-module/ui-helper';
-import { DOCUMENT, PlatformLocation } from '@angular/common';
+import { PlatformLocation } from '@angular/common';
 
 @Component({
     selector: 'es-global-login',
@@ -11,12 +11,12 @@ import { DOCUMENT, PlatformLocation } from '@angular/common';
  * handle global login triggers (i.e. google one tap)
  */
 export class GlobalLoginComponent {
-    constructor(
-        private platformLocation: PlatformLocation,
-        private authenticationService: AuthenticationService,
-        private ngZone: NgZone,
-        @Inject(DOCUMENT) private document: Document,
-    ) {
+    private platformLocation = inject(PlatformLocation);
+    private authenticationService = inject(AuthenticationService);
+    private ngZone = inject(NgZone);
+    private document = inject<Document>(DOCUMENT);
+
+    constructor() {
         this.authenticationService.observeLoginInfo().subscribe((login) => {
             if (login.statusCode !== RestConstants.STATUS_CODE_OK) {
                 const googleEntry = (login as PrimaryLogin).oauthEntries.find(

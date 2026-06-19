@@ -1,0 +1,18 @@
+.rs-error-wrapper {
+    width: 100%;
+    justify-self: center;
+    max-width: 700px;
+    mat-card {
+        width: 100%;
+    }
+    .rs-error-message {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        h3 {
+            font-size: 110%;
+            font-weight: bold;
+            margin: 0;
+        }
+    }
+}

@@ -11,7 +11,8 @@ export type ListItemType =
     | 'EVENT'
     | 'ASSIGNMENT'
     | 'SUBMISSION'
-    | 'SHARE';
+    | 'SHARE'
+    | 'SUGGESTION';
 
 /**
  * A list item info, which is basically a column
@@ -49,6 +50,10 @@ export class ListItem {
         columns.push(new ListItem('COLLECTION', 'info'));
         columns.push(new ListItem('COLLECTION', 'scope'));
         return columns;
+    }
+
+    static getSuggestionDefaults() {
+        return [new ListItem('NODE', 'title'), new ListItem('SUGGESTION', 'count')];
     }
 }
 export class ListItemSort extends ListItem {

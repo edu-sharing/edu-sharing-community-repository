@@ -8,7 +8,6 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.apache.commons.io.IOUtils;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -24,8 +23,6 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -85,9 +82,7 @@ public class NodeFrontpage {
         }
 
 
-        //InputStream is = NodeFrontpage.class.getClassLoader().getResourceAsStream("frontpage-ratings.properties");
-        InputStream is = NodeFrontpage.class.getClassLoader().getResource("frontpage-ratings.properties").openStream();
-        String sortingScript = IOUtils.toString(is, StandardCharsets.UTF_8);
+        String sortingScript = SearchServiceElastic.loadScript("frontpage-ratings.properties");
 
         Script sortingScriptInline = new Script.Builder().
                 lang("painless")

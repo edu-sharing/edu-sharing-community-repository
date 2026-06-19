@@ -29,16 +29,13 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/spring-security-* \
         tomcat/webapps/alfresco/WEB-INF/lib/oauth2-oidc-sdk-* \
         tomcat/webapps/alfresco/WEB-INF/lib/tika-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/log4j-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/apache-mime4j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/bcutil-jdk18on-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/commons-collections4-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-exec-* \
         tomcat/webapps/alfresco/WEB-INF/lib/dd-plist-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/fontbox-* \
         tomcat/webapps/alfresco/WEB-INF/lib/jackcess-4* \
         tomcat/webapps/alfresco/WEB-INF/lib/jcl-over-slf4j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/juniversalchardet-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/jwarc-* \
         tomcat/webapps/alfresco/WEB-INF/lib/poi-* \
         tomcat/webapps/alfresco/WEB-INF/lib/xmpbox-* \
         tomcat/webapps/alfresco/WEB-INF/lib/stax2-api-*
@@ -78,9 +75,9 @@ USER worker
 EXPOSE 8009 8080 8081
 
 ENTRYPOINT ["entrypoint.sh"]
-CMD [ "/opt/bitnami/scripts/tomcat/run.sh" ]
+CMD ["catalina.sh", "run"]
 
-VOLUME [ "/opt/alfresco/alf_data", "/opt/alfresco/alf_safe", "/opt/bitnami/tomcat/shared/classes/config/cluster", "/opt/bitnami/tomcat/shared/classes/config/node" ]
+VOLUME [ "/opt/alfresco/alf_data", "/opt/alfresco/alf_safe", "/usr/local/tomcat/shared/classes/config/cluster", "/usr/local/tomcat/shared/classes/config/node" ]
 
 ########################################################################################################################
 

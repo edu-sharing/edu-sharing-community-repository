@@ -113,4 +113,8 @@ public interface SearchService {
 	default org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Long maxAge, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
 		return null;
 	}
+
+	default org.edu_sharing.repository.server.SearchResult<SearchSuggestionNode> getNodesBySuggestion(List<org.edu_sharing.service.suggestion.SuggestionStatus> statusFilter, List<org.edu_sharing.service.suggestion.SuggestionType> typeFilter, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+		return null;
+	}
 }

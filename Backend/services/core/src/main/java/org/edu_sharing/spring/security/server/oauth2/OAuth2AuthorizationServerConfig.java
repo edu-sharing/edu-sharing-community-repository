@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.basic.GuestCleanupFilter;
+import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
 import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
@@ -64,6 +65,7 @@ public class OAuth2AuthorizationServerConfig {
         /*authorizationServerConfigurer
                 .oidc(Customizer.withDefaults())
                 .deviceAuthorizationEndpoint(Customizer.withDefaults());*/
+        http.addFilterBefore(new SecurityContextStrategySwitchFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class);
 
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)

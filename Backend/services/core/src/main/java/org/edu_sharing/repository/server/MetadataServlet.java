@@ -16,6 +16,12 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.version.VersionService;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.edu_sharing.service.version.VersionService;
+import org.edu_sharing.spring.ApplicationContextFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
 @Slf4j
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")

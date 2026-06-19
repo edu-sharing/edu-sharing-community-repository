@@ -46,15 +46,19 @@ public abstract class FixElasticSearchBase extends AbstractJobMapAnnotationParam
         return builder;
     }
 
-    protected void search(Query query, FixElasticSearchDeletedNodes.SearchResultHandler searchResultHandler) throws IOException {
-        logger.info("search with handler: " + searchResultHandler.getClass().getName());
+    protected void search(Query query, SearchResultHandler searchResultHandler) throws IOException {
+        search(SearchServiceElastic.WORKSPACE_INDEX, query, searchResultHandler);
+    }
+
+    protected void search(String index, Query query, SearchResultHandler searchResultHandler) throws IOException {
+        logger.info("search on index " + index + " with handler: " + searchResultHandler.getClass().getName());
 
         Time scroll = Time.of(time -> time.time("4h"));
         ResponseBody<Map> response = null;
         int page = 0;
         do {
             if (response == null) {
-                response = search(SearchServiceElastic.WORKSPACE_INDEX, query, scroll);
+                response = search(index, query, scroll);
             } else {
                 response = scroll(scroll, response.scrollId());
             }

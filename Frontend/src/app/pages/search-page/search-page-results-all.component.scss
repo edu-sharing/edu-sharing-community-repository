@@ -1,4 +1,5 @@
 @use './common' as *;
+@use 'variables-scss' as vars;
 
 // .actionbar {
 //     display: flex;
@@ -20,4 +21,8 @@
 
 .no-search-results-message {
     @include noSearchResultsMessage;
+}
+
+es-node-entries-wrapper {
+    --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
 }

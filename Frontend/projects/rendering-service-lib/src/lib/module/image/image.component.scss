@@ -1,0 +1,36 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+:host(:not(:fullscreen)) .image-wrapper,
+:host(:not(:fullscreen)) img {
+    max-height: var(--containerHeight);
+}
+
+:host(:fullscreen) .image-wrapper,
+:host(:fullscreen) img {
+    max-height: 100% !important;
+}
+
+.image-wrapper {
+    width: 100%;
+    height: 100%;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    button {
+        position: absolute;
+        margin: 5px;
+        right: 0;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}

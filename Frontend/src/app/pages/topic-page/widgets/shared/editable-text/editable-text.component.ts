@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal, WritableSignal } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    Output,
+    signal,
+    WritableSignal,
+    inject,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
@@ -25,6 +33,9 @@ import { SelfAdjustingTextareaComponent } from './self-adjusting-textarea/self-a
     styleUrls: ['./editable-text.component.scss'],
 })
 export class EditableTextComponent {
+    private markdown = inject(MarkdownPipe);
+    private highlightSearch = inject(HighlightSearchPipe);
+
     @Input() aiGenerated: boolean = false;
     @Input() alignCenter: boolean = false;
     @Input() applyTextareaPadding: boolean = true;
@@ -62,8 +73,6 @@ export class EditableTextComponent {
 
     outputText: WritableSignal<string> = signal(null);
     showMore: boolean = false;
-
-    constructor(private markdown: MarkdownPipe, private highlightSearch: HighlightSearchPipe) {}
 
     /**
      * Emits the change event whether the text should be generated with AI received by self-adjusting-textarea.

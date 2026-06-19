@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { v4 as uuidv4 } from 'uuid';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -17,13 +17,13 @@ import { Swimlane } from '../../shared/types/swimlane';
     styleUrls: ['./add-swimlane-border-button.component.scss'],
 })
 export class AddSwimlaneBorderButtonComponent {
+    private translate = inject(TranslateService);
+
     @Input() requestInProgress: boolean = false;
     @Output() addSwimlaneTriggered: EventEmitter<Swimlane> = new EventEmitter<Swimlane>();
     supportedSwimlaneTypes: string[] = SWIMLANE_TYPE_OPTIONS.map(
         (type: SelectOption) => type.value,
     );
-
-    constructor(private translate: TranslateService) {}
 
     /**
      * Configures the swimlane and grid by emitting a newly created swimlane.

@@ -4,7 +4,6 @@ set -eu
 
 ########################################################################################################################
 
-alfresco_share_enabled="${REPOSITORY_SERVICE_ALFRESCO_SHARE_ENABLED:-false}"
 my_admin_pass="${REPOSITORY_SERVICE_ADMIN_PASS:-admin}"
 my_admin_pass_md4="$(printf '%s' "$my_admin_pass" | iconv -t utf16le | openssl md4 -provider legacy | awk '{ print $2 }')"
 
@@ -17,6 +16,7 @@ my_path_external="${REPOSITORY_SERVICE_PATH_EXTERNAL:-/edu-sharing}"
 my_base_external="${my_prot_external}://${my_host_external}:${my_port_external}${my_path_external}"
 my_auth_external="${my_base_external}/services/authentication"
 my_pool_external="${REPOSITORY_SERVICE_POOL_EXTERNAL:-200}"
+my_max_http_request_header_size="${REPOSITORY_SERVICE_REQUEST_HEADER_SIZE:-8192}"
 my_wait_external="${REPOSITORY_SERVICE_WAIT_EXTERNAL:--1}"
 my_proxy_buffer_size="${REPOSITORY_SERVICE_PROXY_BUFFER_SIZE:-65536}"
 
@@ -222,6 +222,8 @@ export CATALINA_OPTS="-Djavax.xml.validation.SchemaFactory:http://www.w3.org/200
 # hazelcast 5.3
 export CATALINA_OPTS="--add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED $CATALINA_OPTS"
 
+# bitnami backport
+export CATALINA_OPTS="-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true -XX:+UseG1GC $CATALINA_OPTS"
 
 xmlstarlet ed -L \
   -d '/Server/Service[@name="Catalina"]/Engine[@name="Catalina"]/Host[@name="localhost"]/@hostConfigClass' \
@@ -282,6 +284,7 @@ xmlstarlet ed -L \
   -i '$external1' -t attr -n "protocol" -v "org.apache.coyote.http11.Http11NioProtocol" \
   -i '$external1' -t attr -n "connectionTimeout" -v "${my_wait_external}" \
   -i '$external1' -t attr -n "maxThreads" -v "${my_pool_external}" \
+  -i '$external1' -t attr -n "maxHttpRequestHeaderSize" -v "${my_max_http_request_header_size}" \
   -s '/Server/Service[@name="Catalina"]' -t elem -n 'Connector' -v '' \
   --var external2 '$prev' \
   -i '$external2' -t attr -n "address" -v "${my_bind}" \
@@ -449,11 +452,6 @@ xmlstarlet ed -L \
 
   cp ${catAlfLog} tomcat/webapps/alfresco/WEB-INF/classes/log4j2.properties
 
-}
-
-[[ "${alfresco_share_enabled}" == "false" ]] && {
-  echo "Alfresco share is disabled. Removing webapp"
-  rm -rf tomcat/webapps/share
 }
 
 ### edu-sharing ########################################################################################################
@@ -826,4 +824,5 @@ done
 
 ########################################################################################################################
 
-exec /opt/bitnami/scripts/tomcat/entrypoint.sh "$@"
+#exec /opt/bitnami/scripts/tomcat/entrypoint.sh "$@"
+exec "$@"

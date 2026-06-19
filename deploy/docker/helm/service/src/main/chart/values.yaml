@@ -8,6 +8,12 @@ global:
   ## @param global.annotations Define global annotations
   annotations: {}
 
+  backup:
+
+    velero:
+      ## @param global.backup.velero.enabled Enable velero backup
+      enabled: false
+
   cluster:
 
     cert:
@@ -274,6 +280,8 @@ config:
       threads: 200
       ## @param config.connector.external.timeout Set external connector timeout
       timeout: 20000
+      ## @param config.connector.external.maxHttpRequestHeaderSize Set tomcat maxHttpRequestHeaderSize
+      maxHttpRequestHeaderSize: 8192
 
     internal:
       ## @param config.connector.internal.threads Set internal connector threads
@@ -559,6 +567,16 @@ persistence:
         resources:
           requests:
             ## @param persistence.data.config.spec.resources.requests.storage Set storage request for persistent data
+            storage: 1Gi
+    temp:
+      ## @param persistence.data.temp.create Create temporary data
+      create: false
+      spec:
+        ## @param persistence.data.temp.spec.accessModes Set access modes for temporary data
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            ## @param persistence.data.temp.spec.resources.requests.storage Set storage request for temporary data
             storage: 1Gi
 
   share:

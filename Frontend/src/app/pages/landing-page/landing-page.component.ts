@@ -1,7 +1,14 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
-import { UIConstants, UIService } from 'ngx-edu-sharing-ui';
+import {
+    DefaultGroups,
+    ElementType,
+    HideMode,
+    OptionItem,
+    UIConstants,
+    UIService,
+} from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../core-module/rest/rest-constants';
@@ -28,9 +35,16 @@ export type SwimlaneEntry = {
     standalone: false,
 })
 export class LandingPageComponent implements OnInit, OnDestroy {
+    private authenticationService = inject(AuthenticationService);
+    private configService = inject(ConfigService);
+    private mainNav = inject(MainNavService);
+    private router = inject(Router);
+    private searchFieldService = inject(SearchFieldService);
+    private ui = inject(UIService);
+
     private readonly destroyed$ = new Subject<void>();
     readonly i18nPrefix: string = 'LANDING_PAGE.';
-    landingPageScope: string = 'LANDING';
+    landingPageScope: string = 'landing';
     searchEvent$: Observable<SearchEvent>;
 
     /**
@@ -39,14 +53,22 @@ export class LandingPageComponent implements OnInit, OnDestroy {
      */
     swimlanes = signal<SwimlaneEntry[]>([]);
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private configService: ConfigService,
-        private mainNav: MainNavService,
-        private router: Router,
-        private searchFieldService: SearchFieldService,
-        private ui: UIService,
-    ) {
+    constructor() {
+        const createAssignment = new OptionItem('EDITORIAL.OPTIONS.CREATE_ASSIGNMENT', 'task', () =>
+            this.router.navigate([UIConstants.ROUTER_PREFIX, 'editorial', 'assignment'], {
+                queryParams: {
+                    mainComponent: 'manageAssignment',
+                },
+                queryParamsHandling: 'replace',
+            }),
+        );
+        createAssignment.group = DefaultGroups.Create;
+        createAssignment.elementType = [ElementType.NoneOrUnknown];
+        createAssignment.toolpermissions = [
+            RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+        ];
+
+        createAssignment.toolpermissionsMode = HideMode.Hide;
         this.mainNav.setMainNavConfig({
             showUser: true,
             showScope: true,
@@ -56,6 +78,10 @@ export class LandingPageComponent implements OnInit, OnDestroy {
             create: {
                 allowed: true,
                 allowBinary: true,
+            },
+            customCreateOptions: {
+                useDefaultOptions: true,
+                addOptions: [createAssignment],
             },
             showNavigation: true,
         });

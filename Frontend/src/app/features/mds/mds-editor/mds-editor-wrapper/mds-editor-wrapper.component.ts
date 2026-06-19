@@ -1,6 +1,8 @@
 import {
     Component,
     EventEmitter,
+    HostBinding,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
@@ -44,6 +46,10 @@ import { MdsEditorInstanceServiceAbstract, MdsExtendedValues } from 'ngx-edu-sha
     standalone: false,
 })
 export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private toast = inject(Toast);
+    private search = inject(SearchService);
+
     // tslint:disable: no-output-on-prefix  // Keep API compatibility.
 
     @Input() addWidget = false;
@@ -76,6 +82,10 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     @Input() priority = 1;
     @Input() repository = RestConstants.HOME_REPOSITORY;
     @Input() editorMode: EditorMode;
+    @HostBinding('class')
+    get editorModeClass(): string {
+        return this.editorMode ? `mds-editor-mode-${this.editorMode}` : '';
+    }
     @Input() setId: string;
     /**
      * Filters that should be applied in addition to the MDS's own values when fetching remote
@@ -108,17 +118,11 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     private destroyed$ = new Subject<void>();
     private values: Values;
 
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private toast: Toast,
-        private search: SearchService,
-    ) {}
-
     getInstanceService() {
         return this.mdsEditorInstance;
     }
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.nodes) {
+        if (changes.nodes && !changes.nodes.firstChange) {
             this.ngOnInit();
         }
     }
@@ -258,7 +262,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
                         this.mdsEditorInstance
                             .getCompletitonStatus()
                             .mandatory.fields.filter((f) => !f.isCompleted)
-                            .map((f) => f.widget.definition.id),
+                            .map((f) => f.widget?.definition.id ?? 'author'),
                     );
                     this.mdsEditorInstance.showMissingRequiredWidgets();
                 }

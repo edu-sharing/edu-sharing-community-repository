@@ -1,17 +1,43 @@
 import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { MdsWidget } from 'ngx-edu-sharing-api';
+import { MdsWidget, UserEvent } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
 import { PrimaryMode } from '../../features/editorial-sidebar/editorial-sidebar.component';
+
+export const RECENT_ACTIVITY_EVENT_TYPES: Record<string, NonNullable<UserEvent['eventType']>[]> = {
+    viewed: [
+        'VIEW_MATERIAL',
+        'VIEW_COLLECTION',
+        'VIEW_MATERIAL_EMBEDDED',
+        'VIEW_MATERIAL_PLAY_MEDIA',
+        'OPEN_EXTERNAL_LINK',
+    ],
+    created: ['CREATE_MATERIAL', 'EDIT_MATERIAL_RELATION'],
+    edited: [
+        'EDIT_MATERIAL',
+        'MOVE_MATERIAL',
+        'COPY_MATERIAL',
+        'ARCHIVE_MATERIAL',
+        'DELETE_MATERIAL',
+    ],
+};
 
 export type EditorialTab = {
     id: string;
     caption?: string;
     icon: string;
 };
+export type CloseConfig = {
+    show: boolean;
+    callback?: () => void;
+};
 @Injectable()
 export class EditorialPageService {
     readonly displayType = signal(NodeEntriesDisplayType.Table);
+    /**
+     * info for close button state (next to breadcrumbs)
+     */
+    readonly close = signal<CloseConfig>(null);
     private virtualNodes$ = new BehaviorSubject<{ [key: string]: NodeEntriesDataType[] }>({});
     private tabs$ = new BehaviorSubject<EditorialTab[]>(null);
     private tabWidgetId$ = new BehaviorSubject<string>(null);
@@ -41,26 +67,36 @@ export class EditorialPageService {
     registerTabs(tab: EditorialTab[]) {
         this.tabs$.next(tab);
     }
-    registerTabsFromWidget(widget: MdsWidget) {
+    registerTabsFromWidget(widget: MdsWidget): EditorialTab[] {
+        this.tabs$.next(this.mapWidgetToTabs(widget));
+        return this.tabs$.value;
+    }
+    mapWidgetToTabs(widget: MdsWidget) {
         this.tabWidgetId$.next(widget.id);
-        this.tabs$.next(
-            widget.values.map((v) => {
-                return {
-                    id: v.id,
-                    caption: v.caption,
-                    icon: v.icon,
-                };
-            }),
-        );
+        return widget.values.map((v) => {
+            return {
+                id: v.id,
+                caption: v.caption,
+                icon: v.icon,
+            };
+        });
     }
-    getVirtualNodes(mode: PrimaryMode) {
-        return this.virtualNodes$.value[mode];
+    getTabId(tabIndex: number): string {
+        return this.tabs$.value?.[tabIndex]?.id;
     }
-    addVirtualNodes(nodes: NodeEntriesDataType[], mode: PrimaryMode) {
-        if (!this.virtualNodes$.value[mode]) {
-            this.virtualNodes$.value[mode] = [];
+    getVirtualNodes(mode: PrimaryMode, tabId: string) {
+        return this.virtualNodes$.value[`${mode}:${tabId}`];
+    }
+    clearVirtualNodes(mode: PrimaryMode, tabId: string) {
+        delete this.virtualNodes$.value[`${mode}:${tabId}`];
+        this.virtualNodes$.next(this.virtualNodes$.value);
+    }
+    addVirtualNodes(nodes: NodeEntriesDataType[], mode: PrimaryMode, tabId: string) {
+        const key = `${mode}:${tabId}`;
+        if (!this.virtualNodes$.value[key]) {
+            this.virtualNodes$.value[key] = [];
         }
-        this.virtualNodes$.value[mode] = [...this.virtualNodes$.value[mode], ...nodes];
+        this.virtualNodes$.value[key] = [...this.virtualNodes$.value[key], ...nodes];
         this.virtualNodes$.next(this.virtualNodes$.value);
     }
 }

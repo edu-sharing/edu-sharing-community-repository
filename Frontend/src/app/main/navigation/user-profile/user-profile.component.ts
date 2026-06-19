@@ -5,6 +5,7 @@ import {
     HostListener,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { trigger } from '@angular/animations';
 import { Toast } from '../../../services/toast';
@@ -25,6 +26,9 @@ import { UIAnimation } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class UserProfileComponent {
+    private iam = inject(RestIamService);
+    private toast = inject(Toast);
+
     @ViewChild('form') form: ElementRef;
     public user: User;
     public changePassword = false;
@@ -48,7 +52,7 @@ export class UserProfileComponent {
      */
     @Output() cancelProfile = new EventEmitter<void>();
 
-    constructor(private iam: RestIamService, private toast: Toast) {
+    constructor() {
         void this.iam.getCurrentUserAsync().then((data: IamUser) => {
             this.user = data.person;
         });

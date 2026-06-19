@@ -8,10 +8,10 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.AccessPermission;
@@ -170,7 +170,6 @@ public class CollectionServiceElastic implements CollectionService {
     }
 
     private String addToCollection(String collectionId, String refNodeId, boolean allowDuplicate) throws Throwable {
-
         // use original
         String nodeId = refNodeId;
         String originalNodeId;
@@ -193,6 +192,7 @@ public class CollectionServiceElastic implements CollectionService {
             throw new Exception(message);
         }
         NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId);
+        throwIfNotACollection(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), collectionId);
         boolean collectionIsPublic = false;
         Set<AccessPermission> permissions = permissionService.getAllSetPermissions(collectionRef);
         for (AccessPermission accessPermission : permissions) {
@@ -785,7 +785,7 @@ public class CollectionServiceElastic implements CollectionService {
                 List<org.edu_sharing.service.model.NodeRef> returnVal = new ArrayList<>();
                 for (ChildAssociationRef child : children) {
                     returnVal.add(new NodeRefImpl(
-                            child.getChildRef().getId()
+                            child.getChildRef()
                     ));
                 }
                 return returnVal;
@@ -1069,6 +1069,7 @@ public class CollectionServiceElastic implements CollectionService {
                                     .must(m -> m.wildcard(w -> w.field("fullpath").wildcard("*/" + nodeRef.getId() + "*")))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_PAGE))))
+                                    .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_PAGE_VARIANT))))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_WIDGET))))
                             )));
 
@@ -1188,20 +1189,55 @@ public class CollectionServiceElastic implements CollectionService {
             throw new IllegalArgumentException("refs only can not be copied");
         }
         CopyResult copyResult = new CopyResult();
-        copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+        if(dst == null){
+            copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+        }else{
+            String pathSrc = AuthenticationUtil.runAsSystem(() -> getNodeIdPath(src));
+            String pathDst = AuthenticationUtil.runAsSystem(() -> getNodeIdPath(dst));
+            if(!pathDst.contains(pathSrc)){
+                copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+            }else{
+                //copy to an temp collection to prevent endless recursion
+                Collection temp = new Collection();
+                temp.setLevel0(true);
+                temp.setTitle("temp"+UUID.randomUUID());
+                temp = create(null,temp);
+
+                NodeRef tempNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,temp.nodeId);
+                copyInternal(copyResult,null,src, tempNodeRef, copyRoot, copyRefs, copyPermissions,copyChildCollections);
+
+                for(ChildAssociationRef childAssociationRef : nodeService.getChildAssocs(tempNodeRef)){
+                    eduNodeService.moveNode(dst.getId(),CCConstants.CM_ASSOC_FOLDER_CONTAINS,childAssociationRef.getChildRef().getId());
+                }
+                eduNodeService.removeNode(temp.nodeId, null, false);
+                copyResult.root = dst;
+            }
+        }
         return copyResult;
     }
 
+    private String getNodeIdPath(NodeRef nodeRef){
+        NodeRef tmp = nodeRef;
+        String result = null;
+        do{
+            result = (result == null) ? tmp.getId() : tmp.getId() + "/" + result;
+            tmp = nodeService.getPrimaryParent(tmp).getParentRef();
+        }while(tmp != null);
+        return result;
+    }
+
     private NodeRef copyInternal(CopyResult copyResult, NodeRef parent, NodeRef src, NodeRef dst, boolean copySrc, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
-        String parentNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
-        List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
-        for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
-            if(!allowedToCopy(childAssociationRef.getChildRef(),copyRefs,copyChildCollections)){
-                continue;
+        String copyResultNodeId = (copySrc) ? copy(copyResult,parent,src,dst,copyPermissions) : dst.getId();
+        if(copyResultNodeId != null) {
+            List<ChildAssociationRef> childrenChildAssociationRef = eduNodeService.getChildrenChildAssociationRef(src.getId());
+            for (ChildAssociationRef childAssociationRef : childrenChildAssociationRef) {
+                if (!allowedToCopy(childAssociationRef.getChildRef(), copyRefs, copyChildCollections)) {
+                    continue;
+                }
+                copyInternal(copyResult, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, copyResultNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, copyResultNodeId), true, copyRefs, copyPermissions, copyChildCollections);
             }
-            copyInternal(copyResult,new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId), childAssociationRef.getChildRef(), new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentNodeId),true, copyRefs,copyPermissions,copyChildCollections);
         }
-        return (parentNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,parentNodeId);
+        return (copyResultNodeId == null) ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,copyResultNodeId);
     }
 
     private boolean allowedToCopy(NodeRef src, boolean copyRefs, boolean copyChildCollections){

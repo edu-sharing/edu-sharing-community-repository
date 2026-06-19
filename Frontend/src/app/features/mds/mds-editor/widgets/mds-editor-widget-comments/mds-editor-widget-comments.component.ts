@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -10,6 +10,8 @@ import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.com
     standalone: false,
 })
 export class MdsEditorWidgetCommentsComponent implements NativeWidgetComponent {
+    mdsEditorInstanceService = inject(MdsEditorInstanceService);
+
     static readonly constraints = {
         requiresNode: true,
         supportsBulk: false,
@@ -17,6 +19,4 @@ export class MdsEditorWidgetCommentsComponent implements NativeWidgetComponent {
     hasChanges = new BehaviorSubject<boolean>(false);
 
     isEmpty = of(false);
-
-    constructor(public mdsEditorInstanceService: MdsEditorInstanceService) {}
 }

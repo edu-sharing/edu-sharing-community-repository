@@ -1,48 +1,45 @@
 <div class="value-selection-wrapper">
-  <div class="missing-value-msg" *ngIf="!selectedValues()?.length; else valueSelection">
-    Noch keine Auswahl vorhanden.
-  </div>
-  <ng-template #valueSelection>
-    <ng-container [formGroup]="form">
-      <ng-container formArrayName="selections">
-        <mat-card
-          class="selected-value-card"
-          *ngFor="let value of selectionsArray.controls; let i = index; trackBy: trackByIndex"
-        >
-          <mat-checkbox
-            class="check"
-            color="primary"
-            [formControlName]="i"
-            (change)="onCheckboxChange($event, i)"
-          ></mat-checkbox>
-
-          <div class="value-text" *ngIf="selectedValues()[i] as selectedValue">
-            <div
-              class="title"
-              esCheckTextOverflow
-              #text="esCheckTextOverflow"
-              [matTooltip]="text.hasTextOverflow() ? selectedValue.label : null"
-            >
-              {{ selectedValue.label }}
-            </div>
-            <div
-              class="subtitle"
-              *ngIf="selectedValue.hint && selectedValue.label !== selectedValue.hint"
-            >
-              {{ selectedValue.hint }}
-            </div>
-          </div>
-
-          <button
-            mat-icon-button
-            [attr.aria-label]="'CLICKTOREMOVE' | translate"
-            class="remove-value"
-            (click)="onRemove(i)"
+  @if (!selectedValues()?.length) {
+  <div class="missing-value-msg">Noch keine Auswahl vorhanden.</div>
+  } @else {
+  <ng-container [formGroup]="form">
+    <ng-container formArrayName="selections">
+      @for (value of selectionsArray.controls; track trackByIndex($index); let i = $index) {
+      <mat-card class="selected-value-card">
+        <mat-checkbox
+          class="check"
+          color="primary"
+          [formControlName]="i"
+          (change)="onCheckboxChange($event, i)"
+        ></mat-checkbox>
+        @if (selectedValues()[i]; as selectedValue) {
+        <div class="value-text">
+          <div
+            class="title"
+            esCheckTextOverflow
+            #text="esCheckTextOverflow"
+            [matTooltip]="text.hasTextOverflow() ? selectedValue.label : null"
           >
-            <i esIcon="close"></i>
-          </button>
-        </mat-card>
-      </ng-container>
+            {{ selectedValue.label }}
+          </div>
+          @if (selectedValue.hint && selectedValue.label !== selectedValue.hint) {
+          <div class="subtitle">
+            {{ selectedValue.hint }}
+          </div>
+          }
+        </div>
+        }
+        <button
+          mat-icon-button
+          [attr.aria-label]="'CLICKTOREMOVE' | translate"
+          class="remove-value"
+          (click)="onRemove(i)"
+        >
+          <i esIcon="close"></i>
+        </button>
+      </mat-card>
+      }
     </ng-container>
-  </ng-template>
+  </ng-container>
+  }
 </div>

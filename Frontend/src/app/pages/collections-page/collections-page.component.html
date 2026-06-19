@@ -4,41 +4,43 @@
   [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'"
   [showSkip]="false"
 ></es-tutorial>
+@if (showTabs()) {
 <mat-tab-group
   role="navigation"
   [attr.aria-label]="'NAV.COLLECTIONS' | translate"
   mat-stretch-tabs
   [color]="$any('dark')"
   [(selectedIndex)]="tabSelectedIndex"
-  *ngIf="showTabs()"
 >
-  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-my data-test-collections-tab-my">
+  @if (!isGuest) {
+  <mat-tab labelClass="mat-tab-my data-test-collections-tab-my">
     <ng-template mat-tab-label>
       <i esIcon="person" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="!isGuest" labelClass="mat-tab-groups data-test-collections-tab-collaborative">
+  } @if (!isGuest) {
+  <mat-tab labelClass="mat-tab-groups data-test-collections-tab-collaborative">
     <ng-template mat-tab-label>
       <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab *ngIf="hasEditorial" labelClass="mat-tab-editorial data-test-collections-tab-editorial">
+  } @if (hasEditorial) {
+  <mat-tab labelClass="mat-tab-editorial data-test-collections-tab-editorial">
     <ng-template mat-tab-label>
       <i esIcon="star" esIconContext="collection-scope" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
     </ng-template>
   </mat-tab>
-  <mat-tab
-    *ngIf="hasMediacenter"
-    labelClass="mat-tab-media-center data-test-collections-tab-media-centre"
-  >
+  } @if (hasMediacenter) {
+  <mat-tab labelClass="mat-tab-media-center data-test-collections-tab-media-centre">
     <ng-template mat-tab-label>
       <i esIcon="domain" class="tab-icon"></i>
       <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
     </ng-template>
   </mat-tab>
+  }
   <mat-tab labelClass="mat-tab-edu-all data-test-collections-tab-public">
     <ng-template mat-tab-label>
       <i esIcon="language" class="tab-icon"></i>
@@ -46,6 +48,7 @@
     </ng-template>
   </mat-tab>
 </mat-tab-group>
+}
 <ng-container *ngTemplateOutlet="customTemplates.value.belowTabs"></ng-container>
 <mat-sidenav-container>
   <mat-sidenav
@@ -68,8 +71,8 @@
 
   <mat-sidenav-content>
     <div class="collections-header-group">
+      @if (collectionContentTemplateRef && !isRootLevelCollection()) {
       <es-actionbar
-        *ngIf="collectionContentTemplateRef && !isRootLevelCollection()"
         #actionbarCollection
         [numberOfAlwaysVisibleOptions]="1"
         [numberOfAlwaysVisibleOptionsMobile]="1"
@@ -77,6 +80,7 @@
         [style]="'flat'"
         [dropdownPosition]="'right'"
       ></es-actionbar>
+      }
       <!-- collection header -->
       <ng-container
         [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
@@ -98,23 +102,26 @@
         class="collectionsContainer"
         [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
       >
+        @if (!isLoading && !isRootLevelCollection() && collection) {
         <es-collection-info-bar
           #infobar
-          *ngIf="!isLoading && !isRootLevelCollection() && collection"
           [collection]="collection"
           [permissions]="collectionContentRef?.permissions ?? null"
           (edit)="collectionEdit()"
         ></es-collection-info-bar>
+        }
         <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
         <div class="collections-right">
-          <section *ngIf="isLoading || !isReady" class="collections-loading-div">
+          @if (isLoading || !isReady) {
+          <section class="collections-loading-div">
             <es-spinner></es-spinner>
           </section>
-          <h1 *ngIf="isRootLevelCollection()" esTitle class="cdk-visually-hidden">
+          } @if (isRootLevelCollection()) {
+          <h1 esTitle class="cdk-visually-hidden">
             {{ 'COLLECTIONS.TITLE' | translate }}
           </h1>
+          } @if (!isLoading && isGuest) {
           <a
-            *ngIf="!isLoading && isGuest"
             mat-button
             color="primary"
             class="switchToSearch"
@@ -126,55 +133,51 @@
             {{ 'COLLECTIONS.TO_SEARCH' | translate }}
             <i esIcon="arrow_forward"></i>
           </a>
-          <ng-container *ngIf="collection">
-            <div
-              role="navigation"
-              [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-              class="breadcrumb-space"
-              *ngIf="!isRootLevelCollection() && !isLoading"
-            >
-              <es-breadcrumbs
-                class="collections-breadcrumb"
-                [home]="'COLLECTIONS.TAB.' + tabSelected"
-                [showLanding]="true"
-                [homeRouterLink]="{
-                  routerLink: ['.'],
-                  queryParams: { scope: tabSelected, id: null },
-                  queryParamsHandling: 'merge'
-                }"
-                preferredName="title"
-                [invisibleDescription]="true"
-                [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
-                (dropElement)="
-                  collectionContentComponent.dropOnCollection($event.target, $event.source)
-                "
-              ></es-breadcrumbs>
-              <es-actionbar [options]="sidebarOption"></es-actionbar>
-            </div>
-            <es-collection-content
-              #collectionContentComponent
-              [collection]="collection"
-              [getInfobar]="getInfobar"
-              [scope]="getScope()"
-              [isRootLevel]="isRootLevelCollection()"
-              [createAllowed]="createAllowed"
-              [class.collections-master-div-notabs]="!showTabs()"
-            >
-              <ng-template #empty>
-                <ng-container *ngIf="isRootLevelCollection()">
-                  <ng-container *ngIf="tabSelected === 'EDU_GROUPS'">
-                    {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
-                  </ng-container>
-                  <ng-container *ngIf="tabSelected === 'EDU_ALL'">
-                    {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
-                  </ng-container>
-                </ng-container>
-                <ng-container *ngIf="!isRootLevelCollection()">
-                  {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
-                </ng-container>
-              </ng-template>
-            </es-collection-content>
-          </ng-container>
+          } @if (collection) { @if (!isRootLevelCollection() && !isLoading) {
+          <div
+            role="navigation"
+            [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+            class="breadcrumb-space"
+          >
+            <es-breadcrumbs
+              class="collections-breadcrumb"
+              [home]="'COLLECTIONS.TAB.' + tabSelected"
+              [showLanding]="true"
+              [homeRouterLink]="{
+                routerLink: ['.'],
+                queryParams: { scope: tabSelected, id: null },
+                queryParamsHandling: 'merge'
+              }"
+              preferredName="title"
+              [invisibleDescription]="true"
+              [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
+              (dropElement)="
+                collectionContentComponent.dropOnCollection($event.target, $event.source)
+              "
+            ></es-breadcrumbs>
+            <es-actionbar [options]="sidebarOption"></es-actionbar>
+          </div>
+          }
+          <es-collection-content
+            #collectionContentComponent
+            [collection]="collection"
+            [getInfobar]="getInfobar"
+            [scope]="getScope()"
+            [isRootLevel]="isRootLevelCollection()"
+            [createAllowed]="createAllowed"
+            [class.collections-master-div-notabs]="!showTabs()"
+          >
+            <ng-template #empty>
+              @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+              {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
+              } @if (tabSelected === 'EDU_ALL') {
+              {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
+              } } @if (!isRootLevelCollection()) {
+              {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+              }
+            </ng-template>
+          </es-collection-content>
+          }
         </div>
       </div>
       <es-footer [scope]="'collections'"></es-footer>
@@ -187,25 +190,21 @@
     let-callback="callback"
     let-toggleCallback="toggleCallback"
   >
+    @if (sortInfo.name === 'ccm:collection_ordered_position') {
     <mat-slide-toggle
-      *ngIf="sortInfo.name === 'ccm:collection_ordered_position'"
       [(ngModel)]="sortInfo.customActive"
       (ngModelChange)="toggleCallback.emit($event)"
     >
       {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
     </mat-slide-toggle>
-    <button
-      *ngIf="sortDropdown.menu"
-      [matMenuTriggerFor]="sortDropdown.menu"
-      mat-button
-      color="primary"
-    >
+    } @if (sortDropdown.menu) {
+    <button [matMenuTriggerFor]="sortDropdown.menu" mat-button color="primary">
       {{ 'NODE.' + sortInfo.name | translate }}
-      <i
-        *ngIf="sortInfo.name !== 'ccm:collection_ordered_position'"
-        [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"
-      ></i>
+      @if (sortInfo.name !== 'ccm:collection_ordered_position') {
+      <i [esIcon]="'arrow_' + (sortInfo.ascending ? 'upward' : 'downward')"></i>
+      }
     </button>
+    }
     <es-sort-dropdown
       #sortDropdown
       [columns]="columns"

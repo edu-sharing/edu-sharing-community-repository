@@ -49,7 +49,7 @@ import static org.edu_sharing.restservices.search.v1.SearchApi.getSearchToken;
 @Slf4j
 @Path("/assignment/v1")
 @Tag(name = "Assignment v1", description = "Assignment API")
-@ApiService(value = "ASSIGNMENT", major = 1, minor = 0)
+@ApiService(value = "ASSIGNMENT", major = 1)
 @Consumes({"application/json"})
 @Produces({"application/json"})
 public class AssignmentApi {
@@ -83,6 +83,27 @@ public class AssignmentApi {
         return Response.ok().entity(assignment.getAssignment()).build();
     }
 
+    @PUT
+    @Path("/{assignmentId}/status")
+    @Operation(summary = "Set assignment Status", description = "Set assignment Status.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Assignment.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response createOrUpdateAssignment(@PathParam("assignmentId") String assignmentId,
+                                             @QueryParam("status") Assignment.Status status) {
+        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
+        assignment.setStatus(status);
+        return Response.ok().entity(assignment.getAssignment()).build();
+    }
+
     @Data
     @EqualsAndHashCode(callSuper = true)
     public static class AssignmentSearchResult extends SearchResult<Assignment> {
@@ -103,12 +124,12 @@ public class AssignmentApi {
             }
     )
     public Response searchAssignments(
-            @Parameter(description = "search parameters", required = false) SearchParameters parameters,
+            @Parameter(description = "search parameters") SearchParameters parameters,
             @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
             @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
             @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
             @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending
-            ) throws Throwable {
+    ) throws Throwable {
         SearchToken token = getSearchToken(SearchService.ContentType.ALL, maxItems, skipCount, sortProperties, sortAscending, parameters);
         SearchResult<AssignmentDao> assignmentDaoSearchResult = assignmentDaoFactory.searchAssignments(parameters.getCriteria(), token);
         AssignmentSearchResult result = assignmentDaoSearchResult.map(AssignmentDao::getAssignment, AssignmentSearchResult::new);
@@ -244,7 +265,7 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response editSubmission(@PathParam("assignmentId") String assignmentId,
+    public Response editSubmissionValidation(@PathParam("assignmentId") String assignmentId,
                                    @Parameter(description = "id or -me- to get submission from current assignee")
                                    @PathParam("submissionId") String submissionId,
                                    SubmissionValidationRequest request) {
@@ -256,7 +277,7 @@ public class AssignmentApi {
 
     @PUT
     @Path("/{assignmentId}/submissions/{submissionId}/submissionStatus")
-    @Operation(summary = "edit submission status", description = "edit submission status")
+    @Operation(summary = "edit submission status", description = "edit submission status & notes")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Submission.class))),
@@ -268,13 +289,36 @@ public class AssignmentApi {
                     @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             }
     )
-    public Response editSubmission(@PathParam("assignmentId") String assignmentId,
-                                   @Parameter(description = "id or -me- to get submission from current assignee")
+    public Response editSubmissionInfo(@PathParam("assignmentId") String assignmentId,
+                                       @Parameter(description = "id or -me- to get submission from current assignee (only as coordinator of the task)")
                                    @PathParam("submissionId") String submissionId,
-                                   @QueryParam("status") Submission.Status status) {
+                                       SubmissionInfoRequest request) {
         AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
         SubmissionDao submission = assignment.getOrCreateSubmission(submissionId);
-        submission.setStatus(status);
+        submission.setUserNotes(request.userNotes());
+        submission.setStatus(request.status());
+        return Response.ok().entity(submission.getSubmission()).build();
+    }
+
+    @PUT
+    @Path("/{assignmentId}/submissions/create")
+    @Operation(summary = "create submission", description = "create submission by username")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Submission.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response createSubmission(@PathParam("assignmentId") String assignmentId,
+                                     @Parameter(description = "The userId, usually the account name", required = true)
+                                     @QueryParam("user") String userId) {
+        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
+        SubmissionDao submission = assignment.createSubmissionByUserId(userId);
         return Response.ok().entity(submission.getSubmission()).build();
     }
 

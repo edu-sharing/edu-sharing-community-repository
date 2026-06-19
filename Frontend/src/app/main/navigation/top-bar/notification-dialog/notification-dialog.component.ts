@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogButton } from '../../../../util/dialog-button';
@@ -30,6 +30,11 @@ enum NotificationEvents {
     standalone: false,
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
+    private dialogRef = inject<CardDialogRef<void, void>>(CardDialogRef);
+    private toast = inject(Toast);
+    private notificationService = inject(NotificationV1Service);
+    private configService = inject(ConfigService);
+
     readonly destroyed$ = new Subject<void>();
     private config: NotificationConfig;
     private clientConfig: ClientConfig;
@@ -39,13 +44,6 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
         defaultInterval: new FormControl(),
         intervals: new FormGroup({}),
     });
-
-    constructor(
-        private dialogRef: CardDialogRef<void, void>,
-        private toast: Toast,
-        private notificationService: NotificationV1Service,
-        private configService: ConfigService,
-    ) {}
 
     getGroups() {
         const result = [];

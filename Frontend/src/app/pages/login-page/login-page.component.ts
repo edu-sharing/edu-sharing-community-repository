@@ -4,12 +4,17 @@ import { HttpClient } from '@angular/common/http';
 import {
     AfterViewInit,
     Component,
+    computed,
     ElementRef,
     OnDestroy,
     OnInit,
+    Signal,
+    signal,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { delay, filter, first, map, startWith, switchMap } from 'rxjs/operators';
@@ -20,7 +25,6 @@ import {
     LoginResult,
     RestConnectorService,
     RestConstants,
-    RestHelper,
 } from '../../core-module/core.module';
 import { Helper } from '../../core-module/rest/helper';
 import { InputPasswordComponent } from '../../shared/components/input-password/input-password.component';
@@ -37,7 +41,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo, OAuthEntry, PrimaryLogin } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
@@ -48,6 +52,12 @@ import {
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { CordovaService } from '../../services/cordova.service';
 
+type WafyEntry = {
+    name: string;
+    url: string;
+    type: string;
+};
+
 @Component({
     selector: 'es-login-page',
     templateUrl: 'login-page.component.html',
@@ -56,6 +66,23 @@ import { CordovaService } from '../../services/cordova.service';
     standalone: false,
 })
 export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
+    private connector = inject(RestConnectorService);
+    private toast = inject(Toast);
+    private dialogs = inject(DialogsService);
+    private platformLocation = inject(PlatformLocation);
+    private ui = inject(UIService);
+    private router = inject(Router);
+    private http = inject(HttpClient);
+    private translations = inject(TranslationsService);
+    private configService = inject(ConfigurationService);
+    private route = inject(ActivatedRoute);
+    bridge = inject(BridgeService);
+    private cordova = inject(CordovaService);
+    private authentication = inject(AuthenticationService);
+    private themeService = inject(ThemeService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNav = inject(MainNavService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     @ViewChild('loginForm') loginForm: ElementRef;
     @ViewChild('faConfirmRef') faConfirmRef: TemplateRef<unknown>;
@@ -69,12 +96,12 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     currentProvider: any;
     disabled = false;
     isSafeLogin = false;
-    filteredProviders: any;
+    filteredProviders: Observable<any[]>;
     isLoading = true;
     loginUrl: any;
     password = '';
     providerControl = new UntypedFormControl();
-    showProviders = false;
+    readonly showProviders = signal(false);
     username = '';
     loginSafeFailed = false;
 
@@ -82,6 +109,17 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     faConfirm = new FormGroup({
         code: new FormControl('', [Validators.required, Validators.pattern(/^\d{6}$/)]),
     });
+    readonly providersOnly = signal(false);
+    readonly queryParams: Signal<Params>;
+    readonly providersOnlyMode = computed(
+        () =>
+            this.showProviders() &&
+            this.providersOnly() &&
+            this.queryParams()?.['local'] !== 'true',
+    );
+    readonly showLocalLogin = computed(
+        () => !this.providersOnly() || this.queryParams()?.['local'] === 'true',
+    );
     private next = '';
     private providers: any;
     private scope = '';
@@ -89,24 +127,10 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     // @TODO change model
     registeredOauthProviders: OAuthEntry[];
 
-    constructor(
-        private connector: RestConnectorService,
-        private toast: Toast,
-        private dialogs: DialogsService,
-        private platformLocation: PlatformLocation,
-        private ui: UIService,
-        private router: Router,
-        private http: HttpClient,
-        private translations: TranslationsService,
-        private configService: ConfigurationService,
-        private route: ActivatedRoute,
-        public bridge: BridgeService,
-        private cordova: CordovaService,
-        private authentication: AuthenticationService,
-        private themeService: ThemeService,
-        private loadingScreen: LoadingScreenService,
-        private mainNav: MainNavService,
-    ) {
+    constructor() {
+        const configService = this.configService;
+
+        this.queryParams = toSignal(this.route.queryParams, { initialValue: {} as Params });
         // reset the theme in case user was in safe previously
         this.themeService.initWithDefaults();
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
@@ -203,6 +227,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                             !allowLocal &&
                             !hasProviders &&
                             this.loginUrl &&
+                            !configService.instant('loginProvidersUrl') &&
                             data.statusCode !== RestConstants.STATUS_CODE_OK
                         ) {
                             this.openLoginUrl();
@@ -211,7 +236,8 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.isLoading = false;
                         loadingTask.done();
                         if (configService.instant('loginProvidersUrl')) {
-                            this.showProviders = true;
+                            this.showProviders.set(true);
+                            this.providersOnly.set(!configService.instant('loginAllowLocal', true));
                             this.updateButtons();
                             // delay to make sure animation of card has finished
                             // otherwise, overlay gets aligned wrongly
@@ -304,7 +330,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         UIHelper.openUrl(url, this.bridge, OPEN_URL_MODE.Current);
     }
 
-    async login(password = this.password, code2Fa?: string) {
+    async login(password = this.password) {
         this.isLoading = true;
         if (this.scope) {
             // before we're converting to a safe session, we need to make sure all previous requests are finished
@@ -328,7 +354,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                 return;
             }
         }
-        this.connector.login(this.username, password, this.scope, code2Fa).subscribe(
+        this.connector.login(this.username, password, this.scope).subscribe(
             (data) => {
                 if (data.statusCode === RestConstants.STATUS_CODE_OK) {
                     this.goToNext(data);
@@ -349,10 +375,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                     } else if (data.statusCode === RestConstants.STATUS_CODE_PERSON_BLOCKED) {
                         this.toast.error(null, 'LOGIN.PERSON_BLOCKED');
                     } else if (data.statusCode === RestConstants.STATUS_CODE_2FA) {
-                        if (code2Fa) {
-                            this.toast.error(null, 'LOGIN.2FA.WRONG_CODE');
-                        }
-                        void this.show2Fa(password);
+                        void this.show2Fa();
                     } else {
                         if (this.isSafeLogin) {
                             this.loginSafeFailed = true;
@@ -424,11 +447,18 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private processProviders(providers: any) {
-        const data: any = {};
+        const data: {
+            [key in string]: {
+                group: string;
+                providers: WafyEntry[];
+            };
+        } = {};
         for (const provider of Object.keys(providers.wayf_idps)) {
-            const object = providers.wayf_idps[provider];
+            const object: WafyEntry = providers.wayf_idps[provider];
             if (object) {
-                object.url = provider;
+                if (!object.url) {
+                    object.url = provider;
+                }
                 const type = object.type;
                 if (!data[type]) {
                     data[type] = {
@@ -452,7 +482,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private updateButtons() {
-        if (this.showProviders) {
+        if (this.showProviders()) {
             return;
         }
         const register = new DialogButton('LOGIN.REGISTER_TEXT', { color: 'standard' }, () =>
@@ -475,7 +505,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         login.disabled = this.disabled;
     }
 
-    private async show2Fa(password: string) {
+    private async show2Fa() {
         this.faConfirm.reset();
         this.show2FaDialog = await this.dialogs.openGenericDialog({
             title: 'LOGIN.2FA.TITLE',
@@ -504,9 +534,24 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         const result = await firstValueFrom(this.show2FaDialog.afterClosed());
         this.show2FaDialog = null;
         if (result === 'NEXT' && this.faConfirm.status === 'VALID') {
-            // do login
             this.isLoading = true;
-            void this.login(password, this.faConfirm.get('code').value);
+            this.connector.verify2Fa(this.faConfirm.get('code').value).subscribe(
+                (data) => {
+                    if (data.statusCode === RestConstants.STATUS_CODE_OK) {
+                        this.goToNext(data);
+                    } else if (data.statusCode === RestConstants.STATUS_CODE_2FA) {
+                        this.toast.error(null, 'LOGIN.2FA.WRONG_CODE');
+                        this.isLoading = false;
+                    } else {
+                        this.toast.error(null, 'LOGIN.ERROR');
+                        this.isLoading = false;
+                    }
+                },
+                (error: any) => {
+                    this.toast.error(error);
+                    this.isLoading = false;
+                },
+            );
         }
     }
 

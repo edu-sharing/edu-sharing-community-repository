@@ -1,8 +1,5 @@
 package org.edu_sharing.service.permission;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.PermissionReference;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -12,7 +9,11 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.nodeservice.NodeServiceInterceptor;
 import org.springframework.context.ApplicationContext;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PermissionServiceHelper {
     private static ApplicationContext alfApplicationContext = AlfAppContextGate.getApplicationContext();
@@ -72,7 +73,7 @@ public class PermissionServiceHelper {
         return permissionModel.getGranteePermissions(pr).stream().map(PermissionReference::getName).collect(Collectors.toUnmodifiableSet());
     }
 
-    public static Set<String> getEffectivePermissions(List<String> restrictedPermissions, boolean restrictedAccess) {
+	public static Set<String> getEffectivePermissions(String originalNodeId, List<String> restrictedPermissions, boolean restrictedAccess) {
         Set<String> result = new HashSet<>();
         if (restrictedAccess) {
             if (restrictedPermissions != null) {
@@ -84,6 +85,7 @@ public class PermissionServiceHelper {
         } else {
             result.addAll(CCConstants.getUsagePermissions());
         }
+		result = new HashSet<>(NodeServiceInterceptor.handleCollectionPermissionsFromInterceptors(originalNodeId, new ArrayList<>(CCConstants.getUsagePermissions()), new ArrayList<>(result)));
         return result;
     }
 

@@ -1,17 +1,12 @@
-<es-mds-editor-widget-container
-  #container
-  *ngIf="filteredSuggestions$ | async"
-  [widget]="widget"
-  [label]="true"
-  [wrapInGroup]="false"
->
+@if (filteredSuggestions$ | async) {
+<es-mds-editor-widget-container #container [widget]="widget" [label]="true" [wrapInGroup]="false">
   <mat-chip-grid
     #chipList
     [attr.aria-labelledby]="container.labelId"
     [attr.aria-describedby]="container.descriptionId"
   >
+    @for (value of filteredSuggestions$ | async; track value) {
     <mat-chip-row
-      *ngFor="let value of filteredSuggestions$ | async"
       (click)="add(value)"
       (keydown.enter)="add(value)"
       [matTooltip]="'MDS.FILTER_FOR' | translate : { value: value.label, count: value.count }"
@@ -22,5 +17,7 @@
         <span class="count">({{ value.count }})</span>
       </div>
     </mat-chip-row>
+    }
   </mat-chip-grid>
 </es-mds-editor-widget-container>
+}

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
@@ -15,6 +14,7 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -50,7 +50,6 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
     selector: 'es-content-teaser',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         FormsModule,
         GenericNodeEntriesComponent,
@@ -72,6 +71,12 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
     styleUrls: ['./content-teaser.component.scss'],
 })
 export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private scrollHelperService = inject(ScrollHelperService);
+    private searchHelperService = inject(SearchHelperService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private translate = inject(TranslateService);
+
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
     @Input() defaultNodeId: string = '';
@@ -101,6 +106,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     @Output() configChanged: EventEmitter<void> = new EventEmitter<void>();
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     // VARIABLES
@@ -108,7 +114,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     criteria: Signal<MdsQueryCriteria[]> = computed((): MdsQueryCriteria[] => {
         const criteriaArray: MdsQueryCriteria[] = [];
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to search for the collection
-        if (!Object.keys(this.propertyFilters())?.length) {
+        if (!this.propertyFilters()) {
             criteriaArray.push({
                 property: DEFAULT_COLLECTION_ID_PROP,
                 values: [this.contextNodeId],
@@ -196,20 +202,14 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             viewValue: 'LIST_VIEW',
         },
     ];
-    private propertyFilters: WritableSignal<Values> = signal({});
+    private propertyFilters: WritableSignal<Values> = signal(null);
     queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     private searchMode: string = RestConstants.PRIMARY_SEARCH_CRITERIA;
     totalSearchResultCount: number = -1;
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
 
-    constructor(
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private scrollHelperService: ScrollHelperService,
-        private searchHelperService: SearchHelperService,
-        private topicPageHelperService: TopicPageHelperService,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         if (
             this.genericWidgetGlobalService.hasCustomDisplayType(
                 GenericNodeEntriesDisplayType.MapView,
@@ -268,10 +268,12 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
      * Opens the repository content URL using the previously set propertyFilters and searchText.
      */
     openRepoContentUrl(): void {
-        const propertyFilters: Values = this.propertyFilters();
+        let propertyFilters: Values | null = this.propertyFilters();
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to filter for the collection
-        if (!Object.keys(propertyFilters)?.length) {
-            propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [this.contextNodeId];
+        if (!propertyFilters) {
+            propertyFilters = {
+                [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+            };
         }
         // set both filters and query string
         const contentTeaserExtra: NavigationExtras = {
@@ -325,13 +327,14 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     }
 
     /**
-     * Reacts to es-node-entries (totalSearchResultCountChanged) event by displaying the new count.
-     * In this case, the total count is displayed rather than the filtered nodes count.
+     * Reacts to es-node-entries (totalSearchResultCountChanged) event
+     * by displaying the new count and emitting it.
      *
      * @param count
      */
     changeTotalSearchResultCount(count: number): void {
         this.totalSearchResultCount = count;
+        this.totalSearchResultCountChanged.emit(count);
     }
 
     /**

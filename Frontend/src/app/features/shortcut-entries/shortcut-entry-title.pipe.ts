@@ -11,7 +11,7 @@ import { ExtendedShortcutEntry } from './shortcut-entries-types';
 })
 export class ShortcutEntryTitlePipe implements PipeTransform {
     private translate = inject(TranslateService);
-    private nodeTitlePipe = new NodeTitlePipe(this.translate);
+    private nodeTitlePipe = inject(NodeTitlePipe);
 
     /**
      * Transforms a given extended shortcut entry into its individual title.

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import {
     AuthenticationService,
     ConfigService,
@@ -18,18 +18,17 @@ import { RestHelper } from '../../util/rest-helper';
     standalone: false,
 })
 export class NodeRatingComponent<T extends Node> implements OnInit {
+    toast = inject(Toast);
+    configService = inject(ConfigService);
+    private networkApi = inject(NetworkService);
+    authenticationService = inject(AuthenticationService);
+    changeDetectorRef = inject(ChangeDetectorRef);
+    ratingService = inject(RatingV1Service);
+
     @Input() node: T;
     mode: RatingMode;
     hasPermission: boolean;
     hoverStar: number;
-    constructor(
-        public toast: Toast,
-        public configService: ConfigService,
-        private networkApi: NetworkService,
-        public authenticationService: AuthenticationService,
-        public changeDetectorRef: ChangeDetectorRef,
-        public ratingService: RatingV1Service,
-    ) {}
 
     async ngOnInit() {
         await this.configService.observeConfig().pipe(take(1)).toPromise();

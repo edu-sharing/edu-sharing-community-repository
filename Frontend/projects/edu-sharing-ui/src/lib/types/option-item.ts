@@ -24,9 +24,10 @@ export class OptionItem {
     public showAlways = false;
     /**
      * If true, this option will be shown as an action (if room). If none of the items has showAsAction set, the first items will always be shown as action
+     * False explicitly will opt out this option to become an action
      * @type {boolean}
      */
-    public showAsAction = false;
+    public showAsAction: boolean | 'auto' = 'auto';
     /**
      * If true, shows a line at the top.
      *
@@ -126,6 +127,11 @@ export class OptionItem {
     public group: OptionGroup;
 
     public keyboardShortcut: KeyboardShortcutCondition;
+
+    /**
+     * Material color theme for the option. Use 'warn' for critical/destructive actions.
+     */
+    public color: 'warn' | 'primary' | 'accent' = 'primary';
 
     /**
      * Or concat of supported element types for the action
@@ -258,19 +264,19 @@ export enum Scope {
     DebugShowAll = 'DebugShowAll', // Full debug mode which enables all options
 }
 export enum ElementType {
-    Node,
-    NodeChild, // Child object
-    Assignment,
-    AssignmentFile,
-    MapRef, // Map ref (link to another map)
-    NodePublishedCopy,
-    NodeRevoked, // revoked copy / revoked published node
-    NodeBlockedImport, // node with property ccm:importblocked == true
-    NodeProposal, // node proposal for a collection
-    Person,
-    Group,
-    SavedSearch,
-    NoneOrUnknown,
+    Node = 'Node',
+    NodeChild = 'NodeChild', // Child object
+    Assignment = 'Assignment',
+    AssignmentFile = 'AssignmentFile',
+    MapRef = 'MapRef', // Map ref (link to another map)
+    NodePublishedCopy = 'NodePublishedCopy',
+    NodeRevoked = 'NodeRevoked', // revoked copy / revoked published node
+    NodeBlockedImport = 'NodeBlockedImport', // node with property ccm:importblocked == true
+    NodeProposal = 'NodeProposal', // node proposal for a collection
+    Person = 'Person',
+    Group = 'Group',
+    SavedSearch = 'SavedSearch',
+    NoneOrUnknown = 'NoneOrUnknown',
 }
 export class OptionGroup {
     /**

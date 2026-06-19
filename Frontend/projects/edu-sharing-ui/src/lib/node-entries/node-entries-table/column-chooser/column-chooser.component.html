@@ -14,7 +14,8 @@
     class="column-chooser mat-elevation-z2"
     (cdkDropListDropped)="columnChooserDrop($event)"
   >
-    <div class="column-chooser-item" *ngFor="let column of columns; index as index" cdkDrag>
+    @for (column of columns; track column; let index = $index) {
+    <div class="column-chooser-item" cdkDrag>
       <mat-checkbox
         [checked]="column.visible"
         (change)="columnChooserToggle(index)"
@@ -26,5 +27,6 @@
         <i esIcon="drag_handle"></i>
       </div>
     </div>
+    }
   </div>
 </ng-template>

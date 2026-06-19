@@ -1,6 +1,6 @@
 import { FormControl, UntypedFormControl, ValidatorFn, Validators } from '@angular/forms';
-import { InputStatus, MdsWidget, RequiredMode } from '../../types/types';
-import { Directive, EventEmitter } from '@angular/core';
+import { InputStatus, MdsWidget, MdsWidgetValue, RequiredMode } from '../../types/types';
+import { Directive, EventEmitter, inject } from '@angular/core';
 import { MdsEditorWidgetCore } from '../mds-editor-widget-core.directive';
 import { SuggestionResponseDto, SuggestionStatus } from 'ngx-edu-sharing-api';
 import { DisplayValue } from './DisplayValues';
@@ -13,6 +13,8 @@ import { TranslateService } from '@ngx-translate/core';
 @Directive()
 export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     abstract readonly valueType: ValueType;
+    protected authorityNamePipe = inject(AuthorityNamePipe);
+    protected toast = inject(Toast);
 
     /**
      * triggered when the input focus is lost
@@ -25,12 +27,8 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     focus(): void {
         // default implementation will do nothing
     }
-    constructor(
-        protected toast: Toast,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        protected translate: TranslateService,
-    ) {
-        super(mdsEditorInstance, translate);
+    constructor() {
+        super();
     }
     protected setValue(value: string[], dirty?: boolean): void {
         this.widget.setValue(value, dirty);
@@ -98,7 +96,6 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
     chipsControl: UntypedFormControl;
 
     abstract add(value: DisplayValue): void;
-    abstract toDisplayValue(value: string): DisplayValue;
     initSuggestions(): void {
         this.chipsSuggestionsSubject = this.widget
             .getSuggestions()
@@ -115,7 +112,7 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
         return `${this.translate.instant('MDS.SUGGESTION_TOOLTIP', {
             value: this.toDisplayValue(suggestion.value as string).label,
             // @TODO
-            creator: new AuthorityNamePipe(this.translate).transform(suggestion.createdBy),
+            creator: this.authorityNamePipe.transform(suggestion.createdBy),
         })}`;
     }
 
@@ -148,5 +145,32 @@ export abstract class MdsEditorWidgetChipsSuggestionBase extends MdsEditorWidget
                 ),
             ),
         );
+    }
+
+    toDisplayValue(value: MdsWidgetValue | string): DisplayValue {
+        if (typeof value === 'string') {
+            const knownValue = this.widget.definition.values?.find((v) => v.id === value);
+            if (!knownValue && this.widget.getInitialDisplayValues().value) {
+                const ds = this.widget
+                    .getInitialDisplayValues()
+                    .value.values?.find((v) => v.key === value)?.displayString;
+                return {
+                    key: value,
+                    label: ds || value,
+                };
+            }
+            if (knownValue) {
+                value = knownValue;
+            } else {
+                return {
+                    key: value,
+                    label: value,
+                };
+            }
+        }
+        return {
+            key: value.id,
+            label: value.caption,
+        };
     }
 }

@@ -10,7 +10,6 @@ import { User } from './api/models/user';
 
 import { HttpErrorResponse } from '@angular/common/http';
 import { SuggestionsV1Service } from './api/services/suggestions-v-1.service';
-import { GetSuggestionsByNodeId$Params } from './api/fn/suggestions-v-1/get-suggestions-by-node-id';
 
 export type Mediacenter = MediacenterApi & {
     profile: GroupProfile & {
@@ -49,6 +48,8 @@ export { CollectionReference } from './api/models/collection-reference';
 export { Context } from './api/models/context';
 export { CollectionsType } from './api/models/collections-type';
 export { CollectionsTypeConfig } from './api/models/collections-type-config';
+export { Copy } from './api/models/copy';
+export { CreateSuggestionRequestDto } from './api/models/create-suggestion-request-dto';
 export { DashboardShortcut } from './api/models/dashboard-shortcut';
 export { DashboardShortcutEntry } from './api/models/dashboard-shortcut-entry';
 export { DefaultDashboardShortcut } from './api/models/default-dashboard-shortcut';
@@ -62,6 +63,7 @@ export { LicenseAgreement } from './api/models/license-agreement';
 export { ManualRegistrationData } from './api/models/manual-registration-data';
 export { HandleParam } from './api/models/handle-param';
 export { NodePermissions as NodePermissionsGet } from './api/models/node-permissions';
+export { NodePermissionInheritance } from './api/models/node-permission-inheritance';
 export { Mds as MdsDefinition } from './api/models/mds';
 export { MdsAiConfig } from './api/models/mds-ai-config';
 export { MdsGroup } from './api/models/mds-group';
@@ -125,6 +127,7 @@ export { StreamEntry } from './api/models/stream-entry';
 export { Tool } from './api/models/tool';
 export { NodeSuggestionResponseDto } from './api/models/node-suggestion-response-dto';
 export { SuggestionResponseDto } from './api/models/suggestion-response-dto';
+export { SuggestionNode } from './api/models/suggestion-node';
 export { Suggestion } from './api/models/suggestion';
 export { Tools } from './api/models/tools';
 export { CreateQaEntryDto } from './api/models/create-qa-entry-dto';

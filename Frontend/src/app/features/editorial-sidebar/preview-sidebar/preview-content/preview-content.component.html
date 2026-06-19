@@ -1,75 +1,83 @@
-<es-render-wrapper-component
-  *ngIf="renderNode()"
-  [showTopbar]="false"
-  [showMetadata]="false"
-  [nodeId]="renderNode().ref.id"
-  [repository]="renderNode().ref.repo"
-></es-render-wrapper-component>
-
-<div class="preview-sidebar-image-container" *ngIf="!renderNode()">
-  <img
-    class="preview-sidebar-image"
-    [src]="node | esNodeImage | async"
-    alt=""
-    draggable="false"
-    (mousedown)="showContentButton.launch({ centered: true })"
-    (click)="onShowContentClick()"
-  />
-  <button
-    matRipple
-    #showContentButton="matRipple"
-    class="show-content-button"
-    mat-flat-button
-    color="primary"
-    (click)="onShowContentClick()"
-  >
-    <i esIcon="play_arrow"></i>
-    <span>{{ 'SHOW' | translate }}</span>
-  </button>
-</div>
-<div class="preview-sidebar-body">
-  <div class="top-h-box" *ngIf="!previewSidebarTemplateService.actionsRow">
-    <div class="stats-and-rating">
-      <es-node-stats-badges [node]="node" backgroundStyle="darken"></es-node-stats-badges>
-      <es-node-rating [node]="node"></es-node-rating>
+<div class="preview-sidebar-scroll" (esBorderBoxObserver)="onContentResize($event)">
+  @if (renderNode()) {
+  <es-render-wrapper-component
+    [showTopbar]="false"
+    [showMetadata]="false"
+    [nodeId]="renderNode().ref.id"
+    [repository]="renderNode().ref.repo"
+    [fullWidth]="!modal"
+  ></es-render-wrapper-component>
+  } @if (!renderNode()) {
+  <div class="preview-sidebar-image-container">
+    <img
+      class="preview-sidebar-image"
+      [src]="node() | esNodeImage | async"
+      alt=""
+      draggable="false"
+      (mousedown)="showContentButton.launch({ centered: true })"
+      (click)="onShowContentClick()"
+    />
+    <button
+      matRipple
+      #showContentButton="matRipple"
+      class="show-content-button"
+      mat-flat-button
+      color="primary"
+      (click)="onShowContentClick()"
+    >
+      <i esIcon="play_arrow"></i>
+      <span>{{ 'SHOW' | translate }}</span>
+    </button>
+  </div>
+  }
+  <div class="preview-sidebar-body">
+    @if (!previewSidebarTemplateService.actionsRow) {
+    <div class="top-h-box">
+      <div class="stats-and-rating">
+        <es-node-stats-badges [node]="node()" backgroundStyle="darken"></es-node-stats-badges>
+        <es-node-rating [node]="node()"></es-node-rating>
+      </div>
+      <es-actionbar appearance="icon-button"></es-actionbar>
     </div>
-    <es-actionbar appearance="icon-button"></es-actionbar>
-  </div>
-  <div class="top-h-box" *ngIf="previewSidebarTemplateService.actionsRow">
-    <ng-container
-      *ngTemplateOutlet="
-        previewSidebarTemplateService.actionsRow;
-        context: { element: node, allDetailsLink, actionbar, autoRender }
-      "
-    ></ng-container>
-  </div>
-  <ng-container *ngIf="!previewSidebarTemplateService.metadata">
+    } @if (previewSidebarTemplateService.actionsRow) {
+    <div class="top-h-box">
+      <ng-container
+        *ngTemplateOutlet="
+          previewSidebarTemplateService.actionsRow;
+          context: { element: node(), allDetailsLink, actionbar, autoRender }
+        "
+      ></ng-container>
+    </div>
+    } @if (!previewSidebarTemplateService.metadata) { @if (node()?.properties && mdsVisible()) {
     <es-mds-editor-wrapper
       #mds
-      *ngIf="node?.properties"
       [embedded]="true"
-      [editorMode]="'viewer'"
-      [groupId]="'preview_sidebar'"
-      [nodes]="[node]"
+      [editorMode]="editorMode"
+      [groupId]="groupId"
+      [nodes]="[node()]"
     >
     </es-mds-editor-wrapper>
-    <!-- h2 class="title">
-      {{ node.title ?? node.name }}
-    </h2>
-    <p class="description">
-      {{ node.properties['cclom:general_description'] }}
-    </p -->
-    <a mat-flat-button [routerLink]="allDetailsLink" class="all-details-link">
-      <span>{{ 'ALL_DETAILS' | translate }}</span>
-      <i esIcon="arrow_forward"></i>
-    </a>
-  </ng-container>
-  <ng-container *ngIf="previewSidebarTemplateService.metadata">
+    } } @if (previewSidebarTemplateService.metadata) {
     <ng-container
       *ngTemplateOutlet="
         previewSidebarTemplateService.metadata;
-        context: { element: node, allDetailsLink, actionbar, autoRender }
+        context: { element: node(), allDetailsLink, actionbar, autoRender }
       "
     ></ng-container>
-  </ng-container>
+    }
+  </div>
 </div>
+@if (!previewSidebarTemplateService.metadata) {
+<div class="sticky-bar">
+  @if (editorMode === 'viewer') {
+  <a mat-stroked-button [routerLink]="allDetailsLink" class="all-details-link" color="primary">
+    <span>{{ 'ALL_DETAILS' | translate }}</span>
+    <i esIcon="arrow_forward"></i>
+  </a>
+  } @if (editorMode !== 'viewer') {
+  <button mat-flat-button class="save-button" color="primary" (click)="onSaveMds()">
+    <span>{{ 'SAVE' | translate }}</span>
+  </button>
+  }
+</div>
+}

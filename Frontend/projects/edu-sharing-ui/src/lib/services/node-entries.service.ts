@@ -1,9 +1,10 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, signal, WritableSignal } from '@angular/core';
+import { EventEmitter, Injectable, signal, WritableSignal, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
     ClickSource,
+    CtrlClickBehavior,
     FetchEvent,
     GridConfig,
     InteractionType,
@@ -14,6 +15,7 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     TableConfig,
+    TreeConfig,
 } from '../node-entries/entries-model';
 import { NodeDataSource } from '../node-entries/node-data-source';
 import {
@@ -47,22 +49,22 @@ export class CustomSelectionModel<T> extends SelectionModel<T> {
     );
     deselect(...values: T[]) {
         this._clickSource = null;
-        super.deselect(...values);
+        return super.deselect(...values);
     }
 
     toggle(value: T) {
         this._clickSource = null;
-        super.toggle(value);
+        return super.toggle(value);
     }
 
     clear() {
         this._clickSource = null;
-        super.clear();
+        return super.clear();
     }
 
     select(...values: T[]) {
         this._clickSource = null;
-        super.select(...values);
+        return super.select(...values);
     }
 
     /**
@@ -76,6 +78,10 @@ export class CustomSelectionModel<T> extends SelectionModel<T> {
 
 @Injectable()
 export class NodeEntriesService<T extends NodeEntriesDataType> {
+    private uiService = inject(UIService);
+    private toast = inject(Toast);
+    private entriesGlobal = inject(NodeEntriesGlobalService);
+
     list: ListEventInterface<T>;
     readonly dataSource$ = new BehaviorSubject<NodeDataSource<T> | null>(null);
     readonly paginationStrategy$ = new BehaviorSubject<PaginationStrategy | null>(null);
@@ -141,6 +147,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     fetchData: EventEmitter<FetchEvent>;
     readonly gridConfig$ = new BehaviorSubject<GridConfig | null>(null);
     readonly tableConfig$ = new BehaviorSubject<TableConfig>(null);
+    readonly treeConfig$ = new BehaviorSubject<TreeConfig>(null);
     get gridConfig() {
         return this.gridConfig$.value;
     }
@@ -153,24 +160,32 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     set tableConfig(value: TableConfig) {
         this.tableConfig$.next(value);
     }
-    primaryInstance: boolean;
+    get treeConfig() {
+        return this.treeConfig$.value;
+    }
+    set treeConfig(value: TreeConfig) {
+        this.treeConfig$.next(value);
+    }
+    get primaryInstance(): boolean {
+        return this.entriesGlobal.getPrimaryInstance() === this;
+    }
+    set primaryInstance(value: boolean) {
+        if (value) {
+            this.entriesGlobal.setPrimaryInstance(this);
+        }
+    }
     singleClickHint: 'dynamic' | 'static';
+    ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
 
-    constructor(
-        private uiService: UIService,
-        private toast: Toast,
-        private entriesGlobal: NodeEntriesGlobalService,
-    ) {}
-
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
-        if (event.ctrlKey || event.metaKey) {
+        if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {
             this.selection.toggle(data.element);
         } else if (event.shiftKey) {
             this.expandSelectionTo(data.element);
         } else {
-            this.clickItem.emit(data);
+            this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
         }
     }
 

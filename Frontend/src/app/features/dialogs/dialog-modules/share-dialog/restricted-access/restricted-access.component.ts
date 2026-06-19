@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 
@@ -9,7 +9,8 @@ import { RestConstants } from '../../../../../core-module/rest/rest-constants';
     standalone: false,
 })
 export class ShareDialogRestrictedAccessComponent implements OnChanges {
-    constructor(private nodeService: NodeService) {}
+    private nodeService = inject(NodeService);
+
     ngOnChanges(changes: SimpleChanges): void {
         this.restrictedAccess =
             this.node.properties[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] === 'true' || false;

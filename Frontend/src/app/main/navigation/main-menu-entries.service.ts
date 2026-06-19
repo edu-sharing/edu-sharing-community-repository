@@ -1,5 +1,5 @@
 import { first, map, shareReplay, switchMap } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -46,6 +46,17 @@ interface EntryDefinition {
 
 @Injectable()
 export class MainMenuEntriesService {
+    private authentication = inject(AuthenticationService);
+    private bridge = inject(BridgeService);
+    private configuration = inject(ConfigurationService);
+    private frameEvents = inject(FrameEventsService);
+    private restConnector = inject(RestConnectorService);
+    private restMediacenter = inject(RestMediacenterService);
+    private restOrganization = inject(RestOrganizationService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private ui = inject(UIService);
+
     entries$: Observable<ConfigEntry[]>;
 
     // Initialized on update.
@@ -151,18 +162,7 @@ export class MainMenuEntriesService {
         },
     ];
 
-    constructor(
-        private authentication: AuthenticationService,
-        private bridge: BridgeService,
-        private configuration: ConfigurationService,
-        private frameEvents: FrameEventsService,
-        private restConnector: RestConnectorService,
-        private restMediacenter: RestMediacenterService,
-        private restOrganization: RestOrganizationService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private ui: UIService,
-    ) {
+    constructor() {
         this.entries$ = this.authentication.observeLoginInfo().pipe(
             switchMap(() => rxjs.from(this.initInformation())),
             map(() => this.createEntries()),

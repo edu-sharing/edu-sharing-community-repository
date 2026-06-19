@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { firstValueFrom, Observable } from 'rxjs';
 import { first, map, switchMap } from 'rxjs/operators';
@@ -8,7 +8,6 @@ import { Node } from '../models';
 import { shareReplayReturnValue } from '../utils/decorators/share-replay-return-value';
 import { AuthenticationService } from './authentication.service';
 import { Repo } from '../api/models/repo';
-import { RestConstants } from '../rest-constants';
 
 type Repository = Repo;
 
@@ -20,10 +19,8 @@ interface NetworkRepositories {
     providedIn: 'root',
 })
 export class NetworkService {
-    constructor(
-        private networkV1: NetworkV1Service,
-        private authentication: AuthenticationService,
-    ) {}
+    private networkV1 = inject(NetworkV1Service);
+    private authentication = inject(AuthenticationService);
 
     @shareReplayReturnValue()
     getRepositories(): Observable<Repository[]> {
@@ -57,7 +54,7 @@ export class NetworkService {
     }
 
     isFromHomeRepository(node: Node): Observable<boolean> {
-        if (node.ref.isHomeRepo) {
+        if (!node?.ref || node.ref.isHomeRepo) {
             return rxjs.of(true);
         } else {
             return this.isHomeRepository(node.ref.repo);

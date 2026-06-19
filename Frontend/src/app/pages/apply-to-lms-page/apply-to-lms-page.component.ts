@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     FrameEventsService,
@@ -26,19 +26,21 @@ export type NodeLMS = Node & {
     standalone: false,
 })
 export class ApplyToLmsPageComponent {
-    constructor(
-        private connector: RestConnectorService,
-        private locator: RestLocatorService,
-        private nodeApi: RestNodeService,
-        private toast: Toast,
-        private events: FrameEventsService,
-        private translations: TranslationsService,
-        private temporaryStorage: TemporaryStorageService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-        private route: ActivatedRoute,
-    ) {
+    private connector = inject(RestConnectorService);
+    private locator = inject(RestLocatorService);
+    private nodeApi = inject(RestNodeService);
+    private toast = inject(Toast);
+    private events = inject(FrameEventsService);
+    private translations = inject(TranslationsService);
+    private temporaryStorage = inject(TemporaryStorageService);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private platformLocation = inject(PlatformLocation);
+    private route = inject(ActivatedRoute);
+
+    constructor() {
+        const temporaryStorage = this.temporaryStorage;
+
         this.route.queryParams.subscribe((params: Params) => {
             if (params.reurl) {
                 this.reurl = params.reurl;

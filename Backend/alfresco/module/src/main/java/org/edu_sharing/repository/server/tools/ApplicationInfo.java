@@ -118,6 +118,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
 	public static final String KEY_CERTIFICATE = "certificate";
 
+    public static final String KEY_SIGNATURE_ALGORITHM = "signature_algorithm";
+
 	public static final String KEY_KEYSTORE_PW = "keystore_pw";
 	
 	public static final String KEY_MESSAGE_OFFSET_MILLISECONDS = "message_offset_ms";
@@ -131,6 +133,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public static final String KEY_ORDER = "order";
 
 	public static final String KEY_ALLOW_ORIGIN = "allow_origin";
+
+	public static final String KEY_HOST_ALLOW_INTERNAL_IP = "host_allow_internal_ip";
 
 	public static final String KEY_COOKIE_ATTRIBUTES = "cookie_attributes";
 
@@ -255,6 +259,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	 * an , separated List of Hosts, maybe ip ranges in future
 	 */
 	private String hostAliases = null;
+
+	/**
+	 * if true, internal/private ip addresses (e.g. loopback, site-local, k8s) are treated as trusted hosts
+	 */
+	private boolean hostAllowInternalIp = false;
 	
 	/**
 	 * used for previewurls or content urls, usefull when we got an proxy
@@ -355,6 +364,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	private String privateKey = null;
 
 	private String certificate;
+
+    private String signatureAlgorithm;
 	
 	private String messageOffsetMs = null;
 	
@@ -455,6 +466,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		host = properties.getProperty(KEY_HOST);
 				
 		hostAliases = properties.getProperty("host_aliases");
+
+		hostAllowInternalIp = Boolean.parseBoolean(properties.getProperty(KEY_HOST_ALLOW_INTERNAL_IP));
 		
 		domain = properties.getProperty(KEY_DOMAIN);
 		
@@ -553,6 +566,8 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		privateKey = properties.getProperty(KEY_PRIVATE_KEY);
 
 		certificate = properties.getProperty(KEY_CERTIFICATE);
+
+        signatureAlgorithm = properties.getProperty(KEY_SIGNATURE_ALGORITHM);
 		
 		messageOffsetMs = properties.getProperty(KEY_MESSAGE_OFFSET_MILLISECONDS);
 		
@@ -931,7 +946,11 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getHostAliases() {
 		return hostAliases;
 	}
-	
+
+	public boolean isHostAllowInternalIp() {
+		return hostAllowInternalIp;
+	}
+
 	/**
 	 * checks it hostName is configured host or host alias
 	 * @param hostName
@@ -943,14 +962,39 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 		if(this.getDomain() != null && !this.getDomain().equals("")){
 			hostList.add(this.getDomain());
 		}
-		
+
 		if(this.getHostAliases() != null && !this.getHostAliases().trim().equals("")){
 			String[] splitted = this.getHostAliases().split(",");
 			// add all and trim to fix stuff like "ip1, ip2"
 			hostList.addAll(Arrays.stream(splitted).map(String::trim).collect(Collectors.toList()));
 		}
 
-		return hostList.contains("*") || hostList.contains(hostName);
+		if(hostList.contains("*") || hostList.contains(hostName)){
+			return true;
+		}
+
+		return this.isHostAllowInternalIp() && isInternalIp(hostName);
+	}
+
+	/**
+	 * checks if the given hostName resolves to an internal/private ip address
+	 * (loopback, site-local, link-local, wildcard or IPv6 unique-local fc00::/7)
+	 * @param hostName host name or ip literal
+	 * @return true if the address is considered internal/private
+	 */
+	private static boolean isInternalIp(String hostName){
+		if(hostName == null || hostName.trim().isEmpty()){
+			return false;
+		}
+		try {
+			java.net.InetAddress address = java.net.InetAddress.getByName(hostName);
+			return address.isLoopbackAddress()
+					|| address.isSiteLocalAddress()
+					|| address.isLinkLocalAddress()
+					|| address.isAnyLocalAddress();
+		} catch (java.net.UnknownHostException e) {
+			return false;
+		}
 	}
 
 	public String getProtocol() {
@@ -1010,8 +1054,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 	public String getPrivateKey() {
 		return privateKey;
 	}
-	
-	public long getMessageOffsetMs() {
+
+    public String getSignatureAlgorithm() {
+        return signatureAlgorithm;
+    }
+
+    public long getMessageOffsetMs() {
 		if(messageOffsetMs!=null && !messageOffsetMs.isEmpty())
 			return new Long(messageOffsetMs);
 		return DEFAULT_OFFSET_MS;

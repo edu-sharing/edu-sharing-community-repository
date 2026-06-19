@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -22,19 +22,18 @@ import { AddFolderDialogData, AddFolderDialogResult } from './add-folder-dialog-
     standalone: false,
 })
 export class AddFolderDialogComponent implements OnInit {
+    data = inject<AddFolderDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<AddFolderDialogData, AddFolderDialogResult>>(CardDialogRef);
+    private mds = inject(RestMdsService);
+    private translate = inject(TranslateService);
+    private config = inject(ConfigService);
+
     folderName = '';
     mdsSetsIds: MdsInfo[];
     mdsSets: MdsInfo[];
     mdsSet: string;
     _parent: Node;
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: AddFolderDialogData,
-        private dialogRef: CardDialogRef<AddFolderDialogData, AddFolderDialogResult>,
-        private mds: RestMdsService,
-        private translate: TranslateService,
-        private config: ConfigService,
-    ) {}
 
     ngOnInit(): void {
         this.processDialogData();

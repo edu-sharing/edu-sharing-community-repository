@@ -6,12 +6,15 @@ import {
     EventEmitter,
     Input,
     Output,
+    inject,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
+import { Values } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../../shared/shared.module';
 import { WIDGET_TYPE_OPTIONS, WIDGETS } from '../../shared/types/custom-definitions';
 import { GridTile } from '../../shared/types/grid-tile';
 import { GridTileToHitsMapping } from '../../shared/types/grid-tile-to-hits-mapping';
+import { GridTileToSearchCountMapping } from '../../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../../shared/types/grid-tile-to-search-results-mapping';
 import { SwimlaneBackgroundShape } from '../../shared/types/swimlane-background-shape';
 import { convertNodeRefIntoNodeId } from '../../shared/utils/template-util';
@@ -19,7 +22,6 @@ import { GenericWidgetComponent } from '../../widgets/generic-widget/generic-wid
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import { ConfigureGridComponent } from './configure-grid/configure-grid.component';
 import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-type.component';
-import { Values } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'es-swimlane',
@@ -33,6 +35,10 @@ import { Values } from 'ngx-edu-sharing-ui';
     styleUrls: ['./swimlane.component.scss'],
 })
 export class SwimlaneComponent implements AfterViewChecked {
+    private cdr = inject(ChangeDetectorRef);
+    private elementRef = inject(ElementRef);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+
     @Input() set aiSupported(value: boolean) {
         if (!value) {
             this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
@@ -46,6 +52,13 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Input() editMode: boolean;
     @Input() grid: GridTile[] = [];
     @Input() pageVariantNode?: Node;
+    @Input() set rendering2Supported(value: boolean) {
+        if (!value) {
+            this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
+                (widgetType) => widgetType !== WIDGETS.MEDIA_RENDERING,
+            );
+        }
+    }
     @Input() searchInput: string;
     @Input() searchFilters: Values;
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
@@ -54,17 +67,13 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Output() gridUpdated: EventEmitter<GridTile[]> = new EventEmitter<GridTile[]>();
     @Output() searchHitsChanged: EventEmitter<GridTileToHitsMapping> =
         new EventEmitter<GridTileToHitsMapping>();
+    @Output() totalSearchResultCountChanged: EventEmitter<GridTileToSearchCountMapping> =
+        new EventEmitter<GridTileToSearchCountMapping>();
     @Output() visibleNodesChanged: EventEmitter<GridTileToSearchResultsMapping> =
         new EventEmitter<GridTileToSearchResultsMapping>();
 
     supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map((option) => option.value);
     swimlaneColor: string;
-
-    constructor(
-        private cdr: ChangeDetectorRef,
-        private elementRef: ElementRef,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-    ) {}
 
     /**
      * After the view was checked, retrieve the swimlane color from the computed styles
@@ -93,6 +102,17 @@ export class SwimlaneComponent implements AfterViewChecked {
      */
     changeVisibleNodes(nodes: Node[], gridIndex: number): void {
         this.visibleNodesChanged.emit({ gridIndex, nodes });
+    }
+
+    /**
+     * Called by es-generic-widget totalSearchResultCountChanged output event.
+     * Emits the total search result count.
+     *
+     * @param count
+     * @param gridIndex
+     */
+    changeTotalSearchResultCount(count: number, gridIndex: number): void {
+        this.totalSearchResultCountChanged.emit({ gridIndex, count });
     }
 
     /**
@@ -127,5 +147,6 @@ export class SwimlaneComponent implements AfterViewChecked {
             this.genericWidgetGlobalService.hasCustomWidget(name)
         );
     }
+
     protected readonly convertNodeRefIntoNodeId = convertNodeRefIntoNodeId;
 }

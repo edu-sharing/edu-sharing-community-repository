@@ -13,8 +13,6 @@ export type NodeRoot =
     | 'MY_FILES'
     | 'COLLECTION_HOME'
     | 'SHARED_FILES'
-    | 'MY_SHARED_FILES'
-    | 'TO_ME_SHARED_FILES'
     | 'WORKFLOW_RECEIVE'
     | 'RECYCLE'
     | 'ALL_FILES';
@@ -61,6 +59,8 @@ export interface ListDragGropConfig<T extends NodeEntriesDataType> {
     dropped?: (target: Node, source: DropSource<NodeEntriesDataType>) => void;
 }
 
+export type CtrlClickBehavior = 'multiselect' | 'emit';
+
 export enum ClickSource {
     Preview,
     Icon,
@@ -74,6 +74,7 @@ export type NodeClickEvent<T extends NodeEntriesDataType> = {
     element: T;
     source: ClickSource;
     attribute?: ListItem; // only when source === Metadata
+    ctrlKey?: boolean;
 };
 export type FetchEvent = {
     offset: number;
@@ -105,6 +106,34 @@ export type TableConfig = {
      * scroll: horizontal scrolling
      */
     dataColumnLayout: 'scroll' | 'limit';
+};
+export type TreeConfig = {
+    /**
+     * whether multiple selection is allowed
+     */
+    multipleSelection?: boolean;
+    /**
+     * whether to display the file name instead of the title
+     */
+    showFileName?: boolean;
+    /**
+     * whether the parents should be selected as well when selecting a node
+     */
+    selectParents?: boolean;
+    /**
+     * whether the tree acts as source (pick nodes) or target (pick destination folder)
+     */
+    selectionMode?: 'source' | 'target';
+    /**
+     * callback to validate which nodes are valid drag sources
+     */
+    isValidSourceCallback?: (node: Node) => boolean;
+    /** whether to show file nodes in the tree (default: true) */
+    showFiles?: boolean;
+    /** whether to include resolved inherited access when loading children */
+    includeResolveInheritedAccess?: boolean;
+    /** node attribute used to determine the initial selection state */
+    initialSelectionAttribute?: string;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

@@ -114,6 +114,9 @@
   "ORIGINAL_DELETE": "Entfernen",
   "ORIGINAL_DELETED": "Inhalt wurde gelöscht",
   "ORIGINAL_DELETED_INFO": "Nur Informationen sichtbar",
+  "ORIGINAL_ACCESS_DENIED": "Zugriff verweigert",
+  "ORIGINAL_ACCESS_DENIED_INFO": "Keine Berechtigungen, Details zum Material anzuzeigen",
+  "ORIGINAL_ACCESS_DENIED_MORE": "Weitere Informationen",
   "COMMON_API_ERROR": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   "COMMON_API_ERROR_TITLE": "Fehlerdetails ({{date}})",
   "RENDERSERVICE_API_ERROR": "Fehler beim Verbinden mit dem Renderingservice. Bitte melden Sie diesen Fehler einen Administrator.",
@@ -178,7 +181,10 @@
     "TOOLPERMISSION_MANAGE_RELATIONS": "Verwalten und erstellen von Beziehungen zwischen Elementen.",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Zeitlich beschränkte Freigaben erstellen.",
     "TOOLPERMISSION_SUGGESTION_READ": "Vorschläge für Metadaten an Elementen abrufen.",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen."
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen.",
+    "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
+    "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",
   "NODE_SEARCH": "Elemente suchen...",
@@ -278,7 +284,8 @@
   "MAPTYPE": {
     "IMAGES": "Bilder",
     "USERDATAFOLDER": "Dokumente",
-    "INBOX": "Inbox"
+    "INBOX": "Inbox",
+    "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE": "Standard"
   },
   "NODE": {
     "cm:name": "Dateiname",
@@ -329,7 +336,8 @@
       "VIEW_COLLECTION": "Sammlungs-Aufrufe",
       "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
       "DOWNLOAD_MATERIAL": "Downloads",
-      "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben"
+      "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "DSGVO-Bestätigungen"
     }
   },
   "SHARE": {
@@ -351,6 +359,10 @@
     "STATUS": {
       "DRAFT": "Entwurf",
       "INPROGRESS": "Ausgeteilt",
+      "CORRECTED": "Korrigiert",
+      "SENDBACK": "Zurückgegeben",
+      "TO_SUBMIT": "Offen",
+      "SUBMITTED": "Abgegeben",
       "HAS_SUBMISSIONS": "Zu korrigieren",
       "CANCELED": "Abgebrochen",
       "FINISHED": "Abgeschlossen"
@@ -376,6 +388,7 @@
     "eventType": "Aktion",
     "timestamp": "Zeitpunkt",
     "TYPE": {
+      "CREATE_MATERIAL": "erstellt",
       "EDIT_MATERIAL": "bearbeitet",
       "DOWNLOAD_MATERIAL": "heruntergeladen",
       "ADD_MATERIAL_TO_COLLECTION": "Material hinzugefügt",
@@ -443,7 +456,7 @@
       "CC_SHARE_ND": "Keine Bearbeitung des Werks erlaubt.",
       "CC_SHARE_SA": "Bearbeitung erlaubt, wenn es unter gleichen Bedingungen weitergegeben wird.",
       "CC_COMMERCIAL_NC": "Keine kommerzielle Verwendung erlaubt.",
-      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attribuierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
+      "CC_0": "Dieses Werk ist gemeinfrei.<br />Keine Attributierung und Namensnennung notwendig.<br />Kommerzielle Nutzung erlaubt.",
       "COPYRIGHT_FREE": "Das Werk ist kostenfrei zugänglich.<br />Nutzung und Quellenangabe gemäß den allgemeingültigen gesetzlichen Regelungen (UrhG).",
       "COPYRIGHT_LICENSE": "Das Werk darf ausschließlich von einer eingeschränkten Anzahl von Personen gemäß den vertraglichen Bedingungen genutzt werden.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
       "SCHULFUNK": "Zugangsbeschränkte und zeitlich begrenzte Bereitstellung als Schulfunksendung nach §47 UrhG.<br />Keine Weitergabe an Dritte.<br />Quellenangabe gemäß der üblichen Praxis.",
@@ -460,6 +473,17 @@
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Unterrichts- und Lehrmedien",
       "EDU": "edu-sharing Lizenzen",
       "CUSTOM": "eigene Lizenz definieren"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/list.de",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "COOKIE_INFO": {
@@ -557,6 +581,7 @@
     "INFO_CHILDS": "Material",
     "INFO_CHILDS_MULTI": "Materialien",
     "INFO_NO_CONTENT": "Leere Sammlung",
+    "INFO_UPDATING": "Wird aktualisiert",
     "SCOPE": {
       "UNKNOWN": "Unbekannter Typ",
       "MY": "Privat",
@@ -767,6 +792,7 @@
     "SHOW_ALL_OPTIONS": "Weitere Aktionen",
     "APPLY": "Übernehmen",
     "SHOW": "Vorschau & Infos",
+    "VIEW_ELEMENT": "Öffnen",
     "SHOW_IN_FOLDER": "Zum Speicherort",
     "OPEN_ORIGINAL_NODE": "Original öffnen",
     "DEBUG": "Debug",
@@ -831,7 +857,12 @@
     "ASSIGNMENT_SUBMIT": "Abgeben",
     "ASSIGNMENT_SUBMISSION": "Abgaben",
     "ASSIGNMENT_EDIT": "Aufgabe bearbeiten",
-    "SORT_INTO": "Einsortieren"
+    "ASSIGNMENT_CANCEL": "Aufgabe abbrechen",
+    "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
+    "ASSIGNMENT_FINISH": "Aufgabe abschließen",
+    "ASSIGNMENT_FINISH_CONFIRM": "Möchten Sie diese Aufgabe wirklich abschließen? Dies kann nicht rückgängig gemacht werden.",
+    "MANAGE_CONTENT": "Einsortieren",
+    "EDIT_CONNECTOR": "Bearbeiten"
   },
   "LTI": {
     "REGISTERED": {
@@ -911,8 +942,12 @@
       "TOAST": {
         "DECLINED": "Der Vorschlag wurde abgelehnt",
         "INVALID_VALUE": "Der Vorschlagswert war ungültig und konnte nicht verwendet werden"
+      },
+      "USER_PROPOSALS": {
+        "LABEL": "Community Metadaten"
       }
-    }
+    },
+    "OPEN_CLOSE_EXTENDED": "Ansicht öffnen/schließen"
   },
   "FEEDBACK": {
     "TITLE": "Feedback zum Material geben.",
@@ -1021,6 +1056,7 @@
     "CONVERTING": "Konvertierung",
     "QUEUED": "Warteschlange",
     "QUEUE_POSITION": "Position in der Warteschlange",
+    "OPEN_IN_NEW_TAB": "In neuem Tab öffnen",
     "REVOKED": {
       "DETAILS_EMPTY": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. \n\nWeitere Details finden Sie in der Begründung unten.",
@@ -1064,7 +1100,9 @@
     "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt.",
     "OPTION_DISABLED_OR_UNAVAILABLE": "Die gewünschte Aktion steht leider nicht zur Verfügung.",
     "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen.",
-    "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen."
+    "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
+    "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
+    "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen."
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",
@@ -1616,7 +1654,7 @@
     "EXPAND": "{{ element }} ausklappen",
     "COLLAPSE": "{{ element }} einklappen",
     "ACTIVITY": {
-      "ACTION_TEXT_PREFIX": "zuletzt",
+      "ACTION_TEXT_PREFIX": "",
       "ACTION_TEXT_SUFFIX": "am",
       "EMPTY": "Keine kürzlichen Aktivitäten",
       "TIMEGROUP": {
@@ -1654,15 +1692,15 @@
     "recent-activities": {
       "TITLE": "Letzte Aktivitäten",
       "SUBTITLE": {
-        "collections": "Sammlungen",
-        "files": "Dateien",
-        "folders": "Ordner"
+        "viewed": "Angesehen",
+        "created": "Erstellt",
+        "edited": "Bearbeitet"
       }
     }
   },
   "DOWNLOAD_METADATA": {
     "TITLE": "Metadaten herunterladen",
-    "MESSAGE": "In welchen Format möchten Sie die Metadaten herunterladen?",
+    "MESSAGE": "In welchem Format möchten Sie die Metadaten herunterladen?",
     "TYPE_PDF": "PDF-Datei",
     "TYPE_TEXT": "Textdatei"
   },

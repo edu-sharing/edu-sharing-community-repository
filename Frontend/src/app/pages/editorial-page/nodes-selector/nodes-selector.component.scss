@@ -3,7 +3,7 @@
 
 @mixin tabLayout2Line() {
     mat-tab-header {
-        --mdc-secondary-navigation-tab-container-height: 55px;
+        --mat-tab-container-height: 55px;
     }
     .mdc-tab__text-label {
         display: flex;
@@ -54,6 +54,7 @@
 
     .mat-mdc-tab-body-content {
         overflow-y: auto;
+        @include mixins.materialScrollbarLight();
     }
 }
 
@@ -80,6 +81,7 @@
     bottom: 0;
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
     border-top: 1px solid #ccc;
     box-sizing: border-box;
 
@@ -90,7 +92,7 @@
 
 // search tab related styles
 :host ::ng-deep .search-field {
-    --mdc-outlined-text-field-container-shape: 28px;
+    --mat-form-field-outlined-container-shape: 28px;
     width: 100%;
 }
 
@@ -110,7 +112,7 @@
 }
 
 // collections tab related styles
-.tree-search-container {
+.tab-search-container {
     display: flex;
     align-items: center;
 }
@@ -179,9 +181,9 @@ es-info-message {
     }
 }
 
-es-info-message.no-config-alert {
-    margin-top: 16px;
-    display: block;
+// fix empty container should take full width
+:host ::ng-deep es-node-entries-wrapper .empty-container {
+    width: 100%;
 }
 
 .checklist {
@@ -195,4 +197,17 @@ es-info-message.no-config-alert {
     .mat-column-actions {
         display: none;
     }
+}
+
+// adjust height + width of workspace action select
+.workspace-action-select ::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    width: 120px;
+}
+
+.upload-create-row {
+    display: flex;
+    justify-content: center;
+    padding-top: 16px;
 }

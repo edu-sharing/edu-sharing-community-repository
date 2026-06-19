@@ -6,6 +6,7 @@ import {
     Input,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Assignment, Node } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../services/node-helper.service';
@@ -24,6 +25,9 @@ const NODE_URL_TAG_NAME = 'es-node-url';
     standalone: false,
 })
 export class NodeUrlComponent implements AfterViewInit {
+    private nodeHelper = inject(NodeHelperService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     @ViewChild('link') link: ElementRef<HTMLAnchorElement>;
 
     @Input() node: Node | Assignment;
@@ -65,11 +69,6 @@ export class NodeUrlComponent implements AfterViewInit {
     // element to the inner `NodeUrl` that expands its click area.
     isNested: boolean;
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private elementRef: ElementRef<HTMLElement>,
-    ) {}
-
     ngAfterViewInit(): void {
         setTimeout(() => {
             this.isNested = this.getIsNested();
@@ -83,7 +82,7 @@ export class NodeUrlComponent implements AfterViewInit {
     }
 
     get(mode: 'routerLink' | 'queryParams'): any {
-        const result: any = this.nodeHelper.getNodeLink(mode, this.node);
+        const result: any = this.nodeHelper.getNodeLink(mode, this.node) || {};
         if (mode === 'queryParams') {
             // it is important that we remove the fromLogin info because otherwise the render component will redirect to the default page on back
             result.fromLogin = null;

@@ -1,14 +1,15 @@
+@if (editorType === 'Monaco') {
 <ngx-monaco-editor
-  *ngIf="editorType === 'Monaco'"
   [options]="options"
   [ngModel]="ngModel"
   (ngModelChange)="ngModelChange.emit($event)"
   [ngModelOptions]="{ standalone: true }"
 ></ngx-monaco-editor>
+} @if (editorType === 'Textarea') {
 <textarea
   [readOnly]="options?.readOnly === true"
-  *ngIf="editorType === 'Textarea'"
   [ngModel]="ngModel"
   (ngModelChange)="ngModelChange.emit($event)"
   [ngModelOptions]="{ standalone: true }"
 ></textarea>
+}

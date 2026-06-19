@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -21,7 +21,7 @@ export type RawValuesDict = { [property: string]: string[] };
     providedIn: 'root',
 })
 export class MdsLabelService {
-    constructor(private mds: MdsService) {}
+    private mds = inject(MdsService);
 
     /** Converts a dictionary of raw value arrays to a dictionary of labeled value arrays. */
     labelValuesDict(mdsId: MdsIdentifier, values: RawValuesDict): Observable<LabeledValuesDict> {

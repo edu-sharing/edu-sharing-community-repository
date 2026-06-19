@@ -4,9 +4,9 @@ import {
     Input,
     OnChanges,
     OnInit,
-    Optional,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ClickSource, InteractionType } from '../entries-model';
@@ -30,6 +30,15 @@ import { BehaviorSubject } from 'rxjs';
     standalone: false,
 })
 export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnInit {
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    nodeHelper = inject(NodeHelperService);
+    applicationRef = inject(ApplicationRef);
+    configService = inject(ConfigService);
+    authenticationService = inject(AuthenticationService);
+    templatesService = inject(NodeEntriesTemplatesService, { optional: true });
+    nodeEntriesGlobalService = inject(NodeEntriesGlobalService, { optional: true });
+    private toast = inject(Toast, { optional: true });
+
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     readonly ClickSource = ClickSource;
@@ -43,16 +52,6 @@ export class NodeEntriesCardComponent<T extends Node> implements OnChanges, OnIn
     dropdownTop: number;
     showRatings = new BehaviorSubject(false);
     isCollection: boolean;
-    constructor(
-        public entriesService: NodeEntriesService<T>,
-        public nodeHelper: NodeHelperService,
-        public applicationRef: ApplicationRef,
-        public configService: ConfigService,
-        public authenticationService: AuthenticationService,
-        @Optional() public templatesService: NodeEntriesTemplatesService,
-        @Optional() public nodeEntriesGlobalService: NodeEntriesGlobalService,
-        @Optional() private toast: Toast,
-    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         this.isCollection = this.nodeHelper.isNodeCollection(changes.node?.currentValue);

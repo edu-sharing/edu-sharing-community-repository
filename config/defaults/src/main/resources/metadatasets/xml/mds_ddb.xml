@@ -111,7 +111,7 @@
 			</views>
 		</group>
 	</groups>
-	<queries>
+	<queries syntax="dsl">
 		<query join="AND" id="ngsearch">
 			<property name="virtual:title"></property>
 			<property name="virtual:place">

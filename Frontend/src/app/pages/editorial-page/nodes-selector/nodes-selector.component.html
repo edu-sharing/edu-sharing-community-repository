@@ -5,7 +5,8 @@
   (selectedTabChange)="onTabChange($event)"
 >
   <!-- SEARCH TAB -->
-  <mat-tab [id]="idPrefix + TabType.SEARCH" *ngIf="selectionMode() === 'source'">
+  @if (supportedTabs().includes(TabType.SEARCH)) {
+  <mat-tab [id]="idPrefix + TabType.SEARCH">
     <ng-template mat-tab-label>
       <i esIcon="search" class="tab-icon"></i>
       <span class="tab-label">{{ 'SIDEBAR.SEARCH_SHORT' | translate }}</span>
@@ -14,9 +15,12 @@
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.SEARCH }"
     ></ng-container>
   </mat-tab>
+  }
 
   <!-- METHODOLOGY TAB -->
-  <mat-tab [id]="idPrefix + TabType.METHODOLOGY" *ngIf="selectionMode() !== 'source'">
+  @if ( supportedTabs().includes(TabType.METHODOLOGY) && ('TOOLPERMISSION_METADATA_METHODOLOGY' |
+  esToolpermission | async) ) {
+  <mat-tab [id]="idPrefix + TabType.METHODOLOGY">
     <ng-template mat-tab-label>
       <i esIcon="dashboard" class="tab-icon"></i>
       <span class="tab-label">{{ i18nPrefix + 'METHODOLOGY.TITLE' | translate }}</span>
@@ -25,8 +29,10 @@
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.METHODOLOGY }"
     ></ng-container>
   </mat-tab>
+  }
 
   <!-- COLLECTIONS TAB -->
+  @if (supportedTabs().includes(TabType.COLLECTIONS)) {
   <mat-tab [id]="idPrefix + TabType.COLLECTIONS">
     <ng-template mat-tab-label>
       <i esIcon="layers" class="tab-icon"></i>
@@ -36,12 +42,12 @@
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.COLLECTIONS }"
     ></ng-container>
   </mat-tab>
+  }
 
   <!-- WORKSPACE TAB -->
-  <mat-tab
-    [id]="idPrefix + TabType.WORKSPACE"
-    *ngIf="'TOOLPERMISSION_WORKSPACE' | esToolpermission | async"
-  >
+  @if ( supportedTabs().includes(TabType.WORKSPACE) && ('TOOLPERMISSION_WORKSPACE' |
+  esToolpermission | async) ) {
+  <mat-tab [id]="idPrefix + TabType.WORKSPACE">
     <ng-template mat-tab-label>
       <i esIcon="cloud" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TITLE' | translate }}</span>
@@ -50,44 +56,45 @@
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.WORKSPACE }"
     ></ng-container>
   </mat-tab>
+  }
 
   <!-- UPLOAD TAB -->
-  <mat-tab [id]="idPrefix + TabType.UPLOAD" *ngIf="selectionMode() === 'source'">
+  @if (supportedTabs().includes(TabType.UPLOAD)) {
+  <mat-tab [id]="idPrefix + TabType.UPLOAD">
     <ng-template mat-tab-label>
-      <i esIcon="upload" class="tab-icon"></i>
-      <span class="tab-label">{{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}</span>
+      <i esIcon="add_circle_outline" class="tab-icon"></i>
+      <span class="tab-label">{{ i18nPrefix + 'UPLOAD.TITLE' | translate }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.UPLOAD }"
     ></ng-container>
   </mat-tab>
+  }
 </mat-tab-group>
 
 <ng-template #tabContent let-tabType="tabType">
   <div
     class="tab-content"
     [class.actionbar-visible]="selectedNodes().length || methodologyTabWithValue()"
-    *ngIf="tabType === selectedTab()"
   >
     <!-- search field + filter button -->
-    <div
-      class="tree-search-container"
-      *ngIf="[TabType.SEARCH, TabType.COLLECTIONS].includes(selectedTab()) && isSelectStep()"
-    >
+    @if ([TabType.SEARCH, TabType.COLLECTIONS].includes(tabType) && isSelectStep()) {
+    <div class="tab-search-container">
       <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
         <i esIcon="search" matPrefix></i>
         <input
           matInput
           [placeholder]="
             i18nPrefix +
-              (selectedTab() === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
+              (tabType === TabType.SEARCH ? 'SEARCH.PLACEHOLDER' : 'COLLECTIONS.PLACEHOLDER')
               | translate
           "
           [(ngModel)]="searchText"
+          [disabled]="tabType === TabType.SEARCH && dataSourceSearch.isLoading"
           (keydown.enter)="executeSearch()"
         />
+        @if (searchText()) {
         <button
-          *ngIf="searchText()"
           matSuffix
           mat-icon-button
           [attr.aria-label]="'SEARCH_CLEAR' | translate"
@@ -95,271 +102,310 @@
         >
           <i esIcon="close"></i>
         </button>
+        }
       </mat-form-field>
     </div>
-    <ng-container [ngSwitch]="selectedTab()" *ngIf="isSelectStep(); else configureCopy">
-      <!-- SEARCH TAB -->
-      <ng-container *ngSwitchCase="TabType.SEARCH">
-        <div class="search-container">
-          <es-actionbar
-            #actionbarSearchTab
-            class="actionbar-search"
-            [class.display-none]="dataSourceSearch.isEmpty() || dataSourceSearch.isLoading"
-          ></es-actionbar>
-          <es-node-entries-wrapper
-            #searchWrapperRef
-            *ngIf="
-              (selectedTab() === TabType.SEARCH && dataSourceSearch.isLoading) ||
-              !dataSourceSearch.isEmpty()
-            "
-            [dragDrop]="{
-              dragAllowed: true,
-              dropAllowed: canDropOnSearchRef,
-              dropped: dropped
-            }"
-            [columns]="flatNodeEntriesColumns"
-            [dataSource]="dataSourceSearch"
-            [(displayType)]="searchDisplayType"
-            [elementInteractionType]="InteractionType.Emitter"
-            [initConfig]="{
-              actionbar: actionbarSearchTab,
-              customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
-            }"
-            [scope]="Scope.Search"
-            (clickItem)="selectOnClick(searchWrapperRef, $event)"
-            (fetchData)="loadMore($event)"
-            (selectionChange)="onNodeSelectionChange($event)"
-          ></es-node-entries-wrapper>
-          <ng-container
-            *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
-          ></ng-container>
-        </div>
-      </ng-container>
+    } @if (isSelectStep()) { @switch (tabType) {
+    <!-- SEARCH TAB -->
+    @case (TabType.SEARCH) {
+    <div class="search-container">
+      <es-actionbar
+        #actionbarSearchTab
+        class="actionbar-search"
+        [class.display-none]="dataSourceSearch.isEmpty()"
+      ></es-actionbar>
+      @if (searchCompleted() && (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)) {
+      <es-node-entries-wrapper
+        #searchWrapperRef
+        [dragDrop]="{
+          dragAllowed: selectionMode() !== 'target',
+          dropAllowed: canDropOnSearchRef,
+          dropped: dropped
+        }"
+        [columns]="searchColumns"
+        [dataSource]="dataSourceSearch"
+        [(displayType)]="searchDisplayType"
+        [elementInteractionType]="InteractionType.Emitter"
+        [initConfig]="{
+          actionbar: actionbarSearchTab,
+          customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
+        }"
+        [scope]="Scope.Search"
+        (clickItem)="selectOnClick(searchWrapperRef, $event)"
+        (fetchData)="loadMore($event)"
+        (selectionChange)="onNodeSelectionChange($event)"
+      ></es-node-entries-wrapper>
+      }
+      <ng-container
+        *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceSearch }"
+      ></ng-container>
+      @if (!searchCompleted()) {
+      <ng-container *ngTemplateOutlet="loading"></ng-container>
+      }
+    </div>
+    }
 
-      <!-- METHODOLOGY TAB -->
-      <ng-container *ngSwitchCase="TabType.METHODOLOGY">
-        <es-metadata-template-management
-          (extendedValuesChange)="onExtendedValuesChange($event)"
-        ></es-metadata-template-management>
-      </ng-container>
+    <!-- METHODOLOGY TAB -->
+    @case (TabType.METHODOLOGY) {
+    <es-metadata-template-management
+      (extendedValuesChange)="onExtendedValuesChange($event)"
+    ></es-metadata-template-management>
+    }
 
-      <!-- COLLECTIONS TAB -->
-      <ng-container *ngSwitchCase="TabType.COLLECTIONS">
-        <!-- TODO: move into actionbar -->
-        <mat-button-toggle-group
-          class="collection-display-type"
-          [disabled]="
-            collectionsDisplayTypeToggleDisabled() ||
-            (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsTree.isLoading) ||
-            (collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsFlat.isLoading)
-          "
-          hideSingleSelectionIndicator
-          [value]="collectionsDisplayType()"
-          (change)="onCollectionsDisplayTypeChange($event)"
-        >
-          <mat-button-toggle [value]="NodeEntriesDisplayType.Grid">
-            <i esIcon="grid_view"></i>
-          </mat-button-toggle>
+    <!-- COLLECTIONS TAB -->
+    @case (TabType.COLLECTIONS) {
+    <!-- TODO: move into actionbar -->
+    <mat-button-toggle-group
+      class="collection-display-type"
+      [disabled]="
+        collectionsDisplayTypeToggleDisabled() ||
+        (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
+          ((dataSourceCollectionsTree.isLoadingSubject | async) ||
+            dataSourceCollectionsTree.isEmpty())) ||
+        (collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
+          (dataSourceCollectionsFlat.isLoadingSubject | async))
+      "
+      hideSingleSelectionIndicator
+      [value]="collectionsDisplayType()"
+      (change)="onCollectionsDisplayTypeChange($event)"
+    >
+      <mat-button-toggle [value]="NodeEntriesDisplayType.SmallGrid">
+        <i esIcon="grid_view"></i>
+      </mat-button-toggle>
 
-          <mat-button-toggle [value]="NodeEntriesDisplayType.Table">
-            <i esIcon="list"></i>
-          </mat-button-toggle>
+      <mat-button-toggle [value]="NodeEntriesDisplayType.Table">
+        <i esIcon="list"></i>
+      </mat-button-toggle>
 
-          <mat-button-toggle [value]="NodeEntriesDisplayType.Tree">
-            <i esIcon="account_tree"></i>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-        <!-- tree or flat node entries component -->
-        <es-node-entries-wrapper
-          #collectionsWrapperRef
-          *ngIf="
-            selectedTab() === TabType.COLLECTIONS &&
-            !(
-              collectionsDisplayType() !== NodeEntriesDisplayType.Tree &&
-              dataSourceCollectionsFlat.isEmpty()
-            )
-          "
-          [columns]="flatNodeEntriesColumns"
-          [dataSource]="
-            collectionsDisplayType() === NodeEntriesDisplayType.Tree
-              ? dataSourceCollectionsTree
-              : dataSourceCollectionsFlat
-          "
-          [displayType]="collectionsDisplayType()"
-          [dragDrop]="{
-            dragAllowed: true,
-            dropAllowed: canDropOnCollection,
-            dropped: dropOnCollection
-          }"
-          [elementInteractionType]="InteractionType.Emitter"
-          (clickItem)="selectOnClick(collectionsWrapperRef, $event)"
-          (fetchData)="loadMore($event, true)"
-          (selectionChange)="onNodeSelectionChange($event)"
-        ></es-node-entries-wrapper>
-        <ng-container *ngIf="collectionsDisplayType() !== NodeEntriesDisplayType.Tree">
-          <ng-container
-            *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceCollectionsFlat }"
-          ></ng-container>
-        </ng-container>
-      </ng-container>
-
-      <!-- WORKSPACE TAB -->
-      <ng-container *ngSwitchCase="TabType.WORKSPACE">
-        <es-node-entries-wrapper
-          #workspaceWrapperRef
-          *ngIf="selectedTab() === TabType.WORKSPACE"
-          [columns]="flatNodeEntriesColumns"
-          [dataSource]="dataSourceWorkspace"
-          [displayType]="NodeEntriesDisplayType.Tree"
-          [dragDrop]="{
-            dragAllowed: true,
-            dropAllowed: canDropOnCollection,
-            dropped: dropOnCollection
-          }"
-          (selectionChange)="onNodeSelectionChange($event)"
-        ></es-node-entries-wrapper>
-      </ng-container>
-
-      <!-- UPLOAD TAB -->
-      <ng-container *ngSwitchCase="TabType.UPLOAD">
-        <es-add-material-dialog
-          *ngIf="inboxNode"
-          [dialogData]="{
-            childobject: false,
-            chooseParent: false,
-            multiple: true,
-            parent: inboxNode,
-            showLti: false
-          }"
-          (dialogResult)="uploadMaterialDialogResult($event)"
-        ></es-add-material-dialog>
-      </ng-container>
-
-      <ng-template #noSearchResults let-dataSource="dataSource">
-        <es-info-message
-          mode="info"
-          class="info-message"
-          *ngIf="dataSource.isEmpty() && !dataSource.isLoading && searchSent()"
-        >
-          {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
+      <mat-button-toggle [value]="NodeEntriesDisplayType.Tree">
+        <i esIcon="account_tree"></i>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    <!-- tree or flat node entries component -->
+    @if ( collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
+    !dataSourceCollectionsFlat.isEmpty() || dataSourceCollectionsFlat.isLoading ) {
+    <es-node-entries-wrapper
+      #collectionsWrapperRef
+      [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
+      [columns]="
+        collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid
+          ? collectionsGridColumns
+          : collectionsTableColumns
+      "
+      [dataSource]="
+        collectionsDisplayType() === NodeEntriesDisplayType.Tree
+          ? dataSourceCollectionsTree
+          : dataSourceCollectionsFlat
+      "
+      [displayType]="collectionsDisplayType()"
+      [dragDrop]="{
+        dragAllowed: selectionMode() !== 'target',
+        dropAllowed: canDropOnCollection,
+        dropped: dropOnCollection
+      }"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="selectOnClick(collectionsWrapperRef, $event)"
+      (fetchData)="loadMore($event, true)"
+      (selectionChange)="onNodeSelectionChange($event)"
+    >
+      <ng-template #empty>
+        <es-info-message mode="info" class="info-message">
+          {{ i18nPrefix + 'COLLECTIONS.EMPTY_MESSAGE' | translate }}
         </es-info-message>
       </ng-template>
+    </es-node-entries-wrapper>
+    } @if (collectionsDisplayType() !== NodeEntriesDisplayType.Tree) {
+    <ng-container
+      *ngTemplateOutlet="noSearchResults; context: { dataSource: dataSourceCollectionsFlat }"
+    ></ng-container>
+    } }
 
-      <!-- FALLBACK -->
-      <ng-container *ngSwitchDefault> No view defined for tab {{ selectedTab() }}. </ng-container>
-    </ng-container>
-    <ng-template #configureCopy>
-      <es-info-message mode="info">
-        <h4>
-          {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_HEADING' | translate }}
-        </h4>
-        {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_MESSAGE' | translate }}
+    <!-- WORKSPACE TAB -->
+    @case (TabType.WORKSPACE) { @if (selectionMode() === 'target') {
+    <mat-form-field class="workspace-action-select">
+      <mat-select [(ngModel)]="workspaceAction" [disabled]="dataSourceWorkspace.isLoading">
+        <mat-option value="copy">{{ 'WORKSPACE.COPY_MOVE.COPY' | translate }}</mat-option>
+        <mat-option value="move" [disabled]="!canMoveWorkspaceNodes()">{{
+          'WORKSPACE.COPY_MOVE.MOVE' | translate
+        }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    }
+    <es-node-entries-wrapper
+      #workspaceWrapperRef
+      [checkbox]="false"
+      [dataSource]="dataSourceWorkspace"
+      [displayType]="NodeEntriesDisplayType.Tree"
+      [dragDrop]="{
+        dragAllowed: selectionMode() !== 'target',
+        dropAllowed: canDropOnCollection,
+        dropped: dropOnCollection
+      }"
+      [treeConfig]="workspaceTreeConfig()"
+      (selectionChange)="onNodeSelectionChange($event)"
+    >
+      <ng-template #empty>
+        <es-info-message mode="info" class="info-message">
+          {{ i18nPrefix + 'WORKSPACE.EMPTY_MESSAGE' | translate }}
+        </es-info-message>
+      </ng-template>
+    </es-node-entries-wrapper>
+    }
+
+    <!-- UPLOAD TAB -->
+    @case (TabType.UPLOAD) { @if (!inboxNode()) {
+    <es-spinner></es-spinner>
+    } @if (inboxNode()) {
+    <es-add-material-dialog
+      #material
+      [dialogData]="{
+        childobject: false,
+        chooseParent: chooseParent(),
+        multiple: true,
+        parent: chooseParent() ? inboxNode() : parent(),
+        showLti: true
+      }"
+      (dialogResult)="uploadMaterialDialogResult($event)"
+    ></es-add-material-dialog>
+    @if ( !material.selectedFiles()?.length && connectorOptions().length &&
+    option()?.optionConfig?.allowCreate !== false ) {
+    <div class="upload-create-row">
+      <es-dropdown
+        #connectorDropdown
+        [options]="connectorOptions()"
+        [showDisabled]="false"
+        position="right"
+      ></es-dropdown>
+      <button
+        mat-flat-button
+        color="primary"
+        [matMenuTriggerFor]="connectorDropdown.menu ? connectorDropdown.menu : null"
+        [attr.aria-label]="'CREATE' | translate"
+      >
+        <i esIcon="add"></i>
+        <span>{{ 'CREATE' | translate }}</span>
+      </button>
+    </div>
+    } } }
+
+    <!-- FALLBACK -->
+    @default { No view defined for tab {{ tabType }}. } } } @else {
+    <es-info-message mode="info">
+      <h4>
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_HEADING' | translate }}
+      </h4>
+      {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_MESSAGE' | translate }}
+    </es-info-message>
+    <h3>
+      {{ i18nPrefix + 'CONFIGURE_CONFIG.CONFIG_HEADING' | translate }}
+    </h3>
+    @if (highestSelectedNode(); as selectedNode) {
+    {{ i18nPrefix + 'CONFIGURE_CONFIG.COPY' | translate }} "{{ selectedNode.title }}" @if
+    (nodeHelperService.isNodeCollection(partialAsNode(selectedNode))) { ({{
+      'MEDIATYPE.collection' | translate
+    }}) } @else { ({{ 'MEDIATYPE.folder' | translate }}) } @if
+    (nodeHelperService.isNodeCollection(partialAsNode(selectedNode))) {
+    <div class="checklist">
+      <mat-checkbox [(ngModel)]="copyRoot">
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_MAIN' | translate }}
+      </mat-checkbox>
+
+      @if (selectedNode.collection?.childCollectionsCount) {
+      <mat-checkbox [(ngModel)]="copyChildCollections">
+        @if (selectedNode.collection.childCollectionsCount === 1) {
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.SINGLE' | translate }}
+        } @else {
+        {{
+          i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.MULTIPLE'
+            | translate : { count: selectedNode.collection.childCollectionsCount }
+        }}
+        }
+      </mat-checkbox>
+      } @if (numberOfRefs()) {
+      <mat-checkbox [(ngModel)]="copyRefs">
+        @if (numberOfRefs() === 1) {
+        {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.SINGLE' | translate }}
+        } @else {
+        {{
+          i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.MULTIPLE'
+            | translate : { count: numberOfRefs() }
+        }}
+        }
+      </mat-checkbox>
+      }
+    </div>
+    } @else {
+    <es-info-message class="info-message" mode="info">
+      {{ i18nPrefix + 'CONFIGURE_CONFIG.NO_CONFIG_OPTIONS' | translate }}
+    </es-info-message>
+    } } }
+
+    <ng-template #noSearchResults let-dataSource="dataSource">
+      @if (dataSource.isEmpty() && !dataSource.isLoading && searchSent()) {
+      <es-info-message mode="info" class="info-message">
+        {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
       </es-info-message>
-      <h3>
-        {{ i18nPrefix + 'CONFIGURE_CONFIG.CONFIG_HEADING' | translate }}
-      </h3>
-      <ng-container *ngIf="highestSelectedNode() as selectedNode">
-        {{ i18nPrefix + 'CONFIGURE_CONFIG.COPY' | translate }} "{{ selectedNode.title }}"
-        <ng-container
-          *ngIf="nodeHelperService.isNodeCollection(partialAsNode(selectedNode)); else folderType"
-        >
-          ({{ 'MEDIATYPE.collection' | translate }})
-        </ng-container>
-        <ng-template #folderType> ({{ 'MEDIATYPE.folder' | translate }}) </ng-template>
-        <div
-          class="checklist"
-          *ngIf="
-            nodeHelperService.isNodeCollection(partialAsNode(selectedNode));
-            else noConfigOptions
-          "
-        >
-          <mat-checkbox [(ngModel)]="copyRoot">
-            {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_MAIN' | translate }}
-          </mat-checkbox>
+      }
+    </ng-template>
 
-          <mat-checkbox
-            [(ngModel)]="copyChildCollections"
-            *ngIf="selectedNode.collection?.childCollectionsCount"
-          >
-            <ng-container
-              *ngIf="selectedNode.collection.childCollectionsCount === 1; else includeMultipleSub"
-            >
-              {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.SINGLE' | translate }}
-            </ng-container>
-            <ng-template #includeMultipleSub>
-              {{
-                i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_SUB.MULTIPLE'
-                  | translate : { count: selectedNode.collection.childCollectionsCount }
-              }}
-            </ng-template>
-          </mat-checkbox>
-
-          <mat-checkbox [(ngModel)]="copyRefs" *ngIf="numberOfRefs()">
-            <ng-container *ngIf="numberOfRefs() === 1; else includeMultipleItems">
-              {{ i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.SINGLE' | translate }}
-            </ng-container>
-            <ng-template #includeMultipleItems>
-              {{
-                i18nPrefix + 'CONFIGURE_CONFIG.INCLUDE_ITEMS.MULTIPLE'
-                  | translate : { count: numberOfRefs() }
-              }}
-            </ng-template>
-          </mat-checkbox>
-        </div>
-        <ng-template #noConfigOptions>
-          <es-info-message class="no-config-alert" mode="info">
-            {{ i18nPrefix + 'CONFIGURE_CONFIG.NO_CONFIG_OPTIONS' | translate }}
-          </es-info-message>
-        </ng-template>
-      </ng-container>
+    <ng-template #loading>
+      <es-spinner></es-spinner>
     </ng-template>
   </div>
 </ng-template>
 
 <!-- FOOTER ACTION BAR -->
-<div class="tab-action-bar" *ngIf="selectedNodes().length || methodologyTabWithValue()">
-  <ng-container *ngIf="selectionMode() === 'target'">
-    <ng-container *ngIf="!isMethodologyTab(); else methodologyActions">
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="!isValidSelection()"
-        (click)="insertSelectedNodes()"
-      >
-        {{ option().optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
-        <i esIcon="arrow_forward"></i>
-      </button>
-    </ng-container>
-    <ng-template #methodologyActions>
-      <button mat-flat-button color="primary" (click)="saveMetadata()">
-        {{ 'SAVE' | translate }}
-      </button>
-    </ng-template>
-  </ng-container>
-  <ng-container *ngIf="selectionMode() === 'source'">
-    <ng-container *ngIf="!isSelectStep()">
-      <button mat-flat-button color="primary" class="back-btn" (click)="goBack()">
-        <i esIcon="arrow_back"></i>
-        {{ 'BACK' | translate }}
-      </button>
-    </ng-container>
-    <ng-container>
-      <!-- disable in second step, if root or child collections are not selected -->
-      <button
-        mat-flat-button
-        color="primary"
-        [disabled]="!isValidSelection() || (!isSelectStep() && !atLeastRootOrChildrenSelected())"
-        (click)="copyNodes()"
-      >
-        {{
-          option().optionConfig?.applyLabel ||
-            i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE')
-            | translate
-        }}
-        <i esIcon="arrow_forward"></i>
-      </button>
-    </ng-container>
-  </ng-container>
+@if (selectedNodes().length || methodologyTabWithValue()) {
+<div class="tab-action-bar">
+  @if (selectionMode() === 'target') { @if (!isMethodologyTab()) {
+  <div
+    [matTooltip]="
+      invalidSelectionReason()
+        ? (i18nPrefix + 'INVALID_SELECTION_REASON.' + invalidSelectionReason() | translate)
+        : null
+    "
+  >
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!!invalidSelectionReason()"
+      (click)="insertSelectedNodes()"
+    >
+      {{ option().optionConfig?.applyLabel || i18nPrefix + 'COPY.TARGET' | translate }}
+      <i esIcon="arrow_forward"></i>
+    </button>
+  </div>
+  } @else {
+  <button mat-flat-button color="primary" (click)="saveMetadata()">
+    {{ 'SAVE' | translate }}
+  </button>
+  } } @if (selectionMode() === 'source') { @if (!isSelectStep()) {
+  <button mat-button color="primary" class="back-btn" (click)="goBack()">
+    <i esIcon="arrow_back"></i>
+    {{ 'BACK' | translate }}
+  </button>
+  }
+  <!-- disable in second step, if root or child collections are not selected -->
+  <div
+    [matTooltip]="
+      invalidSelectionReason()
+        ? (i18nPrefix + 'INVALID_SELECTION_REASON.' + invalidSelectionReason() | translate)
+        : null
+    "
+  >
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!!invalidSelectionReason()"
+      (click)="copyNodes()"
+    >
+      {{
+        option().optionConfig?.applyLabel ||
+          i18nPrefix + 'COPY.' + (selectedNodes().length === 1 ? 'SINGLE' : 'MULTIPLE') | translate
+      }}
+      <i esIcon="arrow_forward"></i>
+    </button>
+  </div>
+  }
 </div>
+}

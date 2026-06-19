@@ -1,5 +1,5 @@
 import { PlatformLocation } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -36,6 +36,7 @@ import { WidgetConfig } from '../types/widget-config/widget-config';
 import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
 import {
     convertNodeRefIntoNodeId,
+    prependWorkspacePrefix,
     retrieveNodeId,
     retrievePageVariantTemplateRef,
     retrievePageVariantTemplateVersion,
@@ -47,24 +48,22 @@ import { TopicPageGlobalService } from './topic-page-global.service';
     providedIn: 'root',
 })
 export class TopicPageHelperService {
+    private collectionApi = inject(CollectionService);
+    private dialogs = inject(DialogsService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private nodeApi = inject(NodeService);
+    private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
+    private platformLocation = inject(PlatformLocation);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private topicPageEventsService = inject(TopicPageEventsService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private translate = inject(TranslateService);
+
     blobToUpload: Blob;
     private selectedVariablesSubject: BehaviorSubject<{ [key: string]: string[] }> =
         new BehaviorSubject<{ [key: string]: string[] }>({});
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
-
-    constructor(
-        private collectionApi: CollectionService,
-        private dialogs: DialogsService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private nodeApi: NodeService,
-        private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private platformLocation: PlatformLocation,
-        private router: Router,
-        private toast: Toast,
-        private topicPageEventsService: TopicPageEventsService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private translate: TranslateService,
-    ) {}
 
     /**
      * Retrieves the base href of the application.
@@ -89,8 +88,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomReurlExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomReurlExtras() || {},
+                extras,
             );
         }
         extras.queryParams.reurl = 'WINDOW';
@@ -117,8 +116,8 @@ export class TopicPageHelperService {
         }
         if (this.topicPageGlobalService.getCustomApplyFilterExtras()) {
             extras = this.mergeNavigationExtras(
-                extras,
                 this.topicPageGlobalService.getCustomApplyFilterExtras() || {},
+                extras,
             );
         }
         extras.queryParams.action = 'applyFilter';
@@ -134,6 +133,45 @@ export class TopicPageHelperService {
                 .createUrlTree([UIConstants.ROUTER_PREFIX + applyFilterComponent], extras)
                 .toString();
         return window.open(link, '_blank');
+    }
+
+    /**
+     * Opens the link to a node for inspection.
+     *
+     * @param node
+     */
+    openChangeOnInspectionTableLink(node: Node): void {
+        const component = this.topicPageGlobalService.getCustomApplyFilterComponent() || 'render';
+        const urlBase = this.buildInspectionTableUrlBase(component, node);
+        const extras = this.topicPageGlobalService.getCustomInspectionTableExtras() || {};
+        if (this.topicPageGlobalService.getCustomInspectionTableNodeIdQueryParam()) {
+            extras.queryParams[
+                this.topicPageGlobalService.getCustomInspectionTableNodeIdQueryParam()
+            ] = retrieveNodeId(node);
+        }
+        const link = this.getBaseHref() + this.router.createUrlTree(urlBase, extras).toString();
+
+        window.open(link, '_blank');
+    }
+
+    /**
+     * Helper function to build the inspection table URL base.
+     *
+     * @param component
+     * @param node
+     */
+    private buildInspectionTableUrlBase(component: string, node: Node): string[] {
+        if (component !== 'render') {
+            return [UIConstants.ROUTER_PREFIX + component];
+        }
+
+        const urlBase = [UIConstants.ROUTER_PREFIX + component, retrieveNodeId(node)];
+
+        if (node.content.version) {
+            urlBase.push(node.content.version);
+        }
+
+        return urlBase;
     }
 
     /**
@@ -323,6 +361,22 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Copies a node as a child of a given parent node.
+     */
+    async copyNodeAsChild(sourceNodeId: string, parentNodeId: string): Promise<Node> {
+        sourceNodeId = convertNodeRefIntoNodeId(sourceNodeId);
+        parentNodeId = convertNodeRefIntoNodeId(parentNodeId);
+        return await firstValueFrom(
+            this.nodeApi.createChildByCopying({
+                repository: HOME_REPOSITORY,
+                node: parentNodeId,
+                source: sourceNodeId,
+                withChildren: false,
+            }),
+        );
+    }
+
+    /**
      * Deletes a node with a given ID.
      */
     async deleteNode(nodeId: string): Promise<void> {
@@ -358,13 +412,22 @@ export class TopicPageHelperService {
     private cleanPageVariantConfig(value: string): string {
         const blacklistedProperties: string[] = ['hasHits', 'searchCount', 'statistics'];
         const parsedValue: PageVariantConfig = JSON.parse(value);
+        // workaround to avoid keeping legacy properties
+        const legacyProperties: string[] = ['template', 'variables'];
+        legacyProperties.forEach((prop: string) => delete (parsedValue as any)[prop]);
+        // render/copy breadcrumb/header markers are inheritance-only and must never be persisted
+        delete parsedValue.structure?.propagatedBreadcrumbNodeId;
+        delete parsedValue.structure?.propagatedHeaderNodeId;
+        delete parsedValue.structure?.temporaryBreadcrumbNodeId;
+        delete parsedValue.structure?.temporaryHeaderNodeId;
         parsedValue.structure?.swimlanes?.forEach((swimlane: Swimlane): void => {
             swimlane.grid?.forEach((gridItem: GridTile): void => {
                 // @ts-ignore
                 blacklistedProperties.forEach((prop) => delete gridItem[prop]);
-                // special case for propagatedNodeId
-                if (gridItem.nodeId && gridItem.propagatedNodeId) {
+                // render/copy markers must never be persisted alongside a real nodeId
+                if (gridItem.nodeId) {
                     delete gridItem.propagatedNodeId;
+                    delete gridItem.temporaryNodeId;
                 }
             });
         });
@@ -509,15 +572,20 @@ export class TopicPageHelperService {
         customTitleSuffix: string = '',
         variantConfig?: PageVariantConfig,
     ) {
-        const variantTemplateRef: string = retrievePageVariantTemplateRef(node);
-        const variantTemplateNode: Node = variantTemplateRef.includes(retrieveNodeId(node))
-            ? node
-            : await this.getNode(convertNodeRefIntoNodeId(variantTemplateRef));
-        const variantTemplateVersion: string =
-            retrievePageVariantTemplateVersion(variantTemplateNode);
+        const variantTemplateVersion: string = retrievePageVariantTemplateVersion(node);
+        // the new node is based on `node`: if `node` is itself a template, that template
+        // is the new node's foundation; otherwise the new node inherits `node`'s own
+        // foundation (a sibling copy shares the same template ref). Without this, a
+        // variant created from a non-root template would point at the template's parent
+        // instead of the template it was actually built on.
+        const isTemplateSource: boolean =
+            node.properties?.[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]?.[0] === 'true';
+        const templateRef: string = isTemplateSource
+            ? prependWorkspacePrefix(retrieveNodeId(node))
+            : retrievePageVariantTemplateRef(node);
         const properties: { [p: string]: string | string[] } = {
             [DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP]: 'false',
-            [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: retrievePageVariantTemplateRef(node),
+            [DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]: templateRef,
             [DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]: variantTemplateVersion,
         };
         // if a variant config is set, copy it as well

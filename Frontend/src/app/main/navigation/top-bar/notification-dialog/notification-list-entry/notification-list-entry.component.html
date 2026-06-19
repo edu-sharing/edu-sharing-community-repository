@@ -26,23 +26,30 @@
                 }
         }}
       </div>
-      <ul class="permissions" *ngIf="$any(entry).permissions as permissions">
-        <li *ngFor="let permission of $any(permissions)">
+      @if ($any(entry).permissions; as permissions) {
+      <ul class="permissions">
+        @for (permission of $any(permissions); track permission) {
+        <li>
           {{
             'NOTIFICATION.PERMISSION.' + permission.toLowerCase()
               | translate : { fallback: permission }
           }}
         </li>
+        }
       </ul>
-      <div
-        class="user-content"
-        *ngIf="$any(entry).commentContent || $any(entry).userComment as content"
-      >
+      } @if ($any(entry).commentContent || $any(entry).userComment; as content) {
+      <div class="user-content">
         <span>{{ content }}</span>
       </div>
+      }
     </div>
     <div>
-      <es-node-url mode="link" target="_blank" [node]="getNode()">
+      <es-node-url
+        mode="link"
+        target="_blank"
+        [node]="getNode()"
+        [queryParams]="{ closeOnBack: true }"
+      >
         <button mat-icon-button color="primary">
           <i esIcon="open_in_new"></i>
         </button>

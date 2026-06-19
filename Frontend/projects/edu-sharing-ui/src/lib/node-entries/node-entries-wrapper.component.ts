@@ -18,6 +18,7 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
@@ -32,6 +33,7 @@ import {
 import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesComponent } from './node-entries.component';
 import {
+    CtrlClickBehavior,
     FetchEvent,
     GridConfig,
     InteractionType,
@@ -43,6 +45,7 @@ import {
     NodeClickEvent,
     NodeEntriesDisplayType,
     TableConfig,
+    TreeConfig,
 } from './entries-model';
 import { NodeDataSource } from './node-data-source';
 import { Helper } from '../util/helper';
@@ -66,19 +69,40 @@ import { PaginationStrategy } from './node-entries-global.service';
 import { NodeEntriesDataType } from './data-type';
 import { OptionsHelperService } from '../services/abstract/options-helper.service';
 import { OptionsHelperDataService } from '../services/options-helper-data.service';
+import { TreeNodeService } from './node-entries-tree/tree-node.service';
 
 @Component({
     selector: 'es-node-entries-wrapper',
-    template: `<es-node-entries
-        #nodeEntriesComponent
-        *ngIf="!customNodeListComponent"
-    ></es-node-entries>`,
-    providers: [NodeEntriesService, OptionsHelperDataService, NodeEntriesTemplatesService],
+    template: `@if (!customNodeListComponent) {
+        <es-node-entries #nodeEntriesComponent></es-node-entries>
+        }`,
+    providers: [
+        NodeEntriesService,
+        OptionsHelperDataService,
+        NodeEntriesTemplatesService,
+        TreeNodeService,
+    ],
     standalone: false,
 })
 export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnInit, OnChanges, OnDestroy, ListEventInterface<T>
 {
+    private viewContainerRef = inject(ViewContainerRef);
+    private temporaryStorageService = inject(TemporaryStorageService);
+    private ngZone = inject(NgZone);
+    private entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    private nodeService = inject(NodeService);
+    optionsHelper = inject(OptionsHelperDataService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private nodeHelperService = inject(NodeHelperService);
+    private uiService = inject(UIService);
+    private templatesService = inject(NodeEntriesTemplatesService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private elementRef = inject(ElementRef);
+    public treeNodeService = inject(TreeNodeService);
+    // @TODO
+    // private mainNav = inject(MainNavService);
+
     /**
      * title (above) the table/grid
      */
@@ -125,6 +149,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() dragDrop: ListDragGropConfig<T>;
     @Input() gridConfig: GridConfig;
     @Input() tableConfig: TableConfig;
+    @Input() treeConfig: TreeConfig;
     /**
      * this can be set instead of calling initOptionsGenerator()
      */
@@ -149,10 +174,14 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      *   selecting the element or displaying information in a complementary page area. The
      *   `dblClickItem` event can be used for a more disruptive action.
      * - When choosing 'dynamic', the `clickItem` event should trigger a major action like
-     *   navigating to a new page or closing a dialog.
+     *   navigating to a new page or closing a dialog. (will show a pointer cursor)
      */
     // TODO: Consider controlling the ui hints and the actual behavior with a single option.
     @Input() singleClickHint: 'dynamic' | 'static' = 'dynamic';
+    /**
+     * behaviour when ctrl is pressed wy clicking
+     */
+    @Input() ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     /**
      * Do not load more data on scroll.
      */
@@ -176,22 +205,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private dataSourceDestroy$ = new Subject<void>();
     private destroyed = new Subject<void>();
 
-    constructor(
-        private viewContainerRef: ViewContainerRef,
-        private temporaryStorageService: TemporaryStorageService,
-        private ngZone: NgZone,
-        private entriesService: NodeEntriesService<T>,
-        private nodeService: NodeService,
-        public optionsHelper: OptionsHelperDataService,
-        private optionsHelperService: OptionsHelperService,
-        private nodeHelperService: NodeHelperService,
-        private uiService: UIService,
-        // @TODO
-        // private mainNav: MainNavService,
-        private templatesService: NodeEntriesTemplatesService,
-        private changeDetectorRef: ChangeDetectorRef,
-        private elementRef: ElementRef,
-    ) {
+    constructor() {
         // regulary re-bind template since it might have updated without ngChanges trigger
         /*
         ngZone.runOutsideAngular(() =>
@@ -279,6 +293,30 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         if (this.tableConfig) {
             this.entriesService.tableConfig = this.tableConfig;
         }
+        if (this.treeConfig) {
+            this.entriesService.treeConfig = this.treeConfig;
+            if (this.treeConfig.selectionMode !== undefined) {
+                this.treeNodeService.setSelectionMode(this.treeConfig.selectionMode);
+            }
+            if (this.treeConfig.isValidSourceCallback !== undefined) {
+                this.treeNodeService.setCustomIsValidSourceCallback(
+                    this.treeConfig.isValidSourceCallback,
+                );
+            }
+            if (this.treeConfig.showFiles !== undefined) {
+                this.treeNodeService.updateShowFiles(this.treeConfig.showFiles);
+            }
+            if (this.treeConfig.includeResolveInheritedAccess !== undefined) {
+                this.treeNodeService.updateIncludeResolveInheritedAccess(
+                    this.treeConfig.includeResolveInheritedAccess,
+                );
+            }
+            if (this.treeConfig.initialSelectionAttribute !== undefined) {
+                this.treeNodeService.updateInitialSelectionAttribute(
+                    this.treeConfig.initialSelectionAttribute,
+                );
+            }
+        }
         this.entriesService.options = this.options;
         if (this.globalOptions) {
             const globalOptions$ = new BehaviorSubject(
@@ -303,6 +341,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.fetchData = this.fetchData;
         this.entriesService.primaryInstance = this.primaryInstance;
         this.entriesService.singleClickHint = this.singleClickHint;
+        this.entriesService.ctrlClickBehavior = this.ctrlClickBehavior;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);

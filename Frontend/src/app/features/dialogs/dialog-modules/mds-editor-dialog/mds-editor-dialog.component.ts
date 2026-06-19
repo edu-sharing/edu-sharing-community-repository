@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
 import { DialogButton, Node } from '../../../../core-module/core.module';
@@ -27,6 +27,13 @@ import {
     standalone: false,
 })
 export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
+    data = inject<MdsEditorDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>>(CardDialogRef);
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    private localEvents = inject(LocalEventsService);
+    private toast = inject(Toast);
+
     @ViewChild('customBottomBarContent') customBottomBarContent: TemplateRef<HTMLElement>;
     @ViewChild(MdsEditorCoreComponent) mdsEditorCore: MdsEditorCoreComponent;
 
@@ -34,13 +41,7 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
     completedProperties: FillTypeStatus;
     totalProperties: FillTypeStatus;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: MdsEditorDialogData,
-        private dialogRef: CardDialogRef<MdsEditorDialogData, MdsEditorDialogResult>,
-        public mdsEditorInstance: MdsEditorInstanceService,
-        private localEvents: LocalEventsService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
     }
 
@@ -132,13 +133,13 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
         ])
             .pipe(
                 map(([activeViews]) =>
-                    activeViews.map((view) =>
+                    activeViews?.map((view) =>
                         this.mdsEditorCore.viewRef?.find((v) => v.view.id === view.id),
                     ),
                 ),
                 map((viewRef) =>
                     viewRef
-                        .filter((v) => v && !v.isInHiddenState() && v.view.caption)
+                        ?.filter((v) => v && !v.isInHiddenState() && v.view.caption)
                         .map(
                             (v) =>
                                 new JumpMark(

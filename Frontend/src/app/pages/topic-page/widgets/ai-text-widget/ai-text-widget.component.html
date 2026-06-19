@@ -1,31 +1,24 @@
-<div class="ai-widget" *ngIf="initialized(); else loadingSpinner">
-  <ng-container *ngIf="reloadingIndicator()">
-    <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
-  </ng-container>
-  <div class="edit-mode" *ngIf="editMode(); else outputResult">
+@if (initialized()) {
+<div class="ai-widget">
+  @if (reloadingIndicator()) {
+  <ng-container *ngTemplateOutlet="loadingSpinner"></ng-container>
+  } @if (editMode()) {
+  <div class="edit-mode">
     <h3 class="mat-heading-4">
       {{ i18nPrefix + 'HEADING' | translate }}
     </h3>
-
     <p class="prompt-description">
       {{ i18nPrefix + 'PROMPT_DESCRIPTION' | translate }}
       {{ i18nPrefix + 'PLACEHOLDER_DESCRIPTION' | translate }}
-      <ng-container *ngIf="availableSelectDimensionKeys.length > 0">
-        <ng-container *ngFor="let key of availableSelectDimensionKeys; let i = index">
-          <code (click)="appendDimensionKey(key)">{{
-            dimensionPrefix + key + dimensionSuffix
-          }}</code>
-          {{ i <= availableSelectDimensionKeys.length - 3 ? ', ' : '' }}
-          {{
-            i === availableSelectDimensionKeys.length - 2
-              ? ' ' + (i18nPrefix + 'AND' | translate)
-              : ''
-          }}
-        </ng-container>
-        .
-      </ng-container>
+      @if (availableSelectDimensionKeys.length > 0) { @for (key of availableSelectDimensionKeys;
+      track key; let i = $index) {
+      <code (click)="appendDimensionKey(key)">{{ dimensionPrefix + key + dimensionSuffix }}</code>
+      {{ i <= availableSelectDimensionKeys.length - 3 ? ', ' : '' }}
+      {{
+        i === availableSelectDimensionKeys.length - 2 ? ' ' + (i18nPrefix + 'AND' | translate) : ''
+      }}
+      } . }
     </p>
-
     <mat-form-field appearance="outline">
       <mat-label>
         {{ i18nPrefix + 'PROMPT_LABEL' | translate }}
@@ -40,7 +33,6 @@
         #promptTextarea
       ></textarea>
     </mat-form-field>
-
     <p>
       {{ i18nPrefix + 'SEND_HINT' | translate }}
     </p>
@@ -52,16 +44,15 @@
     >
       {{ i18nPrefix + 'SEND' | translate }}
     </button>
-
-    <div class="answers-container" *ngIf="latestStoredPrompt">
+    @if (latestStoredPrompt) {
+    <div class="answers-container">
       <h3 class="mat-heading-4">
         {{ i18nPrefix + 'ANSWERS_LABEL' | translate }}
       </h3>
-
       <p>
         {{ i18nPrefix + 'ANSWERS_DESCRIPTION' | translate }}
       </p>
-
+      @if (selectDimensionKeysUsed.length > 0 && !processPromptInProgress) {
       <div
         class="select-dimensions"
         [class.topic-page-grid-cols-1]="selectDimensionKeysUsed.length === 1"
@@ -69,26 +60,25 @@
         [class.topic-page-grid-cols-3]="
           selectDimensionKeysUsed.length > 2 && selectDimensionKeysUsed.length % 2 !== 0
         "
-        *ngIf="selectDimensionKeysUsed.length > 0 && !processPromptInProgress"
       >
-        <ng-container *ngFor="let dimensionKey of selectDimensionKeysUsed; let i = index">
-          <es-mds-editor-single-widget
-            [editorMode]="'form'"
-            [mds]="mds"
-            [widgetId]="dimensionKey"
-            [customAttributes]="{ type: MdsWidgetType.Singleoption }"
-            [ngModel]="latestSelectedDimensionValues[dimensionKey]"
-            (ngModelChange)="
-              latestSelectedDimensionValues[dimensionKey] = $event; updateResultInput()
-            "
-            ngDefaultControl
-          ></es-mds-editor-single-widget>
-        </ng-container>
+        @for (dimensionKey of selectDimensionKeysUsed; track dimensionKey; let i = $index) {
+        <es-mds-editor-single-widget
+          [editorMode]="'form'"
+          [mds]="mds"
+          [widgetId]="dimensionKey"
+          [customAttributes]="{ type: MdsWidgetType.Singleoption }"
+          [ngModel]="latestSelectedDimensionValues[dimensionKey]"
+          (ngModelChange)="
+            latestSelectedDimensionValues[dimensionKey] = $event; updateResultInput()
+          "
+          ngDefaultControl
+        ></es-mds-editor-single-widget>
+        }
       </div>
+      }
     </div>
-
+    } @if (latestStoredPrompt) {
     <es-editable-text
-      *ngIf="latestStoredPrompt"
       [applyTextareaPadding]="false"
       [disabled]="disabled() || processPromptInProgress"
       [editable]="true"
@@ -99,7 +89,7 @@
       [text]="resultInput"
       (textChange)="resultInput = $event; saveModification()"
     ></es-editable-text>
-
+    }
     <div>
       <button
         mat-flat-button
@@ -110,7 +100,6 @@
         {{ i18nPrefix + 'GENERATE_TEXT' | translate }}
       </button>
     </div>
-
     <!-- color + configuration buttons -->
     <es-widget-configuration-buttons
       [optionOne]="embedConfigurationOption"
@@ -119,26 +108,31 @@
       (optionOneClicked)="embedWidget()"
     ></es-widget-configuration-buttons>
   </div>
-  <ng-template #outputResult>
-    <es-editable-text
-      *ngIf="resultString; else emptyResultString"
-      [aiGenerated]="aiGeneratedText()"
-      [editable]="false"
-      [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
-      [nonEditText]="resultString"
-      [searchInput]="searchInput()"
-      [text]="resultString"
-      (searchResultsUpdated)="updateSearchResults($event)"
-    ></es-editable-text>
-    <ng-template #emptyResultString>
-      <div class="empty-result-string" *ngIf="initialized() && !reloadingIndicator()">
-        {{ i18nPrefix + 'NO_ANSWER_DEFINED' | translate }}
-      </div>
-    </ng-template>
-  </ng-template>
+  } @else { @if (resultString) {
+  <es-editable-text
+    [aiGenerated]="aiGeneratedText()"
+    [editable]="false"
+    [label]="i18nPrefix + 'CURRENT_SELECTION_ANSWER_LABEL' | translate"
+    [nonEditText]="resultString"
+    [searchInput]="searchInput()"
+    [text]="resultString"
+    (searchResultsUpdated)="updateSearchResults($event)"
+  ></es-editable-text>
+  } @else { @if (initialized() && !reloadingIndicator()) {
+  <div class="empty-result-string">
+    {{ i18nPrefix + 'NO_ANSWER_DEFINED' | translate }}
+  </div>
+  } } }
 </div>
+} @else { @if (reloadingIndicator()) {
+<div class="reloading-indicator">
+  <es-spinner></es-spinner>
+</div>
+} }
 <ng-template #loadingSpinner>
-  <div class="reloading-indicator" *ngIf="reloadingIndicator()">
+  @if (reloadingIndicator()) {
+  <div class="reloading-indicator">
     <es-spinner></es-spinner>
   </div>
+  }
 </ng-template>

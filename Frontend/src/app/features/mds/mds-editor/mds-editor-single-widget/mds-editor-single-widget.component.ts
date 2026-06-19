@@ -12,6 +12,7 @@ import {
     SimpleChanges,
     ViewChild,
     ViewContainerRef,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
@@ -55,6 +56,13 @@ export interface MdsEditInterface {
     standalone: false,
 })
 export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, MdsEditInterface {
+    mdsEditorInstance = inject(MdsEditorInstanceService);
+    mdsService = inject(MdsService);
+    private applicationRef = inject(ApplicationRef);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private injector = inject(Injector);
+    private containerRef = inject(ViewContainerRef);
+
     @ViewChild('widget') ref: ElementRef<HTMLDivElement>;
     @Input() editorMode = 'inline' as EditorMode;
     @Input() ngModel: string[];
@@ -76,15 +84,6 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
     private instanceExists: boolean = false;
     private widget: Widget;
 
-    constructor(
-        public mdsEditorInstance: MdsEditorInstanceService,
-        public mdsService: MdsService,
-        private applicationRef: ApplicationRef,
-        private factoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        private containerRef: ViewContainerRef,
-    ) {}
-
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
@@ -99,7 +98,7 @@ export class MdsEditorSingleWidgetComponent implements OnChanges, OnDestroy, Mds
                 return;
             }
             let definition = mdsDefinition.widgets.find(
-                (w) => w.id === this.widgetId && !w.template,
+                (w) => w.id === this.widgetId && !w.template.length,
             );
             if (this.customAttributes) {
                 definition = { ...definition, ...this.customAttributes };

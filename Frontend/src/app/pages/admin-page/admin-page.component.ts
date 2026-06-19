@@ -1,6 +1,14 @@
 import { trigger } from '@angular/animations';
 import { PlatformLocation } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    inject,
+} from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -111,6 +119,25 @@ type Job = {
     standalone: false,
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
+    private about = inject(AboutService);
+    private admin = inject(RestAdminService);
+    private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private mediacenterService = inject(RestMediacenterService);
+    private networkService = inject(NetworkService);
+    private node = inject(RestNodeService);
+    private organization = inject(RestOrganizationService);
+    private platformLocation = inject(PlatformLocation);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private searchApi = inject(RestSearchService);
+    private storage = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
     readonly InteractionType = InteractionType;
@@ -124,26 +151,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private queryParams: Params;
     jobsLoading = false;
 
-    constructor(
-        private about: AboutService,
-        private admin: RestAdminService,
-        private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private mediacenterService: RestMediacenterService,
-        private networkService: NetworkService,
-        private node: RestNodeService,
-        private organization: RestOrganizationService,
-        private platformLocation: PlatformLocation,
-        private route: ActivatedRoute,
-        private router: Router,
-        private searchApi: RestSearchService,
-        private storage: SessionStorageService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -1179,7 +1187,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         if (name == 'COMPANY_HOME') {
             check.callback = () => {
                 this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node) => {
-                    UIHelper.goToWorkspaceFolder(this.node, this.router, null, node.node.parent.id);
+                    UIHelper.goToWorkspaceFolder(this.router, null, node.node.parent.id);
                 });
             };
         }

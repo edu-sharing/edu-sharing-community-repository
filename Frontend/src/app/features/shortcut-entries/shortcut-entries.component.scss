@@ -135,10 +135,18 @@ $tileSize: 124px;
 
         &.disabled {
             cursor: not-allowed;
-            border-color: #ccc;
+            border-color: color-mix(
+                in srgb,
+                var(--landingPageShortcutNewColor) 90%,
+                var(--landingPageShortcutBackground)
+            );
 
             .entry-icon-wrapper .entry-icon {
-                color: #ccc;
+                color: color-mix(
+                    in srgb,
+                    var(--landingPageShortcutNewColor) 90%,
+                    var(--landingPageShortcutBackground)
+                );
             }
         }
 

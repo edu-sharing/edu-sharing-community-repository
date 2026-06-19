@@ -2,19 +2,7 @@
 
 :host {
     display: flex;
-    flex-direction: row-reverse; // Automatically scroll to the end
     align-items: center;
-    overflow-y: hidden;
-    overflow-x: auto;
-    // Firefox
-    scrollbar-width: thin;
-    // Chromium-based
-    &::-webkit-scrollbar {
-        height: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color: $textMediumLight;
-    }
 }
 
 :host[short='always'] .breadcrumb-full {
@@ -35,6 +23,23 @@
         .breadcrumb-short {
             display: none;
         }
+    }
+}
+
+.breadcrumb-wrapper {
+    display: flex;
+    flex-direction: row-reverse; // Automatically scroll to the end
+    align-items: center;
+    overflow-y: hidden;
+    overflow-x: auto;
+    // Firefox
+    scrollbar-width: thin;
+    // Chromium-based
+    &::-webkit-scrollbar {
+        height: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $textMediumLight;
     }
 }
 
@@ -75,6 +80,15 @@
         max-height: 1.5em;
         display: inline-flex;
         align-items: center;
+
+        &:has(span) {
+            padding-bottom: 2px;
+        }
+
+        a {
+            padding-bottom: 2px;
+        }
+
         &.cdk-drop-list-dragging {
             > *:first-child {
                 display: none;
@@ -157,6 +171,7 @@ button {
 
 .home-notice {
     color: $textLight;
+    padding-bottom: 2px;
 }
 
 .breadcrumb-arrow {

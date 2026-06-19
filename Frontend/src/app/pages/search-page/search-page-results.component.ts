@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -27,6 +27,7 @@ import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 export type SearchFilter = {
     propertyFilters: Values;
@@ -41,6 +42,17 @@ export type SearchFilter = {
     standalone: false,
 })
 export class SearchPageResultsComponent implements OnInit, OnDestroy {
+    private globalSearchPageInternal = inject(GlobalSearchPageServiceInternal);
+    private results = inject(SearchPageResultsService);
+    private configService = inject(ConfigService);
+    searchPage = inject(SearchPageService);
+    private temporaryStorageService = inject(TemporaryStorageService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private frameEventsService = inject(FrameEventsService);
+    private announcer = inject(LiveAnnouncer);
+    private translate = inject(TranslateService);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -70,17 +82,9 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     defaultCustomOptions: CustomOptions;
 
-    constructor(
-        private globalSearchPageInternal: GlobalSearchPageServiceInternal,
-        private results: SearchPageResultsService,
-        private configService: ConfigService,
-        public searchPage: SearchPageService,
-        private temporaryStorageService: TemporaryStorageService,
-        private editorialSidebarService: EditorialSidebarService,
-        private frameEventsService: FrameEventsService,
-        private announcer: LiveAnnouncer,
-        private translate: TranslateService,
-    ) {
+    constructor() {
+        const results = this.results;
+
         this.registerPrimaryActionOptions();
         // announce newly loaded elements to users using screen readers
         results.diffCount
@@ -127,8 +131,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     }
 
     toggleFilters(): void {
-        const filterBarIsVisible = this.searchPage.filterBarIsVisible;
-        filterBarIsVisible.setUserValue(!filterBarIsVisible.getValue());
+        this.searchFieldInternalService.filtersButtonClicked.next();
     }
 
     ngOnDestroy(): void {

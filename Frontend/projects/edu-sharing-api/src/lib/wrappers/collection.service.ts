@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { CollectionV1Service } from '../api/services';
@@ -7,16 +7,16 @@ import { Node } from '../models';
 import { cachedShareReplay, KeyCache } from '../utils/decorators/cached-share-replay';
 import { ReferenceEntries } from '../api/models/reference-entries';
 import { CollectionEntries } from '../api/models/collection-entries';
-import { CollectionEntry } from '../api/models/collection-entry';
+import { Copy } from '../api/models/copy';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CollectionService {
+    private collectionV1 = inject(CollectionV1Service);
+
     private static readonly collectionCache = new KeyCache();
     private static readonly subCollectionsCache = new KeyCache();
-
-    constructor(private collectionV1: CollectionV1Service) {}
 
     getCollection(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         // TODO: Wrap other endpoints and reset not on get, but on modifying actions.
@@ -107,7 +107,7 @@ export class CollectionService {
          * if true child collections will be copied
          */
         copyChildCollections?: boolean;
-    }): Observable<CollectionEntry> {
+    }): Observable<Copy> {
         return this.collectionV1.copyCollection(params);
     }
 }

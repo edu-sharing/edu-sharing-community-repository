@@ -1,10 +1,70 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { MdsEditorWrapperComponent } from './mds-editor-wrapper.component';
-import { DummyNode, mdsStorybookProviders, registerMockNode } from '../storybook-utils';
+import {
+    DummyNode,
+    mdsStorybookProviders,
+    registerMockNode,
+    SuggestionsV1ServiceMock,
+} from '../storybook-utils';
 import { SharedModule } from '../../../../shared/shared.module';
-import { DEFAULT, Node } from 'ngx-edu-sharing-api';
+import { DEFAULT, Node, SuggestionsV1Service } from 'ngx-edu-sharing-api';
 import { MdsModule } from '../../mds.module';
 import { Helper, MdsExtendedValue, MdsExtendedValues } from 'ngx-edu-sharing-ui';
+import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
+import { SuggestionResponseDto } from 'ngx-edu-sharing-api';
+
+function makeUserProposals(
+    propertyId: string,
+    nodeId: string,
+    valueCounts: [string, number][],
+): SuggestionResponseDto[] {
+    return valueCounts.flatMap(
+        ([value, count]) =>
+            Array.from({ length: count }, (_, i) => ({
+                created: new Date().toISOString(),
+                createdBy: { authorityName: `Community User ${i + 1}` },
+                propertyId,
+                status: 'PENDING',
+                version: '1.0',
+                id: `proposal-${value}-${i}-${Math.random()}`,
+                type: 'USER_PROPOSAL',
+                confidence: 1,
+                nodeId,
+                value,
+            })) as SuggestionResponseDto[],
+    );
+}
+
+@Injectable()
+class SuggestionsWithUserProposalsMock extends SuggestionsV1ServiceMock {
+    getSuggestionsByNodeId(params: any, context?: any) {
+        return super.getSuggestionsByNodeId(params, context).pipe(
+            map((result) => {
+                result.suggestions['ccm:educationallearningresourcetype'] = [
+                    ...(result.suggestions['ccm:educationallearningresourcetype'] ?? []),
+                    ...makeUserProposals('ccm:educationallearningresourcetype', params.node, [
+                        ['other', 8],
+                        ['table', 7],
+                        ['experiment', 4],
+                        ['graph', 3],
+                        ['index', 2],
+                    ]),
+                ];
+                result.suggestions['cclom:general_keyword'] = [
+                    ...(result.suggestions['cclom:general_keyword'] ?? []),
+                    ...makeUserProposals('cclom:general_keyword', params.node, [
+                        ['Mathematik', 5],
+                        ['Grundschule', 4],
+                        ['Lernspiel', 3],
+                        ['Interaktiv', 2],
+                    ]),
+                ];
+                return result;
+            }),
+        );
+    }
+}
 
 const meta: Meta<MdsEditorWrapperComponent> = {
     title: 'Mds/Editor',
@@ -119,5 +179,18 @@ export const MdsIOBulkSidebarTemplate: Story = {
         currentValues: DummyProps,
         currentValuesChange: (v) => {},
         currentValuesExtendedChange: (v) => {},
+    },
+};
+
+export const MdsIOWithUserProposals: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                { provide: SuggestionsV1Service, useClass: SuggestionsWithUserProposalsMock },
+            ],
+        }),
+    ],
+    args: {
+        groupId: 'io',
     },
 };

@@ -1,36 +1,38 @@
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as *;
 
-$previewHeight: 400px;
-
 :host {
-    overflow-y: auto;
-    overflow-x: hidden;
-    &::-webkit-scrollbar {
-        width: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.26);
-    }
+    // default fallback; will be set via scale observer in ts!
+    --previewHeight: 500px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
     ::ng-deep {
         es-mds-editor-wrapper es-mds-editor-core {
             display: grid;
         }
-
-        es-render-wrapper-component {
-            --renderWrapperHeight: #{$previewHeight};
-            rs-root {
-                width: 100%;
-                height: auto;
-                min-height: $previewHeight;
-                max-height: $previewHeight;
-                margin: 0;
-
-                > div {
-                    width: 100% !important;
-                }
-            }
-        }
+    }
+    @media screen and (max-width: ($mobileTabSwitchWidth)) {
+        // mobile layout: full height, so we use same logic as in single view
+        // and keep some space to see the metadata line
+        --previewHeight: calc(
+            var(--editorialSidebarHeight) - var(--editorialHeaderHeight) - 90px
+        ) !important;
+    }
+}
+// content mode only: make the host a flex row so the full-width render wrapper's
+// flex-grow can claim the available width, and drive its --containerHeight from
+// the preview height instead of the default viewport-based calculation.
+// In modal mode the render wrapper keeps its default layout (block host, no
+// fullWidth, viewport-based height).
+:host(:not(.modal)) es-render-wrapper-component {
+    display: flex;
+    //min-height: var(--previewHeight);
+    --renderWrapperHeight: var(--previewHeight);
+    // drop the render wrapper's default rs-root margin in content mode
+    ::ng-deep rs-root {
+        margin: 0;
     }
 }
 ::ng-deep {
@@ -38,17 +40,25 @@ $previewHeight: 400px;
         min-height: calc(100vh - 200px);
     }
 }
+
+.preview-sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    @include materialScrollbarLight();
+}
+
 es-render-wrapper-component {
     display: flex;
-    min-height: $previewHeight;
+    min-height: var(--previewHeight);
 }
 
 .preview-sidebar-image-container {
     position: relative;
     display: grid;
     place-items: center;
-    height: $previewHeight;
-    min-height: $previewHeight;
+    height: var(--previewHeight);
+    min-height: var(--previewHeight);
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     & > * {
@@ -57,7 +67,7 @@ es-render-wrapper-component {
     .preview-sidebar-image {
         width: 100%;
         cursor: pointer;
-        height: $previewHeight;
+        height: var(--previewHeight);
         //@include blurImage(3px);
         filter: brightness(0.8);
         object-fit: cover;
@@ -69,7 +79,31 @@ es-render-wrapper-component {
     }
 }
 
+.sticky-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--backgroundColor, #fff);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+}
+
+.all-details-link {
+    padding-right: 6px;
+    border-radius: 18px;
+}
+
+.save-button {
+    border-radius: 18px;
+}
+
 .preview-sidebar-body {
+    display: flex;
+    flex-direction: column;
     padding: 15px;
     overflow-wrap: break-word;
     .top-h-box {
@@ -91,10 +125,5 @@ es-render-wrapper-component {
     .description {
         margin-top: 0;
         color: $textMain;
-    }
-    .all-details-link {
-        padding-right: 6px;
-        border-radius: 18px;
-        background: rgba(0, 0, 0, 0.1);
     }
 }

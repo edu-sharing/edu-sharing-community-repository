@@ -7,6 +7,7 @@ import {
     input,
     signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     ColumnType,
@@ -56,6 +57,7 @@ import { Params, Router, RouterLink } from '@angular/router';
 import { filter, first } from 'rxjs/operators';
 import { DashboardInteractivityStreamComponent } from './dashboard-interactivity-stream/dashboard-interactivity-stream.component';
 import { OptionsHelperService } from '../../services/options-helper.service';
+import { RECENT_ACTIVITY_EVENT_TYPES } from '../../pages/editorial-page/editorial-page.service';
 
 type StreamDetails = { key: string; result: SearchResultGeneric<NodeEvent>; params: Params };
 type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; params: Params };
@@ -77,6 +79,18 @@ type ShareDetails = { key: string; result: SearchResultGeneric<NodeShare>; param
     ],
 })
 export class DashboardSwimlaneComponent {
+    private storage = inject(SessionStorageService);
+    private translate = inject(TranslateService);
+    private ref = inject(ApplicationRef);
+    private router = inject(Router);
+    private authenticationService = inject(AuthenticationService);
+    private searchService = inject(SearchService);
+    private uiService = inject(UIService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private nodeService = inject(NodeService);
+    private assignmentService = inject(AssignmentV1Service);
+    private mdsHelperService = inject(MdsHelperService);
+
     /**
      * @param {SwimlaneEntry} swimlane - The required SwimlaneEntry.
      * @description
@@ -114,19 +128,7 @@ export class DashboardSwimlaneComponent {
         maxRows: 1,
     };
     private nodes = signal<NodeEntriesData>(null);
-    constructor(
-        private storage: SessionStorageService,
-        private translate: TranslateService,
-        private ref: ApplicationRef,
-        private router: Router,
-        private authenticationService: AuthenticationService,
-        private searchService: SearchService,
-        private uiService: UIService,
-        private optionsHelperService: OptionsHelperService,
-        private nodeService: NodeService,
-        private assignmentService: AssignmentV1Service,
-        private mdsHelperService: MdsHelperService,
-    ) {
+    constructor() {
         this.open
             .pipe(
                 filter((o) => !!o),
@@ -189,6 +191,7 @@ export class DashboardSwimlaneComponent {
                     queryParams: {
                         mainComponent: 'manageAssignment',
                     },
+                    queryParamsHandling: 'replace',
                 });
             });
             createAssignment.elementType = [ElementType.NoneOrUnknown];
@@ -201,7 +204,9 @@ export class DashboardSwimlaneComponent {
             void this.fetch(
                 this.assignmentService.searchAssignments({
                     body: {
-                        criteria: [],
+                        criteria: [
+                            { property: 'virtual:assignmentType', values: ['swimlane_landing'] },
+                        ],
                     },
                     sortProperties: [RestConstants.CM_PROP_C_CREATED],
                     sortAscending: [false],
@@ -245,20 +250,18 @@ export class DashboardSwimlaneComponent {
         } else if (this.swimlane().id === 'recent-activities') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/activity');
             const events = [] as StreamDetails[];
-            [
-                ['files', 'FILES'],
-                ['collections', 'COLLECTIONS'],
-                ['folders', 'FOLDERS'],
-            ].forEach(async (k, i) => {
-                events.splice(i, 0, {
-                    key: k[0],
+            let i = 0;
+            for (const [key, types] of Object.entries(RECENT_ACTIVITY_EVENT_TYPES)) {
+                events.splice(i++, 0, {
+                    key,
                     result: await firstValueFrom(
                         this.searchService.search({
                             metadataset: DEFAULT,
                             query: null,
-                            type: 'recentActivity',
+                            searchMode: 'recentActivity',
                             repository: HOME_REPOSITORY,
-                            contentType: k[1] as any,
+                            contentType: 'ALL',
+                            eventType: types,
                             maxItems: this.maxItemsEvents,
                             body: {
                                 criteria: [],
@@ -266,10 +269,10 @@ export class DashboardSwimlaneComponent {
                         }),
                     ),
                     params: {
-                        filters: JSON.stringify({ 'virtual:activityType': [k[1]] }),
+                        filters: JSON.stringify({ 'virtual:activityType': [key] }),
                     },
                 });
-            });
+            }
             this.streamEvents.set(events);
         } else if (this.swimlane().id === 'shares') {
             this.routerLink.set('/' + UIConstants.ROUTER_PREFIX + 'editorial/share');
@@ -285,7 +288,7 @@ export class DashboardSwimlaneComponent {
                         this.searchService.search({
                             metadataset: DEFAULT,
                             query: null,
-                            type: 'shares',
+                            searchMode: 'shares',
                             direction: k[1] as any,
                             repository: HOME_REPOSITORY,
                             contentType: 'ALL',

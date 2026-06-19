@@ -1,7 +1,8 @@
+@if (node()) {
 <es-render-wrapper-component
-  *ngIf="node()"
   [showTopbar]="false"
   [showMetadata]="false"
   [nodeId]="node().ref.id"
   [repository]="node().ref.repo"
 ></es-render-wrapper-component>
+}

@@ -1,0 +1,86 @@
+<div class="url-wrapper">
+  @if (gdpr === null) {
+  <div>
+    @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
+    <div class="youtube-wrapper">
+      <youtube-player [videoId]="externalId ?? ''" [disableCookies]="true"></youtube-player>
+    </div>
+    } @if (embedding === UrlEmbeddings.VIMEO && externalId !== '') {
+    <iframe class="vimeoFrame" [src]="sanitizedUrl"></iframe>
+    } @if (embedding === UrlEmbeddings.AUDIO && url !== '') {
+    <div class="audio-wrapper">
+      <video controls style="max-width: 100%" [src]="url" poster="assets/img/audio.svg"></video>
+    </div>
+    } @if (embedding === UrlEmbeddings.IMAGE && url !== '') {
+    <div class="image-wrapper">
+      <img
+        [ngSrc]="url"
+        [alt]="node?.title ?? 'Edu-Sharing image'"
+        [title]="node?.title ?? 'Edu-Sharing image'"
+      />
+    </div>
+    } @if (embedding === UrlEmbeddings.VIDEO && url !== '') {
+    <div class="video-wrapper">
+      <video controls [src]="url"></video>
+    </div>
+    } @if ((embedding === UrlEmbeddings.PREZI || embedding === UrlEmbeddings.LEARNINGAPPS) && url
+    !== '') {
+    <iframe
+      class="eduUrlFrame"
+      [src]="sanitizedUrl"
+      allowfullscreen=""
+      allow="autoplay; fullscreen"
+    ></iframe>
+    } @if (embedding === UrlEmbeddings.LTI13TOOL && url !== '') {
+    <iframe #ltiFrame class="ltiFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
+    } @if (embedding === UrlEmbeddings.SODIX) {
+    <div class="sodixFrame">
+      @if (node.mediatype === 'file-audio') {
+      <img [src]="previewUrl" alt="" />
+      }
+      <iframe class="sodix-type-{{ node.mediatype }}" [src]="sanitizedUrl"> </iframe>
+    </div>
+    } @if (embedding === UrlEmbeddings.LINK || embedding === UrlEmbeddings.PIXABAY || embedding ===
+    UrlEmbeddings.OERSI || embedding === UrlEmbeddings.BROCKHAUS) {
+    <div class="link-wrapper">
+      <img [src]="previewUrl" alt="preview" />
+      <a mat-flat-button color="primary" [href]="url" target="_blank" (click)="onLinkClick()">
+        <div class="link-label">{{ 'SHARING.LINK' | translate }}<i esIcon="open_in_new"></i></div>
+      </a>
+    </div>
+    }
+  </div>
+  } @if (gdpr !== null) {
+  <div class="gdpr-wrapper">
+    <div class="gdpr-image-container">
+      <img [src]="previewUrl" alt="" />
+      <div class="gdpr-overlay" [class.contrast-mode]="isContrastMode">
+        @if (isGdprGeneric()) {
+        <div class="gdpr-content">
+          <h3>{{ 'RENDERING.GDPR.EXTERNAL_SITE' | translate }}</h3>
+          <span>{{ gdprInfoText }}</span>
+          <a mat-button="outlined" [href]="gdpr.ref" target="_blank">{{
+            'RENDERING.GDPR.GDPR_REGULATIONS' | translate
+          }}</a>
+          <button mat-button (click)="consentToGdprWarning()">
+            {{ 'SHARING.LINK' | translate }}
+          </button>
+        </div>
+        } @if (!isGdprGeneric()) {
+        <div class="gdpr-content">
+          <h3>{{ 'RENDERING.GDPR.EXTERNAL_CONTENT' | translate }}</h3>
+          <span>{{ gdprInfoText }}</span>
+          <span>{{ 'RENDERING.GDPR.FURTHER_INFORMATION' | translate }}</span>
+          <a mat-button="outlined" [href]="gdpr.ref" target="_blank">{{
+            'RENDERING.GDPR.GDPR_REGULATIONS' | translate
+          }}</a>
+          <button mat-button (click)="consentToGdprWarning()">
+            {{ 'RENDERING.GDPR.AGREE_AND_CONTINUE' | translate }}
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>

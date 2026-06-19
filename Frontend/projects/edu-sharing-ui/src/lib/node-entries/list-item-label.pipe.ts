@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -11,7 +11,8 @@ import { delay, startWith, switchMap } from 'rxjs/operators';
     standalone: false,
 })
 export class ListItemLabelPipe implements PipeTransform {
-    constructor(private translate: TranslateService, private translations: TranslationsService) {}
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
 
     transform(item: ListItem, args = { fallback: item.name }): Observable<string> {
         const mapping = {
@@ -25,6 +26,7 @@ export class ListItemLabelPipe implements PipeTransform {
             ASSIGNMENT: 'ASSIGNMENT',
             SUBMISSION: 'SUBMISSION',
             SHARE: 'SHARE',
+            SUGGESTION: 'SUGGESTION',
         };
         if (item.label) {
             return rxjs.of(item.label);

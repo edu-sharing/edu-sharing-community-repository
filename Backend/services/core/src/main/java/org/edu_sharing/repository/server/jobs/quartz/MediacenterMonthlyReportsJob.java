@@ -80,6 +80,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
             ActivityOnNodeEventType.VIEW_MATERIAL,
             ActivityOnNodeEventType.VIEW_MATERIAL_EMBEDDED,
             ActivityOnNodeEventType.VIEW_MATERIAL_PLAY_MEDIA,
+            ActivityOnNodeEventType.VIEW_MATERIAL_GDPR_CONFIRMED,
             ActivityOnNodeEventType.OPEN_EXTERNAL_LINK,
             ActivityOnNodeEventType.DOWNLOAD_MATERIAL
     );

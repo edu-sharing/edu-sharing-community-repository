@@ -92,7 +92,13 @@
       "MEDIA_CENTER": "centro multimediale",
       "MEDIA_CENTER_PROXY": "gruppo di delega (centro multimediale)",
       "MEDIACENTER_ADMINISTRATORS": "amministratori (media center)",
-      "ORG_ADMINISTRATORS": "amministratori"
+      "ORG_ADMINISTRATORS": "amministratori",
+      "CLASS": "Classe",
+      "WORKING_GROUP": "Gruppo di lavoro",
+      "LESSON": "Istruzioni",
+      "SCHOOL_NATIONAL": "Scuola statale",
+      "SCHOOL_MUNICIPAL": "Scuola comunale",
+      "SCHOOL_PRIVATE": "Scuola privata"
     },
     "SCOPE_TYPE": {
       "null": "Visibilità locale / predefinita",
@@ -173,7 +179,7 @@
         "FOLDER_STRUCTURE_CAPTION": "Struttura delle cartelle della directory..."
       },
       "SHARED_FOLDERS": {
-        "CAPTION": "File e cartelle dell'utente in directory condivise e di terze parti",
+        "CAPTION": "File e cartelle utente in directory condivise ed esterne",
         "FOLDERS_CAPTION": "Cartelle",
         "PRIVATE_FILES_CAPTION": "File senza o con licenze non aperte",
         "CC_FILES_CAPTION": "File con licenze aperte (CC)"
@@ -237,6 +243,25 @@
       "simple_DETAILS": "Gli utenti possono registrarsi autonomamente nell'organizzazione/gruppo e diventare immediatamente membri.",
       "password_DETAILS": "Gli utenti possono iscriversi all'organizzazione/gruppo indipendentemente e diventare subito membri se conoscono la password corretta.",
       "list_DETAILS": "Gli utenti possono iscriversi all'organizzazione/gruppo da soli e vengono inseriti in una lista d'attesa. Un amministratore deve poi confermare l'iscrizione."
+    },
+    "MENU_RESET_PASSWORD": "Reimposta password",
+    "USER_QUOTA_HINT": "Se non viene impostato alcun valore, non vi è alcuna restrizione.",
+    "NEW_PASSWORD": "Nuova password",
+    "ERROR_PASSWORD_TO_WEAK": "La password scelta non è sufficientemente sicura.",
+    "ERROR_PASSWORD_POLICY_NOT_MATCHED": "La password scelta non soddisfa i criteri di password impostati (Dettagli: {{cause}})",
+    "TOAST_PASSWORD_RESET": "La password è stata reimpostata",
+    "EXCLUDE": {
+      "TITLE": "Escludere la persona dall'organizzazione",
+      "DESCRIPTION": "Escludendo un utente, la persona selezionata perde l'accesso alla cartella dell'organizzazione in \"Contenuti condivisi\" e a tutte le condivisioni condivise con tale organizzazione. Tutte le condivisioni esplicite concesse a tale persona rimangono accessibili. In modalità \"Assegna contenuti a un'altra persona\", tutti i contenuti creati da tale persona all'interno della cartella dell'organizzazione vengono assegnati a un'altra persona con pieni diritti.",
+      "MODE_LABEL": "Modalità per gli elementi della persona",
+      "MODE": {
+        "NONE": "Non modificare gli elementi",
+        "ASSIGN": "Assegnare il contenuto a un'altra persona"
+      },
+      "ASSIGN_USER": "Ricevitori degli elementi",
+      "ASSIGN_USER_PLACEHOLDER": "Cerca persona...",
+      "ERROR_MISSING_RECEIVER": "Si prega di specificare un destinatario.",
+      "ASSIGN_USER_NOT_ORG_MEMBER": "La persona selezionata \"{{user}}\" non è membro dell'organizzazione \"{{org}}\". Si prega di valutare attentamente se la persona selezionata debba comunque essere utilizzata come destinatario."
     }
   }
 }

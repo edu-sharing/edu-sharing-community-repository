@@ -66,7 +66,7 @@ public class MetadataQueryParameter implements Serializable {
 			}catch(JSONException e){
 				throw new RuntimeException(e);
 			}
-		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
+		} else if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)) {
 			return "@" + name.replace(":", "\\:") + ":\"*${value}*\"";
 		}
 		throw new RuntimeException("Unsupported syntax for query language: " + syntax);
@@ -99,6 +99,11 @@ public class MetadataQueryParameter implements Serializable {
 		 * When null, fields with missing values are ignored
 		 */
 		private String missing = null;
+		/**
+		 * When true, the facet aggregation combines indexed property values with
+		 * values from pending nested suggestions for the same property and the current user
+		 */
+		private boolean combineWithSuggestions = false;
 		private List<MetadataQueryFacetItem> items = new ArrayList<>();
 
 		public enum Type {

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiErrorResponse, SavedSearch, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -21,18 +21,17 @@ import { SaveSearchDialogData, SaveSearchDialogResult } from './save-search-dial
     standalone: false,
 })
 export class SaveSearchDialogComponent implements OnInit {
+    data = inject<SaveSearchDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<SaveSearchDialogData, SaveSearchDialogResult>>(CardDialogRef);
+    private savedSearchesService = inject(SavedSearchesService);
+    private dialogs = inject(DialogsService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     readonly nameControl = new UntypedFormControl();
     private readonly _savedSearches = new BehaviorSubject<SavedSearch[]>(null);
     autocompleteValues: string[];
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: SaveSearchDialogData,
-        private dialogRef: CardDialogRef<SaveSearchDialogData, SaveSearchDialogResult>,
-        private savedSearchesService: SavedSearchesService,
-        private dialogs: DialogsService,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {}
 
     ngOnInit(): void {
         const name = this.data.name || this.getInitialName(this.data.searchString);

@@ -19,6 +19,8 @@ import { DropdownBottomSheetComponent } from './dropdown-bottom-sheet/dropdown-b
     standalone: false,
 })
 export class DropdownComponent implements OnChanges {
+    private ui = inject(UIService);
+
     private _bottomSheet = inject(MatBottomSheet);
 
     @ViewChild('dropdown', { static: true }) menu: MatMenu;
@@ -47,8 +49,6 @@ export class DropdownComponent implements OnChanges {
      * taken out of the host container by angular.
      */
     @Input() menuClass: string;
-
-    constructor(private ui: UIService) {}
 
     ngOnChanges(changes?: SimpleChanges): void {
         if (changes == null || changes?.options || changes?.callbackObjects) {

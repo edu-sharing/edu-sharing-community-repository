@@ -185,6 +185,12 @@ $cardLineHeight: 1.4;
             }
         }
     }
+    &.dynamic-single-click {
+        cursor: pointer;
+        button {
+            cursor: pointer;
+        }
+    }
     &.dynamic-single-click:hover {
         @include materialShadowMediumLarge(false, 0.2);
         background-color: rgb(var(--palette-primary-50));

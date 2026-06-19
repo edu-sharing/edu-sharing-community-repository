@@ -19,10 +19,7 @@ import org.edu_sharing.service.share.ShareInfoServiceImpl;
 import org.edu_sharing.service.share.ShareType;
 import org.springframework.dao.DuplicateKeyException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @UpdateService
@@ -58,8 +55,12 @@ public class Release_11_0_ShareInfos {
 
             List<String> rawUsers = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_USERS));
             List<String> rawInvited = (List<String>) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_INVITED));
+            Date rawDate = (Date) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_MODIFIED));
+
+
             if (rawUsers == null) rawUsers = new ArrayList<>();
             if (rawInvited == null) rawInvited = new ArrayList<>();
+            if (rawDate == null) rawDate = (Date)nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIED));
 
             Set<String> users = new HashSet<>(rawUsers);
             Set<String> invited = new HashSet<>(rawInvited);
@@ -82,7 +83,7 @@ public class Release_11_0_ShareInfos {
                 String shareCreator = (String) nodeService.getProperty(nodeRefShare, ContentModel.PROP_CREATOR);
 
                 try {
-                    shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK);
+                    shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK, rawDate);
                     log.info("Created link share for {}: by: {} - with: {}", nodeRef.getId(), shareCreator, share.getNodeId());
                 } catch (DuplicateKeyException ignored) {
                 }
@@ -92,7 +93,7 @@ public class Release_11_0_ShareInfos {
             users.remove(sharedBy);
             for (String authority : invited) {
                 try {
-                    shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY);
+                    shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY, rawDate);
                     log.info("Created authority share for {}: by: {} - with: {}", nodeRef.getId(), creator, authority);
                 } catch (DuplicateKeyException ignored) {
                 }

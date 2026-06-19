@@ -8,6 +8,7 @@
     align-items: center;
     padding: 20px;
     gap: 5px;
+    height: var(--editorialHeaderHeight);
     > div {
         font-size: vars.$fontSizeXLarge;
         @include mixins.limitLineCount(1, 1.25);
@@ -23,13 +24,20 @@
     }
 }
 :host {
+    --editorialHeaderHeight: 88px;
     @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
         position: fixed;
         z-index: vars.$dialogZIndex - 10;
         left: var(--roundedContainerMargin);
         top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
         right: var(--roundedContainerMargin);
-        bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
+        --editorialSidebarHeight: calc(
+            100vh - #{vars.$mobileTabNavHeight} - var(--mainnavCurrentHeight) - var(
+                    --roundedContainerMargin
+                ) * 2
+        );
+        height: var(--editorialSidebarHeight);
+        //bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
         isolation: isolate;
         border-radius: var(--borderRadiusCards);
         overflow: hidden;
@@ -62,6 +70,7 @@
 }
 .sidebar-container {
     background-color: #fff;
+    overflow-x: hidden;
     overflow-y: auto;
     height: 0;
     flex-grow: 1;
@@ -72,7 +81,8 @@
     height: 100%;
     &.option-WORKSPACE_METADATA,
     &.option-PREVIEW,
-    &.option-SORT_INTO {
+    &.option-SORT_INTO,
+    &.option-MANAGE_SUBMISSION {
         // has own padding cause of tabs
         padding: 0;
     }
@@ -80,6 +90,12 @@
     &.option-SORT_INTO {
         // set full height
         height: 100%;
+    }
+    &.option-PREVIEW,
+    &.option-MANAGE_SUBMISSION {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
     }
 }
 .entries {
@@ -117,7 +133,7 @@
         .text {
             flex-grow: 1;
             .title {
-                @include mixins.limitLineCount(1);
+                @include mixins.limitLineCount(1, 1.25);
                 word-break: break-all;
                 font-size: vars.$fontSizeXLarge;
                 font-weight: bold;

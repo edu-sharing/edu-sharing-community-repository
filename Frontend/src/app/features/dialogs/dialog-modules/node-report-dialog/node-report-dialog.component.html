@@ -1,22 +1,25 @@
 <form #formElement (ngSubmit)="report()" [formGroup]="form">
   <h2>{{ data.mode + '.REPORT_INFO' | translate : { name: (data.node | nodeTitle) } }}</h2>
   <div class="report">
+    @if (data.showOptions) {
     <mat-radio-group
       formControlName="reason"
       name="reason"
-      *ngIf="data.showOptions"
       [attr.aria-label]="'NODE_REPORT.REASON' | translate"
     >
+      @for (reason of reasons; track reason) {
       <mat-radio-button
-        *ngFor="let reason of reasons"
         [value]="reason"
         [aria-describedby]="shouldShowError('reason') ? 'node-report-reason-error' : null"
         >{{ 'NODE_REPORT.REASONS.' + reason | translate }}</mat-radio-button
       >
+      }
     </mat-radio-group>
-    <mat-error *ngIf="shouldShowError('reason')" id="node-report-reason-error">
+    } @if (shouldShowError('reason')) {
+    <mat-error id="node-report-reason-error">
       {{ data.mode + '.REASON_REQUIRED' | translate }}
     </mat-error>
+    }
   </div>
   <mat-form-field floatLabel="always" class="comment">
     <mat-label>{{ data.mode + '.COMMENT' | translate }}</mat-label>
@@ -30,9 +33,11 @@
       placeholder="{{ data.mode + '.COMMENT_PLACEHOLDER' | translate }}"
       autofocus
     ></textarea>
-    <mat-error *ngIf="shouldShowError('comment')" id="node-report-comment-error">
+    @if (shouldShowError('comment')) {
+    <mat-error id="node-report-comment-error">
       {{ data.mode + '.COMMENT_REQUIRED' | translate }}
     </mat-error>
+    }
   </mat-form-field>
   <mat-form-field floatLabel="always">
     <mat-label>{{ data.mode + '.EMAIL' | translate }}</mat-label>

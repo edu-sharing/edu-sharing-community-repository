@@ -3,12 +3,13 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
@@ -18,6 +19,7 @@ import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
 import org.edu_sharing.service.assignment.SubmissionFileDao;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.transform.RepresentationService;
 import org.edu_sharing.util.CheckedFunction;
@@ -30,6 +32,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements SubmissionFileDao {
@@ -108,15 +111,15 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         if (StringUtils.isNotBlank(nodeId)) {
             throw new IllegalStateException("Submission file id must be empty, but is: " + nodeId);
         }
-        if(!assignmentDao.getAllowAdditionalDocumentSubmissions() || request.assignmentFile() != null) {
+        if (!assignmentDao.getAllowAdditionalDocumentSubmissions() || request.assignmentFile() != null) {
             // validates if assignment file exists otherwise throws exception
             assignmentDao.getAssignmentFile(request.assignmentFile());
         }
         log.debug("Creating new submission file");
         Map<String, Object> properties = new HashMap<>() {{
-            put(CCConstants.CM_NAME, "content");
+            put(CCConstants.CM_NAME, UUID.randomUUID().toString());
         }};
-        if(request.assignmentFile() != null) {
+        if (request.assignmentFile() != null) {
             properties.put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.assignmentFile()));
         }
 
@@ -130,6 +133,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         handleSubmissionFile(request, fileInputStream);
         refresh();
         AuthenticationUtil.runAsSystem(() -> {
+
             NodeRef nodeRef = representationService.updateChildPdf(getAlfrescoContentNodeRef(), getAlfrescoNodeRef(), getAlfrescoCorrectionNodeRef(), "correction", CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION);
             if (nodeRef != null) {
                 nodeService.setOwner(nodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
@@ -153,7 +157,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             NodeRef alfrescoCorrectionNodeRef = getAlfrescoCorrectionNodeRef();
             if (alfrescoCorrectionNodeRef == null) {
                 log.debug("Creating new correction node for {}", nodeId);
-                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, submissionDao.getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
+                nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, getNodeId(), CCConstants.CCM_TYPE_IO, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CORRECTION, Map.of(CCConstants.CM_NAME, "correction"));
                 nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
                 alfrescoCorrectionNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             }
@@ -184,25 +188,32 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
     }
 
     private void handleReferenceCopy(SubmissionFileRequest request) {
-        if (Boolean.parseBoolean(nodeService.getProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.CCM_PROP_RESTRICTED_ACCESS))) {
+
+        if (NodeServiceHelper.hasRestrictedAccess(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, request.originalFile()), CCConstants.PERMISSION_READ_ALL, CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
             log.debug("Skipping reference copy for restricted access document");
             return;
         }
 
-        if (!permissionService.hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), request.originalFile(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
+        org.alfresco.service.cmr.repository.NodeRef originalNode = nodeService.getOriginalNode(request.originalFile());
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_READ_ALL)) {
+            throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_READ_ALL);
+        }
+
+        if (!permissionService.hasPermission(originalNode.getStoreRef().getProtocol(), originalNode.getStoreRef().getIdentifier(), originalNode.getId(), CCConstants.PERMISSION_DOWNLOAD_CONTENT)) {
             throw new InsufficientPermissionException("You do not have permission to copy the original file. Required permission: " + CCConstants.PERMISSION_DOWNLOAD_CONTENT);
         }
 
+        String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
-            log.debug("Copying reference node {}", request.originalFile());
-            NodeRef contentNodeRef = nodeService.copyNode(request.originalFile(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true);
+            log.debug("Copying reference node {}", originalNode.getId());
+            NodeRef contentNodeRef = nodeService.copyNode(originalNode.getId(), nodeId, CCConstants.CCM_ASSOC_SUBMISSION_FILE_CONTENT, true, null);
             nodeService.setOwner(contentNodeRef.getId(), ApplicationInfoList.getHomeRepository().getUsername());
             log.debug("Copied reference node {}", contentNodeRef.getId());
 
 
             try {
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
-                    put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{request.originalFile()});
+                    put(CCConstants.CCM_PROP_IO_ORIGINAL, new String[]{originalNode.getId()});
                 }};
                 nodeService.updateNode(contentNodeRef.getId(), contentProperties, false);
                 log.debug("Updated properties for new submission file {} with {}", nodeId, contentProperties);
@@ -215,7 +226,6 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             nodeService.addAspect(contentNodeRef.getId(), CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
             log.debug("Added content aspect to content node {}", contentNodeRef.getId());
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             permissionService.setPermission(contentNodeRef.getId(), currentUser, CCConstants.PERMISSION_CONSUMER);
             log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeRef.getId());
             return null;
@@ -223,13 +233,15 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
     }
 
     private void handleFileUpload(SubmissionFileRequest request, InputStream fileInputStream) {
+        String currentUser = AuthenticationUtil.getRunAsUser();
         AuthenticationUtil.runAsSystem(() -> {
             String contentNodeId;
             try {
                 Map<String, String[]> contentProperties = new HashMap<>(request.properties()) {{
+                    put(CCConstants.CM_NAME, new String[]{"content"});
                     put(CCConstants.CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE, new String[]{request.assignmentFile()});
                 }};
-                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true);
+                contentNodeId = nodeService.createNode(nodeId, CCConstants.CCM_TYPE_IO, contentProperties, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT, true, null);
                 log.debug("Created new submission file content node {} for {}", contentNodeId, nodeId);
 
                 apiClient.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, contentNodeId, fileInputStream, null, null, CCConstants.CM_PROP_CONTENT);
@@ -243,8 +255,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
             nodeService.addAspect(contentNodeId, CCConstants.CCM_ASPECT_SUBMISSION_FILE_CONTENT);
             log.debug("Added content aspect to content node {}", contentNodeId);
 
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-            permissionService.setPermission(contentNodeId, AuthenticationUtil.getFullyAuthenticatedUser(), CCConstants.PERMISSION_CONSUMER);
+            permissionService.setPermission(contentNodeId, currentUser, CCConstants.PERMISSION_CONSUMER);
             log.debug("Added consumer permission for {} to submission file {}", currentUser, contentNodeId);
             return null;
         });
@@ -257,20 +268,25 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
         submissionDao.validateCanCoordinatorChangeSubmission();
 
         refresh();
-
-        nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, validationStatus.name()));
+            return null;
+        });
         refresh();
     }
 
     @Override
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
-    @RunAsSystem
     public void delete() {
         if (!exists()) {
             return;
         }
+
         submissionDao.validateAssigneeCanChangeSubmission();
-        doDelete();
+        AuthenticationUtil.runAsSystem(() -> {
+            doDelete();
+            return null;
+        });
         refresh();
     }
 
@@ -282,7 +298,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
 
 
         Node correctionNode = null;
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId()) || submissionDao.isReturned()) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId()) || submissionDao.isReturned()) {
             correctionNode = this.correctionNode.get();
         }
 
@@ -297,7 +313,7 @@ final class NodeSubmissionFileDao extends BasicNodeDaoImpl implements Submission
 
     @Override
     public Submission.Status getValidationStatus() {
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getCorrectionNodeId())) {
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
             return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class);
         } else {
             return null;

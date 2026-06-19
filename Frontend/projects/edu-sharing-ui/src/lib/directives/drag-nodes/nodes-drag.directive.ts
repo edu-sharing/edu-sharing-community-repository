@@ -1,5 +1,5 @@
 import { CdkDrag, DragRef } from '@angular/cdk/drag-drop';
-import { Directive, Input } from '@angular/core';
+import { Directive, Input, inject } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
 
@@ -13,9 +13,12 @@ import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
     standalone: false,
 })
 export class NodesDragDirective {
+    private cdkDrag = inject<CdkDrag<Node[]>>(CdkDrag);
+    private nodesDragDrop = inject(NodesDragDropService);
+
     @Input() componentId?: string;
 
-    constructor(private cdkDrag: CdkDrag<Node[]>, private nodesDragDrop: NodesDragDropService) {
+    constructor() {
         this.cdkDrag.started.subscribe((event) => {
             this.nodesDragDrop.draggedNodes = event.source.data;
             this.nodesDragDrop.origin = null;

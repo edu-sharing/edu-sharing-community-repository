@@ -5,37 +5,36 @@
   <aiConfigs>
     <aiConfig>
       <id>suggestion_ai</id>
-      <provider>openai</provider>
+      <provider>academiccloud</provider>
       <useCaching>false</useCaching>
-      <chatCompletion>
+      <prompt>
         {
-        "model": "gpt-4.1",
+        "model": "gemma-4-31b-it",
         "messages": [
         {
         "role":"system",
-        "content": "Du bist ein Assistent für edu-sharing.\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."
+        "content": "Du bist ein Klassifikations- und Texterstellungsdienst für Bildungsmetadaten im offenen Bildungsrepositorium edu-sharing (OER für Schule und Bildung).\n# Aufgabe\nDu erhältst die vorhandenen Informationen zu einem Bildungsmaterial. Gib nur den Vorschlag als Wert zurück - keine Rückfragen, keine Einleitung, keine Begründung.\n# Grundregeln\n- Entscheide auf Basis des tatsächlichen INHALTS (Volltext). Selbstbeschreibungen und Dein allgemeines Wissen sind nachrangig.\n- Felder mit dem Wert \"-\" sind leer und kein Beleg. Vorhandene Felder sind Kontext und stützen sich gegenseitig (Titel + Beschreibung + Schlagworte ergeben mehr als jedes Feld allein).\n- Widerspricht ein Metadatenwert dem Inhalt, richte dich nach dem Inhalt.\n- Verwende etablierte deutsche Fach- und Schulterminologie (an Lehrplänen orientiert) und passe das Sprachregister an die Bildungsstufe an.\n- Im Zweifel die konservativere, besser belegbare Einordnung wählen.\n# Ausgabe\n- Gib ausschließlich den geforderten Wert zurück – ohne Einleitung, Anführungszeichen, Markdown oder Codeblöcke.\n- Halte dich exakt an das im Auftrag genannte Ausgabeformat.\n- Ist keine fundierte Aussage möglich, gib eine leere Antwort zurück."
         },
         {
         "role": "user",
-        "content": "Ich benötige Hilfe bei diesem Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}"
+        "content": "Material mit folgenden vorhandenen Informationen:\nTitel: {{var(cclom:title)|-}}\nBeschreibung: {{var(cclom:general_description)|-}}\nSchlagworte: {{var(cclom:general_keyword)|-}}\nDateiname: {{var(cm:name)|-}}\nLink: {{var(ccm:wwwurl)|-}}\nÜbergeordnete Kategorie: {{var(ccm:oeh_extendedType)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|-}}\nInhaltstyp: {{var(ccm:oeh_lrt)|-}}\nBildungsstufe: {{node(ccm:educationalcontext)|-}}\nFachgebiet: {{node(ccm:taxonid)|-}}\nZielgruppe: {{var(ccm:educationalintendedenduserrole)|-}}\nBerufsgruppe: {{var(ccm:oeh_profession_group)|-}}\nSprache: {{node(cclom:general_language)|-}}\nFormat: {{node(cclom:format)|-}}\nMedientyp: {{node(virtual:mediatype)|-}}\n\nVolltext:\n{{node(textContent)|-}}"
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>image_ai</id>
       <provider>openai</provider>
       <useCaching>false</useCaching>
-      <createImage>
+      <prompt>
         {
-        "model": "dall-e-2",
-        "size": "256x256",
+        "model": "gpt-image-2",
+        "size": "1024x1024",
         "n": 3,
-        "response_format": "b64_json",
-        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)||-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
+        "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \nTitel: {{var(cclom:title)|node(cclom:title)|-}}\nDateiname: {{var(cm:name)|node(cm:name)|-}}\nLink: {{var(ccm:wwwwurl)|node(ccm:wwwurl)|-}}\nMaterialart: {{var(ccm:educationallearningresourcetype)|node(ccm:educationallearningresourcetype)|-}}\nSchlagworte: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\nBeschreibung: {{var(cclom:general_description)|node(cclom:general_description)|-}}. Erstelle das Bild im Stil {{var(preview.drawingStyle)}}"
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_default</id>
@@ -44,22 +43,21 @@
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_chat_completion</id>
-      <chatCompletion>
+      <prompt>
         {
         "model": "gpt-4.1-mini"
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_create_image</id>
-      <createImage>
+      <prompt>
         {
-        "model": "dall-e-3",
+        "model": "gpt-image-2",
         "size": "1024x1024",
-        "n": 1,
-        "response_format": "b64_json"
+        "n": 1
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_clear_cache</id>
@@ -67,50 +65,50 @@
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_image</id>
-      <createImage>
+      <prompt>
         {
-        "prompt": "## Aufgabe\nErzeuge ein ansprechendes, realistisch wirkendes Vorschaubild zu einer Sammlung von Bildungsinhalten.  \n- Vermeide sämtliche Textelemente oder Logos im Bild.  \n- Nutze die zentralen Schlagwörter, um das Thema klar widerzuspiegeln.  \n- Richte Dich nach den folgenden Anforderungen und Stilvorgaben.\n## Anforderungen\n1. **Hauptmotiv**: Beschreibe das zentrale Element der Sammmlung (eine Szene oder ein Kernthema), das den Bildungsinhalt repräsentiert.  \n2. **Realismus**: Achte auf eine glaubwürdige Darstellung aller Objekte und Szenen, inklusiv und kulturell sensitiv.  \n3. **Minimalismus**: Reduziere Ablenkungen, konzentriere Dich auf das Wesentliche, um eine klare Botschaft zu vermitteln.  \n4. **Emotionale Ansprache**: Verwende warme Farben, natürliches Licht und eine einladende Atmosphäre.  \n5. **Keine Texte im Bild**: Verzichte gänzlich auf Schrift oder Logos, um Redundanz und visuelle Störungen zu vermeiden.  \n## Stilvorgaben\n- **Attribute**: hochdetailliert, scharfe Fokussierung, poliert, makellos, ansprechend, Symmetrie, kohärent, minimalistisch, sauber, aufgeräumt  \n- **Farben und Beleuchtung**: warme Farben, natürliches Licht  \n- **Designelemente**: klare Linien, einfache Formen, ausbalancierte Komposition  \n- **Qualität**: professionelle Qualität, hohe Auflösung  \n- **Ästhetik**: elegant, geradlinig, modern, klare visuelle Hierarchie  \n## Eingabedaten\n- **Beschreibung des Bildungsinhalts**: {{var(cm:name)|node(cm:name)|-}} ({{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}})  \n- **Wichtige Schlagwörter**: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}\n**Integriere alle oben genannten Anforderungen und Stilvorgaben sowie die Eingabedaten 'Beschreibung des Bildungsinhalts' und 'Wichtige Schlagwörter'.**"
+        "prompt": "Erzeuge ein realistisches, ansprechendes Vorschaubild für eine Sammlung von Bildungsinhalten zum Thema \"{{var(cm:name)|node(cm:name)|-}}\" ({{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}).\nZentrale Motive aus den Schlagwörtern: {{var(cclom:general_keyword)|node(cclom:general_keyword)|-}}.\nStil: ein klares Hauptmotiv, minimalistisch und aufgeräumt, warme Farben, natürliches Licht, einladende Atmosphäre, hohe Detailtiefe, scharfer Fokus, ausgewogene Komposition, professionelle Qualität.\nDarstellung glaubwürdig, inklusiv und kulturell sensibel.\nKein Text, keine Schrift, keine Logos."
         }
-      </createImage>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_description</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
         "role": "user",
-        "content": "## Aufgabe\n1. **Ziel**\n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.\n   - Wecke das Interesse der Leserinnen und Leser durch einen konkreten, thematischen Einstieg.\n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.\n   - Zeige, wie Lehrende und Lernende die Ressourcen praktisch einsetzen können.\n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Text, sofern Dir diese als Information vorliegen.\n2. **Struktur**\n   - **Absatz 1**: Thematischer Einstieg, der ein konkretes Problem, eine Frage oder ein Szenario aufgreift und so zum Weiterlesen einlädt. Benenne die zentralen Themen der Sammlung.\n   - **Absatz 2**: Übersicht der Hauptthemen, konkreter Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen oder Kompetenzen. Schließe mit einem aktivierenden Satz, der zur Nutzung einlädt.\n3. **Sprache und Stil**\n   - **Verständlichkeit**: Vermeide unnötige Fachbegriffe. Erläutere komplexe Konzepte in einem Nebensatz oder durch ein Beispiel.\n   - **Aktive Formulierungen**: Verwende aktive Satzstrukturen. Vermeide Passivkonstruktionen, wo immer möglich.\n   - **Kohärenz**: Nutze einheitliche Terminologie. Vermeide Wiederholungen, Widersprüche und Synonymketten.\n   - **Prägnanz**: Schreibe kurze Sätze (max. 20 Wörter). Bevorzuge einfache Wörter (2–3 Silben).\n   - **Lesbarkeit**: Setze klare Absätze. Jeder Absatz verfolgt genau einen Gedanken.\n   - **Zielgruppenanpassung**: Passe Tonalität und Sprachniveau an Bildungsstufe und Fachgebiet an (z. B. spielerischer für Grundschule, fachlicher für Sekundarstufe II).\n4. **Inhaltliche Relevanz**\n   - Baue relevante Schlüsselbegriffe natürlich in den Fließtext ein.\n   - Orientiere dich am Vorwissen, den Interessen und dem Nutzen der Zielgruppe.\n   - Mache den Mehrwert der Sammlung greifbar: Was können Nutzende nach der Arbeit mit den Materialien besser?\n5. **Verboten**\n   - Eröffnungen mit 'Diese Sammlung...', 'Dieses Material...', 'Hier finden Sie...' oder ähnlichen Floskeln.\n   - Allgemeine, nichtssagende Aussagen wie 'Ein spannendes Thema für alle' oder 'Ideal für den Unterricht'.\n   - URLs, Markennamen und Dateinamen.\n   - Reine Aufzählung von Schlagworten ohne Satzstruktur.\n   - Inhalte erfinden, die nicht in den gegebenen Informationen enthalten sind.\n   - Übertriebene Superlative ('die beste Sammlung', 'unverzichtbar').\n6. **Output-Format**\n   - Gib den fertigen Text als zusammenhängende Beschreibung in genau zwei Absätzen aus.\n   - Halte die maximale Zeichenlänge ein (inkl. Leerzeichen).\n   - Gib ausschließlich den Beschreibungstext aus – keine Überschriften, keine Meta-Kommentare, keine Erklärungen.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}\n- **Maximale Zeichenlänge:** 400"
+        "content": "Stell eine Sammlung von Bildungsressourcen in genau zwei Absätzen vor (max. 400 Zeichen inkl. Leerzeichen).\n- Absatz 1: konkreter thematischer Einstieg (Problem, Frage oder Szenario), der die zentralen Themen benennt und zum Weiterlesen einlädt.\n- Absatz 2: Hauptthemen im Überblick, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen; Schluss mit aktivierendem Satz.\nStil: aktive Sprache, kurze Sätze (max. 20 Wörter), verständlich, an Bildungsstufe und Fachgebiet angepasst.\nVerboten: Floskeln wie \"Diese Sammlung…\"/\"Hier finden Sie…\"; Allgemeinplätze; URLs, Marken- und Dateinamen; reine Schlagwortlisten; erfundene Inhalte; Superlative.\nGib ausschließlich den Beschreibungstext aus (keine Überschriften, keine Meta-Kommentare).\n\nEingabedaten:\n- Thema: {{var(cm:name)|node(cm:name)|-}}\n- Bildungsstufe: {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- Fachgebiet: {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}\n- Maximale Zeichenlänge: 400"
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_topic_header_text</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
         "role": "user",
-        "content": "## Aufgabe\n1. **Ziel**  \n   - Erstelle einen ansprechenden, prägnanten Text, der eine Sammlung von Bildungsressourcen vorstellt.  \n   - Wecke das Interesse der Leserinnen und Leser.  \n   - Erkläre kurz und verständlich die wichtigsten Themen der Sammlung.  \n   - Zeige, wie die Ressourcen der Sammlung von Lehrenden und Lernenden genutzt werden können.  \n   - Erkläre zusätzlich: 'Wofür ist das wichtig?' → Stelle den Bezug zur Lebenswelt, zum Alltag oder Arbeitsleben her. Gib ggf. auch einen Ausblick auf gesellschaftliche oder wissenschaftliche Relevanz.  \n   - Integriere Hinweise auf konkrete Ressourcen der Sammlung in den Beschreibungstext, falls Dir diese als Information gegeben werden.\n2. **Struktur**\n   - **Absatz 1**: Kurzer Einstieg, der zentrale Themen nennt und Interesse weckt.  \n   - **Absatz 2**: Übersicht der Hauptthemen, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen. Beantworte hier auch die Frage 'Wofür ist das wichtig?' mit konkretem Nutzen und Relevanz für Alltag, Beruf, Gesellschaft oder Wissenschaft.\n3. **Sprache und Stil**\n   - **Verständlichkeit**: Keine unnötigen Fachbegriffe, kurze Erläuterung komplexer Themen.  \n   - **Aktive Formulierungen**: Verzichte nach Möglichkeit auf den Passivstil.  \n   - **Kohärenz**: Verwende konsistente Terminologie, vermeide Wiederholungen und Widersprüche.  \n   - **Prägnanz**: Nutze kurze Sätze (max. 20 Wörter) und möglichst einfache Wörter (2–3 Silben).  \n   - **Lesbarkeit**: Achte auf klare Absätze und ausreichend Leerraum.  \n   - **Zielgruppenanpassung**: Passe Stil und Sprachgebrauch an die Bedürfnisse der Zielgruppe und des Fachgebiets an.\n4. **Inhaltliche Relevanz**\n   - Baue relevante Schlüsselbegriffe ein.  \n   - Passe den Text an die Zielgruppe an (Vorwissen, Interessen, Nutzen).  \n   - Erkläre den Mehrwert der Inhalte und zeige auf, in welchen Kontexten das Wissen angewendet werden kann.\n5. **Output-Format**\n   - Gib den fertigen Text als zusammenhängende Beschreibung in **zwei Absätzen** aus.  \n   - Halte dich an die **maximale Zeichenlänge** (inkl. Leerzeichen).  \n   - Verzichte auf URLs, Markennamen und unnötige Füllwörter.\n## Eingabedaten\n- **Thema der Sammlung:** {{var(cm:name)|node(cm:name)|-}}\n- **Bildungsstufe:** {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- **Fachgebiet:** {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}} \n- **Maximale Zeichenlänge:** 400\n**Hinweis:** Verwende die oben genannten Informationen, um einen einheitlichen, gut strukturierten Text zu erstellen, der alle genannten Anforderungen erfüllt. Achte dabei besonders auf Sprachstil, Verständlichkeit und die Einhaltung der Zeichenbegrenzung."
+        "content": "Stell eine Sammlung von Bildungsressourcen in genau zwei Absätzen vor (max. 400 Zeichen inkl. Leerzeichen).\n- Absatz 1: kurzer Einstieg, der die zentralen Themen nennt und Interesse weckt.\n- Absatz 2: Hauptthemen, Mehrwert für Lehrende und Lernende, Bezug zu Lernzielen – und beantworte \"Wofür ist das wichtig?\" mit konkretem Nutzen für Alltag, Beruf, Gesellschaft oder Wissenschaft.\nStil: aktive Sprache, kurze Sätze (max. 20 Wörter), verständlich, an Zielgruppe und Fachgebiet angepasst.\nVerboten: URLs, Marken- und Dateinamen, Füllwörter, erfundene Inhalte.\nGib ausschließlich den Text aus.\n\nEingabedaten:\n- Thema: {{var(cm:name)|node(cm:name)|-}}\n- Bildungsstufe: {{var(ccm:educationalcontext_DISPLAYNAME)|node(ccm:educationalcontext_DISPLAYNAME)|-}}\n- Fachgebiet: {{var(ccm:taxonid_DISPLAYNAME)|node(ccm:taxonid_DISPLAYNAME)|-}}\n- Maximale Zeichenlänge: 400"
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
     <aiConfig>
       <id>topic_page_ai_text_widget</id>
-      <chatCompletion>
+      <prompt>
         {
         "messages": [
         {
         "role": "user",
-        "content": "Erstelle eine Zusammenfassung des Themas ({{var(cm:name)|node(cm:name)|-}}) in 5 Sätzen."
+        "content": "Fasse das Thema \"{{var(cm:name)|node(cm:name)|-}}\" in genau 5 Sätzen verständlich zusammen.\n- Aktive Sprache, kurze Sätze, an die Zielgruppe angepasst.\n- Keine Floskeln, keine URLs/Markennamen, keine erfundenen Fakten.\nGib ausschließlich die Zusammenfassung aus."
         }
         ]
         }
-      </chatCompletion>
+      </prompt>
     </aiConfig>
   </aiConfigs>
   <widgets>
@@ -144,16 +142,16 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
             "role": "user",
-            "content": "Erzeuge einen aussagekräftigen Titel"
+            "content": "Formuliere einen suchoptimierten, inhaltsbeschreibenden Titel, der den INHALT präzise benennt – nicht die Form oder Zielgruppe.\n\n- Länge: 40–70 Zeichen (Ausnahmen bei sehr kurzen Titeln sind möglich).\n- Substantivisch formulieren, ohne Artikel und Sonderzeichen (keine Anführungszeichen, Doppelpunkte, Bindestriche o. Ä.).\n- Materialtyp (z. B. Arbeitsblatt, Video, Quiz) und Zielgruppenangaben (z. B. für Schüler, Sekundarstufe) dürfen NICHT im Titel vorkommen.\n- Nenne nicht nur das Fachgebiet (z. B. „Mathematik“), sondern das konkrete Thema oder die zentralen Inhalte.\n- Platziere die wichtigsten Schlüsselbegriffe möglichst am Anfang des Titels.\n- Verbinde Begriffe so, dass der Titel gut lesbar und verständlich bleibt – minimaler Einsatz von Bindewörtern ist erlaubt, sofern keine Artikel verwendet werden.\n- Vermeide Füllwörter und irrelevante Zusatzinformationen.\n- Beispiele:\n  - „Fotosynthese Lichtreaktion Dunkelreaktion“\n  - „Bruchrechnung Kürzen Erweitern“\n  - „Kirche Mittelalter Macht Ablasshandel Glaubensvorstellungen“\n\nAusgabe: Nur der Titel, ohne weitere Erklärungen oder Zusätze."
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
       <required>mandatoryForPublish</required>
@@ -193,16 +191,16 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
             "role": "user",
-            "content": "Erzeuge eine kurze zusammenfassende Beschreibung"
+            "content": "Erstelle eine motivierende und suchoptimierte Beschreibung des Inhalts mit folgenden Anforderungen:\n\n- Länge: 400 bis 800 Zeichen.\n- Satzlänge: Maximal 20 Wörter pro Satz.\n- Sprache: Aktiv, klar, motivierend und zielgruppengerecht formuliert.\n- Struktur (Reihenfolge strikt einhalten):\n  1. Kernthema des Materials\n  2. Zentrale Inhalte und Konzepte\n  3. Didaktische Form (z. B. Methoden, Lernformate)\n  4. Zielgruppe und Einsatzmöglichkeiten\n  5. Mehrwert und Nutzen für Lernende\n- Fachbegriffe und gängige Suchbegriffe sollen möglichst vielfältig, natürlich und sinnvoll eingebunden werden, um die Auffindbarkeit zu verbessern.\n- Verwende ausschließlich Inhalte, die im Ausgangsmaterial belegt sind. Keine erfundenen Details, keine Ergänzungen ohne Beleg.\n- Vermeide Floskeln wie \"Dieses Material …\", \"Hier finden Sie …\" sowie URLs, Dateinamen oder andere technische Angaben.\n- Ausgabe: Nur der reine Beschreibungstext, ohne zusätzliche Formatierungen, Überschriften oder Felder."
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -234,16 +232,16 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
             "role": "user",
-            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+            "content": "Erzeuge 5 bis 8 inhaltliche Schlagworte zum Thema, sortiert nach absteigender Relevanz (Kernthema zuerst).\n\nBeachte dabei folgende Vorgaben:\n\n- Verwende ausschließlich Substantive im Nominativ Singular.\n- Nutze etablierte Fachterminologie, die spezifisch und präzise ist (z. B. \"Bruchrechnung\" statt \"Mathematik\").\n- Vermeide Synonyme, Dopplungen sowie die gleichzeitige Nennung von Ober- und Unterbegriffen.\n- Schließe Materialtypen, Bildungsstufen, Markennamen, Personen (außer bei historischen oder literarischen Themen), Orte und irrelevante Kategorien aus.\n- Gib für jedes Schlagwort ein einzelnen Value samt Confidence im JSON-Modell zurück\""
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -273,16 +271,16 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
             "role": "user",
-            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
+            "content": "Erzeuge 5 bis 8 inhaltliche Schlagworte zum Thema, sortiert nach absteigender Relevanz (Kernthema zuerst).\n\nBeachte dabei folgende Vorgaben:\n\n- Verwende ausschließlich Substantive im Nominativ Singular.\n- Nutze etablierte Fachterminologie, die spezifisch und präzise ist (z. B. \"Bruchrechnung\" statt \"Mathematik\").\n- Vermeide Synonyme, Dopplungen sowie die gleichzeitige Nennung von Ober- und Unterbegriffen.\n- Schließe Materialtypen, Bildungsstufen, Markennamen, Personen (außer bei historischen oder literarischen Themen), Orte und irrelevante Kategorien aus.\n- Gib die Schlagworte als einfache, kommagetrennte Liste ohne zusätzliche Formatierungen aus.\n- Beispiel: \"Bruchrechnung, Dezimalzahlen, Prozentrechnung, Grundrechenarten, Mathematikunterricht\""
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -293,21 +291,6 @@
       <caption>lom_prop_general_keyword</caption>
       <placeholder>lom_prop_general_keyword_placeholder_search</placeholder>
       <template>search</template>
-      <aiConfigs>
-        <aiConfig>
-          <id>default</id>
-          <chatCompletion>
-            {
-            "messages": [
-            {
-            "role": "user",
-            "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"
-            }
-            ]
-            }
-          </chatCompletion>
-        </aiConfig>
-      </aiConfigs>
     </widget>
     <widget>
       <id>ccm:author_freetext</id>
@@ -330,16 +313,16 @@
       <aiConfigs>
         <aiConfig>
           <id>default</id>
-          <chatCompletion>
+          <prompt>
             {
             "messages": [
             {
             "role": "user",
-            "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget(\"ccm:educationallearningresourcetype\".values[*].{id:id, name:caption})}} nutze zur Einordnung den Namen aber gib die jeweilige id zurück."
+            "content": "Bestimme die Materialart ausschließlich nach der DIDAKTISCHEN FUNKTION, nicht nach dem Dateiformat.\n\nLeitfrage: Was ist der hauptsächliche Zweck des Materials?\nBeispiele für didaktische Funktionen:\n- lesen/ansehen\n- bearbeiten/lösen\n- nachschlagen\n- ausprobieren\n- Unterricht planen\n\nWähle genau EINE Kategorie, die die dominante didaktische Funktion des Materials beschreibt.\nBei Mischformen entscheide dich für die vorherrschende Funktion.\n\nFolgende Kategorien stehen zur Auswahl (Name → id):\n{{widget(\"ccm:educationallearningresourcetype\".values[*].{id:id, name:caption})}}\n\nWichtig:\n- Gib ausschließlich die id der gewählten Kategorie aus.\n- Die id ist ein String ohne Anführungszeichen, ohne weitere Zusätze oder Erklärungen.\n- Keine Ausgabe von Namen, JSON-Objekten oder sonstigen Kommentaren.\n- Beispiel für korrekte Ausgabe: unterricht_planen\n\nAusgabe:"
             }
             ]
             }
-          </chatCompletion>
+          </prompt>
         </aiConfig>
       </aiConfigs>
     </widget>
@@ -624,6 +607,22 @@
       <max>99</max>
     </widget>
     <widget>
+      <id>ccm:educationaltypicalagerangecluster</id>
+      <caption>lom_prop_educational_typicalagerange</caption>
+      <type>multivalueButtons</type>
+      <valuespace_i18n_prefix>ccm_educationaltypicalagerangecluster_</valuespace_i18n_prefix>
+      <values>
+        <value>5-6</value>
+        <value>6-8</value>
+        <value>8-10</value>
+        <value>10-12</value>
+        <value>12-14</value>
+        <value>14-16</value>
+        <value>16-19</value>
+        <value>19-99</value>
+      </values>
+    </widget>
+    <widget>
       <id>ccm:taxonid</id>
       <id rel="graphql">lom.classification.taxon</id>
       <caption>input_taxonentry</caption>
@@ -716,6 +715,11 @@
       <type>checkbox</type>
     </widget>
     <widget>
+      <id>cclom:location</id>
+      <type>text</type>
+      <textEscapingPolicy>all</textEscapingPolicy>
+    </widget>
+    <widget>
       <id>curriculum_title</id>
       <required>mandatory</required>
       <caption>Pinnwand-Titel</caption>
@@ -765,9 +769,9 @@
       <caption>cp_virtual_activityType</caption>
       <valuespace_i18n_prefix>activityType_</valuespace_i18n_prefix>
       <values>
-        <entry icon="description">FILES</entry>
-        <entry icon="folder">FOLDERS</entry>
-        <entry icon="layers">COLLECTIONS</entry>
+        <entry icon="visibility">viewed</entry>
+        <entry icon="post_add">created</entry>
+        <entry icon="edit">edited</entry>
       </values>
     </widget>
     <widget>
@@ -798,8 +802,18 @@
       <caption>cp_virtual_assignmentType</caption>
       <valuespace_i18n_prefix>assignmentType_</valuespace_i18n_prefix>
       <values>
-        <entry icon="place_item">assigned</entry>
         <entry icon="ios_share">created</entry>
+        <entry icon="place_item">assigned</entry>
+        <entry icon="done_all">finished</entry>
+      </values>
+    </widget>
+    <widget>
+      <id>virtual:suggestionType</id>
+      <caption>cp_virtual_suggestionType</caption>
+      <valuespace_i18n_prefix>suggestionType_</valuespace_i18n_prefix>
+      <values>
+        <entry icon="person">USER_PROPOSAL</entry>
+        <entry icon="auto_awesome">AI</entry>
       </values>
     </widget>
   </widgets>
@@ -1148,6 +1162,13 @@
 				]]></html>
     </template>
     <template>
+      <id>editorial_suggestions</id>
+      <html><![CDATA[
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
+      ]]></html>
+    </template>
+    <template>
       <id>editorial_assignment</id>
       <html><![CDATA[
 				]]></html>
@@ -1172,22 +1193,22 @@
     <template>
       <id>topic_page_profiling</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group>
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="radioVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_configuration</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="checkboxVertical">
-          <ccm:educationalcontext type="checkboxVertical">
+          <ccm:page_variant_profiling_target_group type="checkboxVertical" isExtended="false">
+          <ccm:educationalcontext type="checkboxVertical" isExtended="false">
       ]]></html>
     </template>
     <template>
       <id>topic_page_variant_search</id>
       <html><![CDATA[
-          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges">
-          <ccm:educationalcontext type="multivalueFixedBadges">
+          <ccm:page_variant_profiling_target_group type="multivalueFixedBadges" isExtended="false">
+          <ccm:educationalcontext type="multivalueFixedBadges" isExtended="false">
       ]]></html>
     </template>
   </templates>
@@ -1379,6 +1400,13 @@
       </views>
     </group>
     <group>
+      <id>preview_sidebar_edit</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>node_general</view>
+      </views>
+    </group>
+    <group>
       <id>mediacenter_filter</id>
       <rendering>angular</rendering>
       <views>
@@ -1414,6 +1442,20 @@
       </views>
     </group>
     <group>
+      <id>topic_page_variant_configuration</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>topic_page_variant_configuration</view>
+      </views>
+    </group>
+    <group>
+      <id>topic_page_variant_search</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>topic_page_variant_search</view>
+      </views>
+    </group>
+    <group>
       <id>editorial_activity</id>
       <rendering>angular</rendering>
       <views>
@@ -1432,6 +1474,13 @@
       <rendering>angular</rendering>
       <views>
         <view>editorial_assignment</view>
+      </views>
+    </group>
+    <group>
+      <id>editorial_suggestions</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>editorial_suggestions</view>
       </views>
     </group>
   </groups>
@@ -1753,6 +1802,73 @@
         </statement>
       </property>
     </query>
+    <query join="AND" id="nodesBySuggestion">
+      <basequery>{"bool":{
+        "should":[
+        {"match":{"type":"ccm:io"}},
+        {"match":{"type":"ccm:map"}}
+        ],
+        "must_not": [
+        {"match":{"type":"ccm:notify"}},
+        {"match":{"aspects":"ccm:collection_io_reference"}}
+        ],
+        "minimum_should_match": 1
+        }}
+      </basequery>
+      <specialFilter>exclude_system_folder</specialFilter>
+      <specialFilter>exclude_sites_folder</specialFilter>
+      <specialFilter>exclude_people_folder</specialFilter>
+      <property name="ngsearchword">
+        <statement>
+          {"bool": {
+          "must_not": [
+          {"match":{"type":"ccm:notify"}},
+          {"match":{"aspects":"ccm:collection_io_reference"}}
+          ],
+          "should":[
+          {"wildcard":{"nodeRef.id": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"content.fulltext": {"value": "${value}", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:name.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cm:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:title.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_description.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"properties.cclom:general_keyword.keyword": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationallearningresourcetype": {"value": "*${value}*", "case_insensitive": true}}},
+          {"wildcard":{"i18n.de_DE.ccm:educationalcontext": {"value": "*${value}*", "case_insensitive": true}}}
+          ],
+          "minimum_should_match": 1
+          }}
+        </statement>
+      </property>
+      <property name="ccm:taxonid">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:taxonid.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:taxonid"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="ccm:educationalcontext">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:educationalcontext.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:educationalcontext"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="ccm:educationallearningresourcetype">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.ccm:educationallearningresourcetype.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"ccm:educationallearningresourcetype"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="cclom:general_keyword">
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.cclom:general_keyword.keyword":"${value}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"cclom:general_keyword"}},{"term":{"suggestions.value":"${value}"}}]}}}}],"minimum_should_match":1}}</statement>
+      </property>
+      <property name="virtual:suggestionType">
+        <statement value="AI">
+          {"nested":{"path":"suggestions","query":{"term":{"suggestions.type":"AI"}}}}
+        </statement>
+        <statement value="USER_PROPOSAL">
+          {"nested":{"path":"suggestions","query":{"term":{"suggestions.type":"USER_PROPOSAL"}}}}
+        </statement>
+      </property>
+    </query>
     <query join="AND" id="shared">
       <basequery>{"bool":{
         "should":[
@@ -1907,8 +2023,8 @@
           "flags": "OR|AND|PREFIX|PHRASE|WHITESPACE",
           "fields": [
           "properties.cm:name^2",
-          "properties.cclom:title^5",
-          "properties.cclom:general_description^2"
+          "properties.cm:title^5",
+          "properties.cm:description^2"
           ],
           "default_operator": "and"
           }
@@ -1919,14 +2035,43 @@
         </statement>
       </property>
       <property name="virtual:assignmentType">
+        <statement value="swimlane_landing">
+          {"bool":{
+          "must_not":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }},
+          {"bool":{"must":[
+          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }},
+          {"bool":{"must_not":[{"match":{"properties.cm:creator.keyword":"${user.cm:userName}"}}]}}
+          ]}}
+          ]
+          }}
+        </statement>
         <statement value="created">
-          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
+          {"bool":{
+          "must":[
+          {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }}
+          ],
+          "must_not":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          ]
+          }}
         </statement>
         <statement value="assigned">
           {"bool":{
           "must_not":[
           {"match": {"properties.cm:creator.keyword": "${user.cm:userName}" }},
-          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }}
+          {"match": {"properties.ccm:assignment_status.keyword": "DRAFT" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
+          ]
+          }}
+        </statement>
+        <statement value="finished">
+          {"bool":{
+          "should":[
+          {"match": {"properties.ccm:assignment_status.keyword": "CANCELED" }},
+          {"match": {"properties.ccm:assignment_status.keyword": "FINISHED" }}
           ]
           }}
         </statement>
@@ -2047,6 +2192,8 @@
       <property name="cclom:general_keyword">
         <multiple>true</multiple>
         <multiplejoin>AND</multiplejoin>
+        <statement>{"bool":{"should":[{"term":{"properties.cclom:general_keyword.keyword":"${valueRaw}"}},{"nested":{"path":"suggestions","query":{"bool":{"must":[{"term":{"suggestions.propertyId":"cclom:general_keyword"}},{"term":{"suggestions.value":"${valueRaw}"}},{"term":{"suggestions.createdBy":"${authority}"}}]}}}}],"minimum_should_match":1}}</statement>
+        <facets combineWithSuggestions="true"/>
       </property>
       <property name="ccm:classification_purpose"/>
       <property name="ccm:commonlicense_key"/>
@@ -2094,9 +2241,15 @@
           "path": "collections",
           "query":
           {"bool":{
+          "must":[
+          {"bool":{
           "should":[
           {"match":{"collections.path": "${valueRaw}"}},
           {"match":{"collections.nodeRef.id": "${valueRaw}"}}
+          ],
+          "minimum_should_match": 1
+          }},
+          {"match":{"collections.relation.type": "ccm:usage"}}
           ]
           }}
           }}
@@ -2245,23 +2398,23 @@
       <property name="ngsearchword" asFilter="false">
         <exactMatching>true</exactMatching>
         <statement>
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "simple_query_string": {
-                            "query": "${value}*",
-                            "fields": [
-                                "properties.cclom:title^4",
-                                "properties.cm:title^2",
-                                "properties.cm:name^1"
-                            ],
-                            "default_operator": "and"
-                            }
-                        }
-                    ]
-                }
-            }
+          {
+          "bool": {
+          "should": [
+          {
+          "simple_query_string": {
+          "query": "${value}*",
+          "fields": [
+          "properties.cclom:title^4",
+          "properties.cm:title^2",
+          "properties.cm:name^1"
+          ],
+          "default_operator": "and"
+          }
+          }
+          ]
+          }
+          }
         </statement>
       </property>
       <property name="ccm:page_variant_is_template">
@@ -2276,6 +2429,16 @@
       <property name="ccm:educationalcontext">
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
+      </property>
+      <property name="virtual:page_variant_global">
+        <statement value="true">{"match":{"path":"${systemfolder}"}}</statement>
+        <statement>{"match_all": {}}</statement>
+      </property>
+      <property name="virtual:parent_recursive">
+        <statement>{"match":{"path":"${valueRaw}"}}</statement>
+      </property>
+      <property name="virtual:parent">
+        <statement>{"term":{"parentRef.id":"${valueRaw}"}}</statement>
       </property>
     </query>
 

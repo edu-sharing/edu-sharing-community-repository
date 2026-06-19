@@ -10,6 +10,7 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -74,6 +75,29 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
     standalone: false,
 })
 export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
+    private appContainer = inject(AppContainerService);
+    iam = inject(RestIamService);
+    connector = inject(RestConnectorService);
+    eventsService = inject(FrameEventsService);
+    private bridge = inject(BridgeService);
+    private configService = inject(ConfigurationService);
+    private aboutService = inject(AboutService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private uiService = inject(UIService);
+    private mainNavService = inject(MainNavService);
+    private storage = inject(TemporaryStorageService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private nodeHelper = inject(NodeHelperService);
+    private authentication = inject(AuthenticationService);
+    private user = inject(UserService);
+    private ngZone = inject(NgZone);
+    private rocketChat = inject(RocketChatService);
+    private dialogs = inject(DialogsService);
+    private licenseAgreement = inject(LicenseAgreementService);
+    private searchField = inject(SearchFieldService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+
     // FIXME: This component contains a lot of business logic, that does not need to be exposed to
     // the rest of the application, but should live in a service. Refactoring into an internal
     // main-nav service would be a good solution.
@@ -120,32 +144,6 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private about: About;
     private queryParams: Params;
 
-    constructor(
-        private appContainer: AppContainerService,
-        public iam: RestIamService,
-        public connector: RestConnectorService,
-        public eventsService: FrameEventsService,
-        private bridge: BridgeService,
-        private configService: ConfigurationService,
-        private aboutService: AboutService,
-        private optionsHelperService: OptionsHelperService,
-        private uiService: UIService,
-        private mainNavService: MainNavService,
-        private storage: TemporaryStorageService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private nodeHelper: NodeHelperService,
-        private authentication: AuthenticationService,
-        private user: UserService,
-        private ngZone: NgZone,
-        // private changeDetectorRef: ChangeDetectorRef,
-        private rocketChat: RocketChatService,
-        private dialogs: DialogsService,
-        private licenseAgreement: LicenseAgreementService,
-        private searchField: SearchFieldService,
-        private imprintPrivacy: ImprintPrivacyService,
-    ) {}
-
     ngOnInit(): void {
         this.init();
         this.registerMainNavConfig();
@@ -168,7 +166,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     @HostListener('window:resize')
-    onResize(event: any) {
+    onResize() {
         void this.updateUserOptions();
     }
 

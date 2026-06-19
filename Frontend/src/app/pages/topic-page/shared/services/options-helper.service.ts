@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, Optional } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { AuthenticationService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     NodeHelperService,
@@ -13,13 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class OptionsHelperService extends OptionsHelperServiceAbstract implements OnDestroy {
-    constructor(
-        nodeHelperService: NodeHelperService,
-        authenticationService: AuthenticationService,
-        storage: TemporaryStorageService,
-        networkService: NetworkService,
-        @Optional() route: ActivatedRoute,
-    ) {
+    constructor() {
+        const nodeHelperService = inject(NodeHelperService);
+        const authenticationService = inject(AuthenticationService);
+        const storage = inject(TemporaryStorageService);
+        const networkService = inject(NetworkService);
+        const route = inject(ActivatedRoute, { optional: true });
+
         super(nodeHelperService, authenticationService, storage, networkService, route);
     }
     /**

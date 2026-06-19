@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as rxjs from 'rxjs';
@@ -18,10 +18,9 @@ import { NavigationScheduler } from './navigation-scheduler';
  */
 @Injectable({ providedIn: 'root' })
 export class UserModifiableValuesService {
-    constructor(
-        navigationScheduler: NavigationScheduler,
-        //  preferences: SessionStorageService
-    ) {
+    constructor() {
+        const navigationScheduler = inject(NavigationScheduler);
+
         UserModifiableValue.navigationScheduler = navigationScheduler;
         // UserModifiableValue.preferences = preferences;
     }

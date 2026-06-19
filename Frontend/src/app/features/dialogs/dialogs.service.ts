@@ -1,4 +1,4 @@
-import { Injectable, Injector, TemplateRef } from '@angular/core';
+import { Injectable, Injector, TemplateRef, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogButton, RestConnectorService } from '../../core-module/core.module';
 import { Closable } from './card-dialog/card-dialog-config';
@@ -171,22 +171,20 @@ export enum DialogTemplate {
     providedIn: 'root',
 })
 export class DialogsService {
+    private cardDialog = inject(CardDialogService);
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private sharingV1Service = inject(SharingV1Service);
+    private localEvents = inject(LocalEventsService);
+    private translate = inject(TranslateService);
+    private injector = inject(Injector);
+    private restConnector = inject(RestConnectorService);
+    private nodeTitlePipe = inject(NodeTitlePipe);
+
     private customTemplates: { [key in DialogTemplate]?: TemplateRef<any> } = {};
 
     get openDialogs() {
         return this.cardDialog.openDialogs;
     }
-
-    constructor(
-        private cardDialog: CardDialogService,
-        private cardDialogUtils: CardDialogUtilsService,
-        private sharingV1Service: SharingV1Service,
-        private localEvents: LocalEventsService,
-        private translate: TranslateService,
-        private injector: Injector,
-        // TODO: Move the methods we use of `RestConnectorService` to a utils function if possible.
-        private restConnector: RestConnectorService,
-    ) {}
 
     async openGenericDialog<R extends string>(
         config: GenericDialogConfig<R>,
@@ -954,7 +952,6 @@ export class DialogsService {
                 });
             }
         }
-        const nodeTitle = new NodeTitlePipe(this.translate);
         return await this.openGenericDialog({
             buttons,
             nodes: source.element?.slice(),
@@ -964,9 +961,9 @@ export class DialogsService {
                 (source.element?.length === 1 ? '_SINGLE' : '_MULTIPLE'),
             messageParameters: {
                 count: source.element?.length.toString(),
-                element: nodeTitle.transform(source.element[0]),
-                source: nodeTitle.transform(oldParent),
-                target: nodeTitle.transform(target),
+                element: this.nodeTitlePipe.transform(source.element[0]),
+                source: this.nodeTitlePipe.transform(oldParent),
+                target: this.nodeTitlePipe.transform(target),
             },
         });
     }

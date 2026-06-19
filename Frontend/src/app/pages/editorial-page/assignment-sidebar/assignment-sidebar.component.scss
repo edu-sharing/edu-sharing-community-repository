@@ -1,0 +1,44 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use '../submit-assignment/feedback-mixin' as fm;
+@use '../manage-submission-nodes/node-list-mixin' as ms;
+
+:host {
+    overflow-y: auto;
+}
+.details {
+    display: flex;
+    flex-direction: column;
+    > label {
+        font-size: vars.$fontSizeXLarge;
+        font-weight: bold;
+        padding-bottom: 10px;
+    }
+    > div {
+        padding-bottom: 30px;
+    }
+    .state,
+    .date {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .feedback {
+        @include fm.feedback();
+        margin-bottom: 20px;
+    }
+    .node-list {
+        padding-top: 10px;
+        @include ms.nodeList();
+        > div.selected {
+            background: linear-gradient(
+                    to right,
+                    var(--primary) 0,
+                    var(--primary) 5px,
+                    var(--palette-primary-100) 5px,
+                    var(--palette-primary-100) 5px
+                )
+                no-repeat;
+        }
+    }
+}

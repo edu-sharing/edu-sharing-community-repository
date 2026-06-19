@@ -54,6 +54,7 @@ export * from './mds-viewer/mds-viewer.component';
 export * from './mds-viewer/replace-element-with-div';
 export * from './node-url/node-url.component';
 export * from './info-message/info-message.component';
+export * from './pipes/option-tooltip.pipe';
 export * from './pipes/authority-name.pipe';
 export * from './pipes/authority-color.pipe';
 export * from './pipes/assets-path.pipe';

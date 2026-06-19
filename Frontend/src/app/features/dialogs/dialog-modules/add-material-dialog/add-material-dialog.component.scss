@@ -116,9 +116,14 @@ mat-form-field {
     }
 }
 
+.link-submit {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
 .location {
     margin-top: 20px;
-    background-color: $backgroundColor;
     display: flex;
     flex-direction: column;
     .caption {

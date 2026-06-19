@@ -11,11 +11,12 @@
   [matTooltipPosition]="position === 'right' ? 'left' : 'right'"
   (click)="menuItemClicked()"
 >
-  <span class="menu-title" *ngIf="!icon; else iconContainer">
+  @if (!icon) {
+  <span class="menu-title">
     {{ title }}
   </span>
-  <ng-template #iconContainer>
-    <!-- note: esIcon does always set aria-hidden to true, even when settings [aria]="true" -->
-    <mat-icon aria-hidden="false" [fontIcon]="icon" [attr.aria-label]="title ?? icon"></mat-icon>
-  </ng-template>
+  } @else {
+  <!-- note: esIcon does always set aria-hidden to true, even when settings [aria]="true" -->
+  <mat-icon aria-hidden="false" [fontIcon]="icon" [attr.aria-label]="title ?? icon"></mat-icon>
+  }
 </button>

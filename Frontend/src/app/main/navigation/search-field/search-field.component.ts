@@ -8,6 +8,7 @@ import {
     OnDestroy,
     OnInit,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MatChip } from '@angular/material/chips';
@@ -39,6 +40,12 @@ import { SearchFieldConfig } from './search-field.service';
     standalone: false,
 })
 export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
+    private elementRef = inject(ElementRef);
+    private internal = inject(SearchFieldInternalService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mdsService = inject(MdsService);
+    private ngZone = inject(NgZone);
+
     /** The number of filters visible on the facets overlay. */
     filtersCount: number;
     /** The total number of filters independently of categories of the facets overlay. */
@@ -65,6 +72,8 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly rawFilters$ = this.internal.rawFilters$;
     readonly categories$ = this.internal.categoriesSubject;
     readonly suggestions$ = this.internal.suggestions$;
+    readonly filterBarVisible = this.internal.filterBarVisible;
+
     showOverlay = new BehaviorSubject(false);
     inhibitOverlay = false;
     hasSuggestions = true;
@@ -93,13 +102,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private readonly destroyed$ = new Subject<void>();
 
-    constructor(
-        private elementRef: ElementRef,
-        private internal: SearchFieldInternalService,
-        private loadingScreen: LoadingScreenService,
-        private mdsService: MdsService,
-        private ngZone: NgZone,
-    ) {
+    constructor() {
         this.mdsInfo$
             .pipe(switchMap((mds) => this.mdsService.getMetadataSet(mds)))
             .subscribe((mds) => (this.mds = mds));
@@ -226,7 +229,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
 
     focusOverlayIfOpen(event: Event): void {
         if (this.firstActiveChip) {
-            this.firstActiveChip._elementRef.nativeElement.focus();
+            this.firstActiveChip.focus();
             event.stopPropagation();
             event.preventDefault();
         } else if (this.showOverlay.value && this.hasSuggestions) {

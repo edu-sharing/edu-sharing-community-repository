@@ -1,60 +1,54 @@
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'SUBMISSION'">
-  <span *ngSwitchCase="'assignee'">
-    <es-user-avatar size="xsmall" [user]="$any(node).assignee"></es-user-avatar>
-    <span>{{ submission().assignee | authorityName }}</span>
-  </span>
-  <span *ngSwitchCase="'submissionStatus'" class="status status-{{ submissionStatus() }}">
-    {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + submissionStatus() | translate }}
-  </span>
-  <span *ngSwitchCase="'validationStatus'" class="status status-{{ $any(node).validationStatus }}">
-    {{ 'ASSIGNMENT.VALIDATION_STATUS.' + $any(node).validationStatus | translate }}
-  </span>
-  <span *ngSwitchCase="'submissionDate'" class="status submissionDate">
-    <i esIcon="alarm"></i>
-    {{ $any(node).submissionDate | formatDate : { time: true, relative: false } }}
-  </span>
-  <span *ngSwitchCase="'returnDate'" class="status returnDate">
-    <i esIcon="alarm"></i>
-    {{ $any(node).returnDate | formatDate : { time: true, relative: false } }}
-  </span>
-</ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'ASSIGNMENT'">
-  <span *ngSwitchCase="'title'">
-    {{ $any(node).title }}
-  </span>
-  <ng-container *ngSwitchCase="'endTime'">
-    <span
-      *ngIf="$any(node).endTime as endTime"
-      class="status assignmentEndTime"
-      matTooltip="{{ endTime | formatDate : { time: true, relative: false } }}"
-    >
-      <i esIcon="alarm"></i>
-      {{ endTime | formatDate : { time: false, relative: false } }}
-    </span>
-  </ng-container>
-  <span
-    *ngSwitchCase="'summary'"
-    class="assignment-summary"
-    [innerHTML]="$any(node).summary"
-    [matTooltip]="$any(node).summary | htmlTextPipe"
-  >
-  </span>
-  <span *ngSwitchCase="'status'" class="status status-{{ $any(node).status }}">
-    {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate : { fallback: $any(node).status } }}
-  </span>
-  <ng-container *ngSwitchCase="'submissionStatus'">
-    <span
-      *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'ASSIGNEE'"
-      class="status submission-status-{{ $any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED' }}"
-    >
-      {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
-    </span>
-    <ng-container *ngIf="($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR'">
-      {{ $any(node) | assignment : { mode: 'submissionsDone' } }} /
-      {{ $any(node) | assignment : { mode: 'submissionsTotal' } }}
-    </ng-container>
-  </ng-container>
-  <span *ngSwitchCase="'type'" class="status type-{{ $any(node).type }}">
-    {{ 'ASSIGNMENT.TYPE.' + $any(node).type | translate : { fallback: $any(node).type } }}
-  </span>
-</ng-container>
+@if (item.type === 'SUBMISSION') { @switch (item.name) { @case ('assignee') {
+<span>
+  <es-user-avatar size="xsmall" [user]="$any(node).assignee"></es-user-avatar>
+  <span>{{ submission().assignee | authorityName }}</span>
+</span>
+} @case ('validationStatus') {
+<span class="status status-{{ getValidationStatus($any(node)) }}">
+  {{ 'ASSIGNMENT.STATUS.' + getValidationStatus($any(node)) | translate }}
+</span>
+} @case ('submissionDate') {
+<span class="status submissionDate">
+  {{ $any(node).submissionDate | formatDate : { time: true, relative: false } }}
+</span>
+} @case ('returnDate') {
+<span class="status returnDate">
+  {{ $any(node).returnDate | formatDate : { time: true, relative: false } }}
+</span>
+} } } @if (item.type === 'ASSIGNMENT') { @switch (item.name) { @case ('title') {
+<span>
+  {{ $any(node).title }}
+</span>
+} @case ('endTime') { @if ($any(node).endTime; as endTime) {
+<span
+  class="status endTime endTime-{{ $any(node) | assignment : { mode: 'endTimePriority' } }}"
+  matTooltip="{{ endTime | formatDate : { time: true, relative: false } }}"
+>
+  {{ endTime | formatDate : { time: false, relative: false } }}
+</span>
+} } @case ('summary') {
+<span
+  class="assignment-summary"
+  [innerHTML]="$any(node).summary"
+  [matTooltip]="$any(node).summary | htmlTextPipe"
+>
+</span>
+} @case ('status') {
+<span class="status status-{{ $any(node).status }}">
+  {{ 'ASSIGNMENT.STATUS.' + $any(node).status | translate : { fallback: $any(node).status } }}
+</span>
+} @case ('submissionStatus') { @if (($any(node) | assignment : { mode: 'permissions' }) ===
+'ASSIGNEE') {
+<span
+  class="status submission-status-{{ $any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED' }}"
+>
+  {{ 'ASSIGNMENT.SUBMISSION_STATUS.' + ($any(node).submissions?.[0]?.submissionStatus || 'NOT_STARTED') | translate }}
+</span>
+} @if (($any(node) | assignment : { mode: 'permissions' }) === 'COORDINATOR') {
+{{ $any(node) | assignment : { mode: 'submissionsDone' } }} /
+{{ $any(node) | assignment : { mode: 'submissionsTotal' } }}
+} } @case ('type') {
+<span class="status type-{{ $any(node).type }}">
+  {{ 'ASSIGNMENT.TYPE.' + $any(node).type | translate : { fallback: $any(node).type } }}
+</span>
+} } }

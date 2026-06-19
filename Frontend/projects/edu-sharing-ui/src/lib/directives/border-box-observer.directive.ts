@@ -1,4 +1,12 @@
-import { Directive, ElementRef, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+    Directive,
+    ElementRef,
+    EventEmitter,
+    OnDestroy,
+    OnInit,
+    Output,
+    inject,
+} from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -19,9 +27,11 @@ interface BorderBox {
     standalone: false,
 })
 export class BorderBoxObserverDirective implements OnInit, OnDestroy {
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     static observeElement(elementRef: ElementRef<HTMLElement>): Observable<BorderBox> {
         return new Observable((subscriber) => {
-            const borderBoxObserver = new BorderBoxObserverDirective(elementRef);
+            const borderBoxObserver = new BorderBoxObserverDirective();
             borderBoxObserver.ngOnInit();
             borderBoxObserver.borderBoxSubject.subscribe(subscriber);
             return () => borderBoxObserver.ngOnDestroy();
@@ -35,8 +45,6 @@ export class BorderBoxObserverDirective implements OnInit, OnDestroy {
 
     width$ = this.borderBoxSubject.pipe(map(({ width }) => width));
     height$ = this.borderBoxSubject.pipe(map(({ height }) => height));
-
-    constructor(private elementRef: ElementRef<HTMLElement>) {}
 
     ngOnInit(): void {
         this.registerEventEmitter();

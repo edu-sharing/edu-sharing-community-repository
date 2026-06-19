@@ -1,6 +1,8 @@
 <es-dropdown #dropdown [options]="options"></es-dropdown>
-<div *ngIf="_node" class="group">
-  <div class="new" *ngIf="canComment() && mode !== 'view'">
+@if (_node) {
+<div class="group">
+  @if (canComment() && mode !== 'view') {
+  <div class="new">
     <div class="left">
       <es-user-avatar [size]="'small'" [user]="user"></es-user-avatar>
     </div>
@@ -15,14 +17,18 @@
             [(ngModel)]="newComment"
           ></textarea>
         </mat-form-field>
-        <button *ngIf="!sending" mat-icon-button (click)="addComment()">
+        @if (!sending) {
+        <button mat-icon-button (click)="addComment()">
           <i esIcon="send"></i>
         </button>
-        <es-spinner-small *ngIf="sending"></es-spinner-small>
+        } @if (sending) {
+        <es-spinner-small></es-spinner-small>
+        }
       </form>
     </div>
   </div>
-  <div class="new-no-permission" *ngIf="!canComment() && mode !== 'view'">
+  } @if (!canComment() && mode !== 'view') {
+  <div class="new-no-permission">
     <div class="no-permission">
       {{
         'NODE_COMMENTS.' +
@@ -34,12 +40,16 @@
       }}
     </div>
   </div>
-  <div class="comments comments-loading" *ngIf="isLoading"><es-spinner></es-spinner></div>
-  <div class="comments" [class.commentsLong]="!canComment()" *ngIf="comments">
-    <div *ngIf="comments && !comments.length && canComment()" class="no-comments">
+  } @if (isLoading) {
+  <div class="comments comments-loading"><es-spinner></es-spinner></div>
+  } @if (comments) {
+  <div class="comments" [class.commentsLong]="!canComment()">
+    @if (comments && !comments.length && canComment()) {
+    <div class="no-comments">
       {{ 'NODE_COMMENTS.NO_COMMENTS' | translate }}
     </div>
-    <div *ngFor="let comment of comments; let i = index" class="comment">
+    } @for (comment of comments; track comment; let i = $index) {
+    <div class="comment">
       <div class="top">
         <div class="left">
           <es-user-avatar [link]="true" [size]="'small'" [user]="comment.creator"></es-user-avatar>
@@ -47,26 +57,26 @@
         <div class="right">
           <div class="creator">
             <div class="name">{{ comment.creator | authorityName }}</div>
+            @if (getOptions(comment) && getOptions(comment).length) {
             <button
               mat-icon-button
               #menuTrigger="matMenuTrigger"
               class="dropdown-dummy"
               [matMenuTriggerFor]="dropdown.menu"
-              *ngIf="getOptions(comment) && getOptions(comment).length"
               (click)="options = getOptions(comment)"
             >
               <i esIcon="more_vert" class="dropdown"></i>
             </button>
+            }
           </div>
-          <div class="commentText" *ngIf="comment !== editComment && text === 'plain'">
+          @if (comment !== editComment && text === 'plain') {
+          <div class="commentText">
             {{ comment.comment }}
           </div>
-          <div
-            class="commentText commentHTML"
-            *ngIf="comment !== editComment && text === 'html'"
-            [innerHTML]="comment.comment"
-          ></div>
-          <div class="commentTextEdit" *ngIf="comment === editComment">
+          } @if (comment !== editComment && text === 'html') {
+          <div class="commentText commentHTML" [innerHTML]="comment.comment"></div>
+          } @if (comment === editComment) {
+          <div class="commentTextEdit">
             <form (ngSubmit)="saveEditComment()">
               <mat-form-field>
                 <textarea
@@ -78,9 +88,11 @@
               </mat-form-field>
             </form>
           </div>
+          }
         </div>
       </div>
-      <div class="icons" *ngIf="comment === editComment">
+      @if (comment === editComment) {
+      <div class="icons">
         <div
           class="btn-negative"
           tabindex="0"
@@ -98,7 +110,12 @@
           <i esIcon="check"></i>
         </div>
       </div>
-      <div class="date" *ngIf="comment !== editComment">{{ comment.created | formatDate }}</div>
+      } @if (comment !== editComment) {
+      <div class="date">{{ comment.created | formatDate }}</div>
+      }
     </div>
+    }
   </div>
+  }
 </div>
+}

@@ -1,21 +1,15 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { SessionStorageService } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../shared/shared.module';
-import { DialogsService } from '../dialogs/dialogs.service';
+import { DialogsModule } from '../dialogs/dialogs.module';
 import { MdsModule } from '../mds/mds.module';
 import {
     mdsStorybookProviders,
-    MetadataTemplateDialogsServiceMock,
     SessionStorageServiceMock,
 } from '../mds/mds-editor/storybook-utils';
 import { MetadataTemplateManagementComponent } from './metadata-template-management.component';
-import { DialogsModule } from '../dialogs/dialogs.module';
 
 const additionalProviders = [
-    /*{
-        provide: DialogsService,
-        useClass: MetadataTemplateDialogsServiceMock,
-    },*/
     {
         provide: SessionStorageService,
         useClass: SessionStorageServiceMock,

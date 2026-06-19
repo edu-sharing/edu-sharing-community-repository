@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { KeyEvents } from '../util/key-events';
@@ -12,10 +12,13 @@ interface ShortcutsRecord {
 
 @Injectable({ providedIn: 'root' })
 export class KeyboardShortcutsService implements KeyboardShortcutsService {
+    private dialogs = inject(DialogsService);
+    private ngZone = inject(NgZone);
+
     private shortcuts: ShortcutsRecord[] = [];
     private flattenedShortcuts: KeyboardShortcut[] = [];
 
-    constructor(private dialogs: DialogsService, private ngZone: NgZone) {
+    constructor() {
         this.ngZone.runOutsideAngular(() =>
             document.addEventListener('keydown', (event) => this.handleKeydown(event)),
         );

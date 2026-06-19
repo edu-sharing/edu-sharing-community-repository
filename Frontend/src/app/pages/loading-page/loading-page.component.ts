@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { LoadingScreenComponent } from '../../main/loading-screen/loading-screen.component';
@@ -13,9 +13,11 @@ import { Subject } from 'rxjs';
     standalone: true,
 })
 export class LoadingPageComponent implements OnDestroy {
+    private loadingScreenService = inject(LoadingScreenService);
+
     private destroyed$ = new Subject<void>();
 
-    constructor(private loadingScreenService: LoadingScreenService) {
+    constructor() {
         this.loadingScreenService.addLoadingTask({
             startup: true,
             until: this.destroyed$,

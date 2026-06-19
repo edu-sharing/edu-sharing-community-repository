@@ -1,8 +1,10 @@
-<div class="empty" *ngIf="!authorities()?.length">
+@if (!authorities()?.length) {
+<div class="empty">
   {{ 'EDITORIAL.ASSIGNMENT.FORM.AUTHORITIES_EMPTY' | translate }}
 </div>
-<div class="node-list" *ngIf="authorities()?.length">
-  @for (item of authorities(); track item) {
+} @if (authorities()?.length) {
+<div class="node-list">
+  @for (item of authoritiesFiltered(); track item) {
   <div>
     <es-user-avatar [user]="item.authority" size="xsmall"></es-user-avatar>
     <div class="title">{{ item.authority | authorityName }}</div>
@@ -23,19 +25,18 @@
       }
     </mat-form-field>
     <div class="warn-area">
+      @if ( item.authority.authorityType !== 'USER' && item.role === 'ASSIGNEE' && assignment().type
+      === 'SUBMISSION' ) {
       <div
         class="multiply-group"
         matTooltip="{{ 'EDITORIAL.ASSIGNMENT.FORM.GROUP_MULTIPLY' | translate }}"
-        *ngIf="
-          item.authority.authorityType !== 'USER' &&
-          item.role === 'ASSIGNEE' &&
-          assignment().type === 'SUBMISSION'
-        "
       >
         <i esIcon="asterisk"></i>
       </div>
+      }
     </div>
     <button mat-icon-button class="delete" (click)="remove(item)"><i esIcon="close"></i></button>
   </div>
   }
 </div>
+}

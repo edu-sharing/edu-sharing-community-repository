@@ -58,7 +58,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
     @Override
-    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren) {
+    public NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy) {
         return null;
     }
 
@@ -251,7 +251,7 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds)
+	public String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds, String[] aspects)
 			throws Throwable {
 		// TODO Auto-generated method stub
 		return null;
@@ -427,6 +427,11 @@ public class NodeServiceAdapter implements NodeService {
 
 	@Override
 	public NodeRef getOriginalNode(String nodeId) {
+		return null;
+	}
+
+	@Override
+	public NodeRef getReferenceOriginalNode(String nodeId) {
 		return null;
 	}
 

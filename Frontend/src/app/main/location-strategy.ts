@@ -1,5 +1,5 @@
 import { APP_BASE_HREF, PathLocationStrategy, PlatformLocation } from '@angular/common';
-import { Inject, Injectable, Optional } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { UrlSerializer } from '@angular/router';
 
 const PRESERVED_QUERY_PARAMS = ['reurl'];
@@ -8,16 +8,20 @@ const PRESERVED_QUERY_PARAMS = ['reurl'];
 // https://www.bytelimes.com/a-neat-trick-to-globally-preserve-query-params-in-angular-router/
 @Injectable()
 export class AppLocationStrategy extends PathLocationStrategy {
+    private platformLocation: PlatformLocation;
+    private urlSerializer = inject(UrlSerializer);
+
     private get search(): string {
         return this.platformLocation?.search ?? '';
     }
 
-    constructor(
-        private platformLocation: PlatformLocation,
-        private urlSerializer: UrlSerializer,
-        @Optional() @Inject(APP_BASE_HREF) _baseHref?: string,
-    ) {
+    constructor() {
+        const platformLocation = inject(PlatformLocation);
+        const _baseHref = inject(APP_BASE_HREF, { optional: true });
+
         super(platformLocation, _baseHref);
+
+        this.platformLocation = platformLocation;
     }
 
     prepareExternalUrl(internal: string): string {

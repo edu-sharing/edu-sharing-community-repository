@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
 
 /**
@@ -33,4 +34,25 @@ export class LocalEventsService {
     // FIXME: Maybe a `nodesMoved` emitter would make for sense for updating lists that used to
     // include a node and lists that the node was moved to.
     readonly nodesDeleted = new EventEmitter<Node[]>();
+    /**
+     * One or more nodes have been moved to a different location.
+     * source: the folder the nodes were moved FROM, target: the folder they were moved TO.
+     */
+    readonly nodesMoved = new EventEmitter<{
+        nodes: Node[];
+        source: Partial<Node>;
+        target: Node;
+    }>();
+
+    readonly createdNodes$ = new BehaviorSubject<Node[]>([]);
+    readonly changedNodes$ = new BehaviorSubject<Node[]>([]);
+    readonly deletedNodes$ = new BehaviorSubject<Node[]>([]);
+
+    constructor() {
+        this.nodesCreated.subscribe((nodes) => this.createdNodes$.next(nodes));
+        this.nodesChanged.subscribe((nodes) => this.changedNodes$.next(nodes));
+        this.nodesDeleted.subscribe((nodes) => {
+            this.deletedNodes$.next(nodes);
+        });
+    }
 }

@@ -1,0 +1,30 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.binder-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .preview-container {
+        flex-grow: 1;
+    }
+
+    .preview-container > .frame {
+        width: 100%;
+        height: 100%;
+    }
+
+    .binder-link-container {
+        display: flex;
+        justify-content: center;
+        padding-top: 1em;
+    }
+}

@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import {
     AboutService,
     AuthenticationService,
@@ -22,6 +22,12 @@ import { NodeDataSource, TranslationsService } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class NotificationListComponent implements OnInit {
+    private aboutService = inject(AboutService);
+    private authenticationService = inject(AuthenticationService);
+    private translations = inject(TranslationsService);
+    private notificationService = inject(NotificationV1Service);
+    private dialogs = inject(DialogsService);
+
     static readonly NOTIFICATION_REFRESH_INTERVAL = 30 * 1000;
     static readonly NOTIFICATION_COUNT_ALL = 100;
     static readonly NOTIFICATION_COUNT_UNREAD = 25;
@@ -30,13 +36,6 @@ export class NotificationListComponent implements OnInit {
     unreadNotificationsCount: number;
     show = false;
     viewRead = false;
-    constructor(
-        private aboutService: AboutService,
-        private authenticationService: AuthenticationService,
-        private translations: TranslationsService,
-        private notificationService: NotificationV1Service,
-        private dialogs: DialogsService,
-    ) {}
 
     async ngOnInit() {
         this.dataSource.isLoading = true;

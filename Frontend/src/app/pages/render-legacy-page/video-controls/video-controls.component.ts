@@ -1,6 +1,6 @@
 import { catchError, filter, first, map, tap } from 'rxjs/operators';
 import { trigger } from '@angular/animations';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgxSliderModule, Options } from '@angular-slider/ngx-slider';
 import { of, ReplaySubject } from 'rxjs';
@@ -30,6 +30,16 @@ interface VideoControlsValues {
     imports: [DurationPipe, SharedModule, NgxSliderModule],
 })
 export class VideoControlsComponent implements OnInit, OnDestroy {
+    private bridge = inject(BridgeService);
+    private collectionService = inject(RestCollectionService);
+    private connector = inject(RestConnectorService);
+    private nodeService = inject(RestNodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private router = inject(Router);
+    private mainNav = inject(MainNavService);
+    private temporaryStorage = inject(TemporaryStorageService);
+    private toast = inject(Toast);
+
     @Input() node: Node;
     @Input() video: HTMLVideoElement;
     @Input() size: 'small' | 'large' = 'large';
@@ -44,18 +54,6 @@ export class VideoControlsComponent implements OnInit, OnDestroy {
     private playbackStartedTime: Date;
     private previousValues: VideoControlsValues;
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
-
-    constructor(
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        private connector: RestConnectorService,
-        private nodeService: RestNodeService,
-        private nodeHelper: NodeHelperService,
-        private router: Router,
-        private mainNav: MainNavService,
-        private temporaryStorage: TemporaryStorageService,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         // This component is injected programmatically without calling ngOnChanges. Therefore, we

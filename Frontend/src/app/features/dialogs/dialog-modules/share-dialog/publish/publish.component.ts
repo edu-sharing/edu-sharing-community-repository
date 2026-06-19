@@ -8,6 +8,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -46,6 +47,19 @@ type PublishedNode = Node & {
     standalone: false,
 })
 export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy {
+    private bridge = inject(BridgeService);
+    private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private legacyNodeService = inject(RestNodeService);
+    private mdsService = inject(MdsEditorInstanceService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
+    private aboutService = inject(AboutService);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     @Input() node: Node;
     @Input() permissions: ExtendedAce[];
     @Input() inherited: boolean;
@@ -76,20 +90,7 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     private about: About;
     @Input() restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
 
-    constructor(
-        private bridge: BridgeService,
-        private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private legacyNodeService: RestNodeService,
-        private mdsService: MdsEditorInstanceService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        private aboutService: AboutService,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.handlePermission = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_HANDLESERVICE,
         );
@@ -376,6 +377,9 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
         }
     }
 
+    supportsLicensing() {
+        return !this.node?.isDirectory && this.node.type !== RestConstants.CCM_TYPE_SAVED_SEARCH;
+    }
     getType() {
         if (this.node?.isDirectory) {
             return this.node.collection ? 'COLLECTION' : 'DIRECTORY';
@@ -385,7 +389,11 @@ export class ShareDialogPublishComponent implements OnChanges, OnInit, OnDestroy
     }
 
     copyAllowed() {
-        return this.publishCopyPermission && !this.node?.isDirectory;
+        return (
+            this.publishCopyPermission &&
+            !this.node?.isDirectory &&
+            this.node.type !== RestConstants.CCM_TYPE_SAVED_SEARCH
+        );
     }
 
     setRepublish() {

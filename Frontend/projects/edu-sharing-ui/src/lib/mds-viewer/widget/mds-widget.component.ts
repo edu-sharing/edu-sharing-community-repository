@@ -9,10 +9,10 @@ import {
     OnChanges,
     OnDestroy,
     OnInit,
-    Optional,
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { MatRipple } from '@angular/material/core';
@@ -74,6 +74,7 @@ export enum MdsWidgetType {
     MultiValueFixedBadges = 'multivalueFixedBadges',
     MultiValueSuggestBadges = 'multivalueSuggestBadges',
     MultiValueAuthorityBadges = 'multivalueAuthorityBadges',
+    MultiValueButtons = 'multivalueButtons',
     Nodefilter = 'nodefilter',
     Singleoption = 'singleoption',
     Slider = 'slider',
@@ -144,6 +145,14 @@ export enum ValueType {
     ],
 })
 export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
+    mdsEditorInstance = inject(MdsEditorInstanceServiceAbstract, { optional: true });
+    translate = inject(TranslateService);
+    private ui = inject(UIService);
+    private viewInstance = inject(ViewInstanceService);
+    private mdsViewerService = inject(MdsViewerService);
+    private injector = inject(Injector);
+    private nodeHelper = inject(NodeHelperService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly focusTrigger = new Subject<void>();
     readonly destroyed$ = new Subject<void>();
@@ -160,6 +169,7 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         MdsWidgetType.MultiValueFixedBadges,
         MdsWidgetType.MultiValueSuggestBadges,
         MdsWidgetType.MultiValueTree,
+        MdsWidgetType.MultiValueButtons,
     ];
 
     readonly valueType = ValueType.String;
@@ -198,18 +208,6 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
 
     value = signal<string[]>(undefined);
     private temporaryValue: string[] = undefined;
-
-    constructor(
-        @Optional() public mdsEditorInstance: MdsEditorInstanceServiceAbstract,
-        public translate: TranslateService,
-        private ui: UIService,
-        private viewInstance: ViewInstanceService,
-        private mdsViewerService: MdsViewerService,
-        private injector: Injector,
-        private nodeHelper: NodeHelperService,
-    ) {
-        // super(toast, null, translate);
-    }
 
     ngOnDestroy(): void {
         this.destroyed$.next();
@@ -315,22 +313,24 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     click() {
-        if (this.getDefinition().link === '_BLANK') {
-            window.open(
-                this.mdsViewerService.getFormattedValue(
+        if (this.getDefinition().link) {
+            if (this.getDefinition().link === '_BLANK') {
+                window.open(
+                    this.mdsViewerService.getFormattedValue(
+                        this.value(),
+                        this.getDefinition(),
+                        'text',
+                    )[0],
+                );
+            } else if (this.getDefinition().link === '_SELF') {
+                window.location.href = this.mdsViewerService.getFormattedValue(
                     this.value(),
-                    this.getDefinition(),
+                    this.definition,
                     'text',
-                )[0],
-            );
-        } else if (this.getDefinition().link === '_SELF') {
-            window.location.href = this.mdsViewerService.getFormattedValue(
-                this.value(),
-                this.definition,
-                'text',
-            )[0];
-        } else {
-            console.warn('Unsupported link type ' + this.getDefinition().link);
+                )[0];
+            } else {
+                console.warn('Unsupported link type ' + this.getDefinition().link);
+            }
         }
     }
 

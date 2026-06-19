@@ -10,6 +10,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.basic.*;
+import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
@@ -60,6 +61,8 @@ public class SecurityConfigurationOAuth2 {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain oAuth2FilterChain(HttpSecurity http, GuestCleanupFilter guestCleanupFilter, ClientRegistrationRepository clientRegistrationRepository, SilentLoginAuthorizationRequestResolver silentLoginAuthorizationRequestResolver, EduAuthSuccsessHandler eduAuthSuccsessHandler, OidcUserSessionMapper mapper, CustomErrorHandler customErrorHandler) throws Exception {
+        http.addFilterBefore(new SecurityContextStrategySwitchFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class);
+
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatchers(matchers -> matchers

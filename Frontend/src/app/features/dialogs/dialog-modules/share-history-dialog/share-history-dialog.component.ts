@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     NodePermissionsHistory,
@@ -21,19 +21,20 @@ import { ShareHistoryDialogData, ShareHistoryDialogResult } from './share-histor
     standalone: false,
 })
 export class ShareHistoryDialogComponent {
+    data = inject<ShareHistoryDialogData>(CARD_DIALOG_DATA);
+    dialogRef =
+        inject<CardDialogRef<ShareHistoryDialogData, ShareHistoryDialogResult>>(CardDialogRef);
+    private nodeApi = inject(RestNodeService);
+    private toast = inject(Toast);
+    private nodeHelper = inject(NodeHelperService);
+    private translation = inject(TranslateService);
+
     private STATUS_SAME = 0;
     private STATUS_ADD = 1;
     private STATUS_CHANGE = 2;
     history: any;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: ShareHistoryDialogData,
-        public dialogRef: CardDialogRef<ShareHistoryDialogData, ShareHistoryDialogResult>,
-        private nodeApi: RestNodeService,
-        private toast: Toast,
-        private nodeHelper: NodeHelperService,
-        private translation: TranslateService,
-    ) {
+    constructor() {
         // Run in constructor to avoid changed-after-checked error.
         this.loadHistory();
     }

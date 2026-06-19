@@ -15,9 +15,10 @@
     (attributeChange)="onActiveDescendantChanges($event)"
     (blur)="onBlur.emit()"
   >
-    <mat-option [value]="null" *ngIf="widget.definition.allowempty"></mat-option>
+    @if (widget.definition.allowempty) {
+    <mat-option [value]="null"></mat-option>
+    } @for (value of values | async; track value) {
     <mat-option
-      *ngFor="let value of values | async"
       [value]="value"
       esCheckTextOverflow=".mat-option-text"
       #text="esCheckTextOverflow"
@@ -29,5 +30,6 @@
     >
       {{ value.caption }}
     </mat-option>
+    }
   </mat-select>
 </es-mds-editor-widget-container>

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     FacetsDict,
     LabeledValue,
@@ -45,11 +45,17 @@ const NUMBER_OF_FACET_SUGGESTIONS = 5;
     providedIn: 'root',
 })
 export class SearchFieldInternalService implements EventListener {
+    private search = inject(SearchService);
+    private mdsLabel = inject(MdsLabelService);
+    private event = inject(FrameEventsService);
+
     readonly config = new BehaviorSubject<SearchFieldConfig | null>(null);
     /** Reference to the search-field component, if currently visible. */
     searchFieldComponent = new BehaviorSubject<SearchFieldComponent>(null);
     /** The user clicked the filters button inside the search field. */
     readonly filtersButtonClicked = new Subject<void>();
+    /** Whether the filter bar is visible. */
+    readonly filterBarVisible = new BehaviorSubject<boolean>(false);
     /** The user triggered a search using the search field. */
     readonly searchTriggered = new Subject<SearchEvent>();
     /** The user changed the search string by typing into the search field. */
@@ -78,11 +84,7 @@ export class SearchFieldInternalService implements EventListener {
         map((filters) => (filters ? this.mdsLabel.getRawValuesDict(filters) : null)),
     );
 
-    constructor(
-        private search: SearchService,
-        private mdsLabel: MdsLabelService,
-        private event: FrameEventsService,
-    ) {
+    constructor() {
         this.filters$ = this.enableFiltersAndSuggestionsSubject.pipe(
             switchMap((enabled) => (enabled ? this.filtersSubject : of(null))),
         );

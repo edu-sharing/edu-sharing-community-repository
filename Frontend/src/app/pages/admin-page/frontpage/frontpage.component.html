@@ -1,19 +1,19 @@
-<es-info-message
-  *ngIf="(configService.get('frontpage.enabled', true) | async) === false"
-  class="info-disabled"
->
+@if ((configService.get('frontpage.enabled', true) | async) === false) {
+<es-info-message class="info-disabled">
   {{ 'ADMIN.FRONTPAGE.DISABLED' | translate }}
 </es-info-message>
+} @if (chooseCollection) {
 <es-collection-chooser
   class="dialog-right"
-  *ngIf="chooseCollection"
   [@fromRight]="chooseCollection"
   title="WORKSPACE.SELECT_COLLECTION"
   (cancel)="chooseCollection = false"
   (choose)="setCollection($event)"
 ></es-collection-chooser>
-<div class="frontpage" *ngIf="configService.get('frontpage.enabled', true) | async">
-  <form *ngIf="config" [formGroup]="form">
+} @if (configService.get('frontpage.enabled', true) | async) {
+<div class="frontpage">
+  @if (config) {
+  <form [formGroup]="form">
     <h4 class="mat-heading-4 mat-heading-underline">
       <i esIcon="settings"></i>{{ 'ADMIN.FRONTPAGE.GENERAL' | translate }}
     </h4>
@@ -27,13 +27,14 @@
             [(ngModel)]="config.frontpage.mode"
             [ngModelOptions]="{ standalone: true }"
           >
-            <mat-option *ngFor="let mode of modes" [value]="mode">{{
-              'ADMIN.FRONTPAGE.MODE.' + mode | translate
-            }}</mat-option>
+            @for (mode of modes; track mode) {
+            <mat-option [value]="mode">{{ 'ADMIN.FRONTPAGE.MODE.' + mode | translate }}</mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="mode-collection" *ngIf="config.frontpage.mode === 'collection'">
+      @if (config.frontpage.mode === 'collection') {
+      <div class="mode-collection">
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.COLLECTION_LABEL' | translate }}</mat-label>
           <mat-hint>{{ 'ADMIN.FRONTPAGE.COLLECTION_HINT' | translate }}</mat-hint>
@@ -47,8 +48,8 @@
           />
         </mat-form-field>
       </div>
-
-      <div class="config-timespan" *ngIf="config.frontpage.mode !== 'collection'">
+      } @if (config.frontpage.mode !== 'collection') {
+      <div class="config-timespan">
         <mat-form-field>
           <mat-label
             >{{ 'ADMIN.FRONTPAGE.TIMESPAN_LABEL' | translate }} ({{
@@ -62,31 +63,34 @@
           {{ 'ADMIN.FRONTPAGE.TIMESPAN.all' | translate }}
         </mat-checkbox>
       </div>
+      }
     </div>
-    <div class="group" *ngIf="config.frontpage.mode === 'collection'">
+    @if (config.frontpage.mode === 'collection') {
+    <div class="group">
       <div class="select-collection">
         <button mat-raised-button color="primary" (click)="chooseCollection = true">
           {{ 'ADMIN.FRONTPAGE.CHOOSE_COLLECTION' | translate }}
         </button>
       </div>
     </div>
-    <div *ngIf="config.frontpage.mode !== 'collection'">
+    } @if (config.frontpage.mode !== 'collection') {
+    <div>
       <div class="group">
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate }}</mat-label>
           <mat-hint>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate }}</mat-hint>
           <input matInput id="totalCount" formControlName="totalCount" type="number" />
-          <mat-error *ngIf="form.get('totalCount').errors">
-            <span *ngIf="form.get('totalCount').errors.required">{{
-              'FIELD_REQUIRED' | translate
-            }}</span>
-            <span *ngIf="form.get('totalCount').errors.pattern">{{
-              'FIELD_VALIDATION_ERROR_INTEGER' | translate
-            }}</span>
-            <span *ngIf="form.get('totalCount').errors.outOfRange">{{
-              'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate
-            }}</span>
+          @if (form.get('totalCount').errors) {
+          <mat-error>
+            @if (form.get('totalCount').errors.required) {
+            <span>{{ 'FIELD_REQUIRED' | translate }}</span>
+            } @if (form.get('totalCount').errors.pattern) {
+            <span>{{ 'FIELD_VALIDATION_ERROR_INTEGER' | translate }}</span>
+            } @if (form.get('totalCount').errors.outOfRange) {
+            <span>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_OUT_OF_RANGE' | translate }}</span>
+            }
           </mat-error>
+          }
         </mat-form-field>
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate }}</mat-label>
@@ -101,11 +105,14 @@
         </mat-form-field>
       </div>
       <div class="group-info">
-        <es-info-message *ngIf="form.get('totalCount').value > form.get('displayCount').value">
+        @if (form.get('totalCount').value > form.get('displayCount').value) {
+        <es-info-message>
           {{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
         </es-info-message>
+        }
       </div>
-      <div class="group queries" *ngFor="let query of config.frontpage.queries">
+      @for (query of config.frontpage.queries; track query) {
+      <div class="group queries">
         <div class="condition">
           <mat-form-field>
             <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_TYPE' | translate }}</mat-label>
@@ -117,12 +124,15 @@
               [(ngModel)]="query.condition.type"
               [ngModelOptions]="{ standalone: true }"
             >
-              <mat-option *ngFor="let type of conditionTypes" [value]="type">{{
+              @for (type of conditionTypes; track type) {
+              <mat-option [value]="type">{{
                 'ADMIN.FRONTPAGE.CONDITION_TYPE.' + type | translate
               }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
-          <mat-form-field *ngIf="query.condition.type === 'TOOLPERMISSION'">
+          @if (query.condition.type === 'TOOLPERMISSION') {
+          <mat-form-field>
             <mat-label>{{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE' | translate }}</mat-label>
             <mat-hint>{{
               'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_VALUE_HINT' | translate
@@ -132,9 +142,12 @@
               [(ngModel)]="query.condition.value"
               [ngModelOptions]="{ standalone: true }"
             >
-              <mat-option *ngFor="let p of toolpermissions" [value]="p">{{ p }}</mat-option>
+              @for (p of toolpermissions; track p) {
+              <mat-option [value]="p">{{ p }}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
+          }
           <mat-radio-group
             class="negate"
             [(ngModel)]="query.condition.negate"
@@ -149,15 +162,15 @@
             >
           </mat-radio-group>
           <!--
-          <div class="negate">
-              <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
-              <div class="mat-slide-toggle-twoside">
-                  <mat-label>false</mat-label>
-                  <mat-slide-toggle [ngModel]="!query.condition.negate" (ngModelChange)="query.condition.negate=!$event" [ngModelOptions]="{standalone: true}"></mat-slide-toggle>
-                  <mat-label>true</mat-label>
-              </div>
-          </div>
-          -->
+                        <div class="negate">
+                          <mat-label>{{'ADMIN.FRONTPAGE.CUSTOM_QUERY_CONDITION_NEGATE' | translate}}</mat-label>
+                          <div class="mat-slide-toggle-twoside">
+                            <mat-label>false</mat-label>
+                            <mat-slide-toggle [ngModel]="!query.condition.negate" (ngModelChange)="query.condition.negate=!$event" [ngModelOptions]="{standalone: true}"></mat-slide-toggle>
+                            <mat-label>true</mat-label>
+                          </div>
+                        </div>
+                        -->
           <button mat-flat-button color="warn" (click)="removeQueryCondition(query)">
             {{ 'ADMIN.FRONTPAGE.CUSTOM_QUERY_REMOVE_CONDITION' | translate }}
           </button>
@@ -173,6 +186,7 @@
           >
         </div>
       </div>
+      }
       <div class="group">
         <div>
           <button mat-raised-button color="primary" (click)="addQueryCondition()">
@@ -181,6 +195,7 @@
         </div>
       </div>
     </div>
+    }
     <div class="group">
       <div class="save">
         <button mat-raised-button color="primary" (click)="save()" [disabled]="!form.valid">
@@ -189,6 +204,7 @@
       </div>
     </div>
   </form>
+  }
   <h4 class="mat-heading-4 mat-heading-underline preview-heading">
     <i esIcon="apps"></i>{{ 'ADMIN.FRONTPAGE.PREVIEW' | translate }}
     <div class="reload">
@@ -196,11 +212,12 @@
     </div>
   </h4>
   <div class="group preview">
-    <h5 class="mat-heading-5 preview-error" *ngIf="previewError">
+    @if (previewError) {
+    <h5 class="mat-heading-5 preview-error">
       {{ 'ADMIN.FRONTPAGE.PREVIEW_ERROR.' + previewError | translate }}
     </h5>
+    } @if (!previewError) {
     <es-node-entries-wrapper
-      *ngIf="!previewError"
       [columns]="previewColumns"
       [dataSource]="previewNodesDataSource"
       [checkbox]="false"
@@ -210,10 +227,13 @@
       (dblClickItem)="openNode.emit($any($event.element))"
       [scope]="$any('dummy')"
     ></es-node-entries-wrapper>
+    }
   </div>
+  @if (!previewLoading && !previewError) {
   <h5
     class="mat-heading-5 preview-hint"
-    *ngIf="!previewLoading && !previewError"
     innerHTML="{{ 'ADMIN.FRONTPAGE.PREVIEW_HINT' | translate }}"
   ></h5>
+  }
 </div>
+}

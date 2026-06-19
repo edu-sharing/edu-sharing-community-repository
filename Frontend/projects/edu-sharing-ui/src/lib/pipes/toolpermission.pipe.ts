@@ -1,11 +1,12 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'esToolpermission',
 })
 export class ToolpermissionPipe implements PipeTransform {
-    constructor(private authenticationService: AuthenticationService) {}
+    private authenticationService = inject(AuthenticationService);
 
     transform(toolpermission: string) {
         return this.authenticationService.hasToolpermission(toolpermission);

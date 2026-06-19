@@ -9,14 +9,17 @@ import {
     input,
     Input,
     InputSignal,
+    OnChanges,
     OnDestroy,
     OnInit,
     Output,
     signal,
     Signal,
+    SimpleChanges,
     ViewChild,
     ViewContainerRef,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -57,7 +60,12 @@ export interface BreadcrumbExtensionInterface {
     templateUrl: './breadcrumb.component.html',
     styleUrls: ['./breadcrumb.component.scss'],
 })
-export class BreadcrumbComponent implements OnInit, OnDestroy {
+export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
+    private connector = inject(RestConnectorService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+    private uiService = inject(UIService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.BREADCRUMB.';
     readonly navigateToTemplateValue: string = 'NAVIGATE_TO_TEMPLATE';
@@ -67,6 +75,9 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     editMode: InputSignal<boolean> = input<boolean>(false);
     isProcessing: InputSignal<boolean> = input<boolean>(false);
     @Input() nodeId?: string;
+    // propagated (inherited) breadcrumb node — used to render the editorial members as selected
+    // while still letting an edit create a fresh copy (persistConfig keys off the empty nodeId)
+    @Input() propagatedNodeId?: string;
     @Input() pageVariantNode?: Node;
     pageTemplateExists: InputSignal<boolean> = input<boolean>(false);
     pageVariantConfigNodes: InputSignal<Node[]> = input<Node[]>([]);
@@ -98,12 +109,7 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     private customExtensionComponentRef: ComponentRef<any> | null = null;
     customExtensionInstance: BreadcrumbExtensionInterface;
 
-    constructor(
-        private connector: RestConnectorService,
-        private topicPageGlobalService: TopicPageGlobalService,
-        private topicPageHelperService: TopicPageHelperService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         effect((): void => {
             // update editMode of custom extension
             const currentEditMode: boolean = this.editMode();
@@ -135,6 +141,27 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Reloads the widget config when the (propagated) node ID changes — e.g. when switching into
+     * template mode or to another page variant — so a stale config from the previously loaded node
+     * is not kept.
+     *
+     * @param changes
+     */
+    async ngOnChanges(changes: SimpleChanges): Promise<void> {
+        const nodeIdChanged: boolean =
+            !!changes.nodeId &&
+            !changes.nodeId.firstChange &&
+            changes.nodeId.currentValue !== changes.nodeId.previousValue;
+        const propagatedNodeIdChanged: boolean =
+            !!changes.propagatedNodeId &&
+            !changes.propagatedNodeId.firstChange &&
+            changes.propagatedNodeId.currentValue !== changes.propagatedNodeId.previousValue;
+        if (nodeIdChanged || propagatedNodeIdChanged) {
+            await this.loadWidgetConfig();
+        }
+    }
+
+    /**
      * On destruction, destroy custom extension component if it exists and complete destroy subject.
      */
     ngOnDestroy(): void {
@@ -149,16 +176,33 @@ export class BreadcrumbComponent implements OnInit, OnDestroy {
      * Initializes the breadcrumb component.
      */
     async initializeComponent(): Promise<void> {
-        // retrieve a config node if one exists
-        if (this.nodeId) {
-            const widgetNode: Node = await this.topicPageHelperService.getNode(this.nodeId);
-            this.widgetConfig = retrieveWidgetConfigFromNode(widgetNode);
-        }
+        await this.loadWidgetConfig();
         if (this.topicPageGlobalService.hasCustomBreadcrumbExtension()) {
             this.initializeCustomExtension();
         }
         // set component to be initialized
         this.initialized.set(true);
+    }
+
+    /**
+     * Loads the breadcrumb widget config from the current (or propagated) node and pushes the
+     * resulting editorial members into the custom extension when it is already mounted. Falling
+     * back to the propagated (inherited) node shows the inherited editorial members as selected
+     * until the page is adjusted.
+     */
+    private async loadWidgetConfig(): Promise<void> {
+        const configNodeId: string = this.nodeId || this.propagatedNodeId;
+        this.widgetConfig = configNodeId
+            ? retrieveWidgetConfigFromNode(await this.topicPageHelperService.getNode(configNodeId))
+            : undefined;
+        this.editorialMemberNodeIds = this.widgetConfig?.editorialMemberNodeIds || [];
+        // refresh the selected editorial members in the custom extension if it is already mounted
+        if (this.customExtensionComponentRef) {
+            this.customExtensionComponentRef.setInput(
+                'editorialMemberNodeIds',
+                this.editorialMemberNodeIds,
+            );
+        }
     }
 
     /**

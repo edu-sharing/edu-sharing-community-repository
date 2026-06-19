@@ -22,6 +22,7 @@ import org.edu_sharing.service.permission.events.AddedPermissionsEvent;
 import org.edu_sharing.service.permission.events.RemovedPermissionEvent;
 import org.edu_sharing.service.share.ibatis.ShareInfoMapper;
 import org.edu_sharing.service.share.ibatis.ShareInfoOpLogMapper;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -173,13 +174,17 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     }
 
     @Override
-    @Transactional
     public void createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType) {
+        createShare(nodeId, sharedBy, sharedWith, shareType, new Date());
+    }
+
+    @Override
+    public void createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date) {
         Exception error = retryingTransactionHelper.doInTransaction(() -> {
-            ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, new Date());
+            ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, date);
             try {
                 shareInfoMapper.create(shareInfoData);
-                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
+                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, date));
                 return null;
             } catch (DuplicateKeyException e) {
                 log.warn("Share already exists: {}", shareInfoData);

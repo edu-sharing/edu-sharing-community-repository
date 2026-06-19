@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RestConstants, RestMdsService, RestNodeService } from '../../../core-module/core.module';
@@ -32,12 +32,10 @@ export class UserPresentableError extends Error {
     providedIn: 'root',
 })
 export class MdsEditorCommonService {
-    constructor(
-        private restNode: RestNodeService,
-        private nodeService: NodeService,
-        private mdsService: RestMdsService,
-        private suggestionsV1Service: SuggestionsV1Service,
-    ) {}
+    private restNode = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private mdsService = inject(RestMdsService);
+    private suggestionsV1Service = inject(SuggestionsV1Service);
 
     /**
      * Fetches the up-to-date and complete metadata from the server.

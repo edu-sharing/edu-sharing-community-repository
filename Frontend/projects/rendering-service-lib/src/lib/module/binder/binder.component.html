@@ -1,0 +1,20 @@
+<div class="binder-wrapper">
+  @if (hasPreview()) {
+  <div class="preview-container">
+    @if (previewUrl() === '') {
+    <mat-spinner [diameter]="50"></mat-spinner>
+    } @if (previewUrl() !== '') {
+    <iframe class="frame" [src]="previewUrl()"></iframe>
+    }
+  </div>
+  }
+  <div class="binder-link-container">
+    @if (binderItem()?.link === '') {
+    <mat-spinner [diameter]="50"></mat-spinner>
+    } @if (binderItem()?.link !== '') {
+    <a mat-flat-button color="primary" [href]="binderItem()?.link" target="_blank"
+      >Link to object</a
+    >
+    }
+  </div>
+</div>

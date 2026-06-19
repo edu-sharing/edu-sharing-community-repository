@@ -10,13 +10,14 @@
   >
     <div class="search-field">
       <div class="search-field-input-wrapper">
+        @if (config.showFiltersButton) {
         <button
-          *ngIf="config.showFiltersButton"
           matPrefix
           class="filters-button"
           mat-icon-button
           type="button"
           [attr.aria-label]="'SEARCH.FILTERS' | translate"
+          [attr.aria-expanded]="filterBarVisible | async"
           matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
             totalFiltersCount > 0
               ? '(' +
@@ -29,6 +30,7 @@
         >
           <i esIcon="filter_list" [aria]="false"></i>
         </button>
+        }
         <input
           class="search-input"
           #input
@@ -45,9 +47,9 @@
           data-test="top-bar-search-field"
           (click)="onInputFocus()"
         />
+        @if (inputControl.value) {
         <button
           class="clear-button"
-          *ngIf="inputControl.value"
           mat-icon-button
           type="button"
           (click)="onClear()"
@@ -55,6 +57,7 @@
         >
           <i esIcon="clear" [aria]="false"></i>
         </button>
+        }
         <button
           class="submit-button"
           mat-icon-button
@@ -80,36 +83,38 @@
   <!-- FIXME: The focus trap doesn't seem to work, when there are suggestions for only one facet
   category. -->
   <div class="suggestion-card mat-elevation-z2" cdkTrapFocus>
+    @if (filtersCount) {
     <div
-      *ngIf="filtersCount"
       class="suggestion-active-filter"
       [class.suggestion-active-filter-separator]="!facets.isEmpty()"
     >
       <label #label>{{ 'SEARCH.ACTIVE_FILTER' | translate }}</label>
       <mat-chip-listbox [attr.aria-labelledby]="label" #chipList>
-        <div class="chips-wrapper" *ngIf="filters$ | async as filtersDict">
-          <ng-container *ngFor="let filters of filtersDict | keyvalue">
-            <!-- We considered injecting the chip list from the mds editor like the suggestions
-            panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
-            keyboard interaction to work. -->
-            <ng-container *ngIf="(categories$ | async)?.includes(filters.key)">
-              <mat-chip-option
-                [selectable]="false"
-                *ngFor="let filterValue of filters.value"
-                class="filter-chip-{{ filters.key | propertySlug }}"
-                [removable]="true"
-                (removed)="onRemoveFilter(filters.key, filterValue)"
-                [matTooltip]="getTooltip(filters.key, filterValue)"
-                matTooltipPosition="above"
-              >
-                {{ filterValue.label }}
-                <mat-icon matChipRemove class="remove-chip">cancel</mat-icon>
-              </mat-chip-option>
-            </ng-container>
-          </ng-container>
+        @if (filters$ | async; as filtersDict) {
+        <div class="chips-wrapper">
+          @for (filters of filtersDict | keyvalue; track filters) {
+          <!-- We considered injecting the chip list from the mds editor like the suggestions
+                panel, but `mat-chip-list` needs direct access to `mat-chip`s as child components for
+                keyboard interaction to work. -->
+          @if ((categories$ | async)?.includes(filters.key)) { @for (filterValue of filters.value;
+          track filterValue) {
+          <mat-chip-option
+            [selectable]="false"
+            class="filter-chip-{{ filters.key | propertySlug }}"
+            [removable]="true"
+            (removed)="onRemoveFilter(filters.key, filterValue)"
+            [matTooltip]="getTooltip(filters.key, filterValue)"
+            matTooltipPosition="above"
+          >
+            {{ filterValue.label }}
+            <mat-icon matChipRemove class="remove-chip">cancel</mat-icon>
+          </mat-chip-option>
+          } } }
         </div>
+        }
       </mat-chip-listbox>
     </div>
+    }
     <ng-container *ngTemplateOutlet="facets.suggestionsPanel"></ng-container>
   </div>
 </ng-template>

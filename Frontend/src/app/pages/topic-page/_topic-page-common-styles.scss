@@ -79,7 +79,7 @@
     // exclude back to top button
     .topic-page-menu,
     es-custom-topic-page {
-        i.mat-icon:not([esicon='arrow_upward']) {
+        i.mat-icon:not([esicon='arrow_upward']):not([esicon='comment']) {
             font-size: 24px;
             width: 24px;
             height: 24px;

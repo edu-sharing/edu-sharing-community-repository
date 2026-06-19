@@ -6,13 +6,13 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     HostBinding,
+    inject,
     Injector,
     Input,
     NgZone,
     OnChanges,
     OnDestroy,
     OnInit,
-    Optional,
     signal,
     SimpleChanges,
     Type,
@@ -34,7 +34,7 @@ import {
     NativeWidgetType,
     Values,
 } from '../../types/types';
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { MdsEditorCoreComponent } from '../mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService, Widget } from '../mds-editor-instance.service';
 import { Attributes, getAttributesArray } from '../util/parse-attributes';
@@ -60,6 +60,13 @@ export interface NativeWidgetComponent {
     status?: Observable<InputStatus>;
     isEmpty?: Observable<boolean>;
     focus?: () => void;
+    /** Called when the user tries to save while required fields are missing. */
+    showMissingRequired?: () => void;
+    /**
+     * If set, the native widget participates in the completion status (e.g. `author`).
+     * Combined with `isEmpty` to determine whether the required value is provided.
+     */
+    isRequired?: MdsWidget['isRequired'];
 }
 
 type NativeWidgetClass = {
@@ -88,6 +95,18 @@ type NativeWidgetClass = {
 export class MdsEditorViewComponent
     implements OnInit, AfterViewInit, OnChanges, OnDestroy, MdsEditInterface
 {
+    private sanitizer = inject(DomSanitizer);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private containerRef = inject(ViewContainerRef);
+    private applicationRef = inject(ApplicationRef);
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+    private mdsEditorGlobalService = inject(MdsEditorGlobalService);
+    private ngZone = inject(NgZone);
+    private viewInstance = inject(ViewInstanceService);
+    private uiService = inject(UIService);
+    injector = inject(Injector);
+    private jumpMarks = inject(JumpMarksService, { optional: true });
+
     private static readonly nativeWidgets = NativeWidgets;
     private static readonly suggestionWidgetComponents: {
         [type in MdsWidgetType]?: Type<object>;
@@ -117,19 +136,7 @@ export class MdsEditorViewComponent
     private allWidgetsHidden = false;
     private expandContentDone = new Subject<void>();
 
-    constructor(
-        private sanitizer: DomSanitizer,
-        private factoryResolver: ComponentFactoryResolver,
-        private containerRef: ViewContainerRef,
-        private applicationRef: ApplicationRef,
-        private mdsEditorInstance: MdsEditorInstanceService,
-        private mdsEditorGlobalService: MdsEditorGlobalService,
-        private ngZone: NgZone,
-        private viewInstance: ViewInstanceService,
-        private uiService: UIService,
-        public injector: Injector,
-        @Optional() private jumpMarks: JumpMarksService,
-    ) {
+    constructor() {
         this.isEmbedded = this.mdsEditorInstance.isEmbedded;
         this.knownWidgetTags = [
             ...Object.values(NativeWidgetType),
@@ -182,6 +189,7 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             this.injectWidgets();
             this.checkHideState();
+            MdsViewerService.hideEmpty(this.container);
         });
     }
 

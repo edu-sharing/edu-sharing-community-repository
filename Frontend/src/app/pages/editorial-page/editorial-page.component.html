@@ -1,20 +1,24 @@
-<h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }}</h1>
+<!---h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }} </h1-->
+<h1 esTitle class="cdk-visually-hidden">
+  {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
+</h1>
+
 <mat-sidenav-container
-  [class.mat-sidenav-container-left-open]="sidenavLeft()"
+  [class.mat-sidenav-container-left-open]="filterBarVisible | async"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
-    [opened]="sidenavLeft() && (mainComponent$ | async) === null"
+    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null"
     position="start"
     class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
     esResizableSidenav
   >
     <div class="es-mat-sidenav-content es-mat-sidenav-content-mds">
+      @if (mdsGroup() && (searchValues$ | async) !== null) {
       <es-mds-editor-wrapper
-        *ngIf="mdsGroup()"
         [groupId]="mdsGroup()"
         [embedded]="true"
         [repository]="HOME_REPOSITORY"
@@ -23,6 +27,7 @@
         [currentValues]="searchValues$ | async"
         (currentValuesChange)="updateMdsFilter($event)"
       ></es-mds-editor-wrapper>
+      }
     </div>
   </mat-sidenav>
 
@@ -58,78 +63,96 @@
        </button>
      </mat-toolbar>
  -->
-    <div class="main-content" esBorderBoxObserver #observer="borderBoxObserver">
+    <div
+      class="main-content"
+      esBorderBoxObserver
+      #observer="borderBoxObserver"
+      role="main"
+      [class.has-main-component]="mainComponent$ | async"
+    >
       <div class="top-area">
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
+        @if (editorialPageService.close()?.show) {
+        <button class="close" mat-icon-button (click)="editorialPageService.close().callback()">
+          <i esIcon="close"></i>
+        </button>
+        }
       </div>
-      <ng-container *ngIf="mainComponent$ | async as component">
-        @switch (component) { @case ('manageAssignment') {
-        <es-manage-assignment></es-manage-assignment>
-        } @case ('assignmentSubmission') {
-        <es-assignment-submission></es-assignment-submission>
-        } @case ('submitAssignment') {
-        <es-submit-assignment></es-submit-assignment>
-        } @default {
-        <span> Component "{{ component }}" not implemented </span>
-        } }
-      </ng-container>
-      <ng-container *ngIf="(mainComponent$ | async) === null">
-        <mat-tab-group
-          *ngIf="(editorialPageService.observeTabs() | async)?.length"
-          [selectedIndex]="tabSelection$ | async"
-          (selectedIndexChange)="tabSelection$.next($event)"
-        >
-          <mat-tab *ngFor="let tab of editorialPageService.observeTabs() | async">
-            <ng-template mat-tab-label>
-              <i [esIcon]="tab.icon"></i>
-              {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
-            </ng-template>
-          </mat-tab>
-        </mat-tab-group>
-        <div class="option-area">
-          <div class="options-left">
-            <button mat-stroked-button color="primary" (click)="sidenavLeft.set(!sidenavLeft())">
-              <i esIcon="filter_list" [aria]="false"></i>
-              {{ 'SEARCH.FILTERS' | translate }}
-            </button>
-          </div>
-          <es-actionbar
-            [class.display-none]="(mainComponent$ | async) !== null"
-            [numberOfAlwaysVisibleOptions]="3"
-            [showCaptions]="(observer.width$ | async) > 700"
-          ></es-actionbar>
+      @if (mainComponent$ | async; as component) { @switch (component) { @case ('manageAssignment')
+      {
+      <es-manage-assignment></es-manage-assignment>
+      } @case ('assignmentSubmission') {
+      <es-assignment-submission></es-assignment-submission>
+      } @case ('submitAssignment') {
+      <es-submit-assignment></es-submit-assignment>
+      } @default {
+      <span> Component "{{ component }}" not implemented </span>
+      } } } @if ((mainComponent$ | async) === null) { @if ((editorialPageService.observeTabs() |
+      async)?.length) {
+      <mat-tab-group
+        class="mat-tab-group-shadow"
+        [selectedIndex]="tabSelection$ | async"
+        (selectedIndexChange)="tabSelection$.next($event)"
+      >
+        @for (tab of editorialPageService.observeTabs() | async; track tab) {
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <i [esIcon]="tab.icon"></i>
+            {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
+          </ng-template>
+        </mat-tab>
+        }
+      </mat-tab-group>
+      }
+      <div class="option-area">
+        <div class="options-left">
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="filtersButtonClicked.next()"
+            [attr.aria-expanded]="filterBarVisible | async"
+          >
+            <i esIcon="filter_list" [aria]="false"></i>
+            {{ 'SEARCH.FILTERS' | translate }}
+          </button>
         </div>
-        <ng-container *ngIf="(params$ | async).primaryMode as mode">
-          <ng-container *ngIf="mode === 'activity' || mode === 'share' || mode === 'assignment'">
-            <es-node-entries-wrapper
-              [primaryInstance]="true"
-              [dataSource]="dataSource"
-              [elementInteractionType]="InteractionType.Emitter"
-              [scope]="Scope.EditorialPage"
-              singleClickHint="static"
-              (clickItem)="select($event)"
-              (fetchData)="fetchEvent($event)"
-              (selectionChange)="selectionChange($event)"
-              [columns]="columns()"
-              [displayType]="editorialPageService.displayType()"
-            >
-              <ng-template #empty>
-                <div class="empty">
-                  {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
-                </div>
-              </ng-template>
-            </es-node-entries-wrapper>
-          </ng-container>
-        </ng-container>
-      </ng-container>
+        <es-actionbar
+          [class.display-none]="(mainComponent$ | async) !== null"
+          [numberOfAlwaysVisibleOptions]="3"
+          [showCaptions]="(observer.width$ | async) > 700"
+        ></es-actionbar>
+      </div>
+      @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
+      || mode === 'assignment' || mode === 'suggestions' ) {
+      <es-node-entries-wrapper
+        [primaryInstance]="true"
+        [dataSource]="dataSource"
+        [elementInteractionType]="InteractionType.Emitter"
+        [scope]="Scope.EditorialPage"
+        singleClickHint="static"
+        (clickItem)="click($event)"
+        (dblClickItem)="openItem($event)"
+        (fetchData)="fetchEvent($event)"
+        (selectionChange)="selectionChange($event)"
+        [columns]="columns()"
+        [displayType]="editorialPageService.displayType()"
+      >
+        <ng-template #empty>
+          <div class="empty">
+            {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
+          </div>
+        </ng-template>
+      </es-node-entries-wrapper>
+      } } }
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+@if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
-  *ngIf="(isMobile$ | async) === true && editorialSidebarService.sidebarOpened()"
   [primaryMode]="(params$ | async).primaryMode"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>
+}

@@ -1,14 +1,17 @@
 package org.edu_sharing.metadataset.v2;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.I18nServer;
 import org.json.simple.JSONValue;
 import org.springframework.context.ApplicationContext;
 
@@ -56,7 +59,31 @@ public class QueryUtils {
                     StringUtils.join(authorities.stream().map(v -> v.replaceAll("[\\W]", "\\\\$0")).collect(Collectors.toSet()), "|")
             );
         }
+        query = replaceSystemFolderPlaceholder(query, replacer);
         return query;
+    }
+
+    private static String replaceSystemFolderPlaceholder(String query, ReplaceInterface replacer) {
+        if (!query.contains("${systemfolder}")) {
+            return query;
+        }
+        return AuthenticationUtil.runAsSystem(() -> {
+            try {
+                // unfortunately, we can not use the SystemFolder class here
+                ApplicationContext ctx = AlfAppContextGate.getApplicationContext();
+                Repository repositoryHelper = (Repository) ctx.getBean("repositoryHelper");
+                ServiceRegistry serviceRegistry = (ServiceRegistry) ctx.getBean(ServiceRegistry.SERVICE_REGISTRY);
+                NodeRef child = serviceRegistry.getNodeService().getChildByName(
+                        repositoryHelper.getCompanyHome(),
+                        ContentModel.ASSOC_CONTAINS,
+                        I18nServer.getTranslationDefaultResourcebundle(CCConstants.I18n_SYSTEMFOLDER_BASE)
+                );
+                return replacer.replaceString(query, "${systemfolder}", child.getId());
+            } catch (Exception e) {
+                logger.warn("Could not resolve system folder for ${systemfolder} placeholder", e);
+                return query;
+            }
+        });
     }
 
     private static ReplaceInterface luceneReplacer = (str, search, replace) -> str.replace(search, QueryParser.escape(replace));
@@ -80,7 +107,7 @@ public class QueryUtils {
         if(syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)){
             if(raw) return dslReplacerRaw;
             else return dslReplacer;
-        } else if (syntax.equals(MetadataReader.QUERY_SYNTAX_LUCENE)) {
+        } else if (syntax.equals(MetadataReader.QUERY_SYNTAX_DSL)) {
             return luceneReplacer;
         } else {
             throw new IllegalArgumentException("No replacer for search syntax " + syntax);

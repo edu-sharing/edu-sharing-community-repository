@@ -1,6 +1,6 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
-import { HueValue } from 'angular-material-css-vars/lib/model';
+import { HueValue } from 'angular-material-css-vars';
 import { ConfigService, ConfigThemeColor } from 'ngx-edu-sharing-api';
 import { EDU_SHARING_UI_CONFIG, EduSharingUiConfiguration } from 'ngx-edu-sharing-ui';
 
@@ -11,11 +11,11 @@ export enum Variable {
 }
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-    constructor(
-        private materialCssVarsService: MaterialCssVarsService,
-        private configService: ConfigService,
-        @Inject(EDU_SHARING_UI_CONFIG) private uiConfig: EduSharingUiConfiguration,
-    ) {
+    private materialCssVarsService = inject(MaterialCssVarsService);
+    private configService = inject(ConfigService);
+    private uiConfig = inject<EduSharingUiConfiguration>(EDU_SHARING_UI_CONFIG);
+
+    constructor() {
         // set defaults
         this.initWithDefaults();
     }

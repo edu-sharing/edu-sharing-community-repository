@@ -1,9 +1,10 @@
-import { ElementRef, Injectable } from '@angular/core';
+import { ElementRef, Injectable, inject } from '@angular/core';
 import { RawValuesDict, SearchConfig } from 'ngx-edu-sharing-api';
 import { Observable, Subject } from 'rxjs';
 import { delay, map, take, takeUntil } from 'rxjs/operators';
 import { notNull } from 'ngx-edu-sharing-ui';
 import { SearchFieldInternalService } from './search-field-internal.service';
+import { UserModifiableValuesService } from '../../../pages/search-page/user-modifiable-values';
 
 export class SearchFieldConfig {
     /** The placeholder text for the search field, will be translated. */
@@ -22,6 +23,8 @@ export class SearchFieldConfig {
     enableFiltersAndSuggestions = false;
     /** Focus the search field input when it initially becomes available. */
     autoFocus = false;
+    /** Will register the userModifiableValue in the session store with that key */
+    filterBarVisibleStorageKey: string = null;
 }
 
 export type MdsInfo = Pick<SearchConfig, 'repository' | 'metadataSet'>;
@@ -36,7 +39,33 @@ export type SearchEvent = {
 };
 
 export class SearchFieldInstance {
-    constructor(private _until: Observable<void>, private _internal: SearchFieldInternalService) {}
+    readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
+
+    constructor(
+        private _until: Observable<void>,
+        private _internal: SearchFieldInternalService,
+        private userModifiableValues: UserModifiableValuesService,
+    ) {
+        this.filterBarIsVisible
+            .observeValue()
+            .pipe(takeUntil(this._until))
+            .subscribe((value) => {
+                this._internal.filterBarVisible.next(value);
+            });
+        this._internal.filtersButtonClicked
+            .pipe(takeUntil(this._until))
+            .subscribe(() =>
+                this.filterBarIsVisible.setUserValue(!this.filterBarIsVisible.getValue()),
+            );
+
+        /** register storage key if its set in the config */
+        if (this._internal.config.value?.filterBarVisibleStorageKey !== null) {
+            this.filterBarIsVisible.registerSessionStorage(
+                this._internal.config.value.filterBarVisibleStorageKey,
+            );
+            this._internal.filterBarVisible.next(this.filterBarIsVisible.getValue());
+        }
+    }
 
     patchConfig(config: Partial<SearchFieldConfig>) {
         const newConfig = { ...this._internal.config.value, ...config };
@@ -117,10 +146,13 @@ export class SearchFieldInstance {
     providedIn: 'root',
 })
 export class SearchFieldService {
+    private _internal = inject(SearchFieldInternalService);
+    private _userModifiableValues = inject(UserModifiableValuesService);
+
     private _currentInstance: SearchFieldInstance | null = null;
     private _resetInstance = new Subject<void>();
 
-    constructor(private _internal: SearchFieldInternalService) {
+    constructor() {
         this._resetInstance.subscribe(() => {
             this._currentInstance = null;
             this._internal.config.next(null);
@@ -179,7 +211,11 @@ export class SearchFieldService {
 
     private _createInstance(): SearchFieldInstance {
         const until = this._resetInstance.pipe(take(1));
-        this._currentInstance = new SearchFieldInstance(until, this._internal);
+        this._currentInstance = new SearchFieldInstance(
+            until,
+            this._internal,
+            this._userModifiableValues,
+        );
         return this._currentInstance;
     }
 }

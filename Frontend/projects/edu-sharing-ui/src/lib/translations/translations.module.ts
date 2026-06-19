@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ModuleWithProviders, NgModule, Optional, SkipSelf } from '@angular/core';
+import { ModuleWithProviders, NgModule, Optional, inject } from '@angular/core';
 import { MissingTranslationHandler, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
@@ -41,7 +41,9 @@ export class TranslationsModule {
         };
     }
 
-    constructor(@Optional() @SkipSelf() parentModule?: TranslationsModule) {
+    constructor() {
+        const parentModule = inject(TranslationsModule, { optional: true, skipSelf: true });
+
         if (parentModule) {
             console.warn(
                 'TranslationsModule is already loaded. Import it in the AppModule only',

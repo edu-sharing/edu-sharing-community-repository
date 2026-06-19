@@ -1,47 +1,99 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
-@use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/node-entries-card-small.component'
-    as card;
+@use 'projects/edu-sharing-ui/src/lib/node-entries/node-entries-card-small/assignment-mixins' as
+    card;
+@use './feedback-mixin' as fm;
 
 $maxWidth: 1200px;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
 mat-tab-group {
     width: 100%;
-    max-width: $maxWidth;
-    justify-self: center;
+    margin: 0 auto;
     display: flex;
+    flex: 1;
+    min-height: 0;
+}
+mat-tab-header {
+    @include mixins.materialShadowBottom();
+}
+ngx-extended-pdf-viewer {
+    display: block;
+    padding: 40px var(--roundedContainerMargin) var(--roundedContainerMargin)
+        var(--roundedContainerMargin);
+}
+.assignment-file-preview {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
+    .preview-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        justify-content: center;
+
+        es-render-wrapper-component {
+            display: block;
+            width: 100%;
+            padding: 20px var(--roundedContainerMargin) var(--roundedContainerMargin)
+                var(--roundedContainerMargin);
+        }
+    }
+
+    .preview-actionbar {
+        display: flex;
+        justify-content: center;
+        padding: 12px var(--roundedContainerMargin);
+        flex-shrink: 0;
+        border: 1px solid var(--palette-primary-100);
+        @include mixins.materialShadowSmall();
+        border-radius: var(--borderRadiusCards);
+    }
 }
 .assignment-view,
 .assignment-submit {
     width: 100%;
-    justify-self: center;
+    max-width: $maxWidth;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     gap: 20px;
-    padding-top: 40px;
+    padding: 40px var(--roundedContainerMargin) var(--roundedContainerMargin)
+        var(--roundedContainerMargin);
     .heading {
         width: 100%;
         display: flex;
         gap: 20px;
         align-items: center;
-        padding-bottom: 20px;
+        padding-bottom: 10px;
 
         > span {
             flex-grow: 1;
-            font-size: vars.$fontSizeXLarge;
+            font-size: 170%;
             font-weight: bold;
         }
 
-        border-bottom: 1px solid vars.$cardSeparatorLineColor;
+        border-bottom: 2px solid var(--primary);
     }
     .block {
-        padding: 0;
         display: flex;
         flex-direction: column;
         gap: 10px;
         padding-bottom: 20px;
         &:not(:last-child) {
-            border-bottom: 1px solid vars.$cardSeparatorLineColor;
+            border-bottom: 1px solid var(--palette-primary-300);
         }
         > label {
             font-size: vars.$fontSizeLarge;
@@ -64,12 +116,23 @@ mat-tab-group {
                 @include card.assignmentBadge();
             }
         }
+        &.feedback {
+            @include fm.feedback();
+        }
     }
     .submit,
-    .add-comment {
+    .add-notes {
         display: flex;
         justify-content: center;
         align-items: center;
+        &.add-notes {
+            margin-top: 20px;
+        }
+        > div {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
     }
 }
 .no-submission {
@@ -108,6 +171,47 @@ mat-tab-group {
     }
     //border: $border dashed var(--primary);
     color: var(--primary);
+}
+.polling-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: vars.$darkenColor;
+    backdrop-filter: blur(2px);
+    color: #fff;
+    cursor: default;
+    padding: 40px 16px 16px;
+    text-align: center;
+
+    es-spinner-small {
+        --mdc-circular-progress-active-indicator-color: #fff;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        --mdc-icon-button-icon-color: #fff;
+    }
+
+    strong {
+        font-size: vars.$fontSizeLarge;
+        font-weight: bold;
+    }
+
+    .hint {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 16px;
+        background-color: rgba(0, 0, 0, 0.3);
+        font-size: vars.$fontSizeSmall;
+    }
 }
 :host ::ng-deep {
     .summary {

@@ -4,6 +4,7 @@ import {
     Component,
     effect,
     HostBinding,
+    inject,
     OnDestroy,
     OnInit,
     TemplateRef,
@@ -25,6 +26,7 @@ import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 @Component({
     selector: 'es-search-page',
@@ -42,6 +44,22 @@ import { EditorialSidebarService } from '../../features/editorial-sidebar/editor
     standalone: false,
 })
 export class SearchPageComponent implements OnInit, OnDestroy {
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private breakpointObserver = inject(BreakpointObserver);
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private navigationScheduler = inject(NavigationScheduler);
+    private router = inject(Router);
+    private optionsHelperService = inject(OptionsHelperService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private route = inject(ActivatedRoute);
+    private nodeService = inject(NodeService);
+    private savedSearchesService = inject(SavedSearchesService);
+    searchPage = inject(SearchPageService);
+    private configService = inject(ConfigService);
+    private translate = inject(TranslateService);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+
     readonly Scope = Scope;
 
     @ViewChild('filtersDialogResetButton', { static: true })
@@ -55,29 +73,14 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
-    readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
 
-    constructor(
-        private breadcrumbsService: BreadcrumbsService,
-        private breakpointObserver: BreakpointObserver,
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private navigationScheduler: NavigationScheduler,
-        private router: Router,
-        private optionsHelperService: OptionsHelperService,
-        public editorialSidebarService: EditorialSidebarService,
-        private route: ActivatedRoute,
-        private nodeService: NodeService,
-        private savedSearchesService: SavedSearchesService,
-        public searchPage: SearchPageService,
-        private configService: ConfigService,
-        private translate: TranslateService,
-    ) {
+    constructor() {
         this.registerSidebars();
         this.searchPage.init();
         this.searchPage.sidebarOption.next(
@@ -127,6 +130,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     goToRepository(repository: Repository): void {
         this.activeRepository.setUserValue(repository.id);
+        // Filters are repository specific, so reset them (clears the `filters` query param)
+        // when switching to another repository.
+        this.searchFilters.resetUserValue();
+        this.editorialSidebarService.close();
         this.navigationScheduler.scheduleNavigation({
             route: [UIConstants.ROUTER_PREFIX, 'search'],
         });
@@ -140,7 +147,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
         let dialogRefPromise: Promise<CardDialogRef<unknown>>;
         let isMobileScreen: boolean;
         rxjs.combineLatest([
-            this.searchPage.filterBarIsVisible.observeValue().pipe(),
+            this.searchFieldInternalService.filterBarVisible.pipe(),
             this.isMobileScreen.pipe(tap((value) => (isMobileScreen = value))),
         ])
             .pipe(takeUntil(this.destroyed))
@@ -162,8 +169,7 @@ export class SearchPageComponent implements OnInit, OnDestroy {
 
     private registerSidebars(): void {
         // Make filter- and preview bars mutually exclusive.
-        this.filterBarIsVisible
-            .observeValue()
+        this.searchFieldInternalService.filterBarVisible
             .pipe(takeUntil(this.destroyed), filter(isTrue))
             .subscribe(() => this.editorialSidebarService.close());
         effect(() => {

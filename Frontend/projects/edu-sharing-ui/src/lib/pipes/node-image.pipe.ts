@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { AssignmentFile, NetworkService, Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -20,12 +20,10 @@ interface NodeImagePreferences {
     standalone: false,
 })
 export class NodeImagePipe implements PipeTransform {
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private sanitizer: DomSanitizer,
-        private repoUrlService: RepoUrlService,
-        private networkApi: NetworkService,
-    ) {}
+    private nodeHelper = inject(NodeHelperService);
+    private sanitizer = inject(DomSanitizer);
+    private repoUrlService = inject(RepoUrlService);
+    private networkApi = inject(NetworkService);
 
     transform(
         node: Node | AssignmentFile,

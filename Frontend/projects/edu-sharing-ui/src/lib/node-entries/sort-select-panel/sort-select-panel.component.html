@@ -1,32 +1,28 @@
+@if (active === 'ccm:collection_ordered_position') {
 <mat-slide-toggle
-  *ngIf="active === 'ccm:collection_ordered_position'"
   [(ngModel)]="customSortingInProgress"
   (ngModelChange)="customSortingInProgressChange.emit($event)"
 >
   {{ 'COLLECTIONS.SORT_SLIDER' | translate }}
 </mat-slide-toggle>
-<ng-container *ngIf="columns?.length">
-  <button
-    *ngIf="sortDropdown.menu"
-    [matMenuTriggerFor]="sortDropdown.menu"
-    mat-button
-    color="primary"
-  >
-    <span *ngIf="active">{{
-      'NODE_SORT.' + active | translate : { fallback: ('NODE.' + active | translate) }
-    }}</span>
-    <span *ngIf="!active">{{ 'SORT_BY' | translate }}</span>
-    <i
-      *ngIf="active && active !== 'ccm:collection_ordered_position'"
-      [esIcon]="'arrow_' + (direction === 'asc' ? 'upward' : 'downward')"
-    ></i>
-  </button>
-
-  <es-sort-dropdown
-    #sortDropdown
-    [columns]="columns"
-    [sortBy]="active"
-    [sortAscending]="direction === 'asc'"
-    (sort)="onSort($event)"
-  ></es-sort-dropdown>
-</ng-container>
+} @if (columns?.length) { @if (sortDropdown.menu) {
+<button [matMenuTriggerFor]="sortDropdown.menu" mat-button color="primary">
+  @if (active) {
+  <span>{{
+    'NODE_SORT.' + active | translate : { fallback: ('NODE.' + active | translate) }
+  }}</span>
+  } @if (!active) {
+  <span>{{ 'SORT_BY' | translate }}</span>
+  } @if (active && active !== 'ccm:collection_ordered_position') {
+  <i [esIcon]="'arrow_' + (direction === 'asc' ? 'upward' : 'downward')"></i>
+  }
+</button>
+}
+<es-sort-dropdown
+  #sortDropdown
+  [columns]="columns"
+  [sortBy]="active"
+  [sortAscending]="direction === 'asc'"
+  (sort)="onSort($event)"
+></es-sort-dropdown>
+}

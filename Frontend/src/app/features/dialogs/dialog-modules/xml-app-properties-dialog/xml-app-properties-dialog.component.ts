@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { DialogButton, RestAdminService } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
@@ -17,17 +17,18 @@ const MULTILINE_PROPERTIES = ['custom_html_headers', 'public_key'];
     standalone: false,
 })
 export class XmlAppPropertiesDialogComponent implements OnInit {
+    data = inject<XmlAppPropertiesDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<XmlAppPropertiesDialogData, XmlAppPropertiesDialogResult>>(
+            CardDialogRef,
+        );
+    private admin = inject(RestAdminService);
+    private toast = inject(Toast);
+
     xmlAppAdditionalPropertyName: string;
     xmlAppAdditionalPropertyValue: string;
 
     readonly propertyKeys = Object.keys(this.data.properties);
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: XmlAppPropertiesDialogData,
-        private dialogRef: CardDialogRef<XmlAppPropertiesDialogData, XmlAppPropertiesDialogResult>,
-        private admin: RestAdminService,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         this.dialogRef.patchConfig({

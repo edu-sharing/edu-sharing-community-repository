@@ -3,7 +3,6 @@ package org.edu_sharing.restservices.login.v1.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpSession;
 import lombok.Data;
-import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.authentication.LoginHelper;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
@@ -19,10 +18,7 @@ import org.edu_sharing.service.lti13.model.LTISessionObject;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Data
 public abstract class AbstractLogin {
@@ -93,7 +89,8 @@ public abstract class AbstractLogin {
                 // not logged in
             }
         }
-        this.statusCode = service.isGuest() ? STATUS_CODE_GUEST : statusCode;
+        this.statusCode = !
+                Objects.equals(statusCode, STATUS_CODE_2FA) && service.isGuest() ? STATUS_CODE_GUEST : statusCode;
         this.authorityName = service.isGuest() ? null : AuthenticationUtil.getFullyAuthenticatedUser();
         this.isAdmin = service.isGlobalAdmin();
         this.isValidLogin = isValidLogin;

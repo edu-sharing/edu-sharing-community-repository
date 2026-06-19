@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -10,9 +10,11 @@ import { Node, RestConstants } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class ListNodeWorkflowComponent extends ListWidget {
+    private nodeHelper = inject(NodeHelperService);
+
     static supportedItems = [new ListItem('NODE', RestConstants.CCM_PROP_WF_STATUS)];
 
-    constructor(private nodeHelper: NodeHelperService) {
+    constructor() {
         super();
     }
 

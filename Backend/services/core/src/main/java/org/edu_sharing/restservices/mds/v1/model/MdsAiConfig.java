@@ -12,6 +12,5 @@ public class MdsAiConfig {
     private String provider;
     private Boolean useCaching;
     private Boolean clearCache;
-    private String chatCompletion;
-    private String createImage;
+    private String prompt;
 }

@@ -11,6 +11,10 @@
       "ngx-edu-sharing-api": [
         "dist/edu-sharing-api/edu-sharing-api",
         "dist/edu-sharing-api"
+      ],
+      "ngx-rendering-service-api": [
+        "dist/rendering-service-api/rendering-service-api",
+        "dist/rendering-service-api"
       ]
     }
   },

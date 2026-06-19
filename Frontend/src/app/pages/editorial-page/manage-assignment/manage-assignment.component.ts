@@ -1,4 +1,4 @@
-import { Component, computed, signal, ViewChild } from '@angular/core';
+import { Component, computed, signal, ViewChild, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -35,6 +35,7 @@ import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
+
 export const AssignmentEditorConfig = {
     branding: false,
     height: 200,
@@ -64,9 +65,23 @@ export const AssignmentEditorConfig = {
     ],
 })
 export class ManageAssignmentComponent {
+    private formBuilder = inject(FormBuilder);
+    private toast = inject(Toast);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private authenticationService = inject(AuthenticationService);
+    private dialogsService = inject(DialogsService);
+    private assignmentService = inject(AssignmentV1Service);
+    private nodeHelperService = inject(NodeHelperService);
+    private platformLocation = inject(PlatformLocation);
+    private translateService = inject(TranslateService);
+    private editorialPageService = inject(EditorialPageService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+
     readonly editorConfig = {
         ...AssignmentEditorConfig,
-        base_url: this.platformLocation.getBaseHrefFromDOM() + 'tinymce',
+        base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
     };
     now = new Date().getTime();
@@ -78,6 +93,7 @@ export class ManageAssignmentComponent {
         status: 'DRAFT',
     } as Assignment;
     assignment = signal<Assignment>(this.EmptyAssignment);
+    saving = signal(false);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -97,26 +113,22 @@ export class ManageAssignmentComponent {
                     break;
                 }
             }
+        } else if (
+            this.mainDataFormGroup.get('useEndTime').value &&
+            !this.dateChooserRef?.isValid(this.now)
+        ) {
+            this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
+        } else if (
+            !this.mainDataFormGroup.get('allowAdditionalDocumentSubmissions').value &&
+            !(this.nodes() || []).some((n) => n.documentRole === 'SUBMITTABLE')
+        ) {
+            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.NO_SUBMITTABLE_FILE');
         } else {
             this.matStepper.next();
         }
     }
 
-    constructor(
-        private formBuilder: FormBuilder,
-        private toast: Toast,
-        private router: Router,
-        private route: ActivatedRoute,
-        private authenticationService: AuthenticationService,
-        private dialogsService: DialogsService,
-        private assignmentService: AssignmentV1Service,
-        private nodeHelperService: NodeHelperService,
-        private platformLocation: PlatformLocation,
-        private translateService: TranslateService,
-        private editorialPageService: EditorialPageService,
-        private editorialSidebarService: EditorialSidebarService,
-        private editorialBreadcrumbService: EditorialBreadcrumbService,
-    ) {
+    constructor() {
         this.mainDataFormGroup = this.formBuilder.group({
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],
@@ -145,7 +157,12 @@ export class ManageAssignmentComponent {
                         this.assignment.set(this.EmptyAssignment);
                         this.submissions.set(null);
                         this.authorities.set(null);
-                        this.mainDataFormGroup.reset();
+                        this.mainDataFormGroup.reset({
+                            title: '',
+                            summary: '',
+                            useEndTime: false,
+                            allowAdditionalDocumentSubmissions: true,
+                        });
                         this.nodes.set(null);
                         return EMPTY;
                     }
@@ -161,7 +178,7 @@ export class ManageAssignmentComponent {
                     summary: assignment.summary,
                     useEndTime: assignment.endTime !== null,
                     allowAdditionalDocumentSubmissions:
-                        assignment.allowAdditionalDocumentSubmissions,
+                        assignment.allowAdditionalDocumentSubmissions ?? true,
                 });
                 this.nodes.set(
                     files.map((f) => {
@@ -174,21 +191,6 @@ export class ManageAssignmentComponent {
                     }),
                 );
             });
-        this.editorialSidebarService.applyNodeEmitted.subscribe(({ nodes }) => {
-            this.nodes.set(
-                (this.nodes() || []).concat(
-                    nodes
-                        .filter((n) => !(this.nodes() || []).some((n2) => n2.ref?.id === n.ref?.id))
-                        .map((node) => {
-                            return {
-                                ...node,
-                                documentRole: 'SUPPLEMENTARY',
-                            } as NodeWithRole;
-                        }),
-                ),
-            );
-            this.editorialSidebarService.sidebarOpened.set(false);
-        });
     }
 
     showFileDialog() {
@@ -196,11 +198,33 @@ export class ManageAssignmentComponent {
             option: 'SORT_INTO',
             optionConfig: {
                 upload: 'fast',
+                allowCreate: false,
+                autoClose: true,
                 applyLabel: 'EDITORIAL.ASSIGNMENT.SELECT_FILE',
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,
                     ),
+                onNodesChoosen: ({ nodes }) => {
+                    this.nodes.set(
+                        (this.nodes() || []).concat(
+                            nodes
+                                .filter(
+                                    (n) =>
+                                        !(this.nodes() || []).some(
+                                            (n2) => n2.ref?.id === n.ref?.id,
+                                        ),
+                                )
+                                .map(
+                                    (node) =>
+                                        ({
+                                            ...node,
+                                            documentRole: 'SUBMITTABLE',
+                                        } as NodeWithRole),
+                                ),
+                        ),
+                    );
+                },
             } as NodesSelectorConfig,
             trap: true,
         });
@@ -228,18 +252,20 @@ export class ManageAssignmentComponent {
     }
 
     async submit(status: Assignment['status']) {
-        if (!this.authorities()?.length) {
-            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
-            return;
+        if (status !== 'DRAFT') {
+            if (!this.authorities()?.length) {
+                this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES');
+                return;
+            }
+            if (
+                this.assignment().type === 'SUBMISSION' &&
+                !this.authorities()?.some((a) => a.role === 'ASSIGNEE')
+            ) {
+                this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
+                return;
+            }
         }
-        if (
-            this.assignment().type === 'SUBMISSION' &&
-            !this.authorities()?.some((a) => a.role === 'ASSIGNEE')
-        ) {
-            this.toast.error(null, 'EDITORIAL.ASSIGNMENT.ERROR.MISSING_AUTHORITIES_ASSIGNEE');
-            return;
-        }
-        const permissions: PermissionRequest[] = this.authorities().map((a) => {
+        const permissions: PermissionRequest[] = (this.authorities() || []).map((a) => {
             return {
                 authorityName: a.authority.authorityName,
                 role: a.role,
@@ -268,12 +294,18 @@ export class ManageAssignmentComponent {
             permissions,
             assignmentFiles,
         };
-        const newAssignment = await firstValueFrom(
-            this.assignmentService.createOrUpdateAssignment({
-                body: assignment,
-            }),
-        );
-        this.editorialPageService.addVirtualNodes([newAssignment], 'assignment');
+        this.saving.set(true);
+        let newAssignment: Assignment;
+        try {
+            newAssignment = await firstValueFrom(
+                this.assignmentService.createOrUpdateAssignment({
+                    body: assignment,
+                }),
+            );
+        } finally {
+            this.saving.set(false);
+        }
+        this.editorialPageService.addVirtualNodes([newAssignment], 'assignment', 'created');
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParamsHandling: 'merge',

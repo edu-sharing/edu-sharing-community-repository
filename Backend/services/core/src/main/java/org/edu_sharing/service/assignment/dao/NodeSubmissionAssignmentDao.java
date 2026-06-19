@@ -14,10 +14,13 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
+import org.edu_sharing.restservices.GroupDao;
 import org.edu_sharing.restservices.MissingResourceException;
+import org.edu_sharing.restservices.PersonDao;
 import org.edu_sharing.restservices.assignment.v1.model.*;
 import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.restservices.shared.UserSimple;
+import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.AssignmentConfig;
 import org.edu_sharing.service.assignment.AssignmentDao;
 import org.edu_sharing.service.assignment.AssignmentFileDao;
@@ -99,7 +102,6 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         }));
 
         submissions = registerLazyProvider(createLazySubmissionsProvider());
-
     }
 
 
@@ -158,11 +160,19 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                             .map(ace -> {
                                 Assignment.Role role = mapPermissionToRole(ace.getPermission());
                                 if (role == null) {
-                                    log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
+                                    if (!ace.getPermission().equals(CCConstants.PERMISSION_CONSUMER)) {
+                                        log.error("Unknown permission for assignment {} {}", nodeId, ace.getPermission());
+                                    }
                                     return null;
                                 }
 
-                                return new Assignment.Permission(new Authority(ace), role);
+                                Authority authority = new Authority(ace);
+                                return new Assignment.Permission(switch (authority.getAuthorityType()) {
+                                    case USER, OWNER, GUEST ->
+                                            PersonDao.getPerson(repositoryDao.get(), authority.getAuthorityName()).asPersonSimple(false);
+                                    case GROUP, EVERYONE ->
+                                            GroupDao.getGroup(repositoryDao.get(), authority.getAuthorityName()).asGroup();
+                                }, role);
                             })
                             .filter(Objects::nonNull)
                             .toList()
@@ -201,7 +211,6 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     @Override
-    @RunAsSystem
     @RetryingTransaction
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS, requiresUser = true)
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
@@ -234,28 +243,44 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             put(CCConstants.CCM_PROP_ASSIGNMENT_END_DATE, request.endTime());
         }};
 
-        String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
-        String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
-        nodeId = nodeService.createNodeBasic(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT, properties);
-        nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
-        log.debug("Created assignment node {}", nodeId);
+        String currentUser = AuthenticationUtil.getRunAsUser();
+        AuthenticationUtil.runAsSystem(() -> {
+            String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
+            String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
+            nodeId = nodeService.createNodeBasic(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT, properties);
+            nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
+            log.debug("Created assignment node {}", nodeId);
 
-        // subfolder for submissions + permission only for type SUBMISSION
-        Map<String, Object> submissionsProperties = Map.of(
-                CCConstants.CM_NAME, "submissions",// NodeRef
-                CCConstants.CM_PROP_TITLE, "Submissions"
-        );
-        String submissionId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CCM_TYPE_SUBMISSIONS, CCConstants.CCM_ASSOC_ASSIGNMENT_SUBMISSIONS, submissionsProperties);
-        nodeService.setOwner(submissionId, ApplicationInfoList.getHomeRepository().getUsername());
-        log.debug("Created submissions node {}", submissionId);
+            permissionService.setPermissions(nodeId, List.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, currentUser)), false);
 
-        setAssignmentPermissions(request.permissions());
+            // subfolder for submissions + permission only for type SUBMISSION
+            Map<String, Object> submissionsProperties = Map.of(
+                    CCConstants.CM_NAME, "submissions",// NodeRef
+                    CCConstants.CM_PROP_TITLE, "Submissions"
+            );
+            String submissionId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CCM_TYPE_SUBMISSIONS, CCConstants.CCM_ASSOC_ASSIGNMENT_SUBMISSIONS, submissionsProperties);
+            nodeService.setOwner(submissionId, ApplicationInfoList.getHomeRepository().getUsername());
+            log.debug("Created submissions node {}", submissionId);
+            permissionService.setPermissions(submissionId, List.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, currentUser)), false);
+
+            return null;
+        });
+
+        setAssignmentPermissions(request.permissions(), request.status() == Assignment.Status.DRAFT);
         setSubmissionPermissions(request.permissions());
         updateAssignmentFiles(request.assignmentFiles());
     }
 
     private void update(CreateAssignmentRequest request) {
         validateExists();
+
+        if (!canChangeMetadata()) {
+            throw new IllegalStateException("Cannot change metadata of assignment " + nodeId);
+        }
+
+        if (!canChangeStatus(request.status())) {
+            throw new IllegalStateException("Cannot change status of assignment " + nodeId + " to " + request.status());
+        }
 
         Map<String, Object> properties = new HashMap<>() {{
             put(CCConstants.CM_NAME, UUID.randomUUID().toString());
@@ -266,20 +291,19 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             put(CCConstants.CCM_PROP_ASSIGNMENT_END_DATE, request.endTime());
         }};
 
-        if (!canChangeMetadata()) {
-            throw new IllegalStateException("Cannot change metadata of assignment " + nodeId);
-        }
+        AuthenticationUtil.runAsSystem(() -> {
+            log.debug("Update assignment node {} with {}", nodeId, properties);
+            nodeService.updateNodeNative(nodeId, properties);
+            return null;
+        });
 
-        log.debug("Update assignment node {} with {}", nodeId, properties);
-        nodeService.updateNodeNative(nodeId, properties);
-
-        setAssignmentPermissions(request.permissions());
+        setAssignmentPermissions(request.permissions(), request.status() == Assignment.Status.DRAFT);
         setSubmissionPermissions(request.permissions());
         updateAssignmentFiles(request.assignmentFiles());
     }
 
 
-    private void setAssignmentPermissions(List<PermissionRequest> permissions) {
+    private void setAssignmentPermissions(List<PermissionRequest> permissions, boolean isDraft) {
         List<ACE> aceList = new ArrayList<>(permissions
                 .stream()
                 .flatMap(x -> switch (x.role()) {
@@ -288,19 +312,22 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                         if (authorityType == AuthorityType.GROUP) {
                             yield authorityService.getMembershipsOfGroupRecursively(x.authorityName())
                                     .stream()
-                                    .flatMap(y -> Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y), new ACE(CCConstants.PERMISSION_CONSUMER, y)));
+                                    .flatMap(y -> isDraft ? Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y)) : Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, y), new ACE(CCConstants.PERMISSION_CONSUMER, y)));
 
                         } else {
-                            yield Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName()), new ACE(CCConstants.PERMISSION_CONSUMER, x.authorityName()));
+                            yield isDraft ? Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName())) : Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNEE, x.authorityName()), new ACE(CCConstants.PERMISSION_CONSUMER, x.authorityName()));
                         }
                     }
                     case COORDINATOR ->
                             Stream.of(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, x.authorityName()));
                 })
                 .toList());
-        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
+        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
         log.debug("Setting permissions for assignment {}: {}", nodeId, aceList);
-        permissionService.setPermissions(nodeId, aceList, false);
+        AuthenticationUtil.runAsSystem(() -> {
+            permissionService.setPermissions(nodeId, aceList, false);
+            return null;
+        });
         refresh();
     }
 
@@ -317,9 +344,12 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                         }
                 )
                 .toList());
-        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getFullyAuthenticatedUser()));
+        aceList.add(new ACE(CCConstants.PERMISSION_ASSIGNMENT_COORDINATOR, AuthenticationUtil.getRunAsUser()));
         log.debug("Setting permissions for submissions folder {}: {}", submissionFolderRef.get(), aceList);
-        permissionService.setPermissions(submissionFolderRef.get(), aceList, false);
+        AuthenticationUtil.runAsSystem(() -> {
+            permissionService.setPermissions(submissionFolderRef.get(), aceList, false);
+            return null;
+        });
         refresh();
     }
 
@@ -370,6 +400,14 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         return getStatus() == Assignment.Status.DRAFT || (getStatus() == Assignment.Status.INPROGRESS && getSubmissions().stream().allMatch(s -> s instanceof EmptySubmissionAssignmentDao));
     }
 
+    boolean canDeleteAssignment() {
+        return switch (getStatus()) {
+            case CANCELED, FINISHED, DRAFT -> true;
+            case INPROGRESS -> getSubmissions().stream().allMatch(s -> s instanceof EmptySubmissionAssignmentDao);
+            default -> false;
+        };
+    }
+
     private boolean canChangeMetadata() {
         return switch (getStatus()) {
             case CANCELED, FINISHED -> false;
@@ -378,14 +416,14 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     @Override
+    @RunAsSystem
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
     public void delete() {
         if (!exists()) {
             return;
         }
 
-        // TODO can the user do this action
-        if (canChangeAssignment()) {
+        if (!canDeleteAssignment()) {
             throw new IllegalStateException("Cannot delete assignment " + nodeId);
         }
         doDelete();
@@ -397,6 +435,8 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
         if (!exists()) {
             return null;
         }
+
+        validateAssigneeCanSeeAssignment();
 
         String creator = getCreator();
         List<Submission> submissions = getSubmissions().stream().map(SubmissionDao::getSubmission).toList();
@@ -415,6 +455,17 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                 getPermissions(),
                 submissions
         );
+    }
+
+    private void validateAssigneeCanSeeAssignment() {
+
+        if (AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
+            return;
+        }
+
+        if (AssignmentUtil.isAssignee(permissionService, getNodeId()) && getStatus() == Assignment.Status.DRAFT) {
+            throw new InsufficientPermissionException("Assignment with id " + getNodeId() + " is in draft mode and cannot be modified by assignees.");
+        }
     }
 
     @Override
@@ -465,7 +516,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     @Override
     public SubmissionDao getSubmission(String submissionId) {
         if ("-me-".equalsIgnoreCase(submissionId)) {
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            String currentUser = AuthenticationUtil.getRunAsUser();
             return getSubmissionByCreator(currentUser)
                     .orElseThrow(() -> new MissingResourceException("No submission found for user " + currentUser));
         }
@@ -485,6 +536,12 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     }
 
     @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public SubmissionDao createSubmissionByUserId(String username) {
+        return AuthenticationUtil.runAs(() -> getOrCreateSubmission("-me-"), username);
+    }
+
+    @Override
     public SubmissionDao getOrCreateSubmission(String submissionId) {
         submissionsMap.invalidate();
 
@@ -494,7 +551,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             submissionDao.create();
             submissionsMap.get().put(submissionDao.getNodeId(), submissionDao);
         } else if ("-me-".equalsIgnoreCase(submissionId)) {
-            String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+            String currentUser = AuthenticationUtil.getRunAsUser();
             Optional<SubmissionDao> submissionByCreator = getSubmissionByCreator(currentUser);
             if (submissionByCreator.isEmpty() || submissionByCreator.get() instanceof EmptySubmissionAssignmentDao) {
                 submissionDao = assignmentDaoFactory.submissionDaoByNodeId(this, null);
@@ -526,5 +583,53 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
             throw new IllegalArgumentException("AssignmentFile with id " + id + " does not exist.");
         }
         return assignmentFileDao;
+    }
+
+
+    @Override
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNMENT_COORDINATOR)")
+    public void setStatus(Assignment.Status status) {
+        validateExists();
+        refresh();
+
+        if (!canChangeStatus(status)) {
+            throw new IllegalStateException("Cannot change status of assignment " + nodeId + " to " + status);
+        }
+
+        Assignment.Status currentStatus = getStatus();
+        if (currentStatus == status) {
+            log.debug("Submission status of {}, is already set to {}", nodeId, status);
+            return;
+        }
+
+        Map<String, Object> properties = new HashMap<>() {{
+            put(CCConstants.CCM_PROP_ASSIGNMENT_STATUS, status.name());
+        }};
+
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, properties);
+            return null;
+        });
+
+        // we need to update permissions based on the new status because of draft rules (e.g. consumer privileges)
+        List<PermissionRequest> permissions = getPermissions()
+                .stream()
+                .map(x -> new PermissionRequest(x.authority().getAuthorityName(), x.role()))
+                .toList();
+        setAssignmentPermissions(permissions, status == Assignment.Status.DRAFT);
+        setSubmissionPermissions(permissions);
+
+        refresh();
+    }
+
+
+    private boolean canChangeStatus(Assignment.Status newStatus) {
+        return switch (getStatus()) {
+            case CANCELED, FINISHED -> false;
+            default -> switch (newStatus) {
+                case DRAFT -> getSubmissions().stream().allMatch(s -> s instanceof EmptySubmissionAssignmentDao);
+                default -> true;
+            };
+        };
     }
 }

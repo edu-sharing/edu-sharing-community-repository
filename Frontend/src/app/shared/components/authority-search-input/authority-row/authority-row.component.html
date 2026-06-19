@@ -10,35 +10,39 @@
       >
         {{ authority | authorityName }}
       </div>
-      <div class="secondary" *ngIf="secondaryTitle">{{ secondaryTitle }}</div>
+      @if (secondaryTitle) {
+      <div class="secondary">{{ secondaryTitle }}</div>
+      }
     </div>
     <div class="secondary-data">
       <div class="parent-orgs">
+        @if (authority.organizations) {
         <span
-          *ngIf="authority.organizations"
           esCheckTextOverflow
           #orgs="esCheckTextOverflow"
           #div
           [matTooltip]="orgs.hasTextOverflow() ? div.innerText : null"
         >
-          <span *ngFor="let org of authority.organizations; last as last">
-            {{ org | authorityName }}<ng-container *ngIf="!last">, </ng-container>
-          </span>
+          @for (org of authority.organizations; track org; let last = $last) {
+          <span> {{ org | authorityName }}@if (!last) { , } </span>
+          }
         </span>
-        <span *ngIf="!authority.organizations">&nbsp;</span>
+        } @if (!authority.organizations) {
+        <span>&nbsp;</span>
+        }
       </div>
-      <div class="affiliation" *ngIf="authority.authorityType === 'USER'">
+      @if (authority.authorityType === 'USER') {
+      <div class="affiliation">
         {{ (authority | authorityAffiliation) || '&nbsp;' }}
       </div>
-      <div
-        class="affiliation affiliation-group"
-        *ngIf="authority.profile?.displayName && authority.properties"
-      >
+      } @if (authority.profile?.displayName && authority.properties) {
+      <div class="affiliation affiliation-group">
         {{
           'AUTHORITY_TYPE_' + (authority.properties['ccm:edu_homedir'] ? 'ORG' : 'GROUP')
             | translate
         }}
       </div>
+      }
     </div>
   </div>
 </div>

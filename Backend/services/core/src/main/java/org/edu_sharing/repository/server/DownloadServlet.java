@@ -326,9 +326,8 @@ public class DownloadServlet extends SpringHttpServlet {
 
         NodeService nodeService = NodeServiceFactory.getInstance().getLocalService();
 
-        File file = TempFileProvider.createTempFile("edu.", ".zip");
-        FileOutputStream bufferOut = new FileOutputStream(file);
-        ZipOutputStream zos = new ZipOutputStream(bufferOut);
+		setHeaders(resp, zipName,"application/zip");
+		ZipOutputStream zos = new ZipOutputStream(resp.getOutputStream());
         zos.setMethod(ZipOutputStream.DEFLATED);
 
         List<String> errors = new ArrayList<>();
@@ -382,10 +381,8 @@ public class DownloadServlet extends SpringHttpServlet {
             } else {
                 result = runAll.doWork();
             }
-            if (result) {
-				outputData(resp, zipName, file, "application/zip");
-            }
-        } catch (Throwable t) {
+		}
+		catch(Throwable t){
             t.printStackTrace();
             throw t;
         }

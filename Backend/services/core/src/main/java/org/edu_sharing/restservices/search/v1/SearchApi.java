@@ -32,6 +32,8 @@ import org.edu_sharing.service.search.UserShareDirection;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SearchVCard;
 import org.edu_sharing.service.search.model.SortDefinition;
+import org.edu_sharing.service.suggestion.SuggestionStatus;
+import org.edu_sharing.service.suggestion.SuggestionType;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.jetbrains.annotations.NotNull;
 
@@ -641,6 +643,50 @@ public class SearchApi {
 			response.setNodes(events.getNodes().stream().map(UserEventDao::asUserEvent).toList());
 			response.setFacets(events.getFacets());
 			response.setPagination(events.getPagination());
+
+			return Response.status(Response.Status.OK).entity(response).build();
+		} catch (DAOException e) {
+			return ErrorResponse.createResponse(e);
+		}
+	}
+
+	@POST
+	@Path("/suggestions/{repository}")
+	@Operation(summary = "Get nodes that have suggestions (requires write permissions on the individual nodes)")
+	@ApiResponses(
+			value = {
+					@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResultSuggestion.class))),
+					@ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+					@ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			})
+	public Response getNodesBySuggestion(
+			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "Filter by suggestion status", required = false) @QueryParam("status") List<SuggestionStatus> status,
+			@Parameter(description = "Filter by suggestion type", required = false) @QueryParam("type") List<SuggestionType> type,
+			@Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
+			@Parameter(description = "search parameters", required = false) SearchParameters parameters,
+			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "25")) @QueryParam("maxItems") Integer maxItems,
+			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+			@Context HttpServletRequest req) {
+
+		try {
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+			SearchResult<SuggestionDao> result = SuggestionDao.getNodesBySuggestion(
+					repoDao,
+					status,
+					type,
+					parameters.getCriteria(),
+					getSearchToken(contentType, maxItems, skipCount, null, null, parameters)
+			);
+
+			SearchResultSuggestion response = new SearchResultSuggestion();
+			response.setNodes(result.getNodes().stream().map(SuggestionDao::asNodeSuggestionEvent).toList());
+			response.setFacets(result.getFacets());
+			response.setPagination(result.getPagination());
 
 			return Response.status(Response.Status.OK).entity(response).build();
 		} catch (DAOException e) {

@@ -13,12 +13,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Toast } from '../../services/toast';
 import {
     Connector,
-    ConnectorList,
     FrameEventsService,
     ParentList,
     RestCollectionService,
     RestConnectorService,
-    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestNodeService,
@@ -27,8 +25,9 @@ import {
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
-import { Component } from '@angular/core';
+import { ConnectorService, Node } from 'ngx-edu-sharing-api';
+import { take } from 'rxjs/operators';
+import { Component, inject } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
 import { CordovaService, OnBackBehaviour } from '../../services/cordova.service';
 
@@ -40,6 +39,21 @@ import { CordovaService, OnBackBehaviour } from '../../services/cordova.service'
     standalone: false,
 })
 export class AppSharePageComponent {
+    private toast = inject(Toast);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private sanitizer = inject(DomSanitizer);
+    private node = inject(RestNodeService);
+    private connectorService = inject(ConnectorService);
+    private events = inject(FrameEventsService);
+    private uiService = inject(UIService);
+    private utilities = inject(RestUtilitiesService);
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+    private collectionApi = inject(RestCollectionService);
+    private cordova = inject(CordovaService);
+    private connector = inject(RestConnectorService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     globalProgress = true;
@@ -58,22 +72,7 @@ export class AppSharePageComponent {
     private file: File;
     private fileName: string;
     private text: string;
-    constructor(
-        private toast: Toast,
-        private route: ActivatedRoute,
-        private router: Router,
-        private sanitizer: DomSanitizer,
-        private node: RestNodeService,
-        private connectors: RestConnectorsService,
-        private events: FrameEventsService,
-        private uiService: UIService,
-        private utilities: RestUtilitiesService,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-        private collectionApi: RestCollectionService,
-        private cordova: CordovaService,
-        private connector: RestConnectorService,
-    ) {
+    constructor() {
         // when the user finished sharing and navigates back he must return to the origin app
         this.cordova.setOnBackBehaviour(OnBackBehaviour.closeApp);
         this.columns = {
@@ -229,7 +228,7 @@ export class AppSharePageComponent {
         return !this.uri.startsWith('content://') && !this.uri.startsWith('file://');
     }
     private goToInbox() {
-        UIHelper.goToWorkspaceFolder(this.node, this.router, null, this.inbox.ref.id, {
+        UIHelper.goToWorkspaceFolder(this.router, null, this.inbox.ref.id, {
             replaceUrl: true,
         });
     }
@@ -300,14 +299,17 @@ export class AppSharePageComponent {
                     );
                 } else if (this.isTextSnippet()) {
                     this.globalProgress = false;
-                    this.connectors.list().subscribe(
-                        (list: ConnectorList) => {
-                            this.prepareTextSnippet(list.connectors);
-                        },
-                        (error: any) => {
-                            this.prepareTextSnippet(null);
-                        },
-                    );
+                    this.connectorService
+                        .observeConnectorList()
+                        .pipe(take(1))
+                        .subscribe(
+                            (list) => {
+                                this.prepareTextSnippet(list?.connectors);
+                            },
+                            (error: any) => {
+                                this.prepareTextSnippet(null);
+                            },
+                        );
                 } else {
                     if (
                         this.cordova.isRunningCordova() &&

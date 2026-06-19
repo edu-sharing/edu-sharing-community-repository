@@ -1,12 +1,13 @@
 <div class="message-bg">
-  <div *ngIf="message" class="message-container">
-    <img *ngIf="error === '404'" [src]="'assets/images/message/404.svg' | esAssetsPath" alt="" />
-    <img *ngIf="error === '500'" [src]="'assets/images/message/500.svg' | esAssetsPath" alt="" />
-    <img
-      *ngIf="error !== '500' && error !== '404'"
-      [src]="'assets/images/message/invalid.svg' | esAssetsPath"
-      alt=""
-    />
+  @if (message) {
+  <div class="message-container">
+    @if (error === '404') {
+    <img [src]="'assets/images/message/404.svg' | esAssetsPath" alt="" />
+    } @if (error === '500') {
+    <img [src]="'assets/images/message/500.svg' | esAssetsPath" alt="" />
+    } @if (error !== '500' && error !== '404') {
+    <img [src]="'assets/images/message/invalid.svg' | esAssetsPath" alt="" />
+    }
     <div>
       <h1 esTitle>{{ message | translate }}</h1>
       <h2>{{ messageDetail | translate : { text: messageText } }}</h2>
@@ -17,4 +18,5 @@
       </div>
     </div>
   </div>
+  }
 </div>

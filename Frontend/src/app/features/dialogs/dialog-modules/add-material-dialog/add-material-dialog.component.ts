@@ -3,12 +3,12 @@ import {
     Component,
     ElementRef,
     EventEmitter,
-    Inject,
     Input,
     OnInit,
-    Optional,
     Output,
+    signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
@@ -52,6 +52,20 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
     standalone: false,
 })
 export class AddMaterialDialogComponent implements OnInit {
+    data = inject<AddMaterialDialogData | null>(CARD_DIALOG_DATA, { optional: true });
+    private dialogRef = inject<CardDialogRef<
+        AddMaterialDialogData,
+        AddMaterialDialogResult
+    > | null>(CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>, { optional: true });
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private clientUtils = inject(ClientutilsV1Service);
+    private configService = inject(ConfigurationService);
+    dialogs = inject(DialogsService);
+    private nodeService = inject(RestNodeService);
+    private storageService = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private userService = inject(UserService);
+
     readonly DialogTemplate = DialogTemplate;
     @Input() dialogData?: AddMaterialDialogData;
     @Output() dialogResult: EventEmitter<AddMaterialDialogResult> =
@@ -73,7 +87,7 @@ export class AddMaterialDialogComponent implements OnInit {
     protected ltiSharedSecret: string;
     protected userQuota: UserQuota;
     protected websiteInformation: WebsiteInformation;
-    protected hideFileUpload = false;
+    hideFileUpload = signal(false);
     protected hideLink = false;
     protected isFileOver = false;
     protected loadingWebsiteInformation = false;
@@ -82,25 +96,13 @@ export class AddMaterialDialogComponent implements OnInit {
         new ListItem('NODE', RestConstants.CM_PROP_C_CREATED),
     ];
     protected parent$ = new BehaviorSubject<Node>(null);
-    selectedFiles: File[] = [];
+    selectedFiles = signal<File[]>([]);
 
     get currentData(): AddMaterialDialogData {
         return this.data || this.dialogData;
     }
 
-    constructor(
-        @Optional() @Inject(CARD_DIALOG_DATA) public data: AddMaterialDialogData | null,
-        @Optional()
-        private dialogRef: CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult> | null,
-        private breadcrumbsService: BreadcrumbsService,
-        private clientUtils: ClientutilsV1Service,
-        private configService: ConfigurationService,
-        public dialogs: DialogsService,
-        private nodeService: RestNodeService,
-        private storageService: SessionStorageService,
-        private toast: Toast,
-        private userService: UserService,
-    ) {
+    constructor() {
         this.registerParentListener();
         this.userService
             .observeCurrentUser()
@@ -167,10 +169,10 @@ export class AddMaterialDialogComponent implements OnInit {
     }
 
     private updateHideFileUpload(): void {
-        if (this.hideFileUpload && !this.linkControl.value.trim()) {
-            this.hideFileUpload = false;
-        } else if (!this.hideFileUpload && this.websiteInformation) {
-            this.hideFileUpload = true;
+        if (this.hideFileUpload() && !this.linkControl.value.trim()) {
+            this.hideFileUpload.set(false);
+        } else if (!this.hideFileUpload() && this.websiteInformation) {
+            this.hideFileUpload.set(true);
         }
     }
 
@@ -187,10 +189,7 @@ export class AddMaterialDialogComponent implements OnInit {
      * Closes the dialog and returns the given file list to the caller.
      */
     closeWithFiles(fileList: FileList) {
-        this.selectedFiles = [];
-        for (let file of fileList) {
-            this.selectedFiles.push(file);
-        }
+        this.selectedFiles.set(Array.from(fileList));
         if (this.currentData.showFiles === true) {
             this.setState('');
             this.updateHideFileUpload();
@@ -198,7 +197,7 @@ export class AddMaterialDialogComponent implements OnInit {
         }
         const dialogResult: AddMaterialDialogResult = {
             kind: 'file',
-            files: this.selectedFiles,
+            files: this.selectedFiles(),
             parent: this.parent$.value,
         };
         this.dialogRef ? this.dialogRef.close(dialogResult) : this.dialogResult.emit(dialogResult);
@@ -207,10 +206,10 @@ export class AddMaterialDialogComponent implements OnInit {
     setLink() {
         if (this.disabled) {
             // To nothing
-        } else if (this.selectedFiles.length) {
+        } else if (this.selectedFiles().length) {
             const dialogResult: AddMaterialDialogResult = {
                 kind: 'file',
-                files: this.selectedFiles,
+                files: this.selectedFiles(),
                 parent: this.parent$.value,
             };
             this.dialogRef
@@ -249,7 +248,7 @@ export class AddMaterialDialogComponent implements OnInit {
 
     setState(link: string) {
         link = link.trim();
-        this.disabled = !link && !this.selectedFiles.length;
+        this.disabled = !link && !this.selectedFiles().length;
         this.updateButtons();
         this.dialogRef?.patchConfig({ closable: Closable.Standard });
     }
@@ -352,7 +351,7 @@ export class AddMaterialDialogComponent implements OnInit {
     protected readonly DialogsService = DialogsService;
 
     removeFile(file: File) {
-        this.selectedFiles.splice(this.selectedFiles.indexOf(file), 1);
+        this.selectedFiles.update((files) => files.filter((f) => f !== file));
         this.setState('');
     }
 }

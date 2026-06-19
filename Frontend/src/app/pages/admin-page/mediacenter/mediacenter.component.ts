@@ -1,4 +1,4 @@
-import { Component, EventEmitter, NgZone, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, NgZone, Output, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Group,
@@ -50,6 +50,18 @@ import { firstValueFrom } from 'rxjs';
     standalone: false,
 })
 export class AdminMediacenterComponent {
+    private mediacenterServiceLegacy = inject(RestMediacenterService);
+    private mediacenterService = inject(MediacenterService);
+    private mdsService = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private searchHelperService = inject(SearchHelperService);
+    private translate = inject(TranslateService);
+    private connector = inject(RestConnectorService);
+    private ngZone = inject(NgZone);
+    private dialogs = inject(DialogsService);
+    private toast = inject(Toast);
+
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -136,19 +148,7 @@ export class AdminMediacenterComponent {
 
     public removeSchoolsFromMC = false;
 
-    constructor(
-        private mediacenterServiceLegacy: RestMediacenterService,
-        private mediacenterService: MediacenterService,
-        private mdsService: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private optionsHelperService: OptionsHelperService,
-        private searchHelperService: SearchHelperService,
-        private translate: TranslateService,
-        private connector: RestConnectorService,
-        private ngZone: NgZone,
-        private dialogs: DialogsService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.isAdmin = this.connector.getCurrentLogin().isAdmin;
         this.hasManagePermissions = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_MEDIACENTER_MANAGE,

@@ -1,0 +1,21 @@
+:host {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.moodle-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+
+    .frame {
+        border: 2px solid lightgray;
+        width: 100%;
+        height: 100%;
+    }
+}

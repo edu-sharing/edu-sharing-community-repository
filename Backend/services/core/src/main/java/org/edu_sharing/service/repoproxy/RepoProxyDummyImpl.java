@@ -1,15 +1,14 @@
 package org.edu_sharing.service.repoproxy;
 
-import java.util.List;
-import java.util.Map;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Response;
-
 import org.edu_sharing.restservices.mds.v1.model.SuggestionParam;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.shared.ErrorResponse;
 import org.edu_sharing.service.search.SearchService.ContentType;
+
+import java.util.List;
+import java.util.Map;
 
 public class RepoProxyDummyImpl extends RepoProxyAbstract {
 	
@@ -60,4 +59,11 @@ public class RepoProxyDummyImpl extends RepoProxyAbstract {
 	public Response getMetadata(String repository, String node, List<String> propertyFilter, HttpServletRequest req) {
 		return ErrorResponse.createResponse(e);
 	}
+
+	@Override
+	public Response getMetadataSigned(String repository, String node, String version, HttpServletRequest req) {
+		return ErrorResponse.createResponse(e);
+	}
+
+
 }

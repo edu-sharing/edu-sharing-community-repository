@@ -2,7 +2,8 @@
   <i esIcon="{{ showCcAuthor ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}"></i>
   {{ 'WORKSPACE.LICENSE.CC.NAME_AUTHOR' | translate }}
 </a>
-<div *ngIf="showCcAuthor" [@cardAnimation]="showCcAuthor">
+@if (showCcAuthor) {
+<div [@cardAnimation]="showCcAuthor">
   <div class="ccAuthorGroup" role="group" aria-labelledby="reference-info-expander">
     <mat-form-field>
       <mat-label>{{ 'WORKSPACE.LICENSE.CC.TITLE_OF_WORK' | translate }}</mat-label>
@@ -33,3 +34,4 @@
     </mat-form-field>
   </div>
 </div>
+}

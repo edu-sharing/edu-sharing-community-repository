@@ -87,7 +87,9 @@ public class CallSourceHelper {
         if(path.startsWith(WEBAPP_BASE_PATH + "/components/render")
                 || path.startsWith(WEBAPP_BASE_PATH + "/rest/rendering")
                 || path.startsWith(WEBAPP_BASE_PATH + "/eduservlet/render")
-                || path.startsWith(WEBAPP_BASE_PATH + "/content")){
+                || path.startsWith(WEBAPP_BASE_PATH + "/content")
+                || (path.startsWith(WEBAPP_BASE_PATH + "/rest/node/") && path.endsWith("/metadata/secured"))
+                || (path.startsWith(WEBAPP_BASE_PATH + "/rest/node/") && path.endsWith("/metadata"))) {
             return true;
         }
         return false;

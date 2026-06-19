@@ -14,14 +14,18 @@ import {
     Node,
     Permission,
     Submission,
+    UserSimple,
 } from 'ngx-edu-sharing-api';
 
 import {
+    ColumnType,
     EduSharingUiCommonModule,
     Helper,
+    ListItem,
     NodeDataSource,
     NodeEntriesModule,
     OptionItem,
+    SubmissionWithAssignment,
 } from 'ngx-edu-sharing-ui';
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
 import { AuthenticationServiceMock } from './node-entries-card/node-entries-card.component.stories';
@@ -29,6 +33,7 @@ import {
     DefaultColumns,
     DummyAssignment,
     DummyNode,
+    DummyUser,
     mdsStorybookProviders,
 } from 'src/app/features/mds/mds-editor/storybook-utils';
 import { InteractionType, NodeEntriesDisplayType } from './entries-model';
@@ -49,21 +54,69 @@ const Assignments = Array(16)
         n = Helper.deepCopy(n);
         n.ref.id = 'id_' + i;
         n.title += ' ' + i;
-        const status: Assignment['status'][] = ['DRAFT', 'INPROGRESS', 'CANCELED', 'FINISHED'];
-        n.status = status[Math.floor(Math.random() * status.length)];
-        const submissionStatus: Submission['submissionStatus'][] = [
-            'NOT_STARTED',
-            'PENDING',
-            'FINISHED',
-        ];
-        n.submissions = [
-            {
-                submissionStatus:
-                    submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
-                validationStatus:
-                    submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
-            } as Submission,
-        ];
+        if (i === 0) {
+            n.status = 'DRAFT';
+            n.submissions = [
+                {
+                    submissionStatus: 'NOT_STARTED',
+                    validationStatus: 'NOT_STARTED',
+                } as Submission,
+            ];
+        } else if (i === 1) {
+            n.status = 'INPROGRESS';
+            n.submissions = [
+                {
+                    submissionStatus: 'NOT_STARTED',
+                    validationStatus: 'NOT_STARTED',
+                } as Submission,
+            ];
+        } else if (i === 2) {
+            n.status = 'INPROGRESS';
+            n.submissions = [
+                {
+                    submissionStatus: 'FINISHED',
+                    validationStatus: 'NOT_STARTED',
+                } as Submission,
+            ];
+        } else if (i === 3) {
+            n.status = 'CORRECTED';
+            n.submissions = [
+                {
+                    submissionStatus: 'FINISHED',
+                    validationStatus: 'FINISHED',
+                } as Submission,
+            ];
+        } else if (i === 4) {
+            n.status = 'FINISHED';
+            n.submissions = [
+                {
+                    submissionStatus: 'FINISHED',
+                    validationStatus: 'FINISHED',
+                } as Submission,
+            ];
+        } else {
+            const status: Assignment['status'][] = ['DRAFT', 'INPROGRESS', 'CANCELED', 'FINISHED'];
+            n.status = status[Math.floor(Math.random() * status.length)];
+            const submissionStatus: Submission['submissionStatus'][] = [
+                'NOT_STARTED',
+                'PENDING',
+                'FINISHED',
+            ];
+            n.submissions = [
+                {
+                    submissionStatus:
+                        submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
+                    validationStatus:
+                        submissionStatus[Math.floor(Math.random() * submissionStatus.length)],
+                } as Submission,
+            ];
+        }
+        n.submissions = n.submissions.map((s) => {
+            return {
+                ...s,
+                assignee: new DummyUser(),
+            };
+        });
         n.permissions = [
             {
                 role: 'COORDINATOR',
@@ -74,7 +127,7 @@ const Assignments = Array(16)
         ];
         if (Math.random() > 0.5) {
             n.endTime = new Date(
-                new Date().getTime() + 1000 * 86400 * 7 * Math.random(),
+                new Date().getTime() + 1000 * 86400 * 7 * Math.random() - 1000 * 86400 * 3,
             ).toISOString();
         }
         return n;
@@ -84,6 +137,14 @@ const dummyDataSourceAssignmentsSubmission = new NodeDataSource<Assignment>(
     Helper.deepCopy(Assignments).map((a: Assignment) => {
         a.permissions = a.permissions.filter((a) => a.role !== 'COORDINATOR');
         return a;
+    }),
+);
+const dummyDataSourceSubmission = new NodeDataSource<SubmissionWithAssignment>(
+    Helper.deepCopy(Assignments).map((a: Assignment) => {
+        return {
+            ...a.submissions[0],
+            assignment: a,
+        } as SubmissionWithAssignment;
     }),
 );
 const emptyDataSource = new NodeDataSource<Node>([]);
@@ -214,5 +275,17 @@ export const EntriesSmallGridAssignmentsSubmission: Story = {
     args: {
         dataSource: dummyDataSourceAssignmentsSubmission as any,
         displayType: NodeEntriesDisplayType.SmallGrid,
+    },
+};
+export const SubmittedTasksTable: Story = {
+    args: {
+        dataSource: dummyDataSourceSubmission as any,
+        columns: {
+            Default: [
+                new ListItem('SUBMISSION', 'assignee'),
+                new ListItem('SUBMISSION', 'validationStatus'),
+            ],
+        } as ColumnType,
+        displayType: NodeEntriesDisplayType.Table,
     },
 };

@@ -31,17 +31,16 @@
     </button>
 
     <mat-menu #selectSwimlaneShape="matMenu" class="topic-page-menu">
-      <button
-        mat-menu-item
-        *ngFor="let option of swimlaneBackgroundShapeOptions"
-        (click)="updateSwimlaneShape(option.shape)"
-      >
-        <i [esIcon]="option.image" *ngIf="option.image; else backgroundShape"></i>
-        <ng-template #backgroundShape>
-          <es-swimlane-background-shape [shape]="option.shape"></es-swimlane-background-shape>
-        </ng-template>
+      @for (option of swimlaneBackgroundShapeOptions; track option) {
+      <button mat-menu-item (click)="updateSwimlaneShape(option.shape)">
+        @if (option.image) {
+        <i [esIcon]="option.image"></i>
+        } @else {
+        <es-swimlane-background-shape [shape]="option.shape"></es-swimlane-background-shape>
+        }
         {{ 'TOPIC_PAGE.SWIMLANE.SELECT_BACKGROUND.' + option.viewValue | translate }}
       </button>
+      }
     </mat-menu>
 
     <button

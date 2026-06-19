@@ -12,7 +12,8 @@
     {{ root === MY_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
   </i>
 </div>
-<div class="tree" *ngIf="root === MY_FILES">
+@if (root === MY_FILES) {
+<div class="tree">
   <es-workspace-sub-tree
     [node]="'-userhome-'"
     [currentPath]="currentPath"
@@ -21,6 +22,7 @@
     (clickElement)="doOpenNode($event)"
   ></es-workspace-sub-tree>
 </div>
+}
 <div
   class="rootNode"
   [class.rootNodeSelected]="root === SHARED_FILES"
@@ -32,7 +34,8 @@
     {{ root === SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
   </i>
 </div>
-<div class="tree" *ngIf="root === SHARED_FILES">
+@if (root === SHARED_FILES) {
+<div class="tree">
   <es-workspace-sub-tree
     [node]="'-shared_files-'"
     [currentPath]="currentPath"
@@ -41,6 +44,7 @@
     (clickElement)="doOpenNode($event)"
   ></es-workspace-sub-tree>
 </div>
+}
 <div
   class="rootNode"
   [esNodesDropTarget]="SHARED_FILES_LINK"
@@ -50,7 +54,6 @@
   data-test="workspace-tree-shared-files-link"
 >
   <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.SHARED_FILES_LINK' | translate }}
-  <i class="material-icons"> open_in_new </i>
 </div>
 <div
   class="rootNode"
@@ -60,7 +63,8 @@
 >
   <i class="material-icons typeIcon">inbox</i>{{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate }}
 </div>
-<div class="tree" *ngIf="root === WORKFLOW_RECEIVE">
+@if (root === WORKFLOW_RECEIVE) {
+<div class="tree">
   <es-workspace-sub-tree
     [node]="'-workflow_receive-'"
     [currentPath]="currentPath"
@@ -69,6 +73,7 @@
     (clickElement)="doOpenNode($event)"
   ></es-workspace-sub-tree>
 </div>
+}
 <div
   class="rootNode"
   [class.rootNodeSelected]="root === RECYCLE"

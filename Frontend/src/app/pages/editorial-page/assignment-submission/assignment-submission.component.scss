@@ -1,14 +1,71 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+mat-tab-group {
+    flex: 1;
+    min-height: 0;
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        min-height: 0;
+    }
+}
+
+:host ::ng-deep ngx-extended-pdf-viewer {
+    display: block;
+    height: 100%;
+    // match the pdf.js viewer background so the scrollbar gutter doesn't show as a white stripe
+    background-color: #d4d4d7;
+
+    // override ngx-extended-pdf-viewer's dynamic CSS that hides toolbar elements
+    .body :is(input, button, select, a),
+    #outerContainer .hiddenTinyView * {
+        display: revert !important;
+    }
+    @media screen and (max-width: vars.$mobileWidth - vars.$mobileStage*2) {
+        .editorParamsToolbar {
+            position: absolute !important;
+            left: 10% !important;
+            right: 10% !important;
+        }
+    }
+}
+
+:host ::ng-deep {
+    // we have no actions available
+    .cdk-column-actions {
+        display: none !important;
+    }
+}
+.list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    gap: 20px;
+    padding: 0 var(--roundedContainerMargin) var(--roundedContainerMargin) 20px;
+    .actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 20px;
+    }
+}
 #toolbarViewer {
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     #toolbarViewerRight {
-        //flex-grow: 1;
-        justify-self: flex-end;
+        margin-left: auto;
     }
     &.medium {
         pdf-zoom-toolbar {
@@ -16,7 +73,6 @@
         }
     }
     &.small {
-        justify-content: flex-end;
         #toolbarViewerLeft {
             display: none;
         }

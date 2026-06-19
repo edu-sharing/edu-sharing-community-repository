@@ -6,6 +6,7 @@ import {
     OnDestroy,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -60,6 +61,29 @@ import { EditorialSidebarService } from '../../features/editorial-sidebar/editor
     standalone: false,
 })
 export class CollectionsPageComponent implements OnDestroy {
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private collectionService = inject(RestCollectionService);
+    private config = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private connector = inject(RestConnectorService);
+    private iamService = inject(RestIamService);
+    private localEvents = inject(LocalEventsService);
+    private mediacenterService = inject(RestMediacenterService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(RestNodeService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private optionsHelperService = inject(OptionsHelperService);
+    private globalCollectionsPageServiceInternal = inject(GlobalCollectionsPageServiceInternal);
+    private tempStorage = inject(TemporaryStorageService);
+    private optionsService = inject(OptionsHelperDataService);
+    private networkService = inject(RestNetworkService);
+    private temporaryStorageService = inject(TemporaryStorageService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private toast = inject(Toast);
+    private translations = inject(TranslationsService);
+    private uiService = inject(UIService);
+
     static INDEX_MAPPING = [
         RestConstants.COLLECTIONSCOPE_MY,
         RestConstants.COLLECTIONSCOPE_ORGA,
@@ -143,30 +167,7 @@ export class CollectionsPageComponent implements OnDestroy {
     private person: EduData.User;
     hasEditorial = false;
     hasMediacenter = false;
-    constructor(
-        private breadcrumbsService: BreadcrumbsService,
-        private collectionService: RestCollectionService,
-        private config: ConfigurationService,
-        private configService: ConfigService,
-        private connector: RestConnectorService,
-        private iamService: RestIamService,
-        private localEvents: LocalEventsService,
-        private mediacenterService: RestMediacenterService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private optionsHelperService: OptionsHelperService,
-        private globalCollectionsPageServiceInternal: GlobalCollectionsPageServiceInternal,
-        private tempStorage: TemporaryStorageService,
-        private optionsService: OptionsHelperDataService,
-        private networkService: RestNetworkService,
-        private temporaryStorageService: TemporaryStorageService,
-        public editorialSidebarService: EditorialSidebarService,
-        private toast: Toast,
-        private translations: TranslationsService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.sidebarOption = [
             this.optionsHelperService.getOptionItemToggleSidebar(
                 this.editorialSidebarService.sidebarOpened,

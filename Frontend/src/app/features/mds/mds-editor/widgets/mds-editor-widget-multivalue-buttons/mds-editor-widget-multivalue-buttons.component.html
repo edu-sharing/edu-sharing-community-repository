@@ -1,0 +1,29 @@
+@if (mdsEditorInstance.editorMode === 'valueSelection' || true) { @if (widget?.definition?.caption)
+{
+<h3>
+  {{ widget.definition.caption | translate }}
+</h3>
+} }
+<es-mds-editor-widget-container
+  #container
+  [widget]="widget"
+  [label]="false"
+  [valueType]="valueType"
+  [control]="chipsControl"
+  [wrapInFormField]="false"
+>
+  @if (widget.definition?.values) {
+  <div class="buttons-container">
+    @for (value of widget.definition.values; track trackByValue($index, value)) { @if
+    (isValueSelected(value)) {
+    <button mat-flat-button color="primary" (click)="toggleValue(value)" mat-button>
+      {{ toDisplayValue(value).label }}
+    </button>
+    } @if (!isValueSelected(value)) {
+    <button mat-stroked-button color="primary" (click)="toggleValue(value)" mat-button>
+      {{ toDisplayValue(value).label }}
+    </button>
+    } }
+  </div>
+  }
+</es-mds-editor-widget-container>

@@ -1,6 +1,6 @@
 <ng-template #gridTop>
+  @if (entriesService.configureColumns) {
   <button
-    *ngIf="entriesService.configureColumns"
     class="configure-columns"
     mat-icon-button
     (click)="columnChooserVisible$.next(!columnChooserVisible$.value)"
@@ -11,8 +11,8 @@
   >
     <i esIcon="settings"></i>
   </button>
+  } @if (entriesService.sort?.allowed) {
   <es-sort-select-panel
-    *ngIf="entriesService.sort?.allowed"
     class="order-panel"
     [active]="entriesService.sort.active"
     [direction]="entriesService.sort.direction"
@@ -21,234 +21,197 @@
     [(customSortingInProgress)]="entriesService.sort.customSortingInProgress"
     (customSortingInProgressChange)="onCustomSortingInProgressChange()"
   ></es-sort-select-panel>
+  }
 </ng-template>
+@if (entriesService.configureColumns) {
 <es-column-chooser
-  *ngIf="entriesService.configureColumns"
   [(columns)]="entriesService.columns"
   [columnChooserVisible]="columnChooserVisible$ | async"
   [origin]="columnChooserTrigger"
   (columnChooserVisibleChange)="columnChooserVisible$.next($event)"
 ></es-column-chooser>
+}
 <es-dropdown #dropdown [options]="entriesService.options?.[Target.ListDropdown]"></es-dropdown>
 
 <!-- Do not render the list element (`role="list"` or `li`) when there are no list items. -->
-<ng-container
-  *ngIf="
-    (nodes$ | async)?.length > 0 ||
-    ((entriesService.globalOptionsSubject | async)?.length > 0 &&
-      (!entriesService.dataSource.isLoading ||
-        (entriesService.gridConfig$ | async)?.layout !== 'scroll'))
-  "
->
-  <!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
+@if ( (nodes$ | async)?.length > 0 || ((entriesService.globalOptionsSubject | async)?.length > 0 &&
+(!entriesService.dataSource.isLoading || (entriesService.gridConfig$ | async)?.layout !== 'scroll'))
+) {
+<!-- FIXME: Ideally, we would use native `ul` and `li` elements, but these have a strict model,
   that only allows `li` elements as direct children of `ul` elements. So we would need to use the
   native elements at all places without any elements between `ul` and `li`. -->
+@if (entriesService.sort?.customSortingInProgress) {
+<div role="list" class="card-grid card-grid-reorder" cdkDropListGroup>
+  @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
   <div
-    *ngIf="entriesService.sort?.customSortingInProgress"
+    class="card-grid-order-wrapper"
+    role="none"
+    cdkDropList
+    [cdkDropListConnectedTo]="dropLists"
+    [cdkDropListData]="i"
+  >
+    @if (displayType === NodeEntriesDisplayType.Grid) {
+    <es-node-entries-card
+      #item
+      [node]="node"
+      role="listitem"
+      cdkDrag
+      [cdkDragData]="i"
+      [cdkDragStartDelay]="getDragStartDelay()"
+      cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
+      (cdkDragEntered)="onRearrangeDragEntered($event)"
+      (cdkDragStarted)="onRearrangeDragStarted()"
+      (cdkDragEnded)="onRearrangeDragEnded()"
+    ></es-node-entries-card>
+    } @if (displayType === NodeEntriesDisplayType.SmallGrid) {
+    <es-node-entries-card-small
+      #item
+      [node]="node"
+      role="listitem"
+      cdkDrag
+      [cdkDragData]="i"
+      [cdkDragStartDelay]="getDragStartDelay()"
+      cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
+      (cdkDragEntered)="onRearrangeDragEntered($event)"
+      (cdkDragStarted)="onRearrangeDragStarted()"
+      (cdkDragEnded)="onRearrangeDragEnded()"
+    ></es-node-entries-card-small>
+    }
+  </div>
+  } }
+</div>
+} @if (!entriesService.sort?.customSortingInProgress) {
+<div
+  class="card-grid-wrapper"
+  [class.card-grid-wrapper-empty]="entriesService.dataSource?.isEmpty()"
+>
+  <ng-container *ngTemplateOutlet="scrollHelper"></ng-container>
+  <div
     role="list"
-    class="card-grid card-grid-reorder"
-    cdkDropListGroup
+    class="card-grid card-grid-layout-{{ layout }}"
+    #grid
+    (esBorderBoxObserver)="onGridSizeChanges()"
+    esInfiniteScroll
+    (scroll)="updateScrollState()"
+    (scrolled)="!visibleItemsLimited && loadData('scroll')"
   >
-    <ng-container *ngIf="nodes$ | async as nodes">
-      <div
-        class="card-grid-order-wrapper"
-        *ngFor="let node of nodes; let i = index"
-        role="none"
-        cdkDropList
-        [cdkDropListConnectedTo]="dropLists"
-        [cdkDropListData]="i"
-      >
-        <es-node-entries-card
-          *ngIf="displayType === NodeEntriesDisplayType.Grid"
-          #item
-          [node]="node"
-          role="listitem"
-          cdkDrag
-          [cdkDragData]="i"
-          [cdkDragStartDelay]="getDragStartDelay()"
-          cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
-          (cdkDragEntered)="onRearrangeDragEntered($event)"
-          (cdkDragStarted)="onRearrangeDragStarted()"
-          (cdkDragEnded)="onRearrangeDragEnded()"
-        ></es-node-entries-card>
-        <es-node-entries-card-small
-          *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-          #item
-          [node]="node"
-          role="listitem"
-          cdkDrag
-          [cdkDragData]="i"
-          [cdkDragStartDelay]="getDragStartDelay()"
-          cdkDragPreviewClass="es-card-grid-rearrange-drag-preview"
-          (cdkDragEntered)="onRearrangeDragEntered($event)"
-          (cdkDragStarted)="onRearrangeDragStarted()"
-          (cdkDragEnded)="onRearrangeDragEnded()"
-        ></es-node-entries-card-small>
-      </div>
-    </ng-container>
-  </div>
-  <div
-    class="card-grid-wrapper"
-    [class.card-grid-wrapper-empty]="entriesService.dataSource?.isEmpty()"
-    *ngIf="!entriesService.sort?.customSortingInProgress"
-  >
-    <ng-container *ngTemplateOutlet="scrollHelper"></ng-container>
+    @if ( (entriesService.globalOptionsSubject | async)?.length &&
+    entriesService.globalOptionsPosition === 'before' ) {
+    <es-node-entries-global-options [displayType]="displayType"> </es-node-entries-global-options>
+    } @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
     <div
-      role="list"
-      class="card-grid card-grid-layout-{{ layout }}"
-      #grid
-      (esBorderBoxObserver)="onGridSizeChanges()"
-      esInfiniteScroll
-      (scroll)="updateScrollState()"
-      (scrolled)="!visibleItemsLimited && loadData('scroll')"
+      class="card-grid-drag-wrapper"
+      role="none"
+      cdkDropList
+      [cdkDropListSortingDisabled]="true"
+      [esNodesDropTarget]="node"
+      [canDropNodes]="canDropNodes"
+      (nodeDropped)="onNodesDropped($event)"
+      #dropTarget="esNodesDropTarget"
     >
-      <es-node-entries-global-options
-        *ngIf="
-          (entriesService.globalOptionsSubject | async)?.length &&
-          entriesService.globalOptionsPosition === 'before'
+      @if (isCustomTemplate(node)) {
+      <ng-container
+        *ngTemplateOutlet="
+          templatesService.customCard || $any(node);
+          context: { element: node, options: entriesService.options }
         "
-        [displayType]="displayType"
+      ></ng-container>
+      } @if (!isCustomTemplate(node)) { @if (displayType === NodeEntriesDisplayType.Grid) {
+      <es-node-entries-card
+        #item
+        [node]="node"
+        [dropdown]="dropdown"
+        role="listitem"
+        cdkDrag
+        [cdkDragDisabled]="(getDragEnabled() | async) === false"
+        [cdkDragData]="getDragData(node)"
+        esNodesDrag
+        (cdkDragStarted)="onDragStarted(node)"
+        (cdkDragEnded)="onDragEnded()"
+        [class.card-import-blocked]="isBlocked(node)"
+        [class.selected-when-dragging]="isDragging && entriesService.selection.isSelected(node)"
       >
-      </es-node-entries-global-options>
-      <ng-container *ngIf="nodes$ | async as nodes">
-        <div
-          class="card-grid-drag-wrapper"
-          *ngFor="let node of nodes; let i = index"
-          role="none"
-          cdkDropList
-          [cdkDropListSortingDisabled]="true"
-          [esNodesDropTarget]="node"
-          [canDropNodes]="canDropNodes"
-          (nodeDropped)="onNodesDropped($event)"
-          #dropTarget="esNodesDropTarget"
-        >
-          <ng-container *ngIf="isCustomTemplate(node)">
-            <ng-container
-              *ngTemplateOutlet="
-                templatesService.customCard || $any(node);
-                context: { element: node, options: entriesService.options }
-              "
-            ></ng-container>
-          </ng-container>
-          <ng-container *ngIf="!isCustomTemplate(node)">
-            <es-node-entries-card
-              *ngIf="displayType === NodeEntriesDisplayType.Grid"
-              #item
-              [node]="node"
-              [dropdown]="dropdown"
-              role="listitem"
-              cdkDrag
-              [cdkDragDisabled]="(getDragEnabled() | async) === false"
-              [cdkDragData]="getDragData(node)"
-              esNodesDrag
-              (cdkDragStarted)="onDragStarted(node)"
-              (cdkDragEnded)="onDragEnded()"
-              [class.card-import-blocked]="isBlocked(node)"
-              [class.selected-when-dragging]="
-                isDragging && entriesService.selection.isSelected(node)
-              "
-            >
-              <ng-container *ngIf="entriesService.selection.selected.length > 1">
-                <es-node-entries-card
-                  *cdkDragPreview
-                  [node]="node"
-                  [matBadge]="
-                    entriesService.selection.selected.length > 1
-                      ? entriesService.selection.selected.length
-                      : null
-                  "
-                  class="card-drag-preview"
-                ></es-node-entries-card>
-              </ng-container>
-            </es-node-entries-card>
-            <es-node-entries-card-small
-              *ngIf="displayType === NodeEntriesDisplayType.SmallGrid"
-              #item
-              [node]="node"
-              [dropdown]="dropdown"
-              role="listitem"
-              cdkDrag
-              [cdkDragDisabled]="(getDragEnabled() | async) === false"
-              [cdkDragData]="[node]"
-              esNodesDrag
-            >
-            </es-node-entries-card-small>
-          </ng-container>
-          <div
-            *ngIf="dropTarget.active?.canDrop?.denyExplicit"
-            class="card-grid-drop-blocked-container"
-          >
-            <i esIcon="cancel"></i>
-          </div>
-          <div *ngIf="dropTarget.active?.canDrop?.accept" class="card-grid-drop-allowed-container">
-            <i
-              [esIcon]="dropTarget.active.action === 'copy' ? 'add_circle_outline' : 'archive'"
-            ></i>
-          </div>
-        </div>
-      </ng-container>
-      <es-node-entries-global-options
-        *ngIf="
-          (entriesService.globalOptionsSubject | async)?.length &&
-          entriesService.globalOptionsPosition === 'after'
-        "
-        [displayType]="displayType"
+        @if (entriesService.selection.selected.length > 1) {
+        <es-node-entries-card
+          *cdkDragPreview
+          [node]="node"
+          [matBadge]="
+            entriesService.selection.selected.length > 1
+              ? entriesService.selection.selected.length
+              : null
+          "
+          class="card-drag-preview"
+        ></es-node-entries-card>
+        }
+      </es-node-entries-card>
+      } @if (displayType === NodeEntriesDisplayType.SmallGrid) {
+      <es-node-entries-card-small
+        #item
+        [node]="node"
+        [dropdown]="dropdown"
+        role="listitem"
+        cdkDrag
+        [cdkDragDisabled]="(getDragEnabled() | async) === false"
+        [cdkDragData]="[node]"
+        esNodesDrag
       >
-      </es-node-entries-global-options>
+      </es-node-entries-card-small>
+      } } @if (dropTarget.active?.canDrop?.denyExplicit) {
+      <div class="card-grid-drop-blocked-container">
+        <i esIcon="cancel"></i>
+      </div>
+      } @if (dropTarget.active?.canDrop?.accept) {
+      <div class="card-grid-drop-allowed-container">
+        <i [esIcon]="dropTarget.active.action === 'copy' ? 'add_circle_outline' : 'archive'"></i>
+      </div>
+      }
     </div>
+    } } @if ( (entriesService.globalOptionsSubject | async)?.length &&
+    entriesService.globalOptionsPosition === 'after' ) {
+    <es-node-entries-global-options [displayType]="displayType"> </es-node-entries-global-options>
+    }
   </div>
-</ng-container>
-<ng-container
-  *ngIf="
-    !entriesService.dataSource.isLoading &&
-    entriesService.dataSource.hasMore() &&
-    !visibleItemsLimited &&
-    entriesService.paginationStrategy === 'infinite-scroll' &&
-    layout !== 'scroll'
-  "
->
-  <div class="load-more">
-    <button mat-button color="primary" (click)="loadData('button')">
-      <i esIcon="refresh"></i>
-      <span>{{ 'LOAD_MORE' | translate }}</span>
-    </button>
-  </div>
-</ng-container>
-<ng-container
-  *ngIf="
-    entriesService.dataSource.isLoading === true ||
-    entriesService.dataSource.isLoading === 'initial' ||
-    (entriesService.dataSource.isLoading === 'page' &&
-      entriesService.paginationStrategy === 'infinite-scroll')
-  "
->
-  <ng-container *ngTemplateOutlet="loading"></ng-container>
-</ng-container>
+</div>
+} } @if ( !entriesService.dataSource.isLoading && entriesService.dataSource.hasMore() &&
+!visibleItemsLimited && entriesService.paginationStrategy === 'infinite-scroll' && layout !==
+'scroll' ) {
+<div class="load-more">
+  <button mat-button color="primary" (click)="loadData('button')">
+    <i esIcon="refresh"></i>
+    <span>{{ 'LOAD_MORE' | translate }}</span>
+  </button>
+</div>
+} @if ( entriesService.dataSource.isLoading === true || entriesService.dataSource.isLoading ===
+'initial' || (entriesService.dataSource.isLoading === 'page' && entriesService.paginationStrategy
+=== 'infinite-scroll') ) {
+<ng-container *ngTemplateOutlet="loading"></ng-container>
+}
 
 <ng-template #loading>
   <es-spinner></es-spinner>
 </ng-template>
 <ng-template #scrollHelper>
-  <ng-container *ngIf="layout === 'scroll'">
-    <div
-      class="scroll-helper-left"
-      role="presentation"
-      (click)="doScroll('left')"
-      *ngIf="scroll.left"
+  @if (layout === 'scroll') { @if (scroll.left) {
+  <div class="scroll-helper-left" role="presentation" (click)="doScroll('left')">
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="$event.stopPropagation(); doScroll('left')"
+      tabindex="-1"
     >
-      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('left')">
-        <i esIcon="keyboard_arrow_left" [aria]="true"></i>
-      </button>
-    </div>
-    <div
-      class="scroll-helper-right"
-      role="presentation"
-      (click)="doScroll('right')"
-      *ngIf="scroll.right"
+      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+    </button>
+  </div>
+  } @if (scroll.right) {
+  <div class="scroll-helper-right" role="presentation" (click)="doScroll('right')">
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="$event.stopPropagation(); doScroll('right')"
+      tabindex="-1"
     >
-      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('right')">
-        <i esIcon="keyboard_arrow_right" [aria]="true"></i>
-      </button>
-    </div>
-  </ng-container>
+      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+    </button>
+  </div>
+  } }
 </ng-template>

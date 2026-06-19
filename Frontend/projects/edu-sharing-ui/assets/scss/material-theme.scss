@@ -51,18 +51,18 @@ $dark-secondary-text: rgba(black, 0.54);
 
 :root {
     --mat-sys-corner-full: 9999px;
-    --mdc-fab-container-color: #{$backgroundColor};
+    --mat-fab-container-color: #{$backgroundColor};
 }
 :root {
-    --mdc-switch-track-width: 48px;
-    --mdc-switch-track-height: 26px;
-    --mat-switch-with-icon-handle-size: 22px;
-    --mdc-switch-handle-width: 22px;
-    --mdc-switch-handle-height: 22px;
-    --mat-switch-pressed-handle-size: 22px;
-    --mat-switch-track-outline-color: var(--mdc-switch-unselected-handle-color);
-    --mdc-switch-handle-shape: var(--mat-sys-corner-full);
-    --mdc-switch-track-shape: var(--mat-sys-corner-full);
+    --mat-slide-toggle-track-width: 48px;
+    --mat-slide-toggle-track-height: 26px;
+    --mat-slide-toggle-with-icon-handle-size: 22px;
+    --mat-slide-toggle-handle-width: 22px;
+    --mat-slide-toggle-handle-height: 22px;
+    --mat-slide-toggle-pressed-handle-size: 22px;
+    --mat-slide-toggle-track-outline-color: var(--mat-slide-toggle-unselected-handle-color);
+    --mat-slide-toggle-handle-shape: var(--mat-sys-corner-full);
+    --mat-slide-toggle-track-shape: var(--mat-sys-corner-full);
     --mat-sidenav-content-background-color: #{$backgroundColor};
 }
 html mat-sidenav {
@@ -70,27 +70,27 @@ html mat-sidenav {
     --mat-sidenav-container-background-color: #{$backgroundColor};
 }
 html .mat-mdc-slide-toggle {
-    --mat-switch-track-outline-width: 2px;
-    --mat-switch-unselected-with-icon-handle-horizontal-margin: 0 4px;
-    --mat-switch-unselected-pressed-handle-horizontal-margin: 0 4px;
-    --mat-switch-selected-with-icon-handle-horizontal-margin: 0 -2px;
-    --mat-switch-selected-pressed-handle-horizontal-margin: 0 -2px;
-    --mdc-switch-handle-elevation-shadow: none;
-    --mat-switch-track-outline-color: var(--mdc-switch-unselected-handle-color);
+    --mat-slide-toggle-track-outline-width: 2px;
+    --mat-slide-toggle-unselected-with-icon-handle-horizontal-margin: 0 4px;
+    --mat-slide-toggle-unselected-pressed-handle-horizontal-margin: 0 4px;
+    --mat-slide-toggle-selected-with-icon-handle-horizontal-margin: 0 -2px;
+    --mat-slide-toggle-selected-pressed-handle-horizontal-margin: 0 -2px;
+    --mat-slide-toggle-handle-elevation-shadow: none;
+    --mat-slide-toggle-track-outline-color: var(--mat-slide-toggle-unselected-handle-color);
 }
 .mat-mdc-standard-chip {
-    --mdc-chip-elevated-container-color: var(--palette-primary-100);
+    --mat-chip-elevated-container-color: var(--palette-primary-100);
 }
 .mdc-switch--selected {
-    --mdc-switch-selected-icon-size: 16px;
-    --mdc-switch-selected-handle-color: var(--palette-primary-contrast-500);
-    --mdc-switch-selected-focus-handle-color: var(--palette-primary-contrast-500);
-    --mdc-switch-selected-hover-handle-color: var(--palette-primary-contrast-500);
-    --mdc-switch-selected-pressed-handle-color: var(--palette-primary-contrast-500);
-    --mdc-switch-selected-icon-color: var(--palette-primary-500);
+    --mat-slide-toggle-selected-icon-size: 16px;
+    --mat-slide-toggle-selected-handle-color: var(--palette-primary-contrast-500);
+    --mat-slide-toggle-selected-focus-handle-color: var(--palette-primary-contrast-500);
+    --mat-slide-toggle-selected-hover-handle-color: var(--palette-primary-contrast-500);
+    --mat-slide-toggle-selected-pressed-handle-color: var(--palette-primary-contrast-500);
+    --mat-slide-toggle-selected-icon-color: var(--palette-primary-500);
 }
 .mat-mdc-outlined-button:not(:disabled) {
-    --mdc-outlined-button-outline-color: var(--palette-primary-500);
+    --mat-button-outlined-outline-color: var(--palette-primary-500);
 }
 .mdc-button {
     span {
@@ -114,7 +114,7 @@ mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
         color: var(--light-primary-text);
         background-color: var(--primary);
-        --mat-standard-button-toggle-selected-state-text-color: var(--light-primary-text);
+        --mat-button-toggle-selected-state-text-color: var(--light-primary-text);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
         background-color: var(--primary);
@@ -146,6 +146,9 @@ mat-button-toggle-group {
 mat-tab-group {
     mat-tab-header {
         background-color: var(--roundedContainerBackground);
+    }
+    &.mat-tab-group-shadow mat-tab-header {
+        @include materialShadowBottom();
     }
 }
 .mat-tab-group.mat-dark {
@@ -236,7 +239,7 @@ mat-tab-group {
 }
 // form border on hover
 .mat-form-field-appearance-outline {
-    --mdc-outlined-text-field-hover-outline-color: #{mat-css-vars.mat-css-color-primary(300)};
+    --mat-form-field-outlined-hover-outline-color: #{mat-css-vars.mat-css-color-primary(300)};
 }
 .mat-form-field-dark {
     input,
@@ -257,28 +260,28 @@ mat-tab-group {
 .mat-mdc-form-field.mat-form-field-bright {
     input,
     textarea {
-        --mdc-outlined-text-field-caret-color: var(--primaryLight);
+        --mat-form-field-outlined-caret-color: var(--primaryLight);
     }
-    --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.87);
-    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.6);
-    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.87);
-    --mdc-outlined-text-field-focus-outline-color: #{mat-css-vars.mat-css-color-primary(100)};
+    --mat-form-field-outlined-label-text-color: rgba(255, 255, 255, 0.87);
+    --mat-form-field-outlined-outline-color: rgba(255, 255, 255, 0.6);
+    --mat-form-field-outlined-hover-outline-color: rgba(255, 255, 255, 0.87);
+    --mat-form-field-outlined-focus-outline-color: #{mat-css-vars.mat-css-color-primary(100)};
     .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
         color: mat-css-vars.mat-css-color-primary(50);
     }
-    --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
+    --mat-form-field-outlined-input-text-color: rgba(255, 255, 255);
 }
 mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
-    --mdc-switch-unselected-handle-color: #fff;
-    --mdc-switch-unselected-hover-handle-color: var(--palette-primary-50);
-    --mdc-switch-unselected-focus-handle-color: var(--palette-primary-50);
-    --mdc-switch-unselected-pressed-handle-color: var(--palette-primary-50);
-    --mdc-switch-unselected-icon-color: var(--textLight);
-    --mdc-switch-selected-handle-color: #fff;
-    --mdc-switch-selected-hover-handle-color: var(--palette-primary-50);
-    --mdc-switch-selected-focus-handle-color: var(--palette-primary-50);
-    --mdc-switch-selected-pressed-handle-color: var(--palette-primary-50);
-    --mdc-switch-selected-icon-color: var(--primary);
+    --mat-slide-toggle-unselected-handle-color: #fff;
+    --mat-slide-toggle-unselected-hover-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-unselected-focus-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-unselected-pressed-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-unselected-icon-color: var(--textLight);
+    --mat-slide-toggle-selected-handle-color: #fff;
+    --mat-slide-toggle-selected-hover-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-selected-focus-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-selected-pressed-handle-color: var(--palette-primary-50);
+    --mat-slide-toggle-selected-icon-color: var(--primary);
     .mdc-form-field label {
         color: #fff;
     }
@@ -331,7 +334,7 @@ mat-label,
 }
 body {
     // Background for raised button
-    --mdc-protected-button-container-color: white;
+    --mat-button-protected-container-color: white;
 }
 // improve default positioning of outlined fields with label
 .mat-mdc-form-field:not(.mat-mdc-paginator-page-size-select) {
@@ -343,10 +346,10 @@ body {
     }
 }
 .mat-mdc-checkbox {
-    --mdc-checkbox-selected-checkmark-color: var(--primary);
-    --mdc-checkbox-selected-hover-icon-color: var(--primary);
-    --mdc-checkbox-selected-focus-icon-color: var(--primary);
-    --mdc-checkbox-disabled-selected-checkmark-color: var(--palette-primary-100);
+    --mat-checkbox-selected-checkmark-color: var(--primary);
+    --mat-checkbox-selected-hover-icon-color: var(--primary);
+    --mat-checkbox-selected-focus-icon-color: var(--primary);
+    --mat-checkbox-disabled-selected-checkmark-color: var(--palette-primary-100);
     .mdc-checkbox__background {
         background-color: #fff;
         .mdc-checkbox__checkmark {
@@ -452,7 +455,7 @@ button {
 .mat-calendar-table-header-divider {
     display: none;
 }
-.mat-option {
+mat-option {
     font-size: 100%;
     .mat-option-primary {
         line-height: initial;

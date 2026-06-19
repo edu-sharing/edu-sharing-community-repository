@@ -112,6 +112,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
                 i++, count++
             ) {}
             this.data.splice(index + 1, count);
+            this.treeNodeService.collapseNode(node.item);
         } else {
             const nodes = children.map(
                 (childNode) =>
@@ -122,9 +123,12 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
                     ),
             );
             this.data.splice(index + 1, 0, ...nodes);
+            this.treeNodeService.expandNode(node.item);
         }
         // notify the change
         this.dataChange.next(this.data);
+        // sync the current data with the initial data to allow reinitialization of the tree
+        this.treeNodeService.setCurrentData(this.data);
         node.isLoading.set(false);
     }
 }

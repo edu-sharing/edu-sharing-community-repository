@@ -14,6 +14,7 @@ import {
     ViewChild,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -32,7 +33,7 @@ import { Toast, ToastType } from '../../../../services/toast';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import { BapiConfig } from '../../shared/types/bapi-config';
+import { BapiChatCompletionConfig } from '../../shared/types/bapi-chat-completion-config';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { TextVariant } from '../../shared/types/text-variant';
@@ -71,6 +72,13 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     styleUrls: ['./ai-text-widget.component.scss'],
 })
 export class AiTextWidgetComponent implements WidgetComponentInterface {
+    private aiHelperService = inject(AiHelperService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private mdsService = inject(MdsService);
+    private toast = inject(Toast);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.AI_WIDGET.';
 
@@ -110,14 +118,7 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
     selectedVariables: Signal<{ [property: string]: string[] }>;
     updateInProgress: WritableSignal<boolean> = signal(false);
 
-    constructor(
-        private aiHelperService: AiHelperService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private mdsService: MdsService,
-        private toast: Toast,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         this.selectedVariables = toSignal(this.topicPageHelperService.getSelectedVariables$(), {
             initialValue: {},
         });
@@ -176,13 +177,14 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
         const existingTextIndex: number = this.retrieveExistingValueForSelection(
             this.latestStoredTexts,
             this.selectedVariables(),
+            true,
         );
-        // a (partial) text match exists, use it
+        // if an exact full match exists, use it
         if (existingTextIndex !== -1) {
             this.resultString = this.latestStoredTexts?.[existingTextIndex]?.textValue?.text;
             this.aiGeneratedText.set(false);
         }
-        // no text match exists, request AI generation
+        // no exact full match exists, request AI generation
         if (existingTextIndex === -1 || !this.resultString) {
             await this.executePrompt();
             this.aiGeneratedText.set(true);
@@ -372,14 +374,14 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
         const mdsAIConfig: MdsAiConfig = mds.aiConfigs.find(
             (config: MdsAiConfig) => config.id === aiConfigId,
         );
-        // parse the JSON string of chatCompletion
-        mdsAIConfig.chatCompletion =
-            typeof mdsAIConfig.chatCompletion === 'string'
-                ? JSON.parse(mdsAIConfig.chatCompletion)
-                : mdsAIConfig.chatCompletion;
+        // parse the JSON string of prompt
+        mdsAIConfig.prompt =
+            typeof mdsAIConfig.prompt === 'string'
+                ? JSON.parse(mdsAIConfig.prompt)
+                : mdsAIConfig.prompt;
         if (mdsAIConfig) {
             const aiConfig: BapiConfigObject = {
-                prompt: mdsAIConfig as BapiConfig,
+                prompt: mdsAIConfig as unknown as BapiChatCompletionConfig,
             };
             this.latestStoredPrompt = retrievePromptFromAiConfig(aiConfig, 'prompt');
             this.promptInput = this.latestStoredPrompt;

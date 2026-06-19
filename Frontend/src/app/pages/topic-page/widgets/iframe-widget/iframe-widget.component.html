@@ -1,42 +1,38 @@
-<div *ngIf="initialized(); else loadingSpinner" class="iframe-widget">
+@if (initialized()) {
+<div class="iframe-widget">
   <!-- form with remaining fields -->
-  <form *ngIf="editMode()" [formGroup]="iframeForm" class="iframe-form">
+  @if (editMode()) {
+  <form [formGroup]="iframeForm" class="iframe-form">
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>
         {{ i18nPrefix + 'SOURCE' | translate }}
       </mat-label>
       <input type="url" matInput formControlName="src" />
     </mat-form-field>
-
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>
         {{ i18nPrefix + 'WIDTH' | translate }}
       </mat-label>
       <input matInput formControlName="width" />
     </mat-form-field>
-
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>
         {{ i18nPrefix + 'HEIGHT' | translate }}
       </mat-label>
       <input matInput formControlName="height" />
     </mat-form-field>
-
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>
         {{ i18nPrefix + 'TITLE' | translate }}
       </mat-label>
       <input matInput formControlName="title" />
     </mat-form-field>
-
     <mat-slide-toggle formControlName="border" class="toggle-input">
       {{ i18nPrefix + 'SHOW_BORDER' | translate }}
     </mat-slide-toggle>
-
     <mat-slide-toggle formControlName="confirmation" class="toggle-input">
       {{ i18nPrefix + 'SHOW_CONFIRMATION' | translate }}
     </mat-slide-toggle>
-
     <div class="iframe-buttons">
       <button mat-raised-button type="button" (click)="showPreview()">
         {{ i18nPrefix + (previewConfig ? 'UPDATE_PREVIEW' : 'SHOW_PREVIEW') | translate }}
@@ -46,26 +42,21 @@
       </button>
     </div>
   </form>
-
-  <div
-    *ngIf="(!editMode() && iframeConfig) || (editMode() && previewConfig)"
-    class="iframe-display"
-    [class.edit-mode]="editMode()"
-  >
-    <div *ngIf="editMode()" class="preview-title">
+  } @if ((!editMode() && iframeConfig) || (editMode() && previewConfig)) {
+  <div class="iframe-display" [class.edit-mode]="editMode()">
+    @if (editMode()) {
+    <div class="preview-title">
       {{ i18nPrefix + 'PREVIEW_TITLE' | translate }}
     </div>
+    }
     <ng-container
       *ngTemplateOutlet="showIframe; context: { config: editMode() ? previewConfig : iframeConfig }"
     ></ng-container>
   </div>
-
+  }
   <ng-template #showIframe let-config="config">
-    <div
-      *ngIf="config.confirmation && !statusConfirmed(); else embedIframe"
-      class="confirmation-dialog"
-      [style.height]="config.height || '450px'"
-    >
+    @if (config.confirmation && !statusConfirmed()) {
+    <div class="confirmation-dialog" [style.height]="config.height || '450px'">
       <h2>
         {{ i18nPrefix + 'SHOW_EXTERNAL_CONTENT.HEADING' | translate }}
       </h2>
@@ -74,41 +65,38 @@
         {{ i18nPrefix + 'SHOW_EXTERNAL_CONTENT.BUTTON' | translate }}
       </button>
     </div>
-    <ng-template #embedIframe>
-      <iframe
-        *ngIf="config.src; else missingSrc"
-        [class.show-border]="config.border"
-        [attr.src]="config.src | safeUrl"
-        [attr.width]="config.width || '100%'"
-        [attr.height]="config.height || '450px'"
-        [attr.title]="config.title || 'Embedded Content'"
-        loading="lazy"
-        sandbox="allow-same-origin allow-scripts allow-popups"
-        referrerpolicy="no-referrer"
-        allow="encrypted-media"
-        allowfullscreen
-      >
-        {{ i18nPrefix + 'NOT_SUPPORTED' | translate }}
-      </iframe>
-    </ng-template>
-  </ng-template>
-
-  <ng-template #missingSrc>
+    } @else { @if (config.src) {
+    <iframe
+      [class.show-border]="config.border"
+      [attr.src]="config.src | safeUrl"
+      [attr.width]="config.width || '100%'"
+      [attr.height]="config.height || '450px'"
+      [attr.title]="config.title || 'Embedded Content'"
+      loading="lazy"
+      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allow="encrypted-media"
+      allowfullscreen
+    >
+      {{ i18nPrefix + 'NOT_SUPPORTED' | translate }}
+    </iframe>
+    } @else {
     <es-info-message mode="info">
       {{ i18nPrefix + 'MISSING_SRC' | translate }}
     </es-info-message>
+    } }
   </ng-template>
-
   <!-- color + configuration buttons -->
+  @if (editMode()) {
   <es-widget-configuration-buttons
-    *ngIf="editMode()"
     [optionOne]="embedConfigurationOption"
     [pageVariantNode]="pageVariantNode"
     [swimlaneIndex]="swimlaneIndex"
     [updateInProgress]="updateInProgress()"
     (optionOneClicked)="embedWidget()"
   ></es-widget-configuration-buttons>
+  }
 </div>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}

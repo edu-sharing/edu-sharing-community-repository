@@ -6,6 +6,7 @@ import {
     OnInit,
     signal,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     Assignment,
@@ -21,6 +22,7 @@ import {
     Node,
     NodeEvent,
     NodeShare,
+    NodeSuggestion,
     SearchResults,
     SearchService,
     SearchServiceUnwrapped,
@@ -52,11 +54,12 @@ import {
     NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodeHelperService,
     OptionItem,
     OptionItemToggle,
     Scope,
     SearchHelperService,
-    UIService,
+    ToolpermissionPipe,
     Values,
 } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -65,8 +68,15 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { EditorialPageService } from './editorial-page.service';
-import { debounceTime, delay, distinctUntilChanged, first, startWith } from 'rxjs/operators';
+import { EditorialPageService, RECENT_ACTIVITY_EVENT_TYPES } from './editorial-page.service';
+import {
+    debounceTime,
+    delay,
+    distinctUntilChanged,
+    first,
+    startWith,
+    takeUntil,
+} from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -77,6 +87,8 @@ import {
     PrimaryMode,
 } from '../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { UIService } from '../../core-module/rest/services/ui.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -90,6 +102,27 @@ type RouteConfig = {
     standalone: false,
 })
 export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private breakpointObserver = inject(BreakpointObserver);
+    private dialogs = inject(DialogsService);
+    private mdsService = inject(MdsService);
+    private mainNav = inject(MainNavService);
+    private searchFieldService = inject(SearchFieldService);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+    private searchService = inject(SearchService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private searchServiceUnwrapped = inject(SearchServiceUnwrapped);
+    private configService = inject(ConfigService);
+    private searchHelperService = inject(SearchHelperService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private ui = inject(UIService);
+    private authenticationService = inject(AuthenticationService);
+    editorialPageService = inject(EditorialPageService);
+    editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    private nodeHelperService = inject(NodeHelperService);
+    private toolpermissionPipe = inject(ToolpermissionPipe);
+
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
     /**
@@ -99,6 +132,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly TabWidgetActivities = 'virtual:activityType';
     readonly TabWidgetShares = 'virtual:shareDirection';
     readonly TabWidgetAssignment = 'virtual:assignmentType';
+    readonly TabWidgetSuggestions = 'virtual:suggestionType';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -109,7 +143,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
-    sidenavLeft = signal(false);
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -124,7 +157,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      * primary component to show in the center
      */
     mainComponent$ = new BehaviorSubject<MainComponentType>(null);
-    searchValues$ = new BehaviorSubject<Values>({});
+    searchValues$ = new BehaviorSubject<Values>(null);
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
     /**
@@ -136,7 +169,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
-    readonly dataSource = new NodeDataSource<Node | NodeShare | NodeEvent | Assignment>();
+    readonly dataSource = new NodeDataSource<
+        Node | NodeShare | NodeEvent | Assignment | NodeSuggestion
+    >();
     columns = signal<ColumnType>(null);
     selection = signal<SelectionModel<NodeEntriesDataType | null>>(null);
     private sidebarOptionToggle: OptionItemToggle;
@@ -145,25 +180,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         maxItems: number;
     }>(null);
 
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private breakpointObserver: BreakpointObserver,
-        private dialogs: DialogsService,
-        private mdsService: MdsService,
-        private mainNav: MainNavService,
-        private searchFieldService: SearchFieldService,
-        private searchService: SearchService,
-        public editorialSidebarService: EditorialSidebarService,
-        private searchServiceUnwrapped: SearchServiceUnwrapped,
-        private configService: ConfigService,
-        private searchHelperService: SearchHelperService,
-        private optionsHelperService: OptionsHelperService,
-        private ui: UIService,
-        private authenticationService: AuthenticationService,
-        public editorialPageService: EditorialPageService,
-        public editorialBreadcrumbService: EditorialBreadcrumbService,
-    ) {
+    readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
+    readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
+
+    constructor() {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
         });*/
@@ -203,9 +223,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 first(),
             )
             .subscribe((instance) => {
-                instance
-                    .onFiltersButtonClicked()
-                    .subscribe(() => this.sidenavLeft.set(!this.sidenavLeft()));
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
@@ -326,6 +343,26 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     currentScope: 'editorial_suggestions',
                     title: 'EDITORIAL.TITLE_SUGGESTIONS',
                 });
+                this.columns.set({ Default: ListItem.getSuggestionDefaults() });
+                this.mdsDefinition$.next(
+                    await firstValueFrom(
+                        this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY }),
+                    ),
+                );
+                const widget = MdsHelperService.getWidget(
+                    this.TabWidgetSuggestions,
+                    null,
+                    this.mdsDefinition$.value.widgets,
+                );
+                this.mdsGroup.set('editorial_suggestions');
+                if (widget == null) {
+                    console.warn(
+                        'Can not register tabs since widget definition was not found',
+                        this.TabWidgetSuggestions,
+                    );
+                } else {
+                    this.editorialPageService.registerTabsFromWidget(widget);
+                }
             } else if (p.primaryMode === 'assignment') {
                 this.mainNav.patchMainNavConfig({
                     currentScope: 'editorial_assignment',
@@ -367,7 +404,15 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                         this.TabWidgetAssignment,
                     );
                 } else {
-                    this.editorialPageService.registerTabsFromWidget(widget);
+                    const canCreate = await this.toolpermissionPipe.transform(
+                        RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS,
+                    );
+                    // hide created tab if user can not create assignments
+                    this.editorialPageService.registerTabs(
+                        this.editorialPageService
+                            .mapWidgetToTabs(widget)
+                            .filter((t) => canCreate || t.id !== 'created'),
+                    );
                 }
             }
         });
@@ -375,21 +420,32 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     private initSubscription() {
         combineLatest([
-            this.queryParams$.pipe(startWith(this.queryParams$.value)),
-            this.params$.pipe(startWith(this.params$.value)),
+            this.queryParams$,
+            this.params$,
+            this.editorialPageService.observeTabs().pipe(filter((t) => t?.length > 0)),
         ])
-            .pipe(debounceTime(10))
+            .pipe(takeUntil(this.destroyed$), debounceTime(10))
             .subscribe(([params, primary]) => {
                 void this.processCurrentValues(params, primary);
             });
+
+        // when primary mode change -> trigger a full reinit
+        this.params$
+            .pipe(
+                startWith(this.params$.value),
+                debounceTime(0),
+                distinctUntilChanged((a, b) => a?.primaryMode === b?.primaryMode),
+            )
+            .subscribe(() => this.init$.next(false));
         combineLatest([
             this.init$.pipe(
+                takeUntil(this.destroyed$),
+                distinctUntilChanged(),
                 filter((i) => i),
-                first(),
             ),
             this.searchEvent$.pipe(
                 startWith({
-                    searchString: this.searchFieldService.getCurrentInstance()?.getSearchString(),
+                    searchString: this.queryParams$.value.q || '',
                     cleared: false,
                 }),
                 distinctUntilChanged(),
@@ -401,13 +457,12 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             this.searchValues$.pipe(distinctUntilChanged((a, b) => Helper.objectEquals(a, b))),
         ])
             .pipe(
+                takeUntil(this.destroyed$),
                 filter(([init]) => init),
                 distinctUntilChanged(),
                 debounceTime(50),
             )
             .subscribe(([_, search, tab, pagination, mainComponent, values]) => {
-                console.log('THIS MUST BE SHOWN ONCE', search, tab, pagination, values);
-
                 const queryParams = {
                     q: search?.searchString,
                     offset: pagination?.skipCount || null,
@@ -432,6 +487,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
         this.searchFieldService.getCurrentInstance().patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
+            showFiltersButton: !params.mainComponent,
         });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}') as Values;
@@ -446,7 +502,8 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         };
         this.pagination$.next(pagination);
         this.tabSelection$.next(this.editorialPageService.resolveTabForCriteria(criteria));
-        this.searchValues$.next(criteria);
+        // deep copy since it is modified via IgnoredSearchFields!
+        this.searchValues$.next(Helper.deepCopy(criteria));
         let ngsearchword = '';
         if (params.q) {
             ngsearchword = params.q;
@@ -482,6 +539,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.prepareOptions();
         this.dataSource.isLoading = true;
         this.dataSource.reset();
+        this.clearSelection();
 
         this.nodeEntriesRef?.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
@@ -497,17 +555,18 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 mds.widgets,
                 true,
             );
+            const activityTabKey = this.editorialPageService.buildSearchCriteria(
+                this.tabSelection$.value,
+            )[this.TabWidgetActivities]?.[0];
             this.searchService
                 .search({
-                    type: 'recentActivity',
+                    searchMode: 'recentActivity',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
                     ...pagination,
-                    // @TODO: we might need to consider eventType instead?
-                    contentType: this.editorialPageService.buildSearchCriteria(
-                        this.tabSelection$.value,
-                    )[this.TabWidgetActivities] as any,
+                    contentType: 'ALL',
+                    eventType: RECENT_ACTIVITY_EVENT_TYPES[activityTabKey],
                     body: {
                         facetLimit: 5,
                         facetMinCount: 1,
@@ -532,7 +591,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             const maxAge = originalCriteria['virtual:shareMaxAge']?.[0];
             this.searchService
                 .search({
-                    type: 'shares',
+                    searchMode: 'shares',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
@@ -552,10 +611,43 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.dataSource.isLoading = false;
                     this.setNewData(event);
                 });
+        } else if (routeConfig.primaryMode === 'suggestions') {
+            const searchCriteria = this.searchHelperService.convertCritieria(
+                {
+                    ...criteria,
+                    ...(ngsearchword
+                        ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
+                        : {}),
+                },
+                mds.widgets,
+                true,
+            );
+            const tabCriteria = this.editorialPageService.buildSearchCriteria(
+                this.tabSelection$.value,
+            );
+            this.searchService
+                .search<GenericSearchResults>({
+                    searchMode: 'suggestions',
+                    metadataset: DEFAULT,
+                    query: null,
+                    repository: HOME_REPOSITORY,
+                    type: tabCriteria[this.TabWidgetSuggestions] as any,
+                    contentType: 'ALL',
+                    ...pagination,
+                    body: {
+                        facetLimit: 5,
+                        facetMinCount: 1,
+                        criteria: searchCriteria,
+                    },
+                })
+                .subscribe((event) => {
+                    this.dataSource.isLoading = false;
+                    this.setNewData(event);
+                });
         } else if (routeConfig.primaryMode === 'assignment') {
             this.searchService
                 .search({
-                    type: 'assignments',
+                    searchMode: 'assignments',
                     metadataset: DEFAULT,
                     query: null,
                     repository: HOME_REPOSITORY,
@@ -593,8 +685,21 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 });
         }
     }
-    select(event: NodeClickEvent<NodeEntriesDataType>) {
-        this.editorialSidebarService.handleSelect(this.nodeEntriesRef, event, Scope.EditorialPage);
+    click(event: NodeClickEvent<NodeEntriesDataType>) {
+        if (this.nodeHelperService.directActionOnSingleClick(event.element as Node)) {
+            this.nodeHelperService.navigateToNode(event);
+            return;
+        }
+        const previewConfig =
+            this.params$.value?.primaryMode === 'suggestions'
+                ? { groupId: 'preview_sidebar_edit', editorMode: 'nodes' as const }
+                : undefined;
+        this.editorialSidebarService.handleSelect(
+            this.nodeEntriesRef,
+            event,
+            Scope.EditorialPage,
+            previewConfig,
+        );
     }
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {
@@ -650,16 +755,19 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        if (
-            this.nodeEntriesRef &&
-            this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode)
-        ) {
-            this.nodeEntriesRef.addVirtualNodes(
-                this.editorialPageService.getVirtualNodes(this.params$.value.primaryMode),
-            );
+        const tabId = this.editorialPageService.getTabId(this.tabSelection$.value);
+        const virtualNodes = this.editorialPageService.getVirtualNodes(
+            this.params$.value.primaryMode,
+            tabId,
+        );
+        if (this.nodeEntriesRef && virtualNodes) {
+            this.nodeEntriesRef.addVirtualNodes(virtualNodes);
+            this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
         }
     }
-
+    openItem(element: NodeClickEvent<NodeEntriesDataType>) {
+        void this.nodeHelperService.navigateToNode(element);
+    }
     private clearSelection() {
         this.nodeEntriesRef?.getSelection()?.clear();
         this.editorialSidebarService.sidebarOpened.set(false);

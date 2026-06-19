@@ -1,0 +1,12 @@
+@if (data?.items !== undefined) {
+<div class="h5p-wrapper">
+  <iframe
+    #iframeEl
+    [title]="node?.title ?? 'H5P'"
+    class="frame"
+    [src]="sanitizedUrl"
+    allow="camera; microphone; fullscreen"
+    allowfullscreen
+  ></iframe>
+</div>
+}

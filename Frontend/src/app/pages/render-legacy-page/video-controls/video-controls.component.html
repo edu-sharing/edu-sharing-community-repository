@@ -1,8 +1,5 @@
-<div
-  *ngIf="sliderOptions && hasRequiredPermissions"
-  class="selection"
-  [class.small]="size === 'small'"
->
+@if (sliderOptions && hasRequiredPermissions) {
+<div class="selection" [class.small]="size === 'small'">
   <mat-expansion-panel class="mat-elevation-z0">
     <mat-expansion-panel-header>
       <mat-panel-title>
@@ -74,13 +71,17 @@
             </mat-form-field>
           </div>
           <div class="save">
-            <button mat-raised-button color="primary" (click)="save()" *ngIf="!isLoading">
+            @if (!isLoading) {
+            <button mat-raised-button color="primary" (click)="save()">
               {{ 'SAVE' | translate }}
             </button>
-            <es-spinner-small *ngIf="isLoading">{{ 'SAVE' | translate }}</es-spinner-small>
+            } @if (isLoading) {
+            <es-spinner-small>{{ 'SAVE' | translate }}</es-spinner-small>
+            }
           </div>
         </form>
       </div>
     </ng-template>
   </mat-expansion-panel>
 </div>
+}

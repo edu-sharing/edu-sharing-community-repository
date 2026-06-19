@@ -131,8 +131,7 @@
       "NODE_OVERRIDE_CONFIG_TITLE": "Node-Override",
       "NODE_OVERRIDE_CONFIG_HINT": "Override-Konfiguration für den aktuellen Cluster-Knoten (IP-Adresse überprüfen!)",
       "DEFAULTS_OVERRIDE_CONFIG_TITLE": "Helm Config override",
-      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Values configured via helm deployment override",
-
+      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Override für Einstellungen, die via helm deployment konfiguriert wurden.",
       "SIZE": "Editor-Größe",
       "SIZE_MEDIUM": "Normal",
       "SIZE_LARGE": "Groß",
@@ -382,7 +381,9 @@
       "UPLOAD_TEMP_DONE": "Datei wurde unter {{filename}} auf dem Server abgelegt",
       "AUTHENTICATE": "Sitzung starten",
       "AUTHENTICATE_AS_USER": "Sitzung als nutzende Person starten",
-      "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung mit dem gewählten Konto gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?"
+      "AUTHENTICATE_AS_USER_DETAILS": "Wenn sie fortfahren, wird die bestehende Admin-Sitzung beendet und eine Sitzung mit dem gewählten Konto gestartet. Um die Admin-Rechte wieder zu erlangen, müssen Sie sich erneut anmelden. Fortfahren?",
+      "REFRESH_EDU_GROUP_CACHE": "Edu Group Cache aktualisieren",
+      "EDU_GROUP_CACHE_REFRESHED": "Edu Group Cache wurde aktualisiert"
     },
     "BROWSER": {
       "NODE_BROWSER": "Node-Browser",
@@ -495,13 +496,6 @@
       "NODES_MEDIACENTER_INFO": "Die gezeigten Statistiken sind nur für den Abruf aktueller Daten vorgesehen. Für den Zugriff auf historische Daten nutzen Sie bitte die bereitgestellten Dateien unter \"Monatlich/Jährlich\".",
       "NODES_APPLY": "Auswertung starten",
       "CUSTOM_GROUPS": "Nach Kriterium",
-      "VIEWS": "Seitenaufrufe",
-      "VIEWS_EMBEDDED": "Einbettungen",
-      "VIEWS_COLLECTION": "Sammlungs-Aufrufe",
-      "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
-      "DOWNLOADS": "Downloads",
-      "VIEWS_PLAY_MEDIA": "Wiedergaben",
-      "USER_LOGINS": "Logins",
       "GROUP_BY": "Gruppieren nach",
       "FROM": "Start-Zeit",
       "TO": "End-Zeit",
@@ -553,7 +547,8 @@
         "VIEW_MATERIAL_EMBEDDED": "Einbettungen",
         "VIEW_COLLECTION": "Sammlungs-Aufrufe",
         "OPEN_EXTERNAL_LINK": "Externe Linkaufrufe",
-        "DOWNLOAD_MATERIAL": "Downloads"
+        "DOWNLOAD_MATERIAL": "Downloads",
+        "VIEW_MATERIAL_GDPR_CONFIRMED": "DSGVO-Bestätigungen"
       }
     },
     "MEDIACENTER": {

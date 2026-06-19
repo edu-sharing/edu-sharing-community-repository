@@ -19,7 +19,7 @@ import { Helper } from '../core-module/rest/helper';
 import { HttpClient } from '@angular/common/http';
 import { MessageType } from '../util/message-type';
 import { Toast } from './toast';
-import { ComponentFactoryResolver, Injectable, ViewContainerRef } from '@angular/core';
+import { ComponentFactoryResolver, Injectable, ViewContainerRef, inject } from '@angular/core';
 import { BridgeService } from './bridge.service';
 import {
     AuthorityProfile,
@@ -79,44 +79,24 @@ export type HandleState = {
 };
 @Injectable({ providedIn: 'root' })
 export class NodeHelperService extends NodeHelperServiceBase {
+    private componentFactoryResolver = inject(ComponentFactoryResolver);
+    private authenticationService = inject(AuthenticationService);
+    private config = inject(ConfigService);
+    private dialogsService = inject(DialogsService);
+    private rest = inject(RestConnectorService);
+    private bridge = inject(BridgeService);
+    private http = inject(HttpClient);
+    private connector = inject(RestConnectorService);
+    private nodeService = inject(RestNodeService);
+    private toastGlobal = inject(Toast);
+    private sessionStorage = inject(SessionStorageService);
+    private storage = inject(TemporaryStorageService);
+    private trackingV1Service = inject(TrackingV1Service);
+    private location = inject(Location);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+
     private viewContainerRef: ViewContainerRef;
-    constructor(
-        translate: TranslateService,
-        apiHelpersService: ApiHelpersService,
-        networkService: NetworkService,
-        configService: ConfigService,
-        repoUrlService: RepoUrlService,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private authenticationService: AuthenticationService,
-        private config: ConfigService,
-        configuration: EduSharingUiConfiguration,
-        private dialogsService: DialogsService,
-        private rest: RestConnectorService,
-        private bridge: BridgeService,
-        private http: HttpClient,
-        private connector: RestConnectorService,
-        private nodeService: RestNodeService,
-        toast: ToastUi,
-        private toastGlobal: Toast,
-        router: Router,
-        platformLocation: PlatformLocation,
-        private sessionStorage: SessionStorageService,
-        private storage: TemporaryStorageService,
-        private trackingV1Service: TrackingV1Service,
-        private location: Location,
-    ) {
-        super(
-            translate,
-            apiHelpersService,
-            networkService,
-            configService,
-            configuration,
-            repoUrlService,
-            platformLocation,
-            toast,
-            router,
-        );
-    }
+
     setViewContainerRef(viewContainerRef: ViewContainerRef) {
         this.viewContainerRef = viewContainerRef;
     }
@@ -526,7 +506,7 @@ export class NodeHelperService extends NodeHelperServiceBase {
                 data = data.reference;
             }
             if (item.name === RestConstants.CM_CREATOR) {
-                return new NodePersonNamePipe(this.config).transform(data);
+                return this.nodePersonNamePipe.transform(data);
             }
             if (item.name === RestConstants.CM_NAME) {
                 return data.name;
@@ -637,8 +617,19 @@ export class NodeHelperService extends NodeHelperServiceBase {
     }
 
     referenceOriginalExists(node: Node | CollectionReference) {
-        if (node == null) return true;
+        if (node == null) {
+            return true;
+        }
         return node.hasOwnProperty('originalId') ? (node as any).originalId != null : true;
+    }
+
+    /**
+     * Returns the original node id for nodes carrying a `ccm:original` pointer
+     * (collection references, submission file contents, …). Falls back to the
+     * node's own ref id if the property is not set.
+     */
+    getOriginalId(node: Node): string {
+        return node?.properties?.[RestConstants.CCM_PROP_IO_ORIGINAL]?.[0] ?? node?.ref?.id;
     }
 
     /**

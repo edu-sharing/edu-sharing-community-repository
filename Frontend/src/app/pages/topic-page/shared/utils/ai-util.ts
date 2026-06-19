@@ -1,5 +1,5 @@
-import { ChatCompletionResult, MdsConfig } from 'ngx-edu-sharing-b-api';
-import { BapiConfig } from '../types/bapi-config';
+import { CreateChatCompletionResponse, MdsConfig } from 'ngx-edu-sharing-b-api';
+import { BapiChatCompletionConfig } from '../types/bapi-chat-completion-config';
 import { BapiConfigObject } from '../types/bapi-config-object';
 
 /**
@@ -7,7 +7,7 @@ import { BapiConfigObject } from '../types/bapi-config-object';
  *
  * @param completionResult
  */
-export const retrieveResultString = (completionResult: ChatCompletionResult): string => {
+export const retrieveResultString = (completionResult: CreateChatCompletionResponse): string => {
     return completionResult.choices[0]?.message?.content ?? '';
 };
 
@@ -57,12 +57,12 @@ export const retrieveBapiConfigObject = (
  *
  * @param content
  */
-export const retrieveChatCompletionObject = (content: string): BapiConfig => {
+export const retrieveChatCompletionObject = (content: string): BapiChatCompletionConfig => {
     if (!content) {
         return {};
     }
     return {
-        chatCompletion: {
+        prompt: {
             messages: [
                 {
                     role: 'user',

@@ -31,7 +31,7 @@
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.name>
 
     <docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
-      5.2.0
+      5.2.4
     </docker.edu_sharing.community.common.alfresco.transform.core.aio.tag>
 
     <docker.edu_sharing.community.common.alfresco.search.service.name>
@@ -47,7 +47,7 @@
     </docker.edu_sharing.community.common.alfresco.share.name>
 
     <docker.edu_sharing.community.common.alfresco.share.tag>
-      25.2.0
+      25.3.0
     </docker.edu_sharing.community.common.alfresco.share.tag>
 
     <docker.edu_sharing.community.common.postgresql.name>
@@ -119,11 +119,11 @@
     </docker.edu_sharing.community.common.varnish.exporter.tag>
 
     <docker.from.openjdk.17.liberica.debian>
-      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.16
+      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.19
     </docker.from.openjdk.17.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
-      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.2.0-2
+      ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:25.3.0-3
     </docker.from.edu_sharing.community.common.alfresco.repository>
 
     <helm.kube.version>&gt;= 1.20.0-0</helm.kube.version>

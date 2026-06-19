@@ -10,14 +10,12 @@
     <ng-content select="[slot=menu]"></ng-content>
   </div>
 
-  <div
-    class="menu-content"
-    *ngIf="selectedMenuItem !== ''"
-    [style.min-height.px]="sideMenuWrapper.offsetHeight + 20"
-  >
+  @if (selectedMenuItem !== '') {
+  <div class="menu-content" [style.min-height.px]="sideMenuWrapper.offsetHeight + 20">
     <button mat-icon-button class="close-btn" [disabled]="closeDisabled()" (click)="closeContent()">
-      <i esIcon="close"></i>
+      <i esIcon="close" [aria]="true"></i>
     </button>
     <ng-content select="[slot=content]"></ng-content>
   </div>
+  }
 </div>

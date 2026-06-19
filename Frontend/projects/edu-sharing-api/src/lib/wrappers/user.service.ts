@@ -1,15 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
-import { Observable, Subject, using } from 'rxjs';
-import { first, map, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import {
+    distinctUntilKeyChanged,
+    first,
+    map,
+    startWith,
+    switchMap,
+    take,
+    tap,
+} from 'rxjs/operators';
 import { User } from '../api/models/user';
 import { UserEntry } from '../api/models/user-entry';
 import { UserProfileEdit } from '../api/models/user-profile-edit';
 import { IamV1Service } from '../api/services';
+import * as Constants from '../constants';
 import { HOME_REPOSITORY, ME } from '../constants';
 import { switchReplay } from '../utils/rxjs-operators/switch-replay';
 import { AuthenticationService, LoginInfo } from './authentication.service';
-import * as Constants from '../constants';
 
 export { UserEntry, User };
 
@@ -22,6 +30,9 @@ export interface CurrentUserInfo {
     providedIn: 'root',
 })
 export class UserService {
+    private authentication = inject(AuthenticationService);
+    private iamApi = inject(IamV1Service);
+
     /**
      * Triggers when the profile of the current user is edited.
      *
@@ -31,7 +42,7 @@ export class UserService {
     /** The currently logged in user. */
     private readonly currentUser$;
 
-    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {
+    constructor() {
         this.currentUser$ = this.createCurrentUser();
     }
 
@@ -124,7 +135,13 @@ export class UserService {
 
     private createCurrentUser(): Observable<UserEntry | null> {
         return rxjs
-            .merge(this.authentication.observeUserChanges(), this.currentUserProfileChangesSubject)
+            .merge(
+                this.authentication.observeUserChanges(),
+                this.authentication
+                    .observeLoginInfo()
+                    .pipe(distinctUntilKeyChanged('isValidLogin')),
+                this.currentUserProfileChangesSubject,
+            )
             .pipe(
                 startWith(void 0 as void),
                 switchMap(() => this.authentication.observeLoginInfo().pipe(take(1))),

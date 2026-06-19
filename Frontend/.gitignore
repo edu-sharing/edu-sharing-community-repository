@@ -10,6 +10,8 @@
 # dependencies
 node_modules
 /bower_components
+# sub-packages must not self-install; they resolve deps from the root
+projects/*/package-lock.json
 
 # IDEs and editors
 /.idea
@@ -55,3 +57,5 @@ src/app/rest
 /playwright/.cache/
 /playwright/storage/*.json
 /playwright/out
+
+/Frontend/projects/rendering-service-lib/dist/

@@ -1,11 +1,5 @@
 package org.edu_sharing.service.authentication;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -29,10 +23,15 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 
@@ -199,7 +198,6 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 			EduGroup tmEduGroup = new EduGroup();
 			tmEduGroup.setGroupname(eduGroup.getGroupname() + "_" + scope);
 			tmEduGroup.setGroupDisplayName(eduGroup.getGroupDisplayName() + "_" + scope);
-			tmEduGroup.setFolderName(tmEduGroup.getGroupDisplayName().replaceAll("GROUP_",""));
 			tmEduGroup.setScope(scope);
 			//try to get root folder of edugroups
 			ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroup.getFolderId()));
@@ -221,7 +219,6 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 				EduGroup tmEduGroup = new EduGroup();
 				tmEduGroup.setGroupname(eduGroup.getGroupname() + "_" + scope);
 				tmEduGroup.setGroupDisplayName(eduGroup.getGroupDisplayName() + "_" + scope);
-				tmEduGroup.setFolderName(tmEduGroup.getGroupDisplayName().replaceAll("GROUP_",""));
 				tmEduGroup.setScope(scope);
 				if(!scopedEduGroups.contains(tmEduGroup)){
 					
@@ -229,7 +226,10 @@ public class ScopeUserHomeServiceImpl implements ScopeUserHomeService{
 					ChildAssociationRef primaryParent = nodeService.getPrimaryParent(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,eduGroup.getFolderId()));
 					
 					EduGroup scopedEduGroup = authorityService.getOrCreateEduGroup(tmEduGroup,eduGroup, primaryParent.getParentRef().getId());
-				
+				    if(scopedEduGroup == null){
+                      logger.warn(tmEduGroup.getGroupname() +" could not be resolved/created");
+                      continue;
+                    }
 					
 					RunAsWork<Void> runAs = new RunAsWork<Void>() {
 						@Override

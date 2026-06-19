@@ -293,35 +293,21 @@ $imagePath: '../../../../assets/images/collections/';
     position: relative;
     min-height: 120px;
     padding: 16px;
-    color: #fff;
+    color: #000;
     transition: $transitionNormal all;
-    --mdc-outlined-text-field-hover-label-text-color: #eee;
+
+    --mat-form-field-outlined-hover-label-text-color: #333;
+
     @include placeholder {
-        color: #ccc;
+        color: #333;
     }
+
     input,
     textarea {
         background-color: transparent;
     }
 }
-.collection-new-bg {
-    position: absolute;
-    width: 100%;
-    height: calc(100% - 150px);
-    left: 0;
-    top: 0;
-    background-color: rgba(0, 0, 0, 0.15);
-}
-.dark-color {
-    color: #000;
-    .collection-new-bg {
-        background-color: rgba(255, 255, 255, 0.15);
-    }
-    @include placeholder {
-        color: #333;
-    }
-    --mdc-outlined-text-field-hover-label-text-color: #222;
-}
+
 .collection-new-preview-headline {
     font-size: 200%;
 }
@@ -362,12 +348,6 @@ $imagePath: '../../../../assets/images/collections/';
 .dialog-basic-area {
     padding: $cardPadding;
     padding-bottom: 15px;
-}
-
-.dialog-dark-area {
-    padding: 16px;
-    padding-bottom: 8px;
-    background: #efefef;
 }
 
 .button-area {

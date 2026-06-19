@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import {
     DialogButton,
     Node,
@@ -18,17 +18,18 @@ import { NodeTemplateDialogData, NodeTemplateDialogResult } from './node-templat
     standalone: false,
 })
 export class NodeTemplateDialogComponent implements OnInit {
+    data = inject<NodeTemplateDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<NodeTemplateDialogData, NodeTemplateDialogResult>>(CardDialogRef);
+    private nodeService = inject(RestNodeService);
+    private toast = inject(Toast);
+
     @ViewChild('mds') mdsRef: MdsEditorWrapperComponent;
 
     templateNode: Node;
     enabled: boolean;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: NodeTemplateDialogData,
-        private dialogRef: CardDialogRef<NodeTemplateDialogData, NodeTemplateDialogResult>,
-        private nodeService: RestNodeService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
     }
 

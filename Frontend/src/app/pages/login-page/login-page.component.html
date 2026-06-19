@@ -1,5 +1,7 @@
-<es-global-progress *ngIf="isLoading"></es-global-progress>
-<div *ngIf="!isLoading && !show2FaDialog">
+@if (isLoading) {
+<es-global-progress></es-global-progress>
+} @if (!isLoading && !show2FaDialog) {
+<div>
   <es-card
     role="main"
     esSkipTarget="MAIN_CONTENT"
@@ -10,10 +12,10 @@
     modal="auto"
     [isCancelable]="bridge.isRunningCordova()"
     (cancel)="appBack()"
-    [buttons]="showProviders ? [] : buttons"
-    [width]="showProviders ? 'xxlarge' : 'normal'"
-    [height]="showProviders ? '' : 'large'"
-    [attr.showProviders]="showProviders"
+    [buttons]="showProviders() ? [] : buttons"
+    [width]="showProviders() ? (providersOnlyMode() ? 'normal' : 'xxlarge') : 'normal'"
+    [height]="showProviders() ? '' : 'large'"
+    [attr.showProviders]="showProviders()"
   >
     <div class="login-content">
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
@@ -24,8 +26,9 @@
           alt="{{ 'LOGIN.APP_LOGO' | translate }}"
         />
       </div>
-      <div class="groups">
-        <div class="providers-select" *ngIf="showProviders">
+      <div class="groups" [class.providers-only]="providersOnlyMode()">
+        @if (showProviders()) {
+        <div class="providers-select">
           <div class="group-heading">{{ 'LOGIN.PROVIDER_SELECT_GROUP' | translate }}</div>
           <div class="group-description">
             {{ 'LOGIN.PROVIDER_SELECT_GROUP_DESCRIPTION' | translate }}
@@ -44,21 +47,18 @@
               #autoProvider="matAutocomplete"
               [displayWith]="currentProviderDisplay"
             >
-              <mat-optgroup
-                *ngFor="let group of filteredProviders | async"
-                [label]="group.group.name"
-              >
-                <mat-option
-                  *ngFor="let option of group.providers"
-                  [value]="option"
-                  (onSelectionChange)="currentProvider = option"
-                >
+              @for (group of filteredProviders | async; track group) {
+              <mat-optgroup [label]="group.group.name">
+                @for (option of group.providers; track option) {
+                <mat-option [value]="option" (onSelectionChange)="currentProvider = option">
                   <div class="mat-option-primary">{{ option.name }}</div>
                   <div class="mat-option-secondary">
                     {{ option.url | esUrl : { mode: 'domain' } }}
                   </div>
                 </mat-option>
+                }
               </mat-optgroup>
+              }
             </mat-autocomplete>
           </mat-form-field>
           <div class="sso-group">
@@ -70,15 +70,20 @@
             </div>
           </div>
         </div>
+        } @if (!showProviders() || showLocalLogin()) {
         <div class="login-form">
-          <div class="group-heading" *ngIf="showProviders">
+          @if (showProviders()) {
+          <div class="group-heading">
             {{ 'LOGIN.LOGIN_GROUP' | translate }}
           </div>
-          <div class="group-description" *ngIf="showProviders">
+          } @if (showProviders()) {
+          <div class="group-description">
             {{ 'LOGIN.LOGIN_GROUP_DESCRIPTION' | translate }}
           </div>
+          }
           <form (ngSubmit)="login()" #loginForm>
-            <mat-form-field floatLabel="always" *ngIf="!isSafeLogin">
+            @if (!isSafeLogin) {
+            <mat-form-field floatLabel="always">
               <mat-label>{{ 'LOGIN.USERNAME' | translate }}</mat-label>
               <input
                 matInput
@@ -93,6 +98,7 @@
                 autocapitalize="none"
               />
             </mat-form-field>
+            }
             <div class="password-field">
               <es-input-password
                 #passwordInput
@@ -103,78 +109,84 @@
                 (keydown.enter)="login()"
                 [(value)]="password"
               ></es-input-password>
-              <div
-                class="forgot-password"
-                *ngIf="
-                  (config.register.local && config.register.recoverPassword !== false) ||
-                  config.register.recoverPassword === true ||
-                  config.register.recoverUrl
-                "
-              >
+              @if ( (config.register.local && config.register.recoverPassword !== false) ||
+              config.register.recoverPassword === true || config.register.recoverUrl ) {
+              <div class="forgot-password">
+                @if (config.register.local || config.register.recoverPassword === true) {
                 <a
-                  *ngIf="config.register.local || config.register.recoverPassword === true"
                   cdkMonitorElementFocus
                   [routerLink]="['/' + ROUTER_PREFIX + 'register', 'request']"
                 >
                   {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
                 </a>
-                <a
-                  *ngIf="!(config.register.local || config.register.recoverPassword === true)"
-                  [href]="config.register.recoverUrl"
-                  cdkMonitorElementFocus
-                >
+                } @if (!(config.register.local || config.register.recoverPassword === true)) {
+                <a [href]="config.register.recoverUrl" cdkMonitorElementFocus>
                   {{ 'LOGIN.RECOVER_PASSWORD' | translate }}
                 </a>
+                }
               </div>
+              }
             </div>
           </form>
-          <div class="useUrl" *ngIf="config.loginUrl && !showProviders && !isSafeLogin">
+          @if (config.loginUrl && !showProviders() && !isSafeLogin) {
+          <div class="useUrl">
             <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
             <es-mat-link (clickOnLink)="openLoginUrl()" class="goto">
               <span>{{ 'LOGIN.USE_URL_LINK' | translate }}</span>
               <i class="material-icons">arrow_forward</i>
             </es-mat-link>
           </div>
-          <div class="group-actions" *ngIf="showProviders">
-            <button mat-button color="primary" *ngIf="canRegister()" (click)="register()">
+          } @if (showProviders()) {
+          <div class="group-actions">
+            @if (canRegister()) {
+            <button mat-button color="primary" (click)="register()">
               {{ 'LOGIN.REGISTER_TEXT' | translate }}
             </button>
+            }
             <button mat-raised-button color="primary" [class.disabled]="disabled" (click)="login()">
               {{ 'LOGIN.LOGIN' | translate }}
             </button>
           </div>
+          } @if (isSafeLogin && loginSafeFailed) {
           <div
-            *ngIf="isSafeLogin && loginSafeFailed"
             innerHTML="{{
               'LOGIN.ERROR_SAFE_DETAIL'
                 | translate : { safeAccountUrl: config.register.recoverUrlSafe }
             }}"
           ></div>
+          }
         </div>
+        }
       </div>
-      <div class="oauth-providers" *ngIf="registeredOauthProviders?.length">
+      @if (registeredOauthProviders?.length) {
+      <div class="oauth-providers">
         <h4 class="mat-heading-4">{{ 'LOGIN.OAUTH.TITLE' | translate }}</h4>
         <div>
+          @for (provider of registeredOauthProviders; track provider) {
           <a
             matTooltip="{{ 'LOGIN.OAUTH.USE_PROVIDER' | translate : { provider: provider.name } }}"
             [href]="'/edu-sharing/sso?id=' + encodeURIComponent(provider.registrationId)"
-            *ngFor="let provider of registeredOauthProviders"
             ><img
               [src]="'assets/images/oauth/' + provider.name.toLowerCase() + '.svg'"
               [alt]="provider.name"
           /></a>
+          }
         </div>
       </div>
+      }
     </div>
-    <div class="login-help" *ngIf="showProviders">
+    @if (showProviders()) {
+    <div class="login-help">
       <div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div>
     </div>
+    }
   </es-card>
   <es-powered-by
     mode="color"
     [ngClass]="{ 'powered-down': config.register.local || config.register.registerUrl }"
   ></es-powered-by>
 </div>
+}
 <ng-template #faConfirmRef>
   <form class="fa-confirm" [formGroup]="faConfirm" (ngSubmit)="show2FaDialog.close('NEXT')">
     <h3 class="mat-heading-6">

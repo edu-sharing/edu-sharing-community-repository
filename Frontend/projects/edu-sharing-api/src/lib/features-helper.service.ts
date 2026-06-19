@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AboutService } from './wrappers/about.service';
 import { AuthenticationService } from './wrappers/authentication.service';
@@ -11,7 +11,8 @@ import { RestConstants } from './rest-constants';
     providedIn: 'root',
 })
 export class FeaturesHelperService {
-    constructor(private auth: AuthenticationService, private about: AboutService) {}
+    private auth = inject(AuthenticationService);
+    private about = inject(AboutService);
 
     /**
      * returns true if the current user can access ai features

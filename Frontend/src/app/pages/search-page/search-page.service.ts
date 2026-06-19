@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
     ClientConfig,
@@ -34,7 +34,7 @@ import {
 } from '../../main/navigation/search-field/search-field.service';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageResults } from './search-page-results.service';
-import { UserModifiableValuesService } from './user-modifiable-values';
+import { UserModifiableValue, UserModifiableValuesService } from './user-modifiable-values';
 import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { Sort } from '@angular/material/sort';
 
@@ -59,13 +59,24 @@ interface AddToCollectionMode {
 
 @Injectable()
 export class SearchPageService implements OnDestroy {
+    private collection = inject(CollectionService);
+    private config = inject(ConfigService);
+    private mainNavService = inject(MainNavService);
+    private mds = inject(MdsService);
+    private navigationScheduler = inject(NavigationScheduler);
+    private network = inject(NetworkService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private searchField = inject(SearchFieldService);
+    private userModifiableValues = inject(UserModifiableValuesService);
+
     readonly availableRepositories = new BehaviorSubject<Repository[]>(null);
     readonly activeRepository = this.userModifiableValues.createString();
     readonly showingAllRepositories = new BehaviorSubject<boolean>(null);
     readonly availableMetadataSets = new BehaviorSubject<MetadataSetInfo[]>(null);
     readonly activeMetadataSet = this.userModifiableValues.createString();
     // Whether filters are visible---either as sidebar or dialog on mobile.
-    readonly filterBarIsVisible = this.userModifiableValues.createBoolean(false);
+    filterBarIsVisible: UserModifiableValue<boolean> = null;
     readonly selection = new BehaviorSubject<Node[]>(null);
     readonly searchFilters = this.userModifiableValues.createDict();
     readonly searchString = this.userModifiableValues.createString();
@@ -119,19 +130,6 @@ export class SearchPageService implements OnDestroy {
     }
 
     private readonly destroyed = new Subject<void>();
-
-    constructor(
-        private collection: CollectionService,
-        private config: ConfigService,
-        private mainNavService: MainNavService,
-        private mds: MdsService,
-        private navigationScheduler: NavigationScheduler,
-        private network: NetworkService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private searchField: SearchFieldService,
-        private userModifiableValues: UserModifiableValuesService,
-    ) {}
 
     ngOnDestroy(): void {
         this.destroyed.next();
@@ -189,7 +187,6 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.registerQueryParameter('mds', this.route);
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
-        this.filterBarIsVisible.registerSessionStorage('search-page-filters');
         this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
     }
 
@@ -210,7 +207,10 @@ export class SearchPageService implements OnDestroy {
         this.showingAllRepositories.subscribe((showingAllRepositories) => {
             if (showingAllRepositories) {
                 this.activeRepository.setOverrideValue(null);
-                this.filterBarIsVisible.resetUserValue();
+                // Filters are repository specific and not available across all repositories, so
+                // force the filter bar closed (overriding a `true` system default) when switching
+                // to the all-repositories view.
+                this.filterBarIsVisible.setUserValue(false);
             } else {
                 this.activeRepository.unsetOverrideValue();
             }
@@ -271,20 +271,17 @@ export class SearchPageService implements OnDestroy {
             {
                 placeholder: 'SEARCH.SEARCH_STUFF',
                 autoFocus: autoFocusSearchField,
+                filterBarVisibleStorageKey: 'search-page-filters',
             },
             this.destroyed,
         );
+        this.filterBarIsVisible = searchFieldInstance.filterBarIsVisible;
         this.showingAllRepositories.subscribe((showingAllRepositories) => {
             searchFieldInstance.patchConfig({
                 showFiltersButton: !showingAllRepositories,
                 enableFiltersAndSuggestions: !showingAllRepositories,
             });
         });
-        searchFieldInstance
-            .onFiltersButtonClicked()
-            .subscribe(() =>
-                this.filterBarIsVisible.setUserValue(!this.filterBarIsVisible.getValue()),
-            );
         searchFieldInstance
             .onSearchTriggered()
             .subscribe(({ searchString }) => this.searchString.setUserValue(searchString || null));

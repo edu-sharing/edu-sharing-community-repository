@@ -35,6 +35,7 @@ public class SecurityConfigurationBasic {
     @Bean
     @Order
     public SecurityFilterChain basicFilterChain(HttpSecurity http) throws Exception {
+
         http.securityMatcher(new OrRequestMatcher(new AntPathRequestMatcher("/rest"), new AntPathRequestMatcher("/rest/**")))
                 .authorizeHttpRequests(authorize ->
                         /*

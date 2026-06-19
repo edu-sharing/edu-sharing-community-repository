@@ -2,6 +2,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import {
     AfterViewInit,
     Component,
+    inject,
     Input,
     OnChanges,
     OnInit,
@@ -20,6 +21,9 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
     standalone: false,
 })
 export class AppComponent implements OnChanges, AfterViewInit, OnInit {
+    private renderHelperService = inject(RenderHelperService);
+    private translations = inject(TranslationsService);
+
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
     @Input() signature: string;
@@ -31,7 +35,12 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() assets_url: string = '';
     @Input() resource_url: string = '';
     @Input() preview_url: string = '';
+    @Input() signature_algorithm: string | null = null;
+    @Input() component_height: number | null = null;
+    @Input() footer_height: number = 100;
+    @Input() target_blank: boolean = false;
     showInlineMetadata = false;
+    overlayHeight = '300px';
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
 
@@ -40,11 +49,9 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     assetUrl: string;
     resourceUrl: string;
     previewUrl: string;
+    targetBlank: boolean;
 
-    constructor(
-        private renderHelperService: RenderHelperService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.translations.initialize().subscribe(() => {});
     }
 
@@ -60,6 +67,12 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.assetUrl = this.assets_url;
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
+        this.targetBlank = this.target_blank;
+        if (this.component_height !== null && this.component_height > 0) {
+            const containerHeight = this.component_height - this.footer_height;
+            document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
+            this.overlayHeight = `${Math.min(300, containerHeight)}px`;
+        }
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -69,8 +82,11 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
                 this.signature,
                 this.jwt,
                 this.render_url,
+                this.signature_algorithm ?? 'SHA512withRSA',
             );
-            data.node.preview.url = this.previewUrl;
+            if (this.previewUrl !== '') {
+                data.node.preview.url = this.previewUrl;
+            }
             this.node.set(data.node);
             this.request.set(data.request);
         }

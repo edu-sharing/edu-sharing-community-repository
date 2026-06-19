@@ -45,22 +45,31 @@ $toggleHeight: 39px;
             font-weight: bold;
         }
     }
+    es-spinner-small {
+        --mdc-circular-progress-active-indicator-color: var(--aiColorText);
+        margin-left: 10px;
+        display: flex;
+    }
     mat-slide-toggle {
         display: flex;
         --textLight: var(--aiColorText);
-        --mdc-switch-selected-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
-        --mdc-switch-selected-focus-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
-        --mdc-switch-selected-hover-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
-        --mdc-switch-selected-pressed-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
-        --mdc-switch-unselected-handle-color: var(--aiColorText);
-        --mdc-switch-unselected-focus-handle-color: var(--aiColorText);
-        --mdc-switch-unselected-hover-handle-color: var(--aiColorText);
-        --mdc-switch-unselected-pressed-handle-color: var(--aiColorText);
-        --mdc-switch-unselected-icon-color: var(--aiColor);
-        --mdc-switch-selected-handle-color: var(--aiColorText);
-        --mdc-switch-selected-focus-handle-color: var(--aiColorText);
-        --mdc-switch-selected-hover-handle-color: var(--aiColorText);
-        --mdc-switch-selected-pressed-handle-color: var(--aiColorText);
-        --mdc-switch-selected-icon-color: var(--aiColor);
+        --mat-slide-toggle-selected-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mat-slide-toggle-selected-focus-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mat-slide-toggle-selected-hover-track-color: color-mix(in srgb, var(--aiColor), #fff 55%);
+        --mat-slide-toggle-selected-pressed-track-color: color-mix(
+            in srgb,
+            var(--aiColor),
+            #fff 55%
+        );
+        --mat-slide-toggle-unselected-handle-color: var(--aiColorText);
+        --mat-slide-toggle-unselected-focus-handle-color: var(--aiColorText);
+        --mat-slide-toggle-unselected-hover-handle-color: var(--aiColorText);
+        --mat-slide-toggle-unselected-pressed-handle-color: var(--aiColorText);
+        --mat-slide-toggle-unselected-icon-color: var(--aiColor);
+        --mat-slide-toggle-selected-handle-color: var(--aiColorText);
+        --mat-slide-toggle-selected-focus-handle-color: var(--aiColorText);
+        --mat-slide-toggle-selected-hover-handle-color: var(--aiColorText);
+        --mat-slide-toggle-selected-pressed-handle-color: var(--aiColorText);
+        --mat-slide-toggle-selected-icon-color: var(--aiColor);
     }
 }

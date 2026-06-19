@@ -1,37 +1,32 @@
-<ng-container *ngIf="isCollection && collectionIcons">
-  <i
-    [matTooltip]="
-      'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-    "
-    [altText]="
-      'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
-    "
-    [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
-  ></i>
-</ng-container>
-<ng-container *ngIf="!(isCollection && collectionIcons)">
-  <ng-container *ngIf="getCustomTemplate() as ref">
-    <ng-container
-      *ngTemplateOutlet="ref; context: { node: node, entriesService: nodeEntriesService }"
-    ></ng-container>
-  </ng-container>
-  <ng-container *ngIf="!getCustomTemplate()">
-    <i *ngIf="materialIcon() as icon" [esIcon]="icon"></i>
-    <ng-container *ngIf="!materialIcon()">
-      <img
-        *ngIf="$any(node).relations?.Original || $any(node).referNode || node as n"
-        [src]="n | esNodeIcon | async"
-        [alt]="
-          n.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
-            : ''
-        "
-        [matTooltip]="
-          n.mediatype
-            ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
-            : ''
-        "
-      />
-    </ng-container>
-  </ng-container>
-</ng-container>
+@if (isCollection && collectionIcons) {
+<i
+  [matTooltip]="
+    'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+  "
+  [altText]="
+    'COLLECTION.SCOPE.' + nodeHelper.getCollectionScopeInfo($any(node)).scopeName | translate
+  "
+  [esIcon]="nodeHelper.getCollectionScopeInfo($any(node)).icon"
+></i>
+} @if (!(isCollection && collectionIcons)) { @if (getCustomTemplate(); as ref) {
+<ng-container
+  *ngTemplateOutlet="ref; context: { node: node, entriesService: nodeEntriesService }"
+></ng-container>
+} @if (!getCustomTemplate()) { @if (materialIcon(); as icon) {
+<i [esIcon]="icon"></i>
+} @if (!materialIcon()) { @if ($any(node).relations?.Original || $any(node).referNode || node; as n)
+{
+<img
+  [src]="n | esNodeIcon | async"
+  [alt]="
+    n.mediatype
+      ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
+      : ''
+  "
+  [matTooltip]="
+    n.mediatype
+      ? ('NODE.mediatype' | translate) + ': ' + ('MEDIATYPE.' + n.mediatype | translate)
+      : ''
+  "
+/>
+} } } }

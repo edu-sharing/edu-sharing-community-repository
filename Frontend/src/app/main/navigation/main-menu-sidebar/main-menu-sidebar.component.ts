@@ -7,6 +7,7 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    inject,
 } from '@angular/core';
 import { RestConstants, RestIamService } from '../../../core-module/core.module';
 import { UIAnimation, UIConstants } from 'ngx-edu-sharing-ui';
@@ -22,6 +23,9 @@ import { Subject } from 'rxjs';
     standalone: false,
 })
 export class MainMenuSidebarComponent implements OnInit, OnDestroy {
+    iam = inject(RestIamService);
+    private user = inject(UserService);
+
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly ME = RestConstants.ME;
     private readonly destroyed$ = new Subject<void>();
@@ -37,7 +41,7 @@ export class MainMenuSidebarComponent implements OnInit, OnDestroy {
     loginInfo: LoginInfo;
     currentUser: User;
 
-    constructor(public iam: RestIamService, private user: UserService) {
+    constructor() {
         this.user
             .observeCurrentUser()
             .pipe(takeUntil(this.destroyed$))

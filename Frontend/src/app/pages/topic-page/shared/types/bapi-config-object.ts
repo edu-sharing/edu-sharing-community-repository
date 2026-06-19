@@ -1,7 +1,7 @@
-import { BapiConfig } from './bapi-config';
+import { BapiChatCompletionConfig } from './bapi-chat-completion-config';
 
 export interface BapiConfigObject {
-    headline?: BapiConfig;
-    description?: BapiConfig;
-    [key: string]: BapiConfig | undefined;
+    headline?: BapiChatCompletionConfig;
+    description?: BapiChatCompletionConfig;
+    [key: string]: BapiChatCompletionConfig | undefined;
 }

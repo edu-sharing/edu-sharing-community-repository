@@ -1,27 +1,25 @@
 package org.edu_sharing.repository.server.tools.security;
 
-import java.util.Map;
-
+import io.opentelemetry.api.internal.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.service.stream.StreamService;
-import org.edu_sharing.service.stream.StreamServiceFactory;
-import org.edu_sharing.service.stream.StreamServiceHelper;
-import org.edu_sharing.service.permission.PermissionService;
+
+import java.util.List;
+
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class SignatureVerifier {
 
 	Logger logger = Logger.getLogger(SignatureVerifier.class);
-	
+
+    com.typesafe.config.Config config = LightbendConfigLoader.get();
+
 	public class Result{
 		int statuscode;
 		String message;
@@ -45,7 +43,7 @@ public class SignatureVerifier {
 	}
 	
 	
-	public Result verify(String appId, String sig, String signed, String timeStamp){
+	public Result verify(String appId, String sig, String signed, String timeStamp, String algorithm){
 		
 		logger.debug("appId:"+appId+" sig:"+sig+" signed:"+signed+" timeStamp:"+timeStamp);
 			
@@ -97,8 +95,29 @@ public class SignatureVerifier {
 				Signing signing = new Signing();
 				
 				byte[] decoded = new Base64().decode(sig.getBytes());
-				
-				verified = signing.verify(signing.getPemPublicKey(appInfo.getPublicKey(), "RSA"),decoded, signed, "SHA1withRSA");
+
+                String algDefaultVerify = this.config.getString("security.sso.authByApp.alg.defaultVerify");
+
+                if(algorithm == null){
+                    if(!StringUtils.isNullOrEmpty(appInfo.getSignatureAlgorithm())){
+                        algorithm = appInfo.getSignatureAlgorithm();
+                    }else{
+                        algorithm = algDefaultVerify;
+                    }
+                }
+
+                List<String> supported = this.config.getStringList("security.sso.authByApp.alg.supported");
+                if(!supported.contains(algorithm)
+                        && (appInfo.getSignatureAlgorithm() != null && !appInfo.getSignatureAlgorithm().equals(algorithm))
+                        && !algDefaultVerify.equals(algorithm)){
+                    return new Result(HttpServletResponse.SC_BAD_REQUEST,"ALGORITHM NOT SUPPORTED",appInfo);
+                }
+
+
+
+
+
+				verified = signing.verify(signing.getPemPublicKey(appInfo.getPublicKey(), "RSA"),decoded, signed, algorithm);
 				
 				
 			}catch(Exception e){
@@ -133,6 +152,7 @@ public class SignatureVerifier {
 		String appId=getHeaderOrParam("X-Edu-App-Id",httpReq);
 		String sig=getHeaderOrParam("X-Edu-App-Sig",httpReq);
 		String signed=getHeaderOrParam("X-Edu-App-Signed",httpReq);
+        String signedAlg=getHeaderOrParam("X-Edu-App-SignedAlg",httpReq);
 		String ts=getHeaderOrParam("X-Edu-App-Ts",httpReq);
 		ApplicationInfo app = ApplicationInfoList.getRepositoryInfoById(appId);
 
@@ -142,7 +162,7 @@ public class SignatureVerifier {
 			logger.warn(message);
 			result = new Result(HttpServletResponse.SC_BAD_REQUEST,message,app);
 		}else{
-			result = this.verify(appId, sig, signed, ts);
+			result = this.verify(appId, sig, signed, ts, signedAlg);
 			if(result.getStatuscode() == HttpServletResponse.SC_OK){
 				logger.debug("Application request verified returning "+ appId);
 			}
@@ -165,6 +185,11 @@ public class SignatureVerifier {
 		String value = httpReq.getHeader(key);
 		if(value == null){
 			value = httpReq.getParameter(key);
+		} else {
+			// header spec does not allow special utf chars
+			if(key.equals("X-Edu-User-Id")) {
+				value = URLDecoder.decode(value, StandardCharsets.UTF_8);
+			}
 		}
 		return value;
 	}

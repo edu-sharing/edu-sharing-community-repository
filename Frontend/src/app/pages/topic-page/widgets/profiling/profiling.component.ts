@@ -8,6 +8,7 @@ import {
     ViewChild,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { DEFAULT, HOME_REPOSITORY, MdsWidget, SessionStorageService } from 'ngx-edu-sharing-api';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -29,6 +30,11 @@ import { GenericWidgetGlobalService } from '../generic-widget/generic-widget-glo
     styleUrls: ['./profiling.component.scss'],
 })
 export class ProfilingComponent implements AfterViewInit {
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private storage = inject(SessionStorageService);
+    private toast = inject(Toast);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     private destroy$ = new Subject<void>();
     mdsParams: { repository: string; setId: string } = {
         repository: HOME_REPOSITORY,
@@ -44,12 +50,7 @@ export class ProfilingComponent implements AfterViewInit {
     >();
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;
 
-    constructor(
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private storage: SessionStorageService,
-        private toast: Toast,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         this.mdsParams.setId = this.genericWidgetGlobalService.getDefaultMds();
     }
 

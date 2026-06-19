@@ -8,6 +8,7 @@ import org.alfresco.query.PagingRequest;
 import org.alfresco.query.PagingResults;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.repo.security.authentication.TicketComponent;
 import org.alfresco.repo.security.authority.AuthorityInfo;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
@@ -25,6 +26,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfresco.policy.GuestCagePolicy;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -50,6 +52,8 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
+import static org.edu_sharing.restservices.PersonDao.ME;
+
 
 @Slf4j
 @Primary
@@ -73,6 +77,7 @@ public class AuthorityServiceImpl implements AuthorityService {
     private final PersonService personService;
     private final org.alfresco.service.cmr.security.MutableAuthenticationService authenticationService;
     private final org.alfresco.repo.security.authentication.RepositoryAuthenticationDao authenticationDao;
+    private final TicketComponent ticketComponent;
 
     /**
      * Returns a property for a certain authority (it will fetch the coressponding node and load the property)
@@ -263,11 +268,20 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public ArrayList<EduGroup> getAllEduGroups(String authority) {
+    public ArrayList<EduGroup> getAllEduGroups(String authority, boolean filterNamePattern) {
         Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(authority);
         ArrayList<EduGroup> result = new ArrayList<>();
 
         for (String a : authoritiesForUser) {
+            if(filterNamePattern) {
+                if (!a.startsWith(PermissionService.GROUP_PREFIX)) {
+                    a = PermissionService.GROUP_PREFIX + authority;
+                }
+                // filter non GROUP_ORG_ named entitities
+                if(!a.startsWith(PermissionService.GROUP_PREFIX + org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX)) {
+                    continue;
+                }
+            }
             EduGroup eg = getEduGroup(a);
             if (eg != null) result.add(eg);
         }
@@ -288,20 +302,14 @@ public class AuthorityServiceImpl implements AuthorityService {
         NodeRef nodeRefEduGroupHomeDir = (NodeRef) nodeService.getProperty(nodeRef,
                 QName.createQName(CCConstants.CCM_PROP_EDUGROUP_EDU_HOMEDIR));
         if (nodeRefEduGroupHomeDir != null) {
-
-            Map<QName, Serializable> folderProps = nodeService.getProperties(nodeRefEduGroupHomeDir);
             EduGroup eduGroup = new EduGroup();
-            eduGroup.setFolderId((String) folderProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
-            eduGroup.setFolderName((String) folderProps.get(QName.createQName(CCConstants.CM_NAME)));
+            eduGroup.setFolderId(nodeRefEduGroupHomeDir.getId());
 
-            Map<QName, Serializable> groupProps = nodeService.getProperties(nodeRef);
-
-            eduGroup.setGroupId((String) groupProps.get(QName.createQName(CCConstants.SYS_PROP_NODE_UID)));
-            eduGroup.setGroupname(
-                    (String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYNAME)));
+            eduGroup.setGroupId(nodeRef.getId());
+            eduGroup.setGroupname(authority);
             eduGroup.setGroupDisplayName(
-                    (String) groupProps.get(QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
-            eduGroup.setScope((String) groupProps.get(QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
+                    (String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME)));
+            eduGroup.setScope((String) nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_EDUSCOPE_NAME)));
 
             return eduGroup;
         }
@@ -315,17 +323,26 @@ public class AuthorityServiceImpl implements AuthorityService {
         return getEduGroups(currentScope);
     }
 
+    /**
+     * @param authority
+     * @param scope
+     * @param filterNamePattern
+     * when true, only GROUP_ORG_ prefixed groups will be obeyed
+     * This might fail for old ORGs but is much faster
+     * @return
+     */
     @Override
-    public ArrayList<EduGroup> getEduGroups(String authority, String scope) {
-        ArrayList<EduGroup> result = new ArrayList<>();
-
-        for (EduGroup eduGroup : getAllEduGroups(authority)) {
-            if ((eduGroup.getScope() == null && scope == null)
-                    || (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
-                result.add(eduGroup);
+    public ArrayList<EduGroup> getEduGroups(String authority, String scope, boolean filterNamePattern) {
+        return transactionService.getRetryingTransactionHelper().doInTransaction(() -> {
+            ArrayList<EduGroup> result = new ArrayList<>();
+            for (EduGroup eduGroup : getAllEduGroups(authority, filterNamePattern)) {
+                if ((eduGroup.getScope() == null && scope == null)
+                        || (eduGroup.getScope() != null && eduGroup.getScope().equals(scope))) {
+                    result.add(eduGroup);
+                }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
     @Override
@@ -430,12 +447,9 @@ public class AuthorityServiceImpl implements AuthorityService {
 
                         String eduGroupHomeFolderId = eduGroup.getFolderId();
                         if (eduGroupHomeFolderId == null) {
-                            String folderName = eduGroup.getFolderName();
-                            if (folderName == null) {
-                                folderName = eduGroup.getGroupname().replace(PermissionService.GROUP_PREFIX, "");
-                                if (eduGroup.getScope() != null) {
-                                    folderName = folderName + "_" + eduGroup.getScope();
-                                }
+                            String folderName = eduGroup.getGroupname().replace(PermissionService.GROUP_PREFIX, "");
+                            if (eduGroup.getScope() != null) {
+                                folderName = folderName + "_" + eduGroup.getScope();
                             }
                             folderName = NodeServiceHelper.cleanupCmName(folderName);
                             Map<QName, Serializable> folderProps = new HashMap<>();
@@ -986,5 +1000,26 @@ public class AuthorityServiceImpl implements AuthorityService {
                 }, AuthenticationUtil.getFullyAuthenticatedUser()), false);
 
         return new QRCode2Fa(oneTimeTokenService.generateQRCode(username, secret), secret);
+    }
+
+    @Override
+    public void inValidateTickets(String user){
+        String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        if (ME.equals(user)) {
+            user = fullyAuthenticatedUser;
+        }
+
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
+        if(!user.equals(fullyAuthenticatedUser)){
+            if(!isAdmin){
+                throw new NotAnAdminException();
+            }
+        }
+
+        if(!isAdmin && (guestService.isGuestUser(user) || CCConstants.PROXY_USER.equals(user))){
+            throw new GuestCagePolicy.GuestPermissionDeniedException("guest has no permissions to do that");
+        }
+
+        ticketComponent.invalidateTicketByUser(user);
     }
 }

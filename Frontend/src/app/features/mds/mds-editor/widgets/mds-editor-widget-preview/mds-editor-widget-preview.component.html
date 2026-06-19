@@ -7,29 +7,30 @@
   (cancel)="$event.stopPropagation()"
 />
 <div class="preview-wrapper">
-  <mat-label *ngIf="mdsEditorInstance.editorMode === 'inline'">{{
-    'WORKSPACE.EDITOR.PREVIEW' | translate
-  }}</mat-label>
-  <div class="loading" *ngIf="loading$ | async">
+  @if (mdsEditorInstance.editorMode === 'inline') {
+  <mat-label>{{ 'WORKSPACE.EDITOR.PREVIEW' | translate }}</mat-label>
+  } @if (loading$ | async) {
+  <div class="loading">
     <es-spinner-small [diameter]="70"></es-spinner-small>
   </div>
+  }
   <div class="image-container">
-    <div class="delete-overlay" *ngIf="delete">
+    @if (delete) {
+    <div class="delete-overlay">
       <i esIcon="delete"></i>
       {{ 'WORKSPACE.EDITOR.PREVIEW_DELETED' | translate }}
     </div>
-    <ng-container *ngIf="!(!node?.preview?.isIcon || file)">
-      <es-preview-image [node]="node"></es-preview-image>
-    </ng-container>
-    <ng-container *ngIf="!node?.preview?.isIcon || file">
-      <img [src]="src$ | async" (load)="loading$.next(false)" />
-      <div class="card-image-backdrop">
-        <img [src]="src$ | async" alt="" />
-      </div>
-    </ng-container>
+    } @if (!(!node?.preview?.isIcon || file)) {
+    <es-preview-image [node]="node"></es-preview-image>
+    } @if (!node?.preview?.isIcon || file) {
+    <img [src]="src$ | async" (load)="loading$.next(false)" />
+    <div class="card-image-backdrop">
+      <img [src]="src$ | async" alt="" />
+    </div>
+    }
     <div class="button-group">
+      @if (mdsEditorInstance.hasAi | async) {
       <button
-        *ngIf="mdsEditorInstance.hasAi | async"
         esElementRef
         #overlayRef="esElementRef"
         mat-fab
@@ -38,32 +39,24 @@
       >
         <i esIcon="brush"></i>
       </button>
-
-      <button
-        mat-fab
-        [color]="$any('white')"
-        (click)="fileInput.click()"
-        *ngIf="mdsEditorInstance.editorMode !== 'viewer'"
-      >
+      } @if (mdsEditorInstance.editorMode !== 'viewer') {
+      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
         <i esIcon="upload"></i>
       </button>
-
+      } @if ( mdsEditorInstance.editorMode !== 'viewer' && !delete && (file || getType() ===
+      'TYPE_USERDEFINED') ) {
       <button
         mat-fab
         [color]="$any('white')"
         (click)="file ? (file = null) : (delete = true); updateSrc()"
-        *ngIf="
-          mdsEditorInstance.editorMode !== 'viewer' &&
-          !delete &&
-          (file || getType() === 'TYPE_USERDEFINED')
-        "
       >
         <i esIcon="delete"></i>
       </button>
+      }
     </div>
     <!-- Overlay template -->
+    @if (mdsEditorInstance.hasAi | async) {
     <es-ai-preview-images-overlay
-      *ngIf="mdsEditorInstance.hasAi | async"
       #aiPreviewImagesOverlay
       [file]="file"
       [node]="node"
@@ -72,8 +65,11 @@
       (updateShowOverlay)="overlayVisible$.next($event)"
       (updateSrcAttribute)="src$.next($event)"
     ></es-ai-preview-images-overlay>
+    }
   </div>
-  <div class="save" *ngIf="(hasChanges | async) && mdsEditorInstance.editorMode === 'inline'">
+  @if ((hasChanges | async) && mdsEditorInstance.editorMode === 'inline') {
+  <div class="save">
     <button mat-flat-button color="primary" (click)="foreSave()">{{ 'SAVE' | translate }}</button>
   </div>
+  }
 </div>

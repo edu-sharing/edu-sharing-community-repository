@@ -1,4 +1,4 @@
-import { Component, computed, Signal } from '@angular/core';
+import { Component, computed, Signal, inject } from '@angular/core';
 import { ListWidget } from '../list-widget';
 import { ListItem } from '../../types/list-item';
 import { NodeHelperService } from '../../services/node-helper.service';
@@ -13,6 +13,8 @@ import { SubmissionWithAssignment } from '../../node-entries/data-type';
     standalone: false,
 })
 export class ListNodeAssignmentComponent extends ListWidget {
+    private nodeHelper = inject(NodeHelperService);
+
     static supportedItems = [new ListItem('ASSIGNMENT', '*'), new ListItem('SUBMISSION', '*')];
     private _assignment = toSignal(this.nodeSubject) as Signal<Assignment>;
     assignment = computed(() => this.submission().assignment || this._assignment());
@@ -35,7 +37,16 @@ export class ListNodeAssignmentComponent extends ListWidget {
         return this.submission()?.submissionStatus;
     });
 
-    constructor(private nodeHelper: NodeHelperService) {
-        super();
+    getValidationStatus(node: SubmissionWithAssignment) {
+        if (node.assignment?.status === 'CORRECTED' || node.assignment?.status === 'FINISHED') {
+            return 'SENDBACK';
+        }
+        if (node.validationStatus === 'FINISHED') {
+            return 'CORRECTED';
+        }
+        if (node.submissionStatus !== 'FINISHED') {
+            return 'INPROGRESS';
+        }
+        return 'HAS_SUBMISSIONS';
     }
 }

@@ -104,4 +104,6 @@ public interface PermissionService {
 	boolean isAdminOrSystem();
 
 	List<String> getOrganizationsOfUser();
+
+	Boolean isInherited(String storeProtocol, String storeId, String nodeId);
 }

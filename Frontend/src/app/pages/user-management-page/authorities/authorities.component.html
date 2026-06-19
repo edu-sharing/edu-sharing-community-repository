@@ -1,30 +1,37 @@
 <div class="topFrame">
   <div class="info">
-    <div *ngIf="_mode !== 'ORG' && !embedded">
-      <div *ngIf="!org">
+    @if (_mode !== 'ORG' && !embedded) {
+    <div>
+      @if (!org) {
+      <div>
         <span>{{ 'PERMISSIONS.INFO_GLOBAL_' + _mode | translate }}</span>
         <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
       </div>
-      <div *ngIf="org">
+      } @if (org) {
+      <div>
         <span>{{
           'PERMISSIONS.INFO_ORG_' + _mode | translate : { org: org.profile.displayName }
         }}</span>
-        <span *ngIf="isAdmin">
+        @if (isAdmin) {
+        <span>
           <a class="clickable" (click)="doDeselectOrg()">{{ 'PERMISSIONS.NO_ORG' | translate }}</a>
           <a class="clickable" (click)="setOrgTab()">{{ 'PERMISSIONS.CHOOSE_ORG' | translate }}</a>
         </span>
+        }
       </div>
+      }
     </div>
+    }
   </div>
   <es-actionbar #actionbar></es-actionbar>
 </div>
+@if (toolpermissionAuthority) {
 <es-toolpermission-manager
-  *ngIf="toolpermissionAuthority"
   [authority]="toolpermissionAuthority"
   (closeManager)="toolpermissionAuthority = null"
 ></es-toolpermission-manager>
+} @if (editStatus) {
 <es-card
-  *ngIf="editStatus"
   title="{{ 'PERMISSIONS.SET_STATUS' | translate }}"
   subtitle="{{ editStatus | authorityName }}"
   height="auto"
@@ -33,29 +40,33 @@
   (cancel)="editStatus = null"
 >
   <div class="card-content-padding card-status">
-    <mat-form-field floatLabel="always" *ngIf="isAdmin">
+    @if (isAdmin) {
+    <mat-form-field floatLabel="always">
       <mat-label>{{ 'PERMISSIONS.STATUS_LABEL' | translate }}</mat-label>
       <mat-select
         name="status"
         [(ngModel)]="editStatus.status.status"
         placeholder="{{ 'PERMISSIONS.STATUS.null' | translate }}"
       >
-        <mat-option *ngFor="let type of STATUS_TYPES" [value]="type">{{
-          'PERMISSIONS.USER_STATUS.' + type | translate
-        }}</mat-option>
+        @for (type of STATUS_TYPES; track $index) {
+        <mat-option [value]="type">{{ 'PERMISSIONS.USER_STATUS.' + type | translate }} </mat-option>
+        }
       </mat-select>
     </mat-form-field>
-    <mat-checkbox [(ngModel)]="editStatusNotify">{{
-      'PERMISSIONS.STATUS_NOTIFY' | translate
-    }}</mat-checkbox>
-    <div class="status-change" *ngIf="editStatus.status.date">
+    }
+    <mat-checkbox [(ngModel)]="editStatusNotify"
+      >{{ 'PERMISSIONS.STATUS_NOTIFY' | translate }}
+    </mat-checkbox>
+    @if (editStatus.status.date) {
+    <div class="status-change">
       {{ 'PERMISSIONS.STATUS_LAST_CHANGE' | translate }}:
       {{ editStatus.status.date | formatDate : { relative: false, time: true } }}
     </div>
+    }
   </div>
 </es-card>
+} @if (resetPassword) {
 <es-card
-  *ngIf="resetPassword"
   title="{{ 'PERMISSIONS.MENU_RESET_PASSWORD' | translate }}"
   subtitle="{{ resetPassword | authorityName }}"
   width="small"
@@ -73,8 +84,8 @@
     ></es-input-password>
   </div>
 </es-card>
+} @if (groupSignupDetails) {
 <es-card
-  *ngIf="groupSignupDetails"
   title="{{ 'PERMISSIONS.ORG_SIGNUP' | translate }}"
   height="auto"
   [node]="groupSignup"
@@ -83,24 +94,26 @@
   (cancel)="groupSignupDetails = null"
 >
   <div class="card-content-padding org-signup">
-    <es-info-message mode="warning" class="warning-email" *ngIf="!groupSignup.profile.groupEmail">
+    @if (!groupSignup.profile.groupEmail) {
+    <es-info-message mode="warning" class="warning-email">
       {{ 'PERMISSIONS.ORG_SIGNUP_NO_EMAIL' | translate }}
     </es-info-message>
+    }
     <mat-form-field>
       <mat-label>{{ 'PERMISSIONS.ORG_SIGNUP_METHOD' | translate }}</mat-label>
       <mat-select [(ngModel)]="groupSignupDetails.signupMethod">
-        <mat-option value="disabled">{{
-          'PERMISSIONS.ORG_SIGNUP_METHODS.disabled' | translate
-        }}</mat-option>
-        <mat-option value="simple">{{
-          'PERMISSIONS.ORG_SIGNUP_METHODS.simple' | translate
-        }}</mat-option>
-        <mat-option value="password">{{
-          'PERMISSIONS.ORG_SIGNUP_METHODS.password' | translate
-        }}</mat-option>
-        <mat-option value="list">{{
-          'PERMISSIONS.ORG_SIGNUP_METHODS.list' | translate
-        }}</mat-option>
+        <mat-option value="disabled"
+          >{{ 'PERMISSIONS.ORG_SIGNUP_METHODS.disabled' | translate }}
+        </mat-option>
+        <mat-option value="simple"
+          >{{ 'PERMISSIONS.ORG_SIGNUP_METHODS.simple' | translate }}
+        </mat-option>
+        <mat-option value="password"
+          >{{ 'PERMISSIONS.ORG_SIGNUP_METHODS.password' | translate }}
+        </mat-option>
+        <mat-option value="list"
+          >{{ 'PERMISSIONS.ORG_SIGNUP_METHODS.list' | translate }}
+        </mat-option>
       </mat-select>
     </mat-form-field>
     <es-info-message mode="info">
@@ -110,16 +123,17 @@
           '_DETAILS' | translate
       }}
     </es-info-message>
+    @if (groupSignupDetails.signupMethod === 'password') {
     <es-input-password
-      *ngIf="groupSignupDetails.signupMethod === 'password'"
       [(value)]="groupSignupDetails.signupPassword"
       label="{{ 'PERMISSIONS.ORG_SIGNUP_PASSWORD' | translate }}"
       hint="{{ 'PERMISSIONS.ORG_SIGNUP_PASSWORD_HINT' | translate }}"
     ></es-input-password>
+    }
   </div>
 </es-card>
+} @if (groupSignupListShown) {
 <es-card
-  *ngIf="groupSignupListShown"
   title="{{ 'PERMISSIONS.ORG_SIGNUP_LIST' | translate }}"
   height="large"
   [node]="groupSignup"
@@ -152,9 +166,8 @@
     </es-node-entries-wrapper>
   </div>
 </es-card>
-
+} @if (edit) {
 <es-card
-  *ngIf="edit"
   title="{{ 'PERMISSIONS.' + (editId === null ? 'CREATE' : 'EDIT') + '_' + _mode | translate }}"
   [subtitle]="
     editId
@@ -169,11 +182,13 @@
 >
   <div class="card-content-padding card-edit">
     <form>
-      <div *ngIf="editId" class="editSystemName">
+      @if (editId) {
+      <div class="editSystemName">
         <label>{{ 'PERMISSIONS.INTERNAL_NAME' | translate }}</label>
         <div class="infoText">{{ edit.authorityName }}</div>
       </div>
-      <div *ngIf="_mode === 'GROUP'">
+      } @if (_mode === 'GROUP') {
+      <div>
         <mat-form-field>
           <mat-label>{{ 'GROUP.displayName' | translate }}</mat-label>
           <input
@@ -195,25 +210,32 @@
             [(ngModel)]="edit.profile.groupType"
             placeholder="{{ 'PERMISSIONS.GROUP_TYPE.null' | translate }}"
           >
-            <mat-option *ngFor="let type of GROUP_TYPES" [value]="type">{{
-              'PERMISSIONS.GROUP_TYPE.' + type | translate
-            }}</mat-option>
+            @for (type of GROUP_TYPES; track $index) {
+            <mat-option [value]="type"
+              >{{ 'PERMISSIONS.GROUP_TYPE.' + type | translate }}
+            </mat-option>
+            }
           </mat-select>
         </mat-form-field>
-        <mat-form-field floatLabel="always" *ngIf="isAdmin">
+        @if (isAdmin) {
+        <mat-form-field floatLabel="always">
           <mat-label>{{ 'GROUP.scopeType' | translate }}</mat-label>
           <mat-select
             name="scopeType"
             [(ngModel)]="edit.profile.scopeType"
             placeholder="{{ 'PERMISSIONS.SCOPE_TYPE.null' | translate }}"
           >
-            <mat-option *ngFor="let type of SCOPE_TYPES" [value]="type">{{
-              'PERMISSIONS.SCOPE_TYPE.' + type | translate
-            }}</mat-option>
+            @for (type of SCOPE_TYPES; track $index) {
+            <mat-option [value]="type"
+              >{{ 'PERMISSIONS.SCOPE_TYPE.' + type | translate }}
+            </mat-option>
+            }
           </mat-select>
         </mat-form-field>
+        }
       </div>
-      <div *ngIf="_mode === 'ORG'">
+      } @if (_mode === 'ORG') {
+      <div>
         <mat-form-field>
           <mat-label>{{ 'ORG.displayName' | translate }}</mat-label>
           <input
@@ -235,12 +257,15 @@
             [(ngModel)]="edit.profile.groupType"
             placeholder="{{ 'PERMISSIONS.GROUP_TYPE.null' | translate }}"
           >
-            <mat-option *ngFor="let type of ORG_TYPES" [value]="type">{{
-              'PERMISSIONS.GROUP_TYPE.' + type | translate
-            }}</mat-option>
+            @for (type of ORG_TYPES; track $index) {
+            <mat-option [value]="type"
+              >{{ 'PERMISSIONS.GROUP_TYPE.' + type | translate }}
+            </mat-option>
+            }
           </mat-select>
         </mat-form-field>
-        <div class="folder-path" *ngIf="edit.folderPath?.length">
+        @if (edit.folderPath?.length) {
+        <div class="folder-path">
           <label>{{ 'PERMISSIONS.ORG_HOME_FOLDER_LABEL' | translate }}</label>
           <es-breadcrumbs
             home="{{ 'PERMISSIONS.ORG_HOME_FOLDER_MAIN' | translate }}"
@@ -248,9 +273,12 @@
             [createLink]="true"
           ></es-breadcrumbs>
         </div>
+        }
       </div>
-      <div *ngIf="_mode === 'USER'">
-        <mat-form-field *ngIf="!editId">
+      } @if (_mode === 'USER') {
+      <div>
+        @if (!editId) {
+        <mat-form-field>
           <mat-label>{{ 'USER.authorityName' | translate }}</mat-label>
           <input
             matInput
@@ -260,6 +288,7 @@
             autofocus
           />
         </mat-form-field>
+        }
         <mat-form-field>
           <mat-label>{{ 'USER.firstName' | translate }}</mat-label>
           <input matInput name="firstName" [(ngModel)]="edit.profile.firstName" required />
@@ -275,29 +304,30 @@
         <div class="group">
           <mat-form-field>
             <mat-label>{{ 'USER.primaryAffiliation' | translate }}</mat-label>
-            <mat-select
-              *ngIf="primaryAffiliationList"
-              name="primaryAffiliation"
-              [(ngModel)]="edit.profile.primaryAffiliation"
-            >
+            @if (primaryAffiliationList) {
+            <mat-select name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
               <mat-option></mat-option>
-              <mat-option *ngFor="let a of PRIMARY_AFFILIATIONS" [value]="a">{{
-                'USER.PRIMARY_AFFILIATION.' + a | translate
-              }}</mat-option>
+              @for (a of PRIMARY_AFFILIATIONS; track $index) {
+              <mat-option [value]="a"
+                >{{ 'USER.PRIMARY_AFFILIATION.' + a | translate }}
+              </mat-option>
+              }
             </mat-select>
+            } @if (!primaryAffiliationList) {
             <input
               matInput
-              *ngIf="!primaryAffiliationList"
               type="text"
               name="primaryAffiliation"
               [(ngModel)]="edit.profile.primaryAffiliation"
             />
+            }
           </mat-form-field>
           <button mat-flat-button (click)="primaryAffiliationList = !primaryAffiliationList">
             <i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list' }}</i>
           </button>
         </div>
-        <div *ngIf="!editId">
+        @if (!editId) {
+        <div>
           <es-input-password
             #passwordRef
             label="{{ 'USER.password' | translate }}"
@@ -305,20 +335,24 @@
             [displayStrength]="true"
           ></es-input-password>
         </div>
+        }
         <div class="quota">
           <mat-form-field>
             <mat-label>{{ 'USER.sizeQuota' | translate }}</mat-label>
             <input matInput name="sizeQuota" [(ngModel)]="edit.profile.sizeQuota" />
             <mat-hint>{{ 'PERMISSIONS.USER_QUOTA_HINT' | translate }}</mat-hint>
           </mat-form-field>
-          <es-user-quota *ngIf="editId && edit.quota.enabled" [quota]="edit.quota"></es-user-quota>
+          @if (editId && edit.quota.enabled) {
+          <es-user-quota [quota]="edit.quota"></es-user-quota>
+          }
         </div>
       </div>
+      }
     </form>
   </div>
 </es-card>
+} @if (editGroups || editMembers || addMembers) {
 <es-card
-  *ngIf="editGroups || editMembers || addMembers"
   class="card-edit-wrapper"
   title="{{
     (addMembers
@@ -328,15 +362,13 @@
       : editMembers
       ? 'PERMISSIONS.EDIT_MEMBERS'
       : 'PERMISSIONS.EDIT_MEMBER_GROUPS'
-    ) | translate
+    )
+      | translate
+        : {
+            name: (addMembers || editMembers | authorityName)
+          }
   }}"
-  [subtitle]="
-    addMembers
-      ? $any(addMembers).profile.displayName
-      : editMembers
-      ? $any(editMembers).profile.displayName
-      : editGroups.authorityName
-  "
+  [subtitle]="addMembers || editMembers | authorityName"
   icon="person_add"
   width="xlarge"
   height="xlarge"
@@ -348,14 +380,16 @@
     <div class="memberActions">
       <form (ngSubmit)="searchMembers()">
         <mat-form-field>
-          <mat-label>{{
-            (addMembers
-              ? 'PERMISSIONS.SEARCH_USER'
-              : editGroups
-              ? 'PERMISSIONS.SEARCH_GROUPS'
-              : 'PERMISSIONS.SEARCH_MEMBER'
-            ) | translate
-          }}</mat-label>
+          <mat-label
+            >{{
+              (addMembers
+                ? 'PERMISSIONS.SEARCH_USER'
+                : editGroups
+                ? 'PERMISSIONS.SEARCH_GROUPS'
+                : 'PERMISSIONS.SEARCH_MEMBER'
+              ) | translate
+            }}
+          </mat-label>
           <input
             matInput
             type="search"
@@ -364,13 +398,12 @@
           />
         </mat-form-field>
       </form>
-      <es-actionbar
-        class="memberItem memberActionBar"
-        *ngIf="editMembers || editGroups"
-        #actionbarMember
-      ></es-actionbar>
+      @if (editMembers || editGroups) {
+      <es-actionbar class="memberItem memberActionBar" #actionbarMember></es-actionbar>
+      }
     </div>
-    <div class="currentMembers" *ngIf="editMembers">
+    @if (editMembers) {
+    <div class="currentMembers">
       {{
         'PERMISSIONS.CURRENT_MEMBERS'
           | translate
@@ -381,6 +414,7 @@
               }
       }}
     </div>
+    }
     <es-node-entries-wrapper
       #memberAdd
       [scope]="Scope.UserManagement"
@@ -393,8 +427,10 @@
     ></es-node-entries-wrapper>
   </div>
 </es-card>
+}
 <!-- <div *ngIf="addTo" [@fade]="addTo" class="dialog darken"></div> -->
-<div *ngIf="addTo" [@fromRight]="addTo" class="addTo">
+@if (addTo) {
+<div [@fromRight]="addTo" class="addTo">
   <div class="addToList">
     <es-permissions-authorities
       #addToComponent
@@ -416,7 +452,8 @@
     </button>
   </div>
 </div>
-<div *ngIf="embedded" class="searchEmbedded">
+} @if (embedded) {
+<div class="searchEmbedded">
   <form (ngSubmit)="searchQuery = embeddedQuery">
     <mat-form-field>
       <mat-label>{{ 'PERMISSIONS.SEARCH_' + _mode | translate }}</mat-label>
@@ -424,6 +461,7 @@
     </mat-form-field>
   </form>
 </div>
+}
 <es-node-entries-wrapper
   class="list"
   #mainList
@@ -444,17 +482,21 @@
   (sortChange)="changeSort($event)"
 >
   <ng-template #empty>
-    <h5 class="noElements" *ngIf="!_searchQuery">{{ 'PERMISSIONS.NO_ELEMENTS' | translate }}</h5>
-    <h5 class="noElements" *ngIf="!!_searchQuery">
+    @if (!_searchQuery) {
+    <h5 class="noElements">{{ 'PERMISSIONS.NO_ELEMENTS' | translate }}</h5>
+    } @if (!!_searchQuery) {
+    <h5 class="noElements">
       {{ 'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate }}
     </h5>
+    }
   </ng-template>
 </es-node-entries-wrapper>
 <ng-template #exclude>
-  <form [formGroup]="excludeForm" class="exclude-form" *ngIf="isAdmin">
-    <es-info-message mode="info" class="description">{{
-      'PERMISSIONS.EXCLUDE.DESCRIPTION' | translate
-    }}</es-info-message>
+  @if (isAdmin) {
+  <form [formGroup]="excludeForm" class="exclude-form">
+    <es-info-message mode="info" class="description"
+      >{{ 'PERMISSIONS.EXCLUDE.DESCRIPTION' | translate }}
+    </es-info-message>
     <mat-form-field>
       <mat-label>{{ 'PERMISSIONS.EXCLUDE.MODE_LABEL' | translate }}</mat-label>
       <mat-select formControlName="mode">
@@ -462,49 +504,50 @@
         <mat-option value="assign">{{ 'PERMISSIONS.EXCLUDE.MODE.ASSIGN' | translate }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <ng-container *ngIf="excludeForm.get('mode').value === 'assign'">
-      <es-authority-search-input
-        [mode]="AuthoritySearchMode.Users"
-        label="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER' | translate }}"
-        placeholder="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER_PLACEHOLDER' | translate }}"
-        [showRecent]="false"
-        (chooseAuthority)="setExcludeReceiver($event)"
-      ></es-authority-search-input>
-      <mat-chip-listbox>
-        <mat-chip-option
-          [selectable]="false"
-          *ngIf="excludeReceiver"
-          (removed)="excludeReceiver = null"
-        >
-          <span>{{ excludeReceiver | authorityName }}</span>
-          <i matChipRemove esIcon="cancel"></i>
-        </mat-chip-option>
-      </mat-chip-listbox>
-      <es-info-message
-        *ngIf="excludeReceiver && !receiverIsMemberOfOrg"
-        class="wrong-user"
-        mode="warning"
-        >{{
-          'PERMISSIONS.EXCLUDE.ASSIGN_USER_NOT_ORG_MEMBER'
-            | translate : { user: excludeReceiver | authorityName, org: org | authorityName }
-        }}</es-info-message
-      >
-    </ng-container>
+    @if (excludeForm.get('mode').value === 'assign') {
+    <es-authority-search-input
+      [mode]="AuthoritySearchMode.Users"
+      label="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER' | translate }}"
+      placeholder="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER_PLACEHOLDER' | translate }}"
+      [showRecent]="false"
+      (chooseAuthority)="setExcludeReceiver($event)"
+    ></es-authority-search-input>
+    <mat-chip-listbox>
+      @if (excludeReceiver) {
+      <mat-chip-option [selectable]="false" (removed)="excludeReceiver = null">
+        <span>{{ excludeReceiver | authorityName }}</span>
+        <i matChipRemove esIcon="cancel"></i>
+      </mat-chip-option>
+      }
+    </mat-chip-listbox>
+    @if (excludeReceiver && !receiverIsMemberOfOrg) {
+    <es-info-message class="wrong-user" mode="warning"
+      >{{
+        'PERMISSIONS.EXCLUDE.ASSIGN_USER_NOT_ORG_MEMBER'
+          | translate : { user: excludeReceiver | authorityName, org: org | authorityName }
+      }}
+    </es-info-message>
+    } }
   </form>
+  }
 </ng-template>
 <ng-template #faTemplate>
   <form [formGroup]="faForm" class="fa-config">
     <es-info-message mode="info">{{ 'PERMISSIONS.2FA.DESCRIPTION' | translate }}</es-info-message>
 
     <mat-checkbox formControlName="status">{{ 'PERMISSIONS.2FA.STATUS' | translate }}</mat-checkbox>
-    <div *ngIf="faForm.get('status').value">
-      <mat-checkbox formControlName="generate">{{
-        'PERMISSIONS.2FA.GENERATE_NEW_SECRET' | translate
-      }}</mat-checkbox>
-      <es-info-message mode="warning" *ngIf="faInititalStatus && faForm.get('generate').value"
+    @if (faForm.get('status').value) {
+    <div>
+      <mat-checkbox formControlName="generate"
+        >{{ 'PERMISSIONS.2FA.GENERATE_NEW_SECRET' | translate }}
+      </mat-checkbox>
+      @if (faInititalStatus && faForm.get('generate').value) {
+      <es-info-message mode="warning"
         >{{ 'PERMISSIONS.2FA.REGENERATE' | translate }}
       </es-info-message>
+      }
     </div>
+    }
   </form>
 </ng-template>
 <ng-template #faCode>
@@ -516,7 +559,7 @@
     <div class="code">{{ faData.code }}</div>
     <form [formGroup]="faConfirm">
       <mat-form-field>
-        <mat-label>{{ 'PERMISSIONS.2FA.CONFIRM_CODE' | translate }} </mat-label>
+        <mat-label>{{ 'PERMISSIONS.2FA.CONFIRM_CODE' | translate }}</mat-label>
         <input matInput formControlName="code" maxlength="6" minlength="6" placeholder="000000" />
       </mat-form-field>
     </form>

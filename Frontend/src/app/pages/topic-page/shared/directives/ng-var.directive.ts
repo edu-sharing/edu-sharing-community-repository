@@ -1,10 +1,13 @@
-import { Directive, Input, TemplateRef, ViewContainerRef } from '@angular/core';
+import { Directive, Input, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 
 @Directive({
     selector: '[ngVar]',
     standalone: true,
 })
 export class VarDirective {
+    private templateRef = inject<TemplateRef<any>>(TemplateRef);
+    private viewContainerRef = inject(ViewContainerRef);
+
     @Input() set ngVar(context: unknown) {
         this.context.$implicit = this.context.ngVar = context;
 
@@ -23,9 +26,4 @@ export class VarDirective {
     };
 
     private hasView: boolean = false;
-
-    constructor(
-        private templateRef: TemplateRef<any>,
-        private viewContainerRef: ViewContainerRef,
-    ) {}
 }

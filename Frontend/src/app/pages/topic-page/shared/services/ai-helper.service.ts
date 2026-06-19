@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
+import { Injectable, inject } from '@angular/core';
+import { AboutService, FeaturesHelperService, UserService } from 'ngx-edu-sharing-api';
 import {
-    ChatCompletionResult,
+    CreateChatCompletionResponse,
     EduSharingLlmService,
-    ImageResult,
+    ImagesResponse,
     MdsConfig,
     NodeConfig,
 } from 'ngx-edu-sharing-b-api';
@@ -16,19 +16,26 @@ import { GlobalWidgetConfigService } from './global-widget-config.service';
     providedIn: 'root',
 })
 export class AiHelperService {
-    constructor(
-        private eduSharingLlmService: EduSharingLlmService,
-        private featuresHelperService: FeaturesHelperService,
-        private genericWidgetGlobalService: GenericWidgetGlobalService,
-        private globalWidgetConfigService: GlobalWidgetConfigService,
-        private userService: UserService,
-    ) {}
+    private aboutService = inject(AboutService);
+    private eduSharingLlmService = inject(EduSharingLlmService);
+    private featuresHelperService = inject(FeaturesHelperService);
+    private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private userService = inject(UserService);
 
     /**
      * Checks whether AI is supported.
      */
     async hasAISupport(): Promise<boolean> {
         return await this.featuresHelperService.hasUserAISupport();
+    }
+
+    /**
+     * Checks whether rendering service 2 is supported.
+     */
+    async hasRendering2Support(): Promise<boolean> {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        return !!about.renderingService2;
     }
 
     /**
@@ -42,7 +49,7 @@ export class AiHelperService {
         configId: string | NodeConfig,
         variables: { [key: string]: string[] } = {},
         contextNodeId: string,
-    ): Promise<ChatCompletionResult> {
+    ): Promise<CreateChatCompletionResponse> {
         const user: string = await this.getCurrentUser();
         let config: NodeConfig | MdsConfig;
         if (typeof configId === 'string') {
@@ -80,10 +87,10 @@ export class AiHelperService {
         widgetNodeId: string,
         contextNodeId: string,
         variables: { [key: string]: string[] } = {},
-    ): Promise<ImageResult> {
+    ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
                         retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),
@@ -112,10 +119,10 @@ export class AiHelperService {
         widgetNodeId: string,
         contextNodeId: string,
         variables: { [key: string]: string[] } = {},
-    ): Promise<ImageResult> {
+    ): Promise<ImagesResponse> {
         const user: string = await this.getCurrentUser();
         return firstValueFrom(
-            this.eduSharingLlmService.imageGeneration1({
+            this.eduSharingLlmService.imageGeneration({
                 body: {
                     configIds: [
                         retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),

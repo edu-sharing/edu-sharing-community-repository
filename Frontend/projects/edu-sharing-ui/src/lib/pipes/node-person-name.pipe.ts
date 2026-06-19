@@ -1,12 +1,14 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { ConfigService, Person } from 'ngx-edu-sharing-api';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'nodePersonName',
     standalone: false,
 })
 export class NodePersonNamePipe implements PipeTransform {
-    constructor(private config: ConfigService) {}
+    private config = inject(ConfigService);
+
     transform(person: Person | any, args: any = null): string {
         let field = this.config.instant('userDisplayName', 'fullName');
         if (person == null) return null;

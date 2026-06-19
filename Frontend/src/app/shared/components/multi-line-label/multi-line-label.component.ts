@@ -4,8 +4,8 @@ import {
     Component,
     ElementRef,
     OnInit,
-    Optional,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatRadioButton } from '@angular/material/radio';
@@ -40,6 +40,8 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     standalone: false,
 })
 export class MultiLineLabelComponent implements OnInit, AfterViewInit {
+    private changeDetector = inject(ChangeDetectorRef);
+
     @ViewChild('label') label: ElementRef;
     @ViewChild('description') description: ElementRef<HTMLElement>;
     @ViewChild('additionalInformation') additionalInformation: ElementRef;
@@ -49,12 +51,11 @@ export class MultiLineLabelComponent implements OnInit, AfterViewInit {
     hasDescription = true;
     hasAdditionalInformation = true;
 
-    constructor(
-        private changeDetector: ChangeDetectorRef,
-        @Optional() matCheckbox: MatCheckbox,
-        @Optional() matRadioButton: MatRadioButton,
-        @Optional() matSlideToggle: MatSlideToggle,
-    ) {
+    constructor() {
+        const matCheckbox = inject(MatCheckbox, { optional: true });
+        const matRadioButton = inject(MatRadioButton, { optional: true });
+        const matSlideToggle = inject(MatSlideToggle, { optional: true });
+
         this.parent = matCheckbox ?? matRadioButton ?? matSlideToggle;
         if (!this.parent) {
             console.error(

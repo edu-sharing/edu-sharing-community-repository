@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Target } from '../../types/option-item';
 import { ClickSource, InteractionType } from '../entries-model';
 
@@ -17,17 +17,15 @@ import { AssignmentPipe } from '../../pipes/assignment.pipe';
     standalone: false,
 })
 export class NodeEntriesCardSmallComponent<T extends Node> {
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    nodeHelper = inject(NodeHelperService);
+    templatesService = inject(NodeEntriesTemplatesService);
+
     readonly ClickSource = ClickSource;
     readonly InteractionType = InteractionType;
     readonly Target = Target;
     @Input() node: T;
     @Input() dropdown: DropdownComponent;
-
-    constructor(
-        public entriesService: NodeEntriesService<T>,
-        public nodeHelper: NodeHelperService,
-        public templatesService: NodeEntriesTemplatesService,
-    ) {}
 
     optionsOnCard() {
         const options = this.entriesService.options[Target.List];
@@ -66,39 +64,29 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
         DRAFT: 'news',
         INPROGRESS: 'schedule_send',
         CANCELED: 'cancel',
+        CORRECTED: 'done',
         FINISHED: 'done',
     };
 
-    assignmentEndTimePriority(assignment: Assignment) {
-        const now = new Date().getTime();
-        const permissions = new AssignmentPipe().transform(assignment, { mode: 'permissions' });
-        if (permissions === 'COORDINATOR') {
-            if (assignment.status !== 'INPROGRESS') {
-                return 'low';
-            }
-        } else if (permissions === 'ASSIGNEE') {
-            if (
-                assignment.submissions?.[0]?.submissionStatus === 'FINISHED' ||
-                assignment.submissions?.[0]?.validationStatus === 'FINISHED'
-            ) {
-                return 'low';
-            }
-        }
-        const delayUntil =
-            (Date.parse(assignment.endTime as string) ||
-                (assignment.endTime as unknown as number)) - now;
-        // > 5 days == low delay
-        if (delayUntil < 3600 * 1000 * 24 * 1) {
-            return 'high';
-        } else if (delayUntil < 3600 * 1000 * 24 * 2) {
-            return 'medium';
-        }
-        return 'low';
-    }
-
     assignmentStatus(assignment: Assignment) {
-        if (assignment.submissions?.some((s) => s.submissionStatus === 'FINISHED')) {
+        if (
+            assignment.status === 'INPROGRESS' &&
+            assignment.submissions?.some((s) => s.submissionStatus === 'FINISHED')
+        ) {
             return 'HAS_SUBMISSIONS';
+        }
+        return assignment.status;
+    }
+    assignmentStatusAssignee(assignment: Assignment) {
+        if (assignment.status === 'INPROGRESS') {
+            const sub = assignment.submissions?.[0];
+            if (sub?.validationStatus === 'FINISHED') {
+                return 'CORRECTED';
+            } else if (sub?.submissionStatus === 'FINISHED') {
+                return 'SUBMITTED';
+            } else {
+                return 'TO_SUBMIT';
+            }
         }
         return assignment.status;
     }

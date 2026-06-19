@@ -1,10 +1,10 @@
-<es-mds-editor-widget-container
-  *ngIf="show && mdsEditorValues.editorMode !== 'viewer'"
-  [label]="'WORKSPACE.EDITOR.VERSION' | translate"
->
-  <div class="loading" *ngIf="loading$ | async">
+@if (show && mdsEditorValues.editorMode !== 'viewer') {
+<es-mds-editor-widget-container [label]="'WORKSPACE.EDITOR.VERSION' | translate">
+  @if (loading$ | async) {
+  <div class="loading">
     <es-spinner-small [diameter]="30"></es-spinner-small>
   </div>
+  }
   <div class="version-container">
     <div>
       <input
@@ -19,7 +19,8 @@
           {{ 'WORKSPACE.EDITOR.REPLACE_MATERIAL' | translate }}
         </button>
       </div>
-      <mat-form-field *ngIf="file || mdsEditorValues?.editorMode !== 'inline'">
+      @if (file || mdsEditorValues?.editorMode !== 'inline') {
+      <mat-form-field>
         <mat-label>{{ 'VERSION_COMMENT' | translate }}</mat-label>
         <input
           matInput
@@ -29,20 +30,20 @@
           (ngModelChange)="onChange()"
         />
       </mat-form-field>
-      <button
-        *ngIf="file && mdsEditorValues?.editorMode === 'inline'"
-        mat-flat-button
-        color="primary"
-        (click)="forceUpload()"
-      >
+      } @if (file && mdsEditorValues?.editorMode === 'inline') {
+      <button mat-flat-button color="primary" (click)="forceUpload()">
         {{ 'SAVE' | translate }}
       </button>
+      }
     </div>
-    <mat-chip-listbox *ngIf="file">
+    @if (file) {
+    <mat-chip-listbox>
       <mat-chip-option (removed)="file = null">
         {{ file.name }}
         <mat-icon matChipRemove>cancel</mat-icon>
       </mat-chip-option>
     </mat-chip-listbox>
+    }
   </div>
 </es-mds-editor-widget-container>
+}

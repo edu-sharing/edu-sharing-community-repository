@@ -138,6 +138,12 @@ public class CCConstants {
     public final static String AUTH_ERROR_STATUS_2FA = "2FA";
 
     /**
+     * this var is set when the current session was already validated user/password
+     * but the user has yet to provide a valid 2FA token in the next request
+     */
+    public final static String SESSION_2FA_PENDING_USERNAME = "SESSION_2FA_PENDING_USERNAME";
+
+    /**
      * access on nodes that was validated by lms
      */
     public final static String AUTH_SINGLE_USE_NODEIDS = "AUTH_SINGLE_USE_NODEIDS";
@@ -202,8 +208,13 @@ public class CCConstants {
     public final static String NAMESPACE_SHORT_SITE = "st";
 
     public final static String NAMESPACE_SHORT_CCM = "ccm";
+    public final static String NAMESPACE_AUDIO = "http://www.alfresco.org/model/audio/1.0";
 
-    public final static String NAMESPACE_SHORT_LOM = "cclom";
+    public final static String NAMESPACE_WEBDAV = "http://www.alfresco.org/model/webdav/1.0";
+
+    public final static String NAMESPACE_RENDITION = "http://www.alfresco.org/model/rendition/1.0";
+
+	public final static String NAMESPACE_SHORT_LOM = "cclom";
 
     public final static String NAMESPACE_SHORT_CM = "cm";
 
@@ -214,6 +225,11 @@ public class CCConstants {
     public final static String NAMESPACE_SHORT_EXIF = "exif";
 
     public final static String CCM_TYPE_BASKET = "{http://www.campuscontent.de/model/1.0}basketfolder";
+    public final static String NAMESPACE_SHORT_AUDIO = "audio";
+
+    public final static String NAMESPACE_SHORT_WEBDAV = "webdav";
+
+    public final static String NAMESPACE_SHORT_RENDITION = "rendition";
 
     public final static String CM_TYPE_THUMBNAIL = "{http://www.alfresco.org/model/content/1.0}thumbnail";
 
@@ -492,6 +508,9 @@ public class CCConstants {
 
     public final static String CCM_ASPECT_WIDGET = "{http://www.campuscontent.de/model/1.0}widget";
     public final static String CCM_ASPECT_PAGE = "{http://www.campuscontent.de/model/1.0}page";
+    public final static String CCM_ASPECT_PAGE_VARIANT = "{http://www.campuscontent.de/model/1.0}page_variant";
+
+    public final static String CCM_PROP_PAGE_VARIANT_IS_TEMPLATE = "{http://www.campuscontent.de/model/1.0}page_variant_is_template";
 
     public final static String CCM_PROP_TOOL_OBJECT_TOOLINSTANCEREF = "{http://www.campuscontent.de/model/1.0}tool_instance_ref";
 
@@ -746,6 +765,7 @@ public class CCConstants {
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGETO = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange_to";
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTERACTIVITYTYPE = "{http://www.campuscontent.de/model/1.0}educationalinteractivitytype";
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGE = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerange";
+    public final static String CCM_PROP_IO_REPL_EDUCATIONAL_TYPICALAGERANGECLUSTER = "{http://www.campuscontent.de/model/1.0}educationaltypicalagerangecluster";
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_INTENDEDENDUSERROLE = "{http://www.campuscontent.de/model/1.0}educationalintendedenduserrole";
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_SCHEMA_RELATION = "{http://www.campuscontent.de/model/1.0}schema_relation";
     public final static String CCM_PROP_IO_REPL_EDUCATIONAL_LANGUAGE = "{http://www.campuscontent.de/model/1.0}educationallanguage";
@@ -1023,6 +1043,8 @@ public class CCConstants {
 
     public final static String CCM_VALUE_TOOLPERMISSION_EDITORIAL_SUGGESTIONS = "TOOLPERMISSION_EDITORIAL_SUGGESTIONS";
 
+    public final static String CCM_VALUE_TOOLPERMISSION_METADATA_METHODOLOGY = "TOOLPERMISSION_METADATA_METHODOLOGY";
+
     public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_TEACHER = "teacher";
 
     public final static String CM_VALUE_PERSON_EDU_SCHOOL_PRIMARY_AFFILIATION_STUDENT = "student";
@@ -1250,6 +1272,9 @@ public class CCConstants {
 
     public static final String CCM_PROP_IO_UNIVERSITY = "{http://www.campuscontent.de/model/1.0}university";
 
+	public static final String CCM_PROP_IO_FULLTEXT_CONTENT = "{http://www.campuscontent.de/model/1.0}fulltext_content";
+	public static final String CCM_PROP_IO_FULLTEXT_STATUS = "{http://www.campuscontent.de/model/1.0}fulltext_status";
+
     public static final String SCHOOLCONTEXT_PATH_SEPARATOR = "#";
 
     public final static String CCM_PROP_CONFIGOBJECT_VALUE = "{http://www.campuscontent.de/model/1.0}configvalue";
@@ -1439,6 +1464,10 @@ public class CCConstants {
 
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE = "EDUSYSTEM_TEMPLATE";
 
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TEMPLATE_DEFAULT = "EDUSYSTEM_TEMPLATE_DEFAULT";
+
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE = "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE";
+
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_SERVICE = "EDUSYSTEM_SERVICE";
 
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_MEDIACENTER = "EDUSYSTEM_MEDIACENTER";
@@ -1453,6 +1482,8 @@ public class CCConstants {
 
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_GDPR = "EDUSYSTEM_GDPR";
     public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_ASSIGNMENT = "EDUSYSTEM_ASSIGNMENT";
+
+    public final static String CCM_VALUE_MAP_TYPE_EDU_SHARING_SYSTEM_TOPIC_PAGE_TEMPLATES = "EDUSYSTEM_TOPIC_PAGE_TEMPLATES";
 
 
     public final static String CCM_ASPECT_GROUP_SIGNUP = "{http://www.campuscontent.de/model/1.0}group_signup";
@@ -1487,6 +1518,7 @@ public class CCConstants {
     public final static String CCM_PROP_SUBMISSION_VALIDATION_STATUS = "{http://www.campuscontent.de/model/1.0}submission_validation_status";
     public final static String CCM_PROP_SUBMISSION_VALIDATION_NOTES = "{http://www.campuscontent.de/model/1.0}submission_validation_notes";
     public final static String CCM_PROP_SUBMISSION_FEEDBACK= "{http://www.campuscontent.de/model/1.0}submission_feedback";
+    public final static String CCM_PROP_SUBMISSION_USER_NOTES = "{http://www.campuscontent.de/model/1.0}submission_user_notes";
 
     public final static String CCM_PROP_SUBMISSION_FILE_REFER_TO_ASSIGNMENT_FILE = "{http://www.campuscontent.de/model/1.0}submission_file_refer_to_assignment_file";
     public final static String CCM_PROP_SUBMISSION_FILE_VALIDATION_STATUS = "{http://www.campuscontent.de/model/1.0}submission_file_validation_status";
@@ -1728,6 +1760,7 @@ public class CCConstants {
     public final static String I18n_SYSTEMFOLDER_TOOLPERMISSIONS = "systemfolder_toolpermissions";
 
     public final static String I18n_SYSTEMFOLDER_TEMPLATE = "systemfolder_template";
+    public final static String I18n_SYSTEMFOLDER_TEMPLATE_DEFAULT = "systemfolder_template_default";
 
     public final static String I18n_SYSTEMFOLDER_SERVICE = "systemfolder_service";
 
@@ -1738,6 +1771,8 @@ public class CCConstants {
     public final static String I18n_SYSTEMFOLDER_GDPR = "systemfolder_gdpr";
 
     public final static String I18n_SYSTEMFOLDER_ASSIGNMENT = "systemfolder_assignment";
+
+    public final static String I18n_SYSTEMFOLDER_TOPIC_PAGE_TEMPLATES = "systemfolder_topic_page_templates";
 
 
     //Gruppen root Folder
@@ -2265,15 +2300,18 @@ public class CCConstants {
 
     public static final String CC_CACHE_MILLISECONDS_KEY = "CC_CACHE_MILLISECONDS_KEY";
 
-    private static final Map<String, String> nameSpaceMap = new HashMap<>(Map.of(
-            NAMESPACE_CCM, NAMESPACE_SHORT_CCM,
-            NAMESPACE_CM, NAMESPACE_SHORT_CM,
-            NAMESPACE_LOM, NAMESPACE_SHORT_LOM,
-            NAMESPACE_SYS, NAMESPACE_SHORT_SYS,
-            NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL,
-            NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF,
-            NAMESPACE_APP, NAMESPACE_SHORT_APP,
-            NAMESPACE_SITE, NAMESPACE_SHORT_SITE
+    private static final Map<String, String> nameSpaceMap = new HashMap<>(Map.ofEntries(
+            Map.entry(NAMESPACE_CCM, NAMESPACE_SHORT_CCM),
+            Map.entry(NAMESPACE_CM, NAMESPACE_SHORT_CM),
+            Map.entry(NAMESPACE_LOM, NAMESPACE_SHORT_LOM),
+            Map.entry(NAMESPACE_SYS, NAMESPACE_SHORT_SYS),
+            Map.entry(NAMESPACE_VIRTUAL, NAMESPACE_SHORT_VIRTUAL),
+            Map.entry(NAMESPACE_EXIF, NAMESPACE_SHORT_EXIF),
+            Map.entry(NAMESPACE_APP, NAMESPACE_SHORT_APP),
+            Map.entry(NAMESPACE_SITE, NAMESPACE_SHORT_SITE),
+            Map.entry(NAMESPACE_AUDIO, NAMESPACE_SHORT_AUDIO),
+            Map.entry(NAMESPACE_WEBDAV, NAMESPACE_SHORT_WEBDAV),
+            Map.entry(NAMESPACE_RENDITION, NAMESPACE_SHORT_RENDITION)
     ));
 
     /**

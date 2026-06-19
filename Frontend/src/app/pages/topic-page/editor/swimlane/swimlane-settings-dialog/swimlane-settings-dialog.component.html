@@ -15,9 +15,11 @@
       {{ 'TOPIC_PAGE.SWIMLANE.EDIT.TYPE_LABEL' | translate }}
     </mat-label>
     <mat-select formControlName="type">
-      <mat-option [value]="option.value" *ngFor="let option of swimlaneTypeOptions">
+      @for (option of swimlaneTypeOptions; track option) {
+      <mat-option [value]="option.value">
         {{ 'TOPIC_PAGE.SWIMLANE.SELECT_ELEMENT.' + option.viewValue | translate }}
       </mat-option>
+      }
     </mat-select>
   </mat-form-field>
   <mat-label>
@@ -29,75 +31,72 @@
     (cdkDropListDropped)="drop($event)"
     class="topic-page-grid topic-page-grid-cols-6 topic-page-gap"
   >
-    <ng-container *ngIf="gridItems?.length >= 1; else configureGrid">
-      <div
-        cdkDrag
-        class="topic-page-grid-content"
-        [class.topic-page-col-span-2]="gridItem.cols === 2"
-        [class.topic-page-col-span-3]="gridItem.cols === 3"
-        [class.topic-page-col-span-4]="gridItem.cols === 4"
-        [class.topic-page-col-span-6]="gridItem.cols === 6 || gridItems.length === 1"
-        *ngFor="let gridItem of gridItems; let i = index"
-      >
-        <!-- drag handle (retrieved from official example) -->
-        <div class="drag-handle" cdkDragHandle>
-          <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"
-            ></path>
-            <path d="M0 0h24v24H0z" fill="none"></path>
-          </svg>
-        </div>
-        <div role="button" class="delete-tile" (click)="removeGridTile(i)">
-          <i esIcon="remove_circle_outline"></i>
-        </div>
-        <div
-          *ngIf="gridItem.item; else selectWidgetTypeDialog"
-          class="topic-page-grid-border-container"
-        >
-          <div class="grid-label">
-            {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CURRENT_TYPE' | translate }}:
-            <strong>
-              {{
-                'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' + widgetTypeToTextMap.get(gridItem.item)
-                  | translate
-              }}
-            </strong>
-            <ng-container *ngIf="!!gridItem.nodeId">
-              ({{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CONFIG_EXISTS' | translate }})
-            </ng-container>
-          </div>
-          <es-select-widget-type
-            [grid]="gridItems"
-            [tileIndex]="i"
-            (gridUpdated)="updatedGrid($event)"
-          ></es-select-widget-type>
-        </div>
-        <ng-template #selectWidgetTypeDialog>
-          <!-- display a form to select it when being in edit mode -->
-          <div class="topic-page-grid-border-container">
-            <div class="grid-label">
-              {{ 'TOPIC_PAGE.SWIMLANE.NO_WIDGET_AVAILABLE' | translate }}
-            </div>
-            <es-select-widget-type
-              [grid]="gridItems"
-              [tileIndex]="i"
-              (gridUpdated)="updatedGrid($event)"
-            ></es-select-widget-type>
-          </div>
-        </ng-template>
+    @if (gridItems?.length >= 1) { @for (gridItem of gridItems; track gridItem; let i = $index) {
+    <div
+      cdkDrag
+      class="topic-page-grid-content"
+      [class.topic-page-col-span-2]="gridItem.cols === 2"
+      [class.topic-page-col-span-3]="gridItem.cols === 3"
+      [class.topic-page-col-span-4]="gridItem.cols === 4"
+      [class.topic-page-col-span-6]="gridItem.cols === 6 || gridItems.length === 1"
+    >
+      <!-- drag handle (retrieved from official example) -->
+      <div class="drag-handle" cdkDragHandle>
+        <svg width="24px" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"
+          ></path>
+          <path d="M0 0h24v24H0z" fill="none"></path>
+        </svg>
       </div>
-      <ng-container *ngTemplateOutlet="reconfigureGrid"></ng-container>
-    </ng-container>
-  </div>
-
-  <!-- no grid has been defined yet -->
-  <ng-template #configureGrid>
+      <div role="button" class="delete-tile" (click)="removeGridTile(i)">
+        <i esIcon="remove_circle_outline"></i>
+      </div>
+      @if (gridItem.item) {
+      <div class="topic-page-grid-border-container">
+        <div class="grid-label">
+          {{ 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CURRENT_TYPE' | translate }}:
+          <strong>
+            {{
+              'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' + widgetTypeToTextMap.get(gridItem.item)
+                | translate
+            }}
+          </strong>
+          @if (!!gridItem.nodeId) { ({{
+            'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.CONFIG_EXISTS' | translate
+          }}) }
+        </div>
+        <es-select-widget-type
+          [grid]="gridItems"
+          [tileIndex]="i"
+          (gridUpdated)="updatedGrid($event)"
+        ></es-select-widget-type>
+      </div>
+      } @else {
+      <!-- display a form to select it when being in edit mode -->
+      <div class="topic-page-grid-border-container">
+        <div class="grid-label">
+          {{ 'TOPIC_PAGE.SWIMLANE.NO_WIDGET_AVAILABLE' | translate }}
+        </div>
+        <es-select-widget-type
+          [grid]="gridItems"
+          [tileIndex]="i"
+          (gridUpdated)="updatedGrid($event)"
+        ></es-select-widget-type>
+      </div>
+      }
+    </div>
+    }
+    <ng-container *ngTemplateOutlet="reconfigureGrid"></ng-container>
+    } @else {
     <div class="topic-page-grid-border-container topic-page-col-span-6">
       <!-- configure grid for initial data -->
       <es-configure-grid [grid]="gridItems" (gridUpdated)="updatedGrid($event)"></es-configure-grid>
     </div>
-  </ng-template>
+    }
+  </div>
+
+  <!-- no grid has been defined yet -->
 
   <ng-template #reconfigureGrid>
     <div class="topic-page-col-span-6 topic-page-text-center">

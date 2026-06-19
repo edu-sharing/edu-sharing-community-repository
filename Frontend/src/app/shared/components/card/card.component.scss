@@ -51,16 +51,7 @@
 }
 
 @mixin setZIndex($baseZIndex) {
-    @for $p from 0 through 50 {
-        &[priority='#{$p}'] {
-            z-index: $baseZIndex + $p;
-        }
-    }
-    @for $p from 1000 through 1050 {
-        &[priority='#{$p}'] {
-            z-index: $baseZIndex + $p;
-        }
-    }
+    z-index: calc(#{$baseZIndex} + var(--card-priority, 0));
 }
 
 :host ::ng-deep .card-dialog {

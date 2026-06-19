@@ -1,10 +1,11 @@
-import { Component, computed, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, OnInit, signal, ViewChild, inject } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PluginStatus, RestConstants, UIService } from '../../../core-module/core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { FormControl, FormGroup } from '@angular/forms';
 import {
     AdminV1Service,
+    ConfigService,
     ConfigV1Service,
     Context,
     RepositoryConfig,
@@ -33,6 +34,17 @@ import { Toast } from 'ngx-edu-sharing-ui';
     imports: [SharedModule, ContextNamePipe, EditorModule, ShareDialogModule],
 })
 export class AdminMessagesComponent implements OnInit {
+    private configV1Service = inject(ConfigV1Service);
+    private configService = inject(ConfigService);
+    private uiService = inject(UIService);
+    private platformLocation = inject(PlatformLocation);
+    private mainNavService = inject(MainNavService);
+    private translate = inject(TranslateService);
+    private dialogs = inject(DialogsService);
+    private toast = inject(Toast);
+    private sanitizer = inject(DomSanitizer);
+    private adminV1Service = inject(AdminV1Service);
+
     @ViewChild('heading') headingRef: ElementRef;
     selectedContexts = signal<Context[]>([]);
     contexts = signal<Context[]>([]);
@@ -87,33 +99,8 @@ export class AdminMessagesComponent implements OnInit {
     });
     editorConfig: any;
     message: string;
-    constructor(
-        private configV1Service: ConfigV1Service,
-        private uiService: UIService,
-        private platformLocation: PlatformLocation,
-        private mainNavService: MainNavService,
-        private translate: TranslateService,
-        private dialogs: DialogsService,
-        private toast: Toast,
-        private sanitizer: DomSanitizer,
-        private adminV1Service: AdminV1Service,
-    ) {}
 
     async ngOnInit() {
-        this.editorConfig = {
-            branding: false,
-            height: 200,
-            apiKey: '',
-            menubar: false,
-            statusbar: false,
-            resize: true,
-            plugins: ['link', 'code'],
-            //newline_behavior: 'linebreak',
-            toolbar:
-                'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
-            language: this.translate.getDefaultLang(),
-        };
-        this.editorConfig.base_url = this.platformLocation.getBaseHrefFromDOM() + 'tinymce/';
         this.components.set(this.mainNavService.getAvailableScopes());
         this.config.set(await firstValueFrom(this.adminV1Service.getConfig()));
         this.tp.set(
@@ -138,6 +125,22 @@ export class AdminMessagesComponent implements OnInit {
                 domain: ['test2.de', 'abc.de'],
             } as Context,
         ]);*/
+        if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
+            this.editorConfig = {
+                base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
+                branding: false,
+                height: 200,
+                apiKey: '',
+                menubar: false,
+                statusbar: false,
+                resize: true,
+                //newline_behavior: 'linebreak',
+                plugins: ['link', 'code'],
+                toolbar:
+                    'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
+                language: this.translate.getDefaultLang(),
+            };
+        }
     }
 
     async addMessage() {

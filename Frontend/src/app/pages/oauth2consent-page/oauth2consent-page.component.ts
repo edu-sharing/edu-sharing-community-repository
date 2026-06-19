@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AuthenticationService, OAuth2Consent } from 'ngx-edu-sharing-api';
 import { ScopeEntry } from './scope-entry';
 import { TranslateService } from '@ngx-translate/core';
@@ -12,15 +12,15 @@ import { Toast, ToastMessage, ToastType } from '../../services/toast';
     standalone: false,
 })
 export class Oauth2consentPageComponent {
+    private authentication = inject(AuthenticationService);
+    private translate = inject(TranslateService);
+    private http = inject(HttpClient);
+    private toast = inject(Toast);
+
     scopes: ScopeEntry[] = [];
 
     oauth2Consent: OAuth2Consent;
-    constructor(
-        private authentication: AuthenticationService,
-        private translate: TranslateService,
-        private http: HttpClient,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.authentication.getOauthConsent().subscribe((c) => {
             this.oauth2Consent = c;
             this.scopes = this.oauth2Consent.scopes.map((s) => ({

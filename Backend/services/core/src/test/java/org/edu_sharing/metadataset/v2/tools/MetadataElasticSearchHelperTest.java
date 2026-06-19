@@ -3,11 +3,11 @@ package org.edu_sharing.metadataset.v2.tools;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.json.JsonpUtils;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.Lists;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.metadataset.v2.*;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.service.search.SearchService;
@@ -19,12 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.opensaml.xmlsec.signature.P;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 class MetadataElasticSearchHelperTest {
@@ -243,6 +241,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
                 null,
+                false,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
@@ -274,6 +273,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
                 null,
+                false,
                 Collections.emptyList())
         );
         query.setParameters(Collections.singletonList(parameter));
@@ -321,6 +321,41 @@ class MetadataElasticSearchHelperTest {
                         "}",
                 result.get("test_facet")
         );
+    }
+
+
+    @Test
+    void getAggregationsCombineWithSuggestions() {
+        SearchToken token = new SearchToken();
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
+        parameter.setName("test_facet");
+        parameter.setFacet(new MetadataQueryParameter.MetadataQueryFacet(
+                MetadataQueryParameter.MetadataQueryFacet.Type.term,
+                MetadataQueryParameter.MetadataQueryFacet.SortBy.count,
+                MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
+                null,
+                null,
+                true,
+                Collections.emptyList())
+        );
+        query.setParameters(Collections.singletonList(parameter));
+
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(
+                new SearchRequest.Builder(), mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
+                new BoolQuery.Builder().build()._toQuery(),
+                token
+        );
+        assertEquals(1, result.size());
+
+        String json = JsonpUtils.toJsonString(result.get("test_facet"), new JacksonJsonpMapper());
+        // when combineWithSuggestions is set the terms agg must be driven by the painless script,
+        // not by a plain keyword field
+        assertTrue(json.contains("\"lang\":\"painless\""), "expected painless script-based aggregation, got: " + json);
+        assertTrue(json.contains("\"property\":\"test_facet\""), "expected property param wired to facet name, got: " + json);
+        // suggestions must be scoped to the current user via the authority param
+        assertTrue(json.contains("\"authority\":\"user\""), "expected current-user authority param, got: " + json);
+        assertFalse(json.contains("\"field\":\"properties.test_facet.keyword\""), "expected no field-based terms agg, got: " + json);
     }
 
 
@@ -382,6 +417,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
                 null,
+                false,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet1", null),
                         new MetadataQueryParameter.MetadataQueryFacetItem("facet2", null)
@@ -411,6 +447,7 @@ class MetadataElasticSearchHelperTest {
                 MetadataQueryParameter.MetadataQueryFacet.SortOrder.asc,
                 null,
                 null,
+                false,
                 Arrays.asList(
                         new MetadataQueryParameter.MetadataQueryFacetItem("contributor.displayname.keyword", "contributor")
                 ))

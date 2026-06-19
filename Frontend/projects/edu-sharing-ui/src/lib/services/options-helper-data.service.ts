@@ -1,7 +1,7 @@
 import type { DropdownComponent } from '../dropdown/dropdown.component';
 import type { ActionbarComponent } from '../actionbar/actionbar.component';
 import type { ListEventInterface, NodeEntriesDisplayType } from '../node-entries/entries-model';
-import { EventEmitter, Injectable, NgZone, OnDestroy, Optional } from '@angular/core';
+import { EventEmitter, Injectable, NgZone, OnDestroy, inject } from '@angular/core';
 import { AuthenticationService, ME, NetworkService, Node, UserService } from 'ngx-edu-sharing-api';
 import { take, takeUntil } from 'rxjs/operators';
 import { CustomOptions, OptionItem, Scope, Target } from '../types/option-item';
@@ -12,6 +12,7 @@ import { KeyboardShortcutsService } from './abstract/keyboard-shortcuts.service'
 import { ActivatedRoute } from '@angular/router';
 import { LocalEventsService } from './local-events.service';
 import { Toast } from './abstract/toast.service';
+import { GlobalStateService } from 'ngx-rendering-service-api';
 import { NodeEntriesDataType } from '../node-entries/data-type';
 
 type DeleteEvent = {
@@ -31,6 +32,7 @@ export interface OptionData {
     selectedObjects?: Node[] | any[];
     allObjects?: Node[] | any[];
     parent?: Node | any;
+    customDownloadUrl?: string;
     customOptions?: CustomOptions;
     /**
      * custom interceptor to modify the default options array
@@ -39,6 +41,17 @@ export interface OptionData {
 }
 @Injectable()
 export class OptionsHelperDataService implements OnDestroy {
+    private ngZone = inject(NgZone);
+    private route = inject(ActivatedRoute, { optional: true });
+    private localEvents = inject(LocalEventsService);
+    private authenticationService = inject(AuthenticationService);
+    private toast = inject(Toast);
+    private userService = inject(UserService);
+    private networkService = inject(NetworkService);
+    private globalStateService = inject(GlobalStateService);
+    private keyboardShortcutsService = inject(KeyboardShortcutsService, { optional: true });
+    private optionsHelperService = inject(OptionsHelperService, { optional: true });
+
     private components: OptionsHelperComponents;
     private data: OptionData;
     private keyboardShortcutsSubscription: Subscription;
@@ -50,18 +63,13 @@ export class OptionsHelperDataService implements OnDestroy {
     readonly nodesDeleted = new EventEmitter<DeleteEvent>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
 
-    constructor(
-        private ngZone: NgZone,
-        @Optional() private route: ActivatedRoute,
-        private localEvents: LocalEventsService,
-        private authenticationService: AuthenticationService,
-        private toast: Toast,
-        private userService: UserService,
-        private networkService: NetworkService,
-        @Optional() private keyboardShortcutsService: KeyboardShortcutsService,
-        @Optional() private optionsHelperService: OptionsHelperService,
-    ) {
+    constructor() {
         this.registerStaticSubscriptions();
+        this.globalStateService.downloadUrl$.pipe(takeUntil(this.destroyed)).subscribe(() => {
+            if (this.data) {
+                void this.refreshComponents();
+            }
+        });
     }
 
     /** Performs subscriptions that don't have to be refreshed. */
@@ -94,6 +102,10 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     getData() {
+        if (!this.data) {
+            return null;
+        }
+        this.data.customDownloadUrl = this.globalStateService.downloadUrl$.value;
         return this.data;
     }
 
@@ -111,7 +123,7 @@ export class OptionsHelperDataService implements OnDestroy {
             return;
         }
         this.globalOptions = await this.getAvailableOptions(Target.Actionbar);
-        await this.optionsHelperService?.refreshComponents(this.components, this.data);
+        await this.optionsHelperService?.refreshComponents(this.components, this.getData());
     }
 
     getAvailableOptions(target: Target, objects: Node[] = null) {
@@ -119,7 +131,7 @@ export class OptionsHelperDataService implements OnDestroy {
             target,
             objects,
             this.components,
-            this.data,
+            this.getData(),
         );
     }
 
@@ -165,7 +177,8 @@ export class OptionsHelperDataService implements OnDestroy {
     }
     filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
         return (
-            this.optionsHelperService?.filterOptions(options, target, this.data, objects) || options
+            this.optionsHelperService?.filterOptions(options, target, this.getData(), objects) ||
+            options
         );
     }
     /**
@@ -183,6 +196,6 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     pasteNode(nodes: Node[] = []) {
-        this.optionsHelperService.pasteNode(this.components, this.data, true, nodes);
+        this.optionsHelperService.pasteNode(this.components, this.getData(), true, nodes);
     }
 }

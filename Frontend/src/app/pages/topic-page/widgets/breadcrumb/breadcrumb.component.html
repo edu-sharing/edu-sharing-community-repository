@@ -1,37 +1,26 @@
-<div
-  class="es-topic-page-breadcrumb"
-  [class.edit-mode]="editMode()"
-  *ngIf="initialized(); else loadingSpinner"
->
+@if (initialized()) {
+<div class="es-topic-page-breadcrumb" [class.edit-mode]="editMode()">
   <ul class="es-topic-page-breadcrumb-list">
-    <li
-      class="es-topic-page-breadcrumb-list-item"
-      [class.last-item]="last"
-      *ngFor="let node of processedNodes(); let i = index; let last = last"
-    >
-      <a [href]="rootLink()" *ngIf="i === 0 && rootLink(); else defaultLink">
+    @for (node of processedNodes(); track node; let i = $index; let last = $last) {
+    <li class="es-topic-page-breadcrumb-list-item" [class.last-item]="last">
+      @if (i === 0 && rootLink()) {
+      <a [href]="rootLink()">
         {{ rootName ?? (i18nPrefix + 'DEFAULT_ROOT_NAME' | translate) }}
       </a>
-      <ng-template #defaultLink>
-        <a
-          *ngIf="customUrl && customUrl(node); else defaultNodeLink"
-          [href]="customUrl(node)"
-          [target]="customUrlTarget"
-        >
-          <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
-        </a>
-        <ng-template #defaultNodeLink>
-          <es-node-url [node]="node" [mode]="'link'">
-            <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
-          </es-node-url>
-        </ng-template>
-      </ng-template>
-      <i *ngIf="!last || pageVariantConfigNodes().length" esIcon="chevron_right"></i>
+      } @else { @if (customUrl && customUrl(node)) {
+      <a [href]="customUrl(node)" [target]="customUrlTarget">
+        <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
+      </a>
+      } @else {
+      <es-node-url [node]="node" [mode]="'link'">
+        <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
+      </es-node-url>
+      } } @if (!last || pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
+      <i esIcon="chevron_right"></i>
+      }
     </li>
-    <li
-      class="es-topic-page-breadcrumb-list-item"
-      *ngIf="pageVariantConfigNodes().length as countOfConfigs"
-    >
+    } @if (pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
+    <li class="es-topic-page-breadcrumb-list-item">
       <mat-form-field class="select-config-field" appearance="outline" subscriptSizing="dynamic">
         <mat-label>
           {{ i18nPrefix + 'PAGE_VARIANT_LABEL' | translate }}
@@ -39,40 +28,37 @@
         <!-- hint: use default mat-select over es-dropdown due to being implemented as mat-menu -->
         <mat-select
           [disabled]="
-            (countOfConfigs === 1 || isProcessing()) &&
+            (pageVariantConfigNodes().length === 1 || isProcessing()) &&
             !(isAdmin() && pageTemplateExists() && !templateMode())
           "
           [value]="pageVariantNode?.ref.id"
           (selectionChange)="selectVariant($event.value)"
         >
-          <mat-option
-            *ngFor="let variant of pageVariantConfigNodes(); let i = index"
-            [value]="variant.ref.id"
-          >
+          @for (variant of pageVariantConfigNodes(); track variant; let i = $index) {
+          <mat-option [value]="variant.ref.id">
             {{
               variant.title && !variant.title.includes(pageVariantConfigPrefix)
                 ? (variant | nodeTitle)
                 : (i18nPrefix + 'PAGE_VARIANT_LABEL' | translate) + ' ' + (i + 1)
             }}
           </mat-option>
-          <mat-option
-            class="navigate-to-template"
-            [value]="navigateToTemplateValue"
-            *ngIf="isAdmin() && pageTemplateExists()"
-          >
+          } @if (isAdmin() && pageTemplateExists()) {
+          <mat-option class="navigate-to-template" [value]="navigateToTemplateValue">
             {{ i18nPrefix + 'NAVIGATE_TO_PAGE_TEMPLATE' | translate }}
           </mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </li>
+    }
   </ul>
-  <ng-container *ngIf="hasBreadcrumbExtension()">
-    <div #customExtension></div>
-  </ng-container>
+  @if (hasBreadcrumbExtension()) {
+  <div #customExtension></div>
+  }
 </div>
+} @else {
+<es-spinner></es-spinner>
+}
 <ng-template #nodeTitle let-node="node">
   {{ node.properties?.['ccm:collectionshorttitle']?.[0] || (node | nodeTitle) }}
-</ng-template>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
 </ng-template>

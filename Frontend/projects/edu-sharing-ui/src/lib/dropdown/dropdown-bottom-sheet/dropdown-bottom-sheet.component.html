@@ -1,32 +1,31 @@
 <ul role="none">
-  <ng-container *ngFor="let option of options$ | async; let i = index">
-    <li *ngIf="option.isEnabled || showDisabled" role="none">
-      <button
-        mat-button
-        color="primary"
-        class="mat-menu-item collection-item-{{
-          option.name | replaceChars : { search: '.', replace: '-' }
-        }}"
-        matTooltip="{{ option | optionTooltip | async }}"
-        matTooltipPosition="right"
-        matTooltipTouchGestures="off"
-        [attr.aria-label]="option.ariaLabel || option.name | translate"
-        [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
-        [class.mat-menu-item-selected]="option.isSelected"
-        [disabled]="!option.isEnabled"
-        (click)="click(option)"
-        attr.data-test="menu-item-{{ option.name }}"
-      >
-        <ng-container *ngIf="option.customTemplate">
-          <ng-container
-            *ngTemplateOutlet="option.customTemplate; context: { option }"
-          ></ng-container>
-        </ng-container>
-        <ng-container *ngIf="!option.customTemplate">
-          <i *ngIf="option.icon" [esIcon]="option.icon" esIconContext="option"></i>
-          {{ option.name | translate }}
-        </ng-container>
-      </button>
-    </li>
-  </ng-container>
+  @for (option of options$ | async; track option; let i = $index) { @if (option.isEnabled ||
+  showDisabled) {
+  <li role="none">
+    <button
+      mat-button
+      [color]="option.color"
+      class="mat-menu-item collection-item-{{
+        option.name | replaceChars : { search: '.', replace: '-' }
+      }}"
+      matTooltip="{{ option | optionTooltip | async }}"
+      matTooltipPosition="right"
+      matTooltipTouchGestures="off"
+      [attr.aria-label]="option.ariaLabel || option.name | translate"
+      [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+      [class.mat-menu-item-selected]="option.isSelected"
+      [disabled]="!option.isEnabled"
+      (click)="click(option)"
+      attr.data-test="menu-item-{{ option.name }}"
+    >
+      @if (option.customTemplate) {
+      <ng-container *ngTemplateOutlet="option.customTemplate; context: { option }"></ng-container>
+      } @if (!option.customTemplate) { @if (option.icon) {
+      <i [esIcon]="option.icon" esIconContext="option"></i>
+      }
+      {{ option.name | translate }}
+      }
+    </button>
+  </li>
+  } }
 </ul>

@@ -1,8 +1,5 @@
-<div class="empty" *ngIf="!files()?.length">
-  {{ 'EDITORIAL.SIDEBAR.SUBMISSION.ATTACHMENT_EMPTY' | translate }}
-</div>
-<div class="node-list" *ngIf="files()?.length">
-  @for (item of files(); track item) {
+<div class="node-list">
+  @for (item of localFiles(); track item) {
   <div
     tabindex="0"
     (click)="click(item)"

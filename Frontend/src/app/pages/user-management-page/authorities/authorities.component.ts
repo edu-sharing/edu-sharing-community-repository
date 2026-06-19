@@ -11,6 +11,7 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -100,6 +101,23 @@ import { DomSanitizer } from '@angular/platform-browser';
     standalone: false,
 })
 export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit {
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private connector = inject(RestConnectorService);
+    sanitizer = inject(DomSanitizer);
+    private dialogs = inject(DialogsService);
+    private iam = inject(RestIamService);
+    private iamService = inject(IamV1Service);
+    private node = inject(RestNodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private optionsHelperService = inject(OptionsHelperDataService);
+    private organization = inject(RestOrganizationService);
+    private organizationService = inject(OrganizationV1Service);
+    private ref = inject(ApplicationRef);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private uiService = inject(UIService);
+
     readonly DisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -356,24 +374,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         } as ColumnType;
     }
 
-    constructor(
-        private breadcrumbsService: BreadcrumbsService,
-        private connector: RestConnectorService,
-        public sanitizer: DomSanitizer,
-        private dialogs: DialogsService,
-        private iam: RestIamService,
-        private iamService: IamV1Service,
-        private node: RestNodeService,
-        private nodeHelper: NodeHelperService,
-        private optionsHelperService: OptionsHelperDataService,
-        private organization: RestOrganizationService,
-        private organizationService: OrganizationV1Service,
-        private ref: ApplicationRef,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.isAdmin = this.connector.getCurrentLogin()?.isAdmin;
         this.organization.getOrganizations().subscribe((data: OrganizationOrganizations) => {
             void this.updateOptions();
@@ -524,7 +525,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             orgSignupList.priority = 20;
             orgSignupList.constrains = [Constrain.NoBulk];
             options.push(orgSignupList);
-            const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'checkbox', (data) => {
+            const orgSignup = new OptionItem('PERMISSIONS.ORG_SIGNUP', 'how_to_reg', (data) => {
                 this.groupSignup = this.getList(data)[0];
                 this.groupSignupDetails = {
                     signupMethod: this.getList(data)[0].signupMethod ?? 'disabled',
@@ -1436,12 +1437,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         );
     }
     openFolder(folder: SharedFolder) {
-        UIHelper.goToWorkspaceFolder(
-            this.node,
-            this.router,
-            this.connector.getCurrentLogin(),
-            folder.id,
-        );
+        UIHelper.goToWorkspaceFolder(this.router, this.connector.getCurrentLogin(), folder.id);
     }
 
     private updateButtons() {

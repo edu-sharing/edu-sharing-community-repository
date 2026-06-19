@@ -24,7 +24,6 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
 
-import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +35,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     public static final int FACET_LIMIT_MULTIPLIER = 5;
     public static final String FACET_SELECTED_POSTFIX = "_selected";
     static final String GEOPOINT_RUNTIME_FIELD = "geo_point_runtime";
+    /** Terms-agg value source merging indexed values + <em>all</em> nested suggestions for the property. Param: {@code property}. */
+    public static final String COMBINED_SUGGESTION_FACET_SCRIPT = SearchServiceElastic.loadScript("suggestion-combined-facet.painless");
+    /** Like {@link #COMBINED_SUGGESTION_FACET_SCRIPT} but nested suggestions are restricted to {@code createdBy == authority}. Params: {@code property}, {@code authority}. */
+    public static final String COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT = SearchServiceElastic.loadScript("suggestion-combined-facet-current-user.painless");
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
@@ -393,6 +396,22 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                             .field(GEOPOINT_RUNTIME_FIELD)
                             .precision((int) facet.getArgs().get("precision"))
                             .build()._toAggregation();
+                } else if (metadataQueryFacet.isPresent()
+                        && metadataQueryFacet.get().isCombineWithSuggestions()
+                        && (metadataQueryFacet.get().getItems() == null || metadataQueryFacet.get().getItems().size() <= 1)) {
+                    // only show suggestions created by the current user in addition to indexed property values
+                    String authority = org.alfresco.repo.security.authentication.AuthenticationUtil.getFullyAuthenticatedUser();
+                    Map<String, JsonData> params = new HashMap<>();
+                    params.put("property", JsonData.of(facet.getProperty()));
+                    params.put("authority", authority == null ? JsonData.of("") : JsonData.of(authority));
+                    TermsAggregation.Builder builder = AggregationBuilders.terms()
+                            .script(s -> s
+                                    .source(COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT)
+                                    .lang("painless")
+                                    .params(params))
+                            .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
+                            .minDocCount(searchToken.getFacetsMinCount());
+                    innerAggregation = builder.build()._toAggregation();
                 } else {
                     TermsAggregation.Builder builder = AggregationBuilders.terms()
                             .field(fieldName.get(0).getValue())

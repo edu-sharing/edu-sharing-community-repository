@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnInit } from '@angular/core';
+import { Directive, ElementRef, Input, OnInit, inject } from '@angular/core';
 
 /**
  * Checks whether text of the annotated element or a descendent (give a selector) was cut of, e.g.,
@@ -12,13 +12,13 @@ import { Directive, ElementRef, Input, OnInit } from '@angular/core';
     standalone: false,
 })
 export class CheckTextOverflowDirective implements OnInit {
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     @Input('esCheckTextOverflow') selector?: string;
 
     private textElement: HTMLElement;
 
     hasTextOverflow = delay(this.hasTextOverflow_);
-
-    constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
     ngOnInit(): void {
         this.textElement = this.getTextElement();

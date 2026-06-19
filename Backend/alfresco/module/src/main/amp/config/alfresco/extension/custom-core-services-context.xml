@@ -289,6 +289,15 @@
     <constructor-arg name="repositoryCache" ref="repositoryCache"/>
   </bean>
 
+   	 <bean id="onFulltextContentUpdatePolicy" class="org.edu_sharing.alfresco.policy.OnFulltextContentUpdatePolicy" init-method="init">
+   	 	<property name="policyComponent">
+            <ref bean="policyComponent"/>
+        </property>
+         <property name="nodeService">
+            <ref bean="nodeService" />
+        </property>
+   	 </bean>
+
 
   <bean id="onCopyCollectionRefPolicy" class="org.edu_sharing.alfresco.policy.OnCopyCollectionRefPolicy"
         init-method="init">
@@ -512,32 +521,11 @@
     </property>
   </bean>
 
-  <!-- Preview Job -->
-  <bean id="eduPreviewJob" class="org.springframework.scheduling.quartz.SchedulerAccessorBean">
-    <property name="scheduler" ref="schedulerFactory"/>
-    <!-- Repeat hourly on the half hour -->
-    <property name="triggers">
-      <list>
-        <bean id="eduPreviewJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-          <property name="startDelay" value="0"/>
-          <property name="cronExpression" value="0/5 * * * * ?"/>
-          <property name="jobDetail">
-            <bean id="eduPreviewJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-              <property name="jobClass" value="org.edu_sharing.alfresco.jobs.PreviewJob"/>
-              <property name="jobDataAsMap">
-                <map>
-                </map>
-              </property>
-            </bean>
-          </property>
-        </bean>
-      </list>
-    </property>
-  </bean>
-
-  <bean id="eduAuthorityService" class="org.edu_sharing.alfresco.service.AuthorityService">
-    <property name="authorityService" ref="AuthorityService"/>
-  </bean>
+    <bean id="eduAuthorityService" class="org.edu_sharing.alfresco.service.AuthorityService">
+    		<property name="authorityService">
+        		<ref bean="AuthorityService" />
+        </property>
+    </bean>
 
   <bean id="eduOrganisationService" class="org.edu_sharing.alfresco.service.OrganisationService">
     <constructor-arg name="authorityService" ref="AuthorityService"/>

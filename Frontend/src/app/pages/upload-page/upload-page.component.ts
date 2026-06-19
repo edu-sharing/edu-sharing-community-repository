@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { Node } from 'ngx-edu-sharing-api';
@@ -17,19 +17,19 @@ import { UploadDialogService } from '../../services/upload-dialog.service';
     standalone: false,
 })
 export class UploadPageComponent {
+    private translations = inject(TranslationsService);
+    private nodeHelper = inject(NodeHelperService);
+    private connector = inject(RestConnectorService);
+    private events = inject(FrameEventsService);
+    private route = inject(ActivatedRoute);
+    private uploadDialogs = inject(UploadDialogService);
+
     loading = true;
     parent: Node;
 
     private reurl: string;
 
-    constructor(
-        private translations: TranslationsService,
-        private nodeHelper: NodeHelperService,
-        private connector: RestConnectorService,
-        private events: FrameEventsService,
-        private route: ActivatedRoute,
-        private uploadDialogs: UploadDialogService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn(false).subscribe((login) => {
                 if (login.statusCode === RestConstants.STATUS_CODE_OK) {
@@ -60,7 +60,6 @@ export class UploadPageComponent {
             return;
         }
         this.nodeHelper.addNodeToLms(node[0], this.reurl);
-        window.close();
     }
 
     private _cancel() {

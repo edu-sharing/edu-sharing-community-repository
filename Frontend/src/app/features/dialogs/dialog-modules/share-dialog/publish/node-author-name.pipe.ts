@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { Node } from 'ngx-edu-sharing-api';
@@ -12,6 +12,8 @@ import { VCard } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class NodeAuthorNamePipe implements PipeTransform {
+    private translate = inject(TranslateService);
+
     transform(node: Node, args: any = null): string {
         const data = [];
         if (node.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT]?.[0]) {
@@ -29,5 +31,4 @@ export class NodeAuthorNamePipe implements PipeTransform {
         }
         return data.join(', ');
     }
-    constructor(private translate: TranslateService) {}
 }

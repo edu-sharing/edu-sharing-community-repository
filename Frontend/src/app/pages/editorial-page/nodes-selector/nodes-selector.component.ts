@@ -1,9 +1,11 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import {
+    ChangeDetectorRef,
     Component,
     computed,
     effect,
+    inject,
     input,
-    Input,
     model,
     OnInit,
     Signal,
@@ -18,9 +20,13 @@ import {
     AboutService,
     AuthenticationService,
     CollectionService as ApiCollectionService,
+    Connector,
+    Copy,
+    CreateSuggestionRequestDto,
     DEFAULT,
     HOME_REPOSITORY,
     MdsQueryCriteria,
+    NetworkService,
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
@@ -37,6 +43,7 @@ import {
     DropSource,
     FetchEvent,
     InteractionType,
+    ListItem,
     LocalEventsService,
     MdsExtendedValueData,
     MdsExtendedValues,
@@ -45,13 +52,14 @@ import {
     NodeDataSource,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
-    NodeEntriesService,
     NodeEntriesWrapperComponent,
     NodesRightMode,
+    OptionItem,
     Scope,
-    TreeNodeService,
+    TreeConfig,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom } from 'rxjs';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { combineLatest, firstValueFrom, map, of, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     CollectionReference,
@@ -59,9 +67,25 @@ import {
 } from '../../../core-module/rest/data-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestCollectionService } from '../../../core-module/rest/services/rest-collection.service';
+import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
+import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
+import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import {
+    AddWithConnectorDialogData,
+    AddWithConnectorDialogResult,
+} from '../../../features/dialogs/dialog-modules/add-with-connector-dialog/add-with-connector-dialog-data';
 import { AddMaterialDialogResult } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog-data';
-import { AddMaterialDialogModule } from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+import {
+    AddMaterialDialogComponent,
+    AddMaterialDialogModule,
+} from '../../../features/dialogs/dialog-modules/add-material-dialog/add-material-dialog.module';
+import {
+    OptionState,
+    SidebarContext,
+} from '../../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { MetadataTemplateManagementComponent } from '../../../features/metadata-template-management/metadata-template-management.component';
 import { BridgeService } from '../../../services/bridge.service';
@@ -70,10 +94,6 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
-import { CreateSuggestionRequestDto } from '../../../../../dist/edu-sharing-api/lib/api/models/create-suggestion-request-dto';
-import { SelectionModel } from '@angular/cdk/collections';
-import { OptionState } from '../../../features/editorial-sidebar/editorial-sidebar.component';
-import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 
 export enum TabType {
     SEARCH = 'search',
@@ -86,6 +106,13 @@ export enum TabType {
 enum StepType {
     SELECT = 'select',
     CONFIGURE = 'configure',
+}
+
+enum InvalidSelectionReason {
+    INVALID_COMBINATION = 'invalidCombination',
+    INVALID_SELECTION = 'invalidSelection',
+    MISSING_PRIVILEGES = 'missingPrivileges',
+    AT_LEAST_ROOT_OR_CHILDREN_SELECTED = 'atLeastRootOrChildrenSelected',
 }
 
 export type NodesSelectorConfig = {
@@ -107,6 +134,19 @@ export type NodesSelectorConfig = {
      * custom label for the APPLY button
      */
     applyLabel?: string;
+    /**
+     * whether to show the connector "Create" button in the upload tab (default: true)
+     */
+    allowCreate?: boolean;
+    /**
+     * automatically close the sidebar after nodes are emitted
+     */
+    autoClose?: boolean;
+    /**
+     * called whenever nodes are produced (upload, copy, or connector create).
+     * Use this instead of subscribing to EditorialSidebarService.applyNodeEmitted globally to only listen to your current trigger session
+     */
+    onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
 };
 
 @Component({
@@ -119,13 +159,41 @@ export type NodesSelectorConfig = {
         MdsModule,
         MetadataTemplateManagementComponent,
     ],
-    providers: [NodeEntriesService, TreeNodeService],
 })
 export class NodesSelectorComponent implements OnInit {
+    private apiCollectionService = inject(ApiCollectionService);
+    private bridge = inject(BridgeService);
+    private networkService = inject(NetworkService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private collectionService = inject(RestCollectionService);
+    private localEventsService = inject(LocalEventsService);
+    private mdsHelperService = inject(MdsHelperService);
+    nodeHelperService = inject(NodeHelperService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    private nodeService = inject(NodeService);
+    private restNodeService = inject(RestNodeService);
+    private suggestionsV1Service = inject(SuggestionsV1Service);
+    private uiService = inject(UIService);
+    private uploadDialogService = inject(UploadDialogService);
+    private authenticationService = inject(AuthenticationService);
+    private aboutService = inject(AboutService);
+    private connectorOptionsService = inject(ConnectorOptionsService);
+    private dialogs = inject(DialogsService);
+    private searchService = inject(SearchService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
     protected readonly idPrefix: string = 'nodes-selector-tab';
-    @Input() parent: Node;
+
+    @ViewChild(AddMaterialDialogComponent) addMaterialDialogComponent: AddMaterialDialogComponent;
+
     option = input<OptionState<NodesSelectorConfig>>();
+    parent = input<Node>();
+    primaryMode = input<SidebarContext>();
+    chooseParent = computed(
+        () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
+    );
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -144,11 +212,19 @@ export class NodesSelectorComponent implements OnInit {
             return Object.values(value).some((data: MdsExtendedValueData) => data.enabled);
         });
     });
-    supportedTabs: Signal<TabType[]> = computed(() =>
-        this.selectionMode() === 'source'
-            ? [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD]
-            : [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE],
-    );
+    supportedTabs: Signal<TabType[]> = computed(() => {
+        if (this.selectionMode() === 'source') {
+            if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
+                return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
+            } else {
+                return [TabType.WORKSPACE, TabType.UPLOAD];
+            }
+        }
+        if (this.allSelectedNodesFromHomeRepo()) {
+            return [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
+        }
+        return [TabType.COLLECTIONS];
+    });
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
         // early return for empty or single selection
@@ -163,7 +239,9 @@ export class NodesSelectorComponent implements OnInit {
             selectedNodes.find((n) => !selectedNodeIds.includes(n.parent.id)) ?? selectedNodes[0]
         );
     });
+    isCollectionsTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.COLLECTIONS);
     isMethodologyTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.METHODOLOGY);
+    isSearchTab: Signal<boolean> = computed(() => this.selectedTab() === TabType.SEARCH);
     methodologyTabWithValue: Signal<boolean> = computed(
         () => this.isMethodologyTab() && this.atLeastOneEnabledExtendedValue(),
     );
@@ -173,21 +251,99 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
-    isValidSelection: Signal<boolean> = computed((): boolean => {
-        if (this.selectionMode() === 'source') {
-            return (
-                (this.onlyOneSelected() || this.onlyFilesSelected()) &&
-                (!this.option().optionConfig?.applyCallback ||
-                    this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[]))
-            );
-        } else {
-            return (
-                this.onlyOneSelected() &&
-                (this.selectedNodes()[0].mediatype === 'folder' ||
-                    this.selectedNodes()[0].mediatype === 'collection')
-            );
+    invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
+        (): InvalidSelectionReason | null => {
+            if (this.selectionMode() === 'source') {
+                if (
+                    this.option().optionConfig?.applyCallback &&
+                    !this.option().optionConfig?.applyCallback(this.selectedNodes() as Node[])
+                ) {
+                    return InvalidSelectionReason.INVALID_SELECTION;
+                }
+                // fallback for configuration tab
+                if (!this.isSelectStep() && !this.atLeastRootOrChildrenSelected()) {
+                    return InvalidSelectionReason.AT_LEAST_ROOT_OR_CHILDREN_SELECTED;
+                }
+                // copy collection dialog
+                if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
+                    return null;
+                }
+                if (!this.onlyFilesSelected()) {
+                    return InvalidSelectionReason.INVALID_COMBINATION;
+                }
+                // only allow insert into collection when all have CCPublish
+                if (
+                    this.parent() &&
+                    this.nodeHelperService.isNodeCollection(this.parent()) &&
+                    !this.nodeHelperService.getNodesRight(
+                        this.selectedNodes() as Node[],
+                        RestConstants.ACCESS_CC_PUBLISH,
+                        NodesRightMode.Effective,
+                    )
+                ) {
+                    return InvalidSelectionReason.MISSING_PRIVILEGES;
+                }
+                return null;
+            } else {
+                if (
+                    this.onlyOneSelected() &&
+                    (this.selectedNodes()[0].mediatype === 'folder' ||
+                        this.selectedNodes()[0].mediatype === 'collection')
+                ) {
+                    return null;
+                }
+                return InvalidSelectionReason.INVALID_SELECTION;
+            }
+        },
+    );
+    // The nodes that are currently selected as source
+    selectedSourceNodes: Signal<Node[]> = computed(() => {
+        // upload tab has no source nodes — always acts as source, never as target
+        if (this.option()?.optionConfig?.state === TabType.UPLOAD) {
+            return [];
         }
+        const selected = this.option()?.optionConfig?.selection?.selected as Node[];
+        if (selected?.length) {
+            return selected;
+        }
+        // note: use primaryMode() over scope, as scope resets on reload
+        const primaryModesWithAutomaticSelection: SidebarContext[] = [
+            'collections',
+            'workspace',
+            'search',
+        ];
+        if (this.primaryMode() && primaryModesWithAutomaticSelection.includes(this.primaryMode())) {
+            return (this.editorialSidebarService.nodes() ?? []) as Node[];
+        }
+        return [];
     });
+    allSelectedNodesFromHomeRepo: Signal<boolean> = toSignal(
+        toObservable(this.selectedSourceNodes).pipe(
+            switchMap((nodes) =>
+                nodes.length === 0
+                    ? of(false)
+                    : combineLatest(
+                          nodes.map((n) => this.networkService.isFromHomeRepository(n as Node)),
+                      ).pipe(map((results) => results.every(Boolean))),
+            ),
+        ),
+        { initialValue: false },
+    );
+    workspaceAction = model<'move' | 'copy'>('move');
+    canMoveWorkspaceNodes = computed(
+        () =>
+            this.option().optionConfig &&
+            this.selectedSourceNodes()?.length &&
+            this.selectedSourceNodes().every(
+                (n: Node) => !n.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),
+            ) &&
+            this.nodeHelperService.getNodesRight(
+                this.selectedSourceNodes(),
+                RestConstants.ACCESS_CHANGE_PERMISSIONS,
+                NodesRightMode.Effective,
+            ),
+    );
+
     // initialize collection copy variables with true
     copyRoot = model(true);
     copyChildCollections = model(true);
@@ -225,11 +381,14 @@ export class NodesSelectorComponent implements OnInit {
 
     // search tab
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    searchColumns: ColumnType;
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // collections tab
+    collectionsGridColumns: ColumnType;
+    collectionsTableColumns: ColumnType;
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
     );
@@ -245,46 +404,41 @@ export class NodesSelectorComponent implements OnInit {
 
     // workspace tab
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    workspaceTreeConfig = computed<TreeConfig>(() => ({
+        showFileName: true,
+        selectionMode: this.selectionMode(),
+        isValidSourceCallback: (node: Node) =>
+            (this.parent()?.mediatype === 'collection' &&
+                node?.mediatype === 'collection' &&
+                this.parent()?.ref.id !== node?.ref.id &&
+                this.parent()?.parent?.id !== node?.ref.id) ||
+            node?.type === RestConstants.CCM_TYPE_IO,
+    }));
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
-    inboxNode: Node;
+    inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
+    connectorOptions: WritableSignal<OptionItem[]> = signal([]);
 
     // shared among tabs
-    flatNodeEntriesColumns: ColumnType;
+    searchCompleted: WritableSignal<boolean> = signal(false);
     searchText = model('');
-    selectionMode = computed(() =>
-        this.option()?.optionConfig?.selection?.selected.length > 0 ? 'target' : 'source',
-    );
+    // Is this component acting as the target our source?
+    selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
 
-    constructor(
-        private apiCollectionService: ApiCollectionService,
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        private localEventsService: LocalEventsService,
-        private mdsHelperService: MdsHelperService,
-        public nodeHelperService: NodeHelperService,
-        public editorialSidebarService: EditorialSidebarService,
-        private nodeService: NodeService,
-        private suggestionsV1Service: SuggestionsV1Service,
-        private uiService: UIService,
-        private uploadDialogService: UploadDialogService,
-        private authenticationService: AuthenticationService,
-        private aboutService: AboutService,
-        private searchService: SearchService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private treeNodeService: TreeNodeService,
-    ) {
+    constructor() {
+        this.connectorOptionsService
+            .buildOptions((connector) => void this.showCreateConnector({ connector }))
+            .subscribe((options) => this.connectorOptions.set(options));
         effect(() => {
             const option = this.option();
             if (option?.optionConfig?.state) {
                 this.selectedTab.set(option.optionConfig.state);
                 void this.refreshData(option.optionConfig.state);
             }
-            this.treeNodeService.setSelectionMode(
-                option?.optionConfig?.selection?.selected?.length > 0 ? 'target' : 'source',
-            );
+            if (!this.canMoveWorkspaceNodes()) {
+                this.workspaceAction.set('copy');
+            }
         });
     }
 
@@ -294,11 +448,17 @@ export class NodesSelectorComponent implements OnInit {
     async ngOnInit(): Promise<void> {
         if (this.selectedTab() === null) {
             this.selectedTab.set(this.supportedTabs()[0]);
+            await this.refreshData(this.selectedTab());
         }
-        this.flatNodeEntriesColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+        this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
-        this.inboxNode = await firstValueFrom(this.nodeService.getNode(RestConstants.INBOX));
+        this.collectionsGridColumns = {
+            Default: ListItem.getCollectionDefaults(),
+        };
+        this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
+            repository: HOME_REPOSITORY,
+        });
     }
 
     /**
@@ -340,8 +500,8 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
         this.selectedNodes.set([]);
         this.searchText.set('');
+        this.searchCompleted.set(false);
         this.searchSent.set(false);
-        this.treeNodeService.resetData();
         // execute tab-specific actions
         switch (event.tab.id) {
             case this.idPrefix + TabType.SEARCH:
@@ -367,6 +527,7 @@ export class NodesSelectorComponent implements OnInit {
      * Executes the search query and updates the search datasource.
      */
     async executeSearch() {
+        this.searchCompleted.set(false);
         this.searchSent.set(true);
         this.resetNodeEntriesSelections();
         if (this.selectedTab() === TabType.SEARCH) {
@@ -375,16 +536,12 @@ export class NodesSelectorComponent implements OnInit {
             if (!this.dataSourceSearch.isEmpty()) {
                 this.dataSourceSearch.reset();
             }
-            if (!this.searchText()) {
-                this.dataSourceSearch.setData([]);
-                this.dataSourceSearch.isLoading = false;
-                return;
-            }
             const request = this.createSearchRequest();
             const searchResult: SearchResults = await firstValueFrom(
                 this.searchService.search(request),
             );
             this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
+            this.searchCompleted.set(true);
             this.dataSourceSearch.isLoading = false;
         } else if (this.selectedTab() === TabType.COLLECTIONS) {
             this.dataSourceCollectionsFlat.isLoading = true;
@@ -402,6 +559,7 @@ export class NodesSelectorComponent implements OnInit {
                 this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
             }
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            this.searchCompleted.set(true);
             this.dataSourceCollectionsFlat.isLoading = false;
         }
     }
@@ -416,6 +574,7 @@ export class NodesSelectorComponent implements OnInit {
         } else if (this.selectedTab() === TabType.COLLECTIONS) {
             // reset type to tree view and reset variables
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
+            this.searchCompleted.set(false);
             this.searchSent.set(false);
         }
     }
@@ -432,20 +591,23 @@ export class NodesSelectorComponent implements OnInit {
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
-            [NodeEntriesDisplayType.Grid, NodeEntriesDisplayType.Table].includes(nextDisplayType)
+            [NodeEntriesDisplayType.SmallGrid, NodeEntriesDisplayType.Table].includes(
+                nextDisplayType,
+            )
         ) {
             // reset the flat datasource
             this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();
             this.dataSourceCollectionsFlat.isLoading = true;
+            const collectionsTreeService = this.collectionsWrapper?.treeNodeService;
             const deepestNode = this.findDeepestNodeFromDataMap(
-                this.treeNodeService.getDataMap(),
+                collectionsTreeService?.getDataMap(),
             )?.node;
             if (!deepestNode) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
             }
             // retrieve the children of the deepestNode to retrieve the level to be displayed
-            const nodes = this.treeNodeService.getDataMap().get(deepestNode.parent.id);
+            const nodes = collectionsTreeService?.getDataMap().get(deepestNode.parent.id);
             if (!nodes?.length) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
@@ -489,14 +651,11 @@ export class NodesSelectorComponent implements OnInit {
         // note: the nodes are added to the inbox node if the upload was successful,
         //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            this.editorialSidebarService.applyNodeEmitted.emit({
-                nodes: createdNodes,
-                parent: this.parent,
-            });
-            if (this.parent) {
+            this.emitNodes({ nodes: createdNodes, parent: this.parent() });
+            if (this.parent() && this.nodeHelperService.isNodeCollection(this.parent())) {
                 try {
                     this.toast.showProgressSpinner();
-                    this.uiService.addToCollection(this.parent, createdNodes, false, () => {
+                    this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
                         this.toast.closeProgressSpinner();
                     });
                 } catch (e) {
@@ -505,6 +664,7 @@ export class NodesSelectorComponent implements OnInit {
                 }
             }
         }
+        this.addMaterialDialogComponent.selectedFiles.set([]);
     }
 
     // DRAG-AND-DROP RELATED FUNCTIONS
@@ -531,13 +691,17 @@ export class NodesSelectorComponent implements OnInit {
      */
     canDropOnCollection = (dragData: DragData<CollectionReference>): CanDrop => {
         // allow dropping if:
-        // * access information is set (i.e., no fake node),
+        // * access information is set (i.e., no fake node) and includes AddChildren permission,
         // * only files are dragged,
         // * the target is a collection,
         // * and the view context changed.
         return {
             accept:
-                dragData.target.access?.length &&
+                this.nodeHelperService.getNodesRight(
+                    [dragData.target] as Node[],
+                    RestConstants.ACCESS_ADD_CHILDREN,
+                    NodesRightMode.Effective,
+                ) &&
                 dragData.draggedNodes.every((n) => n.type === 'ccm:io') &&
                 this.nodeHelperService.isNodeCollection(dragData.target) &&
                 !dragData.isFromOwnContainer,
@@ -591,7 +755,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async insertSelectedNodes(): Promise<void> {
         const target = this.selectedNodes()[0] as Node;
-        const source = this.option().optionConfig.selection?.selected as Node[];
+        const source = this.selectedSourceNodes();
         if (target.mediatype === 'collection') {
             this.editorialSidebarService.sidebarLoading.set(true);
             this.uiService.addToCollection(target, source, false, () => {
@@ -601,7 +765,7 @@ export class NodesSelectorComponent implements OnInit {
         } else if (target.mediatype === 'folder') {
             this.editorialSidebarService.sidebarLoading.set(true);
             try {
-                await this.uiService.copyNodes(source, target);
+                await this.uiService.copyOrMoveNodes(source, target, this.workspaceAction());
                 this.editorialSidebarService.sidebarOpened.set(false);
             } catch (e) {}
             this.editorialSidebarService.sidebarLoading.set(false);
@@ -613,7 +777,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     async saveMetadata(): Promise<void> {
         this.editorialSidebarService.sidebarLoading.set(true);
-        const source = this.option().optionConfig.selection?.selected as Node[];
+        const source = this.selectedSourceNodes();
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
         const enabledMetadata: { [key: string]: string[] } = {};
@@ -736,24 +900,30 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.selectedNodes().length) {
             return;
         }
-        this.editorialSidebarService.applyNodeEmitted.emit({
-            nodes: this.selectedNodes() as Node[],
-            parent: this.parent,
-        });
-        if (!this.parent) {
+        const nodesToEmit = this.selectedNodes() as Node[];
+        if (!this.parent()) {
+            this.emitNodes({ nodes: nodesToEmit, parent: this.parent() });
+            this.resetNodeEntriesSelections();
             return;
         }
+        // only files are selected -> directly copy them, depending on the parent type
         if (this.onlyFilesSelected()) {
             try {
                 this.toast.showProgressSpinner();
-                this.uiService.addToCollection(
-                    this.parent,
-                    this.selectedNodes() as Node[],
-                    false,
-                    () => {
+                if (this.nodeHelperService.isNodeCollection(this.parent())) {
+                    this.uiService.addToCollection(this.parent(), nodesToEmit, false, () => {
+                        this.resetNodeEntriesSelections();
                         this.toast.closeProgressSpinner();
-                    },
-                );
+                    });
+                } else {
+                    await this.uiService.copyOrMoveNodes(
+                        nodesToEmit,
+                        this.parent(),
+                        this.workspaceAction(),
+                    );
+                    this.resetNodeEntriesSelections();
+                    this.toast.closeProgressSpinner();
+                }
             } catch (e) {
                 console.error(e);
                 this.toast.closeProgressSpinner();
@@ -761,8 +931,19 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.error({}, this.i18nPrefix + 'COPY.ERROR');
                 });
             }
-        } else if (this.currentStep() === StepType.SELECT) {
-            const selectedNode: Partial<Node> = this.highestSelectedNode();
+            this.emitNodes({ nodes: nodesToEmit, parent: this.parent() });
+        }
+        // when there are not the only files selected, switch to the configuration mode
+        else if (this.currentStep() === StepType.SELECT) {
+            // fix that selected nodes (collections) might have reset their attributes to avoid toggling them
+            const selectedNode: Node = await firstValueFrom(
+                this.nodeService.getNode(this.highestSelectedNode().ref.id),
+            );
+            this.selectedNodes.set(
+                this.selectedNodes().map((node) =>
+                    node.ref.id === selectedNode.ref.id ? selectedNode : node,
+                ),
+            );
             // reset the default configuration and sync it with the view
             this.copyRoot.set(!!selectedNode.collection);
             this.copyChildCollections.set(selectedNode.collection?.childCollectionsCount > 0);
@@ -770,9 +951,12 @@ export class NodesSelectorComponent implements OnInit {
             // switch into the configuration step
             this.currentStep.set(StepType.CONFIGURE);
             // load the children of the selected node to be able to update the number of references
-            const selectedNodeChildren = await this.treeNodeService.getChildren(selectedNode);
+            const selectedNodeChildren =
+                (await this.collectionsWrapper?.treeNodeService.getChildren(selectedNode)) ?? [];
             this.selectedNodeChildren.set(selectedNodeChildren);
-        } else if (
+        }
+        // configuration step for collections
+        else if (
             this.currentStep() === StepType.CONFIGURE &&
             this.atLeastRootOrChildrenSelected()
         ) {
@@ -785,17 +969,37 @@ export class NodesSelectorComponent implements OnInit {
                 const copyParams = {
                     repository: HOME_REPOSITORY,
                     sourceCollection: selectedNode.ref.id,
-                    targetCollection: this.parent.ref.id,
+                    targetCollection: this.parent().ref.id,
                     copyRoot: this.copyRoot(),
                     copyChildCollections: this.copyChildCollections(),
                     copyRefs: this.copyRefs(),
                     copyPermissions: true,
                 };
-                await firstValueFrom(this.apiCollectionService.copyCollection(copyParams));
-                this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
-                this.localEventsService.nodesChanged.emit([this.parent]);
+                const copyResponse: Copy = await firstValueFrom(
+                    this.apiCollectionService.copyCollection(copyParams),
+                );
+                const refsWithoutPublishPermission: number =
+                    copyResponse?.entries?.filter(
+                        (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
+                    )?.length ?? 0;
+                const successCount =
+                    (copyResponse?.entries?.length ?? 0) - refsWithoutPublishPermission;
+                if (refsWithoutPublishPermission > 0) {
+                    this.bridge.showTemporaryMessage(
+                        MessageType.info,
+                        'COLLECTIONS.TOAST.COPIED_NO_PUBLISH_PERMISSION',
+                        { count: refsWithoutPublishPermission },
+                    );
+                } else {
+                    this.bridge.showTemporaryMessage(MessageType.info, 'COLLECTIONS.TOAST.COPIED');
+                }
+                this.localEventsService.nodesChanged.emit([this.parent()]);
+                if (copyResponse?.root) {
+                    this.localEventsService.nodesCreated.emit([copyResponse.root]);
+                }
                 this.toast.closeProgressSpinner();
                 this.goBack();
+                this.emitNodes({ nodes: this.selectedNodes() as Node[], parent: this.parent() });
             } catch (e) {
                 this.toast.closeProgressSpinner();
                 setTimeout(() => {
@@ -813,6 +1017,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     goBack() {
         this.currentStep.set(StepType.SELECT);
+        this.resetNodeEntriesSelections();
         this.selectedNodes.set([]);
         this.selectedNodeChildren.set([]);
     }
@@ -851,6 +1056,7 @@ export class NodesSelectorComponent implements OnInit {
     private async updateSearchDataSource(): Promise<void> {
         this.dataSourceSearch.isLoading = true;
         this.dataSourceSearch.setData([]);
+        await this.executeSearch();
         this.dataSourceSearch.isLoading = false;
     }
 
@@ -887,11 +1093,15 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = recentCollectionsNode.ref.id;
             // reset childCollectionsCount and childReferencesCount to provide them as a flat list
-            collection.collection.childCollectionsCount = 0;
-            collection.collection.childReferencesCount = 0;
+            if (collection.collection) {
+                collection.collection.childCollectionsCount = 0;
+                collection.collection.childReferencesCount = 0;
+            }
         });
-        initialData.push(recentCollectionsNode);
-        initialData = initialData.concat(subRecentCollections.collections);
+        if (subRecentCollections.collections?.length) {
+            initialData.push(recentCollectionsNode);
+            initialData = initialData.concat(subRecentCollections.collections);
+        }
         // my collections
         const myCollectionsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'COLLECTIONS.MY_COLLECTIONS'),
@@ -911,8 +1121,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = myCollectionsNode.ref.id;
         });
-        initialData.push(myCollectionsNode);
-        initialData = initialData.concat(subMyCollections.collections);
+        if (subMyCollections.collections?.length) {
+            initialData.push(myCollectionsNode);
+            initialData = initialData.concat(subMyCollections.collections);
+        }
         // editorial collections
         const editorialCollectionsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'COLLECTIONS.EDITORIAL_COLLECTIONS'),
@@ -932,8 +1144,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             collection.parent.id = editorialCollectionsNode.ref.id;
         });
-        initialData.push(editorialCollectionsNode);
-        initialData = initialData.concat(subEditorialCollections.collections);
+        if (subEditorialCollections.collections?.length) {
+            initialData.push(editorialCollectionsNode);
+            initialData = initialData.concat(subEditorialCollections.collections);
+        }
         this.dataSourceCollectionsTree.setData(initialData);
         this.dataSourceCollectionsTree.isLoading = false;
     }
@@ -968,8 +1182,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             node.parent.id = myContentsNode.ref.id;
         });
-        initialData.push(myContentsNode);
-        initialData = initialData.concat(subMyContents);
+        if (subMyContents?.length) {
+            initialData.push(myContentsNode);
+            initialData = initialData.concat(subMyContents);
+        }
         // shared contents
         const sharedContentsNode: Partial<Node> = this.createFakeNode(
             this.translate.instant(this.i18nPrefix + 'WORKSPACE.SHARED_CONTENTS'),
@@ -982,8 +1198,10 @@ export class NodesSelectorComponent implements OnInit {
             // set the ID to the (fake) parent node
             node.parent.id = sharedContentsNode.ref.id;
         });
-        initialData.push(sharedContentsNode);
-        initialData = initialData.concat(subSharedContents);
+        if (subSharedContents?.length) {
+            initialData.push(sharedContentsNode);
+            initialData = initialData.concat(subSharedContents);
+        }
         this.dataSourceWorkspace.setData(initialData);
         this.dataSourceWorkspace.isLoading = false;
     }
@@ -1052,13 +1270,13 @@ export class NodesSelectorComponent implements OnInit {
                 ? RestConstants.QUERY_NAME_COLLECTIONS
                 : RestConstants.DEFAULT_QUERY_NAME,
             repository: HOME_REPOSITORY,
-            maxItems: 51,
+            maxItems: RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             skipCount,
             propertyFilter: [PROPERTY_FILTER_ALL],
-            contentType: 'ALL',
-            metadataset: '-default-',
-            sortProperties: ['cm:created'],
-            sortAscending: [true],
+            contentType: searchForCollections ? 'COLLECTIONS' : 'FILES',
+            metadataset: DEFAULT,
+            sortProperties: [RestConstants.CM_MODIFIED_DATE],
+            sortAscending: [false],
             body: {
                 criteria,
                 resolveCollections: true,
@@ -1109,6 +1327,67 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsWrapper?.getSelection().clear();
         this.searchWrapper?.getSelection().clear();
         this.workspaceWrapper?.getSelection().clear();
+    }
+
+    /**
+     * Opens the AddWithConnectorDialog for the picked connector. On confirm, a node is created in
+     * the inbox, the connector edit window (pre-opened by the dialog as a user gesture) is
+     * navigated to the connector URL, and the new node is emitted via applyNodeEmitted with
+     * connectorId + window so consumers (e.g. submit-assignment) can poll for write-back.
+     */
+    private emitNodes(payload: {
+        nodes: Node[];
+        parent?: Node;
+        connectorId?: string;
+        window?: Window;
+    }): void {
+        this.editorialSidebarService.applyNodeEmitted.emit(payload);
+        this.localEventsService.nodesCreated.emit(payload.nodes);
+        this.option()?.optionConfig?.onNodesChoosen?.({
+            nodes: payload.nodes,
+            connectorId: payload.connectorId,
+            window: payload.window,
+        });
+        if (this.option()?.optionConfig?.autoClose) {
+            this.editorialSidebarService.close();
+        }
+    }
+
+    async showCreateConnector(details: AddWithConnectorDialogData): Promise<void> {
+        const dialogRef = await this.dialogs.openAddWithConnectorDialog(details);
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                void this.createConnector(details.connector, result);
+            }
+        });
+    }
+
+    private async createConnector(
+        connector: Connector,
+        event: AddWithConnectorDialogResult,
+    ): Promise<void> {
+        const props = this.nodeHelperService.propertiesFromConnector(event);
+        this.restNodeService
+            .createNode(this.inboxNode().ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
+            .subscribe(
+                (data) => {
+                    void this.uiService.editConnector(data.node, {
+                        type: event.type as any,
+                        win: event.window,
+                        connectorType: connector,
+                    });
+                    this.emitNodes({
+                        nodes: [data.node],
+                        parent: this.parent(),
+                        connectorId: connector.id,
+                        window: event.window,
+                    });
+                },
+                (error: any) => {
+                    event.window?.close();
+                    this.nodeHelperService.handleNodeError(event.name, error);
+                },
+            );
     }
 
     protected readonly DEFAULT = DEFAULT;

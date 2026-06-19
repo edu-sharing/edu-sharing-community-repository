@@ -1,4 +1,4 @@
-import { Component, Inject, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -27,6 +27,15 @@ import { SimpleEditMetadataComponent } from './simple-edit-metadata/simple-edit-
     standalone: false,
 })
 export class SimpleEditDialogComponent {
+    data = inject<SimpleEditDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<SimpleEditDialogData, SimpleEditDialogResult>>(CardDialogRef);
+    private connector = inject(RestConnectorService);
+    private dialogs = inject(DialogsService);
+    private localEvents = inject(LocalEventsService);
+    private nodeApi = inject(RestNodeService);
+    private toast = inject(Toast);
+
     @ViewChild('metadata') metadata: SimpleEditMetadataComponent;
     @ViewChild('invite') invite: SimpleEditInviteComponent;
     @ViewChild('license') license: SimpleEditLicenseComponent;
@@ -36,15 +45,7 @@ export class SimpleEditDialogComponent {
     protected tpInvite: boolean;
     protected tpLicense: boolean;
 
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: SimpleEditDialogData,
-        private dialogRef: CardDialogRef<SimpleEditDialogData, SimpleEditDialogResult>,
-        private connector: RestConnectorService,
-        private dialogs: DialogsService,
-        private localEvents: LocalEventsService,
-        private nodeApi: RestNodeService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.dialogRef.patchState({ isLoading: true });
         this.connector
             .hasToolPermission(RestConstants.TOOLPERMISSION_INVITE)

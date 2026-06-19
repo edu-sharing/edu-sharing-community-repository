@@ -1,211 +1,179 @@
-<label *ngIf="item.config?.showLabel">
+@if (item.config?.showLabel) {
+<label>
   {{ getI18n(item) | translate }}
 </label>
-<ng-container *ngIf="item.type === 'ORG' || item.type === 'GROUP'">
-  <ng-container [ngSwitch]="item.name">
-    <span *ngSwitchCase="'displayName'" [class.type-danger]="isDangerousGroup()">
-      {{ $any(getNode()).profile?.displayName || $any(getNode()).authorityName }}
-    </span>
-    <span *ngSwitchCase="'groupType'">
-      {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile?.groupType | translate }}
-    </span>
-    <span *ngSwitchDefault>
-      {{ $any(getNode())[item.name] }}
-    </span>
-  </ng-container>
-</ng-container>
-<ng-container *ngIf="item.type === 'USER'">
-  <span *ngIf="isUserProfileAttribute(item.name)">
-    {{ $any(getNode()).profile?.[item.name] }}
-  </span>
-  <span *ngIf="item.name === 'status'">
-    {{ 'PERMISSIONS.USER_STATUS.' + $any(getNode()).status.status | translate }}
-  </span>
-  <span *ngIf="!isUserProfileAttribute(item.name) && item.name !== 'status'">
-    {{ $any(getNode())[item.name] }}
-  </span>
-</ng-container>
-<ng-container [ngSwitch]="item.name" *ngIf="item.type === 'EVENT' || item.type === 'SHARE'">
-  <span *ngSwitchCase="'eventType'">
-    {{
-      'EVENT.TYPE.' + $any(getNode()).eventType
-        | translate : { fallback: $any(getNode()).eventType }
-    }}
-  </span>
-  <span *ngSwitchCase="'sharedBy'">
-    {{ $any(getNode()).sharedBy | authorityName }}
-  </span>
-  <span *ngSwitchCase="'timestamp'">
-    {{
-      $any(getNode()).timestamp | formatDate : { async: true, time: true, relative: true } | async
-    }}
-  </span>
-</ng-container>
-<ng-container
-  [ngSwitch]="item.name"
-  *ngIf="item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION'"
+} @if (item.type === 'ORG' || item.type === 'GROUP') { @switch (item.name) { @case ('displayName') {
+<span [class.type-danger]="isDangerousGroup()">
+  {{ $any(getNode()).profile?.displayName || $any(getNode()).authorityName }}
+</span>
+} @case ('groupType') {
+<span>
+  {{ 'PERMISSIONS.GROUP_TYPE.' + $any(getNode()).profile?.groupType | translate }}
+</span>
+} @default {
+<span>
+  {{ $any(getNode())[item.name] }}
+</span>
+} } } @if (item.type === 'USER') { @if (isUserProfileAttribute(item.name)) {
+<span>
+  {{ $any(getNode()).profile?.[item.name] }}
+</span>
+} @if (item.name === 'status') {
+<span>
+  {{ 'PERMISSIONS.USER_STATUS.' + $any(getNode()).status.status | translate }}
+</span>
+} @if (!isUserProfileAttribute(item.name) && item.name !== 'status') {
+<span>
+  {{ $any(getNode())[item.name] }}
+</span>
+} } @if (item.type === 'EVENT' || item.type === 'SHARE') { @switch (item.name) { @case ('eventType')
+{
+<span>
+  {{
+    'EVENT.TYPE.' + $any(getNode()).eventType | translate : { fallback: $any(getNode()).eventType }
+  }}
+</span>
+} @case ('sharedBy') {
+<span>
+  {{ $any(getNode()).sharedBy | authorityName }}
+</span>
+} @case ('timestamp') {
+<span>
+  {{ $any(getNode()).timestamp | formatDate : { async: true, time: true, relative: true } | async }}
+</span>
+} } } @if (item.type === 'NODE' || item.type === 'NODE_PROPOSAL' || item.type === 'COLLECTION') {
+@switch (item.name) { @case ('name') {
+<span>
+  {{ $any(getNode()).name }}
+</span>
+} @case ('mediatype') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  }
+  {{ 'MEDIATYPE.' + $any(getNode()).mediatype | translate }}
+</span>
+} @case ('size') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  }
+  {{ $any(getNode()).size | formatSize }}
+</span>
+} @case ('cclom:size') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  }
+  {{ $any(getNode()).size | formatSize }}
+</span>
+} @case ('dimensions') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  }
+  {{ $any(getNode()) | NodeImageSize }}
+</span>
+} @case ('ccm:wf_status') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  <es-list-node-workflow [item]="item" [node]="node" [provideLabel]="false"></es-list-node-workflow>
+  <!--<span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+        {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}-->
+</span>
+} @case ('cm:creator') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  }
+  {{ $any(getNode()).createdBy | nodePersonName }}
+</span>
+} @case ('cm:modifier') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.cm:modifier' | translate }}:</span>
+  }
+  {{ $any(getNode()).modifiedBy | nodePersonName }}
+</span>
+} @case ('ccm:replicationsource') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.ccm:replicationsource' | translate }}:</span>
+  }
+  {{ $any(getNode()).properties['ccm:replicationsource'] | appNodeSource : { mode: 'text' } }}
+</span>
+} @case ('ccm:commonlicense_key') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.ccm:commonlicense_key' | translate }}:</span>
+  } @if ($any(getNode()).properties['ccm:commonlicense_key']; as license) {
+  {{
+    license[0] === 'CUSTOM'
+      ? $any(getNode()).properties['cclom:rights_description']
+      : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
+        | translate : { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
+  }}
+  } @if (!$any(getNode()).properties['ccm:commonlicense_key']) {
+  {{ 'LICENSE.NAMES.NONE' | translate }}
+  }
+</span>
+} @case ('ccm:educationaltypicalagerange') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span>
+  } @if ( $any(getNode()).properties['ccm:educationaltypicalagerange_from'] ||
+  $any(getNode()).properties['ccm:educationaltypicalagerange_to'] ) {
+  {{ $any(getNode()).properties['ccm:educationaltypicalagerange_from'] }} -
+  {{ $any(getNode()).properties['ccm:educationaltypicalagerange_to'] }}
+  }
+</span>
+} @case ('cclom:duration') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.cclom:duration' | translate }}:</span>
+  }
+  {{ $any(getNode()).properties['cclom:duration']?.[0] | formatDuration }}
+</span>
+} @case ('ccm:collection_proposal_status') {
+<span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ 'NODE.ccm:collection_proposal_status' | translate }}:</span>
+  }
+  <!-- use node instead of getNode() to access the raw proposal data! -->
+  {{
+                    'PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]
+                    | translate: { fallback: '' }
+  }}
+</span>
+} @default {
+<span
+  esCheckTextOverflow
+  #text="esCheckTextOverflow"
+  [matTooltip]="
+    provideLabel ? (getI18n(item) | translate) : text.hasTextOverflow() ? content.innerText : null
+  "
+  #content
 >
-  <span *ngSwitchCase="'name'">
-    {{ $any(getNode()).name }}
-  </span>
-  <span
-    *ngSwitchCase="'mediatype'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ 'MEDIATYPE.' + $any(getNode()).mediatype | translate }}
-  </span>
-  <span *ngSwitchCase="'size'" [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ $any(getNode()).size | formatSize }}
-  </span>
-  <span
-    *ngSwitchCase="'cclom:size'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ $any(getNode()).size | formatSize }}
-  </span>
-  <span
-    *ngSwitchCase="'dimensions'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ $any(getNode()) | NodeImageSize }}
-  </span>
-  <span
-    *ngSwitchCase="'ccm:wf_status'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <es-list-node-workflow
-      [item]="item"
-      [node]="node"
-      [provideLabel]="false"
-    ></es-list-node-workflow>
-    <!--<span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ 'WORKFLOW.' + getWorkflowStatus().id | translate }}-->
-  </span>
-  <span
-    *ngSwitchCase="'cm:creator'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    {{ $any(getNode()).createdBy | nodePersonName }}
-  </span>
-  <span
-    *ngSwitchCase="'cm:modifier'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.cm:modifier' | translate }}:</span
-    >
-    {{ $any(getNode()).modifiedBy | nodePersonName }}
-  </span>
-  <span
-    *ngSwitchCase="'ccm:replicationsource'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.ccm:replicationsource' | translate }}:</span
-    >
-    {{ $any(getNode()).properties['ccm:replicationsource'] | appNodeSource : { mode: 'text' } }}
-  </span>
-  <span
-    *ngSwitchCase="'ccm:commonlicense_key'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.ccm:commonlicense_key' | translate }}:</span
-    >
-    <ng-container *ngIf="$any(getNode()).properties['ccm:commonlicense_key'] as license">
-      {{
-        license[0] === 'CUSTOM'
-          ? $any(getNode()).properties['cclom:rights_description']
-          : ('LICENSE.NAMES.' + $any(getNode()).properties['ccm:commonlicense_key']
-            | translate : { fallback: $any(getNode()).properties['ccm:commonlicense_key'] })
-      }}
-    </ng-container>
-    <ng-container *ngIf="!$any(getNode()).properties['ccm:commonlicense_key']">
-      {{ 'LICENSE.NAMES.NONE' | translate }}
-    </ng-container>
-  </span>
-  <span
-    *ngSwitchCase="'ccm:educationaltypicalagerange'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.ccm:educationaltypicalagerange' | translate }}:</span
-    >
-    <ng-container
-      *ngIf="
-        $any(getNode()).properties['ccm:educationaltypicalagerange_from'] ||
-        $any(getNode()).properties['ccm:educationaltypicalagerange_to']
-      "
-    >
-      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_from'] }} -
-      {{ $any(getNode()).properties['ccm:educationaltypicalagerange_to'] }}
-    </ng-container>
-  </span>
-  <span
-    *ngSwitchCase="'cclom:duration'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.cclom:duration' | translate }}:</span
-    >
-    {{ $any(getNode()).properties['cclom:duration']?.[0] | formatDuration }}
-  </span>
-  <span
-    *ngSwitchCase="'ccm:collection_proposal_status'"
-    [matTooltip]="provideLabel ? (getI18n(item) | translate) : null"
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden"
-      >{{ 'NODE.ccm:collection_proposal_status' | translate }}:</span
-    >
-    <!-- use node instead of getNode() to access the raw proposal data! -->
-    {{
-      'PROPOSAL_STATUS.' + $any(node).properties['ccm:collection_proposal_status']?.[0]
-        | translate: { fallback: '' }
-    }}
-  </span>
-  <span
-    *ngSwitchDefault
-    esCheckTextOverflow
-    #text="esCheckTextOverflow"
-    [matTooltip]="
-      provideLabel ? (getI18n(item) | translate) : text.hasTextOverflow() ? content.innerText : null
-    "
-    #content
-  >
-    <span *ngIf="provideLabel" class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
-    <ng-container *ngIf="['title', 'cm:title', 'cclom:title'].includes(item.name)">
-      {{ $any(getNode()) | nodeTitle }}
-    </ng-container>
-    <ng-container *ngIf="['name', 'cm:name'].includes(item.name)">
-      {{ $any(getNode()) | nodeTitle : { type: 'name' } }}
-    </ng-container>
-    <ng-container
-      *ngIf="!['name', 'cm:name', 'title', 'cm:title', 'cclom:title'].includes(item.name)"
-    >
-      <ng-container
-        *ngIf="DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1"
-      >
-        {{ displayName$ | async }}
-      </ng-container>
-      <ng-container *ngIf="DATE_FIELDS.includes(item.name)">
-        {{
-          ($any(getNode()).properties?.[item.name + '_LONG']?.[0] || $any(getNode()).properties[item.name]?.[0])
-            | formatDate: { async: true, time: true, relative: true }
-            | async
-        }}
-      </ng-container>
-      <ng-container *ngIf="VCARD_FIELDS.includes(item.name)">
-        {{
-          $any(getNode()).properties?.[item.name]
-            ? ($any(getNode()).properties[item.name] | vcardName)
-            : ''
-        }}
-      </ng-container>
-    </ng-container>
-  </span>
-</ng-container>
+  @if (provideLabel) {
+  <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  } @if (['title', 'cm:title', 'cclom:title'].includes(item.name)) {
+  {{ $any(getNode()) | nodeTitle }}
+  } @if (['name', 'cm:name'].includes(item.name)) {
+  {{ $any(getNode()) | nodeTitle : { type: 'name' } }}
+  } @if (!['name', 'cm:name', 'title', 'cm:title', 'cclom:title'].includes(item.name)) { @if
+  (DATE_FIELDS.indexOf(item.name) === -1 && VCARD_FIELDS.indexOf(item.name) === -1) {
+  {{ displayName$ | async }}
+  } @if (DATE_FIELDS.includes(item.name)) {
+  {{
+                        ($any(getNode()).properties?.[item.name + '_LONG']?.[0] || $any(getNode()).properties[item.name]?.[0])
+                        | formatDate: { async: true, time: true, relative: true }
+                        | async
+  }}
+  } @if (VCARD_FIELDS.includes(item.name)) {
+  {{
+                        $any(getNode()).properties?.[item.name]
+                        ? ($any(getNode()).properties[item.name] | vcardName)
+                        : ''
+  }}
+  } }
+</span>
+} } }

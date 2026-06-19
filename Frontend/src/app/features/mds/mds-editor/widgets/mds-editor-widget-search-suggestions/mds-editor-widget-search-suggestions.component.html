@@ -1,6 +1,6 @@
+@if (filteredSuggestions$ | async; as suggestions) {
 <es-mds-editor-widget-container
   #container
-  *ngIf="filteredSuggestions$ | async as suggestions"
   [widget]="widget"
   [label]="'SEARCH.FILTER_BY' | translate : { property: widget.definition.caption }"
   [wrapInGroup]="false"
@@ -11,8 +11,8 @@
     [attr.aria-labelledby]="container.labelId"
     [attr.aria-describedby]="container.descriptionId"
   >
+    @for (suggestion of suggestions; track suggestion) {
     <mat-chip-option
-      *ngFor="let suggestion of suggestions"
       class="filter-chip-{{ widget.definition.id | propertySlug }}"
       [selectable]="false"
       (click)="add(suggestion)"
@@ -23,5 +23,7 @@
       <span class="caption">{{ suggestion.label }}</span>
       <!-- <span class="count">({{ value.count }})</span> -->
     </mat-chip-option>
+    }
   </mat-chip-listbox>
 </es-mds-editor-widget-container>
+}

@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthenticationService, SavedSearch, SearchService } from 'ngx-edu-sharing-api';
@@ -21,6 +21,15 @@ import { SearchPageRestoreService } from './search-page-restore.service';
     standalone: false,
 })
 export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
+    private authentication = inject(AuthenticationService);
+    private dialogs = inject(DialogsService);
+    private globalSearchPageInternal = inject(GlobalSearchPageServiceInternal);
+    private ngZone = inject(NgZone);
+    private searchPage = inject(SearchPageService);
+    private searchService = inject(SearchService);
+    private searchPageRestoreService = inject(SearchPageRestoreService);
+    private translate = inject(TranslateService);
+
     @ViewChild(MdsEditorWrapperComponent) mdsEditor: MdsEditorWrapperComponent;
 
     readonly activeRepository = this.searchPage.activeRepository;
@@ -40,17 +49,6 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     private defaultValues: Values;
     private causedValueChange = false;
     private destroyed = new Subject<void>();
-
-    constructor(
-        private authentication: AuthenticationService,
-        private dialogs: DialogsService,
-        private globalSearchPageInternal: GlobalSearchPageServiceInternal,
-        private ngZone: NgZone,
-        private searchPage: SearchPageService,
-        private searchService: SearchService,
-        private searchPageRestoreService: SearchPageRestoreService,
-        private translate: TranslateService,
-    ) {}
 
     ngOnInit(): void {
         this.registerSearchFilterOverride();

@@ -1,5 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
@@ -7,6 +7,7 @@ import { map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { SearchPageService } from './search-page.service';
+import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 @Component({
     selector: 'es-search-page-filters-sidebar',
@@ -15,6 +16,12 @@ import { SearchPageService } from './search-page.service';
     standalone: false,
 })
 export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
+    private searchPage = inject(SearchPageService);
+    private dialogs = inject(DialogsService);
+    private translate = inject(TranslateService);
+    private breakpointObserver = inject(BreakpointObserver);
+    private searchFieldInternalService = inject(SearchFieldInternalService);
+
     @ViewChild('filtersDialogContent', { static: true }) filtersDialogContent: TemplateRef<unknown>;
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
@@ -24,13 +31,6 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
-
-    constructor(
-        private searchPage: SearchPageService,
-        private dialogs: DialogsService,
-        private translate: TranslateService,
-        private breakpointObserver: BreakpointObserver,
-    ) {}
 
     ngOnInit(): void {
         this.registerFilterDialog();
@@ -45,7 +45,7 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
         let dialogRefPromise: Promise<CardDialogRef<unknown>>;
         let isMobileScreen: boolean;
         rxjs.combineLatest([
-            this.searchPage.filterBarIsVisible.observeValue(),
+            this.searchFieldInternalService.filterBarVisible,
             this.isMobileScreen.pipe(tap((value) => (isMobileScreen = value))),
         ])
             .pipe(takeUntil(this.destroyed))

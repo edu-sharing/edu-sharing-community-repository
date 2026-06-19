@@ -14,12 +14,5 @@
 </mat-form-field>
 <mat-form-field class="time">
   <mat-label>{{ 'WORKSPACE.SHARE.TIMEBASED.TIME_LABEL' | translate }}</mat-label>
-  <input
-    matInput
-    pattern="\d\d:\d\d"
-    maxlength="5"
-    [formControl]="timeControl"
-    name="timeControl"
-    ngDefaultControl
-  />
+  <input matInput maxlength="5" [formControl]="timeControl" name="timeControl" ngDefaultControl />
 </mat-form-field>

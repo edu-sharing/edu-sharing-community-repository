@@ -1,28 +1,34 @@
-<div class="smallCollection" *ngIf="collection">
+@if (collection) {
+<div class="smallCollection">
   <div
     class="image"
     [class.image-icon]="collection.preview.isIcon"
     [style.background-color]="collection.collection.color"
   >
-    <img
-      [src]="collection | esNodeImage : { maxWidth: 100, maxHeight: 100, crop: true } | async"
-      *ngIf="!collection.preview.isIcon"
-    />
-    <div *ngIf="collection.preview.isIcon" class="icon">
+    @if (!collection.preview.isIcon) {
+    <img [src]="collection | esNodeImage : { maxWidth: 100, maxHeight: 100, crop: true } | async" />
+    } @if (collection.preview.isIcon) {
+    <div class="icon">
       <i class="material-icons" [style.color]="collection.collection.color">layers</i>
     </div>
+    }
   </div>
   <div class="right">
-    <div class="title" *ngIf="titleLabel">
+    @if (titleLabel) {
+    <div class="title">
       {{ titleLabel | translate : { title: collection.title } }}
     </div>
-    <div class="title titleMobile" *ngIf="titleLabelShort">
+    } @if (titleLabelShort) {
+    <div class="title titleMobile">
       {{ titleLabelShort | translate : { title: collection.title } }}
     </div>
-    <div class="title titleMobile" *ngIf="!(titleLabel && titleLabelShort)">
+    } @if (!(titleLabel && titleLabelShort)) {
+    <div class="title titleMobile">
       {{ collection.title }}
     </div>
+    }
     <es-list-base class="scope" [node]="collection" [item]="scopeItem"></es-list-base>
     <ng-content></ng-content>
   </div>
 </div>
+}

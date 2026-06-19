@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CordovaService } from '../services/cordova.service';
 import { UIConstants } from 'ngx-edu-sharing-ui';
 import { Router } from '@angular/router';
@@ -14,12 +14,10 @@ import { environment } from '../../environments/environment';
     standalone: false,
 })
 export class StartupComponent implements OnInit {
-    constructor(
-        private cordova: CordovaService,
-        private router: Router,
-        private platformLocation: PlatformLocation,
-        private config: ConfigurationService,
-    ) {}
+    private cordova = inject(CordovaService);
+    private router = inject(Router);
+    private platformLocation = inject(PlatformLocation);
+    private config = inject(ConfigurationService);
 
     async ngOnInit() {
         if (this.cordova.isRunningCordova()) {

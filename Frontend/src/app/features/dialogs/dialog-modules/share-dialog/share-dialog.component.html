@@ -1,13 +1,10 @@
 <ng-template #shareLink>
-  <button
-    *ngIf="!isCollection() && !isBulk() && showShareLink()"
-    mat-raised-button
-    class="share-link-button"
-    (click)="openShareLinkDialog()"
-  >
+  @if (!isCollection() && !isBulk() && showShareLink()) {
+  <button mat-raised-button class="share-link-button" (click)="openShareLinkDialog()">
     <i esIcon="link"></i>
     {{ 'OPTIONS.SHARE_LINK' | translate }}
   </button>
+  }
 </ng-template>
 
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tab" (selectedTabChange)="onTabChange($event)">
@@ -19,10 +16,12 @@
     <div class="share-group">
       <!-- notification settings -->
       <div class="group groupMessage">
-        <mat-checkbox id="notify" [(ngModel)]="notifyUsers" *ngIf="!hasNotificationService">
+        @if (!hasNotificationService) {
+        <mat-checkbox id="notify" [(ngModel)]="notifyUsers">
           <strong>{{ 'WORKSPACE.NOTIFY_TITLE' | translate }}</strong>
           <div class="notify-info">{{ 'WORKSPACE.NOTIFY_INFO' | translate }}</div>
         </mat-checkbox>
+        }
         <!--        <mat-form-field *ngIf="notifyUsers" [@overlay]="notifyUsers" floatLabel="always">-->
         <!--          <mat-label>{{ 'WORKSPACE.SHARE.MESSAGE' | translate }}</mat-label>-->
         <!--          <textarea-->
@@ -45,40 +44,45 @@
           [initialFocus]="false"
           (chooseAuthority)="addSuggestion($event)"
         ></es-authority-search-input>
-        <div class="hintNoFuzzy" *ngIf="globalSearch && !fuzzyAllowed">
+        @if (globalSearch && !fuzzyAllowed) {
+        <div class="hintNoFuzzy">
           {{ 'WORKSPACE.SHARE.NO_FUZZY' | translate }}
         </div>
+        }
         <!-- <ng2-completer [(ngModel)]="searchStr" [clearSelected]="true" (selected)="addAuthority($event)" [dataService]="dataService" [minSearchLength]="2" class="search"></ng2-completer>-->
         <!-- <input type="text" id="inviteName" /> -->
       </div>
 
       <!-- settings for single node -->
-      <div class="group groupInvited" *ngIf="_nodes?.length === 1">
+      @if (_nodes?.length === 1) {
+      <div class="group groupInvited">
         <!-- local shares overview -->
         <strong>
           {{ 'WORKSPACE.SHARE.LOCAL_SHARING_TITLE' | translate }}
         </strong>
         <br />
-        <es-mat-link
-          *ngIf="_nodes && _nodes[0].ref.id"
-          class="history uppercase"
-          (clickOnLink)="showHistory()"
+        @if (_nodes && _nodes[0].ref.id) {
+        <es-mat-link class="history uppercase" (clickOnLink)="showHistory()"
           >{{ 'WORKSPACE.SHARE.SHOW_HISTORY' | translate }} <i esIcon="arrow_forward"></i
         ></es-mat-link>
-        <div class="groupName" *ngIf="owner">{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</div>
+        } @if (owner) {
+        <div class="groupName">{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</div>
+        } @if (owner) {
         <es-share-dialog-permission
           class="groupEntry owner"
-          *ngIf="owner"
           [permission]="owner"
           [isDirectory]="_nodes[0].isDirectory"
           [isEditable]="false"
           [showDelete]="false"
         ></es-share-dialog-permission>
-        <div class="groupName" *ngIf="permissionsGroup && permissionsGroup.length">
+        } @if (permissionsGroup && permissionsGroup.length) {
+        <div class="groupName">
           {{ 'WORKSPACE.SHARE.GROUP_GROUPS' | translate }}
         </div>
+        }
         <div class="normal">
-          <div *ngFor="let permission of permissionsGroup">
+          @for (permission of permissionsGroup; track permission) {
+          <div>
             <es-share-dialog-permission
               class="groupEntry"
               [class.added]="isNewPermission(permission)"
@@ -92,12 +96,16 @@
               (changeType)="permission.permissions = $event.permissions; updatePermissionInfo()"
             ></es-share-dialog-permission>
           </div>
+          }
         </div>
-        <div class="groupName" *ngIf="permissionsUser && permissionsUser.length">
+        @if (permissionsUser && permissionsUser.length) {
+        <div class="groupName">
           {{ 'WORKSPACE.SHARE.GROUP_USERS' | translate }}
         </div>
+        }
         <div class="normal">
-          <div *ngFor="let permission of permissionsUser">
+          @for (permission of permissionsUser; track permission) {
+          <div>
             <es-share-dialog-permission
               class="groupEntry"
               [class.added]="isNewPermission(permission)"
@@ -114,59 +122,54 @@
               (changeType)="permission.permissions = $event.permissions; updatePermissionInfo()"
             ></es-share-dialog-permission>
           </div>
+          }
         </div>
-
-        <ng-container *ngIf="showLink && link">
-          <div class="groupName">{{ 'WORKSPACE.SHARE.LINK' | translate }}</div>
-          <es-mat-link class="manageLink uppercase" (clickOnLink)="openShareLinkDialog()">{{
-            'WORKSPACE.SHARE.MANAGE_LINK' | translate
-          }}</es-mat-link>
-          <es-share-dialog-permission
-            class="groupEntry link"
-            [permission]="linkEnabled"
-            [isDirectory]="_nodes[0].isDirectory"
-            [isEditable]="false"
-            [showDelete]="false"
-          ></es-share-dialog-permission>
-        </ng-container>
-        <ng-container
-          *ngIf="
-            !!publishComponent?.shareModeDirect ||
-            !!publishComponent?.shareModeCopy ||
-            !!publishComponent?.initialState?.direct ||
-            !!publishComponent?.initialState?.copy
+        @if (showLink && link) {
+        <div class="groupName">{{ 'WORKSPACE.SHARE.LINK' | translate }}</div>
+        <es-mat-link class="manageLink uppercase" (clickOnLink)="openShareLinkDialog()">{{
+          'WORKSPACE.SHARE.MANAGE_LINK' | translate
+        }}</es-mat-link>
+        <es-share-dialog-permission
+          class="groupEntry link"
+          [permission]="linkEnabled"
+          [isDirectory]="_nodes[0].isDirectory"
+          [isEditable]="false"
+          [showDelete]="false"
+        ></es-share-dialog-permission>
+        } @if ( !!publishComponent?.shareModeDirect || !!publishComponent?.shareModeCopy ||
+        !!publishComponent?.initialState?.direct || !!publishComponent?.initialState?.copy ) {
+        <div class="groupName">{{ 'WORKSPACE.SHARE.PUBLISH_LABEL' | translate }}</div>
+        @if (publishPermission && !isBulk() && !isSafe) {
+        <es-mat-link
+          class="manageLink uppercase"
+          (clickOnLink)="
+            tab = _nodes[0].ref?.id && isCollectionOrDirectory() && atLeastOneTreeChild() ? 2 : 1
           "
         >
-          <div class="groupName">{{ 'WORKSPACE.SHARE.PUBLISH_LABEL' | translate }}</div>
-          <es-mat-link
-            class="manageLink uppercase"
-            *ngIf="publishPermission && !isBulk() && !isSafe"
-            (clickOnLink)="
-              tab = _nodes[0].ref?.id && isCollectionOrDirectory() && atLeastOneTreeChild() ? 2 : 1
-            "
-          >
-            {{ 'WORKSPACE.SHARE.MANAGE_PUBLISH' | translate }}</es-mat-link
-          >
-          <es-share-dialog-permission
-            class="groupEntry link"
-            [class.added]="
-              !publishComponent.initialState?.direct &&
-              !publishComponent.initialState?.copy &&
-              (publishComponent.shareModeDirect || publishComponent.shareModeCopy)
-            "
-            [permission]="publishEnabled"
-            [isDirectory]="_nodes[0].isDirectory"
-            [isEditable]="publishComponent.shareModeDirect ? 'timebasedOnly' : false"
-            [showDelete]="false"
-            [isDeleted]="
-              (publishComponent.initialState?.direct || publishComponent.initialState?.copy) &&
-              !publishComponent.shareModeDirect &&
-              !publishComponent.shareModeCopy
-            "
-          ></es-share-dialog-permission>
-        </ng-container>
-        <div class="groupName" *ngIf="hasUsages()">{{ 'WORKSPACE.SHARE.USAGES' | translate }}</div>
-        <div *ngIf="collections && collections.length" class="usage">
+          {{ 'WORKSPACE.SHARE.MANAGE_PUBLISH' | translate }}</es-mat-link
+        >
+        }
+        <es-share-dialog-permission
+          class="groupEntry link"
+          [class.added]="
+            !publishComponent.initialState?.direct &&
+            !publishComponent.initialState?.copy &&
+            (publishComponent.shareModeDirect || publishComponent.shareModeCopy)
+          "
+          [permission]="publishEnabled"
+          [isDirectory]="_nodes[0].isDirectory"
+          [isEditable]="publishComponent.shareModeDirect ? 'timebasedOnly' : false"
+          [showDelete]="false"
+          [isDeleted]="
+            (publishComponent.initialState?.direct || publishComponent.initialState?.copy) &&
+            !publishComponent.shareModeDirect &&
+            !publishComponent.shareModeCopy
+          "
+        ></es-share-dialog-permission>
+        } @if (hasUsages()) {
+        <div class="groupName">{{ 'WORKSPACE.SHARE.USAGES' | translate }}</div>
+        } @if (collections && collections.length) {
+        <div class="usage">
           <es-share-dialog-usage
             class="usageEntry"
             [name]="'COLLECTION'"
@@ -174,27 +177,29 @@
             [(deleteList)]="deletedUsages"
           ></es-share-dialog-usage>
         </div>
-        <div *ngFor="let usage of usages | keyvalue" class="usage">
+        } @for (usage of usages | keyvalue; track usage) {
+        <div class="usage">
+          @if (usage.key !== 'null') {
           <es-share-dialog-usage
-            *ngIf="usage.key !== 'null'"
             class="usageEntry"
             [name]="usage.key"
             [usages]="usage.value"
             [(deleteList)]="deletedUsages"
           ></es-share-dialog-usage>
+          }
         </div>
-
+        }
         <!--
-          <es-share-dialog-permission *ngIf="showLink && !link"
-                                      class="groupEntry link"
-                                      [permission]="linkDisabled"
-                                      [readOnly]="true"
-                                      [showDelete]="false"
-          ></es-share-dialog-permission>
-          -->
-
+        <es-share-dialog-permission *ngIf="showLink && !link"
+          class="groupEntry link"
+          [permission]="linkDisabled"
+          [readOnly]="true"
+          [showDelete]="false"
+        ></es-share-dialog-permission>
+        -->
         <!-- inheritance settings -->
-        <div *ngIf="inheritAllowed">
+        @if (inheritAllowed) {
+        <div>
           <div class="groupHeading">
             <div class="inheritCheck">
               <mat-checkbox
@@ -218,12 +223,10 @@
               </mat-checkbox>
             </div>
           </div>
-          <div
-            class="inherit"
-            [class.crossed]="!inherited"
-            *ngIf="inherited && inherit && inherit.length"
-          >
-            <div *ngFor="let permission of inherit" class="groupEntry">
+          @if (inherited && inherit && inherit.length) {
+          <div class="inherit" [class.crossed]="!inherited">
+            @for (permission of inherit; track permission) {
+            <div class="groupEntry">
               <es-share-dialog-permission
                 [permission]="permission"
                 [isDirectory]="_nodes[0].isDirectory"
@@ -231,141 +234,138 @@
                 [isEditable]="false"
               ></es-share-dialog-permission>
             </div>
+            }
           </div>
-          <div class="inheritDisabled" *ngIf="!inherited">
+          } @if (!inherited) {
+          <div class="inheritDisabled">
             {{ 'WORKSPACE.INHERIT_DISABLED' | translate }}
           </div>
-          <div class="inheritDisabled" *ngIf="inherited && inheritAccessDenied">
+          } @if (inherited && inheritAccessDenied) {
+          <div class="inheritDisabled">
             {{ 'WORKSPACE.INHERIT_ACCESS_DENIED' | translate }}
           </div>
-          <div class="inheritEmpty" *ngIf="inherited && !inherit.length && !inheritAccessDenied">
+          } @if (inherited && !inherit.length && !inheritAccessDenied) {
+          <div class="inheritEmpty">
             {{ 'WORKSPACE.INHERIT_EMPTY' | translate }}
           </div>
+          }
         </div>
+        }
       </div>
+      }
 
       <!-- settings for multiple nodes -->
-      <ng-container *ngIf="isBulk()">
-        <!-- shares to add -->
-        <div class="group groupToInvite" *ngIf="getNewInvitedAuthorities().length">
-          <mat-chip-set class="toInvite">
-            <mat-chip
-              *ngFor="let permission of getNewInvitedAuthorities()"
-              (removed)="removePermission(permission)"
-            >
-              <div class="mat-chip-group">
-                <span class="primary">{{ permission | permissionName }}</span>
-                <span class="secondary">{{
-                  permission | permissionName : { field: 'secondary' }
-                }}</span>
-              </div>
-              <i matChipRemove esIcon="cancel"></i>
-            </mat-chip>
-          </mat-chip-set>
-          <div class="typeButton" *ngIf="getNewInvitedAuthorities().length">
-            <button
-              mat-raised-button
-              (click)="chooseType()"
-              role="combobox"
-              [attr.aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
-              aria-haspopup="true"
-              [attr.aria-expanded]="showChooseType || null"
-              [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
-            >
-              <ng-container *ngIf="currentType.length === 0">
-                <i esIcon="help"></i>
-                <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
-                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
-              ></ng-container>
-              <ng-container *ngIf="currentType.indexOf('Consumer') > -1">
-                <i esIcon="remove_red_eye"></i>
-                <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
-                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
-              ></ng-container>
-              <ng-container *ngIf="currentType.indexOf('Collaborator') > -1">
-                <i esIcon="edit"></i>
-                <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
-                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
-              ></ng-container>
-              <ng-container *ngIf="currentType.indexOf('Coordinator') > -1">
-                <i esIcon="work"></i>
-                <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
-                <i aria-hidden="true" esIcon="keyboard_arrow_down"></i
-              ></ng-container>
-            </button>
-
-            <!--<div class="share-type-mobile">-->
-            <!--<p *ngIf="currentType.length==0">{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</p>-->
-            <!--<p *ngIf="currentType.indexOf('Consumer')>-1">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</p>-->
-            <!--<p *ngIf="currentType.indexOf('Collaborator')>-1">{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</p>-->
-            <!--<p *ngIf="currentType.indexOf('Coordinator')>-1">{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</p>-->
-            <!--</div>-->
-          </div>
-
-          <es-share-dialog-choose-type
-            *ngIf="showChooseType"
-            class="typeAdd"
-            [aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
-            [selected]="currentType"
-            [isDirectory]="_nodes[0].isDirectory"
-            [canPublish]="!isSafe"
-            (cancelType)="showChooseType = false"
-            (typeChosen)="setType($event)"
-          ></es-share-dialog-choose-type>
+      @if (isBulk()) {
+      <!-- shares to add -->
+      @if (getNewInvitedAuthorities().length) {
+      <div class="group groupToInvite">
+        <mat-chip-set class="toInvite">
+          @for (permission of getNewInvitedAuthorities(); track permission) {
+          <mat-chip (removed)="removePermission(permission)">
+            <div class="mat-chip-group">
+              <span class="primary">{{ permission | permissionName }}</span>
+              <span class="secondary">{{
+                permission | permissionName : { field: 'secondary' }
+              }}</span>
+            </div>
+            <i matChipRemove esIcon="cancel"></i>
+          </mat-chip>
+          }
+        </mat-chip-set>
+        @if (getNewInvitedAuthorities().length) {
+        <div class="typeButton">
+          <button
+            mat-raised-button
+            (click)="chooseType()"
+            role="combobox"
+            [attr.aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
+            aria-haspopup="true"
+            [attr.aria-expanded]="showChooseType || null"
+            [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
+          >
+            @if (currentType.length === 0) {
+            <i esIcon="help"></i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate }}</span>
+            <i aria-hidden="true" esIcon="keyboard_arrow_down"></i>
+            } @if (currentType.indexOf('Consumer') > -1) {
+            <i esIcon="remove_red_eye"></i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
+            <i aria-hidden="true" esIcon="keyboard_arrow_down"></i>
+            } @if (currentType.indexOf('Collaborator') > -1) {
+            <i esIcon="edit"></i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+            <i aria-hidden="true" esIcon="keyboard_arrow_down"></i>
+            } @if (currentType.indexOf('Coordinator') > -1) {
+            <i esIcon="work"></i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
+            <i aria-hidden="true" esIcon="keyboard_arrow_down"></i>
+            }
+          </button>
+          <!--<div class="share-type-mobile">-->
+          <!--<p *ngIf="currentType.length==0">{{'WORKSPACE.SHARE.TYPE_UNKNOWN' | translate}}</p>-->
+          <!--<p *ngIf="currentType.indexOf('Consumer')>-1">{{'WORKSPACE.SHARE.TYPE_VIEWER' | translate}}</p>-->
+          <!--<p *ngIf="currentType.indexOf('Collaborator')>-1">{{'WORKSPACE.SHARE.TYPE_COWORKER' | translate}}</p>-->
+          <!--<p *ngIf="currentType.indexOf('Coordinator')>-1">{{'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate}}</p>-->
+          <!--</div>-->
         </div>
-
-        <!-- bulk configuration -->
-        <div class="bulk-config">
-          <mat-radio-group [(ngModel)]="bulkMode">
-            <strong>{{ 'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate }}</strong>
-            <mat-radio-button value="extend">
-              <es-multi-line-label>
-                <ng-container slot="label">
-                  {{ 'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate }}
-                </ng-container>
-                <ng-container slot="description">
-                  {{ 'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate }}
-                </ng-container>
-              </es-multi-line-label>
-            </mat-radio-button>
-            <mat-radio-button value="replace">
-              <es-multi-line-label>
-                <ng-container slot="label">
-                  {{ 'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate }}
-                </ng-container>
-                <ng-container slot="description">
-                  {{ 'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate }}
-                </ng-container>
-              </es-multi-line-label>
-            </mat-radio-button>
-          </mat-radio-group>
-          <div class="publish-bulk">
-            <mat-slide-toggle [(ngModel)]="bulkPublish" [disabled]="!publishPermission">
-              <es-multi-line-label>
-                <ng-container slot="label">
-                  {{ 'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate }}
-                </ng-container>
-                <ng-container slot="description">
-                  {{ 'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO_MULTIPLE' | translate }}
-                </ng-container>
-              </es-multi-line-label>
-            </mat-slide-toggle>
-          </div>
+        } @if (showChooseType) {
+        <es-share-dialog-choose-type
+          class="typeAdd"
+          [aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
+          [selected]="currentType"
+          [isDirectory]="_nodes[0].isDirectory"
+          [canPublish]="!isSafe"
+          (cancelType)="showChooseType = false"
+          (typeChosen)="setType($event)"
+        ></es-share-dialog-choose-type>
+        }
+      </div>
+      }
+      <!-- bulk configuration -->
+      <div class="bulk-config">
+        <mat-radio-group [(ngModel)]="bulkMode">
+          <strong>{{ 'WORKSPACE.SHARE.BULK_MODE.TITLE' | translate }}</strong>
+          <mat-radio-button value="extend">
+            <es-multi-line-label>
+              <ng-container slot="label">
+                {{ 'WORKSPACE.SHARE.BULK_MODE.EXTEND' | translate }}
+              </ng-container>
+              <ng-container slot="description">
+                {{ 'WORKSPACE.SHARE.BULK_MODE.EXTEND_DESCRIPTION' | translate }}
+              </ng-container>
+            </es-multi-line-label>
+          </mat-radio-button>
+          <mat-radio-button value="replace">
+            <es-multi-line-label>
+              <ng-container slot="label">
+                {{ 'WORKSPACE.SHARE.BULK_MODE.REPLACE' | translate }}
+              </ng-container>
+              <ng-container slot="description">
+                {{ 'WORKSPACE.SHARE.BULK_MODE.REPLACE_DESCRIPTION' | translate }}
+              </ng-container>
+            </es-multi-line-label>
+          </mat-radio-button>
+        </mat-radio-group>
+        <div class="publish-bulk">
+          <mat-slide-toggle [(ngModel)]="bulkPublish" [disabled]="!publishPermission">
+            <es-multi-line-label>
+              <ng-container slot="label">
+                {{ 'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT' | translate }}
+              </ng-container>
+              <ng-container slot="description">
+                {{ 'WORKSPACE.SHARE.PUBLISH.MODE_DIRECT_INFO_MULTIPLE' | translate }}
+              </ng-container>
+            </es-multi-line-label>
+          </mat-slide-toggle>
         </div>
-      </ng-container>
+      </div>
+      }
     </div>
   </mat-tab>
   <!-- structure and inheritance tab -->
-  <mat-tab
-    [id]="structureTabId"
-    *ngIf="
-      _nodes?.length === 1 &&
-      _nodes[0].ref?.id &&
-      isCollectionOrDirectory() &&
-      atLeastOneTreeChild()
-    "
-    class="tabContent"
-  >
+  @if ( _nodes?.length === 1 && _nodes[0].ref?.id && isCollectionOrDirectory() &&
+  atLeastOneTreeChild() ) {
+  <mat-tab [id]="structureTabId" class="tabContent">
     <ng-template mat-tab-label>
       <i esIcon="group" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TAB_STRUCTURE_INHERITANCE' | translate }}</span>
@@ -374,18 +374,21 @@
       <es-info-message mode="info">
         <span [innerHTML]="'WORKSPACE.STRUCTURE.INFO' | translate"></span>
       </es-info-message>
+      @if (dataSourceStructure.getTotal() > 0) {
       <es-node-entries-wrapper
-        *ngIf="dataSourceStructure.getTotal() > 0"
         class="node-entries-structure"
         [columns]="structureColumns"
         [dataSource]="dataSourceStructure"
         [displayType]="NodeEntriesDisplayType.Tree"
         [elementInteractionType]="InteractionType.Emitter"
+        [treeConfig]="structureTreeConfig"
         (selectionChange)="onNodeSelectionChange($event)"
       ></es-node-entries-wrapper>
+      }
     </div>
   </mat-tab>
-  <mat-tab *ngIf="_nodes && publishPermission && !isBulk() && !isSafe" class="tabContent">
+  } @if (_nodes && publishPermission && !isBulk() && !isSafe) {
+  <mat-tab class="tabContent">
     <ng-template mat-tab-label>
       <i esIcon="public" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TAB_PUBLISH' | translate }}</span>
@@ -404,10 +407,8 @@
       ></es-share-dialog-publish>
     </div>
   </mat-tab>
-  <mat-tab
-    *ngIf="_nodes && restrictedAccessPermission && !isBulk() && !isCollection() && !isSafe"
-    class="tabContent"
-  >
+  } @if (_nodes && restrictedAccessPermission && !isBulk() && !isCollection() && !isSafe) {
+  <mat-tab class="tabContent">
     <ng-template mat-tab-label>
       <i esIcon="lock" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TAB_RESTRICTED_ACCESS' | translate }}</span>
@@ -419,23 +420,27 @@
       ></es-share-dialog-restricted-access>
     </div>
   </mat-tab>
-  <mat-tab *ngIf="isAdmin && permissionsUser && permissionsGroup" class="tabContent">
+  } @if (isAdmin && permissionsUser && permissionsGroup) {
+  <mat-tab class="tabContent">
     <ng-template mat-tab-label>
       <i esIcon="settings" class="tab-icon"></i>
       <span class="tab-label">{{ 'WORKSPACE.TAB_ADVANCED' | translate }}</span>
     </ng-template>
     <div class="advanced">
-      <h4 class="mat-heading-4" *ngIf="permissionsUser.length + permissionsGroup.length === 0">
+      @if (permissionsUser.length + permissionsGroup.length === 0) {
+      <h4 class="mat-heading-4">
         {{ 'WORKSPACE.SHARE.NO_PERMISSIONS' | translate }}
       </h4>
-      <div *ngFor="let permission of permissionsGroup.concat(permissionsUser)">
+      } @for (permission of permissionsGroup.concat(permissionsUser); track permission) {
+      <div>
         <div class="advancedAuthority">
           <i class="type material-icons">{{
             permission.authority.authorityType === 'USER' ? 'person' : 'group'
           }}</i
           >{{ permission | permissionName }}
         </div>
-        <div *ngFor="let type of ALL_PERMISSIONS" class="advancedPermission">
+        @for (type of ALL_PERMISSIONS; track type) {
+        <div class="advancedPermission">
           <mat-checkbox
             id="{{ permission.authority.authorityName + '_' + type }}"
             [checked]="hasImplicitPermission(permission, type)"
@@ -445,34 +450,31 @@
             {{ type }}
           </mat-checkbox>
         </div>
+        }
       </div>
+      }
     </div>
   </mat-tab>
+  }
 </mat-tab-group>
 
 <ng-template #state>
-  <div class="state" *ngIf="initialState">
-    <div
-      *ngIf="getState() === 'PRIVATE'"
-      [class.state-changed]="isStateModified()"
-      class="show-state"
-    >
+  @if (initialState) {
+  <div class="state">
+    @if (getState() === 'PRIVATE') {
+    <div [class.state-changed]="isStateModified()" class="show-state">
       <i esIcon="lock"></i><span> {{ 'WORKSPACE.SHARE.STATE.PRIVATE' | translate }}</span>
     </div>
-    <div
-      *ngIf="getState() === 'SHARED'"
-      [class.state-changed]="isStateModified()"
-      class="show-state"
-    >
+    } @if (getState() === 'SHARED') {
+    <div [class.state-changed]="isStateModified()" class="show-state">
       <i esIcon="group"></i><span> {{ 'WORKSPACE.SHARE.STATE.SHARED' | translate }}</span>
     </div>
-    <div
-      *ngIf="getState() === 'PUBLIC'"
-      [class.state-changed]="isStateModified()"
-      class="show-state"
-    >
+    } @if (getState() === 'PUBLIC') {
+    <div [class.state-changed]="isStateModified()" class="show-state">
       <i class="material-icons" style="color: #42ca8d">public</i
       ><span> {{ 'WORKSPACE.SHARE.STATE.PUBLIC' | translate }}</span>
     </div>
+    }
   </div>
+  }
 </ng-template>

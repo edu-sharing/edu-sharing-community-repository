@@ -8,6 +8,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -22,6 +23,8 @@ import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
     standalone: false,
 })
 export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDestroy {
+    private mainMenuEntries = inject(MainMenuEntriesService);
+
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     @Input() currentScope: string;
@@ -29,8 +32,6 @@ export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDe
     private readonly destroyed$ = new Subject<void>();
     optionItems$: Observable<OptionItem[]>;
     @Output() closeDropdown = new EventEmitter<void>();
-
-    constructor(private mainMenuEntries: MainMenuEntriesService) {}
 
     ngOnDestroy(): void {
         this.destroyed$.next();

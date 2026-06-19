@@ -27,6 +27,7 @@
     "SELECT_COLLECTION": "Sélectionner une collection",
     "SELECT_ORG": "ou",
     "SELECT_LINK": "Saisir l'URL",
+    "ADD_LINK": "Ajouter le lien",
     "LINK_INVALID_INFO": "Nous n'avons pas trouvé de site web pour ce lien.",
     "LINK_DUPLICATES_INFO": "Nous avons trouvé d'autres articles similaires à ce lien. Veuillez vérifier si cet article existe déjà.",
     "RELOGIN": "Reconnexion",
@@ -161,7 +162,6 @@
           "DownloadContent": "Télécharger"
         }
       },
-
       "TIMEBASED": {
         "TOOLTIP": "Configurer l'autorisation procgrammée",
         "INVALID_STATE": "Cette autorisation programmée est remplacée par une autre autorisation permanente et n'a aucun effet.",
@@ -177,7 +177,6 @@
         "TIME": "Date",
         "INVALID_DATE": "Date non valide"
       },
-
       "PUBLISH": {
         "OPEN_VERSION": "Afficher la version",
         "NO_LICENSE": "Le matériel actuel n'a pas de licence attribuée. Les matériaux partagés doivent avoir une licence appropriée pour spécifier si et comment le matériau peut être réutilisé.",
@@ -216,7 +215,10 @@
         "DOI_UPDATE": "Mise à jour de la poignée existante",
         "DOI_UPDATE_INFO": "La nouvelle version de l'élément sera disponible à l'avenir sous l'ancienne adresse existante. La version publiée précédemment n'est plus directement accessible via l'adresse de l'identifiant.",
         "LICENSE_REQUIRED": "Pour publier le matériel, vous devez d'abord définir une licence.",
-        "AUTHOR_REQUIRED": "Pour publier le matériel, il faut d'abord définir l'auteur."
+        "AUTHOR_REQUIRED": "Pour publier le matériel, il faut d'abord définir l'auteur.",
+        "PUBLISH_RESTRICTED_ACCESS": "Ce document est soumis à une licence. Sa mise à disposition du public n'entraînerait aucune restriction au titre de cette licence, puisque toute personne serait autorisée à y accéder.",
+        "UPDATE_LAST_NON_REVOKED": "La mise à jour des métadonnées concernera la dernière version non retirée. Veuillez consulter la liste ci-dessous.",
+        "REVOKED": "Cette publication a été retirée."
       },
       "STATE": {
         "PRIVATE": "Privé",
@@ -300,7 +302,8 @@
         "BULK_MIGRATION": "Étape de migration pour la conversion des importations oai en importations etl/bulk",
         "REMOTE_OBJECT_INIT": "Objet importé de la source de recherche fédérée",
         "IMPORT_BLOCKED": "Changement du statut de l'import-blocking"
-      }
+      },
+      "STATISTICS_START": "Début du décompte: "
     },
     "LTI_V13_PLATFORM": {
       "NODE": {
@@ -352,7 +355,8 @@
       "LINK_INFO_FOLDER": "Toute personne ayant accès à ce lien peut télécharger tout le contenu de ce dossier. Les sous-dossiers ne sont pas accessibles.",
       "LINK_DOWNLOADS": "Nombre de téléchargements : {{ count }}",
       "COPIED_CLIPBOARD": "Lien copié dans le presse-papiers",
-      "COPIED_CLIPBOARD_ERROR": "La copie du lien a échoué. Veuillez le marquer et le copier manuellement"
+      "COPIED_CLIPBOARD_ERROR": "La copie du lien a échoué. Veuillez le marquer et le copier manuellement",
+      "PASSWORD_EDIT_HINT": "La saisie de ces informations dans ce champ permettra de définir un nouveau mot de passe."
     },
     "WORKFLOW": {
       "TITLE": "flux de travail",
@@ -474,6 +478,20 @@
         "CC0_INFO": "Je suis le seul détenteur des droits d'auteur de cet objet et je choisis de dédier l'œuvre au domaine public en renonçant à tous mes droits sur l'œuvre dans le monde entier en vertu de la loi sur les droits d'auteur, y compris tous les droits connexes et voisins, dans la mesure permise par la loi.",
         "PDM": "Marque du domaine public",
         "PDM_INFO": "Cet objet est libre de toute restriction connue couverte par la loi sur les droits d'auteur."
+      },
+      "AI": {
+        "TITLE": "Informations sur l'origine et l'utilisation de l'IA",
+        "USE_FOR_TRAINING": "Adapté à l'entraînement",
+        "USE_FOR_TRAINING_INFO": "Cet élément peut être utilisé pour l'entraînement des réseaux d'IA. (C'est généralement le cas, sauf exclusion explicite.)",
+        "GENERATED": "Généré par l'IA",
+        "GENERATED_INFO": "Cet élément a été généré à l'aide de l'IA.",
+        "TOOL": "Outil",
+        "TOOL_INFO": "Quel outil/modèle a été utilisé pour la génération ?",
+        "TOOL_CUSTOM": "Un autre outil",
+        "TOOL_CUSTOM_NAME": "Nom de l'outil",
+        "TOOL_NO_INFO": "Aucune information / Inconnu",
+        "MANUALLY_MODIFIED": "Il a été modifié",
+        "MANUALLY_MODIFIED_INFO": "L'élément a été modifié ou édité manuellement de manière significative après sa génération."
       }
     },
     "FILE_CHOOSER": {
@@ -542,6 +560,26 @@
       "DELETE_CONFIG": "Supprimer la configuration",
       "DELETE_CONFIG_TITLE": "Supprimer la configuration ?",
       "DELETE_CONFIG_MESSAGE": "Êtes-vous sûr de vouloir supprimer la configuration d'outil sélectionnée ?\nTous les objets déjà créés à l'aide de cette configuration deviendront invalides."
-    }
+    },
+    "COLLECTION_HOME": "Niveau principal",
+    "UPLOAD_EXISTS": {
+      "TITLE": "Éléments existants",
+      "SINGLE": "L'élément \"{{fileName}}\" existe déjà à cet emplacement. Voulez-vous remplacer l'élément existant ou conserver les deux?",
+      "MULTIPLE": "Au moins un élément portant le même nom existe déjà. Voulez-vous remplacer les éléments existants ou tous les conserver ?",
+      "SINGLE_OVERWRITE": "Remplacer l'élément existant",
+      "SINGLE_KEEP": "Les deux éléments conservent",
+      "MULTIPLE_OVERWRITE": "Remplacer les éléments existants",
+      "MULTIPLE_KEEP": "Tous les éléments conservent",
+      "UPLOAD": "Télécharger"
+    },
+    "REVOCATION": {
+      "TITLE": "Retirer la publication",
+      "REASON": "Veuillez fournir une raison.",
+      "REVOKE": "Retirer l'objet",
+      "DETAILS": "Cette action supprimera la publication de cet élément. Seule une page de notification contenant les métadonnées sera conservée. Si l'élément contient des éléments de série, ceux-ci seront également supprimés. Veuillez noter que cette action est irréversible."
+    },
+    "SAFE_CONFIRM_DOWNLOAD_TITLE": "Avis",
+    "SAFE_CONFIRM_DOWNLOAD_CHECKBOX": "Ne plus afficher dans cette session",
+    "SAFE_CONFIRM_DOWNLOAD_MESSAGE": "Veuillez noter que les fichiers stockés localement doivent être supprimés du coffre-fort numérique. Nous vous recommandons également de désactiver la synchronisation avec vos services cloud."
   }
 }

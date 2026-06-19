@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import com.hazelcast.core.HazelcastInstance;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -19,11 +20,12 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.springframework.context.ApplicationContext;
 
 public class Monitoring {
-	
+
+	private final ApplicationContext applicationContext;
 	Logger logger = Logger.getLogger(Monitoring.class);
 	
-	ServiceRegistry serviceRegistry;
-	Repository repositoryHelper;
+	final ServiceRegistry serviceRegistry;
+	final Repository repositoryHelper;
 
 	public static ExecutorService executorService = Executors.newFixedThreadPool(10);
 	
@@ -33,7 +35,7 @@ public class Monitoring {
 	};
 	
 	public Monitoring() {
-		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+		applicationContext = AlfAppContextGate.getApplicationContext();
 		serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
 		repositoryHelper = (Repository) applicationContext.getBean("repositoryHelper");
 	}
@@ -91,11 +93,22 @@ public class Monitoring {
 		};
 		return executeTask(timeoutInSeconds, task);
 	}
-	
-	private String executeTask(int timeoutInSeconds, Callable<String> task) throws Throwable{
+	public boolean clusterCheckTimeout(int timeoutInSeconds) throws Throwable{
+		Callable<Boolean> task = () -> {
+            HazelcastInstance hz = applicationContext.getBean(HazelcastInstance.class);
+            if(!hz.getLifecycleService().isRunning()) {
+                logger.error("Hazelcast instance is down");
+                return false;
+            }
+            return true;
+        };
+		return executeTask(timeoutInSeconds, task);
+	}
 
-		Future<String> future = executorService.submit(task);
-		String result = future.get(timeoutInSeconds, TimeUnit.SECONDS);
+	private<T> T executeTask(int timeoutInSeconds, Callable<T> task) throws Throwable{
+
+		Future<T> future = executorService.submit(task);
+		T result = future.get(timeoutInSeconds, TimeUnit.SECONDS);
 		return result;
 	}
 	

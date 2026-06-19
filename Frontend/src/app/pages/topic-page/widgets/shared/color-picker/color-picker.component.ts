@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,11 +10,14 @@ import { TopicPageGlobalService } from '../../../shared/services/topic-page-glob
 
 @Component({
     selector: 'es-color-picker',
-    imports: [CommonModule, FormsModule, MatButton, NgxColorsModule, TranslateModule],
+    imports: [FormsModule, MatButton, NgxColorsModule, TranslateModule],
     templateUrl: './color-picker.component.html',
     styleUrls: ['./color-picker.component.scss'],
 })
 export class ColorPickerComponent implements OnInit {
+    private configService = inject(ConfigService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+
     private _selectedColor: string = '#ffffff';
     private _initialColor: string | null = null;
 
@@ -36,6 +38,8 @@ export class ColorPickerComponent implements OnInit {
     @Input() cancelLabel: string = 'CANCEL';
     @Input() colorLabel: string;
     @Input() customClass: string = '';
+    @Input() customColor: string = '';
+    @Input() customColorPosition: 'start' | 'end' = 'end';
     @Output() colorChange: EventEmitter<string> = new EventEmitter<string>();
 
     get internalColor(): string {
@@ -45,11 +49,6 @@ export class ColorPickerComponent implements OnInit {
         this._selectedColor = value;
     }
     protected palette: any[] = [];
-
-    constructor(
-        private configService: ConfigService,
-        private topicPageGlobalService: TopicPageGlobalService,
-    ) {}
 
     /**
      * Initializes the component by retrieving a defined color palette or the default colors and generating the palette.
@@ -75,6 +74,23 @@ export class ColorPickerComponent implements OnInit {
                 });
             });
         }
+        // add a custom color to the palette (if not already included)
+        if (this.customColor) {
+            const customColorIncluded = this.palette.find((c) => {
+                return (
+                    c === this.customColor ||
+                    c?.preview === this.customColor ||
+                    c?.variants?.includes(this.customColor)
+                );
+            });
+            if (!customColorIncluded) {
+                if (this.customColorPosition === 'start') {
+                    this.palette.unshift(this.customColor);
+                } else {
+                    this.palette.push(this.customColor);
+                }
+            }
+        }
         // workaround to reset the color to the default undefined color
         if (this.addTransparency && !this.palette.includes(undefined)) {
             this.palette.push(undefined);
@@ -83,13 +99,23 @@ export class ColorPickerComponent implements OnInit {
 
     /**
      * Emits the color change event when the color is changed.
-     * Only emits if the color actually changed from the initial value.
+     * Treats empty string / null / undefined as the same "transparent" state
+     * so that intermediate values emitted by ngx-colors (caused by duplicate internalColor)
+     * do not trigger a spurious second event.
+     *
+     * Hint: null/undefined/empty string are all interpreted as transparency.
      */
     onColorChange(): void {
-        if (this._initialColor !== null && this._selectedColor !== this._initialColor) {
-            this.colorChange.emit(this.selectedColor);
-            // update the initial value for further changes
-            this._initialColor = this._selectedColor;
+        const normalize = (v: string | null | undefined): string | null =>
+            v == null || v === '' ? null : v.toLowerCase();
+
+        const previous: string | null = normalize(this._initialColor);
+        const current: string | null = normalize(this._selectedColor);
+
+        if (previous === current) {
+            return;
         }
+        this.colorChange.emit(this._selectedColor);
+        this._initialColor = this._selectedColor;
     }
 }

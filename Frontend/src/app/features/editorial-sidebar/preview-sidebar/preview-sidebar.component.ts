@@ -1,6 +1,5 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
-    AfterViewInit,
     Component,
     EventEmitter,
     Input,
@@ -8,6 +7,7 @@ import {
     Output,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
@@ -16,6 +16,7 @@ import { PreviewContentComponent } from './preview-content/preview-content.compo
 
 import { PreviewSidebarService } from './preview-sidebar.service';
 import { CustomOptions, RestHelper } from 'ngx-edu-sharing-ui';
+import { EditorMode } from '../../mds/types/types';
 import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 import { GenericDialogData } from '../../dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../dialogs/dialogs.service';
@@ -31,7 +32,11 @@ import { DialogsService } from '../../dialogs/dialogs.service';
     styleUrls: ['./preview-sidebar.component.scss'],
     standalone: false,
 })
-export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
+export class PreviewSidebarComponent implements OnDestroy {
+    private dialogs = inject(DialogsService);
+    private previewSidebarService = inject(PreviewSidebarService);
+    private breakpointObserver = inject(BreakpointObserver);
+
     @ViewChild('modal') modalRef: TemplateRef<HTMLElement>;
     @ViewChild('preview') previewRef: PreviewContentComponent;
 
@@ -41,6 +46,10 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
      * custom options to configure the actionbar
      */
     @Input() customOptions: CustomOptions;
+    /** Editor mode forwarded to the embedded mds-editor-wrapper. */
+    @Input() editorMode: EditorMode;
+    /** Group id forwarded to the embedded mds-editor-wrapper. */
+    @Input() groupId: string;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 
@@ -50,18 +59,14 @@ export class PreviewSidebarComponent implements OnDestroy, AfterViewInit {
     private modalDialogRef: CardDialogRef<GenericDialogData<string>, string>;
     private modalOpen$ = new BehaviorSubject<boolean>(false);
 
-    constructor(
-        private dialogs: DialogsService,
-        private previewSidebarService: PreviewSidebarService,
-        private breakpointObserver: BreakpointObserver,
-    ) {
+    constructor() {
         this.previewSidebarService.registerInstance(this);
     }
 
-    ngAfterViewInit(): void {
-        // Wait for `contentRef` to be populated before calling `registerDialogOnMobile`.
-        // this.registerDialogOnMobile();
-    }
+    //ngAfterViewInit(): void {
+    // Wait for `contentRef` to be populated before calling `registerDialogOnMobile`.
+    // this.registerDialogOnMobile();
+    //}
 
     ngOnDestroy(): void {
         this.destroyed.next();

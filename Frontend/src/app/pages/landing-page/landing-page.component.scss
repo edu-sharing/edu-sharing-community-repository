@@ -13,6 +13,15 @@
         }
     }
 }
+.landing-page {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    .landing-main {
+        background-color: #fefef9;
+        flex-grow: 1;
+    }
+}
 
 // custom style for global options (this may need to be moved to another location)
 ::ng-deep .global-options .global-option-btn {

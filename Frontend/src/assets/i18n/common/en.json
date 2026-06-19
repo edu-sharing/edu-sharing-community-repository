@@ -108,6 +108,9 @@
   "ORIGINAL_DELETE": "Remove",
   "ORIGINAL_DELETED": "Content deleted",
   "ORIGINAL_DELETED_INFO": "Only metadata accessable",
+  "ORIGINAL_ACCESS_DENIED": "Access denied",
+  "ORIGINAL_ACCESS_DENIED_INFO": "No permissions to view details of this material",
+  "ORIGINAL_ACCESS_DENIED_MORE": "More information",
   "COMMON_API_ERROR": "An error occured. Please try again.",
   "COMMON_API_ERROR_TITLE": "Error details ({{date}})",
   "RENDERSERVICE_API_ERROR": "error while reaching rendering service. Please report this error an administrator.",
@@ -172,7 +175,10 @@
     "TOOLPERMISSION_RATE_READ": "The right to view reviews of materials",
     "TOOLPERMISSION_INVITE_TIMEBASED": "Create time-restricted invitations",
     "TOOLPERMISSION_SUGGESTION_READ": "Read metadata suggestions on materials",
-    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials"
+    "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
+    "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
+    "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",
   "NODE_SEARCH": "Search elements...",
@@ -258,7 +264,8 @@
   "MAPTYPE": {
     "IMAGES": "Images",
     "USERDATAFOLDER": "Documents",
-    "INBOX": "Inbox"
+    "INBOX": "Inbox",
+    "EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE": "Default"
   },
   "NODE": {
     "cm:name": "filename",
@@ -302,7 +309,8 @@
       "DOWNLOAD_MATERIAL": "Downloads",
       "VIEW_MATERIAL_PLAY_MEDIA": "Playbacks",
       "VIEW_COLLECTION": "Collection views",
-      "OPEN_EXTERNAL_LINK": "External link views"
+      "OPEN_EXTERNAL_LINK": "External link views",
+      "VIEW_MATERIAL_GDPR_CONFIRMED": "GDPR confirmations"
     },
     "ccm:replicationsourcetimestamp": "last changed",
     "ccm:eaf_subtitle": "subtitle",
@@ -411,6 +419,7 @@
     "INFO_CHILDS": "material",
     "INFO_CHILDS_MULTI": "materials",
     "INFO_NO_CONTENT": "empty collection",
+    "INFO_UPDATING": "Being updated",
     "SCOPE": {
       "UNKNOWN": "Unknown type",
       "MY": "private",
@@ -603,7 +612,6 @@
       "TOOL": ". generated with {{tool}}",
       "MODIFIED": "(has been modified)"
     },
-
     "NAMES": {
       "NONE": "No or unknown license",
       "MULTI": "Multiple licenses",
@@ -645,6 +653,17 @@
       "EDU": "edu-sharing Licenses",
       "CUSTOM": "define custom license",
       "UNTERRICHTS_UND_LEHRMEDIEN": "§60b Media collections for teaching"
+    },
+    "URLS": {
+      "CC_BY_ABOUT": "https://creativecommons.org/licenses/list.de",
+      "CC_BY": "https://creativecommons.org/licenses/by/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_ND": "https://creativecommons.org/licenses/by-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_SA": "https://creativecommons.org/licenses/by-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC": "https://creativecommons.org/licenses/by-nc/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_ND": "https://creativecommons.org/licenses/by-nc-nd/{{version}}/{{locale}}legalcode.de",
+      "CC_BY_NC_SA": "https://creativecommons.org/licenses/by-nc-sa/{{version}}/{{locale}}legalcode.de",
+      "CC_0": "https://creativecommons.org/publicdomain/zero/1.0/legalcode.de",
+      "PDM": "https://creativecommons.org/public-domain/pdm/"
     }
   },
   "LIST": {
@@ -669,6 +688,7 @@
     "SHOW_ALL_OPTIONS": "More actions",
     "APPLY": "Apply",
     "SHOW": "Preview & Info",
+    "VIEW_ELEMENT": "Open",
     "SHOW_IN_FOLDER": "Open storage location",
     "DEBUG": "Debug",
     "INVITE": "Invite",
@@ -728,7 +748,15 @@
     "COLLECTION_PROPOSAL_DECLINE": "Decline proposal",
     "RELATIONS": "Manage relations",
     "SELECT_ALL": "Select all",
-    "DESELECT": "Deselect all"
+    "DESELECT": "Deselect all",
+    "ASSIGNMENT_SUBMIT": "Submit",
+    "ASSIGNMENT_SUBMISSION": "Submissions",
+    "ASSIGNMENT_EDIT": "Edit assignment",
+    "ASSIGNMENT_CANCEL": "Cancel assignment",
+    "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
+    "ASSIGNMENT_FINISH": "Finish assignment",
+    "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone.",
+    "EDIT_CONNECTOR": "Edit"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Version comment",
@@ -796,7 +824,10 @@
       "TYPE_AI": "AI",
       "TYPE_USER": "User",
       "APPLY": "Accept",
-      "DECLINE": "Decline"
+      "DECLINE": "Decline",
+      "USER_PROPOSALS": {
+        "LABEL": "Community Metadata"
+      }
     }
   },
   "SIMPLE_EDIT": {
@@ -898,6 +929,7 @@
     "CONVERTING": "Converting",
     "QUEUED": "Queued",
     "QUEUE_POSITION": "Queue position",
+    "OPEN_IN_NEW_TAB": "Open in new tab",
     "REVOKED": {
       "DETAILS_EMPTY": "The publisher or editorial team has revoked this object. Only the metadata are available.\n\nCheck the reason below for more details",
       "DETAILS": "The publisher or editorial team has revoked this object.\n\nCheck the reason below for more details",
@@ -941,7 +973,9 @@
     "DOWNLOAD_TRY_AGAIN": "Try again",
     "STORAGE_LOCATION_SAVED": "The folder \"{{name}}\" will be used by default for uploads in the future",
     "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
-    "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable"
+    "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable",
+    "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
+    "ASSIGNMENT_FINISH": "The assignment has been finished."
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",
@@ -1550,5 +1584,6 @@
     "SELECTIVE_MATERIALS": "selective_materials",
     "MATERIALS": "materials",
     "TO": "to"
-  }
+  },
+  "NOT_SUPPORTED_REMOTELY": "Relations to external elements are not supported."
 }

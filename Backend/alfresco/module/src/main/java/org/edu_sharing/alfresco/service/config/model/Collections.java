@@ -1,25 +1,28 @@
 package org.edu_sharing.alfresco.service.config.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.xml.bind.annotation.XmlElement;
 import java.io.Serializable;
 
 public class Collections implements Serializable {
 	public enum CollectionsInvitationType {
-		@JsonPropertyDescription("Default invitation dialog, you can invite every group or user")
+		@Schema(description = "Default invitation dialog for inviting any group or user")
 		Default,
-		@JsonPropertyDescription("List of editorial groups only")
+		@Schema(description = "List of editorial groups only")
 		EditorialGroups
 	}
 	public static class CollectionsTypeConfig implements Serializable {
-		@JsonPropertyDescription("Choose the invitation type")
-		@XmlElement	public CollectionsInvitationType invitationType;
-		@JsonPropertyDescription("set the metadata group id (or null if no metadata should be shown)")
-		@XmlElement	public String metadataGroup;
+		@Schema(description = "Type of invitation dialog")
+		@XmlElement public CollectionsInvitationType invitationType;
+		@Schema(description = "Metadata group ID to display (null = no metadata shown)")
+		@XmlElement public String metadataGroup;
 	}
 	public static class CollectionsType implements Serializable {
-		@XmlElement	public CollectionsTypeConfig editorial;
+		@Schema(description = "Configuration for editorial collections")
+		@XmlElement public CollectionsTypeConfig editorial;
 	}
-	@XmlElement	public CollectionsType types;
-	@XmlElement	public String[] colors;
+	@Schema(description = "Special collection types configuration")
+	@XmlElement public CollectionsType types;
+	@Schema(description = "Array of allowed color values for collections")
+	@XmlElement public String[] colors;
 }

@@ -1,12 +1,4 @@
-import {
-    Component,
-    EventEmitter,
-    input,
-    OnChanges,
-    Output,
-    signal,
-    SimpleChanges,
-} from '@angular/core';
+import { Component, effect, input, model, signal, inject } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { AssignmentV1Service, SubmissionFile } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
@@ -18,27 +10,25 @@ import { SubmissionConfig } from '../submission-sidebar/submission-sidebar.compo
     styleUrls: ['manage-submission-nodes.component.scss'],
     imports: [SharedModule],
 })
-export class ManageSubmissionNodesComponent implements OnChanges {
-    data = input.required<SubmissionConfig>();
-    files = signal<SubmissionFile[]>(null);
-    selected = signal<SubmissionFile>(null);
-    @Output() nodeClick = new EventEmitter<SubmissionFile>();
-    constructor(private assignmentV1Service: AssignmentV1Service) {}
+export class ManageSubmissionNodesComponent {
+    private assignmentV1Service = inject(AssignmentV1Service);
 
-    async ngOnChanges(changes: SimpleChanges) {
-        if (changes.data) {
-            this.files.set(
-                await firstValueFrom(
-                    this.assignmentV1Service.getSubmissionFiles({
-                        submissionId: this.data().submission.ref.id,
-                        assignmentId: this.data().assignment.ref.id,
-                    }),
-                ),
-            );
-        }
+    data = input.required<SubmissionConfig>();
+    files = input<SubmissionFile[]>(null);
+    localFiles = signal<SubmissionFile[]>(null);
+    selected = model<SubmissionFile>(null);
+
+    constructor() {
+        effect(() => {
+            this.localFiles.set(this.files());
+        });
     }
 
-    click(item: SubmissionFile) {
+    async click(item: SubmissionFile) {
+        // let the parent veto the switch (e.g. unsaved correction changes)
+        if ((await this.data().submissionFileCallback?.(item)) === false) {
+            return;
+        }
         void firstValueFrom(
             this.assignmentV1Service.updateSubmissionFileValidation({
                 assignmentId: this.data().assignment.ref.id,
@@ -49,8 +39,8 @@ export class ManageSubmissionNodesComponent implements OnChanges {
                 },
             }),
         );
-        this.files.set(
-            this.files().map((f) => {
+        this.localFiles.set(
+            this.localFiles().map((f) => {
                 if (f === item) {
                     f.validationStatus = 'PENDING';
                 }
@@ -58,6 +48,5 @@ export class ManageSubmissionNodesComponent implements OnChanges {
             }),
         );
         this.selected.set(item);
-        this.nodeClick.emit(item);
     }
 }

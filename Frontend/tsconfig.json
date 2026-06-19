@@ -20,6 +20,16 @@
         "dist/b-api/b-api",
         "dist/b-api"
       ],
+      //paths for idea
+      "ngx-rendering-service-api": [
+        "dist/rendering-service-api/rendering-service-api",
+        "dist/rendering-service-api"
+      ],
+      //paths for idea
+      "ngx-rendering-service-lib": [
+        "dist/rendering-service-lib/rendering-service-lib",
+        "dist/rendering-service-lib"
+      ],
       "ngx-edu-sharing-ui": [
         "dist/edu-sharing-ui/edu-sharing-ui",
         "dist/edu-sharing-ui"
@@ -34,7 +44,7 @@
       // import { Node } from 'ngx-edu-sharing-api'; // Yes!
       // ```
       "projects/*": [
-        "",
+        ""
       ],
       "@angular/*": [
         "./node_modules/@angular/*"
@@ -49,9 +59,13 @@
     "esModuleInterop": true,
     "declaration": false,
     "experimentalDecorators": true,
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
     "module": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "target": "es2022",

@@ -2,6 +2,7 @@ package org.edu_sharing.service.assignment.dao;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -10,9 +11,10 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
-import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
+import org.edu_sharing.restservices.assignment.v1.model.Assignment;
 import org.edu_sharing.restservices.assignment.v1.model.Submission;
 import org.edu_sharing.restservices.assignment.v1.model.SubmissionFileRequest;
+import org.edu_sharing.restservices.assignment.v1.model.SubmissionValidationRequest;
 import org.edu_sharing.restservices.shared.UserSimple;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.assignment.SubmissionDao;
@@ -36,6 +38,8 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     private PermissionService permissionService;
     @Setter(onMethod_ = @Autowired)
     private AuthorityService authorityService;
+    @Setter(onMethod_ = @Autowired)
+    private BehaviourFilter policyBehaviourFilter;
 
     private AssignmentDaoFactory assignmentDaoFactory;
     private NodeSubmissionAssignmentDao assignmentDao;
@@ -70,29 +74,17 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
         }
 
         String creator = getCreator();
-        if (AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)) {
-            return new Submission(
-                    getNodeRef(),
-                    UserSimple.create(authorityService.getUser(creator), creator),
-                    getValidationNotes(),
-                    getFeedback(),
-                    getStatus(),
-                    getValidationStatus(),
-                    getSubmissionDate(),
-                    getReturnDate()
-            );
-        } else {
-            return new Submission(
-                    getNodeRef(),
-                    UserSimple.create(authorityService.getUser(creator), creator),
-                    null,
-                    isReturned() ? getFeedback() : null,
-                    getStatus(),
-                    isReturned() ? getValidationStatus() : Submission.Status.PENDING,
-                    getSubmissionDate(),
-                    getReturnDate()
-            );
-        }
+        return new Submission(
+                getNodeRef(),
+                UserSimple.create(authorityService.getUser(creator), creator),
+                getValidationNotes(),
+                getFeedback(),
+                getStatus(),
+                getValidationStatus(),
+                getSubmissionDate(),
+                getReturnDate(),
+                getUserNotes()
+        );
     }
 
     @Override
@@ -107,7 +99,11 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public boolean isReturned() {
-        return propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) == Submission.Status.FINISHED;
+        return switch (assignmentDao.getStatus()) {
+            case CORRECTED, FINISHED ->
+                    propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) == Submission.Status.FINISHED;
+            default -> false;
+        };
     }
 
     @Override
@@ -204,7 +200,6 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     @Override
     @RetryingTransaction // node does not exists after return, because rollback is performed for no reason
     @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
-    @RunAsSystem
     public SubmissionFileDao createSubmissionFile(SubmissionFileRequest submissionFileRequest, InputStream fileInputStream, FormDataContentDisposition fileMetaData) {
         submissionFileRefs.invalidate();
         validateAssigneeCanChangeSubmission();
@@ -233,17 +228,25 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
             put(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.NOT_STARTED.name());
         }};
 
-        String fullyAuthenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        String user = AuthenticationUtil.getRunAsUser();
 
         AuthenticationUtil.runAsSystem(() -> {
             nodeId = nodeService.createNodeBasic(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, assignmentDao.getSubmissionRefId(), CCConstants.CCM_TYPE_SUBMISSION, CCConstants.CCM_ASSOC_SUBMISSIONS_SUBMISSION, properties);
+            // if a coordinator creates a submission, the creator and modifier needs to be set to the run as user otherwise it will be set to the coordinator
+            policyBehaviourFilter.disableBehaviour();
+            try {
+                nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CM_PROP_C_CREATOR, user, true);
+                nodeService.setProperty(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, CCConstants.CM_PROP_C_MODIFIER, user, true);
+            } finally {
+                policyBehaviourFilter.enableBehaviour();
+            }
             nodeService.setOwner(nodeId, ApplicationInfoList.getHomeRepository().getUsername());
-            log.debug("Created new submission for {}({}) to {}", fullyAuthenticatedUser, nodeId, assignmentDao.getSubmissionRefId());
+            log.debug("Created new submission for {}({}) to {}", user, nodeId, assignmentDao.getSubmissionRefId());
 
-            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_ASSIGNEE);
-            permissionService.setPermission(nodeId, fullyAuthenticatedUser, CCConstants.PERMISSION_COMMENT);
+            permissionService.setPermission(nodeId, user, CCConstants.PERMISSION_ASSIGNEE);
+            permissionService.setPermission(nodeId, user, CCConstants.PERMISSION_COMMENT);
 
-            log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, fullyAuthenticatedUser, nodeId);
+            log.debug("Added permission {} for {} to submission {}", CCConstants.PERMISSION_ASSIGNEE, user, nodeId);
             return null;
         });
     }
@@ -267,6 +270,10 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public Submission.Status getValidationStatus() {
+        if (isReturned()) {
+            return Submission.Status.FINISHED;
+        }
+
         if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId) && !isReturned()) {
             return Submission.Status.PENDING;
         }
@@ -275,7 +282,9 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
 
     @Override
     public String getFeedback() {
-        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId) && !isReturned()) {
+        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, nodeId)
+                && !isReturned()
+                && propertyMapper.get().getEnum(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_STATUS, Submission.Status.class) != Submission.Status.FINISHED) {
             return null;
         }
 
@@ -288,6 +297,24 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
             return null;
         }
         return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_VALIDATION_NOTES);
+    }
+
+    @Override
+    public String getUserNotes() {
+        return propertyMapper.get().getString(CCConstants.CCM_PROP_SUBMISSION_USER_NOTES);
+    }
+
+    @Override
+    @RetryingTransaction
+    @PreAuthorize("hasPermission(#root.this.getNodeId(), T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_ASSIGNEE)")
+    public void setUserNotes(String userNotes) {
+        validateExists();
+        validateAssigneeCanChangeSubmission();
+        AuthenticationUtil.runAsSystem(() -> {
+            nodeService.updateNodeNative(nodeId, Map.of(CCConstants.CCM_PROP_SUBMISSION_USER_NOTES, userNotes));
+            return null;
+        });
+        refresh();
     }
 
     void validateCanCoordinatorChangeSubmission() {
@@ -307,6 +334,10 @@ final class NodeSubmissionDao extends BasicNodeDaoImpl implements SubmissionDao 
     void validateAssigneeCanChangeSubmission() {
         if (AssignmentUtil.isAssignmentCoordinator(permissionService, assignmentDao.getNodeId())) {
             return;
+        }
+
+        if (assignmentDao.getStatus() == Assignment.Status.DRAFT) {
+            throw new InsufficientPermissionException("Assignment with id " + assignmentDao.getNodeId() + " is in draft mode and cannot be modified by assignees.");
         }
 
         if (assignmentDao.getEndDate() != null && assignmentDao.getEndDate().before(new Date())) {

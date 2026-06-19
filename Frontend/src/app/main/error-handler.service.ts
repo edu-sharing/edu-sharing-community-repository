@@ -1,6 +1,6 @@
 import { Location } from '@angular/common';
 import { HttpRequest } from '@angular/common/http';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { type ApiErrorResponse } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../core-module/core.module';
 import { DialogsService } from '../features/dialogs/dialogs.service';
@@ -11,10 +11,13 @@ import { Toast } from '../services/toast';
     providedIn: 'root',
 })
 export class ErrorHandlerService {
+    private injector = inject(Injector);
+    private location = inject(Location);
+
     private toast: Toast;
     private dialogs: DialogsService;
 
-    constructor(private injector: Injector, private location: Location) {
+    constructor() {
         // Prevent circular dependency.
         void Promise.resolve().then(() => {
             this.toast = this.injector.get(Toast);

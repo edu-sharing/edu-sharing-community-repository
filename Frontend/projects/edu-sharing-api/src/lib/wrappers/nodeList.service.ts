@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import { catchError, filter, finalize, map, startWith, switchMap } from 'rxjs/operators';
@@ -38,13 +38,14 @@ interface NodeListErrorResponse {
     providedIn: 'root',
 })
 export class NodeListService {
+    private authentication = inject(AuthenticationService);
+    private iamApi = inject(IamV1Service);
+
     /**
      * Triggers when the node list of the given listId changes.
      */
     private readonly nodeListChangesSubject = new Subject<string>();
     private readonly nodeListObservables: { [parameters: string]: Observable<NodeEntries> } = {};
-
-    constructor(private authentication: AuthenticationService, private iamApi: IamV1Service) {}
 
     /**
      * Observe the node list with the given `listId`.

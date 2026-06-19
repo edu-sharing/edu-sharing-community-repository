@@ -4,16 +4,16 @@ import {
     ApplicationRef,
     Component,
     EventEmitter,
-    Inject,
     Input,
     OnInit,
-    Optional,
     Output,
     signal,
     TemplateRef,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -25,11 +25,12 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     NodeHelperService,
-    TreeNodeService,
+    TreeConfig,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { firstValueFrom, forkJoin as observableForkJoin, of } from 'rxjs';
+import { buffer, firstValueFrom, forkJoin as observableForkJoin, of, Subject } from 'rxjs';
+import { catchError, debounceTime, filter, map } from 'rxjs/operators';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -67,6 +68,7 @@ import {
     HOME_REPOSITORY,
     IamV1Service,
     Node,
+    NodePermissionInheritance,
     NodeService,
 } from 'ngx-edu-sharing-api';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
@@ -74,7 +76,6 @@ import {
     ConfigMotivationDefaultConfig,
     MotivationConfig,
 } from '../share-publish-motivation/share-publish-motivation-dialog.component';
-import { catchError } from 'rxjs/operators';
 
 export type ExtendedAcl = {
     inherited: boolean;
@@ -93,10 +94,33 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     templateUrl: './share-dialog.component.html',
     styleUrls: ['./share-dialog.component.scss'],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
-    providers: [TreeNodeService],
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
+    dataCard = inject<ShareDialogData>(CARD_DIALOG_DATA, { optional: true });
+    private dialogRef = inject<CardDialogRef<ShareDialogData, ShareDialogResult>>(CardDialogRef, {
+        optional: true,
+    });
+    private applicationRef = inject(ApplicationRef);
+    private authenticationService = inject(AuthenticationService);
+    private cardDialogUtils = inject(CardDialogUtilsService);
+    private collectionService = inject(RestCollectionService);
+    private config = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private connector = inject(RestConnectorService);
+    private localEvents = inject(LocalEventsService);
+    private dialogs = inject(DialogsService);
+    private aboutService = inject(AboutService);
+    private iam = inject(RestIamService);
+    private iamV1Service = inject(IamV1Service);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeApiLegacy = inject(RestNodeService);
+    private nodeApi = inject(NodeService);
+    nodeHelperService = inject(NodeHelperService);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private usageApi = inject(RestUsageService);
+
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;
     @ViewChild(ShareDialogRestrictedAccessComponent)
     restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
@@ -217,32 +241,20 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     atLeastOneTreeChild: WritableSignal<boolean> = signal(false);
     structureColumns: ColumnType;
     readonly structureTabId: string = 'structure_tab';
+    structureTreeConfig: TreeConfig = {
+        showFileName: false,
+        multipleSelection: true,
+        selectParents: true,
+        showFiles: false,
+        includeResolveInheritedAccess: true,
+        initialSelectionAttribute: 'inherited',
+        selectionMode: 'target',
+    };
     dataSourceStructure: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
+    initiallySkippedNodeIds: string[] = [];
+    private readonly inheritanceChange$ = new Subject<NodePermissionInheritance[]>();
 
-    constructor(
-        @Optional() @Inject(CARD_DIALOG_DATA) public dataCard: ShareDialogData,
-        @Optional() private dialogRef: CardDialogRef<ShareDialogData, ShareDialogResult>,
-        private applicationRef: ApplicationRef,
-        private authenticationService: AuthenticationService,
-        private cardDialogUtils: CardDialogUtilsService,
-        private collectionService: RestCollectionService,
-        private config: ConfigurationService,
-        private configService: ConfigService,
-        private connector: RestConnectorService,
-        private localEvents: LocalEventsService,
-        private dialogs: DialogsService,
-        private aboutService: AboutService,
-        private iam: RestIamService,
-        private iamV1Service: IamV1Service,
-        private mdsHelperService: MdsHelperService,
-        private nodeApiLegacy: RestNodeService,
-        private nodeApi: NodeService,
-        public nodeHelperService: NodeHelperService,
-        private toast: Toast,
-        private translate: TranslateService,
-        private treeNodeService: TreeNodeService,
-        private usageApi: RestUsageService,
-    ) {
+    constructor() {
         //this.dataService=new SearchData(iam);
         this.linkEnabled = {
             authority: {
@@ -265,15 +277,22 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             },
             permissions: [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH],
         };
-        // do not show files in the node-entries-tree of the structure tab
-        this.treeNodeService.updateShowFiles(false);
-        // allow multiple selection in the node-entries-tree of the structure tab
-        this.treeNodeService.updateMultipleSelectionAllowed(true);
-
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isSafe = data.currentScope != null;
             this.updateToolpermissions();
         });
+        // initialize inheritance change subscription
+        const debounced$ = this.inheritanceChange$.pipe(debounceTime(1000));
+        this.inheritanceChange$
+            .pipe(
+                buffer(debounced$),
+                map((lists) => this.mergeInheritanceLists(lists)),
+                filter((merged) => merged.length > 0),
+                takeUntilDestroyed(),
+            )
+            .subscribe(async (inheritanceList) => {
+                await firstValueFrom(this.nodeApi.setNodePermissionInheritance(inheritanceList));
+            });
         // Call in constructor to avoid changed-after-checked error when setting `isLoading` state.
         this.initNodes();
     }
@@ -477,10 +496,15 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         // check whether the first node is either a collection or directory
         const isCollection: boolean = this.isCollection();
         const nodeIsDirectory: boolean =
-            !isCollection && this._nodes[0]?.type === RestConstants.CCM_TYPE_MAP;
+            !isCollection &&
+            this._nodes[0]?.type &&
+            [RestConstants.CCM_TYPE_MAP, RestConstants.CM_TYPE_FOLDER].includes(
+                this._nodes[0].type,
+            );
         this.isCollectionOrDirectory.set(
             this._nodes?.length > 0 && (isCollection || nodeIsDirectory),
         );
+        this.structureTreeConfig.showFileName = nodeIsDirectory;
         // count the number of tree children with type !== ccm:io
         const children: Node[] = this._nodes?.length
             ? (await firstValueFrom(this.nodeApi.getChildren(this._nodes[0].ref.id))).nodes
@@ -1170,29 +1194,55 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
      * Other nodes are loaded subsequently (first level on init, remaining levels on demand)
      */
     private async updateStructureView(): Promise<void> {
-        // TODO: request nodes with inherited permissions and select them in the node entries
-        const nodesWithInheritedPermissions: Node[] = [];
-        // Note: The comparison of the SelectionModel uses reference equality (===) by default,
-        //       so the selection is not detected properly, even when both JSON objects are identically
-        // set them in the service to be replaced when requested
-        this.treeNodeService.updateInitiallySelectedNodes(nodesWithInheritedPermissions);
         this.dataSourceStructure.isLoading = true;
         this.dataSourceStructure.setData(this._nodes);
         this.dataSourceStructure.isLoading = false;
-        // update the selection as soon as the data source is loaded
-        setTimeout(async () => {
-            this.structureTreeNodeEntries.getSelection().select(...nodesWithInheritedPermissions);
-        });
     }
 
+    /**
+     * Persists inheritance changes.
+     *
+     * @param event
+     */
     onNodeSelectionChange(event: SelectionChange<Node>) {
-        /*console.log('onNodeSelectionChange', event);
+        const inheritanceList: NodePermissionInheritance[] = [];
         event.added?.forEach((node: Node) => {
-            console.log('Check that node has inheritance set', node);
+            // skip initial selection of nodes (inherited: true)
+            if (node.inherited && !this.initiallySkippedNodeIds.includes(node.ref.id)) {
+                this.initiallySkippedNodeIds.push(node.ref.id);
+            } else {
+                inheritanceList.push({
+                    node: node.ref.id,
+                    inherit: true,
+                });
+            }
         });
         event.removed?.forEach((node: Node) => {
-            console.log('Check that node has inheritance not set', node);
-        });*/
+            inheritanceList.push({
+                node: node.ref.id,
+                inherit: false,
+            });
+        });
+
+        if (inheritanceList.length) {
+            this.inheritanceChange$.next(inheritanceList);
+        }
+    }
+
+    /**
+     * Merges multiple incoming inheritance lists into one.
+     * If the same node appears multiple times, the latest value wins.
+     */
+    private mergeInheritanceLists(
+        lists: NodePermissionInheritance[][],
+    ): NodePermissionInheritance[] {
+        const merged = new Map<string, NodePermissionInheritance>();
+        for (const list of lists) {
+            for (const entry of list) {
+                merged.set(entry.node, entry);
+            }
+        }
+        return Array.from(merged.values());
     }
 
     protected readonly InteractionType = InteractionType;

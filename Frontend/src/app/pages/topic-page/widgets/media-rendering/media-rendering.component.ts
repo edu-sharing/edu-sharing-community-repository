@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
@@ -16,23 +15,26 @@ import {
     signal,
     ViewEncapsulation,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { NavigationExtras } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Toast } from '../../../../services/toast';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
+import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
+import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-display-type';
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
@@ -44,7 +46,6 @@ import { PreviewSidebarService } from '../../../../features/editorial-sidebar/pr
     selector: 'es-media-rendering',
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
@@ -62,6 +63,12 @@ import { PreviewSidebarService } from '../../../../features/editorial-sidebar/pr
     styleUrls: ['./media-rendering.component.scss'],
 })
 export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
+    private highlightSearch = inject(HighlightSearchPipe);
+    private nodeTitlePipe = inject(NodeTitlePipe);
+    private previewSidebarService = inject(PreviewSidebarService);
+    private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     // CONSTANTS
     readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.MEDIA_RENDERING.';
 
@@ -87,6 +94,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     @Output() embedWidgetClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() internalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() itemClickedEvent: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() totalSearchResultCountChanged: EventEmitter<number> = new EventEmitter<number>();
     @Output() visibleNodesChanged: EventEmitter<Node[]> = new EventEmitter<Node[]>();
 
     private destroy$ = new Subject<void>();
@@ -124,13 +132,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
 
-    constructor(
-        private highlightSearch: HighlightSearchPipe,
-        private nodeTitlePipe: NodeTitlePipe,
-        private previewSidebarService: PreviewSidebarService,
-        private toast: Toast,
-        private topicPageHelperService: TopicPageHelperService,
-    ) {
+    constructor() {
         // subscribe to changes on the selected node
         this.previewSidebarService
             .getCurrentNode()
@@ -186,9 +188,10 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             if (!node) {
                 return;
             }
-            if (!node.isPublic) {
-                // inform user about the node not being public
-                this.toast.error(null, 'TOPIC_PAGE.WIDGET.NODE_NOT_PUBLIC');
+            // run any registered selection validator
+            // a validator may cancel the selection silently and inform the user itself
+            const isValid: boolean = await this.topicPageGlobalService.validateNodeSelection(node);
+            if (!isValid) {
                 return;
             }
             // workaround to properly update the selected node
@@ -206,7 +209,15 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      * Opens a new window with the Re-URL parameter set.
      */
     openReurlLink(): void {
-        this.windowRef = this.topicPageHelperService.openReurlLink();
+        // set filter to collection ID
+        const mediaRenderingExtra: NavigationExtras = {
+            queryParams: {
+                filters: {
+                    [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
+                },
+            },
+        };
+        this.windowRef = this.topicPageHelperService.openReurlLink(mediaRenderingExtra);
     }
 
     /**
@@ -304,8 +315,10 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     private emitVisibleNode(): void {
         if (this.selectedNode) {
             this.visibleNodesChanged.emit([this.selectedNode]);
+            this.totalSearchResultCountChanged.emit(1);
         } else {
             this.visibleNodesChanged.emit([]);
+            this.totalSearchResultCountChanged.emit(0);
         }
     }
 

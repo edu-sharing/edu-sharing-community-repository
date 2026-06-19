@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { HOME_REPOSITORY } from 'ngx-edu-sharing-api';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { Values } from '../../../../features/mds/types/types';
@@ -12,10 +12,10 @@ import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic
     styleUrls: ['./topic-page-filters-sidebar.component.scss'],
 })
 export class TopicPageFiltersSidebarComponent {
+    genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+
     @Output() closeFilterbar: EventEmitter<void> = new EventEmitter<void>();
     @Output() currentValuesChange: EventEmitter<Values> = new EventEmitter<Values>();
-
-    constructor(public genericWidgetGlobalService: GenericWidgetGlobalService) {}
 
     /**
      * Reacts to the currentValuesChange event and emits it the same way.

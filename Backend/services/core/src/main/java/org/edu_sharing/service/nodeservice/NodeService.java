@@ -24,15 +24,15 @@ public interface NodeService {
 
     void createAssoc(String parentId, String childId, String assocName);
 
-    NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren);
+    NodeRef copyNode(String nodeId, String toNodeId, String assocType, boolean copyChildren, String nameOfCopy);
 
     String createNode(String parentId, String nodeType, Map<String, String[]> props) throws Throwable;
 
     default String createNode(String parentId, String nodeType, HashMap<String, String[]> props, String childAssociation) throws Throwable {
-        return createNode(parentId, nodeType, props, childAssociation, true);
+        return createNode(parentId, nodeType, props, childAssociation, true, null);
     }
 
-    String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds) throws Throwable;
+    String createNode(String parentId, String nodeType, Map<String, String[]> props, String childAssociation, boolean obeyMds, String[] aspects) throws Throwable;
 
     String createNodeBasic(String parentID, String nodeTypeString, Map<String, ?> _props);
 
@@ -244,13 +244,25 @@ public interface NodeService {
 
 
     /**
-     * Returns the original NodeRef of the given node id
-     * This is used to return the original node of a linked node
-     *
+	 * Returns the original NodeRef of the given node id.
+	 * Resolves both collection references (ccm:collection_io_reference) and published copies
+	 * (ccm:io_published_original). Use {@link #getReferenceOriginalNode(String)} to resolve
+	 * collection references only.
      * @param nodeId
      * @return
      */
     NodeRef getOriginalNode(String nodeId);
+
+	/**
+	 * Returns the original NodeRef of the given node id, resolving collection references
+	 * (ccm:collection_io_reference to ccm:original) only.
+	 * Published copies (ccm:io_published_original) are NOT followed, so the copy keeps its
+	 * own identity. Use this when a published copy must remain distinct from its origin,
+	 * for example for content-bound data such as fulltext.
+	 * @param nodeId
+	 * @return
+	 */
+    NodeRef getReferenceOriginalNode(String nodeId);
 
     /**
      * revoke a published copy

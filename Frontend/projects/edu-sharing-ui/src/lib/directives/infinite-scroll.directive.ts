@@ -7,6 +7,7 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    inject,
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AppContainerService } from '../services/app-container.service';
@@ -16,6 +17,10 @@ import { AppContainerService } from '../services/app-container.service';
     standalone: false,
 })
 export class InfiniteScrollDirective implements OnInit, OnDestroy {
+    private appContainer = inject(AppContainerService);
+    private element = inject(ElementRef);
+    private zone = inject(NgZone);
+
     @Output() scrolled = new EventEmitter<void>();
 
     @Input() infiniteScrollDistance: number = 1.5;
@@ -24,12 +29,6 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
     private lastEvent = 0;
     private lastScroll = 0;
     private destroyed$ = new Subject<void>();
-
-    constructor(
-        private appContainer: AppContainerService,
-        private element: ElementRef,
-        private zone: NgZone,
-    ) {}
 
     ngOnInit(): void {
         this.zone.runOutsideAngular(() => {

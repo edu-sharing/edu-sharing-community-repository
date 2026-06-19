@@ -1,0 +1,88 @@
+@defer (when node && this.nodeHelperService.isNodeRevoked(node)){
+<rs-revoked [node]="node"></rs-revoked>
+} @defer (when node && !(this.nodeHelperService.isNodeRevoked(node) && node.size === '0')) {
+<div class="module module-{{ (renderData$ | async)?.module }}">
+  @if (renderData$ | async; as data) { @defer (when data?.module === 'IMAGE'){
+  <rs-module-image [data]="data" [node]="node"></rs-module-image>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'SODIX'){
+  <rs-module-url [data]="data" [node]="node"></rs-module-url>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'VIDEO'){
+  <rs-module-video [data]="data" [node]="node"></rs-module-video>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when (data?.module === 'PDF' || data?.module === 'DOCUMENT') && isWebComponent) {
+  <rs-module-pdf-iframe [data]="data" [node]="node"></rs-module-pdf-iframe>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when (data?.module === 'PDF' || data?.module === 'DOCUMENT') && !isWebComponent) {
+  <rs-module-pdf [data]="data" [node]="node"></rs-module-pdf>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'EDUHTML' || data?.module === 'JUPYTER' || data.module ===
+  'SPREADSHEET' || data.module === 'HTML') {
+  <rs-module-edu-html [data]="data" [node]="node"></rs-module-edu-html>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'H5P'){
+  <rs-module-h5p [data]="data" [node]="node"></rs-module-h5p>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'AUDIO'){
+  <rs-module-audio [data]="data" [node]="node"></rs-module-audio>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'MOODLE') {
+  <rs-module-moodle
+    [data]="data"
+    [node]="node"
+    [isWebComponent]="isWebComponent"
+  ></rs-module-moodle>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'BINDER'){
+  <rs-module-binder [data]="data" [node]="node"></rs-module-binder>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @defer (when data?.module === 'DDB'){
+  <rs-module-ddb [data]="data" [node]="node"></rs-module-ddb>
+  } @loading {
+  <ng-container *ngTemplateOutlet="loading"></ng-container>
+  } @if (data.module === 'default') { @defer (when data.module === 'default') {
+  <rs-module-default [node]="node"></rs-module-default>
+  } } @if (data.module === 'url') { @defer (when data.module === 'url') {
+  <rs-module-url [node]="node" [data]="data" [isWebComponent]="isWebComponent"></rs-module-url>
+  } } @if (data.module === 'ERROR') { @defer (when data.module === 'ERROR') {
+  <rs-module-error [node]="node" [data]="data"></rs-module-error>
+  } } } @if ((renderData$ | async) === null;) {
+  <div class="progress">
+    @if (progress$ | async; as progress) { @switch (['VIDEO', 'AUDIO'].includes(progress.module) ?
+    'bar' : 'spinner') { @case ('bar') { @if ((progress.progress ?? 0) < 0) {
+    <div>{{ 'RENDERING.QUEUE_POSITION' | translate }}: {{ -(progress.progress ?? 0) }}</div>
+    } @if ((progress.progress ?? 0) >= 0) {
+    <div>{{ 'RENDERING.CONVERTING' | translate }}</div>
+    } @if ((progress.progress ?? 0) >= 0) {
+    <div>
+      <mat-progress-bar [value]="progress.progress ?? 0"></mat-progress-bar>
+    </div>
+    } } @case ('spinner') { @if ((progress.progress ?? 0) < 0) {
+    <div>{{ 'RENDERING.QUEUE_POSITION' | translate }}: {{ -(progress.progress ?? 0) }}</div>
+    } @if ((progress.progress ?? 0) >= 0) {
+    <div>{{ 'RENDERING.CONVERTING' | translate }}</div>
+    } @if ((progress.progress ?? 0) >= 0) {
+    <div>
+      <mat-spinner [diameter]="50"></mat-spinner>
+    </div>
+    } } } }
+  </div>
+  }
+</div>
+}
+<ng-template #loading>
+  <div class="progress">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

@@ -2,7 +2,7 @@
  * Created by Torsten on 13.01.2017.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { ConfigurationHelper } from '../../../core-module/core.module';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
@@ -14,10 +14,12 @@ import { take } from 'rxjs/operators';
     standalone: false,
 })
 export class BannerComponent {
+    private config = inject(ConfigService);
+
     @Input() scope: string;
     @Output() update = new EventEmitter();
     public banner: any;
-    constructor(private config: ConfigService) {
+    constructor() {
         this.banner = ConfigurationHelper.getBanner(this.config);
         this.config
             .observeConfig()

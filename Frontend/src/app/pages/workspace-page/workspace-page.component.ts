@@ -1,8 +1,10 @@
 import { trigger } from '@angular/animations';
 import {
+    AfterViewInit,
     ApplicationRef,
     Component,
     HostListener,
+    inject,
     NgZone,
     OnDestroy,
     OnInit,
@@ -26,16 +28,13 @@ import {
     CanDrop,
     ClipboardObject,
     CustomOptions,
-    DefaultGroups,
     DragData,
     DropSource,
     DropTarget,
-    ElementType,
     LocalEventsService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeRoot,
-    OptionItemToggle,
     TemporaryStorageService,
     TranslationsService,
     UIAnimation,
@@ -43,7 +42,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { delay, filter, first, map, take, takeUntil } from 'rxjs/operators';
+import { delay, first, map, take, takeUntil } from 'rxjs/operators';
 import {
     ConfigurationService,
     Connector,
@@ -100,21 +99,46 @@ type NodeWrapper = { node: Node };
     providers: [OptionsHelperService],
     standalone: false,
 })
-export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy {
-    private static VALID_ROOTS = [
-        'MY_FILES',
-        'SHARED_FILES',
-        'MY_SHARED_FILES',
-        'TO_ME_SHARED_FILES',
-        'WORKFLOW_RECEIVE',
-        'RECYCLE',
-    ];
+export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy, AfterViewInit {
+    private appContainer = inject(AppContainerService);
+    private breadcrumbsService = inject(BreadcrumbsService);
+    private card = inject(CardService);
+    private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
+    private connectors = inject(RestConnectorsService);
+    private dialogs = inject(DialogsService);
+    private event = inject(FrameEventsService);
+    private iam = inject(RestIamService);
+    private loadingScreen = inject(LoadingScreenService);
+    private localEvents = inject(LocalEventsService);
+    private mainNavService = inject(MainNavService);
+    private mds = inject(MdsService);
+    private ngZone = inject(NgZone);
+    private applicationRef = inject(ApplicationRef);
+    private node = inject(RestNodeService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private optionsHelperService = inject(OptionsHelperService);
+    private searchField = inject(SearchFieldService);
+    private session = inject(SessionStorageService);
+    private storage = inject(TemporaryStorageService);
+    private userService = inject(UserService);
+    private toast = inject(Toast);
+    private toolService = inject(RestToolService);
+    private translate = inject(TranslateService);
+    private translations = inject(TranslationsService);
+    private configService = inject(ConfigService);
+    private themeService = inject(ThemeService);
+    private ui = inject(UIService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    workspace = inject(WorkspaceService);
+
+    private static VALID_ROOTS = ['MY_FILES', 'SHARED_FILES', 'WORKFLOW_RECEIVE', 'RECYCLE'];
     private static VALID_ROOTS_NODES = [
         RestConstants.USERHOME,
         '-shared_files-',
-        '-my_shared_files-',
-        '-to_me_shared_files_personal-',
-        '-to_me_shared_files-',
         '-workflow_receive-',
     ];
     readonly UIConstants = UIConstants;
@@ -126,6 +150,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
 
     cardHasOpenModals$: Observable<boolean>;
+    sidebarParent: Node;
     private isRootFolder: boolean;
     private sharedFolders: Node[] = [];
     path: Node[] = [];
@@ -197,42 +222,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     private readonly destroyed$ = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
-    constructor(
-        private appContainer: AppContainerService,
-        private breadcrumbsService: BreadcrumbsService,
-        private card: CardService,
-        private config: ConfigurationService,
-        private connector: RestConnectorService,
-        private connectors: RestConnectorsService,
-        private dialogs: DialogsService,
-        private event: FrameEventsService,
-        private iam: RestIamService,
-        private loadingScreen: LoadingScreenService,
-        private localEvents: LocalEventsService,
-        private mainNavService: MainNavService,
-        private mds: MdsService,
-        private ngZone: NgZone,
-        private applicationRef: ApplicationRef,
-        private node: RestNodeService,
-        private nodeService: NodeService,
-        private nodeHelper: NodeHelperService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private optionsHelperService: OptionsHelperService,
-        private searchField: SearchFieldService,
-        private session: SessionStorageService,
-        private storage: TemporaryStorageService,
-        private userService: UserService,
-        private toast: Toast,
-        private toolService: RestToolService,
-        private translate: TranslateService,
-        private translations: TranslationsService,
-        private configService: ConfigService,
-        private themeService: ThemeService,
-        private ui: UIService,
-        public editorialSidebarService: EditorialSidebarService,
-        public workspace: WorkspaceService,
-    ) {
+    constructor() {
         this.event.addListener(this, this.destroyed$);
         this.connector.setRoute(this.route, this.router);
         this.globalProgress = true;
@@ -264,7 +254,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             // this.connector.logout().toPromise();
         }
     }
-    @HostListener('window:scroll', ['$event'])
+    @HostListener('window:scroll')
     scrollDocument() {
         this.treeOffset = Math.min(15, window.scrollY);
     }
@@ -348,7 +338,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         win: any = null,
         connectorType: Connector = null,
     ) {
-        this.ui.openConnector(this.getNodeList(node)[0], type, win, connectorType);
+        void this.ui.editConnector(this.getNodeList(node)[0], { type, win, connectorType });
     }
 
     async handleDrop(event: { target: DropTarget; source: DropSource<Node> }) {
@@ -770,6 +760,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             if (id === RestConstants.USERHOME) {
                 this.selectedNodeTree = null;
                 this.path = [];
+                this.breadcrumbsService.setNodePath(this.path);
             } else {
                 this.nodeService
                     .getParents(id, {
@@ -863,6 +854,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             }
             const node: Node | any = {
                 ref: {
+                    repo: HOME_REPOSITORY,
                     id,
                 },
                 name: this.translate.instant('WORKSPACE.' + this.root),
@@ -990,12 +982,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         if (this.root === 'SHARED_FILES') {
             return RestConstants.SHARED_FILES;
         }
-        if (this.root === 'MY_SHARED_FILES') {
-            return RestConstants.MY_SHARED_FILES;
-        }
-        if (this.root === 'TO_ME_SHARED_FILES') {
-            return RestConstants.TO_ME_SHARED_FILES;
-        }
         if (this.root === 'WORKFLOW_RECEIVE') {
             return RestConstants.WORKFLOW_RECEIVE;
         }
@@ -1003,19 +989,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     }
 
     async getRootFolderInternalId() {
-        if (this.root === 'TO_ME_SHARED_FILES') {
-            const toggle = await this.toMeSharedToggle$
-                .pipe(
-                    filter((v) => v !== null),
-                    first(),
-                )
-                .toPromise();
-            if (toggle) {
-                return RestConstants.TO_ME_SHARED_FILES;
-            } else {
-                return RestConstants.TO_ME_SHARED_FILES_PERSONAL;
-            }
-        }
         return this.getRootFolderId();
     }
 
@@ -1089,37 +1062,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
                 this.config.instant('workspaceSharedToMeDefaultAll', false),
             ),
         );
-        const shareToggle = new OptionItemToggle(
-            {
-                enabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
-                disabled: 'OPTIONS.TOGGLE_SHARED_TO_ME',
-            },
-            {
-                enabled: 'edu-content_shared_me_all',
-                disabled: 'edu-content_shared_me_private',
-            },
-            this.toMeSharedToggle$.value,
-            () => {
-                this.toMeSharedToggle$.next(!this.toMeSharedToggle$.value);
-                void this.session.set('toMeSharedGroup', this.toMeSharedToggle$.value);
-                void this.openDirectoryFromRoute();
-                //this.treeComponent.reload = Boolean(true);
-                this.toast.toast(
-                    'WORKSPACE.TOAST.TO_ME_SHARED_' +
-                        (this.toMeSharedToggle$.value ? 'ALL' : 'PERSONAL'),
-                );
-            },
-        );
-        shareToggle.group = DefaultGroups.Toggles;
-        shareToggle.elementType = [ElementType.NoneOrUnknown, ElementType.Node];
-        shareToggle.priority = 5;
-        shareToggle.customShowCallback = async () => {
-            return this.root === 'TO_ME_SHARED_FILES';
-        };
         const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
             this.editorialSidebarService.sidebarOpened,
         );
-        this.customOptions.addOptions = [sidebarToggle, shareToggle];
+        this.customOptions.addOptions = [sidebarToggle];
     }
 
     private getLastLocationStorageId() {
@@ -1171,6 +1117,26 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
     onDeleteNodes(nodes: Node[]): void {
         void this.dialogs.openDeleteNodesDialog({ nodes });
         // this.mainNavService.getDialogs().nodeDelete = nodes;
+    }
+
+    protected getRootFolder(): Node {
+        if (this.root === 'MY_FILES') {
+            return {
+                ref: {
+                    repo: HOME_REPOSITORY,
+                    id: RestConstants.USERHOME,
+                    isHomeRepo: true,
+                },
+                type: RestConstants.CCM_TYPE_MAP,
+            } as Node;
+        }
+        return null;
+    }
+
+    ngAfterViewInit(): void {
+        this.explorer?.node$.pipe(takeUntil(this.destroyed$)).subscribe((node) => {
+            this.sidebarParent = node || this.getRootFolder();
+        });
     }
 }
 

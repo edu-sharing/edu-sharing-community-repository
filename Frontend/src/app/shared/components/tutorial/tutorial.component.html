@@ -1,6 +1,6 @@
+@if (show) {
 <div
   class="tutorial"
-  *ngIf="show"
   [@fade]="show"
   [style.background]="background"
   (click)="doNext()"
@@ -17,16 +17,11 @@
     <h1 class="heading">{{ heading | translate }}</h1>
     <div class="description">{{ description | translate }}</div>
     <div class="buttons">
-      <button
-        cdkMonitorElementFocus
-        mat-button
-        color="primary"
-        class="skip"
-        *ngIf="showSkip"
-        (click)="doSkip()"
-      >
+      @if (showSkip) {
+      <button cdkMonitorElementFocus mat-button color="primary" class="skip" (click)="doSkip()">
         {{ 'SKIP' | translate }}
       </button>
+      }
       <button
         cdkMonitorElementFocus
         mat-flat-button
@@ -39,3 +34,4 @@
     </div>
   </div>
 </div>
+}

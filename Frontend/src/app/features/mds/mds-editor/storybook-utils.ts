@@ -1,20 +1,11 @@
-import { CommonModule } from '@angular/common';
 import {
     ApplicationConfig,
-    Component,
     EventEmitter,
     importProvidersFrom,
-    Inject,
+    inject,
     Injectable,
     NgModule,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import {
-    MAT_DIALOG_DATA,
-    MatDialog,
-    MatDialogModule,
-    MatDialogRef,
-} from '@angular/material/dialog';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -53,7 +44,6 @@ import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     ColumnType,
-    EduSharingUiModule,
     Helper,
     I18N_CONFIG,
     I18nConfig,
@@ -87,8 +77,9 @@ import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 export class translateProvider {
     private translation$: Observable<any> | null = null;
     cache$ = new BehaviorSubject(null);
+    private httpClient = inject(HttpClient);
 
-    constructor(private httpClient: HttpClient) {}
+    constructor() {}
 
     instant(v: string, args: any = {}) {
         let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
@@ -135,12 +126,16 @@ export class translateProvider {
 
 @Injectable()
 export class TranslationsServiceMock {
-    constructor(private translateProvider: TranslateService) {}
+    private translateProvider = inject(TranslateService);
+    constructor() {}
     waitForInit(): Observable<void> {
         return (this.translateProvider as unknown as translateProvider).cache$.pipe(
             first((languageLoaded: any) => !!languageLoaded),
             map(() => undefined as void),
         );
+    }
+    getLocale(): string {
+        return this.translateProvider.currentLang ?? 'de';
     }
 }
 @Injectable()
@@ -355,121 +350,6 @@ export class EduSharingLlmServiceMock {
     }
 }
 
-@Component({
-    standalone: true,
-    selector: 'es-inline-generic-dialog',
-    template: `
-        <mat-dialog-content class="mat-typography">
-            <header class="dialog-header">
-                <div class="header-text">
-                    <h2 mat-dialog-title>{{ data.title | translate }}</h2>
-                    <p class="subtitle" *ngIf="data.subtitle">
-                        {{ data.subtitle }}
-                    </p>
-                </div>
-
-                <button mat-icon-button aria-label="Close" (click)="close('close')">
-                    <i esIcon="close"></i>
-                </button>
-            </header>
-
-            <section class="dialog-body">
-                <ng-container *ngIf="data.message; else templateContent">
-                    <div>
-                        {{ data.message | translate }}
-                    </div>
-                </ng-container>
-
-                <ng-template #templateContent>
-                    <ng-container *ngTemplateOutlet="data.contentTemplate"></ng-container>
-                </ng-template>
-            </section>
-        </mat-dialog-content>
-
-        <mat-dialog-actions align="end" *ngIf="data.buttons?.length">
-            <button mat-button *ngFor="let button of data.buttons" (click)="close(button.label)">
-                {{ button.label | translate }}
-            </button>
-        </mat-dialog-actions>
-    `,
-    styles: `
-        mat-dialog-content {
-            padding: 0 !important;
-        }
-
-        .dialog-header, .dialog-body, mat-dialog-actions {
-            padding: 12px 16px !important;
-        }
-
-        .dialog-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            border-bottom: 1px solid #e0e0e0;
-
-            .header-text {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            h2 {
-                margin: 0;
-                padding: 0;
-                font-size: 1.5rem;
-                display: flex;
-                align-items: center;
-            }
-
-            .subtitle {
-                margin: 0.25rem 0 0;
-                font-size: 0.875rem;
-                color: rgba(0, 0, 0, 0.6);
-            }
-        }
-
-        mat-dialog-actions {
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.5rem;
-        }
-    `,
-    imports: [CommonModule, EduSharingUiModule, MatButtonModule, MatDialogModule],
-})
-export class SimpleGenericDialogComponent {
-    constructor(
-        @Inject(MAT_DIALOG_DATA) public data: any,
-        private dialogRef: MatDialogRef<SimpleGenericDialogComponent, any>,
-    ) {}
-
-    close(result: any): void {
-        this.dialogRef.close(result);
-    }
-}
-
-// TODO: Replace by a real mocked dialogs service
-@Injectable()
-export class MetadataTemplateDialogsServiceMock {
-    constructor(private dialog: MatDialog) {}
-
-    async openGenericDialog(config: any): Promise<MatDialogRef<SimpleGenericDialogComponent, any>> {
-        const dialogRef = this.dialog.open(SimpleGenericDialogComponent, {
-            width: config.width ?? '480px',
-            disableClose: config.disableClose ?? false,
-            data: {
-                title: config.title,
-                subtitle: config.subtitle,
-                message: config.message,
-                contentTemplate: config.contentTemplate,
-                buttons: config.buttons,
-            },
-        });
-
-        return Promise.resolve(dialogRef);
-    }
-}
-
 @Injectable()
 export class SessionStorageServiceMock extends SessionStorageService {
     storageObject: any = {};
@@ -637,12 +517,12 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: NodeService, useClass: NodeServiceMock },
     { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
-    { provide: MdsService, useFactory: () => new MdsServiceMock(null) },
+    { provide: MdsService, useClass: MdsServiceMock },
     ViewInstanceService,
     CordovaService,
     { provide: Toast, useClass: ToastMock },
     { provide: CARD_DIALOG_DATA, useValue: {} },
-    { provide: CardDialogRef, useValue: {} },
+    { provide: CardDialogRef, useValue: null },
     { provide: ActivatedRoute, useClass: ActivatedRouteMock },
     {
         provide: TranslateService,
@@ -846,17 +726,13 @@ export const DefaultMds: MdsDefinition = {
             id: 'suggestion_ai',
             provider: 'openai',
             useCaching: false,
-            chatCompletion:
-                '\n        {\n          "model": "gpt-4.1",\n          "messages": [\n            {\n              "role":"system",\n              "content": "Du bist ein Assistent für edu-sharing.\\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."\n            },\n            {\n              "role": "user",\n              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|-}}\\nDateiname: {{var.cm:name|-}}\\nLink: {{var.ccm:wwwwurl|-}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\\nSchlagworte: {{var.cclom:general_keyword|-}}\\nBeschreibung: {{var.cclom:general_description|-}}\\nFormat: {{node.cclom:format|-}}\\nMedientyp: {{node.virtual:mediatype|-}}"\n            }\n          ]\n        }\n      ',
-            createImage: null,
+            prompt: '\n        {\n          "model": "gpt-4.1",\n          "messages": [\n            {\n              "role":"system",\n              "content": "Du bist ein Assistent für edu-sharing.\\nDu sollst dem Nutzer helfen die Metadaten der Materialien mit passenden Vorschlägen zu vervollständigen. Gibt nur den Vorschlag als Wert zurück."\n            },\n            {\n              "role": "user",\n              "content": "Ich benötige hilfe bei diesem Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|-}}\\nDateiname: {{var.cm:name|-}}\\nLink: {{var.ccm:wwwwurl|-}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|-}}\\nSchlagworte: {{var.cclom:general_keyword|-}}\\nBeschreibung: {{var.cclom:general_description|-}}\\nFormat: {{node.cclom:format|-}}\\nMedientyp: {{node.virtual:mediatype|-}}"\n            }\n          ]\n        }\n      ',
         },
         {
             id: 'image_ai',
             provider: 'openai',
             useCaching: false,
-            chatCompletion: null,
-            createImage:
-                '\n        {\n          "model": "dall-e-2",\n          "size": "256x256",\n          "n": 3,\n          "response_format": "b64_json",\n          "prompt": "Ich benötige ein Bild für dieses Material. Es hat die folgenden Eigenschaften \\nTitel: {{var.cclom:title|{{node.cclom:title|-}}}}\\nDateiname: {{var.cm:name|{{node.cm:name|-}}}}\\nLink: {{var.ccm:wwwwurl|{{node.ccm:wwwurl|-}}}}\\nMaterialart: {{var.ccm:educationallearningresourcetype|{{node.ccm:educationallearningresourcetype||-}}}}\\nSchlagworte: {{var.cclom:general_keyword|{{node.cclom:general_keyword|-}}}}\\nBeschreibung: {{var.cclom:general_description|{{node.cclom:general_description|-}}}}. Erstelle das Bild im Stil {{var.preview.drawingStyle}}"\n        }\n      ',
+            prompt: null,
         },
     ],
     widgets: [
@@ -943,23 +819,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge einen aussagekräftigen Titel"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge einen aussagekräftigen Titel"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1086,23 +958,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erzeuge eine kurze zusammenfassende Beschreibung"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1258,23 +1126,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1391,23 +1255,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1452,23 +1312,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Erstelle Schlagwörter, welche das Material für eine Suche auffindbar machen"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -1705,23 +1561,19 @@ export const DefaultMds: MdsDefinition = {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
                 {
                     id: 'default',
                     provider: null,
                     useCaching: false,
-                    chatCompletion:
-                        '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"\n                }\n              ]\n            }\n          ',
-                    createImage: null,
+                    prompt: '\n            {\n              "messages": [\n                {\n                  "role": "user",\n                  "content": "Ordne das Material in einer der folgende Kategorien ein: {{widget.$.ccm:educationallearningresourcetype.values..caption}}"\n                }\n              ]\n            }\n          ',
                 },
                 {
                     id: null,
                     provider: null,
                     useCaching: false,
-                    chatCompletion: null,
-                    createImage: null,
+                    prompt: null,
                 },
             ],
             isExtended: false,
@@ -3155,6 +3007,83 @@ export const DefaultMds: MdsDefinition = {
             configuration: null,
             hasValues: false,
             values: null,
+            subwidgets: null,
+            placeholder: null,
+            unit: null,
+            format: null,
+            min: 0,
+            max: 99,
+            defaultMin: null,
+            defaultMax: null,
+            step: null,
+            allowValuespaceSuggestions: false,
+            hideIfEmpty: false,
+            allowempty: false,
+            defaultvalue: null,
+            countDefaultvalueAsFilter: false,
+            condition: {
+                type: 'PROPERTY',
+                value: 'ccm:educationaltypicalagerangecluster',
+                negate: true,
+                dynamic: true,
+                pattern: '^.*$',
+            },
+            maxlength: 0,
+            interactionType: 'Input',
+            filterMode: 'disabled',
+            expandable: 'disabled',
+            aiConfigs: [],
+            isExtended: false,
+            isRequired: 'optional',
+            isSearchable: false,
+        },
+        {
+            ids: {
+                graphql: 'lom.educational.0.typicalAgeRangeNominal',
+            },
+            id: 'ccm:educationaltypicalagerangecluster',
+            caption: 'typisches Alter der Zielgruppe',
+            bottomCaption: null,
+            icon: null,
+            type: 'multivalueButtons',
+            link: null,
+            template: null,
+            configuration: null,
+            hasValues: false,
+            values: [
+                {
+                    id: '0',
+                    caption: 'Vorschule',
+                },
+                {
+                    id: '1',
+                    caption: '1.-2. Klasse',
+                },
+                {
+                    id: '2',
+                    caption: '3.-4. Klasse',
+                },
+                {
+                    id: '3',
+                    caption: '5.-6. Klasse',
+                },
+                {
+                    id: '4',
+                    caption: '7.-8. Klasse',
+                },
+                {
+                    id: '5',
+                    caption: '9.-10. Klasse',
+                },
+                {
+                    id: '6',
+                    caption: 'Oberstufe',
+                },
+                {
+                    id: '7',
+                    caption: 'Erwachsenenbildung',
+                },
+            ],
             subwidgets: null,
             placeholder: null,
             unit: null,
@@ -17391,7 +17320,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general',
             caption: 'Allg. Informationen',
             icon: 'description',
-            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title> <ccm:taxonid> <ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange><ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
+            html: '\n\t\t\t  <preview>\n              <ccm:wwwurl>\n              <cm:name>\n              <cclom:title> <ccm:taxonid> <ccm:educationaltypicallearningtime><ccm:educationaltypicalagerange> <ccm:educationaltypicalagerangecluster> <ccm:commonlicense_ai_tool caption="Test AI Tool" type="radioVertical"><ccm:tool_category>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>\n              <license>\n              <version>\n              <childobjects> <ccm:tool_instance_params>\n\t\t\t\t',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,
@@ -17433,7 +17362,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general_bulk_sidebar',
             caption: null,
             icon: 'description',
-            html: '\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid>',
+            html: '\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid> <ccm:educationaltypicalagerangecluster>',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,

@@ -1,10 +1,11 @@
-import { EventEmitter, Injectable, signal } from '@angular/core';
+import { EventEmitter, inject, Injectable, signal } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
+    EDITORIAL_SIDEBAR_OPTIONS,
     EditorialSidebarComponent,
-    MULTISELECT_OPTIONS,
     OptionConfig,
     OptionState,
+    PreviewConfig,
 } from './editorial-sidebar.component';
 import {
     NodeClickEvent,
@@ -13,11 +14,15 @@ import {
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { SelectionChange } from '@angular/cdk/collections';
+import { MainNavService } from '../../main/navigation/main-nav.service';
+import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root',
 })
 export class EditorialSidebarService {
+    mainNavService = inject(MainNavService);
+
     /**
      * currently selected nodes
      * (handled via handleSelection() and used by the component for displaying the item)
@@ -26,7 +31,14 @@ export class EditorialSidebarService {
     /**
      * triggered when in the sidebar a copy / apply event was performed (mode SORT_INTO)
      */
-    applyNodeEmitted = new EventEmitter<{ nodes: Node[]; parent?: Node }>();
+    applyNodeEmitted = new EventEmitter<{
+        nodes: Node[];
+        parent?: Node;
+        // when a connector is used, otherwise null
+        connectorId?: string;
+        // only non-null when a connector is used
+        window?: Window;
+    }>();
     configChange$ = new EventEmitter<OptionConfig>();
     scope = signal(Scope.Search);
     private _editorialSidebar: EditorialSidebarComponent;
@@ -35,6 +47,18 @@ export class EditorialSidebarService {
      * indicate that the sidebar should overlay a global progress spinner
      */
     readonly sidebarLoading = signal(false);
+
+    constructor() {
+        this.mainNavService
+            .observeMainNavConfig()
+            .pipe(
+                map((config) => config.currentScope),
+                distinctUntilChanged(),
+                skip(1),
+            )
+            .subscribe(() => this.close());
+    }
+
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
         if (this._editorialSidebar && this._editorialSidebar !== editorialSidebar) {
             console.error(
@@ -71,17 +95,18 @@ export class EditorialSidebarService {
     }
 
     close() {
-        this._editorialSidebar.enabledOption.set(null);
+        this._editorialSidebar?.enabledOption?.set(null);
         this.sidebarOpened.set(false);
     }
 
     /**
-     * handle a s select event from the node entries wrapper component and trigger the sidebar
+     * handle a select event from the node entries wrapper component and trigger the sidebar
      */
     handleSelect(
         nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>,
         event: NodeClickEvent<NodeEntriesDataType>,
         scope: Scope,
+        previewConfig?: PreviewConfig,
     ) {
         this.scope.set(scope);
         if (
@@ -105,21 +130,22 @@ export class EditorialSidebarService {
             this.showOption({
                 option: 'PREVIEW',
                 trap: false,
+                optionConfig: previewConfig,
             });
         }
     }
 
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {
         this.nodes.set(selection.source.selected);
+        const option = this._editorialSidebar.enabledOption()?.option;
+        const selectionMode = option ? EDITORIAL_SIDEBAR_OPTIONS[option].selectionMode : 'none';
         if (selection.source.selected.length === 0) {
             this.close();
         } else if (
-            selection.source.selected.length !== 1 &&
-            !MULTISELECT_OPTIONS.includes(this._editorialSidebar.enabledOption()?.option)
+            (selection.source.selected.length === 1 && selectionMode === 'none') ||
+            (selection.source.selected.length >= 1 && selectionMode !== 'multi')
         ) {
-            this.close();
-        } else {
-            //this.selection.set(selection.source.
+            this._editorialSidebar.enabledOption.set(null);
         }
     }
 }

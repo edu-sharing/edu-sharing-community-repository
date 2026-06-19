@@ -5,6 +5,7 @@
   [position]="dropdownPosition"
 ></es-dropdown>
 <div
+  #actionbarDiv
   class="actionbar"
   [class.actionbar-all-flat]="style === 'flat'"
   [class.actionbar-background-dark]="backgroundType === 'dark'"
@@ -12,87 +13,83 @@
   [class.actionbar-round]="appearance === 'round'"
   [class.actionbar-icon-button]="appearance === 'icon-button'"
 >
-  <div
-    *ngIf="optionsToggleBefore.length"
-    class="actionToggle before"
-    [class.actionToggleDivider]="(optionsAlways$ | async).length"
-  >
+  @if (optionsToggleBefore.length) {
+  <div class="actionToggle before" [class.actionToggleDivider]="(optionsAlways$ | async).length">
     <ng-container
       *ngTemplateOutlet="toggle; context: { optionsToggle: optionsToggleBefore }"
     ></ng-container>
   </div>
-  <ng-container *ngFor="let option of optionsAlways$ | async; let i = index">
-    <button
-      *ngIf="shouldHighlight(i, option)"
-      mat-flat-button
-      color="primary"
-      [disabled]="!option.isEnabled"
-      [class]="
-        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
-      "
-      matTooltip="{{ option | optionTooltip | async }}"
-      [matTooltipPosition]="tooltipPosition"
-      [attr.aria-label]="option.ariaLabel || option.name | translate"
-      (click)="click(option)"
+  } @for (option of optionsAlways$ | async; track option.name; let i = $index) { @if
+  (shouldHighlight(i, option)) {
+  <button
+    mat-flat-button
+    [color]="option.color"
+    [disabled]="!option.isEnabled"
+    [class]="
+      (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+    "
+    matTooltip="{{ option | optionTooltip | async }}"
+    [matTooltipPosition]="tooltipPosition"
+    [attr.aria-label]="option.ariaLabel || option.name | translate"
+    (click)="click(option)"
+  >
+    <i [esIcon]="option.icon"></i>
+    @if (option.showName && appearance === 'button' && showCaptions !== false) {
+    <span
+      class="action-always-caption"
+      [class.action-always-caption-custom]="showCaptions !== 'auto'"
     >
-      <i [esIcon]="option.icon"></i>
-      <span
-        class="action-always-caption"
-        [class.action-always-caption-custom]="showCaptions !== 'auto'"
-        *ngIf="option.showName && appearance === 'button' && showCaptions !== false"
-      >
-        {{ option.name | translate }}
-      </span>
-    </button>
-    <button
-      *ngIf="!shouldHighlight(i, option)"
-      mat-stroked-button
-      color="primary"
-      [disabled]="!option.isEnabled"
-      [class]="
-        (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
-      "
-      matTooltip="{{ option | optionTooltip | async }}"
-      [matTooltipPosition]="tooltipPosition"
-      [attr.aria-label]="option.ariaLabel || option.name | translate"
-      (click)="click(option)"
+      {{ option.name | translate }}
+    </span>
+    }
+  </button>
+  } @if (!shouldHighlight(i, option)) {
+  <button
+    mat-stroked-button
+    color="primary"
+    [disabled]="!option.isEnabled"
+    [class]="
+      (!option.isEnabled && !showDisabled ? 'display-none ' : '') + (option.name | propertySlug)
+    "
+    matTooltip="{{ option | optionTooltip | async }}"
+    [matTooltipPosition]="tooltipPosition"
+    [attr.aria-label]="option.ariaLabel || option.name | translate"
+    (click)="click(option)"
+  >
+    <i [esIcon]="option.icon"></i>
+    @if (option.showName && appearance === 'button' && showCaptions !== false) {
+    <span
+      class="action-always-caption"
+      [class.action-always-caption-custom]="showCaptions !== 'auto'"
     >
-      <i [esIcon]="option.icon"></i>
-      <span
-        class="action-always-caption"
-        [class.action-always-caption-custom]="showCaptions !== 'auto'"
-        *ngIf="option.showName && appearance === 'button' && showCaptions !== false"
-      >
-        {{ option.name | translate }}</span
-      >
-    </button>
-  </ng-container>
-  <ng-container *ngIf="canShowDropdown()">
-    <button
-      *ngIf="!UIService.isMobileWidth()"
-      mat-button
-      color="primary"
-      class="more"
-      [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
-      [matMenuTriggerFor]="dropdownRef.menu"
-      data-test="more-actions-button"
+      {{ option.name | translate }}</span
     >
-      <i esIcon="more_vert" [aria]="false"></i>
-    </button>
-    <button
-      *ngIf="UIService.isMobileWidth()"
-      mat-button
-      color="primary"
-      class="more"
-      [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
-      (click)="dropdownRef.triggerBottomSheet()"
-      data-test="more-actions-button"
-    >
-      <i esIcon="more_vert" [aria]="false"></i>
-    </button>
-  </ng-container>
+    }
+  </button>
+  } } @if (canShowDropdown()) { @if (!UIService.isMobileWidth()) {
+  <button
+    mat-button
+    color="primary"
+    class="more"
+    [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
+    [matMenuTriggerFor]="dropdownRef.menu"
+    data-test="more-actions-button"
+  >
+    <i esIcon="more_vert" [aria]="false"></i>
+  </button>
+  } @if (UIService.isMobileWidth()) {
+  <button
+    mat-button
+    color="primary"
+    class="more"
+    [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
+    (click)="dropdownRef.triggerBottomSheet()"
+    data-test="more-actions-button"
+  >
+    <i esIcon="more_vert" [aria]="false"></i>
+  </button>
+  } } @if (optionsToggleAfter.length) {
   <div
-    *ngIf="optionsToggleAfter.length"
     class="actionToggle after"
     [class.actionToggleDivider]="(optionsAlways$ | async).length || optionsToggleBefore.length"
   >
@@ -100,77 +97,78 @@
       *ngTemplateOutlet="toggle; context: { optionsToggle: optionsToggleAfter }"
     ></ng-container>
   </div>
+  }
 </div>
 <ng-template #toggle let-optionsToggle="optionsToggle">
-  <ng-container *ngFor="let option of optionsToggle">
-    <button
-      *ngIf="option.isToggleVisible && option.toggleType === 'default'"
-      mat-icon-button
-      matTooltip="{{
+  @for (option of optionsToggle; track option.name) { @if (option.isToggleVisible &&
+  option.toggleType === 'default') {
+  <button
+    mat-icon-button
+    matTooltip="{{
+      ($any(option).toggleNames
+        ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+        : option.name
+      ) | translate
+    }}"
+    [attr.aria-label]="option.ariaLabel || option.name | translate"
+    (click)="click(option)"
+    [class]="
+      'toggle-default' +
+      (($any(option).toggleNames
+        ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+        : option.name
+      ) | replaceChars : { search: '.', replace: '-' }) +
+      (option.isEnabled ? '' : ' disabled')
+    "
+    attr.data-test="toggle-{{ option.name }}"
+  >
+    <i
+      [esIcon]="
+        $any(option).toggleIcons
+          ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
+          : option.icon
+      "
+      [aria]="false"
+    ></i>
+  </button>
+  } @if (option.isToggleVisible && option.toggleType === 'primary') {
+  <button
+    mat-flat-button
+    color="primary"
+    matTooltip="{{
+      ($any(option).toggleNames
+        ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+        : option.name
+      ) | translate
+    }}"
+    [attr.aria-label]="option.ariaLabel || option.name | translate"
+    (click)="click(option)"
+    [class]="
+      'toggle-primary' +
+      (($any(option).toggleNames
+        ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
+        : option.name
+      ) | replaceChars : { search: '.', replace: '-' }) +
+      (option.isEnabled ? '' : ' disabled')
+    "
+    attr.data-test="toggle-{{ option.name }}"
+  >
+    <i
+      [esIcon]="
+        $any(option).toggleIcons
+          ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
+          : option.icon
+      "
+      [aria]="false"
+    ></i>
+    <span class="action-always-caption">
+      {{
         ($any(option).toggleNames
           ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
           : option.name
         ) | translate
-      }}"
-      [attr.aria-label]="option.ariaLabel || option.name | translate"
-      (click)="click(option)"
-      [class]="
-        'toggle-default' +
-        (($any(option).toggleNames
-          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
-          : option.name
-        ) | replaceChars : { search: '.', replace: '-' }) +
-        (option.isEnabled ? '' : ' disabled')
-      "
-      attr.data-test="toggle-{{ option.name }}"
-    >
-      <i
-        [esIcon]="
-          $any(option).toggleIcons
-            ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
-            : option.icon
-        "
-        [aria]="false"
-      ></i>
-    </button>
-    <button
-      *ngIf="option.isToggleVisible && option.toggleType === 'primary'"
-      mat-flat-button
-      color="primary"
-      matTooltip="{{
-        ($any(option).toggleNames
-          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
-          : option.name
-        ) | translate
-      }}"
-      [attr.aria-label]="option.ariaLabel || option.name | translate"
-      (click)="click(option)"
-      [class]="
-        'toggle-primary' +
-        (($any(option).toggleNames
-          ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
-          : option.name
-        ) | replaceChars : { search: '.', replace: '-' }) +
-        (option.isEnabled ? '' : ' disabled')
-      "
-      attr.data-test="toggle-{{ option.name }}"
-    >
-      <i
-        [esIcon]="
-          $any(option).toggleIcons
-            ? $any(option).toggleIcons[option.toggleState ? 'enabled' : 'disabled']
-            : option.icon
-        "
-        [aria]="false"
-      ></i>
-      <span class="action-always-caption">
-        {{
-          ($any(option).toggleNames
-            ? $any(option).toggleNames[option.toggleState ? 'enabled' : 'disabled']
-            : option.name
-          ) | translate
-        }}
-      </span>
-    </button>
-  </ng-container>
+      }}
+    </span>
+  </button>
+  } }
 </ng-template>

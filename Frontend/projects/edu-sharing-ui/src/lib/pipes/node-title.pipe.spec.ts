@@ -1,13 +1,24 @@
 import { TranslateService } from '@ngx-translate/core';
 import { NodeTitlePipe } from './node-title.pipe';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
+import { TestBed } from '@angular/core/testing';
 
 const translateServiceMock = {
     instant: (key: string, values?: any) => key,
 } as TranslateService;
 
 describe('NodeTitlePipe', () => {
-    let pipe = new NodeTitlePipe(translateServiceMock);
+    let pipe: NodeTitlePipe;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [
+                NodeTitlePipe,
+                { provide: TranslateService, useValue: translateServiceMock },
+            ],
+        });
+        pipe = TestBed.inject(NodeTitlePipe);
+    });
 
     it('should create the pipe', () => {
         expect(pipe).toBeTruthy();

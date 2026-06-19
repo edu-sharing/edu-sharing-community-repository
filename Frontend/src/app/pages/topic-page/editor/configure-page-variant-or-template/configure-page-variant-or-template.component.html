@@ -1,0 +1,86 @@
+@if (initialized()) {
+<div class="config-page-variant-or-template">
+  @if (!variableInputValid()) {
+  <es-info-message mode="error" class="info-message">
+    {{ i18nPrefix + (isDuplicate() ? 'DUPLICATE_WARN_TEXT' : 'WARN_TEXT') | translate }}
+  </es-info-message>
+  }
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>
+      {{ dynamicI18nPrefix() + 'TITLE' | translate }}
+    </mat-label>
+    <input
+      matInput
+      type="text"
+      [placeholder]="dynamicI18nPrefix() + 'TITLE_PLACEHOLDER' | translate"
+      [(ngModel)]="titleInput"
+    />
+  </mat-form-field>
+  <es-mds-editor-wrapper
+    class="page-variant-config-editor"
+    [currentValues]="currentValues"
+    [editorMode]="'search'"
+    [embedded]="true"
+    groupId="topic_page_variant_configuration"
+    mode="search"
+    [repository]="mdsParams.repository"
+    [setId]="mdsParams.setId"
+    (currentValuesChange)="onCurrentValuesChange($event)"
+  >
+  </es-mds-editor-wrapper>
+  <div class="configuration-buttons">
+    @if (deleteVariantEnabled()) {
+    <button
+      mat-stroked-button
+      class="btn-outline-primary"
+      color="primary"
+      (click)="deletePageVariant()"
+    >
+      <i esIcon="delete"></i>
+      {{ dynamicI18nPrefix() + 'DELETE_VARIANT' | translate }}
+    </button>
+    }
+    <div [matTooltip]="regenerateTooltip()">
+      <button
+        mat-stroked-button
+        [color]="templateUpdateAvailable() ? 'warn' : 'primary'"
+        [disabled]="!templateUpdateAvailable()"
+        (click)="triggerRegenerate()"
+      >
+        <i esIcon="sync"></i>
+        {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
+      </button>
+    </div>
+    @if (addToGlobalTemplatesEnabled()) {
+    <button
+      mat-stroked-button
+      class="btn-outline-primary"
+      color="primary"
+      (click)="addToGlobalTemplates()"
+    >
+      <i esIcon="public"></i>
+      {{ dynamicI18nPrefix() + 'ADD_TO_GLOBAL_TEMPLATES' | translate }}
+    </button>
+    }
+    <div
+      [matTooltip]="
+        !variableInputValid()
+          ? (i18nPrefix + (isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS')
+            | translate)
+          : null
+      "
+    >
+      <button
+        mat-flat-button
+        color="primary"
+        [disabled]="!variableInputValid()"
+        (click)="applyChanges()"
+      >
+        {{ 'APPLY' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+} @else {
+<es-spinner></es-spinner>
+}

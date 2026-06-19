@@ -1,0 +1,57 @@
+<div class="details">
+  <label for="summary">{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}</label>
+  <div id="summary" class="summary" [innerHTML]="assignment().summary"></div>
+  <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_STATE' | translate }}</label>
+  <div class="state">
+    <es-list-node-assignment
+      [node]="submission()"
+      [item]="submissionStatus"
+    ></es-list-node-assignment>
+    <es-list-node-assignment
+      [node]="submission()"
+      [item]="validationStatus"
+    ></es-list-node-assignment>
+  </div>
+  @if (submission().submissionDate) {
+  <label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.SUBMISSION_DATE' | translate }}</label>
+  <div class="date">
+    <es-list-node-assignment
+      [node]="submission()"
+      [item]="submissionDate"
+    ></es-list-node-assignment>
+  </div>
+  } @if (submittableFiles()?.length > 0) {
+  <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUBMITTABLE' | translate }}</label>
+  <ng-container *ngTemplateOutlet="list; context: { items: submittableFiles() }"></ng-container>
+  } @if (supplementaryFiles()?.length > 0) {
+  <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.SUPPLEMENTARY' | translate }}</label>
+  <ng-container *ngTemplateOutlet="list; context: { items: supplementaryFiles() }"></ng-container>
+  } @if (submission().validationStatus === 'FINISHED') {
+  <div class="block feedback" #feedback>
+    <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.TITLE' | translate }}</label>
+    <div>
+      @if (submission().feedback?.trim(); as feedback) {
+      <div>
+        <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.FEEDBACK' | translate }}</label>
+        <div [innerHTML]="feedback"></div>
+      </div>
+      } @if (correctedFiles()?.length > 0) {
+      <div>
+        <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.FEEDBACK.CORRECTED' | translate }}</label>
+        <ng-container *ngTemplateOutlet="list; context: { items: correctedFiles() }"></ng-container>
+      </div>
+      }
+    </div>
+  </div>
+  }
+</div>
+<ng-template #list let-items="items">
+  <div class="node-list">
+    @for (item of items; track item) {
+    <div tabindex="0" (click)="setFile(item)" [class.selected]="selectedRefId() === item.ref.id">
+      <es-node-type-badge [node]="item"></es-node-type-badge>
+      <div class="title">{{ item | nodeTitle }}</div>
+    </div>
+    }
+  </div>
+</ng-template>

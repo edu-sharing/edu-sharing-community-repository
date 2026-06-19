@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
     ColumnType,
@@ -11,6 +11,7 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodePersonNamePipe,
     OPEN_URL_MODE,
     OptionItem,
     Scope,
@@ -44,6 +45,20 @@ import { OptionsHelperService } from '../../services/options-helper.service';
     standalone: false,
 })
 export class SharingPageComponent {
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private connector = inject(RestConnectorService);
+    private nodeService = inject(RestNodeService);
+    private optionsHelper = inject(OptionsHelperService);
+    private sharingService = inject(RestSharingService);
+    private bridge = inject(BridgeService);
+    private nodeHelperService = inject(NodeHelperService);
+    private storage = inject(TemporaryStorageService);
+    private toast = inject(Toast);
+    private config = inject(ConfigService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private translations = inject(TranslationsService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -64,20 +79,7 @@ export class SharingPageComponent {
         useDefaultOptions: false,
         addOptions: [],
     };
-    constructor(
-        private router: Router,
-        private route: ActivatedRoute,
-        private connector: RestConnectorService,
-        private nodeService: RestNodeService,
-        private optionsHelper: OptionsHelperService,
-        private sharingService: RestSharingService,
-        private bridge: BridgeService,
-        private nodeHelperService: NodeHelperService,
-        private storage: TemporaryStorageService,
-        private toast: Toast,
-        private config: ConfigService,
-        private translations: TranslationsService,
-    ) {
+    constructor() {
         this.columns = {
             Default: [
                 new ListItem('NODE', RestConstants.CM_NAME),
@@ -155,6 +157,7 @@ export class SharingPageComponent {
     download(children: Node[] = null) {
         const node = this.params.nodeId;
         const token = this.params.token;
+        let ids;
         let url =
             this.connector.getAbsoluteEndpointUrl() +
             '../share?mode=download&token=' +
@@ -164,15 +167,27 @@ export class SharingPageComponent {
             '&nodeId=' +
             encodeURIComponent(node);
         if (!children?.length && this.sharingInfo.node.isDirectory) {
-            const ids = RestHelper.getNodeIds(this.nodesDataSource.getData()).join(',');
-            url += '&childIds=' + encodeURIComponent(ids);
+            ids = RestHelper.getNodeIds(this.nodesDataSource.getData());
         } else {
             if (children != null) {
-                const ids = RestHelper.getNodeIds(children).join(',');
-                url += '&childIds=' + encodeURIComponent(ids);
+                ids = RestHelper.getNodeIds(children);
             }
         }
-        window.open(url);
+        if (ids?.length) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'childIds';
+            input.value = ids.join(',');
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        } else {
+            window.open(url);
+        }
     }
     changeSort(sort: ListSortConfig) {
         this.sort = sort;
@@ -207,7 +222,7 @@ export class SharingPageComponent {
         return Helper.objectEquals(this.sharingInfo.invitedBy, this.sharingInfo.node.createdBy);
     }
     getPersonName(person: Person) {
-        return ConfigurationHelper.getPersonWithConfigDisplayName(person, this.config);
+        return ConfigurationHelper.getPersonWithConfigDisplayName(person, this.nodePersonNamePipe);
     }
 
     childCount() {

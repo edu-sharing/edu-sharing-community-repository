@@ -8,7 +8,7 @@ import {
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { _getFocusedElementPierceShadowDom } from '@angular/cdk/platform';
 import { CdkPortalOutlet, ComponentPortal } from '@angular/cdk/portal';
-import { DOCUMENT } from '@angular/common';
+
 import {
     Component,
     ComponentRef,
@@ -16,12 +16,12 @@ import {
     EventEmitter,
     HostBinding,
     HostListener,
-    Inject,
     NgZone,
     OnDestroy,
     OnInit,
-    Optional,
     ViewChild,
+    DOCUMENT,
+    inject,
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -119,6 +119,15 @@ type CardState = 'void' | 'enter' | 'exit';
     standalone: false,
 })
 export class CardDialogContainerComponent implements OnInit, OnDestroy {
+    private document = inject(DOCUMENT, { optional: true });
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private focusTrapFactory = inject(ConfigurableFocusTrapFactory);
+    private cardDialogService = inject(CardDialogService);
+    private _interactivityChecker = inject(InteractivityChecker);
+    private _ngZone = inject(NgZone);
+    private breakpointObserver = inject(BreakpointObserver);
+    private focusMonitor = inject(FocusMonitor);
+
     readonly id = idCounter++;
     @HostBinding('attr.aria-modal') readonly ariaModal = 'true';
     @HostBinding('attr.role') readonly role = 'dialog';
@@ -161,19 +170,6 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     /** Element that was focused before the dialog was opened. Save this to restore upon close. */
     private elementFocusedBeforeDialogWasOpened: HTMLElement | null = null;
     private readonly destroyed$ = new Subject<void>();
-
-    constructor(
-        // @Inject(CARD_DIALOG_STATE) private dialogState: CardDialogState,
-        // @Inject(CARD_DIALOG_OVERLAY_REF) private overlayRef: OverlayRef,
-        @Optional() @Inject(DOCUMENT) private document: any,
-        private elementRef: ElementRef<HTMLElement>,
-        private focusTrapFactory: ConfigurableFocusTrapFactory,
-        private cardDialogService: CardDialogService,
-        private _interactivityChecker: InteractivityChecker,
-        private _ngZone: NgZone,
-        private breakpointObserver: BreakpointObserver,
-        private focusMonitor?: FocusMonitor,
-    ) {}
 
     private initObservables() {
         this.config = this.dialogRef.config;

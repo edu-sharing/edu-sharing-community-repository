@@ -19,7 +19,6 @@
       "SAVE_CONFIG_MESSAGE": "Your changes will be saved.",
       "SAVE_CONFIG_ERROR_ACTION": "Reload page",
       "SAVE_CONFIG_ERROR_MESSAGE": "Your changes could not be saved.",
-      "NODE_NOT_PUBLIC": "The selected content is not public.",
       "AI_WIDGET": {
         "HEADING": "Request",
         "PROMPT_DESCRIPTION": "Formulate a request to the AI.",
@@ -44,8 +43,6 @@
         "NAVIGATE_TO_PAGE_TEMPLATE": "Navigate to page template"
       },
       "COLLECTION_CHIPS": {
-        "DEFAULT_ICON": "Default icon",
-        "UPLOADED_ICON": "Uploaded icon",
         "SHOW_MORE": "show more",
         "SHOW_LESS": "show less",
         "CONFIG_ARIA": "Choose the layout of the navigation pills",
@@ -58,7 +55,7 @@
         "SWITCH_INTO_VIEW_MODE": "Switch to view mode",
         "POPUP_BLOCKED": "Popup was blocked or could not be opened.",
         "FILTER_EVENT_RECEIVED": "Filter event received",
-        "NO_CONTENTS": "No contents yet",
+        "NO_CONTENTS": "No search results were found.",
         "CHANGE_ON_INSPECTION_TABLE": "Change object on inspection table",
         "REMOVE_FROM_WIDGET": "Hide object",
         "ADD_TO_WIDGET": "Show object"
@@ -73,8 +70,9 @@
         "LINK": "Link",
         "UNORDERED_LIST": "Unordered list",
         "ORDERED_LIST": "Ordered list",
+        "OUTPUT_TEXT": "Output entered text",
         "GENERATE_WITH_AI": "Generate with AI",
-        "MISSING_TEXT": "Please enter a text first.",
+        "MISSING_TEXT": "Please enter a text first before being able to execute it with AI.",
         "AI_TAGS_EXIST": "AI placeholders were found, the text will be generated automatically.",
         "TITLE": "Add collection title",
         "DESCRIPTION": "Add collection description",
@@ -95,7 +93,7 @@
         "HEIGHT": "Height",
         "TITLE": "Title (for accessibility)",
         "SHOW_BORDER": "Show border?",
-        "SHOW_CONFIRMATION": "Show confirmation?",
+        "SHOW_CONFIRMATION": "Show dialog for embedding external content?",
         "SHOW_PREVIEW": "Show preview",
         "UPDATE_PREVIEW": "Update preview",
         "PREVIEW_TITLE": "iframe preview",
@@ -109,13 +107,10 @@
         "MISSING_SRC": "No source was specified, therefore no iframe can be displayed."
       },
       "IMAGE_WRAPPER": {
-        "BACKDROP": "Blurred background of the image",
-        "ALT": "Image to motivate the topic",
         "GENERATE": "Generate image",
         "REGENERATE": "Regenerate image",
         "UPLOAD": "Upload image",
         "DELETE": "Delete image",
-        "NO_IMAGE_SELECTED": "No image has been selected yet.",
         "IMAGE_UPLOAD_CONFIRMATION_TEXT": "I agree that I hold all necessary rights to this image to include it on the topic page."
       },
       "MEDIA_RENDERING": {
@@ -131,6 +126,10 @@
       "PROFILING": {
         "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
         "CHANGES_RESET": "Your profiling has been reset."
+      },
+      "SEARCH_WIDGET": {
+        "SEARCH": "Search",
+        "SEARCH_PLACEHOLDER": "Search for contents on the topic page ..."
       },
       "SHARE_OPTIONS": {
         "COPY_LINK": "Copy link",
@@ -151,7 +150,8 @@
         "IMPORTANCE_LABEL": "Description of importance"
       },
       "TOPICS_COLUMN_BROWSER": {
-        "ERROR_RECEIVING_DATA": "Error receiving data"
+        "ERROR_RECEIVING_DATA": "Error receiving data",
+        "REFERENCES_LABEL": "References count"
       },
       "EMBEDDING": {
         "LABEL": "Embed",
@@ -205,7 +205,16 @@
         "TITLE_PLACEHOLDER": "Topic page variant for xyz",
         "EDUCATION_LEVEL_LABEL": "Educational level",
         "TARGET_GROUP_LABEL": "Target group",
+        "TEMPLATE_UPDATE": {
+          "TOOLTIP": "A new version of the template used is available.",
+          "TOOLTIP_AVAILABLE": "WARNING: new template from {{date}}",
+          "TOOLTIP_UP_TO_DATE": "Template up to date",
+          "HEADING": "Update page variant",
+          "MESSAGE": "Do you want to update the page variant based on the new template? Changes made to the page variant will be lost."
+        },
+        "REGENERATE_VARIANT": "Regenerate",
         "DELETE_VARIANT": "Delete variant",
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
         "DEFINE_PARAMETERS": "Define parameters",
         "DUPLICATE_PARAMETERS": "Duplicate in existing variant detected"
       },
@@ -213,7 +222,8 @@
         "HEADING": "Settings of the topic page template",
         "TITLE": "Template title",
         "TITLE_PLACEHOLDER": "Topic page template for xyz",
-        "DELETE_VARIANT": "Delete template"
+        "DELETE_VARIANT": "Delete template",
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates"
       }
     },
     "ADD_PAGE_TEMPLATE": {
@@ -240,6 +250,8 @@
       "RECOMMENDED": "Recommended"
     },
     "ANCHOR_FALLBACK_PREFIX": "Section",
+    "ANCHOR_ARIA_HEADING": "Navigate to section: ",
+    "ANCHOR_ARIA_SEARCH_COUNT": "Number of search results: ",
     "SWIMLANE": {
       "HEADING_LABEL": "Heading",
       "DEFAULT_HEADING": "An example heading",
@@ -330,12 +342,9 @@
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
     "NO_PAGE_CONFIG": {
-      "DEFAULT_MESSAGE": "No page configuration could be found for this page.",
+      "DEFAULT_MESSAGE": "No topic page has been created for this collection yet.",
       "VIEW_MESSAGE": "Please contact your system administrator.",
-      "EDIT_MESSAGE": "However, you can select a page configuration that you want to use via the menu.",
-      "SELECT_LABEL": "Page config",
-      "SELECT_PLACEHOLDER": "Select page config",
-      "CREATE_PAGE": "Create page",
+      "EDIT_MESSAGE": "Please use the following button or the \"New\" button to create a new topic page variant.",
       "MISSING_CONFIG_OR_VARIANTS": "The page configuration does not contain any page variants or no page variant could be selected.",
       "MISSING_VARIANTS": "The page configuration does not contain any page variants."
     },
@@ -351,9 +360,24 @@
     "SAVE_CONFIG_ERROR_ACTION": "Reload page",
     "SAVE_CONFIG_ERROR_MESSAGE": "An error occurred while loading a resource. Please reload the page.",
     "DEFAULT_PAGE_TEMPLATE_NAME": "Page template",
+    "CREATE_PAGE_TEMPLATE": {
+      "HEADING": "Create new topic page template",
+      "PENDING_MESSAGE": "A new page template is being created and loaded.",
+      "SUCCESS_MESSAGE": "The page template was created successfully"
+    },
     "DEFAULT_PAGE_VARIANT_NAME": "Page variant",
+    "NAVIGATE_TO_COLLECTION_PAGE": "Navigate to collection page",
+    "COPY_SUFFIX": "Copy",
+    "ADD_TO_GLOBAL": {
+      "PENDING_MESSAGE": "The page is being added to the global templates.",
+      "SUCCESS_MESSAGE": "The page was successfully added to the global templates"
+    },
     "CREATE_PAGE_VARIANT": {
       "HEADING": "Create new topic page variant",
+      "NEW_TOPIC_PAGE": {
+        "INFO_HEADING": "There is no topic page for this collection yet.",
+        "INFO_TEXT": "Select a template to use as the basis for a new topic page variant."
+      },
       "EXISTING_VARIANT": {
         "INFO_HEADING": "Attention: There are already variants of this topic page.",
         "INFO_LIST_TEXT": "Before creating a new one, please check:",
@@ -362,7 +386,7 @@
       },
       "EXISTING_TOPIC_PAGE": {
         "INFO_HEADING": "There is already a topic page for this collection.",
-        "INFO_TEXT": "You can create and customize a copy of it, replace its filters, choose a different topic page as a basis, or create a new variant from a template."
+        "INFO_TEXT": "You can customize it to create a copy, or create a new variant from a template."
       },
       "CREATE_COPY_OF_LABEL": "Create copy of:",
       "COPY_OPTIONS": {
@@ -370,12 +394,11 @@
         "TOPIC_PAGE": "Topic page",
         "TEMPLATE": "Template"
       },
-      "SEARCH_PLACEHOLDER": "Search topic page templates",
+      "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",
       "EMPTY": "No templates could be found.",
       "PENDING_MESSAGE": "A new page variant is being created and loaded.",
-      "SUCCESS_MESSAGE": "Topic page copy created successfully",
-      "COPY_SUFFIX": "Copy"
+      "SUCCESS_MESSAGE": "Topic page copy created successfully"
     },
     "DELETE_PAGE_VARIANT": {
       "HEADING": "Delete page variant",

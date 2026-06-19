@@ -1,19 +1,20 @@
-<es-spinner *ngIf="loading"></es-spinner>
-<div class="done-info" *ngIf="!loading">
-  <img
-    *ngIf="inputState === 'done'"
-    [src]="'assets/images/register/register-confirm.svg' | esAssetsPath"
-    alt=""
-  />
-  <img
-    *ngIf="inputState !== 'done'"
-    [src]="'assets/images/register/register-mail.svg' | esAssetsPath"
-    alt=""
-  />
+@if (loading) {
+<es-spinner></es-spinner>
+} @if (!loading) {
+<div class="done-info">
+  @if (inputState === 'done') {
+  <img [src]="'assets/images/register/register-confirm.svg' | esAssetsPath" alt="" />
+  } @if (inputState !== 'done') {
+  <img [src]="'assets/images/register/register-mail.svg' | esAssetsPath" alt="" />
+  }
   <h4>{{ 'REGISTER.DONE.TITLE' | translate }}</h4>
   <p class="mail-info">
     {{ 'REGISTER.DONE.MAIL_INFO' | translate }}
-    <span (click)="editMail()">{{ email }} <i *ngIf="!keyUrl" class="material-icons">edit</i></span>
+    <span (click)="editMail()"
+      >{{ email }} @if (!keyUrl) {
+      <i class="material-icons">edit</i>
+      }</span
+    >
     {{ 'REGISTER.DONE.MAIL_INFO2' | translate }}
   </p>
   <p>
@@ -22,7 +23,8 @@
         | translate
     }}
   </p>
-  <div *ngIf="!keyUrl" class="keyForm">
+  @if (!keyUrl) {
+  <div class="keyForm">
     <form (ngSubmit)="keyInput.trim() ? activate(keyInput) : null">
       <mat-form-field>
         <mat-label>{{ 'REGISTER.DONE.KEY_PL' | translate }}</mat-label>
@@ -37,15 +39,13 @@
       </mat-form-field>
     </form>
   </div>
-
+  }
   <strong>{{ 'REGISTER.DONE.NO_MAIL' | translate }}</strong>
   <small>{{ 'REGISTER.DONE.NO_MAIL_INFO' | translate }}</small>
-  <a
-    *ngIf="!keyUrl"
-    class="send-mail"
-    tabindex="0"
-    (click)="sendMail()"
-    (keyup.enter)="sendMail()"
-    >{{ 'REGISTER.DONE.SEND_MAIL' | translate }}</a
-  >
+  @if (!keyUrl) {
+  <a class="send-mail" tabindex="0" (click)="sendMail()" (keyup.enter)="sendMail()">{{
+    'REGISTER.DONE.SEND_MAIL' | translate
+  }}</a>
+  }
 </div>
+}

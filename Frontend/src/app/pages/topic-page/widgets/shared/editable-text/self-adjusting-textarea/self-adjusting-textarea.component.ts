@@ -18,10 +18,11 @@ import {
     SimpleChanges,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -31,6 +32,7 @@ import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
+import { TooltipAriaLabelDirective } from '../../../../shared/directives/tooltip-aria-label.directive';
 import { AiTagOption } from '../../../../shared/types/ai-tag-option';
 import { containsAiTags } from '../../../../shared/utils/ai-util';
 
@@ -41,11 +43,12 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
-        MatCheckbox,
+        MatButtonToggleModule,
         MatFormFieldModule,
         MatInputModule,
         MatTooltip,
         ReactiveFormsModule,
+        TooltipAriaLabelDirective,
         TranslateModule,
     ],
     templateUrl: './self-adjusting-textarea.component.html',
@@ -53,6 +56,8 @@ import { containsAiTags } from '../../../../shared/utils/ai-util';
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
+    private ngZone = inject(NgZone);
+
     aiGenerated: InputSignal<boolean> = input(false);
     @Input() alignCenter: boolean = false;
     @Input() disabled: boolean = false;
@@ -87,7 +92,7 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
         return null;
     });
 
-    constructor(private ngZone: NgZone) {
+    constructor() {
         effect((): void => {
             this.generateWithAi.set(this.aiGenerated());
         });
@@ -117,13 +122,13 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.TARGET_GROUP',
                 'group',
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.TARGET_GROUP',
-                '{{var(virtual:profiling_widget_intention)|-}}',
+                '{{var(ccm:page_variant_profiling_target_group)|-}}',
             ),
             new AiTagOption(
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.EDUCATIONAL_LEVEL',
                 'school',
                 'TOPIC_PAGE.WIDGET.EDITABLE_TEXT.EDUCATIONAL_LEVEL',
-                '{{var(virtual:profiling_widget_education_level)|-}}',
+                '{{var(ccm:educationalcontext)|-}}',
             ),
         );
     }
@@ -208,7 +213,19 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
      *
      * @param checked
      */
-    onGenerateWithAiChange = (checked: boolean): void => {
+    private onGenerateWithAiChange = (checked: boolean): void => {
         this.generateWithAiChanged.emit(checked);
     };
+
+    /**
+     * Applies the chosen AI mode ('text' or 'ai') from the toggle group and emits the change.
+     */
+    onAiModeChange(mode: 'text' | 'ai'): void {
+        const next: boolean = mode === 'ai';
+        if (this.generateWithAi() === next) {
+            return;
+        }
+        this.generateWithAi.set(next);
+        this.onGenerateWithAiChange(next);
+    }
 }

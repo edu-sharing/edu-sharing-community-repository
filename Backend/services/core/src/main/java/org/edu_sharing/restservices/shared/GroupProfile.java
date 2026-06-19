@@ -1,6 +1,8 @@
 package org.edu_sharing.restservices.shared;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import org.edu_sharing.repository.client.rpc.Group;
 
@@ -9,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class GroupProfile implements Serializable {
 
   private String displayName = null;

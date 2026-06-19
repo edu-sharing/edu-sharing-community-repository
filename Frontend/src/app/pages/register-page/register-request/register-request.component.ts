@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output, inject } from '@angular/core';
 import { Toast } from '../../../services/toast';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
@@ -12,6 +12,9 @@ import { RegisterService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class RegisterRequestComponent implements OnDestroy {
+    private toast = inject(Toast);
+    private register = inject(RegisterService);
+
     @Output() done = new EventEmitter<void>();
     @Output() stateChanged = new EventEmitter<void>();
     private destroyed$: ReplaySubject<void> = new ReplaySubject(1);
@@ -19,7 +22,7 @@ export class RegisterRequestComponent implements OnDestroy {
         Validators.required,
         // Validators.email, // also local accounts are allowed for restore
     ]);
-    constructor(private toast: Toast, private register: RegisterService) {
+    constructor() {
         this.emailFormControl.statusChanges
             .pipe(takeUntil(this.destroyed$))
             .subscribe(() => this.stateChanged.emit());

@@ -1,6 +1,6 @@
 import { firstValueFrom, forkJoin as observableForkJoin, of, Subject, timer } from 'rxjs';
 
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -54,30 +54,33 @@ import { TranslateService } from '@ngx-translate/core';
     standalone: false,
 })
 export class ProfilePageComponent implements OnInit, OnDestroy {
+    private toast = inject(Toast);
+    private route = inject(ActivatedRoute);
+    private dialogs = inject(DialogsService);
+    private mainNav = inject(MainNavService);
+    private ui = inject(UIService);
+    private connector = inject(RestConnectorService);
+    private translations = inject(TranslationsService);
+    private translate = inject(TranslateService);
+    private router = inject(Router);
+    private config = inject(ConfigurationService);
+    private configService = inject(ConfigService);
+    private sanitizer = inject(DomSanitizer);
+    private optionsHelperDataService = inject(OptionsHelperDataService);
+    private loadingScreen = inject(LoadingScreenService);
+    private iamService = inject(IamV1Service);
+    private userService = inject(UserService);
+    private nodePersonNamePipe = inject(NodePersonNamePipe);
+
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
     // dummy parameter to refetch the avatar
     avatarCache = '';
     gdprExport: NodeEntry;
     params: any;
-    constructor(
-        private toast: Toast,
-        private route: ActivatedRoute,
-        private dialogs: DialogsService,
-        private mainNav: MainNavService,
-        private ui: UIService,
-        private connector: RestConnectorService,
-        private translations: TranslationsService,
-        private translate: TranslateService,
-        private router: Router,
-        private config: ConfigurationService,
-        private configService: ConfigService,
-        private sanitizer: DomSanitizer,
-        private optionsHelperDataService: OptionsHelperDataService,
-        private loadingScreen: LoadingScreenService,
-        private iamService: IamV1Service,
-        private userService: UserService,
-    ) {
+    constructor() {
+        const route = this.route;
+
         this.translations.waitForInit().subscribe(() => {
             route.params.subscribe((params) => {
                 this.params = params;
@@ -414,7 +417,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
         void this.dialogs.openGenericDialog({
             title: 'PROFILES.GDPR.TITLE',
-            subtitle: new NodePersonNamePipe(this.configService).transform(this.user),
+            subtitle: this.nodePersonNamePipe.transform(this.user),
             message,
             avatar: {
                 kind: 'icon',

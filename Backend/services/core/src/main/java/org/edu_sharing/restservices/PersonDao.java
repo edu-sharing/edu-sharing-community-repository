@@ -58,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -137,8 +138,7 @@ public class PersonDao {
 
                 repoDao.getBaseClient().getUserInfo(userName);
 
-                throw new DAOValidationException(
-                        new IllegalArgumentException("Username already exists."));
+				throw new DAODuplicateNodeNameException(new DuplicateKeyException("Username already exists."), userName);
 
             } catch (NoSuchPersonException e) {
 
@@ -244,7 +244,7 @@ public class PersonDao {
     }
 
     public void changeProfile(UserProfileEdit profile) throws DAOException {
-		throwIfNotAllowedToModify();
+        throwIfNotAllowedToModify();
         try {
 
             Map<String, Serializable> newUserInfo = profileToMap(profile);
@@ -298,22 +298,22 @@ public class PersonDao {
         return response;
     }
 
-	public void throwIfNotAllowedToModify() {
-		if(authorityService.isGlobalAdmin()) {
-			return;
-		}
-		String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
-		if (!currentUser.equals(getUserName())) {
-			throw new DAOSecurityException(
-					new SecurityException("user can not be modified without admin."));
-		}
-		if (authorityService.isGuest()) {
-			throw new DAOSecurityException(
-					new SecurityException("not allowed for guest"));
-		}
-	}
+    public void throwIfNotAllowedToModify() {
+        if(authorityService.isGlobalAdmin()) {
+            return;
+        }
+        String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
+        if (!currentUser.equals(getUserName())) {
+            throw new DAOSecurityException(
+                    new SecurityException("user can not be modified without admin."));
+        }
+        if (authorityService.isGuest()) {
+            throw new DAOSecurityException(
+                    new SecurityException("not allowed for guest"));
+        }
+    }
     public void changePassword(String oldPassword, String newPassword) throws DAOException {
-		throwIfNotAllowedToModify();
+        throwIfNotAllowedToModify();
         try {
             if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
                 throw new AccessDeniedException("It's not allowed to change password of external managed users. Please contact your system administrator.");
@@ -345,7 +345,7 @@ public class PersonDao {
 
     public void delete(boolean force) throws DAOException {
         try {
-			throwIfNotAllowedToModify();
+            throwIfNotAllowedToModify();
             String currentUser = AuthenticationUtil.getFullyAuthenticatedUser();
             if (currentUser.equals(getUserName())) {
                 throw new DAOValidationException(
@@ -409,7 +409,7 @@ public class PersonDao {
     private List<EduGroup> getParentOrganizations() {
         // may causes performance penalties!
         return AuthenticationUtil.runAsSystem(() ->
-                authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope())
+                authorityService.getEduGroups(this.getUserName(), NodeServiceInterceptor.getEduSharingScope(), true)
         );
     }
 
@@ -551,7 +551,7 @@ public class PersonDao {
     }
 
     public void removeAvatar() throws DAOException {
-		throwIfNotAllowedToModify();
+        throwIfNotAllowedToModify();
         try {
             org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
             if (currentAvatar != null) {
@@ -563,7 +563,7 @@ public class PersonDao {
     }
 
     public void changeAvatar(InputStream is) throws DAOException {
-		throwIfNotAllowedToModify();
+        throwIfNotAllowedToModify();
         try {
             org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
             ImageTool.VerifyResult result = ImageTool.verifyAndPreprocessImage(is, ImageTool.MAX_THUMB_SIZE);
@@ -636,28 +636,29 @@ public class PersonDao {
     }
 
     public String[] getType() {
-        return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
-            @Override
-            public String[] doWork() throws Exception {
-                PersonCache.get(getAuthorityName(), PersonCache.TYPE);
-                if (PersonCache.contains(getAuthorityName(), PersonCache.TYPE)) {
-                    return (String[]) PersonCache.get(getAuthorityName(), PersonCache.TYPE);
-                }
-                Set<String> types = new HashSet<>();
-                Set<String> groups = authorityService.getMemberships(getAuthorityName());
-                for (String group : groups) {
-                    try {
-                        String type = GroupDao.getGroup(repoDao, group).getGroupType();
-                        if (type != null)
-                            types.add(type);
-
-                    } catch (Throwable ignored) {
-                    }
-                }
-                String[] typesArray = types.toArray(new String[0]);
-                PersonCache.put(getAuthorityName(), PersonCache.TYPE, typesArray);
-                return typesArray;
+        return AuthenticationUtil.runAsSystem(() -> {
+            PersonCache.get(getAuthorityName(), PersonCache.TYPE);
+            if (PersonCache.contains(getAuthorityName(), PersonCache.TYPE)) {
+                return (String[]) PersonCache.get(getAuthorityName(), PersonCache.TYPE);
             }
+            Set<String> types = new HashSet<>();
+            Set<String> groups = authorityService.getMemberships(getAuthorityName());
+            for (String group : groups) {
+                try {
+                    org.alfresco.service.cmr.repository.NodeRef groupRef = authorityService.getAuthorityNodeRef(group);
+                    if(groupRef != null) {
+                        String type = (String) NodeServiceHelper.getPropertyNative(groupRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+                        if (type != null) {
+                            types.add(type);
+                        }
+                    }
+
+                } catch (Throwable ignored) {
+                }
+            }
+            String[] typesArray = types.toArray(new String[0]);
+            PersonCache.put(getAuthorityName(), PersonCache.TYPE, typesArray);
+            return typesArray;
         });
     }
 
@@ -844,14 +845,18 @@ public class PersonDao {
     }
 
     public void setStatus(PersonLifecycleService.PersonStatus status, boolean notifyMail) throws DAOValidationException {
+		if (!AuthorityServiceFactory.getInstance().getLocalService().isGlobalAdmin()) {
+			throw new NotAnAdminException();
+		}
         if (getAuthorityName().equals(ApplicationInfoList.getHomeRepository().getUsername())) {
             throw new DAOValidationException(
                     new Exception("Method not allowed for the primary admin")
             );
         }
         String oldStatus = (String) userInfo.get(CCConstants.CM_PROP_PERSON_ESPERSONSTATUS);
-        NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
-        NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
+		if(!Objects.equals(status.name(), oldStatus)) {
+            NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUS, status.name(), false);
+            NodeServiceFactory.getInstance().getLocalService().setProperty(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), getNodeId(), CCConstants.CM_PROP_PERSON_ESPERSONSTATUSDATE, new Date(), false);
         if (notifyMail) {
             NotificationServiceFactory.getInstance().getLocalService()
                     .notifyPersonStatusChanged(
@@ -862,6 +867,7 @@ public class PersonDao {
                             status.name());
         }
     }
+	}
 
     public String generate2FaCode() {
         if (Objects.equals(userInfo.get(CCConstants.PROP_USER_ESSSOTYPE), "shibboleth")) {
@@ -899,14 +905,14 @@ public class PersonDao {
         return authorityService.generate2FaQRCode(getUserName());
     }
 
-	public void requestDataProtectionExport(){
-            ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-		dataProtectionService.requestDataProtectionExport(getUserName());
+    public void requestDataProtectionExport(){
+        ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+        dataProtectionService.requestDataProtectionExport(getUserName());
     }
 
-	public String getDataProtectionNode(){
-            ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
-		return dataProtectionService.getDataProtectionNode(getUserName());
+    public String getDataProtectionNode(){
+        ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+        return dataProtectionService.getDataProtectionNode(getUserName());
     }
 
     public DashboardShortcutEntry[] getDashboardShortcuts() throws Exception {

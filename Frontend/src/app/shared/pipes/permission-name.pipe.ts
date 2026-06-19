@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthorityProfile,
@@ -13,7 +13,8 @@ import {
     standalone: false,
 })
 export class PermissionNamePipe implements PipeTransform {
-    constructor(private translate: TranslateService, private config: ConfigurationService) {}
+    private translate = inject(TranslateService);
+    private config = inject(ConfigurationService);
 
     transform(
         permission: Organization | AuthorityProfile | Group | User | any,

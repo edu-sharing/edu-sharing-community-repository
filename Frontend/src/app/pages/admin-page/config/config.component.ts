@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import { forkJoin } from 'rxjs';
 import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
@@ -13,13 +13,18 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
     standalone: false,
 })
 export class AdminConfigComponent {
+    private adminService = inject(RestAdminService);
+    private configService = inject(ConfigService);
+    private dialogs = inject(DialogsService);
+    private toast = inject(Toast);
+
     public static CONFIG_FILE_REFERENCE = 'edu-sharing.reference.conf';
     public static EXTENSION_CONFIG_FILE = 'edu-sharing.application.conf';
     public static OVERRIDE_CONFIG_FILE = 'edu-sharing.override.conf';
     public static CONFIG_DEPLOYMENT_FILE = 'edu-sharing.deployment.conf';
     public static CLIENT_CONFIG_FILE = 'client.config.xml';
 
-    @HostListener('keydown.control.s', ['$event']) onCtrlS(event: KeyboardEvent) {
+    @HostListener('keydown.control.s', ['$event']) onCtrlS(event: Event) {
         event.preventDefault();
         this.save();
     }
@@ -55,12 +60,7 @@ export class AdminConfigComponent {
     showRO = false;
     editSupported = false;
 
-    constructor(
-        private adminService: RestAdminService,
-        private configService: ConfigService,
-        private dialogs: DialogsService,
-        private toast: Toast,
-    ) {
+    constructor() {
         this.adminService
             .getConfigFile(AdminConfigComponent.CLIENT_CONFIG_FILE, 'DEFAULTS')
             .subscribe((data) => (this.configs.clientConfig = data));

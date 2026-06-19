@@ -6,6 +6,7 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    inject,
 } from '@angular/core';
 
 @Directive({
@@ -13,13 +14,13 @@ import {
     standalone: false,
 })
 export class OnAttributeChangeDirective implements OnInit, OnDestroy {
+    private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
     @Input('esOnAttributeChange') attribute: string;
 
     @Output() attributeChange = new EventEmitter<string>();
 
     private changes: MutationObserver;
-
-    constructor(private readonly elementRef: ElementRef<HTMLElement>) {}
 
     ngOnInit(): void {
         this.changes = new MutationObserver((mutations: MutationRecord[]) => {

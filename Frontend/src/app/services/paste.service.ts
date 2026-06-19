@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { filter, switchMap, map } from 'rxjs/operators';
 import { runInZone } from '../util/rxjs-operators/run-in-zone';
@@ -21,10 +21,14 @@ const AUX_CLICK_PASTE_MIN_DIFF_MS = 100;
     providedIn: 'root',
 })
 export class PasteService {
+    private ngZone = inject(NgZone);
+
     private lastAuxClickTime = 0;
     private pasteSubjectOutsideZone = new Subject<ClipboardEvent>();
 
-    constructor(private ngZone: NgZone) {
+    constructor() {
+        const ngZone = this.ngZone;
+
         ngZone.runOutsideAngular(() => {
             document.addEventListener('auxclick', () => this.onAuxClick());
             document.addEventListener('paste', (event) => this.onPaste(event));

@@ -9,16 +9,15 @@ import { CommonModule } from '@angular/common';
 @Component({
     selector: 'es-icon-component',
     template: `
-        <ng-container *ngIf="type === 'material'">
-            <div *ngFor="let icon of matIcons">
-                <i [esIcon]="icon"></i> <span>{{ icon }}</span>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="type === 'edu'">
-            <div *ngFor="let icon of eduIcons">
-                <i [esIcon]="'edu-' + icon"></i> <span>edu-{{ icon }}</span>
-            </div>
-        </ng-container>
+        @if (type === 'material') { @for (icon of matIcons; track $index) {
+        <div>
+            <i [esIcon]="icon"></i> <span>{{ icon }}</span>
+        </div>
+        } } @if (type === 'edu') { @for (icon of eduIcons; track $index) {
+        <div>
+            <i [esIcon]="'edu-' + icon"></i> <span>edu-{{ icon }}</span>
+        </div>
+        } }
     `,
     styles: `
         :host {

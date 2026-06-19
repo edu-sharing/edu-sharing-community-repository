@@ -10,12 +10,16 @@ import {
     SimpleChanges,
     TemplateRef,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PlatformLocation } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AuthenticationService,
+    CollectionReference,
     ConfigService,
+    ConfigValues,
     MdsService,
     Node,
     NodeService,
@@ -52,12 +56,7 @@ import {
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
-import {
-    CollectionReference,
-    ConfigurationHelper,
-    LoginResult,
-    Permission,
-} from '../../../core-module/core.module';
+import { ConfigurationHelper, LoginResult, Permission } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { RequestObject } from '../../../core-module/rest/request-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
@@ -80,6 +79,11 @@ import { CollectionInfoBarComponent } from '../collection-info-bar/collection-in
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { GlobalCollectionsPageService } from '../global-collections-page.service';
+import {
+    NodesSelectorConfig,
+    TabType,
+} from '../../editorial-page/nodes-selector/nodes-selector.component';
 
 @Component({
     selector: 'es-collection-content',
@@ -88,6 +92,31 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     standalone: false,
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
+    private authenticationService = inject(AuthenticationService);
+    private localEventsService = inject(LocalEventsService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private bridge = inject(BridgeService);
+    private collectionService = inject(RestCollectionService);
+    configurationService = inject(ConfigService);
+    private sessionStorageService = inject(SessionStorageService);
+    private dialogs = inject(DialogsService);
+    private infobar = inject(InfobarService);
+    private loadingScreen = inject(LoadingScreenService);
+    private mainNavService = inject(MainNavService);
+    private mdsService = inject(MdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(RestNodeService);
+    private nodeServiceApi = inject(NodeService);
+    private optionsService = inject(OptionsHelperDataService);
+    private platformLocation = inject(PlatformLocation);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translation = inject(TranslateService);
+    private uiService = inject(UIService);
+    private globalCollectionsPageService = inject(GlobalCollectionsPageService);
+
     private static DEFAULT_REQUEST = {
         sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -170,10 +199,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
     });
     addMaterialBinaryOptionItem = new OptionItem('OPTIONS.ADD_OBJECT', 'cloud_upload', () => {
-        // void this.mainNavService.getMainNav().topBar.createMenu.openUploadSelect();
-        /*void this.editorialSidebarService.showOption({
+        this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
-        })*/
+            trap: false,
+            optionConfig: {
+                state: TabType.UPLOAD,
+                upload: 'default',
+                allowCreate: true,
+                autoClose: true,
+            } as NodesSelectorConfig,
+        });
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
@@ -184,31 +219,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private contentNode: Node;
     permissions: Permission[];
     login: LoginResult;
+    config: ConfigValues;
 
-    constructor(
-        private authenticationService: AuthenticationService,
-        private localEventsService: LocalEventsService,
-        private editorialSidebarService: EditorialSidebarService,
-        private bridge: BridgeService,
-        private collectionService: RestCollectionService,
-        private configurationService: ConfigService,
-        private sessionStorageService: SessionStorageService,
-        private dialogs: DialogsService,
-        private infobar: InfobarService,
-        private loadingScreen: LoadingScreenService,
-        private mainNavService: MainNavService,
-        private mdsService: MdsService,
-        private mdsHelperService: MdsHelperService,
-        private nodeHelper: NodeHelperService,
-        private nodeService: RestNodeService,
-        private nodeServiceApi: NodeService,
-        private optionsService: OptionsHelperDataService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private toast: Toast,
-        private translation: TranslateService,
-        private uiService: UIService,
-    ) {
+    constructor() {
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -262,6 +275,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
         // check: this sometimes caused missing actionbar data, why is it here?
         //this.optionsService.clearComponents(this.actionbarReferences);
+        this.configurationService
+            .observeConfig()
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((config) => (this.config = config));
         this.registerMainNav();
         this.mainNavUpdateTrigger.next();
     }
@@ -273,6 +290,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
             this.createSubCollectionOptionItem.name =
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
+            void this.listCollections?.initOptionsGenerator({});
             if (this.isRootLevel) {
                 // display root collections with tabs
 
@@ -335,6 +353,20 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             return !this.login?.isGuest; //this.tabSelected === RestConstants.COLLECTIONSCOPE_MY
         }
         return RestHelper.hasAccessPermission(this.collection, RestConstants.PERMISSION_WRITE);
+    }
+
+    isAllowedToAddContent(): boolean {
+        if (!this.isAllowedToEditCollection()) return false;
+        // In public collections, adding content requires INVITE_ALLAUTHORITIES tool permission.
+        // Sub-collection creation is handled separately via createAllowed() and is not affected.
+        if (this.collection.isPublic) {
+            return (
+                this.login?.toolPermissions?.includes(
+                    RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
+                ) ?? false
+            );
+        }
+        return true;
     }
     onCreateCollection() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
@@ -475,6 +507,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                             )
                             .subscribe(
                                 () => {
+                                    void this.globalCollectionsPageService.removeTemporaryCollections(
+                                        source.element,
+                                    );
                                     this.toast.closeProgressSpinner();
                                     this.refreshContent();
                                 },
@@ -551,6 +586,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.contentNode = event.element;
         if (event.element.type === RestConstants.CCM_TYPE_COLLECTION_PROPOSAL) {
             this.clickElementEvent(event);
+        } else if ((event.element as CollectionReference).accessEffective === null) {
+            // no metadata available
+            return;
         } else if ((event.element as CollectionReference).originalId == null) {
             const dialogRef = await this.dialogs.openGenericDialog({
                 title: 'COLLECTIONS.ORIGINAL_MISSING',
@@ -581,6 +619,19 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
+            if (event.ctrlKey) {
+                window.open(
+                    this.platformLocation.getBaseHrefFromDOM() +
+                        this.router.serializeUrl(
+                            this.router.createUrlTree([
+                                UIConstants.ROUTER_PREFIX + 'render',
+                                event.element.ref.id,
+                            ]),
+                        ),
+                    '_blank',
+                );
+                return;
+            }
             this.editorialSidebarService.handleSelect(
                 this.listReferences,
                 event,
@@ -639,7 +690,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.mainNavService.patchMainNavConfig({
                 create: {
                     allowed: this.createAllowed(),
-                    allowBinary: !this.isRootLevel && (await this.isAllowedToEditCollection()),
+                    allowBinary: !this.isRootLevel && (await this.isAllowedToAddContent()),
                     parent: this.collection ?? null,
                 },
             });
@@ -990,8 +1041,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
     }
 
+    openItem(event: NodeClickEvent<CollectionReference>) {
+        void this.nodeHelper.navigateToNode(event);
+    }
+
     canDelete(node: EduData.CollectionReference) {
-        return RestHelper.hasAccessPermission(node, 'Delete');
+        return RestHelper.hasAccessPermission(this.collection, 'Delete');
     }
 
     isDeleted(node: CollectionReference) {

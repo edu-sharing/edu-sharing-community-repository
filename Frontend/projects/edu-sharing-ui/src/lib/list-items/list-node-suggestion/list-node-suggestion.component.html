@@ -1,0 +1,5 @@
+@if (item.type === 'SUGGESTION') { @switch (item.name) { @case ('count') {
+<span>
+  {{ pendingCount$ | async }}
+</span>
+} } }

@@ -42,7 +42,10 @@ import { MdsEditorWidgetTextComponent } from './mds-editor/widgets/mds-editor-wi
 import { HighlightPipe } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/highlight.pipe';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { MdsEditorWidgetTreeValueSelectionComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree-value-section/mds-editor-widget-tree-value-selection.component';
-import { MdsEditorWidgetTreeComponent } from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
+import {
+    EsProposalChipDirective,
+    MdsEditorWidgetTreeComponent,
+} from './mds-editor/widgets/mds-editor-widget-tree/mds-editor-widget-tree.component';
 import { MdsEditorWidgetVCardComponent } from './mds-editor/widgets/mds-editor-widget-vcard/mds-editor-widget-vcard.component';
 import { MdsEditorWidgetVersionComponent } from './mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetTinyMCEComponent } from './mds-editor/widgets/mds-editor-widget-wysiwyg-html/mds-editor-widget-tinymce.component';
@@ -55,6 +58,7 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
 import { MdsNodeRelationsWidgetComponent } from './mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
 import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-editor-widget-nodefilter/mds-editor-widget-nodefilter.component';
+import { MdsEditorWidgetMultivalueButtonsComponent } from './mds-editor/widgets/mds-editor-widget-multivalue-buttons/mds-editor-widget-multivalue-buttons.component';
 
 @NgModule({
     declarations: [
@@ -76,6 +80,7 @@ import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-edi
         MdsEditorWidgetCheckboxComponent,
         MdsEditorWidgetCheckboxesComponent,
         MdsEditorWidgetChildobjectsComponent,
+        MdsEditorWidgetMultivalueButtonsComponent,
         MdsEditorWidgetChipsComponent,
         MdsEditorWidgetChipsRangedValueComponent,
         MdsEditorWidgetContainerComponent,
@@ -96,6 +101,7 @@ import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-edi
         MdsEditorWidgetTinyMCEComponent,
         MdsEditorWidgetTreeComponent,
         MdsEditorWidgetTreeCoreComponent,
+        EsProposalChipDirective,
         MdsEditorWidgetVCardComponent,
         MdsEditorWidgetVersionComponent,
         MdsEditorWrapperComponent,

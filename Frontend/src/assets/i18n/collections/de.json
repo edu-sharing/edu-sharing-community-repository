@@ -95,6 +95,7 @@
       "ERROR_IMAGE_APPLY": "Das ausgewählte Bild konnte leider nicht gelesen werden. Bitte versuchen Sie es mit einem anderen Element.",
       "CREATED": "Sammlung wurde erstellt",
       "COPIED": "Sammlung wurde kopiert",
+      "COPIED_NO_PUBLISH_PERMISSION": "Sammlung kopiert ({{count}} übersprungen (fehlende Berechtigung)",
       "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden.",
       "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
       "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"
@@ -120,7 +121,6 @@
     }
   },
   "collections_description": "Beschreibung:",
-
   "collections_content": "Materialien",
   "collections_noContentAvailable": "Keine Materialien vorhanden",
   "collections_howToAddContent": "Sie können in der Suchumgebung nach geeigneten Materialien für Ihre Sammlung suchen. Klicken Sie einfach auf ein geeignetes Material und wählen Sie dann die Option 'zu Sammlung hinzufügen' aus.",
@@ -130,5 +130,7 @@
   "collectionNew_createCollection": "erstellen",
   "collectionNew_storeChanges": "speichern",
   "collectionNew_placeholderTitle": "Titel Ihrer Sammlung",
-  "collectionNew_placeholderDescription": "Worum geht es in Ihrer Sammlung?"
+  "collectionNew_placeholderDescription": "Worum geht es in Ihrer Sammlung?",
+  "collections_noCollections": "Es sind keine öffentlichen Sammlungen verfügbar.",
+  "collections_noOrgaCollections": "Sie wurden bisher zu keiner Sammlung eingeladen."
 }

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
     Component,
     computed,
@@ -10,6 +9,7 @@ import {
     Signal,
     signal,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconButton } from '@angular/material/button';
@@ -29,7 +29,6 @@ import { SwimlaneBackgroundShapeComponent } from '../swimlane-background-shape/s
 @Component({
     selector: 'es-swimlane-configuration-buttons',
     imports: [
-        CommonModule,
         EduSharingUiCommonModule,
         ColorPickerComponent,
         FormsModule,
@@ -42,6 +41,8 @@ import { SwimlaneBackgroundShapeComponent } from '../swimlane-background-shape/s
     styleUrls: ['./swimlane-configuration-buttons.component.scss'],
 })
 export class SwimlaneConfigurationButtonsComponent {
+    private topicPageHelperService = inject(TopicPageHelperService);
+
     @Input() pageVariantNode: Node;
     @Input() swimlaneColor: string = DEFAULT_BG_COLOR;
     @Input() swimlaneIndex: number = -1;
@@ -54,8 +55,6 @@ export class SwimlaneConfigurationButtonsComponent {
     inputsDisabled: Signal<boolean> = computed(() => {
         return this.updateInProgress() || this.colorChangeInProgress();
     });
-
-    constructor(private topicPageHelperService: TopicPageHelperService) {}
 
     /**
      * The color was changed using the color picker.

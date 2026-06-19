@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import { Repository } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from '../../services/node-helper.service';
 
@@ -7,7 +7,7 @@ import { NodeHelperService } from '../../services/node-helper.service';
     standalone: false,
 })
 export class RepositoryIconPipe implements PipeTransform {
-    constructor(private nodeHelper: NodeHelperService) {}
+    private nodeHelper = inject(NodeHelperService);
 
     transform(value: Repository): string {
         return this.nodeHelper.getSourceIconRepoPath(value);

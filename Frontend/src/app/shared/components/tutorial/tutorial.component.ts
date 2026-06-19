@@ -6,6 +6,7 @@ import {
     Input,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 import { ConfigService, ConfigTutorial } from 'ngx-edu-sharing-api';
@@ -26,6 +27,10 @@ interface Dimensions {
     standalone: false,
 })
 export class TutorialComponent {
+    private sanitizer = inject(DomSanitizer);
+    private appContainer = inject(AppContainerService);
+    private configService = inject(ConfigService);
+
     private static activeTutorial: ElementRef = null;
     private static PADDING_TOLERANCE = 50;
 
@@ -51,12 +56,6 @@ export class TutorialComponent {
     } = {};
 
     private interval: any;
-
-    constructor(
-        private sanitizer: DomSanitizer,
-        private appContainer: AppContainerService,
-        private configService: ConfigService,
-    ) {}
 
     @HostListener('document:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent) {

@@ -1,26 +1,32 @@
 import {
     AfterViewInit,
     Component,
+    effect,
+    ElementRef,
+    inject,
     Input,
+    input,
     OnChanges,
     OnDestroy,
     signal,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { AboutService, Node } from 'ngx-edu-sharing-api';
+import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
     NodeHelperService,
+    OptionItemToggle,
     OptionsHelperDataService,
     RenderHelperService,
 } from 'ngx-edu-sharing-ui';
-import { Subject } from 'rxjs';
-import { Router } from '@angular/router';
+import { firstValueFrom, Subject } from 'rxjs';
+import { Params, Router } from '@angular/router';
 import { ModuleInfoService } from 'ngx-rendering-service-lib';
 import { PreviewSidebarTemplateService } from '../preview-sidebar-template.service';
 import { MdsEditorWrapperComponent } from '../../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
+import { EditorMode } from '../../../mds/types/types';
 import { DialogsService } from '../../../dialogs/dialogs.service';
 import { EditorialSidebarService } from '../../editorial-sidebar.service';
 import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
@@ -38,70 +44,89 @@ import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
     standalone: false,
 })
 export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChanges {
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private nodeHelper = inject(NodeHelperService);
+    private dialogs = inject(DialogsService);
+    optionsHelper = inject(OptionsHelperDataService);
+    moduleInfoService = inject(ModuleInfoService);
+    previewSidebarTemplateService = inject(PreviewSidebarTemplateService);
+    editorialSidebarService = inject(EditorialSidebarService);
+    networkService = inject(NetworkService);
+    private renderHelperService = inject(RenderHelperService);
+    router = inject(Router);
+    about = inject(AboutService);
+
     /**
      all modules in this list will be automatically rendered without confirmation
      */
-    readonly AutoRenderModules = ['default', 'image', 'video', 'audio', 'document', 'pdf', 'url'];
+    readonly AutoRenderModules = [
+        'default',
+        'image',
+        'video',
+        'audio',
+        'document',
+        'pdf',
+        'url',
+        'sodix',
+    ];
 
     /**
      * always render the node, do not wait for click
      */
     @Input() autoRender = false;
 
+    /**
+     * whether this content is displayed inside the fullscreen modal rather than the sidebar
+     */
+    @Input() modal = false;
+
     @Input() customOptions: CustomOptions;
+    /** Editor mode for the embedded mds-editor-wrapper. */
+    @Input() editorMode: EditorMode = 'viewer';
+    /** Group id for the embedded mds-editor-wrapper. */
+    @Input() groupId: string = 'preview_sidebar';
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 
     private readonly destroyed = new Subject<void>();
-    private _node: Node;
+    readonly node = input<Node>();
     renderNode = signal<Node>(null);
-
-    /** The node to preview. */
-    @Input()
-    get node(): Node {
-        return this._node;
-    }
-
-    set node(node: Node) {
-        this._node = node;
-        this.renderNode.set(null);
-        const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
-            .filter((k) => !!k[1])
-            .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
-        this.allDetailsLink =
-            (this.nodeHelper.getNodeLink('routerLink', node) as string) +
-            (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
-        void this.mdsRef?.reInit();
-        if (this.actionbar) {
-            void this.updateOptions();
-        }
-        void this.about.hasPlugin('rendering-service-2').then(async (has) => {
-            if (has) {
-                const module = await this.moduleInfoService.getModuleInfo(node);
-                console.info('rs module', module);
-                if (this.autoRender || this.AutoRenderModules.includes(module.module)) {
-                    void this.onShowContentClick();
-                }
-            } else {
-                console.info('rs2 not present');
-            }
-        });
-    }
+    mdsVisible = signal<boolean>(true);
 
     allDetailsLink: string;
+    allDetailsParams: Params;
 
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private dialogs: DialogsService,
-        public optionsHelper: OptionsHelperDataService,
-        public moduleInfoService: ModuleInfoService,
-        public previewSidebarTemplateService: PreviewSidebarTemplateService,
-        public editorialSidebarService: EditorialSidebarService,
-        private renderHelperService: RenderHelperService,
-        public router: Router,
-        public about: AboutService,
-    ) {
+    constructor() {
         void this.renderHelperService.prepareRootUrl();
+        effect(() => {
+            const node = this.node();
+            this.renderNode.set(null);
+            this.mdsVisible.set(false);
+            setTimeout(() => this.mdsVisible.set(true));
+            this.allDetailsParams = this.nodeHelper.getNodeLink('queryParams', node) as Params;
+            this.allDetailsLink = this.nodeHelper.getNodeLink('routerLink', node) as string;
+            queueMicrotask(() => void this.mdsRef?.reInit());
+            if (this.actionbar) {
+                void this.updateOptions();
+            }
+            if (node) {
+                void this.about.hasPlugin('rendering-service-2').then(async (has) => {
+                    if (has) {
+                        let module = 'default';
+                        if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
+                            // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
+                            module = (await this.moduleInfoService.getModuleInfo(node)).module;
+                        }
+                        console.info('rs module', module);
+                        if (this.autoRender || this.AutoRenderModules.includes(module)) {
+                            void this.onShowContentClick();
+                        }
+                    } else {
+                        console.info('rs2 not present');
+                    }
+                });
+            }
+        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -111,7 +136,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     ngAfterViewInit(): void {
-        if (this.node) {
+        if (this.node()) {
             void this.updateOptions();
         }
     }
@@ -121,9 +146,17 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         this.destroyed.complete();
     }
 
+    /**
+     * Keeps the preview height at 3/2 of the available content width.
+     */
+    onContentResize({ width }: { width: number; height: number }): void {
+        // 3:2 aspect
+        this.elementRef.nativeElement.style.setProperty('--previewHeight', `${(width * 2) / 3}px`);
+    }
+
     async onShowContentClick(): Promise<void> {
         if (await this.about.hasPlugin('rendering-service-2')) {
-            this.renderNode.set(this.node);
+            this.renderNode.set(this.node());
             /*let dialogRefPromise: Promise<CardDialogRef>;
 
             dialogRefPromise = this.openMediaDialog();
@@ -138,12 +171,18 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void dialogRefPromise?.then((dialogRef) => dialogRef.close());
             });*/
         } else {
-            await this.router.navigateByUrl(this.allDetailsLink);
+            await this.router.navigate([this.allDetailsLink], {
+                queryParams: this.allDetailsParams,
+            });
         }
     }
 
     private async openMediaDialog(): Promise<CardDialogRef> {
-        return await this.dialogs.openPreviewMediaDialog({ node: this._node });
+        return await this.dialogs.openPreviewMediaDialog({ node: this.node() });
+    }
+
+    async onSaveMds(): Promise<void> {
+        await this.mdsRef?.onSave();
     }
 
     /**
@@ -157,6 +196,14 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
             scope: this.editorialSidebarService.scope(),
             activeObjects: [this.node],
             customOptions: this.customOptions,
+            postPrepareOptions: (options) => {
+                // no toggles in sidebar
+                options.splice(
+                    0,
+                    options.length,
+                    ...options.filter((o) => !(o as OptionItemToggle).isToggle),
+                );
+            },
         });
         void this.optionsHelper.refreshComponents();
     }

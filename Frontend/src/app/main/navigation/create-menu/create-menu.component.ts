@@ -7,6 +7,7 @@ import {
     OnInit,
     Output,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -25,6 +26,7 @@ import {
     DropdownComponent,
     ElementType,
     LocalEventsService,
+    NodeEntriesGlobalService,
     OptionItem,
     OptionsHelperDataService,
     Scope,
@@ -39,7 +41,6 @@ import {
     Filetype,
     FrameEventsService,
     RestConnectorService,
-    RestConnectorsService,
     RestConstants,
     RestHelper,
     RestIamService,
@@ -65,7 +66,13 @@ import { CardComponent } from '../../../shared/components/card/card.component';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
+import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import {
+    NodesSelectorConfig,
+    TabType,
+} from '../../../pages/editorial-page/nodes-selector/nodes-selector.component';
 
 @Component({
     selector: 'es-create-menu',
@@ -76,6 +83,34 @@ import { OptionsHelperService } from '../../../services/options-helper.service';
     standalone: false,
 })
 export class CreateMenuComponent implements OnInit, OnDestroy {
+    public bridge = inject(BridgeService);
+    private cardService = inject(CardService);
+    private cardDialogService = inject(CardDialogService);
+    private connector = inject(RestConnectorService);
+    private connectorApi = inject(ConnectorService);
+    private configService = inject(ConfigService);
+    private mainNavService = inject(MainNavService);
+    private dialogs = inject(DialogsService);
+    private event = inject(FrameEventsService);
+    private uiService = inject(UIService);
+    private iam = inject(RestIamService);
+    private iamService = inject(RestIamService);
+    private ltiPlatformService = inject(LtiPlatformService);
+    private nodeHelper = inject(NodeHelperService);
+    private localEventsService = inject(LocalEventsService);
+    private nodeService = inject(RestNodeService);
+    private optionsService = inject(OptionsHelperDataService);
+    private optionsHelperService = inject(OptionsHelperService);
+    private paste = inject(PasteService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private toast = inject(Toast);
+    private translate = inject(TranslateService);
+    private uploadDialog = inject(UploadDialogService);
+    private editorialSidebarService = inject(EditorialSidebarService);
+    private connectorOptionsService = inject(ConnectorOptionsService);
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
     /**
@@ -111,6 +146,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     _parent: Node = null;
 
     connectorList: Connector[];
+    connectorOptions: OptionItem[] = [];
     fileIsOver = false;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
@@ -122,44 +158,23 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private destroyed = new BehaviorSubject(false);
     private destroyed$ = this.destroyed.pipe(filter((d) => d === true));
 
-    constructor(
-        public bridge: BridgeService,
-        private cardService: CardService,
-        private cardDialogService: CardDialogService,
-        private connector: RestConnectorService,
-        private connectorApi: ConnectorService,
-        private configService: ConfigService,
-        private mainNavService: MainNavService,
-        private connectors: RestConnectorsService,
-        private dialogs: DialogsService,
-        private event: FrameEventsService,
-        private uiService: UIService,
-        private iam: RestIamService,
-        private iamService: RestIamService,
-        private ltiPlatformService: LtiPlatformService, //private paste: PasteService,
-        private nodeHelper: NodeHelperService,
-        private localEventsService: LocalEventsService,
-        private nodeService: RestNodeService,
-        private optionsService: OptionsHelperDataService,
-        private optionsHelperService: OptionsHelperService,
-        private paste: PasteService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private toast: Toast,
-        private translate: TranslateService,
-        private uploadDialog: UploadDialogService,
-    ) {
+    constructor() {
         this.route.queryParams.subscribe((params) => {
             this.params = params;
             void this.updateOptions();
         });
-        this.connectorApi
-            .observeConnectorList()
+        this.connectorOptionsService
+            .observeConnectors()
             .pipe(takeUntil(this.destroyed$))
-            .subscribe((list) => {
-                this.connectorList = this.connectors
-                    .filterConnectors(list?.connectors)
-                    .concat(this.connectors.filterConnectors(list?.simpleConnectors));
+            .subscribe((connectors) => {
+                this.connectorList = connectors;
+                void this.updateOptions();
+            });
+        this.connectorOptionsService
+            .buildOptions((connector) => void this.showCreateConnector({ connector }))
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((options) => {
+                this.connectorOptions = options;
                 void this.updateOptions();
             });
         this.connector.isLoggedIn(false).subscribe((login) => {
@@ -256,7 +271,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             pasteNodes.group = DefaultGroups.Primary;
             this.options.push(pasteNodes);
         }
-        if (this._parent && this.nodeHelper.isNodeCollection(this._parent)) {
+        if (
+            (this._parent && this.nodeHelper.isNodeCollection(this._parent)) ||
+            ['collections', 'landing'].includes(this.scope)
+        ) {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
                 this.uiService.goToCollection(this._parent, 'new'),
             );
@@ -288,23 +306,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             upload.priority = 10;
             this.options.push(upload);
             // handle connectors
-            if (this.connectorList) {
-                this.options = this.options.concat(
-                    this.connectorList.map((connector, i) => {
-                        const option = new OptionItem(
-                            'CONNECTOR.' + connector.id + '.NAME',
-                            connector.icon,
-                            () =>
-                                this.showCreateConnector({
-                                    connector,
-                                }),
-                        );
-                        option.elementType = [ElementType.NoneOrUnknown];
-                        option.group = DefaultGroups.CreateConnector;
-                        option.priority = i;
-                        return option;
-                    }),
-                );
+            if (this.connectorOptions?.length) {
+                this.options = this.options.concat(this.connectorOptions);
             }
             // handle app
             if (this.bridge.isRunningCordova()) {
@@ -375,6 +378,20 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     async openUploadSelect(): Promise<void> {
+        if (this.editorialSidebarService.editorialSidebar) {
+            this.nodeEntriesGlobalService.getPrimaryInstance()?.selection.clear();
+            this.editorialSidebarService.showOption({
+                option: 'SORT_INTO',
+                trap: false,
+                optionConfig: {
+                    state: TabType.UPLOAD,
+                    allowCreate: false,
+                    autoClose: false,
+                    upload: 'default',
+                } as NodesSelectorConfig,
+            });
+            return;
+        }
         const nodes = await this.uploadDialog.openUploadDialog({
             parent: await this.getParent(),
             chooseParent: this.showPicker,
@@ -518,7 +535,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         parameters: { [key in string]: string[] } = null,
         connectorType: Connector = null,
     ) {
-        this.uiService.openConnector(node, type, win, connectorType, true, parameters);
+        const preferEdit = parameters?.['preferEdit']?.[0] === 'true';
+        void this.uiService.editConnector(node, { type, win, connectorType, preferEdit });
     }
 
     pickMaterialFromSearch() {

@@ -5,7 +5,7 @@
   [attr.modal]="modal"
   [attr.width]="width"
   [attr.height]="height"
-  [attr.priority]="priority"
+  [style.--card-priority]="priority"
   [cdkTrapFocus]="modal === 'always'"
   [cdkTrapFocusAutoCapture]="captureFocus"
   (keydown)="handleEvent($event)"
@@ -22,31 +22,40 @@
     [avatar]="icon ? {kind: 'icon', icon: icon} : {kind: 'image', url: avatar}"
     [disableClose]="!isCancelable"
     (triggerClose)="cancel()"
-    ></es-card-header> -->
-    <mat-card-header *ngIf="header">
-      <div *ngIf="avatar" class="avatar" mat-card-avatar>
+  ></es-card-header> -->
+    @if (header) {
+    <mat-card-header>
+      @if (avatar) {
+      <div class="avatar" mat-card-avatar>
         <img [src]="avatar | esAssetsPath" alt="" esImageConfig />
       </div>
-      <div *ngIf="icon" class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
+      } @if (icon) {
+      <div class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
+      }
       <mat-card-title [class.no-subtitle]="!subtitle">{{ title }}</mat-card-title>
       <mat-card-subtitle>{{ subtitle }}</mat-card-subtitle>
       <div class="cancel">
-        <button mat-button *ngIf="isCancelable" (click)="doCancel()">
+        @if (isCancelable) {
+        <button mat-button (click)="doCancel()">
           <i esIcon="close" [aria]="true"></i>
         </button>
+        }
       </div>
     </mat-card-header>
-    <div #jumpmarksRef class="jumpmarks" *ngIf="jumpmarks && jumpmarks.length > 1">
+    } @if (jumpmarks && jumpmarks.length > 1) {
+    <div #jumpmarksRef class="jumpmarks">
+      @for (jumpmark of jumpmarks; track jumpmark) {
       <button
         mat-button
         color="primary"
-        *ngFor="let jumpmark of jumpmarks"
         [class.active]="jumpmark === jumpmarkActive"
         (click)="scrollToJumpMark(jumpmark)"
       >
         <i [esIcon]="jumpmark.icon"></i> {{ jumpmark.label }}
       </button>
+      }
     </div>
+    }
     <mat-card-content
       #cardContainer
       cdkScrollable
@@ -58,36 +67,40 @@
       ><ng-content></ng-content>
     </mat-card-content>
     <!-- <es-card-actions
-    [buttons]="buttons"
-    [additionalContent]="beforeButtonRef"
-    ></es-card-actions> -->
-    <mat-card-actions #cardActions *ngIf="_buttons && _buttons.length">
+  [buttons]="buttons"
+  [additionalContent]="beforeButtonRef"
+></es-card-actions> -->
+    @if (_buttons && _buttons.length) {
+    <mat-card-actions #cardActions>
       <ng-container [ngTemplateOutlet]="beforeButtonRef"></ng-container>
       <div class="additional-action-area-content">
         <ng-content select="[action-area]"></ng-content>
       </div>
       <div class="buttons-left">
+        @for (button of _buttonsLeft; track button) {
         <ng-container
-          *ngFor="let button of _buttonsLeft"
           [ngTemplateOutlet]="buttonsTemplate"
           [ngTemplateOutletContext]="{ $implicit: button }"
         >
         </ng-container>
+        }
       </div>
       <div class="buttons">
+        @for (button of _buttons; track button) {
         <ng-container
-          *ngFor="let button of _buttons"
           [ngTemplateOutlet]="buttonsTemplate"
           [ngTemplateOutletContext]="{ $implicit: button }"
         >
         </ng-container>
+        }
       </div>
     </mat-card-actions>
+    }
   </mat-card>
 </div>
 <ng-template #buttonsTemplate let-button>
+  @if (button.color === 'primary') {
   <button
-    *ngIf="button.color === 'primary'"
     mat-flat-button
     color="primary"
     [disabled]="button.disabled"
@@ -96,8 +109,8 @@
   >
     {{ button.label | translate }}
   </button>
+  } @if (button.color === 'standard') {
   <button
-    *ngIf="button.color === 'standard'"
     mat-button
     color="primary"
     [disabled]="button.disabled"
@@ -106,8 +119,8 @@
   >
     {{ button.label | translate }}
   </button>
+  } @if (button.color === 'danger') {
   <button
-    *ngIf="button.color === 'danger'"
     mat-flat-button
     color="warn"
     [disabled]="button.disabled"
@@ -116,4 +129,5 @@
   >
     {{ button.label | translate }}
   </button>
+  }
 </ng-template>

@@ -4,31 +4,36 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.alfresco.repo.content.MimetypeMap;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.NodeRefVersion;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
+import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.node.v1.model.*;
 import org.edu_sharing.restservices.node.v1.model.SearchResult;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.clientutils.ClientUtilsService;
 import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
@@ -48,6 +53,9 @@ import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.ShareInfoContextHolder;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.transform.FulltextService;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,343 +66,351 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Path("/node/v1")
-@Tag(name="NODE v1")
-@ApiService(value="NODE", major=1, minor=0)
-@Consumes({ "application/json" })
+@Tag(name = "NODE v1")
+@ApiService(value = "NODE", major = 1, minor = 0)
+@Consumes({"application/json"})
 @Produces({"application/json"})
-public class NodeApi  {
+public class NodeApi {
 
-	public static final String CCM_RESSOURCETYPE_BINDER = "binder";
+    public static final String CCM_RESSOURCETYPE_BINDER = "binder";
+
+    @Autowired
+    private GitHubService gitHubService;
+    @Autowired
+    private ActivityEventService activityEventService;
+
+    private static Logger logger = Logger.getLogger(NodeApi.class);
 
 	@Autowired
-	private GitHubService gitHubService;
-	@Autowired
-	private ActivityEventService activityEventService;
+	private FulltextService fulltextService;
 
-	private static Logger logger = Logger.getLogger(NodeApi.class);
-	  @GET
-	    @Path("/nodes/{repository}/{node}/workflow")
-	        
-	    @Operation(summary = "Get workflow history.", description = "Get workflow history of node.")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = WorkflowHistory[].class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+    @GET
+    @Path("/nodes/{repository}/{node}/workflow")
 
-	    public Response getWorkflowHistory(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
-	    	
-	    	try {
-	    		
-	    		
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	
-		    	return Response.status(Response.Status.OK).entity(nodeDao.getWorkflowHistory()).build();
-		
-	    	} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);    		
-	    	}
+    @Operation(summary = "Get workflow history.", description = "Get workflow history of node.")
 
-	    }
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = WorkflowHistory[].class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-	@GET
-	@Path("/nodes/{repository}/{node}/lrmi")
-	@Operation(summary = "Get lrmi data.", description = "Get lrmi data of node.")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = JSONObject.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    public Response getWorkflowHistory(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
 
-	public Response getLrmiData(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "Version of the node" ) @QueryParam("version") String version,
-			@Context HttpServletRequest req) {
-
-		try {
-			org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node);
+        try {
 
 
-			return Response.status(Response.Status.OK).entity(LRMITool.getLRMIJson(new NodeRefVersion(nodeRef,version)).toString()).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-	}
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-	  @POST
-	    @Path("/nodes/{repository}/{node}/report")
-	        
-	    @Operation(summary = "Report the node.", description = "Report a node to notify the admin about an issue)")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+            return Response.status(Response.Status.OK).entity(nodeDao.getWorkflowHistory()).build();
 
-	    public Response reportNode(
-			  @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			  @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			  @Parameter(description = "the mode of reporting (reporting or feedback)",required=false ) @QueryParam("mode")NotificationService.NotifyMode mode,
-			  @Parameter(description = "the reason for the report",required=true ) @QueryParam("reason") String reason,
-			  @Parameter(description = "mail of reporting user",required=true ) @QueryParam("userEmail") String userEmail,
-			  @Parameter(description = "additional user comment",required=false ) @QueryParam("userComment") String userComment,
-			  @Context HttpServletRequest req) {
-	    	
-	    	try {
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.reportNode(mode == null ? NotificationService.NotifyMode.ReportProblem : mode, reason,userEmail,userComment);
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-				activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.REPORT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+    }
 
-		    	return Response.status(Response.Status.OK).build();
-		
-	    	} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);    		
-	    	}
+    @GET
+    @Path("/nodes/{repository}/{node}/lrmi")
+    @Operation(summary = "Get lrmi data.", description = "Get lrmi data of node.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = JSONObject.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-	    }
-	  @PUT
-	    @Path("/nodes/{repository}/{node}/workflow")
-	        
-	    @Operation(summary = "Add workflow.", description = "Add workflow entry to node.")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+    public Response getLrmiData(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Version of the node") @QueryParam("version") String version,
+            @Context HttpServletRequest req) {
 
-	    public Response addWorkflowHistory(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@Parameter(description = "The history entry to put (editor and time can be null and will be filled automatically)", required = true) WorkflowHistory entry,
-			@Context HttpServletRequest req) {
-	    	
-	    	try {
-	    			    		
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.addWorkflowHistory(entry, true);
-		    	return Response.status(Response.Status.OK).build();
-		
-	    	} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);    		
-	    	}
+        try {
+            org.alfresco.service.cmr.repository.NodeRef nodeRef = new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node);
 
-	    }
 
-	@POST
-	@Path("/nodes/{repository}/{node}/publish")
+            return Response.status(Response.Status.OK).entity(LRMITool.getLRMIJson(new NodeRefVersion(nodeRef, version)).toString()).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	@Operation(summary = "Publish", description = "Create a published copy of the current node ")
+    }
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    @POST
+    @Path("/nodes/{repository}/{node}/report")
 
-	public Response publishCopy(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle",required=false ) @QueryParam("handleMode") HandleMode handleMode,
-			@Parameter(description = "handle parameter, if a handle and/or doi should be created. Skip this parameter if you don't want a handle or doi,",required = false) HandleParam handleParam,
-			@Context HttpServletRequest req) {
+    @Operation(summary = "Report the node.", description = "Report a node to notify the admin about an issue)")
 
-		try {
-			if(handleParam == null){
-				if(handleMode != null){
-					handleParam = HandleParam.builder()
-							.doiService(handleMode)
-							.handleService(handleMode)
-							.build();
-				}
-			}
-			HandleMode handleModeTmp = (handleMode != null) ? handleMode : (handleParam.handleService != null ? handleParam.handleService : handleParam.doiService);
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao published = (handleModeTmp == HandleMode.sync) ? nodeDao.syncCopy(handleParam) : nodeDao.publishCopy(handleParam);
-			NodeEntry response = new NodeEntry();
-			response.setNode(published.asNode());
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-			return Response.status(Response.Status.OK).entity(response).build();
+    public Response reportNode(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "the mode of reporting (reporting or feedback)", required = false) @QueryParam("mode") NotificationService.NotifyMode mode,
+            @Parameter(description = "the reason for the report", required = true) @QueryParam("reason") String reason,
+            @Parameter(description = "mail of reporting user", required = true) @QueryParam("userEmail") String userEmail,
+            @Parameter(description = "additional user comment", required = false) @QueryParam("userComment") String userComment,
+            @Context HttpServletRequest req) {
 
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            nodeDao.reportNode(mode == null ? NotificationService.NotifyMode.ReportProblem : mode, reason, userEmail, userComment);
 
-	}
-	@DELETE
-	@Path("/nodes/{repository}/{node}/publish/revoke")
+            activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.REPORT_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
-	@Operation(summary = "Revoke published copy or regular node", description = "Revoke a previously published copy or a regular. The content of this copy will be irrevocable removed, only the metadata will remain")
+            return Response.status(Response.Status.OK).build();
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	public Response revokeNode(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) RevokeDetails details,
-			@Context HttpServletRequest req) {
+    }
 
-		try {
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
-			NodeDao response = nodeDao.revokeNode(details);
-			return Response.status(Response.Status.OK).entity(response.asNode()).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+    @PUT
+    @Path("/nodes/{repository}/{node}/workflow")
 
-	}
-	@GET
-	@Path("/nodes/{repository}/{node}/publish")
+    @Operation(summary = "Add workflow.", description = "Add workflow entry to node.")
 
-	@Operation(summary = "Publish", description = "Get all published copies of the current node")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    public Response addWorkflowHistory(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "The history entry to put (editor and time can be null and will be filled automatically)", required = true) WorkflowHistory entry,
+            @Context HttpServletRequest req) {
 
-	public Response getPublishedCopies(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
+        try {
 
-		try {
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao originalDao = NodeDao.getNode(repoDao, node);
-			List<NodeDao> published = originalDao.getPublishedCopies();
-			NodeEntries response = new NodeEntries();
-			response.setNodes(published.stream().map(dao -> {
-				try {
-					return dao.asNode();
-				} catch (DAOException e) {
-					throw new RuntimeException(e);
-				}
-			}).collect(Collectors.toList()));
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            nodeDao.addWorkflowHistory(entry, true);
+            return Response.status(Response.Status.OK).build();
 
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	}
+    }
 
-	@PUT
-	    @Path("/nodes/{repository}/{node}/aspects")
-	        
-	    @Operation(summary = "Add aspect to node.", description = "Add aspect to node.")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+    @POST
+    @Path("/nodes/{repository}/{node}/publish")
 
-	    public Response addAspects(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@Parameter(description = "aspect name, e.g. ccm:lomreplication",required=true) List<String> aspects,
-			@Context HttpServletRequest req) {
-	    	
-	    	try {
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.addAspects(aspects);
-		    	NodeEntry response = new NodeEntry();
-		    	response.setNode(nodeDao.asNode());
-		    	
-		    	return Response.status(Response.Status.OK).entity(response).build();
-		
-	    	} catch (Throwable t) {
-	    		return ErrorResponse.createResponse(t);    		
-	    	}
+    @Operation(summary = "Publish", description = "Create a published copy of the current node ")
 
-	    }
-	  
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response publishCopy(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "handle mode, if a handle should be created. Skip this parameter if you don't want an handle", required = false) @QueryParam("handleMode") HandleMode handleMode,
+            @Parameter(description = "handle parameter, if a handle and/or doi should be created. Skip this parameter if you don't want a handle or doi,", required = false) HandleParam handleParam,
+            @Context HttpServletRequest req) {
+
+        try {
+            if (handleParam == null) {
+                if (handleMode != null) {
+                    handleParam = HandleParam.builder()
+                            .doiService(handleMode)
+                            .handleService(handleMode)
+                            .build();
+                }
+            }
+            HandleMode handleModeTmp = (handleMode != null) ? handleMode : (handleParam.handleService != null ? handleParam.handleService : handleParam.doiService);
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            NodeDao published = (handleModeTmp == HandleMode.sync) ? nodeDao.syncCopy(handleParam) : nodeDao.publishCopy(handleParam);
+            NodeEntry response = new NodeEntry();
+            response.setNode(published.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+    @DELETE
+    @Path("/nodes/{repository}/{node}/publish/revoke")
+
+    @Operation(summary = "Revoke published copy or regular node", description = "Revoke a previously published copy or a regular. The content of this copy will be irrevocable removed, only the metadata will remain")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Node.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response revokeNode(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) RevokeDetails details,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+            NodeDao response = nodeDao.revokeNode(details);
+            return Response.status(Response.Status.OK).entity(response.asNode()).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+    @GET
+    @Path("/nodes/{repository}/{node}/publish")
+
+    @Operation(summary = "Publish", description = "Get all published copies of the current node")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getPublishedCopies(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao originalDao = NodeDao.getNode(repoDao, node);
+            List<NodeDao> published = originalDao.getPublishedCopies();
+            NodeEntries response = new NodeEntries();
+            response.setNodes(published.stream().map(dao -> {
+                try {
+                    return dao.asNode();
+                } catch (DAOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList()));
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+    @PUT
+    @Path("/nodes/{repository}/{node}/aspects")
+
+    @Operation(summary = "Add aspect to node.", description = "Add aspect to node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response addAspects(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "aspect name, e.g. ccm:lomreplication", required = true) List<String> aspects,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            nodeDao.addAspects(aspects);
+            NodeEntry response = new NodeEntry();
+            response.setNode(nodeDao.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     @GET
     @Path("/nodes/{repository}/{node}/metadata")
-        
+
     @Operation(summary = "Get metadata of node.", description = "Get metadata of node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getMetadata(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
-        @Parameter(description = "version of the node") @QueryParam("version") String version,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
-			if(remote != null) {
-				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
-			}
-    		Filter filter = new Filter(propertyFilter);
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Parameter(description = "version of the node") @QueryParam("version") String version,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+            if (remote != null) {
+                return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), propertyFilter, req);
+            }
+            Filter filter = new Filter(propertyFilter);
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
 
             NodeDao nodeDao;
             if (version != null && !version.equals("-1")) {
@@ -403,1961 +419,2090 @@ public class NodeApi  {
                 nodeDao = NodeDao.getNode(repoDao, node, filter);
             }
 
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(nodeDao.asNode());
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);    		
-    	}
+            NodeEntry response = new NodeEntry();
+            response.setNode(nodeDao.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
-	@GET
-	@Path("/nodes/{repository}/{node}/metadata/secured")
+    @GET
+    @Path("/nodes/{repository}/{node}/metadata/secured")
 
-	@Operation(summary = "Get signed metadata of node.", description = "Get metadata of node. The content is signed and includes jwt for permissions")
+    @Operation(summary = "Get signed metadata of node.", description = "Get metadata of node. The content is signed and includes jwt for permissions")
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SignedNodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SignedNodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-	public Response getMetadataSigned(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+    public Response getMetadataSigned(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @Parameter(description = "Version of the node") @QueryParam("version") String version,
             @Context HttpServletRequest req) {
 
-		try {
-			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
-			if(remote != null) {
-				return RepoProxyFactory.getRepoProxy().getMetadata(remote.getRepository(), remote.getNodeId(), Arrays.asList("-all-"), req);
-			}
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
+        try {
+            RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+            if (remote != null) {
+				return RepoProxyFactory.getRepoProxy().getMetadataSigned(remote.getRepository(), remote.getNodeId(), version, req);
+            }
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
 
             NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, node, version);
 
-			Base64.Encoder encoder = Base64.getEncoder();
-			SignedNode signedNode = nodeDao.getSignedNode();
+            Base64.Encoder encoder = Base64.getEncoder();
+            SignedNode signedNode = nodeDao.getSignedNode();
 
-			String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
-			String encodedSignature = encoder.encodeToString(signedNode.getSignature());
+            String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
+            String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 
-			SignedNodeEntry response = new SignedNodeEntry();
-			response.setNode(nodeDao.asNode());
-			response.setJwt(nodeDao.getJWT());
-			response.setSignedNode(encodedSignedNode);
-			response.setSignature(encodedSignature);
+            SignedNodeEntry response = new SignedNodeEntry();
+            response.setNode(nodeDao.asNode());
+            response.setJwt(nodeDao.getJWT());
+            response.setSignedNode(encodedSignedNode);
+            response.setSignature(encodedSignature);
+            response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
+			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
+			if (rs != null) {
+				response.setRenderingBaseUrl(rs.getContentUrl());
+			}
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            return Response.status(Response.Status.OK).entity(response).build();
 
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	}
+    }
 
 
     @GET
     @Path("/nodes/{repository}/{node}/lock/unlock")
-        
+
     @Operation(summary = "unlock node.", description = "unlock node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response unlock(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Context HttpServletRequest req) {
-    	
-    	try{
-    		EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,node));
-    	}catch(LockedException e){
-    		return ErrorResponse.createResponse(e);    		
-    	}
-    	return Response.ok().build();
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+            EditLockServiceFactory.getEditLockService().unlock(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
+        } catch (LockedException e) {
+            return ErrorResponse.createResponse(e);
+        }
+        return Response.ok().build();
     }
-    
+
     @GET
     @Path("/nodes/{repository}/{node}/lock/status")
-        
+
     @Operation(summary = "locked status of a node.", description = "locked status of a node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeLocked.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeLocked.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response islocked(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Context HttpServletRequest req) {
-		try {
-			boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
-			NodeLocked response = new NodeLocked();
-			response.setLocked(isLocked);
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+        try {
+            boolean isLocked = EditLockServiceFactory.getEditLockService().isLockedByAnotherUser(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node));
+            NodeLocked response = new NodeLocked();
+            response.setLocked(isLocked);
 
-			return Response.ok().entity(response).build();
-		}catch(Throwable t){
-			return ErrorResponse.createResponse(t);
-		}
+            return Response.ok().entity(response).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
-    
-    
+
+
     @GET
     @Path("/nodes/{repository}/{node}/textContent")
-        
-    @Operation(summary = "Get the text content of a document.", description = "May fails with 500 if the node can not be read.")
-    
+
+    @Operation(summary = "Get the plain text content of a node.", description = "Returns the extracted plain text for a ccm:io node. The result is cached in ccm:fulltext_content after the first extraction.\n\nFor file nodes, the text is extracted from the binary content via the local transform service.\nFor link nodes (ccm:wwwurl set), text is fetched from the URL via the BAPI text-extraction proxy. If extraction fails, null is returned.")
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeText.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeText.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getTextContent(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	
-	    	NodeText response = new NodeText();
-	    	response.setText(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_TEXT_PLAIN));
-	    	try{
-	    		response.setHtml(((MCAlfrescoAPIClient)repoDao.getBaseClient()).getNodeTextContent(node,MimetypeMap.MIMETYPE_HTML));
-	    	}catch(Throwable t){}
-	    	try{
-	    		InputStream is=((MCAlfrescoAPIClient)repoDao.getBaseClient()).getContent(node);
-	    		if(is.available()<1024*1024*5)
-	    			response.setRaw(IOUtils.toString(is));
-	    	}catch(Throwable t){}
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);    		
-    	}
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+    	@Parameter(description = "Skip the fulltext cache and always re-extract. Requires admin.", required = false) @QueryParam("forceUpdate") Boolean forceUpdate,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+			if (forceUpdate != null && forceUpdate && !AuthorityServiceHelper.isAdmin()) {
+	    		throw new SecurityException("Admin required for forceUpdate");
+	    	}
+
+            NodeText response = new NodeText();
+	    	response.setText(fulltextService.getFulltext(nodeDao.getNodeRef().getNodeId(), forceUpdate != null && forceUpdate));
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
+
     @GET
     @Path("/nodes/{repository}/{node}/parents")
-        
+
     @Operation(summary = "Get parents of node.", description = "Get all parents metadata + own metadata of node. Index 0 is always the current node")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ParentEntries.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ParentEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getParents(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
-    	@Parameter(description = "activate to return the full alfresco path, otherwise the path for the user home is resolved") @QueryParam("fullPath") Boolean fullPath,
-    	@Parameter(description = "if true, a 403 will not be thrown and the highest possible path will be resolved") @QueryParam("ignoreAccessError") Boolean ignoreAccessError,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)") @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Parameter(description = "activate to return the full alfresco path, otherwise the path for the user home is resolved") @QueryParam("fullPath") Boolean fullPath,
+            @Parameter(description = "if true, a 403 will not be thrown and the highest possible path will be resolved") @QueryParam("ignoreAccessError") Boolean ignoreAccessError,
+            @Context HttpServletRequest req) {
 
-		ParentEntries response=new ParentEntries();
-		List<Node> parents=new ArrayList<>();
-    	try {
-    		
-    		Filter filter = new Filter(propertyFilter);
-		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if("-inbox-".equals(node)){
-    			node = repoDao.getUserInbox(true);
-    		}
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
-	    	
+        ParentEntries response = new ParentEntries();
+        List<Node> parents = new ArrayList<>();
+        try {
 
-	    	Node last=nodeDao.asNode();
-	    	parents.add(last);
-	    	String userHome=repoDao.getUserHome();
-			if(last.getRef().getId().equals(userHome)) {
-				response.setNodes(new ArrayList<>());
-				response.setScope("MY_FILES");
-			} else {
-				List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
-				boolean collection = last.getMediatype().equals("collection");
-				if (fullPath == null) {
-					fullPath = false;
-				}
-				if(ignoreAccessError == null) {
-					ignoreAccessError = false;
-				}
-				while (true) {
-					if (last == null || last.getParent() == null || last.getParent().getId() == null)
-						break;
-					if (!fullPath) {
-						if (last.getParent().getId().equals(userHome)) {
-							response.setScope("MY_FILES");
-							break;
-						}
-						if ((shared != null && shared.contains(last.getRef()))) {
-							response.setScope("SHARED_FILES");
-							break;
-						}
-					}
-					if (collection && !fullPath) {
-						Node finalLast = last;
-						last = AuthenticationUtil.runAsSystem(() -> NodeDao.getNode(repoDao, finalLast.getParent().getId(), filter).asNode());
-						if (!last.getMediatype().equals("collection")) {
-							response.setScope("COLLECTION");
-							break;
-						}
-					} else {
-						last = NodeDao.getNode(repoDao, last.getParent().getId(), filter).asNode();
-					}
-					parents.add(last);
-				}
+            Filter filter = new Filter(propertyFilter);
 
-				response.setNodes(parents);
-			}
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-			if(t instanceof DAOSecurityException && ignoreAccessError) {
-				response.setScope("SHARED_FILES");
-				response.setNodes(parents);
-				return Response.status(Response.Status.OK).entity(response).build();
-			}
-    		return ErrorResponse.createResponse(t);    		
-    	}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            if ("-inbox-".equals(node)) {
+                node = repoDao.getUserInbox(true);
+            }
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+
+
+            Node last = nodeDao.asNode();
+            parents.add(last);
+            String userHome = repoDao.getUserHome();
+            if (last.getRef().getId().equals(userHome)) {
+                response.setNodes(new ArrayList<>());
+                response.setScope("MY_FILES");
+            } else {
+                List<NodeRef> shared = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson().getSharedFolders();
+                boolean collection = last.getMediatype().equals("collection");
+                if (fullPath == null) {
+                    fullPath = false;
+                }
+                if (ignoreAccessError == null) {
+                    ignoreAccessError = false;
+                }
+                while (true) {
+                    if (last == null || last.getParent() == null || last.getParent().getId() == null)
+                        break;
+                    if (!fullPath) {
+                        if (last.getParent().getId().equals(userHome)) {
+                            response.setScope("MY_FILES");
+                            break;
+                        }
+                        if ((shared != null && shared.contains(last.getRef()))) {
+                            response.setScope("SHARED_FILES");
+                            break;
+                        }
+                    }
+                    if (collection && !fullPath) {
+                        Node finalLast = last;
+                        last = AuthenticationUtil.runAsSystem(() -> NodeDao.getNode(repoDao, finalLast.getParent().getId(), filter).asNode());
+                        if (!last.getMediatype().equals("collection")) {
+                            response.setScope("COLLECTION");
+                            break;
+                        }
+                    } else {
+                        last = NodeDao.getNode(repoDao, last.getParent().getId(), filter).asNode();
+                    }
+                    parents.add(last);
+                }
+
+                response.setNodes(parents);
+            }
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            if (t instanceof DAOSecurityException && ignoreAccessError) {
+                response.setScope("SHARED_FILES");
+                response.setNodes(parents);
+                return Response.status(Response.Status.OK).entity(response).build();
+            }
+            return ErrorResponse.createResponse(t);
+        }
 
     }
-    
+
     @PUT
-    @Path("/nodes/{repository}/{node}/metadata")    
-    
+    @Path("/nodes/{repository}/{node}/metadata")
+
     @Operation(summary = "Change metadata of node.", description = "Change metadata of node.")
-    
+
     @ApiResponses(
-    	value = { 
-			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		})
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response changeMetadata(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds",required = false, schema = @Schema(defaultValue="true" )) @QueryParam("obeyMds") Boolean obeyMds,
-	    @Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changeProperties(properties, obeyMds == null || obeyMds);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(newNode.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("obeyMds") Boolean obeyMds,
+            @Parameter(description = "properties", required = true) HashMap<String, String[]> properties,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+        try {
 
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeDao newNode = nodeDao.changeProperties(properties, obeyMds == null || obeyMds);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
 
-	@PUT
-	@Path("/nodes/{repository}/{node}/metadata/copy/{from}")
+    @PUT
+    @Path("/nodes/{repository}/{node}/metadata/copy/{from}")
 
-	@Operation(summary = "Copy metadata from another node.", description = "Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.")
+    @Operation(summary = "Copy metadata from another node.", description = "Copies all common metadata from one note to another. Current user needs write access to the target node and read access to the source node.")
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response copyMetadata(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "The node where to copy the metadata from",required=true ) @PathParam("from") String from,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao fromDao = NodeDao.getNode(repoDao, from);
-			NodeDao newNode = nodeDao.copyProperties(fromDao);
-
-			NodeEntry response = new NodeEntry();
-			response.setNode(newNode.asNode());
-
-			return Response.status(Response.Status.OK).entity(response).build();
-
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-	}
-
-
-	@GET
-	@Path("/nodes/{repository}/{node}/metadata/template")
-
-	@Operation(summary = "Get the metadata template + status for this folder.", description = "All the given metadata will be inherited to child nodes.")
-
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response getTemplateMetadata(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-
-
-			NodeTemplateEntry response = new NodeTemplateEntry();
-			if(nodeDao.getTemplateNode()!=null)
-				response.setNode(nodeDao.getTemplateNode().asNode());
-			response.setEnabled(nodeDao.getTemplateStatus());
-
-			return Response.status(Response.Status.OK).entity(response).build();
-
-		} catch (Throwable t) {
-
-			return ErrorResponse.createResponse(t);
-		}
-	}
-	@PUT
-	@Path("/nodes/{repository}/{node}/metadata/template")
-
-	@Operation(summary = "Set the metadata template for this folder.", description = "All the given metadata will be inherited to child nodes.")
-
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response changeTemplateMetadata(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "Is the inherition currently enabled",required=true ) @QueryParam("enable") Boolean enable,
-			@Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-
-			NodeDao templateNode = nodeDao.changeTemplateProperties(enable,properties);
-
-			NodeTemplateEntry response = new NodeTemplateEntry();
-			if(nodeDao.getTemplateNode()!=null)
-				response.setNode(templateNode.asNode());
-			response.setEnabled(nodeDao.getTemplateStatus());
-
-			return Response.status(Response.Status.OK).entity(response).build();
-
-		} catch (Throwable t) {
-
-			return ErrorResponse.createResponse(t);
-		}
-	}
-
-
-	@POST
-    @Path("/nodes/{repository}/{node}/metadata")    
-    
-    @Operation(summary = "Change metadata of node (new version).", description = "Change metadata of node (new version).")
-    
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),	        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-    	})
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response copyMetadata(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "The node where to copy the metadata from", required = true) @PathParam("from") String from,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            NodeDao fromDao = NodeDao.getNode(repoDao, from);
+            NodeDao newNode = nodeDao.copyProperties(fromDao);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+
+    @GET
+    @Path("/nodes/{repository}/{node}/metadata/template")
+
+    @Operation(summary = "Get the metadata template + status for this folder.", description = "All the given metadata will be inherited to child nodes.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getTemplateMetadata(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+
+            NodeTemplateEntry response = new NodeTemplateEntry();
+            if (nodeDao.getTemplateNode() != null)
+                response.setNode(nodeDao.getTemplateNode().asNode());
+            response.setEnabled(nodeDao.getTemplateStatus());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @PUT
+    @Path("/nodes/{repository}/{node}/metadata/template")
+
+    @Operation(summary = "Set the metadata template for this folder.", description = "All the given metadata will be inherited to child nodes.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response changeTemplateMetadata(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Is the inherition currently enabled", required = true) @QueryParam("enable") Boolean enable,
+            @Parameter(description = "properties", required = true) HashMap<String, String[]> properties,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeDao templateNode = nodeDao.changeTemplateProperties(enable, properties);
+
+            NodeTemplateEntry response = new NodeTemplateEntry();
+            if (nodeDao.getTemplateNode() != null)
+                response.setNode(templateNode.asNode());
+            response.setEnabled(nodeDao.getTemplateStatus());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+
+    @POST
+    @Path("/nodes/{repository}/{node}/metadata")
+
+    @Operation(summary = "Change metadata of node (new version).", description = "Change metadata of node (new version).")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response changeMetadataWithVersioning(
-	    @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "comment",required=true) @QueryParam("versionComment") String versionComment,
-		@Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds",required = false, schema = @Schema(defaultValue="true" )) @QueryParam("obeyMds") Boolean obeyMds,
-		@Parameter(description = "properties" ,required=true ) HashMap<String, String[]> properties,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changePropertiesWithVersioning(properties, obeyMds == null || obeyMds, versionComment);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(newNode.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "comment", required = true) @QueryParam("versionComment") String versionComment,
+            @Parameter(description = "obey the mds definition, onyl accepting fields defined in the mds", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("obeyMds") Boolean obeyMds,
+            @Parameter(description = "properties", required = true) HashMap<String, String[]> properties,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	    	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeDao newNode = nodeDao.changePropertiesWithVersioning(properties, obeyMds == null || obeyMds, versionComment);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
-    
-    
 
-    
+
     @DELETE
-    @Path("/nodes/{repository}/{node}")    
-    
+    @Path("/nodes/{repository}/{node}")
+
     @Operation(summary = "Delete node.", description = "Delete node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response delete(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "move the node to recycle",schema = @Schema(defaultValue="true"),required=false) @QueryParam("recycle") Boolean recycle,
-    	@Parameter(description = "protocol",schema = @Schema(defaultValue=""),required=false) @QueryParam("protocol") String protocol,
-    	@Parameter(description = "store",schema = @Schema(defaultValue=""),required=false) @QueryParam("store") String store,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-    		if(protocol != null && !protocol.trim().equals("") 
-    				&& store != null && !store.trim().equals("")) {
-    			
-    			if(!ApplicationInfoList.getHomeRepository().getUsername().equals(AuthenticationUtil.getFullyAuthenticatedUser())){
-    				throw new Exception("admin user required when trying to delete node of another store");
-    			}
-    			
-    			NodeDao.delete(protocol, store, node);
-    			return Response.status(Response.Status.OK).build();
-    		
-    		}
-    		
-    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	nodeDao.delete(recycle==null ? true : recycle);
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "move the node to recycle", schema = @Schema(defaultValue = "true"), required = false) @QueryParam("recycle") Boolean recycle,
+            @Parameter(description = "protocol", schema = @Schema(defaultValue = ""), required = false) @QueryParam("protocol") String protocol,
+            @Parameter(description = "store", schema = @Schema(defaultValue = ""), required = false) @QueryParam("store") String store,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).build();
+        try {
 
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+    		if(StringUtils.isNotBlank(protocol) && StringUtils.isNotBlank(store)) {
+
+                if (!ApplicationInfoList.getHomeRepository().getUsername().equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
+                    throw new Exception("admin user required when trying to delete node of another store");
+                }
+
+                NodeDao.delete(protocol, store, node);
+                return Response.status(Response.Status.OK).build();
+
+            }
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	nodeDao.delete(recycle == null || recycle);
+
+            return Response.status(Response.Status.OK).build();
+
+        } catch (DAOValidationException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        } catch (Throwable t) {
+
+    		log.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
 
     }
 
     @GET
-    @Path("/nodes/{repository}/{node}/children")    
-    
+    @Path("/nodes/{repository}/{node}/children")
+
     @Operation(summary = "Get children of node.", description = "Get children of node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getChildren(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow, \"-saved_search-\" for saved searches of the user)",required=true ) @PathParam("node") String node,
-	    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500") ) @QueryParam("maxItems") Integer maxItems,
-	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
-	    @Parameter(description = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
-	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	    @Parameter(description = "Filter for a specific association. May be empty", required = false, schema = @Schema(defaultValue="")) @QueryParam("assocName") String assocName,
-	    @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "ID of parent node (or \"-userhome-\" for home directory of current user, \"-shared_files-\" for shared folders, \"-to_me_shared_files\" for shared files for the user,\"-my_shared_files-\" for files shared by the user, \"-inbox-\" for the inbox, \"-workflow_receive-\" for files assigned by workflow, \"-saved_search-\" for saved searches of the user)", required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "500")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = RestConstants.MESSAGE_FILTER) @QueryParam("filter") List<String> filter,
+            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+            @Parameter(description = "Filter for a specific association. May be empty") @QueryParam("assocName") String assocName,
+            @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Parameter(description = "Resolve inherited access permissions from parent nodes (default false)") @QueryParam("resolveInheritedAccess") Boolean resolveInheritedAccess,
+            @Context HttpServletRequest req) {
 
-    	try {
-			RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
-			if(remote != null) {
-				return RepoProxyFactory.getRepoProxy().getChildren(remote.getRepository(), remote.getNodeId(), maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
-			}
-
-    		Filter propFilter = new Filter(propertyFilter);
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	node=NodeDao.mapNodeConstants(repoDao,node, false);
-
-			SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
-
-			NodeEntries response=null;
-			List<NodeRef> children=null;
-			if(node == null) {
-				response = new NodeEntries();
-			} else if("-shared_files-".equals(node)){
-		    	User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
-		    	children = person.getSharedFolders();
-		    	List<org.alfresco.service.cmr.repository.NodeRef> converted=NodeDao.convertApiNodeRef(children);
-                children=NodeDao.convertAlfrescoNodeRef(repoDao,NodeDao.sortAlfrescoRefs(converted,filter,sortDefinition));
+        try {
+            RepoProxy.RemoteRepoDetails remote = RepoProxyFactory.getRepoProxy().myTurn(repository, node);
+            if (remote != null) {
+                return RepoProxyFactory.getRepoProxy().getChildren(remote.getRepository(), remote.getNodeId(), maxItems, skipCount, filter, sortProperties, sortAscending, assocName, propertyFilter, req);
             }
-	    	else if("-my_shared_files-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedByMe(repoDao, filter, propFilter, sortDefinition, skipCount, maxItems));
-			}
-	    	else if("-workflow_receive-".equals(node)){
-				response = searchResultToResponse(NodeDao.getWorkflowReceive(repoDao,filter,sortDefinition, skipCount, maxItems));
-	    	}
-	    	else if("-to_me_shared_files-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.All, filter, propFilter,sortDefinition,skipCount,maxItems));
-			}
-			else if("-to_me_shared_files_personal-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter,sortDefinition,skipCount,maxItems));
-			}
-	    	else if("-frontpage-".equals(node)){
-				response = searchResultToResponse(NodeDao.getFrontpageNodes(repoDao));
-			}
-	    	else{
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-	    		children = nodeDao.getChildren(assocName,filter,sortDefinition);
-            }
-	    	if(response==null)
-            	response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
-			//List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
-	    	//Collections.sort(children);
-			//NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
-	    
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
 
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
+            Filter propFilter = new Filter(propertyFilter);
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node, false);
+
+            SortDefinition sortDefinition = new SortDefinition(sortProperties, sortAscending);
+
+            NodeEntries response = null;
+            List<NodeRef> children = null;
+            if (node == null) {
+                response = new NodeEntries();
+            } else if ("-shared_files-".equals(node)) {
+                User person = PersonDao.getPerson(repoDao, PersonDao.ME).asPerson();
+                children = person.getSharedFolders();
+                List<org.alfresco.service.cmr.repository.NodeRef> converted = NodeDao.convertApiNodeRef(children);
+                children = NodeDao.convertAlfrescoNodeRef(repoDao, NodeDao.sortAlfrescoRefs(converted, filter, sortDefinition));
+            } else if ("-my_shared_files-".equals(node)) {
+                response = searchResultToResponse(NodeDao.getFilesSharedByMe(repoDao, filter, propFilter, sortDefinition, skipCount, maxItems));
+            } else if ("-workflow_receive-".equals(node)) {
+                response = searchResultToResponse(NodeDao.getWorkflowReceive(repoDao, filter, sortDefinition, skipCount, maxItems));
+            } else if ("-to_me_shared_files-".equals(node)) {
+                response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.All, filter, propFilter, sortDefinition, skipCount, maxItems));
+            } else if ("-to_me_shared_files_personal-".equals(node)) {
+                response = searchResultToResponse(NodeDao.getFilesSharedToMe(repoDao, SharedToMeType.Private, filter, propFilter, sortDefinition, skipCount, maxItems));
+            } else if ("-frontpage-".equals(node)) {
+                response = searchResultToResponse(NodeDao.getFrontpageNodes(repoDao));
+            } else {
+                NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
+                children = nodeDao.getChildren(assocName, filter, sortDefinition);
+            }
+            if (response == null)
+                response = NodeDao.convertToRest(repoDao, propFilter, children, skipCount == null ? 0 : skipCount, maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems, (nodeDao) -> {
+                    if(Boolean.TRUE.equals(resolveInheritedAccess)) {
+                        nodeDao.fetchInheritedAccess();
+                    }
+                    return nodeDao;
+
+                });
+            //List<Node> sorted=NodeDao.sortAndFilterByType(repoDao,children,sortDefinition,filter,propFilter);
+            //Collections.sort(children);
+            //NodeEntries response=createResponseFromNodeList(sorted,skipCount,maxItems);
+
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
     }
 
-	public static NodeEntries searchResultToResponse(org.edu_sharing.restservices.shared.SearchResult<NodeDao> data) throws DAOException {
-		NodeEntries response;
-		response=new NodeEntries();
-		response.setPagination(data.getPagination());
-		List<Node> list = new ArrayList<>();
-		for (NodeDao nodeDao : data.getNodes()) {
-			Node asNode = nodeDao.asNode();
-			list.add(asNode);
-		}
-		response.setNodes(list);
-		return response;
-	}
+    public static NodeEntries searchResultToResponse(org.edu_sharing.restservices.shared.SearchResult<NodeDao> data) throws DAOException {
+        NodeEntries response;
+        response = new NodeEntries();
+        response.setPagination(data.getPagination());
+        List<Node> list = new ArrayList<>();
+        for (NodeDao nodeDao : data.getNodes()) {
+            Node asNode = nodeDao.asNode();
+            list.add(asNode);
+        }
+        response.setNodes(list);
+        return response;
+    }
 
-	@GET
-	@Path("/nodes/{repository}/{node}/assocs")
+    @GET
+    @Path("/nodes/{repository}/{node}/assocs")
 
-	@Operation(summary = "Get related nodes.", description = "Get nodes related based on an assoc.")
+    @Operation(summary = "Get related nodes.", description = "Get nodes related based on an assoc.")
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-	public Response getAssocs(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="500") ) @QueryParam("maxItems") Integer maxItems,
-			@Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0") ) @QueryParam("skipCount") Integer skipCount,
-			@Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-			@Parameter(description = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"",required = true) @QueryParam("direction") AssocInfo.Direction direction,
-			@Parameter(description = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
-			@Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
-			@Context HttpServletRequest req) {
+    public Response getAssocs(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "500")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+            @Parameter(description = "Either where the given node should be the \"SOURCE\" or the \"TARGET\"", required = true) @QueryParam("direction") AssocInfo.Direction direction,
+            @Parameter(description = "Association name (e.g. ccm:forkio).") @QueryParam("assocName") String assocName,
+            @Parameter(description = RestConstants.MESSAGE_PROPERTY_FILTER, array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Context HttpServletRequest req) {
 
-		try {
-			Filter propFilter = new Filter(propertyFilter);
+        try {
+            Filter propFilter = new Filter(propertyFilter);
 
-			NodeEntries response=new NodeEntries();
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			List<NodeRef> children;
+            NodeEntries response = new NodeEntries();
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
+            List<NodeRef> children;
 
-            SortDefinition sortDefinition = new SortDefinition(sortProperties,sortAscending);
+            SortDefinition sortDefinition = new SortDefinition(sortProperties, sortAscending);
 
             NodeDao nodeDao = NodeDao.getNode(repoDao, node, propFilter);
-			children = nodeDao.getAssocs(new AssocInfo(direction,assocName),null,sortDefinition);
-            response=NodeDao.convertToRest(repoDao,propFilter,children,skipCount==null ? 0 : skipCount,maxItems==null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
+            children = nodeDao.getAssocs(new AssocInfo(direction, assocName), null, sortDefinition);
+            response = NodeDao.convertToRest(repoDao, propFilter, children, skipCount == null ? 0 : skipCount, maxItems == null ? RestConstants.DEFAULT_MAX_ITEMS : maxItems);
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            return Response.status(Response.Status.OK).entity(response).build();
 
-		}
-		catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	}
+    }
+
     @DELETE
-    @Path("/nodes/{repository}/{node}/shares/{shareId}")    
-    
+    @Path("/nodes/{repository}/{node}/shares/{shareId}")
+
     @Operation(summary = "Remove share of a node.", description = "Remove the specified share id")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response removeShare(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "share id",required=true ) @PathParam("shareId") String shareId,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "share id", required = true) @PathParam("shareId") String shareId,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	
-	    	nodeDao.removeShare(shareId);
+        try {
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_UNSHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-	    	return Response.status(Response.Status.OK).build();
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
-    }    
+            nodeDao.removeShare(shareId);
+
+            activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_UNSHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+
+            return Response.status(Response.Status.OK).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     @POST
-    @Path("/nodes/{repository}/{node}/shares/{shareId}")    
-    
+    @Path("/nodes/{repository}/{node}/shares/{shareId}")
+
     @Operation(summary = "update share of a node.", description = "update the specified share id")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response updateShare(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "share id",required=true ) @PathParam("shareId") String shareId,
-	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ GlobalShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
-	    @Parameter(description = "new password for share, leave empty if you don't want to change it", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "share id", required = true) @PathParam("shareId") String shareId,
+            @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue = "" + GlobalShareService.EXPIRY_DATE_UNLIMITED)) @QueryParam("expiryDate") Long expiryDate,
+            @Parameter(description = "new password for share, leave empty if you don't want to change it", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeShare response=nodeDao.updateShare(shareId,expiryDate==null? GlobalShareService.EXPIRY_DATE_UNLIMITED:expiryDate,password);
-	    	return Response.status(Response.Status.OK).entity(response).build();
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
-    }  
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeShare response = nodeDao.updateShare(shareId, expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password);
+            return Response.status(Response.Status.OK).entity(response).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     @POST
-    @Path("/nodes/{repository}/{node}/import")    
-    
+    @Path("/nodes/{repository}/{node}/import")
+
     @Operation(summary = "Import node", description = "Import a node from a foreign repository to the local repository.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response importNode(
-    	@Parameter(description = "The id of the foreign repository",required=true) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "Parent node where to store it locally, may also use -userhome- or -inbox-",required=true ) @QueryParam("parent") String parent,
-		@Context HttpServletRequest req) {
+            @Parameter(description = "The id of the foreign repository", required = true) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Parent node where to store it locally, may also use -userhome- or -inbox-", required = true) @QueryParam("parent") String parent,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	if(repoDao.isHomeRepo()){
-	    		throw new InvalidArgumentException("Import can be only done for a foreign repository");
-	    	}
-	    	
-	    	RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
-			node=NodeDao.mapNodeConstants(repoDaoHome,node);
-			parent=NodeDao.mapNodeConstants(repoDaoHome,parent);
+        try {
 
-			NodeDao nodeDao=NodeDao.getNode(repoDao, node).importNode(parent);
-	    	NodeEntry response=new NodeEntry();
-	    	response.setNode(nodeDao.asNode());
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            if (repoDao.isHomeRepo()) {
+                throw new InvalidArgumentException("Import can be only done for a foreign repository");
+            }
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+            RepositoryDao repoDaoHome = RepositoryDao.getRepository(RepositoryDao.HOME);
+            node = NodeDao.mapNodeConstants(repoDaoHome, node);
+            parent = NodeDao.mapNodeConstants(repoDaoHome, parent);
 
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
-    }    
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node).importNode(parent);
+            NodeEntry response = new NodeEntry();
+            response.setNode(nodeDao.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     @GET
-    @Path("/nodes/{repository}/{node}/shares")    
-    
+    @Path("/nodes/{repository}/{node}/shares")
+
     @Operation(summary = "Get shares of node.", description = "Get list of shares (via mail/token) for a node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare[].class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare[].class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getShares(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "Filter for a specific email or use "+ GlobalShareService.EMAIL_TYPE_LINK+" for link shares (Optional)",required=false) @QueryParam("email") String email,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Filter for a specific email or use " + GlobalShareService.EMAIL_TYPE_LINK + " for link shares (Optional)", required = false) @QueryParam("email") String email,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	List<NodeShare> response=nodeDao.getShares(email);
-	    	return Response.status(Response.Status.OK).entity(response).build();
+        try {
 
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
-    }    
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            List<NodeShare> response = nodeDao.getShares(email);
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     @PUT
-    @Path("/nodes/{repository}/{node}/shares")    
-    
+    @Path("/nodes/{repository}/{node}/shares")
+
     @Operation(summary = "Create a share for a node.", description = "Create a new share for a node")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeShare.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response createShare(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue=""+ GlobalShareService.EXPIRY_DATE_UNLIMITED )) @QueryParam("expiryDate") Long expiryDate,
-	    @Parameter(description = "password for this share, use none to not use a password", required = false, schema = @Schema(defaultValue="")) @QueryParam("password") String password,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "expiry date for this share, leave empty or -1 for unlimited", required = false, schema = @Schema(defaultValue = "" + GlobalShareService.EXPIRY_DATE_UNLIMITED)) @QueryParam("expiryDate") Long expiryDate,
+            @Parameter(description = "password for this share, use none to not use a password", required = false, schema = @Schema(defaultValue = "")) @QueryParam("password") String password,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao=NodeDao.getNode(repoDao, node);
-	    	NodeShare response=nodeDao.createShare(expiryDate==null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate,password);
+        try {
 
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            NodeShare response = nodeDao.createShare(expiryDate == null ? GlobalShareService.EXPIRY_DATE_UNLIMITED : expiryDate, password);
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+            activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.LINK_SHARE_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
-    	}
-    	catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-       
-    }    
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
     public static NodeEntries createResponseFromNodeList(List<Node> sorted, Integer skipCount, Integer maxItems) {
-		NodeEntries response = new NodeEntries();
-    	int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
-    	int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();   
-    		
-    	List<Node> data = new ArrayList<>();
-    	for (Node child : sorted.subList(min, max)) {
-    		data.add(child);
-    	}
-    	
-    	Pagination pagination = new Pagination();
-    	pagination.setFrom(min);
-    	pagination.setCount(data.size());
-    	pagination.setTotal(sorted.size());
-    	
-    	response.setNodes(data);
-    	response.setPagination(pagination);
-    	return response;
-	}
+        NodeEntries response = new NodeEntries();
+        int min = (skipCount != null) ? Math.min(sorted.size(), skipCount) : 0;
+        int max = (maxItems != null) ? Math.min(sorted.size(), min + maxItems) : sorted.size();
+
+        List<Node> data = new ArrayList<>(sorted.subList(min, max));
+
+        Pagination pagination = new Pagination();
+        pagination.setFrom(min);
+        pagination.setCount(data.size());
+        pagination.setTotal(sorted.size());
+
+        response.setNodes(data);
+        response.setPagination(pagination);
+        return response;
+    }
+
+    /**
+     * Only used for Swagger UI / OpenApi Specification.
+     * To use this as a parameter, we need to register a MessageBodyReader for multipart/form-data.
+     */
+    @Schema(name = "ChildrenFileContentUpload", description = "Multipart upload for node content")
+    public static class ChildrenFileContentUpload {
+        @Schema(description = "JSON-Metadaten")
+        public ChildrenMetadata properties;
+
+        @Schema(type = "string", format = "binary", description = "File content")
+        public InputStream file;
+    }
+
+    public record ChildrenMetadata(Map<String, String[]> properties) {
+    }
 
 
-	
-
-	@POST
-    @Path("/nodes/{repository}/{node}/children")    
-    
-    @Operation(summary = "Create a new child.", description = "Create a new child.")
-    
+    @POST
+    @Path("/nodes/{repository}/{node}/children/_content")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Operation(
+            summary = "Create a new child with content.",
+            description = "Create a new child with content.",
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA,
+                            schema = @Schema(implementation = ChildrenFileContentUpload.class),
+                            encoding = {
+                                    @Encoding(
+                                            name = "properties",
+                                            contentType = "application/json"
+                                    ),
+                                    @Encoding(
+                                            name = "file",
+                                            contentType = "application/octet-stream"
+                                    )
+                            }
+                    )
+            ))
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    @RetryingTransaction
+    public Response createChildWithContent(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_PARENT_NODE + " use -userhome- for userhome or -inbox- for inbox node", required = true) @PathParam("node") String node,
+            @Parameter(description = "type of node", required = true) @QueryParam("type") String type,
+            @Parameter(description = "aspects of node") @QueryParam("aspects") List<String> aspects,
+            @Parameter(description = "rename if the same node name exists", schema = @Schema(defaultValue = "false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+            @Parameter(description = "comment, leave empty = no inital version") @QueryParam("versionComment") String versionComment,
+            @Parameter(description = "Association type, can be empty") @QueryParam("assocType") String assocType,
+            @Parameter(description = "accept only properties from the specific mds set", schema = @Schema(defaultValue = "true")) @QueryParam("obeyMds") Boolean obeyMds,
+            @FormDataParam("properties") FormDataBodyPart metadataPart,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FormDataContentDisposition fileMetaData) {
+
+        metadataPart.setMediaType(MediaType.APPLICATION_JSON_TYPE);
+        Map<String, String[]> properties = metadataPart.getValueAs(ChildrenMetadata.class).properties();
+
+        String[] url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
+        if (url != null && fileInputStream != null) {
+            throw new IllegalArgumentException("Cannot upload file and URL at the same time");
+        }
+
+        if (url == null && fileInputStream == null) {
+            throw new IllegalArgumentException("Either file or URL must be provided");
+        }
+
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+        resolveURLTitle(properties);
+
+        if (fileMetaData != null) {
+            String[] cmName = properties.get("cm:name");
+            if (cmName == null || cmName.length == 0) {
+                properties.put("cm:name", new String[]{fileMetaData.getFileName()});
+            }
+        }
+
+        NodeDao child = nodeDao.createChild(type, aspects, properties,
+                renameIfExists != null && renameIfExists,
+                StringUtils.isBlank(assocType) ? assocType : null, obeyMds != Boolean.FALSE);
+
+        if (fileInputStream != null) {
+            nodeDao.changeContent(fileInputStream, null, versionComment);
+        }
+
+        NodeEntry response = new NodeEntry();
+        response.setNode(child.asNode());
+
+        return Response.status(Response.Status.OK).entity(response).build();
+    }
+
+
+    @POST
+    @Path("/nodes/{repository}/{node}/children")
+
+    @Operation(summary = "Create a new child.", description = "Create a new child.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response createChild(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_PARENT_NODE+" use -userhome- for userhome or -inbox- for inbox node",required=true ) @PathParam("node") String node,
-	    @Parameter(description = "type of node",required=true ) @QueryParam("type") String type,
-	    @Parameter(description = "aspects of node" ) @QueryParam("aspects") List<String> aspects,
-	    @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue="false")) @QueryParam("renameIfExists") Boolean renameIfExists,
-	    @Parameter(description = "comment, leave empty = no inital version", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}" , required=true ) HashMap<String, String[]> properties,
-		@Parameter(description = "Association type, can be empty" , required=false ) @QueryParam("assocType") String assocType,
-		@Parameter(description = "accept only properties from the specific mds set" , required=false, schema = @Schema(defaultValue="true") ) @QueryParam("obeyMds") Boolean obeyMds,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_PARENT_NODE + " use -userhome- for userhome or -inbox- for inbox node", required = true) @PathParam("node") String node,
+            @Parameter(description = "type of node", required = true) @QueryParam("type") String type,
+            @Parameter(description = "aspects of node") @QueryParam("aspects") List<String> aspects,
+            @Parameter(description = "rename if the same node name exists", required = false, schema = @Schema(defaultValue = "false")) @QueryParam("renameIfExists") Boolean renameIfExists,
+            @Parameter(description = "comment, leave empty = no inital version", required = false) @QueryParam("versionComment") String versionComment,
+            @Parameter(description = "properties, example: {\"{http://www.alfresco.org/model/content/1.0}name\": [\"test\"]}", required = true) HashMap<String, String[]> properties,
+            @Parameter(description = "Association type, can be empty", required = false) @QueryParam("assocType") String assocType,
+            @Parameter(description = "accept only properties from the specific mds set", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("obeyMds") Boolean obeyMds,
+            @Context HttpServletRequest req) {
 
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
+        try {
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	resolveURLTitle(properties);
-	    	NodeDao child = nodeDao.createChild(type, aspects, properties,
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            resolveURLTitle(properties);
+            NodeDao child = nodeDao.createChild(type, aspects, properties,
                     renameIfExists != null && renameIfExists,
-					assocType!=null && !assocType.trim().isEmpty() ? assocType : null, obeyMds == null || obeyMds);
+                    assocType != null && !assocType.trim().isEmpty() ? assocType : null, obeyMds == null || obeyMds);
 
-			if(versionComment!=null && !versionComment.isEmpty()){
-				child.createVersion(versionComment);
-			}
-	    	
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(child.asNode());
+            if (versionComment != null && !versionComment.isEmpty()) {
+                child.createVersion(versionComment);
+            }
 
-			return Response.status(Response.Status.OK).entity(response).build();
 
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            NodeEntry response = new NodeEntry();
+            response.setNode(child.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
 
-	@POST
-	@Path("/nodes/{repository}/{node}/xapi")
+    @POST
+    @Path("/nodes/{repository}/{node}/xapi")
 
-	@Operation(summary = "Store xApi-Conform data for a given node")
+    @Operation(summary = "Store xApi-Conform data for a given node")
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response storeXApiData(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "xApi conform json data",required=true ) String xApi,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			String result = nodeDao.storeXApiData(xApi);
-			return Response.status(Response.Status.OK).entity(result).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-
-	}
-
-	public void resolveURLTitle(HashMap<String, String[]> properties) {
-		String[] url=(String[])properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
-
-		if(url==null)
-			return;
-
-		List<String> gitHubUrls = Arrays.stream(url).filter(x->x.contains("github.com")).collect(Collectors.toList());
-
-		if (gitHubUrls.stream().anyMatch(gitHubService::checkForJupyterNotebooks)) {
-			properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[]{CCM_RESSOURCETYPE_BINDER});
-		}
-
-		// Don't resolve url if name is already given by client
-		if(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))!=null) {
-			properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
-					new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
-			return;
-		}
-		 WebsiteInformation info=ClientUtilsService.getWebsiteInformation(url[0]);
-		 if(info==null){
-		     properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
-		     properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),url);
-			 return;
-		 }
-		 String title=info.getTitle();
-		 if(info.getTitle()==null) {
-			 title = info.getPage();
-		 }
-		 if(title == null || title.trim().isEmpty()){
-		 	title = url[0];
-		 }
-	    properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(title)});
-	    properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE),new String[]{title});
-	    if(info.getDescription()!=null)
-	    	properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION),new String[]{info.getDescription()});
-	    if(info.getKeywords()!=null)
-	    	properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_KEYWORD),info.getKeywords());
-	    if(info.getLicense()!=null){
-	    	properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY),new String[]{info.getLicense().getName()});
-	    	if(info.getLicense().getCcVersion()!=null)
-	    		properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION),new String[]{info.getLicense().getCcVersion()});
-		}
-	    if(info.getLrmiProperties()!=null){
-	    	properties.putAll(info.getLrmiProperties());
-		}
-	}
-
-	@POST
-	@Path("/nodes/{repository}/{node}/children/_fork")
-
-	@Operation(summary = "Create a copy of a node by creating a forked version (variant).")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response createForkOfNode(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-			@Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
-			@Parameter(description = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			source=NodeDao.mapNodeConstants(repoDao,source);
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao child = nodeDao.createFork(source);
-
-			NodeEntry response = new NodeEntry();
-			response.setNode(child.asNode());
-
-			activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, child.asNode().getRef().getId()), null, ActivityOnNodeEventType.FORK_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
-
-			return Response.status(Response.Status.OK).entity(response).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-
-	}
-
-	@POST
-    @Path("/nodes/{repository}/{node}/children/_copy")    
-    
-    @Operation(summary = "Create a new child by copying.", description = "Create a new child by copying.")
-    
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Object.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-    public Response createChildByCopying(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-	    @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
-	    @Parameter(description = "flag for children",required=true) @QueryParam("withChildren") boolean withChildren,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+    public Response storeXApiData(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "xApi conform json data", required = true) String xApi,
+            @Context HttpServletRequest req) {
 
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			source=NodeDao.mapNodeConstants(repoDao,source);
+        try {
 
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao child = nodeDao.createChildByCopy(source, withChildren);
-	    			
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(child.asNode());
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            String result = nodeDao.storeXApiData(xApi);
+            return Response.status(Response.Status.OK).entity(result).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-    	} catch (Throwable t) {	
-    		return ErrorResponse.createResponse(t);
-    	}
+    }
+
+    public void resolveURLTitle(Map<String, String[]> properties) {
+        String[] url = properties.get(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_WWWURL));
+
+        if (url == null)
+            return;
+
+        List<String> gitHubUrls = Arrays.stream(url)
+                .filter(x -> x.contains("github.com"))
+                .toList();
+
+        if (gitHubUrls.stream().anyMatch(gitHubService::checkForJupyterNotebooks)) {
+            properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[]{CCM_RESSOURCETYPE_BINDER});
+        }
+
+        // Don't resolve url if name is already given by client
+        if (properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME)) != null) {
+            properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME),
+                    new String[]{NodeServiceHelper.cleanupCmName(properties.get(CCConstants.getValidLocalName(CCConstants.CM_NAME))[0])});
+            return;
+        }
+        WebsiteInformation info = ClientUtilsService.getWebsiteInformation(url[0]);
+        if (info == null) {
+            properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(url[0])});
+            properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE), url);
+            return;
+        }
+        String title = info.getTitle();
+        if (info.getTitle() == null) {
+            title = info.getPage();
+        }
+        if (title == null || title.trim().isEmpty()) {
+            title = url[0];
+        }
+        properties.put(CCConstants.getValidLocalName(CCConstants.CM_NAME), new String[]{NodeServiceHelper.cleanupCmName(title)});
+        properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_TITLE), new String[]{title});
+        if (info.getDescription() != null)
+            properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_DESCRIPTION), new String[]{info.getDescription()});
+        if (info.getKeywords() != null)
+            properties.put(CCConstants.getValidLocalName(CCConstants.LOM_PROP_GENERAL_KEYWORD), info.getKeywords());
+        if (info.getLicense() != null) {
+            properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY), new String[]{info.getLicense().getName()});
+            if (info.getLicense().getCcVersion() != null)
+                properties.put(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_COMMONLICENSE_CC_VERSION), new String[]{info.getLicense().getCcVersion()});
+        }
+        if (info.getLrmiProperties() != null) {
+            properties.putAll(info.getLrmiProperties());
+        }
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/children/_fork")
+
+    @Operation(summary = "Create a copy of a node by creating a forked version (variant).")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response createForkOfNode(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_PARENT_NODE, required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE, required = true) @QueryParam("source") String source,
+            @Parameter(description = "new file name for the forked element", required = true) @QueryParam("name") String name,
+            @Parameter(description = "flag for children", required = true) @QueryParam("withChildren") boolean withChildren,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+            node = NodeDao.mapNodeConstants(repoDao, node);
+            source = NodeDao.mapNodeConstants(repoDao, source);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            NodeDao child = nodeDao.createFork(source, name);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(child.asNode());
+
+            activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, child.asNode().getRef().getId()), null, ActivityOnNodeEventType.FORK_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
     @POST
-    @Path("/nodes/{repository}/{node}/children/_move")    
-    
-    @Operation(summary = "Create a new child by moving.", description = "Create a new child by moving.")
-    
+    @Path("/nodes/{repository}/{node}/children/_copy")
+
+    @Operation(summary = "Create a new child by copying.", description = "Create a new child by copying.")
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response createChildByCopying(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_PARENT_NODE, required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE, required = true) @QueryParam("source") String source,
+            @Parameter(description = "flag for children", required = true) @QueryParam("withChildren") boolean withChildren,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+            node = NodeDao.mapNodeConstants(repoDao, node);
+            source = NodeDao.mapNodeConstants(repoDao, source);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            NodeDao child = nodeDao.createChildByCopy(source, withChildren);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(child.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/children/_move")
+
+    @Operation(summary = "Create a new child by moving.", description = "Create a new child by moving.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response createChildByMoving(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-		@Parameter(description = RestConstants.MESSAGE_PARENT_NODE,required=true ) @PathParam("node") String node,
-		@Parameter(description = RestConstants.MESSAGE_SOURCE_NODE,required=true) @QueryParam("source") String source,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			source=NodeDao.mapNodeConstants(repoDao,source);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			NodeDao child = nodeDao.createChildByMove(source);
-	    			
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(child.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_PARENT_NODE, required = true) @PathParam("node") String node,
+            @Parameter(description = RestConstants.MESSAGE_SOURCE_NODE, required = true) @QueryParam("source") String source,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+        try {
 
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao child = NodeDao.createChildByMove(repoDao, node, source);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(child.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
     @POST
     @Path("/nodes/{repository}/{node}/preview")
-    @Consumes({ "multipart/form-data" })
-    
+    @Consumes({"multipart/form-data"})
+
     @Operation(summary = "Change preview of node.", description = "Change preview of node.")
-    
+
     @ApiResponses(
-    	value = { 
-        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response changePreview(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(schema = @Schema(type = "string", format = "binary")) @FormDataParam("image") InputStream inputStream,
-	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-		@Parameter(description = "create a node version", required = false, schema = @Schema(defaultValue="true")) @QueryParam("createVersion") Boolean createVersion,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao =  NodeDao.getNode(repoDao, node).changePreview(inputStream,mimetype, createVersion==null || createVersion);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(nodeDao.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(schema = @Schema(type = "string", format = "binary")) @FormDataParam("image") InputStream inputStream,
+            @Parameter(description = "MIME-Type", required = true) @QueryParam("mimetype") String mimetype,
+            @Parameter(description = "create a node version", required = false, schema = @Schema(defaultValue = "true")) @QueryParam("createVersion") Boolean createVersion,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+        try {
 
-    	} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node).changePreview(inputStream, mimetype, createVersion == null || createVersion);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(nodeDao.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
-	@DELETE
-	@Path("/nodes/{repository}/{node}/preview")
 
-	@Operation(summary = "Delete preview of node.")
+    @DELETE
+    @Path("/nodes/{repository}/{node}/preview")
 
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
+    @Operation(summary = "Delete preview of node.")
 
-	public Response deletePreview(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-		try {
+    public Response deletePreview(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
 
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+        try {
 
-			NodeDao newNode = nodeDao.deletePreview();
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-			NodeEntry response = new NodeEntry();
-			response.setNode(newNode.asNode());
+            NodeDao newNode = nodeDao.deletePreview();
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
 
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-	}
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
     @POST
     @Path("/nodes/{repository}/{node}/content")
-    @Consumes({ "multipart/form-data" })
-    
+    @Consumes({"multipart/form-data"})
+
     @Operation(summary = "Change content of node.", description = "Change content of node.")
-    
+
     @ApiResponses(
-    	value = { 
-        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response changeContent(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-	    //@FormDataParam("file") InputStream inputStream,
-		@Parameter(description = "file upload", schema = @Schema( name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required = false) @QueryParam("versionComment") String versionComment,
+            @Parameter(description = "MIME-Type", required = true) @QueryParam("mimetype") String mimetype,
+            //@FormDataParam("file") InputStream inputStream,
+            @Parameter(description = "file upload", schema = @Schema(name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
 //	    @FormDataParam("file") FormDataContentDisposition fileDetail,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            @Context HttpServletRequest req) {
 
-			//use tika framework for mimetype detection
-	    	NodeDao newNode = nodeDao.changeContent(inputStream, null, versionComment);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(newNode.asNode());
+        try {
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
 
-    	} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+            //use tika framework for mimetype detection
+            NodeDao newNode = nodeDao.changeContent(inputStream, null, versionComment);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
     }
-    
+
     @POST
     @Path("/nodes/{repository}/{node}/textContent")
     @Operation(summary = "Change content of node as text.", description = "Change content of node as text.")
-    
+
     @ApiResponses(
-    	value = { 
-        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response changeContentAsText(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required=false ) @QueryParam("versionComment")  String versionComment,
-	    @Parameter(description = "MIME-Type", required=true ) @QueryParam("mimetype")  String mimetype,
-	    @Parameter(description = "The content data to write (text)", required=true )String text,
-		@Context HttpServletRequest req) {
-    	
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao newNode = nodeDao.changeContent(new ByteArrayInputStream(text.getBytes()), mimetype, versionComment);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(newNode.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required = false) @QueryParam("versionComment") String versionComment,
+            @Parameter(description = "MIME-Type", required = true) @QueryParam("mimetype") String mimetype,
+            @Parameter(description = "The content data to write (text)", required = true) String text,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
+        try {
 
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeDao newNode = nodeDao.changeContent(new ByteArrayInputStream(text.getBytes()), mimetype, versionComment);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(newNode.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
 
     @GET
-    @Path("/nodes/{repository}/{node}/versions")    
-    
+    @Path("/nodes/{repository}/{node}/versions")
+
     @Operation(summary = "Get all versions of node.", description = "Get all versions of node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionRefEntries.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionRefEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getVersions(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-		@Context HttpServletRequest req) {
-    
-    	try {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
 
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
+        try {
 
-			NodeVersionRefEntries response=new NodeVersionRefEntries();
-	    	response.setVersions(nodeDao.getNodeRefHistory());
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
-	  }
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, Filter.createShowAllFilter());
 
-	@GET
-	@Path("/nodes/{repository}/{node}/versions/metadata")
+            NodeVersionRefEntries response = new NodeVersionRefEntries();
+            response.setVersions(nodeDao.getNodeRefHistory());
+            return Response.status(Response.Status.OK).entity(response).build();
 
-	@Operation(summary = "Get all versions of node, including it's metadata.", description = "Get all versions of node, including it's metadata.")
-
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntries.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response getVersions(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Filter filter = new Filter(propertyFilter);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
-
-			NodeVersionEntries response=new NodeVersionEntries();
-			response.setVersions(nodeDao.getHistory());
-			return Response.status(Response.Status.OK).entity(response).build();
-
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-	}
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
 
     @GET
-    @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")    
-    
-    @Operation(summary = "Get metadata of node version.", description = "Get metadata of node version.")
-    
+    @Path("/nodes/{repository}/{node}/versions/metadata")
+
+    @Operation(summary = "Get all versions of node, including it's metadata.", description = "Get all versions of node, including it's metadata.")
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntries.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getVersions(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            Filter filter = new Filter(propertyFilter);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+
+            NodeVersionEntries response = new NodeVersionEntries();
+            response.setVersions(nodeDao.getHistory());
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @GET
+    @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/metadata")
+
+    @Operation(summary = "Get metadata of node version.", description = "Get metadata of node version.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeVersionEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getVersionMetadata(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "major version",required=true ) @PathParam("major") int major,
-    	@Parameter(description = "minor version",required=true ) @PathParam("minor") int minor,
-    	@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
-		@Context HttpServletRequest req) {
-    
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	Filter filter = new Filter(propertyFilter);
-	    	
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
-	    	
-	    	NodeVersionEntry response = new NodeVersionEntry(); 
-	    	response.setVersion(nodeDao.getVersion(major, minor));
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "major version", required = true) @PathParam("major") int major,
+            @Parameter(description = "minor version", required = true) @PathParam("minor") int minor,
+            @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            Filter filter = new Filter(propertyFilter);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node, filter);
+
+            NodeVersionEntry response = new NodeVersionEntry();
+            response.setVersion(nodeDao.getVersion(major, minor));
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
-	@PUT
-    @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")    
-    
+    @PUT
+    @Path("/nodes/{repository}/{node}/versions/{major}/{minor}/_revert")
+
     @Operation(summary = "Revert to node version.", description = "Revert to node version.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response revertVersion(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "major version",required=true ) @PathParam("major") int major,
-    	@Parameter(description = "minor version",required=true ) @PathParam("minor") int minor,
-		@Context HttpServletRequest req) {
-    
-    	try {
-    		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodeDao revert = nodeDao.revertHistory(major, minor);
-	    	
-	    	NodeEntry response = new NodeEntry();
-	    	response.setNode(revert.asNode());
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "major version", required = true) @PathParam("major") int major,
+            @Parameter(description = "minor version", required = true) @PathParam("minor") int minor,
+            @Context HttpServletRequest req) {
 
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodeDao revert = nodeDao.revertHistory(major, minor);
+
+            NodeEntry response = new NodeEntry();
+            response.setNode(revert.asNode());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
     @POST
-    @Path("/nodes/{repository}")    
-    
+    @Path("/nodes/{repository}")
+
     @Operation(summary = "Searching nodes.", description = "Searching nodes.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResult.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = SearchResult.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response getNodes(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    @Parameter(description = "lucene query",required=true) @QueryParam("query") String query,
-	    @Parameter(description = "facets") @QueryParam("facets") List<String> facets,
-	    @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue="10")) @QueryParam("maxItems") Integer maxItems,
-	    @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue="0")) @QueryParam("skipCount") Integer skipCount,
-	    @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-	    @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-	    @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue="-all-")) ) @QueryParam("propertyFilter") List<String> propertyFilter,
-		@Context HttpServletRequest req) {
-		    
-    	try {
-    		
-    		Filter filter= new Filter(propertyFilter);
-  
-    		RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-    		
-    		SearchToken searchToken=new SearchToken();
-			searchToken.setLuceneString(query);
-			searchToken.setFrom(skipCount != null ? skipCount : 0);
-			searchToken.setMaxResult(maxItems!= null ? maxItems : 10);
-			if(facets != null) {
-				searchToken.setFacets(facets.stream().map(f -> new SearchFacet(f, null)).collect(Collectors.toList()));
-			}
-			searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-    		NodeSearch search = NodeDao.search(repoDao,searchToken);
-    		List<Node> data = new ArrayList<>();
-	    	for (NodeRef ref : search.getResult()) {
-	    		data.add(NodeDao.getNode(repoDao, ref.getId(),filter).asNode());
-	    	}
-	    	Pagination pagination = new Pagination();
-	    	pagination.setFrom(search.getSkip());
-	    	pagination.setCount(data.size());
-	    	pagination.setTotal(search.getCount());
-	    	
-	    	
-	    	SearchResult response = new SearchResult();
-	    	response.setNodes(data);
-	    	response.setPagination(pagination);	    	
-	    	response.setFacets(search.getFacets());
-	    	return Response.status(Response.Status.OK).entity(response).build();
-    		
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = "lucene query", required = true) @QueryParam("query") String query,
+            @Parameter(description = "facets") @QueryParam("facets") List<String> facets,
+            @Parameter(description = RestConstants.MESSAGE_MAX_ITEMS, schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = RestConstants.MESSAGE_SKIP_COUNT, schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+            @Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            Filter filter = new Filter(propertyFilter);
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+
+            SearchToken searchToken = new SearchToken();
+            searchToken.setLuceneString(query);
+            searchToken.setFrom(skipCount != null ? skipCount : 0);
+            searchToken.setMaxResult(maxItems != null ? maxItems : 10);
+            if (facets != null) {
+                searchToken.setFacets(facets.stream().map(f -> new SearchFacet(f, null)).collect(Collectors.toList()));
+            }
+            searchToken.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
+            NodeSearch search = NodeDao.search(repoDao, searchToken);
+            List<Node> data = new ArrayList<>();
+            for (NodeRef ref : search.getResult()) {
+                data.add(NodeDao.getNode(repoDao, ref.getId(), filter).asNode());
+            }
+            Pagination pagination = new Pagination();
+            pagination.setFrom(search.getSkip());
+            pagination.setCount(data.size());
+            pagination.setTotal(search.getCount());
+
+
+            SearchResult response = new SearchResult();
+            response.setNodes(data);
+            response.setPagination(pagination);
+            response.setFacets(search.getFacets());
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
-	@GET
-    @Path("/nodes/{repository}/{node}/permissions/{user}")    
-    
+    @GET
+    @Path("/nodes/{repository}/{node}/permissions/{user}")
+
     @Operation(summary = "Which permissions has user/group for node.", description = "Check for actual permissions (also when user is in groups) for a specific node")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
- 
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String[].class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
     public Response hasPermission(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "Authority (user/group) to check (use \"-me-\" for current user",required=true ) @PathParam("user") String authority,
-		@Context HttpServletRequest req) {
-    
-    	try {
-		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if(authority.equals("-me-"))
-	    		authority=AuthenticationUtil.getFullyAuthenticatedUser();
-	    	List<String> response = nodeDao.getPermissions(authority);
-	    
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "Authority (user/group) to check (use \"-me-\" for current user", required = true) @PathParam("user") String authority,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            if (authority.equals("-me-"))
+                authority = AuthenticationUtil.getFullyAuthenticatedUser();
+            List<String> response = nodeDao.getPermissions(authority);
+
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
-	
+
     @GET
-    @Path("/nodes/{repository}/{node}/permissions")    
-    
+    @Path("/nodes/{repository}/{node}/permissions")
+
     @Operation(summary = "Get all permission of node.", description = "Get all permission of node.")
-    
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodePermissionEntry.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
- 
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodePermissionEntry.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
     public Response getPermission(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-		@Context HttpServletRequest req) {
-    
-    	try {
-		
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	
-	    	NodePermissionEntry response = new NodePermissionEntry(); 
-	    	
-	    	response.setPermissions(nodeDao.getPermissions());
-	    	
-	    	return Response.status(Response.Status.OK).entity(response).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            NodePermissionEntry response = new NodePermissionEntry();
+
+            response.setPermissions(nodeDao.getPermissions());
+
+            return Response.status(Response.Status.OK).entity(response).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
 
 
-	@GET
-	@Path("/nodes/{repository}/{node}/permissions/raw")
-	@Operation(summary = "Get all permission of node (not grouped, requires admin).", description = "Get all permission of node (not grouped, requires admin).")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = org.edu_sharing.repository.client.rpc.ACL.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response getRawPermission(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
-
-		try {
-
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			return Response.status(Response.Status.OK).entity(nodeDao.getRawPermissions()).build();
-
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-
-	}
     @GET
-    @Path("/nodes/{repository}/{node}/notifys")    
-    
-    @Operation(summary = "Get notifys (sharing history) of the node.", description = "Ordered by the time of each notify")
-    
+    @Path("/nodes/{repository}/{node}/permissions/raw")
+    @Operation(summary = "Get all permission of node (not grouped, requires admin).", description = "Get all permission of node (not grouped, requires admin).")
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NotifyEntry[].class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
- 
-    public Response getNotifyList(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-		@Context HttpServletRequest req) {
-    
-    	try {
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	List<NotifyEntry> notifys = nodeDao.getNotifys();
-	    	return Response.status(Response.Status.OK).entity(notifys).build();
-	
-    	} catch (Throwable t) {
-    		return ErrorResponse.createResponse(t);
-    	}
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = org.edu_sharing.repository.client.rpc.ACL.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getRawPermission(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            return Response.status(Response.Status.OK).entity(nodeDao.getRawPermissions()).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
     }
-    @POST
-    @Path("/nodes/{repository}/{node}/permissions")    
-    
-    @Operation(summary = "Set local permissions of node.", description = "Set local permissions of node.")
-    
+
+    @GET
+    @Path("/nodes/{repository}/{node}/notifys")
+
+    @Operation(summary = "Get notifys (sharing history) of the node.", description = "Ordered by the time of each notify")
+
     @ApiResponses(
-    	value = { 
-	        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-	        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-	        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-	        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-	    })
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NotifyEntry[].class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getNotifyList(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            List<NotifyEntry> notifys = nodeDao.getNotifys();
+            return Response.status(Response.Status.OK).entity(notifys).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/permissions")
+
+    @Operation(summary = "Set local permissions of node.", description = "Set local permissions of node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
     public Response setPermission(
-    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-    	@Parameter(description = "permissions",required=true ) ACL permissions,
-    	@Parameter(description = "mailtext",required=false ) @QueryParam("mailtext")  String mailText,
-    	@Parameter(description = "sendMail",required=true ) @QueryParam("sendMail") Boolean sendMail,
-    	@Parameter(description = "sendCopy",required=true ) @QueryParam("sendCopy") Boolean sendCopy,
-        @Parameter(description = "creates share infos for shared by/with me", schema = @Schema(defaultValue="true")) @QueryParam("createShares") Boolean createShares,
-		@Context HttpServletRequest req) {
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "permissions", required = true) ACL permissions,
+            @Parameter(description = "mailtext", required = false) @QueryParam("mailtext") String mailText,
+            @Parameter(description = "sendMail", required = true) @QueryParam("sendMail") Boolean sendMail,
+            @Parameter(description = "sendCopy", required = true) @QueryParam("sendCopy") Boolean sendCopy,
+            @Parameter(description = "creates share infos for shared by/with me", schema = @Schema(defaultValue = "true")) @QueryParam("createShares") Boolean createShares,
+            @Context HttpServletRequest req) {
 
-    	try {
+        try {
 
-	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-	    	if(createShares == Boolean.FALSE){
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            if (createShares == Boolean.FALSE) {
                 ShareInfoContextHolder.getContext().setCreateSharesOnPermissionChanged(false);
             }
-	    	nodeDao.setPermissions(permissions,mailText,sendMail,sendCopy);
-	    	
-	    	return Response.status(Response.Status.OK).build();
-	
-    	} catch (DAOValidationException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOSecurityException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (DAOMissingException t) {
-    		
-    		logger.warn(t.getMessage(), t);
-    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-    		
-    	} catch (Throwable t) {
-    		
-    		logger.error(t.getMessage(), t);
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-    	}
+            nodeDao.setPermissions(permissions, mailText, sendMail, sendCopy);
+
+            return Response.status(Response.Status.OK).build();
+
+        } catch (DAOValidationException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        } catch (Throwable t) {
+
+    		log.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
 
     }
-    
 
-	  @POST
-	    @Path("/nodes/{repository}/{node}/prepareUsage")    
-	    
-	    @Operation(summary = "create remote object and get properties.", description = "create remote object and get properties.")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeRemote.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+    @PUT
+    @Path("/nodes/{repository}/permissions/inheritance")
 
-	    public Response prepareUsage(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    @Context HttpServletRequest req) {
-	    
-	    	try {
-	    		
-	    		if(RepoProxyFactory.getRepoProxy().myTurn(repository)) {
-	    			return RepoProxyFactory.getRepoProxy().prepareUsage(repository, node, req);
-	    		}
-	    		
-			
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	NodeRemote nodeRemote = NodeDao.prepareUsage(repoDao.getId(), node);
-		    	return Response.status(Response.Status.OK).entity(nodeRemote).build();
-		
-	    	} catch (DAOValidationException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOSecurityException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOMissingException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (Throwable t) {
-	    		
-	    		logger.error(t.getMessage(), t);
-	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-	    	}
+    @Operation(summary = "Set local permissions of node.", description = "Set local permissions of node.")
 
-	    }
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
 
-		@POST
-	    @Path("/nodes/{repository}/{node}/owner")    
-	    
-	    @Operation(summary = "Set owner of node.", description = "Set owner of node.")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
+    public Response set(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            SetNodePermissionInheritanceRequest nodeInheritance,
+            @Context HttpServletRequest req) {
 
-	    public Response setOwner(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@Parameter(description = "username",required=false ) @QueryParam("username")  String username,
-			@Context HttpServletRequest req) {
-	    
-	    	try {
-			
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-		    	nodeDao.setOwner(username);
+        RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+        for (NodePermissionInheritance item : nodeInheritance.inheritanceList()) {
+            NodeDao nodeDao = NodeDao.getNode(repoDao, item.node());
+            nodeDao.setInherited(item.inherit());
+        }
 
-				activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.CHANGE_MATERIAL_OWNER, AuthenticationUtil.getFullyAuthenticatedUser());
-
-				return Response.status(Response.Status.OK).build();
-		
-	    	} catch (DAOValidationException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOSecurityException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOMissingException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (Throwable t) {
-	    		
-	    		logger.error(t.getMessage(), t);
-	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-	    	}
-
-	    }
-		
-		@POST
-	    @Path("/nodes/{repository}/{node}/property")    
-	    
-	    @Operation(summary = "Set single property of node.", description = "When the property is unset (null), it will be removed")
-	    
-	    @ApiResponses(
-	    	value = { 
-		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),        
-		        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),        
-		        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))), 
-		        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class))) 
-		    })
-
-	    public Response setProperty(
-	    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-	    	@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-	    	@Parameter(description = "property",required=true ) @QueryParam("property")  String property,
-			@Parameter(description = "keepModifiedDate",required=false, schema = @Schema(defaultValue="false")) @QueryParam("keepModifiedDate") Boolean keepModifiedDate,
-			@Parameter(description = "value",required=false ) List<String> value,
-			@Context HttpServletRequest req) {
-	    
-	    	try {
-			
-		    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-		    	NodeDao.setProperty(
-						repoDao,
-						node,
-						property,
-						value == null || value.size() != 1? (Serializable) value : value.get(0),
-						keepModifiedDate != null && keepModifiedDate
-				);
-
-		    	return Response.status(Response.Status.OK).build();
-		
-	    	} catch (DAOValidationException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOSecurityException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (DAOMissingException t) {
-	    		
-	    		logger.warn(t.getMessage(), t);
-	    		return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
-	    		
-	    	} catch (Throwable t) {
-	    		
-	    		logger.error(t.getMessage(), t);
-	    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
-	    	}
-
-	    }
-
-	@GET
-	@Path("/nodes/{repository}/{node}/stats")
-	@Operation(summary = "Get statistics of node.", description = "Get statistics (views, downloads) of node. Requires " + PermissionService.CHANGE_PERMISSIONS + " permission on node")
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeStatsEntry.NodeStats.class))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-
-	public Response getStats(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
-
-		try {
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			node=NodeDao.mapNodeConstants(repoDao,node);
-
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			return Response.status(Response.Status.OK).entity(NodeDao.getStats(nodeDao)).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
-
-	}
+        return Response.status(Response.Status.OK).build();
+    }
 
 
-	@GET
-	@Path("/nodes/{repository}/{node}/permissions/jwt")
-	@Operation(summary = "Generate a jwt access token of the node.", description = "Generate a jwt access token of the node")
-	@Produces({"application/text"})
-	@ApiResponses(
-			value = {
-					@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class,  format = "byte"))),
-					@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-					@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-			})
-	public Response getJWT(
-			@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
-			@Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
-			@Context HttpServletRequest req) {
+    @POST
+    @Path("/nodes/{repository}/{node}/prepareUsage")
 
-		try {
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+    @Operation(summary = "create remote object and get properties.", description = "create remote object and get properties.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeRemote.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response prepareUsage(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            if (RepoProxyFactory.getRepoProxy().myTurn(repository)) {
+                return RepoProxyFactory.getRepoProxy().prepareUsage(repository, node, req);
+            }
+
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeRemote nodeRemote = NodeDao.prepareUsage(repoDao.getId(), node);
+            return Response.status(Response.Status.OK).entity(nodeRemote).build();
+
+        } catch (DAOValidationException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        } catch (Throwable t) {
+
+	    		log.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/owner")
+
+    @Operation(summary = "Set owner of node.", description = "Set owner of node.")
+
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response setOwner(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "username", required = false) @QueryParam("username") String username,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            nodeDao.setOwner(username);
+
+            activityEventService.trackActivityOnNode(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node), null, ActivityOnNodeEventType.CHANGE_MATERIAL_OWNER, AuthenticationUtil.getFullyAuthenticatedUser());
+
+            return Response.status(Response.Status.OK).build();
+
+        } catch (DAOValidationException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        } catch (Throwable t) {
+
+	    		log.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/property")
+
+    @Operation(summary = "Set single property of node.", description = "When the property is unset (null), it will be removed")
+
+    @ApiResponses(
+            value = {
+		        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response setProperty(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Parameter(description = "property", required = true) @QueryParam("property") String property,
+            @Parameter(description = "keepModifiedDate", required = false, schema = @Schema(defaultValue = "false")) @QueryParam("keepModifiedDate") Boolean keepModifiedDate,
+            @Parameter(description = "value", required = false) List<String> value,
+            @Context HttpServletRequest req) {
+
+        try {
+
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            NodeDao.setProperty(
+                    repoDao,
+                    node,
+                    property,
+                    value == null || value.size() != 1 ? (Serializable) value : value.get(0),
+                    keepModifiedDate != null && keepModifiedDate
+            );
+
+            return Response.status(Response.Status.OK).build();
+
+        } catch (DAOValidationException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.BAD_REQUEST).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOSecurityException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.FORBIDDEN).entity(new ErrorResponse(t)).build();
+
+        } catch (DAOMissingException t) {
+
+	    		log.warn(t.getMessage(), t);
+            return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse(t)).build();
+
+        } catch (Throwable t) {
+
+	    		log.error(t.getMessage(), t);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).build();
+        }
+
+    }
+
+    @GET
+    @Path("/nodes/{repository}/{node}/stats")
+    @Operation(summary = "Get statistics of node.", description = "Get statistics (views, downloads) of node. Requires " + PermissionService.CHANGE_PERMISSIONS + " permission on node")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = NodeStatsEntry.NodeStats.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+
+    public Response getStats(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+            node = NodeDao.mapNodeConstants(repoDao, node);
+
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            return Response.status(Response.Status.OK).entity(NodeDao.getStats(nodeDao)).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+
+    }
+
+
+    @GET
+    @Path("/nodes/{repository}/{node}/permissions/jwt")
+    @Operation(summary = "Generate a jwt access token of the node.", description = "Generate a jwt access token of the node")
+    @Produces({"application/text"})
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class, format = "byte"))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public Response getJWT(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
+            @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
+            @Context HttpServletRequest req) {
+
+        try {
+            RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 //			node=NodeDao.mapNodeConstants(repoDao,node);
 //
-			NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-			return Response.status(Response.Status.OK).entity(nodeDao.getJWT()).build();
-		} catch (Throwable t) {
-			return ErrorResponse.createResponse(t);
-		}
+            NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+            return Response.status(Response.Status.OK).entity(nodeDao.getJWT()).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
 
-	}
+    }
 }
 

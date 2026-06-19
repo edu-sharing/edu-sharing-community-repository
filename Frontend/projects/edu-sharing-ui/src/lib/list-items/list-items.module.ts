@@ -14,6 +14,7 @@ import { EduSharingUiCommonModule } from '../common/edu-sharing-ui-common.module
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateModule } from '@ngx-translate/core';
 import { ListNodeAssignmentComponent } from './list-node-assignment/list-node-assignment.component';
+import { ListNodeSuggestionComponent } from './list-node-suggestion/list-node-suggestion.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 
 @NgModule({
@@ -23,6 +24,7 @@ import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
         ListNodeLicenseComponent,
         ListNodeReplicationSourceComponent,
         ListNodeAssignmentComponent,
+        ListNodeSuggestionComponent,
         ListNodeWorkflowComponent,
         ListTextComponent,
         ListCountsComponent,

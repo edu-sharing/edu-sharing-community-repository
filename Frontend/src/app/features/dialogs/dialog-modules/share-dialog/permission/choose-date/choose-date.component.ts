@@ -7,6 +7,7 @@ import {
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -24,6 +25,10 @@ import moment from 'moment';
     imports: [SharedModule],
 })
 export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
+    private toast = inject(Toast);
+    private translationsService = inject(TranslationsService);
+    private dateAdapter = inject<DateAdapter<any>>(DateAdapter);
+
     @ViewChild(MatDatepicker) matDatepicker: MatDatepicker<any>;
     @ViewChild(MatInput) matInput: MatInput;
     @Input() dateTime: number;
@@ -31,12 +36,8 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
     @Input() to?: number;
     @Output() dateTimeChange = new EventEmitter<number>();
 
-    timeControl = new FormControl('', [Validators.pattern(/\d\d:\d\d/)]);
-    constructor(
-        private toast: Toast,
-        private translationsService: TranslationsService,
-        private dateAdapter: DateAdapter<any>,
-    ) {
+    timeControl = new FormControl('', [Validators.pattern(/\d\d?:\d\d/)]);
+    constructor() {
         if (this.translationsService.getLocale()) {
             this.dateAdapter.setLocale(this.translationsService.getLocale());
         } else {
@@ -70,6 +71,10 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
             new DatePipe('en').transform(this.toDate(this.dateTime), 'HH:mm'),
         );
         setTimeout(() => (this.matInput.value = this.toDate(this.dateTime)));
+    }
+
+    isValid(from: number): boolean {
+        return this.timeControl.valid && this.dateTime > (from ?? 0);
     }
 
     updateDate(event: MatDatepickerInputEvent<Date, any>) {

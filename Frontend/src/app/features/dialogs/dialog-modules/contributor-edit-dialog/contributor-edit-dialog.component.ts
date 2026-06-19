@@ -1,5 +1,5 @@
 import { trigger } from '@angular/animations';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime, filter, startWith, switchMap } from 'rxjs/operators';
@@ -30,6 +30,15 @@ import {
     standalone: false,
 })
 export class ContributorEditDialogComponent implements OnInit {
+    data = inject<ContributorEditDialogData>(CARD_DIALOG_DATA);
+    private dialogRef =
+        inject<CardDialogRef<ContributorEditDialogData, ContributorEditDialogResult>>(
+            CardDialogRef,
+        );
+    private searchService = inject(RestSearchService);
+    private iamService = inject(RestIamService);
+    private toast = inject(Toast);
+
     readonly roles = this.getAvailableRoles();
     vCard: VCard;
     editType: number | string; // FIXME: weird type
@@ -43,14 +52,6 @@ export class ContributorEditDialogComponent implements OnInit {
     private orgName = new BehaviorSubject('');
     suggestionPersons$: Observable<VCardResult[]>;
     suggestionOrgs$: Observable<VCardResult[]>;
-
-    constructor(
-        @Inject(CARD_DIALOG_DATA) public data: ContributorEditDialogData,
-        private dialogRef: CardDialogRef<ContributorEditDialogData, ContributorEditDialogResult>,
-        private searchService: RestSearchService,
-        private iamService: RestIamService,
-        private toast: Toast,
-    ) {}
 
     ngOnInit(): void {
         this.initObservables();

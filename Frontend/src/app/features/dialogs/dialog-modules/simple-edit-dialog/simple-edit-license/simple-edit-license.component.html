@@ -1,21 +1,23 @@
-<es-info-message message="SIMPLE_EDIT.LICENSE.ERROR_TOOLPERMISSION_MISSING" *ngIf="!tpLicense">
-</es-info-message>
-<es-info-message message="SIMPLE_EDIT.LICENSE.INVALID_STATE" *ngIf="invalid">
+@if (!tpLicense) {
+<es-info-message message="SIMPLE_EDIT.LICENSE.ERROR_TOOLPERMISSION_MISSING"> </es-info-message>
+} @if (invalid) {
+<es-info-message message="SIMPLE_EDIT.LICENSE.INVALID_STATE">
   <button mat-raised-button [color]="$any('white')" (click)="invalid = false; prepare()">
     {{ 'SIMPLE_EDIT.LICENSE.REPLACE' | translate }}
   </button>
 </es-info-message>
-<div class="license" *ngIf="!invalid && tpLicense">
+} @if (!invalid && tpLicense) {
+<div class="license">
   <label id="material-source-label">{{ 'SIMPLE_EDIT.LICENSE.SOURCE_TYPE' | translate }}</label>
   <div class="field-group">
     <mat-button-toggle-group
       #modeGroup="matButtonToggleGroup"
       aria-labelledby="material-source-label"
     >
-      <mat-button-toggle [value]="'own'">{{
+      <mat-button-toggle [value]="'own'" cdkMonitorElementFocus>{{
         'SIMPLE_EDIT.LICENSE.SOURCE_OWN' | translate
       }}</mat-button-toggle>
-      <mat-button-toggle [value]="'foreign'">{{
+      <mat-button-toggle [value]="'foreign'" cdkMonitorElementFocus>{{
         'SIMPLE_EDIT.LICENSE.SOURCE_FOREIGN' | translate
       }}</mat-button-toggle>
     </mat-button-toggle-group>
@@ -26,29 +28,32 @@
       #licenseGroup="matButtonToggleGroup"
       aria-labelledby="material-license-label"
     >
-      <mat-button-toggle *ngFor="let license of allowedLicenses" [value]="license">{{
+      @for (license of allowedLicenses; track license) {
+      <mat-button-toggle [value]="license" cdkMonitorElementFocus>{{
         'SIMPLE_EDIT.LICENSE.LICENSES.' + license | translate
       }}</mat-button-toggle>
+      }
     </mat-button-toggle-group>
   </div>
-  <ng-container *ngIf="modeGroup.value === 'foreign'">
-    <mat-form-field class="authorFreetext">
-      <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
-      <textarea
-        matInput
-        cdkTextareaAutosize
-        id="authorFreetext"
-        [(ngModel)]="authorFreetext"
-        cdkAutosizeMinRows="3"
-        cdkAutosizeMaxRows="5"
-      ></textarea>
-    </mat-form-field>
-  </ng-container>
+  @if (modeGroup.value === 'foreign') {
+  <mat-form-field class="authorFreetext">
+    <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
+    <textarea
+      matInput
+      cdkTextareaAutosize
+      id="authorFreetext"
+      [(ngModel)]="authorFreetext"
+      cdkAutosizeMinRows="3"
+      cdkAutosizeMaxRows="5"
+    ></textarea>
+  </mat-form-field>
+  } @if (isCCAttributableLicense() && modeGroup.value === 'foreign') {
   <es-license-source
-    *ngIf="isCCAttributableLicense() && modeGroup.value === 'foreign'"
     [(ccTitleOfWork)]="ccTitleOfWork"
     [(ccSourceUrl)]="ccSourceUrl"
     [(ccProfileUrl)]="ccProfileUrl"
     class="field-group"
   ></es-license-source>
+  }
 </div>
+}

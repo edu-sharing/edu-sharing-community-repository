@@ -1,5 +1,5 @@
+@if (_node) {
 <es-card
-  *ngIf="_node"
   title="{{ 'FEEDBACK.VIEW_TITLE' | translate }}"
   [node]="_node"
   [isCancelable]="true"
@@ -10,12 +10,16 @@
 >
   <div class="card-content-padding">
     <div class="feedback">
-      <h2 class="empty" *ngIf="!feedbacks || !feedbacks.length">
+      @if (!feedbacks || !feedbacks.length) {
+      <h2 class="empty">
         {{ 'FEEDBACK.VIEW_EMPTY' | translate }}
       </h2>
+      }
       <!-- TODO: introduce a sensible heading structure. -->
-      <div *ngIf="feedbacks && feedbacks.length">
-        <div *ngFor="let feedback of feedbacks" class="feedback-container">
+      @if (feedbacks && feedbacks.length) {
+      <div>
+        @for (feedback of feedbacks; track feedback) {
+        <div class="feedback-container">
           <div class="main-data">
             <div class="author">
               <es-user-avatar
@@ -33,7 +37,10 @@
             <es-mds-viewer [data]="feedback.data" groupId="material_feedback_view"></es-mds-viewer>
           </div>
         </div>
+        }
       </div>
+      }
     </div>
   </div>
 </es-card>
+}

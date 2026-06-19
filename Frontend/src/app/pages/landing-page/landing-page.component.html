@@ -1,9 +1,13 @@
 <div class="landing-page">
-  <h1 esTitle class="cdk-visually-hidden">{{ i18nPrefix + 'TITLE' | translate }}</h1>
+  <div class="landing-main" role="main">
+    <h1 esTitle class="cdk-visually-hidden">{{ i18nPrefix + 'TITLE' | translate }}</h1>
 
-  <es-shortcut-entries></es-shortcut-entries>
-  <div class="swimlanes">
-    <es-dashboard-swimlane *ngFor="let s of swimlanes()" [swimlane]="s"></es-dashboard-swimlane>
+    <es-shortcut-entries></es-shortcut-entries>
+    <div class="swimlanes">
+      @for (s of swimlanes(); track s) {
+      <es-dashboard-swimlane [swimlane]="s"></es-dashboard-swimlane>
+      }
+    </div>
   </div>
   <es-footer [scope]="landingPageScope"></es-footer>
 </div>

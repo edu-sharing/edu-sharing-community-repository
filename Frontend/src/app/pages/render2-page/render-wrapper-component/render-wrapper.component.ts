@@ -2,35 +2,41 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    HostBinding,
     Input,
     OnChanges,
     Output,
     signal,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import {
     ActionbarComponent,
     CombinedRenderData,
+    DefaultGroups,
+    ElementType,
     EduSharingUiModule,
+    OptionItem,
     OptionsHelperDataService,
     RenderHelperService,
+    Scope,
     TranslationsService,
 } from 'ngx-edu-sharing-ui';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
+import { NodeHelperService } from '../../../services/node-helper.service';
 
 @Component({
     selector: 'es-render-wrapper-component',
     templateUrl: 'render-wrapper.component.html',
     styleUrls: ['render-wrapper.component.scss'],
     imports: [
-        CommonModule,
         EduSharingUiModule,
         MatButtonModule,
         RenderComponent,
@@ -42,6 +48,12 @@ import { firstValueFrom } from 'rxjs';
     providers: [OptionsHelperDataService, RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {
+    private renderHelperService = inject(RenderHelperService);
+    private nodeService = inject(NodeService);
+    private nodeHelper = inject(NodeHelperService);
+    private translations = inject(TranslationsService);
+    private optionsHelper = inject(OptionsHelperDataService);
+
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() showTopbar = true;
     @Input() showMetadata = true;
@@ -53,6 +65,10 @@ export class RenderWrapperComponent implements OnChanges {
     @Input() repository: string;
     @Input() version: string;
     @Input() childId: string = null;
+    /**
+     * if set, modules ignore their per-type width settings and render full width (edge-to-edge)
+     */
+    @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
 
     @ViewChild('childobjects') childobjects: ElementRef;
@@ -67,13 +83,9 @@ export class RenderWrapperComponent implements OnChanges {
     data = signal<CombinedRenderData>(null);
     loading = signal(false);
     children = signal<Node[]>(null);
+    private parentNode = signal<Node>(null);
 
-    constructor(
-        private renderHelperService: RenderHelperService,
-        private nodeService: NodeService,
-        private translations: TranslationsService,
-        private optionsHelper: OptionsHelperDataService,
-    ) {
+    constructor() {
         this.translations.waitForInit().subscribe(() => {});
         this.optionsHelper.registerGlobalKeyboardShortcuts();
         this.data.set(undefined);
@@ -82,20 +94,33 @@ export class RenderWrapperComponent implements OnChanges {
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
             if (this.showChildobjects) {
-                this.children.set(
-                    (
-                        await firstValueFrom(
-                            this.nodeService.getChildren(changes.nodeId.currentValue, {
-                                repository: this.repository,
-                                filter: ['files'],
-                                sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
-                                sortAscending: [true],
-                                assocName: RestConstants.CCM_ASSOC_CHILDIO,
-                                maxItems: RestConstants.COUNT_UNLIMITED,
-                            }),
-                        )
-                    ).nodes,
+                this.parentNode.set(
+                    await firstValueFrom(
+                        this.nodeService.getNode(changes.nodeId.currentValue, {
+                            repository: this.repository || HOME_REPOSITORY,
+                        }),
+                    ),
                 );
+                try {
+                    this.children.set(
+                        (
+                            await firstValueFrom(
+                                this.nodeService.getChildren(changes.nodeId.currentValue, {
+                                    repository: this.repository || HOME_REPOSITORY,
+                                    filter: ['files'],
+                                    sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                                    sortAscending: [true],
+                                    assocName: RestConstants.CCM_ASSOC_CHILDIO,
+                                    maxItems: RestConstants.COUNT_UNLIMITED,
+                                }),
+                            )
+                        ).nodes,
+                    );
+                } catch (e) {
+                    this.children.set(null);
+                    e.preventDefault();
+                    console.warn('Could not fetch children', e);
+                }
             } else {
                 this.children.set(null);
             }
@@ -103,6 +128,38 @@ export class RenderWrapperComponent implements OnChanges {
         if (changes.nodeId || changes.childId) {
             await this.refresh();
         }
+    }
+
+    /**
+     * zip download btn (series object)
+     * @param node
+     * @private
+     */
+    private addDownloadAllBtn(node: Node) {
+        const children = this.children();
+        if (!node || !children?.length) {
+            return;
+        }
+        const parent = this.parentNode();
+        const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
+            void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
+        });
+        downloadAll.elementType = [
+            ElementType.Node,
+            ElementType.NodeChild,
+            ElementType.NodePublishedCopy,
+        ];
+        downloadAll.group = DefaultGroups.View;
+        downloadAll.priority = 35;
+        this.optionsHelper.setData({
+            scope: Scope.Render,
+            activeObjects: [node],
+            parent: { ref: { id: node.parent.id } },
+            customOptions: {
+                useDefaultOptions: true,
+                addOptions: [downloadAll],
+            },
+        });
     }
     async refresh() {
         await this.setNodeById(this.childId || this.nodeId);
@@ -116,6 +173,7 @@ export class RenderWrapperComponent implements OnChanges {
             this.version,
             this.repository,
         );
+        this.addDownloadAllBtn(data.node);
         setTimeout(async () => {
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();

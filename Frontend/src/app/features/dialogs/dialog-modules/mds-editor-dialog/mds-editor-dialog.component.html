@@ -1,10 +1,11 @@
 <es-mds-editor-core></es-mds-editor-core>
 
 <ng-template #customBottomBarContent>
+  @if (!mdsEditorInstance.editorBulkMode?.isBulk) {
   <es-input-fill-progress
-    *ngIf="!mdsEditorInstance.editorBulkMode?.isBulk"
     [current]="completedProperties"
     [maximum]="totalProperties"
     (showMissing)="onShowMissing()"
   ></es-input-fill-progress>
+  }
 </ng-template>

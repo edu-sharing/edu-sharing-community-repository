@@ -1,4 +1,4 @@
-import { Injectable, Injector, Optional } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
 import {
@@ -9,6 +9,7 @@ import {
     NodeService,
     NodeServiceUnwrapped,
     RestConstants,
+    UserEvent,
 } from 'ngx-edu-sharing-api';
 import { EduSharingUiConfiguration } from '../edu-sharing-ui-configuration';
 import { OptionsHelperDataService } from './options-helper-data.service';
@@ -25,20 +26,19 @@ export type CombinedRenderData = {
 };
 @Injectable({ providedIn: 'root' })
 export class RenderHelperService {
-    constructor(
-        private injector: Injector,
-        private aboutService: AboutService,
-        private configService: ConfigService,
-        private nodeService: NodeService,
-        private nodeApiUnwrapped: NodeServiceUnwrapped,
-        private configuration: EduSharingUiConfiguration,
-        @Optional() private optionsHelperDataService: OptionsHelperDataService,
-    ) {}
+    private injector = inject(Injector);
+    private aboutService = inject(AboutService);
+    private configService = inject(ConfigService);
+    private nodeService = inject(NodeService);
+    private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
+    private configuration = inject(EduSharingUiConfiguration);
+    private optionsHelperDataService = inject(OptionsHelperDataService, { optional: true });
 
     async getRenderData(
         nodeId: string,
         version: string = null,
         repository = HOME_REPOSITORY,
+        eventType: NonNullable<UserEvent['eventType']> = 'VIEW_MATERIAL',
     ): Promise<CombinedRenderData> {
         const about = await firstValueFrom(this.aboutService.getAbout());
         const securedNode = await firstValueFrom(
@@ -78,14 +78,18 @@ export class RenderHelperService {
                 error: 'RENDERING.ERROR.RS2_NOT_CONFIGURED',
             };
         }
-        void this.prepareRootUrl();
+        const rootUrl = await this.prepareRootUrl();
         const token = securedNode.jwt;
         const request = {
+            eventType,
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: securedNode.signedNode,
             signature: securedNode.signature,
+            signatureAlgorithm: securedNode.signatureAlgorithm,
             token: token,
+            renderingBaseUrl:
+                rootUrl === securedNode.renderingBaseUrl ? null : securedNode.renderingBaseUrl,
         } as RenderDataRequestWithToken;
 
         return {
@@ -100,16 +104,21 @@ export class RenderHelperService {
         signature: string,
         jwt: string,
         renderUrl: string,
+        signatureAlgorithm: string,
+        eventType: NonNullable<UserEvent['eventType']> = 'VIEW_MATERIAL_EMBEDDED',
     ): Promise<CombinedRenderData> {
+        console.log('Fetching render data for LMS with signature algorithm:', signatureAlgorithm);
         this.injector.get(RSApiConfiguration).rootUrl = renderUrl;
         const decodedNodeString = this.base64ToUtf8(encodedNode);
         const node = JSON.parse(decodedNodeString) as Node;
         const request = {
+            eventType,
             nodeId: node.ref.id,
             repoId: node.ref.repo,
             securedNode: encodedNode,
             signature: signature,
             token: jwt,
+            signatureAlgorithm: signatureAlgorithm,
         } as RenderDataRequestWithToken;
 
         return {
@@ -120,16 +129,15 @@ export class RenderHelperService {
 
     async prepareRootUrl() {
         const about = await firstValueFrom(this.aboutService.getAbout());
+        const rootUrl = about.renderingService2.url.replace(/\/$/g, '');
         if (this.configuration.production) {
-            this.injector.get(RSApiConfiguration).rootUrl = about.renderingService2.url.replace(
-                /\/$/g,
-                '',
-            );
+            this.injector.get(RSApiConfiguration).rootUrl = rootUrl;
         } else {
             console.info('dev mode active, routing rendering to proxy');
             this.injector.get(RSApiConfiguration).rootUrl = '/rendering2';
         }
         console.info(this.injector.get(RSApiConfiguration));
+        return rootUrl;
     }
 
     private base64ToUtf8(b64: string): string {

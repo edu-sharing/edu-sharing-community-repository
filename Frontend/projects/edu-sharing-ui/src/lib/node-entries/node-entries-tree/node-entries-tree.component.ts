@@ -5,10 +5,12 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    HostBinding,
     OnDestroy,
     signal,
     ViewChild,
     WritableSignal,
+    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
@@ -18,6 +20,7 @@ import { DropdownComponent } from '../../dropdown/dropdown.component';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { NodesDragDropService } from '../../services/nodes-drag-drop.service';
+import { UIService } from '../../services/ui.service';
 import { TranslationsService } from '../../translations/translations.service';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Target } from '../../types/option-item';
@@ -37,8 +40,19 @@ import { NodeEntriesDataType } from '../data-type';
 export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     implements AfterViewInit, OnDestroy
 {
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    entriesService = inject<NodeEntriesService<T>>(NodeEntriesService);
+    nodeHelper = inject(NodeHelperService);
+    private elementRef = inject(ElementRef);
+    private nodesDragDropService = inject(NodesDragDropService);
+    private translations = inject(TranslationsService);
+    private treeNodeService = inject(TreeNodeService);
+
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
+    readonly UIService = UIService;
+
+    @HostBinding('class.is-loading') protected isLoading = false;
 
     @ViewChild(DropdownComponent) dropdown: DropdownComponent;
     @ViewChild('menuTrigger') menuTrigger: MatMenuTrigger;
@@ -65,26 +79,24 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     };
     selectionMode: WritableSignal<'source' | 'target'> = signal('source');
     treeInitialized: WritableSignal<boolean> = signal(false);
+    indentOffset: WritableSignal<number> = signal(0);
+    // 28px (toggle, checkbox, icon) + 8px (gap)
+    protected readonly treeNodeIndent: number = 36;
 
-    constructor(
-        private changeDetectorRef: ChangeDetectorRef,
-        public entriesService: NodeEntriesService<T>,
-        public nodeHelper: NodeHelperService,
-        private elementRef: ElementRef,
-        private nodesDragDropService: NodesDragDropService,
-        private translations: TranslationsService,
-        private treeNodeService: TreeNodeService,
-    ) {
+    constructor() {
         // listening to the selection changed subject
         this.entriesService.selection.changed
             .pipe(takeUntil(this.destroyed), debounceTime(0))
             .subscribe(() => this.changeDetectorRef.detectChanges());
-        // listening to the loading subject
-        this.entriesService.dataSource.isLoadingSubject
+        // initialize the tree once data is available and loading is done
+        combineLatest([
+            this.entriesService.dataSource.isLoadingSubject.pipe(startWith(false)),
+            this.entriesService.dataSource.connect().pipe(startWith([] as NodeEntriesDataType[])),
+        ])
             .pipe(takeUntil(this.destroyed))
-            .subscribe(async (isLoading) => {
-                // after initial load and when not already initialized, initialize the tree
-                if (!isLoading && !this.treeInitialized()) {
+            .subscribe(async ([isLoading, data]) => {
+                this.isLoading = isLoading !== false;
+                if (!isLoading && data?.length && !this.treeInitialized()) {
                     await this.initializeTree();
                 }
             });
@@ -96,6 +108,55 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             });
         // retrieve the selection mode
         this.selectionMode.set(this.treeNodeService.getSelectionMode());
+        // define the indent offset (checkbox does replace first indent)
+        if (this.entriesService.checkbox) {
+            this.indentOffset.set(-1);
+        }
+        // set apply selection callback
+        this.treeNodeService.setApplySelectionCallback((nodes: Node[]) => {
+            this.entriesService.selection.select(...(nodes as T[]));
+            this.changeDetectorRef.detectChanges();
+        });
+    }
+
+    onContextMenu(event: MouseEvent | Event, node: T): void {
+        event.stopPropagation();
+        event.preventDefault();
+        if (!this.dropdown) {
+            return;
+        }
+        if (event instanceof MouseEvent) {
+            ({ clientX: this.dropdownLeft, clientY: this.dropdownTop } = event);
+        } else {
+            ({ x: this.dropdownLeft, y: this.dropdownTop } = (
+                event.target as HTMLElement
+            ).getBoundingClientRect());
+        }
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.menuTrigger.openMenu(),
+            );
+        }
+    }
+
+    async openMenu(node: T): Promise<void> {
+        if (UIService.isMobileWidth()) {
+            this.entriesService.openDropdown(this.dropdown, node, () =>
+                this.dropdown.triggerBottomSheet(),
+            );
+        } else {
+            this.entriesService.openDropdown(this.dropdown, node);
+        }
+    }
+
+    hasDropdownOptions(): boolean {
+        return this.entriesService.options?.[Target.List]?.some(
+            (o) => o.isEnabled && !o.showAlways,
+        );
     }
 
     async ngAfterViewInit(): Promise<void> {
@@ -113,6 +174,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     }
 
     ngOnDestroy(): void {
+        this.treeNodeService.setApplySelectionCallback(null);
         this.destroyed.next();
         this.destroyed.complete();
     }
@@ -135,20 +197,72 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     async updateSelectedNodes(flatNode: DynamicFlatNode, event?: MouseEvent): Promise<void> {
         if (
             flatNode.level === 0 ||
-            (this.selectionMode() === 'target' && !this.isValidInsertTarget(flatNode))
+            (this.selectionMode() === 'target' && !this.isValidInsertTarget(flatNode)) ||
+            (this.selectionMode() === 'source' && !this.isValidSource(flatNode))
         ) {
             return;
         }
         const node: T = flatNode.item as T;
+        const handleParentSelection = (): void => {
+            if (!this.entriesService.treeConfig?.selectParents) {
+                return;
+            }
+
+            const parents: T[] = [];
+            let parent = this.getParentNode(flatNode);
+
+            while (parent && parent.level > 0) {
+                parents.push(parent.item as T);
+                parent = this.getParentNode(parent);
+            }
+
+            if (parents.length) {
+                this.entriesService.selection.select(...parents);
+            }
+        };
+        const handleChildrenDeselection = (): void => {
+            if (!this.entriesService.treeConfig?.selectParents) {
+                return;
+            }
+
+            const dataMap = this.treeNodeService.getDataMap();
+            const queue: string[] = [flatNode.item.ref.id];
+            const visited = new Set<string>();
+            const childrenToDeselect: T[] = [];
+
+            while (queue.length) {
+                const parentId = queue.shift()!;
+                if (visited.has(parentId)) {
+                    continue;
+                }
+                visited.add(parentId);
+
+                const children: Partial<Node>[] = dataMap.get(parentId) ?? [];
+                for (const child of children) {
+                    childrenToDeselect.push(child as T);
+                    const childId = child.ref?.id;
+                    if (childId && !visited.has(childId)) {
+                        queue.push(childId);
+                    }
+                }
+            }
+
+            if (childrenToDeselect.length) {
+                this.entriesService.selection.deselect(...childrenToDeselect);
+            }
+        };
         // either multiple selection is allowed or a key press on cmd / strg is detected
-        const multipleSelectionAllowed: boolean = this.treeNodeService.isMultipleSelectionAllowed();
+        const multipleSelectionAllowed: boolean =
+            this.entriesService.treeConfig?.multipleSelection || false;
         const ctrlOrMetaKeyPressed: boolean = event && (event.ctrlKey || event.metaKey);
         if (multipleSelectionAllowed || ctrlOrMetaKeyPressed) {
             // multi-select: add or remove the node from the selection
             if (this.entriesService.selection.isSelected(node)) {
                 this.entriesService.selection.deselect(node);
+                handleChildrenDeselection();
             } else {
                 this.entriesService.selection.select(node);
+                handleParentSelection();
             }
             return;
         } else {
@@ -159,6 +273,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
             this.entriesService.selection.clear();
             if (!nodeAlreadySelected || multipleNodesSelected) {
                 this.entriesService.selection.select(node);
+                handleParentSelection();
             }
         }
     }
@@ -171,10 +286,17 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     async loadFurtherChildren(node: DynamicFlatNode): Promise<void> {
         const parentId: string = node.item.parent?.id;
         if (parentId) {
-            await this.treeNodeService.getFurtherChildren(parentId);
-            setTimeout(async () => {
-                await this.triggerNodeUpdate(parentId);
-            }, 100);
+            node.isLoading.set(true);
+            try {
+                await this.treeNodeService.getFurtherChildren(parentId);
+                setTimeout(async () => {
+                    await this.triggerNodeUpdate(parentId);
+                }, 100);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                node.isLoading.set(false);
+            }
         }
     }
 
@@ -218,10 +340,30 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param flatNode
      */
     isValidInsertTarget(flatNode: DynamicFlatNode): boolean {
+        // custom validation callback defined?
+        if (this.treeNodeService.getCustomIsValidTargetCallback()) {
+            return this.treeNodeService.getCustomIsValidTargetCallback()(flatNode.item as Node);
+        }
         if (flatNode.item?.mediatype) {
             return flatNode.item.mediatype === 'collection' || flatNode.item.mediatype === 'folder';
         }
         return false;
+    }
+
+    /**
+     * Util function to check if a node is a valid source.
+     *
+     * @param flatNode
+     */
+    isValidSource(flatNode: DynamicFlatNode): boolean {
+        // custom validation callback defined?
+        if (this.treeNodeService.getCustomIsValidSourceCallback()) {
+            return this.treeNodeService.getCustomIsValidSourceCallback()(flatNode.item as Node);
+        }
+        return (
+            flatNode.item?.mediatype === 'collection' ||
+            flatNode.item?.type === RestConstants.CCM_TYPE_IO
+        );
     }
 
     // HELPER FUNCTIONS
@@ -232,19 +374,34 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
         this.dataSource = new DynamicDataSource(this.treeControl, this.treeNodeService);
         // retrieve the current nodes from the data source and initialize the tree with it
-        if (!this.treeNodeService.getDataMap().size) {
+        const alreadyInitialized = this.treeNodeService.getDataMap().size > 0;
+        if (!alreadyInitialized) {
             const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
             await this.treeNodeService.initializeTreeData(nodes);
         }
-        this.dataSource.data = this.treeNodeService.getInitialData();
-        // find a first level element that can be expanded and expand it
-        const firstLevelElement = this.dataSource.data.find((d) => d.level === 0 && d.expandable);
-        if (firstLevelElement) {
-            this.treeControl.expand(firstLevelElement);
-            await this.updateTree([firstLevelElement.item as Node]);
+        this.dataSource.data = this.treeNodeService.getCurrentData();
+        if (!alreadyInitialized) {
+            // find a first level element that can be expanded and expand it
+            const firstLevelElement = this.dataSource.data.find(
+                (d) => d.level === 0 && d.expandable,
+            );
+            if (firstLevelElement) {
+                this.treeControl.expand(firstLevelElement);
+                await this.updateTree([firstLevelElement.item as Node]);
+            }
+        } else {
+            // restore the previously existing expanded states
+            for (const nodeId of this.treeNodeService.getExpandedNodes()) {
+                const element = this.dataSource.data
+                    .slice()
+                    .reverse()
+                    .find((d) => d.item.ref.id === nodeId);
+                if (element) {
+                    this.treeControl.expansionModel.select(element);
+                }
+            }
         }
         this.treeInitialized.set(true);
-        this.changeDetectorRef.detectChanges();
     }
 
     /**
@@ -267,11 +424,32 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
      * @param nodeId
      */
     private async triggerNodeUpdate(nodeId: string): Promise<void> {
-        const treeElement = this.dataSource.data.find((d) => d.item.ref.id === nodeId);
+        const treeElement = this.treeNodeService
+            .getCurrentData()
+            .find((d) => d.item.ref.id === nodeId);
         if (treeElement) {
             const isExpanded = this.treeControl.isExpanded(treeElement);
             await this.dataSource.toggleNode(treeElement, !isExpanded);
             await this.dataSource.toggleNode(treeElement, isExpanded);
         }
+    }
+
+    /**
+     * Helper function to get the parent node of a given node in the tree.
+     *
+     * @param node
+     */
+    private getParentNode(node: DynamicFlatNode): DynamicFlatNode | null {
+        const parentId = node.item.parent?.id;
+        if (!parentId) {
+            return null;
+        }
+        const treeElement: DynamicFlatNode = this.treeNodeService
+            .getCurrentData()
+            .find((d) => d.item.ref.id === parentId);
+        if (!treeElement) {
+            return null;
+        }
+        return treeElement;
     }
 }

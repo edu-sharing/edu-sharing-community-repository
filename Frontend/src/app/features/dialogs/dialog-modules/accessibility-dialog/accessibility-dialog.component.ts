@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Subject } from 'rxjs';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -12,16 +12,14 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
     standalone: false,
 })
 export class AccessibilityDialogComponent implements OnInit, OnDestroy {
+    private accessibility = inject(AccessibilityService);
+    private dialogRef = inject<CardDialogRef<void, void>>(CardDialogRef);
+
     readonly TOAST_DURATION = ToastDuration;
     readonly destroyed$ = new Subject<void>();
     settings: AccessibilitySettings;
 
     private saveTrigger = new Subject<void>();
-
-    constructor(
-        private accessibility: AccessibilityService,
-        private dialogRef: CardDialogRef<void, void>,
-    ) {}
 
     ngOnInit() {
         this.accessibility

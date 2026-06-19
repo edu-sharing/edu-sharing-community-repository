@@ -1,15 +1,15 @@
 <div class="sidebar-wrapper">
-  <div class="loading" *ngIf="editorialSidebarService.sidebarLoading()">
+  @if (editorialSidebarService.sidebarLoading()) {
+  <div class="loading">
     <es-spinner></es-spinner>
   </div>
+  }
   <div class="sidebar-header">
-    <button
-      mat-icon-button
-      *ngIf="enabledOption() && !enabledOption().trap"
-      (click)="enabledOption.set(null)"
-    >
+    @if (enabledOption() && !enabledOption().trap) {
+    <button mat-icon-button (click)="enabledOption.set(null)">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
+    }
     <div>
       {{ title() | translate }}
     </div>
@@ -20,50 +20,69 @@
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <ng-template #content>
-      <div
-        *ngIf="enabledOption()?.option as option"
-        class="option option-{{ option | propertySlug }}"
-      >
+      @if (enabledOption()?.option; as option) {
+      <div class="option option-{{ option | propertySlug }}">
+        @if (option === 'SORT_INTO' || option === 'MANAGE_CONTENT') {
         <es-nodes-selector
-          *ngIf="option === 'SORT_INTO'"
           [option]="enabledOption()"
           [parent]="parent()"
+          [primaryMode]="primaryMode()"
         ></es-nodes-selector>
+        } @if (option === 'WORKSPACE_METADATA') {
         <es-metadata-sidebar
-          *ngIf="option === 'WORKSPACE_METADATA'"
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-metadata-sidebar>
+        } @if (option === 'MANAGE_SUBMISSION') {
         <es-submission-sidebar
-          *ngIf="option === 'MANAGE_SUBMISSION'"
           [data]="$any(enabledOption().optionConfig)"
           (dataChange)="editorialSidebarService.patchOptionConfig($event)"
         ></es-submission-sidebar>
+        } @if (option === 'VIEW_ASSIGNMENT') {
+        <es-assignment-sidebar [data]="$any(enabledOption().optionConfig)"></es-assignment-sidebar>
+        } @if (option === 'PREVIEW') {
         <es-preview-sidebar
-          *ngIf="option === 'PREVIEW'"
           [node]="$any(editorialSidebarService.nodes())?.[0]"
+          [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
+          [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
         ></es-preview-sidebar>
+        }
       </div>
-
-      <div class="entries" *ngIf="!enabledOption()">
-        <ng-container *ngIf="options()?.length">
-          <div
-            class="entry"
-            *ngFor="let option of options()"
-            [tabindex]="option.isEnabled ? 0 : -1"
-            cdkMonitorElementFocus
-            (click)="option.callback(editorialSidebarService.nodes())"
-            [attr.aria-disabled]="!option.isEnabled"
-            [class.disabled]="!option.isEnabled"
-          >
-            <i class="icon" [esIcon]="option.icon"></i>
-            <div class="text">
-              <div class="title">{{ option.name | translate }}</div>
-              <div class="description">{{ option.name + '_DESCRIPTION' | translate }}</div>
+      } @if (!enabledOption()) {
+      <div class="entries">
+        @if (options()?.length) { @for (option of options(); track option.name) {
+        <div
+          class="entry"
+          [tabindex]="option.isEnabled ? 0 : -1"
+          cdkMonitorElementFocus
+          (click)="option.callback(editorialSidebarService.nodes())"
+          [attr.aria-disabled]="!option.isEnabled"
+          [class.disabled]="!option.isEnabled"
+        >
+          <i class="icon" [esIcon]="option.icon"></i>
+          <div class="text">
+            <div
+              class="title"
+              esCheckTextOverflow
+              #text="esCheckTextOverflow"
+              [matTooltip]="text.hasTextOverflow() ? (option.name | translate) : null"
+            >
+              {{ option.name | translate }}
             </div>
-            <i class="navigate" esIcon="keyboard_arrow_right"></i>
+            <div
+              class="description"
+              esCheckTextOverflow
+              #description="esCheckTextOverflow"
+              [matTooltip]="
+                description.hasTextOverflow() ? (option.name + '_DESCRIPTION' | translate) : null
+              "
+            >
+              {{ option.name + '_DESCRIPTION' | translate }}
+            </div>
           </div>
-        </ng-container>
-        <es-info-message *ngIf="!options()?.length" mode="info">
+          <i class="navigate" esIcon="keyboard_arrow_right"></i>
+        </div>
+        } } @if (!options()?.length) {
+        <es-info-message mode="info">
           <div class="message">
             {{
               'EDITORIAL.SIDEBAR.NO_OPTIONS' +
@@ -72,7 +91,9 @@
             }}
           </div>
         </es-info-message>
+        }
       </div>
+      }
     </ng-template>
   </div>
 </div>

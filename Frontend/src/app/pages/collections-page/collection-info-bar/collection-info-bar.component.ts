@@ -1,11 +1,14 @@
 import {
     Component,
+    computed,
     EventEmitter,
     Input,
+    input,
     OnChanges,
     Output,
     SimpleChanges,
     ViewChild,
+    inject,
 } from '@angular/core';
 import { Node, NodeService, NodeStats } from 'ngx-edu-sharing-api';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
@@ -28,18 +31,22 @@ import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-e
     standalone: false,
 })
 export class CollectionInfoBarComponent implements OnChanges {
+    private nodeHelper = inject(NodeHelperService);
+    private nodeService = inject(NodeService);
+    mdsEditorInstanceService = inject(MdsEditorInstanceService);
+
     @ViewChild('actionbar') actionbar: ActionbarComponent;
     @ViewChild('mds') mds: MdsViewerComponent;
     @Input() collection: Node;
-    @Input() permissions: Permission[];
+    permissions = input<Permission[]>();
+    readonly uniquePermissions = computed(() =>
+        this.permissions()?.filter(
+            (p, i, arr) =>
+                arr.findIndex((q) => q.authority.authorityName === p.authority.authorityName) === i,
+        ),
+    );
     @Output() edit = new EventEmitter<void>();
     stats: NodeStats;
-
-    constructor(
-        private nodeHelper: NodeHelperService,
-        private nodeService: NodeService,
-        public mdsEditorInstanceService: MdsEditorInstanceService,
-    ) {}
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.collection?.currentValue) {
@@ -47,13 +54,6 @@ export class CollectionInfoBarComponent implements OnChanges {
                 this.stats = await this.nodeService.getStats(this.collection.ref.id).toPromise();
             }
         }
-    }
-
-    isBrightColor() {
-        return (
-            ColorHelper.getPreferredColor(this.collection?.collection?.color) ===
-            PreferredColor.White
-        );
     }
 
     hasNonIconPreview(): boolean {

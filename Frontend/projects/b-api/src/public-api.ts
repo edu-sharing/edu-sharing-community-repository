@@ -8,8 +8,3 @@ export * from './lib/api/models';
 // Unwrapped API services.
 export * from './lib/api/fn/edu-sharing-llm/suggestions';
 export * from './lib/api/services/edu-sharing-llm.service';
-export * from './lib/api/services/photon-geocoding-api.service';
-export * from './lib/api/services/large-language-models.service';
-export * from './lib/api/services/themenbaum-api.service';
-export * from './lib/api/services/kidra.service';
-export * from './lib/api/services/compendious-text-generator.service';

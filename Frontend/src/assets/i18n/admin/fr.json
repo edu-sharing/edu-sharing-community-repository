@@ -1,4 +1,147 @@
 {
+  "CHOOSEENVIRONMENT": "Choisir l'environnement",
+  "YES": "oui",
+  "NO": "non",
+  "OFF": "Arrêt",
+  "ON": "Sur",
+  "ADD": "Ajouter",
+  "OK": "ok",
+  "BACK": "retour",
+  "NEXT": "continuer",
+  "SKIP": "sauter",
+  "SAVE": "sauver",
+  "DISCARD": "mettre de côté",
+  "APPLY": "appliquer",
+  "CANCEL": "annuler",
+  "YES_DELETE": "Oui, supprimer",
+  "RESET": "Remise à zéro",
+  "START": "Démarrage",
+  "STOP": "Arrêter",
+  "RENAME": "renommer",
+  "USER_GUEST": "invité",
+  "IMPRINT": "Impression",
+  "PRIVACY_INFORMATION": "Vie privée / Privacy",
+  "ONLINE_HELP": "Aide en ligne",
+  "WHATS_NEW": "Quoi de neuf ?",
+  "USERMENU": "Menu utilisateur",
+  "SHOW_MORE": "montrer",
+  "MORE_SELECTBOX": "plus d'éléments",
+  "HIDE_MORE": "cacher",
+  "GO_TO_TOP": "Aller au sommet",
+  "FIELD_REQUIRED": "Exigée",
+  "FIELD_VALIDATION_ERROR_INTEGER": "Utiliser des nombres entiers",
+  "EXTENSION_NOT_MATCH": "Modifier l'extension de fichier ?",
+  "EXTENSION_NOT_MATCH_INFO": "Êtes-vous sûr de vouloir modifier l'extension du fichier de \"{{extensionOld}}\" à \"{{extensionNew}}\" ?\n\n{{warning}}",
+  "EXTENSION_NOT_MATCH_INFO_OLD": "Êtes-vous sûr de vouloir supprimer l'extension de fichier \"{{extensionOld}}\" ?\n\n{{warning}}",
+  "EXTENSION_NOT_MATCH_INFO_NEW": "Sind Sie sicher, dass Sie die Dateiendung '{{extensionNew}}' hinzufügen möchten?",
+  "EXTENSION_NOT_MATCH_WARNING": "Le fichier peut devenir inutilisable lorsqu'il est téléchargé ou ouvert.",
+  "EXTENSION_CHANGE": "Oui, changer",
+  "EXTENSION_KEEP": "Conserver l'extension",
+  "INPUT_HOURS": "H.",
+  "INPUT_MINUTES": "Min.",
+  "HOUR": "Heure",
+  "HOURS": "Heures",
+  "MINUTE": "Minute",
+  "MINUTES": "Procès-verbal",
+  "SECOND": "Deuxième",
+  "SECONDS": "Secondes",
+  "SELECT_DIRECTORY": "sélectionner un dossier",
+  "SELECT_FILE": "sélectionner un fichier",
+  "NO_MORE_ELEMENTS": "pas d'autres éléments",
+  "FIELD_MUST_BE_FILLED": "Ce champ ne peut pas être vide.",
+  "CHOOSE_DATE": "Choisir la date",
+  "CARD_SUBTITLE_MULTIPLE": "Éléments {{count}}",
+  "SELECT_COLLECTION": "Ajouter à \"{{name}}",
+  "SELECT_ROOT_NAME": "Accueil",
+  "SELECT_ROOT": "sélectionner la maison",
+  "SELECT_ROOT_DISABLED": "sélectionner un élément",
+  "CLOSE": "fermer",
+  "DOWNLOAD": "télécharger",
+  "LOAD_MORE": "En savoir plus",
+  "LOADING": "chargement...",
+  "INFORMATION": "l'information",
+  "TODAY": "aujourd'hui",
+  "YESTERDAY": "hier",
+  "DAYS_AGO": "Il y a {{ days }} jours",
+  "HOURS_AGO": "Il y a {{ hours }} heures",
+  "MINUTES_AGO": "Il y a {{ minutes }} minutes",
+  "JUST_NOW": "A l'instant",
+  "CREATE": "créer",
+  "LOGOUT": "Déconnexion",
+  "INVALID_OPERATION": "Cette fonction n'est pas prise en charge actuellement",
+  "SORT_BY": "Trier par",
+  "ASCENDING": "ascendante",
+  "DESCENDING": "descendant",
+  "SELECTED": "sélectionné",
+  "EDIT_ACCOUNT": "Gérer le compte",
+  "CHANGE_LANGUAGE": "Changer de langue",
+  "DEFAULT_METADATASET": "Jeu de métadonnées par défaut ({{name}})",
+  "NO_MATCHES": "Aucune correspondance trouvée",
+  "NO_CC_PUBLISH": "pas d'autorisation de publication pour l'objet",
+  "SELECT": "sélectionner {{ element }}",
+  "EDIT": "éditer {{ thing }}",
+  "EXPAND": "expand {{ element }}",
+  "COLLAPSE": "effondrement {{ element }}",
+  "CHECKBOX_CHECKED": "case à cocher cochée",
+  "CHECKBOX_NOT_CHECKED": "case à cocher non cochée",
+  "RADIO_BUTTON_SELECTED": "bouton radio sélectionné",
+  "RADIO_BUTTON_NOT_SELECTED": "bouton radio non sélectionné",
+  "DISABLED": "handicapé",
+  "SUB_CATEGORY_ARIA": "sous-catégorie",
+  "ASK_CC_PUBLISH": "Demander",
+  "ASK_CC_PUBLISH_SUBJECT": "Demande de permissions pour l'élément {{name}}",
+  "ORIGINAL_DELETE": "Retirer",
+  "ORIGINAL_DELETED": "Contenu supprimé",
+  "ORIGINAL_DELETED_INFO": "Seules les métadonnées sont accessibles",
+  "COMMON_API_ERROR": "Une erreur s'est produite. Veuillez réessayer.",
+  "COMMON_API_ERROR_TITLE": "Détails de l'erreur ({{date}})",
+  "RENDERSERVICE_API_ERROR": "erreur lors de l'accès au service de rendu. Veuillez signaler cette erreur à un administrateur.",
+  "SYSTEM_FOLDER_DELETE_ERROR": "Ce dossier système ne peut pas être supprimé",
+  "GENERIC_QUOTA_ERROR_TITLE": "L'opération n'a pas pu être exécutée car le quota de téléchargement a été dépassé.",
+  "CONNECTOR_FORMAT_LABEL": "Type de fichier",
+  "CONNECTOR_QUOTA_REACHED_TITLE": "Le quota de téléchargement a été dépassé",
+  "CONNECTOR_QUOTA_REACHED_MESSAGE": "Cette fonction n'est pas disponible car le quota de téléchargements est entièrement dépassé.\n\nSupprimez des fichiers pour récupérer de l'espace de stockage et réessayez.",
+  "RESTRICTED_ACCESS_ERROR_TITLE": "Pas de licence pour le matériel",
+  "RESTRICTED_ACCESS_ERROR_MESSAGE": "L'accès au contenu actuel nécessite une licence. Vous ne disposez pas des droits suffisants pour y accéder.",
+  "RESTRICTED_ACCESS_COPY_ERROR": "Le matériel ou une partie du matériel situé dans ce dossier est sous licence. Seuls les utilisateurs disposant d'autorisations de partage peuvent les copier",
+  "TOOLPERMISSION_ERROR": "Vous n'avez pas les permissions suffisantes pour cette tâche",
+  "TOOLPERMISSION_ERROR_INLINE": "Vous ne pouvez pas effectuer cette action car la permission \"{{permission}}\" est manquante.",
+  "TOOLPERMISSION_ERROR_TITLE": "Permissions insuffisantes",
+  "TOOLPERMISSION_ERROR_HEADER": "L'autorisation suivante est manquante pour votre compte :",
+  "TOOLPERMISSION_ERROR_FOOTER": "Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur et demandez-lui l'autorisation {{permission}}.",
+  "NO_WRITE_PERMISSIONS": "Aucune autorisation",
+  "NODE_SEARCH": "Éléments de recherche...",
+  "VALUE": "Valeur",
+  "FILTER": "Filtre",
+  "REPLACE": "Remplacer",
+  "CHANGE_STORAGE_LOCATION": "Sélectionner",
+  "STORAGE_LOCATION_UNSET": "Non défini",
+  "SUGGESTION": "Suggestion",
+  "CLICKTOREMOVE": "Cliquez pour supprimer",
+  "NO_PERMISSIONS_FOR_SCOPE": "Aucune autorisation d'accès à cet environnement",
+  "DATE_SELECT_YEAR": "Choisir l'année",
+  "DATE_CLEAR": "Effacer",
+  "PROFILE_UPDATED": "Mise à jour des données du compte",
+  "SHOW_EMAIL_UPDATED": "Le courrier électronique est désormais public",
+  "HIDE_EMAIL_UPDATED": "L'adresse e-mail est maintenant privée",
+  "CHANGE_PASSWORD": "Modifier le mot de passe",
+  "OLD_PASSWORD": "Ancien mot de passe",
+  "NEW_PASSWORD": "Nouveau mot de passe",
+  "NEW_PASSWORD_REPEAT": "Confirmer le nouveau mot de passe",
+  "WRONG_PASSWORD": "Le mot de passe saisi n'est pas valide",
+  "PASSWORD_MIN_LENGTH": "Le mot de passe doit comporter au moins {{length}} caractères.",
+  "PASSWORD_NOT_MATCH": "Les mots de passe ne correspondent pas",
+  "LEARNINGAGE_YEAR": "Années",
+  "PROGRESS_DIALOG_DEFAULT_TITLE": "La tâche est exécutée...",
+  "PROGRESS_DIALOG_DEFAULT_MESSAGE": "Veuillez patienter, la tâche est en cours d'exécution...",
+  "CLIPBOARD_DATA_UNSUPPORTED": "Les données actuelles du presse-papiers ne sont pas prises en charge",
+  "DELETED_USER": "Utilisateur-trice supprimé-e",
+  "GROUP_EVERYONE": "tout le monde",
+  "BREADCRUMB_LOCATION_PREFIX": "Vous êtes ici :",
+  "DETAILS": "détails",
+  "INFO": "info",
+  "GOTO_LOGIN": "Accéder à la connexion",
+  "GOTO": "aller à",
   "ADMIN": {
     "TITLE": "Outils administratifs",
     "UNDERSTAND": "Compris, poursuivez",
@@ -18,7 +161,8 @@
       "JOBS": "Emplois",
       "TOOLKIT": "Boîte à outils (caches, fichiers journaux)",
       "BROWSER": "Navigateur Node et débogage Solr",
-      "FOLDERTEMPLATES": "Modèles de dossiers"
+      "FOLDERTEMPLATES": "Modèles de dossiers",
+      "CONTEXT": "Contextes/Domaines"
     },
     "PLUGINS": {
       "TITLE": "Extensions",
@@ -28,22 +172,28 @@
       "DISABLED": "Inactif",
       "PLUGIN_DETAILS": {
         "edu_sharing-community-repository-backend-alfresco-module": {
-          "TITLE": "edu-sharing Core"
+          "TITLE": "edu-sharing Core",
+          "DESCRIPTION": "Le module principal d'edu-sharing. Il étend le système de base avec les API et les interfaces d'edu-sharing ainsi que d'autres fonctionnalités."
         },
         "Alfresco Share Services AMP": {
-          "TITLE": "Alfresco Share Service"
+          "TITLE": "Alfresco Share Service",
+          "DESCRIPTION": "Ce module Alfresco fournit les interfaces Alfresco Share"
         },
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
-          "TITLE": "edu-sharing Elasticsearch Plugin"
+          "TITLE": "edu-sharing Elasticsearch Plugin",
+          "DESCRIPTION": "Le module Elasticsearch transforme les objets, y compris les statistiques et les métadonnées, en une structure d'index Elasticsearch spéciale et permet des recherches efficaces et très détaillées."
         },
         "alfresco-trashcan-cleaner project": {
-          "TITLE": "Nettoyeur de poubelles"
+          "TITLE": "Nettoyeur de poubelles",
+          "DESCRIPTION": "Le nettoyeur de corbeille supprime régulièrement les anciens contenus de la corbeille de tous les utilisateurs."
         },
         "edu_sharing-projects-community-repository-backend-alfresco-module": {
-          "TITLE": "edu-sharing Customizing"
+          "TITLE": "edu-sharing Customizing",
+          "DESCRIPTION": "Ce module peut inclure des ajustements spécifiques au projet"
         },
         "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
-          "TITLE": "edu-sharing Transformer Plugin"
+          "TITLE": "edu-sharing Transformer Plugin",
+          "DESCRIPTION": "Ce plugin sépare les fonctions de transformation (capture d'écran et génération de documents en texte intégral via LibreOffice) du serveur de dépôt et permet une répartition plus efficace et plus stable de la charge de travail."
         }
       },
       "MORE": "De plus amples informations sur l'obtention, la configuration et le déploiement des extensions sont disponibles sur le site web edu-sharing.",
@@ -77,7 +227,13 @@
       "SAVED": "Configuration sauvegardée. Le site a peut-être besoin d'être rechargé",
       "CHECK": "Vérifier",
       "ERROR": "Erreur de configuration",
-      "PARSE_ERROR": "Erreur lors de la prise en charge de la Config ! Vérifiez la syntaxe et la configuration et répétez la procédure.<br><b>Le référentiel a maintenant un état invalide!</b><br>Veuillez consulter les fichiers journaux pour plus d'informations<br><br>{{error}}"
+      "PARSE_ERROR": "Erreur lors de la prise en charge de la Config ! Vérifiez la syntaxe et la configuration et répétez la procédure.<br><b>Le référentiel a maintenant un état invalide!</b><br>Veuillez consulter les fichiers journaux pour plus d'informations<br><br>{{error}}",
+      "SERVER_CONFIG_HINT": "Vous pouvez écraser les valeurs de configuration ici. Ces modifications s'appliquent au serveur actuel et ne sont pas écrasées par les mises à jour. Elles ont la priorité la plus élevée. ATTENTION ! En mode cluster, ces paramètres ne s'appliquent qu'au serveur cluster actuel !",
+      "SERVER_CONFIG_TITLE": "Fichier de configuration du serveur (écrasement)",
+      "DEPLOYMENT_CONFIG_TITLE": "Fichier de configuration du déploiement",
+      "DEPLOYMENT_CONFIG_HINT": "Ce fichier a été défini par le déploiement et peut modifier les données qui s'écartent du modèle. Ce fichier ne peut être modifié que par le déploiement.",
+      "DEFAULTS_OVERRIDE_CONFIG_TITLE": "Remplacement de la configuration Helm",
+      "DEFAULTS_OVERRIDE_CONFIG_HINT": "Remplacer les paramètres configurés via le déploiement Helm."
     },
     "CONFIG": {
       "XML_CONFIG": "Fichiers de configuration XML",
@@ -155,7 +311,8 @@
         "url_dynamic": "Si la valeur est vraie, tous les liens générés (par exemple vers des aperçus) sont toujours mappés vers le domaine demandeur du client. Si false, la valeur est toujours générée en fonction du protocole, du port et du domaine du client.",
         "allow_origin": "Liste séparée par des virgules de toutes les adresses d'origine pour lesquelles l'accès CORS est autorisé. Une valeur vide autorise l'accès CORS à partir de n'importe quel domaine demandeur. Exemple : \"https://example.com\"",
         "notify_fetch_limit": "Nombre maximum d'objets Notify pouvant être créés lors du chargement du dossier \"Shared by me\" / \"Shared with me\". Les valeurs recommandées sont comprises entre 200 et 1000. 0 désactive la limite",
-        "cookie_attributes": "Drapeaux pour le cookie de session, typiquement \"secure\" pour qu'il ne soit envoyé que via https. Le comportement sur le même site peut également être configuré, par exemple \"SameSite=None\""
+        "cookie_attributes": "Drapeaux pour le cookie de session, typiquement \"secure\" pour qu'il ne soit envoyé que via https. Le comportement sur le même site peut également être configuré, par exemple \"SameSite=None\"",
+        "import_metadataset": "Jeu de métadonnées utilisé pour les objets importés de cette source"
       },
       "CCMAIL": {
         "mail.authtype": "Type d'authentification sur le serveur de messagerie. Actuellement soit vide (= sans authentification), soit \"tls\".",
@@ -289,7 +446,8 @@
       "REMOVE_IMPORTS": "Supprimer les importations supprimées",
       "IMPORTS_REMOVED": "Les éléments OAI supprimés seront supprimés.\n Consultez la liste des tâches pour connaître l'état d'avancement",
       "EXCEL_IMPORTED": "Fichier Excel importé ({{ rows }} lignes importées)",
-      "COLLECTIONS_IMPORTED": "{{ count }} Collections importées"
+      "COLLECTIONS_IMPORTED": "{{ count }} Collections importées",
+      "EXCEL_COLLECTION": "Ajouter les objets importés aux collections. Si cette option n'est pas définie, les colonnes préfixées par \"collection\" sont ignorées."
     },
     "TOOLKIT": {
       "REFRESH_APP": "Reload App Info",
@@ -311,7 +469,9 @@
       "UPLOAD_TEMP_DONE": "Le fichier a été stocké sur le serveur en tant que {{filename}}",
       "AUTHENTICATE": "Début de la session",
       "AUTHENTICATE_AS_USER": "Démarrer la session en tant qu'utilisateur",
-      "AUTHENTICATE_AS_USER_DETAILS": "Si vous continuez, la session d'administration en cours sera fermée et vous serez authentifié en tant qu'utilisateur coosen. Vous devrez vous reconnecter en tant qu'administrateur après avoir terminé votre test. Voulez-vous continuer ?"
+      "AUTHENTICATE_AS_USER_DETAILS": "Si vous continuez, la session d'administration en cours sera fermée et vous serez authentifié en tant qu'utilisateur coosen. Vous devrez vous reconnecter en tant qu'administrateur après avoir terminé votre test. Voulez-vous continuer ?",
+      "REFRESH_EDU_GROUP_CACHE": "actualiser Edu Group Cache",
+      "EDU_GROUP_CACHE_REFRESHED": "Edu Group Cache a été mis à jour"
     },
     "BROWSER": {
       "NODE_BROWSER": "Node-Browser",
@@ -351,7 +511,8 @@
         "DELETE_BUTTON": "Supprimer le modèle \"{{ template }}\"",
         "CREATE_BUTTON": "Créer",
         "CHOOSE_NAME_TEXT": "Choisissez un nom pour le nouveau modèle.",
-        "CHOOSE_NAME_INPUT_LABEL": "Nom"
+        "CHOOSE_NAME_INPUT_LABEL": "Nom",
+        "DEFAULT_TEMPLATE_OVERRIDE": "Les modèles standard ne doivent pas être écrasés"
       },
       "LUCENE_DEFAULT_TEMPLATES": {
         "GROUPS": "Tous les groupes et organisations",
@@ -397,7 +558,9 @@
         "BulkEditNodesJob": "Traitement en masse d'un bien pour plusieurs nœuds",
         "BulkDeleteAuthoritiesJob": "Supprimer des utilisateurs et des organisations en masse",
         "CheckLinkJob": "Vérifie si la cible d'un lien existe toujours et définit un statut approprié"
-      }
+      },
+      "PARAMETERS": "Paramètre de l'emploi",
+      "APPLY_TEMPLATE": "Insérer comme modèle"
     },
     "FOLDERTEMPLATES": {
       "EDUGROUP": "Organisation",
@@ -465,7 +628,8 @@
         "authority_organization": "Organisation",
         "authority_organization_id": "Organisation-Id",
         "authority_mediacenter": "Centre des médias",
-        "date": "Date"
+        "date": "Date",
+        "license": "Licences"
       },
       "ACTIONS": {
         "LOGIN_USER_SESSION": "Connexion",
@@ -588,6 +752,7 @@
       "RESET": "Remise à zéro",
       "TOTAL_COUNT_LABEL": "Nombre total d'éléments",
       "TOTAL_COUNT_HINT": "Nombre total d'éléments sélectionnés. Si cette valeur est >= au nombre d'éléments affichés, le nombre sélectionné d'éléments affichés est toujours choisi de manière aléatoire dans ce pool.",
+      "TOTAL_COUNT_LARGER_HINT": "Si le nombre total d'éléments est supérieur au nombre d'éléments affichés, le nombre d'éléments à afficher est toujours sélectionné de manière aléatoire dans cette réserve.",
       "DISPLAY_COUNT_LABEL": "Nombre d'éléments affichés",
       "DISPLAY_COUNT_HINT": "Nombre d'éléments à afficher lors de l'ouverture de la page d'accueil",
       "TOTAL_COUNT_OUT_OF_RANGE": "Le nombre total d'éléments doit être >= aux éléments affichés.",
@@ -635,67 +800,70 @@
         "auth_token_url": "Url du jeton d'authentification",
         "CREATED": "Plate-forme enregistrée"
       }
-    }
-  },
-  "Key": "ANGLAIS",
-  "Konto": "Compte",
-  "LTITOOL": {
-    "REGISTER": "Début de l'enregistrement",
-    "DYNAMIC_URL": "Outil d'enregistrement dynamique url",
-    "DATA": {
-      "redirectionUrls": "Urls de redirection",
-      "targetLinkUri": "Lien cible Url",
-      "clientName": "Nom de l'outil",
-      "keysetUrl": "Url du jeu de clés",
-      "loginInitiationUrl": "Url d'ouverture de session (oidc)"
     },
-    "MANUAL_INFO": "Si votre outil compatible LTI ne prend pas en charge l'enregistrement dynamique ou s'il ne fonctionne pas, vous pouvez utiliser l'enregistrement manuel.\n\nAprès avoir cliqué sur \"Enregistrer\", une connexion sera préparée avec les données fournies.",
-    "HEADER": "Enregistrement de l'outil LTI",
-    "DYNAMIC_INFO": "Grâce à l'enregistrement dynamique des LTI, les outils LTI peuvent être facilement connectés à l'edu-sharing.\n Déterminez l'URL pour l'enregistrement dynamique de l'outil et entrez-la dans le champ \"URL de l'outil pour l'enregistrement dynamique\". En cliquant sur \"Démarrer l'enregistrement\", l'outil externe est automatiquement connecté à l'edu-sharing."
-  },
-  "GLOBAL_CONFIG": {
-    "SERVER_CONFIG_HINT": "Vous pouvez écraser les valeurs de configuration ici. Ces modifications s'appliquent au serveur actuel et ne sont pas écrasées par les mises à jour. Elles ont la priorité la plus élevée. ATTENTION ! En mode cluster, ces paramètres ne s'appliquent qu'au serveur cluster actuel !",
-    "SERVER_CONFIG_TITLE": "Fichier de configuration du serveur (écrasement)",
-    "DEPLOYMENT_CONFIG_TITLE": "Fichier de configuration du déploiement",
-    "DEPLOYMENT_CONFIG_HINT": "Ce fichier a été défini par le déploiement et peut modifier les données qui s'écartent du modèle. Ce fichier ne peut être modifié que par le déploiement."
-  },
-  "PLUGINS": {
-    "PLUGIN_DETAILS": {
-      "Alfresco Share Services AMP": {
-        "DESCRIPTION": "Ce module Alfresco fournit les interfaces Alfresco Share"
+    "LTITOOL": {
+      "REGISTER": "Début de l'enregistrement",
+      "DYNAMIC_URL": "Outil d'enregistrement dynamique url",
+      "DATA": {
+        "redirectionUrls": "Urls de redirection",
+        "targetLinkUri": "Lien cible Url",
+        "clientName": "Nom de l'outil",
+        "keysetUrl": "Url du jeu de clés",
+        "loginInitiationUrl": "Url d'ouverture de session (oidc)"
       },
-      "edu_sharing-community-repository-backend-alfresco-module": {
-        "DESCRIPTION": "Le module principal d'edu-sharing. Il étend le système de base avec les API et les interfaces d'edu-sharing ainsi que d'autres fonctionnalités."
-      },
-      "edu_sharing-enterprise-repository-plugin-transform-backend-alfresco-module": {
-        "DESCRIPTION": "Ce plugin sépare les fonctions de transformation (capture d'écran et génération de documents en texte intégral via LibreOffice) du serveur de dépôt et permet une répartition plus efficace et plus stable de la charge de travail."
-      },
-      "alfresco-trashcan-cleaner project": {
-        "DESCRIPTION": "Le nettoyeur de corbeille supprime régulièrement les anciens contenus de la corbeille de tous les utilisateurs."
-      },
-      "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
-        "DESCRIPTION": "Le module Elasticsearch transforme les objets, y compris les statistiques et les métadonnées, en une structure d'index Elasticsearch spéciale et permet des recherches efficaces et très détaillées."
-      },
-      "edu_sharing-projects-community-repository-backend-alfresco-module": {
-        "DESCRIPTION": "Ce module peut inclure des ajustements spécifiques au projet"
-      }
+      "MANUAL_INFO": "Si votre outil compatible LTI ne prend pas en charge l'enregistrement dynamique ou s'il ne fonctionne pas, vous pouvez utiliser l'enregistrement manuel.\n\nAprès avoir cliqué sur \"Enregistrer\", une connexion sera préparée avec les données fournies.",
+      "HEADER": "Enregistrement de l'outil LTI",
+      "DYNAMIC_INFO": "Grâce à l'enregistrement dynamique des LTI, les outils LTI peuvent être facilement connectés à l'edu-sharing.\n Déterminez l'URL pour l'enregistrement dynamique de l'outil et entrez-la dans le champ \"URL de l'outil pour l'enregistrement dynamique\". En cliquant sur \"Démarrer l'enregistrement\", l'outil externe est automatiquement connecté à l'edu-sharing."
+    },
+    "CONTEXT": {
+      "CREATE": "Créer un nouveau contexte",
+      "CREATE_SAVE": "Créer un contexte",
+      "CREATE_INFO": "Un contexte permet de définir des valeurs de configuration spécifiques au domaine pour l'interface utilisateur (client.config.xml), notamment les paramètres de langue. Cette configuration permet d'ajouter, de modifier ou de supprimer des contextes à l'exécution. Les paramètres sont enregistrés de manière permanente et peuvent remplacer toute information existante dans le fichier client.config.xml fourni. Les modifications sont appliquées immédiatement.",
+      "CONTEXT_ID": "Identifiant interne du contexte",
+      "CONTEXT_DOMAIN": "Nom(s) de domaine du contexte",
+      "ACTIVE": "Ce contexte est actif pour le domaine/la session en cours.",
+      "ACTIVATE": "Passer au contexte",
+      "CURRENT": "Contextes existants",
+      "CONTEXT_CONFIG_VALUES": "Valeurs de contexte / configuration",
+      "CONTEXT_CONFIG_LANGUAGE": "Le langage prime sur le contexte",
+      "CONTEXT_CONFIG_VARIABLES": "Variables de contexte",
+      "VALUES_SAMPLE": "Modèle de valeurs/documentation d'exemple",
+      "ERROR_PARSING": "Au moins une des configurations n'a pas pu être lue au format JSON. Veuillez vérifier la syntaxe.",
+      "REFRESH_TITLE": "Recharger la page ?",
+      "REFRESH_MESSAGE": "Des modifications ont été apportées au contexte actif. Pour que ces modifications soient visibles, l'application Angular doit être réinitialisée.\n\nFaut-il recharger la page ?",
+      "SAVED": "Contexte stocké",
+      "DELETE": "Supprimer le contexte",
+      "TEMPLATE": "À utiliser comme modèle",
+      "DELETED": "Le contexte a été supprimé.",
+      "DELETE_TITLE": "Supprimer le contexte ?",
+      "DELETE_MESSAGE": "Êtes-vous sûr de vouloir supprimer le contexte (Id : {{id}}, Domaines : {{domain}}) ?",
+      "MISSING_VALUES": "Veuillez remplir tous les champs."
     }
   },
-  "JOBS": {
-    "PARAMETERS": "Paramètre de l'emploi",
-    "APPLY_TEMPLATE": "Insérer comme modèle"
-  },
-  "APPLICATIONS": {
-    "HOMEAPP": {
-      "import_metadataset": "Jeu de métadonnées utilisé pour les objets importés de cette source"
-    }
-  },
-  "FRONTPAGE": {
-    "TOTAL_COUNT_LARGER_HINT": "Si le nombre total d'éléments est supérieur au nombre d'éléments affichés, le nombre d'éléments à afficher est toujours sélectionné de manière aléatoire dans cette réserve."
-  },
-  "BROWSER": {
-    "LUCENE_TEMPLATE_MEMORY": {
-      "DEFAULT_TEMPLATE_OVERRIDE": "Les modèles standard ne doivent pas être écrasés"
-    }
-  }
+  "Key": "FRANÇAIS",
+  "Konto": "Compte",
+  "SEARCH_CLEAR": "Clair",
+  "COMMENTS_SINGLE": "Commentaire",
+  "COMMENTS_MULTIPLE": "Commentaires",
+  "AUTHORITY_TYPE_GROUP": "Groupe",
+  "AUTHORITY_TYPE_ORG": "Organisation",
+  "CHILDOBJECT_COUNT": "Éléments {{count}} (séquence)",
+  "OPTIONS_FOR": "Actions pour {{element}}",
+  "NO_AVAILABLE_OPTIONS": "Aucune action n'est disponible pour les éléments sélectionnés",
+  "NO_SIZE": "-",
+  "VERSION_COMMENT": "Commentaire sur la version",
+  "LICENSE_INFORMATION": "À propos d'edu-sharing",
+  "collections_description": "Description :",
+  "collections_content": "Contenu",
+  "collections_noContentAvailable": "Pas de contenu disponible",
+  "collections_howToAddContent": "Il suffit de cliquer sur le bouton \"Ajouter du matériel\" et d'utiliser le moteur de recherche pour trouver des contenus pour votre collection.",
+  "collectionNew_preview": "aperçu de la collection",
+  "collectionNew_setColor": "couleur de la collection :",
+  "collectionNew_colorIndex": "couleur {{ index }}",
+  "collectionNew_createCollection": "créer",
+  "collectionNew_storeChanges": "enregistrer les modifications",
+  "collectionNew_placeholderTitle": "titre de votre collection",
+  "collectionNew_placeholderDescription": "Quel est le thème de votre collection ?",
+  "collections_noCollections": "Aucune collection publique n'est disponible.",
+  "collections_noOrgaCollections": "Vous n'avez pas encore été invité à une collection."
 }

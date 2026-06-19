@@ -6,6 +6,7 @@ import {
     NgZone,
     OnDestroy,
     Output,
+    inject,
 } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -27,6 +28,11 @@ export const JUMP_MARK_POSTFIX = '_header';
     standalone: false,
 })
 export class JumpMarksHandlerDirective implements OnDestroy {
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+    private uiService = inject(UIService);
+    private ngZone = inject(NgZone);
+    private jumpMarksService = inject(JumpMarksService);
+
     private jumpMarksSubject = new BehaviorSubject<JumpMark[]>(null);
     @Input('esJumpMarksHandler')
     get jumpMarks(): JumpMark[] {
@@ -42,12 +48,7 @@ export class JumpMarksHandlerDirective implements OnDestroy {
     private activeJumpMarkSubject = new BehaviorSubject<JumpMark | null>(null);
     private destroyed = new Subject<void>();
 
-    constructor(
-        private elementRef: ElementRef<HTMLElement>,
-        private uiService: UIService,
-        private ngZone: NgZone,
-        private jumpMarksService: JumpMarksService,
-    ) {
+    constructor() {
         this.activeJumpMarkSubject.subscribe(this.activeJumpMarkChanged);
         this.registerUpdateActiveJumpMark();
         this.registerJumpMarksService();

@@ -1,14 +1,16 @@
-<div *ngIf="initialized(); else loadingSpinner">
+@if (initialized()) {
+<div>
   <!-- color + configuration buttons -->
+  @if (editMode()) {
   <es-widget-configuration-buttons
-    *ngIf="editMode()"
     [optionOne]="embedConfigurationOption"
     [pageVariantNode]="pageVariantNode"
     [swimlaneIndex]="swimlaneIndex"
     [updateInProgress]="updateInProgress()"
     (optionOneClicked)="embedWidget()"
   ></es-widget-configuration-buttons>
+  }
 </div>
-<ng-template #loadingSpinner>
-  <es-spinner></es-spinner>
-</ng-template>
+} @else {
+<es-spinner></es-spinner>
+}

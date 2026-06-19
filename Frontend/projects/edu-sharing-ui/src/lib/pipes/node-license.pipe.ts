@@ -1,16 +1,18 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 export type LicenseType = 'name';
 
+@Injectable({ providedIn: 'root' })
 @Pipe({
     name: 'esNodeLicense',
     standalone: false,
 })
 export class NodeLicensePipe implements PipeTransform {
-    constructor(private translate: TranslateService) {}
+    private translate = inject(TranslateService);
+
     transform(node: Node, args: { type: LicenseType }): Observable<string> {
         if (node.properties[RestConstants.CCM_PROP_LICENSE]?.[0]) {
             if (args?.type === 'name') {

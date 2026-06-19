@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.PreviewServlet;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeService;
@@ -51,7 +52,7 @@ public class Preview implements Serializable {
     setUrl(preview.getUrl());
   }
 
-  public Preview(String storeProtocol, String storeIdentifier, String nodeId, NodeRef.Preview previewData) {
+  public Preview(String storeProtocol, String storeIdentifier, String nodeId, String nodeType, NodeRef.Preview previewData) {
     setUrl(NodeServiceFactory.getInstance().getLocalService().getPreviewUrl(
             storeProtocol,
             storeIdentifier,
@@ -61,12 +62,16 @@ public class Preview implements Serializable {
     if(previewData.getIcon() != null) {
       setIcon(previewData.getIcon());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview icon info in elastic index for node " + nodeId);
+        }
     }
     if(previewData.getType() != null) {
       setType(previewData.getType());
     } else {
-      Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        if(!nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
+            Logger.getLogger(Preview.class).warn("no preview type info in elastic index for node " + nodeId);
+        }
     }
     setMimetype(previewData.getMimetype());
     setData(previewData.getData());

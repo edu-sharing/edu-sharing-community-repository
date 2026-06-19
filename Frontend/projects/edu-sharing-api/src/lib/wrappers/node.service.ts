@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
@@ -6,6 +6,7 @@ import { HOME_REPOSITORY } from '../constants';
 import {
     Node,
     NodeEntries,
+    NodePermissionInheritance,
     NodePermissions,
     NodePermissionsGet,
     NodeVersion,
@@ -18,7 +19,6 @@ import { NodeEntry } from '../api/models/node-entry';
 import { HandleParam } from '../api/models/handle-param';
 import {
     cachedApiReplay,
-    cachedShareReplay,
     DEFAULT_API_CACHE_DURATION,
     KeyCache,
 } from '../utils/decorators/cached-share-replay';
@@ -41,12 +41,13 @@ export class NodeTools {
     providedIn: 'root',
 })
 export class NodeService {
+    private nodeV1 = inject(NodeV1Service);
+    private searchV1 = inject(SearchV1Service);
+
     private static readonly parentsCache = new KeyCache<ParentEntries>();
     private static readonly nodesCache = new KeyCache<Node>();
     private readonly _nodesChanged = new Subject<void>();
     readonly nodesChanged = this._nodesChanged.asObservable();
-
-    constructor(private nodeV1: NodeV1Service, private searchV1: SearchV1Service) {}
 
     @cachedApiReplay(NodeService.nodesCache, getNodeCacheKey, 1)
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
@@ -106,6 +107,33 @@ export class NodeService {
         };
     }): Observable<Node> {
         return this.nodeV1.createChild(params).pipe(map((nodeEntry) => nodeEntry.node));
+    }
+
+    /**
+     * Create a new child by copying.
+     */
+    createChildByCopying(params: {
+        /**
+         * ID of repository (or &quot;-home-&quot; for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of parent node
+         */
+        node: string;
+
+        /**
+         * ID of source node
+         */
+        source: string;
+
+        /**
+         * flag for children
+         */
+        withChildren: boolean;
+    }): Observable<Node> {
+        return this.nodeV1.createChildByCopying(params).pipe(map((nodeEntry) => nodeEntry.node));
     }
 
     deleteNode(
@@ -314,6 +342,22 @@ export class NodeService {
         }
     }
 
+    forkNode(
+        targetParent: string,
+        sourceNode: string,
+        forkName: string,
+        repository = HOME_REPOSITORY,
+        withChildren = true,
+    ) {
+        return this.nodeV1.createForkOfNode({
+            node: targetParent,
+            source: sourceNode,
+            name: forkName,
+            repository,
+            withChildren,
+        });
+    }
+
     /**
      * Set single property of node.
      *
@@ -460,6 +504,13 @@ export class NodeService {
      */
     getStats(nodeId: string, { repository = HOME_REPOSITORY } = {}): Observable<NodeStats> {
         return this.nodeV1.getStats({ repository, node: nodeId });
+    }
+
+    setNodePermissionInheritance(
+        inheritanceList: NodePermissionInheritance[],
+        { repository = HOME_REPOSITORY } = {},
+    ): Observable<void> {
+        return this.nodeV1.set({ repository, body: { inheritanceList } });
     }
 }
 function getParentsCacheKey(

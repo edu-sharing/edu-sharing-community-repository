@@ -2,11 +2,11 @@ import {
     ComponentFactoryResolver,
     ElementRef,
     EventEmitter,
+    inject,
     Injectable,
     Injector,
     NgZone,
     OnDestroy,
-    Optional,
     Type,
     ViewContainerRef,
 } from '@angular/core';
@@ -21,6 +21,7 @@ import {
     LoginInfo,
     MdsService,
     MdsViewRelation,
+    NetworkService,
     Node,
     NodeSuggestionResponseDto,
     Suggestion,
@@ -32,6 +33,7 @@ import {
     BehaviorSubject,
     combineLatest,
     EMPTY,
+    firstValueFrom,
     from,
     Observable,
     of,
@@ -85,6 +87,7 @@ import {
     MdsEditorViewComponent,
     NativeWidgetComponent,
 } from './mds-editor-view/mds-editor-view.component';
+import { nativeWidgetEmptyCheckers } from './util/native-widget-completion';
 import { parseAttributes } from './util/parse-attributes';
 import { MdsEditorWidgetVersionComponent } from './widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { Helper } from '../../../core-module/rest/helper';
@@ -108,8 +111,14 @@ import {
 import { mapExtendedValues } from './mds-editor-wrapper/extended-values-mapper';
 
 export interface CompletionStatusField {
-    widget: Widget;
+    /** Undefined for native widgets (e.g. `author`) that contribute to completion. */
+    widget?: Widget;
     isCompleted: boolean;
+}
+interface NativeWidgetCompletion {
+    /** `mandatory` / `mandatoryForPublish` if the native widget is required, else null/undefined. */
+    isRequired: MdsWidget['isRequired'] | null;
+    isEmpty: boolean;
 }
 export interface CompletionStatusEntry {
     completed: number;
@@ -139,6 +148,24 @@ export class MdsEditorInstanceService
     extends MdsEditorInstanceServiceAbstract
     implements OnDestroy
 {
+    private mdsEditorCommonService = inject(MdsEditorCommonService);
+    private mdsService = inject(MdsService);
+    private aboutService = inject(AboutService);
+    private factoryResolver = inject(ComponentFactoryResolver);
+    private injector = inject(Injector);
+    private containerRef = inject(ViewContainerRef, { optional: true });
+    private ngZone = inject(NgZone);
+    private restMdsService = inject(RestMdsService);
+    private configService = inject(ConfigurationService);
+    private uiService = inject(UIService);
+    private authenticationService = inject(AuthenticationService);
+    private featuresHelperService = inject(FeaturesHelperService);
+    searchHelperService = inject(SearchHelperService);
+    private suggestionsService = inject(SuggestionsV1Service);
+    private restConnector = inject(RestConnectorService);
+    private config = inject(ConfigService);
+    private networkService = inject(NetworkService);
+
     static Widget = class implements GeneralWidget, MdsViewerWidget {
         readonly addValue = new EventEmitter<MdsWidgetValue>();
         readonly status = new BehaviorSubject<InputStatus>(null);
@@ -253,7 +280,20 @@ export class MdsEditorInstanceService
             );
             return this.mapParentValues(changedValues ?? this.initialValues.jointValues);
         }
-
+        isMultivalue(): boolean {
+            return [
+                'vcard',
+                'checkboxHorizontal',
+                'checkboxVertical',
+                'multivalueTree',
+                'multivalueBadges',
+                'multivalueFixedBadges',
+                'multivalueSuggestBadges',
+                'multivalueGroup',
+                'multioption',
+                'multivalueCombined',
+            ].includes(this.definition?.type);
+        }
         /**
          * replace variables from client.config inside parameters of the widget
          */
@@ -655,17 +695,25 @@ export class MdsEditorInstanceService
                 .toPromise();
         }
 
-        public getValuesForKeys(keys: string[]) {
-            const mdsvl = this.mdsEditorInstanceService.restMdsService
-                .getValuesForKeys(
-                    keys,
-                    this.mdsEditorInstanceService.mdsId,
-                    RestConstants.DEFAULT_QUERY_NAME,
-                    this.definition.id,
-                    RestConstants.HOME_REPOSITORY,
+        public async getValuesForKeys(keys: string[]) {
+            if (
+                await firstValueFrom(
+                    this.mdsEditorInstanceService.networkService.isHomeRepository(
+                        this.repositoryId,
+                    ),
                 )
-                .toPromise();
-            return mdsvl;
+            ) {
+                return await firstValueFrom(
+                    this.mdsEditorInstanceService.restMdsService.getValuesForKeys(
+                        keys,
+                        this.mdsEditorInstanceService.mdsId,
+                        RestConstants.DEFAULT_QUERY_NAME,
+                        this.definition.id,
+                        RestConstants.HOME_REPOSITORY,
+                    ),
+                );
+            }
+            return null;
         }
 
         private readNodeValue(node: Node, definition: MdsWidget): string[] {
@@ -793,6 +841,23 @@ export class MdsEditorInstanceService
      * Will be appended on init depending if they exist in the currently rendered group.
      */
     nativeWidgets = new BehaviorSubject<NativeWidget[]>([]);
+    /**
+     * Whether all native widgets currently report a valid status. Native widgets (e.g. `author`)
+     * may declare themselves as required and emit `INVALID` to block saving.
+     */
+    private nativeWidgetsValid$ = this.nativeWidgets.pipe(
+        switchMap((widgets) =>
+            widgets.length
+                ? combineLatest(widgets.map((widget) => widget.status))
+                : of<InputStatus[]>([]),
+        ),
+        map((statuses) => statuses.every((status) => status !== 'INVALID')),
+        startWith(true),
+        distinctUntilChanged(),
+        shareReplay(1),
+    );
+    /** Synchronous mirror of {@link nativeWidgetsValid$} for `getIsValid()`. */
+    private nativeWidgetsValidValue = true;
     /** Input to `MdsEditorWrapper`. */
     externalFilters: Values;
 
@@ -845,25 +910,7 @@ export class MdsEditorInstanceService
     private state$ = new BehaviorSubject<MdsState>({ widgets: {} });
     widgetLocations = [] as WidgetLocation[];
 
-    constructor(
-        private mdsEditorCommonService: MdsEditorCommonService,
-        private mdsService: MdsService,
-        private aboutService: AboutService,
-        private factoryResolver: ComponentFactoryResolver,
-        private injector: Injector,
-        // not supported/available in storybook
-        @Optional() private containerRef: ViewContainerRef,
-        private ngZone: NgZone,
-        private restMdsService: RestMdsService,
-        private configService: ConfigurationService,
-        private uiService: UIService,
-        private authenticationService: AuthenticationService,
-        private featuresHelperService: FeaturesHelperService,
-        public searchHelperService: SearchHelperService,
-        private suggestionsService: SuggestionsV1Service,
-        private restConnector: RestConnectorService,
-        private config: ConfigService,
-    ) {
+    constructor() {
         super();
         this.registerInitMds();
         this.registerLoginInfo();
@@ -878,35 +925,47 @@ export class MdsEditorInstanceService
             this.hasProgrammaticChanges$,
             this.hasSuggestionChanges$,
             this.isValid$,
+            this.nativeWidgetsValid$,
         ])
             .pipe(
                 map(
-                    ([hasUserChanges, hasProgrammaticChanges, hasSuggestionChanges, isValid]) =>
+                    ([
+                        hasUserChanges,
+                        hasProgrammaticChanges,
+                        hasSuggestionChanges,
+                        isValid,
+                        nativeWidgetsValid,
+                    ]) =>
                         (this.editorMode === 'nodes'
                             ? hasUserChanges || hasProgrammaticChanges || hasSuggestionChanges
-                            : true) && isValid,
+                            : true) &&
+                        isValid &&
+                        nativeWidgetsValid,
                 ),
             )
             .subscribe(this.canSave$);
+        this.nativeWidgetsValid$.subscribe((valid) => (this.nativeWidgetsValidValue = valid));
         // Updated list of widgets that meet dynamic conditions and should be considered when saving
         // values and counting completion status.
         const activeWidgets = combineLatest([this.widgets, this.nativeWidgets]).pipe(
-            switchMap(([widgets, nativeWidgets]) =>
-                combineLatest([
+            switchMap(([widgets, nativeWidgets]) => {
+                const sources = [
                     ...(widgets?.map((widget) =>
                         widget.meetsDynamicCondition.pipe(
                             map((meetsCondition) => ({ widget, meetsCondition })),
                         ),
                     ) ?? []),
                     ...(nativeWidgets?.map((widget) => of({ widget, meetsCondition: true })) ?? []),
-                ]).pipe(
+                ];
+                // combineLatest([]) never emits in RxJS; use of([]) to handle the no-widgets case
+                return (sources.length > 0 ? combineLatest(sources) : of([])).pipe(
                     map((entry) =>
                         entry
                             .filter(({ meetsCondition }) => meetsCondition)
                             .map(({ widget }) => widget),
                     ),
-                ),
-            ),
+                );
+            }),
         );
         activeWidgets
             .pipe(
@@ -936,20 +995,91 @@ export class MdsEditorInstanceService
                                 true,
                             ),
                         );
-                    return combineLatest(
-                        filteredWidgets.map((widget) =>
-                            widget.observeHasChanged().pipe(map(() => widget)),
+                    // Native widgets (e.g. author) may declare themselves required and contribute
+                    // to the completion status from one of two mutually exclusive sources:
+                    //  1. RENDERED (editor dialog): the registered component reports a live
+                    //     `isEmpty`; whether it counts is decided from its `isRequired`.
+                    //  2. UNRENDERED (e.g. the publish dialog, which only calls `initWithNodes`
+                    //     and never instantiates the components): derive emptiness from the editor
+                    //     values via `nativeWidgetEmptyCheckers`, using `definition.isRequired`
+                    //     parsed onto the model widget.
+                    const nativeWidgets = widgets.filter(
+                        (widget): widget is NativeWidget =>
+                            !(widget instanceof MdsEditorInstanceService.Widget),
+                    );
+                    // Only consider the unrendered path when no native components are registered;
+                    // when they are (editor dialog) the component path is authoritative and the
+                    // model widgets must not be counted again.
+                    const unrenderedNativeWidgets: Widget[] = nativeWidgets.length
+                        ? []
+                        : widgets.filter(
+                              (widget): widget is Widget =>
+                                  widget instanceof MdsEditorInstanceService.Widget &&
+                                  typeof nativeWidgetEmptyCheckers[
+                                      widget.definition.id as NativeWidgetType
+                                  ] === 'function' &&
+                                  this.meetsCondition(
+                                      widget.definition,
+                                      this.nodes$.value,
+                                      this.values$.value,
+                                      true,
+                                  ),
+                          );
+                    const regularWidgets$ = filteredWidgets.length
+                        ? combineLatest(
+                              filteredWidgets.map((widget) =>
+                                  widget.observeHasChanged().pipe(map(() => widget)),
+                              ),
+                          )
+                        : of([] as Widget[]);
+                    const nativeWidgets$ = nativeWidgets.length
+                        ? combineLatest(
+                              nativeWidgets.map((nativeWidget) =>
+                                  (nativeWidget.component.isEmpty ?? of(false)).pipe(
+                                      map((isEmpty) => ({
+                                          isRequired: nativeWidget.component.isRequired ?? null,
+                                          isEmpty,
+                                      })),
+                                  ),
+                              ),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    // Re-evaluate when either value source changes. `initWithNodes` only populates
+                    // `nodes$` (not `values$`); a node's `properties` are themselves a `Values`
+                    // map, so we feed whichever is available into the `isEmpty(values)` helper.
+                    const unrenderedNativeWidgets$ = unrenderedNativeWidgets.length
+                        ? combineLatest([this.nodes$, this.values$]).pipe(
+                              map(([nodes, values]) => {
+                                  const effectiveValues =
+                                      nodes?.[0]?.properties ?? (values as Values) ?? {};
+                                  return unrenderedNativeWidgets.map((widget) => ({
+                                      isRequired: widget.definition.isRequired ?? null,
+                                      isEmpty:
+                                          nativeWidgetEmptyCheckers[
+                                              widget.definition.id as NativeWidgetType
+                                          ]?.(effectiveValues) ?? false,
+                                  }));
+                              }),
+                          )
+                        : of([] as NativeWidgetCompletion[]);
+                    return combineLatest([
+                        regularWidgets$,
+                        nativeWidgets$,
+                        unrenderedNativeWidgets$,
+                    ]).pipe(
+                        map(([ws, natives, unrendered]) =>
+                            this.calculateCompletionStatus(ws, [...natives, ...unrendered]),
                         ),
-                    ).pipe(map((ws) => this.calculateCompletionStatus(ws)));
+                    );
                 }),
             )
             .subscribe((c) => {
                 this.completionStatus$.next(c);
-                if (this.editorBulkMode.isBulk) {
+                if (this.editorBulkMode?.isBulk) {
                     // disable required fields validation in bulk since they might be filled with individual values
                     this.isValid$.next(
                         c.mandatory.fields.every(
-                            (f) => f.isCompleted || f.widget.getBulkMode() !== 'replace',
+                            (f) => f.isCompleted || f.widget?.getBulkMode() !== 'replace',
                         ),
                     );
                 } else {
@@ -959,7 +1089,7 @@ export class MdsEditorInstanceService
         activeWidgets
             .pipe(
                 map((widgets) =>
-                    this.views.filter((view) =>
+                    this.views?.filter((view) =>
                         widgets.some((widget) => widget.viewId === view.id),
                     ),
                 ),
@@ -973,41 +1103,44 @@ export class MdsEditorInstanceService
                     map(() => widgets),
                 ),
             ),
-            switchMap((widgets) =>
+            switchMap((widgets) => {
                 // FIXME: The mappings below are a bit hacky. We take take the raw `value`
                 // observable for regular widgets and the `hasChanges` observable for native widgets
                 // and extract the actual values later in the pipe.
                 //
                 // TODO: Provide observables for the mapped values by the widgets themselves, so
                 // they can be trivially combined here.
-                combineLatest([
-                    // regular widgets
-                    combineLatest(
-                        widgets
-                            .filter(
-                                (widget): widget is Widget =>
-                                    widget instanceof MdsEditorInstanceService.Widget,
-                            )
-                            .filter((widget) => widget.meetsDynamicCondition.value)
-                            .map((widget) => widget.observeValue().pipe(map((value) => widget))),
-                    ).pipe(map((regularWidgets) => this.mapWidgetValues(regularWidgets))),
-                    // native widgets
-                    ...widgets
-                        .filter(
-                            (widget): widget is NativeWidget =>
-                                !(widget instanceof MdsEditorInstanceService.Widget),
-                        )
-                        .map((nativeWidget) =>
-                            nativeWidget.component.hasChanges.pipe(
-                                switchMap((hasChanges) =>
-                                    nativeWidget.component.getValues
-                                        ? from(nativeWidget.component.getValues({}, null))
-                                        : of({}),
-                                ),
+                const regularWidgetObservables = widgets
+                    .filter(
+                        (widget): widget is Widget =>
+                            widget instanceof MdsEditorInstanceService.Widget,
+                    )
+                    .filter((widget) => widget.meetsDynamicCondition.value)
+                    .map((widget) => widget.observeValue().pipe(map((value) => widget)));
+                const nativeWidgetObservables = widgets
+                    .filter(
+                        (widget): widget is NativeWidget =>
+                            !(widget instanceof MdsEditorInstanceService.Widget),
+                    )
+                    .map((nativeWidget) =>
+                        nativeWidget.component.hasChanges.pipe(
+                            switchMap((hasChanges) =>
+                                nativeWidget.component.getValues
+                                    ? from(nativeWidget.component.getValues({}, null))
+                                    : of({}),
                             ),
                         ),
-                ]).pipe(takeUntil(this.mdsInflated.pipe(filter((isInflated) => !isInflated)))),
-            ),
+                    );
+                // combineLatest([]) never emits in RxJS; use of([]) to handle the no-widgets case
+                const regularValues = (
+                    regularWidgetObservables.length > 0
+                        ? combineLatest(regularWidgetObservables)
+                        : of([] as Widget[])
+                ).pipe(map((regularWidgets) => this.mapWidgetValues(regularWidgets)));
+                return combineLatest([regularValues, ...nativeWidgetObservables]).pipe(
+                    takeUntil(this.mdsInflated.pipe(filter((isInflated) => !isInflated))),
+                );
+            }),
             map((values) =>
                 values.reduce((acc, v) => ({ ...acc, ...v }), {} as { [id: string]: string[] }),
             ),
@@ -1088,7 +1221,12 @@ export class MdsEditorInstanceService
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         }
         const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
-        const wasInitialized = await this.initMds(groupId, mdsId, undefined, this.nodes$.value);
+        const wasInitialized = await this.initMds(
+            groupId,
+            mdsId,
+            this.nodes$.value?.[0]?.ref?.repo || HOME_REPOSITORY,
+            this.nodes$.value,
+        );
         if (!wasInitialized) {
             return null;
         }
@@ -1433,6 +1571,10 @@ export class MdsEditorInstanceService
      * through all widgets when called multiple times.
      */
     showMissingRequiredWidgets(shouldScrollIntoView = true): void {
+        // native widgets (e.g. author) handle their own required hint display
+        for (const { component } of this.nativeWidgets.value) {
+            component.showMissingRequired?.();
+        }
         if (this.lastScrolledIntoViewIndex === null) {
             // No widget was scrolled into view yet. We need to touch all widgets so they will
             // display the required hint and tell them to scroll into view until we found a missing
@@ -1533,7 +1675,7 @@ export class MdsEditorInstanceService
     }
 
     getIsValid() {
-        return this.isValid$.value;
+        return this.isValid$.value && this.nativeWidgetsValidValue;
     }
     getCompletitonStatus() {
         return this.completionStatus$.value;
@@ -1541,7 +1683,7 @@ export class MdsEditorInstanceService
 
     async getValues(node?: Node, validate = true): Promise<Values> {
         // same behaviour as old mds, do not return values until it is valid
-        if (validate && !this.isValid$.value) {
+        if (validate && !this.getIsValid()) {
             this.showMissingRequiredWidgets(true);
             return null;
         }
@@ -2019,11 +2161,18 @@ export class MdsEditorInstanceService
         }
     }
 
-    private calculateCompletionStatus(widgets: Widget[]): CompletionStatus {
+    private calculateCompletionStatus(
+        widgets: Widget[],
+        nativeWidgets: NativeWidgetCompletion[] = [],
+    ): CompletionStatus {
         return Object.values(RequiredMode)
             .filter((requiredMode) => requiredMode !== RequiredMode.Ignore)
             .reduce((acc, requiredMode) => {
-                acc[requiredMode] = this.getCompletionStatusEntry(widgets, requiredMode);
+                acc[requiredMode] = this.getCompletionStatusEntry(
+                    widgets,
+                    requiredMode,
+                    nativeWidgets,
+                );
                 return acc;
             }, {} as CompletionStatus);
     }
@@ -2031,23 +2180,29 @@ export class MdsEditorInstanceService
     private getCompletionStatusEntry(
         widgets: Widget[],
         requiredMode: RequiredMode,
+        nativeWidgets: NativeWidgetCompletion[] = [],
     ): CompletionStatusEntry {
         const total = widgets.filter(
             (widget) =>
                 widget.definition.isRequired === requiredMode &&
                 this.meetsCondition(widget.definition, this.nodes$.value, this.values$.value, true),
         );
-        const completed = total.filter((widget) => widget.getValue() && widget.getValue()[0]);
         const widgetCompletion: CompletionStatusField[] = total.map((widget) => {
             return {
                 widget,
                 isCompleted: !!widget.getValue()?.[0],
             };
         });
+        // native widgets (e.g. author) declare their required mode via `isRequired`, whose string
+        // values match `RequiredMode`. A non-empty native widget counts as completed.
+        const nativeCompletion: CompletionStatusField[] = nativeWidgets
+            .filter((nativeWidget) => nativeWidget.isRequired === requiredMode)
+            .map((nativeWidget) => ({ isCompleted: !nativeWidget.isEmpty }));
+        const fields = [...widgetCompletion, ...nativeCompletion];
         return {
-            total: total.length,
-            completed: completed.length,
-            fields: widgetCompletion,
+            total: fields.length,
+            completed: fields.filter((field) => field.isCompleted).length,
+            fields,
         };
     }
 

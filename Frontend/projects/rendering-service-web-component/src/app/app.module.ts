@@ -5,6 +5,7 @@ import {
     Injector,
     NgModule,
     Provider,
+    inject,
 } from '@angular/core';
 import { createCustomElement } from '@angular/elements';
 import { AppComponent } from './app.component';
@@ -69,7 +70,9 @@ export abstract class Toast extends ToastAbstract {
     ] as Provider[],
 })
 export class AppModule implements DoBootstrap {
-    constructor(injector: Injector) {
+    constructor() {
+        const injector = inject(Injector);
+
         const embeddedApp = createCustomElement(AppComponent, { injector });
         customElements.define('edu-sharing-render', embeddedApp);
     }

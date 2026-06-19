@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.security.basic.*;
+import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -55,6 +56,7 @@ public class SecurityConfigurationSaml {
 
     @Bean
     SecurityFilterChain samlFilterChain(HttpSecurity http, GuestCleanupFilter guestCleanupFilter) throws Exception {
+        http.addFilterBefore(new SecurityContextStrategySwitchFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class);
 
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)

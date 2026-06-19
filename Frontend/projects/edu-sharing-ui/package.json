@@ -1,21 +1,21 @@
 {
   "name": "ngx-edu-sharing-ui",
-  "version": "11.0.0",
+  "version": "11.0.2",
   "license": "GNU GPL v2",
   "description": "Angular components for Edu-Sharing UX parts",
   "scripts": {
     "publish": "ng build && cd ../../dist/edu-sharing-ui && npm publish --tag next"
   },
   "peerDependencies": {
-    "@angular/cdk": ">=18.0.0",
-    "@angular/common": ">=18.0.0",
-    "@angular/core": ">=18.0.0 ",
-    "@angular/material": ">=18.0.0",
+    "@angular/cdk": ">=21.0.0",
+    "@angular/common": ">=21.0.0",
+    "@angular/core": ">=21.0.0 ",
+    "@angular/material": ">=21.0.0",
     "material-design-icons": "^3.0.1",
     "ngx-edu-sharing-api": ">=11.0.0",
     "ngx-rendering-service-api": ">=0.0.41",
     "@ngx-translate/core": ">=15.0.0",
-    "angular-material-css-vars": ">=7.0.0",
+    "angular-material-css-vars": ">=10.0.0",
     "rxjs": "^6.6.7 || ^7.0.0",
     "lodash-es": "^4.17.21"
   },

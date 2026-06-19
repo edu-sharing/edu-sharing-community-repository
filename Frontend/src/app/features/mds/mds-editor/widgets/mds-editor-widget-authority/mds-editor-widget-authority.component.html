@@ -17,14 +17,14 @@
       (chooseAuthority)="add($event)"
     ></es-authority-search-input>
   </div>
+  @if (chipsControl) {
   <mat-chip-listbox
     #chipList
     [formControl]="chipsControl"
-    *ngIf="chipsControl"
     [attr.aria-labelledby]="container.labelId"
   >
+    @for (value of chipsControl.value; track value) {
     <mat-chip-option
-      *ngFor="let value of chipsControl.value"
       [selectable]="false"
       [removable]="true"
       (click)="add(value)"
@@ -37,7 +37,9 @@
       <span class="mat-chip-label">{{ value.label }}</span>
       <mat-icon matChipRemove>cancel</mat-icon>
     </mat-chip-option>
+    }
   </mat-chip-listbox>
+  }
 </es-mds-editor-widget-container>
 
 <!-- Load styles for mat-select-arrow. -->

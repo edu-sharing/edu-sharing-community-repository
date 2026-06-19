@@ -29,15 +29,11 @@ public class BulkEditDimensionExtractionTrigger implements Consumer<NodeRef> {
     }
 
     private void exec(NodeRef nodeRef) {
-        if(nodeService.getProperty(nodeRef, WIDTH) != null && nodeService.getProperty(nodeRef, HEIGHT) != null) {
-            log.info("trigger Metadata extraction for node: " + nodeRef);
-            Map<String, Serializable> result  = transformService.transform(nodeRef, "alfresco-metadata-extract", Map.class);
-            if(result.containsKey(CCConstants.CCM_PROP_IO_WIDTH))
-                nodeService.setProperty(nodeRef, WIDTH, result.get(CCConstants.CCM_PROP_IO_WIDTH));
-            if(result.containsKey(CCConstants.CCM_PROP_IO_HEIGHT))
-                nodeService.setProperty(nodeRef, HEIGHT, result.get(CCConstants.CCM_PROP_IO_HEIGHT));
-        }else{
-            log.info("no width and height set for " + nodeRef);
-        }
+        log.info("trigger Metadata extraction for node: " + nodeRef);
+        Map<String, Serializable> result  = transformService.transform(nodeRef, "alfresco-metadata-extract", Map.class);
+        if(result.containsKey(CCConstants.CCM_PROP_IO_WIDTH))
+            nodeService.setProperty(nodeRef, WIDTH, result.get(CCConstants.CCM_PROP_IO_WIDTH));
+        if(result.containsKey(CCConstants.CCM_PROP_IO_HEIGHT))
+            nodeService.setProperty(nodeRef, HEIGHT, result.get(CCConstants.CCM_PROP_IO_HEIGHT));
     }
 }

@@ -1,3 +1,5 @@
-<footer *ngIf="showFooter()">
+@if (showFooter()) {
+<footer>
   <es-imprint-privacy></es-imprint-privacy>
 </footer>
+}

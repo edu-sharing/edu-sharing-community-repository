@@ -1,18 +1,19 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, Input, OnInit, ViewChild } from '@angular/core';
 import { MatTabGroup } from '@angular/material/tabs';
 import { BehaviorSubject } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
-import { Node } from 'ngx-edu-sharing-api';
+import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { VCard } from 'ngx-edu-sharing-ui';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
+import { MdsEditorInstanceService, Widget } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
 import { Attributes } from '../../util/parse-attributes';
+import { authorIsEmpty } from '../../util/native-widget-completion';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
-import { Values } from '../../../types/types';
+import { InputStatus, Values } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
@@ -29,6 +30,12 @@ enum DefaultTab {
     standalone: false,
 })
 export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
+    mdsEditorValues = inject(MdsEditorInstanceService);
+    private iamApi = inject(RestIamService);
+    private mainNavService = inject(MainNavService);
+    ui = inject(UIService);
+    private dialogs = inject(DialogsService);
+
     static readonly constraints = {
         requiresNode: false,
         supportsBulk: false,
@@ -38,6 +45,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     @Input() showContributorDialog = true;
     _nodes: Node[];
     hasChanges = new BehaviorSubject<boolean>(false);
+    status = new BehaviorSubject<InputStatus>('VALID');
+    /** whether the widget currently holds no author value (used for the completion status) */
+    isEmpty = new BehaviorSubject<boolean>(true);
+    /**
+     * 'mandatory' / 'mandatoryForPublish' if the widget is configured as required via the
+     * `required` attribute in the mds template, e.g. `<author required="mandatory">`
+     */
+    isRequired: MdsWidget['isRequired'] | null = null;
+    /**
+     * whether the missing-required hint should be displayed (after a save attempt or interaction)
+     */
+    showMissingRequiredHint = false;
+    /**
+     * minimal "fake" widget passed to the container so it renders the required marker (`*`) from
+     * `definition.isRequired`, reusing the existing marker logic. `null` when not required.
+     */
+    private _requiredWidget: Partial<Widget> | null = null;
     authorTab = 0;
     author: AuthorData;
     /**
@@ -45,14 +69,6 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      */
     userAuthor: boolean;
     private initialAuthor: AuthorData;
-
-    constructor(
-        public mdsEditorValues: MdsEditorInstanceService,
-        private iamApi: RestIamService,
-        private mainNavService: MainNavService,
-        public ui: UIService,
-        private dialogs: DialogsService,
-    ) {}
 
     ngOnInit(): void {
         this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe((nodes) => {
@@ -67,6 +83,63 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             this.initialAuthor.freetext !== this.author.freetext ||
                 this.initialAuthor.author.getDisplayName() !== this.author.author.getDisplayName(),
         );
+        this.updateStatus();
+    }
+
+    /**
+     * Live emptiness of the current (possibly edited) author value. Delegates to the shared
+     * {@link authorIsEmpty} predicate (also used for the unrendered/publish case via
+     * `nativeWidgetEmptyCheckers`) so there is a single source of truth.
+     */
+    private get isEmptyValue(): boolean {
+        return authorIsEmpty(this.author?.freetext, this.author?.author);
+    }
+
+    /**
+     * recalculate the input status based on the `required` configuration.
+     * `mandatory` blocks saving (INVALID), `mandatoryForPublish` is only a warning (stays VALID).
+     */
+    private updateStatus(): void {
+        const empty = this.isEmptyValue;
+        this.isEmpty.next(empty);
+        const status: InputStatus = this.isRequired === 'mandatory' && empty ? 'INVALID' : 'VALID';
+        this.status.next(status);
+    }
+
+    /**
+     * called by the editor when the user tries to save while required fields are missing,
+     * so the hint gets displayed.
+     */
+    showMissingRequired(): void {
+        this.showMissingRequiredHint = true;
+    }
+
+    onBlur(): void {
+        this.showMissingRequiredHint = true;
+    }
+
+    /**
+     * whether the missing-required hint/marker should currently be shown to the user
+     */
+    get isMissingRequired(): boolean {
+        return !!this.isRequired && this.isEmptyValue;
+    }
+
+    /**
+     * "fake" widget passed to the container so it shows the required marker via the existing
+     * `widget.definition.isRequired` logic. Returns a stable, cached instance.
+     */
+    get requiredWidget() {
+        if (!this.isRequired) {
+            return null;
+        }
+        if (!this._requiredWidget) {
+            this._requiredWidget = {
+                definition: { id: 'author', isRequired: this.isRequired, isExtended: false },
+                meetsDynamicCondition: new BehaviorSubject(true),
+            } as Partial<Widget>;
+        }
+        return this._requiredWidget;
     }
 
     static async openContributorDialog(
@@ -102,6 +175,9 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     }
 
     async getValues(values: Values, node: Node): Promise<Values> {
+        if (!this.author) {
+            return {};
+        }
         values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
         // copy current value from node, replace only first entry (if it has multiple authors)
         values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = (node as Node)?.properties?.[
@@ -179,6 +255,13 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             ) {
                 this.authorTab = 0;
             }
+            // read the required configuration from the template attribute, e.g.
+            // `<author required="mandatory">` (analogous to `defaulttab`)
+            const required = this.attributes?.required ?? this.attributes?.isrequired;
+            if (required === 'mandatory' || required === 'mandatoryForPublish') {
+                this.isRequired = required;
+            }
+            this.updateStatus();
             // deep copy the elements to compare state
             this.initialAuthor = {
                 freetext: this.author.freetext,

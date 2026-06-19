@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import {
     NetworkService,
     Node,
@@ -21,6 +21,11 @@ import { SharedModule } from '../../../../../../shared/shared.module';
     imports: [SharedModule],
 })
 export class MdsNodeRelationsWidgetComponent implements OnChanges {
+    private translate = inject(TranslateService);
+    private relationService = inject(RelationService);
+    private nodeService = inject(NodeService);
+    private networkService = inject(NetworkService);
+
     loading = true;
     @Input() node: Node;
     relations: NodeRelationData[];
@@ -29,13 +34,6 @@ export class MdsNodeRelationsWidgetComponent implements OnChanges {
     forkedOrigin: Node;
     forkedChilds: Node[];
     isFromHomeRepo: boolean;
-
-    constructor(
-        private translate: TranslateService,
-        private relationService: RelationService,
-        private nodeService: NodeService,
-        private networkService: NetworkService,
-    ) {}
 
     async ngOnChanges(changes?: SimpleChanges) {
         if (this.node) {

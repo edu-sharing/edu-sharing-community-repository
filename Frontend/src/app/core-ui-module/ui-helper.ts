@@ -268,7 +268,6 @@ export class UIHelper {
      * @param folder The folder id to open
      */
     public static goToWorkspaceFolder(
-        nodeService: RestNodeService,
         router: Router,
         login: LoginInfo,
         folder: string,

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 
@@ -9,6 +9,12 @@ import { AuthenticationService } from 'ngx-edu-sharing-api';
     standalone: false,
 })
 export class WrapperComponent implements OnInit {
+    private router = inject(Router);
+    /**
+     * service to allow access for sending authentication data
+     */
+    authenticationService = inject(AuthenticationService);
+
     @Input()
     get searchString(): string {
         return this._searchString;
@@ -28,14 +34,6 @@ export class WrapperComponent implements OnInit {
         this.onTicketStringChanged();
     }
     private _ticket: string;
-
-    constructor(
-        private router: Router,
-        /**
-         * service to allow access for sending authentication data
-         */
-        public authenticationService: AuthenticationService,
-    ) {}
 
     ngOnInit(): void {
         // We need this to hook up routing to our LocationStrategy. Otherwise calls on Location

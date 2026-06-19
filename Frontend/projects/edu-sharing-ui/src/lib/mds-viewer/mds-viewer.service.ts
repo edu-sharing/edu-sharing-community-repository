@@ -1,4 +1,4 @@
-import { ElementRef, Injectable, QueryList, ViewChildren } from '@angular/core';
+import { ElementRef, Injectable, QueryList, ViewChildren, inject } from '@angular/core';
 import { MdsDefinition, MdsWidget } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { Values } from '../services/search-helper.service';
@@ -10,10 +10,13 @@ import { DateHelper } from '../util/DateHelper';
 
 @Injectable()
 export class MdsViewerService {
+    private vCardNamePipe = inject(VCardNamePipe);
+    private translate = inject(TranslateService);
+    private formatSizePipe = inject(FormatSizePipe);
+
     @ViewChildren('container') container: QueryList<ElementRef>;
     values$ = new BehaviorSubject<Values>(undefined);
     mds$ = new BehaviorSubject<MdsDefinition>(undefined);
-    constructor(private translate: TranslateService) {}
     getFormattedValue(value: string[], definition: MdsWidget, basicType: string): string[] {
         switch (basicType) {
             case 'date':
@@ -30,7 +33,7 @@ export class MdsViewerService {
 
     private formatVCard(value: string[]): string[] {
         return value.map((v) => {
-            return new VCardNamePipe(this.translate).transform(v);
+            return this.vCardNamePipe.transform(v);
         });
     }
 
@@ -59,7 +62,7 @@ export class MdsViewerService {
     private formatNumber(value: string[], definition: MdsWidget): string[] {
         return value.map((value) => {
             if (definition.format === 'bytes') {
-                return new FormatSizePipe(this.translate).transform(value);
+                return this.formatSizePipe.transform(value);
             }
             return value;
         });
@@ -94,6 +97,7 @@ export class MdsViewerService {
             case 'multivalueSuggestBadges':
             case 'singlevalueSuggestBadges':
             case 'multivalueBadges':
+            case 'multivalueButtons':
             case 'singlevalueTree':
             case 'multivalueTree':
                 return flat ? 'array' : 'tree';
@@ -105,5 +109,16 @@ export class MdsViewerService {
                 return 'range';
         }
         return 'unknown';
+    }
+
+    /**
+     * hide empty widgets inside a closed container
+     */
+    static hideEmpty(c: ElementRef) {
+        for (let emptyGroup of c.nativeElement.getElementsByTagName('hideifempty')) {
+            if (!emptyGroup.getElementsByTagName('hideifempty-content')?.[0]?.innerText?.trim()) {
+                emptyGroup.parentElement.removeChild(emptyGroup);
+            }
+        }
     }
 }
