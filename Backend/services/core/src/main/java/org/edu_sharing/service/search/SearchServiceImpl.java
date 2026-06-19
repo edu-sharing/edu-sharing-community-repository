@@ -6,6 +6,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -16,6 +17,7 @@ import org.alfresco.service.cmr.security.AuthorityService;
 import org.alfresco.service.cmr.security.AuthorityType;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.service.namespace.RegexQNamePattern;
 import org.alfresco.util.ISO9075;
 import org.alfresco.util.Pair;
 import org.apache.commons.lang3.NotImplementedException;
@@ -327,15 +329,18 @@ public class SearchServiceImpl implements SearchService {
 				new RetryingTransactionCallback<SearchResult<String>>() {
 
 					public SearchResult<String> execute() throws Throwable {
-						String key = authorityName;
-						String[] data = authorityService.getContainingAuthorities(null, key, true)
-								.toArray(new String[0]);
-						return filterAndSortAuthorities(data,pattern,null,skipCount,maxValues,sort);
+						// parent groups of a person are few, so we don't pre-resolve their node refs here;
+						// filterAndSortAuthorities lazily resolves a ref only for the few survivors of a pattern search.
+						Map<String, NodeRef> authorities = new LinkedHashMap<>();
+						for (String parent : authorityService.getContainingAuthorities(null, authorityName, true)) {
+							authorities.put(parent, null);
+						}
+						return filterAndSortAuthorities(authorities,pattern,null,skipCount,maxValues,sort);
 					}
 
 				}, true);
 	}
-	
+
 	@Override
 	public SearchResult<String> searchGroupMembers(String groupName, String pattern, String authorityType,
 			int skipCount, int maxValues, SortDefinition sort) {
@@ -346,70 +351,88 @@ public class SearchServiceImpl implements SearchService {
 				new RetryingTransactionCallback<SearchResult<String>>() {
 
 					public SearchResult<String> execute() throws Throwable {
-						String key = groupName;
-						String[] data = authorityService.getContainedAuthorities(null, key, true)
-								.toArray(new String[0]);
-						return filterAndSortAuthorities(data,pattern,authorityType,skipCount,maxValues,sort);
+						// Read the immediate members straight from the group's cm:member child associations: the
+						// association's QName local name IS the authority name (see AuthorityDAOImpl.addAuthority),
+						// and the child ref is the member node - so we get (name -> nodeRef) without a single
+						// getAuthorityNodeRef() call per member (the former bottleneck for large groups).
+						// Note: GROUP_EVERYONE membership is synthetic and not expressed via cm:member.
+						NodeRef groupNodeRef = authorityService.getAuthorityNodeRef(groupName);
+						Map<String, NodeRef> authorities = new LinkedHashMap<>();
+						if (groupNodeRef != null) {
+							// preload the member nodes when a pattern search will read their display names
+							boolean preload = pattern != null && !pattern.isEmpty();
+							for (ChildAssociationRef car : serviceRegistry.getNodeService().getChildAssocs(
+									groupNodeRef, ContentModel.ASSOC_MEMBER, RegexQNamePattern.MATCH_ALL, preload)) {
+								authorities.put(car.getQName().getLocalName(), car.getChildRef());
+							}
+						}
+						return filterAndSortAuthorities(authorities,pattern,authorityType,skipCount,maxValues,sort);
 					}
 
 				}, true);
 	}
-	private SearchResult<String> filterAndSortAuthorities(String[] data,String pattern,String authorityType,int skipCount, int maxValues,SortDefinition sort) throws Exception {
-		List<String> list2 = new ArrayList<>();
+	/**
+	 * @param authorities authorityName -&gt; member nodeRef (the nodeRef may be null, in which case it is resolved
+	 *                    lazily via {@link AuthorityService#getAuthorityNodeRef(String)} only when needed)
+	 */
+	private SearchResult<String> filterAndSortAuthorities(Map<String, NodeRef> authorities,String pattern,String authorityType,int skipCount, int maxValues,SortDefinition sort) throws Exception {
+		// apply the cheap GROUP/USER type filter in-memory
+		Map<String, NodeRef> members;
 		if (authorityType != null && !authorityType.isEmpty()) {
-			for (String authority : data) {
+			members = new LinkedHashMap<>();
+			for (Map.Entry<String, NodeRef> entry : authorities.entrySet()) {
+				String authority = entry.getKey();
 				if (authorityType.equals("GROUP")
 						&& !authority.startsWith(PermissionService.GROUP_PREFIX))
 					continue;
 				if (authorityType.equals("USER")
 						&& authority.startsWith(PermissionService.GROUP_PREFIX))
 					continue;
-				list2.add(authority);
+				members.put(authority, entry.getValue());
 			}
 		} else {
-			list2 = Arrays.asList(data);
+			members = authorities;
 		}
 
-		List<String> list = new ArrayList<>();
+		List<String> list;
 		if (pattern != null && !pattern.isEmpty()) {
-			for (String authority : list2) {
-				
-				NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
-				
-				String name = authority;
+			String patternLower = pattern.toLowerCase();
+			list = new ArrayList<>();
+			for (Map.Entry<String, NodeRef> entry : members.entrySet()) {
+				String authority = entry.getKey();
+				NodeRef authorityNodeRef = entry.getValue();
+				if (authorityNodeRef == null) {
+					// caller didn't supply a node ref - resolve it lazily (legacy path / searchPersonGroups)
+					authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
+				}
 
-				String toCompare = "" + name;
-				
-				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
-					name = name.substring(PermissionService.GROUP_PREFIX.length());
-					
-					if(authorityNodeRef != null) {
-						String displayName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
-						if(displayName != null) {
-							toCompare += displayName;
+				StringBuilder toCompare = new StringBuilder(authority);
+				if (authority.startsWith(PermissionService.GROUP_PREFIX)) {
+					if (authorityNodeRef != null) {
+						String displayName = (String) serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
+						if (displayName != null) {
+							toCompare.append(displayName);
 						}
 					}
-						
-					
-				}else {
-					if(authorityNodeRef != null) {
-						String firstName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
-						String lastName = (String)serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
-						if(firstName != null) {
-							toCompare+=firstName;
+				} else {
+					if (authorityNodeRef != null) {
+						String firstName = (String) serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
+						String lastName = (String) serviceRegistry.getNodeService().getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
+						if (firstName != null) {
+							toCompare.append(firstName);
 						}
-						if(lastName != null) {
-							toCompare+=lastName;
+						if (lastName != null) {
+							toCompare.append(lastName);
 						}
 					}
 				}
-				
-				
-				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
+
+				if (toCompare.toString().toLowerCase().contains(patternLower)) {
 					list.add(authority);
+				}
 			}
 		} else {
-			list = list2;
+			list = new ArrayList<>(members.keySet());
 		}
 
 		if (sort.hasContent()) {
@@ -432,6 +455,7 @@ public class SearchServiceImpl implements SearchService {
 		list = limitList(list, skipCount, maxValues);
 		return new SearchResult<String>(list, skipCount, count);
 	}
+
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
 			SortDefinition sort,Map<String,String> customProperties) throws Exception {
