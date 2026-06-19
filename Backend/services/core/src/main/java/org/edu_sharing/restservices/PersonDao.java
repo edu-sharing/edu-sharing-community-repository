@@ -455,13 +455,22 @@ public class PersonDao {
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
-		List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
-		for(ChildAssociationRef ref : refs) {
-			if(ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))){
-				return ref.getChildRef();
+		Serializable cache = PersonCache.get(getAuthorityName(), PersonCache.AVATAR);
+		if(cache == null) {
+			List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
+			for (ChildAssociationRef ref : refs) {
+				if (ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))) {
+					PersonCache.put(getAuthorityName(), PersonCache.AVATAR, ref.getChildRef());
+					return ref.getChildRef();
+				}
 			}
+			PersonCache.put(getAuthorityName(), PersonCache.AVATAR, PersonCache.NULL_NODEREF);
+			return null;
+		} else if(cache.equals(PersonCache.NULL_NODEREF)) {
+			return null;
+		} else {
+			return (org.alfresco.service.cmr.repository.NodeRef) cache;
 		}
-		return null;
 	}
 	private String getAvatar() {
 		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
@@ -475,6 +484,7 @@ public class PersonDao {
 			org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
 			if(currentAvatar!=null) {
 				this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
+				PersonCache.reset(getAuthorityName());
 			}
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
@@ -496,6 +506,7 @@ public class PersonDao {
 		NodeServiceHelper.setCreateVersion(nodeId,false);
 		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
 		this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE,new String[]{CCConstants.PERMISSION_CONSUMER},true);
+		PersonCache.reset(getAuthorityName());
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
 		}
