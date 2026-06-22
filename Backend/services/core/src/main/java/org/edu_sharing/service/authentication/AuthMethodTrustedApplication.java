@@ -1,18 +1,19 @@
 package org.edu_sharing.service.authentication;
 
-import java.util.Map;
-
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationException;
-import org.apache.log4j.Logger;
+import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
+import java.util.Map;
+
+@Setter
+@Slf4j
 public class AuthMethodTrustedApplication implements AuthMethodInterface {
 
-	Logger logger = Logger.getLogger(AuthMethodTrustedApplication.class);
-	
-	
-	SSOAuthorityMapper ssoAuthorityMapper;
+	private SSOAuthorityMapper ssoAuthorityMapper;
 	
 	public String authenticate(Map<String, String> params) throws AuthenticationException {
 		
@@ -20,41 +21,29 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
 		
 		String applicationId = params.get(SSOAuthorityMapper.PARAM_APP_ID);
 		String clientIp = params.get(SSOAuthorityMapper.PARAM_APP_IP);
-		
-		/**
-		 * check params
-		 */
-		if(applicationId == null || applicationId.trim().length() == 0 || userName == null || userName.trim().length() == 0){
-			logger.error(AuthenticationExceptionMessages.MISSING_PARAM);
-			logger.error(" username:"+userName +" applicationId:"+applicationId +" ( clientIp:"+clientIp+")");
+
+        // check params
+		if(StringUtils.isBlank(applicationId) || StringUtils.isBlank(userName)){
+			log.error(AuthenticationExceptionMessages.MISSING_PARAM);
+            log.error(" username:{} applicationId:{} ( clientIp:{})", userName, applicationId, clientIp);
 			throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
 		}
-		
-		/**
-		 * check applicationId
-		 */
+
+        // check applicationId
 		final ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(applicationId);
 		if (appInfo == null || appInfo.getTrustedclient() == null || !appInfo.getTrustedclient().equals("true")) {
-			logger.info(AuthenticationExceptionMessages.INVALID_APPLICATION +" "+appInfo);
+            log.info(AuthenticationExceptionMessages.INVALID_APPLICATION + " {}", appInfo);
 			throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_APPLICATION);
 		}
-		
 
-		/**
-		 * check host
-		 */	
+        // check host
 		if (ssoAuthorityMapper.isAuthByAppCheckClientIp() && (clientIp == null || !appInfo.isTrustedHost(clientIp))) {
-			logger.error(AuthenticationExceptionMessages.INVALID_HOST + " clientHost:" + clientIp + " appInfo.trusted hosts:" + appInfo.getHost() +" "+ appInfo.getHostAliases() +" "+appInfo.getDomain() +" appInfo.getAppId():"+appInfo.getAppId() +" appfile:"+appInfo.getAppFile() +" param appid:"+applicationId);
+            log.error(AuthenticationExceptionMessages.INVALID_HOST + " clientHost:{} appInfo.trusted hosts:{} {} {} appInfo.getAppId():{} appfile:{} param appid:{}", clientIp, appInfo.getHost(), appInfo.getHostAliases(), appInfo.getDomain(), appInfo.getAppId(), appInfo.getAppFile(), applicationId);
 			throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_HOST + ": " + clientIp);
 		}
-		
-		
-		
+
 		params.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
 		return ssoAuthorityMapper.mapAuthority(params);
 	}
-	
-	public void setSsoAuthorityMapper(SSOAuthorityMapper ssoAuthorityMapper) {
-		this.ssoAuthorityMapper = ssoAuthorityMapper;
-	}
+
 }

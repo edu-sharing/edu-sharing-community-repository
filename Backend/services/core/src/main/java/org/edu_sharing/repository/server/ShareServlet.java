@@ -22,6 +22,8 @@ import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
+import org.edu_sharing.service.tracking.TrackingService;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.springframework.context.ApplicationContext;
 
 import java.io.DataInputStream;
@@ -164,6 +166,8 @@ public class ShareServlet extends HttpServlet {
                 in.close();
                 op.flush();
                 op.close();
+
+                TrackingServiceFactory.getTrackingService().trackActivityOnNode(mappedNodeRef, null, TrackingService.EventType.DOWNLOAD_MATERIAL);
 
                 share.setDownloadCount((share.getDownloadCount() + 1));
                 shareService.updateDownloadCount(share);

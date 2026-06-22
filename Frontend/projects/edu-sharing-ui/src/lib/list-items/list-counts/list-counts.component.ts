@@ -18,6 +18,7 @@ export class ListCountsComponent extends ListWidget {
         new ListItem('NODE', 'counts.VIEW_MATERIAL_PLAY_MEDIA'),
         new ListItem('NODE', 'counts.OPEN_EXTERNAL_LINK'),
         new ListItem('NODE', 'counts.DOWNLOAD_MATERIAL'),
+        new ListItem('NODE', 'counts.VIEW_MATERIAL_GDPR_CONFIRMED'),
     ];
 
     static getCountSingle(node: StatisticsGroup, id: string, group: number = null) {

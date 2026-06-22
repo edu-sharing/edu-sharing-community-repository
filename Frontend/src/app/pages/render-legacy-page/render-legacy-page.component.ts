@@ -560,6 +560,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                                         this.breadcrumbsService.setNodePath(nodes.nodes.reverse()),
                                     (error) => {
                                         console.info("Parent can' be fetched", error);
+                                        error.preventDefault();
                                     },
                                 );
                             }

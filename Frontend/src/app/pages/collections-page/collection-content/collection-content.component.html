@@ -64,6 +64,7 @@
           isUserAllowedToEdit(collection)
         "
       >
+        @if (createAllowed()) {
         <div class="collection-nocontent-big">
           {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
         </div>
@@ -72,6 +73,7 @@
             {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
           </div>
         </div>
+        }
       </div>
     </div>
   </section>

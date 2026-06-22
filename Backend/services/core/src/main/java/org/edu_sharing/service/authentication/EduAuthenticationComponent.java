@@ -27,9 +27,8 @@
  */
 package org.edu_sharing.service.authentication;
 
-import java.util.List;
-import java.util.Map;
-
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -38,25 +37,31 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.authentication.subsystems.SubsystemChainingAuthenticationService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+import java.util.Map;
 
 
+@Slf4j
 public class EduAuthenticationComponent{
 
-	Logger logger = Logger.getLogger(EduAuthenticationComponent.class);
-	
+    /**
+     * -- SETTER --
+     *  IOC
+     *
+     * @param ccAuthMethod
+     */
+    @Setter
     private List<AuthMethodInterface> ccAuthMethod;
     
-    AuthenticationComponent authenticationComponent;
-    
-    PersonService personService;
-    
-    NodeService nodeService;
+    private AuthenticationComponent authenticationComponent;
+    private PersonService personService;
+    private NodeService nodeService;
 
 	public void init(){
 		ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -83,35 +88,30 @@ public class EduAuthenticationComponent{
 		//only allow classes that are in ccAuthMethod List
 		for(AuthMethodInterface authenticator:ccAuthMethod){
 			if(authenticator.getClass().getName().equals(authClassName)){
-		
-				logger.info("authenticator:" + authClassName);
+
+                log.info("authenticator:{}", authClassName);
 				username = authenticator.authenticate(params);
 			}
 		}
-		if(username == null || username.trim().equals("")){
-			logger.info("Auth failed for class:" + authClassName);
+
+		if(StringUtils.isBlank(username)){
+            log.info("Auth failed for class:{}", authClassName);
 			throw new AuthenticationException(AuthenticationExceptionMessages.AUTHENTICATION_FAILED);
 		}
-		else{
-			
+
+		else {
+
 			String fUserName = username;
-			AuthenticationUtil.RunAsWork<String> runAs = new AuthenticationUtil.RunAsWork<String>() {
-				
-				@Override
-				public String doWork() throws Exception {
-					// TODO Auto-generated method stub
-					NodeRef personNodeRef = personService.getPersonOrNull(fUserName);
-					if(personNodeRef == null) {
-						logger.error("person does not exist:" + fUserName);
-						throw new AuthenticationException(AuthenticationExceptionMessages.USERNOTFOUND);
-					}
-					
-					String repoUsername = (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
-					return repoUsername;
+			String repoUsername = AuthenticationUtil.runAsSystem(() -> {
+				// TODO Auto-generated method stub
+				NodeRef personNodeRef = personService.getPersonOrNull(fUserName);
+				if(personNodeRef == null) {
+					log.error("person does not exist:{}", fUserName);
+					throw new AuthenticationException(AuthenticationExceptionMessages.USERNOTFOUND);
 				}
-			};
-			
-			String repoUsername = AuthenticationUtil.runAsSystem(runAs);
+
+				return (String)nodeService.getProperty(personNodeRef, ContentModel.PROP_USERNAME);
+			});
 			
 			//inform Alfresco that the following user authenticated successfully
 			authenticationComponent.setCurrentUser(repoUsername);
@@ -126,13 +126,4 @@ public class EduAuthenticationComponent{
 		}
 		return username;
     }
-    
- 
-    /**
-     * IOC
-     * @param ccAuthMethod
-     */
-	public void setCcAuthMethod(List ccAuthMethod) {
-		this.ccAuthMethod = ccAuthMethod;
-	}	
 }

@@ -60,7 +60,7 @@ public class RenderingServlet extends HttpServlet {
         resp.getWriter().write("<html>");
         resp.getWriter().write("<head>");
         try {
-            resp.getWriter().write("<style>");
+            resp.getWriter().write("<style nonce=\"" + nonce + "\">");
             String customCSS = ConfigServiceFactory.getCurrentConfig().values.customCSS;
             if(!StringUtils.isBlank(customCSS)) {
                 resp.getWriter().write(customCSS);
@@ -84,6 +84,7 @@ public class RenderingServlet extends HttpServlet {
             resp.getWriter().write("<es-app ngCspNonce=\"" + nonce + "\"></es-app>");
             resp.getWriter().write("<style nonce=\"" + nonce + "\">");
             resp.getWriter().write("body,html{margin:0; padding:0;}");
+            resp.getWriter().write("</style>");
         }
         resp.getWriter().write("</head>");
         resp.getWriter().write("<body class= \"eduservlet-render-body\">");
