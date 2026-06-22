@@ -477,7 +477,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ApplicationInfo addApplication(String appMetadataUrl) throws Exception {
 
-        HttpQueryTool httpQuery = new HttpQueryTool();
+        org.edu_sharing.repository.server.tools.http.HttpQueryTool httpQuery = new org.edu_sharing.repository.server.tools.http.HttpQueryTool();
         String httpQueryResult = httpQuery.query(appMetadataUrl);
         if (httpQueryResult == null) {
             throw new CCException(null, "something went wrong. got no result for metadata url: " + appMetadataUrl);

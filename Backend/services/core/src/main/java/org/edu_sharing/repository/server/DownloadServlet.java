@@ -220,7 +220,7 @@ public class DownloadServlet extends SpringHttpServlet {
         }
         if (is == null || is.available() == 0) {
             if (mode.equals(Mode.passthrough)) {
-                Throwable throwable = handleStreamFromLocation(nodeId, new HttpQueryTool.Callback<Throwable>() {
+                Throwable throwable = handleStreamFromLocation(nodeId, new org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable>() {
                     @Override
                     public void handle(InputStream is) {
                         try {
@@ -254,11 +254,11 @@ public class DownloadServlet extends SpringHttpServlet {
      * @param nodeId
      * @return
      */
-    private Throwable handleStreamFromLocation(String nodeId, HttpQueryTool.Callback<Throwable> callback) {
+    private Throwable handleStreamFromLocation(String nodeId, org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable> callback) {
         String location = NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.LOM_PROP_TECHNICAL_LOCATION);
         if (location == null)
             return null;
-        new HttpQueryTool().queryStream(location, callback);
+        new org.edu_sharing.repository.server.tools.http.HttpQueryTool().queryStream(location, callback);
         return callback.getResult();
     }
 

@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.ErrorFilter;
-import org.edu_sharing.repository.server.tools.HttpException;
+import org.edu_sharing.repository.server.tools.http.HttpException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.json.JSONObject;
 

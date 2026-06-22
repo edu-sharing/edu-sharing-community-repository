@@ -14,10 +14,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
-import org.edu_sharing.alfresco.service.connector.Connector;
-import org.edu_sharing.alfresco.service.connector.ConnectorFileType;
-import org.edu_sharing.alfresco.service.connector.ConnectorService;
-import org.edu_sharing.alfresco.service.connector.SimpleConnector;
+import org.edu_sharing.alfresco.service.connector.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
@@ -26,7 +23,7 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.SimpleErrorWithDetailsException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
@@ -68,17 +65,17 @@ public class ConnectorServlet extends SpringHttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String connectorId = req.getParameter("connectorId");
 		String nodeId = req.getParameter("nodeId");
-		
-		
+
+
 		Map<String,String> auth = AuthenticationToolAPI.getInstance().validateAuthentication(req.getSession());
-		
+
 		if(auth == null){
 			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 			return;
 		}
-		
+
 		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
-		
+
 		boolean readOnly=true;
 		boolean isCollection;
 		String toolInstanceNodeId = null;
@@ -118,14 +115,14 @@ public class ConnectorServlet extends SpringHttpServlet {
 			if(simpleConnector.isPresent()) {
 				HashMap<String, Serializable> properties = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
 				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
-                try {
+				try {
 					// try to re-fetch to obey Node Interceptors!
 					Map<String, Object> propertiesWritten = NodeServiceHelper.getProperties(nodeRefOriginal);
 					resp.sendRedirect((String) propertiesWritten.get(CCConstants.CCM_PROP_IO_WWWURL));
 				} catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-                resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
+					throw new RuntimeException(e);
+				}
+				resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
 				// @TODO: redirect resp to the generated element/uri
 				return;
 			}
@@ -140,7 +137,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 				return;
 			}
 		}
-		
+
 		ApplicationInfo connectorAppInfo = null;
 		for(Map.Entry<String, ApplicationInfo> entry : ApplicationInfoList.getApplicationInfos().entrySet()){
 			ApplicationInfo appInfo = entry.getValue();
@@ -148,7 +145,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 				connectorAppInfo = appInfo;
 			}
 		}
-		
+
 		if(connectorAppInfo == null){
 			logger.error("no connector appinfo registered");
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no connector appinfo registered");
@@ -175,7 +172,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 				return;
 			}
 		}
-		
+
 		try{
 			JSONObject jsonObject = new JSONObject();
 			// connector get's the real node id. API can handle permissions for references this way
@@ -204,11 +201,11 @@ public class ConnectorServlet extends SpringHttpServlet {
 			// hint that connector should start in edit mode (i.e. for onlyOffice read/preview mode skip)
 			jsonObject.put("preferEdit", Boolean.parseBoolean(req.getParameter("preferEdit")));
 			jsonObject.put("ts", System.currentTimeMillis() / 1000);
-            jsonObject.put("sessionId", req.getSession().getId());
-            try{
-                jsonObject.put("language",AuthenticationToolAPI.getInstance().getCurrentLanguage());
-            }catch(Throwable t){}
-            jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
+			jsonObject.put("sessionId", req.getSession().getId());
+			try{
+				jsonObject.put("language",AuthenticationToolAPI.getInstance().getCurrentLanguage());
+			}catch(Throwable t){}
+			jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
 			jsonObject.put("api_url",homeRepo.getClientBaseUrl() + "/rest");
 			jsonObject.put("appid",homeRepo.getAppId());
 
@@ -220,10 +217,10 @@ public class ConnectorServlet extends SpringHttpServlet {
 				jsonObject.put("refreshToken", token.getRefreshToken());
 				jsonObject.put("expiresIn", tokenService.getExpiresIn());
 			}
-			
+
 			logger.debug("jsonObject:" + jsonObject);
-				
-			
+
+
 			pushToConnector(jsonObject,connectorAppInfo,resp);
 
 		}catch(Exception e){
@@ -247,29 +244,11 @@ public class ConnectorServlet extends SpringHttpServlet {
 		String url = replaceSimpleConnectorAttributes(requestParameters, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
 		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
 			builder = RequestBuilder.post(url);
-			if(simpleConnector.getApi().getAuthentication() != null && simpleConnector.getApi().getAuthentication().getType() != null) {
-				RequestBuilder builderAuth = null;
-				SimpleConnector.SimpleConnectorAuthentication authentication = simpleConnector.getApi().getAuthentication();
-				if (SimpleConnector.SimpleConnectorApi.Method.Post.equals(authentication.getMethod())) {
-					builderAuth = RequestBuilder.post(authentication.getUrl());
-					if (SimpleConnector.SimpleConnectorApi.BodyType.Form.equals(authentication.getBodyType())) {
-						List<? extends NameValuePair> data = authentication.getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join))).collect(Collectors.toList());
-						builderAuth.setEntity(new UrlEncodedFormEntity(data));
-						builderAuth.setHeader("Content-Type", "application/x-www-form-urlencoded");
-					}
-					// builder.setHeader()
-				}
-				String auth = "";
-				try {
-					auth = new HttpQueryTool().query(builderAuth);
-					JSONObject authJson = new JSONObject(auth);
-					builder.setHeader("Authorization", "Bearer " + authJson.get("access_token"));
-				}catch(JSONException e) {
-					throw new IllegalArgumentException("Wrong json data received: " + auth, e);
-				}catch(Throwable t) {
-					throw new SimpleErrorWithDetailsException("Authentication failed for connector " + simpleConnector.getId() + ". Check the configuration.");
-				}
-            }
+			try {
+				SimpleConnectorHelper.addAuthentication(simpleConnector, builder);
+			}catch(Throwable t){
+				throw new SimpleErrorWithDetailsException("Authentication failed for connector " + simpleConnector.getId() + ". Check the configuration.");
+			}
 			if(simpleConnector.getApi().getBodyType() == null) {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
@@ -289,14 +268,14 @@ public class ConnectorServlet extends SpringHttpServlet {
 			SimpleConnector.ConnectorRequest request = new SimpleConnector.ConnectorRequest(
 					requestParameters, simpleConnector, nodeRefOriginal
 			);
-            try {
-                properties.putAll(
-					((SimpleConnector.PostRequestHandler)Class.forName(simpleConnector.getApi().getPostRequestHandler()).getDeclaredConstructor().newInstance()).handleRequest(request, result)
+			try {
+				properties.putAll(
+						((SimpleConnector.PostRequestHandler)Class.forName(simpleConnector.getApi().getPostRequestHandler()).getDeclaredConstructor().newInstance()).handleRequest(request, result)
 				);
-            } catch (Throwable t) {
+			} catch (Throwable t) {
 				throw new RuntimeException("Error for postRequestHandler", t);
 			}
-        }
+		}
 		return properties;
 	}
 
@@ -304,9 +283,9 @@ public class ConnectorServlet extends SpringHttpServlet {
 		String format(String[] value);
 	}
 	private String replaceSimpleConnectorAttributes(Map<String, String[]> requestParameters, String strToReplace, Formatter format) {
-        for (Map.Entry<String, String[]> parameter: requestParameters.entrySet()) {
+		for (Map.Entry<String, String[]> parameter: requestParameters.entrySet()) {
 			strToReplace = strToReplace.replace("{{" + parameter.getKey() + "}}", format.format(parameter.getValue()));
-        }
+		}
 		// allow global variables that are also allowed for queries
 		strToReplace = MetadataSearchHelper.replaceCommonQueryVariables(strToReplace);
 		// replace other, unkown attributes with empty value
@@ -326,7 +305,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 		Encryption eAES = new Encryption("AES");
 		byte[] encrypted = eAES.encrypt(jsonObject.toString(), aesKey);
 		String url = UrlTool.setParam(connectorAppInfo.getContentUrl(), "e", URLEncoder.encode(java.util.Base64.getEncoder().encodeToString(encrypted)));
-		
+
 		/**
 		 * encrypt the AES key with RSA public key
 		 */

@@ -1,7 +1,7 @@
 package org.edu_sharing.repository.server.importer;
 
 import org.apache.log4j.Logger;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

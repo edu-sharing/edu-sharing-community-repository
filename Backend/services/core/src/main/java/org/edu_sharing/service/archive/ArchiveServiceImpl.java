@@ -58,7 +58,7 @@ public class ArchiveServiceImpl implements ArchiveService  {
 	private final RepositoryCache repositoryCache;
 
 	private final AuthorityService authorityService;
-	
+
 	public ArchiveServiceImpl(NodeService nodeService, RepositoryCache repositoryCache) {
         this.nodeService = nodeService;
         this.repositoryCache = repositoryCache;

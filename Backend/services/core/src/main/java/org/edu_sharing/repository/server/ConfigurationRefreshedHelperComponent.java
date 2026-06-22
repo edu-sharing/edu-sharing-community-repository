@@ -2,7 +2,7 @@ package org.edu_sharing.repository.server;
 
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.service.nodeservice.PropertiesInterceptorFactory;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.event.EventListener;

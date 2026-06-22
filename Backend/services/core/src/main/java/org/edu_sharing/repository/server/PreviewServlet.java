@@ -489,7 +489,7 @@ public class PreviewServlet extends SpringHttpServlet {
 				})) {
 			logger.debug("Follow redirect allowed for " + url);
 			try{
-				new HttpQueryTool().queryStream(url, new HttpQueryTool.Callback<Void>() {
+				new org.edu_sharing.repository.server.tools.http.HttpQueryTool().queryStream(url, new org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Void>() {
 					@Override
 					public void handle(InputStream httpResult) {
 						resp.setHeader("Content-Type", "image/jpeg");

@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
-import org.edu_sharing.repository.server.tools.HttpException;
+import org.edu_sharing.repository.server.tools.http.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
 
 import jakarta.servlet.ServletException;

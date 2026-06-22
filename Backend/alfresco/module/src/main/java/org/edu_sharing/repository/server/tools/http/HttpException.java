@@ -1,4 +1,4 @@
-package org.edu_sharing.repository.server.tools;
+package org.edu_sharing.repository.server.tools.http;
 
 public class HttpException extends RuntimeException {
     private final int statusCode;

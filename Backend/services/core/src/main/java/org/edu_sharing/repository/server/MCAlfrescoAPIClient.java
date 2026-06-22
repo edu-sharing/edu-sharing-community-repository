@@ -14,6 +14,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.filestore.FileContentReader;
 import org.alfresco.repo.management.subsystems.SwitchableApplicationContextFactory;
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.archive.NodeArchiveService;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -117,6 +118,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     private final GuestService guestService;
 
     private final RepositoryCache repositoryCache;
+    private final NodeArchiveService nodeArchiveService;
 
     org.edu_sharing.alfresco.service.AuthorityService eduAuthorityService;
 
@@ -207,6 +209,8 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         dictionaryService = serviceRegistry.getDictionaryService();
         guestService = applicationContext.getBean(GuestService.class);
+
+        nodeArchiveService = applicationContext.getBean("nodeArchiveService", NodeArchiveService.class);
 
         eduAuthorityService = applicationContext.getBean("eduAuthorityService", org.edu_sharing.alfresco.service.AuthorityService.class);
 
@@ -1171,7 +1175,16 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     }
 
     public void removeNode(StoreRef store, String nodeId) {
-        nodeService.deleteNode(new NodeRef(store, nodeId));
+        NodeRef nodeRef = new NodeRef(store, nodeId);
+        if (archiveStoreRef.equals(store)) {
+            // Deleting a node in the archive store means purging it from the recycle bin.
+            // Route through NodeArchiveService so that BeforePurgeNodePolicy fires - a plain
+            // nodeService.deleteNode on the archive store is ignored by storesToIgnorePolicies
+            // and would skip all purge/delete behaviours.
+            nodeArchiveService.purgeArchivedNode(nodeRef);
+        } else {
+            nodeService.deleteNode(nodeRef);
+        }
     }
 
     public String getRootNodeId() {

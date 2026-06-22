@@ -1,4 +1,4 @@
-package org.edu_sharing.repository.server.tools;
+package org.edu_sharing.repository.server.tools.http;
 
 import com.typesafe.config.Config;
 import org.alfresco.repo.cache.SimpleCache;
