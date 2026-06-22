@@ -89,6 +89,6 @@ export class ApiRequestConfiguration {
     }
 
     private generateTraceId(): string {
-        return crypto.randomUUID();
+        return crypto?.randomUUID?.();
     }
 }

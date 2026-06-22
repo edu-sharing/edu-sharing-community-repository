@@ -48,6 +48,6 @@ export class RenderingServiceApiInterceptor implements HttpInterceptor {
     }
 
     private generateTraceId(): string {
-        return crypto.randomUUID();
+        return crypto?.randomUUID?.();
     }
 }
