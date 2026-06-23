@@ -346,6 +346,10 @@ public class Edu_SharingPutMethod extends WebDAVMethod implements ActivityPostPr
                                             ContentData cd = (ContentData) getNodeService().getProperty(nodeRef, ContentModel.PROP_CONTENT);
                                             if (!ContentData.hasContent(cd) || cd.getSize() == 0)
                                             {
+                                                if (getServiceRegistry().getLockService().isLocked(nodeRef)) {
+                                                    getServiceRegistry().getLockService().unlock(nodeRef);
+                                                }
+                                                getNodeService().addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
                                                 getNodeService().deleteNode(nodeRef);
                                                 if (logger.isDebugEnabled())
                                                 {
