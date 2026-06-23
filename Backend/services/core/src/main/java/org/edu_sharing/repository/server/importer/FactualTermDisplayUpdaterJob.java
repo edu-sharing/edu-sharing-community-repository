@@ -1,28 +1,31 @@
 package org.edu_sharing.repository.server.importer;
 
-import org.edu_sharing.repository.server.jobs.quartz.AbstractJob;
+import org.edu_sharing.repository.server.jobs.quartz.AbstractJobMapAnnotationParams;
+import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class FactualTermDisplayUpdaterJob extends AbstractJob {
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+@JobDescription(description = "resolves nodes with changed factualTerms and touch nodes so they get re-indexed by search index")
+public class FactualTermDisplayUpdaterJob extends AbstractJobMapAnnotationParams {
 
-
+    @Autowired
+    FactualTermElasticUpdater factualTermElasticUpdater;
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try {
             PersistenHandlerKeywordsDNBMarc ph = new PersistenHandlerKeywordsDNBMarc();
-            FactualTermDisplayUpdater updater = new FactualTermDisplayUpdater();
             List<String> changedIdents = ph.getChangedIdents();
             for(String key : changedIdents) {
-                updater.updateDisplayStrings(key);
+                factualTermElasticUpdater.touchNodes(key);
                 ph.resetModified(key);
             }
         } catch (Exception e) {
-           logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(),e);
         }
-
     }
 }
