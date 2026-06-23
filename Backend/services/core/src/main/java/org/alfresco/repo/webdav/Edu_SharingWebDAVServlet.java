@@ -376,9 +376,9 @@ public class Edu_SharingWebDAVServlet extends HttpServlet
         m_davMethods.put(WebDAV.METHOD_OPTIONS, OptionsMethod.class);
         m_davMethods.put(WebDAV.METHOD_POST, PostMethod.class);
         
-        //it seems that Edu_SharingPutMethod fix is no longer needed
-       // m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod.class);
-        m_davMethods.put(WebDAV.METHOD_PUT, PutMethod.class);
+        //edu-sharing fix: use Edu_SharingPutMethod so orphan empty nodes left by a rejected PUT
+        //(virus scan / mimetype validation) are cleaned up - notably for the macOS WebDAV client
+        m_davMethods.put(WebDAV.METHOD_PUT, Edu_SharingPutMethod.class);
         m_davMethods.put(WebDAV.METHOD_UNLOCK, Edu_SharingUnlockMethod.class);
     }
 

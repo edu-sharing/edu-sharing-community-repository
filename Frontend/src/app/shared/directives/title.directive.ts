@@ -12,6 +12,7 @@ import { combineLatest, forkJoin, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { ConfigurationService } from '../../core-module/core.module';
+import { GlobalTitleService, TitleOverrideCallback } from './global-title.service';
 
 /**
  * Uses the element's text content to update the document title.
@@ -53,6 +54,7 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
         private documentTitle: Title,
         private translations: TranslationsService,
         configuration: ConfigurationService,
+        private titleService: GlobalTitleService,
     ) {
         this.mutationObserver = new MutationObserver(() => this.updatePageHeading());
         this.mutationObserver.observe(this.elementRef.nativeElement, {
@@ -68,8 +70,11 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
                 siteTitle: configuration.get('siteTitle', 'edu-sharing'),
             }),
             this.pageTitle,
+            titleService.titleOverrideCallback,
             this.translations.waitForInit(), // Prevent initial flicker of the untranslated heading
-        ]).subscribe(([config, pageTitle]) => this.updateTitle(config, pageTitle));
+        ]).subscribe(([config, pageTitle, overrideCallback]) =>
+            this.updateTitle(config, pageTitle, overrideCallback),
+        );
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -96,7 +101,16 @@ export class TitleDirective implements OnInit, OnChanges, OnDestroy {
         this.pageHeading.next(this.elementRef.nativeElement.textContent);
     }
 
-    private updateTitle(config: { branding: boolean; siteTitle: string }, pageTitle: string): void {
+    private updateTitle(
+        config: { branding: boolean; siteTitle: string },
+        pageTitle: string,
+        overrideCallback: TitleOverrideCallback | null,
+    ): void {
+        const override = overrideCallback?.(pageTitle, config);
+        if (override != null) {
+            this.documentTitle.setTitle(override);
+            return;
+        }
         if (!pageTitle) {
             this.documentTitle.setTitle(config.siteTitle);
         } else if (config.branding) {
