@@ -5,11 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.repo.cache.SimpleCache;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 public class PersonCache {
+	public final static NodeRef NULL_NODEREF = new NodeRef("null", "null", "null");
+
 	public static String TYPE="type";
-	static final SimpleCache<String, Map<String,Serializable>> sharedCache = 
+	public static String AVATAR="avatar";
+	static final SimpleCache<String, Map<String,Serializable>> sharedCache =
 			(SimpleCache<String,  Map<String,Serializable>>) 
 				AlfAppContextGate.getApplicationContext().getBean("eduSharingPersonCache");
 	

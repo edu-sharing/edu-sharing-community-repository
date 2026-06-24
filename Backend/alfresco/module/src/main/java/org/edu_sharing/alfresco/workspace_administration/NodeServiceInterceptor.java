@@ -15,6 +15,7 @@ import org.alfresco.util.PropertyCheck;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
@@ -39,10 +40,12 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 	static List<QName> toFilter = Arrays.asList(new QName[]{QName.createQName(CCConstants.CM_TYPE_FOLDER),QName.createQName(CCConstants.CM_TYPE_CONTENT),
 			QName.createQName(CCConstants.CCM_TYPE_MAP),QName.createQName(CCConstants.CCM_TYPE_IO),
 			QName.createQName(CCConstants.CM_TYPE_THUMBNAIL)});
+	private boolean enabled;
 
 	public void init() {
 		PropertyCheck.mandatory(this, "dictionaryService", dictionaryService);
 		PropertyCheck.mandatory(this, "nodeService", nodeService);
+		enabled = LightbendConfigLoader.get().getBoolean("repository.safe.enabled");
 	}
 	
 	public static boolean filterNodeType(NodeService nodeService,NodeRef nodeRef) {
@@ -54,19 +57,20 @@ public class NodeServiceInterceptor implements MethodInterceptor {
 	
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
+		if(!enabled) {
+			return invocation.proceed();
+		}
 		String methodName = invocation.getMethod().getName();
 
-		String runAsUser = AuthenticationUtil.getRunAsUser();
-
-		if (runAsUser != null && runAsUser.equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
-			return invocation.proceed();
-		}
-		
-		if (runAsUser != null && runAsUser.equals(ApplicationInfoList.getHomeRepository().getUsername())) {
-			return invocation.proceed();
-		}
-
 		if (methodName.equals("getChildAssocs")) {
+			String runAsUser = AuthenticationUtil.getRunAsUser();
+			if (runAsUser != null && runAsUser.equals(AuthenticationUtil.SYSTEM_USER_NAME)) {
+				return invocation.proceed();
+			}
+
+			if (runAsUser != null && runAsUser.equals(ApplicationInfoList.getHomeRepository().getUsername())) {
+				return invocation.proceed();
+			}
 
 			String currentScope = NodeServiceInterceptor.eduSharingScope.get();
 			logger.debug("runAsUser:" + runAsUser + " currentScope:" + currentScope);

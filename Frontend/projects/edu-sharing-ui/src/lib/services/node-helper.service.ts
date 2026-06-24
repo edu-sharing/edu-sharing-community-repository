@@ -286,7 +286,7 @@ export class NodeHelperService {
                     queryParams: { id: node.ref.id },
                 };
             } else if (node.ref) {
-                const fromHome = node.ref.isHomeRepo || false; //this.networkService.isFromHomeRepository(node);
+                const fromHome = node.ref.isHomeRepo !== false; // -> this is a promise! this.networkService.isFromHomeRepository(node)
                 data = {
                     routerLink: short
                         ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id

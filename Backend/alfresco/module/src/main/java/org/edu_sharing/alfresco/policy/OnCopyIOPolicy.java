@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.copy.CopyServicePolicies;
 import org.alfresco.repo.copy.CopyServicePolicies.OnCopyCompletePolicy;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -15,6 +16,8 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.transaction.TransactionListenerAdapter;
+import org.alfresco.util.transaction.TransactionSupportUtil;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.alfresco.RestrictedAccessException;
@@ -99,6 +102,16 @@ public class OnCopyIOPolicy implements OnCopyCompletePolicy, CopyServicePolicies
         }
 
 		removeCopiedUsages(nodeService, targetNodeRef);
+        if(nodeService.getProperty(targetNodeRef, ContentModel.PROP_CONTENT) != null){
+            TransactionSupportUtil.bindListener(new TransactionListenerAdapter()
+            {
+                @Override
+                public void afterCommit()
+                {
+                    new ThumbnailHandling().thumbnailHandling(targetNodeRef);
+                }
+            },0);
+        }
 	}
 	
 	

@@ -967,7 +967,9 @@ public class AdminServiceImpl implements AdminService {
         ImmediateJobListener listener = startJob(jobClass, params);
         while(true) {
             if(listener.wasExecuted()) {
-                Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) && job.getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
+                Optional<JobInfo> result = getJobs().stream().filter(job -> job.getStatus().equals(JobInfo.Status.Finished) &&
+                        Objects.equals(job.getJobDataMap().getString(JobHandler.KEY_JOB_UUID), listener.getUuid()) &&
+                        job.getJobClass().getName().equals(jobClass)).max((a, b) -> Long.compare(a.getFinishTime(), b.getFinishTime()));
                 if(result.isEmpty()) {
                     throw new IllegalStateException("Job status not found");
                 }
@@ -977,7 +979,7 @@ public class AdminServiceImpl implements AdminService {
                 throw new Exception("job was vetoed by " + listener.getVetoBy());
             }
             //noinspection BusyWait
-            Thread.sleep(1000);
+            Thread.sleep(500);
         }
     }
 
