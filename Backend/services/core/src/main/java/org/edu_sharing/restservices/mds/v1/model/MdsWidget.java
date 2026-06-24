@@ -60,6 +60,7 @@ public class MdsWidget {
     private Integer step;
     @JsonProperty("isExtended")
     private boolean isExtended;
+    private String suggestionSource;
     /**
      * info if suggestions for new valuespace entries are allowed for this widget
      */
@@ -120,6 +121,7 @@ public class MdsWidget {
         this.inputPreprocessor = widget.getInputPreprocessor();
         this.allowempty = widget.isAllowempty();
         this.isSearchable = widget.isSearchable();
+        this.suggestionSource =widget.getSuggestionSource();
         if (widget.getCondition() != null) {
             this.condition = new MdsWidgetCondition();
             this.condition.setValue(widget.getCondition().getValue());

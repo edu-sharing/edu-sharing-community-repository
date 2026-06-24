@@ -9,6 +9,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -1410,6 +1411,23 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     @Override
     @PreAuthorize("hasPermission(#nodeId, T(org.edu_sharing.repository.client.tools.CCConstants).PERMISSION_COORDINATOR)")
     public void touch(String nodeId, boolean silentUpdate) {
+        // must run in a transaction else disableBehaviour/enableBehaviour does not work cause disabled status is remembered in transactional scope
+        if (AlfrescoTransactionSupport.getTransactionId() != null) {
+            touchInternal(nodeId, silentUpdate);
+        }else{
+            retryingTransactionHelper.doInTransaction(() -> {
+                touchInternal(nodeId, silentUpdate);
+                return null;
+            },false,true);
+        }
+    }
+
+    /**
+     * silentUpdate = true requires transaction
+     * @param nodeId
+     * @param silentUpdate
+     */
+    private void touchInternal(String nodeId, boolean silentUpdate) {
         if (silentUpdate) {
             policyBehaviourFilter.disableBehaviour(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), ContentModel.ASPECT_AUDITABLE);
         }
@@ -1421,6 +1439,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             }
         }
     }
+
 
     private void cleanupAllCollections(NodeRef ref) {
         new UsageDao(RepositoryDao.getRepository(RepositoryDao.HOME)).getUsagesByNodeCollection(ref.getId()).forEach(

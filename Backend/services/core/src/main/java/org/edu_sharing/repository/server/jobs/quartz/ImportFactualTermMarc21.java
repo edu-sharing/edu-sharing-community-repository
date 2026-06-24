@@ -76,8 +76,8 @@ public class ImportFactualTermMarc21 extends AbstractJob{
 
 
         try {
-
-            new ImportFactualTermsFromFileSax(url,new PersistenHandlerKeywordsDNBMarc(), this);
+            System.out.println("TEST");
+            new ImportFactualTermsFromFileStax(url,new PersistenHandlerKeywordsDNBMarc(), this);
         }catch(Throwable e){
             e.printStackTrace();
         }

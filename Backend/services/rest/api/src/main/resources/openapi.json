@@ -4050,6 +4050,9 @@
             },
             "type": "array"
           },
+          "suggestionSource": {
+            "type": "string"
+          },
           "template": {
             "items": {
               "type": "string"
@@ -8482,6 +8485,9 @@
             "type": "string"
           },
           "replacementString": {
+            "type": "string"
+          },
+          "translation": {
             "type": "string"
           }
         },
@@ -30091,6 +30097,15 @@
         "description": "Get values for keys.",
         "operationId": "getValues4Keys",
         "parameters": [
+          {
+            "description": "Requested locale, e.g. de_DE",
+            "in": "header",
+            "name": "locale",
+            "schema": {
+              "example": "de_DE",
+              "type": "string"
+            }
+          },
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
             "in": "path",
