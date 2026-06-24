@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.jobs.quartz.AbstractJobMapAnnotationParams;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.quartz.JobExecutionContext;
@@ -18,12 +19,15 @@ public class FactualTermDisplayUpdaterJob extends AbstractJobMapAnnotationParams
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         try {
-            PersistenHandlerKeywordsDNBMarc ph = new PersistenHandlerKeywordsDNBMarc();
-            List<String> changedIdents = ph.getChangedIdents();
-            for(String key : changedIdents) {
-                factualTermElasticUpdater.touchNodes(key);
-                ph.resetModified(key);
-            }
+            AuthenticationUtil.runAsSystem(() ->{
+                PersistenHandlerKeywordsDNBMarc ph = new PersistenHandlerKeywordsDNBMarc();
+                List<String> changedIdents = ph.getChangedIdents();
+                for(String key : changedIdents) {
+                    factualTermElasticUpdater.touchNodes(key);
+                    ph.resetModified(key);
+                }
+                return null;
+            });
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
         }
