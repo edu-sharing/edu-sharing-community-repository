@@ -27,7 +27,7 @@ import org.edu_sharing.service.tracking.StatisticsFileService;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RefreshScope
 @RequiredArgsConstructor
 public class TrackingDAO {
 
@@ -51,6 +52,8 @@ public class TrackingDAO {
 
     @Value("${repository.statistics.searchResultsLimit:50000}")
     private int maxSearchResults;
+    @Value("${repository.statistics.outputLimit:200}")
+    private int outputLimit;
 
     public List<TrackingNode> getNodeStatistics(GroupingType grouping, Date fromDate, Date toDate, String mediacenter, List<String> additionalFields, List<String> groupFields, Map<String, String> filters) throws DAOException {
 
@@ -228,7 +231,7 @@ public class TrackingDAO {
         searchToken.setFrom(0);
         searchToken.setMaxResult(maxSearchResults); // physical limit because of db execution time
         searchToken.setElasticQuery(query);
-
+        searchToken.setExcludes(List.of("preview", "content", "i18n", "collections"));
         SearchResultNodeRef search = searchService.search(searchToken);
         Map<org.alfresco.service.cmr.repository.NodeRef, List<org.edu_sharing.service.model.NodeRef>> nodeRefGroup = search.getData()
                 .stream()
@@ -239,7 +242,7 @@ public class TrackingDAO {
 
         return trackingMap.entrySet()
                 .stream()
-                .sorted(Comparator.comparing(this::getTotalCounts))
+                .sorted(Comparator.comparing(this::getTotalCounts).reversed())
                 .limit(maxResults)
                 .map(x -> {
                     List<org.edu_sharing.service.model.NodeRef> dataList = nodeRefGroup.get(x.getKey());
@@ -328,6 +331,7 @@ public class TrackingDAO {
         RepositoryDao homeRepository = RepositoryDao.getHomeRepository();
         return data.entrySet()
                 .stream()
+                .limit(outputLimit)
                 .map(x -> map(x, homeRepository))
                 .collect(Collectors.toList());
     }
@@ -336,7 +340,9 @@ public class TrackingDAO {
     @NotNull
     public TrackingNode map(@NotNull Map.Entry<org.edu_sharing.service.model.NodeRef, StatisticEntry> entry, @NotNull RepositoryDao homeRepository) {
         StatisticEntry statisticEntry = entry.getValue();
-        Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
+        // fetch via fast / reduced endpoint caused of large result sets
+        Node node = NodeDao.getAsNodeSimple(entry.getKey());
+        //Node node = new NodeDao(homeRepository, entry.getKey(), filter).asNode();
         return new TrackingNode(node, convertAuthority(statisticEntry.getAuthorityInfo()), statisticEntry.getDate(), statisticEntry.getCounts(), statisticEntry.getFields(), statisticEntry.getGroups());
     }
 
@@ -373,6 +379,53 @@ public class TrackingDAO {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
             String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
             String filename = getFilename(startDate, endDate, orgId + "_" + I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
+            String nodeId = statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
+            String type = nodeService.getType(nodeId);
+            String[] aspects = nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            Map<String, Object> nodeProps = nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);
+            notificationService.notifyMaterialAddedToInbox(nodeId, type, Arrays.stream(aspects).toList(), nodeProps, null, "system", AuthenticationUtil.getRunAsUser());
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Build the node statistics map for ALL content (global), DB based (no elastic query), reusing
+     * the same source as {@link #getNodeStatistics}. Node properties are loaded so they can be
+     * rendered as columns in the exported CSV.
+     */
+    private Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> getNodeStatisticsAll(Date startDate, Date endDate, String mediacenter) throws Throwable {
+        List<StatisticEntryNode> tracks = activityStatisticService.getNodeStatisics(GroupingType.Node, startDate, endDate, mediacenter, null, null, null);
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> result = new HashMap<>();
+        for (StatisticEntryNode track : tracks) {
+            if (track.getNode() == null) {
+                continue;
+            }
+            org.edu_sharing.service.model.NodeRefImpl ref = new org.edu_sharing.service.model.NodeRefImpl(
+                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, track.getNode()));
+            try {
+                ref.setProperties(nodeService.getProperties(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), track.getNode()));
+            } catch (Throwable e) {
+                ref.setProperties(new HashMap<>());
+            }
+            result.put(ref, track);
+        }
+        return result;
+    }
+
+    @Queued(unique = true)
+    @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES)
+    public void scheduleNodeStatistics(Date startDate, Date endDate, String mediacenter, List<List<String>> properties) {
+        try {
+            Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    return getNodeStatisticsAll(startDate, endDate, mediacenter);
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            String userInboxNodeId = RepositoryDao.getHomeRepository().getUserInbox(true);
+            String filename = getFilename(startDate, endDate, I18nAngular.getTranslationAngular("common", "STATISTICS.MATERIALS"));
             String nodeId = statisticsFileService.writeCSV(userInboxNodeId, filename, statisticEntryMap, properties);
             String type = nodeService.getType(nodeId);
             String[] aspects = nodeService.getAspects(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId);

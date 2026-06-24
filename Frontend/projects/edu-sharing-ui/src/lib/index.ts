@@ -59,6 +59,7 @@ export * from './pipes/authority-name.pipe';
 export * from './pipes/authority-color.pipe';
 export * from './pipes/assets-path.pipe';
 export * from './pipes/toolpermission.pipe';
+export * from './pipes/global-admin.pipe';
 export * from './pipes/property-slug.pipe';
 export * from './pipes/html-text.pipe';
 export * from './pipes/file-size.pipe';

@@ -49,6 +49,9 @@
             display: flex;
             margin: auto;
         }
+        &.main-content-no-nav {
+            margin-left: 0;
+        }
     }
     // has own padding cause of tabs
     .main-content-statistics {

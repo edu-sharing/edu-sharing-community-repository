@@ -31,6 +31,7 @@
 </es-card>
 }
 <div class="main">
+  @if (buttons?.length > 1) {
   <div class="main-nav">
     <div>
       @for (button of buttons; track button) {
@@ -48,10 +49,13 @@
       }
     </div>
   </div>
+  }
   <div
     role="main"
     esSkipTarget="MAIN_CONTENT"
-    class="main-content main-content-{{ mode ? mode.toLowerCase() : 'default' }}"
+    class="main-content main-content-{{ mode ? mode.toLowerCase() : 'default' }} {{
+      buttons?.length <= 1 ? 'main-content-no-nav' : ''
+    }}"
   >
     <h1 esTitle class="cdk-visually-hidden">{{ 'ADMIN.TITLE' | translate }}</h1>
     <!-- for dynamically added components from extensions -->
@@ -205,7 +209,10 @@
     </div>
     } @if (modeIsActive('STATISTICS')) {
     <div class="content statistics">
-      <es-admin-statistics (openNode)="openNodeRender($event)"></es-admin-statistics>
+      <es-admin-statistics
+        [nodes]="statisticsNodeIds()"
+        (openNode)="openNodeRender($event)"
+      ></es-admin-statistics>
     </div>
     } @if (modeIsActive('MEDIACENTER')) {
     <div class="content mediacenter">

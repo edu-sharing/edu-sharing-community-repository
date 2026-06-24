@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.*;
@@ -22,15 +26,13 @@ import org.edu_sharing.service.statistic.StatisticsGlobal;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.tracking.GroupingType;
 import org.edu_sharing.service.tracking.ibatis.NodeData;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Path("/statistic/v1")
@@ -109,6 +111,25 @@ public class StatisticApi {
                 trackingDAO.getNodeStatistics(grouping, new Date(dateFrom), new Date(dateTo), mediacenter, additionalFields, groupField, filters)
         );
         return Response.ok().entity(tracks).build();
+    }
+
+    @POST
+    @Path("/statistics/nodes/complete")
+    @Operation(summary = "Schedules a asynchronous job to retrieve statistics for all node actions. The result will be added to your inbox in form of an csv.", description = "requires either toolpermission " + CCConstants.CCM_VALUE_TOOLPERMISSION_GLOBAL_STATISTICS_NODES + " for global stats or to be admin of the requested mediacenter")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getStatisticsNodeAsync(@Context HttpServletRequest req,
+                                           @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
+                                           @Parameter(description = "date range to", required = true) @QueryParam("dateTo") Long dateTo,
+                                           @Parameter(description = "the mediacenter to filter for statistics", required = false) @QueryParam("mediacenter") String mediacenter,
+                                           @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties) {
+        trackingDAO.scheduleNodeStatistics(new Date(dateFrom), new Date(dateTo), mediacenter, properties);
+        return Response.ok().build();
     }
 
     @GET

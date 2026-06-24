@@ -1,9 +1,11 @@
-<mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
-  @if (_mediacenter) {
+<mat-tab-group
+  mat-stretch-tabs
+  [(selectedIndex)]="currentTab"
+  [class.hide-tab-header]="hasSelectedNodes"
+>
+  <!-- when invoked with explicit node ids only the "by object" tab is shown -->
+  @if (!hasSelectedNodes) { @if (_mediacenter) {
   <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}">
-    <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="archive"></i> {{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}
-    </h4>
     <div class="stats-archived-table">
       <es-info-message mode="info">
         {{ 'ADMIN.STATISTICS.ARCHIVED_INFO' | translate }}
@@ -26,9 +28,6 @@
   </mat-tab>
   }
   <mat-tab label="{{ 'ADMIN.STATISTICS.GROUPED' | translate }}" class="stats-grouped">
-    <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="history"></i> {{ 'ADMIN.STATISTICS.GROUPED' | translate }}
-    </h4>
     <div class="modes">
       <mat-form-field>
         <mat-label>{{ 'ADMIN.STATISTICS.GROUP_BY' | translate }}</mat-label>
@@ -65,9 +64,6 @@
     <canvas #groupedChart [class.display-none]="groupedLoading || groupedNoData"></canvas>
   </mat-tab>
   <mat-tab label="{{ 'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate }}" class="stats-custom-groups">
-    <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="view_list"></i> {{ 'ADMIN.STATISTICS.CUSTOM_GROUPS' | translate }}
-    </h4>
     <mat-form-field class="groups-template-select">
       <mat-label>{{ 'ADMIN.STATISTICS.GROUP_TEMPLATE_LABEL' | translate }}</mat-label>
       <mat-select
@@ -183,11 +179,195 @@
       }
     </div>
   </mat-tab>
-  @if (_mediacenter || nodesPermission) {
+  } @if (hasSelectedNodes || _mediacenter || nodesPermission || nodesMode) {
   <mat-tab label="{{ 'ADMIN.STATISTICS.NODES' | translate }}" class="stats-nodes">
-    <h4 class="mat-heading-4 mat-heading-underline">
-      <i esIcon="finance"></i> {{ 'ADMIN.STATISTICS.NODES' | translate }}
-    </h4>
+    @if (nodesMode) {
+    <!-- "by object" panel: choose a content source, a time range and run the evaluation -->
+    <div class="stats-nodes-view">
+      <div class="source-selection">
+        <h4 class="mat-heading-4">
+          {{ 'ADMIN.STATISTICS.SOURCE_TITLE' | translate }}
+        </h4>
+        <mat-radio-group class="source-group" [(ngModel)]="contentSource">
+          <mat-radio-button
+            value="all"
+            [disabled]="
+              ('TOOLPERMISSION_GLOBAL_STATISTICS_NODES' | esToolpermission | async) === false
+            "
+          >
+            {{ 'ADMIN.STATISTICS.SOURCE_ALL' | translate }}
+          </mat-radio-button>
+          @if (hasSelectedNodes) {
+          <mat-radio-button value="selected">
+            {{ 'ADMIN.STATISTICS.SOURCE_SELECTED' | translate }}
+          </mat-radio-button>
+          @if (contentSource === 'selected') {
+          <div class="selected-nodes">
+            @if (selectedNodesDataSource.isLoading) {
+            <es-spinner></es-spinner>
+            } @else {
+            <es-node-entries-wrapper
+              [scope]="Scope.Admin"
+              [dataSource]="selectedNodesDataSource"
+              [elementInteractionType]="InteractionType.Emitter"
+              [checkbox]="false"
+              [showActions]="false"
+              [displayType]="NodeEntriesDisplayType.Table"
+              [columns]="columnsSelectedNodes"
+              (clickItem)="openNode.emit($event.element)"
+            ></es-node-entries-wrapper>
+            }
+          </div>
+          } }
+          <mat-radio-button
+            value="my"
+            [disabled]="
+              ('TOOLPERMISSION_USER_STATISTICS_NODES' | esToolpermission | async) === false
+            "
+          >
+            {{ 'ADMIN.STATISTICS.SOURCE_MY' | translate }}
+          </mat-radio-button>
+          <mat-radio-button
+            value="org"
+            [disabled]="
+              ('TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES' | esToolpermission | async) ===
+                false || organizations.length === 0
+            "
+          >
+            {{ 'ADMIN.STATISTICS.SOURCE_ORG' | translate }}
+          </mat-radio-button>
+          @if (contentSource === 'org' && organizations.length > 1) {
+          <div class="org-suboptions">
+            <mat-radio-group [(ngModel)]="selectedOrg">
+              @for (org of organizations; track org.authorityName) {
+              <mat-radio-button [value]="org.authorityName">
+                {{ org.profile?.displayName || org.authorityName }}
+              </mat-radio-button>
+              }
+            </mat-radio-group>
+          </div>
+          }
+        </mat-radio-group>
+
+        <h4
+          class="mat-heading-4 clickable period-header"
+          (click)="periodExpanded = !periodExpanded"
+        >
+          <span>{{ 'ADMIN.STATISTICS.PERIOD' | translate }}: {{ nodesPeriodLabel }}</span>
+          <i [esIcon]="'keyboard_arrow_' + (periodExpanded ? 'up' : 'down')"></i>
+        </h4>
+        @if (periodExpanded) {
+        <div class="calendars">
+          <div>
+            <mat-calendar
+              [selected]="nodesRange"
+              (selectedChange)="selectNodesRange($event)"
+              [maxDate]="today"
+            ></mat-calendar>
+          </div>
+        </div>
+        }
+
+        <div class="start-button">
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="refreshNodes()"
+            [disabled]="nodesDataSource?.isLoading"
+          >
+            {{ 'ADMIN.STATISTICS.NODES_APPLY' | translate }}
+          </button>
+        </div>
+      </div>
+
+      @if (nodesDataSource !== null) { @if (nodesDataSource.isLoading) {
+      <es-spinner></es-spinner>
+      } @if (nodesNoData && !nodesDataSource.isLoading) {
+      <h5 class="mat-heading-5 no-data">{{ 'ADMIN.STATISTICS.NO_DATA' | translate }}</h5>
+      } @if (!nodesNoData && !nodesDataSource.isLoading) {
+      <es-node-entries-wrapper
+        [scope]="Scope.Admin"
+        [dataSource]="nodesDataSource"
+        [tableConfig]="{ dataColumnLayout: 'scroll' }"
+        [elementInteractionType]="InteractionType.Emitter"
+        [checkbox]="false"
+        [showActions]="false"
+        [displayType]="NodeEntriesDisplayType.Table"
+        [columns]="columns"
+        (clickItem)="openNode.emit($event.element)"
+      ></es-node-entries-wrapper>
+      } }
+      <div class="export">
+        <h4
+          class="mat-heading-4 mat-heading-underline clickable"
+          (click)="showExport = !showExport"
+        >
+          <i esIcon="cloud_download"></i>
+          <span>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}</span>
+          <i [esIcon]="'keyboard_arrow_' + (showExport ? 'up' : 'down')"></i>
+        </h4>
+        @if (showExport) {
+        <div [@overlay]="showExport">
+          <es-info-message mode="info">
+            {{ 'ADMIN.STATISTICS.EXPORT_INFO' | translate }}
+          </es-info-message>
+          @if ((null | esGlobalAdmin | async)) {
+          <div>
+            <mat-button-toggle-group
+              class="export-properties-mode"
+              [(ngModel)]="exportPropertiesMode"
+            >
+              <mat-button-toggle value="input">
+                {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_INPUT' | translate }}
+              </mat-button-toggle>
+              <mat-button-toggle value="list">
+                {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_LIST' | translate }}
+              </mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+          } @if ((null | esGlobalAdmin | async) && exportPropertiesMode === 'input') {
+          <mat-form-field>
+            <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
+            <textarea
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="4"
+              cdkAutosizeMaxRows="6"
+              [(ngModel)]="exportProperties"
+            ></textarea>
+            <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+          } @else {
+          <div class="export-properties-list">
+            @for (column of availableExportColumns; track column.name) {
+            <mat-checkbox
+              [checked]="isExportColumnSelected(column)"
+              (change)="toggleExportColumn(column, $event.checked)"
+            >
+              {{ column | esListItemLabel | async }}
+            </mat-checkbox>
+            }
+          </div>
+          }
+          <div class="actions">
+            <button mat-raised-button color="primary" (click)="startExport()">
+              {{ 'ADMIN.STATISTICS.EXPORT_REQUEST' | translate }}
+            </button>
+            <button
+              mat-button
+              color="primary"
+              [disabled]="exportProperties === exportPropertiesDefault"
+              (click)="resetExportProperties()"
+            >
+              {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_RESET' | translate }}
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    } @else {
+    <!-- global / mediacenter "by object" statistics -->
     @if (_mediacenter) {
     <es-info-message>
       {{ 'ADMIN.STATISTICS.NODES_MEDIACENTER_INFO' | translate }}
@@ -265,101 +445,13 @@
     <es-info-message>
       {{ 'ADMIN.STATISTICS.SLICE_INFO_DOWNLOAD' | translate }}
     </es-info-message>
-    } }
+    } } }
   </mat-tab>
   }
-  <!--
-    <mat-tab label="{{ 'ADMIN.STATISTICS.SINGLE' | translate }}" class="stats-single">
-      <h4 class="mat-heading-4 mat-heading-underline">
-        <i esIcon="view_headline"></i> {{ 'ADMIN.STATISTICS.SINGLE' | translate }}
-      </h4>
-      <div class="modes">
-        <div class="group" *ngIf="_mediacenter || (nodesPermission && userPermission)">
-          <mat-label>{{ 'ADMIN.STATISTICS.SINGLE_MODE' | translate }}</mat-label>
-          <mat-radio-group [(ngModel)]="singleMode">
-            <mat-radio-button value="NODES">{{
-              'ADMIN.STATISTICS.MODE_NODES' | translate
-            }}</mat-radio-button>
-            <mat-radio-button value="USERS">{{
-              'ADMIN.STATISTICS.MODE_USERS' | translate
-            }}</mat-radio-button>
-          </mat-radio-group>
-        </div>
-        <div class="calendars">
-          <div>
-            <mat-label>{{ 'ADMIN.STATISTICS.FROM' | translate }}</mat-label>
-            <mat-calendar [(selected)]="singleStart" [maxDate]="singleEnd"></mat-calendar>
-          </div>
-          <div>
-            <mat-label>{{ 'ADMIN.STATISTICS.TO' | translate }}</mat-label>
-            <mat-calendar
-              [(selected)]="singleEnd"
-              [minDate]="singleStart"
-              [maxDate]="today"
-            ></mat-calendar>
-          </div>
-        </div>
-      </div>
-      <es-spinner *ngIf="singleLoading"></es-spinner>
-      <div class="single-data-table">
-        <mat-table
-          [dataSource]="singleData"
-          [class.mat-table-clickable]="singleMode === 'NODES'"
-          *ngIf="singleData && !singleLoading"
-          >
-          <ng-container *ngFor="let key of singleDataRows" [matColumnDef]="key">
-            <mat-header-cell *matHeaderCellDef>
-              {{ 'ADMIN.STATISTICS.HEADERS.' + key | translate }}
-            </mat-header-cell>
-            <mat-cell
-              *matCellDef="let element"
-              (click)="onOpenNode.emit(element.entry ? element.entry : null)"
-              >
-              <span *ngIf="key === 'action'">{{
-                'ADMIN.STATISTICS.ACTIONS.' + element[key] | translate
-              }}</span>
-              <span *ngIf="key === 'date'">{{
-                element[key] | formatDate : { time: true, relative: false }
-              }}</span>
-              <span *ngIf="key === 'authority'">{{ element.authority.hash | slice : 0 : 8 }}</span>
-              <span *ngIf="key === 'authority_organization'">
-                <div *ngFor="let org of element.authority.organization">
-                  {{ org | authorityName }}
-                </div>
-              </span>
-              <span *ngIf="key === 'authority_mediacenter'">
-                <div *ngFor="let med of element.authority.mediacenter">
-                  {{ med | authorityName }}
-                </div>
-              </span>
-              <span *ngIf="key === 'node'">{{ element[key] }}</span>
-              <span
-              *ngIf="
-                !(
-                  key === 'action' ||
-                  key === 'date' ||
-                  key === 'authority' ||
-                  key === 'node' ||
-                  key === 'authority_organization' ||
-                  key === 'authority_mediacenter'
-                )
-              "
-                >
-                {{ 'ADMIN.STATISTICS.CUSTOM.' + key + '.' + getGroupKey(element, key) | translate }}
-              </span>
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="singleDataRows; sticky: true"></mat-header-row>
-          <mat-row matRipple *matRowDef="let row; columns: singleDataRows"></mat-row>
-        </mat-table>
-        <es-info-message *ngIf="singleData?.length">
-          {{ 'ADMIN.STATISTICS.SLICE_INFO' | translate }}
-        </es-info-message>
-      </div>
-    </mat-tab>
-    -->
 </mat-tab-group>
-@if ((currentTab === 0 && !groupedLoading) || (currentTab === 1 && !customGroupLoading)) {
+
+@if ( !hasSelectedNodes && ((currentTab === 0 && !groupedLoading) || (currentTab === 1 &&
+!customGroupLoading)) ) {
 <div class="export">
   <h4 class="mat-heading-4 mat-heading-underline">
     <i esIcon="cloud_download"></i>{{ 'ADMIN.STATISTICS.EXPORT_LABEL' | translate }}

@@ -16,10 +16,11 @@ This agent assists with development tasks in this Angular frontend project.
 
 ## Project Context
 
--   **Framework**: Angular
+-   **Framework**: Angular (with `@angular/material` / `@angular/cdk` v21)
 -   **Language**: TypeScript
 -   **Test runner**: Jest / Playwright
 -   **Styling**: SCSS
+-   **Local libs path mapping differs by tsconfig**: `tsconfig.app.json` maps `ngx-edu-sharing-api`/`ngx-edu-sharing-ui` to `projects/*/src/lib` (the **source**), so `ng build`/`serve` picks up library edits directly. The root `tsconfig.json` maps them to `dist/*`, which the IDE language service may use — so after adding a new lib `@Input()`/export you can get stale "property not provided / not exported" errors in the editor that do **not** reflect the actual build. Rebuild the lib (or ignore) to clear them.
 
 ## Linting & Styles
 
@@ -46,6 +47,9 @@ This agent assists with development tasks in this Angular frontend project.
 -   Do NOT use spread syntax (`[...x]`, `{...x}`) in templates — it is only supported in Angular 21.1+ and this project is on an older version. A `Set`/`Map` won't serialize with the `json` pipe either (renders `{}`); convert to an array in the component if you need to inspect it.
 -   `UIService.editConnector(node, type?, win?, connectorType?)` and `openConnector(...)` return the opened `Window`. Pre-open the window in the user-gesture (synchronously) and pass it in if the connector call follows an `await`, to avoid popup blockers.
 -   Node list overlays: `es-node-entries-wrapper` projects an `<ng-template #overlay let-element="element">` (via `@ContentChild('overlay')`) rendered per card for `Grid`/`SmallGrid` display types. The card's `.card-overlay` provides the positioning context.
+-   `es-node-entries-wrapper` (table view) hides built-in columns via `[checkbox]="false"`, `[showIconColumn]="false"`, `[showActions]="false"`. These flow wrapper → `NodeEntriesService` (`BehaviorSubject`s) → `node-entries-table` `getVisibleColumnNames()`, which builds `select`/`icon`/data-columns/`actions`. Add new column toggles using this same pattern.
+-   Prefer the RxJS observer-object form `subscribe({ next, error })`; the positional `subscribe(next, error)` overload is deprecated (TS6385) and triggers lint warnings.
+-   The top navigation bar is a single global `<es-main-nav>` in `app.component.html` driven by `MainNavService`. Pages do **not** render their own nav element — they call `mainNav.setMainNavConfig({ title, currentScope, … })` in `ngOnInit` (only `currentScope` is required). The bar's height is the `--mainnavHeight` CSS var.
 -   `es-dropdown` (in `projects/edu-sharing-ui/.../dropdown`) exposes its `MatMenu` as a `@ViewChild('dropdown') menu` and renders only a hidden `matMenuTrigger`. To trigger it from an external button: `<button [matMenuTriggerFor]="ref.menu">…</button>` where `ref` is the `#templateRef` on `<es-dropdown>`. Mobile fallback: call `ref.triggerBottomSheet()`.
 -   `AddWithConnectorDialog` opens its popup `Window` synchronously inside the dialog's "Create" handler (user gesture) and returns it on `AddWithConnectorDialogResult.window`. Always forward that window to `UIService.editConnector(node, {win, connectorType})` — do not re-open one yourself, or the popup blocker will kill it.
 
@@ -67,6 +71,17 @@ This agent assists with development tasks in this Angular frontend project.
 ### API Services
 
 -   Location: `projects/edu-sharing-api`
+-   **Never use the `@Deprecated` legacy `RestXxxService` from `src/app/core-module/rest/services/`** (e.g. `RestNodeService`, `RestStatisticsService`, `RestAdminService`). Use the `ngx-edu-sharing-api` equivalents — wrappers (`NodeService`, `OrganizationService`, …) or generated `*V1Service` (`StatisticV1Service`, `OrganizationV1Service`, …). Same for the DTOs in `core-module/rest/data-object.ts` (also slated for replacement).
+-   Generated `*V1Service` methods take a **single params object** (e.g. `getStatisticsNode({ dateFrom, dateTo, grouping, … })`); request body goes in a `body` field. Date params are inconsistent across endpoints — some take **epoch millis** (`getStatisticsNode`), others **ISO-8601 strings** (`getByNodes`/`getByUsers`/`getByOrganization`); check the `fn/.../<op>.ts` `$Params` interface.
+-   Only services and a subset of models are re-exported from the package public-api. The generated `$Params` interfaces and many models (e.g. `TrackingNode`, `Tracking`) are **not** exported — reference shapes structurally, define a local union/alias, or cast (`as unknown as`) at the boundary instead of importing them.
+-   `NodeService.getNode(id)` (wrapper) already requests `propertyFilter: ['-all-']`, i.e. it hits `/node/v1/.../metadata` and returns all properties.
+-   `core-module`'s `RestConstants extends RestConstantsBase` from `ngx-edu-sharing-api`; add new `TOOLPERMISSION_*`/string constants to `projects/edu-sharing-api/src/lib/rest-constants.ts` and they are available through `core-module`'s `RestConstants` too.
+-   The `ngx-edu-sharing-api` client (`api/fn/<tag>/<op>.ts` + `api/services/*V1Service`) is generated by **ng-openapi-gen** from the backend OpenAPI (files are headed `Code generated … DO NOT EDIT`). After adding/changing a backend REST endpoint, regenerate the client (or, to keep things compiling meanwhile, hand-add the matching `fn` file + service method mirroring an existing operation — it will be reproduced identically on regen).
+
+### Authoring `ngx-edu-sharing-ui` library code
+
+-   Any declarable (component/directive/**pipe**) that a published `NgModule` in the lib **declares + exports** must also be re-exported from the library entrypoint `projects/edu-sharing-ui/src/lib/index.ts` (re-exported by `public-api.ts`), otherwise the lib build fails with **NG3001** "Unsupported private class … not exported from the top-level library entrypoint". Pipes live in `projects/edu-sharing-ui/src/lib/pipes/` and are declared/exported in `common/edu-sharing-ui-common.module.ts`.
+-   Auth-state template gates use pipes over `AuthenticationService.observeLoginInfo()`: `esToolpermission` (`login.toolPermissions.includes(...)`) and `esGlobalAdmin` (`login.isAdmin`), both used with `async`. `WorkspaceExplorerComponent.getColumns(connector)` is a reusable static returning the standard node-column `ListItem[]` for column pickers.
 
 ### Options Helper
 
@@ -115,7 +130,7 @@ This agent assists with development tasks in this Angular frontend project.
     -   Add to `getAllPredefinedToolPermissions()` to register the permission
     -   Add a `.remove()` call in `getAllDefaultAllowedToolpermissions()` to make it **disabled by default**
 -   UI management: `src/app/pages/user-management-page/toolpermission-manager/toolpermission-manager.component.ts` — add to the appropriate group in `GROUPS`
--   Translations: add a `"TOOLPERMISSION_<NAME>"` key in each `src/assets/i18n/common/<lang>.json`
+-   Translations: add a `"TOOLPERMISSION_<NAME>"` entry **inside the nested `"TOOLPERMISSION": { … }` object** in each `src/assets/i18n/common/<lang>.json` (de/en/it/fr; `de-no-binnen-i.json` is a partial override that falls back to `de.json`). It is shown in the UI via the key `TOOLPERMISSION.<NAME>` — a missing entry renders that raw string in the toolpermission manager.
 -   Template evaluation: use the `esToolpermission` pipe with `async`, e.g.:
     ```html
     *ngIf="('TOOLPERMISSION_FOO' | esToolpermission | async)"

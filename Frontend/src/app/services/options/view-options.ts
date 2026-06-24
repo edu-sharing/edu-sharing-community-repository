@@ -292,6 +292,19 @@ export function createViewOptions({
     infoVersions.priority = 20;
     infoVersions.showAsAction = false;
 
+    const showStatistics = new OptionItem('OPTIONS.SHOW_STATISTICS', 'equalizer', (object) => {
+        const ids = service.getObjects(object, data).map((n) => n.ref.id);
+        void service.router.navigate([UIConstants.ROUTER_PREFIX + 'admin'], {
+            queryParams: { mode: 'STATISTICS', nodes: ids.join(',') },
+        });
+    });
+    showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
+    showStatistics.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree, Scope.CollectionsCollection];
+    showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+    showStatistics.toolpermissionsMode = HideMode.Hide;
+    showStatistics.group = DefaultGroups.View;
+    showStatistics.priority = 35;
+
     const downloadNode = service.getDownloadOption(data, false);
     const downloadNodeSafe = service.getDownloadOption(data, true);
 
@@ -437,6 +450,7 @@ export function createViewOptions({
         submitAssignment,
         viewAssignmentSubmission,
         infoVersions,
+        showStatistics,
         downloadNode,
         downloadNodeSafe,
         downloadMetadataNode,

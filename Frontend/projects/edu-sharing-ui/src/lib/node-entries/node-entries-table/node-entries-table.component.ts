@@ -7,13 +7,13 @@ import {
     Component,
     ElementRef,
     HostBinding,
+    inject,
     NgZone,
     OnChanges,
     OnDestroy,
     SimpleChanges,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
@@ -252,8 +252,12 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     private getVisibleColumnNames(): Observable<string[]> {
-        return combineLatest([this.visibleDataColumns$, this.entriesService.showIconColumn]).pipe(
-            map(([visibleDataColumns, showIconColumn]) => {
+        return combineLatest([
+            this.visibleDataColumns$,
+            this.entriesService.showIconColumn,
+            this.entriesService.showActions,
+        ]).pipe(
+            map(([visibleDataColumns, showIconColumn, showActions]) => {
                 const columns = [];
                 if (this.entriesService.checkbox) {
                     columns.push('select');
@@ -261,7 +265,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                 if (showIconColumn) {
                     columns.push('icon');
                 }
-                return columns.concat(visibleDataColumns.map((c) => c.name)).concat(['actions']);
+                const result = columns.concat(visibleDataColumns.map((c) => c.name));
+                return showActions ? result.concat(['actions']) : result;
             }),
             shareReplay(1),
         );
