@@ -3020,6 +3020,28 @@ public class NodeDao {
      * - properties
      * Only use it if you don't need any advanced data or mappings
      */
+    public static Node getAsNodeSimple(org.edu_sharing.service.model.NodeRef nodeRef) throws DAOException {
+        try {
+            NodeDao dao = new NodeDao(RepositoryDao.getHomeRepository(), nodeRef, Filter.createShowAllFilter());
+            Node node = new Node();
+            dao.fillNodeObject(node, false, false);
+            return node;
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    /**
+     * simply transfer an alfresco node to an rest-api compatible node object
+     * This is a pretty simple call which is only supposed to be used for performance critical calls and will skip things like
+     * - Current Access permission list
+     * - Previews
+     * - Content info
+     * and ONLY include:
+     * - aspects
+     * - properties
+     * Only use it if you don't need any advanced data or mappings
+     */
     public static Node getAsNodeSimple(String nodeId) throws DAOException {
         return getAsNodeSimple(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
     }

@@ -3,11 +3,12 @@ import { PlatformLocation } from '@angular/common';
 import {
     Component,
     ElementRef,
+    inject,
     OnDestroy,
     OnInit,
+    signal,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -149,6 +150,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
     private queryParams: Params;
+    /** node ids passed via the `nodes` query param; switches the statistics view to "by object" mode */
+    statisticsNodeIds = signal<string[]>([]);
     jobsLoading = false;
 
     constructor() {
@@ -1387,6 +1390,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             ) !== -1 ||
             this.loginResult.toolPermissions.indexOf(
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_USER_STATISTICS_NODES,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES,
             ) !== -1
         ) {
             this.buttons.splice(1, 0, {
@@ -1423,6 +1435,12 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
         this.route.queryParams.subscribe((data: Params) => {
             this.queryParams = data;
+            this.statisticsNodeIds.set(
+                (data.nodes ?? '')
+                    .split(',')
+                    .map((id: string) => id.trim())
+                    .filter(Boolean),
+            );
             if (data.mode) {
                 this.mode = data.mode;
                 if (this.getModeButton().factory) {
@@ -1435,7 +1453,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             } else this.setMode(this.buttons[0].id, true);
         });
         if (this.loginResult.isAdmin) {
-            if (this.queryParams?.skipWarning !== 'true') {
+            if (this.queryParams?.skipWarning !== 'true' && this.mode !== 'STATISTICS') {
                 void this.showWarningDialog();
             }
             this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {

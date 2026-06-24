@@ -93,6 +93,7 @@ export { PermissionRequest } from './api/models/permission-request';
 export { AssignmentFile } from './api/models/assignment-file';
 export { AssignmentFileRequest } from './api/models/assignment-file-request';
 export { Node } from './api/models/node';
+export { Tracking } from './api/models/tracking';
 export { NodeEntry } from './api/models/node-entry';
 export { NodeEntries } from './api/models/node-entries';
 export { NodeVersion } from './api/models/node-version';

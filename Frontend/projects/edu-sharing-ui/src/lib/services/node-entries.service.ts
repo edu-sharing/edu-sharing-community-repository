@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, signal, WritableSignal, inject } from '@angular/core';
+import { EventEmitter, inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
@@ -178,6 +178,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
     showIconColumn = new BehaviorSubject(true);
+    showActions = new BehaviorSubject(true);
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
         if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {

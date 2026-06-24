@@ -7,6 +7,7 @@ import {
     ElementRef,
     EventEmitter,
     HostBinding,
+    inject,
     Input,
     NgZone,
     OnChanges,
@@ -18,7 +19,6 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
-    inject,
 } from '@angular/core';
 import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
@@ -190,6 +190,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      *  show the icon column (table view only)
      */
     @Input() showIconColumn = true;
+    /**
+     *  show the actions (options) column (table view only)
+     */
+    @Input() showActions = true;
 
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -345,6 +349,9 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
+        }
+        if (changes.showActions) {
+            this.entriesService.showActions.next(this.showActions);
         }
 
         if (changes['initConfig']) {

@@ -146,6 +146,8 @@ ApplicationContextFactory.getApplicationContext().getBean(PermissionChecking.cla
     .checkNodePermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
 ```
 
+`PermissionChecking` is a Spring `@Aspect @Component` (proxy-based AOP), so the same annotations (`@Permission`, `@HasRole`, `@NodePermission`) are **only enforced on calls that go through the bean proxy** — i.e. external callers. A **self-invocation** (one method in a bean calling another annotated method on `this`) bypasses the check entirely. Gotcha: a `@Queued`/async method that internally calls an annotated getter does **not** trigger that getter's `@Permission`; enforce the toolpermission explicitly at the entry point (e.g. `ToolPermissionHelper.throwIfToolpermissionMissing(...)`) instead of relying on the annotation.
+
 ---
 
 ### MDS (Metadata Sets) — Search Queries
