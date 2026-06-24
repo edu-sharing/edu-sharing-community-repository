@@ -1678,7 +1678,7 @@
       </property>
       <property name="user">
         <statement>
-          {"term":{"properties.sys:archivedBy.keyword":"${value}"}}
+          {"term":{"properties.sys:archivedBy.keyword":"${valueRaw}"}}
         </statement>
       </property>
     </query>
