@@ -42,8 +42,8 @@ public abstract class AbstractMetadataFormatWriter implements OaiMetadataFormatW
 
         String type = propertyMapper.getString(CCConstants.NODETYPE);
         if (StringUtils.isBlank(type) || !Objects.equals(type, CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO))) {
-            log.error("Invalid node type");
-            return;
+            throw new IllegalStateException("Cannot export OAI metadata for node " + nodeRef.getId()
+                    + ": unsupported node type '" + type + "' (expected " + CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO) + ")");
         }
 
         MetadataSet metadataset = MetadataHelper.getMetadataset(nodeRef);

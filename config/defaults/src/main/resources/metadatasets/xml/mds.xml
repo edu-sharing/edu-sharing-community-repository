@@ -748,6 +748,36 @@
         <value>general</value>
       </values>
     </widget>
+    <widget>
+      <id>curriculum_commentable</id>
+      <caption>Kommentare aktivieren</caption>
+      <defaultvalue>true</defaultvalue>
+      <type>checkbox</type>
+    </widget>
+    <widget>
+      <id>curriculum_auto_refresh</id>
+      <caption>Automatisches aktualisieren</caption>
+      <defaultvalue>false</defaultvalue>
+      <type>checkbox</type>
+    </widget>
+    <widget>
+      <id>curriculum_only_edit_owned_items</id>
+      <caption>Nutzende können nur selbst erstellte Spalten/Karten bearbeiten</caption>
+      <defaultvalue>false</defaultvalue>
+      <type>checkbox</type>
+    </widget>
+    <widget>
+      <id>curriculum_collapse_items</id>
+      <caption>Karteninhalte standardmäßig einklappen </caption>
+      <defaultvalue>false</defaultvalue>
+      <type>checkbox</type>
+    </widget>
+    <widget>
+      <id>curriculum_allow_copy</id>
+      <caption>Pinnwand darf von anderen kopiert werden</caption>
+      <defaultvalue>true</defaultvalue>
+      <type>checkbox</type>
+    </widget>
   </widgets>
   <templates>
     <template>
@@ -1079,11 +1109,29 @@
     </template>
     <template>
       <id>connector_curriculum</id>
+      <caption>Pinnwand erstellen</caption>
       <html><![CDATA[
 				<curriculum_title>
 				<curriculum_description>
+				]]></html>
+    </template>
+    <template>
+      <id>connector_curriculum_view</id>
+      <caption>Darstellung</caption>
+      <html><![CDATA[
 				<curriculum_color>
+				]]></html>
+    </template>
+    <template>
+      <id>connector_curriculum_permissions</id>
+      <caption>Berechtigungen</caption>
+      <html><![CDATA[
 				<curriculum_editable>
+				<curriculum_commentable>
+				<curriculum_auto_refresh>
+				<curriculum_only_edit_owned_items>
+				<curriculum_collapse_items>
+				<curriculum_allow_copy>
 				]]></html>
     </template>
     <template>
@@ -1114,6 +1162,8 @@
       <rendering>angular</rendering>
       <views>
         <view>connector_curriculum</view>
+        <view>connector_curriculum_view</view>
+        <view>connector_curriculum_permissions</view>
       </views>
     </group>
     <group>

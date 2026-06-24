@@ -28,6 +28,7 @@
 package org.edu_sharing.repository.server.tools;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
@@ -41,7 +42,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable {
+@Slf4j
+public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializable{
 
     public static final long DEFAULT_OFFSET_MS = 10000;
 
@@ -514,7 +516,12 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
         ClassLoader classLoader = Thread.currentThread()
                 .getContextClassLoader();
         URL url = classLoader.getResource(appFile);
-        xml = url != null ? new String(Files.readAllBytes(Paths.get(url.toURI()))) : null;
+        if(url == null){
+            String msg = "classLoader could not find app file: " + appFile;
+            log.error(msg);
+            throw new Exception(msg);
+        }
+		xml = new String(Files.readAllBytes(Paths.get(url.toURI())));
 
         //test if file exists if not exception is thrown
         //properties.getProperty("is_home_node");

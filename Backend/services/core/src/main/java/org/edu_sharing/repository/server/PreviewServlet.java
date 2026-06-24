@@ -736,13 +736,19 @@ public class PreviewServlet extends HttpServlet {
         if (nodeType.equals(CCConstants.CCM_TYPE_MAP)) {
 
             boolean isIcon = true;
+            String prevType = PreviewDetail.TYPE_DEFAULT;
             if (nodeProps != null) {
-                if (nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null) isIcon = false;
-            } else {
-                if (nodeService.getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CCM_PROP_MAP_ICON) != null)
+                if (nodeProps.get(CCConstants.CCM_PROP_MAP_ICON) != null){
                     isIcon = false;
+                    prevType = PreviewDetail.TYPE_USERDEFINED;
+                }
+            } else {
+                if (nodeService.getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CCM_PROP_MAP_ICON) != null){
+                    isIcon = false;
+                    prevType = PreviewDetail.TYPE_USERDEFINED;
+                }
             }
-            return new PreviewDetail(null, null, false, isIcon);
+            return new PreviewDetail(null, prevType, false, isIcon);
         }
 
         if (!nodeType.equals(CCConstants.CCM_TYPE_IO)) {

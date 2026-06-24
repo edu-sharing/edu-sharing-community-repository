@@ -12,6 +12,7 @@ import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.repository.client.rpc.EduGroup;
@@ -470,13 +471,22 @@ public class PersonDao {
 	}
 
 	private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
-		List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
-		for(ChildAssociationRef ref : refs) {
-			if(ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))){
-				return ref.getChildRef();
+		Serializable cache = PersonCache.get(getAuthorityName(), PersonCache.AVATAR);
+		if(cache == null) {
+			List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
+			for (ChildAssociationRef ref : refs) {
+				if (ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))) {
+					PersonCache.put(getAuthorityName(), PersonCache.AVATAR, ref.getChildRef());
+					return ref.getChildRef();
+				}
 			}
+			PersonCache.put(getAuthorityName(), PersonCache.AVATAR, PersonCache.NULL_NODEREF);
+			return null;
+		} else if(cache.equals(PersonCache.NULL_NODEREF)) {
+			return null;
+		} else {
+			return (org.alfresco.service.cmr.repository.NodeRef) cache;
 		}
-		return null;
 	}
 	private String getAvatar() {
 		org.alfresco.service.cmr.repository.NodeRef avatar=getAvatarNode();
@@ -490,6 +500,7 @@ public class PersonDao {
 			org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
 			if(currentAvatar!=null) {
 				this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
+				PersonCache.reset(getAuthorityName());
 			}
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
@@ -511,6 +522,7 @@ public class PersonDao {
 		NodeServiceHelper.setCreateVersion(nodeId,false);
 		nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
 		this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE,new String[]{CCConstants.PERMISSION_CONSUMER},true);
+		PersonCache.reset(getAuthorityName());
 		}catch(Throwable t) {
 			throw DAOException.mapping(t);
 		}
@@ -566,6 +578,9 @@ public class PersonDao {
 	}
 
 	public String[] getType() {
+		if(!LightbendConfigLoader.get().getBoolean("repository.users.inheritTypes")) {
+			return new String[0];
+		}
 		return AuthenticationUtil.runAsSystem(new RunAsWork<String[]>() {
 			@Override
 			public String[] doWork() throws Exception {
