@@ -43,7 +43,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 @Component
 public class JobHandler implements ApplicationListener<RefreshScopeRefreshedEvent> {
 
-    public static final Object KEY_RESULT_DATA = "JOB_RESULT_DATA";
+    public static final String KEY_RESULT_DATA = "JOB_RESULT_DATA";
     public static final String KEY_JOB_UUID = "JOB_UUID";
     private static final int MAX_JOB_LOG_COUNT = 20; // maximal number of jobs to store for history and gui
     //public final static SimpleCache<String, List<JobInfo>> jobs = (SimpleCache)  AlfAppContextGate.getApplicationContext().getBean("eduSharingJobsListCache");
