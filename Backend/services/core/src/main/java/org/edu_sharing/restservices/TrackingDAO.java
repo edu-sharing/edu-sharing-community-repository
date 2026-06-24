@@ -350,6 +350,7 @@ public class TrackingDAO {
     }
 
     @Queued(unique = true)
+    @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_SELECTIVE_STATISTICS_NODES)
     public void scheduleNodeStatisticsByRange(List<String> nodeIds, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByRange(nodeIds, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
@@ -366,6 +367,7 @@ public class TrackingDAO {
     }
 
     @Queued(unique = true)
+    @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES)
     public void scheduleNodeStatisticsByOrganization(@HasRole String orgId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOrganization(orgId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
@@ -382,6 +384,7 @@ public class TrackingDAO {
     }
 
     @Queued(unique = true)
+    @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_USER_STATISTICS_NODES)
     public void scheduleNodeStatisticsByOwningUser(@HasRole String userId, Date startDate, Date endDate, boolean publishedOnly, List<List<String>> properties) {
         try {
             Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> statisticEntryMap = getNodeStatisticsByOwningUser(userId, startDate, endDate, Integer.MAX_VALUE, publishedOnly);
