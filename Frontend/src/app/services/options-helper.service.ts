@@ -246,13 +246,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             components.dropdown.ngOnChanges();
         }
         if (components.actionbar) {
-            components.actionbar.options = await this.getAvailableOptions(
-                Target.Actionbar,
-                [],
-                components,
-                data,
-            );
-            components.actionbar.invalidate();
+            const actionbars = (
+                Array.isArray(components.actionbar) ? components.actionbar : [components.actionbar]
+            ).filter(Boolean);
+            const options = await this.getAvailableOptions(Target.Actionbar, [], components, data);
+            for (const actionbar of actionbars) {
+                actionbar.options = options;
+                actionbar.invalidate();
+            }
         }
     }
 

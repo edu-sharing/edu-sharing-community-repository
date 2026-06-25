@@ -7,6 +7,8 @@
     "DID_YOU_MEAN": "Vouliez-vous dire",
     "COLLECTIONS": "Collections",
     "MATERIALS": "Ressources",
+    "N_SELECTED": "{{count}} sélectionné(e)s",
+    "CLEAR_SELECTION": "Annuler la sélection",
     "FRONTPAGE": "Ressources recommandées",
     "IGNORED_PARAMETERS": "Le résultat contient des objets qui peuvent ne pas correspondre à tous les critères de recherche donnés.",
     "MAINSEARCHFIELD": "Champ de saisie pour la recherche",

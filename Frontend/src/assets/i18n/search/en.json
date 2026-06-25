@@ -7,6 +7,8 @@
     "DID_YOU_MEAN": "Did you mean",
     "COLLECTIONS": "Collections",
     "MATERIALS": "Materials",
+    "N_SELECTED": "{{count}} selected",
+    "CLEAR_SELECTION": "Clear selection",
     "FRONTPAGE": "Recommended materials",
     "IGNORED_PARAMETERS": "The result contains objects which may not fit all given search criteria",
     "MAINSEARCHFIELD": "Input field for search",

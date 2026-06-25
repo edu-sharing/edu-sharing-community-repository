@@ -1,7 +1,7 @@
 import type { DropdownComponent } from '../dropdown/dropdown.component';
 import type { ActionbarComponent } from '../actionbar/actionbar.component';
 import type { ListEventInterface, NodeEntriesDisplayType } from '../node-entries/entries-model';
-import { EventEmitter, Injectable, NgZone, OnDestroy, inject } from '@angular/core';
+import { EventEmitter, inject, Injectable, NgZone, OnDestroy } from '@angular/core';
 import { AuthenticationService, ME, NetworkService, Node, UserService } from 'ngx-edu-sharing-api';
 import { take, takeUntil } from 'rxjs/operators';
 import { CustomOptions, OptionItem, Scope, Target } from '../types/option-item';
@@ -21,7 +21,8 @@ type DeleteEvent = {
     error: boolean;
 };
 export interface OptionsHelperComponents {
-    actionbar?: ActionbarComponent;
+    /** One or several actionbars sharing the same computed options. */
+    actionbar?: ActionbarComponent | ActionbarComponent[];
     dropdown?: DropdownComponent;
     list?: ListEventInterface<NodeEntriesDataType>;
 }
@@ -87,7 +88,7 @@ export class OptionsHelperDataService implements OnDestroy {
     }
 
     async initComponents(
-        actionbar: ActionbarComponent = null,
+        actionbar: ActionbarComponent | ActionbarComponent[] = null,
         list: ListEventInterface<NodeEntriesDataType> = null,
         dropdown: DropdownComponent = null,
     ) {

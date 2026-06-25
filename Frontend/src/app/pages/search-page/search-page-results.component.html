@@ -1,97 +1,126 @@
-<ng-container
-  *ngTemplateOutlet="customTemplates.value.resultsTop"
-  xmlns="http://www.w3.org/1999/html"
-></ng-container>
+<div class="results-scroll">
+  <ng-container
+    *ngTemplateOutlet="customTemplates.value.resultsTop"
+    xmlns="http://www.w3.org/1999/html"
+  ></ng-container>
 
-@if (addToCollectionMode.value; as addToCollection) {
-<es-small-collection
-  class="add-to-collection-banner"
-  [collection]="addToCollection.collection"
-  [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
-  [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
->
-  <es-actionbar backgroundType="primary"></es-actionbar>
-</es-small-collection>
-} @if (primaryAction | async; as action) {
-<div class="primary-action-banner">
-  <div class="description">
-    {{ 'SEARCH.ACTION.' + action.toUpperCase() + '_DESCRIPTION' | translate }}
+  @if (addToCollectionMode.value; as addToCollection) {
+  <es-small-collection
+    class="add-to-collection-banner"
+    [collection]="addToCollection.collection"
+    [titleLabel]="'SEARCH.ADD_INTO_COLLECTION'"
+    [titleLabelShort]="'SEARCH.ADD_INTO_COLLECTION_SHORT'"
+  >
+    <es-actionbar #actionbarAddToCollection backgroundType="primary"></es-actionbar>
+  </es-small-collection>
+  } @if (primaryAction | async; as action) {
+  <div class="primary-action-banner">
+    <div class="description">
+      {{ 'SEARCH.ACTION.' + action.toUpperCase() + '_DESCRIPTION' | translate }}
+    </div>
+    <es-actionbar #actionbarPrimaryBanner backgroundType="primary"></es-actionbar>
   </div>
-  <es-actionbar backgroundType="primary"></es-actionbar>
-</div>
-}
+  }
 
-<!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
+  <!-- We cannot use *ngIf on node-entries-wrapper since it depends on its input variables to
       initialize data fetching. -->
-<es-node-entries-wrapper
-  [class.display-none]="collectionsDataSource.isEmpty()"
-  class="entries-wrapper"
-  [dataSource]="collectionsDataSource"
-  [scope]="Scope.SearchCollections"
-  [columns]="collectionColumns.value"
-  [disableInfiniteScroll]="true"
-  [displayType]="NodeEntriesDisplayType.SmallGrid"
-  [gridConfig]="{ layout: 'scroll' }"
-  data-test="search-result-grid-collections"
->
-  <ng-template #title>
-    <div class="title-container">
-      <h2 class="mat-heading-2">
-        {{ 'SEARCH.COLLECTIONS' | translate }}
-        @if (!collectionsDataSource.isLoading) { ({{ collectionsDataSource.getTotal() }}) } @else {
-        <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
-        }
-      </h2>
-    </div>
-  </ng-template>
-</es-node-entries-wrapper>
-
-<es-node-entries-wrapper
-  #nodeEntriesResults
-  class="entries-wrapper entries-wrapper{{ getContainerClass() }}"
-  [dataSource]="resultsDataSource"
-  [scope]="Scope.Search"
-  [columns]="resultColumns.value"
-  [displayType]="(state | async).displayType"
-  (displayTypeChange)="setDisplayType($event)"
-  (selectionChange)="selectionChange($event)"
-  [sort]="(state | async).sortConfig"
-  (sortChange)="updateSort($event)"
-  [primaryInstance]="true"
-  [elementInteractionType]="
-    previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
-  "
-  [initConfig]="{ actionbar, customOptions: primaryActionOptions || (searchPage.getCustomMaterialOptions | async)}"
-  (clickItem)="onClick($event)"
-  (dblClickItem)="onDblClick($event.element)"
-  data-test="search-result-grid-material"
->
-  <ng-template #title>
-    <div class="title-container title-container{{ getContainerClass() }}">
-      <h2 class="mat-heading-2">
-        {{ 'SEARCH.MATERIALS' | translate }}
-        @if (!resultsDataSource.isLoading) { @if (!resultsDataSource.isEmpty()) {
-        <span class="count count{{ getContainerClass() }}">
-          &nbsp;({{ resultsDataSource.getTotal() }})
-        </span>
-        } } @else {
-        <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
-        }
-      </h2>
-      <div class="right">
-        @if (!addToCollectionMode.value) {
-        <es-actionbar></es-actionbar>
-        }
+  <es-node-entries-wrapper
+    [class.display-none]="collectionsDataSource.isEmpty()"
+    class="entries-wrapper"
+    [dataSource]="collectionsDataSource"
+    [scope]="Scope.SearchCollections"
+    [columns]="collectionColumns.value"
+    [disableInfiniteScroll]="true"
+    [displayType]="NodeEntriesDisplayType.SmallGrid"
+    [gridConfig]="{ layout: 'scroll' }"
+    data-test="search-result-grid-collections"
+  >
+    <ng-template #title>
+      <div class="title-container">
+        <h2 class="mat-heading-2">
+          {{ 'SEARCH.COLLECTIONS' | translate }}
+          @if (!collectionsDataSource.isLoading) { ({{ collectionsDataSource.getTotal() }}) } @else
+          {
+          <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
+          }
+        </h2>
       </div>
-    </div>
-  </ng-template>
-  <ng-template #empty>
-    <div class="no-search-results-message">
-      <i esIcon="search"></i>
-      {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
-    </div>
-  </ng-template>
-</es-node-entries-wrapper>
+    </ng-template>
+  </es-node-entries-wrapper>
+
+  <es-node-entries-wrapper
+    #nodeEntriesResults
+    class="entries-wrapper entries-wrapper{{ getContainerClass() }}"
+    [dataSource]="resultsDataSource"
+    [scope]="Scope.Search"
+    [columns]="resultColumns.value"
+    [displayType]="(state | async).displayType"
+    (displayTypeChange)="setDisplayType($event)"
+    (selectionChange)="selectionChange($event)"
+    [sort]="(state | async).sortConfig"
+    (sortChange)="updateSort($event)"
+    [primaryInstance]="true"
+    [elementInteractionType]="
+      previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
+    "
+    [initConfig]="{
+      actionbar: actionbars(),
+      customOptions: primaryActionOptions || (searchPage.getCustomMaterialOptions | async)
+    }"
+    (clickItem)="onClick($event)"
+    (dblClickItem)="onDblClick($event.element)"
+    data-test="search-result-grid-material"
+  >
+    <ng-template #title>
+      <div class="title-container title-container{{ getContainerClass() }}">
+        <h2 class="mat-heading-2">
+          {{ 'SEARCH.MATERIALS' | translate }}
+          @if (!resultsDataSource.isLoading) { @if (!resultsDataSource.isEmpty()) {
+          <span class="count count{{ getContainerClass() }}">
+            &nbsp;({{ resultsDataSource.getTotal() }})
+          </span>
+          } } @else {
+          <ng-container [ngTemplateOutlet]="smallLoadingSpinner"></ng-container>
+          }
+        </h2>
+        <div class="right">
+          @if (!addToCollectionMode.value) {
+          <es-actionbar #actionbarToggles [showActionOptions]="false"></es-actionbar>
+          }
+        </div>
+      </div>
+    </ng-template>
+    <ng-template #empty>
+      <div class="no-search-results-message">
+        <i esIcon="search"></i>
+        {{ 'SEARCH.QUERY_NO_RESULT' | translate }}
+      </div>
+    </ng-template>
+  </es-node-entries-wrapper>
+</div>
+
+<!-- Action bar shown when items are selected. Lives outside the scroll area (.results-scroll) so the
+  scrollbar stops above it; the actionbar stays in the DOM so its ViewChild/initConfig binding resolves. -->
+<div
+  class="selection-action-bar"
+  [class.visible]="
+    !primaryActionOptions && !addToCollectionMode.value && (searchPage.selection | async)?.length
+  "
+>
+  <button
+    mat-icon-button
+    class="clear-selection"
+    (click)="clearSelection()"
+    [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+    matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+  >
+    <i esIcon="close"></i>
+  </button>
+  <span class="count">
+    {{ 'SEARCH.N_SELECTED' | translate : { count: (searchPage.selection | async)?.length || 0 } }}
+  </span>
+  <es-actionbar #actionbarActions [showToggleOptions]="false"></es-actionbar>
+</div>
 
 <ng-template #smallLoadingSpinner>
   <mat-spinner diameter="24" class="small-progress-spinner"></mat-spinner>

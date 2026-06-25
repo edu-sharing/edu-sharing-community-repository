@@ -1,4 +1,6 @@
 @use './common' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     position: relative;
@@ -94,10 +96,34 @@ es-search-page-filters-sidebar {
     max-height: calc(100vh - var(--mainnavCurrentHeight));
 }
 
-.search-page-body {
-    padding: 0 25px 25px;
+// Global content container, mirroring the editorial page's `.main-content` card. It also carries the
+// mobile bottom-nav (es-main-menu-bottom) clearance so the sticky selection bar inside it stays clear.
+.main-content {
     flex-grow: 1;
     min-width: 0;
+    // Static rounded card whose content scrolls inside (same pattern as editorial-page).
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+
+    // The repository tab bar is a static header; only the body below it scrolls.
+    > nav {
+        flex-shrink: 0;
+    }
+}
+
+// The content area below the tabs. Keeps the page's grey background. It does NOT scroll itself —
+// the routed results component scrolls internally so its selection footer bar stays outside the
+// scrollbar. Padding/scrollbar live on the inner scroll region of each results view.
+.search-page-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: vars.$backgroundColor;
 }
 .filter-bar-body {
     flex-grow: 1;

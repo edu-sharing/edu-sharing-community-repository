@@ -1,4 +1,12 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    viewChild,
+} from '@angular/core';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -21,7 +29,7 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, skip, switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
@@ -63,13 +71,26 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     @ViewChild('nodeEntriesResults')
     nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
-    @ViewChild(ActionbarComponent)
-    set _actionbar(value: ActionbarComponent) {
-        // Avoid changed-after-checked error.
-        setTimeout(() => (this.actionbar = value));
-    }
-
-    actionbar: ActionbarComponent;
+    private readonly actionbarToggles = viewChild<ActionbarComponent>('actionbarToggles');
+    private readonly actionbarActions = viewChild<ActionbarComponent>('actionbarActions');
+    private readonly actionbarAddToCollection = viewChild<ActionbarComponent>(
+        'actionbarAddToCollection',
+    );
+    private readonly actionbarPrimaryBanner =
+        viewChild<ActionbarComponent>('actionbarPrimaryBanner');
+    /**
+     * All actionbars driven by the same computed options: the toggles-only title bar, the actions-only
+     * sticky selection bar, and the banner actionbars shown in add-to-collection / primary-action modes
+     * (these are mutually exclusive in the template; absent ones resolve to undefined and are filtered).
+     */
+    readonly actionbars = computed(() =>
+        [
+            this.actionbarToggles(),
+            this.actionbarActions(),
+            this.actionbarAddToCollection(),
+            this.actionbarPrimaryBanner(),
+        ].filter((bar): bar is ActionbarComponent => !!bar),
+    );
 
     readonly resultsDataSource = this.results.resultsDataSource;
     readonly collectionsDataSource = this.results.collectionsDataSource;
@@ -121,7 +142,14 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         setTimeout(() => {
             this.searchPage.results = this.results;
             this.searchPage.showingAllRepositories.next(false);
+            // Reset any selection carried over from the "all repositories" view we navigated from.
+            this.clearSelection();
         });
+        // Clear the selection when the active repository changes (the component is reused across repos).
+        this.searchPage.activeRepository
+            .observeValue()
+            .pipe(distinctUntilChanged(), skip(1), takeUntil(this.destroyed))
+            .subscribe(() => this.clearSelection());
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
     }
 
@@ -192,5 +220,12 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
         this.searchPage.selection.next(selection.source.selected as Node[]);
         this.editorialSidebarService.handleSelection(selection);
+    }
+
+    clearSelection() {
+        this.nodeEntriesResults?.getSelection().clear();
+        // Reset the shared subject directly: clearing an already-empty wrapper emits no change event,
+        // so a stale selection (e.g. carried over from the "all repositories" view) wouldn't reset.
+        this.searchPage.selection.next([]);
     }
 }

@@ -41,6 +41,8 @@ This agent assists with development tasks in this Angular frontend project.
 ### General notes
 
 -   use custom `esIcon` directive instead of `mat-icon`
+-   Prefer signal view queries (`viewChild()` / `viewChildren()` + `computed()`) over the legacy `@ViewChild` setter-with-`setTimeout` workaround for "ExpressionChangedAfterItHasBeenChecked" — signal queries settle cleanly and can be combined/filtered in a `computed()` that templates read directly (Angular 21).
+-   A component reused across **query/route param changes** (e.g. tabs or `repo` query param) does **not** re-run its constructor/`ngOnInit`; subscribe to the param/value observable to react. Pages also share state via `providedIn:'root'` / page-level `BehaviorSubject`s (e.g. `SearchPageService.selection` written by multiple sibling result components) — a newly-routed instance inherits the **stale** value, so reset such shared subjects explicitly on init rather than relying on the new instance's empty local state.
 -   Connector display names are translated via the `CONNECTOR.<id>.NAME` i18n key, where `<id>` is the connector id (e.g. `ONLYOFFICE`) from `RestConnectorsService.connectorSupportsEdit(node)?.id`. Translate it in the template, not in TS.
 -   To override `mat-button` label color in a dark/overlay context, use the MDC token `--mdc-text-button-label-text-color` (e.g. `button.mat-mdc-button { --mdc-text-button-label-text-color: #fff; }`). The project uses `angular-material-css-vars.
 -   `NodeHelperService.getOriginalId(node)` (in `src/app/services/node-helper.service.ts`) returns the `ccm:original` property value when present, falling back to `node.ref.id`. Use it to detect collection references and submission file variant content nodes.
@@ -67,6 +69,9 @@ This agent assists with development tasks in this Angular frontend project.
 ### Global Styles
 
 -   Location: `projects/edu-sharing-ui/assets/scss`
+-   **SCSS namespace gotcha**: `@use './common' as *` only exposes common's mixins — it does **not** re-export `variables-scss` (common `@use`s it, not `@forward`). To use SCSS vars like `$backgroundColor` / `$mobileTabSwitchWidth` / `$mobileTabNavHeight` in a component stylesheet, add your own `@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;` and reference `vars.$x` (bare `$x` will fail to compile).
+-   Reusable mixins live in `projects/edu-sharing-ui/assets/scss/mixins.scss`: `materialShadow()` / `materialShadowSmall()`, and `materialScrollbar()` / `materialScrollbarLight()` for styled scrollbars on internal scroll areas.
+-   **Rounded container card**: `roundedContainerCard()` (frame — margin / `--roundedContainerBackground` / `--borderRadiusCards` / shadow + mobile bottom-nav `margin-bottom` clearance) and `roundedContainerStaticScroll()` (makes it a static card that scrolls its content internally: `display:flex; flex-direction:column; overflow:hidden` + `height: calc(100vh - 2×--roundedContainerMargin - --mainnavCurrentHeight)` with the `$mobileTabNavHeight` subtraction). Pair with a scrolling child `flex:1; min-height:0; overflow-y:auto`. Used by both editorial-page and search-page `.main-content`.
 
 ### API Services
 
@@ -92,6 +97,7 @@ This agent assists with development tasks in this Angular frontend project.
 -   To bind a standalone `es-actionbar` to a node context (outside `es-node-entries-wrapper`): provide `OptionsHelperDataService` in the component's `providers`, use a `@ViewChild` **setter** (not field) to call `await initComponents(actionbar)` then `refreshComponents()` when the bar first enters the DOM (e.g. after `*ngIf` becomes true), and use an `effect()` to call `setData(…)` + `refreshComponents()` when the active node changes while the actionbar stays rendered. `OptionsHelperService` is already provided at `editorial-page` level — only `OptionsHelperDataService` needs to be added locally.
 -   `OptionsHelperDataService.setData()` calls `wrapOptionCallbacks()`, which replaces each `option.callback` so that when the actionbar calls it with no arguments the node is resolved from `data.activeObjects`. The original callback therefore receives `(undefined, [activeNode])` — write callbacks as `(node, nodes) => fn(node ?? nodes?.[0])` so they work correctly from both `es-node-entries-wrapper` (passes node as first arg) and the standalone actionbar.
 -   The `getDownloadOption(data)` callback closes over its `data` argument. When used with `OptionsHelperDataService`, pass a **shared `OptionData` object reference** and update `activeObjects` on it before each `setData` + `refreshComponents` call, so the download callback resolves the correct node via `getObjects(object, closureData)` even after wrapping.
+-   `ListOptionsConfig.actionbar` (and `OptionsHelperComponents.actionbar`) accept a single `ActionbarComponent` **or an array** — `refreshComponents` computes the options once and assigns them to every bar, so multiple actionbars stay in sync with one selection/options computation (e.g. a toggles-only bar plus an actions-only bar). `ActionbarComponent` has `showToggleOptions` / `showActionOptions` inputs (default `true`) to render only the toggle or only the action options of the same options set; its `actionToggleDivider` should be gated on `showActionOptions` to avoid a dangling divider when actions aren't painted.
 
 ### Connector Create Options
 
