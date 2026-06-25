@@ -21,6 +21,7 @@ public class CallSourceHelper {
         // access from external edu connector tool
         ToolConnector,
         RatingApi,
+        Download,
         Unknown
     }
 
@@ -59,6 +60,8 @@ public class CallSourceHelper {
             return CallSource.Sitemap;
         }else if(isRatingApi(requestPath)){
             return CallSource.RatingApi;
+        }else if(isDownload(requestPath)){
+            return CallSource.Download;
         }else{
             return CallSource.Workspace;
         }
@@ -107,6 +110,13 @@ public class CallSourceHelper {
 
     private static boolean isSitemap(String path){
         if(path.startsWith(WEBAPP_BASE_PATH + "/eduservlet/sitemap")){
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isDownload(String path){
+        if(path.startsWith(WEBAPP_BASE_PATH + "/eduservlet/download")){
             return true;
         }
         return false;
