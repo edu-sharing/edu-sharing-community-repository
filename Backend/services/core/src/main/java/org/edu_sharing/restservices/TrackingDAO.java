@@ -74,6 +74,9 @@ public class TrackingDAO {
                     }
                     TrackingNode tracking = new TrackingNode(node, convertAuthority(track.getAuthorityInfo()), track.getDate(), track.getCounts(), track.getFields(), track.getGroups());
                     result.add(tracking);
+                    if(result.size() >= outputLimit) {
+                        break;
+                    }
                 }
             }
             return result;
