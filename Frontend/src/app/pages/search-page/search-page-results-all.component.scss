@@ -1,5 +1,17 @@
 @use './common' as *;
 @use 'variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+// The "all repositories" view scrolls internally (its parent .search-page-body no longer scrolls).
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 25px;
+    @include mixins.materialScrollbarLight();
+}
 
 // .actionbar {
 //     display: flex;
