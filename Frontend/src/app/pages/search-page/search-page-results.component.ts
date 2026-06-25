@@ -35,6 +35,7 @@ import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 export type SearchFilter = {
@@ -102,6 +103,19 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     defaultCustomOptions: CustomOptions;
+
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     constructor() {
         const results = this.results;
@@ -227,5 +241,15 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         // Reset the shared subject directly: clearing an already-empty wrapper emits no change event,
         // so a stale selection (e.g. carried over from the "all repositories" view) wouldn't reset.
         this.searchPage.selection.next([]);
+        this.selectionOverlayOpen = false;
+    }
+
+    /**
+     * Remove a single node from the selection (triggered by unchecking it in the selection overlay).
+     * Deselecting on the main wrapper's selection model fires `selectionChange`, which updates the
+     * shared `searchPage.selection` subject and thus shrinks the overlay's node list.
+     */
+    deselectNode(node: Node) {
+        this.nodeEntriesResults?.getSelection().deselect(node);
     }
 }

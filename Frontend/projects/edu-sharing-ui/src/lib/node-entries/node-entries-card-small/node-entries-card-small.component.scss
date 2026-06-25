@@ -25,6 +25,8 @@ $collectionIconSize: 25px;
     @include materialShadowBottom();
     > i {
         font-size: 12px;
+        width: 14px;
+        height: 14px;
     }
 }
 
@@ -35,6 +37,15 @@ $collectionIconSize: 25px;
             outline-color: var(--palette-primary-400);
         }
     }
+}
+
+.card-small-checkbox {
+    position: absolute;
+    z-index: 2;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
 }
 
 .grid-card {

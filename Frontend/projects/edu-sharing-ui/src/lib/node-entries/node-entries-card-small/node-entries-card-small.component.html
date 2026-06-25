@@ -15,8 +15,18 @@
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
+  [class.selected]="entriesService.selection.isSelected(node)"
 >
-  @if (templatesService.overlay) {
+  @if (entriesService.checkbox) {
+  <div class="card-small-checkbox">
+    <mat-checkbox
+      [checked]="entriesService.selection.isSelected(node)"
+      (change)="entriesService.onCheckboxChanged(node, $event.checked)"
+      color="primary"
+      aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
+    ></mat-checkbox>
+  </div>
+  } @if (templatesService.overlay) {
   <div
     class="card-overlay"
     (click)="

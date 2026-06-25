@@ -1,0 +1,11 @@
+<es-node-entries-wrapper
+  [dataSource]="dataSource"
+  [scope]="Scope.Search"
+  [columns]="displayColumns"
+  [dragDrop]="{ dragAllowed: false }"
+  [checkbox]="true"
+  [displayType]="NodeEntriesDisplayType.SmallGrid"
+  [gridConfig]="{ layout: 'scroll' }"
+  [elementInteractionType]="InteractionType.None"
+  (selectionChange)="onSelectionChange($event)"
+></es-node-entries-wrapper>

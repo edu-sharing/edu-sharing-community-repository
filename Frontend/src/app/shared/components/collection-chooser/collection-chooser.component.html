@@ -79,6 +79,7 @@
         [elementInteractionType]="InteractionType.Emitter"
         [dataSource]="dataSourceTree"
         [columns]="columns"
+        [checkbox]="false"
         [globalOptions]="canCreate ? [createCollectionOptionItem] : []"
         (clickItem)="goIntoCollection($event.element)"
         (dblClickItem)="goIntoCollection($event.element)"

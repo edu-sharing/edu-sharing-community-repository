@@ -12,6 +12,7 @@
         [columns]="collectionsColumns"
         (clickItem)="clickItem.emit($event)"
         (fetchData)="loadMoreCollections()"
+        [checkbox]="false"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
         [dragDrop]="{

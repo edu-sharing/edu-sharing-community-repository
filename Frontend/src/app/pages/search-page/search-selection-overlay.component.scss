@@ -1,0 +1,13 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 25px;
+    background-color: var(--roundedContainerBackground, #{vars.$backgroundColor});
+    border-top: 1px solid var(--mat-divider-color);
+    // Gradient color used by the horizontal scroll-helper arrows of the card grid.
+    --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
+}
