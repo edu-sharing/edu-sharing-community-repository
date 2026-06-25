@@ -19,6 +19,7 @@ import {
     ME,
     Node,
     NodeService,
+    Permission,
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
@@ -62,6 +63,7 @@ import {
     RepoUrlService,
     Scope,
     TranslationsService,
+    UserAvatarComponent,
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { RestConnectorsService } from '../../../core-module/rest/services/rest-connectors.service';
@@ -95,6 +97,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         EditorComponent,
         RenderWrapperComponent,
         NgxExtendedPdfViewerModule,
+        UserAvatarComponent,
     ],
     providers: [OptionsHelperDataService],
 })
@@ -147,6 +150,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    coordinators = computed<Permission[]>(
+        () => this.assignment()?.permissions?.filter((p) => p.role === 'COORDINATOR') ?? [],
+    );
     isOpenForSubmission = computed(() =>
         ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
     );

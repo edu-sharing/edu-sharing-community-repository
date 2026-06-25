@@ -115,6 +115,24 @@ ngx-extended-pdf-viewer {
             .badge {
                 @include card.assignmentBadge();
             }
+            &.authority {
+                display: flex;
+                flex-direction: column;
+                &.created-by {
+                    padding-top: 5px;
+                }
+                > label {
+                    font-weight: bold;
+                }
+                .authority-entry {
+                    display: flex;
+                    align-items: center;
+                    font-weight: bold;
+                    gap: 10px;
+                    font-weight: bold;
+                    padding: 5px 0;
+                }
+            }
         }
         &.feedback {
             @include fm.feedback();

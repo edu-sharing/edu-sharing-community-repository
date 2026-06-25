@@ -320,6 +320,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "isCoordinator": {
+            "description": "Whether the current user is a coordinator of this assignment.",
+            "type": "boolean"
+          },
           "modified": {
             "format": "date-time",
             "type": "string"
@@ -373,6 +377,7 @@
           "allowAdditionalDocumentSubmissions",
           "created",
           "creator",
+          "isCoordinator",
           "permissions",
           "ref",
           "status",

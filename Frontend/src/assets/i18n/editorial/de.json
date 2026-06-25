@@ -153,6 +153,8 @@
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
       "SUBMISSION_TIME": "Abgegeben",
+      "CREATED_BY": "Aufgabe erstellt",
+      "CORRECTION_RIGHTS": "Korrekturrechte",
       "SUBMISSION_SENT": "Diese Aufgabe wurde bereits abgegeben",
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material hinzufügen",
       "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
