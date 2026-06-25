@@ -63,7 +63,7 @@ public class Values implements Serializable {
 	@Schema(description = "If true (default), show edu-sharing logo top-left and 'Powered by edu-sharing' at login")
 	@XmlElement public Boolean branding;
 	@Schema(description = "Rating configuration")
-	@XmlElement public ConfigRating rating;
+	@XmlElement public ConfigRating rating = new ConfigRating();
 	@Schema(description = "If true, show confirmation message when publishing to everyone")
 	@XmlElement public Boolean publishingNotice;
 	@XmlElement	public PublishingConfig publishing;
