@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
     ApiHelpersService,
     Assignment,
@@ -38,7 +38,7 @@ export class NodeHelperService {
     protected configuration = inject(EduSharingUiConfiguration);
     protected repoUrlService = inject(RepoUrlService);
     protected platformLocation = inject(PlatformLocation);
-    protected toast = inject(Toast);
+    protected toast = inject(Toast, { optional: true });
     protected router = inject(Router, { optional: true });
 
     readonly LICENSE_URLS = {
@@ -507,7 +507,7 @@ export class NodeHelperService {
 
     public handleNodeError(name: string, error: any): number {
         if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-            this.toast.error(null, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
+            this.toast?.error(null, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
                 name,
             });
             return error.status;
@@ -516,12 +516,12 @@ export class NodeHelperService {
                 'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
             )
         ) {
-            this.toast.error(null, 'WORKSPACE.TOAST.CYCLIC_NODE', {
+            this.toast?.error(null, 'WORKSPACE.TOAST.CYCLIC_NODE', {
                 name,
             });
             return error.status;
         }
-        this.toast.error(error);
+        this.toast?.error(error);
         return error.status;
     }
 
