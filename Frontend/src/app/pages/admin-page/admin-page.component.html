@@ -218,6 +218,10 @@
     <div class="content mediacenter">
       <es-admin-mediacenter (openNode)="openNodeRender($event)"></es-admin-mediacenter>
     </div>
+    } @if (modeIsActive('CONTRIBUTORS')) {
+    <div class="content contributors">
+      <es-admin-contributors></es-admin-contributors>
+    </div>
     } @if (modeIsActive('FRONTPAGE')) {
     <div class="content frontpage">
       <es-admin-frontpage (openNode)="openNodeRender($event)"></es-admin-frontpage>

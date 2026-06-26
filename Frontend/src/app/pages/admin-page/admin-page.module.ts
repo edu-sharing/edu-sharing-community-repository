@@ -11,6 +11,7 @@ import { LtiAdminComponent } from './lti-admin/lti-admin.component';
 import { LtitoolAdminComponent } from './ltitool-admin/ltitool-admin.component';
 import { LuceneTemplateMemoryComponent } from './lucene-template-memory/lucene-template-memory.component';
 import { AdminMediacenterComponent } from './mediacenter/mediacenter.component';
+import { AdminContributorsComponent } from './contributors/contributors.component';
 import { AdminPluginsComponent } from './plugins/plugins.component';
 import { AdminStatisticsComponent } from './statistics/statistics.component';
 import { CodeEditorComponent } from './code-editor/code-editor';
@@ -22,6 +23,7 @@ import { AdminMessagesComponent } from './messages/messages.component';
         AdminConfigComponent,
         AdminFrontpageComponent,
         AdminMediacenterComponent,
+        AdminContributorsComponent,
         AdminPageComponent,
         AdminPluginsComponent,
         AdminContextComponent,

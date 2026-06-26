@@ -549,8 +549,8 @@ public class SearchApi {
 			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
 			@Parameter(description = "search word", required = true) @QueryParam("searchWord") String searchWord,
 			@Parameter(description = "contributor kind", required = true, schema = @Schema(defaultValue = "PERSON")) @QueryParam("contributorKind") SearchService.ContributorKind contributorKind,
-			@Parameter(description = "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']") @QueryParam("fields") List<String> fields,
-			@Parameter(description = "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']") @QueryParam("contributorProperties") List<String> contributorProperties,
+			@Parameter(description = "DEPRECATED - no longer evaluated. Contributors are now served from the managed contributor registry.") @QueryParam("fields") List<String> fields,
+			@Parameter(description = "DEPRECATED - no longer evaluated. The contributor registry is role-independent.") @QueryParam("contributorProperties") List<String> contributorProperties,
 			@Context HttpServletRequest req) {
 
 		try {

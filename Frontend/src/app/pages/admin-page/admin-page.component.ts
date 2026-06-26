@@ -1415,6 +1415,17 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 icon: 'domain',
             });
         }
+        if (
+            this.loginResult.isAdmin ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_MANAGE_CONTRIBUTORS,
+            ) !== -1
+        ) {
+            this.buttons.push({
+                id: 'CONTRIBUTORS',
+                icon: 'people',
+            });
+        }
     }
 
     private init() {
