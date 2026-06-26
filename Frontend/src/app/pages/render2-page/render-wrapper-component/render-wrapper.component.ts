@@ -64,6 +64,7 @@ export class RenderWrapperComponent implements OnChanges {
      */
     @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
+    @Output() closeClick = new EventEmitter<void>();
 
     @ViewChild('childobjects') childobjects: ElementRef;
     /**
@@ -187,7 +188,7 @@ export class RenderWrapperComponent implements OnChanges {
         // void this.setNodeById(child ? child.ref.id : this.nodeId);
     }
     goBack() {
-        window.history.back();
+        this.closeClick.emit();
     }
 
     private canScroll(direction: 'left' | 'right') {
