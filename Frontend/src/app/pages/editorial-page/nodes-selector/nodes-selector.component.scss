@@ -15,6 +15,13 @@
             //font-weight: bold;
         }
     }
+    // when the surrounding container (not the screen) is narrow, show icon-only tabs.
+    // the container context is established via `container-type: inline-size` on the component :host.
+    @container (max-width: 450px) {
+        .tab-label {
+            display: none;
+        }
+    }
 }
 
 :host {
@@ -23,6 +30,8 @@
     position: relative;
     height: 100%;
     overflow: hidden;
+    // establish a query container so the tab labels react to this component's width, not the viewport
+    container-type: inline-size;
 
     ::ng-deep {
         @include tabLayout2Line();

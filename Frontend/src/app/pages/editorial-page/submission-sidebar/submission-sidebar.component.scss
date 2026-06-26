@@ -8,6 +8,8 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    // establish a query container so the tab labels react to this component's width, not the viewport
+    container-type: inline-size;
 }
 
 :host ::ng-deep {
