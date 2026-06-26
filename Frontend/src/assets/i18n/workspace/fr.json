@@ -417,6 +417,8 @@
         "SCRIPT_WRITER": "scénariste",
         "INSTRUCTIONAL_DESIGNER": "concepteur pédagogique",
         "SUBJECT_MATTER_EXPERT": "expert en la matière",
+        "SPRECHER": "narrateur",
+        "DARSTELLER": "acteur",
         "CREATOR": "créateur",
         "PROVIDER": "fournisseur"
       }

@@ -492,6 +492,8 @@
         "SCRIPT_WRITER": "Scriptwriter{{GENDER_SEPARATOR}}in",
         "INSTRUCTIONAL_DESIGNER": "Didaktische Gestaltung",
         "SUBJECT_MATTER_EXPERT": "Wissenschaftliche Beratung",
+        "SPRECHER": "Sprecher{{GENDER_SEPARATOR}}in",
+        "DARSTELLER": "Darsteller{{GENDER_SEPARATOR}}in",
         "CREATOR": "Ersteller{{GENDER_SEPARATOR}}in",
         "PROVIDER": "Anbieter{{GENDER_SEPARATOR}}in"
       }

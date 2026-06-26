@@ -454,6 +454,8 @@
         "SCRIPT_WRITER": "script writer",
         "INSTRUCTIONAL_DESIGNER": "instructional designer",
         "SUBJECT_MATTER_EXPERT": "subject matter expert",
+        "SPRECHER": "speaker",
+        "DARSTELLER": "actor",
         "CREATOR": "creator",
         "PROVIDER": "provider"
       }

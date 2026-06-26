@@ -280,6 +280,8 @@ export class RestConstants {
         'script_writer',
         'instructional_designer',
         'subject_matter_expert',
+        'sprecher',
+        'darsteller',
     ];
     public static CONTRIBUTOR_ROLES_METADATA = ['creator', 'validator', 'provider'];
 

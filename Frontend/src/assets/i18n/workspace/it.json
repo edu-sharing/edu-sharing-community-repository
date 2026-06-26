@@ -413,6 +413,8 @@
         "SCRIPT_WRITER": "sceneggiatore",
         "INSTRUCTIONAL_DESIGNER": "progettista didattico",
         "SUBJECT_MATTER_EXPERT": "esperto in materia",
+        "SPRECHER": "speaker",
+        "DARSTELLER": "attore",
         "CREATOR": "creatore",
         "PROVIDER": "fornitore"
       }
