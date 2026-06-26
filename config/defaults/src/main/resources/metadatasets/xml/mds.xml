@@ -859,6 +859,7 @@
       <id>node_general_bulk_sidebar</id>
       <icon>description</icon>
       <html><![CDATA[
+              <cclom:general_keyword>
               <ccm:educationallearningresourcetype>
               <ccm:educationalcontext>
               <ccm:taxonid>

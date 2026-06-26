@@ -150,7 +150,22 @@
       </div>
     </mat-chip-grid>
   </es-mds-editor-widget-container>
-  } @else { @if (showDropdownArrow) {
+  } @else { @if (isFreeBadges) {
+  <!-- Free-text / suggestion badges only: show the autocomplete input directly so values can be
+    added via select or enter, while the selected values are rendered as cards above. Fixed badges
+    and trees are unaffected and keep their browse button below. -->
+  <div class="input-wrapper value-selection-input">
+    <input
+      autocomplete="off"
+      [formControl]="inputControl"
+      #inputElement
+      [placeholder]="widget.definition.placeholder"
+      (keyup.enter)="addSelectedTreeNode()"
+      (focus)="openOverlay($event)"
+      (blur)="onBlurInput($event)"
+    />
+  </div>
+  } @else if (showDropdownArrow) {
   <button
     mat-button
     class="custom-toggle-button"

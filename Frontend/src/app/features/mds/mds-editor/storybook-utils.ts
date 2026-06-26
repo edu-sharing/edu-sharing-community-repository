@@ -40,6 +40,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
+import { RestMdsService } from '../../../core-module/rest/services/rest-mds.service';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
@@ -207,6 +208,42 @@ export class MdsServiceMock extends MdsService {
     getMetadataSet({ repository, metadataSet }: Partial<MdsIdentifier>): Observable<MdsDefinition> {
         return of(DefaultMds);
     }
+}
+
+/**
+ * Mocks the (deprecated) `RestMdsService` so the autocomplete / suggestion backend call
+ * (`.../values` resp. `.../values/{widget}/suggest`) returns fake values in Storybook instead of
+ * firing a real HTTP request that fails. Used e.g. by free-text / suggestion badges
+ * (`cclom:general_keyword`) which have no local valuespace.
+ */
+@Injectable()
+export class RestMdsServiceMock {
+    private static readonly fakeValues = [
+        'Baum',
+        'Blume',
+        'Wald',
+        'Wasser',
+        'Mathematik',
+        'Biologie',
+        'Grundschule',
+        'Lernspiel',
+        'Interaktiv',
+    ];
+
+    getValues = (values?: any): Observable<MdsValueList> => {
+        const pattern: string = (values?.valueParameters?.pattern ?? '').toLowerCase();
+        const matches = RestMdsServiceMock.fakeValues.filter((v) =>
+            v.toLowerCase().includes(pattern),
+        );
+        return of({
+            values: matches.map((v) => ({ key: v, displayString: v })),
+        } as MdsValueList);
+    };
+
+    getValuesForKeys = (keys: string[]): Observable<MdsValueList> =>
+        of({
+            values: (keys ?? []).map((key) => ({ key, displayString: key })),
+        } as MdsValueList);
 }
 
 @Injectable()
@@ -518,6 +555,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useClass: MdsServiceMock },
+    { provide: RestMdsService, useClass: RestMdsServiceMock },
     ViewInstanceService,
     CordovaService,
     { provide: Toast, useClass: ToastMock },
@@ -17362,7 +17400,7 @@ export const DefaultMds: MdsDefinition = {
             id: 'node_general_bulk_sidebar',
             caption: null,
             icon: 'description',
-            html: '\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid> <ccm:educationaltypicalagerangecluster>',
+            html: '\n <cclom:general_keyword>\n <ccm:educationallearningresourcetype>\n <ccm:educationalcontext>\n <ccm:taxonid> <ccm:educationaltypicalagerangecluster>',
             rel: null,
             hideIfEmpty: false,
             isExtended: false,
