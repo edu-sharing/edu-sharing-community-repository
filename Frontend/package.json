@@ -28,6 +28,7 @@
     "build:components:amd": "cd projects/rendering-service-web-component && npm run build-amd",
     "build:storybook": "rm -rf dist/storybook && npm run build-storybook && mv dist/storybook/angular-edusharing/* dist/storybook && rm -rf dist/storybook/angular-edusharing",
     "copy-build-to-kubernetes": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/. edusharing-repository-service-0:/usr/local/tomcat/temp/0-edu-sharing/",
+    "copy-build-to-kubernetes-web-components": "kubectl  --kubeconfig=${npm_config_kubeconfig} --namespace=${npm_config_namespace} cp ./dist/web-components/. edusharing-repository-service-0:/usr/local/tomcat/temp/0-edu-sharing/web-components/",
     "copy-build-to-docker": "docker container cp ./dist/. $(docker ps --filter name=^repository-service --quiet):/usr/local/tomcat/temp/0-edu-sharing/",
     "build-and-copy-to-docker": "npm run build && npm run copy-build-to-docker",
     "check:lint": "ng lint --max-warnings=835",
