@@ -12,6 +12,7 @@ public class Suggestion implements Serializable {
     private String key;
     private String displayString;
     private String translation;
+    private String url;
 
     @Override
     public boolean equals(Object o) {

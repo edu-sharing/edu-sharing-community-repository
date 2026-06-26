@@ -88,6 +88,16 @@ public class MetadataSearchHelper {
     }
 
     public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException {
+        return getSuggestions(repoId, mds, queryId, parameterId, value, criterias, null);
+    }
+
+    public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias, String localeParam) throws IllegalArgumentException {
+
+        ApplicationInfo appInfo = "-home-".equals(repoId)
+                ? ApplicationInfoList.getHomeRepository()
+                : ApplicationInfoList.getRepositoryInfoById(repoId);
+        repoId = appInfo.getAppId();
+
         MetadataWidget widget = mds.findWidget(parameterId);
 
         String source = widget.getSuggestionSource();
@@ -106,7 +116,7 @@ public class MetadataSearchHelper {
             case MetadataReader.SUGGESTION_SOURCE_SEARCH ->
                     SearchServiceFactory.getInstance().getService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
             case MetadataReader.SUGGESTION_SOURCE_MDS -> getSuggestionsMds(widget, value);
-            case MetadataReader.SUGGESTION_SOURCE_SQL -> getSuggestionsSql(widget, value);
+            case MetadataReader.SUGGESTION_SOURCE_SQL -> getSuggestionsSql(widget, value, localeParam);
             default ->
                     throw new IllegalArgumentException("Unknow suggestionSource " + source + " for widget " + parameterId +
                             ", use " + MetadataReader.SUGGESTION_SOURCE_MDS + ", " +
@@ -117,26 +127,31 @@ public class MetadataSearchHelper {
     }
 
     private static List<? extends Suggestion> getSuggestionsSql(MetadataWidget widget,
-                                                                String value) throws IllegalArgumentException {
+                                                                String value, String localeParam) throws IllegalArgumentException {
         String query = widget.getSuggestionQuery();
 
         //default is english, german not present in dnb factual terms
         String locale = "en";
-        Context context = Context.getCurrentInstance();
-        if(context != null){
-            String ctxLocale = null;
-            if(context.getRequest() != null){
-                String tmp = context.getRequest().getHeader("locale");
-                if(StringUtils.isNotBlank(tmp)){
-                    ctxLocale = tmp.split("_")[0];
+        if(localeParam == null) {
+            Context context = Context.getCurrentInstance();
+            if (context != null) {
+                String ctxLocale = null;
+                if (context.getRequest() != null) {
+                    String tmp = context.getRequest().getHeader("locale");
+                    if (StringUtils.isNotBlank(tmp)) {
+                        ctxLocale = tmp.split("_")[0];
+                    }
+                }
+                if (StringUtils.isBlank(ctxLocale) && (StringUtils.isNotBlank(context.getLocale()))) {
+                    ctxLocale = context.getLocale().split("_")[0];
+                    ;
+                }
+                if (StringUtils.isNotBlank(ctxLocale)) {
+                    locale = ctxLocale;
                 }
             }
-            if(StringUtils.isBlank(ctxLocale) && (StringUtils.isNotBlank(context.getLocale()))){
-                ctxLocale = context.getLocale().split("_")[0];;
-            }
-            if(StringUtils.isNotBlank(ctxLocale)){
-                locale = ctxLocale;
-            }
+        }else{
+            locale = localeParam;
         }
         query = query.replace("{{locale}}", locale);
 
@@ -180,7 +195,14 @@ public class MetadataSearchHelper {
                     String translation = resultSet.getString(3);
                     sqlKw.setTranslation(translation);
                 }catch (SQLException e) {
-                    //no display string in result
+                    //no translation string in result
+                }
+
+                try{
+                    String url = resultSet.getString(4);
+                    sqlKw.setUrl(url);
+                }catch (SQLException e) {
+                    //no url string in result
                 }
 
                 result.add(sqlKw);
