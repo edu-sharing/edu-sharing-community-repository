@@ -23,6 +23,7 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
+import org.edu_sharing.service.usage.UsageException;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
@@ -111,6 +112,9 @@ public class DAOException extends RuntimeException {
         }
         // these exceptions come from annotated permissions checks
         if (t instanceof UndeclaredThrowableException) {
+            t = t.getCause();
+        }
+        if (t instanceof UsageException && t.getCause() instanceof PermissionException) {
             t = t.getCause();
         }
         if (t instanceof DAOException) {

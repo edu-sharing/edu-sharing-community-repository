@@ -760,9 +760,29 @@ public class NodeDao {
             } catch (RuntimeException ignored) {
             }
 
+            if (nodeRef.getAspects() == null) {
+                // getAspects must be always fetched so we can decide if this is an remote ref!
+                String[] aspects = AuthenticationUtil.runAsSystem(() -> nodeService.getAspects(this.storeProtocol, this.storeId, nodeId));
+                this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<>();
+            } else {
+                this.aspects = nodeRef.getAspects();
+            }
+
             // call getProperties on demand
             if (nodeRef.getProperties() == null || nodeRef.getProperties().isEmpty()) {
-                this.nodeProps = this.nodeService.getProperties(this.storeProtocol, this.storeId, this.nodeId);
+                // fetching of local dummy/shadow data is allowed, permission handlling is delegated into the implemented permission service of the remote object
+                if(this.isFromRemoteRepository()) {
+                    this.nodeProps = AuthenticationUtil.runAsSystem(() -> {
+                        try {
+                            return this.nodeService.getProperties(this.storeProtocol, this.storeId, this.nodeId);
+                        } catch (Throwable e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                } else {
+                    // regular node, so regular fetch and permission checks stay in place
+                    this.nodeProps = this.nodeService.getProperties(this.storeProtocol, this.storeId, this.nodeId);
+                }
 
             } else {
                 this.nodeProps = nodeRef.getProperties();
@@ -800,12 +820,7 @@ public class NodeDao {
             } else {
                 this.type = CCConstants.CCM_TYPE_IO;
             }
-            if (nodeRef.getAspects() == null) {
-                String[] aspects = nodeService.getAspects(this.storeProtocol, this.storeId, nodeId);
-                this.aspects = (aspects != null) ? Arrays.asList(aspects) : new ArrayList<>();
-            } else {
-                this.aspects = nodeRef.getAspects();
-            }
+
             refreshPermissions(nodeRef);
             this.access = PermissionServiceHelper.getPermissionsAsString(hasPermissions);
             // replace all data if its an remote object
