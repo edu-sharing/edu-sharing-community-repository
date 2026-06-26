@@ -58,4 +58,4 @@ src/app/rest
 /playwright/storage/*.json
 /playwright/out
 
-/Frontend/projects/rendering-service-lib/dist/
+projects/rendering-service-lib/dist/
