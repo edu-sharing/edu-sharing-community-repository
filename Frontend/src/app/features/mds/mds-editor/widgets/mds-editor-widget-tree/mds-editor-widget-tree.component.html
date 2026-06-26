@@ -154,8 +154,9 @@
   <!-- Free-text / suggestion badges only: show the autocomplete input directly so values can be
     added via select or enter, while the selected values are rendered as cards above. Fixed badges
     and trees are unaffected and keep their browse button below. -->
-  <div class="input-wrapper value-selection-input">
+  <mat-form-field appearance="outline" class="value-selection-input">
     <input
+      matInput
       autocomplete="off"
       [formControl]="inputControl"
       #inputElement
@@ -164,7 +165,7 @@
       (focus)="openOverlay($event)"
       (blur)="onBlurInput($event)"
     />
-  </div>
+  </mat-form-field>
   } @else if (showDropdownArrow) {
   <button
     mat-button

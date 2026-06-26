@@ -49,29 +49,10 @@ mat-chip-grid {
     display: flex;
     flex-grow: 1;
 }
-// Standalone autocomplete input used in the `valueSelection` layout (free-text / suggestion
-// badges), rendered below the selected-value cards.
+// Standalone autocomplete field used in the `valueSelection` layout (free-text / suggestion
+// badges), rendered below the selected-value cards. Uses the default Material outline appearance.
 .value-selection-input {
-    align-items: center;
-    border: 1px solid var(--inputBorderColor);
-    border-radius: 8px;
-    padding: 0 4px 0 12px;
-    background: var(--backgroundElevatedColor);
-
-    input {
-        flex: 1;
-        min-width: 0;
-        height: 40px;
-        border: none;
-        outline: none;
-        background: transparent;
-        font: inherit;
-        color: $textMain;
-
-        &::placeholder {
-            color: var(--placeholderColor);
-        }
-    }
+    width: 100%;
 }
 .suggestion-card {
     width: 100%;
