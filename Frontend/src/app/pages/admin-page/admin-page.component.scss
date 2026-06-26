@@ -10,7 +10,7 @@
         position: fixed;
         display: flex;
         flex-direction: column;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         height: calc(100% - var(--mainnavHeight));
         overflow-y: auto;
         width: admin.$sidenavWidth;
@@ -127,7 +127,11 @@
         .check {
             display: flex;
             flex-direction: row;
-            background-color: color.adjust($colorStatusPositive, $lightness: 40%);
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusPositive) 15%,
+                var(--backgroundColor)
+            );
             padding: 10px 10px;
             margin: 2px 0;
             .data {
@@ -154,7 +158,7 @@
                         margin-right: 5px;
                     }
                     .solution-link {
-                        color: var(--palette-primary-900);
+                        color: var(--primaryForeground900);
                         text-transform: uppercase;
                         font-weight: bold;
                     }
@@ -165,13 +169,25 @@
                 margin-bottom: 5px;
             }
             &.check-fail {
-                background-color: color.adjust($warning, $lightness: 35%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusNegative) 30%,
+                    var(--backgroundColor)
+                );
             }
             &.check-info {
-                background-color: color.adjust($colorStatusNeutral, $lightness: 45%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusNeutral) 10%,
+                    var(--backgroundColor)
+                );
             }
             &.check-warn {
-                background-color: color.adjust($warningMedium, $lightness: 50%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusWarning) 15%,
+                    var(--backgroundColor)
+                );
             }
         }
     }
@@ -329,7 +345,7 @@
 }
 .tableRow {
     display: table-row;
-    background-color: color.adjust($colorStatusPositive, $lightness: 50%);
+    background-color: color-mix(in srgb, var(--colorStatusPositive) 20%, var(--backgroundColor));
     div {
         display: table-cell;
         padding: 5px 10px;
@@ -341,7 +357,7 @@
         }
     }
     &.table-not-executed {
-        background-color: color.adjust($warningMedium, $lightness: 50%);
+        background-color: color-mix(in srgb, var(--colorStatusWarning) 20%, var(--backgroundColor));
     }
 }
 .header {
@@ -599,7 +615,7 @@
             padding: 10px 20px;
         }
         .row-detail {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             padding-bottom: 10px;
             width: 100%;
             .log {
@@ -683,17 +699,37 @@
             width: 40px;
             color: $textLight;
         }
+
         .status-fine {
-            background-color: #dcffd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusPositive) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-aborted {
-            background-color: #eee;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusNeutral) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-warning {
-            background-color: #ffffd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusWarning) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-error {
-            background-color: #ffdcd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusNegative) 20%,
+                var(--backgroundColor)
+            );
         }
     }
 }

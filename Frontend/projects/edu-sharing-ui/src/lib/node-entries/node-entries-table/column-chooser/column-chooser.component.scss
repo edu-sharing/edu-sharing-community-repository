@@ -4,25 +4,25 @@
     border: solid 1px #ccc;
     min-height: 60px;
     display: block;
-    background: white;
+    background: var(--backgroundColor);
     border-radius: 4px;
     overflow: auto;
 }
 
 .column-chooser-item {
     border-bottom: solid 1px #ccc;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--textMain);
     display: flex;
     flex-direction: row;
     align-items: center;
-    background: white;
+    background: var(--backgroundColor);
     font-size: 14px;
     justify-content: space-between;
     mat-checkbox {
         margin: 0 12px;
     }
     .drag-handle {
-        color: rgba(0, 0, 0, 0.5);
+        color: var(--textLight);
         cursor: move;
         padding: 20px;
     }

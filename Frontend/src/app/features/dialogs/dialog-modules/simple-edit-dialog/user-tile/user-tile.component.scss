@@ -7,7 +7,7 @@
     padding: 10px 15px;
     border: 1px solid #eee;
     border-radius: $buttonBorderRadius;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -30,7 +30,7 @@
         color: var(--light-primary-text);
         background-color: var(--primary);
         &:hover {
-            background-color: rgb(var(--palette-primary-50));
+            background-color: rgb(var(--primaryBackground50));
         }
     }
     &:hover {

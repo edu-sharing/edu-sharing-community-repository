@@ -52,7 +52,7 @@ const dialog: Meta<SharePublishMotivationDialogComponent> = {
                 },
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(1),
+                    useFactory: () => new IamV1ServiceMock(1),
                 },
             ],
         }),
@@ -69,7 +69,7 @@ export const Variant_1: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[0]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[0]),
                 },
             ],
         }),
@@ -82,7 +82,7 @@ export const Variant_2: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[1]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[1]),
                 },
             ],
         }),
@@ -95,7 +95,7 @@ export const Variant_3: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[2]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[2]),
                 },
             ],
         }),
@@ -108,7 +108,7 @@ export const Variant_4: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[3]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[3]),
                 },
             ],
         }),
@@ -121,7 +121,7 @@ export const Variant_5: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[4]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[4]),
                 },
             ],
         }),
@@ -134,7 +134,7 @@ export const Variant_6: Story = {
             providers: [
                 {
                     provide: IamV1Service,
-                    useValue: new IamV1ServiceMock(DefaultRange[5]),
+                    useFactory: () => new IamV1ServiceMock(DefaultRange[5]),
                 },
             ],
         }),

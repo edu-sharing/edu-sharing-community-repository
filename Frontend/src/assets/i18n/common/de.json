@@ -656,6 +656,13 @@
       "STANDARD": "Standard-Ansicht",
       "CONTRAST": "Verstärkter Kontrast"
     },
+    "DARK_MODE_TITLE": "Dunkelmodus",
+    "DARK_MODE_MESSAGE": "Wählen Sie ein helles oder dunkles Farbschema oder übernehmen Sie die Systemeinstellung Ihres Geräts.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Systemeinstellung verwenden",
+      "LIGHT": "Hell",
+      "DARK": "Dunkel"
+    },
     "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
     "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
     "INDICATOR_ICONS_OPTION": {

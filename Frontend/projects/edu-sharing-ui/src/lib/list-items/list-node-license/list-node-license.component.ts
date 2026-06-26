@@ -11,6 +11,7 @@ import { AccessibilityService } from '../../services/accessibility.service';
 @Component({
     selector: 'es-list-node-license',
     templateUrl: './list-node-license.component.html',
+    styleUrls: ['./list-node-license.component.scss'],
     standalone: false,
 })
 export class ListNodeLicenseComponent extends ListWidget {

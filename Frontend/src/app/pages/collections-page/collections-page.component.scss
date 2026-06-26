@@ -67,7 +67,7 @@ mat-tab-group {
     vertical-align: bottom;
     padding: 10px;
     padding-bottom: 3px;
-    background-color: white;
+    background-color: var(--backgroundColor);
     border-bottom-width: 3px;
     border-bottom-style: solid;
     border-bottom-color: var(--primary);
@@ -79,7 +79,7 @@ section {
 
 .coll-breadcrumb {
     display: inline;
-    color: black;
+    color: var(--textBlack);
     margin-left: 2px;
 }
 
@@ -114,7 +114,7 @@ section {
 .dialog-dark-area {
     padding: 16px;
     padding-bottom: 8px;
-    background: #efefef;
+    background: var(--backgroundColor);
 }
 
 .button-area {
@@ -162,7 +162,7 @@ section {
 }
 .breadcrumb-space {
     padding: 15px 10px 15px 20px;
-    background: #fff;
+    background: var(--defaultBackground);
     @include materialShadow();
     display: flex;
     justify-content: space-between;

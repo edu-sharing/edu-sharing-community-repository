@@ -2,7 +2,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .sidebar-header {
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -69,7 +69,7 @@
     }
 }
 .sidebar-container {
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     overflow-x: hidden;
     overflow-y: auto;
     height: 0;
@@ -125,7 +125,7 @@
             opacity: 0.75;
         }
         &:hover {
-            background-color: var(--palette-primary-50);
+            background-color: var(--primaryBackground50);
         }
         .icon {
             font-size: 30px;

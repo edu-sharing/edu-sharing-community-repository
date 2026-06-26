@@ -44,7 +44,7 @@ $height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             width: calc(#{$height} - 10px);
             height: calc(#{$height} - 10px);
             border-radius: 50%;

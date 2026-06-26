@@ -42,7 +42,7 @@
         position: absolute;
         top: 125px;
         left: 20px;
-        background-color: white;
+        background-color: var(--backgroundColor);
         border-color: #eee;
         border-style: solid;
         border-width: 1px;
@@ -72,8 +72,8 @@
         position: absolute;
         top: 125px;
         left: 20px;
-        background-color: white;
-        border-color: #eee;
+        background-color: var(--backgroundColor);
+        border-color: var(--borderLight);
         border-style: solid;
         border-width: 1px;
         z-index: 1;
@@ -135,14 +135,14 @@
 }
 
 .m-inactive {
-    border-left: 4px solid #f6f6f6;
-    color: #888;
+    border-left: 4px solid var(--backgroundColor);
+    color: var(--textMediumLight);
 }
 
 .m-active {
-    border-left: 4px solid #48708e;
-    background-color: white;
-    color: #48708e;
+    border-left: 4px solid var(--primary);
+    background-color: var(--backgroundColor);
+    color: var(--primary);
     font-weight: bold;
 }
 
@@ -162,7 +162,7 @@
 }
 
 .stream-box {
-    background-color: white;
+    background-color: var(--backgroundColor);
     margin: 15px;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
     border-radius: 2px;

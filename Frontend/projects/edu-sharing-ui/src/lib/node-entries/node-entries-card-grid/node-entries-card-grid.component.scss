@@ -45,7 +45,7 @@ $horizontalScrollPadding: 1.5em;
         z-index: 5;
         @include clickable();
         > button {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             color: var(--primary);
             @include materialShadowMediumLarge(false, 0.25);
         }

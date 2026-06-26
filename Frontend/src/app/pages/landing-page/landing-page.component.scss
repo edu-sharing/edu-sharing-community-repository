@@ -1,15 +1,15 @@
 .swimlanes {
     display: flex;
     flex-direction: column;
-    background: #e4e4e4;
+    background: var(--backgroundColor);
 
     es-dashboard-swimlane {
         &:nth-child(even) {
-            --es-dashboard-swimlane-background: #fefef9;
+            --es-dashboard-swimlane-background: var(--backgroundColor);
         }
 
         &:nth-child(odd) {
-            --es-dashboard-swimlane-background: #fafbe6;
+            --es-dashboard-swimlane-background: var(--backgroundOddColor);
         }
     }
 }
@@ -18,7 +18,7 @@
     flex-direction: column;
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     .landing-main {
-        background-color: #fefef9;
+        background-color: var(--defaultBackground);
         flex-grow: 1;
     }
 }

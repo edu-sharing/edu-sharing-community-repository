@@ -46,7 +46,7 @@ form.edit {
         color: $colorStatusPositive;
     }
     padding: 15px 20px;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     > span {
         flex-grow: 1;
     }

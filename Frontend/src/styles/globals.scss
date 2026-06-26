@@ -41,6 +41,12 @@ body {
     -webkit-font-smoothing: antialiased;
     margin: 0;
 }
+
+body {
+    color: var(--textMain);
+    background-color: var(--backgroundColor);
+}
+
 // storybook no background
 body:not(.sb-show-main) {
     background-color: $backgroundColor;
@@ -108,7 +114,7 @@ button.cdk-keyboard-focused {
 }
 .completer-row {
     color: var(--palette-foreground-text) !important;
-    background: #fff !important;
+    background: var(--defaultBackground) !important;
 }
 .completer-selected-row,
 .completer-row:hover {
@@ -127,7 +133,7 @@ button.cdk-keyboard-focused {
     top: -25px;
 }
 .noElementsInfo {
-    color: #767676;
+    color: var(--textMediumLight);
     font-size: 110%;
     width: 100%;
     float: left;
@@ -155,7 +161,7 @@ button.cdk-keyboard-focused {
     padding: 10px;
     height: 44px;
     color: var(--primary);
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     border-radius: 50%;
     @include clickable();
     @include materialShadowBottom();

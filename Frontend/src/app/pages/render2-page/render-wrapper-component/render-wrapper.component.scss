@@ -29,7 +29,7 @@ es-spinner {
         white-space: nowrap;
 
         .itemTitle {
-            color: #585858;
+            color: var(--textLight);
             display: inline-block;
             width: 100px;
             text-overflow: ellipsis;
@@ -58,7 +58,7 @@ es-spinner {
 
             .wrapper.selected {
                 margin: 0;
-                border: 3px solid var(--palette-primary-200);
+                border: 3px solid var(--primaryBackground300);
                 @include materialShadowMediumLarge();
             }
 
@@ -71,7 +71,7 @@ es-spinner {
                 height: 0;
                 border-left: 10px solid transparent;
                 border-right: 10px solid transparent;
-                border-top: 10px solid var(--palette-primary-200);
+                border-top: 10px solid var(--primaryBackground300);
                 clear: both;
             }
         }
@@ -89,7 +89,7 @@ es-spinner {
         z-index: 5;
         @include clickable();
         > button {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             color: var(--primary);
             @include materialShadowMediumLarge(false, 0.25);
         }
@@ -100,7 +100,7 @@ es-spinner {
         background: linear-gradient(
             to left,
             transparent 0,
-            #fff calc(100% - $horizontalScrollPadding)
+            var(--defaultBackground) calc(100% - $horizontalScrollPadding)
         );
         > button {
             margin-left: calc($horizontalScrollPadding - 8px);
@@ -112,7 +112,7 @@ es-spinner {
         background: linear-gradient(
             to right,
             transparent 0,
-            #fff calc(100% - $horizontalScrollPadding)
+            var(--defaultBackground) calc(100% - $horizontalScrollPadding)
         );
         > button {
             margin-right: calc($horizontalScrollPadding - 8px);
@@ -215,8 +215,7 @@ rs-root {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    // background-color: var(--palette-primary-50);
-    background-color: #f8f8f8;
+    background-color: var(--backgroundColor);
     padding: 10px $rsPaddingHorizontal;
     gap: 10px;
     > * {
@@ -270,13 +269,12 @@ rs-root {
         }
         es-mds-editor-view {
             padding: 0;
-            //border: 1px solid var(--palette-primary-100);
             border-radius: 5px;
             overflow: hidden;
             .view-wrapper {
                 .heading-container {
                     > h3 {
-                        background-color: $workspaceMetadataBackground; //var(--palette-primary-50);
+                        background-color: $workspaceMetadataBackground;
                         border-bottom: 1px solid $cardSeparatorLineColor;
                         margin: 0;
                     }

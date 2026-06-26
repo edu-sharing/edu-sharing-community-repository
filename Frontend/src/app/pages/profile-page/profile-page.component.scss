@@ -34,7 +34,7 @@ $path: '../../../assets/images/';
         display: flex;
         flex-direction: column;
         padding-bottom: 20px;
-        background: white;
+        background: var(--backgroundColor);
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 
         .name {
@@ -54,12 +54,14 @@ $path: '../../../assets/images/';
             padding-left: 20px;
             padding-right: 20px;
             text-align: center;
-            color: var(--light-primary-text);
+            // hardcoded whit since the background is (dark) colored
+            color: white; //var(--light-primary-text);
             z-index: 2;
             overflow: hidden;
 
             a {
-                color: var(--light-primary-text);
+                // hardcoded whit since the background (dark) colored
+                color: white; //var(--light-primary-text);
             }
 
             a,
@@ -254,7 +256,7 @@ $path: '../../../assets/images/';
         }
 
         .statsBackground {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             width: 100%;
             @include materialShadow();
         }
@@ -301,7 +303,7 @@ $path: '../../../assets/images/';
             width: 100%;
 
             .btn-flat:hover {
-                background-color: #eee;
+                background-color: var(--actionDialogBackground);
             }
 
             button {

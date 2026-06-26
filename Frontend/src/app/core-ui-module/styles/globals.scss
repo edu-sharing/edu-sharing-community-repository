@@ -127,7 +127,7 @@ mat-sidenav.es-mat-sidenav {
 
 ngx-slider.ngx-slider {
     .ngx-slider-bar {
-        background: #e1e1e1;
+        background: var(--backgroundTinted);
         border-radius: 2px;
     }
     .ngx-slider-selection {
@@ -137,17 +137,17 @@ ngx-slider.ngx-slider {
         background-color: var(--primary);
     }
     .ngx-slider-pointer.ngx-slider-active:after {
-        background-color: var(--palette-primary-900);
+        background-color: var(--primaryBackground900);
     }
     .ngx-slider-tick.ngx-slider-selected {
-        background-color: var(--palette-primary-200);
+        background-color: var(--primaryBackground300);
     }
     .ngx-slider-bubble {
-        color: var(--palette-primary-900);
+        color: var(--primaryBackground900);
     }
     .ngx-slider-bubble.ngx-slider-limit {
         display: none;
-        color: var(--palette-primary-900);
+        color: var(--primaryBackground900);
     }
 }
 ngx-slider.ngx-slider-small {

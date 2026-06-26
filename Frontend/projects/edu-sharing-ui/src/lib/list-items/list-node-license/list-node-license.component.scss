@@ -1,0 +1,7 @@
+// License icons are black monochrome SVGs served from the backend, so they
+// can't be restyled directly. In dark mode invert them (black -> white) so
+// they stay legible on dark surfaces. `.isDarkTheme` lives on <body>, hence
+// :host-context.
+:host-context(body.isDarkTheme) img {
+    filter: invert(1);
+}

@@ -4,7 +4,7 @@
 :host {
     display: flex;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     overflow-x: auto;
     overflow-y: hidden;
     height: $mobileTabNavHeight;

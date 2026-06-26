@@ -232,7 +232,7 @@ button.user {
 
 :host ::ng-deep button.mat-button {
     &:not([disabled]) .mat-button-focus-overlay {
-        background-color: white;
+        background-color: var(--backgroundColor);
     }
     &[disabled] {
         color: rgba(var(--light-primary-text), 0.75);

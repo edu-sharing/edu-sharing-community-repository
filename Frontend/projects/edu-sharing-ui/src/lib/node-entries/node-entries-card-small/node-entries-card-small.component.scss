@@ -52,7 +52,7 @@ $collectionIconSize: 25px;
     cursor: pointer;
     &.grid-card-collection {
         // default fallback color
-        background-color: rgb(var(--palette-primary-300));
+        background-color: rgb(var(--primaryBackground300));
     }
     .card-assignment {
         display: flex;
@@ -92,7 +92,9 @@ $collectionIconSize: 25px;
         }
     }
     .card-meta {
-        background-color: rgba(255, 255, 255, 0.8);
+        //--defaultBackground: #1e1e1e;
+        background-color: var(--defaultBackground);
+        color: var(--textBlack);
         // grid-template-columns: 50%;
         padding-bottom: $entriesCardPaddingVertical;
 

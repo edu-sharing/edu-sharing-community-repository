@@ -79,7 +79,7 @@ html .mat-mdc-slide-toggle {
     --mat-slide-toggle-track-outline-color: var(--mat-slide-toggle-unselected-handle-color);
 }
 .mat-mdc-standard-chip {
-    --mat-chip-elevated-container-color: var(--palette-primary-100);
+    --mat-chip-elevated-container-color: var(--primaryBackground100);
 }
 .mdc-switch--selected {
     --mat-slide-toggle-selected-icon-size: 16px;
@@ -112,9 +112,9 @@ html .mat-mdc-slide-toggle {
  */
 mat-button-toggle-group {
     .mat-button-toggle-checked.mat-button-toggle-appearance-standard {
-        color: var(--light-primary-text);
+        color: var(--palette-primary-contrast-500);
         background-color: var(--primary);
-        --mat-button-toggle-selected-state-text-color: var(--light-primary-text);
+        --mat-button-toggle-selected-state-text-color: var(--palette-primary-contrast-500);
     }
     .mat-button-toggle-appearance-standard .mat-button-toggle-focus-overlay {
         background-color: var(--primary);
@@ -171,7 +171,7 @@ mat-tab-group {
         }
     }
     .mat-ink-bar {
-        background-color: var(--palette-primary-100);
+        background-color: var(--primaryBackground100);
     }
 }
 // a mat table with clickable columns
@@ -244,7 +244,7 @@ mat-tab-group {
 .mat-form-field-dark {
     input,
     textarea {
-        caret-color: var(--palette-primary-900);
+        caret-color: var(--primaryBackground900);
     }
     .mat-form-field-outline,
     .mat-form-field-label {
@@ -260,7 +260,7 @@ mat-tab-group {
 .mat-mdc-form-field.mat-form-field-bright {
     input,
     textarea {
-        --mat-form-field-outlined-caret-color: var(--primaryLight);
+        --mat-form-field-outlined-caret-color: var(--primaryBackground50);
     }
     --mat-form-field-outlined-label-text-color: rgba(255, 255, 255, 0.87);
     --mat-form-field-outlined-outline-color: rgba(255, 255, 255, 0.6);
@@ -328,7 +328,7 @@ mat-label,
 .mat-flat-button {
     padding: 0 15px !important;
     .mdc-button__label {
-        color: var(--palette-primary-900) !important;
+        color: var(--primaryForeground900) !important;
     }
     background-color: var(--primary) !important;
 }
@@ -349,18 +349,18 @@ body {
     --mat-checkbox-selected-checkmark-color: var(--primary);
     --mat-checkbox-selected-hover-icon-color: var(--primary);
     --mat-checkbox-selected-focus-icon-color: var(--primary);
-    --mat-checkbox-disabled-selected-checkmark-color: var(--palette-primary-100);
+    --mat-checkbox-disabled-selected-checkmark-color: var(--primaryBackground100);
     .mdc-checkbox__background {
-        background-color: #fff;
+        background-color: var(--defaultBackground);
         .mdc-checkbox__checkmark {
-            color: #fff !important;
+            color: var(--defaultBackground) !important;
         }
     }
     &.mdc-checkbox--disabled {
         &.mat-mdc-checkbox-checked,
         &.mat-mdc-checkbox-indeterminate {
             .mdc-checkbox__background {
-                background-color: var(--palette-primary-100) !important;
+                background-color: var(--primaryBackground100) !important;
             }
         }
     }
@@ -369,8 +369,8 @@ body {
         .mdc-checkbox__background {
             .mdc-checkbox__checkmark,
             .mdc-checkbox__mixedmark {
-                color: #fff !important;
-                border-color: #fff !important;
+                color: var(--defaultBackground) !important;
+                border-color: var(--defaultBackground) !important;
             }
         }
     }
@@ -591,13 +591,13 @@ mat-select.mat-select-icon {
 .mat-chip-list {
     .mat-chip.mat-standard-chip {
         height: unset; // Override height: 1px
-        background-color: var(--palette-primary-100);
+        background-color: var(--primaryBackground100);
         overflow: hidden;
         &.indeterminate {
             background: repeating-linear-gradient(
                 -45deg,
-                var(--palette-primary-100),
-                var(--palette-primary-100) 5px,
+                var(--primaryBackground100),
+                var(--primaryBackground100) 5px,
                 rgba(0, 0, 0, 0.04) 5px,
                 rgba(0, 0, 0, 0.04) 10px
             );

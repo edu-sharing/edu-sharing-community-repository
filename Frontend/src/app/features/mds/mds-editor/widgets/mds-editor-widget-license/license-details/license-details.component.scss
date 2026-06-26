@@ -66,6 +66,8 @@ h5 {
 .currentLicenseIcon {
     height: 40px;
     width: auto;
+
+    filter: var(--invertSvgFilter, none);
 }
 .customLicenseDescription {
     white-space: pre-line;

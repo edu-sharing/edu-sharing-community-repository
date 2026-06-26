@@ -34,7 +34,7 @@ mat-sidenav-content {
         border-radius: var(--borderRadiusCards) var(--borderRadiusCards) 0 0;
         width: 100%;
         height: $workspaceBreadcrumbsHeight;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         @include materialShadow();
         display: flex;
         > es-breadcrumbs {
@@ -53,10 +53,11 @@ mat-sidenav-content {
             border-radius: 0 var(--borderRadiusCards) 0 0;
             background: linear-gradient(
                 to right,
-                rgba(255, 255, 255, 0.001) 0,
-                #fff 10px,
-                #fff 100%
+                color-mix(in srgb, var(--backgroundColor) 1%, transparent) 0,
+                var(--backgroundColor) 10px,
+                var(--backgroundColor) 100%
             ); /* safari fix */
+            //TODO check if that works
         }
     }
     ::ng-deep {
@@ -171,7 +172,7 @@ es-user-quota {
     color: var(--primary) !important;
     font-weight: bold;
     background: $workspaceTreeSelectedBackgroundEffect;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
 }
 .explorer {
     position: relative;

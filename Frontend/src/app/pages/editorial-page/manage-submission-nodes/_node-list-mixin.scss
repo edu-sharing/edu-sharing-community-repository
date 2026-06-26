@@ -13,7 +13,7 @@
             @include mixins.limitLineCount(2, 1.25);
         }
         &:hover {
-            background-color: var(--palette-primary-50);
+            background-color: var(--primaryBackground50);
         }
         &.selected {
             background: var(--listItemSelectedBackgroundEffect);

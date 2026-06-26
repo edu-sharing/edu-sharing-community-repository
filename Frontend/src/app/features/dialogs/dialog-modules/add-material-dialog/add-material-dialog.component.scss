@@ -15,8 +15,8 @@
         font-size: 60px;
     }
     &.dropActive {
-        border-color: var(--palette-primary-200);
-        background: var(--palette-primary-100);
+        border-color: var(--primaryBackground300);
+        background: var(--primaryBackground100);
         i {
             color: var(--primary);
         }
@@ -162,7 +162,7 @@ mat-form-field {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    background-color: var(--palette-primary-50);
+    background-color: var(--primaryBackground50);
     > div {
         display: flex;
         align-items: center;

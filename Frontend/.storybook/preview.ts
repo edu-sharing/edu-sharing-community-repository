@@ -4,6 +4,7 @@ import { applicationConfig, type Preview } from '@storybook/angular';
 import { EduSharingApiModule } from 'ngx-edu-sharing-api';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { Themes, withTheme } from './theme-wrapper';
+import { Variable } from '../src/app/services/theme.service';
 
 const themes: Themes = {
     default: {
@@ -20,6 +21,11 @@ const themes: Themes = {
         primary: '#76a1c0',
         accent: '#76a1c0',
         warn: '#cd2457',
+    },
+    darkModeColors: {
+        primary: '#96cdf8',
+        accent: '#96cdf8',
+        warn: '#ff6b9d',
     },
 };
 
@@ -51,6 +57,19 @@ const preview: Preview = {
                 title: 'Theme',
                 icon: 'circlehollow',
                 items: Object.keys(themes),
+            },
+        },
+        darkMode: {
+            description: 'Light / dark color scheme',
+            defaultValue: 'light',
+            toolbar: {
+                title: 'Dark mode',
+                icon: 'contrast',
+                items: [
+                    { value: 'light', title: 'Light' },
+                    { value: 'dark', title: 'Dark' },
+                ],
+                dynamicTitle: true,
             },
         },
     },

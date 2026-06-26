@@ -26,7 +26,7 @@
 .new-no-permission {
     display: flex;
     align-items: center;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     margin-top: 20px;
     padding: 10px 0;
     .left {
@@ -88,7 +88,7 @@ mat-form-field {
     padding: $cardPadding;
     .comment {
         padding: 10px;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         @include materialShadow();
         margin: 20px 0;
         display: flex;

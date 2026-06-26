@@ -1,5 +1,4 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'sass:color';
 
 ::ng-deep {
     .mobile-move-top,
@@ -34,10 +33,10 @@ es-user-profile {
 
 .topBar {
     @include placeholder {
-        color: color.mix(
-            $workspaceTopBarInputBackground,
-            $workspaceTopBarInputText,
-            20%
+        color: color-mix(
+            in srgb,
+            #{$workspaceTopBarInputBackground} 20%,
+            #{$workspaceTopBarInputText}
         ); //rgba(255,255,255,0.165);/* => #595959;*/
     }
 }

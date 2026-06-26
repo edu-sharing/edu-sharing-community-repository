@@ -137,7 +137,8 @@
 }
 
 .collections-header-textarea {
-    background-color: rgba(255, 255, 255, 0.8);
+    //ackground-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--color-readable-overlay);
 
     .collection-label,
     .collection-metadata {

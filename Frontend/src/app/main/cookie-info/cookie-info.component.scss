@@ -42,7 +42,7 @@
     }
     .cdk-keyboard-focused,
     .more button.cdk-keyboard-focused {
-        outline-color: var(--palette-primary-900);
+        outline-color: var(--primaryBackground900);
     }
 }
 @media screen and (max-width: ($mobileWidth+$mobileStage*3)) {

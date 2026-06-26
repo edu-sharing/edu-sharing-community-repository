@@ -3,7 +3,7 @@ import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { AccessibilitySettings } from '../types/accessibillity';
-import { SessionStorageService } from 'ngx-edu-sharing-api';
+import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
 
 @Injectable({
     providedIn: 'root',
@@ -17,9 +17,13 @@ export class AccessibilityService {
         const browserContrastPreference = this.getBrowserContrastPreference();
 
         if (browserContrastPreference) {
-            void this.storage.setValues({
-                [AccessibilityService.STORAGE_PREFIX + 'contrastMode']: browserContrastPreference,
-            });
+            void this.storage.setValues(
+                {
+                    [AccessibilityService.STORAGE_PREFIX + 'contrastMode']:
+                        browserContrastPreference,
+                },
+                Store.LocalStorage,
+            );
         }
     }
 
@@ -51,7 +55,7 @@ export class AccessibilityService {
                 return acc;
             }, {} as { [key: string]: any });
         if (Object.keys(values).length > 0) {
-            return this.storage.setValues(values);
+            return this.storage.setValues(values, Store.LocalStorage);
         }
     }
 
@@ -76,7 +80,11 @@ export class AccessibilityService {
         key: K,
     ): Observable<AccessibilitySettings[K]> {
         const defaultValues = new AccessibilitySettings();
-        return this.storage.observe(AccessibilityService.STORAGE_PREFIX + key, defaultValues[key]);
+        return this.storage.observe(
+            AccessibilityService.STORAGE_PREFIX + key,
+            defaultValues[key],
+            Store.LocalStorage,
+        );
     }
 
     private observeMultiple<K extends keyof AccessibilitySettings>(
@@ -88,6 +96,7 @@ export class AccessibilityService {
                 acc[key] = this.storage.observe(
                     AccessibilityService.STORAGE_PREFIX + key,
                     defaultValues[key],
+                    Store.LocalStorage,
                 );
                 return acc;
             }, {} as { [key in keyof AccessibilitySettings]: Observable<AccessibilitySettings[key]> }),

@@ -39,7 +39,7 @@
     height: 50px;
     z-index: 2;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     @include materialShadowBottom();
 }
 

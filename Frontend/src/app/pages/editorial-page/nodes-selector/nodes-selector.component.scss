@@ -76,7 +76,7 @@
     flex: 0 0 auto;
     position: sticky;
     z-index: 1;
-    background: #fff;
+    background: var(--defaultBackground);
     padding: 8px 20px;
     bottom: 0;
     display: flex;

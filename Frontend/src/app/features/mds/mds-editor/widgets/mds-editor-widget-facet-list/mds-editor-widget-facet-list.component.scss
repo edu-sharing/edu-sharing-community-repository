@@ -1,7 +1,4 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'sass:color';
-
-$countBackgroundColor: color.scale($backgroundColor, $lightness: -15%);
 
 :host ::ng-deep {
     .mdc-form-field {
@@ -53,7 +50,7 @@ mat-checkbox {
         border-radius: 20px;
         padding: 0 6px;
         color: $textMain;
-        background-color: $countBackgroundColor;
+        background-color: color-mix(in srgb, var(--backgroundColor), #000 15%);
         font-weight: bold;
     }
 }

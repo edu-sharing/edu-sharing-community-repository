@@ -11,21 +11,21 @@ mat-form-field {
 }
 
 .searchInput::-webkit-input-placeholder {
-    color: #6f6f6f;
+    color: var(--placeholderColor);
 }
 .searchInput:-moz-placeholder {
-    color: #6f6f6f;
+    color: var(--placeholderColor);
 }
 .searchInput::-moz-placeholder {
-    color: #6f6f6f;
+    color: var(--placeholderColor);
 }
 .searchInput:-ms-input-placeholder {
-    color: #6f6f6f;
+    color: var(--placeholderColor);
 }
 
 .suggestbox {
     position: absolute;
-    background: white;
+    background: var(--backgroundColor);
     text-align: left;
     z-index: $dialogZIndex + 1;
     margin-top: -20px;
@@ -68,7 +68,7 @@ mat-form-field {
 }
 
 .activeItem {
-    background-color: #ddd;
+    background-color: var(--backgroundTinted);
 }
 
 .badge {

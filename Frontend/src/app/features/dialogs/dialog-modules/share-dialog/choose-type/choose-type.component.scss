@@ -3,7 +3,7 @@
 .more-open {
     position: relative;
     z-index: $dialogZIndex + 1;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     @include materialShadowBottom();
     .switch label {
         color: var(--palette-foreground-text);

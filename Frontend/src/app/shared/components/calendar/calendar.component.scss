@@ -14,7 +14,7 @@
 .picker {
     position: absolute;
     z-index: $dialogZIndex + 1;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     padding: 5px;
     width: 250px;
     @include materialShadowMediumLarge();
