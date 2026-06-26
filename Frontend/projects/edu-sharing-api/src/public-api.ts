@@ -67,4 +67,6 @@ export {
     RatingV1Service,
     RenderingV1Service,
     UsageV1Service,
+    ContributorV1Service,
 } from './lib/api/services';
+export * from './lib/api/models/contributor-data';

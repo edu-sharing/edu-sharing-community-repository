@@ -1797,6 +1797,71 @@
         },
         "type": "object"
       },
+      "ContributorData": {
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "vcard": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "vcard"
+        ],
+        "type": "object"
+      },
       "Copy": {
         "properties": {
           "entries": {
@@ -1890,6 +1955,51 @@
           "title",
           "type"
         ],
+        "type": "object"
+      },
+      "CreateContributorRequest": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "CreateQAEntryDTO": {
@@ -8802,6 +8912,54 @@
           },
           "node": {
             "$ref": "#/components/schemas/Node"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateContributorRequest": {
+        "properties": {
+          "applyToExisting": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -21942,6 +22100,467 @@
         "summary": "List all available connectors",
         "tags": [
           "CONNECTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}": {
+      "get": {
+        "description": "Search the contributor registry (autocomplete / management list).",
+        "operationId": "getContributors",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "search word",
+            "in": "query",
+            "name": "searchWord",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "contributor kind",
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "enum": [
+                "PERSON",
+                "ORGANIZATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "max number of results",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContributorData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "search managed contributors",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "post": {
+        "description": "Creates a contributor in the registry. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "createContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContributorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "create a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}/{id}": {
+      "delete": {
+        "description": "Removes a contributor from the registry. The media keep their embedded contributor untouched. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "deleteContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "delete a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "get": {
+        "description": "Returns a single contributor of the registry by its id.",
+        "operationId": "getContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get a single managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "put": {
+        "description": "Updates a contributor. With applyToExisting=true the change is propagated to all media carrying this contributor. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "updateContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContributorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "update a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
         ]
       }
     },
@@ -41507,7 +42126,7 @@
             }
           },
           {
-            "description": "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']",
+            "description": "DEPRECATED - no longer evaluated. Contributors are now served from the managed contributor registry.",
             "in": "query",
             "name": "fields",
             "schema": {
@@ -41518,7 +42137,7 @@
             }
           },
           {
-            "description": "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']",
+            "description": "DEPRECATED - no longer evaluated. The contributor registry is role-independent.",
             "in": "query",
             "name": "contributorProperties",
             "schema": {

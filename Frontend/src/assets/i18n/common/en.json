@@ -182,6 +182,7 @@
     "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
     "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Manage, add and delete contributors (authors, organizations) with persistent ids.",
     "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",

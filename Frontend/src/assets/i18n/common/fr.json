@@ -166,6 +166,7 @@
     "TOOLPERMISSION_SIGNUP_GROUP": "S'inscrire à une organisation/un groupe (ne s'applique qu'aux organisations/groupes configurés pour l'inscription)",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Rechercher et trouver des utilisateurs en dehors de l'organisation sans avoir à saisir l'intégralité de l'identifiant de l'utilisateur",
     "TOOLPERMISSION_MANAGE_RELATIONS": "Gérer et créer des relations entre les éléments",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Gérer, ajouter et supprimer les contributeurs (auteurs, organisations) avec des identifiants persistants.",
     "TOOLPERMISSION_RATE_WRITE": "L'autorisation de noter les matériaux (nécessite TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Suggérer des documents pour des collections pour lesquelles l'utilisateur n'a pas de droits d'écriture",
     "TOOLPERMISSION_RATE_READ": "Le droit de consulter les revues de matériel",

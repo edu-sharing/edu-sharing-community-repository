@@ -126,6 +126,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
                 RestConstants.TOOLPERMISSION_EDITORIAL_SUGGESTIONS,
                 RestConstants.TOOLPERMISSION_MANAGE_QA,
+                RestConstants.TOOLPERMISSION_MANAGE_CONTRIBUTORS,
                 RestConstants.TOOLPERMISSION_BAPI,
             ],
         },

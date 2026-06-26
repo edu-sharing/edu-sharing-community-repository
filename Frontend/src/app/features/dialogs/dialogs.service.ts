@@ -22,6 +22,10 @@ import {
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
 import {
+    ContributorRegistryEditDialogData,
+    ContributorRegistryEditDialogResult,
+} from './dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog-data';
+import {
     ContributorsDialogData,
     ContributorsDialogResult,
 } from './dialog-modules/contributors-dialog/contributors-dialog-data';
@@ -442,6 +446,26 @@ export class DialogsService {
             contentPadding: 0,
             width: 600,
             height: 900,
+            closable: Closable.Standard,
+            data,
+        });
+    }
+
+    async openContributorRegistryEditDialog(
+        data: ContributorRegistryEditDialogData,
+    ): Promise<
+        CardDialogRef<ContributorRegistryEditDialogData, ContributorRegistryEditDialogResult>
+    > {
+        const title = await this.translate
+            .get('ADMIN.CONTRIBUTORS.' + (data.contributor ? 'EDIT' : 'CREATE'))
+            .toPromise();
+        const { ContributorRegistryEditDialogComponent } = await import(
+            './dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog.module'
+        );
+        return this.cardDialog.open(ContributorRegistryEditDialogComponent, {
+            title,
+            contentPadding: 0,
+            width: 600,
             closable: Closable.Standard,
             data,
         });

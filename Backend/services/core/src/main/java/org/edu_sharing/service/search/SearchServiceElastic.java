@@ -51,6 +51,8 @@ import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
+import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -1382,98 +1384,13 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
-        checkClient();
-
-        List<String> searchFields = new ArrayList<>();
-        if (fields == null || fields.isEmpty()) {
-            for (CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()) {
-                searchFields.add("contributor." + att.name());
-            }
-        } else {
-            for (String f : fields) {
-                if (Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))) {
-                    searchFields.add("contributor." + f);
-                }
-            }
-        }
-        final BoolQuery.Builder contributorQuery = QueryBuilders.bool();
-        for (String searchField : searchFields) {
-            final String search = suggest.contains("*") ? suggest : String.format("*%s*", suggest);
-            contributorQuery.should(should -> should.wildcard(wc -> wc.field(searchField).value(search)));
-        }
-
-        if (!contributorProperties.isEmpty()) {
-            contributorQuery.must(must -> must.bool(bool -> bool
-                    .minimumShouldMatch("1")
-                    .should(should -> {
-                        contributorProperties.forEach(prop -> should.term(term -> term.field("contributor.property").value(prop)));
-                        return should;
-                    })));
-        }
-
-        if (contributorKind == ContributorKind.ORGANIZATION) {
-            contributorQuery.must(must -> must.bool(bool -> bool
-                    .should(should -> should.exists(exists -> exists.field("contributor.X-ROR")))
-                    .should(should -> should.exists(exists -> exists.field("contributor.X-Wikidata")))
-                    .minimumShouldMatch("1")));
-        } else {
-            contributorQuery.must(must -> must.bool(bool -> bool
-                    .should(should -> should.exists(exists -> exists.field("contributor.X-ORCID")))
-                    .should(should -> should.exists(exists -> exists.field("contributor.X-GND-URI")))
-                    .minimumShouldMatch("1")));
-        }
-
-        SearchRequest searchRequest = SearchRequest.of(req -> req
-                .index(WORKSPACE_INDEX)
-                .from(0)
-                .size(0)
-                .trackTotalHits(track -> track.enabled(true))
-                .sort(sort -> sort.score(score -> score.order(SortOrder.Desc)))
-                .aggregations("contributor", aggr -> aggr
-                        .nested(nes -> nes.path("contributor"))
-                        .aggregations("vcard", vcardAggr -> vcardAggr
-                                .terms(term -> term
-                                        .field("contributor.vcard")
-                                        .size(100))))
-                .query(query -> query
-                        .nested(nested -> nested
-                                .path("contributor")
-                                .query(nq -> nq
-                                        .bool(contributorQuery.build())))));
-
-        SearchResponse<Map> searchResponse = client
-                .withTransportOptions(this::getRequestOptions)
-                .search(searchRequest, Map.class);
-
-        Aggregate aggregation = searchResponse.aggregations()
-                .get("contributor")
-                .nested()
-                .aggregations()
-                .get("vcard");
-
-        VCardEngine engine = new VCardEngine();
-        return aggregation.sterms().buckets().array().stream().
-                map(StringTermsBucket::key)
-                // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
-                .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.stringValue().toLowerCase().contains(t)))
-                .filter(k -> {
-                    try {
-                        VCard vcard = engine.parse(k.stringValue());
-                        if (contributorKind == ContributorKind.ORGANIZATION) {
-                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
-                                    (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
-                            );
-                        } else {
-                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
-                                    (e) -> e.equals("X-ORCID") || e.equals("X-GND-URI")
-                            );
-                        }
-                    } catch (Exception ignored) {
-                        return false;
-                    }
-                })
-                .map((k) -> new SearchVCard(k.stringValue())).
-                collect(Collectors.toCollection(HashSet::new));
+        // Contributors are now managed in the autonomous edu_contributor registry instead of being
+        // aggregated from the elasticsearch index. The legacy 'fields' and 'contributorProperties'
+        // parameters are no longer used (the registry is role-independent).
+        ContributorService contributorService = ApplicationContextFactory.getApplicationContext().getBean(ContributorService.class);
+        return contributorService.search(suggest, contributorKind, 50).stream()
+                .map(entry -> new SearchVCard(entry.getVcard()))
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     // TODO should we generalize this? Just a dirty hack

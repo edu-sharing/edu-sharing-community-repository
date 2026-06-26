@@ -188,6 +188,7 @@
     "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen.",
     "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Beteiligte (Autorinnen/Autoren, Organisationen) mit persistenten IDs verwalten, hinzufügen und löschen.",
     "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",

@@ -1,0 +1,58 @@
+<div class="contributors">
+  <div class="toolbar">
+    <mat-form-field class="search">
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.SEARCH' | translate }}</mat-label>
+      <input matInput [(ngModel)]="searchWord" (keyup.enter)="load()" name="searchWord" />
+    </mat-form-field>
+    <button mat-icon-button (click)="load()" [attr.aria-label]="'SEARCH' | translate">
+      <i esIcon="search"></i>
+    </button>
+    <span class="spacer"></span>
+    <button mat-raised-button color="primary" (click)="startCreate()">
+      <i esIcon="add"></i>
+      {{ 'ADMIN.CONTRIBUTORS.CREATE' | translate }}
+    </button>
+  </div>
+
+  @if (loading) {
+  <es-spinner></es-spinner>
+  } @else {
+  <table class="contributor-table">
+    <thead>
+      <tr>
+        <th>{{ 'ADMIN.CONTRIBUTORS.NAME' | translate }}</th>
+        <th>{{ 'ADMIN.CONTRIBUTORS.KIND' | translate }}</th>
+        <th>{{ 'ADMIN.CONTRIBUTORS.IDS' | translate }}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (contributor of contributors; track contributor.id) {
+      <tr>
+        <td>{{ displayName(contributor) }}</td>
+        <td>{{ 'ADMIN.CONTRIBUTORS.KIND_' + contributor.kind | translate }}</td>
+        <td class="ids">
+          @if (contributor.orcid) { <span>ORCID</span> } @if (contributor.gnduri) {
+          <span>GND</span> } @if (contributor.ror) { <span>ROR</span> } @if (contributor.wikidata) {
+          <span>Wikidata</span> } @if (contributor.email) { <span>E-Mail</span> }
+        </td>
+        <td class="actions">
+          <button mat-icon-button (click)="startEdit(contributor)">
+            <i esIcon="edit"></i>
+          </button>
+          <button mat-icon-button (click)="remove(contributor)">
+            <i esIcon="delete"></i>
+          </button>
+        </td>
+      </tr>
+      } @empty {
+      <tr>
+        <td colspan="4" class="empty">
+          {{ 'ADMIN.CONTRIBUTORS.EMPTY' | translate }}
+        </td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  }
+</div>
