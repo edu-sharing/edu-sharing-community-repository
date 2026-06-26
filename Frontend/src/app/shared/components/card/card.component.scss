@@ -1,11 +1,10 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'variables' as *;
-@use 'sass:color';
 
 @mixin content {
     overflow-y: auto;
     @include iosScrolling();
-    background-color: #fff;
+    background-color: var(--backgroundColor);
 }
 
 // Maximize both horizontally and vertically.
@@ -119,14 +118,8 @@
                 padding: 2px;
                 background: linear-gradient(
                     to right,
-                    rgba(
-                            color.channel($actionDialogBackground, 'red', $space: rgb),
-                            color.channel($actionDialogBackground, 'green', $space: rgb),
-                            color.channel($actionDialogBackground, 'blue', $space: rgb),
-                            0.0001
-                        )
-                        0,
-                    $actionDialogBackground 15px
+                    transparent 0,
+                    #{$actionDialogBackground} 15px
                 );
                 > button {
                     border-radius: 50%;
@@ -141,7 +134,7 @@
                 align-items: center;
                 justify-content: center;
                 margin-left: 20px;
-                background-color: #fff;
+                background-color: var(--backgroundColor);
                 > img {
                     width: 24px;
                     height: 24px;
@@ -167,7 +160,7 @@
         background-color: $backgroundColor;
         border-radius: 2px;
         mat-card-actions {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             border-top: 1px solid $cardSeparatorLineColor;
             display: flex;
             margin: 0;

@@ -13,7 +13,7 @@ button {
     border-bottom: 1px solid transparent; // Take up the same space as when focused
     &:hover,
     :host.highlight & {
-        color: var(--palette-primary-900);
+        color: var(--primaryForeground900);
     }
     &:focus,
     :host.highlight & {

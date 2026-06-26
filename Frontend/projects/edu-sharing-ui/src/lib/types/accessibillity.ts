@@ -1,9 +1,12 @@
+export type DarkModeSetting = 'auto' | 'light' | 'dark';
+
 export class AccessibilitySettings {
     toastMode: 'important' | 'all' = 'all';
     toastDuration: ToastDuration = ToastDuration.Seconds_5;
     contrastMode = false;
     indicatorIcons = true;
     dragAndDropOptions = false;
+    darkMode: DarkModeSetting = 'auto';
 }
 export enum ToastDuration {
     Seconds_3 = 3,

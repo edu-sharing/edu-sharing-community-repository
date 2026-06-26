@@ -7,7 +7,7 @@
     gap: 8px;
 
     .event ::ng-deep {
-        background: #fff;
+        background-color: var(--defaultBackground);
         box-shadow: 0 2px 2px 0 #0000001f;
         border-radius: 8px;
         color: var(--textLight);

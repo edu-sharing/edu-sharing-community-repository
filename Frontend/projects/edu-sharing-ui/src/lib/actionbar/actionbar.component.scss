@@ -22,25 +22,25 @@ button {
 }
 
 .light {
-    color: #fff;
+    color: var(--textWhite);
     background: transparent;
 }
 .disabled {
     pointer-events: all;
 }
 .light a {
-    color: #fff;
+    color: var(--textWhite);
 }
 
 .actionToggle {
     &.after.actionToggleDivider {
         padding-left: 10px;
-        border-left: 1px solid #ddd;
+        border-left: 1px solid var(--backgroundColor);
     }
     &.before.actionToggleDivider {
         padding-right: 10px;
         margin-right: 10px;
-        border-right: 1px solid #ddd;
+        border-right: 1px solid var(--backgroundColor);
     }
 }
 .more {
@@ -64,11 +64,11 @@ button {
     }
 
     .mat-mdc-unelevated-button {
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         color: var(--primary);
         &:disabled {
-            color: rgba(0, 0, 0, 0.5);
-            background-color: #eee;
+            color: var(--buttonDisabled);
+            background-color: var(--backgroundColor);
         }
     }
 }
@@ -84,12 +84,12 @@ button {
     }
     &.actionbar-background-primary {
         .mat-button {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             color: var(--primary);
         }
     }
     &.actionbar-all-flat button {
-        background: white;
+        background: var(--backgroundColor); // white;
         color: var(--primary) !important;
         &:disabled {
             color: var(--textLight) !important;
@@ -97,7 +97,7 @@ button {
     }
     .more,
     .actionAlways {
-        background: white;
+        background: var(--backgroundColor);
         color: var(--primary);
         display: flex;
         width: 45px;

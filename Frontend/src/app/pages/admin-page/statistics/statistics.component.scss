@@ -60,7 +60,7 @@ $maxWidthContainer: 700px;
     > div {
         padding: 10px;
         margin: 15px;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         @include materialShadow();
         text-align: center;
         mat-calendar {

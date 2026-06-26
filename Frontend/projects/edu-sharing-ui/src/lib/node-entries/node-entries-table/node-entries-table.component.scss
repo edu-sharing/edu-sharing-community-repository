@@ -40,7 +40,7 @@ $rowHeight: 58px;
         mat-cell es-node-url {
             width: 100%;
             a {
-                color: #000;
+                color: var(--textBlack);
             }
             &.cdk-keyboard-focused {
                 @include setGlobalKeyboardFocus('border');
@@ -104,7 +104,7 @@ mat-cell {
     &.dynamic-single-click {
         cursor: pointer;
         &:hover {
-            background-color: rgb(var(--palette-primary-50));
+            background-color: rgb(var(--primaryBackground50));
         }
     }
     &.mat-row-import-blocked {
@@ -175,7 +175,7 @@ mat-cell {
         height: 36px;
         padding: 3px;
         margin: 1px 0;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -189,7 +189,7 @@ mat-cell {
             height: auto;
         }
         > i {
-            color: #666;
+            color: var(--textMediumLight);
             font-size: 18px;
         }
     }

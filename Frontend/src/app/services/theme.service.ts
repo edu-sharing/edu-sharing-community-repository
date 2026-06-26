@@ -1,39 +1,165 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { argbFromHex, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
 import { MaterialCssVarsService } from 'angular-material-css-vars';
 import { HueValue } from 'angular-material-css-vars';
 import { ConfigService, ConfigThemeColor } from 'ngx-edu-sharing-api';
-import { EDU_SHARING_UI_CONFIG, EduSharingUiConfiguration } from 'ngx-edu-sharing-ui';
+import {
+    AccessibilityService,
+    DarkModeSetting,
+    EDU_SHARING_UI_CONFIG,
+    EduSharingUiConfiguration,
+} from 'ngx-edu-sharing-ui';
+import { combineLatest, fromEvent } from 'rxjs';
+import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
 export enum Variable {
     Primary = 'primary',
     Accent = 'accent',
     Warn = 'warn',
 }
+
+/** HCT tone used to lift light brand colors onto dark surfaces (matches the default dark primary). */
+const DARK_TONE = 80;
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
     private materialCssVarsService = inject(MaterialCssVarsService);
     private configService = inject(ConfigService);
     private uiConfig = inject<EduSharingUiConfiguration>(EDU_SHARING_UI_CONFIG);
+    private accessibility = inject(AccessibilityService);
+    private router = inject(Router);
+
+    /** Whether dark mode is currently active. Readable from anywhere via the injected service. */
+    readonly isDarkMode = signal(false);
+
+    /** Latest branding colors from the backend config, re-applied on every dark-mode toggle. */
+    private configColors: Array<ConfigThemeColor> | null = null;
 
     constructor() {
         // set defaults
+        this.registerDarkMode();
         this.initWithDefaults();
     }
 
-    initWithDefaults() {
-        this.setColor(Variable.Primary, '#48708e');
-        this.setColor(Variable.Accent, '#48708e');
-        this.setColor(Variable.Warn, '#cd2457');
-        this.setViaConfig();
+    /**
+     * Applies the dark/light theme by combining the user's accessibility setting with the
+     * browser's `prefers-color-scheme`. When the setting is `auto`, live browser changes are
+     * followed; `light`/`dark` force a fixed value, overriding the browser default.
+     *
+     * A `?theme=auto|dark|light` query param always takes priority over the stored preference
+     * it is presentation-only and not persisted, so removing
+     * the param reverts to the user's saved preference.
+     */
+    private registerDarkMode() {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const browserDark$ = fromEvent<MediaQueryListEvent>(mediaQuery, 'change').pipe(
+            map((event) => event.matches),
+            startWith(mediaQuery.matches),
+        );
+
+        const queryTheme$ = this.router.routerState.root.queryParamMap.pipe(
+            map((params) => this.toThemeSetting(params.get('theme'))),
+            distinctUntilChanged(),
+        );
+
+        combineLatest([this.accessibility.observe('darkMode'), browserDark$, queryTheme$])
+            .pipe(
+                map(([storedMode, browserDark, queryTheme]) =>
+                    this.resolveIsDark(queryTheme ?? storedMode, browserDark),
+                ),
+            )
+            .subscribe((isDark) => {
+                this.applyTheme(isDark);
+            });
     }
 
-    private setViaConfig() {
+    /**
+     * Validates a raw `theme` query-param value against the {@link DarkModeSetting} values.
+     * Returns `null` when absent or invalid, so callers can fall back to the stored preference.
+     */
+    private toThemeSetting(value: string | null): DarkModeSetting | null {
+        return value === 'auto' || value === 'light' || value === 'dark' ? value : null;
+    }
+
+    /** Resolves an effective dark-mode setting into a boolean, following the browser when `auto`. */
+    private resolveIsDark(mode: DarkModeSetting, browserDark: boolean): boolean {
+        return mode === 'dark' ? true : mode === 'light' ? false : browserDark;
+    }
+
+    initWithDefaults() {
+        const browserDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // honor a ?theme= override on the first synchronous paint to avoid flashing the browser
+        // default before the observers in registerDarkMode resolve
+        const queryTheme = this.toThemeSetting(
+            this.router.routerState.root.snapshot.queryParamMap.get('theme'),
+        );
+        this.applyTheme(this.resolveIsDark(queryTheme ?? 'auto', browserDark));
+        this.fetchConfig();
+    }
+
+    /**
+     * Applies the hardcoded default colors for the given theme, then overrides them with the
+     * latest backend config colors (if any). Called on initial load and on every dark-mode toggle
+     * so the backend branding survives toggles instead of reverting to the defaults.
+     */
+    private applyTheme(isDark: boolean) {
+        this.isDarkMode.set(isDark);
+        this.materialCssVarsService.setDarkTheme(isDark);
+        this.applyDefaultColors(isDark);
+        if (this.configColors) {
+            const colors = isDark ? this.toDarkColors(this.configColors) : this.configColors;
+            this.applyFromConfigColors(colors);
+        }
+    }
+
+    /**
+     * Transforms light brand colors into dark-surface-appropriate variants (same hue, lighter tone).
+     * Only the theme palette colors (Primary, Accent, Warn) are converted; any other config color is
+     * left untouched.
+     */
+    private toDarkColors(colors: Array<ConfigThemeColor>): Array<ConfigThemeColor> {
+        const convertible: Array<string> = [Variable.Primary, Variable.Accent, Variable.Warn];
+        return colors.map((c) => {
+            if (!c.value || !c.variable || !convertible.includes(c.variable)) {
+                return c;
+            }
+            return { ...c, value: this.toDarkColor(c.value) };
+        });
+    }
+
+    private toDarkColor(hex: string): string {
+        try {
+            const palette = TonalPalette.fromInt(argbFromHex(hex));
+            return hexFromArgb(palette.tone(DARK_TONE));
+        } catch {
+            // non-hex / unparseable config value: leave untouched
+            return hex;
+        }
+    }
+
+    private applyDefaultColors(isDark: boolean) {
+        if (isDark) {
+            this.setColor(Variable.Primary, '#96cdf8');
+            this.setColor(Variable.Accent, '#96cdf8');
+            this.setColor(Variable.Warn, '#ff6b9d');
+        } else {
+            this.setColor(Variable.Primary, '#48708e');
+            this.setColor(Variable.Accent, '#48708e');
+            this.setColor(Variable.Warn, '#cd2457');
+        }
+    }
+
+    private fetchConfig() {
         this.configService.observeConfig().subscribe(
             (config) => {
                 const colors = config.themeColors?.color;
                 this.setFavicon(config.favicon, config.appleTouchIcon);
                 if (colors) {
-                    this.applyFromConfigColors(colors);
+                    // TODO: the backend should ideally send separate colors for light and dark mode.
+                    // As a fallback, if it only sends one set, we derive the dark variants from the
+                    // light config colors client-side (see toDarkColors).
+                    this.configColors = colors;
+                    this.applyTheme(this.isDarkMode());
                 }
             },
             (error) => {

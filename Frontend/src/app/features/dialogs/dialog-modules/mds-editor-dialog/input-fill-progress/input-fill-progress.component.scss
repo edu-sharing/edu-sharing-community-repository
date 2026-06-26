@@ -10,7 +10,7 @@
     .status {
         width: 100%;
         flex-grow: 1;
-        background-color: #eee;
+        background-color: var(--backgroundTinted);
         position: relative;
         .current-bar {
             position: absolute;

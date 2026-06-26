@@ -94,7 +94,7 @@
     .node-entries-structure ::ng-deep {
         mat-tree mat-tree-node:first-of-type .parent-tree-node-container {
             padding-left: 4px;
-            background: #fafafa;
+            background: var(--backgroundElevatedColor);
             color: var(--textLight);
             height: 56px;
             border-bottom: 1px solid #ccc;
@@ -177,7 +177,7 @@
 .usageEntry {
     width: 100%;
     display: flex;
-    background: #eee;
+    background: var(--actionDialogBackground);
     border-radius: 8px;
     margin-bottom: 6px;
     align-items: center;

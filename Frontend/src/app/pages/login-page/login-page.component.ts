@@ -79,7 +79,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     bridge = inject(BridgeService);
     private cordova = inject(CordovaService);
     private authentication = inject(AuthenticationService);
-    private themeService = inject(ThemeService);
+    protected themeService = inject(ThemeService);
     private loadingScreen = inject(LoadingScreenService);
     private mainNav = inject(MainNavService);
 

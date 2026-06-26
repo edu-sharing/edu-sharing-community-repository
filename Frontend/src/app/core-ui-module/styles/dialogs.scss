@@ -30,7 +30,7 @@ $cardActionHeight: 77px;
 .card {
     z-index: $dialogZIndex + 1;
     color: $textMain;
-    background-color: #fff !important;
+    background-color: var(--backgroundColor) !important;
     transition: all $transitionNormal;
 }
 .center-card {
@@ -252,7 +252,7 @@ $cardActionHeight: 77px;
     i {
         margin-left: 10px;
         margin-right: 10px;
-        color: #666;
+        color: var(--textLight);
         position: relative;
         top: 5px;
     }
@@ -274,7 +274,7 @@ $cardActionHeight: 77px;
     right: 0;
     height: 100%;
     width: $dialogRightWidth;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     display: flex;
     flex-direction: column;
     @include materialShadow();

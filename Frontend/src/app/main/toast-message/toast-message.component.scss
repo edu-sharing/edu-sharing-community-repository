@@ -16,12 +16,12 @@ $toastLeftWidth: 8px;
     }
 
     .toast-message {
-        // Uncomment to change text color
-        //
-        // --mat-snackbar-supporting-text-color: white;
+        // Label text color: --textWhite is white in light mode and black in dark mode,
+        // matching the inverting toast surface (dark toast/light text, light toast/dark text).
+        --mdc-snackbar-supporting-text-color: var(--textWhite);
 
         // Action button's text and ripple color
-        --mat-snack-bar-button-color: var(--palette-accent-200);
+        --mat-snack-bar-button-color: var(--toastButtonColor);
     }
 
     .toast-message-info .mdc-snackbar__surface {

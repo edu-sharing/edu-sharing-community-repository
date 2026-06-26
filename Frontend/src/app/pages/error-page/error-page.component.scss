@@ -1,6 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 .message-bg {
     min-height: 100%;
+    // no dynamic colors
     background: #444;
     color: white;
     display: flex;
@@ -29,6 +30,7 @@
         padding-top: 20px;
     }
     a {
+        // no dynamic colors, should be always a light primary
         color: var(--palette-primary-100);
         text-transform: uppercase;
         font-weight: bold;

@@ -25,8 +25,8 @@
     }
 
     &.dropActive {
-        border-color: var(--palette-primary-200);
-        background: var(--palette-primary-100);
+        border-color: var(--primaryBackground300);
+        background: var(--primaryBackground100);
 
         i {
             color: var(--primary);

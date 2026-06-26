@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ConfigService, Node, SessionStorageService, User } from 'ngx-edu-sharing-api';
-import { OptionItem, UIService } from 'ngx-edu-sharing-ui';
+import { AccessibilityService, DarkModeSetting, OptionItem, UIService } from 'ngx-edu-sharing-ui';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ConfigurationHelper, RestConnectorService } from '../../../core-module/core.module';
@@ -40,9 +40,11 @@ export class TopBarComponent implements AfterViewInit {
     mainNavService = inject(MainNavService);
     dialogs = inject(DialogsService);
     private sessionStorageService = inject(SessionStorageService);
+    private accessibility = inject(AccessibilityService);
     elementRef = inject(ElementRef);
 
     readonly TemplateSlot = TemplateSlot;
+    readonly darkMode$ = this.accessibility.observe('darkMode');
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
@@ -133,6 +135,16 @@ export class TopBarComponent implements AfterViewInit {
         this.mainNavService.updateHeight(
             this.topbarRef.nativeElement?.getBoundingClientRect().height,
         );
+    }
+
+    cycleDarkMode(current: DarkModeSetting) {
+        const next: DarkModeSetting =
+            current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
+        void this.accessibility.set({ darkMode: next });
+    }
+
+    darkModeIcon(mode: DarkModeSetting): string {
+        return mode === 'light' ? 'light_mode' : mode === 'dark' ? 'dark_mode' : 'brightness_auto';
     }
 
     protected readonly UIService = UIService;

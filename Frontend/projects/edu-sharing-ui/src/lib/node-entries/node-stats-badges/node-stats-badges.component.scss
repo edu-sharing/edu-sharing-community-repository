@@ -8,10 +8,10 @@
 .card-top-bar-childobjects {
     > div {
         :host[backgroundStyle='lighten'] & {
-            background-color: rgba(255, 255, 255, 0.75);
+            background-color: var(--color-readable-overlay);
         }
         :host[backgroundStyle='darken'] & {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: var(--color-darken);
         }
         border-radius: 15px;
         display: inline-flex;

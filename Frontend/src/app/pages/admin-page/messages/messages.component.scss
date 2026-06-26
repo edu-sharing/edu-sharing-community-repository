@@ -97,15 +97,30 @@ form.create {
         .message ::ng-deep {
             @include removeTinyWrapping();
         }
+
         .chips {
             .components {
-                --mat-chip-elevated-container-color: #cdbeda;
+                --mat-chip-elevated-container-color: color-mix(
+                    in srgb,
+                    #9b59b6 20%,
+                    var(--backgroundColor)
+                );
             }
+
             .contexts {
-                --mat-chip-elevated-container-color: #bedabe;
+                --mat-chip-elevated-container-color: color-mix(
+                    in srgb,
+                    var(--colorStatusPositive) 25%,
+                    var(--backgroundColor)
+                );
             }
+
             .tp {
-                --mat-chip-elevated-container-color: #eae4ce;
+                --mat-chip-elevated-container-color: color-mix(
+                    in srgb,
+                    var(--colorStatusWarning) 15%,
+                    var(--backgroundColor)
+                );
             }
         }
     }

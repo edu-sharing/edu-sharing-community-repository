@@ -171,7 +171,7 @@ $tileSize: 124px;
         text-align: center;
         font-size: $fontSizeXSmall;
         color: #fff;
-        background-color: var(--warning);
+        background-color: var(--warn);
     }
 
     // wrapper for the main icon of the entry
@@ -296,7 +296,7 @@ $tileSize: 124px;
     .line {
         flex: 1;
         height: 1px;
-        background-color: #ccc;
+        background-color: var(--backgroundTinted);
         margin: 0 8px;
     }
 

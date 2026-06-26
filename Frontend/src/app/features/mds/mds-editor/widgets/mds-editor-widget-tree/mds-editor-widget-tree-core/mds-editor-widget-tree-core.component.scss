@@ -92,7 +92,7 @@
                 align-items: center;
                 &:hover,
                 &:focus {
-                    background-color: var(--palette-primary-50);
+                    background-color: var(--primaryBackground50);
                 }
                 height: var(--mat-tree-node-min-height);
                 .option {

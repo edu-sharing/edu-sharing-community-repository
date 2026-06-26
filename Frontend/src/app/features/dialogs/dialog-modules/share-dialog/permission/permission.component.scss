@@ -135,7 +135,7 @@
 }
 .timebased-overlay {
     @include materialShadowLarge();
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     padding: $cardPadding;
     display: flex;
     align-items: flex-start;

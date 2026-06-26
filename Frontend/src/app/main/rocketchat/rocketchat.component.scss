@@ -55,7 +55,7 @@ $chatHeight: 550px;
     }
     iframe {
         transition: all ease $transitionNormal;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         border: none;
         height: 0;
         &.opened {

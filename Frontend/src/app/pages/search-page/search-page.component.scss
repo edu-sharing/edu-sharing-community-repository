@@ -38,7 +38,7 @@ mat-progress-bar {
     width: 32px;
     flex-shrink: 0;
     img {
-        background-color: white;
+        background-color: var(--backgroundColor);
         height: 20px;
         width: 20px;
         border-radius: 2px;

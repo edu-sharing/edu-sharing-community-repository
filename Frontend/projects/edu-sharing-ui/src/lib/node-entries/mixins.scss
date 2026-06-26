@@ -6,7 +6,7 @@
     justify-content: center;
     user-select: none;
     border-radius: 50%;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     padding: 5px;
     position: relative;
     z-index: 1;
@@ -19,5 +19,8 @@
     img {
         width: 18px;
         height: 18px;
+        // mediatype icons are dark monochrome glyphs designed for the light badge;
+        // lighten them in dark mode (see --nodeBadgeIconFilter in variables.scss)
+        filter: var(--invertSvgFilter, none);
     }
 }

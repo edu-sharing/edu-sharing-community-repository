@@ -50,7 +50,7 @@ es-collection-proposals {
 }
 .node-deleted {
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--color-readable-overlay);
     backdrop-filter: blur(5px);
     padding: 20px;
     display: flex;

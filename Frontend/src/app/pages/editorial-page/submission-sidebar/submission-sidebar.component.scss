@@ -52,7 +52,7 @@ mat-tab-group {
 
     .actions {
         flex-shrink: 0;
-        background: #fff;
+        background: var(--defaultBackground);
         padding: 10px 20px;
         width: 100%;
         display: flex;

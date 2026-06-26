@@ -33,19 +33,23 @@ $primary-dark: if(
 );
 $secondary: #515f7a;
 // the following colors are retrieved from Materials neutral palette (tone value as comment)
-$surface: #faf9f9; // N-98 (possible replacement: $cardLightBackground)
-$surface-alt: #f4f4f4;
-$surface-dim: #dadada; // N-87
-$surface-container-highest: #e3e2e2; // N-90
-$surface-container-high: #e8e8e8; // N-92
-$surface-container: #eee; // N-94 (possible replacement: $actionDialogBackground)
-$surface-container-low: #f4f3f3; // N-96 (possible replacement: $actionDialogBackground)
-$surface-container-lowest: if(
-    meta.global-variable-exists('backgroundColor', vars),
-    vars.$backgroundColor,
-    #fff
-);
-$surface-selected: #f2f5f8;
+$surface: var(
+    --cardLightBackground
+); //#faf9f9; // N-98 (possible replacement: $cardLightBackground)
+$surface-alt: var(--backgroundColor); //#f4f4f4;
+$surface-dim: var(--backgroundDim); //#dadada; // N-87
+$surface-container-highest: var(--backgroundContainerHighest); //#e3e2e2; // N-90
+$surface-container-high: var(--backgroundContainerHigh); //#e8e8e8; // N-92
+$surface-container: var(
+    --backgroundTinted
+); //#eee; // N-94 (possible replacement: $actionDialogBackground)
+$surface-container-low: var(
+    --backgroundColor
+); //#f4f3f3; // N-96 (possible replacement: $actionDialogBackground)
+$surface-container-lowest: var(
+    --defaultBackground
+); //if(meta.global-variable-exists('backgroundColor', vars), vars.$backgroundColor, #fff);
+$surface-selected: var(--listItemSelectedBackground); //#f2f5f8;
 
 // EXTENDED COLOR VARIABLES
 // status colors

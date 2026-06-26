@@ -4,10 +4,10 @@
     align-items: center;
     padding: $paddingH 8px;
     border-radius: var(--borderRadiusBadges);
-    background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
+    background-color: color-mix(in srgb, var(--primaryBackground300), 60% transparent);
     gap: 5px;
     &.endTime-low {
-        background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
+        background-color: color-mix(in srgb, var(--primaryBackground300), 60% transparent);
     }
     &.endTime-high {
         background-color: color-mix(in srgb, var(--colorStatusNegative), 60% transparent);
@@ -15,7 +15,7 @@
     &.status-DRAFT,
     &.status-CANCELED,
     &.status-FINISHED {
-        background-color: #ddd;
+        background-color: color-mix(in srgb, var(--colorStatusNeutral), 60% transparent);
     }
     &.status-HAS_SUBMISSIONS {
         background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
@@ -24,15 +24,15 @@
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
     &.type-SUBMISSION {
-        background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
+        background-color: color-mix(in srgb, var(--primaryBackground300), 60% transparent);
     }
     &.status-INPROGRESS,
     &.status-TO_SUBMIT,
     &.status-SUBMITTED {
-        background-color: color-mix(in srgb, var(--palette-primary-300), 60% transparent);
+        background-color: color-mix(in srgb, var(--primaryBackground300), 60% transparent);
     }
     &.status-FINISHED {
-        background-color: #ddd;
+        background-color: color-mix(in srgb, var(--colorStatusNeutral), 60% transparent);
     }
     > i {
         font-size: 15px;

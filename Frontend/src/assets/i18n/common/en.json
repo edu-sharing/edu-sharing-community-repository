@@ -506,6 +506,13 @@
       "CONTRAST": "Improved contrast",
       "STANDARD": "Standard contrast"
     },
+    "DARK_MODE_TITLE": "Dark Mode",
+    "DARK_MODE_MESSAGE": "Choose a light or dark color scheme, or follow your device's system setting.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Use system setting",
+      "LIGHT": "Light",
+      "DARK": "Dark"
+    },
     "DRAG_AND_DROP_TITLE": "Move Content",
     "DRAG_AND_DROP_MESSAGE": "Content can be moved using drag and drop. For better accessibility, additional actions like \"forward\" and \"back\" buttons can be enabled, allowing movement without using a mouse.",
     "DRAG_AND_DROP_OPTION": {
