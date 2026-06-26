@@ -219,7 +219,6 @@
         "AUTHORITY_ROLE": "Rolle",
         "DELETE": "Löschen",
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",
-        "FILES": "Angehängte Dateien",
         "AUTHORITIES_EMPTY": "Noch nicht zugewiesen",
         "HAS_SUBMISSIONS": "Es gibt bereits Abgaben. Die Dateien können daher nicht mehr geändert werden",
         "FILES_EMPTY": "Noch keine angehängten Dateien",
@@ -234,6 +233,16 @@
         "ROLE": {
           "SUPPLEMENTARY": "Begleitmaterial",
           "SUBMITTABLE": "Arbeitsmaterial (Kopiervorlage)"
+        },
+        "SECTION": {
+          "SUBMITTABLE": {
+            "TITLE": "Arbeitsmaterial",
+            "DESCRIPTION": "Von Schüler:innen zu bearbeiten und für die Abgabe erforderlich."
+          },
+          "SUPPLEMENTARY": {
+            "TITLE": "Begleitmaterial",
+            "DESCRIPTION": "Zusätzliche Informationen – keine Bearbeitung oder Abgabe erforderlich."
+          }
         },
         "PERMISSION_ROLE": {
           "ASSIGNEE_GROUP": "je Person erledigen",

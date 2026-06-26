@@ -1,29 +1,21 @@
-@if (!nodes()?.length) {
+@if (loading()) {
+<es-spinner-small></es-spinner-small>
+} @else if (!roleNodes()?.length) {
 <div class="empty">
   {{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_EMPTY' | translate }}
 </div>
-} @if (assignment() && nodes()?.length) {
-<div class="node-list" cdkDropList [cdkDropListData]="nodes()" (cdkDropListDropped)="drop($event)">
-  @for (item of nodes(); track item) {
+} @if (!loading() && assignment() && roleNodes()?.length) {
+<div
+  class="node-list"
+  cdkDropList
+  [cdkDropListData]="roleNodes()"
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (item of roleNodes(); track item) {
   <div cdkDrag [cdkDragDisabled]="readonly()">
     <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
     <es-node-type-badge [node]="item"></es-node-type-badge>
     <div class="title">{{ item | nodeTitle }}</div>
-    <mat-form-field appearance="fill">
-      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES_ROLE' | translate }}</mat-label>
-      <mat-select
-        [value]="item.documentRole || 'SUBMITTABLE'"
-        (selectionChange)="setRole(item, $event)"
-        [disabled]="readonly()"
-      >
-        @if (translateReady$ | async) { @for (role of ['SUBMITTABLE', 'SUPPLEMENTARY']; track role)
-        {
-        <mat-option [value]="role"
-          >{{ 'EDITORIAL.ASSIGNMENT.FORM.ROLE.' + role | translate : { fallback: role } }}
-        </mat-option>
-        } }
-      </mat-select>
-    </mat-form-field>
     <div class="warn-area">
       @if ( !item.isPublic && assignment().type !== 'SUBMISSION' &&
       nodeHelperService.getNodesRight([item], ChangePermissions, NodesRightMode.Effective) ) {

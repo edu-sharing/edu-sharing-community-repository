@@ -1,4 +1,4 @@
-import { Component, computed, signal, ViewChild, inject } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -94,6 +94,7 @@ export class ManageAssignmentComponent {
     } as Assignment;
     assignment = signal<Assignment>(this.EmptyAssignment);
     saving = signal(false);
+    loadingFiles = signal(false);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -101,6 +102,10 @@ export class ManageAssignmentComponent {
     submissionsWithContent = computed(() =>
         this.submissions()?.filter((s) => s.submissionStatus !== 'NOT_STARTED'),
     );
+    readonly fileSections: { role: NodeWithRole['documentRole'] }[] = [
+        { role: 'SUBMITTABLE' },
+        { role: 'SUPPLEMENTARY' },
+    ];
     validateMainForm() {
         this.mainDataFormGroup.markAllAsTouched();
         if (!this.mainDataFormGroup.valid) {
@@ -141,6 +146,7 @@ export class ManageAssignmentComponent {
                 distinctUntilChanged(),
                 switchMap((assignmentId) => {
                     if (assignmentId) {
+                        this.loadingFiles.set(true);
                         return combineLatest([
                             this.assignmentService.getAssignment({
                                 assignmentId,
@@ -169,6 +175,7 @@ export class ManageAssignmentComponent {
                 }),
             )
             .subscribe(([assignment, files, submissions]) => {
+                this.loadingFiles.set(false);
                 this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
                 this.assignment.set(assignment);
                 this.submissions.set(submissions);
@@ -193,7 +200,7 @@ export class ManageAssignmentComponent {
             });
     }
 
-    showFileDialog() {
+    showFileDialog(documentRole: NodeWithRole['documentRole'] = 'SUBMITTABLE') {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             optionConfig: {
@@ -219,7 +226,7 @@ export class ManageAssignmentComponent {
                                     (node) =>
                                         ({
                                             ...node,
-                                            documentRole: 'SUBMITTABLE',
+                                            documentRole,
                                         } as NodeWithRole),
                                 ),
                         ),
