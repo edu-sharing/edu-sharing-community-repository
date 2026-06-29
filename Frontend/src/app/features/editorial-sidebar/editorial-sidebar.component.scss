@@ -16,7 +16,7 @@
     }
 }
 ::ng-deep {
-    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+    @media screen and (max-width: (vars.$mobileSidebarModal)) {
         .mat-drawer-transition .mat-drawer-content,
         .mat-drawer-transition .mat-drawer {
             transition: none !important;
@@ -25,7 +25,7 @@
 }
 :host {
     --editorialHeaderHeight: 88px;
-    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+    @media screen and (max-width: (vars.$mobileSidebarModal)) {
         position: fixed;
         z-index: vars.$dialogZIndex - 10;
         left: var(--roundedContainerMargin);

@@ -82,8 +82,13 @@
     background-color: var(--roundedContainerBackground);
     border-radius: var(--borderRadiusCards);
     @include materialShadow();
+    // At the mobile breakpoint, drop the card framing and go full-screen (edge to edge), only
+    // leaving room at the bottom for the fixed mobile bottom nav (es-main-menu-bottom).
     @media screen and (max-width: $mobileBreakpoint) {
-        margin-bottom: calc(var(--roundedContainerMargin) + #{$mobileNavHeight});
+        margin: 0;
+        margin-bottom: #{$mobileNavHeight};
+        border-radius: 0;
+        box-shadow: none;
     }
 }
 // Makes a rounded container a static card whose content scrolls internally (instead of the body
@@ -99,11 +104,10 @@
         100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
             var(--mainnavCurrentHeight)
     );
+    // Full-screen at the mobile breakpoint (margins are removed by roundedContainerCard): fill the
+    // viewport minus the main nav and the fixed mobile bottom nav.
     @media screen and (max-width: $mobileBreakpoint) {
-        height: calc(
-            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-                var(--mainnavCurrentHeight) - #{$mobileNavHeight}
-        );
+        height: calc(100vh - var(--mainnavCurrentHeight) - #{$mobileNavHeight});
     }
 }
 @mixin setGlobalKeyboardFocus($mode: 'outline') {
