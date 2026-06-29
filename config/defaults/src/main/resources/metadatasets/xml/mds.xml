@@ -688,20 +688,79 @@
       <hideIfEmpty>true</hideIfEmpty>
     </widget>
     <widget>
-      <id>cclom:classification_keyword</id>
+      <id>ccm:classification_keyword</id>
       <id rel="graphql">lom.classification.keyword</id>
       <type>multivalueFixedBadges</type>
-      <caption>lom_prop_classification_keyword</caption>
-      <placeholder>lom_prop_classification_keyword_placeholder</placeholder>
+      <caption>ccm_classification_keyword</caption>
+      <placeholder>ccm_classification_keyword_placeholder</placeholder>
       <suggestionSource>Sql</suggestionSource>
-      <suggestionQuery>select factual_term_ident, CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN
-        array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])
-        ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from
-        edu_factual_term where (lower(factual_term_value) like ? OR lower(factual_term_synonyms[0]) like ? OR
-        lower(factual_term_synonyms[1]) like ? OR lower(factual_term_ident) like ?) order by
-        char_length(factual_term_value) limit 100
+      <suggestionQuery>
+          WITH terms AS (
+              SELECT
+                  t.*,
+                  CASE
+                      WHEN t.factual_term_synonyms IS NULL THEN t.factual_term_value
+                      WHEN array_length(t.factual_term_synonyms, 1) = 1
+                          THEN format('%s (%s)', t.factual_term_value, t.factual_term_synonyms[1])
+                      ELSE format(
+                          '%s (%s, %s)',
+                          t.factual_term_value,
+                          t.factual_term_synonyms[1],
+                          t.factual_term_synonyms[2]
+                      )
+                  END AS label
+              FROM edu_factual_term t
+          )
+
+          SELECT
+              t.factual_term_ident,
+
+              t.label,
+              CASE
+                  WHEN '{{locale}}' = 'de' THEN t.label
+                  ELSE MAX(elem.value->>'value')
+                      FILTER (WHERE elem.ordinality = 1)
+              END
+              ||
+              COALESCE(
+                  ' (' ||
+                  string_agg(
+                      elem.value->>'value',
+                      ', ' ORDER BY elem.ordinality
+                  ) FILTER (WHERE elem.ordinality > 1)
+                  || ')',
+                  ''
+              ) AS translation,
+              t.factual_term_url
+          FROM terms t
+
+          LEFT JOIN LATERAL jsonb_array_elements(
+              COALESCE(
+                  t.factual_term_ml->'values'->'{{locale}}',
+                  '[]'::jsonb
+              )
+          ) WITH ORDINALITY AS elem(value, ordinality)
+          ON TRUE
+
+          WHERE (
+              lower(t.factual_term_value) LIKE ?
+              OR lower(t.factual_term_synonyms[1]) LIKE ?
+              OR lower(t.factual_term_synonyms[2]) LIKE ?
+              OR lower(t.factual_term_synonyms[3]) LIKE ?
+              OR lower(t.factual_term_ident) LIKE ?
+          )
+          AND NOT lower(t.factual_term_value) LIKE '!!!gesperrt!!!%'
+
+          GROUP BY
+              t.factual_term_ident,
+              t.label,
+              t.factual_term_value,
+              t.factual_term_url
+          ORDER BY
+              char_length(t.factual_term_value)
+
+          LIMIT 100;
       </suggestionQuery>
-      <suggestDisplayProperty>ccm:classification_keyword_display</suggestDisplayProperty>
       <textEscapingPolicy>all</textEscapingPolicy>
     </widget>
     <widget>
