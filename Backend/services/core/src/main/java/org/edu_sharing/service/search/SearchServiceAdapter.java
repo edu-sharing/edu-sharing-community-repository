@@ -107,6 +107,11 @@ public class SearchServiceAdapter implements SearchService {
 		return null;
 	}
 
+	/**
+	 * @deprecated Replaced by the managed contributor registry
+	 * ({@link org.edu_sharing.service.contributor.ContributorService#search}).
+	 */
+	@Deprecated
 	@Override
 	public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) {
 		return new HashSet<>();
