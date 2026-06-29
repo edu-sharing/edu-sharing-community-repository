@@ -1,8 +1,7 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { argbFromHex, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
-import { MaterialCssVarsService } from 'angular-material-css-vars';
-import { HueValue } from 'angular-material-css-vars';
+import { HueValue, MaterialCssVarsService } from 'angular-material-css-vars';
 import { ConfigService, ConfigThemeColor } from 'ngx-edu-sharing-api';
 import {
     AccessibilityService,
@@ -36,9 +35,10 @@ export class ThemeService {
     private configColors: Array<ConfigThemeColor> | null = null;
 
     constructor() {
-        // set defaults
-        this.registerDarkMode();
+        // Paint the synchronous default first (avoids a flash before the observers resolve),
+        // then start the reactive resolution. registerDarkMode must run last so its config-aware
         this.initWithDefaults();
+        this.registerDarkMode();
     }
 
     /**
