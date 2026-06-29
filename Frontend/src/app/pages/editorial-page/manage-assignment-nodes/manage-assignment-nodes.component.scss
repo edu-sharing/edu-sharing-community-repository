@@ -2,7 +2,8 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .empty {
-    color: var(--textLight);
+    color: var(--textMediumLight);
+    font-size: vars.$fontSizeSmall;
 }
 
 @mixin container() {
