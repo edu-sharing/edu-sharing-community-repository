@@ -49,7 +49,7 @@ body {
 
 // storybook no background
 body:not(.sb-show-main) {
-    background-color: $backgroundColor;
+    background-color: var(--backgroundColor);
 }
 a {
     color: var(--primary);

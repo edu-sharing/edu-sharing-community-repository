@@ -1,13 +1,4 @@
-import {
-    Component,
-    effect,
-    EventEmitter,
-    Input,
-    OnChanges,
-    Output,
-    SimpleChanges,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, effect, input, output, viewChild } from '@angular/core';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Node } from 'ngx-edu-sharing-api';
 import {
@@ -30,14 +21,37 @@ import {
     templateUrl: './search-selection-overlay.component.html',
     styleUrls: ['./search-selection-overlay.component.scss'],
     standalone: false,
+    host: {
+        '[class.table-mode]': 'effectiveDisplayType() === NodeEntriesDisplayType.Table',
+    },
 })
-export class SearchSelectionOverlayComponent implements OnChanges {
-    @Input() nodes: Node[] = [];
-    @Input() columns: ColumnType;
-    @Output() deselect = new EventEmitter<Node>();
+export class SearchSelectionOverlayComponent {
+    readonly nodes = input<Node[]>([]);
+    readonly columns = input<ColumnType>();
+    /** Display type of the connected results list; reused so the overlay matches the list layout. */
+    readonly displayType = input<NodeEntriesDisplayType>(NodeEntriesDisplayType.SmallGrid);
+    readonly deselect = output<Node>();
 
-    /** Only the first column of the search config is shown on the overlay cards. */
-    displayColumns: ColumnType = {};
+    /** Table stays a table; any card layout (Grid/SmallGrid) collapses to SmallGrid. */
+    readonly effectiveDisplayType = computed(() =>
+        this.displayType() === NodeEntriesDisplayType.Table
+            ? NodeEntriesDisplayType.Table
+            : NodeEntriesDisplayType.SmallGrid,
+    );
+
+    /** Columns passed to the wrapper: full set for the table, first column only for cards. */
+    readonly displayColumns = computed<ColumnType>(() => {
+        const columns = this.columns();
+        if (this.effectiveDisplayType() === NodeEntriesDisplayType.Table) {
+            // Table keeps all columns.
+            return columns ?? {};
+        }
+        // Keep only the first column of each variant so cards show a single (title) row.
+        return {
+            Default: columns?.Default?.slice(0, 1),
+            Table: columns?.Table?.slice(0, 1),
+        };
+    });
 
     readonly Scope = Scope;
     readonly InteractionType = InteractionType;
@@ -49,32 +63,21 @@ export class SearchSelectionOverlayComponent implements OnChanges {
     private syncing = false;
 
     constructor() {
+        // Keep the data source in sync with the input node list.
+        effect(() => {
+            this.dataSource.setData(this.nodes() ?? []);
+            this.dataSource.isLoading = false;
+        });
         // Pre-select every node so all cards render with a checked checkbox. Runs whenever the
         // wrapper becomes available or the node list changes (see syncSelection for convergence).
         effect(() => {
+            // Read nodes() so this re-runs when the selection changes.
+            this.nodes();
             const wrapper = this.wrapper();
             if (wrapper) {
                 this.syncSelection(wrapper);
             }
         });
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.columns) {
-            // Keep only the first column of each variant so cards show a single (title) row.
-            this.displayColumns = {
-                Default: this.columns?.Default?.slice(0, 1),
-                Table: this.columns?.Table?.slice(0, 1),
-            };
-        }
-        if (changes.nodes) {
-            this.dataSource.setData(this.nodes ?? []);
-            this.dataSource.isLoading = false;
-            const wrapper = this.wrapper();
-            if (wrapper) {
-                this.syncSelection(wrapper);
-            }
-        }
     }
 
     onSelectionChange(event: SelectionChange<NodeEntriesDataType>): void {
@@ -83,7 +86,7 @@ export class SearchSelectionOverlayComponent implements OnChanges {
         }
         const selected = event.source.selected as Node[];
         // A node present in our list but no longer selected was unchecked by the user.
-        const removed = (this.nodes ?? []).filter((node) => !selected.includes(node));
+        const removed = (this.nodes() ?? []).filter((node) => !selected.includes(node));
         removed.forEach((node) => this.deselect.emit(node));
     }
 
@@ -94,8 +97,9 @@ export class SearchSelectionOverlayComponent implements OnChanges {
         try {
             const selection = wrapper.getSelection();
             selection.clear();
-            if (this.nodes?.length) {
-                selection.select(...this.nodes);
+            const nodes = this.nodes();
+            if (nodes?.length) {
+                selection.select(...nodes);
             }
         } finally {
             this.syncing = false;

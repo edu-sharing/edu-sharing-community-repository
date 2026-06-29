@@ -137,14 +137,13 @@
   [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!(searchPage.selection | async)?.length"
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
-  [cdkConnectedOverlayHasBackdrop]="true"
-  cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-  (backdropClick)="selectionOverlayOpen = false"
+  [cdkConnectedOverlayHasBackdrop]="false"
   (overlayOutsideClick)="selectionOverlayOpen = false"
 >
   <es-search-selection-overlay
     [nodes]="(searchPage.selection | async) || []"
     [columns]="resultColumns.value"
+    [displayType]="(state | async).displayType"
     (deselect)="deselectNode($event)"
   ></es-search-selection-overlay>
 </ng-template>

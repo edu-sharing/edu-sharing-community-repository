@@ -1,9 +1,10 @@
 @use 'sass:color';
 @use '../../../../assets/scss/mixins' as *;
+@use '../../../../assets/scss/variables-scss' as vars;
 
 $defaultColumnWidth: 145px;
 $minColumnWidth: 30%;
-$rowHeight: 58px;
+$rowHeight: vars.$nodeEntriesTableRowHeight;
 
 :host {
     display: flex;

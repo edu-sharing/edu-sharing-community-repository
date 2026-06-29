@@ -186,8 +186,9 @@
       } }
     </mat-cell>
   </ng-container>
-  }
+  } @if (entriesService.tableConfig?.headers !== false) {
   <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
+  }
   <mat-row
     mat-row
     matRipple

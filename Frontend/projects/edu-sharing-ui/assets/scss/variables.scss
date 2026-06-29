@@ -35,6 +35,8 @@
     --borderGray: #888;
     --borderLight: #eee;
     --borderDark: #333;
+    // a light border that uses the primary color
+    --borderLightPrimary: color-mix(in srgb, var(--primary) 15%, white);
     --buttonDisabled: #999;
     --workspaceTopBarBackground: #383838;
     --workspaceTopBarFontColor: #fff;
@@ -144,6 +146,7 @@ body.isDarkTheme {
     --borderGray: #c7c7c7;
     --borderLight: #383838;
     --borderDark: #ccc;
+    --borderLightPrimary: color-mix(in srgb, var(--primary) 15%, black);
     --buttonDisabled: #6f6f6f;
     --roundedContainerBackground: #262626;
     --landingPageShortcutBackground: #2a2a2a;

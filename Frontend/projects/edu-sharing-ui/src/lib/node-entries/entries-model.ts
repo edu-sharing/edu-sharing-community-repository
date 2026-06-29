@@ -111,6 +111,8 @@ export type TableConfig = {
      * scroll: horizontal scrolling
      */
     dataColumnLayout: 'scroll' | 'limit';
+    /** whether to render the table header row; defaults to true when omitted */
+    headers?: boolean;
 };
 export type TreeConfig = {
     /**

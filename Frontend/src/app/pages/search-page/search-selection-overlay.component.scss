@@ -5,9 +5,29 @@
     display: block;
     width: 100%;
     box-sizing: border-box;
-    padding: 0 25px;
+    border-top-left-radius: var(--borderRadiusCards);
+    border-top-right-radius: var(--borderRadiusCards);
+    padding: 10px 25px 0 25px;
     background-color: var(--roundedContainerBackground, #{vars.$backgroundColor});
-    border-top: 1px solid var(--mat-divider-color);
+    border-left: 1px solid var(--borderLightPrimary);
+    border-top: 1px solid var(--borderLightPrimary);
+    border-right: 1px solid var(--borderLightPrimary);
     // Gradient color used by the horizontal scroll-helper arrows of the card grid.
     --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
+}
+
+// In table mode, cap the overlay height to ~4 rows and scroll internally.
+:host.table-mode {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    es-node-entries-wrapper {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        // 4 entry rows
+        max-height: vars.$nodeEntriesTableRowHeight * 4;
+        @include mixins.materialScrollbarLight();
+    }
 }

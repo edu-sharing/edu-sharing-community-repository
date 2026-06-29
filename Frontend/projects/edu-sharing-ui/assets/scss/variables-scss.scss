@@ -11,6 +11,9 @@ $mobileWidth: 700px !default;
 $mobileStage: 100px !default;
 $mobileTabSwitchWidth: $mobileWidth + $mobileStage * 2 !default;
 
+// row height of the node-entries table
+$nodeEntriesTableRowHeight: 58px !default;
+
 // All variables can be overridden in `branding.scss`.
 /* replace variables which are may not defined in the branding */
 $primaryVeryLight: var(--primaryBackground50) !default;
