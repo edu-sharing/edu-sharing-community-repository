@@ -19,13 +19,15 @@
         >{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}
         <span aria-hidden="true" class="mat-mdc-form-field-required-marker">*</span></mat-label
       >
+      @for (cfg of [editorConfig()]; track cfg.skin) {
       <editor
-        [init]="editorConfig"
+        [init]="cfg"
         formControlName="summary"
         [class.editor-invalid]="
           mainDataFormGroup.get('summary').invalid && mainDataFormGroup.get('summary').touched
         "
       ></editor>
+      }
       <div class="files">
         @if (submissionsWithContent()?.length > 0) {
         <es-info-message class="submissions">{{

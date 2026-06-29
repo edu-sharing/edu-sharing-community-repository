@@ -1,13 +1,19 @@
-import { AfterViewInit, Component, ViewChild, inject } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    effect,
+    inject,
+    signal,
+    untracked,
+    ViewChild,
+} from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { MdsEditorWidgetBase } from '../mds-editor-widget-base';
-import { TranslateService } from '@ngx-translate/core';
-import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { EditorComponent, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { PlatformLocation } from '@angular/common';
 import { MdsEditorWidgetContainerComponent } from '../mds-editor-widget-container/mds-editor-widget-container.component';
 import { CardDialogService } from '../../../../dialogs/card-dialog/card-dialog.service';
-import { Toast } from '../../../../../services/toast';
+import { ThemeService } from '../../../../../services/theme.service';
 import { ValueType } from 'ngx-edu-sharing-ui';
 
 @Component({
@@ -27,6 +33,7 @@ import { ValueType } from 'ngx-edu-sharing-ui';
 })
 export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase implements AfterViewInit {
     private platformLocation = inject(PlatformLocation);
+    private theme = inject(ThemeService);
     cardService = inject(CardDialogService);
 
     @ViewChild(EditorComponent) editorComponent: EditorComponent;
@@ -45,8 +52,9 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
             'h1 h2 h3 h4 | bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | undo redo',
         language: this.translate.getDefaultLang(),
     };
-    editorConfig: Record<string, any>;
+    editorConfig = signal<Record<string, any>>(null);
     _html = '';
+    private disabledChangeRegistered = false;
     dummyControl = new UntypedFormControl();
     get html() {
         return this._html;
@@ -57,6 +65,40 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
     }
     constructor() {
         super();
+        // Rebuild the editor config when the theme flips so the editor is re-created
+        // with the matching skin (TinyMCE cannot swap skins on a live instance).
+        effect(() => {
+            this.theme.isDarkMode();
+            untracked(() => {
+                if (this.editorConfig()) {
+                    this.buildConfig();
+                }
+            });
+        });
+    }
+
+    private buildConfig(): void {
+        const base = this.widget.definition.configuration
+            ? {
+                  ...this.editorConfigDefault,
+                  ...JSON.parse(this.widget.definition.configuration),
+              }
+            : { ...this.editorConfigDefault };
+        base.skin = this.theme.isDarkMode() ? 'oxide-dark' : 'oxide';
+        base.content_css = this.theme.isDarkMode() ? 'dark' : 'default';
+        this.editorConfig.set(base);
+    }
+
+    onEditorInit(): void {
+        this.editorComponent.editor.mode.set(this.dummyControl.disabled ? 'readonly' : 'design');
+        if (!this.disabledChangeRegistered) {
+            this.disabledChangeRegistered = true;
+            this.dummyControl.registerOnDisabledChange((isDisabled) =>
+                this.editorComponent?.editor?.mode.set(isDisabled ? 'readonly' : 'design'),
+            );
+        }
+        // we need to disable the focus trap cause otherwise any overlay dialogs (i.e. insert link) of tinymce will break
+        this.cardService.getFocusTraps().forEach((f) => f._disable());
     }
 
     onIndeterminateChange(isIndeterminate: boolean): void {
@@ -87,25 +129,6 @@ export class MdsEditorWidgetTinyMCEComponent extends MdsEditorWidgetBase impleme
         (this.editorConfigDefault as any).base_url =
             this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/';
         // dirty workaround for tinyMCE
-        setTimeout(() => {
-            if (this.widget.definition.configuration) {
-                this.editorConfig = {
-                    ...this.editorConfigDefault,
-                    ...JSON.parse(this.widget.definition.configuration),
-                };
-            } else {
-                this.editorConfig = this.editorConfigDefault;
-            }
-            setTimeout(() => {
-                this.editorComponent.editor.mode.set(
-                    this.dummyControl.disabled ? 'readonly' : 'design',
-                );
-                this.dummyControl.registerOnDisabledChange((isDisabled) =>
-                    this.editorComponent.editor.mode.set(isDisabled ? 'readonly' : 'design'),
-                );
-                // we need to disable the focus trap cause otherwise any overlay dialogs (i.e. insert link) of tinymce will break
-                this.cardService.getFocusTraps().forEach((f) => f._disable());
-            });
-        });
+        setTimeout(() => this.buildConfig());
     }
 }

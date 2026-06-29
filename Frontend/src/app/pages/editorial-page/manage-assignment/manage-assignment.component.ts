@@ -33,6 +33,7 @@ import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-br
 import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { ThemeService } from '../../../services/theme.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 
@@ -78,12 +79,15 @@ export class ManageAssignmentComponent {
     private editorialPageService = inject(EditorialPageService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    private theme = inject(ThemeService);
 
-    readonly editorConfig = {
+    readonly editorConfig = computed(() => ({
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
-    };
+        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+    }));
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;

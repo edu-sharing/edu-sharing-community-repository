@@ -83,6 +83,7 @@ import { EditorialPageService } from '../editorial-page.service';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ThemeService } from '../../../services/theme.service';
 
 /**
  * submits an individual assignment (for student)
@@ -122,16 +123,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
     private restConnectorsService = inject(RestConnectorsService);
     private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
     private nodeTitlePipe = inject(NodeTitlePipe);
+    private theme = inject(ThemeService);
 
     @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
     >;
-    readonly editorConfig = {
+    readonly editorConfig = computed(() => ({
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
-    };
+        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+    }));
     readonly destroyed$ = new Subject<void>();
     columns: ColumnType = {
         Default: [new ListItem('NODE', 'title')],

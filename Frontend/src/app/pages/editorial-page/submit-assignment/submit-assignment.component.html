@@ -154,7 +154,9 @@
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup" class="block">
           <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.USER_NOTES' | translate }}</label>
-          <editor [init]="editorConfig" formControlName="userNotes"></editor>
+          @for (cfg of [editorConfig()]; track cfg.skin) {
+          <editor [init]="cfg" formControlName="userNotes"></editor>
+          }
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
 

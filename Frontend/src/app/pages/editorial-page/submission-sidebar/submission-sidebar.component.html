@@ -90,7 +90,9 @@
         <div class="feedback">
           <form [formGroup]="feedbackForm">
             <mat-label>{{ 'EDITORIAL.SIDEBAR.SUBMISSION.FEEDBACK' | translate }}</mat-label>
-            <editor [init]="editorConfig" formControlName="feedback"></editor>
+            @for (cfg of [editorConfig()]; track cfg.skin) {
+            <editor [init]="cfg" formControlName="feedback"></editor>
+            }
             <mat-slide-toggle
               class="toggle-reverse show-notes"
               [ngModelOptions]="{ standalone: true }"
@@ -148,7 +150,9 @@
           text="html"
           [node]="submission()?.ref?.id"
         ></es-comments-list>
-        <editor [init]="editorConfig" formControlName="submitComment"></editor>
+        @for (cfg of [editorConfig()]; track cfg.skin) {
+        <editor [init]="cfg" formControlName="submitComment"></editor>
+        }
         <button mat-flat-button color="primary" [disabled]="isReadOnly()" (click)="addComment()">
           {{ 'EDITORIAL.SUBMIT_ASSIGNMENT.ADD_COMMENT' | translate }}
         </button>
