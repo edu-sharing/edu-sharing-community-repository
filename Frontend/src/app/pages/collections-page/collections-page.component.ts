@@ -6,10 +6,12 @@ import {
     inject,
     OnDestroy,
     TemplateRef,
+    viewChild,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
+    ActionbarComponent,
     ColorHelper,
     LocalEventsService,
     NodeEntriesDisplayType,
@@ -99,6 +101,7 @@ export class CollectionsPageComponent implements OnDestroy {
 
     @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbar');
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
