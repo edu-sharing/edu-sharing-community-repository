@@ -1,6 +1,12 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
+// Included at the top level (not nested under mat-sidenav-container) so the mixin's open-drawer
+// margin selector (`mat-sidenav-container.…-open &`) resolves correctly.
+.main-content {
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+}
+
 mat-sidenav-container {
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     .es-mat-sidenav-content-mds {
@@ -12,7 +18,6 @@ mat-sidenav-container {
             100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
                 var(--mainnavCurrentHeight)
         );
-        @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
         .top-area {
             display: flex;
             flex-direction: row;
@@ -44,16 +49,6 @@ mat-sidenav-container {
             .options-left {
                 flex-grow: 1;
             }
-        }
-    }
-    &.mat-sidenav-container-left-open {
-        .main-content {
-            margin-left: 4px;
-        }
-    }
-    &.mat-sidenav-container-right-open {
-        .main-content {
-            margin-right: 4px;
         }
     }
 }

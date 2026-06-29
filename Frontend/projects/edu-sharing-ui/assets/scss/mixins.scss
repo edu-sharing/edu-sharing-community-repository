@@ -77,6 +77,19 @@
 // Includes the mobile bottom-nav (es-main-menu-bottom) margin-bottom clearance. The mobile
 // breakpoint + nav height are passed in because the breakpoint vars live in `variables-scss`,
 // which forwards this file (importing it here would be a circular dependency).
+//
+// Open-drawer nudge: when the card sits inside an open mat-sidenav drawer the card shrinks its
+// margin on that side (to 4px) so it sits closer to the drawer edge. This relies on the host page
+// adding the marker class(es) to its `<mat-sidenav-container>` itself — they are NOT set by Angular
+// Material:
+//   [class.mat-sidenav-container-left-open]="…"   // a left drawer / filter bar is open
+//   [class.mat-sidenav-container-right-open]="…"  // a right drawer (e.g. editorial sidebar) is open
+// Pages currently wiring this: editorial-page (both), search-page & collections-page (right only),
+// workspace-page (right). Without the binding the nudge simply never applies.
+//
+// IMPORTANT: include this mixin on a TOP-LEVEL `.main-content` selector, not nested under
+// `mat-sidenav-container { … }`. The nudge rule is `mat-sidenav-container.…-open &`; if `&` already
+// contains `mat-sidenav-container` the selector gains a second, non-matching ancestor.
 @mixin roundedContainerCard($mobileBreakpoint, $mobileNavHeight) {
     margin: var(--roundedContainerMargin);
     background-color: var(--roundedContainerBackground);
@@ -89,6 +102,16 @@
         margin-bottom: #{$mobileNavHeight};
         border-radius: 0;
         box-shadow: none;
+    }
+    // When the card lives inside an open mat-sidenav drawer, sit it closer to the drawer edge.
+    // Scoped above the mobile breakpoint, where the card is full-screen (no side margins).
+    @media screen and (min-width: ($mobileBreakpoint + 1px)) {
+        mat-sidenav-container.mat-sidenav-container-left-open & {
+            margin-left: 4px;
+        }
+        mat-sidenav-container.mat-sidenav-container-right-open & {
+            margin-right: 4px;
+        }
     }
 }
 // Makes a rounded container a static card whose content scrolls internally (instead of the body

@@ -17,7 +17,9 @@
 whether a tab bar will be shown. The body itself always lives in the same place now. -->
 @if (tabBarIsVisible !== null) {
 <main>
-  <mat-sidenav-container>
+  <mat-sidenav-container
+    [class.mat-sidenav-container-right-open]="this.editorialSidebarService.sidebarOpened()"
+  >
     <mat-sidenav
       #rightSidenav
       [mode]="'side'"

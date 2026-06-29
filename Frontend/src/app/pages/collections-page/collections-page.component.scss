@@ -1,16 +1,86 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 $sidenavWidth: 250px;
-/*
-table, div {
-   font-family: open_sansregular;
-   font-size: 14px;
+
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    // Lock to the available viewport height (below the in-flow sticky main nav) and clip, so the
+    // page never produces a body scrollbar — the content card scrolls internally instead.
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
 }
-*/
+:host ::ng-deep mat-sidenav-container mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+}
+
+mat-sidenav-container {
+    flex: 1;
+    min-height: 0;
+    background-color: unset;
+}
+
+// Global content container, mirroring the search/editorial page `.main-content` card.
+.main-content {
+    flex-grow: 1;
+    min-width: 0;
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    // Always at least full (available) screen height, even if the mixin's fixed height is overridden.
+    min-height: calc(
+        100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+            var(--mainnavCurrentHeight)
+    );
+    @media screen and (max-width: vars.$mobileTabSwitchWidth) {
+        min-height: calc(100vh - var(--mainnavCurrentHeight) - #{vars.$mobileTabNavHeight});
+    }
+
+    // The tab bar is a static header; only the body below it scrolls.
+    > mat-tab-group {
+        flex-shrink: 0;
+    }
+}
+
+// The scrolling region below the tabs.
+.collections-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    @include mixins.materialScrollbarLight();
+
+    // The collection header is a static block; the drop area fills the remaining height so the
+    // grid (and its left info-bar column) can stretch to the full card height.
+    .collections-header-group {
+        flex-shrink: 0;
+    }
+    .collections-drop {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        .collectionsContainer {
+            flex: 1;
+            // Single stretchable row so the cells (incl. the left info-bar) fill the full height;
+            // the implicit `auto` minimum still lets the row grow when content overflows.
+            grid-template-rows: 1fr;
+        }
+        es-footer {
+            flex-shrink: 0;
+        }
+    }
+}
+
 mat-tab-group {
     margin-bottom: 0;
-    position: sticky;
-    top: var(--mainnavHeight);
     width: 100%;
     z-index: 15;
 }
@@ -21,16 +91,10 @@ mat-tab-group {
     // actionbar.
     grid-template-columns: $sidenavWidth auto;
     position: relative;
-    // Use `margin-top` instead of `top` to not create a negative position offset at the bottom of
-    // the container, which could be overlapped by a custom footer.
-    min-height: calc(100vh - var(--mainnavHeight));
     .collections-right {
         // fix breadcrumbs overflow
         max-width: calc(100vw - $sidenavWidth);
         overflow-x: hidden;
-    }
-    &.collectionsContainerTabs {
-        min-height: calc(100vh - (var(--mainnavHeight) + 48px));
     }
 
     es-collection-content {
@@ -154,7 +218,8 @@ section {
     es-collection-content {
         .actionbarMaterials {
             position: sticky;
-            top: var(--mainnavHeight);
+            // Sticks to the top of the internally-scrolling card body.
+            top: 0;
             z-index: 2;
             background-color: $backgroundColor;
         }
@@ -273,10 +338,5 @@ section {
     }
     .tab-group {
         max-width: 1000px;
-    }
-}
-@media only screen and (max-width: $mobileTabSwitchWidth) {
-    .collectionsContainer {
-        margin-bottom: $mobileTabNavHeight;
     }
 }

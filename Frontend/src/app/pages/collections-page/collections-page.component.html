@@ -4,53 +4,9 @@
   [description]="'COLLECTIONS.TUTORIAL_DESCRIPTION'"
   [showSkip]="false"
 ></es-tutorial>
-@if (showTabs()) {
-<mat-tab-group
-  role="navigation"
-  [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-  mat-stretch-tabs
-  [color]="$any('dark')"
-  [(selectedIndex)]="tabSelectedIndex"
+<mat-sidenav-container
+  [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
-  @if (!isGuest) {
-  <mat-tab labelClass="mat-tab-my data-test-collections-tab-my">
-    <ng-template mat-tab-label>
-      <i esIcon="person" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
-    </ng-template>
-  </mat-tab>
-  } @if (!isGuest) {
-  <mat-tab labelClass="mat-tab-groups data-test-collections-tab-collaborative">
-    <ng-template mat-tab-label>
-      <i esIcon="group" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
-    </ng-template>
-  </mat-tab>
-  } @if (hasEditorial) {
-  <mat-tab labelClass="mat-tab-editorial data-test-collections-tab-editorial">
-    <ng-template mat-tab-label>
-      <i esIcon="star" esIconContext="collection-scope" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
-    </ng-template>
-  </mat-tab>
-  } @if (hasMediacenter) {
-  <mat-tab labelClass="mat-tab-media-center data-test-collections-tab-media-centre">
-    <ng-template mat-tab-label>
-      <i esIcon="domain" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
-    </ng-template>
-  </mat-tab>
-  }
-  <mat-tab labelClass="mat-tab-edu-all data-test-collections-tab-public">
-    <ng-template mat-tab-label>
-      <i esIcon="language" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
-}
-<ng-container *ngTemplateOutlet="customTemplates.value.belowTabs"></ng-container>
-<mat-sidenav-container>
   <mat-sidenav
     #rightSidenav
     [mode]="'side'"
@@ -70,117 +26,167 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="collections-header-group">
-      @if (collectionContentTemplateRef && !isRootLevelCollection()) {
-      <es-actionbar
-        #actionbarCollection
-        [numberOfAlwaysVisibleOptions]="1"
-        [numberOfAlwaysVisibleOptionsMobile]="1"
-        appearance="round"
-        [style]="'flat'"
-        [dropdownPosition]="'right'"
-      ></es-actionbar>
-      }
-      <!-- collection header -->
-      <ng-container
-        [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
-        [ngTemplateOutletContext]="{
-          $implicit: null,
-          collection: collection,
-          permissions: collectionContentRef?.permissions ?? null,
-          isLoading: isLoading,
-          tabSelected: tabSelected
-        }"
-      ></ng-container>
-      <ng-template #collectionContentTemplateRefDefault> </ng-template>
-    </div>
-
-    <div cdkDropList [cdkDropListSortingDisabled]="true">
-      <div
-        [class.collectionsContainerTabs]="showTabs()"
-        [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
-        class="collectionsContainer"
-        [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
+    <div class="main-content">
+      @if (showTabs()) {
+      <mat-tab-group
+        role="navigation"
+        [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+        mat-stretch-tabs
+        [color]="$any('dark')"
+        [(selectedIndex)]="tabSelectedIndex"
       >
-        @if (!isLoading && !isRootLevelCollection() && collection) {
-        <es-collection-info-bar
-          #infobar
-          [collection]="collection"
-          [permissions]="collectionContentRef?.permissions ?? null"
-          (edit)="collectionEdit()"
-        ></es-collection-info-bar>
+        @if (!isGuest) {
+        <mat-tab labelClass="mat-tab-my data-test-collections-tab-my">
+          <ng-template mat-tab-label>
+            <i esIcon="person" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
+          </ng-template>
+        </mat-tab>
+        } @if (!isGuest) {
+        <mat-tab labelClass="mat-tab-groups data-test-collections-tab-collaborative">
+          <ng-template mat-tab-label>
+            <i esIcon="group" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
+          </ng-template>
+        </mat-tab>
+        } @if (hasEditorial) {
+        <mat-tab labelClass="mat-tab-editorial data-test-collections-tab-editorial">
+          <ng-template mat-tab-label>
+            <i esIcon="star" esIconContext="collection-scope" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
+          </ng-template>
+        </mat-tab>
+        } @if (hasMediacenter) {
+        <mat-tab labelClass="mat-tab-media-center data-test-collections-tab-media-centre">
+          <ng-template mat-tab-label>
+            <i esIcon="domain" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
+          </ng-template>
+        </mat-tab>
         }
-        <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
-        <div class="collections-right">
-          @if (isLoading || !isReady) {
-          <section class="collections-loading-div">
-            <es-spinner></es-spinner>
-          </section>
-          } @if (isRootLevelCollection()) {
-          <h1 esTitle class="cdk-visually-hidden">
-            {{ 'COLLECTIONS.TITLE' | translate }}
-          </h1>
-          } @if (!isLoading && isGuest) {
-          <a
-            mat-button
-            color="primary"
-            class="switchToSearch"
-            title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
-            tabindex="0"
-            (click)="navigateToSearch()"
-            [routerLink]="['/' + ROUTER_PREFIX + 'search']"
-          >
-            {{ 'COLLECTIONS.TO_SEARCH' | translate }}
-            <i esIcon="arrow_forward"></i>
-          </a>
-          } @if (collection) { @if (!isRootLevelCollection() && !isLoading) {
+        <mat-tab labelClass="mat-tab-edu-all data-test-collections-tab-public">
+          <ng-template mat-tab-label>
+            <i esIcon="language" class="tab-icon"></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+      }
+      <div class="collections-body">
+        <ng-container *ngTemplateOutlet="customTemplates.value.belowTabs"></ng-container>
+        <div class="collections-header-group">
+          @if (collectionContentTemplateRef && !isRootLevelCollection()) {
+          <es-actionbar
+            #actionbarCollection
+            [numberOfAlwaysVisibleOptions]="1"
+            [numberOfAlwaysVisibleOptionsMobile]="1"
+            appearance="round"
+            [style]="'flat'"
+            [dropdownPosition]="'right'"
+          ></es-actionbar>
+          }
+          <!-- collection header -->
+          <ng-container
+            [ngTemplateOutlet]="collectionContentTemplateRef ?? collectionContentTemplateRefDefault"
+            [ngTemplateOutletContext]="{
+              $implicit: null,
+              collection: collection,
+              permissions: collectionContentRef?.permissions ?? null,
+              isLoading: isLoading,
+              tabSelected: tabSelected
+            }"
+          ></ng-container>
+          <ng-template #collectionContentTemplateRefDefault> </ng-template>
+        </div>
+
+        <div class="collections-drop" cdkDropList [cdkDropListSortingDisabled]="true">
           <div
-            role="navigation"
-            [attr.aria-label]="'NAV.COLLECTIONS' | translate"
-            class="breadcrumb-space"
+            [class.collectionsContainerTabs]="showTabs()"
+            [class.collectionsContainerNoSidebar]="isRootLevelCollection() || isLoading"
+            class="collectionsContainer"
+            [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
           >
-            <es-breadcrumbs
-              class="collections-breadcrumb"
-              [home]="'COLLECTIONS.TAB.' + tabSelected"
-              [showLanding]="true"
-              [homeRouterLink]="{
-                routerLink: ['.'],
-                queryParams: { scope: tabSelected, id: null },
-                queryParamsHandling: 'merge'
-              }"
-              preferredName="title"
-              [invisibleDescription]="true"
-              [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
-              (dropElement)="
-                collectionContentComponent.dropOnCollection($event.target, $event.source)
-              "
-            ></es-breadcrumbs>
-            <es-actionbar [options]="sidebarOption"></es-actionbar>
-          </div>
-          }
-          <es-collection-content
-            #collectionContentComponent
-            [collection]="collection"
-            [getInfobar]="getInfobar"
-            [scope]="getScope()"
-            [isRootLevel]="isRootLevelCollection()"
-            [createAllowed]="createAllowed"
-            [class.collections-master-div-notabs]="!showTabs()"
-          >
-            <ng-template #empty>
-              @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
-              {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
-              } @if (tabSelected === 'EDU_ALL') {
-              {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
-              } } @if (!isRootLevelCollection()) {
-              {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+            @if (!isLoading && !isRootLevelCollection() && collection) {
+            <es-collection-info-bar
+              #infobar
+              [collection]="collection"
+              [permissions]="collectionContentRef?.permissions ?? null"
+              (edit)="collectionEdit()"
+            ></es-collection-info-bar>
+            }
+            <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
+            <div class="collections-right">
+              @if (isLoading || !isReady) {
+              <section class="collections-loading-div">
+                <es-spinner></es-spinner>
+              </section>
+              } @if (isRootLevelCollection()) {
+              <h1 esTitle class="cdk-visually-hidden">
+                {{ 'COLLECTIONS.TITLE' | translate }}
+              </h1>
+              } @if (!isLoading && isGuest) {
+              <a
+                mat-button
+                color="primary"
+                class="switchToSearch"
+                title="{{ 'COLLECTIONS.TO_SEARCH' | translate }}"
+                tabindex="0"
+                (click)="navigateToSearch()"
+                [routerLink]="['/' + ROUTER_PREFIX + 'search']"
+              >
+                {{ 'COLLECTIONS.TO_SEARCH' | translate }}
+                <i esIcon="arrow_forward"></i>
+              </a>
+              } @if (collection) { @if (!isRootLevelCollection() && !isLoading) {
+              <div
+                role="navigation"
+                [attr.aria-label]="'NAV.COLLECTIONS' | translate"
+                class="breadcrumb-space"
+              >
+                <es-breadcrumbs
+                  class="collections-breadcrumb"
+                  [home]="'COLLECTIONS.TAB.' + tabSelected"
+                  [showLanding]="true"
+                  [homeRouterLink]="{
+                    routerLink: ['.'],
+                    queryParams: { scope: tabSelected, id: null },
+                    queryParamsHandling: 'merge'
+                  }"
+                  preferredName="title"
+                  [invisibleDescription]="true"
+                  [canDropNodes]="collectionContentComponent.canDropOnCollectionBreadcrumbs"
+                  (dropElement)="
+                    collectionContentComponent.dropOnCollection($event.target, $event.source)
+                  "
+                ></es-breadcrumbs>
+                <es-actionbar [options]="sidebarOption"></es-actionbar>
+              </div>
               }
-            </ng-template>
-          </es-collection-content>
-          }
+              <es-collection-content
+                #collectionContentComponent
+                [collection]="collection"
+                [getInfobar]="getInfobar"
+                [scope]="getScope()"
+                [isRootLevel]="isRootLevelCollection()"
+                [createAllowed]="createAllowed"
+                [class.collections-master-div-notabs]="!showTabs()"
+              >
+                <ng-template #empty>
+                  @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+                  {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
+                  } @if (tabSelected === 'EDU_ALL') {
+                  {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
+                  } } @if (!isRootLevelCollection()) {
+                  {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+                  }
+                </ng-template>
+              </es-collection-content>
+              }
+            </div>
+          </div>
+          <es-footer [scope]="'collections'"></es-footer>
         </div>
       </div>
-      <es-footer [scope]="'collections'"></es-footer>
     </div>
   </mat-sidenav-content>
   <ng-template
