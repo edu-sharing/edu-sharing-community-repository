@@ -8,7 +8,6 @@ import { SearchPageResultsComponent } from './search-page-results.component';
 import { SearchPageRoutingModule } from './search-page-routing.module';
 import { SearchPageComponent } from './search-page.component';
 import { SearchPageToolbarComponent } from './search-page-toolbar.component';
-import { SearchSelectionOverlayComponent } from './search-selection-overlay.component';
 import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { SearchPageFilterBarComponent } from './search-page-filter-bar.component';
@@ -25,7 +24,6 @@ import { EditorialSidebarModule } from '../../features/editorial-sidebar/editori
         SearchPageToolbarComponent,
         SearchPageResultsComponent,
         SearchPageResultsAllComponent,
-        SearchSelectionOverlayComponent,
     ],
     imports: [
         SearchPageRoutingModule,

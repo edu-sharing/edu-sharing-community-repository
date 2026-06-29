@@ -75,10 +75,10 @@
   ></es-collection-proposals>
   <section class="collections-cards-div" data-test="collection-content-materials">
     <es-actionbar
-      #actionbarReferences
+      #actionbarToggles
       class="actionbarMaterials"
       [class.display-none]="dataSourceReferences.isLoading"
-      [numberOfAlwaysVisibleOptions]="1"
+      [showActionOptions]="false"
     ></es-actionbar>
     <div
       class="references-wrapper"

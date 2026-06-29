@@ -162,31 +162,94 @@
                 <es-actionbar [options]="sidebarOption"></es-actionbar>
               </div>
               }
-              <es-collection-content
-                #collectionContentComponent
-                [collection]="collection"
-                [getInfobar]="getInfobar"
-                [scope]="getScope()"
-                [isRootLevel]="isRootLevelCollection()"
-                [createAllowed]="createAllowed"
-                [class.collections-master-div-notabs]="!showTabs()"
-              >
-                <ng-template #empty>
-                  @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
-                  {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
-                  } @if (tabSelected === 'EDU_ALL') {
-                  {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
-                  } } @if (!isRootLevelCollection()) {
-                  {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
-                  }
-                </ng-template>
-              </es-collection-content>
+              <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
+              <div class="collections-scroll">
+                <es-collection-content
+                  #collectionContentComponent
+                  [collection]="collection"
+                  [getInfobar]="getInfobar"
+                  [selectionActionbar]="selectionActionbar"
+                  [scope]="getScope()"
+                  [isRootLevel]="isRootLevelCollection()"
+                  [createAllowed]="createAllowed"
+                  [class.collections-master-div-notabs]="!showTabs()"
+                >
+                  <ng-template #empty>
+                    @if (isRootLevelCollection()) { @if (tabSelected === 'EDU_GROUPS') {
+                    {{ 'COLLECTIONS.EMPTY.SHARED' | translate }}
+                    } @if (tabSelected === 'EDU_ALL') {
+                    {{ 'COLLECTIONS.EMPTY.PUBLIC' | translate }}
+                    } } @if (!isRootLevelCollection()) {
+                    {{ 'COLLECTIONS.EMPTY.SUBCOLLECTIONS' | translate }}
+                    }
+                  </ng-template>
+                </es-collection-content>
+              </div>
               }
             </div>
           </div>
           <es-footer [scope]="'collections'"></es-footer>
         </div>
       </div>
+
+      <!-- Full-width selection bar (incl. the info-bar column) shown when references are selected;
+        mirrors the search-page selection layout. State lives in es-collection-content. -->
+      <div
+        class="selection-action-bar"
+        cdkOverlayOrigin
+        #selectionBar="cdkOverlayOrigin"
+        [class.visible]="collectionContentRef?.selection?.length"
+      >
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="collectionContentRef?.clearSelection()"
+          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="
+            collectionContentRef.selectionOverlayOpen = !collectionContentRef.selectionOverlayOpen
+          "
+        >
+          {{
+            'SEARCH.N_SELECTED'
+              | translate : { count: collectionContentRef?.selection?.length || 0 }
+          }}
+          <i
+            [esIcon]="collectionContentRef?.selectionOverlayOpen ? 'expand_more' : 'expand_less'"
+          ></i>
+        </button>
+        <es-actionbar
+          #selectionActionbarRef
+          [showToggleOptions]="false"
+          showCaptions="ifRoom"
+        ></es-actionbar>
+      </div>
+
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="
+          collectionContentRef?.selectionOverlayOpen && !!collectionContentRef?.selection?.length
+        "
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="collectionContentRef.selectionOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="collectionContentRef?.selection || []"
+          [columns]="collectionContentRef?.referencesColumns"
+          [displayType]="collectionContentRef?.referencesDisplayType"
+          (deselect)="collectionContentRef?.deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
     </div>
   </mat-sidenav-content>
   <ng-template

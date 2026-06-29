@@ -10,6 +10,7 @@ $sidenavWidth: 250px;
     flex-direction: column;
     // Lock to the available viewport height (below the in-flow sticky main nav) and clip, so the
     // page never produces a body scrollbar — the content card scrolls internally instead.
+    height: calc(100vh - var(--mainnavCurrentHeight));
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     overflow: hidden;
 }
@@ -48,14 +49,39 @@ mat-sidenav-container {
     }
 }
 
-// The scrolling region below the tabs.
+// Full-width selection bar pinned at the bottom of the card (sibling of .collections-body), shown
+// when references are selected. Mirrors the search-page selection layout.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 25px;
+    background-color: var(--roundedContainerBackground);
+    border-top: 1px solid var(--mat-divider-color);
+
+    es-actionbar {
+        padding-left: 10px;
+    }
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+}
+
+// The region below the tabs. It fills the card height and clips; the actual scrolling happens
+// further in, inside `.collections-scroll` (and the info-bar column), so the breadcrumb header and
+// the footer stay fixed.
 .collections-body {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    @include mixins.materialScrollbarLight();
 
     // The collection header is a static block; the drop area fills the remaining height so the
     // grid (and its left info-bar column) can stretch to the full card height.
@@ -69,8 +95,8 @@ mat-sidenav-container {
         flex-direction: column;
         .collectionsContainer {
             flex: 1;
-            // Single stretchable row so the cells (incl. the left info-bar) fill the full height;
-            // the implicit `auto` minimum still lets the row grow when content overflows.
+            min-height: 0;
+            // Single stretchable row so the cells (incl. the left info-bar) fill the full height.
             grid-template-rows: 1fr;
         }
         es-footer {
@@ -91,10 +117,29 @@ mat-tab-group {
     // actionbar.
     grid-template-columns: $sidenavWidth auto;
     position: relative;
+    // The left info-bar column scrolls on its own if it gets taller than the card.
+    es-collection-info-bar {
+        display: block;
+        min-height: 0;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
+    }
     .collections-right {
-        // fix breadcrumbs overflow
         max-width: calc(100vw - $sidenavWidth);
+        // Column = fixed breadcrumb header + internally scrolling body. `hidden` keeps the
+        // breadcrumb overflow clipped and bounds the inner scroll region.
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+    }
+    // The only scrolling region: starts right below the fixed breadcrumb header.
+    .collections-scroll {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
         overflow-x: hidden;
+        @include mixins.materialScrollbarLight();
     }
 
     es-collection-content {
@@ -206,23 +251,11 @@ section {
 .content-header {
     display: flex;
     width: 100%;
-    > .actionbarMaterials {
-        margin-right: 20px;
-    }
 }
 :host ::ng-deep {
     footer {
         float: left;
         width: 100%;
-    }
-    es-collection-content {
-        .actionbarMaterials {
-            position: sticky;
-            // Sticks to the top of the internally-scrolling card body.
-            top: 0;
-            z-index: 2;
-            background-color: $backgroundColor;
-        }
     }
 }
 .breadcrumb-space {
@@ -233,6 +266,11 @@ section {
     justify-content: space-between;
     gap: 10px;
     align-items: center;
+    // Fixed header of the right column: it never scrolls; `.collections-scroll` below it does.
+    // `relative` + z-index keeps its drop shadow painted above the scrolled content.
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 @media only screen and (max-width: $mobileWidth+$mobileStage*3) {
@@ -269,12 +307,32 @@ section {
     }
     .collectionsContainer {
         grid-template-columns: auto;
+        // Single column: rows size to their content (info-bar then content) and the whole card
+        // body scrolls — not a stretched `1fr` row, which would collapse the info-bar height.
+        grid-template-rows: auto;
+        min-height: auto;
+        // Undo the desktop "scroll only the right column" split. These selectors are nested under
+        // `.collectionsContainer` on purpose so they outrank the desktop rules above (equal/higher
+        // specificity); a scrollable grid item has a 0 auto-row min-size and would collapse to zero
+        // height (hiding the info-bar) — `overflow: visible` + `min-height: auto` restores content sizing.
+        es-collection-info-bar,
+        .collections-right,
+        .collections-scroll {
+            display: block;
+            overflow: visible;
+            min-height: auto;
+        }
         .collections-right {
             max-width: unset;
         }
     }
     .card-image-icon-container {
         margin-top: 20px;
+    }
+    // Mobile is a single column with the breadcrumb as an absolute overlay, so the desktop
+    // "scroll only the right column" split is undone: the whole card body scrolls again.
+    .collections-body {
+        overflow-y: auto;
     }
     .breadcrumb-space {
         background: transparent;

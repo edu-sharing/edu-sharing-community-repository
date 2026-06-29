@@ -2,15 +2,16 @@ import {
     Component,
     ContentChild,
     EventEmitter,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
+    Signal,
     SimpleChanges,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
@@ -78,6 +79,7 @@ import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { GlobalCollectionsPageService } from '../global-collections-page.service';
 import {
@@ -145,13 +147,32 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * (the options service is inited in the content component)
      */
     @Input() getInfobar: () => CollectionInfoBarComponent;
+    /** The page-level selection actionbar (rendered full-width in the bottom selection bar), provided
+     * as the page's `viewChild` signal so it resolves lazily/reactively. */
+    @Input() selectionActionbar: Signal<ActionbarComponent | undefined>;
     @Input() isRootLevel: boolean;
     @Input() createAllowed: () => boolean;
     @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
-    @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
+    /** Toggles-only bar above the list (display type / sort). */
+    @ViewChild('actionbarToggles') actionbarToggles: ActionbarComponent;
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
+
+    /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
+    selection: Node[] = [];
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -613,9 +634,24 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     handleSelection(selection: SelectionChange<Node>) {
+        this.selection = selection.source.selected;
         if (this.interactionType === InteractionType.DefaultActionLink) {
             this.editorialSidebarService.handleSelection(selection);
         }
+    }
+
+    clearSelection() {
+        this.listReferences?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
+    }
+
+    /**
+     * Remove a single node from the selection (triggered by unchecking it in the selection overlay).
+     * Deselecting on the list's selection model fires `selectionChange`, which updates `selection`.
+     */
+    deselectNode(node: Node) {
+        this.listReferences?.getSelection().deselect(node as CollectionReference);
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
@@ -701,6 +737,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
         this.listReferences?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
 
@@ -901,7 +939,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         setTimeout(() => {
             this.setOptionsCollection();
             void this.listReferences?.initOptionsGenerator({
-                actionbar: this.actionbarReferences,
+                actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
                 parent: this.collection,
             });
             if (!this.loadingTask.isDone) {

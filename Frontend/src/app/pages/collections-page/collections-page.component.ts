@@ -3,10 +3,10 @@ import {
     ContentChild,
     ElementRef,
     EventEmitter,
+    inject,
     OnDestroy,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -21,6 +21,7 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { ConfigService, Mediacenter, Node } from 'ngx-edu-sharing-api';
@@ -99,6 +100,17 @@ export class CollectionsPageComponent implements OnDestroy {
     @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
+
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     dialogTitle: string;
     dialogCancelable = false;
