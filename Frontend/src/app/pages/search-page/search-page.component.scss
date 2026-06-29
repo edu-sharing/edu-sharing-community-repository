@@ -6,7 +6,10 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - var(--mainnavHeight));
+    // Lock to the available viewport height (below the in-flow sticky main nav) and clip, so the
+    // page never produces a body scrollbar — the results card scrolls internally instead.
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
 }
 :host ::ng-deep {
     mat-sidenav-container mat-sidenav-content {
@@ -15,8 +18,13 @@
 }
 
 mat-progress-bar {
-    position: sticky;
-    top: var(--mainnavCurrentHeight);
+    // Overlay the top edge instead of sitting in flow: the fadeOut animation only animates opacity,
+    // so an in-flow bar would permanently occupy its ~4px height on top of the full-height card and
+    // push the page past the viewport (body scrollbar).
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     flex-shrink: 0;
     transition: unset;
     z-index: 2;
