@@ -117,18 +117,6 @@ public class OaiLomHSOERMetadataFormatWriter extends AbstractMetadataFormatWrite
             .withNamespace("https://www.oerbw.de/hsoerlom")
             .withTransformer(MetadataFormat.identity());
 
-    private MetadataSet mds;
-
-    private MetadataSet getMds() {
-        if (mds == null) {
-            try {
-                mds = MetadataHelper.getLocalDefaultMetadataset();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return mds;
-    }
 
     @NotNull
     @Override

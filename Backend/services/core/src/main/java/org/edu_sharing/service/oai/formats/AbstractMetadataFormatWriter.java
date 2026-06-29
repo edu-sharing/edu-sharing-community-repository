@@ -64,4 +64,17 @@ public abstract class AbstractMetadataFormatWriter implements OaiMetadataFormatW
      * @throws ParserConfigurationException If there is an error in the configuration of the XML parser.
      */
     public abstract void build(Context context) throws ParserConfigurationException;
+
+    private MetadataSet mds;
+
+    protected MetadataSet getMds() {
+        if (mds == null) {
+            try {
+                mds = MetadataHelper.getLocalDefaultMetadataset();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return mds;
+    }
 }
