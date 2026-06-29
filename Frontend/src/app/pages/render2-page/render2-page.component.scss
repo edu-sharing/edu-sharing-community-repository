@@ -1,5 +1,26 @@
-@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 es-render-wrapper-component {
-    min-height: 100%;
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    // Keep the topbar fixed and scroll only the content below it, so the scrollbar starts below the
+    // topbar (not spanning the full card height). The host stays `overflow: hidden` (from the
+    // mixin); the inner `.render-scroll` wrapper carries the scroll.
+    ::ng-deep .render-before {
+        flex-shrink: 0;
+    }
+    ::ng-deep .render-scroll {
+        // Promote the wrapper into a real fixed-height scroll container (it is just a full-width
+        // passive block in the other embedding contexts).
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
+    }
 }

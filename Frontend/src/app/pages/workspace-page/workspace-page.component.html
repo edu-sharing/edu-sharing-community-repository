@@ -120,6 +120,8 @@
           [preventKeyevents]="cardHasOpenModals$ | async"
           [dataSource]="dataSource"
           [actionbar]="actionbar"
+          [selectionActionbar]="selectionActionbar"
+          (selectionChanged)="onSelectionChanged($event)"
           (searchGlobal)="searchGlobal($event)"
           (dropElement)="handleDrop($event)"
           (viewNode)="openNode($any($event), false)"
@@ -131,6 +133,55 @@
       } @if (globalProgress) {
       <es-global-progress></es-global-progress>
       }
+
+      <!-- Full-width selection bar; mirrors the search/collections selection layout. -->
+      <div
+        class="selection-action-bar"
+        cdkOverlayOrigin
+        #selectionBar="cdkOverlayOrigin"
+        [class.visible]="selection.length"
+      >
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearSelection()"
+          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="selectionOverlayOpen = !selectionOverlayOpen"
+        >
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selection.length || 0 } }}
+          <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        <es-actionbar
+          #selectionActionbarRef
+          [showToggleOptions]="false"
+          showCaptions="ifRoom"
+        ></es-actionbar>
+      </div>
+
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selection.length"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="selectionOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="selection"
+          [columns]="explorer?.columns"
+          [displayType]="displayType"
+          (deselect)="deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, signal, ViewChild, inject } from '@angular/core';
+import { Component, inject, Input, OnDestroy, signal, ViewChild } from '@angular/core';
 import { LocalEventsService, OptionsHelperDataService } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
@@ -7,12 +7,23 @@ import { Location } from '@angular/common';
 import { RenderWrapperComponent } from './render-wrapper-component/render-wrapper.component';
 import { RestConstants } from 'ngx-edu-sharing-api';
 import { takeUntil } from 'rxjs/operators';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
+import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 
 @Component({
     selector: 'es-render2-page',
     templateUrl: 'render2-page.component.html',
     styleUrls: ['render2-page.component.scss'],
-    imports: [RenderWrapperComponent],
+    imports: [
+        RenderWrapperComponent,
+        MatSidenav,
+        MatSidenavContainer,
+        ResizableSidenavDirective,
+        MatSidenavContent,
+        EditorialSidebarModule,
+    ],
     providers: [OptionsHelperDataService],
 })
 export class Render2PageComponent implements OnDestroy {
@@ -21,6 +32,7 @@ export class Render2PageComponent implements OnDestroy {
     private location = inject(Location);
     private mainNav = inject(MainNavService);
     private localEvents = inject(LocalEventsService);
+    editorialSidebarService = inject(EditorialSidebarService);
 
     private readonly destroyed$ = new Subject<void>();
     @Input() nodeId = signal<string>(null);
@@ -30,7 +42,7 @@ export class Render2PageComponent implements OnDestroy {
     version = signal<string>(null);
     constructor() {
         this.mainNav.setMainNavConfig({
-            show: true,
+            show: false,
             showNavigation: false,
             currentScope: 'render',
         });

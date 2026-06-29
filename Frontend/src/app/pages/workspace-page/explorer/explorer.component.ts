@@ -7,6 +7,7 @@ import {
     OnChanges,
     OnDestroy,
     Output,
+    Signal,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -203,6 +204,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     @Output() reorderDialogChange = new EventEmitter<boolean>();
     @Input() preventKeyevents: boolean;
     @Input() actionbar: ActionbarComponent;
+    @Input() selectionActionbar?: Signal<ActionbarComponent | undefined>;
 
     totalCount: number;
 
@@ -508,8 +510,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     private async initOptions() {
+        const selectionBar = this.selectionActionbar?.();
         await this.nodeEntries?.initOptionsGenerator({
-            actionbar: this.actionbar,
+            actionbar: selectionBar ? [this.actionbar, selectionBar] : this.actionbar,
             customOptions: this.customOptions,
             parent: this.node$.value,
         });

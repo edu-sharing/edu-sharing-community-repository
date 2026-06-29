@@ -18,6 +18,33 @@
         margin-right: 4px;
     }
 }
+
+// Sticky bottom bar shown when nodes are selected; sticks to viewport bottom during body scroll.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 25px;
+    background-color: var(--roundedContainerBackground);
+    border-top: 1px solid var(--mat-divider-color);
+    border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
+    position: sticky;
+    bottom: var(--roundedContainerMargin);
+    z-index: 60;
+
+    es-actionbar {
+        padding-left: 10px;
+    }
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+}
 mat-sidenav-container,
 mat-sidenav-content {
     // otherwise, position sticky is not working for the top bar

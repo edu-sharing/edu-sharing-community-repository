@@ -97,6 +97,9 @@ export class EditorialSidebarService {
     close() {
         this._editorialSidebar?.enabledOption?.set(null);
         this.sidebarOpened.set(false);
+        // The service is providedIn:'root' and shared across pages, so the selected nodes must be
+        // reset too — otherwise the stale selection survives a scope change (e.g. search → collections).
+        this.nodes.set(null);
     }
 
     /**

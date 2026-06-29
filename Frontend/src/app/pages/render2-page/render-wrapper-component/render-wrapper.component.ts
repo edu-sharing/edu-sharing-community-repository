@@ -3,20 +3,20 @@ import {
     ElementRef,
     EventEmitter,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     Output,
     signal,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import {
     ActionbarComponent,
     CombinedRenderData,
     DefaultGroups,
-    ElementType,
     EduSharingUiModule,
+    ElementType,
     OptionItem,
     OptionsHelperDataService,
     RenderHelperService,
@@ -31,6 +31,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { HOME_REPOSITORY, Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { provideReusableOptionsHelperData } from '../../../services/options-helper-data.provider';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -45,7 +47,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         MdsModule,
     ],
     // required for optional mds module
-    providers: [OptionsHelperDataService, RenderHelperService],
+    providers: [provideReusableOptionsHelperData(), RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {
     private renderHelperService = inject(RenderHelperService);
@@ -53,6 +55,7 @@ export class RenderWrapperComponent implements OnChanges {
     private nodeHelper = inject(NodeHelperService);
     private translations = inject(TranslationsService);
     private optionsHelper = inject(OptionsHelperDataService);
+    private editorialSidebarService = inject(EditorialSidebarService);
 
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() showTopbar = true;
@@ -168,6 +171,7 @@ export class RenderWrapperComponent implements OnChanges {
         this.loading.set(true);
         delete this.data()?.request;
         this.data.set(this.data());
+        this.optionsHelper;
         const data = await this.renderHelperService.getRenderData(
             nodeId,
             this.version,
@@ -175,6 +179,14 @@ export class RenderWrapperComponent implements OnChanges {
         );
         this.addDownloadAllBtn(data.node);
         setTimeout(async () => {
+            // register currently rendered node for sidebar interactions
+            this.optionsHelper.setData({
+                scope: Scope.Render,
+                activeObjects: [data.node],
+                selectedObjects: [data.node],
+                allObjects: [data.node],
+            });
+            console.log('data', data.node);
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();
         });

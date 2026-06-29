@@ -8,8 +8,10 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    viewChild,
     ViewChild,
 } from '@angular/core';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -148,6 +150,22 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
     @ViewChild(RecycleMainComponent) recycleMainComponent: RecycleMainComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
+
+    /** Currently selected nodes, mirrored from explorer for the selection bar/overlay. */
+    selection: Node[] = [];
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     cardHasOpenModals$: Observable<boolean>;
     sidebarParent: Node;
@@ -1073,6 +1091,20 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
             TemporaryStorageService.WORKSPACE_LAST_LOCATION +
             (this.isSafe ? RestConstants.SAFE_SCOPE : '')
         );
+    }
+
+    onSelectionChanged(nodes: Node[]) {
+        this.selection = nodes;
+    }
+
+    clearSelection() {
+        this.explorer?.nodeEntries?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
+    }
+
+    deselectNode(node: Node) {
+        this.explorer?.nodeEntries?.getSelection().deselect(node);
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {

@@ -277,7 +277,7 @@ export class MainNavService {
             //document.documentElement.style.setProperty('--mainnavCurrentHeight', null);
         } else {
             // Override relevant css variables.
-            document.documentElement.style.setProperty('--mainnavHeight', '0');
+            document.documentElement.style.setProperty('--mainnavHeight', '0px');
             //document.documentElement.style.setProperty('--mainnavCurrentHeight', '0');
         }
     }

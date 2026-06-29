@@ -284,6 +284,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     async ngOnInit() {
+        this.registerMainNav();
+        this.mainNavUpdateTrigger.next();
         const mdsSets = await ConfigurationHelper.getAvailableMds(
             RestConstants.HOME_REPOSITORY,
             this.mdsService,
@@ -300,8 +302,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             .observeConfig()
             .pipe(takeUntil(this.destroyed$))
             .subscribe((config) => (this.config = config));
-        this.registerMainNav();
-        this.mainNavUpdateTrigger.next();
     }
 
     ngOnChanges(changes: SimpleChanges) {

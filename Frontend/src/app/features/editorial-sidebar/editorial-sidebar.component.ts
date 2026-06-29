@@ -30,6 +30,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { EditorialSidebarService } from './editorial-sidebar.service';
+import { provideReusableOptionsHelperData } from '../../services/options-helper-data.provider';
 import { trigger } from '@angular/animations';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
@@ -43,7 +44,7 @@ import { EditorMode } from '../mds/types/types';
 export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 
-export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
+export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search' | 'render';
 export type SelectionMode = 'none' | 'single' | 'multi';
 
 export type EditorialSidebarOptionDescriptor = {
@@ -95,7 +96,7 @@ export type OptionState<T extends OptionConfig> = {
     templateUrl: 'editorial-sidebar.component.html',
     styleUrls: ['editorial-sidebar.component.scss'],
     standalone: false,
-    providers: [OptionsHelperDataService],
+    providers: [provideReusableOptionsHelperData()],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {

@@ -3,8 +3,12 @@ $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
 $horizontalScrollPadding: 1.5em;
-$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
+$maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 120px);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
+
+.render-scroll {
+    width: 100%;
+}
 es-spinner {
     margin-top: 40px;
     width: 100%;

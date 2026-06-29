@@ -24,71 +24,77 @@
     [numberOfAlwaysVisibleOptionsMobile]="0"
   ></es-actionbar>
 </div>
-} @if (data()?.error) {
-<es-info-message mode="error">{{ data().error | translate }}</es-info-message>
-} @if (data()?.node && children()?.length > 0) {
-<div class="child-objects-wrapper">
-  @if (scroll.left) {
-  <div class="scroll-helper-left" role="presentation" (click)="doScroll('left')">
-    <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('left')">
-      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
-    </button>
-  </div>
-  } @if (scroll.right) {
-  <div class="scroll-helper-right" role="presentation" (click)="doScroll('right')">
-    <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('right')">
-      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
-    </button>
-  </div>
-  }
-  <div
-    class="child-objects"
-    #childobjects
-    (scroll)="updateScrollState()"
-    (esBorderBoxObserver)="updateScrollState()"
-  >
-    @if (data().nodeParent || data().node; as node) {
-    <div
-      class="wrapperouter clickable"
-      tabindex="0"
-      (click)="setChild(null)"
-      (keyup.enter)="setChild(null)"
-    >
-      <span class="itemTitle">{{ node | nodeTitle }}</span>
-      <div class="wrapper" [class.selected]="childId === null">
-        <img src="{{ node.preview.url }}&crop=true&width=100&height=75" alt="" />
-      </div>
+}
+<!-- Scroll region for everything below the (sticky/fixed) topbar. When the host is a fixed-height
+  card (render2-page roundedContainerStaticScroll) this scrolls internally so the scrollbar starts
+  below the topbar; standalone (web component) it has no height bound and simply doesn't scroll. -->
+<div class="render-scroll">
+  @if (data()?.error) {
+  <es-info-message mode="error">{{ data().error | translate }}</es-info-message>
+  } @if (data()?.node && children()?.length > 0) {
+  <div class="child-objects-wrapper">
+    @if (scroll.left) {
+    <div class="scroll-helper-left" role="presentation" (click)="doScroll('left')">
+      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('left')">
+        <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+      </button>
     </div>
-    } @for (item of children(); track item; let i = $index) {
-    <div
-      tabindex="0"
-      class="wrapperouter clickable"
-      (click)="setChild(item)"
-      (keyup.enter)="setChild(item)"
-    >
-      <span class="itemTitle">{{ item | nodeTitle }}</span>
-      <div class="wrapper" [class.selected]="childId === item.ref.id">
-        <img src="{{ item.preview.url }}&crop=true&width=100&height=75" alt="" />
-      </div>
+    } @if (scroll.right) {
+    <div class="scroll-helper-right" role="presentation" (click)="doScroll('right')">
+      <button mat-icon-button color="primary" (click)="$event.stopPropagation(); doScroll('right')">
+        <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+      </button>
     </div>
     }
+    <div
+      class="child-objects"
+      #childobjects
+      (scroll)="updateScrollState()"
+      (esBorderBoxObserver)="updateScrollState()"
+    >
+      @if (data().nodeParent || data().node; as node) {
+      <div
+        class="wrapperouter clickable"
+        tabindex="0"
+        (click)="setChild(null)"
+        (keyup.enter)="setChild(null)"
+      >
+        <span class="itemTitle">{{ node | nodeTitle }}</span>
+        <div class="wrapper" [class.selected]="childId === null">
+          <img src="{{ node.preview.url }}&crop=true&width=100&height=75" alt="" />
+        </div>
+      </div>
+      } @for (item of children(); track item; let i = $index) {
+      <div
+        tabindex="0"
+        class="wrapperouter clickable"
+        (click)="setChild(item)"
+        (keyup.enter)="setChild(item)"
+      >
+        <span class="itemTitle">{{ item | nodeTitle }}</span>
+        <div class="wrapper" [class.selected]="childId === item.ref.id">
+          <img src="{{ item.preview.url }}&crop=true&width=100&height=75" alt="" />
+        </div>
+      </div>
+      }
+    </div>
   </div>
-</div>
-} @if (loading()) {
-<es-spinner></es-spinner>
-} @if (data()?.request && data()?.node) {
-<rs-root [node]="data().node" [request]="data().request"></rs-root>
-}
-<div class="meta" #meta>
-  @if (data()?.node && showMetadata) {
-  <es-mds-editor-wrapper
-    [class.display-none]="loading()"
-    [embedded]="true"
-    [editorMode]="'viewer'"
-    [nodeRefetch]="false"
-    [groupId]="'io_render'"
-    [nodes]="[data().node]"
-  >
-  </es-mds-editor-wrapper>
+  } @if (loading()) {
+  <es-spinner></es-spinner>
+  } @if (data()?.request && data()?.node) {
+  <rs-root [node]="data().node" [request]="data().request"></rs-root>
   }
+  <div class="meta" #meta>
+    @if (data()?.node && showMetadata) {
+    <es-mds-editor-wrapper
+      [class.display-none]="loading()"
+      [embedded]="true"
+      [editorMode]="'viewer'"
+      [nodeRefetch]="false"
+      [groupId]="'io_render'"
+      [nodes]="[data().node]"
+    >
+    </es-mds-editor-wrapper>
+    }
+  </div>
 </div>

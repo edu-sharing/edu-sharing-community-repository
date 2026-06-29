@@ -101,7 +101,7 @@ export class CollectionsPageComponent implements OnDestroy {
 
     @ViewChild('infobar') infobar: CollectionInfoBarComponent;
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
-    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbar');
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
 
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
