@@ -25,6 +25,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from 'ngx-edu-sharing-ui';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
     selector: 'es-admin-messages',
@@ -44,6 +45,7 @@ export class AdminMessagesComponent implements OnInit {
     private toast = inject(Toast);
     private sanitizer = inject(DomSanitizer);
     private adminV1Service = inject(AdminV1Service);
+    private theme = inject(ThemeService);
 
     @ViewChild('heading') headingRef: ElementRef;
     selectedContexts = signal<Context[]>([]);
@@ -139,6 +141,8 @@ export class AdminMessagesComponent implements OnInit {
                 toolbar:
                     'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
                 language: this.translate.getDefaultLang(),
+                skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+                content_css: this.theme.isDarkMode() ? 'dark' : 'default',
             };
         }
     }
