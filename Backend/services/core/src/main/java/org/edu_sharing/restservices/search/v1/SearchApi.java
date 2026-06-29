@@ -25,6 +25,7 @@ import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.search.v1.model.SearchParameters;
 import org.edu_sharing.restservices.search.v1.model.SearchParametersFacets;
 import org.edu_sharing.restservices.shared.*;
+import org.edu_sharing.service.contributor.ContributorService;
 import org.edu_sharing.service.repoproxy.RepoProxyFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -35,12 +36,10 @@ import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.suggestion.SuggestionStatus;
 import org.edu_sharing.service.suggestion.SuggestionType;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -555,9 +554,17 @@ public class SearchApi {
 
 		try {
 
+			// Contributors are now managed in the autonomous edu_contributor registry instead of being
+			// aggregated from the elasticsearch index. The legacy 'fields' and 'contributorProperties'
+			// parameters are no longer used (the registry is role-independent).
+			ContributorService contributorService = ApplicationContextFactory.getApplicationContext().getBean(ContributorService.class);
+			HashSet<Object> contributors = contributorService.search(searchWord, contributorKind, 50).stream()
+					.map(entry -> new SearchVCard(entry.getVcard()))
+					.collect(Collectors.toCollection(HashSet::new));
+
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 			Set<SearchVCard> result = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
-			return Response.status(Response.Status.OK).entity(result).build();
+			return Response.status(Response.Status.OK).entity(contributors).build();
 
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

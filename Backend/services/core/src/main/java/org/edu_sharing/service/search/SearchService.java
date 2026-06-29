@@ -94,7 +94,22 @@ public interface SearchService {
 
 	SearchResultNodeRef searchFingerPrint(String nodeId);
 
+	/**
+	 * @deprecated Replaced by the managed contributor registry: use
+	 * {@link org.edu_sharing.service.contributor.ContributorService#search(String, ContributorKind, int)}
+	 * (exposed via the {@code /contributor/v1} endpoint). This elasticsearch-aggregation based lookup
+	 * is no longer used by the contributor autocomplete and is kept only for backwards compatibility.
+	 */
+	@Deprecated
 	Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind kind) throws IOException;
+
+	/**
+	 * Returns all distinct contributor vcard strings present in the index.
+	 * Used by the contributor registry migration to enumerate the existing contributors.
+	 */
+	default Set<String> getAllContributorVCards() throws IOException {
+		return java.util.Collections.emptySet();
+	}
 
 	SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException;
 

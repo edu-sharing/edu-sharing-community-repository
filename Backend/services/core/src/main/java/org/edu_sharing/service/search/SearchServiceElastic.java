@@ -1380,17 +1380,168 @@ public class SearchServiceElastic implements SearchService {
 
     enum CONTRIBUTOR_PROP {firstname, lastname, email, url, uid}
 
-    ;
-
+    /**
+     * @deprecated Replaced by the managed contributor registry
+     * ({@link org.edu_sharing.service.contributor.ContributorService#search}). Kept only for backwards
+     * compatibility; the contributor autocomplete no longer calls this.
+     */
+    @Deprecated
     @Override
     public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
-        // Contributors are now managed in the autonomous edu_contributor registry instead of being
-        // aggregated from the elasticsearch index. The legacy 'fields' and 'contributorProperties'
-        // parameters are no longer used (the registry is role-independent).
-        ContributorService contributorService = ApplicationContextFactory.getApplicationContext().getBean(ContributorService.class);
-        return contributorService.search(suggest, contributorKind, 50).stream()
-                .map(entry -> new SearchVCard(entry.getVcard()))
-                .collect(Collectors.toCollection(HashSet::new));
+        checkClient();
+
+        List<String> searchFields = new ArrayList<>();
+        if (fields == null || fields.isEmpty()) {
+            for (CONTRIBUTOR_PROP att : CONTRIBUTOR_PROP.values()) {
+                searchFields.add("contributor." + att.name());
+            }
+        } else {
+            for (String f : fields) {
+                if (Stream.of(CONTRIBUTOR_PROP.values()).anyMatch(v -> v.name().equals(f))) {
+                    searchFields.add("contributor." + f);
+                }
+            }
+        }
+        final BoolQuery.Builder contributorQuery = QueryBuilders.bool();
+        for (String searchField : searchFields) {
+            final String search = suggest.contains("*") ? suggest : String.format("*%s*", suggest);
+            contributorQuery.should(should -> should.wildcard(wc -> wc.field(searchField).value(search)));
+        }
+
+        if (!contributorProperties.isEmpty()) {
+            contributorQuery.must(must -> must.bool(bool -> bool
+                    .minimumShouldMatch("1")
+                    .should(should -> {
+                        contributorProperties.forEach(prop -> should.term(term -> term.field("contributor.property").value(prop)));
+                        return should;
+                    })));
+        }
+
+        if (contributorKind == ContributorKind.ORGANIZATION) {
+            contributorQuery.must(must -> must.bool(bool -> bool
+                    .should(should -> should.exists(exists -> exists.field("contributor.X-ROR")))
+                    .should(should -> should.exists(exists -> exists.field("contributor.X-Wikidata")))
+                    .minimumShouldMatch("1")));
+        } else {
+            contributorQuery.must(must -> must.bool(bool -> bool
+                    .should(should -> should.exists(exists -> exists.field("contributor.X-ORCID")))
+                    .should(should -> should.exists(exists -> exists.field("contributor.X-GND-URI")))
+                    .minimumShouldMatch("1")));
+        }
+
+        SearchRequest searchRequest = SearchRequest.of(req -> req
+                .index(WORKSPACE_INDEX)
+                .from(0)
+                .size(0)
+                .trackTotalHits(track -> track.enabled(true))
+                .sort(sort -> sort.score(score -> score.order(SortOrder.Desc)))
+                .aggregations("contributor", aggr -> aggr
+                        .nested(nes -> nes.path("contributor"))
+                        .aggregations("vcard", vcardAggr -> vcardAggr
+                                .terms(term -> term
+                                        .field("contributor.vcard")
+                                        .size(100))))
+                .query(query -> query
+                        .nested(nested -> nested
+                                .path("contributor")
+                                .query(nq -> nq
+                                        .bool(contributorQuery.build())))));
+
+        SearchResponse<Map> searchResponse = client
+                .withTransportOptions(this::getRequestOptions)
+                .search(searchRequest, Map.class);
+
+        Aggregate aggregation = searchResponse.aggregations()
+                .get("contributor")
+                .nested()
+                .aggregations()
+                .get("vcard");
+
+        VCardEngine engine = new VCardEngine();
+        return aggregation.sterms().buckets().array().stream().
+                map(StringTermsBucket::key)
+                // this would be nicer via elastic "include" feature, however, it seems to be a pain with the java library
+                .filter(k -> Arrays.stream(suggest.toLowerCase().split(" ")).allMatch(t -> k.stringValue().toLowerCase().contains(t)))
+                .filter(k -> {
+                    try {
+                        VCard vcard = engine.parse(k.stringValue());
+                        if (contributorKind == ContributorKind.ORGANIZATION) {
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ROR") || e.equals("X-Wikidata")
+                            );
+                        } else {
+                            return vcard.getExtendedTypes().stream().map(ExtendedType::getExtendedName).anyMatch(
+                                    (e) -> e.equals("X-ORCID") || e.equals("X-GND-URI")
+                            );
+                        }
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                })
+                .map((k) -> new SearchVCard(k.stringValue())).
+                collect(Collectors.toCollection(HashSet::new));
+    }
+
+    /**
+     * Enumerate ALL distinct contributor vcard strings in the index that carry a persistent X- id
+     * (X-ORCID / X-GND-URI / X-ROR / X-Wikidata - same filter the autocomplete uses). A filter
+     * sub-aggregation restricts the nested contributor docs to those with an X- id already in ES, so
+     * we never page through the (potentially millions of) contributors without one. Fully paginated
+     * via the composite after-key - not capped like the terms aggregation used for autocomplete.
+     */
+    @Override
+    public Set<String> getAllContributorVCards() throws IOException {
+        checkClient();
+        Set<String> result = new HashSet<>();
+        Map<String, FieldValue> afterKey = null;
+        do {
+            final Map<String, FieldValue> after = afterKey;
+            SearchRequest searchRequest = SearchRequest.of(req -> req
+                    .index(WORKSPACE_INDEX)
+                    .size(0)
+                    .aggregations("contributor", aggr -> aggr
+                            .nested(nes -> nes.path("contributor"))
+                            .aggregations("withId", filtered -> filtered
+                                    .filter(f -> f.bool(b -> b
+                                            .minimumShouldMatch("1")
+                                            .should(s -> s.exists(e -> e.field("contributor.X-ORCID")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-GND-URI")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-ROR")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-Wikidata")))))
+                                    .aggregations("vcards", vcardAggr -> vcardAggr
+                                            .composite(comp -> {
+                                                comp.size(1000)
+                                                        .sources(List.of(Map.of("vcard",
+                                                                CompositeAggregationSource.of(src -> src
+                                                                        .terms(t -> t.field("contributor.vcard"))))));
+                                                if (after != null) {
+                                                    comp.after(after);
+                                                }
+                                                return comp;
+                                            })))));
+
+            SearchResponse<Map> searchResponse = client
+                    .withTransportOptions(this::getRequestOptions)
+                    .search(searchRequest, Map.class);
+
+            CompositeAggregate composite = searchResponse.aggregations()
+                    .get("contributor").nested()
+                    .aggregations().get("withId").filter()
+                    .aggregations().get("vcards").composite();
+
+            List<CompositeBucket> buckets = composite.buckets().array();
+            if (buckets.isEmpty()) {
+                break;
+            }
+            for (CompositeBucket bucket : buckets) {
+                FieldValue value = bucket.key().get("vcard");
+                if (value != null && value.isString()) {
+                    result.add(value.stringValue());
+                }
+            }
+            afterKey = composite.afterKey();
+        } while (afterKey != null && !afterKey.isEmpty());
+        return result;
     }
 
     // TODO should we generalize this? Just a dirty hack
