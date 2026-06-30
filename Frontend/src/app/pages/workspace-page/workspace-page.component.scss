@@ -1,68 +1,44 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-.frame {
+$quotaHeight: 60px;
+
+// Page shell: lock to the available viewport height (below the in-flow sticky main nav) and clip, so
+// the page never produces a body scrollbar — the tree and the explorer list scroll internally.
+:host {
     display: flex;
     flex-direction: column;
-    min-height: calc(
-        100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-            var(--mainnavCurrentHeight)
-    );
-    margin: var(--roundedContainerMargin);
-    border-radius: var(--borderRadiusCards);
-    background-color: var(--roundedContainerBackground);
-    @include mixins.materialShadowSmall();
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
 }
-.mat-sidenav-container-right-open {
-    .frame {
-        margin-right: 4px;
-    }
+:host ::ng-deep mat-sidenav-container mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+}
+mat-sidenav-container {
+    flex: 1;
+    min-height: 0;
+    background-color: unset;
 }
 
-// Sticky bottom bar shown when nodes are selected; sticks to viewport bottom during body scroll.
-.selection-action-bar {
-    display: none;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 25px;
-    background-color: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
-    border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
-    position: sticky;
-    bottom: var(--roundedContainerMargin);
-    z-index: 60;
+// The card. Fixed height, scrolls its inner regions instead of the body.
+.frame {
+    @include mixins.roundedContainerCard($mobileTabSwitchWidth, $mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll($mobileTabSwitchWidth, $mobileTabNavHeight);
+}
 
-    es-actionbar {
-        padding-left: 10px;
-    }
-    &.visible {
-        display: flex;
-    }
-
-    .count {
-        font-weight: 500;
-        white-space: nowrap;
-    }
-}
-mat-sidenav-container,
-mat-sidenav-content {
-    // otherwise, position sticky is not working for the top bar
-    overflow: unset;
-}
-mat-sidenav-content {
-    min-height: calc(100vh - var(--mainnavHeight));
-}
+// Fixed header row (breadcrumbs + actionbar); no longer sticky since the card is fixed-height.
 .topbarFrame {
-    position: sticky;
-    top: var(--mainnavHeight);
+    flex-shrink: 0;
     z-index: 60;
     > div {
+        position: relative;
         border-radius: var(--borderRadiusCards) var(--borderRadiusCards) 0 0;
         width: 100%;
         height: $workspaceBreadcrumbsHeight;
         background-color: var(--backgroundColor);
-        @include materialShadow();
+        @include mixins.materialShadow();
         display: flex;
         > es-breadcrumbs {
             padding-left: 30px;
@@ -84,7 +60,6 @@ mat-sidenav-content {
                 var(--backgroundColor) 10px,
                 var(--backgroundColor) 100%
             ); /* safari fix */
-            //TODO check if that works
         }
     }
     ::ng-deep {
@@ -96,8 +71,13 @@ mat-sidenav-content {
     }
 }
 
+// The region below the topbar fills the remaining card height and clips; the tree and the explorer
+// list each scroll inside it.
 .workspace-container {
+    flex: 1;
+    min-height: 0;
     display: flex;
+    overflow: hidden;
 }
 
 .isBlocked {
@@ -109,54 +89,68 @@ mat-sidenav-content {
     padding-top: 25px;
 }
 
+// Left column: fixed width, internal scroll for the tree, quota pinned at the bottom.
 .tree {
-    display: table-cell;
+    flex-shrink: 0;
+    width: $workspaceTreeWidth;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2;
+    background: $workspaceTreeBackground;
+    border-radius: 0 0 0 var(--borderRadiusCards);
+    @include mixins.materialShadow();
+    > es-workspace-tree {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
+    }
+    > es-user-quota {
+        flex-shrink: 0;
+        height: $quotaHeight;
+        padding: 10px 20px;
+        background: $workspaceTreeBackground;
+    }
 }
 
 .globalProgress {
     z-index: 122;
 }
 
-$quotaHeight: 60px;
-$treeOffset: calc(
-    #{$workspaceBreadcrumbsHeight} + var(--mainnavHeight) + var(--roundedContainerMargin) - var(--treeOffset)
-);
-.tree {
-    --treeOffset: 0px;
-    min-width: $workspaceTreeWidth;
-    max-width: $workspaceTreeWidth;
-    top: $treeOffset;
-    position: fixed;
-    border-radius: 0 0 0 var(--borderRadiusCards);
-    height: calc(100% - #{$treeOffset} - var(--roundedContainerMargin));
-    z-index: 2;
-    background: $workspaceTreeBackground;
-    es-workspace-tree {
-        min-width: $workspaceTreeWidth;
-        max-width: $workspaceTreeWidth;
-        border-radius: 0 0 0 var(--borderRadiusCards);
-        top: $treeOffset;
-        position: fixed;
-        height: calc(100% - #{$treeOffset} - var(--roundedContainerMargin));
-        overflow-y: auto;
-        @include mixins.materialScrollbarLight();
+// Right column: the node list scrolls internally.
+.explorer {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    @include mixins.materialScrollbarLight();
+}
+
+// Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 25px;
+    background-color: var(--roundedContainerBackground);
+    border-top: 1px solid var(--mat-divider-color);
+    border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
+
+    es-actionbar {
+        padding-left: 10px;
     }
-    .tree-quota {
-        height: calc(
-            100% - #{$workspaceBreadcrumbsHeight} - var(--mainnavHeight) - #{$quotaHeight}
-        );
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
     }
 }
 
-es-user-quota {
-    position: absolute;
-    width: $workspaceTreeWidth;
-    height: $quotaHeight;
-    background: $workspaceTreeBackground;
-    bottom: 0;
-    z-index: 3;
-    padding: 10px 20px;
-}
 .nodeRender {
     padding: 20px;
 }
@@ -201,17 +195,6 @@ es-user-quota {
     background: $workspaceTreeSelectedBackgroundEffect;
     background-color: var(--backgroundColor);
 }
-.explorer {
-    position: relative;
-    display: block;
-    left: 300px;
-    width: calc(100% - 300px);
-    transition: all $transitionNormal;
-}
-
-.explorerMetadata {
-    width: calc(100% - 600px);
-}
 
 .viewType {
     position: fixed;
@@ -220,26 +203,6 @@ es-user-quota {
     padding-right: 25px;
     right: 0;
     z-index: 97;
-}
-.viewType div {
-    /* border-left:1px solid #ccc; */
-}
-
-.tree {
-    @include materialShadow();
-}
-
-@media screen and (max-width: ($mobileWidth+$mobileStage*6)) {
-    .explorerMetadata {
-        width: calc(100% - 300px);
-    }
-}
-@media screen and (max-width: ($mobileWidth+$mobileStage*4)) {
-    /*
-  .breadcrumbFrame{
-    padding-right:170px;
-  }
-  */
 }
 
 @media screen and (max-width: ($mobileTabSwitchWidth)) {
@@ -255,23 +218,4 @@ es-user-quota {
     .topbarFrame > div > es-breadcrumbs {
         padding-left: 20px;
     }
-    .explorer {
-        left: 0;
-        width: 100%;
-        height: calc(100% - (var(--mainnavHeight) + #{$secondaryBarHeight+$mobileTabNavHeight}));
-    }
-    :host ::ng-deep {
-        es-workspace-explorer .list {
-            margin-bottom: 62px;
-        }
-    }
-}
-
-@media screen and (max-width: $mobileWidth) {
-    /*
-  .metadata{
-    max-width:none;
-    width:100%;
-  }
-  */
 }

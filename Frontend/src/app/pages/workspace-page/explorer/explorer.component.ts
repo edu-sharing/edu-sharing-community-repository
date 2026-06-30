@@ -510,9 +510,12 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     private async initOptions() {
+        // Split actionbar (mirrors collections/search): the topbar actionbar (toggles-only in the
+        // explorer view via showActionOptions) shows toggle options; the bottom selection bar shows
+        // node actions. refreshComponents keeps both in sync.
         const selectionBar = this.selectionActionbar?.();
         await this.nodeEntries?.initOptionsGenerator({
-            actionbar: selectionBar ? [this.actionbar, selectionBar] : this.actionbar,
+            actionbar: [this.actionbar, selectionBar].filter(Boolean),
             customOptions: this.customOptions,
             parent: this.node$.value,
         });
@@ -583,6 +586,8 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
         this.editorialSidebarService.handleSelection(selection);
+        // Mirror the selection to the page so the bottom selection bar / overlay can react.
+        this.selectionChanged.emit(selection.source.selected as Node[]);
     }
     clickItem(event: NodeClickEvent<NodeEntriesDataType>) {
         if (this.ui.isMobile() && (event.element as Node).isDirectory) {

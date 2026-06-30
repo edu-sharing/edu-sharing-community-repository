@@ -33,7 +33,9 @@
             (clickBreadcrumb)="openBreadcrumb($event)"
           ></es-breadcrumbs>
           }
-          <es-actionbar #actionbar></es-actionbar>
+          <!-- Split actionbar (mirrors collections/search): the topbar shows toggle options only;
+            node actions move to the bottom selection bar (for both the explorer and recycle views). -->
+          <es-actionbar #actionbar [showActionOptions]="false"></es-actionbar>
         </div>
       </div>
       @if (isBlocked) {
@@ -99,7 +101,12 @@
           }
         </div>
         } @if (root === 'RECYCLE') {
-        <es-recycle class="explorer" [actionbar]="actionbar"></es-recycle>
+        <es-recycle
+          class="explorer"
+          [actionbar]="actionbar"
+          [selectionActionbar]="selectionActionbar"
+          (selectionChanged)="onSelectionChanged($event)"
+        ></es-recycle>
         }
         <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
         @if (root !== 'RECYCLE') {
@@ -177,8 +184,8 @@
       >
         <es-search-selection-overlay
           [nodes]="selection"
-          [columns]="explorer?.columns"
-          [displayType]="displayType"
+          [columns]="selectionColumns"
+          [displayType]="selectionDisplayType"
           (deselect)="deselectNode($event)"
         ></es-search-selection-overlay>
       </ng-template>

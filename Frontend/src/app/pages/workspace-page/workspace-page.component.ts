@@ -724,6 +724,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
+        // The selection belongs to the previous view; reset it so the bottom bar/overlay don't carry
+        // a stale selection across the explorer/recycle switch.
+        this.selection = [];
+        this.selectionOverlayOpen = false;
         void this.routeTo(root, null, null);
         this.actionbarRef.invalidate();
     }
@@ -1097,14 +1101,33 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
         this.selection = nodes;
     }
 
+    /** The node list backing the current view (explorer or recycle) — source of the selection. */
+    private get activeList() {
+        return this.root === 'RECYCLE'
+            ? this.recycleMainComponent?.list
+            : this.explorer?.nodeEntries;
+    }
+
+    /** Columns of the current view, used by the selection overlay. */
+    get selectionColumns() {
+        return this.root === 'RECYCLE'
+            ? this.recycleMainComponent?.columns
+            : this.explorer?.columns;
+    }
+
+    /** Display type of the current view, used by the selection overlay (recycle is always a table). */
+    get selectionDisplayType() {
+        return this.root === 'RECYCLE' ? NodeEntriesDisplayType.Table : this.displayType;
+    }
+
     clearSelection() {
-        this.explorer?.nodeEntries?.getSelection().clear();
+        this.activeList?.getSelection().clear();
         this.selection = [];
         this.selectionOverlayOpen = false;
     }
 
     deselectNode(node: Node) {
-        this.explorer?.nodeEntries?.getSelection().deselect(node);
+        this.activeList?.getSelection().deselect(node);
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {
