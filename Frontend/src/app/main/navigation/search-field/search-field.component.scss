@@ -89,7 +89,7 @@ form {
         height: unset;
         @each $property, $color in $chip-colors {
             &.filter-chip-#{$property} {
-                background-color: $color !important;
+                background-color: var(--chip-color-#{$property}) !important;
             }
         }
 

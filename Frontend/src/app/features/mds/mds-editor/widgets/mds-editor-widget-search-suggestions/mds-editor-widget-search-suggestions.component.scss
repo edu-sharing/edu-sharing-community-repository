@@ -4,7 +4,7 @@
     cursor: pointer;
     @each $property, $color in $chip-colors {
         &.filter-chip-#{$property} {
-            background-color: $color;
+            background-color: var(--chip-color-#{$property});
         }
     }
 }

@@ -1,4 +1,5 @@
 @forward './variables-scss';
+@use './variables-scss' as vars;
 
 /**
     declarations of dynamic css variables
@@ -113,6 +114,11 @@
     --color-darken: rgba(0, 0, 0, 0.2);
     --toastBackground: #333333;
     --toastButtonColor: var(--palette-accent-200);
+
+    // chip colors (source-of-truth: $chip-colors map in variables-scss) — light values
+    @each $key, $color in vars.$chip-colors {
+        --chip-color-#{$key}: #{$color};
+    }
 }
 
 es-node-entries-wrapper {
@@ -210,6 +216,11 @@ body.isDarkTheme {
     // lighten the dark monochrome mediatype icons in node-type-badge; hue-rotate keeps
     // any colored glyphs recognizable (standard dark-mode image inversion)
     --invertSvgFilter: invert(1) hue-rotate(180deg);
+
+    // chip colors: keep each hue but darken so the (now light) dark-theme text reads on top
+    @each $key, $color in vars.$chip-colors {
+        --chip-color-#{$key}: color-mix(in srgb, #{$color}, black 62%);
+    }
 }
 
 body.isDarkTheme es-node-entries-wrapper {
