@@ -5,6 +5,7 @@ import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.ISO9075;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class QueryBuilder {
         }
 
         Selection selection = queryStatement.getSelection();
-        String table = CCConstants.getValidLocalName(queryStatement.getFrom());
+        String table = ISO9075.encodeSQL(CCConstants.getValidLocalName(queryStatement.getFrom()));
         String tableAlias = QName.createQName(queryStatement.getFrom()).getLocalName();
         String from = String.format("FROM %s AS %s", table, tableAlias);
 
@@ -78,7 +79,7 @@ public class QueryBuilder {
         }
 
         String joinTableAlias = propertyDefinition.getContainerClass().getName().getLocalName();
-        String column = CCConstants.getValidLocalName(propertyDefinition.getName().toString());
+        String column = ISO9075.encodeSQL(CCConstants.getValidLocalName(propertyDefinition.getName().toString()));
         joinTables.add(new Join("LEFT", propertyDefinition.getContainerClass().getName()));
         return joinTableAlias + "." + column;
     }
@@ -142,7 +143,7 @@ public class QueryBuilder {
 
     record Join(String kind, QName table) {
         public String joinOn(String tableAlias) {
-            String joinTable = CCConstants.getValidLocalName(table.toString());
+            String joinTable = ISO9075.encodeSQL(CCConstants.getValidLocalName(table.toString()));
             String joinTableAlias = table.getLocalName();
             return String.format("%s JOIN %s AS %s ON %s.cmis:objectId = %s.cmis:objectId", kind, joinTable, joinTableAlias, joinTableAlias, tableAlias);
 

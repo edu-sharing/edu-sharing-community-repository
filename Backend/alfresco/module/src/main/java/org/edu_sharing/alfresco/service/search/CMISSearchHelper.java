@@ -17,6 +17,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
+import org.alfresco.util.ISO9075;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -44,7 +45,7 @@ public class CMISSearchHelper {
         params.setSkipCount(from);
         params.setMaxItems(pageSize);
         params.setMaxPermissionChecks(maxPermissionChecks);
-        String tableName=CCConstants.getValidLocalName(nodeType);
+        String tableName=ISO9075.encodeSQL(CCConstants.getValidLocalName(nodeType));
         String tableNameAlias=tableName.split(":")[1];
         StringBuilder join= new StringBuilder();
         StringBuilder where= new StringBuilder();
@@ -61,7 +62,7 @@ public class CMISSearchHelper {
                     if(property == null){
                         throw new RuntimeException("Property " + filter.getKey() +" was not found in the alfresco dicitionary. Please check the spelling");
                     }
-                    String aspectTable=CCConstants.getValidLocalName(property.getContainerClass().getName().toString());
+                    String aspectTable=ISO9075.encodeSQL(CCConstants.getValidLocalName(property.getContainerClass().getName().toString()));
                     String aspectTableAlias = property.getContainerClass().getName().getLocalName();
                     if(!joinedTable.contains(aspectTable) && !tableName.equals(aspectTable)) {
                         join.append("JOIN ").append(aspectTable).append(" AS ").append(aspectTableAlias)
@@ -69,7 +70,7 @@ public class CMISSearchHelper {
                         joinedTable.add(aspectTable);
                     }
                     prepareWhere(where);
-                    where.append(aspectTableAlias).append(".").append(CCConstants.getValidLocalName(filter.getKey()));
+                    where.append(aspectTableAlias).append(".").append(ISO9075.encodeSQL(CCConstants.getValidLocalName(filter.getKey())));
                     if(filter.getValue()==null) {
                         where.append(" IS NULL");
                     }else{
@@ -83,7 +84,7 @@ public class CMISSearchHelper {
                    if(ad == null){
                        throw new RuntimeException("aspect not found for:"+aspect);
                    }
-                   String aspectTable = CCConstants.getValidLocalName(aspect);
+                   String aspectTable = ISO9075.encodeSQL(CCConstants.getValidLocalName(aspect));
                    String aspectTableAlias = ad.getName().getLocalName();
                    //check if aspect filter was already through property filter added
                    if(!joinedTable.contains(aspectTable) && !tableName.equals(aspectTable)) {
