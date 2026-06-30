@@ -9,9 +9,9 @@ import org.edu_sharing.service.contributor.ContributorEntry;
 import org.edu_sharing.service.contributor.ContributorIdType;
 import org.edu_sharing.service.contributor.ContributorPage;
 import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.service.contributor.ContributorServiceFactory;
 import org.edu_sharing.service.contributor.ContributorSortProperty;
 import org.edu_sharing.service.search.SearchService;
-import org.edu_sharing.spring.ApplicationContextFactory;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class ContributorDao {
     private final ContributorService contributorService;
 
     public ContributorDao(RepositoryDao repoDao) {
-        this.contributorService = ApplicationContextFactory.getApplicationContext().getBean(ContributorService.class);
+        this.contributorService = ContributorServiceFactory.getInstance().getService(repoDao.getId());
     }
 
     public List<ContributorData> search(String searchWord, SearchService.ContributorKind kind, int limit) {

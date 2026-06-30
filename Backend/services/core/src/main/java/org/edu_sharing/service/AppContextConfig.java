@@ -12,6 +12,8 @@ import org.edu_sharing.service.collection.CollectionServiceElastic;
 import org.edu_sharing.service.comment.CommentService;
 import org.edu_sharing.service.comment.CommentServiceAdapter;
 import org.edu_sharing.service.comment.CommentServiceImpl;
+import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.service.contributor.ContributorServiceAdapter;
 import org.edu_sharing.service.dashboard.DashboardConfigService;
 import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.feedback.FeedbackServiceAdapter;
@@ -49,6 +51,7 @@ public class AppContextConfig {
                 .defineBean(NotificationService.class, NotificationService.class)
                 .defineBean(RenderingService.class, RenderingService.class)
                 .defineBean(CollectionService.class, CollectionService.class)
+                .defineBean(ContributorService.class, ContributorServiceAdapter.class)
                 .done()
 
                 .localAppContext()
@@ -66,6 +69,7 @@ public class AppContextConfig {
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
                 .defineBean(OrganizationService.class, OrganizationService.class)
                 .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
+                .defineBean(ContributorService.class, "contributorServiceImpl")
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.ElasticSearchProvider")
@@ -83,6 +87,7 @@ public class AppContextConfig {
                 .defineBean(DashboardConfigService.class, "dashboardConfigServiceImpl")
                 .defineBean(OrganizationService.class, OrganizationService.class)
                 .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
+                .defineBean(ContributorService.class, "contributorServiceImpl")
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.BrockhausProvider")
