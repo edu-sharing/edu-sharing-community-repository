@@ -1447,6 +1447,7 @@ public class SearchServiceElastic implements SearchService {
                                 .query(nq -> nq
                                         .bool(contributorQuery.build())))));
 
+        log.info("Query: {}", searchRequest);
         SearchResponse<Map> searchResponse = client
                 .withTransportOptions(this::getRequestOptions)
                 .search(searchRequest, Map.class);
@@ -1520,6 +1521,7 @@ public class SearchServiceElastic implements SearchService {
                                                 return comp;
                                             })))));
 
+            log.info("Query: {}", searchRequest);
             SearchResponse<Map> searchResponse = client
                     .withTransportOptions(this::getRequestOptions)
                     .search(searchRequest, Map.class);

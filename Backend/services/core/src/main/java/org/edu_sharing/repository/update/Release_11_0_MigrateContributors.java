@@ -48,12 +48,15 @@ public class Release_11_0_MigrateContributors {
         for (String vcard : vcards) {
             ContributorEntry entry = ContributorVCardUtil.fromVCardString(vcard);
             if (entry == null) {
+                log.warn("Skipping unparseable contributor vcard: {}", vcard);
                 continue; // unparseable or no persistent id -> not manageable
             }
             if (!seenKeys.add(idKey(entry))) {
+                log.warn("Skipping contributor vcard with duplicate seen id: {}", vcard);
                 continue; // already handled in this run (e.g. different vcard formatting, same ids)
             }
             if (!contributorMapper.findByAnyId(entry.getOrcid(), entry.getGnduri(), entry.getRor(), entry.getWikidata(), entry.getEmail()).isEmpty()) {
+                log.warn("Skipping contributor vcard with duplicate db id: {}", vcard);
                 continue; // already present in the registry
             }
             Date now = new Date();
