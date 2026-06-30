@@ -2,11 +2,43 @@
   <div class="toolbar">
     <mat-form-field class="search">
       <mat-label>{{ 'ADMIN.CONTRIBUTORS.SEARCH' | translate }}</mat-label>
-      <input matInput [(ngModel)]="searchWord" (keyup.enter)="load()" name="searchWord" />
+      <input matInput [(ngModel)]="searchWord" (keyup.enter)="onFilterChange()" name="searchWord" />
     </mat-form-field>
-    <button mat-icon-button (click)="load()" [attr.aria-label]="'SEARCH' | translate">
+    <button mat-icon-button (click)="onFilterChange()" [attr.aria-label]="'SEARCH' | translate">
       <i esIcon="search"></i>
     </button>
+
+    <mat-form-field class="filter">
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.FILTER_KIND' | translate }}</mat-label>
+      <mat-select
+        [(ngModel)]="kind"
+        [ngModelOptions]="{ standalone: true }"
+        (selectionChange)="onKindChange()"
+      >
+        <mat-option [value]="undefined">{{
+          'ADMIN.CONTRIBUTORS.FILTER_ALL' | translate
+        }}</mat-option>
+        <mat-option value="PERSON">{{ 'ADMIN.CONTRIBUTORS.KIND_PERSON' | translate }}</mat-option>
+        <mat-option value="ORGANIZATION">
+          {{ 'ADMIN.CONTRIBUTORS.KIND_ORGANIZATION' | translate }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="filter">
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.FILTER_ID' | translate }}</mat-label>
+      <mat-select
+        [(ngModel)]="hasId"
+        [ngModelOptions]="{ standalone: true }"
+        (selectionChange)="onFilterChange()"
+        multiple
+      >
+        @for (idType of availableIdTypes; track idType.value) {
+        <mat-option [value]="idType.value">{{ idType.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <span class="spacer"></span>
     <button mat-raised-button color="primary" (click)="startCreate()">
       <i esIcon="add"></i>
@@ -14,29 +46,69 @@
     </button>
   </div>
 
-  @if (loading) {
-  <es-spinner></es-spinner>
-  } @else {
-  <table class="contributor-table">
-    <thead>
-      <tr>
-        <th>{{ 'ADMIN.CONTRIBUTORS.NAME' | translate }}</th>
-        <th>{{ 'ADMIN.CONTRIBUTORS.KIND' | translate }}</th>
-        <th>{{ 'ADMIN.CONTRIBUTORS.IDS' | translate }}</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (contributor of contributors; track contributor.id) {
-      <tr>
-        <td>{{ displayName(contributor) }}</td>
-        <td>{{ 'ADMIN.CONTRIBUTORS.KIND_' + contributor.kind | translate }}</td>
-        <td class="ids">
+  <div class="count">{{ total }} {{ 'ADMIN.CONTRIBUTORS.COUNT' | translate }}</div>
+
+  <!-- the table stays in the DOM across reloads so matSort keeps its state (asc/desc toggle) -->
+  <div class="table-container" [class.loading]="loading">
+    @if (loading) {
+    <div class="loading-overlay"><es-spinner></es-spinner></div>
+    }
+    <table
+      mat-table
+      [dataSource]="contributors"
+      matSort
+      matSortActive="name"
+      matSortDirection="asc"
+      matSortDisableClear
+      (matSortChange)="onSort($event)"
+      class="contributor-table"
+    >
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'ADMIN.CONTRIBUTORS.NAME' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let contributor">{{ displayName(contributor) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="kind">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'ADMIN.CONTRIBUTORS.KIND' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let contributor">
+          {{ 'ADMIN.CONTRIBUTORS.KIND_' + contributor.kind | translate }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ids">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'ADMIN.CONTRIBUTORS.IDS' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let contributor" class="ids">
           @if (contributor.orcid) { <span>ORCID</span> } @if (contributor.gnduri) {
           <span>GND</span> } @if (contributor.ror) { <span>ROR</span> } @if (contributor.wikidata) {
           <span>Wikidata</span> } @if (contributor.email) { <span>E-Mail</span> }
         </td>
-        <td class="actions">
+      </ng-container>
+
+      <ng-container matColumnDef="lastUpdated">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'ADMIN.CONTRIBUTORS.LAST_UPDATED' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let contributor">
+          {{ contributor.lastUpdated | date : 'short' }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="created">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          {{ 'ADMIN.CONTRIBUTORS.CREATED' | translate }}
+        </th>
+        <td mat-cell *matCellDef="let contributor">{{ contributor.created | date : 'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let contributor" class="actions">
           <button mat-icon-button (click)="startEdit(contributor)">
             <i esIcon="edit"></i>
           </button>
@@ -44,15 +116,23 @@
             <i esIcon="delete"></i>
           </button>
         </td>
-      </tr>
-      } @empty {
-      <tr>
-        <td colspan="4" class="empty">
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="empty-row" *matNoDataRow>
+        <td [attr.colspan]="displayedColumns.length" class="empty">
           {{ 'ADMIN.CONTRIBUTORS.EMPTY' | translate }}
         </td>
       </tr>
-      }
-    </tbody>
-  </table>
-  }
+    </table>
+
+    <mat-paginator
+      [length]="total"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPage($event)"
+    ></mat-paginator>
+  </div>
 </div>

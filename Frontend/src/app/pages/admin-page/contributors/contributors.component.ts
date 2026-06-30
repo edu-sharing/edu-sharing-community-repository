@@ -1,4 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
 import { firstValueFrom } from 'rxjs';
 import { ContributorData, ContributorV1Service, HOME_REPOSITORY } from 'ngx-edu-sharing-api';
 import { Toast } from '../../../services/toast';
@@ -6,9 +8,15 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { ContributorRegistryEditDialogResult } from '../../../features/dialogs/dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog-data';
 
+type ContributorKind = 'PERSON' | 'ORGANIZATION';
+type ContributorSortBy = 'NAME' | 'KIND' | 'CREATED' | 'LAST_UPDATED' | 'IDS';
+type ContributorIdType = 'ORCID' | 'GND' | 'ROR' | 'WIKIDATA' | 'EMAIL';
+
 /**
  * Admin tool to manage the autonomous contributor registry (edu_contributor).
  * Gated by TOOLPERMISSION_MANAGE_CONTRIBUTORS (tab visibility in admin-page.component).
+ * Filtering, sorting, paging and the total match count are resolved server-side via
+ * ContributorV1Service.listContributors (GET /contributor/v1/{repository}/list).
  */
 @Component({
     selector: 'es-admin-contributors',
@@ -21,8 +29,31 @@ export class AdminContributorsComponent implements OnInit {
     private toast = inject(Toast);
     private dialogs = inject(DialogsService);
 
+    readonly displayedColumns = ['name', 'kind', 'ids', 'lastUpdated', 'created', 'actions'];
+    /**
+     * Persistent id types per kind: organizations carry ROR / Wikidata, persons ORCID / GND,
+     * an e-mail can belong to both. The id filter options are scoped to the selected kind.
+     */
+    readonly idTypes: { value: ContributorIdType; label: string; kinds: ContributorKind[] }[] = [
+        { value: 'ORCID', label: 'ORCID', kinds: ['PERSON'] },
+        { value: 'GND', label: 'GND', kinds: ['PERSON'] },
+        { value: 'ROR', label: 'ROR', kinds: ['ORGANIZATION'] },
+        { value: 'WIKIDATA', label: 'Wikidata', kinds: ['ORGANIZATION'] },
+        { value: 'EMAIL', label: 'E-Mail', kinds: ['PERSON', 'ORGANIZATION'] },
+    ];
+    readonly pageSizeOptions = [10, 25, 50, 100];
+
     contributors: ContributorData[] = [];
+    total = 0;
+
     searchWord = '';
+    kind?: ContributorKind;
+    hasId: ContributorIdType[] = [];
+    sortBy: ContributorSortBy = 'NAME';
+    sortAscending = true;
+    skip = 0;
+    pageIndex = 0;
+    pageSize = 25;
     loading = false;
 
     ngOnInit(): void {
@@ -32,17 +63,73 @@ export class AdminContributorsComponent implements OnInit {
     async load(): Promise<void> {
         this.loading = true;
         try {
-            this.contributors = await firstValueFrom(
-                this.contributorService.getContributors({
+            const result = await firstValueFrom(
+                this.contributorService.listContributors({
                     repository: HOME_REPOSITORY,
                     searchWord: this.searchWord || undefined,
-                    limit: 200,
+                    kind: this.kind,
+                    hasId: this.hasId.length ? this.hasId : undefined,
+                    sortBy: this.sortBy,
+                    sortAscending: this.sortAscending,
+                    skip: this.skip,
+                    limit: this.pageSize,
                 }),
             );
+            this.contributors = result.contributors;
+            this.total = result.pagination.total;
         } catch (e) {
             this.toast.error(e);
         } finally {
             this.loading = false;
+        }
+    }
+
+    /** id filter options scoped to the currently selected kind (all when no kind is selected) */
+    get availableIdTypes(): { value: ContributorIdType; label: string }[] {
+        return this.kind ? this.idTypes.filter((t) => t.kinds.includes(this.kind!)) : this.idTypes;
+    }
+
+    /** kind change: drop id filters that don't apply to the new kind, then reload */
+    onKindChange(): void {
+        const allowed = new Set(this.availableIdTypes.map((t) => t.value));
+        this.hasId = this.hasId.filter((id) => allowed.has(id));
+        this.onFilterChange();
+    }
+
+    /** filter / search change: jump back to the first page and reload */
+    onFilterChange(): void {
+        this.skip = 0;
+        this.pageIndex = 0;
+        void this.load();
+    }
+
+    onSort(sort: Sort): void {
+        this.sortBy = this.toSortBy(sort.active);
+        this.sortAscending = sort.direction !== 'desc';
+        this.skip = 0;
+        this.pageIndex = 0;
+        void this.load();
+    }
+
+    onPage(event: PageEvent): void {
+        this.pageIndex = event.pageIndex;
+        this.pageSize = event.pageSize;
+        this.skip = event.pageIndex * event.pageSize;
+        void this.load();
+    }
+
+    private toSortBy(active: string): ContributorSortBy {
+        switch (active) {
+            case 'kind':
+                return 'KIND';
+            case 'ids':
+                return 'IDS';
+            case 'created':
+                return 'CREATED';
+            case 'lastUpdated':
+                return 'LAST_UPDATED';
+            default:
+                return 'NAME';
         }
     }
 

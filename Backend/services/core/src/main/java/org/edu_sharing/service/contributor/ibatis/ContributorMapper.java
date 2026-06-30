@@ -61,6 +61,52 @@ public interface ContributorMapper {
                                   @Param("limit") int limit);
 
     /**
+     * Reusable filter predicate shared by {@link #listManaged} and {@link #countManaged}:
+     * optional kind, optional case-insensitive search word (name/org/email) and an optional
+     * "has any of these id types" filter. {@code hasIdColumns} carries already whitelisted column
+     * names (resolved from {@link org.edu_sharing.service.contributor.ContributorIdType} in the service layer).
+     */
+    String MANAGED_FILTER =
+            "<where>" +
+            "  <if test='kind != null'> AND kind = #{kind} </if>" +
+            "  <if test='searchWord != null and searchWord != \"\"'> AND (" +
+            "      givenname ILIKE '%' || #{searchWord} || '%' " +
+            "   OR surname ILIKE '%' || #{searchWord} || '%' " +
+            "   OR org ILIKE '%' || #{searchWord} || '%' " +
+            "   OR email ILIKE '%' || #{searchWord} || '%' " +
+            "  ) </if>" +
+            "  <if test='hasIdColumns != null and !hasIdColumns.isEmpty()'> AND (" +
+            "    <foreach collection='hasIdColumns' item='col' separator=' OR '> ${col} IS NOT NULL </foreach>" +
+            "  ) </if>" +
+            "</where> ";
+
+    /**
+     * Management list with filtering, whitelisted sorting and pagination.
+     * {@code orderBy} is a whitelisted ORDER BY expression (incl. ASC/DESC) built in the service layer.
+     */
+    @Select("<script>" +
+            "SELECT " + COLUMNS + " FROM edu_contributor " +
+            MANAGED_FILTER +
+            "ORDER BY ${orderBy} LIMIT #{limit} OFFSET #{skip}" +
+            "</script>")
+    @ResultMap("contributorResult")
+    List<ContributorEntry> listManaged(@Param("searchWord") String searchWord,
+                                       @Param("kind") SearchService.ContributorKind kind,
+                                       @Param("hasIdColumns") List<String> hasIdColumns,
+                                       @Param("orderBy") String orderBy,
+                                       @Param("skip") long skip,
+                                       @Param("limit") int limit);
+
+    /** Total number of entries matching the same filter as {@link #listManaged} (ignoring pagination). */
+    @Select("<script>" +
+            "SELECT COUNT(*) FROM edu_contributor " +
+            MANAGED_FILTER +
+            "</script>")
+    long countManaged(@Param("searchWord") String searchWord,
+                      @Param("kind") SearchService.ContributorKind kind,
+                      @Param("hasIdColumns") List<String> hasIdColumns);
+
+    /**
      * Lookup by any of the persistent ids - used for deduplication during migration and for create/update validation.
      * Only non-null arguments are considered.
      */
