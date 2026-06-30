@@ -118,9 +118,12 @@
             {{ 'SEARCH.FILTERS' | translate }}
           </button>
         </div>
+        <!-- Split actionbar (mirrors search/workspace): the toolbar shows toggle options only; node
+          actions move to the bottom selection bar. -->
         <es-actionbar
           [class.display-none]="(mainComponent$ | async) !== null"
           [numberOfAlwaysVisibleOptions]="3"
+          [showActionOptions]="false"
           [showCaptions]="(observer.width$ | async) > 700"
         ></es-actionbar>
       </div>
@@ -145,6 +148,56 @@
           </div>
         </ng-template>
       </es-node-entries-wrapper>
+
+      <!-- Full-width selection bar pinned at the bottom of the card; mirrors the search-page
+        selection layout. Node actions render in #selectionActionbarRef. -->
+      <div
+        class="selection-action-bar"
+        cdkOverlayOrigin
+        #selectionBar="cdkOverlayOrigin"
+        [class.visible]="selectedNodes.length"
+      >
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearSelection()"
+          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="selectionOverlayOpen = !selectionOverlayOpen"
+        >
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selectedNodes.length || 0 } }}
+          <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        <es-actionbar
+          #selectionActionbarRef
+          [showToggleOptions]="false"
+          showCaptions="ifRoom"
+        ></es-actionbar>
+      </div>
+
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selectedNodes.length"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="selectionOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="selectedNodes"
+          [columns]="columns()"
+          [displayType]="editorialPageService.displayType()"
+          (deselect)="deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
       } } }
     </div>
   </mat-sidenav-content>

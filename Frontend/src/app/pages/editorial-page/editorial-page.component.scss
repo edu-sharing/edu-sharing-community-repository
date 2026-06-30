@@ -1,55 +1,95 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
+// Page shell: lock to the available viewport height and clip, so the page never produces a body
+// scrollbar — the content card scrolls its list internally instead.
+:host {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
+}
+:host ::ng-deep mat-sidenav-container mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+}
+
 // Included at the top level (not nested under mat-sidenav-container) so the mixin's open-drawer
 // margin selector (`mat-sidenav-container.…-open &`) resolves correctly.
 .main-content {
     @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    // Always a fixed-height card scrolling its list internally (both the list view and the
+    // has-main-component views).
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
 }
 
 mat-sidenav-container {
-    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    flex: 1;
+    min-height: 0;
     .es-mat-sidenav-content-mds {
         overflow: hidden;
     }
     .main-content {
-        // Body scrolls by default (min-height); switches to internal scroll when has-main-component.
-        min-height: calc(
-            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-                var(--mainnavCurrentHeight)
-        );
+        // Static header rows; only the list below them scrolls.
         .top-area {
+            flex-shrink: 0;
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             padding: var(--roundedContainerMargin);
             min-height: 68px;
-            es-editorial-breadcrumb {
-            }
             .close {
                 margin-left: auto;
             }
         }
-        > node-entries-wrapper {
-            display: block;
-            padding: 0 var(--roundedContainerMargin);
-        }
-        mat-tab-group {
+        > mat-tab-group {
+            flex-shrink: 0;
             padding: 0;
         }
-        &.has-main-component {
-            @include mixins.roundedContainerStaticScroll(
-                vars.$mobileTabSwitchWidth,
-                vars.$mobileTabNavHeight
-            );
+        // The node list is the only scrolling region.
+        > es-node-entries-wrapper {
+            display: block;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            @include mixins.materialScrollbarLight();
+            padding: 0 var(--roundedContainerMargin);
         }
         .option-area {
+            flex-shrink: 0;
             display: flex;
             padding: 15px var(--roundedContainerMargin) 10px var(--roundedContainerMargin);
             .options-left {
                 flex-grow: 1;
             }
         }
+    }
+}
+
+// Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 10px var(--roundedContainerMargin);
+    background-color: var(--roundedContainerBackground);
+    border-top: 1px solid var(--mat-divider-color);
+
+    es-actionbar {
+        padding-left: 10px;
+    }
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
     }
 }
 

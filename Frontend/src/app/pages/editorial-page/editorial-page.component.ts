@@ -2,12 +2,14 @@ import {
     AfterViewInit,
     Component,
     effect,
+    inject,
     OnDestroy,
     OnInit,
     signal,
     ViewChild,
-    inject,
+    viewChild,
 } from '@angular/core';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import {
     Assignment,
     AuthenticationService,
@@ -137,8 +139,22 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
     @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
+    /** Bottom selection bar (actions-only); node actions render here, toggles stay in the toolbar. */
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
     @ViewChild(NodeEntriesWrapperComponent)
     nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>;
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
     private destroyed$ = new Subject<void>();
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
@@ -261,8 +277,10 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 )
             );
         };
+        // Split actionbar (mirrors search/workspace): the toolbar actionbar shows toggle options
+        // only; node actions move to the bottom selection bar.
         void this.nodeEntriesRef?.initOptionsGenerator({
-            actionbar: this.actionbarRef,
+            actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
                 addOptions: [this.sidebarOptionToggle, reject],
@@ -704,6 +722,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {
         this.selection.set(event.source);
+        if (!event.source.selected.length) {
+            this.selectionOverlayOpen = false;
+        }
         this.editorialSidebarService.handleSelection(event);
     }
     fetchEvent(event: FetchEvent) {
@@ -768,8 +789,19 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     openItem(element: NodeClickEvent<NodeEntriesDataType>) {
         void this.nodeHelperService.navigateToNode(element);
     }
-    private clearSelection() {
+
+    /** Selected elements as a node list, for the selection bar / overlay. */
+    get selectedNodes(): Node[] {
+        return (this.selection()?.selected ?? []) as Node[];
+    }
+
+    clearSelection() {
         this.nodeEntriesRef?.getSelection()?.clear();
+        this.selectionOverlayOpen = false;
         this.editorialSidebarService.sidebarOpened.set(false);
+    }
+
+    deselectNode(node: Node) {
+        this.nodeEntriesRef?.getSelection()?.deselect(node);
     }
 }
