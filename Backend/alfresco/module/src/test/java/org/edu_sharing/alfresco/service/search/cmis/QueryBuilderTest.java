@@ -87,6 +87,28 @@ public class QueryBuilderTest {
   }
 
   @Test
+  void selectHyphenatedPropertyIsIso9075Encoded(){
+
+    // CMIS column names may not contain '-' (lexer ID rule); the hyphen must be ISO9075-encoded
+    // to '_x002d_' - the same encoding Alfresco itself uses to register the CMIS query name.
+    String expected = "SELECT iometadata.ccm:lifecyclecontributer_maz_x002d_bearbeitung " +
+            "FROM ccm:io AS io LEFT JOIN null AS iometadata ON iometadata.cmis:objectId = io.cmis:objectId";
+
+    QName containerName = QName.createQName("ccm:iometadata", "iometadata");
+    QName propName = QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MAZ_BEARBEITUNG);
+    Mockito.when(dictionaryService.getProperty(ArgumentMatchers.notNull())).thenReturn(propertyDefinition);
+    Mockito.when(propertyDefinition.getContainerClass().getName()).thenReturn(containerName);
+    Mockito.when(propertyDefinition.getName()).thenReturn(propName);
+
+    QueryStatement query = Query
+            .select(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MAZ_BEARBEITUNG)
+            .from(CCConstants.CCM_TYPE_IO);
+
+    String actual = queryBuilder.build(query);
+    Assertions.assertEquals(expected, actual);
+  }
+
+  @Test
   void selectTrhowsUnknownPropertyDefinitionException(){
     QueryStatement query = Query
             .select(CCConstants.CCM_PROP_IO_ORIGINAL)
