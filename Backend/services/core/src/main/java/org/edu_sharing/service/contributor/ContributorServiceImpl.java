@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -36,6 +37,24 @@ public class ContributorServiceImpl implements ContributorService {
     @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_MANAGE_CONTRIBUTORS)
     public long count() {
         return contributorMapper.count();
+    }
+
+    @Override
+    @Permission(CCConstants.CCM_VALUE_TOOLPERMISSION_MANAGE_CONTRIBUTORS)
+    public ContributorPage listManaged(String searchWord, SearchService.ContributorKind kind, List<ContributorIdType> hasIds,
+                                       ContributorSortProperty sortBy, boolean ascending, long skip, int limit) {
+        String word = StringUtils.trimToNull(searchWord);
+        // map the id-type enums to their (whitelisted) db columns - never pass user strings into the sql
+        List<String> hasIdColumns = (hasIds == null) ? List.of()
+                : hasIds.stream().filter(Objects::nonNull).map(ContributorIdType::getColumn).toList();
+        // build a whitelisted ORDER BY expression from the enum + direction
+        ContributorSortProperty sort = (sortBy == null) ? ContributorSortProperty.NAME : sortBy;
+        String orderBy = sort.toOrderBy(ascending);
+
+        long total = contributorMapper.countManaged(word, kind, hasIdColumns);
+        List<ContributorEntry> entries = contributorMapper.listManaged(
+                word, kind, hasIdColumns, orderBy, Math.max(0, skip), limit <= 0 ? 50 : limit);
+        return new ContributorPage(entries, total);
     }
 
     @Override

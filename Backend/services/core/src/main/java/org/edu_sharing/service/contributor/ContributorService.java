@@ -20,6 +20,21 @@ public interface ContributorService {
 
     long count();
 
+    /**
+     * Filtered, sorted and paginated management list with the total match count.
+     * Management-only (requires {@code TOOLPERMISSION_MANAGE_CONTRIBUTORS}).
+     *
+     * @param searchWord    optional case-insensitive search over name/org/email
+     * @param kind          optional kind filter
+     * @param hasIds        optional filter: only entries carrying at least one of the given id types
+     * @param sortBy        whitelisted sort column (defaults to {@link ContributorSortProperty#NAME} when null)
+     * @param ascending     sort direction
+     * @param skip          pagination offset
+     * @param limit         page size
+     */
+    ContributorPage listManaged(String searchWord, SearchService.ContributorKind kind, List<ContributorIdType> hasIds,
+                                ContributorSortProperty sortBy, boolean ascending, long skip, int limit);
+
     ContributorEntry getById(long id);
 
     /** Create a new entry. Requires at least one persistent id. */

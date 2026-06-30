@@ -70,3 +70,4 @@ export {
     ContributorV1Service,
 } from './lib/api/services';
 export * from './lib/api/models/contributor-data';
+export * from './lib/api/models/contributor-search-result';

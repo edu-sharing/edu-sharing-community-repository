@@ -1,10 +1,15 @@
 package org.edu_sharing.restservices;
 
 import org.edu_sharing.restservices.contributor.v1.model.ContributorData;
+import org.edu_sharing.restservices.contributor.v1.model.ContributorSearchResult;
 import org.edu_sharing.restservices.contributor.v1.model.CreateContributorRequest;
 import org.edu_sharing.restservices.contributor.v1.model.UpdateContributorRequest;
+import org.edu_sharing.restservices.shared.Pagination;
 import org.edu_sharing.service.contributor.ContributorEntry;
+import org.edu_sharing.service.contributor.ContributorIdType;
+import org.edu_sharing.service.contributor.ContributorPage;
 import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.service.contributor.ContributorSortProperty;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.spring.ApplicationContextFactory;
 
@@ -20,6 +25,17 @@ public class ContributorDao {
 
     public List<ContributorData> search(String searchWord, SearchService.ContributorKind kind, int limit) {
         return contributorService.search(searchWord, kind, limit).stream().map(ContributorDao::mapToData).toList();
+    }
+
+    public ContributorSearchResult searchManaged(String searchWord, SearchService.ContributorKind kind,
+                                                  List<ContributorIdType> hasIds, ContributorSortProperty sortBy,
+                                                  boolean ascending, int skip, int limit) {
+        ContributorPage page = contributorService.listManaged(searchWord, kind, hasIds, sortBy, ascending, skip, limit);
+        List<ContributorData> contributors = page.entries().stream().map(ContributorDao::mapToData).toList();
+        return ContributorSearchResult.builder()
+                .contributors(contributors)
+                .pagination(new Pagination(skip, (int) page.total(), contributors.size()))
+                .build();
     }
 
     public List<ContributorData> getAll(long skip, int limit) {

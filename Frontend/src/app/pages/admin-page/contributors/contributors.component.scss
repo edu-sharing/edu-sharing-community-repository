@@ -3,14 +3,43 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 16px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
 
         .search {
             min-width: 320px;
         }
 
+        .filter {
+            min-width: 160px;
+        }
+
         .spacer {
             flex: 1;
+        }
+    }
+
+    .count {
+        margin-bottom: 12px;
+        opacity: 0.7;
+        font-size: 0.9em;
+    }
+
+    .table-container {
+        position: relative;
+
+        &.loading .contributor-table {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
         }
     }
 

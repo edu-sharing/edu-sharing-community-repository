@@ -1862,6 +1862,24 @@
         ],
         "type": "object"
       },
+      "ContributorSearchResult": {
+        "properties": {
+          "contributors": {
+            "items": {
+              "$ref": "#/components/schemas/ContributorData"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "required": [
+          "contributors",
+          "pagination"
+        ],
+        "type": "object"
+      },
       "Copy": {
         "properties": {
           "entries": {
@@ -22286,6 +22304,163 @@
           }
         },
         "summary": "create a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}/list": {
+      "get": {
+        "description": "Filtered, sorted and paginated management list of the contributor registry, including the total match count. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "listContributors",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "search word",
+            "in": "query",
+            "name": "searchWord",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "contributor kind",
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "enum": [
+                "PERSON",
+                "ORGANIZATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "only contributors carrying at least one of these id types",
+            "in": "query",
+            "name": "hasId",
+            "schema": {
+              "items": {
+                "enum": [
+                  "ORCID",
+                  "GND",
+                  "ROR",
+                  "WIKIDATA",
+                  "EMAIL"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort column",
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "NAME",
+              "enum": [
+                "NAME",
+                "KIND",
+                "CREATED",
+                "LAST_UPDATED",
+                "IDS"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "sort direction",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "pagination offset",
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "max number of results",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorSearchResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "list managed contributors",
         "tags": [
           "CONTRIBUTOR v1"
         ]
