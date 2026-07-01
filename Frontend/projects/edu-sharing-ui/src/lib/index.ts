@@ -93,6 +93,7 @@ export * from './sort-dropdown/sort-dropdown.component';
 export * from './spinner/spinner.component';
 export * from './spinner-small/spinner-small.component';
 export * from './translations/fallback-translation-handler';
+export * from './translations/translated-mat-paginator-intl';
 export * from './translations/translation-loader';
 export * from './translations/translations.module';
 export * from './translations/translations.service';

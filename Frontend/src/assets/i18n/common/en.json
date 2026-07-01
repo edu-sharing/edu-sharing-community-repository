@@ -263,6 +263,8 @@
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",
     "itemsPerPageLabel": "Entries per page:",
+    "firstPageLabel": "First page",
+    "lastPageLabel": "Last page",
     "nextPageLabel": "Next page",
     "previousPageLabel": "Previous page"
   },

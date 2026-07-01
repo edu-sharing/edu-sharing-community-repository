@@ -1201,6 +1201,8 @@
   "PAGINATOR": {
     "getRangeLabel": "Pagina {{page}} di {{pageCount}}",
     "itemsPerPageLabel": "Voci per pagina:",
+    "firstPageLabel": "Prima pagina",
+    "lastPageLabel": "Ultima pagina",
     "nextPageLabel": "Pagina successiva",
     "previousPageLabel": "Pagina precedente"
   },
