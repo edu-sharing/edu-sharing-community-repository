@@ -2,6 +2,7 @@ package org.edu_sharing.repository.update;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.update.UpdateRoutine;
 import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.contributor.ContributorEntry;
@@ -43,6 +44,8 @@ public class Release_11_0_MigrateContributors {
         Set<String> vcards = SearchServiceFactory.getInstance().getLocalService().getAllContributorVCards();
         log.info("Found {} distinct contributor vcards in the index", vcards.size());
 
+        // record the user running the migration as the creator of the registry entries
+        String creator = AuthenticationUtil.getFullyAuthenticatedUser();
         Set<String> seenKeys = new HashSet<>();
         int created = 0;
         for (String vcard : vcards) {
@@ -60,6 +63,7 @@ public class Release_11_0_MigrateContributors {
                 continue; // already present in the registry
             }
             Date now = new Date();
+            entry.setCreator(creator);
             entry.setCreated(now);
             entry.setLastUpdated(now);
             contributorMapper.create(entry);

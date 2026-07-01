@@ -9,10 +9,10 @@ import java.util.List;
 @Mapper
 public interface ContributorMapper {
 
-    String COLUMNS = "id, kind, title, givenname, surname, org, email, url, uid, orcid, gnduri, ror, wikidata, vcard, created, last_updated";
+    String COLUMNS = "id, kind, title, givenname, surname, org, email, url, uid, orcid, gnduri, ror, wikidata, vcard, creator, created, last_updated";
 
-    @Insert("INSERT INTO edu_contributor(kind, title, givenname, surname, org, email, url, uid, orcid, gnduri, ror, wikidata, vcard, created, last_updated) " +
-            "VALUES (#{kind}, #{title}, #{givenname}, #{surname}, #{org}, #{email}, #{url}, #{uid}, #{orcid}, #{gnduri}, #{ror}, #{wikidata}, #{vcard}, #{created}, #{lastUpdated})")
+    @Insert("INSERT INTO edu_contributor(kind, title, givenname, surname, org, email, url, uid, orcid, gnduri, ror, wikidata, vcard, creator, created, last_updated) " +
+            "VALUES (#{kind}, #{title}, #{givenname}, #{surname}, #{org}, #{email}, #{url}, #{uid}, #{orcid}, #{gnduri}, #{ror}, #{wikidata}, #{vcard}, #{creator}, #{created}, #{lastUpdated})")
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     void create(ContributorEntry entry);
 
