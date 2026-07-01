@@ -52,40 +52,62 @@
           ]"
           [cdkConnectedOverlayOpen]="timebasedOpen"
         >
-          <div class="timebased-overlay" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+          <div
+            class="timebased-overlay"
+            cdkTrapFocus
+            [cdkTrapFocusAutoCapture]="true"
+            [formGroup]="timebasedForm"
+          >
             <div class="content">
               <mat-checkbox
-                [ngModel]="!!timebased.from"
-                (ngModelChange)="
-                  $event ? (timebased.from = getDateTomorrow()) : (timebased.from = null)
-                "
+                [ngModel]="fromEnabled"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="toggleFrom($event)"
                 >{{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}</mat-checkbox
               >
-              <div *ngIf="!!timebased.from">
+              <div *ngIf="fromEnabled">
                 <es-share-dialog-choose-date
-                  [(dateTime)]="timebased.from"
+                  formControlName="from"
                   [from]="currentDate"
-                  [to]="timebased.to"
+                  [to]="timebasedRaw.to"
                 ></es-share-dialog-choose-date>
+                <div
+                  class="timebased-error"
+                  role="alert"
+                  *ngIf="timebasedForm.controls.from.hasError('inPast')"
+                >
+                  {{ 'WORKSPACE.SHARE.TIMEBASED.IN_PAST' | translate }}
+                </div>
               </div>
               <mat-checkbox
-                [ngModel]="!!timebased.to"
-                (ngModelChange)="
-                  $event ? (timebased.to = getDateTomorrow(timebased.from)) : (timebased.to = null)
-                "
+                [ngModel]="toEnabled"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="toggleTo($event)"
                 >{{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}</mat-checkbox
               >
-              <div *ngIf="!!timebased.to">
+              <div *ngIf="toEnabled">
                 <es-share-dialog-choose-date
-                  [(dateTime)]="timebased.to"
-                  [from]="timebased.from || currentDate"
+                  formControlName="to"
+                  [from]="timebasedRaw.from || currentDate"
                 ></es-share-dialog-choose-date>
+              </div>
+              <div
+                class="timebased-error"
+                role="alert"
+                *ngIf="timebasedForm.hasError('fromAfterTo')"
+              >
+                {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
               </div>
               <div class="actions">
                 <button mat-button color="primary" (click)="timebasedOpen = null">
                   {{ 'CANCEL' | translate }}
                 </button>
-                <button mat-flat-button color="primary" (click)="saveTimebased()">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="saveTimebased()"
+                  [disabled]="timebasedForm.invalid"
+                >
                   {{ 'SAVE' | translate }}
                 </button>
               </div>
