@@ -95,6 +95,8 @@
   "DISABLED": "deaktiviert",
   "PAGINATOR": {
     "itemsPerPageLabel": "Einträge pro Seite:",
+    "firstPageLabel": "Erste Seite",
+    "lastPageLabel": "Letzte Seite",
     "nextPageLabel": "Nächste Seite",
     "previousPageLabel": "Vorherige Seite",
     "getRangeLabel": "Seite {{page}} von {{pageCount}}"
