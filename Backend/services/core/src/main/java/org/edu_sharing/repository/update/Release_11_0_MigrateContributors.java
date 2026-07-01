@@ -1,17 +1,14 @@
 package org.edu_sharing.repository.update;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.repository.server.update.UpdateRoutine;
 import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.contributor.ContributorEntry;
-import org.edu_sharing.service.contributor.ContributorVCardUtil;
-import org.edu_sharing.service.contributor.ibatis.ContributorMapper;
+import org.edu_sharing.service.contributor.ContributorServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
 
-import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -21,16 +18,15 @@ import java.util.Set;
  * (see {@link org.edu_sharing.service.search.SearchService#getAllContributorVCards()}). That query
  * already restricts to contributors carrying a persistent X- id (ORCID/GND for persons, ROR/Wikidata
  * for organizations) - mirroring what the {@code searchContributors} autocomplete surfaces, i.e. an
- * email alone is not enough to be migrated. They are deduplicated by id and inserted into the
- * registry. Idempotent - already migrated contributors (matched by id) are skipped, so the routine can
- * be re-run.
+ * email alone is not enough to be migrated. The actual registration (parsing, deduplication,
+ * existence check, insert) is delegated to
+ * {@link org.edu_sharing.service.contributor.ContributorService#registerVCardsIfAbsent} - the single
+ * source of truth shared with the capture policy. Idempotent - already migrated contributors (matched
+ * by id) are skipped, so the routine can be re-run. The migrating user is recorded as the creator.
  */
 @Slf4j
 @UpdateService
-@RequiredArgsConstructor
 public class Release_11_0_MigrateContributors {
-
-    private final ContributorMapper contributorMapper;
 
     @UpdateRoutine(
             id = "Release_11_0_MigrateContributors",
@@ -46,34 +42,8 @@ public class Release_11_0_MigrateContributors {
 
         // record the user running the migration as the creator of the registry entries
         String creator = AuthenticationUtil.getFullyAuthenticatedUser();
-        Set<String> seenKeys = new HashSet<>();
-        int created = 0;
-        for (String vcard : vcards) {
-            ContributorEntry entry = ContributorVCardUtil.fromVCardString(vcard);
-            if (entry == null) {
-                log.warn("Skipping unparseable contributor vcard: {}", vcard);
-                continue; // unparseable or no persistent id -> not manageable
-            }
-            if (!seenKeys.add(idKey(entry))) {
-                log.warn("Skipping contributor vcard with duplicate seen id: {}", vcard);
-                continue; // already handled in this run (e.g. different vcard formatting, same ids)
-            }
-            if (!contributorMapper.findByAnyId(entry.getOrcid(), entry.getGnduri(), entry.getRor(), entry.getWikidata(), entry.getEmail()).isEmpty()) {
-                log.warn("Skipping contributor vcard with duplicate db id: {}", vcard);
-                continue; // already present in the registry
-            }
-            Date now = new Date();
-            entry.setCreator(creator);
-            entry.setCreated(now);
-            entry.setLastUpdated(now);
-            contributorMapper.create(entry);
-            created++;
-            log.info("Migrated contributor {} ({})", idKey(entry), entry.getKind());
-        }
-        log.info("Contributor registry migration finished. Migrated {} contributor(s)", created);
-    }
-
-    private String idKey(ContributorEntry e) {
-        return e.getKind() + "|" + e.getOrcid() + "|" + e.getGnduri() + "|" + e.getRor() + "|" + e.getWikidata() + "|" + e.getEmail();
+        List<ContributorEntry> created = ContributorServiceFactory.getInstance().getLocalService()
+                .registerVCardsIfAbsent(vcards, creator);
+        log.info("Contributor registry migration finished. Migrated {} contributor(s)", created.size());
     }
 }

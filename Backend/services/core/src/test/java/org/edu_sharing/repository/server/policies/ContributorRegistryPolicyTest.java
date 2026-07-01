@@ -4,9 +4,8 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.service.contributor.ContributorEntry;
-import org.edu_sharing.service.contributor.ContributorVCardUtil;
-import org.edu_sharing.service.contributor.ibatis.ContributorMapper;
+import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.service.contributor.ContributorServiceFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,16 +19,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,27 +36,38 @@ class ContributorRegistryPolicyTest {
     @Mock
     private PolicyComponent policyComponent;
     @Mock
-    private ContributorMapper contributorMapper;
+    private ContributorServiceFactory contributorServiceFactory;
+    @Mock
+    private ContributorService contributorService;
     @InjectMocks
     private ContributorRegistryPolicy underTest;
 
     private MockedStatic<AuthenticationUtil> authStatic;
+    private MockedStatic<ContributorServiceFactory> factoryStatic;
 
     private static final QName AUTHOR = QName.createQName(CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
 
     @BeforeEach
     void setUp() {
-        // opened for every test; only stubbed in the tests that actually reach the create path
         authStatic = Mockito.mockStatic(AuthenticationUtil.class);
+        factoryStatic = Mockito.mockStatic(ContributorServiceFactory.class);
     }
 
     @AfterEach
     void tearDown() {
+        factoryStatic.close();
         authStatic.close();
     }
 
+    /** wire the static factory -> local service, only needed for the tests that reach the delegation */
+    private void stubService() {
+        factoryStatic.when(ContributorServiceFactory::getInstance).thenReturn(contributorServiceFactory);
+        when(contributorServiceFactory.getLocalService()).thenReturn(contributorService);
+        authStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("editor-user");
+    }
+
     private static String vcard(String surname, String orcid) {
-        return ContributorVCardUtil.toVCardString(ContributorEntry.builder().surname(surname).orcid(orcid).build());
+        return "BEGIN:VCARD\nN:" + surname + "\nX-ORCID:" + orcid + "\nEND:VCARD";
     }
 
     private static Serializable multi(String... vcards) {
@@ -66,63 +75,26 @@ class ContributorRegistryPolicyTest {
     }
 
     @Test
-    void changedContributorWithValidIdIsRegisteredWithCreator() {
-        authStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("editor-user");
-        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
-        Map<QName, Serializable> after = Map.of(AUTHOR, multi(vcard("Doe", "0000-1")));
+    @SuppressWarnings("unchecked")
+    void changedContributorPropertyDelegatesToServiceWithVCardsAndCreator() {
+        stubService();
+        String vcard = vcard("Doe", "0000-1");
+        Map<QName, Serializable> after = Map.of(AUTHOR, multi(vcard));
 
         underTest.onUpdateProperties(null, Map.of(), after);
 
-        ArgumentCaptor<ContributorEntry> captor = ArgumentCaptor.forClass(ContributorEntry.class);
-        verify(contributorMapper).create(captor.capture());
-        ContributorEntry created = captor.getValue();
-        assertEquals("0000-1", created.getOrcid());
-        assertEquals("editor-user", created.getCreator());
-        assertNotNull(created.getCreated());
-        assertNotNull(created.getLastUpdated());
-    }
-
-    @Test
-    void contributorWithoutPersistentIdIsNotRegistered() {
-        // vcard carries only a name, no X- id -> fromVCardString returns null
-        Map<QName, Serializable> after = Map.of(AUTHOR, multi(vcard("Doe", null)));
-
-        underTest.onUpdateProperties(null, Map.of(), after);
-
-        verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());
-        verify(contributorMapper, never()).create(any());
-    }
-
-    @Test
-    void contributorAlreadyInRegistryIsNotDuplicated() {
-        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any()))
-                .thenReturn(List.of(ContributorEntry.builder().id(1L).orcid("0000-1").build()));
-        Map<QName, Serializable> after = Map.of(AUTHOR, multi(vcard("Doe", "0000-1")));
-
-        underTest.onUpdateProperties(null, Map.of(), after);
-
-        verify(contributorMapper, never()).create(any());
-    }
-
-    @Test
-    void sameIdInMultipleValuesIsRegisteredOnce() {
-        authStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("editor-user");
-        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
-        // same orcid twice (e.g. duplicated) -> only one insert
-        Map<QName, Serializable> after = Map.of(AUTHOR, multi(vcard("Doe", "0000-1"), vcard("Doe-typo", "0000-1")));
-
-        underTest.onUpdateProperties(null, Map.of(), after);
-
-        verify(contributorMapper, times(1)).create(any());
+        ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
+        verify(contributorService).registerVCardsIfAbsent(captor.capture(), eq("editor-user"));
+        assertTrue(captor.getValue().contains(vcard));
     }
 
     @Test
     void unchangedContributorPropertyIsIgnored() {
         Serializable value = multi(vcard("Doe", "0000-1"));
-        // identical before/after -> no change -> nothing happens
+        // identical before/after -> no change -> no delegation
         underTest.onUpdateProperties(null, Map.of(AUTHOR, value), Map.of(AUTHOR, value));
 
-        verifyNoInteractions(contributorMapper);
+        verify(contributorService, never()).registerVCardsIfAbsent(any(), any());
     }
 
     @Test
@@ -131,6 +103,6 @@ class ContributorRegistryPolicyTest {
 
         underTest.onUpdateProperties(null, Map.of(), after);
 
-        verifyNoInteractions(contributorMapper);
+        verify(contributorService, never()).registerVCardsIfAbsent(any(), any());
     }
 }

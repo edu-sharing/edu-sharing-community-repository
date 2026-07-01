@@ -38,4 +38,13 @@ public class ContributorEntry implements Serializable {
     private String creator;
     private Date created;
     private Date lastUpdated;
+
+    /**
+     * Identity key built from the kind and all persistent ids. Used to deduplicate entries that
+     * denote the same person/organization (e.g. the same id surfacing in several contributor roles
+     * or vcard formattings) before they are inserted into the registry.
+     */
+    public String idKey() {
+        return kind + "|" + orcid + "|" + gnduri + "|" + ror + "|" + wikidata + "|" + email;
+    }
 }

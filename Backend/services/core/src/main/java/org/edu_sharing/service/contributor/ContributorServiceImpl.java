@@ -9,9 +9,13 @@ import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.search.SearchService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -70,11 +74,41 @@ public class ContributorServiceImpl implements ContributorService {
         if (entry.getKind() == null) {
             entry.setKind(deriveKind(entry));
         }
-        Date now = new Date();
         entry.setId(null);
+        entry.setVcard(ContributorVCardUtil.toVCardString(entry));
+        return insert(entry);
+    }
+
+    /** ungated - no toolpermission (see {@link ContributorService#registerVCardsIfAbsent}) */
+    @Override
+    public List<ContributorEntry> registerVCardsIfAbsent(Collection<String> vcards, String creator) {
+        List<ContributorEntry> created = new ArrayList<>();
+        Set<String> seenKeys = new HashSet<>();
+        for (String vcard : vcards == null ? List.<String>of() : vcards) {
+            ContributorEntry entry = ContributorVCardUtil.fromVCardString(vcard);
+            if (entry == null) {
+                continue; // unparseable or no persistent X- id -> not manageable
+            }
+            if (!seenKeys.add(entry.idKey())) {
+                continue; // same id already handled in this call (e.g. several roles / vcard formattings)
+            }
+            if (!contributorMapper.findByAnyId(entry.getOrcid(), entry.getGnduri(), entry.getRor(),
+                    entry.getWikidata(), entry.getEmail()).isEmpty()) {
+                continue; // already present in the registry
+            }
+            entry.setCreator(creator);
+            insert(entry);
+            created.add(entry);
+            log.info("Registered contributor {} ({}) by {}", entry.idKey(), entry.getKind(), creator);
+        }
+        return created;
+    }
+
+    /** shared persist step: stamps created/lastUpdated and writes the entry to the db */
+    private ContributorEntry insert(ContributorEntry entry) {
+        Date now = new Date();
         entry.setCreated(now);
         entry.setLastUpdated(now);
-        entry.setVcard(ContributorVCardUtil.toVCardString(entry));
         contributorMapper.create(entry);
         return entry;
     }
