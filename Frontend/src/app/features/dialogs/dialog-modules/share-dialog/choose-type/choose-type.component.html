@@ -10,6 +10,7 @@
   <mat-option
     *ngFor="let option of _options"
     esWorkspaceShareFocusableOption
+    tabindex="-1"
     role="menuitemradio"
     (click)="_setType(option.id)"
     [attr.aria-checked]="_contains(option.id)"

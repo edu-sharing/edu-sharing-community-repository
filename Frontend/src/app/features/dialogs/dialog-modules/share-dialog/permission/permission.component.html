@@ -34,6 +34,7 @@
           cdkConnectedOverlay
           [cdkConnectedOverlayHasBackdrop]="true"
           (backdropClick)="timebasedOpen = false"
+          (overlayKeydown)="onTimebasedKeydown($event)"
           [cdkConnectedOverlayOrigin]="timebasedTrigger"
           [cdkConnectedOverlayPositions]="[
             {
@@ -51,7 +52,7 @@
           ]"
           [cdkConnectedOverlayOpen]="timebasedOpen"
         >
-          <div class="timebased-overlay">
+          <div class="timebased-overlay" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
             <div class="content">
               <mat-checkbox
                 [ngModel]="!!timebased.from"

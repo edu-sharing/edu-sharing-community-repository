@@ -86,6 +86,13 @@ export class ShareDialogPermissionComponent implements OnInit {
         this.timebasedOpen = true;
     }
 
+    onTimebasedKeydown(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            event.stopPropagation();
+            this.timebasedOpen = false;
+        }
+    }
+
     saveTimebased() {
         if (this.timebased.from && this.timebased.to && this.timebased.from > this.timebased.to) {
             this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
