@@ -248,4 +248,38 @@ class ContributorServiceImplTest {
         assertTrue(underTest.registerVCardsIfAbsent(null, "editor").isEmpty());
         verifyNoInteractions(contributorMapper);
     }
+
+    /** a combined vcard (person id + org id) is registered as two independent entries */
+    private static String combinedVcard() {
+        return ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").surname("Doe").orcid("0000-1")
+                .org("Example Org").ror("https://ror.org/1")
+                .email("jane@example.org").build());
+    }
+
+    @Test
+    void registerVCardsIfAbsentSplitsCombinedVcardIntoPersonAndOrganization() {
+        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
+
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(combinedVcard()), "editor");
+
+        assertEquals(2, created.size());
+        assertTrue(created.stream().anyMatch(e -> e.getKind() == SearchService.ContributorKind.PERSON
+                && "0000-1".equals(e.getOrcid())), "a person entry is created for the ORCID");
+        assertTrue(created.stream().anyMatch(e -> e.getKind() == SearchService.ContributorKind.ORGANIZATION
+                && "https://ror.org/1".equals(e.getRor())), "an organization entry is created for the ROR");
+        verify(contributorMapper, times(2)).create(any());
+    }
+
+    @Test
+    void registerVCardsIfAbsentExcludesEmailFromOrganizationLookup() {
+        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
+
+        underTest.registerVCardsIfAbsent(List.of(combinedVcard()), "editor");
+
+        // the person is looked up including its email ...
+        verify(contributorMapper).findByAnyId(eq("0000-1"), isNull(), isNull(), isNull(), eq("jane@example.org"));
+        // ... but the organization lookup drops the email so the just-inserted person cannot mask it
+        verify(contributorMapper).findByAnyId(isNull(), isNull(), eq("https://ror.org/1"), isNull(), isNull());
+    }
 }

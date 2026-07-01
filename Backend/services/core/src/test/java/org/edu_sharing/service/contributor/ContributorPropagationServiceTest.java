@@ -11,6 +11,7 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfresco.service.search.cmis.QueryBuilder;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.search.SearchService.ContributorKind;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -148,5 +149,89 @@ class ContributorPropagationServiceTest {
         assertTrue(written.contains(afterVcard), "matching entry replaced by the after-vcard");
         assertTrue(written.contains(otherVcard), "unrelated entry kept unchanged");
         assertTrue(!written.contains(matchVcard), "old matching vcard removed");
+    }
+
+    /** a combined media vcard carrying both a person (ORCID) and an organization (ROR) component */
+    private static String combinedVcard() {
+        return ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").surname("Doe").orcid("0000-1")
+                .org("Example Org").ror("https://ror.org/1").build());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void personEditRewritesOnlyThePersonComponentOfACombinedVcard() {
+        ContributorEntry before = ContributorEntry.builder()
+                .kind(ContributorKind.PERSON).givenname("Jane").surname("Doe").orcid("0000-1").build();
+        ContributorEntry after = ContributorEntry.builder()
+                .kind(ContributorKind.PERSON).givenname("Jane").surname("Doe-Smith").orcid("0000-1").build();
+
+        stubSinglePageResult();
+        when(nodeService.getProperty(nodeRef, propQName)).thenReturn(combinedVcard());
+
+        underTest.applyContributorChange(before, after);
+
+        ArgumentCaptor<Serializable> captor = ArgumentCaptor.forClass(Serializable.class);
+        verify(nodeService).setProperty(eq(nodeRef), eq(propQName), captor.capture());
+        ContributorEntry result = ContributorVCardUtil.fromVCardString(((List<String>) captor.getValue()).get(0));
+        // person component updated ...
+        assertEquals("Doe-Smith", result.getSurname());
+        // ... organization component preserved
+        assertEquals("Example Org", result.getOrg());
+        assertEquals("https://ror.org/1", result.getRor());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void organizationEditRewritesOnlyTheOrganizationComponentOfACombinedVcard() {
+        ContributorEntry before = ContributorEntry.builder()
+                .kind(ContributorKind.ORGANIZATION).org("Example Org").ror("https://ror.org/1").build();
+        ContributorEntry after = ContributorEntry.builder()
+                .kind(ContributorKind.ORGANIZATION).org("Example Organization e.V.").ror("https://ror.org/1").build();
+
+        stubSinglePageResult();
+        when(nodeService.getProperty(nodeRef, propQName)).thenReturn(combinedVcard());
+
+        underTest.applyContributorChange(before, after);
+
+        ArgumentCaptor<Serializable> captor = ArgumentCaptor.forClass(Serializable.class);
+        verify(nodeService).setProperty(eq(nodeRef), eq(propQName), captor.capture());
+        ContributorEntry result = ContributorVCardUtil.fromVCardString(((List<String>) captor.getValue()).get(0));
+        // organization component updated ...
+        assertEquals("Example Organization e.V.", result.getOrg());
+        // ... person component preserved
+        assertEquals("Doe", result.getSurname());
+        assertEquals("0000-1", result.getOrcid());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void organizationEditRewritesTheSharedEmailAndUrlOfACombinedVcard() {
+        // email and url are shared by both components -> an organization edit rewrites them, too
+        String combined = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").surname("Doe").orcid("0000-1")
+                .org("Example Org").ror("https://ror.org/1")
+                .email("info@example.org").url("https://example.org").build());
+        ContributorEntry before = ContributorEntry.builder()
+                .kind(ContributorKind.ORGANIZATION).org("Example Org").ror("https://ror.org/1")
+                .email("info@example.org").url("https://example.org").build();
+        ContributorEntry after = ContributorEntry.builder()
+                .kind(ContributorKind.ORGANIZATION).org("Example Org").ror("https://ror.org/1")
+                .email("contact@example.org").url("https://example.org/new").build();
+
+        stubSinglePageResult();
+        when(nodeService.getProperty(nodeRef, propQName)).thenReturn(combined);
+
+        underTest.applyContributorChange(before, after);
+
+        ArgumentCaptor<Serializable> captor = ArgumentCaptor.forClass(Serializable.class);
+        verify(nodeService).setProperty(eq(nodeRef), eq(propQName), captor.capture());
+        ContributorEntry result = ContributorVCardUtil.fromVCardString(((List<String>) captor.getValue()).get(0));
+        // shared fields updated ...
+        assertEquals("contact@example.org", result.getEmail());
+        assertEquals("https://example.org/new", result.getUrl());
+        // ... person component preserved
+        assertEquals("0000-1", result.getOrcid());
+        assertEquals("Doe", result.getSurname());
     }
 }

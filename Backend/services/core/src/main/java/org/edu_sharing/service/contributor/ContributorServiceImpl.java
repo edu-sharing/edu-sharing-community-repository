@@ -85,21 +85,24 @@ public class ContributorServiceImpl implements ContributorService {
         List<ContributorEntry> created = new ArrayList<>();
         Set<String> seenKeys = new HashSet<>();
         for (String vcard : vcards == null ? List.<String>of() : vcards) {
-            ContributorEntry entry = ContributorVCardUtil.fromVCardString(vcard);
-            if (entry == null) {
-                continue; // unparseable or no persistent X- id -> not manageable
+            // a single vcard may describe a person together with an affiliated organization -> two entries
+            for (ContributorEntry entry : ContributorVCardUtil.toEntries(vcard)) {
+                if (!seenKeys.add(entry.idKey())) {
+                    continue; // same id already handled in this call (e.g. several roles / vcard formattings)
+                }
+                // email is copied into both the person and the organization record; excluding it from the
+                // organization lookup prevents the just-inserted person from masking the organization
+                String emailForLookup = entry.getKind() == SearchService.ContributorKind.ORGANIZATION
+                        ? null : entry.getEmail();
+                if (!contributorMapper.findByAnyId(entry.getOrcid(), entry.getGnduri(), entry.getRor(),
+                        entry.getWikidata(), emailForLookup).isEmpty()) {
+                    continue; // already present in the registry
+                }
+                entry.setCreator(creator);
+                insert(entry);
+                created.add(entry);
+                log.info("Registered contributor {} ({}) by {}", entry.idKey(), entry.getKind(), creator);
             }
-            if (!seenKeys.add(entry.idKey())) {
-                continue; // same id already handled in this call (e.g. several roles / vcard formattings)
-            }
-            if (!contributorMapper.findByAnyId(entry.getOrcid(), entry.getGnduri(), entry.getRor(),
-                    entry.getWikidata(), entry.getEmail()).isEmpty()) {
-                continue; // already present in the registry
-            }
-            entry.setCreator(creator);
-            insert(entry);
-            created.add(entry);
-            log.info("Registered contributor {} ({}) by {}", entry.idKey(), entry.getKind(), creator);
         }
         return created;
     }

@@ -31,10 +31,12 @@ import java.util.Set;
 /**
  * Applies a contributor change to all media nodes that currently carry the (unchanged) contributor.
  * <p>
- * Matching follows the requirement to compare against <b>all field values</b> of the contributor as it
- * was <i>before</i> the change - not just the persistent id - so that two distinct persons sharing a name
- * are never confused. A coarse CMIS prefilter (LIKE on a distinctive id token) narrows the candidate set,
- * the exact full-field comparison happens in Java.
+ * Matching compares the field values of the component that the changed contributor represents (person or
+ * organization) against the - possibly combined - vcard stored on the node, as it was <i>before</i> the
+ * change. Comparing the full component (not just the persistent id) prevents confusing two distinct persons
+ * sharing a name; ignoring the other component lets a combined "person + organization" vcard still match its
+ * managed entry. A coarse CMIS prefilter (LIKE on a distinctive id token) narrows the candidate set, the
+ * exact comparison happens in Java. On a match only the matched component of the vcard is rewritten.
  * <p>
  * Runs asynchronously via {@link Queued} so the admin request returns immediately.
  */
@@ -72,7 +74,6 @@ public class ContributorPropagationService {
             return;
         }
         List<String> contributorProps = contributorPropertyQNames();
-        String afterVCard = ContributorVCardUtil.toVCardString(after);
 
         QueryStatement query = Query.select(CCConstants.SYS_PROP_NODE_UID)
                 .from(CCConstants.CCM_TYPE_IO)
@@ -96,7 +97,7 @@ public class ContributorPropagationService {
             ResultSet rs = searchService.query(params);
             try {
                 for (ResultSetRow row : rs) {
-                    if (updateNode(row.getNodeRef(), before, afterVCard, contributorProps)) {
+                    if (updateNode(row.getNodeRef(), before, after, contributorProps)) {
                         updatedNodes++;
                     }
                 }
@@ -112,12 +113,13 @@ public class ContributorPropagationService {
     }
 
     /**
-     * Rewrite all contributor properties of a single node, replacing entries that fully match {@code before}.
+     * Rewrite all contributor properties of a single node, replacing the matching component of entries that
+     * match {@code before}.
      *
      * @return true if at least one property of the node was changed
      */
     @SuppressWarnings("unchecked")
-    private boolean updateNode(NodeRef nodeRef, ContributorEntry before, String afterVCard, List<String> contributorProps) {
+    private boolean updateNode(NodeRef nodeRef, ContributorEntry before, ContributorEntry after, List<String> contributorProps) {
         boolean nodeChanged = false;
         for (String prop : contributorProps) {
             QName qName = QName.createQName(prop);
@@ -130,8 +132,10 @@ public class ContributorPropagationService {
             List<String> newVCards = new ArrayList<>(vcards.size());
             for (String vcard : vcards) {
                 ContributorEntry stored = ContributorVCardUtil.fromVCardString(vcard);
-                if (stored != null && fullFieldMatch(before, stored)) {
-                    newVCards.add(afterVCard);
+                if (stored != null && componentMatch(before, stored)) {
+                    // rewrite only the matched component, keeping any other component of a combined vcard intact
+                    applyComponent(stored, after, before.getKind());
+                    newVCards.add(ContributorVCardUtil.toVCardString(stored));
                     propChanged = true;
                 } else {
                     newVCards.add(vcard);
@@ -149,20 +153,50 @@ public class ContributorPropagationService {
     }
 
     /**
-     * Compare all relevant fields of the contributor (name, org, email, url, all persistent ids).
-     * Two contributors only match if every field is equal - this prevents over-matching on homonyms.
+     * Compare the fields of the component that {@code before} represents against the (possibly combined) stored
+     * vcard: person fields (name, title, ORCID, GND) for a person, organization fields (org, ROR, Wikidata) for
+     * an organization, plus the shared fields (email, url) that belong to both. Fields of the other component
+     * are ignored so that a combined vcard still matches its managed person / organization entry. The
+     * persistent ids stay part of the comparison, so two distinct contributors sharing a name are never confused.
      */
-    private boolean fullFieldMatch(ContributorEntry a, ContributorEntry b) {
-        return eq(a.getGivenname(), b.getGivenname())
-                && eq(a.getSurname(), b.getSurname())
-                && eq(a.getTitle(), b.getTitle())
-                && eq(a.getOrg(), b.getOrg())
-                && eq(a.getEmail(), b.getEmail())
-                && eq(a.getUrl(), b.getUrl())
-                && eq(a.getOrcid(), b.getOrcid())
-                && eq(a.getGnduri(), b.getGnduri())
-                && eq(a.getRor(), b.getRor())
-                && eq(a.getWikidata(), b.getWikidata());
+    private boolean componentMatch(ContributorEntry before, ContributorEntry stored) {
+        // email and url are shared by both components
+        if (!eq(before.getEmail(), stored.getEmail()) || !eq(before.getUrl(), stored.getUrl())) {
+            return false;
+        }
+        if (before.getKind() == org.edu_sharing.service.search.SearchService.ContributorKind.ORGANIZATION) {
+            return eq(before.getOrg(), stored.getOrg())
+                    && eq(before.getRor(), stored.getRor())
+                    && eq(before.getWikidata(), stored.getWikidata());
+        }
+        return eq(before.getGivenname(), stored.getGivenname())
+                && eq(before.getSurname(), stored.getSurname())
+                && eq(before.getTitle(), stored.getTitle())
+                && eq(before.getOrcid(), stored.getOrcid())
+                && eq(before.getGnduri(), stored.getGnduri());
+    }
+
+    /**
+     * Overwrite the fields of the matched component in {@code target} with the values from {@code after},
+     * leaving the fields of the other component untouched. Email and url are shared by both components and are
+     * therefore always rewritten.
+     */
+    private void applyComponent(ContributorEntry target, ContributorEntry after,
+                                org.edu_sharing.service.search.SearchService.ContributorKind kind) {
+        target.setEmail(after.getEmail());
+        target.setUrl(after.getUrl());
+        if (kind == org.edu_sharing.service.search.SearchService.ContributorKind.ORGANIZATION) {
+            target.setOrg(after.getOrg());
+            target.setRor(after.getRor());
+            target.setWikidata(after.getWikidata());
+        } else {
+            target.setTitle(after.getTitle());
+            target.setGivenname(after.getGivenname());
+            target.setSurname(after.getSurname());
+            target.setUid(after.getUid());
+            target.setOrcid(after.getOrcid());
+            target.setGnduri(after.getGnduri());
+        }
     }
 
     private boolean eq(String a, String b) {

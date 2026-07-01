@@ -8,6 +8,7 @@ import org.edu_sharing.service.search.SearchService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,14 +28,10 @@ public class ContributorVCardUtil {
      *         (only contributors with at least one id are manageable).
      */
     public static ContributorEntry fromVCardString(String vcardString) {
-        if (StringUtils.isBlank(vcardString)) {
+        Map<String, Object> data = parse(vcardString);
+        if (data == null) {
             return null;
         }
-        ArrayList<Map<String, Object>> parsed = VCardConverter.vcardToMap("", vcardString);
-        if (parsed == null || parsed.isEmpty()) {
-            return null;
-        }
-        Map<String, Object> data = parsed.get(0);
 
         String orcid = trimToNull(data.get(CCConstants.VCARD_T_X_ORCID));
         String gnduri = trimToNull(data.get(CCConstants.VCARD_T_X_GND_URI));
@@ -70,6 +67,63 @@ public class ContributorVCardUtil {
     }
 
     /**
+     * Parse a single vcard string into one or two {@link ContributorEntry contributor entries}.
+     * <p>
+     * A vcard that carries both a person id (ORCID / GND) and an organization id (ROR / Wikidata) describes
+     * a person together with an affiliated organization and is split into two independent entries - a
+     * {@code PERSON} and an {@code ORGANIZATION}. In every other case the result is the single entry produced
+     * by {@link #fromVCardString(String)}, or an empty list if the vcard carries no persistent id.
+     */
+    public static List<ContributorEntry> toEntries(String vcardString) {
+        Map<String, Object> data = parse(vcardString);
+        if (data == null) {
+            return List.of();
+        }
+
+        String orcid = trimToNull(data.get(CCConstants.VCARD_T_X_ORCID));
+        String gnduri = trimToNull(data.get(CCConstants.VCARD_T_X_GND_URI));
+        String ror = trimToNull(data.get(CCConstants.VCARD_T_X_ROR));
+        String wikidata = trimToNull(data.get(CCConstants.VCARD_T_X_WIKIDATA));
+
+        boolean hasPersonId = orcid != null || gnduri != null;
+        boolean hasOrgId = ror != null || wikidata != null;
+        if (!(hasPersonId && hasOrgId)) {
+            // no split - fall back to the single canonical entry (also handles the no-id -> empty case)
+            ContributorEntry single = fromVCardString(vcardString);
+            return single == null ? List.of() : List.of(single);
+        }
+
+        // email and url are copied into both records so each stays self-contained
+        String email = trimToNull(data.get(CCConstants.VCARD_EMAIL));
+        String url = trimToNull(data.get(CCConstants.VCARD_URL));
+
+        ContributorEntry person = ContributorEntry.builder()
+                .kind(SearchService.ContributorKind.PERSON)
+                .title(trimToNull(data.get(CCConstants.VCARD_TITLE)))
+                .givenname(trimToNull(data.get(CCConstants.VCARD_GIVENNAME)))
+                .surname(trimToNull(data.get(CCConstants.VCARD_SURNAME)))
+                .uid(trimToNull(data.get(CCConstants.VCARD_URN_UID)))
+                .email(email)
+                .url(url)
+                .orcid(orcid)
+                .gnduri(gnduri)
+                .build();
+        person.setVcard(toVCardString(person));
+
+        ContributorEntry organization = ContributorEntry.builder()
+                .kind(SearchService.ContributorKind.ORGANIZATION)
+                .org(trimToNull(data.get(CCConstants.VCARD_ORG)))
+                .email(email)
+                .url(url)
+                .ror(ror)
+                .wikidata(wikidata)
+                .build();
+        organization.setVcard(toVCardString(organization));
+
+        return List.of(person, organization);
+    }
+
+    /**
      * Build the canonical vcard string for the given entry.
      */
     public static String toVCardString(ContributorEntry entry) {
@@ -86,6 +140,18 @@ public class ContributorVCardUtil {
         putIfNotBlank(map, CCConstants.VCARD_T_X_ROR, entry.getRor());
         putIfNotBlank(map, CCConstants.VCARD_T_X_WIKIDATA, entry.getWikidata());
         return VCardTool.hashMap2VCard(map);
+    }
+
+    /** Parse the vcard string and return the first entry's field map, or {@code null} if it cannot be parsed. */
+    private static Map<String, Object> parse(String vcardString) {
+        if (StringUtils.isBlank(vcardString)) {
+            return null;
+        }
+        ArrayList<Map<String, Object>> parsed = VCardConverter.vcardToMap("", vcardString);
+        if (parsed == null || parsed.isEmpty()) {
+            return null;
+        }
+        return parsed.get(0);
     }
 
     private static String trimToNull(Object value) {

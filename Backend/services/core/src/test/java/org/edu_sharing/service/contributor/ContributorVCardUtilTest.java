@@ -3,6 +3,8 @@ package org.edu_sharing.service.contributor;
 import org.edu_sharing.service.search.SearchService;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -145,5 +147,79 @@ class ContributorVCardUtilTest {
         ContributorEntry parsed = ContributorVCardUtil.fromVCardString(vcard);
         assertNotNull(parsed);
         assertEquals(vcard, parsed.getVcard());
+    }
+
+    @Test
+    void toEntriesSplitsCombinedVcardIntoPersonAndOrganization() {
+        // a vcard with both a person id (ORCID) and an org id (ROR) describes a person and an affiliated org
+        String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").surname("Doe").title("Prof. Dr.")
+                .org("Example University")
+                .email("jane@example.org").url("https://example.org/jane")
+                .orcid("0000-0002-1825-0097")
+                .ror("https://ror.org/02mhbdp94")
+                .build());
+
+        List<ContributorEntry> entries = ContributorVCardUtil.toEntries(vcard);
+
+        assertEquals(2, entries.size());
+        ContributorEntry person = entries.stream()
+                .filter(e -> e.getKind() == SearchService.ContributorKind.PERSON).findFirst().orElseThrow();
+        ContributorEntry org = entries.stream()
+                .filter(e -> e.getKind() == SearchService.ContributorKind.ORGANIZATION).findFirst().orElseThrow();
+
+        // person keeps the personal fields and the person id, but not the org fields
+        assertEquals("Jane", person.getGivenname());
+        assertEquals("Doe", person.getSurname());
+        assertEquals("Prof. Dr.", person.getTitle());
+        assertEquals("0000-0002-1825-0097", person.getOrcid());
+        assertNull(person.getOrg());
+        assertNull(person.getRor());
+        // organization keeps the org fields and the org id, but not the person fields
+        assertEquals("Example University", org.getOrg());
+        assertEquals("https://ror.org/02mhbdp94", org.getRor());
+        assertNull(org.getGivenname());
+        assertNull(org.getSurname());
+        assertNull(org.getOrcid());
+        // email and url are copied into both records
+        assertEquals("jane@example.org", person.getEmail());
+        assertEquals("jane@example.org", org.getEmail());
+        assertEquals("https://example.org/jane", person.getUrl());
+        assertEquals("https://example.org/jane", org.getUrl());
+    }
+
+    @Test
+    void toEntriesReturnsSinglePersonWhenOnlyPersonIdPresent() {
+        String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .surname("Doe").orcid("0000-1").build());
+        List<ContributorEntry> entries = ContributorVCardUtil.toEntries(vcard);
+        assertEquals(1, entries.size());
+        assertEquals(SearchService.ContributorKind.PERSON, entries.get(0).getKind());
+    }
+
+    @Test
+    void toEntriesReturnsSingleOrganizationWhenOnlyOrgIdPresent() {
+        String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .org("Example Org").ror("https://ror.org/1").build());
+        List<ContributorEntry> entries = ContributorVCardUtil.toEntries(vcard);
+        assertEquals(1, entries.size());
+        assertEquals(SearchService.ContributorKind.ORGANIZATION, entries.get(0).getKind());
+    }
+
+    @Test
+    void toEntriesReturnsSinglePersonForEmailOnly() {
+        String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").email("jane@example.org").build());
+        List<ContributorEntry> entries = ContributorVCardUtil.toEntries(vcard);
+        assertEquals(1, entries.size());
+        assertEquals(SearchService.ContributorKind.PERSON, entries.get(0).getKind());
+    }
+
+    @Test
+    void toEntriesReturnsEmptyWhenNoPersistentId() {
+        String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
+                .givenname("Jane").surname("Doe").org("Some Org").build());
+        assertTrue(ContributorVCardUtil.toEntries(vcard).isEmpty());
+        assertTrue(ContributorVCardUtil.toEntries(null).isEmpty());
     }
 }
