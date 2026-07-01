@@ -10,8 +10,7 @@ import {
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { firstValueFrom, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { first, takeUntil } from 'rxjs/operators';
 import { NodeEntriesDisplayType } from './entries-model';
 import { NodeEntriesGlobalService } from './node-entries-global.service';
@@ -19,7 +18,6 @@ import { NodeEntriesTemplatesService } from './node-entries-templates.service';
 import { NodeEntriesService } from '../services/node-entries.service';
 import { KeyboardShortcutsService } from '../services/abstract/keyboard-shortcuts.service';
 import { NodeDataSourceRemote } from './node-data-source-remote';
-import { TranslationsService } from '../translations/translations.service';
 import { NodeEntriesDataType } from './data-type';
 
 @Component({
@@ -37,8 +35,6 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
     templatesService = inject(NodeEntriesTemplatesService);
     private globalKeyboardShortcuts = inject(KeyboardShortcutsService, { optional: true });
     private route = inject(ActivatedRoute, { optional: true });
-    private translationsService = inject(TranslationsService);
-    private translate = inject(TranslateService);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
@@ -112,23 +108,9 @@ export class NodeEntriesComponent<T extends NodeEntriesDataType>
         }
     }
 
-    private async initPaginator(paginator: MatPaginator) {
-        await firstValueFrom(this.translationsService.waitForInit().pipe(first()));
-        this.paginator._intl.itemsPerPageLabel = this.translate.instant(
-            'PAGINATOR.itemsPerPageLabel',
-        );
-        this.paginator._intl.firstPageLabel = this.translate.instant('PAGINATOR.firstPageLabel');
-        this.paginator._intl.nextPageLabel = this.translate.instant('PAGINATOR.nextPageLabel');
-        this.paginator._intl.previousPageLabel = this.translate.instant(
-            'PAGINATOR.previousPageLabel',
-        );
-        paginator._intl.getRangeLabel = (page, pageSize, length) =>
-            this.translate.instant('PAGINATOR.getRangeLabel', {
-                page: page + 1,
-                pageSize,
-                length,
-                pageCount: Math.ceil(length / pageSize),
-            });
+    private initPaginator(paginator: MatPaginator) {
+        // Paginator labels are translated globally via `TranslatedMatPaginatorIntl`
+        // (registered as a `MatPaginatorIntl` provider), so no `_intl` wiring is needed here.
         // Connect data source.
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe((dataSource) => {
             if (dataSource instanceof NodeDataSourceRemote) {
