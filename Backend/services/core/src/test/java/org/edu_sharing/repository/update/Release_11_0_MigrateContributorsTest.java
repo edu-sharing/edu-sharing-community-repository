@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.update;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.service.contributor.ContributorEntry;
 import org.edu_sharing.service.contributor.ContributorVCardUtil;
 import org.edu_sharing.service.contributor.ibatis.ContributorMapper;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -19,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -38,16 +41,20 @@ class Release_11_0_MigrateContributorsTest {
     private Release_11_0_MigrateContributors underTest;
 
     private MockedStatic<SearchServiceFactory> searchServiceFactoryStatic;
+    private MockedStatic<AuthenticationUtil> authStatic;
 
     @BeforeEach
     void setUp() {
         searchServiceFactoryStatic = Mockito.mockStatic(SearchServiceFactory.class);
         searchServiceFactoryStatic.when(SearchServiceFactory::getInstance).thenReturn(searchServiceFactory);
         when(searchServiceFactory.getLocalService()).thenReturn(localSearchService);
+        authStatic = Mockito.mockStatic(AuthenticationUtil.class);
+        authStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("migration-user");
     }
 
     @AfterEach
     void tearDown() {
+        authStatic.close();
         searchServiceFactoryStatic.close();
     }
 
@@ -64,7 +71,10 @@ class Release_11_0_MigrateContributorsTest {
 
         underTest.execute();
 
-        verify(contributorMapper, times(1)).create(any());
+        ArgumentCaptor<ContributorEntry> captor = ArgumentCaptor.forClass(ContributorEntry.class);
+        verify(contributorMapper, times(1)).create(captor.capture());
+        // the migrating user is recorded as the creator of the registry entry
+        assertEquals("migration-user", captor.getValue().getCreator());
     }
 
     @Test

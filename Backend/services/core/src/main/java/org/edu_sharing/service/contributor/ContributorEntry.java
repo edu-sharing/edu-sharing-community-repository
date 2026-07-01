@@ -34,6 +34,8 @@ public class ContributorEntry implements Serializable {
     private String wikidata;
     /** canonical vcard string (regenerated from the fields above) */
     private String vcard;
+    /** username that introduced this entry (e.g. captured by the contributor registry policy); null for admin/migration */
+    private String creator;
     private Date created;
     private Date lastUpdated;
 }

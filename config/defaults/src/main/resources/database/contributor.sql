@@ -23,6 +23,7 @@ CREATE TABLE edu_contributor
     ror          varchar(255), -- X-ROR
     wikidata     varchar(255), -- X-Wikidata
     vcard        text         not null, -- canonical vcard string
+    creator      varchar(255), -- username that introduced this entry (e.g. via the contributor registry policy); null for admin/migration
     created      timestamp    not null,
     last_updated timestamp    not null,
     -- at least one persistent id / mail must be set, otherwise the entry is not part of a person record
