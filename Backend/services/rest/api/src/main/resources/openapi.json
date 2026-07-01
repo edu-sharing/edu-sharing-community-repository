@@ -9292,7 +9292,7 @@
       },
       "post": {
         "description": "register the specified application. Fails if the application is already registered, use PUT to update or insert.",
-        "operationId": "addApplication_1",
+        "operationId": "createApplication_1",
         "parameters": [
           {
             "description": "Remote application metadata url",
@@ -9383,7 +9383,7 @@
       },
       "put": {
         "description": "register the specified application. If the application is already registered it is updated, otherwise it is added.",
-        "operationId": "updateApplication_1",
+        "operationId": "addApplication_1",
         "parameters": [
           {
             "description": "Remote application metadata url",
@@ -9466,7 +9466,7 @@
     "/admin/v1/applications/xml": {
       "post": {
         "description": "register the xml file provided. Fails if the application is already registered, use PUT to update or insert.",
-        "operationId": "addApplication",
+        "operationId": "createApplication",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -9565,7 +9565,7 @@
       },
       "put": {
         "description": "register the xml file provided. If the application is already registered it is updated, otherwise it is added.",
-        "operationId": "updateApplication",
+        "operationId": "addApplication",
         "requestBody": {
           "content": {
             "multipart/form-data": {
