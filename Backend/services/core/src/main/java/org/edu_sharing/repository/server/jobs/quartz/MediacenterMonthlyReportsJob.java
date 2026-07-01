@@ -282,6 +282,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                 data.put(mappedRef, new StatisticEntry());
             }
             data = filterNonMediacenterMedia(data);
+            logger.info(mediacenter + " remaining " + nodes.size() + " licensed nodes after filtering for non-mediacenter elements");
         }
         String nodeId = generateCSVNode(mediacenter, "nach-Medien", startDate, endDate, reportType);
         try {
