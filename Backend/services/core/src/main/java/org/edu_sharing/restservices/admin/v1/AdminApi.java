@@ -435,17 +435,18 @@ public class AdminApi {
         }
     }
 
-    @PUT
+    @POST
     @Path("/applications/xml")
     @Consumes({"multipart/form-data"})
-    @Operation(summary = "register/add an application via xml file", description = "register the xml file provided.")
+    @Operation(summary = "register/add an application via xml file", description = "register the xml file provided. Fails if the application is already registered, use PUT to update or insert.")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Application.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
-    public Response addApplication(
+    public Response createApplication(
             @Parameter(description = "XML file for app to register", schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("xml") InputStream is,
             @Context HttpServletRequest req) {
         try {
@@ -457,9 +458,53 @@ public class AdminApi {
     }
 
     @PUT
+    @Path("/applications/xml")
+    @Consumes({"multipart/form-data"})
+    @Operation(summary = "update or add an application via xml file", description = "register the xml file provided. If the application is already registered it is updated, otherwise it is added.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Application.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response addApplication(
+            @Parameter(description = "XML file for app to register", schema = @Schema(type = "string", format = "binary"), required = true) @FormDataParam("xml") InputStream is,
+            @Context HttpServletRequest req) {
+        try {
+            Application result = mapToApplications(AdminServiceFactory.getInstance().updateApplicationFromStream(is));
+            return Response.ok().entity(result).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @POST
     @Path("/applications")
 
-    @Operation(summary = "register/add an application", description = "register the specified application.")
+    @Operation(summary = "register/add an application", description = "register the specified application. Fails if the application is already registered, use PUT to update or insert.")
+
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Application.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response createApplication(
+            @Parameter(description = "Remote application metadata url", required = true) @QueryParam("url") String url,
+            @Context HttpServletRequest req) {
+        try {
+            Application result = mapToApplications(AdminServiceFactory.getInstance().addApplication(url));
+            return Response.ok().entity(result).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @PUT
+    @Path("/applications")
+
+    @Operation(summary = "update or add an application", description = "register the specified application. If the application is already registered it is updated, otherwise it is added.")
 
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Application.class))),
             @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -471,7 +516,7 @@ public class AdminApi {
             @Parameter(description = "Remote application metadata url", required = true) @QueryParam("url") String url,
             @Context HttpServletRequest req) {
         try {
-            Application result = mapToApplications(AdminServiceFactory.getInstance().addApplication(url));
+            Application result = mapToApplications(AdminServiceFactory.getInstance().updateApplication(url));
             return Response.ok().entity(result).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);

@@ -5,6 +5,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AboutService,
+    AdminV1Service,
     NetworkService,
     Node,
     SessionStorageService,
@@ -104,6 +105,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     constructor(
         private about: AboutService,
         private admin: RestAdminService,
+        private adminV1: AdminV1Service,
         private config: ConfigurationService,
         private connector: RestConnectorService,
         private dialogs: DialogsService,
@@ -562,7 +564,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         const file = event.target.files[0];
         if (!file) return;
         this.globalProgress = true;
-        this.admin.addApplicationXml(file).subscribe(
+        this.adminV1.addApplication({ body: { xml: file } }).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
                 this.refreshAppList();
