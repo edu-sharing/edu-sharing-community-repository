@@ -4,6 +4,7 @@ import org.edu_sharing.service.search.SearchService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -45,6 +46,11 @@ public class ContributorServiceAdapter implements ContributorService {
 
     @Override
     public ContributorEntry create(ContributorEntry entry) {
+        throw new UnsupportedOperationException(NOT_AVAILABLE);
+    }
+
+    @Override
+    public List<ContributorEntry> registerVCardsIfAbsent(Collection<String> vcards, String creator) {
         throw new UnsupportedOperationException(NOT_AVAILABLE);
     }
 

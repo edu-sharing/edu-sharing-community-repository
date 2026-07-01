@@ -2,29 +2,23 @@ package org.edu_sharing.repository.update;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.service.contributor.ContributorEntry;
-import org.edu_sharing.service.contributor.ContributorVCardUtil;
-import org.edu_sharing.service.contributor.ibatis.ContributorMapper;
+import org.edu_sharing.service.contributor.ContributorService;
+import org.edu_sharing.service.contributor.ContributorServiceFactory;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,15 +26,18 @@ import static org.mockito.Mockito.when;
 class Release_11_0_MigrateContributorsTest {
 
     @Mock
-    private ContributorMapper contributorMapper;
-    @Mock
     private SearchServiceFactory searchServiceFactory;
     @Mock
     private SearchService localSearchService;
-    @InjectMocks
-    private Release_11_0_MigrateContributors underTest;
+    @Mock
+    private ContributorServiceFactory contributorServiceFactory;
+    @Mock
+    private ContributorService contributorService;
+
+    private final Release_11_0_MigrateContributors underTest = new Release_11_0_MigrateContributors();
 
     private MockedStatic<SearchServiceFactory> searchServiceFactoryStatic;
+    private MockedStatic<ContributorServiceFactory> contributorServiceFactoryStatic;
     private MockedStatic<AuthenticationUtil> authStatic;
 
     @BeforeEach
@@ -48,6 +45,11 @@ class Release_11_0_MigrateContributorsTest {
         searchServiceFactoryStatic = Mockito.mockStatic(SearchServiceFactory.class);
         searchServiceFactoryStatic.when(SearchServiceFactory::getInstance).thenReturn(searchServiceFactory);
         when(searchServiceFactory.getLocalService()).thenReturn(localSearchService);
+
+        contributorServiceFactoryStatic = Mockito.mockStatic(ContributorServiceFactory.class);
+        contributorServiceFactoryStatic.when(ContributorServiceFactory::getInstance).thenReturn(contributorServiceFactory);
+        when(contributorServiceFactory.getLocalService()).thenReturn(contributorService);
+
         authStatic = Mockito.mockStatic(AuthenticationUtil.class);
         authStatic.when(AuthenticationUtil::getFullyAuthenticatedUser).thenReturn("migration-user");
     }
@@ -55,48 +57,19 @@ class Release_11_0_MigrateContributorsTest {
     @AfterEach
     void tearDown() {
         authStatic.close();
+        contributorServiceFactoryStatic.close();
         searchServiceFactoryStatic.close();
     }
 
-    private static String vcard(String surname, String orcid) {
-        return ContributorVCardUtil.toVCardString(ContributorEntry.builder().surname(surname).orcid(orcid).build());
-    }
-
     @Test
-    void duplicateIdsWithinTheRunAreInsertedOnlyOnce() throws Exception {
-        // same orcid (-> same id key) but different vcard formatting/name; only the first must be persisted
-        Set<String> vcards = new LinkedHashSet<>(List.of(vcard("Doe", "0000-1"), vcard("Doe-typo", "0000-1")));
+    void delegatesTheIndexedVCardsAndMigratingUserToTheRegistryService() throws Exception {
+        Set<String> vcards = Set.of("vcard-a", "vcard-b");
         when(localSearchService.getAllContributorVCards()).thenReturn(vcards);
-        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
+        when(contributorService.registerVCardsIfAbsent(vcards, "migration-user")).thenReturn(List.of());
 
         underTest.execute();
 
-        ArgumentCaptor<ContributorEntry> captor = ArgumentCaptor.forClass(ContributorEntry.class);
-        verify(contributorMapper, times(1)).create(captor.capture());
-        // the migrating user is recorded as the creator of the registry entry
-        assertEquals("migration-user", captor.getValue().getCreator());
-    }
-
-    @Test
-    void contributorAlreadyInRegistryIsSkipped() throws Exception {
-        when(localSearchService.getAllContributorVCards()).thenReturn(Set.of(vcard("Doe", "0000-1")));
-        // db already contains an entry with one of the ids
-        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any()))
-                .thenReturn(List.of(ContributorEntry.builder().id(1L).orcid("0000-1").build()));
-
-        underTest.execute();
-
-        verify(contributorMapper, never()).create(any());
-    }
-
-    @Test
-    void unparseableVcardIsSkipped() throws Exception {
-        when(localSearchService.getAllContributorVCards()).thenReturn(Set.of("this is not a vcard"));
-
-        underTest.execute();
-
-        // unparseable -> never even consulted for an existing db entry, never created
-        verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());
-        verify(contributorMapper, never()).create(any());
+        // the migration only enumerates the vcards and delegates registration (dedup/parse/insert live in the service)
+        verify(contributorService).registerVCardsIfAbsent(eq(vcards), eq("migration-user"));
     }
 }

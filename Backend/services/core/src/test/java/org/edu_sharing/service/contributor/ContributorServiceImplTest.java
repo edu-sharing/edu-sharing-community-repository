@@ -17,11 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -186,5 +189,63 @@ class ContributorServiceImplTest {
     void deleteDelegatesToMapper() {
         underTest.delete(5);
         verify(contributorMapper).delete(5);
+    }
+
+    private static String vcard(String surname, String orcid) {
+        return ContributorVCardUtil.toVCardString(ContributorEntry.builder().surname(surname).orcid(orcid).build());
+    }
+
+    @Test
+    void registerVCardsIfAbsentSkipsVCardsWithoutPersistentId() {
+        // vcard carries only a name, no X- id -> not manageable
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard("Doe", null)), "editor");
+
+        assertTrue(created.isEmpty());
+        verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());
+        verify(contributorMapper, never()).create(any());
+    }
+
+    @Test
+    void registerVCardsIfAbsentDeduplicatesSameIdWithinCall() {
+        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
+        // same orcid twice (different formatting) -> only one insert
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(
+                List.of(vcard("Doe", "0000-1"), vcard("Doe-typo", "0000-1")), "editor");
+
+        assertEquals(1, created.size());
+        verify(contributorMapper, times(1)).create(any());
+    }
+
+    @Test
+    void registerVCardsIfAbsentSkipsWhenAlreadyInRegistry() {
+        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any()))
+                .thenReturn(List.of(ContributorEntry.builder().id(1L).orcid("0000-1").build()));
+
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard("Doe", "0000-1")), "editor");
+
+        assertTrue(created.isEmpty());
+        verify(contributorMapper, never()).create(any());
+    }
+
+    @Test
+    void registerVCardsIfAbsentCreatesWithCreatorAndTimestamps() {
+        when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
+        ArgumentCaptor<ContributorEntry> captor = ArgumentCaptor.forClass(ContributorEntry.class);
+
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard("Doe", "0000-1")), "editor");
+
+        assertEquals(1, created.size());
+        verify(contributorMapper).create(captor.capture());
+        ContributorEntry entry = captor.getValue();
+        assertEquals("0000-1", entry.getOrcid());
+        assertEquals("editor", entry.getCreator());
+        assertNotNull(entry.getCreated());
+        assertNotNull(entry.getLastUpdated());
+    }
+
+    @Test
+    void registerVCardsIfAbsentHandlesNullInput() {
+        assertTrue(underTest.registerVCardsIfAbsent(null, "editor").isEmpty());
+        verifyNoInteractions(contributorMapper);
     }
 }

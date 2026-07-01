@@ -2,6 +2,7 @@ package org.edu_sharing.service.contributor;
 
 import org.edu_sharing.service.search.SearchService;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -39,6 +40,15 @@ public interface ContributorService {
 
     /** Create a new entry. Requires at least one persistent id. */
     ContributorEntry create(ContributorEntry entry);
+
+    /**
+     * Registers each vcard carrying a valid persistent X- id into the registry unless an entry with
+     * the same id already exists. Deliberately WITHOUT a toolpermission (used by the contributor
+     * capture policy and the registry migration). {@code creator} is stored on newly created entries.
+     *
+     * @return the entries that were actually created (already-present or id-less vcards are skipped)
+     */
+    List<ContributorEntry> registerVCardsIfAbsent(Collection<String> vcards, String creator);
 
     /**
      * Update an entry. If {@code applyToExisting} is true, the change is asynchronously propagated to all
