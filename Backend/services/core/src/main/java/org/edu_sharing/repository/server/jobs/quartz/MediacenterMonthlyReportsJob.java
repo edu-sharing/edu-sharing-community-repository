@@ -252,10 +252,12 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
 
     private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         TrackingService trackingService = TrackingServiceFactory.getTrackingService();
-        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
+        // keyed by the Elasticsearch NodeRef so writeCSVFile can reuse the properties already loaded in
+        // memory instead of re-fetching every node/column through the Alfresco node service
+        Map<NodeRef, StatisticEntry> data = null;
         if (mode.equals(ReportMode.AlfrescoPermissionData)) {
             List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
-            data = trackingService.getListNodeData(
+            Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> tracked = trackingService.getListNodeData(
                     nodes.stream().map(
                             ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
                     ).collect(Collectors.toList()),
@@ -264,6 +266,11 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     additionalFields,
                     mediacenter
             );
+            data = new HashMap<>();
+            for (NodeRef n : nodes) {
+                StatisticEntry entry = tracked.get(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId()));
+                data.put(n, entry != null ? entry : new StatisticEntry());
+            }
         } else if (mode.equals(ReportMode.TrackingMediacenterData)) {
             Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> tracked = trackingService.getListNodeDataByMediacenter(
                     mediacenter,
@@ -284,9 +291,8 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                 if (n.getProperties() != null && !"restricted_mz".equals(n.getProperties().get(CCConstants.CCM_PROP_IO_EDITORIAL_STATE))) {
                     continue;
                 }
-                org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
-                StatisticEntry entry = tracked.get(mappedRef);
-                data.put(mappedRef, entry != null ? entry : new StatisticEntry());
+                StatisticEntry entry = tracked.get(new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()));
+                data.put(n, entry != null ? entry : new StatisticEntry());
             }
             logger.info(mediacenter + " remaining " + data.size() + " elements after filtering for non-mediacenter elements");
         }
@@ -368,7 +374,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         new MCAlfrescoAPIClient().writeContent(nodeId, bos.toByteArray(), "text/csv", String.valueOf(StandardCharsets.UTF_8), CCConstants.CM_PROP_CONTENT);
     }
 
-    private void writeCSVFile(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data, String nodeId) throws Exception {
+    private void writeCSVFile(Map<NodeRef, StatisticEntry> data, String nodeId) throws Exception {
         List<String> header = columns.stream().map(c ->
                 I18nAngular.getTranslationAngular("common", (
                         c.size() == 1 ? "NODE." + c.get(0) : "VCARD." + c.get(1))
@@ -404,18 +410,20 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         ));
 
         ArrayList<ReportEntry> entries = new ArrayList<>();
-        for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry : data.entrySet()) {
+        for (Map.Entry<NodeRef, StatisticEntry> entry : data.entrySet()) {
             if (isInterrupted()) {
                 return;
             }
             List<String> csvEntry = columns.stream().map(
                     e -> {
+                        String globalName = CCConstants.getValidGlobalName(e.get(0));
                         try {
-                            String prop = NodeServiceHelper.getProperty(
-                                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
-                                    CCConstants.getValidGlobalName(e.get(0))
-                            );
-                            if (VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e.get(0)))) {
+                            // reuse the properties already delivered by Elasticsearch instead of
+                            // re-fetching each node/column through the Alfresco node service
+                            Map<String, Object> properties = entry.getKey().getProperties();
+                            Object rawProp = properties == null ? null : properties.get(globalName);
+                            String prop = rawProp == null ? null : rawProp.toString();
+                            if (VCardConverter.isVCardProp(globalName)) {
                                 if (e.size() == 1) {
                                     prop = VCardConverter.getNameForVCardString(prop);
                                 } else {
@@ -432,7 +440,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                             return prop;
                         } catch (Throwable t) {
                             logger.debug(t.getMessage(), t);
-                            return entry.getKey().getId();
+                            return entry.getKey().getNodeId();
                         }
                     }
             ).collect(Collectors.toList());
