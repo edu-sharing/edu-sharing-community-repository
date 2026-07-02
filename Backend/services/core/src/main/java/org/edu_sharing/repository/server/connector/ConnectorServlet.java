@@ -12,6 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.service.connector.*;
@@ -40,6 +41,7 @@ import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -252,16 +254,18 @@ public class ConnectorServlet extends SpringHttpServlet {
 			if(simpleConnector.getApi().getBodyType() == null) {
 
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
-				List<? extends NameValuePair> data = simpleConnector.getApi().getBody().entrySet().stream()
-						.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
-						.filter(f -> StringUtils.isNotBlank(f.getValue()))
-						.collect(Collectors.toList());
+				List<? extends NameValuePair> data = mapSimpleConnectorBody(requestParameters, simpleConnector);
+				try {
+					logger.debug(EntityUtils.toString(new UrlEncodedFormEntity(data)));
+				}catch(Throwable ignored) {}
 				builder.setEntity(new UrlEncodedFormEntity(data));
 				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			}
 		}
-		JSONObject result = new JSONObject(new HttpQueryTool().query(builder));
-		HashMap<String, Serializable> properties = new HashMap<String, Serializable>();
+		String resultStr = new HttpQueryTool().query(builder);
+		try {
+			JSONObject result = new JSONObject(resultStr);
+			HashMap<String, Serializable> properties = new HashMap<>();
 		properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
 		properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
 		if(StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
@@ -277,6 +281,27 @@ public class ConnectorServlet extends SpringHttpServlet {
 			}
 		}
 		return properties;
+		} catch(JSONException e) {
+			logger.warn("Invalid json received from API " + builder, e);
+			throw e;
+		}
+	}
+
+	@NotNull
+	private List<BasicNameValuePair> mapSimpleConnectorBody(Map<String, String[]> requestParameters, SimpleConnector simpleConnector) {
+		List<BasicNameValuePair> pairs = simpleConnector.getApi().getBody().entrySet().stream()
+				.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
+				.filter(f -> StringUtils.isNotBlank(f.getValue()))
+				.collect(Collectors.toList());
+		if (StringUtils.isNotEmpty(simpleConnector.getApi().getBodyHandler())) {
+			try {
+				SimpleConnector.BodyHandler handler = ((SimpleConnector.BodyHandler) Class.forName(simpleConnector.getApi().getBodyHandler()).getDeclaredConstructor().newInstance());
+				pairs = handler.handle(pairs, requestParameters, simpleConnector);
+			} catch(Exception e) {
+				logger.warn(e.getMessage(), e);
+			}
+		}
+		return pairs;
 	}
 
 	private interface Formatter {

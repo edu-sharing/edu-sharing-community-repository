@@ -139,6 +139,7 @@ rs-root {
             &.module-BINDER,
             &.module-SPREADSHEET,
             &.module-MOODLE,
+            &.module-SCORM,
             &.module-HTML {
                 width: 70%;
                 @media screen and (max-width: ($mobileWidth)) {

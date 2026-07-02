@@ -27,6 +27,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -173,8 +175,8 @@ public class Usage2Service {
 						if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 							usageNodeId=NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,usageNodeId),CCConstants.CCM_PROP_IO_ORIGINAL);
 						}
-						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
-								(Map<String, String>)null)).hasPermissions(usageNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
+						List<String> perm = NodeDao.getNode(RepositoryDao.getHomeRepository(), usageNodeId).getPermissions(user);
+						boolean hasPublishPerm = perm != null && perm.contains(CCConstants.PERMISSION_CC_PUBLISH);
 
 						if(!hasPublishPerm){
                         log.info("User {} has no publish permission on {}", user, usageNodeId);

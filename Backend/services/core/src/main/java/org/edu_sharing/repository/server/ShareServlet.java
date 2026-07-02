@@ -15,10 +15,13 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tracking.TrackingService;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.GlobalShareServiceImpl;
+import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
+import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
@@ -162,6 +165,9 @@ public class ShareServlet extends DownloadServlet {
                 in.close();
                 op.flush();
                 op.close();
+
+
+                activityEventService.trackActivityOnNode(mappedNodeRef, null, ActivityOnNodeEventType.DOWNLOAD_MATERIAL, AuthenticationUtil.getFullyAuthenticatedUser());
 
                 share.setDownloadCount((share.getDownloadCount() + 1));
 				globalShareService.updateDownloadCount(share);

@@ -4,7 +4,10 @@ import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationException;
+import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.stereotype.Component;
@@ -12,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component("eduAuthMethodTrustedApplication")
 @RequiredArgsConstructor
+@Setter
 public class AuthMethodTrustedApplication implements AuthMethodInterface {
 
-    private final SSOAuthorityMapper ssoAuthorityMapper;
-
+	private SSOAuthorityMapper ssoAuthorityMapper;
 
     public String authenticate(Map<String, String> params) throws AuthenticationException {
 
@@ -25,8 +28,8 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
         String clientIp = params.get(SSOAuthorityMapper.PARAM_AUTHBYAPP_APP_IP);
 
         // check params
-        if (applicationId == null || applicationId.trim().length() == 0 || userName == null || userName.trim().length() == 0) {
-            log.error(AuthenticationExceptionMessages.MISSING_PARAM);
+		if(StringUtils.isBlank(applicationId) || StringUtils.isBlank(userName)){
+			log.error(AuthenticationExceptionMessages.MISSING_PARAM);
             log.error(" username:{} applicationId:{} ( clientIp:{})", userName, applicationId, clientIp);
             throw new AuthenticationException(AuthenticationExceptionMessages.MISSING_PARAM);
         }
@@ -38,7 +41,6 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
             throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_APPLICATION);
         }
 
-
         // check host
         if (ssoAuthorityMapper.isAuthByAppCheckClientIp() && (clientIp == null || !appInfo.isTrustedHost(clientIp))) {
             log.error("{} clientHost:{} appInfo.trusted hosts:{} {} {} appInfo.getAppId():{} appfile:{} param appid:{}", AuthenticationExceptionMessages.INVALID_HOST, clientIp, appInfo.getHost(), appInfo.getHostAliases(), appInfo.getDomain(), appInfo.getAppId(), appInfo.getAppFile(), applicationId);
@@ -48,4 +50,5 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
         params.put(SSOAuthorityMapper.PARAM_SSO_TYPE, SSOAuthorityMapper.SSO_TYPE_AuthByApp);
         return ssoAuthorityMapper.mapAuthority(params);
     }
+
 }

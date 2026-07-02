@@ -1579,6 +1579,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     }
 
                     policyBehaviourFilter.enableBehaviour(newNode);
+                    // we need to clear cache since MODIFIED_DATE has not changed!
+                    repositoryCache.remove(newNode.getId());
                     return newNode.getId();
                 });
             });

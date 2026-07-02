@@ -24,6 +24,7 @@
       [version]="version()"
       [showChildobjects]="true"
       [childId]="childId()"
+      (closeClick)="close()"
       (childIdChange)="setChildId($event)"
     ></es-render-wrapper-component>
   </mat-sidenav-content>

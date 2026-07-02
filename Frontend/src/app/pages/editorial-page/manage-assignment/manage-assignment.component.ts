@@ -123,8 +123,8 @@ export class ManageAssignmentComponent {
                 }
             }
         } else if (
-            this.mainDataFormGroup.get('useEndTime').value &&
-            !this.dateChooserRef?.isValid(this.now)
+            this.mainDataFormGroup.get('useEndTime').value
+            //@TODO  && !this.dateChooserRef?.isValid(this.now)
         ) {
             this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
         } else if (

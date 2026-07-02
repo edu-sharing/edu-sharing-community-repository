@@ -1,18 +1,37 @@
 <mat-form-field>
   <mat-label>{{ 'WORKSPACE.SHARE.TIMEBASED.DATE_LABEL' | translate }}</mat-label>
   <input
-    #dateInput
     matInput
     readonly
+    [formControl]="dateControl"
     [matDatepicker]="picker"
-    [min]="toDate(from)"
-    [max]="toDate(to)"
-    (dateChange)="updateDate($event)"
+    [min]="minDate"
+    [max]="maxDate"
+    (blur)="onBlur()"
   />
   <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
   <mat-datepicker #picker></mat-datepicker>
+  <mat-error *ngIf="dateControl.hasError('matDatepickerParse')">
+    {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE' | translate }}
+  </mat-error>
+  <mat-error
+    *ngIf="dateControl.hasError('matDatepickerMin') || dateControl.hasError('matDatepickerMax')"
+  >
+    {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
+  </mat-error>
 </mat-form-field>
 <mat-form-field class="time">
   <mat-label>{{ 'WORKSPACE.SHARE.TIMEBASED.TIME_LABEL' | translate }}</mat-label>
-  <input matInput maxlength="5" [formControl]="timeControl" name="timeControl" ngDefaultControl />
+  <input
+    matInput
+    pattern="\d\d:\d\d"
+    maxlength="5"
+    [formControl]="timeControl"
+    name="timeControl"
+    (blur)="onBlur()"
+  />
+  <mat-hint>{{ 'WORKSPACE.SHARE.TIMEBASED.TIME_HINT' | translate }}</mat-hint>
+  <mat-error *ngIf="timeControl.hasError('pattern')">
+    {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_TIME' | translate }}
+  </mat-error>
 </mat-form-field>

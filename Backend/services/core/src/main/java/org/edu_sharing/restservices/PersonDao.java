@@ -12,9 +12,11 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -539,9 +541,23 @@ public class PersonDao {
     }
 
     private org.alfresco.service.cmr.repository.NodeRef getAvatarNode() {
-        List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRefAssoc(getNodeId(), CCConstants.ASSOC_USER_PREFERENCEIMAGE, null, null);
-        return refs.isEmpty() ? null : refs.get(0).getChildRef();
+		Serializable cache = PersonCache.get(getAuthorityName(), PersonCache.AVATAR);
+		if(cache == null) {
+			List<ChildAssociationRef> refs = this.nodeService.getChildrenChildAssociationRef(getNodeId());
+			for (ChildAssociationRef ref : refs) {
+				if (ref.getTypeQName().equals(QName.createQName(CCConstants.ASSOC_USER_PREFERENCEIMAGE))) {
+					PersonCache.put(getAuthorityName(), PersonCache.AVATAR, ref.getChildRef());
+					return ref.getChildRef();
+				}
     }
+			PersonCache.put(getAuthorityName(), PersonCache.AVATAR, PersonCache.NULL_NODEREF);
+			return null;
+		} else if(cache.equals(PersonCache.NULL_NODEREF)) {
+			return null;
+		} else {
+			return (org.alfresco.service.cmr.repository.NodeRef) cache;
+		}
+	}
 
     public static String getAvatar(org.alfresco.service.cmr.repository.NodeRef avatarNode) {
         if (avatarNode == null || avatarNode.getId() == null) {
@@ -556,6 +572,7 @@ public class PersonDao {
             org.alfresco.service.cmr.repository.NodeRef currentAvatar = getAvatarNode();
             if (currentAvatar != null) {
                 this.nodeService.removeNode(currentAvatar.getId(), getNodeId(), false);
+				PersonCache.reset(getAuthorityName());
             }
         } catch (Throwable t) {
             throw DAOException.mapping(t);
@@ -577,7 +594,7 @@ public class PersonDao {
             NodeServiceHelper.setCreateVersion(nodeId, false);
             nodeService.writeContent(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId, result.getInputStream(), result.getMediaType().toString(), null, CCConstants.CM_PROP_CONTENT);
             this.nodeService.setPermissions(nodeId, CCConstants.AUTHORITY_GROUP_EVERYONE, new String[]{CCConstants.PERMISSION_CONSUMER}, true);
-            this.userCache.refresh(getAuthorityName());
+		    PersonCache.reset(getAuthorityName());
         } catch (Throwable t) {
             throw DAOException.mapping(t);
         }
@@ -636,25 +653,23 @@ public class PersonDao {
     }
 
     public String[] getType() {
-        return AuthenticationUtil.runAsSystem(() -> {
+		if(!LightbendConfigLoader.get().getBoolean("repository.users.inheritTypes")) {
+			return new String[0];
+		}
+		return AuthenticationUtil.runAsSystem(() ->  {
             PersonCache.get(getAuthorityName(), PersonCache.TYPE);
             if (PersonCache.contains(getAuthorityName(), PersonCache.TYPE)) {
                 return (String[]) PersonCache.get(getAuthorityName(), PersonCache.TYPE);
             }
             Set<String> types = new HashSet<>();
             Set<String> groups = authorityService.getMemberships(getAuthorityName());
-            for (String group : groups) {
+            for(String group : groups) {
                 try {
-                    org.alfresco.service.cmr.repository.NodeRef groupRef = authorityService.getAuthorityNodeRef(group);
-                    if(groupRef != null) {
-                        String type = (String) NodeServiceHelper.getPropertyNative(groupRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
-                        if (type != null) {
-                            types.add(type);
-                        }
-                    }
+                    String type=GroupDao.getGroup(repoDao, group).getGroupType();
+                    if(type!=null)
+                        types.add(type);
 
-                } catch (Throwable ignored) {
-                }
+                }catch(Throwable t) {}
             }
             String[] typesArray = types.toArray(new String[0]);
             PersonCache.put(getAuthorityName(), PersonCache.TYPE, typesArray);
@@ -728,7 +743,7 @@ public class PersonDao {
 
     /**
      * set value into alfresco database
-     *
+     *if(avatar==null)
      * @param profileSettings (Object)
      */
     public void setProfileSettings(ProfileSettings profileSettings) throws Exception {

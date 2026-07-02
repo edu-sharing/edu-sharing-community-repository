@@ -1,42 +1,77 @@
+import { DatePipe } from '@angular/common';
 import {
     Component,
+    DestroyRef,
     EventEmitter,
+    forwardRef,
     Input,
-    OnChanges,
     OnInit,
     Output,
-    SimpleChanges,
-    ViewChild,
     inject,
 } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
-import { DatePipe } from '@angular/common';
-import { MatDatepicker, MatDatepickerInputEvent } from '@angular/material/datepicker';
-import { MatInput } from '@angular/material/input';
-import { Toast, TranslationsService } from 'ngx-edu-sharing-ui';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+    ControlValueAccessor,
+    FormControl,
+    NG_VALIDATORS,
+    NG_VALUE_ACCESSOR,
+    ValidationErrors,
+    Validator,
+    Validators,
+} from '@angular/forms';
+import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { DateAdapter } from '@angular/material/core';
+import { merge } from 'rxjs';
 import { SharedModule } from '../../../../../../shared/shared.module';
-import moment from 'moment';
 
 @Component({
     selector: 'es-share-dialog-choose-date',
     templateUrl: 'choose-date.component.html',
     styleUrls: ['choose-date.component.scss'],
     imports: [SharedModule],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => ShareDialogChooseDateComponent),
+            multi: true,
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => ShareDialogChooseDateComponent),
+            multi: true,
+        },
+    ],
 })
-export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
-    private toast = inject(Toast);
+export class ShareDialogChooseDateComponent implements OnInit, ControlValueAccessor, Validator {
     private translationsService = inject(TranslationsService);
     private dateAdapter = inject<DateAdapter<any>>(DateAdapter);
 
-    @ViewChild(MatDatepicker) matDatepicker: MatDatepicker<any>;
-    @ViewChild(MatInput) matInput: MatInput;
-    @Input() dateTime: number;
+    /**
+     * The edited timestamp. Kept as a two-way bindable input/output for consumers that use
+     * `[(dateTime)]` (e.g. the admin messages page); the same value is also propagated through the
+     * `ControlValueAccessor` when the component is bound via `formControlName`.
+     */
+    @Input() set dateTime(value: number) {
+        this._dateTime = value;
+        this.setControlsFromTimestamp(value);
+    }
+
+    get dateTime(): number {
+        return this._dateTime;
+    }
     @Input() from?: number;
     @Input() to?: number;
     @Output() dateTimeChange = new EventEmitter<number>();
 
-    timeControl = new FormControl('', [Validators.pattern(/\d\d?:\d\d/)]);
+    readonly dateControl = new FormControl<Date | null>(null);
+    readonly timeControl = new FormControl('', [Validators.pattern(/\d\d:\d\d/)]);
+
+    private _dateTime: number;
+    private _onChange?: (value: number) => void;
+    private _onTouched?: () => void;
+    private _onValidatorChange?: () => void;
+    private readonly destroyRef = inject(DestroyRef);
+
     constructor() {
         if (this.translationsService.getLocale()) {
             this.dateAdapter.setLocale(this.translationsService.getLocale());
@@ -44,59 +79,107 @@ export class ShareDialogChooseDateComponent implements OnInit, OnChanges {
             this.dateAdapter.setLocale('de-DE');
         }
     }
-    toDate(value: number) {
+
+    ngOnInit(): void {
+        merge(this.dateControl.valueChanges, this.timeControl.valueChanges)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => {
+                this._onValidatorChange?.();
+                this.emitCombined();
+            });
+    }
+
+    toDate(value: number): Date | null {
         return value ? new Date(value) : null;
     }
-    ngOnInit(): void {
-        this.timeControl.valueChanges.subscribe((value) => {
-            if (this.timeControl.valid) {
-                const date = this.toDate(this.dateTime);
-                const valueSplit = value.split(':');
-                date.setHours(parseInt(valueSplit[0]), parseInt(valueSplit[1]));
-                this.dateTime = date.getTime();
-                this.dateTimeChange.emit(this.dateTime);
-            }
+
+    /** Lower datepicker bound, normalized to the start of the day so the `from` day itself stays selectable. */
+    get minDate(): Date | null {
+        if (!this.from) {
+            return null;
+        }
+        const date = new Date(this.from);
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    get maxDate(): Date | null {
+        return this.to ? new Date(this.to) : null;
+    }
+
+    onBlur(): void {
+        this._onTouched?.();
+    }
+
+    // --- ControlValueAccessor -------------------------------------------------
+
+    writeValue(value: number): void {
+        this._dateTime = value;
+        this.setControlsFromTimestamp(value);
+    }
+
+    registerOnChange(fn: (value: number) => void): void {
+        this._onChange = fn;
+    }
+
+    registerOnTouched(fn: () => void): void {
+        this._onTouched = fn;
+    }
+
+    setDisabledState(isDisabled: boolean): void {
+        if (isDisabled) {
+            this.dateControl.disable({ emitEvent: false });
+            this.timeControl.disable({ emitEvent: false });
+        } else {
+            this.dateControl.enable({ emitEvent: false });
+            this.timeControl.enable({ emitEvent: false });
+        }
+    }
+
+    // --- Validator ------------------------------------------------------------
+
+    validate(): ValidationErrors | null {
+        const errors: ValidationErrors = {};
+        if (this.timeControl.invalid) {
+            errors['invalidTime'] = true;
+        }
+        if (this.dateControl.invalid && this.dateControl.errors) {
+            Object.assign(errors, this.dateControl.errors);
+        }
+        return Object.keys(errors).length ? errors : null;
+    }
+
+    registerOnValidatorChange(fn: () => void): void {
+        this._onValidatorChange = fn;
+    }
+
+    // --- internals ------------------------------------------------------------
+
+    private setControlsFromTimestamp(value: number): void {
+        const date = this.toDate(value);
+        this.dateControl.setValue(date, { emitEvent: false });
+        this.timeControl.setValue(date ? new DatePipe('en').transform(date, 'HH:mm') : '', {
+            emitEvent: false,
         });
     }
-    ngOnChanges(changes: SimpleChanges): void {
-        if (this.from) {
-            const date = new Date(this.from);
-            date.setHours(0);
-            date.setMinutes(0);
-            date.setSeconds(0);
-            date.setMilliseconds(0);
-            this.from = date.getTime();
-        }
-        this.timeControl.setValue(
-            new DatePipe('en').transform(this.toDate(this.dateTime), 'HH:mm'),
-        );
-        setTimeout(() => (this.matInput.value = this.toDate(this.dateTime)));
-    }
 
-    isValid(from: number): boolean {
-        return this.timeControl.valid && this.dateTime > (from ?? 0);
-    }
-
-    updateDate(event: MatDatepickerInputEvent<Date, any>) {
-        const currentDate = new Date(this.dateTime);
-        if (!event.value && (event.targetElement as HTMLInputElement).value) {
-            const value = (event.targetElement as HTMLInputElement).value;
-            event.value = moment(value, 'DD.MM.YYYY').toDate();
-        }
-        if (
-            !event.value ||
-            (this.from && event.value?.getTime() < this.from) ||
-            (this.to && event.value?.getTime() > this.to)
-        ) {
-            this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
-            this.matInput.value = this.toDate(this.dateTime);
-            this.dateTimeChange.emit(this.dateTime);
+    private emitCombined(): void {
+        if (this.dateControl.invalid || this.timeControl.invalid) {
+            // keep the previous value; invalidity is surfaced through validate()
             return;
         }
-        // keep the hour + minutes so only update the yy-mm-dd
-        currentDate.setFullYear(event.value.getFullYear());
-        currentDate.setMonth(event.value.getMonth());
-        currentDate.setDate(event.value.getDate());
-        this.dateTimeChange.emit(currentDate.getTime());
+        const date = this.dateControl.value;
+        if (!date) {
+            return;
+        }
+        const combined = new Date(date.getTime());
+        const time = this.timeControl.value;
+        if (time && /\d\d:\d\d/.test(time)) {
+            const [hours, minutes] = time.split(':');
+            combined.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+        }
+        this._dateTime = combined.getTime();
+        this.dateTimeChange.emit(this._dateTime);
+        this._onChange?.(this._dateTime);
     }
 }

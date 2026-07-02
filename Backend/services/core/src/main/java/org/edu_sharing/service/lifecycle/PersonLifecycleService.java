@@ -312,13 +312,7 @@ public class PersonLifecycleService {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		refs.forEach((nodeRef)-> rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			policyBehaviourFilter.disableBehaviour(nodeRef);
-			ownableService.setOwner(nodeRef, newUsername);
-			if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newUsername);
-			}
-			if (username.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newUsername);
-			}
+			setOwnerAndCreatorProps(nodeRef, username, newUsername);
 			repositoryCache.remove(nodeRef.getId());
 			policyBehaviourFilter.enableBehaviour(nodeRef);
 			return null;
@@ -826,18 +820,24 @@ public class PersonLifecycleService {
 		RetryingTransactionHelper rth = transactionService.getRetryingTransactionHelper();
 		rth.doInTransaction((RetryingTransactionHelper.RetryingTransactionCallback<Void>) () -> {
 			policyBehaviourFilter.disableBehaviour(nodeRef);
-			ownableService.setOwner(nodeRef, newOwner);
-			if (oldOwner.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newOwner);
-			}
-			if (oldOwner.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
-				nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newOwner);
-			}
+			setOwnerAndCreatorProps(nodeRef, oldOwner, newOwner);
 			updateMetadataCreator(nodeRef,oldOwner,options);
 			policyBehaviourFilter.enableBehaviour(nodeRef);
 			return null;
 		});
 		repositoryCache.remove(nodeRef.getId());
+	}
+
+	private void setOwnerAndCreatorProps(NodeRef nodeRef, String oldOwner, String newOwner) {
+		if(oldOwner.equals(ownableService.getOwner(nodeRef))) {
+			ownableService.setOwner(nodeRef, newOwner);
+		}
+		if (oldOwner.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR)))) {
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_CREATOR), newOwner);
+		}
+		if (oldOwner.equals(nodeService.getProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER)))) {
+			nodeService.setProperty(nodeRef, QName.createQName(CCConstants.CM_PROP_C_MODIFIER), newOwner);
+		}
 	}
 
 	private void updateMetadataCreator(NodeRef nodeRef, String oldOwner, PersonDeleteOptions options) {

@@ -51,20 +51,24 @@
           <div class="collection-nocontent-container collection-nocontent-big">
             <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
           </div>
-          } @if (!isRootLevel && isUserAllowedToEdit(collection)) {
-          <div>
-            <div class="collection-nocontent-big">
-              {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
-            </div>
-            <div class="section-headline collection-nocontent-container">
-              <div class="collection-nocontent-small">
-                {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
-              </div>
-            </div>
-          </div>
           }
         </ng-template>
       </es-node-entries-wrapper>
+      @if (!isRootLevel && dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading &&
+      isUserAllowedToEdit(collection)) {
+      <div>
+        @if (createAllowed()) {
+        <div class="collection-nocontent-big">
+          {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
+        </div>
+        <div class="section-headline collection-nocontent-container">
+          <div class="collection-nocontent-small">
+            {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
+          </div>
+        </div>
+        }
+      </div>
+      }
     </div>
   </section>
   @if (!isRootLevel) {

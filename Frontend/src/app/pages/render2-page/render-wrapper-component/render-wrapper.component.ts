@@ -73,6 +73,7 @@ export class RenderWrapperComponent implements OnChanges {
      */
     @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
+    @Output() closeClick = new EventEmitter<void>();
 
     @ViewChild('childobjects') childobjects: ElementRef;
     /**
@@ -140,27 +141,33 @@ export class RenderWrapperComponent implements OnChanges {
      */
     private addDownloadAllBtn(node: Node) {
         const children = this.children();
-        if (!node || !children?.length) {
-            return;
+        const addOptions = [];
+        if (node && children?.length) {
+            const parent = this.parentNode();
+            const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
+                void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
+            });
+            downloadAll.elementType = [
+                ElementType.Node,
+                ElementType.NodeChild,
+                ElementType.NodePublishedCopy,
+            ];
+            downloadAll.group = DefaultGroups.View;
+            downloadAll.priority = 35;
+            addOptions.push(downloadAll);
         }
-        const parent = this.parentNode();
-        const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
-            void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
-        });
-        downloadAll.elementType = [
-            ElementType.Node,
-            ElementType.NodeChild,
-            ElementType.NodePublishedCopy,
-        ];
-        downloadAll.group = DefaultGroups.View;
-        downloadAll.priority = 35;
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [node],
             parent: { ref: { id: node.parent.id } },
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [downloadAll],
+                addOptions,
+            },
+            postPrepareOptions: (o) => {
+                o.filter((o) => o.name === 'OPTIONS.DOWNLOAD').forEach((download) => {
+                    download.showAsAction = true;
+                });
             },
         });
     }
@@ -199,7 +206,7 @@ export class RenderWrapperComponent implements OnChanges {
         // void this.setNodeById(child ? child.ref.id : this.nodeId);
     }
     goBack() {
-        window.history.back();
+        this.closeClick.emit();
     }
 
     private canScroll(direction: 'left' | 'right') {

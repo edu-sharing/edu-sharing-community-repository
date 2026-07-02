@@ -131,7 +131,13 @@
     color: color.adjust($warningMedium, $lightness: -10%);
 }
 .timebased-invalid {
-    color: $colorStatusNegative;
+    color: var(--colorStatusNegative);
+}
+.timebased-error {
+    color: var(--colorStatusNegative);
+    font-size: $fontSizeSmall;
+    line-height: 1.5;
+    padding-top: 8px;
 }
 .timebased-overlay {
     @include materialShadowLarge();

@@ -11,6 +11,7 @@ public class PermissionServiceReadOnly extends PermissionServiceAdapter {
 	public PermissionServiceReadOnly() {
 		ALLOWED_PERMISSIONS.add(CCConstants.PERMISSION_READ);
 		ALLOWED_PERMISSIONS.add(CCConstants.PERMISSION_READ_PREVIEW);
+		ALLOWED_PERMISSIONS.add(CCConstants.PERMISSION_DOWNLOAD_CONTENT);
 		ALLOWED_PERMISSIONS.add(CCConstants.PERMISSION_READ_ALL);
 	}
 	

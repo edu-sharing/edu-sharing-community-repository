@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Lazy
 @Service
@@ -102,7 +103,7 @@ public class PermissionServiceAdapter implements PermissionService {
 
     @Override
     public List<String> getPermissionsForAuthority(String nodeId, String authorityId, Collection<String> permissions) throws InsufficientPermissionException {
-        return null;
+		return permissions.stream().filter(ALLOWED_PERMISSIONS::contains).collect(Collectors.toList());
     }
 
     @Override

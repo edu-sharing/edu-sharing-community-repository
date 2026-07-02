@@ -725,8 +725,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {
-                    allowed: this.createAllowed(),
-                    allowBinary: !this.isRootLevel && (await this.isAllowedToAddContent()),
+                    allowed: this.createAllowed() || this.isAllowedToAddContent(),
+                    allowBinary: !this.isRootLevel && this.isAllowedToAddContent(),
                     parent: this.collection ?? null,
                 },
             });

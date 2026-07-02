@@ -523,6 +523,9 @@ export class CollectionsPageComponent implements OnDestroy {
         return c != null && c.ref != null ? c.ref.id : null;
     }
 
+    /**
+     * allowed to create collections?
+     */
     createAllowed = () => {
         if (this.isGuest) {
             return false;
@@ -557,7 +560,11 @@ export class CollectionsPageComponent implements OnDestroy {
             }
             return allowed;
         } else {
-            return this.isAllowedToEditCollection();
+            return (
+                this.connector.hasToolPermissionInstant(
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+                ) && this.isAllowedToEditCollection()
+            );
         }
     };
 }

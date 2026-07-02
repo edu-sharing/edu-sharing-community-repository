@@ -11,6 +11,7 @@ export * from './lib/api/models';
 // Unwrapped API services.
 export { ApiConfiguration as RSApiConfiguration } from './lib/api/api-configuration';
 export * from './lib/api/services/job-info-controller.service';
+export * from './lib/api/services/session-controller.service';
 export * from './lib/render-controller-wrapper.service';
 export * from './lib/api/services/asset-controller.service';
 export * from './lib/api/fn/asset-controller/get-asset';

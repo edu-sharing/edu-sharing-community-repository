@@ -506,6 +506,7 @@
     </mat-form-field>
     @if (excludeForm.get('mode').value === 'assign') {
     <es-authority-search-input
+      [globalSearchAllowed]="true"
       [mode]="AuthoritySearchMode.Users"
       label="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER' | translate }}"
       placeholder="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER_PLACEHOLDER' | translate }}"

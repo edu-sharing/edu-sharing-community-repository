@@ -1,6 +1,10 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { RenderDataRequestWithToken, RSApiConfiguration } from 'ngx-rendering-service-api';
+import {
+    RenderDataRequestWithToken,
+    RSApiConfiguration,
+    SessionControllerService,
+} from 'ngx-rendering-service-api';
 import {
     AboutService,
     ConfigService,
@@ -33,6 +37,22 @@ export class RenderHelperService {
     private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
     private configuration = inject(EduSharingUiConfiguration);
     private optionsHelperDataService = inject(OptionsHelperDataService, { optional: true });
+
+    /**
+     * Logs the current user out of rendering service 2.
+     *
+     * Resolves the rs2 root url (production / dev proxy) before issuing the
+     * logout, so the request is sent to the configured rendering service.
+     * No-op if rs2 is not configured.
+     */
+    async logoutRendering2(): Promise<void> {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        if (!about.renderingService2) {
+            return;
+        }
+        await this.prepareRootUrl();
+        await firstValueFrom(this.injector.get(SessionControllerService).logout());
+    }
 
     async getRenderData(
         nodeId: string,

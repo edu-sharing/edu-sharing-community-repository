@@ -107,6 +107,7 @@ public class ExcelLOMImporter {
 					Map<QName,Serializable> toSafe = new HashMap<>();
 					
 					String contentUrl = null;
+					String thumbnailImportUrl = null;
 					LinkedHashSet<String> collectionsToImportTo = new LinkedHashSet<>();
 					for(Cell cell : row){
 						
@@ -144,6 +145,8 @@ public class ExcelLOMImporter {
 						if(alfrescoProperty != null){
 							if(alfrescoProperty.equals(CCConstants.CM_PROP_CONTENT)){
 								contentUrl = value;
+							}else if(alfrescoProperty.equals(CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW)){
+								thumbnailImportUrl = value;
 							}else{
 								PropertyDefinition propDef = dictionaryService.getProperty(QName.createQName(alfrescoProperty));
 								
@@ -183,12 +186,14 @@ public class ExcelLOMImporter {
 						boolean createNode = true;
 						String thumbUrl = (String)toSafe.get(qnameThumbnail);
 
-						if((thumbUrl == null || !thumbUrl.startsWith("http")) && (contentUrl == null || contentUrl.trim().isEmpty())) {
+						if((thumbUrl == null || !thumbUrl.startsWith("http"))
+								&& (contentUrl == null || contentUrl.trim().isEmpty())
+								&& (thumbnailImportUrl == null || !thumbnailImportUrl.startsWith("http"))) {
 							log.error("invalid thumbnail url:" + thumbUrl +" for:" +toSafe.get(QName.createQName(CCConstants.CM_NAME))+" will not safe object");
 							createNode = false;
 						}
 						if(createNode) {
-                            createNode(addToCollection, parentFolder, nodeName, toSafe, contentUrl, collectionsToImportTo);
+                            createNode(addToCollection, parentFolder, nodeName, toSafe, contentUrl, thumbnailImportUrl, collectionsToImportTo);
                         }
 					}else {
 						log.error("can not determine name property for row: "+row.getRowNum());
@@ -215,7 +220,7 @@ public class ExcelLOMImporter {
 
 	}
 
-    private void createNode(Boolean addToCollection, String parentFolder, String nodeName, Map<QName, Serializable> toSafe, String contentUrl, LinkedHashSet<String> collectionsToImportTo) throws Exception {
+    private void createNode(Boolean addToCollection, String parentFolder, String nodeName, Map<QName, Serializable> toSafe, String contentUrl, String thumbnailImportUrl, LinkedHashSet<String> collectionsToImportTo) throws Exception {
         serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
             try{
                 log.info("creating: {}, {}, {}",nodeName,contentUrl,(String)toSafe.get(CCConstants.CCM_PROP_IO_WWWURL));
@@ -233,6 +238,21 @@ public class ExcelLOMImporter {
                                 CCConstants.CM_PROP_CONTENT);
                     } catch (java.io.FileNotFoundException e) {
                         log.error("no content found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + "url:" + contentUrl);
+                    }
+                }
+
+                if (thumbnailImportUrl != null && thumbnailImportUrl.trim().startsWith("http")) {
+                    String mimetype = MimeTypes.guessMimetype(thumbnailImportUrl);
+                    try {
+                        InputStream previewStream = new URL(thumbnailImportUrl).openConnection().getInputStream();
+                        apiClient.writeContent(MCAlfrescoAPIClient.storeRef,
+                                newNode.getChildRef().getId(),
+                                previewStream,
+                                mimetype,
+                                null,
+                                CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
+                    } catch (java.io.FileNotFoundException e) {
+                        log.error("no preview image found for:" + toSafe.get(QName.createQName(CCConstants.CM_NAME)) + " url:" + thumbnailImportUrl);
                     }
                 }
 
@@ -428,6 +448,7 @@ public class ExcelLOMImporter {
 			excelAlfMap.put("RightsCopyrightAndOtherRestrictions", CCConstants.LOM_PROP_RIGHTS_COPY_RIGHT);
 			excelAlfMap.put("RightsDescription", CCConstants.LOM_PROP_RIGHTS_RIGHTS_DESCRIPTION);
 			excelAlfMap.put("thumbnailUrl", CCConstants.CCM_PROP_IO_THUMBNAILURL);
+			excelAlfMap.put("thumbnailUrlImport", CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
 			excelAlfMap.put("taxonId",CCConstants.CCM_PROP_IO_REPL_TAXON_ID);
 			excelAlfMap.put("taxonEntry",CCConstants.CCM_PROP_IO_REPL_TAXON_ENTRY);
 			excelAlfMap.put("licenseKey",CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);

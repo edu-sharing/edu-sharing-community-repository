@@ -129,7 +129,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
         LocalDate now = LocalDate.now();
         if (!force) {
             if(now.getDayOfMonth() != 1) {
-                logger.error("Job not running because of date: " + now.getDayOfMonth());
+                logger.info("Job not running because of date: " + now.getDayOfMonth());
                 return;
             }
             switch (type) {
@@ -137,12 +137,12 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                     break;
                 case Yearly:
                     if(now.getMonthValue() != 1) {
-                        logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
+                        logger.info("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
                         return;
                     }
                 case Quarterly:
                     if(!List.of(1, 4, 7, 10).contains(now.getMonthValue())) {
-                        logger.error("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
+                        logger.info("Job not running because of date: " + now.getDayOfMonth() + " month: " + now.getMonth());
                         return;
                     }
                 default:

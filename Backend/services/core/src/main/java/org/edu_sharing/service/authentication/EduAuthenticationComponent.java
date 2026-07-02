@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationComponent;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -46,6 +48,8 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class EduAuthenticationComponent {

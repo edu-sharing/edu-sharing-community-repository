@@ -14,6 +14,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AboutService,
+    AdminV1Service,
     NetworkService,
     Node,
     SessionStorageService,
@@ -122,6 +123,7 @@ type Job = {
 export class AdminPageComponent implements OnInit, OnDestroy {
     private about = inject(AboutService);
     private admin = inject(RestAdminService);
+    private adminV1 = inject(AdminV1Service);
     private config = inject(ConfigurationService);
     private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
@@ -591,7 +593,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         const file = event.target.files[0];
         if (!file) return;
         this.globalProgress = true;
-        this.admin.addApplicationXml(file).subscribe(
+        this.adminV1.addApplication({ body: { xml: file } }).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
                 this.refreshAppList();
