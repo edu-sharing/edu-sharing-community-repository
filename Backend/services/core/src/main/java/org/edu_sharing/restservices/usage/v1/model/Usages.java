@@ -81,6 +81,7 @@ public class Usages {
     }
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class CollectionUsage extends Usage {
         private Node collection;
         private CollectionUsageType collectionUsageType;
