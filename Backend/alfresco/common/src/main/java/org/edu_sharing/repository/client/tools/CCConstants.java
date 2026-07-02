@@ -1549,6 +1549,7 @@ public class CCConstants {
     public static final String CCM_TYPE_USAGE = "{http://www.campuscontent.de/model/1.0}usage";
     public static final String CCM_PROP_USAGE_APPID = "{http://www.campuscontent.de/model/1.0}usageappid";
     public static final String CCM_PROP_USAGE_COURSEID = "{http://www.campuscontent.de/model/1.0}usagecourseid";
+    public static final String CCM_PROP_USAGE_COURSETITLE = "{http://www.campuscontent.de/model/1.0}usagecoursetitle";
     public static final String CCM_PROP_USAGE_PARENTNODEID = "{http://www.campuscontent.de/model/1.0}usageparentnodeid";
     public static final String CCM_PROP_USAGE_APPUSER = "{http://www.campuscontent.de/model/1.0}usageappuser";
     public static final String CCM_PROP_USAGE_APPUSERMAIL = "{http://www.campuscontent.de/model/1.0}usageappusermail";

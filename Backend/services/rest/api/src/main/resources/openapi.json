@@ -2120,6 +2120,9 @@
           "courseId": {
             "type": "string"
           },
+          "courseTitle": {
+            "type": "string"
+          },
           "nodeId": {
             "type": "string"
           },
@@ -5332,6 +5335,9 @@
             "type": "string"
           },
           "courseId": {
+            "type": "string"
+          },
+          "courseTitle": {
             "type": "string"
           },
           "created": {
@@ -9075,6 +9081,9 @@
             "type": "string"
           },
           "courseId": {
+            "type": "string"
+          },
+          "courseTitle": {
             "type": "string"
           },
           "created": {

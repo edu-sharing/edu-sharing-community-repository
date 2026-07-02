@@ -297,7 +297,7 @@ public class CollectionServiceElastic implements CollectionService {
                     authInfo.get(CCConstants.AUTH_USERNAME),
                     ApplicationInfoList.getHomeRepository().getAppId(),
                     collectionId,
-                    originalNodeId, null, null, null, -1, versLabel, refId, null);
+                    originalNodeId, null, null, null, null, -1, versLabel, refId, null);
 
             String colllectionType = null;
             List<String> collectionAspects;
@@ -534,7 +534,7 @@ public class CollectionServiceElastic implements CollectionService {
                         authInfo.get(CCConstants.AUTH_USERNAME),
                         appInfo.getAppId(),
                         toCollection,
-                        originalNodeId, null, null, null, -1, usage.getUsageVersion(), toMove, null);
+                        originalNodeId, null, null, null, null, -1, usage.getUsageVersion(), toMove, null);
 
             } else {
                 client.moveNode(toCollection, CCConstants.CM_ASSOC_FOLDER_CONTAINS, toMove);

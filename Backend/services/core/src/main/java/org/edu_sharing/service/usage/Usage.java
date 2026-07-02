@@ -24,6 +24,7 @@ public class Usage implements Serializable {
     private String appUserMail;
 
 	private String courseId;
+	private String courseTitle;
 
     private Integer distinctPersons;
 
@@ -54,6 +55,7 @@ public class Usage implements Serializable {
 		result.put(CCConstants.CCM_PROP_USAGE_APPUSERMAIL, this.getAppUserMail());
 		if(this.getUsageCounter() != null) result.put(CCConstants.CCM_PROP_USAGE_COUNTER, this.getUsageCounter().toString());
 		result.put(CCConstants.CCM_PROP_USAGE_COURSEID, this.getCourseId());
+		result.put(CCConstants.CCM_PROP_USAGE_COURSETITLE, this.getCourseTitle());
 		if( this.getFromUsed() != null)	result.put(CCConstants.CCM_PROP_USAGE_FROM, this.getFromUsed().toString());
 		result.put(CCConstants.CCM_PROP_USAGE_GUID, this.getGuid());
 		if(this.getDistinctPersons() != null) result.put(CCConstants.CCM_PROP_USAGE_MAXPERSONS, this.getDistinctPersons().toString());

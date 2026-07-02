@@ -3,10 +3,10 @@ package org.edu_sharing.restservices;
 import java.io.StringReader;
 import java.util.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
@@ -23,11 +23,9 @@ import org.edu_sharing.service.usage.Usage2Service;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Unmarshaller;
-import jakarta.xml.bind.ValidationEvent;
-import jakarta.xml.bind.ValidationEventHandler;
 
+@Slf4j
 public class UsageDao {
-	Logger logger = Logger.getLogger(UsageDao.class);
 
 	private final PermissionService permissionService;
 	RepositoryDao repoDao;
@@ -77,6 +75,7 @@ public class UsageDao {
 
 		usageResult.setType(usage.getType().name());
 		usageResult.setCourseId(usage.getCourseId());
+		usageResult.setCourseTitle(usage.getCourseTitle());
 		usageResult.setDistinctPersons(usage.getDistinctPersons());
 		usageResult.setGuid(usage.getGuid());
 		usageResult.setNodeId(usage.getNodeId());
@@ -93,17 +92,12 @@ public class UsageDao {
 				JAXBContext jaxbContext = JAXBContext.newInstance(Usage.Parameters.class);
 	
 				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-				jaxbUnmarshaller.setEventHandler(new ValidationEventHandler() {
-					@Override
-					public boolean handleEvent(ValidationEvent event) {
-						// ignore all errors, try to parse what is possible
-						return true;
-					}
-				});
+				// ignore all errors, try to parse what is possible
+				jaxbUnmarshaller.setEventHandler(event -> true);
 				usageResult.setUsageXmlParams(
 						(Usage.Parameters) jaxbUnmarshaller.unmarshal(new StringReader(usage.getUsageXmlParams())));
 			} catch (Throwable t) {
-				logger.warn("Error converting usage xml " + usage.getUsageXmlParams(), t);
+				log.warn("Error converting usage xml {}", usage.getUsageXmlParams(), t);
 			}
 			
 			
@@ -147,7 +141,7 @@ public class UsageDao {
 					&& ContextManagementFilter.accessTool.get() != null){
 				if(ContextManagementFilter.accessTool.get().getApplicationInfo().getAppId().equals(usage.getLmsId())) {
 					permission = true;
-					logger.info("Delete usage allowed for app id " + usage.getLmsId());
+					log.info("Delete usage allowed for app id {}", usage.getLmsId());
 				} else {
 					throw new SecurityException("The current authenticated app id is not allowed to delete this usage");
 				}
@@ -222,7 +216,7 @@ public class UsageDao {
 					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_PENDING);
 					collections.add(usage);
 				} catch (DAOException e) {
-					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+					log.warn("Could not fetch collection: {}", e.getMessage(), e);
 				}
 			});
 			CollectionServiceFactory.getInstance().getLocalService().getCollectionProposals(nodeId, CCConstants.PROPOSAL_STATUS.DECLINED).forEach((ref) -> {
@@ -232,7 +226,7 @@ public class UsageDao {
 					usage.setCollectionUsageType(Usages.CollectionUsageType.PROPOSAL_DECLINED);
 					collections.add(usage);
 				} catch (DAOException e) {
-					logger.warn("Could not fetch collection: " + e.getMessage(), e);
+					log.warn("Could not fetch collection: {}", e.getMessage(), e);
 				}
 			});
 			return collections;
@@ -244,23 +238,20 @@ public class UsageDao {
 	public List<Usages.NodeUsage> getUsages(String repositoryId, String nodeId, Long from, Long to) throws Exception {
 
 		
-		RunAsWork<List<Usages.NodeUsage>> runAs = new RunAsWork<List<Usages.NodeUsage>>() {
-			@Override
-			public List<Usages.NodeUsage> doWork() throws Exception {
-				RepositoryDao rd = RepositoryDao.getHomeRepository();
-				
-				List<Usages.NodeUsage> result = new ArrayList<Usages.NodeUsage>();
-				for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsages(repositoryId, nodeId, from,
-						to)) {
-					try {
-						Usages.NodeUsage usageRest = convertUsage(usage, Usages.NodeUsage.class);
-						usageRest.setNode(NodeDao.getNode(rd, usageRest.getParentNodeId(),Filter.createShowAllFilter()).asNode());
-						result.add(usageRest);
-					} catch (Throwable t) {
-					}
+		RunAsWork<List<Usages.NodeUsage>> runAs = () -> {
+			RepositoryDao rd = RepositoryDao.getHomeRepository();
+
+			List<Usages.NodeUsage> result = new ArrayList<>();
+			for (org.edu_sharing.service.usage.Usage usage : new Usage2Service().getUsages(repositoryId, nodeId, from,
+					to)) {
+				try {
+					Usages.NodeUsage usageRest = convertUsage(usage, Usages.NodeUsage.class);
+					usageRest.setNode(NodeDao.getNode(rd, usageRest.getParentNodeId(),Filter.createShowAllFilter()).asNode());
+					result.add(usageRest);
+				} catch (Throwable t) {
 				}
-				return result;
 			}
+			return result;
 		};
 		return AuthenticationUtil.runAsSystem(runAs);
 		
@@ -283,6 +274,7 @@ public class UsageDao {
 				usage.appId,
 				usage.courseId,
 				usage.nodeId,
+				usage.courseTitle,
 				(String)AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(AuthenticationUtil.getFullyAuthenticatedUser()).get(CCConstants.PROP_USER_EMAIL),
 				null,
 				null,
