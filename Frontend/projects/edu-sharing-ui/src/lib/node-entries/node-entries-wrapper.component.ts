@@ -187,6 +187,12 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @Input() disableInfiniteScroll = false;
     /**
+     * Whether infinite scroll listens on the global scroll container (window/app container)
+     * or on the list element itself. Set to false when the list scrolls internally.
+     * (assuming there is any overflow container around)
+     */
+    @Input() infiniteScrollWindow = true;
+    /**
      *  show the icon column (table view only)
      */
     @Input() showIconColumn = true;
@@ -347,6 +353,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.ctrlClickBehavior = this.ctrlClickBehavior;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
+        this.entriesService.infiniteScrollWindow = this.infiniteScrollWindow;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
         }

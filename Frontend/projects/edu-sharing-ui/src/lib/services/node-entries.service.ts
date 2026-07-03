@@ -177,6 +177,7 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     singleClickHint: 'dynamic' | 'static';
     ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
+    infiniteScrollWindow = true;
     showIconColumn = new BehaviorSubject(true);
     showActions = new BehaviorSubject(true);
 

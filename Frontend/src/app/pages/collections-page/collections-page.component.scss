@@ -151,6 +151,15 @@ mat-tab-group {
         padding: 0 10%;
         grid-template-columns: auto;
     }
+    &.collectionsContainerTabs {
+        padding: 0;
+        .collections-right {
+            max-width: unset;
+            es-collection-content {
+                padding: 40px 10% 0 10%;
+            }
+        }
+    }
 }
 .switchToSearch {
     position: relative;

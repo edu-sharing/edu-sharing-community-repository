@@ -33,6 +33,7 @@
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
+  [scrollWindow]="entriesService.infiniteScrollWindow"
   (scrolled)="loadData('scroll')"
 >
   <!-- Checkbox Column -->

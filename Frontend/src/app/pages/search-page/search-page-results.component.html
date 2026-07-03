@@ -61,6 +61,7 @@
     [sort]="(state | async).sortConfig"
     (sortChange)="updateSort($event)"
     [primaryInstance]="true"
+    [infiniteScrollWindow]="false"
     [elementInteractionType]="
       previewMode === 'Sidebar' ? InteractionType.Emitter : InteractionType.DefaultActionLink
     "

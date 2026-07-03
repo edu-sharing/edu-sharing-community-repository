@@ -12,6 +12,7 @@
         [columns]="collectionsColumns"
         (clickItem)="clickItem.emit($event)"
         (fetchData)="loadMoreCollections()"
+        [infiniteScrollWindow]="false"
         [checkbox]="false"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
@@ -103,6 +104,7 @@
             dropAllowed: canDropOnRef,
             dropped: dropOnRef,
           }"
+        [infiniteScrollWindow]="false"
         [sort]="{
             active: sortReferences.active,
             direction: sortReferences.direction,
