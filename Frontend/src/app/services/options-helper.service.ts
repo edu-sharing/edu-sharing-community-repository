@@ -402,7 +402,10 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 if (
                     item.downloadUrl != null &&
                     item.properties &&
-                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                    (!(
+                        item.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                        !item.properties[RestConstants.LOM_PROP_TECHNICAL_LOCATION]
+                    ) ||
                         !RestNetworkService.isFromHomeRepo(item)) &&
                     (item.accessEffective || item.access)?.includes(
                         RestConstants.PERMISSION_DOWNLOAD_CONTENT,
