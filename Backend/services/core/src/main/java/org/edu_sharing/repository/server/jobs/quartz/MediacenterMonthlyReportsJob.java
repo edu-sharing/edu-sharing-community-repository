@@ -6,6 +6,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentService;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +26,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -53,7 +55,34 @@ import static org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX
 public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams {
 
     public enum ReportMode {
-        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored")
+        // Report is built from the mediacenter tracking data (TrackingService.getListNodeDataByMediacenter).
+        //
+        // Special behaviour to be aware of:
+        //
+        // - Single-mediacenter tracking only: the tracking query counts events only for users assigned to exactly
+        //   one mediacenter (ARRAY_LENGTH(authority_mediacenter,1)=1); accesses by users that belong to more than one
+        //   mediacenter are ignored (unlike AlfrescoPermissionData).
+        //
+        // - Licensed nodes plus still-tracked nodes: the media report lists the currently licensed nodes returned by
+        //   MediacenterService.getAllLicensedNodes (scoped by the mediacenter proxy-group read permission), filtered to
+        //   restricted_mz, with the tracking counts merged onto them (a licensed node is listed even with zero activity).
+        //   In addition, nodes that had tracking activity last month but are no longer in the licensed ES snapshot (e.g.
+        //   license revoked since) are kept so their historical data is not lost: they carry no ES properties, so their
+        //   editorial state is verified with a single live read run as system (see isRestrictedMediacenterMedia). Such
+        //   nodes are reported with their counts but empty CSV columns (no ES properties in memory).
+        //
+        // - restricted_mz filter: getAllLicensedNodes does NOT filter on the editorial state, so the licensed nodes are
+        //   additionally filtered here to ccm:io_editorial_state == "restricted_mz" to drop non-mediacenter media.
+        //
+        // - Properties are read ES-first, with a single bounded live fallback: the restricted_mz filter and the exported
+        //   CSV column values use the properties Elasticsearch already delivered in memory (NodeRef.getProperties()), so
+        //   we do NOT re-fetch the full property map of every licensed node through the Alfresco node service (that would
+        //   flood the Alfresco L2 cache and blow up the heap). The only live Alfresco access is the single-property
+        //   fallback in readProperty, hit for the tracked nodes that are no longer in the licensed ES snapshot, to decide
+        //   their editorial state (see isRestrictedMediacenterMedia).
+        //   not re-checked live, to keep that path cheap).
+        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored. " +
+                "The report lists the currently licensed nodes (filtered to editorial state 'restricted_mz') merged with the tracking counts")
         TrackingMediacenterData,
         @JobFieldDescription(description = "Use the current licensed node data. Elements not licensed anymore will not be visible. Elements accessed from users assigned to more than one MZ are counted as well (legacy)")
         AlfrescoPermissionData
@@ -282,18 +311,27 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     additionalFields
             );
             logger.info("Tracking db done for " + mediacenter + " (" + tracked.size() + " elements)");
-            // The licensed nodes are the source of truth for the report. Filter them on the
-            // ccm:io_editorial_state that Elasticsearch already delivered in memory (calling
-            // NodeServiceHelper.getPropertyNative per node instead would load the full property map of
-            // every node into the Alfresco L2 caches and blow up the heap) and merge in the tracking
-            // counts collected above.
+            // first, merge stats with currently licensed nodes (ones without track data will become 0)
             data = new HashMap<>();
             for (NodeRef n : nodes) {
-                if (n.getProperties() != null && !"restricted_mz".equals(n.getProperties().get(CCConstants.CCM_PROP_IO_EDITORIAL_STATE))) {
+                if (!isRestrictedMediacenterMedia(n)) {
                     continue;
                 }
                 StatisticEntry entry = tracked.get(new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()));
                 data.put(n, entry != null ? entry : new StatisticEntry());
+            }
+            // Keep last month's tracking data for nodes that are no longer in the licensed ES snapshot (e.g. license
+            // revoked since). They carry no ES properties, so isRestrictedMediacenterMedia verifies them with a single
+            // live editorial_state read. Their CSV columns stay empty (no ES props); only their counts are reported.
+            Set<String> licensedIds = nodes.stream().map(NodeRef::getNodeId).collect(Collectors.toSet());
+            for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> e : tracked.entrySet()) {
+                if (licensedIds.contains(e.getKey().getId())) {
+                    continue;
+                }
+                NodeRef n = new NodeRefImpl(e.getKey());
+                if (isRestrictedMediacenterMedia(n)) {
+                    data.put(n, e.getValue());
+                }
             }
             logger.info(mediacenter + " remaining " + data.size() + " elements after filtering for non-mediacenter elements");
         }
@@ -352,17 +390,47 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
     }
 
     private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(List<NodeRef> nodes, Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
-        // Determine the mediacenter media from the licensed nodes, filtering on the
-        // ccm:io_editorial_state that Elasticsearch already delivered in memory (calling
-        // NodeServiceHelper.getPropertyNative per node instead would load the full property map of
-        // every node into the Alfresco L2 caches and blow up the heap).
+        // restricted_mz node ids from the licensed ES snapshot (cheap, in-memory props).
         Set<String> mediacenterNodeIds = nodes.stream()
-                .filter(n -> n.getProperties() == null || "restricted_mz".equals(n.getProperties().get(CCConstants.CCM_PROP_IO_EDITORIAL_STATE)))
+                .filter(this::isRestrictedMediacenterMedia)
                 .map(NodeRef::getNodeId)
                 .collect(Collectors.toSet());
+        Set<String> licensedIds = nodes.stream().map(NodeRef::getNodeId).collect(Collectors.toSet());
         return data.entrySet().stream()
-                .filter(e -> mediacenterNodeIds.contains(e.getKey().getId()))
+                .filter(e -> mediacenterNodeIds.contains(e.getKey().getId())
+                        // tracked nodes no longer in the licensed ES snapshot: verify live (see isRestrictedMediacenterMedia)
+                        // so last month's tracking data is kept instead of silently dropped
+                        || (!licensedIds.contains(e.getKey().getId())
+                            && isRestrictedMediacenterMedia(new NodeRefImpl(e.getKey()))))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    // Whether a node counts as mediacenter media, i.e. its ccm:io_editorial_state is "restricted_mz".
+    private boolean isRestrictedMediacenterMedia(NodeRef n) {
+        return "restricted_mz".equals(readProperty(n, CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
+    }
+
+    // Reads a single node property, preferring the properties Elasticsearch already delivered in memory (cheap, no
+    // Alfresco round-trip; this is why we do NOT re-read the full property map of every licensed node). Only when no ES
+    // properties are present for the node (getProperties() == null) do we fall back to a single live read. That fallback
+    // is deliberate: it is used for tracked nodes that dropped out of the current licensed ES snapshot (e.g. their
+    // license was revoked since), so last month's tracking data is still kept in the report. The job runs as system, so
+    // the value is returned even though the mediacenter group can no longer read the node. getProperty encodes
+    // multi-values the same way the ES snapshot does, so callers need no special multi-value handling. Returns null if
+    // the node is deleted / no longer resolvable.
+    private String readProperty(NodeRef n, String globalName) {
+        if (n.getProperties() != null) {
+            Object value = n.getProperties().get(globalName);
+            return value == null ? null : value.toString();
+        }
+        try {
+            return NodeServiceHelper.getProperty(
+                    new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()),
+                    globalName);
+        } catch (InvalidNodeRefException e) {
+            logger.info("property " + globalName + " was not readable for tracked node " + n.getNodeId() + ": " + e.getMessage());
+            return null;
+        }
     }
 
     private void writeCSVFileInternal(String nodeId, List<String> header, List<String[]> data) throws Exception {
@@ -419,11 +487,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     e -> {
                         String globalName = CCConstants.getValidGlobalName(e.get(0));
                         try {
-                            // reuse the properties already delivered by Elasticsearch instead of
-                            // re-fetching each node/column through the Alfresco node service
-                            Map<String, Object> properties = entry.getKey().getProperties();
-                            Object rawProp = properties == null ? null : properties.get(globalName);
-                            String prop = rawProp == null ? null : rawProp.toString();
+                            String prop = readProperty(entry.getKey(), globalName);
                             if (VCardConverter.isVCardProp(globalName) && StringUtils.isNotEmpty(prop)) {
                                 String[] propMulti = ValueTool.getMultivalue(prop);
                                 if (e.size() == 1) {
