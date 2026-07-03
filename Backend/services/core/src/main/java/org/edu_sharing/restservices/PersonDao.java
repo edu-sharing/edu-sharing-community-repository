@@ -29,7 +29,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.EduSharingLockHelper;
 import org.edu_sharing.repository.server.tools.ImageTool;
 import org.edu_sharing.repository.server.tools.cache.PersonCache;
-import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.restservices.iam.v1.model.DashboardShortcutEntry;
 import org.edu_sharing.restservices.iam.v1.model.GroupEntries;
 import org.edu_sharing.restservices.iam.v1.model.ProfileSettings;
@@ -178,7 +177,6 @@ public class PersonDao {
     private final DashboardConfigService dashboardConfigService;
 
     private DataProtectionService dataProtectionService;
-    private final UserCache userCache;
 
     private LDAPService ldapService;
 
@@ -207,7 +205,6 @@ public class PersonDao {
 			);*/
 
             dataProtectionService = ApplicationContextFactory.getApplicationContext().getBean(DataProtectionService.class);
-            userCache = AlfAppContextGate.getApplicationContext().getBean(UserCache.class);
 
             try {
                 ldapService = ApplicationContextFactory.getApplicationContext().getBean(LDAPService.class);
