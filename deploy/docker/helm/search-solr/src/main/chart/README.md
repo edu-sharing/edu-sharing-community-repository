@@ -57,7 +57,7 @@
 | `persistence.data.spec.accessModes`                      | Set access modes for persistent data                | `["ReadWriteOnce"]`                                                                                                                                     |
 | `persistence.data.spec.resources.requests.storage`       | Set storage request for persistent data             | `5Gi`                                                                                                                                                   |
 | `persistence.share.data.create`                          | Create persistent data share                        | `true`                                                                                                                                                  |
-| `persistence.share.data.type`                            | Set volume type of persistent data share            | `persistentVolumeClaim:                                                                                                                                 
+| `persistence.share.data.type`                            | Set volume type of persistent data share            | `persistentVolumeClaim:
   claimName: {{ include "edusharing_repository_search_solr.pvc.share.data" . }}
 `                                               |
 | `persistence.share.data.spec.accessModes`                | Set access modes for persistent data share          | `["ReadWriteMany"]`                                                                                                                                     |
