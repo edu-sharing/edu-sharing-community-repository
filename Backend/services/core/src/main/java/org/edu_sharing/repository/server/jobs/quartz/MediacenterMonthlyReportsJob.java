@@ -6,7 +6,6 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentService;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.apache.commons.lang.StringUtils;
@@ -157,17 +156,20 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     return null;
                 }
                 logger.info("Building stats for mediacenter " + mediacenter);
+                // fetch the licensed nodes once per mediacenter and reuse them across all reports
+                List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
+                logger.info(mediacenter + " has currently " + nodes.size() + " licensed nodes");
                 Date startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
                 Date endDate = Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC));
                 if (generateMonthly) {
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Monthly);
                     // school report is only build in monthly session
-                    generateSchoolReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
+                    generateSchoolReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Monthly);
                 }
                 if (generateYearly && localDate.getMonthValue() == 1) {
                     from = localDate.minusYears(1).withDayOfMonth(1);
                     startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Yearly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Yearly);
                 }
 
                 if (generateQuarterly && List.of(1, 4, 7, 10).contains(localDate.getMonthValue())) {
@@ -175,7 +177,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                             .withDayOfMonth(1);
 
                     startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Quarterly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Quarterly);
                 }
             }
         } catch (Throwable t) {
@@ -184,7 +186,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         return null;
     }
 
-    private void generateSchoolReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
+    private void generateSchoolReportByTimeRange(String mediacenter, List<NodeRef> nodes, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         if (mode.equals(ReportMode.TrackingMediacenterData)) {
             Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> dataNodes = trackingService.getListNodeDataByMediacenter(
                     mediacenter,
@@ -192,7 +194,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     endDate,
                     Collections.singletonList("authority_organization")
             );
-            dataNodes = filterNonMediacenterMedia(dataNodes);
+            dataNodes = filterNonMediacenterMedia(nodes, dataNodes);
 
             // Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
             Map<TrackingService.EventType, Map<String, Long>> result = new HashMap<>();
@@ -252,13 +254,12 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
     TrackingService trackingService = TrackingServiceFactory.getTrackingService();
     MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
 
-    private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
+    private void generateReportByTimeRange(String mediacenter, List<NodeRef> nodes, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         TrackingService trackingService = TrackingServiceFactory.getTrackingService();
         // keyed by the Elasticsearch NodeRef so writeCSVFile can reuse the properties already loaded in
         // memory instead of re-fetching every node/column through the Alfresco node service
         Map<NodeRef, StatisticEntry> data = null;
         if (mode.equals(ReportMode.AlfrescoPermissionData)) {
-            List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
             Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> tracked = trackingService.getListNodeData(
                     nodes.stream().map(
                             ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
@@ -280,9 +281,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     endDate,
                     additionalFields
             );
-            logger.info("Tracking db done for " + mediacenter + " (" + tracked.size() + " elements), fetching all licensed nodes...");
-            List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
-            logger.info(mediacenter + " has currently " + nodes.size() + " licensed nodes");
+            logger.info("Tracking db done for " + mediacenter + " (" + tracked.size() + " elements)");
             // The licensed nodes are the source of truth for the report. Filter them on the
             // ccm:io_editorial_state that Elasticsearch already delivered in memory (calling
             // NodeServiceHelper.getPropertyNative per node instead would load the full property map of
@@ -352,18 +351,18 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         return sb.toString();
     }
 
-    private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
-        return data.entrySet().stream().filter(
-                e -> {
-                    try {
-                        return "restricted_mz".equals(NodeServiceHelper.getPropertyNative(e.getKey(), CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
-                    } catch (InvalidNodeRefException exception) {
-                        // node is deleted
-                        logger.info("restricted_mz was not verifiable: " + e.getKey() + ": " + exception.getMessage());
-                        return false;
-                    }
-                }
-        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(List<NodeRef> nodes, Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
+        // Determine the mediacenter media from the licensed nodes, filtering on the
+        // ccm:io_editorial_state that Elasticsearch already delivered in memory (calling
+        // NodeServiceHelper.getPropertyNative per node instead would load the full property map of
+        // every node into the Alfresco L2 caches and blow up the heap).
+        Set<String> mediacenterNodeIds = nodes.stream()
+                .filter(n -> n.getProperties() == null || "restricted_mz".equals(n.getProperties().get(CCConstants.CCM_PROP_IO_EDITORIAL_STATE)))
+                .map(NodeRef::getNodeId)
+                .collect(Collectors.toSet());
+        return data.entrySet().stream()
+                .filter(e -> mediacenterNodeIds.contains(e.getKey().getId()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private void writeCSVFileInternal(String nodeId, List<String> header, List<String[]> data) throws Exception {
