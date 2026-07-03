@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@SecurityRequirements
 @Path("/sharing/v1")
 @Tag(name = "SHARING v1")
 @ApiService(value = "SHARING", major = 1, minor = 0)
@@ -46,6 +45,7 @@ public class SharingApi {
     private ShareInfoOpLogService shareInfoOpLogService;
 
     @GET
+    @SecurityRequirements
     @Path("/sharing/{repository}/{node}/{share}")
     @Operation(summary = "Get general info of a share.")
     @ApiResponses(
@@ -75,6 +75,7 @@ public class SharingApi {
     }
 
     @GET
+    @SecurityRequirements
     @Path("/sharing/{repository}/{node}/{share}/children")
     @Operation(summary = "Get all children of this share.", description = "Only valid for shared folders")
     @ApiResponses(

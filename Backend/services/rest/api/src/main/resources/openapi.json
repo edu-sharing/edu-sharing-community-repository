@@ -44042,7 +44042,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
@@ -44166,7 +44165,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Get the operation log of share info",
         "tags": [
           "SHARING v1"
@@ -44252,7 +44250,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
@@ -44338,7 +44335,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
