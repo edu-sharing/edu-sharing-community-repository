@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
@@ -424,15 +425,20 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                             Map<String, Object> properties = entry.getKey().getProperties();
                             Object rawProp = properties == null ? null : properties.get(globalName);
                             String prop = rawProp == null ? null : rawProp.toString();
-                            if (VCardConverter.isVCardProp(globalName)) {
+                            if (VCardConverter.isVCardProp(globalName) && StringUtils.isNotEmpty(prop)) {
+                                String[] propMulti = ValueTool.getMultivalue(prop);
                                 if (e.size() == 1) {
-                                    prop = VCardConverter.getNameForVCardString(prop);
+                                    prop = Arrays.stream(propMulti)
+                                            .map(VCardConverter::getNameForVCardString)
+                                            .filter(StringUtils::isNotBlank)
+                                            .collect(Collectors.joining(", "));
                                 } else {
-                                    ArrayList<Map<String, Object>> vcard = VCardConverter.vcardToMap(null, prop);
-                                    if (vcard.isEmpty()) {
-                                        return "";
-                                    }
-                                    return (String) vcard.get(0).getOrDefault(e.get(1), "");
+                                    return Arrays.stream(propMulti)
+                                            .map(v -> VCardConverter.vcardToMap(null, v))
+                                            .filter(vcard -> !vcard.isEmpty())
+                                            .map(vcard -> (String) vcard.get(0).getOrDefault(e.get(1), ""))
+                                            .filter(StringUtils::isNotBlank)
+                                            .collect(Collectors.joining(", "));
                                 }
                             }
                             if (StringUtils.isEmpty(prop)) {
