@@ -64,7 +64,7 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
     @Output() dateTimeChange = new EventEmitter<number>();
 
     readonly dateControl = new FormControl<Date | null>(null);
-    readonly timeControl = new FormControl('', [Validators.pattern(/\d\d:\d\d/)]);
+    readonly timeControl = new FormControl('', [Validators.pattern(/^\d{1,2}:\d{2}$/)]);
 
     private _dateTime: number;
     private _onChange?: (value: number) => void;
@@ -73,6 +73,7 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
     private readonly destroyRef = inject(DestroyRef);
 
     constructor() {
+        console.log(this.translationsService.getLocale());
         if (this.translationsService.getLocale()) {
             this.dateAdapter.setLocale(this.translationsService.getLocale());
         } else {
@@ -87,6 +88,10 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
                 this._onValidatorChange?.();
                 this.emitCombined();
             });
+    }
+
+    isValid(from: number): boolean {
+        return this.timeControl.valid && this.dateControl.valid && this.dateTime > (from ?? 0);
     }
 
     toDate(value: number): Date | null {
@@ -174,7 +179,7 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
         }
         const combined = new Date(date.getTime());
         const time = this.timeControl.value;
-        if (time && /\d\d:\d\d/.test(time)) {
+        if (time && /^\d{1,2}:\d{2}$/.test(time)) {
             const [hours, minutes] = time.split(':');
             combined.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
         }
