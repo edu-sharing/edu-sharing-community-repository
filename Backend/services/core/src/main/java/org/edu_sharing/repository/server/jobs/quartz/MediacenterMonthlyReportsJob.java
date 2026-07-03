@@ -160,6 +160,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                 Date endDate = Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC));
                 if (generateMonthly) {
                     generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
+                    // school report is only build in monthly session
                     generateSchoolReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
                 }
                 if (generateYearly && localDate.getMonthValue() == 1) {
