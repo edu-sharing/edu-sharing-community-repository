@@ -12,14 +12,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.apache.log4j.Logger;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
@@ -604,13 +600,11 @@ public class CollectionApi {
             CollectionDao collectionDao = CollectionDao.getCollection(repoDao,
 					collectionId);
 
-            if (collectionDao == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
-            }
-
             if (!NodeDao.exists(repoDao, nodeId)) {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
+
+			collectionDao.removeFromCollection(nodeId);
 
 			return Response.status(Response.Status.OK).build();
 
