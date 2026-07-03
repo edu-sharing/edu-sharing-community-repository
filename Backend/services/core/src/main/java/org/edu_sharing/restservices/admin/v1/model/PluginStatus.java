@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PluginStatus {
-    private String version;
     private String name;
+    private String version;
     private Boolean enabled;
 }
