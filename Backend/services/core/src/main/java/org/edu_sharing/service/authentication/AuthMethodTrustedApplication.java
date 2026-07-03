@@ -15,10 +15,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component("eduAuthMethodTrustedApplication")
 @RequiredArgsConstructor
-@Setter
 public class AuthMethodTrustedApplication implements AuthMethodInterface {
 
-	private SSOAuthorityMapper ssoAuthorityMapper;
+	private final SSOAuthorityMapper ssoAuthorityMapper;
 
     public String authenticate(Map<String, String> params) throws AuthenticationException {
 
