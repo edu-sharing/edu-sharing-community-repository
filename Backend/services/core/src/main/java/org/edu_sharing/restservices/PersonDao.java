@@ -665,10 +665,13 @@ public class PersonDao {
             Set<String> groups = authorityService.getMemberships(getAuthorityName());
             for(String group : groups) {
                 try {
-                    String type=GroupDao.getGroup(repoDao, group).getGroupType();
-                    if(type!=null)
-                        types.add(type);
-
+                    org.alfresco.service.cmr.repository.NodeRef groupRef = authorityService.getAuthorityNodeRef(group);
+                    if(groupRef != null) {
+                        String type = (String) NodeServiceHelper.getPropertyNative(groupRef, CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE);
+                        if (type != null) {
+                            types.add(type);
+                        }
+                    }
                 }catch(Throwable t) {}
             }
             String[] typesArray = types.toArray(new String[0]);
