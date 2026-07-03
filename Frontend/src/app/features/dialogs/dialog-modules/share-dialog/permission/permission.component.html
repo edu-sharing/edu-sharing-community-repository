@@ -1,9 +1,15 @@
 <div class="group">
-  <div class="deleted-info" *ngIf="isDeleted">
-    <div class="line"><hr /></div>
+  @if (isDeleted) {
+  <div class="deleted-info">
+    <div class="line">
+      <hr />
+    </div>
     <div class="info">{{ 'WORKSPACE.SHARE.DELETED' | translate }}</div>
-    <div class="line"><hr /></div>
+    <div class="line">
+      <hr />
+    </div>
   </div>
+  }
   <div class="container">
     <div class="icon">
       <es-user-avatar [user]="_permission" size="xsmall"></es-user-avatar>
@@ -13,6 +19,8 @@
       <span class="secondary">{{ _permission | permissionName : { field: 'secondary' } }}</span>
     </div>
     <div class="permission" [class.readOnly]="!isEditable">
+      @if (permissionTimebased && (inherit || ((isEditable === 'timebasedOnly' || isEditable ===
+      true) && timebasedAllowed))) {
       <button
         mat-icon-button
         (click)="openTimebased()"
@@ -22,10 +30,6 @@
           'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
             | translate : { permissions: _permission.permissions.join(', ') }
         }}"
-        *ngIf="
-          permissionTimebased &&
-          (inherit || ((isEditable === 'timebasedOnly' || isEditable === true) && timebasedAllowed))
-        "
         cdkOverlayOrigin
         #timebasedTrigger="cdkOverlayOrigin"
       >
@@ -63,41 +67,40 @@
                 [ngModel]="fromEnabled"
                 [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="toggleFrom($event)"
-                >{{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}</mat-checkbox
-              >
-              <div *ngIf="fromEnabled">
+                >{{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
+              </mat-checkbox>
+              @if (fromEnabled) {
+              <div>
                 <es-share-dialog-choose-date
                   formControlName="from"
                   [from]="currentDate"
                   [to]="timebasedRaw.to"
                 ></es-share-dialog-choose-date>
-                <div
-                  class="timebased-error"
-                  role="alert"
-                  *ngIf="timebasedForm.controls.from.hasError('inPast')"
-                >
+                @if (timebasedForm.controls.from.hasError('inPast')) {
+                <div class="timebased-error" role="alert">
                   {{ 'WORKSPACE.SHARE.TIMEBASED.IN_PAST' | translate }}
                 </div>
+                }
               </div>
+              }
               <mat-checkbox
                 [ngModel]="toEnabled"
                 [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="toggleTo($event)"
-                >{{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}</mat-checkbox
-              >
-              <div *ngIf="toEnabled">
+                >{{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
+              </mat-checkbox>
+              @if (toEnabled) {
+              <div>
                 <es-share-dialog-choose-date
                   formControlName="to"
                   [from]="timebasedRaw.from || currentDate"
                 ></es-share-dialog-choose-date>
               </div>
-              <div
-                class="timebased-error"
-                role="alert"
-                *ngIf="timebasedForm.hasError('fromAfterTo')"
-              >
+              } @if (timebasedForm.hasError('fromAfterTo')) {
+              <div class="timebased-error" role="alert">
                 {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
               </div>
+              }
               <div class="actions">
                 <button mat-button color="primary" (click)="timebasedOpen = null">
                   {{ 'CANCEL' | translate }}
@@ -113,34 +116,32 @@
               </div>
             </div>
             <!-- <div class="close">
-              <button mat-icon-button (click)="timebasedOpen = false">
-                <i esIcon="close"></i>
-              </button>
-            </div> -->
+                <button mat-icon-button (click)="timebasedOpen = false">
+                  <i esIcon="close"></i>
+                </button>
+              </div> -->
           </div>
         </ng-template>
       </button>
+      } @if ((_permission.from || _permission.to) && timebasedInvalid) {
       <i
         esIcon="warning"
         class="timebased-invalid"
-        *ngIf="(_permission.from || _permission.to) && timebasedInvalid"
         [matTooltip]="'WORKSPACE.SHARE.TIMEBASED.INVALID_STATE' | translate"
       ></i>
+      }
       <div class="publish">
-        <i
-          class="material-icons"
-          *ngIf="
-            _permission.permissions.indexOf('Coordinator') > -1 ||
-            _permission.permissions.indexOf('CCPublish') > -1
-          "
-          matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}"
+        @if (_permission.permissions.indexOf('Coordinator') > -1 ||
+        _permission.permissions.indexOf('CCPublish') > -1) {
+        <i class="material-icons" matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}"
           >public</i
         >
+        }
       </div>
       <!-- This template displays the overlay content and is connected to the button -->
 
+      @if (invalidPermission) {
       <div
-        *ngIf="invalidPermission"
         title="{{
           'WORKSPACE.SHARE.TYPE_UNKNOWN_DESCRIPTION'
             | translate : { permissions: _permission.permissions.join(', ') }
@@ -152,7 +153,8 @@
           <div class="select"></div>
         </div>
       </div>
-      <div *ngIf="!invalidPermission" class="permission-type">
+      } @if (!invalidPermission) {
+      <div class="permission-type">
         <button
           mat-button
           [disabled]="isEditable !== true"
@@ -165,42 +167,37 @@
           [attr.aria-expanded]="showChooseType || null"
           [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
         >
-          <ng-container *ngIf="_permission.permissions.indexOf('Owner') > -1">
-            <i class="material-icons align">home</i>
-            <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
-          </ng-container>
-          <ng-container *ngIf="_permission.permissions.indexOf('Consumer') > -1">
-            <i class="material-icons align">remove_red_eye</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
-          <ng-container *ngIf="_permission.permissions.indexOf('Collaborator') > -1">
-            <i class="material-icons align">edit</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
-          <ng-container
-            *ngIf="
-              _permission.permissions.indexOf('Coordinator') > -1 ||
-              _permission.permissions.indexOf('All') > -1
-            "
-          >
-            <i class="material-icons align">work</i>
-            <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
-            <span *ngIf="isEditable === true && !isEveryone" class="select"
-              ><i class="material-icons align">keyboard_arrow_down</i></span
-            >
-          </ng-container>
+          @if (_permission.permissions.indexOf('Owner') > -1) {
+
+          <i class="material-icons align">home</i>
+          <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
+
+          } @if (_permission.permissions.indexOf('Consumer') > -1) {
+
+          <i class="material-icons align">remove_red_eye</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
+          @if (isEditable === true && !isEveryone) {
+          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+          } } @if (_permission.permissions.indexOf('Collaborator') > -1) {
+
+          <i class="material-icons align">edit</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+          @if (isEditable === true && !isEveryone) {
+          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+          } } @if (_permission.permissions.indexOf('Coordinator') > -1 ||
+          _permission.permissions.indexOf('All') > -1) {
+
+          <i class="material-icons align">work</i>
+          <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
+          @if (isEditable === true && !isEveryone) {
+          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+          } }
         </button>
 
-        <div *ngIf="_permission.permissions.length === 0"></div>
-
+        @if (_permission.permissions.length === 0) {
+        <div></div>
+        } @if (showChooseType) {
         <es-share-dialog-choose-type
-          *ngIf="showChooseType"
           class="typeAdd"
           [aria-label]="
             'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
@@ -211,25 +208,26 @@
           (cancelType)="showChooseType = false"
           (typeChosen)="doChangeType($event)"
         ></es-share-dialog-choose-type>
+        }
       </div>
+      }
     </div>
     <div>
-      <button
-        class="remove"
-        mat-icon-button
-        (click)="remove()"
-        *ngIf="showDelete"
-        [disabled]="isEditable !== true"
-      >
-        <i *ngIf="!inherit && !isDeleted" class="material-icons">cancel</i>
-        <i *ngIf="!inherit && isDeleted" class="material-icons">undo</i>
+      @if (showDelete) {
+      <button class="remove" mat-icon-button (click)="remove()" [disabled]="isEditable !== true">
+        @if (!inherit && !isDeleted) {
+        <i class="material-icons">cancel</i>
+        } @if (!inherit && isDeleted) {
+        <i class="material-icons">undo</i>
+        } @if (inherit) {
         <i
-          *ngIf="inherit"
           class="inherit"
           esIcon="edu-inherit"
           matTooltip="{{ 'WORKSPACE.SHARE.INHERIT_HINT' | translate }}"
         ></i>
+        }
       </button>
+      }
     </div>
   </div>
 </div>

@@ -11,14 +11,15 @@
   />
   <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
   <mat-datepicker #picker></mat-datepicker>
-  <mat-error *ngIf="dateControl.hasError('matDatepickerParse')">
+  @if (dateControl.hasError('matDatepickerParse')) {
+  <mat-error>
     {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE' | translate }}
   </mat-error>
-  <mat-error
-    *ngIf="dateControl.hasError('matDatepickerMin') || dateControl.hasError('matDatepickerMax')"
-  >
+  } @if (dateControl.hasError('matDatepickerMin') || dateControl.hasError('matDatepickerMax')) {
+  <mat-error>
     {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
   </mat-error>
+  }
 </mat-form-field>
 <mat-form-field class="time">
   <mat-label>{{ 'WORKSPACE.SHARE.TIMEBASED.TIME_LABEL' | translate }}</mat-label>
@@ -31,7 +32,9 @@
     (blur)="onBlur()"
   />
   <mat-hint>{{ 'WORKSPACE.SHARE.TIMEBASED.TIME_HINT' | translate }}</mat-hint>
-  <mat-error *ngIf="timeControl.hasError('pattern')">
+  @if (timeControl.hasError('pattern')) {
+  <mat-error>
     {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_TIME' | translate }}
   </mat-error>
+  }
 </mat-form-field>
