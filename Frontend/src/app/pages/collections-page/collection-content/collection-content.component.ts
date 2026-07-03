@@ -766,7 +766,11 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     private getReferencesRequest(): RequestObject {
         return {
             sortBy: [this.sortReferences.active],
-            sortAscending: [this.sortReferences.direction === 'asc'],
+            sortAscending: [
+                this.sortReferences.active === RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION
+                    ? true
+                    : this.sortReferences.direction === 'asc',
+            ],
         };
     }
 
