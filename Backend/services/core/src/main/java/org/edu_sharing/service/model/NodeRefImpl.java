@@ -3,6 +3,7 @@ package org.edu_sharing.service.model;
 import java.util.*;
 
 import lombok.Data;
+import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.restservices.shared.Contributor;
 
@@ -51,6 +52,8 @@ public class NodeRefImpl implements NodeRef {
     public NodeRefImpl() {}
 
     public NodeRefImpl(String nodeId) {
+        this.storeProtocol = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getProtocol();
+        this.storeId = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier();
         this.nodeId = nodeId;
     }
 
