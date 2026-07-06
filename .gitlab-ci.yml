@@ -112,16 +112,16 @@ build storybook:
   variables:
     NODE_VERSION: 24.9
   before_script:
-    - mkdir -p Frontend/projects/edu-sharing-api/build/
-    - cp Backend/services/rest/api/src/main/resources/openapi.json Frontend/projects/edu-sharing-api/build/openapi.json
-    - cd Frontend/projects/edu-sharing-api
     - node -v
     - npm -v
-    - npm ci
-    - npm run generate-api
-    - cd ../..
+    - cd Frontend
     # Install dependencies on cache miss, e.g., when first running on a ci runner.
     - ([[ -d node_modules ]] || npm ci)
+    - mkdir -p projects/edu-sharing-api/build/
+    - cp ../Backend/services/rest/api/src/main/resources/openapi.json projects/edu-sharing-api/build/openapi.json
+    - cd projects/edu-sharing-api
+    - npm run generate-api
+    - cd ../..
   script:
     - npm run prebuild
     - npm run build:storybook
