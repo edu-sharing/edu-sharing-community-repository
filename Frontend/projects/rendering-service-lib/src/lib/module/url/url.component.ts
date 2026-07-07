@@ -79,6 +79,8 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
     async ngOnInit() {
         if (this.data?.module === 'SODIX') {
             this.processSodix();
+        } else if (this.data?.module === 'OMEGA') {
+            this.processOmega();
         } else {
             this.embedding = this.data?.frontendModuleConfig?.urlModuleConfig?.embedding;
             this.url = this.node?.properties?.['ccm:wwwurl']?.[0] || '';
@@ -228,6 +230,23 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         }
 
         this.embedding = UrlEmbeddings.SODIX;
+    }
+
+    private processOmega(): void {
+        const jobData = this.data?.items?.[0];
+        const additionalData = jobData?.additionalData;
+        const downloadUrl = additionalData?.['downloadUrl'] ?? undefined;
+        this.globalStateService.setDownloadUrl(downloadUrl);
+        this.url = jobData.link;
+        if (this.node.mimetype.startsWith('image')) {
+            this.embedding = UrlEmbeddings.IMAGE;
+        } else if (this.node.mimetype.startsWith('video')) {
+            this.embedding = UrlEmbeddings.VIDEO;
+        } else if (this.node.mimetype.startsWith('audio')) {
+            this.embedding = UrlEmbeddings.AUDIO;
+        } else {
+            this.embedding = UrlEmbeddings.LINK;
+        }
     }
 
     protected readonly UrlEmbeddings = UrlEmbeddings;

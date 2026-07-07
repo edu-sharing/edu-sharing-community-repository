@@ -27,10 +27,11 @@ import {
     exhaustMap,
     firstValueFrom,
     interval,
+    map,
     Subject,
-    switchMap,
     takeUntil,
 } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ImageComponent } from './module/image/image.component';
 import { RenderingApiModule } from './rendering-api.module';
 import { VideoComponent } from './module/video/video.component';
@@ -125,93 +126,76 @@ export class RenderComponent implements OnChanges, OnInit {
             .pipe(
                 filter(() => this.node !== undefined && this.serviceWorkerReady),
                 debounceTime(10),
-                switchMap(async () => {
-                    // load services including the scope so they fetch via a remote render url (if applicable for the current request input)
-                    const services = this.resolveServices(this.request?.renderingBaseUrl);
-                    const frontendModule = await this.checkModule(services.moduleInfo);
-                    return { services, frontendModule };
-                }),
+                // load services including the scope so they fetch via a remote render url (if applicable for the current request input)
+                map(() => this.resolveServices(this.request?.renderingBaseUrl)),
             )
             .subscribe({
-                next: async ({ services, frontendModule }) => {
-                    // No further calls to rs2 necessary if we have a front end only module
-                    if (frontendModule !== null) {
-                        const data: RenderData = {
-                            module: frontendModule.module,
-                            frontendModuleConfig: frontendModule,
-                        };
-                        this.trackingService.trackViewedWithToken(
-                            this.node!!.ref.id,
-                            this.node!!.ref.repo,
-                            this.isWebComponent,
-                            this.request!!.token,
-                        );
-                        this.renderData$.next(data);
-                        this.finished.next();
-                    } else {
-                        try {
-                            this.request!!.eventType = this.isWebComponent
-                                ? 'VIEW_MATERIAL_EMBEDDED'
-                                : 'VIEW_MATERIAL';
-                            const { render, jobInfo: jobInfoService } = services;
-                            const renderResponseData = this.isWebComponent
-                                ? await firstValueFrom(
-                                      render.getRenderDataTokenSessionSafe(this.request!!),
-                                  )
-                                : await firstValueFrom(render.getRenderDataToken(this.request!!));
-                            // Case 1: no job returned => no polling needed
-                            if (renderResponseData.jobId === null) {
-                                this.handleRenderingResponseWithoutJob(renderResponseData);
-                            } else {
-                                this.progress$.next({ module: renderResponseData.module ?? '' });
-                                interval(renderResponseData.module === 'VIDEO' ? 2000 : 500)
-                                    .pipe(
-                                        takeUntil(this.finished),
-                                        takeUntilDestroyed(this.destroyRef),
-                                        exhaustMap(() =>
-                                            jobInfoService
-                                                .getJobInfo({ jobId: renderResponseData.jobId!! })
-                                                .pipe(),
-                                        ),
-                                    )
-                                    .subscribe({
-                                        next: async (jobInfo) => {
-                                            // Some, but not all, jobs are in a final status (this means some are still QUEUED or PROCESSING)
-                                            if (
-                                                jobInfo.jobs.some((j) => j.status === 'FINISHED') &&
-                                                jobInfo.status !== 'FINISHED' &&
-                                                jobInfo.status !== 'PARTIALLY_FAILED'
-                                            ) {
-                                                this.handleJobInfoWithSubJobsInProgress(
-                                                    renderResponseData,
-                                                    jobInfo,
-                                                );
-                                                // main job finished or partially failed
-                                            } else if (
-                                                jobInfo.status === 'FINISHED' ||
-                                                jobInfo.status === 'PARTIALLY_FAILED'
-                                            ) {
-                                                this.handleFinishedOrPartialJobInfo(
-                                                    renderResponseData,
-                                                    jobInfo,
-                                                );
-                                                // Main job failed => no module but error page
-                                            } else if (jobInfo.status === 'FAILED') {
-                                                this.handleFailedMainJob(jobInfo);
-                                            } else {
-                                                // no finished jobs -> show either one progress bar with race leader (progress 0-100)
-                                                // or queue position (progress (-inf,-1])
-                                                this.handleMainJobWithNoSubJobInFinalStatus(
-                                                    jobInfo,
-                                                );
-                                            }
-                                        },
-                                        error: (error) => {
-                                            this.handleApiError(error);
-                                        },
-                                    });
-                            }
-                        } catch (error) {
+                next: async (services) => {
+                    try {
+                        this.request!!.eventType = this.isWebComponent
+                            ? 'VIEW_MATERIAL_EMBEDDED'
+                            : 'VIEW_MATERIAL';
+                        const { render, jobInfo: jobInfoService } = services;
+                        const renderResponseData = this.isWebComponent
+                            ? await firstValueFrom(
+                                  render.getRenderDataTokenSessionSafe(this.request!!),
+                              )
+                            : await firstValueFrom(render.getRenderDataToken(this.request!!));
+                        // Case 1: no job returned => no polling needed
+                        if (renderResponseData.jobId === null) {
+                            this.handleRenderingResponseWithoutJob(renderResponseData);
+                        } else {
+                            this.progress$.next({ module: renderResponseData.module ?? '' });
+                            interval(renderResponseData.module === 'VIDEO' ? 2000 : 500)
+                                .pipe(
+                                    takeUntil(this.finished),
+                                    takeUntilDestroyed(this.destroyRef),
+                                    exhaustMap(() =>
+                                        jobInfoService
+                                            .getJobInfo({ jobId: renderResponseData.jobId!! })
+                                            .pipe(),
+                                    ),
+                                )
+                                .subscribe({
+                                    next: async (jobInfo) => {
+                                        // Some, but not all, jobs are in a final status (this means some are still QUEUED or PROCESSING)
+                                        if (
+                                            jobInfo.jobs.some((j) => j.status === 'FINISHED') &&
+                                            jobInfo.status !== 'FINISHED' &&
+                                            jobInfo.status !== 'PARTIALLY_FAILED'
+                                        ) {
+                                            this.handleJobInfoWithSubJobsInProgress(
+                                                renderResponseData,
+                                                jobInfo,
+                                            );
+                                            // main job finished or partially failed
+                                        } else if (
+                                            jobInfo.status === 'FINISHED' ||
+                                            jobInfo.status === 'PARTIALLY_FAILED'
+                                        ) {
+                                            this.handleFinishedOrPartialJobInfo(
+                                                renderResponseData,
+                                                jobInfo,
+                                            );
+                                            // Main job failed => no module but error page
+                                        } else if (jobInfo.status === 'FAILED') {
+                                            this.handleFailedMainJob(jobInfo);
+                                        } else {
+                                            // no finished jobs -> show either one progress bar with race leader (progress 0-100)
+                                            // or queue position (progress (-inf,-1])
+                                            this.handleMainJobWithNoSubJobInFinalStatus(jobInfo);
+                                        }
+                                    },
+                                    error: (error) => {
+                                        this.handleApiError(error);
+                                    },
+                                });
+                        }
+                    } catch (error) {
+                        // 415 = backend has no module for this media type -> frontend module fallback
+                        if (error instanceof HttpErrorResponse && error.status === 415) {
+                            this.renderFrontendModule(services.moduleInfo);
+                        } else {
                             this.handleApiError(error);
                         }
                     }
@@ -254,7 +238,7 @@ export class RenderComponent implements OnChanges, OnInit {
     }
 
     handleApiError(error: any) {
-        const publicMessage = error.error.userMessage ?? 'GENERIC_ERROR_MESSAGE';
+        const publicMessage = error?.error?.userMessage ?? 'GENERIC_ERROR_MESSAGE';
         const data: RenderData = {
             module: 'ERROR',
             publicErrorMessage: publicMessage,
@@ -322,32 +306,22 @@ export class RenderComponent implements OnChanges, OnInit {
         this.loadData.next();
     }
 
-    async checkModule(moduleInfo: ModuleInfoService): Promise<FrontendModuleConfig | null> {
-        const checkRemoteFrontend = (): boolean => {
-            if (this.node?.remote !== null && this.node?.remote !== undefined) {
-                const remoteType = this.node.remote.repository?.repositoryType ?? '';
-                const frontendRemoteTypes = [
-                    'PIXABAY',
-                    'YOUTUBE',
-                    'LEARNINGAPPS',
-                    'OERSI',
-                    'BROCKHAUS',
-                ];
-                return frontendRemoteTypes.includes(remoteType);
-            }
-            return false;
-        };
-        if (
-            checkRemoteFrontend() ||
-            (await moduleInfo.getAvailableBackendModule(this.node)) === null
-        ) {
-            if (this.node !== undefined) {
-                return moduleInfo.getFrontendModuleSetting(this.node);
-            }
-            return { module: 'default', urlModuleConfig: null };
-        } else {
-            return null;
-        }
+    private renderFrontendModule(moduleInfo: ModuleInfoService) {
+        const frontendModule: FrontendModuleConfig =
+            this.node !== undefined
+                ? moduleInfo.getFrontendModuleSetting(this.node)
+                : { module: 'default', urlModuleConfig: null };
+        this.trackingService.trackViewedWithToken(
+            this.node!!.ref.id,
+            this.node!!.ref.repo,
+            this.isWebComponent,
+            this.request!!.token,
+        );
+        this.renderData$.next({
+            module: frontendModule.module,
+            frontendModuleConfig: frontendModule,
+        });
+        this.finished.next();
     }
 
     handleRenderingResponseWithoutJob(renderDataResponse: RenderDataResponse) {

@@ -6,7 +6,7 @@
   <rs-module-image [data]="data" [node]="node"></rs-module-image>
   } @loading {
   <ng-container *ngTemplateOutlet="loading"></ng-container>
-  } @defer (when data?.module === 'SODIX'){
+  } @defer (when data?.module === 'SODIX' || data?.module === 'OMEGA'){
   <rs-module-url [data]="data" [node]="node"></rs-module-url>
   } @loading {
   <ng-container *ngTemplateOutlet="loading"></ng-container>

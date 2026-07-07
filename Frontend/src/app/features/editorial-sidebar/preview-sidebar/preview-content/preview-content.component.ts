@@ -110,6 +110,9 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void this.updateOptions();
             }
             if (node) {
+                // This needs to be configurable per module in rendering service.
+                // The logic belongs in the render component itself (toggleable via Input)
+                // Ticket: RENDER-138
                 void this.about.hasPlugin('rendering-service-2').then(async (has) => {
                     if (has) {
                         let module = 'default';

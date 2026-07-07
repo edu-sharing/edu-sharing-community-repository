@@ -13,12 +13,8 @@ import { ModuleInfo } from './lib/dto/ModuleInfo';
 export class ModuleInfoService {
     private service = inject(ModuleInfoControllerService);
 
-    private availableMediaTypes: Map<string, string> = new Map<string, string>();
-    private availableMimeTypes: Map<string, string> = new Map<string, string>();
-    private availableMimeTypePrefixes: Map<string, string> = new Map<string, string>();
-    private availableReplicationSources: Map<string, string> = new Map<string, string>();
-    private availableResourceTypes: Map<string, string> = new Map<string, string>();
-    private availableRemoteRepositories: Map<string, string> = new Map<string, string>();
+    /** module name by `<category>:<value>` key, populated once from the modules-info endpoint */
+    private moduleMappings: Map<string, string> | null = null;
 
     async getModuleInfo(node: Node): Promise<ModuleInfo> {
         const backendModule = await this.getAvailableBackendModule(node);
@@ -35,104 +31,81 @@ export class ModuleInfoService {
         };
     }
 
-    async getAvailableBackendModule(node: Node | undefined): Promise<string | null> {
-        if (!this.isInitialized()) {
-            const result = await firstValueFrom(
-                this.service.getModulesInfo({ repoId: node?.ref.repo ?? '' }),
-            );
-            result.forEach((info) => {
-                if (info.typeMapping.type !== undefined && info.typeMapping.type !== null) {
-                    this.availableMediaTypes.set(info.typeMapping.type, info.name);
-                } else if (
-                    info.typeMapping.remoteRepositoryType !== undefined &&
-                    info.typeMapping.remoteRepositoryType !== null
-                ) {
-                    this.availableRemoteRepositories.set(
-                        info.typeMapping.remoteRepositoryType,
-                        info.name,
-                    );
-                } else if (
-                    info.typeMapping.resourceType !== undefined &&
-                    info.typeMapping.resourceType !== null
-                ) {
-                    this.availableResourceTypes.set(info.typeMapping.resourceType, info.name);
-                } else if (
-                    info.typeMapping.replicationSource !== undefined &&
-                    info.typeMapping.replicationSource !== null
-                ) {
-                    this.availableReplicationSources.set(
-                        info.typeMapping.replicationSource,
-                        info.name,
-                    );
-                } else if (
-                    info.typeMapping.mimeTypeSuffix !== undefined &&
-                    info.typeMapping.mimeTypeSuffix !== null &&
-                    info.typeMapping.mimeTypePrefix !== undefined &&
-                    info.typeMapping.mimeTypePrefix !== null
-                ) {
-                    this.availableMimeTypes.set(
-                        `${info.typeMapping.mimeTypePrefix}/${info.typeMapping.mimeTypeSuffix}`,
-                        info.name,
-                    );
-                } else if (
-                    info.typeMapping.mimeTypePrefix !== undefined &&
-                    info.typeMapping.mimeTypePrefix !== null
-                ) {
-                    this.availableMimeTypePrefixes.set(info.typeMapping.mimeTypePrefix, info.name);
-                }
-            });
-        }
-        const mimeTypePrefix = (node?.mimetype ?? '').split('/', 2)[0];
+    private async getAvailableBackendModule(node: Node | undefined): Promise<string | null> {
+        const mappings = await this.getModuleMappings(node?.ref.repo ?? '');
+        const mimeType = node?.mimetype ?? '';
         const backendModule =
-            this.availableMediaTypes.get(node?.mediatype ?? '') ||
-            this.availableRemoteRepositories.get(node?.remote?.repository?.repositoryType ?? '') ||
-            this.availableReplicationSources.get(
-                node?.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE]?.[0] ?? '',
+            mappings.get(`mediaType:${node?.mediatype ?? ''}`) ||
+            mappings.get(`remoteRepository:${node?.remote?.repository?.repositoryType ?? ''}`) ||
+            mappings.get(
+                `replicationSource:${
+                    node?.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE]?.[0] ?? ''
+                }`,
             ) ||
-            this.availableResourceTypes.get(
-                node?.properties?.[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] ?? '',
+            mappings.get(
+                `resourceType:${
+                    node?.properties?.[RestConstants.CCM_PROP_CCRESSOURCETYPE]?.[0] ?? ''
+                }`,
             ) ||
-            this.availableMimeTypes.get(node?.mimetype ?? '') ||
-            this.availableMimeTypePrefixes.get(mimeTypePrefix) ||
+            mappings.get(`mimeType:${mimeType}`) ||
+            mappings.get(`mimeTypePrefix:${mimeType.split('/', 2)[0]}`) ||
             null;
 
         if (backendModule?.toLowerCase() === 'sodix') {
             return backendModule;
         }
+        // nodes with a www url are handled by the frontend url module
         if (node?.properties?.['ccm:wwwurl']?.[0]) {
             return null;
-        } else {
-            return backendModule;
         }
+        return backendModule;
     }
 
-    private isInitialized(): boolean {
-        return (
-            this.availableMediaTypes.size +
-                this.availableMimeTypes.size +
-                this.availableMimeTypePrefixes.size +
-                this.availableReplicationSources.size +
-                this.availableResourceTypes.size +
-                this.availableRemoteRepositories.size !==
-            0
-        );
+    private async getModuleMappings(repoId: string): Promise<Map<string, string>> {
+        if (this.moduleMappings === null) {
+            const result = await firstValueFrom(this.service.getModulesInfo({ repoId }));
+            const mappings = new Map<string, string>();
+            result.forEach(({ name, typeMapping }) => {
+                // each module is registered for exactly one mapping category, in this precedence
+                if (typeMapping.type != null) {
+                    mappings.set(`mediaType:${typeMapping.type}`, name);
+                } else if (typeMapping.remoteRepositoryType != null) {
+                    mappings.set(`remoteRepository:${typeMapping.remoteRepositoryType}`, name);
+                } else if (typeMapping.resourceType != null) {
+                    mappings.set(`resourceType:${typeMapping.resourceType}`, name);
+                } else if (typeMapping.replicationSource != null) {
+                    mappings.set(`replicationSource:${typeMapping.replicationSource}`, name);
+                } else if (
+                    typeMapping.mimeTypePrefix != null &&
+                    typeMapping.mimeTypeSuffix != null
+                ) {
+                    mappings.set(
+                        `mimeType:${typeMapping.mimeTypePrefix}/${typeMapping.mimeTypeSuffix}`,
+                        name,
+                    );
+                } else if (typeMapping.mimeTypePrefix != null) {
+                    mappings.set(`mimeTypePrefix:${typeMapping.mimeTypePrefix}`, name);
+                }
+            });
+            this.moduleMappings = mappings;
+        }
+        return this.moduleMappings;
     }
 
     getFrontendModuleSetting(node: Node): FrontendModuleConfig {
-        const urlModuleConfig = this.checkUrlModule(node);
-        if (urlModuleConfig !== null) {
-            return urlModuleConfig;
-        }
-        return {
-            module: 'default',
-            urlModuleConfig: null,
-        };
+        return (
+            this.checkUrlModule(node) ?? {
+                module: 'default',
+                urlModuleConfig: null,
+            }
+        );
     }
 
-    checkUrlModule(node: Node): FrontendModuleConfig | null {
+    private checkUrlModule(node: Node): FrontendModuleConfig | null {
         const url = node.properties?.['ccm:wwwurl']?.[0] || '';
+        const remoteRepositoryType = node.remote?.repository?.repositoryType?.toLowerCase() ?? '';
         const checkLearningApps = (): UrlModuleConfig | null => {
-            if (node.remote?.repository?.repositoryType?.toLowerCase() === 'learningapps') {
+            if (remoteRepositoryType === 'learningapps') {
                 return {
                     embedding: UrlEmbeddings.LEARNINGAPPS,
                     externalId: '',
@@ -140,11 +113,8 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function checkYouTube
-         */
         const checkYouTube = (): UrlModuleConfig | null => {
-            if (node.remote?.repository?.repositoryType?.toLowerCase() === 'youtube') {
+            if (remoteRepositoryType === 'youtube') {
                 return {
                     embedding: UrlEmbeddings.YOUTUBE,
                     externalId: node.remote?.id ?? '',
@@ -166,9 +136,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function checkVimeo
-         */
         const checkVimeo = (): UrlModuleConfig | null => {
             if (url.includes('vimeo.com')) {
                 const urlObject = new URL(url);
@@ -194,9 +161,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function checkAudio
-         */
         const checkAudio = (): UrlModuleConfig | null => {
             if (url.length > 0 && node.mimetype?.startsWith('audio')) {
                 return {
@@ -206,9 +170,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function checkLti13ToolObject
-         */
         const checkLti13ToolObject = (): UrlModuleConfig | null => {
             if (node.aspects?.includes('ccm:ltitool_node')) {
                 return {
@@ -218,13 +179,10 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function checkImage
-         */
         const checkImage = (): UrlModuleConfig | null => {
-            const remoteRepository = node.remote?.repository?.repositoryType ?? '';
-            const skipTypes = ['PIXABAY', 'DDB'];
-            if (skipTypes.includes(remoteRepository)) {
+            // pixabay and ddb images are handled by their own embeddings / modules
+            const skipTypes = ['pixabay', 'ddb'];
+            if (skipTypes.includes(remoteRepositoryType)) {
                 return null;
             }
             if (node.mediatype === 'file-image') {
@@ -245,9 +203,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         *  Function detectH5P
-         */
         const detectH5P = (): UrlModuleConfig | null => {
             if (url.length > 0 && url.includes('h5p.org/h5p/embed')) {
                 return {
@@ -257,9 +212,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-        /**
-         * Function detectPrezi
-         */
         const detectPrezi = (): UrlModuleConfig | null => {
             if (
                 url.length > 0 &&
@@ -274,10 +226,8 @@ export class ModuleInfoService {
             }
             return null;
         };
-
         const checkPixabay = (): UrlModuleConfig | null => {
-            const remoteType = node.remote?.repository?.repositoryType ?? '';
-            if (remoteType.toLowerCase() === 'pixabay') {
+            if (remoteRepositoryType === 'pixabay') {
                 return {
                     embedding: UrlEmbeddings.PIXABAY,
                     externalId: '',
@@ -285,10 +235,8 @@ export class ModuleInfoService {
             }
             return null;
         };
-
         const checkOersi = (): UrlModuleConfig | null => {
-            const remoteType = node.remote?.repository?.repositoryType ?? '';
-            if (remoteType.toLowerCase() === 'oersi') {
+            if (remoteRepositoryType === 'oersi') {
                 return {
                     embedding: UrlEmbeddings.OERSI,
                     externalId: '',
@@ -296,10 +244,8 @@ export class ModuleInfoService {
             }
             return null;
         };
-
         const checkBrockhaus = (): UrlModuleConfig | null => {
-            const remoteType = node.remote?.repository?.repositoryType ?? '';
-            if (remoteType.toLowerCase() === 'brockhaus') {
+            if (remoteRepositoryType === 'brockhaus') {
                 return {
                     embedding: UrlEmbeddings.BROCKHAUS,
                     externalId: '',
@@ -307,10 +253,6 @@ export class ModuleInfoService {
             }
             return null;
         };
-
-        /**
-         * Function checkLink
-         */
         const checkLink = (): UrlModuleConfig | null => {
             if (url.length > 0 && node.mediatype === 'link') {
                 return {
@@ -321,9 +263,6 @@ export class ModuleInfoService {
             return null;
         };
 
-        /**
-         * embedding if applicable to the node
-         */
         const embedding =
             checkLearningApps() ??
             checkYouTube() ??
