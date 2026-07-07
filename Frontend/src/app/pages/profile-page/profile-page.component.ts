@@ -1,6 +1,14 @@
 import { firstValueFrom, forkJoin as observableForkJoin, of, Subject, timer } from 'rxjs';
 
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+    Component,
+    computed,
+    ElementRef,
+    OnDestroy,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -30,6 +38,8 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { catchError, first, take, takeUntil } from 'rxjs/operators';
 import {
+    About,
+    AboutService,
     ConfigService,
     HOME_REPOSITORY,
     IamV1Service,
@@ -58,12 +68,17 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     avatarCache = '';
     gdprExport: NodeEntry;
     params: any;
+    private about = signal<About>(null);
+    hasDataprotection = computed(
+        () => this.about()?.features?.filter((f) => f.id === 'dataprotection').length > 0,
+    );
     constructor(
         private toast: Toast,
         private route: ActivatedRoute,
         private dialogs: DialogsService,
         private mainNav: MainNavService,
         private connector: RestConnectorService,
+        private aboutService: AboutService,
         private translations: TranslationsService,
         private translate: TranslateService,
         private router: Router,
@@ -87,6 +102,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.editAction.group = DefaultGroups.Edit;
         this.editAction.elementType = [ElementType.Unknown];
         this.editAction.showAsAction = true;
+        this.aboutService.getAbout().subscribe((about) => this.about.set(about));
     }
     private static PASSWORD_MIN_LENGTH = 5;
     public user: User;
@@ -123,7 +139,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.destroyed.next();
         this.destroyed.complete();
     }
-
     public loadUser(authority: string) {
         this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {
