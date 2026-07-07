@@ -88,10 +88,10 @@ public class OaiDublinCoreMetadataFormatWriter extends AbstractMetadataFormatWri
     @Value("${repository.privacy.filterVCardEmail:true}")
     protected boolean filterVCardEmail;
 
-    private final MetadataFormat metadataFormat = MetadataFormat.metadataFormat("dc")
+    private final MetadataFormat metadataFormat = new MetadataFormatProxy(MetadataFormat::identity)
+            .withPrefix("dc")
             .withSchemaLocation("http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd")
-            .withNamespace("http://www.openarchives.org/OAI/2.0/")
-            .withTransformer(MetadataFormat.identity());
+            .withNamespace("http://www.openarchives.org/OAI/2.0/");
 
     @Override
     public void build(Context context) throws ParserConfigurationException {
