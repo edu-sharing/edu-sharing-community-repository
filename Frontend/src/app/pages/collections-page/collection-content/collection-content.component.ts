@@ -727,7 +727,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                                         .get(
                                             SessionStorageService.KEY_ROOT_COLLECTIONS,
                                             [],
-                                            Store.Session,
+                                            Store.BrowserSessionStorage,
                                         )
                                         .toPromise()
                                 ).map((n: VirtualNode) => {

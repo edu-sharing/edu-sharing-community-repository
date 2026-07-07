@@ -946,13 +946,15 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     private async save4(collection: EduData.Node) {
         if (this.parentId === RestConstants.ROOT) {
             const collections = await this.sessionStorageService
-                .get(SessionStorageService.KEY_ROOT_COLLECTIONS, [], Store.Session)
+                .get(SessionStorageService.KEY_ROOT_COLLECTIONS, [], Store.BrowserSessionStorage)
                 .toPromise();
             collections.push(collection);
+            // temporary store for 60s to hold it when elastic index fails
             await this.sessionStorageService.set(
                 SessionStorageService.KEY_ROOT_COLLECTIONS,
                 collections,
-                Store.Session,
+                Store.BrowserSessionStorage,
+                60,
             );
         }
         // check if there are any nodes that should be added to this collection
