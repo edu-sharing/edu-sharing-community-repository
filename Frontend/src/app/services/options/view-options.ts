@@ -289,6 +289,9 @@ export function createViewOptions({
         Constrain.HomeRepository,
         Constrain.FilesAndDirectories,
     ];
+    infoVersions.permissions = [RestConstants.PERMISSION_WRITE];
+    infoVersions.permissionsRightMode = NodesRightMode.Effective;
+    infoVersions.permissionsMode = HideMode.Hide;
     infoVersions.priority = 20;
     infoVersions.showAsAction = false;
 
