@@ -376,17 +376,25 @@ public class SearchServiceImpl implements SearchService {
 
 		List<String> list = new ArrayList<>();
 		if (pattern != null && !pattern.isEmpty()) {
+			String patternLower = pattern.toLowerCase();
+			// if the pattern is a UUID (e.g. an esuid based username) it can only ever match the
+			// authority name, never a display/first/last name, so we can skip the expensive resolution
+			boolean patternIsUuid = isUuid(pattern);
 			for (String authority : list2) {
-				
+
 				String name = authority;
 
 				String toCompare = "" + name;
 
-				if (toCompare.toLowerCase().contains(pattern.toLowerCase())){
+				if (toCompare.toLowerCase().contains(patternLower)){
 					list.add(authority);
 					continue;
 				}
-				
+
+				if (patternIsUuid) {
+					continue;
+				}
+
 				if (name.startsWith(PermissionService.GROUP_PREFIX)) {
 					NodeRef authorityNodeRef = serviceRegistry.getAuthorityService().getAuthorityNodeRef(authority);
 					if(authorityNodeRef != null) {
@@ -412,7 +420,7 @@ public class SearchServiceImpl implements SearchService {
 				}
 				
 				
-				if (toCompare.toLowerCase().contains(pattern.toLowerCase()))
+				if (toCompare.toLowerCase().contains(patternLower))
 					list.add(authority);
 			}
 		} else {
@@ -438,6 +446,15 @@ public class SearchServiceImpl implements SearchService {
 		int count = list.size();
 		list = limitList(list, skipCount, maxValues);
 		return new SearchResult<String>(list, skipCount, count);
+	}
+
+	private static boolean isUuid(String value) {
+		try {
+			UUID.fromString(value);
+			return true;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 	@Override
 	public SearchResult<String> searchUsers(String _pattern, boolean globalSearch, int _skipCount, int _maxValues,
