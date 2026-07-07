@@ -31,6 +31,8 @@ import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
@@ -284,6 +286,7 @@ public class ImporterJob extends AbstractInterruptableJob {
 		// refresh cache after importing
 		if (!isInterrupted && !(idList != null && idList.length > 0))
 			new RefreshCacheExecuter().excecute(null, true, null);
+		logger.info("finished cache building after import of sets "+ String.join(",", sets));
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(),e);
