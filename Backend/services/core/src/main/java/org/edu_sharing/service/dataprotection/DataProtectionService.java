@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -26,11 +27,9 @@ import org.edu_sharing.repository.client.rpc.EduGroup;
 import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
-import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.tools.URLTool;
 import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.repository.server.tools.mailtemplates.MailTemplate;
-import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.authentication.ScopeUserHomeService;
 import org.edu_sharing.service.authentication.ScopeUserHomeServiceFactory;
 import org.edu_sharing.service.authority.AuthorityService;
@@ -48,7 +47,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
 import org.edu_sharing.service.rating.RatingService;
 import org.edu_sharing.service.rating.RatingServiceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -69,31 +67,23 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class DataProtectionService{
 
-    @Autowired
-    NodeService nodeService;
+    private final NodeService nodeService;
+    private final PersonService personService;
+    private final ContentService contentService;
+    private final PermissionService permissionService;
+    private final RegexHomeFolderProvider regexHomeFolderProvider;
+    private final DataProtectionConfig config;
+    private final DataProtectionQueue queue;
+    private final PDFReport report;
 
-    @Autowired
-    PersonService personService;
+    private RatingService ratingService;
+    private FeedbackService feedbackService;
+    private CommentService commentService;
 
-    @Autowired
-    ContentService contentService;
-
-    @Autowired
-    PermissionService permissionService;
-
-    @Autowired
-    RegexHomeFolderProvider regexHomeFolderProvider;
-
-    @Autowired
-    DataProtectionConfig config;
-
-    @Autowired
-    DataProtectionQueue queue;
-
-    @Autowired
-    PDFReport report;
+    private final PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
     @Value("${repository.dataprotection.retentionPeriod:PT240H}")
     private String retentionPeriod;
@@ -110,19 +100,9 @@ public class DataProtectionService{
     @Value("${repository.dataprotection.fileName:dataprotectioninfo_edu-sharing}")
     private String fileName;
 
-    PersonLifecycleService personLifecycleService = new PersonLifecycleService();
 
-    QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
-
-
-    String systemFolder;
-
-    RatingService ratingService;
-
-    FeedbackService feedbackService;
-
-    CommentService commentService;
-
+    private final QName propMapType = QName.createQName(CCConstants.CCM_PROP_MAP_TYPE);
+    private String systemFolder;
 
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshed() {
@@ -270,9 +250,7 @@ public class DataProtectionService{
                 .map(g -> (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
                 .collect(Collectors.toList());
 
-        /**
-         * @TODO use profile data or something dynamic determine locale and timezone
-         */
+        // @TODO use profile data or something dynamic determine locale and timezone
         ZoneId zone = ZoneId.of("Europe/Berlin");
         Locale locale = Locale.GERMANY;
 
@@ -389,10 +367,7 @@ public class DataProtectionService{
     }
 
     public boolean reportOnly(){
-        if(summaryExport && !metadataExport){
-            return true;
-        }
-        return false;
+        return summaryExport && !metadataExport;
     }
 
     private void createStructure(String rootPath, String subPath, HashMap<NodeRef, String> pathMap) throws IOException {
@@ -485,7 +460,7 @@ public class DataProtectionService{
                 if(nodeRefs.contains(parent)) {
                     return Optional.of(parent);
                 }
-            } catch (AccessDeniedException e) {
+            } catch (AccessDeniedException ignored) {
             }
             return Optional.empty();
         }));
@@ -506,7 +481,7 @@ public class DataProtectionService{
 
                 // duplicate handling
                 int suffix = 0;
-                while(pathMap.values().contains(path)){
+                while(pathMap.containsValue(path)){
                     if(suffix > 0){
                         path = path.substring(0,path.length()-3);
                     }
