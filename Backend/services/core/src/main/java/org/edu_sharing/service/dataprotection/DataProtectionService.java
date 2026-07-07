@@ -45,8 +45,6 @@ import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.Utils;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
-import org.edu_sharing.service.rating.RatingService;
-import org.edu_sharing.service.rating.RatingServiceFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -79,7 +77,6 @@ public class DataProtectionService{
     private final DataProtectionQueue queue;
     private final PDFReport report;
 
-    private RatingService ratingService;
     private FeedbackService feedbackService;
     private CommentService commentService;
 
@@ -109,7 +106,6 @@ public class DataProtectionService{
         log.info("DataProtectionService started");
         AuthenticationUtil.runAsSystem(() -> {
             try {
-                ratingService = RatingServiceFactory.getLocalService();
                 feedbackService = FeedbackServiceFactory.getLocalService();
                 commentService = CommentServiceFactory.getLocalService();
 
@@ -487,7 +483,7 @@ public class DataProtectionService{
                     }
                     suffix++;
                     path = path.concat("_"+suffix);
-                };
+                }
                 pathMap.put(k, path);
             }
         });
