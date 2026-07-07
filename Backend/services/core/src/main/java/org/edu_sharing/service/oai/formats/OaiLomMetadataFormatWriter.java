@@ -93,10 +93,10 @@ public class OaiLomMetadataFormatWriter extends AbstractMetadataFormatWriter {
     @Value("${repository.privacy.filterVCardEmail:true}")
     protected boolean filterVCardEmail;
 
-    private final MetadataFormat metadataFormat = MetadataFormat.metadataFormat("lom")
+    private final MetadataFormat metadataFormat = new MetadataFormatProxy(MetadataFormat::identity)
+            .withPrefix("lom")
             .withSchemaLocation("http://www.w3.org/2001/XMLSchema-instance http://ltsc.ieee.org/xsd/LOM http://ltsc.ieee.org/xsd/lomv1.0/lom.xsd")
-            .withNamespace("http://ltsc.ieee.org/xsd/LOM")
-            .withTransformer(MetadataFormat.identity());
+            .withNamespace("http://ltsc.ieee.org/xsd/LOM");
 
 
 

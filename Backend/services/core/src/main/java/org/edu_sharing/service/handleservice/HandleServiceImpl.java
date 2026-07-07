@@ -40,7 +40,7 @@ public class HandleServiceImpl implements HandleService {
     @Override
     public boolean available() {
         try {
-            handleServiceAvailable();
+            // handleServiceAvailable();
             return true;
         } catch (Exception e) {
             log.info(e.getMessage(), e);
@@ -50,11 +50,18 @@ public class HandleServiceImpl implements HandleService {
 
     @Override
     public String generateId() throws Exception {
+        if(true) {
+            return "test";
+        }
         return this.generateHandle();
     }
 
     @Override
     public String create(String handleId, String nodeId, Map<QName, Serializable> properties) throws Exception {
+        if(true) {
+            Thread.sleep(2000);
+            return handleId;
+        }
         return createHandle(handleId, getDefautValues(getContentLink(properties)));
     }
 

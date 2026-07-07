@@ -31,6 +31,7 @@ import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -279,12 +280,10 @@ Logger logger = Logger.getLogger(Usage2Service.class);
 	public List<Usage> getUsageByParentNodeId(String repoId, String user, String parentNodeId) throws UsageException {
 		logger.info("starting");
 
-
-		if(!PermissionServiceFactory.getLocalService().hasPermission(StoreRef.PROTOCOL_WORKSPACE,
-				StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),
-				parentNodeId,
-				PermissionService.READ)){
-			return new ArrayList<>();
+		List<String> perm = NodeDao.getNode(RepositoryDao.getHomeRepository(), parentNodeId).getPermissions(user);
+		boolean hasPerm = perm != null && perm.contains(CCConstants.PERMISSION_READ);
+		if(!hasPerm){
+			throw new UsageException("no permissions on node " + parentNodeId + " to list usages", new PermissionException(parentNodeId, PermissionService.READ));
 		}
 
 		try{

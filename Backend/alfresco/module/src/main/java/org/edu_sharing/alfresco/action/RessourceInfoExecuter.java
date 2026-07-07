@@ -20,6 +20,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorInputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
+import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,6 +74,9 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	public static final String CCM_RESSOURCETYPE_GEOGEBRA = "geogebra";
 	public static final String CCM_RESSOURCETYPE_SERLO = "serlo";
 	public static final String CCM_RESSOURCETYPE_EDUHTML = "eduhtml";
+	// Jupyter Notebook
+	public static final String CCM_RESSOURCETYPE_GIT_JUPYTER_BINDER = "git-binder";
+	public static final String CCM_RESSOURCETYPE_GIT_DEFAULT = "git-default";
 
 	static ArchiveEntry goToFileInZip(ArchiveInputStream zip, String name) throws IOException {
 		while(true) {
@@ -90,7 +94,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 		Tika tika = new Tika();
 		String type = tika.detect(is);
-		logger.info("type:" + type);
+		logger.debug("type:" + type);
 
 		if(type == null) {
 
@@ -110,7 +114,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 			// allowStoredEntriesWithDataDescriptor = true because some h5p might have this
 			return new ZipArchiveInputStream(is, contentreader.getEncoding(), true, true);
 		}else {
-			logger.info("unknown format:" +  type);
+			logger.debug("unknown format:" +  type);
 		}
 		is.close();
 		return null;
@@ -122,13 +126,14 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 
 		if (contentreader != null) {
 			try{
-				logger.info(contentreader.getMimetype());
+				logger.debug(contentreader.getMimetype());
 
 				ArchiveInputStream zip = getZipInputStream(contentreader);
 				ArchiveEntry current = null;
 				if(zip!=null) {
 					String genericHtmlFile = null;
 					while ((current = zip.getNextEntry()) != null) {
+                        logger.debug("current:" + current.getName());
 						if (current.getName().equals("imsmanifest.xml")) {
 
 							boolean isScorm = processScorm(zip, contentreader, actionedUponNodeRef);
@@ -151,9 +156,11 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						}
 						// geogebra
 						if (current.getName().endsWith("geogebra.xml")) {
-							processGeogebra(zip, actionedUponNodeRef);
-							zip.close();
-							return;
+                            // prevent xml parser closes zipinputstream by using CloseShieldInputStream
+							if(processGeogebra(CloseShieldInputStream.wrap(zip), actionedUponNodeRef)){
+                                zip.close();
+                                return;
+                            }
 						}
 
 						if (current.getName().equals("moodle_backup.xml")) {
@@ -384,7 +391,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 		}
 	}
 
-	void processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
+	boolean processGeogebra(InputStream is, NodeRef actionedUponNodeRef) {
 		// thumbnail is handled @org.edu_sharing.alfresco.transformer.GeogebraTransformerWorker
 		try {
 			Document doc = new RessourceInfoTool().loadFromStream(is);
@@ -402,16 +409,19 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						CCM_RESSOURCETYPE_GEOGEBRA);
 				nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 						schemaVers);
+                return true;
 			}
 		} catch(Throwable e) {
 			logger.info("Could not identify if file is a geogebra element: " + e.getMessage());
 		}
+        return false;
 	}
 
 	private void processMoodle(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
 		RessourceInfoTool ressourceInfoTool = new RessourceInfoTool();
 		Document doc = ressourceInfoTool.loadFromStream(is);
 		if ((contentreader.getMimetype().equals("application/zip")
+                || contentreader.getMimetype().equals("application/gzip")
 				|| contentreader.getMimetype().equals("application/save-as")
 				|| contentreader.getMimetype().equals("application/x-zip-compressed")) && doc != null) {
 			try {
@@ -448,6 +458,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 	private void processMoodle2_0(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {
 		Document doc = new RessourceInfoTool().loadFromStream(is);
 		if ((contentreader.getMimetype().equals("application/zip")
+                || contentreader.getMimetype().equals("application/gzip")
 				|| contentreader.getMimetype().equals("application/save-as")
 				|| contentreader.getMimetype().equals("application/x-zip-compressed")
 				|| contentreader.getMimetype().equals("application/vnd.moodle.backup")) && doc != null) {

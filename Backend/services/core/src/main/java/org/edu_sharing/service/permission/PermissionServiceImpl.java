@@ -1750,16 +1750,18 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
 
     @Override
     public List<String> getPermissionsForAuthority(String nodeId, String authorityId, Collection<String> permissions) throws InsufficientPermissionException {
-        if (!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
-            if (!isAdminOrSystem()) {
-                if (!hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, PermissionService.READ_PERMISSIONS)) {
-                    throw new InsufficientPermissionException("Current user is missing " + PermissionService.READ_PERMISSIONS + " for this node");
+        if(authorityId != null) {
+            if (!authorityId.equals(AuthenticationUtil.getFullyAuthenticatedUser())) {
+                if (!isAdminOrSystem()) {
+                    if (!hasPermission(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, PermissionService.READ_PERMISSIONS)) {
+                        throw new InsufficientPermissionException("Current user is missing " + PermissionService.READ_PERMISSIONS + " for this node");
+                    }
                 }
             }
-        }
 
-        if (!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) && !"System".equals(authorityId) && !authorityService.authorityExists(authorityId)) {
-            throw new IllegalArgumentException("Authority " + authorityId + " does not exist");
+            if (!CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) && !"System".equals(authorityId) && !authorityService.authorityExists(authorityId)) {
+                throw new IllegalArgumentException("Authority " + authorityId + " does not exist");
+            }
         }
         return AuthenticationUtil.runAs(() -> {
             List<String> result = new ArrayList<>();
@@ -1771,7 +1773,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 }
             }
             return result;
-        }, CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) ? AuthenticationUtil.getGuestUserName() : authorityId);
+        }, CCConstants.AUTHORITY_GROUP_EVERYONE.equals(authorityId) ? AuthenticationUtil.getGuestUserName() : authorityId == null ? AuthenticationUtil.getFullyAuthenticatedUser() : authorityId);
     }
 
     /**
