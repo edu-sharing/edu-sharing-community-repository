@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @JobDescription(description = "processes dataprotection requests")
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class DataProtectionExportJob extends AbstractInterruptableJob{
 
     @Autowired
