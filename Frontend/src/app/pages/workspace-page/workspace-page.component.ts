@@ -539,8 +539,15 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
 
         if (this.isSafe) {
             const config = await this.configService.observeConfig().pipe(take(1)).toPromise();
-            if (config.themeColors?.colorSafe) {
-                this.themeService.applyFromConfigColors(config.themeColors.colorSafe);
+            // themeColors is a list discriminated by the `theme` attribute; prefer the entry for the
+            // active mode, falling back to the light set.
+            const dark = this.themeService.isDarkMode();
+            const themeColors =
+                config.themeColors?.find((c) =>
+                    dark ? c.theme === 'dark' : !c.theme || c.theme === 'light',
+                ) ?? config.themeColors?.find((c) => !c.theme || c.theme === 'light');
+            if (themeColors?.colorSafe) {
+                this.themeService.applyFromConfigColors(themeColors.colorSafe);
             }
         }
     }

@@ -103,6 +103,7 @@ export { NodeVersionRefEntries } from './api/models/node-version-ref-entries';
 export { NodeRef } from './api/models/node-ref';
 export { NodeStats } from './api/models/node-stats';
 export { ConfigThemeColor } from './api/models/config-theme-color';
+export { ConfigThemeColors } from './api/models/config-theme-colors';
 export { Organization } from './api/models/organization';
 export { Group } from './api/models/group';
 export { GroupProfile } from './api/models/group-profile';

@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { argbFromHex, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
 import { HueValue, MaterialCssVarsService } from 'angular-material-css-vars';
-import { ConfigService, ConfigThemeColor } from 'ngx-edu-sharing-api';
+import { ConfigService, ConfigThemeColor, ConfigThemeColors } from 'ngx-edu-sharing-api';
 import {
     AccessibilityService,
     DarkModeSetting,
@@ -31,8 +31,15 @@ export class ThemeService {
     /** Whether dark mode is currently active. Readable from anywhere via the injected service. */
     readonly isDarkMode = signal(false);
 
-    /** Latest branding colors from the backend config, re-applied on every dark-mode toggle. */
+    /** Latest light-mode branding colors from the backend config, re-applied on every dark-mode toggle. */
     private configColors: Array<ConfigThemeColor> | null = null;
+
+    /**
+     * Latest dark-mode branding colors from the backend config (the `themeColors` entry with
+     * theme="dark"). When present, they are applied as-is in dark mode instead of deriving lightened
+     * variants from {@link configColors}.
+     */
+    private configDarkColors: Array<ConfigThemeColor> | null = null;
 
     constructor() {
         // Paint the synchronous default first (avoids a flash before the observers resolve),
@@ -106,10 +113,38 @@ export class ThemeService {
         this.isDarkMode.set(isDark);
         this.materialCssVarsService.setDarkTheme(isDark);
         this.applyDefaultColors(isDark);
-        if (this.configColors) {
-            const colors = isDark ? this.toDarkColors(this.configColors) : this.configColors;
+        const colors = this.resolveConfigColors(isDark);
+        if (colors) {
             this.applyFromConfigColors(colors);
         }
+    }
+
+    /**
+     * Picks the branding colors to apply for the given mode. In dark mode, an explicit dark color
+     * set (the `themeColors` entry with theme="dark") wins and is used as-is; otherwise the dark
+     * variants are derived from the light colors client-side (see {@link toDarkColors}).
+     */
+    private resolveConfigColors(isDark: boolean): Array<ConfigThemeColor> | null {
+        if (isDark) {
+            if (this.configDarkColors) {
+                return this.configDarkColors;
+            }
+            return this.configColors ? this.toDarkColors(this.configColors) : null;
+        }
+        return this.configColors;
+    }
+
+    /**
+     * Finds the configured color set for the given mode. The light set is the entry whose `theme`
+     * attribute is absent or `"light"`; the dark set is the entry with `theme="dark"`.
+     */
+    private findThemeColors(
+        themeColors: Array<ConfigThemeColors> | undefined,
+        theme: 'light' | 'dark',
+    ): ConfigThemeColors | undefined {
+        return themeColors?.find((c) =>
+            theme === 'dark' ? c.theme === 'dark' : !c.theme || c.theme === 'light',
+        );
     }
 
     /**
@@ -150,25 +185,28 @@ export class ThemeService {
     }
 
     private fetchConfig() {
-        this.configService.observeConfig().subscribe(
-            (config) => {
-                const colors = config.themeColors?.color;
+        this.configService.observeConfig().subscribe({
+            next: (config) => {
+                // themeColors is a list of color sets discriminated by their `theme` attribute:
+                // an entry with no theme (or theme="light") is the light set, theme="dark" the dark set.
+                const lightColors = this.findThemeColors(config.themeColors, 'light')?.color;
+                const darkColors = this.findThemeColors(config.themeColors, 'dark')?.color;
                 this.setFavicon(config.favicon, config.appleTouchIcon);
-                if (colors) {
-                    // TODO: the backend should ideally send separate colors for light and dark mode.
-                    // As a fallback, if it only sends one set, we derive the dark variants from the
-                    // light config colors client-side (see toDarkColors).
-                    this.configColors = colors;
+                if (lightColors || darkColors) {
+                    // When only the light set is configured, we derive the dark variants from it
+                    // client-side as a fallback (see toDarkColors).
+                    this.configColors = lightColors ?? null;
+                    this.configDarkColors = darkColors ?? null;
                     this.applyTheme(this.isDarkMode());
                 }
             },
-            (error) => {
+            error: (error) => {
                 console.warn(
                     'Theme service failed to observe config, no branding colors applied',
                     error,
                 );
             },
-        );
+        });
     }
 
     applyFromConfigColors(colors: Array<ConfigThemeColor>) {

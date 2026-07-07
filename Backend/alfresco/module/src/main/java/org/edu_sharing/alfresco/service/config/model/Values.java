@@ -141,8 +141,8 @@ public class Values implements Serializable {
 	@XmlElement public ConfigReportProblem reportProblem;
 	@Schema(description = "Custom CSS")
 	@XmlElement public String customCSS;
-	@Schema(description = "Theme color customization")
-	@XmlElement public ConfigThemeColors themeColors;
+	@Schema(description = "Theme color customization. An entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side")
+	@XmlElement public java.util.List<ConfigThemeColors> themeColors;
 	@Schema(description = "Privacy settings")
 	@XmlElement public ConfigPrivacy privacy;
 	@Schema(description = "GDPR configuration")

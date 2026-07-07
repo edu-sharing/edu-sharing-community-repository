@@ -1412,7 +1412,7 @@
         "type": "object"
       },
       "ConfigThemeColors": {
-        "description": "Theme color customization",
+        "description": "Theme color customization. Repeatable: an entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
         "properties": {
           "color": {
             "items": {
@@ -1425,6 +1425,12 @@
               "$ref": "#/components/schemas/ConfigThemeColor"
             },
             "type": "array"
+          },
+          "theme": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "type": "object"
@@ -9913,7 +9919,11 @@
             "type": "array"
           },
           "themeColors": {
-            "$ref": "#/components/schemas/ConfigThemeColors"
+            "description": "Theme color customization. Repeatable: an entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
+            "items": {
+              "$ref": "#/components/schemas/ConfigThemeColors"
+            },
+            "type": "array"
           },
           "tutorial": {
             "$ref": "#/components/schemas/ConfigTutorial"
