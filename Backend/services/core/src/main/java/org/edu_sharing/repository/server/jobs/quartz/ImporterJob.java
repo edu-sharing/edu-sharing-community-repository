@@ -279,7 +279,7 @@ public class ImporterJob extends AbstractInterruptableJob {
 				long millisec = System.currentTimeMillis();
 				logger.info("starting import of set "+set);
 				importer.startImport();
-				logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs");
+				logger.info("finished import in " + (System.currentTimeMillis() - millisec) / 1000 + " secs. set:"+set);
 		}
 		// refresh cache after importing
 		if (!isInterrupted && !(idList != null && idList.length > 0))
