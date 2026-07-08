@@ -39,6 +39,8 @@ mat-checkbox {
     align-items: center;
     .caption {
         @include limitLineCount(1);
+        // fix: some chromium browser set height to 0px
+        height: 1em;
         flex-grow: 1;
         padding-right: 10px;
         word-break: break-all;
