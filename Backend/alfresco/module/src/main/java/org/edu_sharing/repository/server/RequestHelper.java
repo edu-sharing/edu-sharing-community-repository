@@ -2,6 +2,7 @@ package org.edu_sharing.repository.server;
 
 import com.typesafe.config.Config;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.http.HttpRequest;
 
 import jakarta.servlet.ServletRequest;
@@ -18,16 +19,21 @@ public class RequestHelper {
     }
 
     public String getRemoteAddr() {
-        if(getConfig().hasPath("ip") && request instanceof HttpServletRequest) {
-            return ((HttpServletRequest) request).getHeader( getConfig().getString("ip"));
+        if(!isInternalNetworkCall() && getConfig().hasPath("ip") && request instanceof HttpServletRequest servletRequest) {
+            return servletRequest.getHeader( getConfig().getString("ip"));
         }
         return request.getRemoteAddr();
     }
+
     public String getServerName() {
-        if(getConfig().hasPath("host") && request instanceof HttpServletRequest) {
-            return ((HttpServletRequest) request).getHeader( getConfig().getString("host"));
+        if(!isInternalNetworkCall() && getConfig().hasPath("host") && request instanceof HttpServletRequest servletRequest) {
+            return servletRequest.getHeader( getConfig().getString("host"));
         }
         return request.getServerName();
+    }
+
+    private boolean isInternalNetworkCall() {
+        return String.valueOf(request.getLocalPort()).equals(ApplicationInfoList.getHomeRepository().getPort());
     }
 
     private Config getConfig() {
