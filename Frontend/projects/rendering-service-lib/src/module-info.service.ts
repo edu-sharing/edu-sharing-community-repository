@@ -254,7 +254,7 @@ export class ModuleInfoService {
             return null;
         };
         const checkLink = (): UrlModuleConfig | null => {
-            if (url.length > 0 && node.mediatype === 'link') {
+            if (url.length > 0) {
                 return {
                     embedding: UrlEmbeddings.LINK,
                     externalId: '',
