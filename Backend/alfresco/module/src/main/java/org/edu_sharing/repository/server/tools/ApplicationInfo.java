@@ -725,7 +725,14 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
     }
 
     public String getString(String key, String defaultValue) {
-        return replaceDynamicVariables(properties.getProperty(key, defaultValue));
+        return getString(key, defaultValue, true);
+    }
+
+    public String getString(String key, String defaultValue, boolean replaceDynamicVariables) {
+        if(replaceDynamicVariables) {
+            return replaceDynamicVariables( properties.getProperty( key, defaultValue ) );
+        }
+        return properties.getProperty(key, defaultValue);
     }
 
     private String replaceDynamicVariables(String data) {
