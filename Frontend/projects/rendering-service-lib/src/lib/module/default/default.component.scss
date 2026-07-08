@@ -2,6 +2,8 @@
     width: 100%;
     img {
         width: 100%;
+        max-height: var(--containerHeight);
+        object-fit: contain;
         position: relative;
     }
 }

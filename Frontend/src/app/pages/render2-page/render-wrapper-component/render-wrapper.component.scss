@@ -164,7 +164,8 @@ rs-root {
                 width: 70%;
             }
             &.module-IMAGE,
-            &.module-DDB {
+            &.module-DDB,
+            &.module-default {
                 width: 50%;
                 height: 100%;
                 @media screen and (max-width: ($mobileWidth)) {
