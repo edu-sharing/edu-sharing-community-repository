@@ -139,7 +139,7 @@ public class ApplicationInfoList {
 
         try {
             ApplicationInfo registry = new ApplicationInfo("ccapp-registry.properties.xml");
-            String repStr = registry.getString("applicationfiles", null);
+            String repStr = registry.getString("applicationfiles", null, false);
             if (repStr == null || repStr.trim().isEmpty()) {
                 logger.error("Repository Registry config is undefined or empty");
                 return;
