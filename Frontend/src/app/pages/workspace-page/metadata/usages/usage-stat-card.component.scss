@@ -71,10 +71,10 @@
     // position on the top border (half above, half below) instead of inside the card
     transform: translateY(-50%);
     border-radius: var(--borderRadiusBadges);
-    font-size: vars.$fontSizeXSmall;
+    font-size: 80%;
     font-weight: bold;
-    line-height: 140%;
-    background: var(--primary);
+    line-height: 120%;
+    background: #6b7280;
     color: var(--palette-primary-contrast-500);
 }
 

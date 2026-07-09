@@ -93,7 +93,6 @@
     @extend %usages-surface;
     display: flex;
     flex-direction: column;
-    gap: 16px;
 }
 
 // hint shown when the embeddings/usage metric is selected but the node has no usages at all
@@ -358,8 +357,14 @@
     // than the sidebar; the -24px left/right break out of the .usages (4px) +
     // editorial .option (20px) padding so the bar spans the full sidebar width
     margin: auto -24px 0;
-    padding: 12px 20px;
+    // match the workspace/collection .selection-action-bar height (10px padding +
+    // 48px mat-icon-button + 1px border-top) so the sidebar bottom bar keeps the
+    // same height across states; centre the (shorter) flat button vertically
+    min-height: 69px;
+    box-sizing: border-box;
+    padding: 0 20px;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     background: var(--roundedContainerBackground);
     border-top: 1px solid var(--mat-divider-color);
