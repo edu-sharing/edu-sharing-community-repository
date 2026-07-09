@@ -71,7 +71,6 @@
     "@angular/platform-browser": "^21.2.14",
     "@angular/platform-browser-dynamic": "^21.2.14",
     "@angular/router": "^21.2.14",
-    "@angular/youtube-player": "^21.2.13",
     "@github/markdown-toolbar-element": "^2.2.3",
     "@ngx-translate/core": "^15.0.0",
     "@tinymce/tinymce-angular": "^9.1.1",

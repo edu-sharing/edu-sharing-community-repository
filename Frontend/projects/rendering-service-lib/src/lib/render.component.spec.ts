@@ -103,12 +103,7 @@ describe('RenderComponent module selection', () => {
         expect(data!.module).toBe('default');
         expect(data!.frontendModuleConfig?.urlModuleConfig).toBeNull();
         expect(moduleInfoController.getModulesInfo).not.toHaveBeenCalled();
-        expect(trackingService.trackViewedWithToken).toHaveBeenCalledOnceWith(
-            'id',
-            'repo',
-            false,
-            'test-token',
-        );
+        expect(trackingService.trackViewedWithToken).not.toHaveBeenCalled();
     });
 
     it('falls back to a matching frontend module on 415', async () => {
@@ -122,7 +117,7 @@ describe('RenderComponent module selection', () => {
         const data = await awaitRenderData(app);
         expect(data!.module).toBe('url');
         expect(data!.frontendModuleConfig?.urlModuleConfig?.externalId).toBe('abc123');
-        expect(trackingService.trackViewedWithToken).toHaveBeenCalledTimes(1);
+        expect(trackingService.trackViewedWithToken).not.toHaveBeenCalled();
     });
 
     it('shows the error module on other errors', async () => {

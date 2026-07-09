@@ -13,7 +13,6 @@ import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { YouTubePlayer } from '@angular/youtube-player';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgOptimizedImage } from '@angular/common';
 import { RenderData } from '../../dto/RenderData';
@@ -33,7 +32,6 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
         RenderingModule,
         MatButtonModule,
         MatIconModule,
-        YouTubePlayer,
         NgOptimizedImage,
         EduSharingUiModule,
     ],
@@ -106,6 +104,8 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
             this.sanitizedUrl = this.getLtiUrl();
         } else if (this.embedding === UrlEmbeddings.SODIX) {
             this.sanitizedUrl = this.getSodixUrl();
+        } else if (this.embedding === UrlEmbeddings.YOUTUBE) {
+            this.sanitizedUrl = this.getYoutubeUrl();
         }
     }
 
@@ -121,6 +121,13 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         if (this.node?.ref.id && this.node?.ref.repo) {
             this.trackingService.trackGdprConsent(this.node.ref.id, this.node.ref.repo);
         }
+    }
+
+    getYoutubeUrl(): SafeResourceUrl {
+        const id = (this.externalId ?? '').split('?')[0];
+        const youtubeUrl = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
+        youtubeUrl.searchParams.set('modestbranding', '1');
+        return this.sanitizer.bypassSecurityTrustResourceUrl(youtubeUrl.toString());
     }
 
     getVimeoUri(): SafeResourceUrl {

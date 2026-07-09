@@ -311,12 +311,6 @@ export class RenderComponent implements OnChanges, OnInit {
             this.node !== undefined
                 ? moduleInfo.getFrontendModuleSetting(this.node)
                 : { module: 'default', urlModuleConfig: null };
-        this.trackingService.trackViewedWithToken(
-            this.node!!.ref.id,
-            this.node!!.ref.repo,
-            this.isWebComponent,
-            this.request!!.token,
-        );
         this.renderData$.next({
             module: frontendModule.module,
             frontendModuleConfig: frontendModule,

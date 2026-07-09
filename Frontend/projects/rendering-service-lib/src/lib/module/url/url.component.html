@@ -3,7 +3,7 @@
   <div>
     @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
     <div class="youtube-wrapper">
-      <youtube-player [videoId]="externalId ?? ''" [disableCookies]="true"></youtube-player>
+      <iframe class="youtubeFrame" [src]="sanitizedUrl" allowfullscreen allow="fullscreen"></iframe>
     </div>
     } @if (embedding === UrlEmbeddings.VIMEO && externalId !== '') {
     <iframe class="vimeoFrame" [src]="sanitizedUrl"></iframe>
