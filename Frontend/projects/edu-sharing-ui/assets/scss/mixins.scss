@@ -13,9 +13,23 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     line-height: ($lineHeight + em) if($important, !important, null);
-    max-height: ($count * $lineHeight + em) if($important, !important, null);
     -webkit-line-clamp: $count if($important, !important, null); /* number of lines to show */
     -webkit-box-orient: vertical;
+
+    /* Fallback for engines without any clamp support:
+       crop via max-height (no ellipsis possible there) */
+    @supports not (-webkit-line-clamp: 1) {
+        display: block;
+        max-height: ($count * $lineHeight + em) if($important, !important, null);
+    }
+
+    /* Standard property for new Chromium — kept inside @supports so
+       browsers do not report "unknown property: line-clamp" */
+    @supports (line-clamp: 1) {
+        display: block;
+        line-clamp: $count if($important, !important, null); /* number of lines to show */
+    }
+
     /* autoprefixer: off */
 }
 @mixin materialShadow($important: false) {
