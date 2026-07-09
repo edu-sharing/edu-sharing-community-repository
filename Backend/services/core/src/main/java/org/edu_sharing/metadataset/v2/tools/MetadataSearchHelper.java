@@ -184,25 +184,31 @@ public class MetadataSearchHelper {
                 Suggestion sqlKw = new Suggestion();
                 sqlKw.setKey(kwValue.trim());
 
-                try {
-                    String displayString = resultSet.getString(2);
-                    sqlKw.setDisplayString(displayString);
-                } catch (SQLException e) {
-                    //no display string in result
-                }
-
+                String translation = null;
                 try{
-                    String translation = resultSet.getString(3);
+                    translation = resultSet.getString(3);
                     sqlKw.setTranslation(translation);
                 }catch (SQLException e) {
-                    //no translation string in result
+                    //no translation col in result
+                }
+
+                try {
+                    if (!StringUtils.isBlank(translation)) {
+                        sqlKw.setDisplayString(translation);
+                    }else{
+                        String displayString = resultSet.getString(2);
+                        sqlKw.setDisplayString(displayString);
+                    }
+
+                } catch (SQLException e) {
+                    //no display col in result
                 }
 
                 try{
                     String url = resultSet.getString(4);
                     sqlKw.setUrl(url);
                 }catch (SQLException e) {
-                    //no url string in result
+                    //no url col in result
                 }
 
                 result.add(sqlKw);
