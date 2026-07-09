@@ -1,7 +1,12 @@
 <div class="events-wrapper" role="list">
   @for (event of events(); track event) {
   <es-node-url class="event" [node]="event" role="listitem">
-    <div class="node-title">
+    <div
+      class="node-title"
+      esCheckTextOverflow
+      #titleText="esCheckTextOverflow"
+      [matTooltip]="titleText.hasTextOverflow() ? (event | nodeTitle) : null"
+    >
       {{ event | nodeTitle }}
     </div>
     <div class="action-text">
