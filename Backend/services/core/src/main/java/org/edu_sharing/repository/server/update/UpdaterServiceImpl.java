@@ -2,6 +2,8 @@ package org.edu_sharing.repository.server.update;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.RollbackException;
+import jakarta.transaction.Status;
+import jakarta.transaction.UserTransaction;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.Value;
@@ -16,7 +18,6 @@ import org.edu_sharing.repository.server.tools.security.RunAsSystem;
 import org.edu_sharing.repository.update.Protocol;
 import org.edu_sharing.repository.update.SQLUpdater;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
-import org.edu_sharing.webservices.util.AuthenticationUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -31,8 +32,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
-
-import jakarta.transaction.UserTransaction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -275,7 +274,17 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
                     if (isTestRunner) {
                         transaction.rollback();
                     } else {
-                        transaction.commit();
+                        int status = transaction.getStatus();
+                         try {
+                             transaction.commit();
+                         } catch (RollbackException e) {
+                             // empty transaction
+                             if(status == Status.STATUS_ACTIVE) {
+                                 log.info("No changes in transaction to commit for {}", x.getId());
+                             } else {
+                                 throw e;
+                             }
+                         }
                     }
                 }
 
@@ -286,8 +295,6 @@ public class UpdaterServiceImpl implements ApplicationContextAware, ApplicationL
                 } catch (Throwable throwable) {
                     log.error("Error writing protocol entry", throwable);
                 }
-            } catch (RollbackException ignore) {
-                log.info("No changes in transaction to commit for {}", x.getId());
             } catch (Exception ex) {
                 try {
                     if (!x.isNonTransactional()) {
