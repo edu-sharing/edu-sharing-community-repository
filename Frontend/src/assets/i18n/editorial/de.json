@@ -51,8 +51,10 @@
       "PREVIEW": "Vorschau",
       "SUBMISSION_REMOVE": "Element entfernen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
-      "WORKSPACE_METADATA": "Statistik, Versionen & Details",
-      "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
+      "VERSION_MANAGEMENT": "Versionsverwaltung",
+      "VERSION_MANAGEMENT_DESCRIPTION": "Die Versionen des Inhalts anzeigen und wiederherstellen",
+      "VIEWS_AND_USAGE": "Aufrufe & Nutzung",
+      "VIEWS_AND_USAGE_DESCRIPTION": "Die Aufrufe, Downloads, Wiedergaben und Verwendungen des Inhalts anzeigen",
       "NODES_SELECTOR": {
         "UPLOAD": {
           "TITLE": "Neu Hinzufügen"

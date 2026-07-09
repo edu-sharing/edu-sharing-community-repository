@@ -280,10 +280,32 @@
       "FORKED_PARENT": "Est une variante de",
       "FORKED_CHILDS": "A {{count}}} variante(s)",
       "USAGE_TYPE": {
-        "LMS": "LMS-Cours",
-        "COLLECTION": "Collections",
         "DOWNLOAD": "Téléchargements",
-        "VIEW": "Points de vue"
+        "VIEW": "Points de vue",
+        "PLAY": "Lectures",
+        "USED": "Utilisé"
+      },
+      "USAGES": {
+        "RANGE_LABEL": "Période",
+        "RANGE_DAYS": "{{days}} derniers jours",
+        "RANGE_ALL": "Total",
+        "COMING_SOON": "Bientôt disponible",
+        "DASHBOARD_LINK": "Vers le tableau de bord",
+        "NO_PREVIEW_TITLE": "Aucun aperçu des statistiques disponible",
+        "NO_PREVIEW_TEXT": "Aucune statistique n'est disponible dans le panneau latéral pour la sélection actuelle. Vous trouverez d'autres analyses dans le tableau de bord.",
+        "NO_SELECTION": "Sélectionnez un indicateur pour voir ses détails.",
+        "NO_EMBEDDINGS": "Cet élément n'est actuellement intégré nulle part.",
+        "EMBEDDINGS_TITLE": "Vues via les intégrations",
+        "EMBEDDINGS_COLUMN": "Cours/Dossier",
+        "EMBEDDINGS_TOTAL": "Total des vues via intégration",
+        "CLUSTERED_TOOLTIP": "{{count}} utilisations dans le même cours sont regroupées.",
+        "NO_USAGES_HINT": "Aucune utilisation n'a encore été trouvée pour cet élément.",
+        "COLLECTIONS_TITLE": "Utilisé dans des collections",
+        "COLLECTIONS_COLUMN": "Collection",
+        "NO_COLLECTIONS": "Cet élément n'est utilisé dans aucune collection.",
+        "FEEDBACK_TITLE": "La fonction de statistiques continue d'évoluer",
+        "FEEDBACK_TEXT": "Avez-vous des idées ou des souhaits pour d'autres analyses ? Vos retours nous intéressent.",
+        "FEEDBACK_ACTION": "Donner un avis"
       },
       "COMMENT": {
         "NONE": "[Non défini].",

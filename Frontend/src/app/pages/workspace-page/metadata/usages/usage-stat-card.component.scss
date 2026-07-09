@@ -1,0 +1,119 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: block;
+    // icon badge color on a selected card
+    --statCardIconBadgeSelectedBackground: #fff;
+}
+
+.stat-card {
+    padding: 12px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 14px;
+    border: 1px solid var(--borderGray);
+    border-radius: var(--borderRadiusBadges);
+    background: var(--backgroundElevatedColor, transparent);
+    color: var(--textMain);
+    cursor: default;
+    @include mixins.materialShadowMedium(false, 0.15);
+
+    &.interactive {
+        cursor: pointer;
+
+        &:hover {
+            background: var(--primaryBackground50);
+            @include mixins.materialShadowMedium(false, 0.15);
+
+            .stat-card__icon-badge {
+                background: var(--statCardIconBadgeSelectedBackground);
+            }
+        }
+
+        &:focus-visible {
+            border-color: var(--primary);
+        }
+    }
+
+    // selected state: switch background and icon badge color
+    &.selected {
+        border-color: var(--primary);
+        background: var(--primaryBackground50);
+
+        .stat-card__icon-badge {
+            background: var(--statCardIconBadgeSelectedBackground);
+        }
+    }
+
+    // non-interactive card (e.g. "coming soon"): no pointer, no hover, no elevation
+    &.readonly {
+        cursor: default;
+        box-shadow: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// badge (e.g. "coming soon") on the card's top-right border
+.stat-card__badge {
+    padding: 2px 8px;
+    position: absolute;
+    top: 0;
+    right: 8px;
+    // position on the top border (half above, half below) instead of inside the card
+    transform: translateY(-50%);
+    border-radius: var(--borderRadiusBadges);
+    font-size: vars.$fontSizeXSmall;
+    font-weight: bold;
+    line-height: 140%;
+    background: var(--primary);
+    color: var(--palette-primary-contrast-500);
+}
+
+// icon badge inside the card
+.stat-card__icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--primaryBackground50);
+    color: var(--primary);
+
+    .stat-card__icon {
+        font-size: 22px;
+        // inherit the badge's primary color
+        color: inherit;
+    }
+}
+
+// card label / title
+.stat-card__label {
+    max-width: 100%;
+    font-size: vars.$fontSizeLarge;
+    font-weight: bold;
+    color: var(--textMain);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// value displayed as a counter in the card
+.stat-card__value {
+    font-size: 200%;
+    font-weight: bolder;
+}
+
+// no additional content was found
+.stat-card__content:empty {
+    display: none;
+}

@@ -1,0 +1,26 @@
+<button
+  type="button"
+  class="stat-card"
+  [class.interactive]="interactive()"
+  [class.readonly]="!selectable()"
+  [class.selected]="selected()"
+  [disabled]="disabled()"
+  [attr.aria-pressed]="selectable() ? selected() : null"
+  (click)="onActivate()"
+>
+  @if (badge(); as badgeText) {
+  <span class="stat-card__badge">{{ badgeText }}</span>
+  } @if (icon(); as iconName) {
+  <span class="stat-card__icon-badge">
+    <i class="stat-card__icon" [esIcon]="iconName" [style.color]="color()"></i>
+  </span>
+  } @if (label(); as labelText) {
+  <span class="stat-card__label">{{ labelText }}</span>
+  } @if (value() !== undefined && value() !== null) {
+  <div class="stat-card__value">{{ value() }}</div>
+  }
+  <!-- slot for future custom content (e.g. an inline chart) -->
+  <div class="stat-card__content">
+    <ng-content></ng-content>
+  </div>
+</button>

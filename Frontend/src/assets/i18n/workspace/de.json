@@ -343,10 +343,32 @@
       "FORKED_PARENT": "Ist Variante von",
       "FORKED_CHILDS": "Hat {{count}} Variante(n)",
       "USAGE_TYPE": {
-        "LMS": "LMS-Kurse",
-        "COLLECTION": "Sammlungen",
         "DOWNLOAD": "Downloads",
-        "VIEW": "Seitenaufrufe"
+        "VIEW": "Aufrufe",
+        "PLAY": "Wiedergaben",
+        "USED": "Verwendet"
+      },
+      "USAGES": {
+        "RANGE_LABEL": "Zeitraum",
+        "RANGE_DAYS": "Letzte {{days}} Tage",
+        "RANGE_ALL": "Gesamt",
+        "COMING_SOON": "Bald verfügbar",
+        "DASHBOARD_LINK": "Zum Dashboard",
+        "NO_PREVIEW_TITLE": "Keine Statistikvorschau verfügbar",
+        "NO_PREVIEW_TEXT": "Für die aktuelle Auswahl stehen keine Statistiken im Seitenpanel zur Verfügung. Weitere Auswertungen finden Sie im Dashboard.",
+        "NO_SELECTION": "Wählen Sie eine Kennzahl, um deren Details zu sehen.",
+        "NO_EMBEDDINGS": "Dieses Element ist derzeit nirgendwo eingebettet.",
+        "EMBEDDINGS_TITLE": "Aufrufe über Einbettungen",
+        "EMBEDDINGS_COLUMN": "Kurs/Ordner",
+        "EMBEDDINGS_TOTAL": "Gesamt Einbettungsaufrufe",
+        "CLUSTERED_TOOLTIP": "{{count}} Nutzungen im selben Kurs werden zusammengefasst.",
+        "NO_USAGES_HINT": "Für dieses Element wurden noch keine Nutzungen gefunden.",
+        "COLLECTIONS_TITLE": "Verwendet in Sammlungen",
+        "COLLECTIONS_COLUMN": "Sammlung",
+        "NO_COLLECTIONS": "Dieses Element wird in keinen Sammlungen verwendet.",
+        "FEEDBACK_TITLE": "Statistikfunktion wird weiterentwickelt",
+        "FEEDBACK_TEXT": "Haben Sie Ideen oder Wünsche für weitere Auswertungen? Wir freuen uns über Ihr Feedback.",
+        "FEEDBACK_ACTION": "Feedback geben"
       },
       "COMMENT": {
         "NONE": "[Nicht angegeben]",

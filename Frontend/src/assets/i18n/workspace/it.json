@@ -276,10 +276,32 @@
       "FORKED_PARENT": "È una variante di",
       "FORKED_CHILDS": "Ha {{count}} variante(i)",
       "USAGE_TYPE": {
-        "LMS": "Corsi LMS",
-        "COLLECTION": "Collezioni",
         "DOWNLOAD": "Scaricamento",
-        "VIEW": "Visualizzazioni"
+        "VIEW": "Visualizzazioni",
+        "PLAY": "Riproduzioni",
+        "USED": "Utilizzato"
+      },
+      "USAGES": {
+        "RANGE_LABEL": "Periodo",
+        "RANGE_DAYS": "Ultimi {{days}} giorni",
+        "RANGE_ALL": "Totale",
+        "COMING_SOON": "Prossimamente",
+        "DASHBOARD_LINK": "Alla dashboard",
+        "NO_PREVIEW_TITLE": "Nessuna anteprima delle statistiche disponibile",
+        "NO_PREVIEW_TEXT": "Per la selezione attuale non sono disponibili statistiche nel pannello laterale. Ulteriori analisi sono disponibili nella dashboard.",
+        "NO_SELECTION": "Seleziona una metrica per vederne i dettagli.",
+        "NO_EMBEDDINGS": "Questo elemento attualmente non è incorporato da nessuna parte.",
+        "EMBEDDINGS_TITLE": "Visualizzazioni tramite incorporamenti",
+        "EMBEDDINGS_COLUMN": "Corso/Cartella",
+        "EMBEDDINGS_TOTAL": "Totale visualizzazioni incorporate",
+        "CLUSTERED_TOOLTIP": "{{count}} utilizzi nello stesso corso sono raggruppati.",
+        "NO_USAGES_HINT": "Nessun utilizzo ancora trovato per questo elemento.",
+        "COLLECTIONS_TITLE": "Utilizzato nelle raccolte",
+        "COLLECTIONS_COLUMN": "Raccolta",
+        "NO_COLLECTIONS": "Questo elemento non è utilizzato in nessuna raccolta.",
+        "FEEDBACK_TITLE": "La funzione statistiche è in continuo sviluppo",
+        "FEEDBACK_TEXT": "Hai idee o richieste per ulteriori analisi? Il tuo feedback è prezioso per noi.",
+        "FEEDBACK_ACTION": "Invia feedback"
       },
       "COMMENT": {
         "NONE": "[Non impostato]",

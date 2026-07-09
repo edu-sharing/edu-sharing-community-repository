@@ -52,7 +52,8 @@ export type EditorialSidebarOptionDescriptor = {
 };
 
 export const EDITORIAL_SIDEBAR_OPTIONS = {
-    WORKSPACE_METADATA: { selectionMode: 'single' },
+    VERSION_MANAGEMENT: { selectionMode: 'single' },
+    VIEWS_AND_USAGE: { selectionMode: 'multi' },
     SHARE_QR: { selectionMode: 'single' },
     PREVIEW: { selectionMode: 'single' },
     /** sort into from right to left (i.e. also create or upload) */
@@ -163,15 +164,27 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         shareElement.scopes = ['activity'];
         options.push(shareElement);
 
-        const workspaceMetadata = new OptionItem(
-            'EDITORIAL.OPTIONS.WORKSPACE_METADATA',
+        const versionManagement = new OptionItem(
+            'EDITORIAL.OPTIONS.VERSION_MANAGEMENT',
             'info',
-            () => this.enabledOption.set({ trap: false, option: 'WORKSPACE_METADATA' }),
+            () => this.enabledOption.set({ trap: false, option: 'VERSION_MANAGEMENT' }),
         );
-        workspaceMetadata.elementType = [ElementType.Node];
-        workspaceMetadata.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
-        workspaceMetadata.scopes = ['workspace'];
-        options.push(workspaceMetadata);
+        versionManagement.elementType = [ElementType.Node];
+        versionManagement.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        versionManagement.scopes = ['workspace'];
+        options.push(versionManagement);
+
+        const showStatistics = new OptionItem(
+            'EDITORIAL.OPTIONS.VIEWS_AND_USAGE',
+            'bar_chart',
+            () => this.enabledOption.set({ trap: false, option: 'VIEWS_AND_USAGE' }),
+        );
+        showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
+        showStatistics.scopes = ['workspace', 'collections', 'search'];
+        showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+        showStatistics.toolpermissionsMode = HideMode.Hide;
+        showStatistics.group = DefaultGroups.View;
+        options.push(showStatistics);
 
         const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
             this.enabledOption.set({ trap: false, option: 'PREVIEW' }),

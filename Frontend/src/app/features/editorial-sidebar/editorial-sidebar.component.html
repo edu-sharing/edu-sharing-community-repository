@@ -28,10 +28,12 @@
           [parent]="parent()"
           [primaryMode]="primaryMode()"
         ></es-nodes-selector>
-        } @if (option === 'WORKSPACE_METADATA') {
+        } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-metadata-sidebar>
+        } @if (option === 'VIEWS_AND_USAGE') {
+        <es-usages-preview [nodes]="$any(editorialSidebarService.nodes())"></es-usages-preview>
         } @if (option === 'MANAGE_SUBMISSION') {
         <es-submission-sidebar
           [data]="$any(enabledOption().optionConfig)"

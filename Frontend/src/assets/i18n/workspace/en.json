@@ -305,10 +305,32 @@
       "FORKED_PARENT": "Is variant of",
       "FORKED_CHILDS": "Has {{count}} variant(s)",
       "USAGE_TYPE": {
-        "LMS": "LMS-Courses",
-        "COLLECTION": "Collections",
         "DOWNLOAD": "Downloads",
-        "VIEW": "Views"
+        "VIEW": "Views",
+        "PLAY": "Plays",
+        "USED": "Used"
+      },
+      "USAGES": {
+        "RANGE_LABEL": "Time range",
+        "RANGE_DAYS": "Last {{days}} days",
+        "RANGE_ALL": "Total",
+        "COMING_SOON": "Coming soon",
+        "DASHBOARD_LINK": "To dashboard",
+        "NO_PREVIEW_TITLE": "No statistics preview available",
+        "NO_PREVIEW_TEXT": "No statistics are available in the side panel for the current selection. You can find further analyses in the dashboard.",
+        "NO_SELECTION": "Select a metric to see its details.",
+        "NO_EMBEDDINGS": "This element is currently not embedded anywhere.",
+        "EMBEDDINGS_TITLE": "Views via embeddings",
+        "EMBEDDINGS_COLUMN": "Course/Folder",
+        "EMBEDDINGS_TOTAL": "Total embedding views",
+        "CLUSTERED_TOOLTIP": "{{count}} usages in the same course are clustered.",
+        "NO_USAGES_HINT": "No usages were found for this element yet.",
+        "COLLECTIONS_TITLE": "Used in collections",
+        "COLLECTIONS_COLUMN": "Collection",
+        "NO_COLLECTIONS": "This element is not used in any collection.",
+        "FEEDBACK_TITLE": "The statistics feature is being developed further",
+        "FEEDBACK_TEXT": "Do you have ideas or requests for further analyses? We look forward to your feedback.",
+        "FEEDBACK_ACTION": "Give feedback"
       },
       "COMMENT": {
         "NONE": "[Unset]",

@@ -13,6 +13,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SubmissionSidebarComponent } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
 import { NodesSelectorComponent } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { MetadataSidebarComponent } from '../../pages/workspace-page/metadata/metadata-sidebar.component';
+import { UsagesPreviewComponent } from '../../pages/workspace-page/metadata/usages/usages-preview.component';
 import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignment-sidebar/assignment-sidebar.component';
 
 @NgModule({
@@ -27,6 +28,7 @@ import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignmen
         SubmissionSidebarComponent,
         NodesSelectorComponent,
         MetadataSidebarComponent,
+        UsagesPreviewComponent,
         CommonModule,
         SharedModule,
         NodeEntriesModule,

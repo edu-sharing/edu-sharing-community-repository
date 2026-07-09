@@ -1,0 +1,426 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    // fill the (flex-column) sidebar option so the dashboard footer can sit at the bottom
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.usages {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    // allow children to adapt to the available width (sidebar can get narrow)
+    container-type: inline-size;
+    min-width: 0;
+    // fill the host; margin-top:auto on the dashboard bar then pushes it to the bottom
+    flex: 1;
+}
+
+.usages__timeframe {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.usages__heading {
+    margin: 0;
+    font-size: vars.$fontSizeXLarge;
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.usages__range {
+    width: 100%;
+    max-height: 40px;
+    border-radius: var(--borderRadiusBadges);
+    overflow: hidden;
+    @include mixins.materialShadowMedium(true, 0.15);
+
+    // border color
+    ::ng-deep &.mat-button-toggle-group-appearance-standard {
+        border-color: var(--borderGray);
+    }
+
+    // divider between the buttons
+    ::ng-deep .mat-button-toggle + .mat-button-toggle {
+        border-left-color: var(--borderGray);
+    }
+
+    // distribute the range buttons evenly across the full width.
+    ::ng-deep .mat-button-toggle {
+        flex: 1;
+        color: var(--textLight);
+        font-size: vars.$fontSizeSmall;
+        font-weight: bold;
+    }
+
+    // fit the button content within the 40px group height
+    // (the standard appearance defaults to a taller 48px line height).
+    ::ng-deep .mat-button-toggle-label-content {
+        line-height: 38px;
+    }
+
+    // only a slight background tint on the selected button.
+    ::ng-deep .mat-button-toggle-checked {
+        color: var(--primary);
+        background: var(--primaryBackground50);
+    }
+}
+
+.usages__cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+
+    // grid items must be allowed to shrink below their content width
+    > * {
+        min-width: 0;
+    }
+}
+
+// shared bordered surface used by the detail area, the hint and the feedback banner
+%usages-surface {
+    border: 1px solid var(--borderGray);
+    border-radius: var(--borderRadiusBadges);
+    background: var(--defaultBackground);
+    @include mixins.materialShadowMedium(false, 0.15);
+}
+
+.usages__detail {
+    @extend %usages-surface;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+// hint shown when the embeddings/usage metric is selected but the node has no usages at all
+.usages__hint {
+    @extend %usages-surface;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: var(--textLight);
+    font-size: vars.$fontSizeSmall;
+}
+
+.usages__hint-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    color: var(--primary);
+}
+
+// --- embeddings detail table ---
+.usage-table {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.usage-table__title {
+    margin: 0 0 14px;
+    padding: 0 4px;
+    font-size: vars.$fontSizeLarge;
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.usage-table__frame {
+    border: 1px solid var(--borderGray);
+    border-radius: var(--borderRadiusBadges);
+    overflow: hidden;
+}
+
+.usage-table__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    font-weight: bold;
+    color: var(--textMain);
+    background: var(--backgroundColor);
+    border-bottom: 1px solid var(--borderGray);
+}
+
+.usage-table__head-label {
+    flex: 1;
+    min-width: 0;
+}
+
+// aligns the value-column header above the row metrics block
+.usage-table__head-value {
+    flex: 0 1 170px;
+    min-width: 0;
+}
+
+.usage-table__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.usage-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--borderGray);
+
+    &:last-child {
+        // frame border already closes the list – avoid a double bottom line
+        border-bottom: none;
+    }
+}
+
+.usage-row__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    i {
+        color: var(--primary);
+    }
+}
+
+.usage-row__label {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--textMain);
+}
+
+// the usage title; truncates so a trailing cluster badge stays visible
+.usage-row__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// cluster-size badge: number of usages from the same course collapsed into one row.
+// placed right after the title; hover fills it to signal the explanatory tooltip.
+.usage-row__badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 11px;
+    background: var(--primary);
+    color: var(--palette-primary-contrast-500);
+    font-size: vars.$fontSizeSmall;
+    font-weight: bold;
+}
+
+// clickable collection title that links to the collection detail page
+.usage-row__link {
+    color: var(--primary);
+    cursor: pointer;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+        text-decoration: underline;
+    }
+}
+
+// right-hand metrics block (value + percentage + bar); aligned with the head-value
+.usage-row__metrics {
+    flex: 0 1 170px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.usage-row__value {
+    min-width: 30px;
+    color: var(--textMain);
+}
+
+.usage-row__percent {
+    min-width: 46px;
+    text-align: right;
+    font-size: vars.$fontSizeSmall;
+    color: var(--textLight);
+}
+
+.usage-row__bar {
+    flex: 1;
+    height: 6px;
+    // no visible rail – only the filled segment shows (as in the mockup)
+    background: transparent;
+    overflow: hidden;
+}
+
+.usage-row__bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: var(--borderRadiusBadges);
+    background: var(--primary);
+}
+
+.usage-table__empty {
+    margin: 0;
+    padding: 16px;
+    color: var(--textLight);
+}
+
+.usage-table__total {
+    // standalone box separated from the table above
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    font-weight: bold;
+    color: var(--textMain);
+    background: var(--backgroundColor);
+    border: 1px solid var(--borderGray);
+    border-radius: var(--borderRadiusBadges);
+}
+
+// --- feedback banner ---
+.usages__feedback {
+    @extend %usages-surface;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+}
+
+.usages__feedback-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--primary);
+    // slight primary tint behind the icon
+    background: var(--primaryBackground50);
+
+    i {
+        font-size: 24px;
+    }
+}
+
+.usages__feedback-text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.usages__feedback-title {
+    font-weight: bold;
+    color: var(--textMain);
+}
+
+.usages__feedback-desc {
+    font-size: vars.$fontSizeSmall;
+    color: var(--textLight);
+}
+
+.usages__feedback-action {
+    flex-shrink: 0;
+
+    i {
+        margin-left: 6px;
+        font-size: 18px;
+    }
+}
+
+// --- footer: full-width sticky bar at the sidebar bottom ---
+.usages__footer {
+    position: sticky;
+    bottom: 0;
+    // margin-top:auto pushes the bar to the very bottom when the content is shorter
+    // than the sidebar; the -24px left/right break out of the .usages (4px) +
+    // editorial .option (20px) padding so the bar spans the full sidebar width
+    margin: auto -24px 0;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: flex-end;
+    background: var(--roundedContainerBackground);
+    border-top: 1px solid var(--mat-divider-color);
+    box-shadow: 0px -2px 8px 0px #0000000f;
+    z-index: 1;
+
+    i {
+        margin-left: 6px;
+        font-size: 18px;
+    }
+}
+
+// --- responsive: keep everything usable / non-overflowing on narrow widths ---
+@container (max-width: 520px) {
+    .usages__range {
+        display: flex !important;
+        flex-wrap: wrap;
+        max-height: none;
+
+        .usages__range-toggle {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            border-left: none;
+            border-right: 1px solid var(--borderGray);
+            border-bottom: 1px solid var(--borderGray);
+
+            /* No right border on every second button */
+            &:nth-child(2n) {
+                border-right: none;
+            }
+
+            /* No bottom border on the last row */
+            &:nth-last-child(-n + 2) {
+                border-bottom: none;
+            }
+        }
+    }
+
+    // fewer, wider metric cards instead of four cramped columns
+    .usages__cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    // move the feedback action onto its own full-width row
+    .usages__feedback {
+        flex-wrap: wrap;
+    }
+
+    .usages__feedback-action {
+        flex: 1 0 100%;
+    }
+}
+
+@container (max-width: 340px) {
+    // single column of cards
+    .usages__cards {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    // drop the distribution bar so the value + percentage stay readable
+    .usage-row__bar {
+        display: none;
+    }
+}
