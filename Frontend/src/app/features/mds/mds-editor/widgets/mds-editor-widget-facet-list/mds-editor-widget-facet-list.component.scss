@@ -37,7 +37,7 @@ mat-checkbox {
     width: 100%;
     align-items: center;
     .caption {
-        @include limitLineCount(1);
+        @include limitLineCount(1, 1.25);
         flex-grow: 1;
         padding-right: 10px;
         word-break: break-all;
