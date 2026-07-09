@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
@@ -11,10 +12,8 @@ import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 @Slf4j
 @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -31,14 +30,15 @@ public class SSORegistrationsDispatcherServlet extends SpringHttpServlet {
 
         String registrationId = req.getParameter("id");
         String eduSharingContext = NodeCustomizationPolicies.getEduSharingContext();
+        OAuth2ClientProperties config = OAuth2ConfigProvider.getConfig(eduSharingContext);
 
-        if (eduSharingContext != null && registrationId != null && !registrationId.startsWith(eduSharingContext)) {
+        if (eduSharingContext != null && registrationId != null && !registrationId.startsWith(config.getContextId())) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "id is not valid for context: " + eduSharingContext + ".");
             return;
         }
 
         if (registrationId == null) {
-            OAuth2ClientProperties config = OAuth2ConfigProvider.getConfig(eduSharingContext);
+
             if (config.getRegistration().isEmpty()) {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "no id found.");
                 return;
@@ -60,15 +60,19 @@ public class SSORegistrationsDispatcherServlet extends SpringHttpServlet {
             String message = "Client registration not found:" + registrationId + ". check lightbend context config.";
             log.warn(message);
 
-            InMemoryClientRegistrationRepository cr = ((InMemoryClientRegistrationRepository) clientRegistrationRepository);
-            Iterator<ClientRegistration> iterator = cr.iterator();
-            if (iterator.hasNext()) {
-                clientRegistration = iterator.next();
-                log.warn("using fallback: {}", clientRegistration.getRegistrationId());
-            } else {
+            // requested id not found -> fall back to the configured default registration
+            String fallbackKey = config.getDefaultRegistration();
+            if (StringUtils.isBlank(fallbackKey) && !config.getRegistration().isEmpty()) {
+                fallbackKey = config.getRegistration().keySet().iterator().next();
+            }
+            if (StringUtils.isNotBlank(fallbackKey)) {
+                clientRegistration = clientRegistrationRepository.findByRegistrationId(config.getRegistrationId(fallbackKey));
+            }
+            if (clientRegistration == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, message);
                 return;
             }
+            log.warn("using fallback: {}", clientRegistration.getRegistrationId());
         }
 
         String redirectPath = "/edu-sharing/oauth2/authorization/" + clientRegistration.getRegistrationId();

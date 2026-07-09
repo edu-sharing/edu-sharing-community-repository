@@ -11,7 +11,7 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.edu_sharing.spring.security.basic.*;
 import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
-import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
+import org.edu_sharing.spring.security.SSORegistrationService;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
@@ -40,8 +39,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Configuration
@@ -211,9 +208,7 @@ public class SecurityConfigurationOAuth2 {
 
     @Bean
     @RefreshScope
-    public ClientRegistrationRepository clientRegistrationRepository(OAuth2ConfigProvider configService) {
-        List<ClientRegistration> registrations = new ArrayList<>(
-                new OAuth2ClientPropertiesMapper(configService).asClientRegistrations().values());
-        return new InMemoryClientRegistrationRepository(registrations);
+    public ClientRegistrationRepository clientRegistrationRepository(SSORegistrationService ssoRegistrationService) {
+        return new InMemoryClientRegistrationRepository(ssoRegistrationService.getClientRegistrations());
     }
 }

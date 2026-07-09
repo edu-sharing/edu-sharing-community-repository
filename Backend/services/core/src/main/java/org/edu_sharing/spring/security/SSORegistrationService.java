@@ -1,29 +1,24 @@
 package org.edu_sharing.spring.security;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.edu_sharing.spring.security.oauth2.OAuth2ClientPropertiesMapper;
+import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SSORegistrationService {
 
-    private final Optional<InMemoryClientRegistrationRepository> clientRegistrationRepository;
+    private final OAuth2ConfigProvider oAuth2ConfigProvider;
 
-    public SSORegistrationService(Optional<InMemoryClientRegistrationRepository> clientRegistrationRepository) {
-        this.clientRegistrationRepository = clientRegistrationRepository;
+    public List<ClientRegistration> getClientRegistrations() {
+        return new ArrayList<>(
+                new OAuth2ClientPropertiesMapper(oAuth2ConfigProvider).asClientRegistrations().values());
     }
-
-    public List<ClientRegistration> getClientRegistrations(){
-        return clientRegistrationRepository
-                .map(clientRegistrations -> StreamSupport.stream(clientRegistrations.spliterator(), false).toList())
-                .orElseGet(ArrayList::new);
-    }
-
 }
