@@ -23,7 +23,7 @@
     } @if (!(!node?.preview?.isIcon || file)) {
     <es-preview-image [node]="node"></es-preview-image>
     } @if (!node?.preview?.isIcon || file) {
-    <img [src]="src$ | async" (load)="loading$.next(false)" />
+    <img [src]="src$ | async" [class.local-file]="!!file" (load)="loading$.next(false)" />
     <div class="card-image-backdrop">
       <img [src]="src$ | async" alt="" />
     </div>

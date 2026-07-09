@@ -72,6 +72,15 @@ $height: 175px;
         object-fit: contain;
         position: relative;
         z-index: 1;
+        // predict the server-side thumbnail rendering (PreviewServlet with crop=true&width=400&height=300):
+        // the saved preview is center-cropped to 4:3 and flattened onto white, so show the
+        // not-yet-uploaded local file the same way
+        &.local-file {
+            width: calc(#{$height} * 4 / 3);
+            object-fit: cover;
+            // matches the white JPEG background the server bakes in; intentionally not theme-dependent
+            background-color: #fff;
+        }
     }
     > .button-group {
         position: absolute;
