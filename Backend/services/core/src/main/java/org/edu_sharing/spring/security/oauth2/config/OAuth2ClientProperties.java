@@ -62,6 +62,7 @@ public class OAuth2ClientProperties {
     }
 
     private String contextId;
+    private String defaultRegistration;
     private Map<String, Registration> registration = new LinkedHashMap<>();
     private Map<String, Provider> provider = new LinkedHashMap<>();
     private Map<String, Mapping> mapping = new LinkedHashMap<>();

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.service.config.model.Config;
 import org.edu_sharing.alfresco.service.config.model.LoginSilentMode;
@@ -17,8 +18,6 @@ import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 
 @RequiredArgsConstructor
@@ -81,13 +80,13 @@ public class SilentLoginModeRedirect {
 
         String context = NodeCustomizationPolicies.getEduSharingContext();
         OAuth2ClientProperties config = configService.getConfig(context);
-        Optional<String> registrationId = config.getRegistration().keySet().stream().filter(s -> s.contains("openIdConnect")).findFirst();
+        String registrationKey = config.getDefaultRegistration();
 
-        if(!registrationId.isPresent()){
+        if (StringUtils.isBlank(registrationKey)) {
             return false;
         }
 
-        response.sendRedirect("/edu-sharing/oauth2/authorization/"+context+"_"+registrationId.get()+"?prompt=none");
+        response.sendRedirect("/edu-sharing/oauth2/authorization/"+config.getRegistrationId(registrationKey)+"?prompt=none");
         return true;
     }
 
