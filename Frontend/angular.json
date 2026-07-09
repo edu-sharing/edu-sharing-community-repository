@@ -44,7 +44,7 @@
 
               },
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets" },
-              { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" }
+              { "glob": "**/*", "input": "projects/rendering-service-lib/assets", "output": "/" }
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -655,7 +655,7 @@
             },
             "assets": [
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets/ngx-extended-pdf-viewer" },
-              { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" },
+              { "glob": "**/*", "input": "projects/rendering-service-lib/assets", "output": "/" },
               { "glob": "**/*", "input": "projects/rendering-service-lib/dist/assets", "output": "/" }
             ]
           },
@@ -724,7 +724,7 @@
             },
             "assets": [
               { "glob": "**/*", "input": "node_modules/ngx-extended-pdf-viewer/assets", "output": "/assets/ngx-extended-pdf-viewer" },
-              { "glob": "**/*", "input": "node_modules/ngx-rendering-service-lib/assets", "output": "/" },
+              { "glob": "**/*", "input": "projects/rendering-service-lib/assets", "output": "/" },
               { "glob": "**/*", "input": "projects/rendering-service-lib/dist/assets", "output": "/" }
             ],
             "browser": "projects/rendering-service-web-component/src/main.ts",
