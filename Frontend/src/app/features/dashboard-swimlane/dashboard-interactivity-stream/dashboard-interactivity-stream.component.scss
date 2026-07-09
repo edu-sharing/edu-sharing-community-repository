@@ -26,7 +26,6 @@
             font-weight: bold;
             font-size: vars.$fontSizeLarge;
             @include mixins.limitLineCount(1, 1.25);
-            height: 1.25em;
         }
 
         .action-text {
