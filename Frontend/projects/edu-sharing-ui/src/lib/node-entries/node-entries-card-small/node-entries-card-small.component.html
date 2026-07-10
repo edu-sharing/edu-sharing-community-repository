@@ -53,7 +53,10 @@
   } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
   <ng-container *ngTemplateOutlet="image"></ng-container>
   <ng-container *ngTemplateOutlet="meta"></ng-container>
-  } @if (entriesService.options?.[Target.List]?.length) {
+  }
+  <!-- bottom options strip (e.g. the APPLY button in picker mode). Assignments use the
+       top-right three-dot menu instead, so they never get this strip. -->
+  @if (!nodeHelper.isNodeAssignment(node) && entriesService.options?.[Target.List]?.length) {
   <div class="card-options">
     <div class="card-options-area">
       @for (option of optionsOnCard(); track option) {

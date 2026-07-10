@@ -311,7 +311,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
             this.createSubCollectionOptionItem.name =
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
-            void this.listCollections?.initOptionsGenerator({});
+            // Per-card options for the sub-collections list are wired (gated on the picker
+            // params) in finishCollectionLoading; wiring them unconditionally here would
+            // paint an empty options strip on the small cards in normal browsing.
             if (this.isRootLevel) {
                 // display root collections with tabs
 
