@@ -1412,7 +1412,7 @@
         "type": "object"
       },
       "ConfigThemeColors": {
-        "description": "Theme color customization. Repeatable: an entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
+        "description": "Theme color customization. An entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
         "properties": {
           "color": {
             "items": {
@@ -5340,6 +5340,9 @@
           "appUserMail": {
             "type": "string"
           },
+          "application": {
+            "$ref": "#/components/schemas/UsageApplication"
+          },
           "courseId": {
             "type": "string"
           },
@@ -9086,6 +9089,9 @@
           "appUserMail": {
             "type": "string"
           },
+          "application": {
+            "$ref": "#/components/schemas/UsageApplication"
+          },
           "courseId": {
             "type": "string"
           },
@@ -9151,6 +9157,20 @@
           "resourceId",
           "usageVersion"
         ],
+        "type": "object"
+      },
+      "UsageApplication": {
+        "properties": {
+          "appCaption": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Usages": {
@@ -9919,7 +9939,7 @@
             "type": "array"
           },
           "themeColors": {
-            "description": "Theme color customization. Repeatable: an entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
+            "description": "Theme color customization. An entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
             "items": {
               "$ref": "#/components/schemas/ConfigThemeColors"
             },

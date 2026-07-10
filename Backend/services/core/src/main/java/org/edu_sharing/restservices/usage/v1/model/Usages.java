@@ -55,6 +55,7 @@ public class Usages {
         private String guid;
         private String appSubtype;
         private String appType;
+        private UsageApplication application;
         private String type;
         private Date created;
         private Date modified;
@@ -76,6 +77,13 @@ public class Usages {
                 public String referencedInInstance;
             }
         }
+    }
+
+    @Data
+    public static class UsageApplication {
+        private String appId;
+        private String appCaption;
+        private String domain;
     }
 
     @Data

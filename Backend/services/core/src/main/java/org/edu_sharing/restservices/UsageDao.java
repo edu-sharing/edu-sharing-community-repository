@@ -10,6 +10,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
+import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.Filter;
 import org.edu_sharing.restservices.usage.v1.model.CreateUsage;
@@ -60,10 +61,19 @@ public class UsageDao {
 		usageResult.setAppId(usage.getLmsId());
 
 		try {
-			usageResult.setAppType(ApplicationInfoList.getRepositoryInfoById(usage.getLmsId()).getType());
-			usageResult.setAppSubtype(ApplicationInfoList.getRepositoryInfoById(usage.getLmsId()).getSubtype());
-		} catch (Throwable t) {
+			ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(usage.getLmsId());
+			if (appInfo != null) {
+				usageResult.setAppType(appInfo.getType());
+				usageResult.setAppSubtype(appInfo.getSubtype());
 
+				Usages.UsageApplication application = new Usages.UsageApplication();
+				application.setAppId(appInfo.getAppId());
+				application.setAppCaption(appInfo.getAppCaption());
+				application.setDomain(appInfo.getDomain());
+				usageResult.setApplication(application);
+			}
+		} catch (Throwable t) {
+			// unknown appId: leave application/appType/appSubtype unset (existing behaviour)
 		}
 
 		// filter out usage info cause of security reasons
