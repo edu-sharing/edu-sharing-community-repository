@@ -85,6 +85,10 @@ export interface UsageDetailRow {
     link?: unknown[];
     /** query params for the link */
     queryParams?: { [key: string]: string };
+    /** embeddings: application/instance shown before the label (e.g. "Moodle RLP") */
+    source?: string;
+    /** embeddings: external URL of the application instance; links the `source` text */
+    sourceUrl?: string;
     /** brand image icon URL (embeddings); `icon` is used when not set */
     iconUrl?: string;
     /** material icon name (used when `iconUrl` is not set) */
@@ -229,14 +233,14 @@ export class UsagesPreviewComponent {
                 const usage = group[0];
                 // non-null: usages are pre-filtered to supported platforms (embeddingUsages)
                 const platform = embeddingPlatform(usage)!;
-                // prefer the concrete application id of the embedding source; fall back to
-                // the generic platform name (WordPress / Moodle / ILIAS) when no appId is set
-                const source = usage.appId || PLATFORM_NAMES[platform];
+                // application instance shown (and linked) before the course title
                 return {
                     key: usageKey(usage),
                     iconUrl: this.nodeHelper.getSourceIconPath(platform),
                     icon: 'code',
-                    label: source + ': ' + (usage.courseTitle || usage.courseId),
+                    source: PLATFORM_NAMES[platform],
+                    sourceUrl: instanceUrl(usage.application?.domain),
+                    label: usage.courseTitle || usage.courseId,
                     // show how many usages of the same course were clustered (>1 only)
                     badge: group.length > 1 ? group.length : undefined,
                 };
@@ -472,6 +476,19 @@ function clusterUsagesByCourse(usages: Usage[]): Usage[][] {
         }
     }
     return Array.from(clusters.values());
+}
+
+/**
+ * Build an absolute URL to the application instance from its domain, or undefined
+ * when no domain is known. A domain that already carries a scheme is used as-is,
+ * otherwise https:// is assumed.
+ */
+function instanceUrl(domain?: string): string | undefined {
+    const trimmed = domain?.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+    return /^https?:\/\//i.test(trimmed) ? trimmed : 'https://' + trimmed;
 }
 
 /**

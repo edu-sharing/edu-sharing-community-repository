@@ -95,7 +95,18 @@
             }
             <span class="usage-row__label">
               <span class="usage-row__title">
-                @if (row.link) {
+                @if (row.source) { @if (row.sourceUrl) {
+                <a
+                  class="usage-row__link usage-row__source"
+                  [href]="row.sourceUrl"
+                  target="_blank"
+                  >{{ row.source }}</a
+                >
+                } @else {
+                <span class="usage-row__source">{{ row.source }}</span>
+                }
+                <span class="usage-row__source-sep">: </span>
+                } @if (row.link) {
                 <a
                   class="usage-row__link"
                   [routerLink]="row.link"
