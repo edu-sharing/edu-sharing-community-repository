@@ -9290,8 +9290,99 @@
           "ADMIN v1"
         ]
       },
+      "post": {
+        "description": "register the specified application. Fails if the application is already registered, use PUT to update or insert.",
+        "operationId": "createApplication_1",
+        "parameters": [
+          {
+            "description": "Remote application metadata url",
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "register/add an application",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
       "put": {
-        "description": "register the specified application.",
+        "description": "register the specified application. If the application is already registered it is updated, otherwise it is added.",
         "operationId": "addApplication_1",
         "parameters": [
           {
@@ -9366,15 +9457,114 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "register/add an application",
+        "summary": "update or add an application",
         "tags": [
           "ADMIN v1"
         ]
       }
     },
     "/admin/v1/applications/xml": {
+      "post": {
+        "description": "register the xml file provided. Fails if the application is already registered, use PUT to update or insert.",
+        "operationId": "createApplication",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "xml": {
+                    "description": "XML file for app to register",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "xml"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "register/add an application via xml file",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
       "put": {
-        "description": "register the xml file provided.",
+        "description": "register the xml file provided. If the application is already registered it is updated, otherwise it is added.",
         "operationId": "addApplication",
         "requestBody": {
           "content": {
@@ -9457,7 +9647,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "register/add an application via xml file",
+        "summary": "update or add an application via xml file",
         "tags": [
           "ADMIN v1"
         ]

@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.I18nAngular;
+import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
@@ -25,6 +26,7 @@ import org.edu_sharing.service.authority.AuthorityServiceHelper;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
 import org.edu_sharing.service.model.NodeRef;
+import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -53,7 +55,34 @@ import static org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX
 public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams {
 
     public enum ReportMode {
-        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored")
+        // Report is built from the mediacenter tracking data (TrackingService.getListNodeDataByMediacenter).
+        //
+        // Special behaviour to be aware of:
+        //
+        // - Single-mediacenter tracking only: the tracking query counts events only for users assigned to exactly
+        //   one mediacenter (ARRAY_LENGTH(authority_mediacenter,1)=1); accesses by users that belong to more than one
+        //   mediacenter are ignored (unlike AlfrescoPermissionData).
+        //
+        // - Licensed nodes plus still-tracked nodes: the media report lists the currently licensed nodes returned by
+        //   MediacenterService.getAllLicensedNodes (scoped by the mediacenter proxy-group read permission), filtered to
+        //   restricted_mz, with the tracking counts merged onto them (a licensed node is listed even with zero activity).
+        //   In addition, nodes that had tracking activity last month but are no longer in the licensed ES snapshot (e.g.
+        //   license revoked since) are kept so their historical data is not lost: they carry no ES properties, so their
+        //   editorial state is verified with a single live read run as system (see isRestrictedMediacenterMedia). Such
+        //   nodes are reported with their counts but empty CSV columns (no ES properties in memory).
+        //
+        // - restricted_mz filter: getAllLicensedNodes does NOT filter on the editorial state, so the licensed nodes are
+        //   additionally filtered here to ccm:io_editorial_state == "restricted_mz" to drop non-mediacenter media.
+        //
+        // - Properties are read ES-first, with a single bounded live fallback: the restricted_mz filter and the exported
+        //   CSV column values use the properties Elasticsearch already delivered in memory (NodeRef.getProperties()), so
+        //   we do NOT re-fetch the full property map of every licensed node through the Alfresco node service (that would
+        //   flood the Alfresco L2 cache and blow up the heap). The only live Alfresco access is the single-property
+        //   fallback in readProperty, hit for the tracked nodes that are no longer in the licensed ES snapshot, to decide
+        //   their editorial state (see isRestrictedMediacenterMedia).
+        //   not re-checked live, to keep that path cheap).
+        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored. " +
+                "The report lists the currently licensed nodes (filtered to editorial state 'restricted_mz') merged with the tracking counts")
         TrackingMediacenterData,
         @JobFieldDescription(description = "Use the current licensed node data. Elements not licensed anymore will not be visible. Elements accessed from users assigned to more than one MZ are counted as well (legacy)")
         AlfrescoPermissionData
@@ -156,16 +185,20 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     return null;
                 }
                 logger.info("Building stats for mediacenter " + mediacenter);
+                // fetch the licensed nodes once per mediacenter and reuse them across all reports
+                List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
+                logger.info(mediacenter + " has currently " + nodes.size() + " licensed nodes");
                 Date startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
                 Date endDate = Date.from(to.atTime(23, 59).toInstant(ZoneOffset.UTC));
                 if (generateMonthly) {
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
-                    generateSchoolReportByTimeRange(mediacenter, startDate, endDate, ReportType.Monthly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Monthly);
+                    // school report is only build in monthly session
+                    generateSchoolReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Monthly);
                 }
                 if (generateYearly && localDate.getMonthValue() == 1) {
                     from = localDate.minusYears(1).withDayOfMonth(1);
                     startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Yearly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Yearly);
                 }
 
                 if (generateQuarterly && List.of(1, 4, 7, 10).contains(localDate.getMonthValue())) {
@@ -173,7 +206,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                             .withDayOfMonth(1);
 
                     startDate = Date.from(from.atStartOfDay().toInstant(ZoneOffset.UTC));
-                    generateReportByTimeRange(mediacenter, startDate, endDate, ReportType.Quarterly);
+                    generateReportByTimeRange(mediacenter, nodes, startDate, endDate, ReportType.Quarterly);
                 }
             }
         } catch (Throwable t) {
@@ -182,7 +215,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         return null;
     }
 
-    private void generateSchoolReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
+    private void generateSchoolReportByTimeRange(String mediacenter, List<NodeRef> nodes, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         if (mode.equals(ReportMode.TrackingMediacenterData)) {
             Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> dataNodes = trackingService.getListNodeDataByMediacenter(
                     mediacenter,
@@ -190,7 +223,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     endDate,
                     Collections.singletonList("authority_organization")
             );
-            dataNodes = filterNonMediacenterMedia(dataNodes);
+            dataNodes = filterNonMediacenterMedia(nodes, dataNodes);
 
             // Holds for each event (VIEW, DOWNLOAD...) a list of Org ids + counts
             Map<TrackingService.EventType, Map<String, Long>> result = new HashMap<>();
@@ -250,12 +283,13 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
     TrackingService trackingService = TrackingServiceFactory.getTrackingService();
     MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
 
-    private void generateReportByTimeRange(String mediacenter, Date startDate, Date endDate, ReportType reportType) throws Throwable {
+    private void generateReportByTimeRange(String mediacenter, List<NodeRef> nodes, Date startDate, Date endDate, ReportType reportType) throws Throwable {
         TrackingService trackingService = TrackingServiceFactory.getTrackingService();
-        Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data = null;
+        // keyed by the Elasticsearch NodeRef so writeCSVFile can reuse the properties already loaded in
+        // memory instead of re-fetching every node/column through the Alfresco node service
+        Map<NodeRef, StatisticEntry> data = null;
         if (mode.equals(ReportMode.AlfrescoPermissionData)) {
-            List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
-            data = trackingService.getListNodeData(
+            Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> tracked = trackingService.getListNodeData(
                     nodes.stream().map(
                             ref -> new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, ref.getNodeId())
                     ).collect(Collectors.toList()),
@@ -264,24 +298,42 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                     additionalFields,
                     mediacenter
             );
+            data = new HashMap<>();
+            for (NodeRef n : nodes) {
+                StatisticEntry entry = tracked.get(new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, n.getNodeId()));
+                data.put(n, entry != null ? entry : new StatisticEntry());
+            }
         } else if (mode.equals(ReportMode.TrackingMediacenterData)) {
-            data = trackingService.getListNodeDataByMediacenter(
+            Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> tracked = trackingService.getListNodeDataByMediacenter(
                     mediacenter,
                     startDate,
                     endDate,
                     additionalFields
             );
-            logger.info("Tracking db done for " + mediacenter + " (" + data.size() + " elements), fetching all licensed nodes...");
-            List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
-            logger.info(mediacenter + " has currently " + nodes.size() + " licensed nodes");
+            logger.info("Tracking db done for " + mediacenter + " (" + tracked.size() + " elements)");
+            // first, merge stats with currently licensed nodes (ones without track data will become 0)
+            data = new HashMap<>();
             for (NodeRef n : nodes) {
-                org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
-                if (data.containsKey(mappedRef)) {
+                if (!isRestrictedMediacenterMedia(n)) {
                     continue;
                 }
-                data.put(mappedRef, new StatisticEntry());
+                StatisticEntry entry = tracked.get(new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()));
+                data.put(n, entry != null ? entry : new StatisticEntry());
             }
-            data = filterNonMediacenterMedia(data);
+            // Keep last month's tracking data for nodes that are no longer in the licensed ES snapshot (e.g. license
+            // revoked since). They carry no ES properties, so isRestrictedMediacenterMedia verifies them with a single
+            // live editorial_state read. Their CSV columns stay empty (no ES props); only their counts are reported.
+            Set<String> licensedIds = nodes.stream().map(NodeRef::getNodeId).collect(Collectors.toSet());
+            for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> e : tracked.entrySet()) {
+                if (licensedIds.contains(e.getKey().getId())) {
+                    continue;
+                }
+                NodeRef n = new NodeRefImpl(e.getKey());
+                if (isRestrictedMediacenterMedia(n)) {
+                    data.put(n, e.getValue());
+                }
+            }
+            logger.info(mediacenter + " remaining " + data.size() + " elements after filtering for non-mediacenter elements");
         }
         String nodeId = generateCSVNode(mediacenter, "nach-Medien", startDate, endDate, reportType);
         try {
@@ -337,18 +389,48 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         return sb.toString();
     }
 
-    private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
-        return data.entrySet().stream().filter(
-                e -> {
-                    try {
-                        return "restricted_mz".equals(NodeServiceHelper.getPropertyNative(e.getKey(), CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
-                    } catch (InvalidNodeRefException exception) {
-                        // node is deleted
-                        logger.info("restricted_mz was not verifiable: " + e.getKey() + ": " + exception.getMessage());
-                        return false;
-                    }
-                }
-        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> filterNonMediacenterMedia(List<NodeRef> nodes, Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data) {
+        // restricted_mz node ids from the licensed ES snapshot (cheap, in-memory props).
+        Set<String> mediacenterNodeIds = nodes.stream()
+                .filter(this::isRestrictedMediacenterMedia)
+                .map(NodeRef::getNodeId)
+                .collect(Collectors.toSet());
+        Set<String> licensedIds = nodes.stream().map(NodeRef::getNodeId).collect(Collectors.toSet());
+        return data.entrySet().stream()
+                .filter(e -> mediacenterNodeIds.contains(e.getKey().getId())
+                        // tracked nodes no longer in the licensed ES snapshot: verify live (see isRestrictedMediacenterMedia)
+                        // so last month's tracking data is kept instead of silently dropped
+                        || (!licensedIds.contains(e.getKey().getId())
+                            && isRestrictedMediacenterMedia(new NodeRefImpl(e.getKey()))))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    // Whether a node counts as mediacenter media, i.e. its ccm:io_editorial_state is "restricted_mz".
+    private boolean isRestrictedMediacenterMedia(NodeRef n) {
+        return "restricted_mz".equals(readProperty(n, CCConstants.CCM_PROP_IO_EDITORIAL_STATE));
+    }
+
+    // Reads a single node property, preferring the properties Elasticsearch already delivered in memory (cheap, no
+    // Alfresco round-trip; this is why we do NOT re-read the full property map of every licensed node). Only when no ES
+    // properties are present for the node (getProperties() == null) do we fall back to a single live read. That fallback
+    // is deliberate: it is used for tracked nodes that dropped out of the current licensed ES snapshot (e.g. their
+    // license was revoked since), so last month's tracking data is still kept in the report. The job runs as system, so
+    // the value is returned even though the mediacenter group can no longer read the node. getProperty encodes
+    // multi-values the same way the ES snapshot does, so callers need no special multi-value handling. Returns null if
+    // the node is deleted / no longer resolvable.
+    private String readProperty(NodeRef n, String globalName) {
+        if (n.getProperties() != null) {
+            Object value = n.getProperties().get(globalName);
+            return value == null ? null : value.toString();
+        }
+        try {
+            return NodeServiceHelper.getProperty(
+                    new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId()),
+                    globalName);
+        } catch (InvalidNodeRefException e) {
+            logger.info("property " + globalName + " was not readable for tracked node " + n.getNodeId() + ": " + e.getMessage());
+            return null;
+        }
     }
 
     private void writeCSVFileInternal(String nodeId, List<String> header, List<String[]> data) throws Exception {
@@ -361,7 +443,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         new MCAlfrescoAPIClient().writeContent(nodeId, bos.toByteArray(), "text/csv", String.valueOf(StandardCharsets.UTF_8), CCConstants.CM_PROP_CONTENT);
     }
 
-    private void writeCSVFile(Map<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> data, String nodeId) throws Exception {
+    private void writeCSVFile(Map<NodeRef, StatisticEntry> data, String nodeId) throws Exception {
         List<String> header = columns.stream().map(c ->
                 I18nAngular.getTranslationAngular("common", (
                         c.size() == 1 ? "NODE." + c.get(0) : "VCARD." + c.get(1))
@@ -397,26 +479,29 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
         ));
 
         ArrayList<ReportEntry> entries = new ArrayList<>();
-        for (Map.Entry<org.alfresco.service.cmr.repository.NodeRef, StatisticEntry> entry : data.entrySet()) {
+        for (Map.Entry<NodeRef, StatisticEntry> entry : data.entrySet()) {
             if (isInterrupted()) {
                 return;
             }
             List<String> csvEntry = columns.stream().map(
                     e -> {
+                        String globalName = CCConstants.getValidGlobalName(e.get(0));
                         try {
-                            String prop = NodeServiceHelper.getProperty(
-                                    new org.alfresco.service.cmr.repository.NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getKey().getId()),
-                                    CCConstants.getValidGlobalName(e.get(0))
-                            );
-                            if (VCardConverter.isVCardProp(CCConstants.getValidGlobalName(e.get(0)))) {
+                            String prop = readProperty(entry.getKey(), globalName);
+                            if (VCardConverter.isVCardProp(globalName) && StringUtils.isNotEmpty(prop)) {
+                                String[] propMulti = ValueTool.getMultivalue(prop);
                                 if (e.size() == 1) {
-                                    prop = VCardConverter.getNameForVCardString(prop);
+                                    prop = Arrays.stream(propMulti)
+                                            .map(VCardConverter::getNameForVCardString)
+                                            .filter(StringUtils::isNotBlank)
+                                            .collect(Collectors.joining(", "));
                                 } else {
-                                    ArrayList<Map<String, Object>> vcard = VCardConverter.vcardToMap(null, prop);
-                                    if (vcard.isEmpty()) {
-                                        return "";
-                                    }
-                                    return (String) vcard.get(0).getOrDefault(e.get(1), "");
+                                    return Arrays.stream(propMulti)
+                                            .map(v -> VCardConverter.vcardToMap(null, v))
+                                            .filter(vcard -> !vcard.isEmpty())
+                                            .map(vcard -> (String) vcard.get(0).getOrDefault(e.get(1), ""))
+                                            .filter(StringUtils::isNotBlank)
+                                            .collect(Collectors.joining(", "));
                                 }
                             }
                             if (StringUtils.isEmpty(prop)) {
@@ -425,7 +510,7 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
                             return prop;
                         } catch (Throwable t) {
                             logger.debug(t.getMessage(), t);
-                            return entry.getKey().getId();
+                            return entry.getKey().getNodeId();
                         }
                     }
             ).collect(Collectors.toList());

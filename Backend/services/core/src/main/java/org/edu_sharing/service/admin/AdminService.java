@@ -33,6 +33,8 @@ public interface AdminService {
 
 	ApplicationInfo addApplication(String appMetadataUrl) throws Exception;
 
+	ApplicationInfo updateApplication(String appMetadataUrl) throws Exception;
+
 	List<ServerUpdateInfo> getServerUpdateInfos();
 
 	String runUpdate(String updateId, boolean execute) throws Exception;
@@ -72,6 +74,8 @@ public interface AdminService {
 	void removeApplication(ApplicationInfo info) throws Exception;
 
 	ApplicationInfo addApplicationFromStream(InputStream is) throws Exception;
+
+	ApplicationInfo updateApplicationFromStream(InputStream is) throws Exception;
 
 	ApplicationInfo addApplication(Map<String,String> properties) throws Exception;
 

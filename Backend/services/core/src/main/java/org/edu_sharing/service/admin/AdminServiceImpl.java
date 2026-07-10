@@ -73,6 +73,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.spring.scope.refresh.ContextRefreshUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.w3c.dom.Document;
@@ -474,7 +475,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ApplicationInfo addApplication(String appMetadataUrl) throws Exception {
+    public synchronized ApplicationInfo addApplication(String appMetadataUrl) throws Exception {
 
         HttpQueryTool httpQuery = new HttpQueryTool();
         String httpQueryResult = httpQuery.query(appMetadataUrl);
@@ -487,7 +488,20 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ApplicationInfo addApplicationFromStream(InputStream is) throws Exception {
+    public synchronized ApplicationInfo updateApplication(String appMetadataUrl) throws Exception {
+
+        HttpQueryTool httpQuery = new HttpQueryTool();
+        String httpQueryResult = httpQuery.query(appMetadataUrl);
+        if (httpQueryResult == null) {
+            throw new CCException(null, "something went wrong. got no result for metadata url: " + appMetadataUrl);
+        }
+
+        InputStream is = new ByteArrayInputStream(httpQueryResult.getBytes(StandardCharsets.UTF_8));
+        return updateApplicationFromStream(is);
+    }
+
+    @Override
+    public synchronized ApplicationInfo addApplicationFromStream(InputStream is) throws Exception {
 
         Properties props = new SortedProperties();
         props.loadFromXML(is);
@@ -500,7 +514,21 @@ public class AdminServiceImpl implements AdminService {
         return storeProperties(appId, props);
     }
 
-    public ApplicationInfo addApplication(Map<String, String> properties) throws Exception {
+    @Override
+    public synchronized ApplicationInfo updateApplicationFromStream(InputStream is) throws Exception {
+
+        Properties props = new SortedProperties();
+        props.loadFromXML(is);
+        String appId = props.getProperty(ApplicationInfo.KEY_APPID);
+
+        if (StringUtils.isBlank(appId)) {
+            throw new Exception("no appId found");
+        }
+
+        return storeProperties(appId, props, true);
+    }
+
+    public synchronized ApplicationInfo addApplication(Map<String, String> properties) throws Exception {
         if (properties == null) {
             throw new Exception("no properties provided");
         }
@@ -536,17 +564,34 @@ public class AdminServiceImpl implements AdminService {
             }
         }
 
-        return storeProperties(appId, props);
+        return storeProperties(appId, props, true);
     }
 
     private ApplicationInfo storeProperties(String appId, Properties props) throws Exception {
+        return storeProperties(appId, props, false);
+    }
+
+    /**
+     * Stores the given application properties as an {@code app-*.properties.xml} file and registers it.
+     *
+     * @param update if {@code false} (add) an exception is thrown when the application is already
+     *               registered; if {@code true} (update or insert) an already registered application is
+     *               overwritten in place without creating a duplicate registry entry.
+     */
+    private ApplicationInfo storeProperties(String appId, Properties props, boolean update) throws Exception {
         String fileNamePart = appId.replaceAll("[/:]", "");
         final String filename = "app-" + fileNamePart + ".properties.xml";
 
-        //check if appID already exists
-//        if (ApplicationInfoList.getApplicationInfos().containsKey(appId)) {
-//            throw new Exception("appId is already in registry");
-//        }
+        String existingFileList = getAppPropertiesApplications();
+
+        if (existingFileList == null) {
+            throw new Exception("AppList is currently empty. Please try again later");
+        }
+
+        boolean alreadyRegistered = Arrays.asList(existingFileList.split(",")).contains(filename);
+        if (alreadyRegistered && !update) {
+            throw new DuplicateKeyException("appId " + appId + " is already in registry");
+        }
 
         //check for mandatory Property type
         String type = props.getProperty(ApplicationInfo.KEY_TYPE);
@@ -564,24 +609,18 @@ public class AdminServiceImpl implements AdminService {
 
         File appFile = new File(PropertiesHelper.Config.getAbsolutePathForConfigFile(PropertiesHelper.Config.getPropertyFilePath(filename)));
         if (appFile.exists()) {
+            // store as backup
+            Files.copy(appFile, new File(appFile.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
             appFile.delete();
         }
         props.storeToXML(new FileOutputStream(appFile), "");
 
-
-        String existingFileList = getAppPropertiesApplications();
-
-        if(existingFileList == null) {
-            try {
-                boolean ignored = appFile.delete();
-            } catch(Throwable t){
-                logger.warn("Could not rollback app file " + appFile.getName(), t);
-            }
-            throw new Exception("AppList is currently empty. Please try again later");
+        if (!alreadyRegistered) {
+            Set<String> entries = new LinkedHashSet<>(Arrays.asList(existingFileList.split(",")));
+            entries.add(filename);
+            String newProperty = String.join(",", entries);
+            changeAppPropertiesApplications(newProperty, new Date() + " added file:" + filename);
         }
-
-        String newProperty=existingFileList+","+filename;
-        changeAppPropertiesApplications(newProperty, new Date() + " added file:" + filename);
 
 
         if (type.equals(ApplicationInfo.TYPE_RENDERSERVICE)) {

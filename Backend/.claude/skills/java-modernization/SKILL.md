@@ -130,6 +130,24 @@ bündelt `@Getter` + `@Setter` + `@ToString` + `@EqualsAndHashCode` + `@Required
 > Sets/Maps als Schlüssel landen, kann das das Verhalten ändern. Im Zweifel bei
 > `@Getter`/`@Setter` bleiben.
 
+**Vererbung: `@EqualsAndHashCode(callSuper = true)` an der Subklasse.** `@Data` (bzw.
+`@EqualsAndHashCode`) bezieht standardmäßig **nur die Felder der eigenen Klasse** in
+`equals`/`hashCode` ein — die Felder der Oberklasse werden ignoriert. Trägt eine Subklasse
+einer `@Data`-Klasse selbst `@Data` (oder `@EqualsAndHashCode`), muss sie zusätzlich
+`@EqualsAndHashCode(callSuper = true)` erhalten, sonst gehen die Oberklassen-Felder im
+Vergleich verloren (und Lombok warnt beim Kompilieren). Wird nur die Oberklasse auf `@Data`
+umgestellt, prüfe daher **alle** Subklassen mit eigenem `@Data`/`@EqualsAndHashCode` und ziehe
+`callSuper = true` mit.
+
+```java
+@Data
+public class Usage { ... }
+
+@Data
+@EqualsAndHashCode(callSuper = true)   // sonst werden die Usage-Felder ignoriert
+public static class NodeUsage extends Usage { ... }
+```
+
 **`boolean`-Feld-Naming `isX` → `x`.** Boolean-Felder ohne `is`-Präfix benennen. Lombok
 `@Getter` erzeugt daraus weiterhin `isX()`, `@Setter` erzeugt `setX(boolean)` — Aufrufer
 bleiben kompatibel.

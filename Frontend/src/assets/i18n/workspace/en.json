@@ -188,7 +188,11 @@
         "TO_CHECKBOX": "Set end date",
         "DATE_LABEL": "Date",
         "TIME_LABEL": "Time",
-        "INVALID_DATE": "Invalid date"
+        "INVALID_DATE": "Invalid date",
+        "INVALID_TIME": "Invalid time",
+        "TIME_HINT": "HH:MM",
+        "INVALID_RANGE": "The start date must be before the end date",
+        "IN_PAST": "The start date must not be in the past"
       },
       "PUBLISH": {
         "OPEN_VERSION": "Show version",

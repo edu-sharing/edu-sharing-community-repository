@@ -45,6 +45,7 @@ export interface MdsValueList {
 export abstract class MdsViewerWidget {
     definition: MdsWidget;
     focusTrigger: Subject<void>;
+    readonly meetsDynamicCondition = new BehaviorSubject<boolean>(true);
     abstract getInitalValuesAsync(): Promise<InitialValues>;
     abstract getInitialDisplayValues(): BehaviorSubject<MdsValueList>;
 }

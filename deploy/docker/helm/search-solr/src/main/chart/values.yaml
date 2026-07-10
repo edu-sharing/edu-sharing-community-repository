@@ -113,9 +113,9 @@ config:
       -XX:+ExplicitGCInvokesConcurrent
     ram:
       ## @param config.jvm.ram.minPercentage Set minimum memory in percentages
-      minPercentage: "75.0"
+      minPercentage: "70.0"
       ## @param config.jvm.ram.maxPercentage Set maximum memory in percentages
-      maxPercentage: "75.0"
+      maxPercentage: "70.0"
 
   metrics:
     ## @param config.metrics.enabled Enable metrics

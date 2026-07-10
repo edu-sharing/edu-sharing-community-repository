@@ -99,6 +99,22 @@ class NodeCustomizationPoliciesTest {
     }
 
     @Test
+    void getMediaTypeDetectsJupyterNotebookByExtension() throws Exception {
+        // A Jupyter notebook is valid JSON; the .ipynb extension must yield the dedicated mimetype.
+        byte[] notebook = "{\"cells\":[],\"nbformat\":4,\"nbformat_minor\":5}".getBytes(StandardCharsets.UTF_8);
+        MediaType ipynb = NodeCustomizationPolicies.getMediaType("notebook.ipynb", new ByteArrayInputStream(notebook));
+        assertEquals("application/x-ipynb+json", ipynb.toString());
+
+        // Case-insensitive extension match.
+        MediaType upper = NodeCustomizationPolicies.getMediaType("NOTEBOOK.IPYNB", new ByteArrayInputStream(notebook));
+        assertEquals("application/x-ipynb+json", upper.toString());
+
+        // Plain JSON without the extension must still be detected as application/json by Tika.
+        MediaType json = NodeCustomizationPolicies.getMediaType("data.json", new ByteArrayInputStream(notebook));
+        assertEquals("application/json", json.toString());
+    }
+
+    @Test
     void checkGithubDataTest() {
         checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);
         checkGithubUri("https://github.com/edu-sharing/edu-sharing-community-repository/tree/release/6.0", RessourceInfoExecuter.CCM_RESSOURCETYPE_GIT_DEFAULT);

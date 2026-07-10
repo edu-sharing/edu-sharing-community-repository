@@ -450,6 +450,11 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
     }
 
     public static MediaType getMediaType(String filename, InputStream inputStream) throws IOException {
+        // Jupyter notebooks are valid JSON, so Tika would report application/json.
+        // Force the dedicated notebook mimetype based on the .ipynb extension.
+        if (filename != null && filename.toLowerCase().endsWith(".ipynb")) {
+            return MediaType.parse("application/x-ipynb+json");
+        }
         TikaConfig config = TikaConfig.getDefaultConfig();
         Detector detector = config.getDetector();
         TikaInputStream stream = TikaInputStream.get(inputStream);

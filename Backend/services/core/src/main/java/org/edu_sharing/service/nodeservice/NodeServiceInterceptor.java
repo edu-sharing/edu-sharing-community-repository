@@ -77,7 +77,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getPublishedCopies") ||
                 methodName.equals("getOriginalNode") ||
                 methodName.equals("getPrimaryParent") ||
-                methodName.equals("getVersionHistory")) {
+                methodName.equals("getVersionHistory") ||
+                methodName.equals("copyNode")) {
             argumentId = 0;
         }
         if (methodName.equals("writeContent")) {
