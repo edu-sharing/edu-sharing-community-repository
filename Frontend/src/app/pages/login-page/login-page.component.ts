@@ -221,7 +221,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         }
                         this.loginUrl = configService.instant('loginUrl');
                         const allowLocal = configService.instant('loginAllowLocal', false);
-                        const hasProviders = this.registeredOauthProviders?.length > 0;
+                        const hasProviders = this.registeredOauthProviders?.length > 1;
                         if (
                             params.local !== 'true' &&
                             !allowLocal &&
