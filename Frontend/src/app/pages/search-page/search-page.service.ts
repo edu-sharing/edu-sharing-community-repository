@@ -82,6 +82,7 @@ export class SearchPageService implements OnDestroy {
     readonly searchString = this.userModifiableValues.createString();
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
+    readonly applyCollections = new BehaviorSubject<boolean>(false);
     readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
     readonly primaryAction = new BehaviorSubject<PrimaryAction>(null);
     readonly filtersMdsWidgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
@@ -188,6 +189,9 @@ export class SearchPageService implements OnDestroy {
         this.searchFilters.registerQueryParameter('filters', this.route);
         this.searchString.registerQueryParameter('q', this.route);
         this.route.queryParams.pipe(map((params) => params.reurl || false)).subscribe(this.reUrl);
+        this.route.queryParams
+            .pipe(map((params) => params.applyCollections === 'true'))
+            .subscribe(this.applyCollections);
     }
 
     private registerRepositories(): void {

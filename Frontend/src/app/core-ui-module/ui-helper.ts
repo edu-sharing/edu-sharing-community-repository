@@ -24,6 +24,7 @@ export class UIHelper {
         'reurlTypes',
         'reurlCreate',
         'applyDirectories',
+        'applyCollections',
         'onlyDownloadable',
     ];
     public static getBlackWhiteContrast(color: string) {}

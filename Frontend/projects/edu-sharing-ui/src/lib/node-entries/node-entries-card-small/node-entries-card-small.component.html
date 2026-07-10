@@ -53,6 +53,14 @@
   } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
   <ng-container *ngTemplateOutlet="image"></ng-container>
   <ng-container *ngTemplateOutlet="meta"></ng-container>
+  } @if (entriesService.options?.[Target.List]?.length) {
+  <div class="card-options">
+    <div class="card-options-area">
+      @for (option of optionsOnCard(); track option) {
+      <es-option-button [option]="option" [node]="node"></es-option-button>
+      }
+    </div>
+  </div>
   }
 </div>
 <ng-template #image let-playAnimation="playAnimation">

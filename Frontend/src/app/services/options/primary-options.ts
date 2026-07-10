@@ -31,17 +31,24 @@ export function createPrimaryOptions({
     applyNode.group = DefaultGroups.Primary;
     applyNode.priority = 10;
     applyNode.customShowCallback = async (nodes) => {
-        return !service.nodeHelper.isNodeCollection(nodes?.[0]);
+        // collections are only applicable when explicitly requested via applyCollections
+        return service.nodeHelper.isNodeCollection(nodes?.[0])
+            ? queryParams.applyCollections === 'true'
+            : true;
     };
     applyNode.customEnabledCallback = (nodes) => {
+        // collections also have isDirectory set, so check them before the directory branch
+        if (service.nodeHelper.isNodeCollection(nodes?.[0])) {
+            return queryParams.applyCollections === 'true';
+        }
         // either apply directories is true or it is an file
-        return service.nodeHelper.isNodeCollection(nodes?.[0])
-            ? false
-            : (nodes?.[0].isDirectory ? queryParams.applyDirectories === 'true' : true) &&
-                  // and either onlyDownloadable is explicitly required or the node has a download url
-                  ((queryParams.onlyDownloadable ?? 'false') === 'false' ||
-                      !!nodes?.[0].downloadUrl ||
-                      nodes?.[0].isDirectory);
+        return (
+            (nodes?.[0].isDirectory ? queryParams.applyDirectories === 'true' : true) &&
+            // and either onlyDownloadable is explicitly required or the node has a download url
+            ((queryParams.onlyDownloadable ?? 'false') === 'false' ||
+                !!nodes?.[0].downloadUrl ||
+                nodes?.[0].isDirectory)
+        );
     };
 
     const acceptProposal = new OptionItem('OPTIONS.COLLECTION_PROPOSAL_ACCEPT', 'check', (object) =>

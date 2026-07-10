@@ -361,7 +361,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             this.entriesService.showActions.next(this.showActions);
         }
 
-        if (changes['initConfig']) {
+        if (changes['initConfig'] && this.initConfig) {
             void this.initOptionsGenerator(this.initConfig);
         }
         if (this.componentRef) {

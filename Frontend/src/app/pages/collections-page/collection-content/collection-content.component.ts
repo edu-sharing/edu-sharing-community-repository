@@ -942,6 +942,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
                 parent: this.collection,
             });
+            // in reurl picker mode with applyCollections, wire options on the sub-collections
+            // list too so their cards expose the APPLY action (mirrors the search page). The
+            // one-shot call in ngOnChanges runs before the view/data are ready and is unreliable.
+            const queryParams = this.route.snapshot.queryParams;
+            if (queryParams.reurl && queryParams.applyCollections === 'true') {
+                void this.listCollections?.initOptionsGenerator({});
+            }
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
             }

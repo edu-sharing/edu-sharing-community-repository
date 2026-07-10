@@ -50,6 +50,17 @@ $collectionIconSize: 25px;
 
 .grid-card {
     cursor: pointer;
+    // reuse the .card-options / .card-options-area styling from node-entries-card.main
+    // (separator border, round option buttons, collection overlay background). the small
+    // card has no rating area or dropdown, so drop the main card's `1fr auto` grid — its
+    // 10px column-gap would otherwise reserve a gutter and stop the row filling full width
+    .card-options {
+        display: block;
+        .card-options-area {
+            justify-content: flex-end;
+            padding: 0 $entriesCardPaddingHorizontal $entriesCardPaddingVertical;
+        }
+    }
     &.grid-card-collection {
         // default fallback color
         background-color: rgb(var(--primaryBackground300));
