@@ -151,6 +151,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Suchen und Finden von Nutzenden außerhalb der Organisation ohne Eingabe der gesamten Nutzenden-ID.",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Suchen und Einladen Nutzender außerhalb der Organisation in gemeinsamen Ordnern im Safe.",
     "TOOLPERMISSION_COLLECTION_PINNING": "Sammlungen anpinnen und gepinnte Sammlungen verwalten.",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Hinzufügen von Materialien zu öffentlichen Sammlungen.",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Lehrplansammlungen erstellen (aktuell nicht verwendet).",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Feedback an Materialien abgeben.",
     "TOOLPERMISSION_CONFIDENTAL": "Zugriff auf gesicherten Bereich (Safe).",

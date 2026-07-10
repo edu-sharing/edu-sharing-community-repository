@@ -144,6 +144,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Searching and inviting users outside the organization in shared folders",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Searching and inviting users outside the organization in shared folders in the safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Pinning collections and managing pinned collections",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Adding materials to public collections",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creating curriculum collections (currently not used)",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Give feedback on other materials",
     "TOOLPERMISSION_CONFIDENTAL": "Access to the secure area (safe)",
