@@ -144,7 +144,8 @@ export class UsagesPreviewComponent {
     protected readonly selectedRange = signal<number>(RANGE_OPTIONS[0]);
 
     /** External feedback link shown in a container below the details */
-    protected readonly feedbackUrl = 'https://edu-sharing.com/impressum/';
+    protected readonly feedbackUrl =
+        'https://edu-sharing.atlassian.net/wiki/external/M2VlMmE5NGM4MWVlNDY5NmJiMGZkMGEyZTk3MWM2YjE';
 
     /** Whether the dashboard link is shown – requires the selective-statistics toolpermission */
     protected readonly showDashboardLink = this.connector.hasToolPermissionInstant(
