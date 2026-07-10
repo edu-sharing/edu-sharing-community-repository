@@ -52,9 +52,16 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     private async setInitialWidth() {
         const defaultWidth = this.getDefaultWidth();
         if (this.storageKey) {
-            const lastValue = this.applyWidthConstrains(
-                await this.storage.get<number>(this.storageKey, defaultWidth, Store.LocalStorage),
+            let storageValue = await this.storage.get<number>(
+                this.storageKey,
+                defaultWidth,
+                Store.LocalStorage,
             );
+            if (storageValue === 0) {
+                storageValue = defaultWidth;
+            }
+            const lastValue = this.applyWidthConstrains(storageValue);
+
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
             this.renderer.setAttribute(
                 this.resizer,
