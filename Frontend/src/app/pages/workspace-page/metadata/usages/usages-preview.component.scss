@@ -202,8 +202,27 @@
     color: var(--textMain);
 }
 
-// the usage title; truncates so a trailing cluster badge stays visible
+// the usage title; a single centered row of [source chip] : [course]
 .usage-row__title {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+// source chip: platform logo + instance name, kept together and never truncated
+.usage-row__source {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.usage-row__source-sep {
+    flex-shrink: 0;
+    margin: 0 4px 0 1px;
+}
+
+// course/folder name; takes the remaining width and truncates with an ellipsis
+.usage-row__course {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -237,6 +256,33 @@
     &:focus-visible {
         text-decoration: underline;
     }
+}
+
+// embeddings: platform logo shown before the instance name, both inside the source link
+.usage-row__source-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    i {
+        color: var(--primary);
+    }
+}
+
+// the anchor is an inline-flex chip, so underline the name text explicitly on hover
+.usage-row__source:hover .usage-row__source-name,
+.usage-row__source:focus-visible .usage-row__source-name {
+    text-decoration: underline;
 }
 
 // right-hand metrics block (value + percentage + bar); aligned with the head-value
