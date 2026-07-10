@@ -8,9 +8,9 @@ $sidenavWidth: 250px;
     position: relative;
     display: flex;
     flex-direction: column;
-    // Lock to the available viewport height (below the in-flow sticky main nav) and clip, so the
-    // page never produces a body scrollbar — the content card scrolls internally instead.
-    height: calc(100vh - var(--mainnavCurrentHeight));
+    // Match the search page: only a `min-height` (no fixed `height`) so the host may grow past the
+    // viewport and reveal the full-width footer below the card via the body scroll. The card itself
+    // still scrolls internally (its height comes from the roundedContainerStaticScroll mixin).
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     overflow: hidden;
 }
