@@ -28,7 +28,7 @@ export function createReuseOptions({
             optionConfig: {
                 state: TabType.COLLECTIONS,
                 selection:
-                    components.list?.getSelection() ||
+                    components?.list?.getSelection() ||
                     service.nodeEntriesGlobalService?.getPrimaryInstance()?.selection ||
                     new SelectionModel(false, service.getObjects(object, data)),
             } as NodesSelectorConfig,
