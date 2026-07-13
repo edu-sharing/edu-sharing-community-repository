@@ -1,19 +1,35 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'admin.variables' as admin;
 @use 'sass:color';
 
-.main {
+// Page shell: lock to the available viewport height (below the in-flow sticky main nav) and clip, so
+// the page never produces a body scrollbar — the card scrolls its content internally instead.
+:host {
     display: flex;
-    width: 100%;
-    min-height: 100%;
+    flex-direction: column;
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
+}
+
+.main {
+    // The rounded card (same mixins as workspace/search): fixed height, scrolls its content
+    // internally. roundedContainerStaticScroll sets flex-direction:column, so restore row here.
+    @include mixins.roundedContainerCard($mobileTabSwitchWidth, $mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll($mobileTabSwitchWidth, $mobileTabNavHeight);
+    flex-direction: row;
     .main-nav {
-        position: fixed;
+        // In-flow left column (was viewport-fixed); fills the card height and scrolls its button
+        // list internally. The card's overflow:hidden rounds its left corners.
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
         background-color: var(--backgroundColor);
-        height: calc(100% - var(--mainnavHeight));
         overflow-y: auto;
         width: admin.$sidenavWidth;
+        border-right: 1px solid var(--mat-divider-color);
+        @include mixins.materialScrollbarLight();
         > div {
             height: 100%;
             .button {
@@ -36,11 +52,13 @@
         }
     }
     .main-content {
+        // The only scrolling region of the card; fills the space next to the nav.
         padding: 20px;
-        width: 100%;
         min-width: 0;
-        margin-left: admin.$sidenavWidth;
-        flex-grow: 1;
+        min-height: 0;
+        flex: 1;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
         .btn-flat {
             min-height: 36px;
             height: auto;
@@ -48,9 +66,6 @@
         .updates-loading {
             display: flex;
             margin: auto;
-        }
-        &.main-content-no-nav {
-            margin-left: 0;
         }
     }
     // has own padding cause of tabs
@@ -781,9 +796,6 @@
                 display: none;
             }
             width: admin.$sidenavWidthMobile;
-        }
-        .main-content {
-            margin-left: admin.$sidenavWidthMobile;
         }
     }
 }
