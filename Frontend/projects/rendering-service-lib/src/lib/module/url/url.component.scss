@@ -118,8 +118,8 @@
                         font-size: 0.875rem;
                     }
                     button {
-                        background-color: green;
-                        color: white;
+                        background-color: var(--gdprButtonBackgroundColor);
+                        color: var(--gdprButtonFontColor);
                     }
                 }
             }

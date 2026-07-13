@@ -19,6 +19,9 @@
     --primaryForeground800: var(--palette-primary-800);
     --primaryForeground900: var(--palette-primary-900);
 
+    // gdpr button rs ("Zustimmen & Fortfahren")
+    --gdprButtonBackgroundColor: #008000;
+    --gdprButtonFontColor: #fff;
     --aiColor: #2c0799;
     --aiColorChipBg: color-mix(in srgb, var(--aiColor), #fff 75%);
     --aiColorText: #fff;
