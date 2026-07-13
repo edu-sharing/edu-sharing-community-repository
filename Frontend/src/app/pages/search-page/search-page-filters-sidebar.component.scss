@@ -1,21 +1,26 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
 :host {
     display: flex;
-    border-right: 1px solid var(--mat-sidenav-container-divider-color);
 }
 
 .filter-bar-container {
     width: 300px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin: 10px;
-    border-radius: 10px;
+    // Unify with the results view
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    margin-right: 4px;
     &[hidden] {
         display: none;
     }
 }
 
 .filter-bar-heading {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 0 20px;
@@ -23,23 +28,25 @@
     border-bottom: 1px solid var(--mat-divider-color);
     .filter-bar-title {
         flex-grow: 1;
-        font-size: 180%;
+        font-size: 160%;
         margin: 0;
         font-weight: 400;
     }
     .filter-bar-close-button {
-        margin-right: -10px;
         flex-shrink: 0;
-        height: 40px;
-        width: 40px;
+        // Resize via the MDC token so the icon stays centered. Overriding width/height directly
+        // keeps MDC's 48px-calibrated padding and pushes the glyph off-centre.
+        --mdc-icon-button-state-layer-size: 40px;
     }
 }
 
 .filter-bar-body {
     flex-grow: 1;
+    min-height: 0;
     overflow: auto;
     --container-padding: 20px;
     padding: var(--container-padding);
+    @include mixins.materialScrollbarLight();
 }
 
 .filters-dialog-content {
