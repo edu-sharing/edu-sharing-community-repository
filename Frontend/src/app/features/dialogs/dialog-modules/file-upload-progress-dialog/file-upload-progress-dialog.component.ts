@@ -3,7 +3,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { FormatSizePipe } from 'ngx-edu-sharing-ui';
 import {
     DialogButton,
-    NodeWrapper,
     RestConstants,
     RestHelper,
     RestNodeService,
@@ -220,30 +219,44 @@ export class FileUploadProgressDialogComponent implements OnInit {
                     RestConstants.COMMENT_CONTENT_UPDATE,
                     { file },
                 )
-                .subscribe(nextUpload(existingNode), nextError(existingNode));
+                .subscribe({ next: nextUpload(existingNode), error: nextError(existingNode) });
         } else {
-            this.nodeService
-                .createNode(
-                    this._getParent(),
-                    RestConstants.CCM_TYPE_IO,
-                    [],
-                    RestHelper.createNameProperty(file.name),
-                    this.keep,
-                )
-                .subscribe((data: NodeWrapper) => {
-                    this.nodeService
-                        .uploadNodeContent(
-                            data.node.ref.id,
-                            file,
-                            RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                            'auto',
-                            (progress) => {
-                                progress.progress = Math.round(progress.progress * 100);
-                                this.progress[number].progress = progress;
-                            },
-                        )
-                        .subscribe(nextUpload(data.node), nextError(data.node));
-                }, nextError(null));
+            this.nodeApi
+                .createChild({
+                    repository: RestConstants.HOME_REPOSITORY,
+                    node: this._getParent(),
+                    type: RestConstants.CCM_TYPE_IO,
+                    renameIfExists: this.keep,
+                    body: RestHelper.createNameProperty(file.name),
+                })
+                .subscribe({
+                    next: (node: Node) => {
+                        const start = new Date().getTime();
+                        this.nodeApi
+                            .changeContent(
+                                node.ref.repo,
+                                node.ref.id,
+                                'auto',
+                                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                { file },
+                                ({ loaded, total }) => {
+                                    const elapsed = (new Date().getTime() - start) / 1000;
+                                    this.progress[number].progress = {
+                                        start,
+                                        loaded,
+                                        total,
+                                        elapsed,
+                                        progress: total ? Math.round((loaded / total) * 100) : 0,
+                                        remaining: loaded
+                                            ? ((total - loaded) * elapsed) / loaded
+                                            : 0,
+                                    };
+                                },
+                            )
+                            .subscribe({ next: nextUpload(node), error: nextError(node) });
+                    },
+                    error: nextError(null),
+                });
         }
     }
 

@@ -1,7 +1,10 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { NodeV1Service, SearchV1Service } from '../api/services';
+import { RequestBuilder } from '../api/request-builder';
+import { changeContent1 } from '../api/fn/node-v-1/change-content-1';
 import { HOME_REPOSITORY } from '../constants';
 import {
     Node,
@@ -43,6 +46,7 @@ export class NodeTools {
 export class NodeService {
     private nodeV1 = inject(NodeV1Service);
     private searchV1 = inject(SearchV1Service);
+    private http = inject(HttpClient);
 
     private static readonly parentsCache = new KeyCache<ParentEntries>();
     private static readonly nodesCache = new KeyCache<Node>();
@@ -428,16 +432,50 @@ export class NodeService {
              */
             file?: Blob;
         },
+
+        /**
+         * Optional callback that receives the number of bytes uploaded so far and
+         * the total number of bytes. When provided, the request is issued with
+         * progress reporting enabled.
+         */
+        onProgress?: (progress: { loaded: number; total: number }) => void,
     ): Observable<Node> {
-        return this.nodeV1
-            .changeContent1({
-                repository,
-                node,
-                versionComment,
-                mimetype,
-                body,
-            })
-            .pipe(map((nEntry) => nEntry.node));
+        if (!onProgress) {
+            return this.nodeV1
+                .changeContent1({
+                    repository,
+                    node,
+                    versionComment,
+                    mimetype,
+                    body,
+                })
+                .pipe(map((nEntry) => nEntry.node));
+        }
+        // The generated client only emits the final response; to report upload
+        // progress we build the request ourselves and observe the event stream.
+        const rb = new RequestBuilder(this.nodeV1.rootUrl, changeContent1.PATH, 'post');
+        rb.path('repository', repository, {});
+        rb.path('node', node, {});
+        rb.query('versionComment', versionComment, {});
+        rb.query('mimetype', mimetype, {});
+        rb.body(body, 'multipart/form-data');
+        return this.http
+            .request<NodeEntry>(
+                rb.build({
+                    responseType: 'json',
+                    accept: 'application/json',
+                    reportProgress: true,
+                }),
+            )
+            .pipe(
+                tap((event) => {
+                    if (event.type === HttpEventType.UploadProgress) {
+                        onProgress({ loaded: event.loaded, total: event.total ?? 0 });
+                    }
+                }),
+                filter((event): event is HttpResponse<NodeEntry> => event instanceof HttpResponse),
+                map((response) => (response.body as NodeEntry).node),
+            );
     }
 
     copyMetadata(targetId: string, sourceId: string, { repository = HOME_REPOSITORY }) {
