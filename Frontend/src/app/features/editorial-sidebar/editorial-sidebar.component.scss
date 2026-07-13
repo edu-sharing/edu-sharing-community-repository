@@ -82,12 +82,14 @@
     &.option-VERSION_MANAGEMENT,
     &.option-PREVIEW,
     &.option-SORT_INTO,
+    &.option-MANAGE_CONTENT,
     &.option-MANAGE_SUBMISSION {
         // has own padding cause of tabs
         padding: 0;
     }
 
-    &.option-SORT_INTO {
+    &.option-SORT_INTO,
+    &.option-MANAGE_CONTENT {
         // set full height
         height: 100%;
     }

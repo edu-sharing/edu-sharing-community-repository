@@ -80,19 +80,23 @@
     }
 }
 
+// Full-width sticky footer; matches the layout/size of the .selection-action-bar (as done for
+// the usages__footer): fixed 69px height, rounded-card background and divider border-top.
 .tab-action-bar {
-    // fixed height
     flex: 0 0 auto;
     position: sticky;
     z-index: 1;
-    background: var(--defaultBackground);
-    padding: 8px 20px;
+    background: var(--roundedContainerBackground);
+    min-height: 69px;
+    box-sizing: border-box;
+    padding: 0 20px;
     bottom: 0;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    border-top: 1px solid #ccc;
-    box-sizing: border-box;
+    border-top: 1px solid var(--mat-divider-color);
+    box-shadow: 0px -2px 8px 0px #0000000f;
 
     .back-btn {
         margin-right: auto;
