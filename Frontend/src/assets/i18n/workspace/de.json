@@ -431,7 +431,13 @@
       "REPLACE_PREVIEW": "Vorschaubild ersetzen",
       "DELETE_PREVIEW": "Vorschaubild löschen",
       "PREVIEW_DELETED": "Vorschaubild wird gelöscht",
-      "UPDATED": "Informationen wurden aktualisiert"
+      "UPDATED": "Informationen wurden aktualisiert",
+      "PREVIEW_CHANGE": "Vorschaubild ändern",
+      "PREVIEW_UPLOAD": "Bild hochladen",
+      "PREVIEW_FROM_SEARCH": "Bild aus Suche wählen",
+      "PREVIEW_PASTE_CLIPBOARD": "Aus Zwischenablage einfügen",
+      "PREVIEW_CLIPBOARD_NO_IMAGE": "Die Zwischenablage enthält kein Bild.",
+      "PREVIEW_CLIPBOARD_ERROR": "Die Zwischenablage konnte nicht gelesen werden."
     },
     "REVERTED_VERSION": "Version wurde erfolgreich wiederhergestellt",
     "NODE_TEMPLATE": {

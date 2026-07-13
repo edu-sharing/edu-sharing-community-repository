@@ -6,6 +6,8 @@
   (change)="setPreview($event)"
   (cancel)="$event.stopPropagation()"
 />
+<!-- collapsed menu with options to change the preview image -->
+<es-dropdown #previewDropdown [options]="previewOptions" position="right"></es-dropdown>
 <div class="preview-wrapper">
   @if (mdsEditorInstance.editorMode === 'inline') {
   <mat-label>{{ 'WORKSPACE.EDITOR.PREVIEW' | translate }}</mat-label>
@@ -29,19 +31,17 @@
     </div>
     }
     <div class="button-group">
-      @if (mdsEditorInstance.hasAi | async) {
+      @if (previewOptions.length) {
       <button
         esElementRef
         #overlayRef="esElementRef"
         mat-fab
         [color]="$any('white')"
-        (click)="showOverlay()"
+        [matMenuTriggerFor]="previewDropdown.menu"
+        [matTooltip]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
+        [attr.aria-label]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
       >
-        <i esIcon="brush"></i>
-      </button>
-      } @if (mdsEditorInstance.editorMode !== 'viewer') {
-      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
-        <i esIcon="upload"></i>
+        <i esIcon="edit"></i>
       </button>
       } @if ( mdsEditorInstance.editorMode !== 'viewer' && !delete && (file || getType() ===
       'TYPE_USERDEFINED') ) {

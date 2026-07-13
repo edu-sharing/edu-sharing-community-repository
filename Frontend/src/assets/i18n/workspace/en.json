@@ -393,7 +393,13 @@
       "REPLACE_PREVIEW": "Replace preview",
       "DELETE_PREVIEW": "Delete preview",
       "UPDATED": "Information updated",
-      "PREVIEW_DELETED": "Thumbnail is deleted"
+      "PREVIEW_DELETED": "Thumbnail is deleted",
+      "PREVIEW_CHANGE": "Change preview image",
+      "PREVIEW_UPLOAD": "Upload image",
+      "PREVIEW_FROM_SEARCH": "Select image from search",
+      "PREVIEW_PASTE_CLIPBOARD": "Paste from clipboard",
+      "PREVIEW_CLIPBOARD_NO_IMAGE": "The clipboard does not contain an image.",
+      "PREVIEW_CLIPBOARD_ERROR": "The clipboard could not be read."
     },
     "REVERTED_VERSION": "Version has been reverted successfully",
     "NODE_TEMPLATE": {

@@ -348,7 +348,13 @@
       "REPLACE_PREVIEW": "Sostituire l'anteprima",
       "DELETE_PREVIEW": "Cancellare l'anteprima",
       "UPDATED": "Informazioni aggiornate",
-      "PREVIEW_DELETED": "La miniatura viene eliminata"
+      "PREVIEW_DELETED": "La miniatura viene eliminata",
+      "PREVIEW_CHANGE": "Modifica l'immagine di anteprima",
+      "PREVIEW_UPLOAD": "Carica immagine",
+      "PREVIEW_FROM_SEARCH": "Scegli immagine dalla ricerca",
+      "PREVIEW_PASTE_CLIPBOARD": "Incolla dagli appunti",
+      "PREVIEW_CLIPBOARD_NO_IMAGE": "Gli appunti non contengono immagini.",
+      "PREVIEW_CLIPBOARD_ERROR": "Impossibile leggere gli appunti."
     },
     "REVERTED_VERSION": "La versione è stata ripristinata con successo",
     "NODE_TEMPLATE": {
