@@ -13,6 +13,7 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -132,6 +133,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     @ViewChild('faTemplate') faTemplate: TemplateRef<unknown>;
     @ViewChild('faCode') faCode: TemplateRef<unknown>;
     @ViewChild('actionbar') actionbar: ActionbarComponent;
+    @ViewChild('actionbarActions') actionbarActions: ActionbarComponent;
     @ViewChild('passwordRef') passwordRef: InputPasswordComponent;
     @ViewChild('actionbarMember') actionbarMember: ActionbarComponent;
     @ViewChild('actionbarSignup') actionbarSignup: ActionbarComponent;
@@ -222,6 +224,20 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     public _mode: ListItemType;
     public addTo: any;
     addToSelection: GenericAuthority[];
+    /** Currently selected authorities, drives the bottom selection footer (mirrors search-page). */
+    selectedItems: GenericAuthority[] = [];
+    /** Whether the selected-nodes overlay above the selection footer is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the footer's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     @Input() set org(org: Organization) {
         this._org = org;
@@ -389,7 +405,15 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 // do not fire in org mode since this loses selection on tab switch
                 filter(() => this._mode !== 'ORG'),
             )
-            .subscribe((selection) => this.selection.emit(selection.source.selected));
+            .subscribe((selection) => {
+                this.selectedItems = selection.source.selected;
+                // Close the selected-nodes overlay once nothing is selected, so it doesn't
+                // auto-reopen (stale open flag) on the next selection.
+                if (!this.selectedItems.length) {
+                    this.selectionOverlayOpen = false;
+                }
+                this.selection.emit(selection.source.selected);
+            });
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -731,7 +755,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.signupActions.addOptions = [signupAdd, signupRemove];
         }
         await this.nodeEntries?.initOptionsGenerator({
-            actionbar: this.actionbar,
+            // The top bar paints the no-selection actions (see [showActionOptions] in the template);
+            // the sticky footer bar paints the selected-item actions ([showToggleOptions]="false").
+            actionbar: [this.actionbar, this.actionbarActions].filter(
+                (bar): bar is ActionbarComponent => !!bar,
+            ),
             customOptions: this.options,
         });
     }
@@ -1575,6 +1603,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 this._org = null;
                 this.selection.emit(null);
                 this.nodeEntries.getSelection().clear();
+                // The changed subscription is filtered out in ORG mode, so sync the selection
+                // footer state manually here.
+                this.selectedItems = [];
+                this.selectionOverlayOpen = false;
                 return;
             }
             this._org = event.element as Organization;
@@ -1582,6 +1614,36 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.nodeEntries.getSelection().clear();
         this.nodeEntries.getSelection().select(event.element);
         this.selection.emit(this.nodeEntries.getSelection().selected);
+        // Keep the selection footer in sync for ORG mode (see note above); harmless for other modes.
+        this.selectedItems = this.nodeEntries.getSelection().selected;
+    }
+
+    /** Clear the whole selection from the footer's clear button. */
+    clearSelection() {
+        this.nodeEntries.getSelection().clear();
+        this.selectedItems = [];
+        this.selectionOverlayOpen = false;
+        // In ORG mode the selection drives the org-scoped sub-tabs; deselecting the org resets them.
+        if (this._mode === 'ORG' && this._org) {
+            this._org = null;
+            this.selection.emit(null);
+        }
+    }
+
+    /** Remove a single authority from the selection (unchecked in the selected-nodes overlay). */
+    deselectNode(node: GenericAuthority) {
+        this.nodeEntries.getSelection().deselect(node);
+        // ORG mode's changed subscription is filtered out, so sync the footer state manually.
+        if (this._mode === 'ORG') {
+            this.selectedItems = this.nodeEntries.getSelection().selected;
+            if (!this.selectedItems.length) {
+                this.selectionOverlayOpen = false;
+                if (this._org) {
+                    this._org = null;
+                    this.selection.emit(null);
+                }
+            }
+        }
     }
 
     private updateColumns() {
