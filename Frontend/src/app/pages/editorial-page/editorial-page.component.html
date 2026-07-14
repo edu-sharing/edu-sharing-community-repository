@@ -17,17 +17,30 @@
     esResizableSidenav
   >
     <div class="es-mat-sidenav-content es-mat-sidenav-content-mds">
-      @if (mdsGroup() && (searchValues$ | async) !== null) {
-      <es-mds-editor-wrapper
-        [groupId]="mdsGroup()"
-        [embedded]="true"
-        [repository]="HOME_REPOSITORY"
-        [mode]="'search'"
-        (mdsLoaded)="mdsLoaded$.next(true)"
-        [currentValues]="searchValues$ | async"
-        (currentValuesChange)="updateMdsFilter($event)"
-      ></es-mds-editor-wrapper>
-      }
+      <!-- Filter header similar to es-search-page-filters-sidebar -->
+      <div class="filter-bar-heading">
+        <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+        <button
+          class="filter-bar-close-button"
+          mat-icon-button
+          (click)="filtersButtonClicked.next()"
+        >
+          <i esIcon="close" [aria]="true"></i>
+        </button>
+      </div>
+      <div class="filter-bar-body">
+        @if (mdsGroup() && (searchValues$ | async) !== null) {
+        <es-mds-editor-wrapper
+          [groupId]="mdsGroup()"
+          [embedded]="true"
+          [repository]="HOME_REPOSITORY"
+          [mode]="'search'"
+          (mdsLoaded)="mdsLoaded$.next(true)"
+          [currentValues]="searchValues$ | async"
+          (currentValuesChange)="updateMdsFilter($event)"
+        ></es-mds-editor-wrapper>
+        }
+      </div>
     </div>
   </mat-sidenav>
 

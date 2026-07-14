@@ -32,6 +32,42 @@ mat-sidenav-container {
     min-height: 0;
     .es-mat-sidenav-content-mds {
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .filter-bar-heading {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: vars.$secondaryBarHeight;
+            background-color: var(--roundedContainerBackground);
+            @include mixins.materialShadowBottom();
+            // paint the shadow above the scrolled filter body
+            position: relative;
+            z-index: 1;
+            // heading style unified with the search filter bar's .filter-bar-title
+            .filter-bar-title {
+                flex-grow: 1;
+                font-size: 140%;
+                margin: 0;
+                font-weight: 400;
+            }
+            .filter-bar-close-button {
+                flex-shrink: 0;
+                // Resize via the MDC token so the icon stays centered (matches the search sidebar).
+                --mdc-icon-button-state-layer-size: 40px;
+            }
+        }
+
+        .filter-bar-body {
+            flex-grow: 1;
+            min-height: 0;
+            overflow: auto;
+            --container-padding: 20px;
+            padding: var(--container-padding);
+            @include mixins.materialScrollbarLight();
+        }
     }
     .main-content {
         // Unified secondary-bar header: breadcrumb left, toggle actionbar right.
