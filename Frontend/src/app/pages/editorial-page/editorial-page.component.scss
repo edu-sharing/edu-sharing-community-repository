@@ -42,7 +42,9 @@ mat-sidenav-container {
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 0 var(--roundedContainerMargin);
+            // no left padding: the breadcrumb carries the 30px inset itself (mirrors the
+            // workspace `.topbarFrame > div > es-breadcrumbs`), so it lands 30px from the card edge.
+            padding: 0 var(--roundedContainerMargin) 0 0;
             height: vars.$secondaryBarHeight;
             background-color: var(--roundedContainerBackground);
             @include mixins.materialShadowBottom();
@@ -50,6 +52,13 @@ mat-sidenav-container {
             // both live in the same stacking context, so the header must outrank the tab bar.
             position: relative;
             z-index: 3;
+            > es-editorial-breadcrumb {
+                // same left inset es-breadcrumbs gets from the workspace topbar
+                padding-left: 30px;
+                @media screen and (max-width: vars.$mobileTabSwitchWidth) {
+                    padding-left: 20px;
+                }
+            }
             > es-actionbar {
                 margin-left: auto;
             }

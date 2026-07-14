@@ -1,29 +1,62 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
 :host {
     display: flex;
     align-items: center;
+}
 
-    .nav-wrapper {
-        ol {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
+.nav-wrapper {
+    display: flex;
+    align-items: center;
 
-            list-style: none;
-            margin: 0;
-            padding: 0;
+    ol {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
 
-            li {
-                margin: 0;
-                padding: 0;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
 
-                > a {
-                    font-size: vars.$fontSizeXLarge;
-                    font-weight: bold;
-                    text-decoration: none;
-                }
-            }
+    li {
+        margin: 0;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    // Breadcrumb links: same style as es-breadcrumbs `.breadcrumb-inner` (primary color, normal
+    // weight, truncating) with the current page bold in the default text color.
+    a {
+        color: var(--primary);
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+        text-decoration: none;
+        @include mixins.clickable();
+
+        &[aria-current='page'] {
+            color: unset;
+            font-weight: bold;
         }
+
+        // editorial anchors are plain routerLinks (no cdkMonitorElementFocus), so key off
+        // :focus-visible directly to deliver the same keyboard focus ring
+        &:focus-visible {
+            @include mixins.setGlobalKeyboardFocus();
+        }
+    }
+
+    // Separator arrows: same style as es-breadcrumbs `.breadcrumb-arrow` (+ the fixed 35px
+    // centered width it shares with the home icon).
+    > ol > i {
+        width: 35px;
+        text-align: center;
+        font-size: 15pt;
+        color: vars.$textLight;
     }
 }
