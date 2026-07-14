@@ -72,6 +72,7 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -96,7 +97,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     protected final DictionaryService dictionaryService;
     protected final BehaviourFilter policyBehaviourFilter;
     protected String repositoryId = ApplicationInfoList.getHomeRepository().getAppId();
+    @Qualifier("NodeService")
     protected final NodeService nodeService;
+    @Qualifier("alfrescoDefaultDbNodeService")
+    protected final NodeService nodeServiceAlfresco;
     protected final VersionService versionService;
     protected final HandleServiceFactory handleServiceFactory;
     protected final RepositoryCache repositoryCache;
@@ -212,12 +216,12 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
                     name = NodeServiceHelper.renameNode(finalName, renameCounter);
                 }
                 // skip names already taken in the target folder
-                NodeRef existing = nodeService.getChildByName(parentRef, assocTypeQName, name);
+                NodeRef existing = nodeServiceAlfresco.getChildByName(parentRef, assocTypeQName, name);
                 if (existing != null && !existing.equals(copyNodeRef)) {
                     renameCounter++;
                     continue;
                 }
-                nodeService.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
+                nodeServiceAlfresco.setProperty(copyNodeRef, QName.createQName(CCConstants.CM_NAME), name);
                 break;
             }
             resetVersion(copyNodeRef);
@@ -595,14 +599,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             NodeRef nodeRef = new NodeRef(store, nodeId);
             //logger.info("nodeRef:"+ nodeRef +"path: " + nodeServiceAlfresco.getPath(nodeRef).toDisplayPath(serviceRegistry.getNodeService(),serviceRegistry.getPermissionService()));
             if (log.isDebugEnabled()) {
-                log.debug("nodeRef:{}path: {}", nodeRef, nodeService.getPath(nodeRef).toPrefixString(namespaceService));
+                log.debug("nodeRef:{}path: {}", nodeRef, nodeServiceAlfresco.getPath(nodeRef).toPrefixString(namespaceService));
             }
             List<ChildAssociationRef> assocs;
             if (types == null) {
-                assocs = nodeService.getChildAssocs(nodeRef);
+                assocs = nodeServiceAlfresco.getChildAssocs(nodeRef);
             } else {
                 Set<QName> typesConverted = types.stream().map(QName::createQName).collect(Collectors.toSet());
-                assocs = nodeService.getChildAssocs(nodeRef, typesConverted);
+                assocs = nodeServiceAlfresco.getChildAssocs(nodeRef, typesConverted);
             }
 
             for (ChildAssociationRef assoc : assocs) {
@@ -614,10 +618,10 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             }
             List<ChildAssociationRef> maps;
             if (recurseMode.equals(RecurseMode.Folders)) {
-                maps = nodeService.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
+                maps = nodeServiceAlfresco.getChildAssocs(nodeRef, new HashSet<>(Arrays.asList(QName.createQName(CCConstants.CCM_TYPE_MAP), QName.createQName(CCConstants.CM_TYPE_FOLDER))));
             } else if (recurseMode.equals(RecurseMode.All)) {
                 // in theory, every object may have children, so we need to access all of them
-                maps = nodeService.getChildAssocs(nodeRef);
+                maps = nodeServiceAlfresco.getChildAssocs(nodeRef);
             } else {
                 throw new IllegalArgumentException("invalid RecurseMode");
             }
@@ -1057,13 +1061,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         if (cache.containsKey(keyType1)) {
             type1 = (String) cache.get(keyType1);
         } else {
-            type1 = nodeService.getType(n1).toString();
+            type1 = nodeServiceAlfresco.getType(n1).toString();
             cache.put(keyType1, type1);
         }
         if (cache.containsKey(keyType2)) {
             type2 = (String) cache.get(keyType2);
         } else {
-            type2 = nodeService.getType(n2).toString();
+            type2 = nodeServiceAlfresco.getType(n2).toString();
             cache.put(keyType2, type2);
         }
         if (EduSharingNodeHelper.typeIsDirectory(type1) != EduSharingNodeHelper.typeIsDirectory(type2)) {
@@ -1155,14 +1159,14 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     private Serializable getSortPropertyValue(NodeRef ref, QName prop) {
-        Serializable value = nodeService.getProperty(ref, prop);
+        Serializable value = nodeServiceAlfresco.getProperty(ref, prop);
         //dbnodeservice returns mltext
         if (value instanceof MLText) {
             value = ((MLText) value).getDefaultValue();
         }
 
         if (prop.toString().equals(CCConstants.LOM_PROP_GENERAL_TITLE) && StringUtils.isBlank((String) value)) {
-            return nodeService.getProperty(ref, ContentModel.PROP_NAME);
+            return nodeServiceAlfresco.getProperty(ref, ContentModel.PROP_NAME);
         }
         return value;
     }
@@ -1303,15 +1307,15 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
         NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
         if (!recycle) {
-            nodeService.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+            nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
         }
         //serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
         Method method = null;
         try {
-            method = nodeService.getClass().getDeclaredMethod("deleteNode", NodeRef.class, boolean.class);
+            method = nodeServiceAlfresco.getClass().getDeclaredMethod("deleteNode", NodeRef.class, boolean.class);
             method.setAccessible(true);
 
-            Object r = method.invoke(nodeService, nodeRef, false);
+            Object r = method.invoke(nodeServiceAlfresco, nodeRef, false);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             log.error(e.getMessage(), e);
         }
@@ -2063,7 +2067,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             return refResolved;
         }
         // handle copied nodes
-        NodeRef original = ((NodeRef) nodeService.getProperty(refResolved, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
+        NodeRef original = ((NodeRef) nodeServiceAlfresco.getProperty(refResolved, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)));
         if (original != null) {
             nodeId = original.getId();
         }
@@ -2084,7 +2088,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         }
         // use the nodeServiceAlfresco since the nodeRef might be null if original was deleted
         if (hasAspect(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-            nodeId = (String) nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
+            nodeId = (String) nodeServiceAlfresco.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), QName.createQName(CCConstants.CCM_PROP_IO_ORIGINAL));
         }
         return new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
     }
