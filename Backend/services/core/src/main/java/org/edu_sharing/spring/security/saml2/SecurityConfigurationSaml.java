@@ -111,10 +111,11 @@ public class SecurityConfigurationSaml {
         org.edu_sharing.alfresco.service.config.model.Config clientConfig = null;
         try {
             clientConfig = ConfigServiceFactory.getCurrentConfig();
+            // a local wayf config
             String loginProvidersUrl = clientConfig.getValue("loginProvidersUrl", null);
             boolean allowLocal = clientConfig.getValue("loginAllowLocal",false);
             //check for both loginProvidersUrl ends in endless loop
-            if(loginProvidersUrl != null && allowLocal){
+            if(loginProvidersUrl != null || allowLocal){
                 loginPath =   "/components/login";
             }
         } catch (Exception e) {
