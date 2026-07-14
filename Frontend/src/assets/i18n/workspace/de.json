@@ -196,6 +196,7 @@
         "TIME_HINT": "HH:MM",
         "INVALID_RANGE": "Der Start-Zeitpunkt muss vor dem End-Zeitpunkt liegen",
         "IN_PAST": "Der Start-Zeitpunkt darf nicht in der Vergangenheit liegen",
+        "DATE_IN_PAST": "Das Datum darf nicht in der Vergangenheit liegen",
         "WITHOUT_LIMITS": "Unbegrenzt",
         "START": "Start",
         "END": "End",

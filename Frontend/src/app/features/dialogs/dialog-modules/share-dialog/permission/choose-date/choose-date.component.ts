@@ -21,6 +21,8 @@ import {
 } from '@angular/forms';
 import { TranslationsService } from 'ngx-edu-sharing-ui';
 import { DateAdapter } from '@angular/material/core';
+import { provideDateFnsAdapter } from '@angular/material-date-fns-adapter';
+import { de, enUS, fr, it, type Locale } from 'date-fns/locale';
 import { merge } from 'rxjs';
 import { SharedModule } from '../../../../../../shared/shared.module';
 
@@ -40,6 +42,7 @@ import { SharedModule } from '../../../../../../shared/shared.module';
             useExisting: forwardRef(() => ShareDialogChooseDateComponent),
             multi: true,
         },
+        provideDateFnsAdapter(),
     ],
 })
 export class ShareDialogChooseDateComponent implements OnInit, ControlValueAccessor, Validator {
@@ -61,6 +64,10 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
     }
     @Input() from?: number;
     @Input() to?: number;
+    @Input() editable = false;
+    /** custom errors if needed, e.g. the component is used as a single date selection */
+    @Input() minError = 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE';
+    @Input() maxError = 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE';
     @Output() dateTimeChange = new EventEmitter<number>();
 
     readonly dateControl = new FormControl<Date | null>(null);
@@ -72,13 +79,11 @@ export class ShareDialogChooseDateComponent implements OnInit, ControlValueAcces
     private _onValidatorChange?: () => void;
     private readonly destroyRef = inject(DestroyRef);
 
+    private static readonly DATE_FNS_LOCALES: Record<string, Locale> = { de, en: enUS, fr, it };
+
     constructor() {
-        console.log(this.translationsService.getLocale());
-        if (this.translationsService.getLocale()) {
-            this.dateAdapter.setLocale(this.translationsService.getLocale());
-        } else {
-            this.dateAdapter.setLocale('de-DE');
-        }
+        const lang = this.translationsService.getLanguage() ?? '';
+        this.dateAdapter.setLocale(ShareDialogChooseDateComponent.DATE_FNS_LOCALES[lang] ?? de);
     }
 
     ngOnInit(): void {

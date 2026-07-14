@@ -2,7 +2,7 @@
   <mat-label>{{ 'WORKSPACE.SHARE.TIMEBASED.DATE_LABEL' | translate }}</mat-label>
   <input
     matInput
-    readonly
+    [readonly]="!editable"
     [formControl]="dateControl"
     [matDatepicker]="picker"
     [min]="minDate"
@@ -15,9 +15,13 @@
   <mat-error>
     {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE' | translate }}
   </mat-error>
-  } @if (dateControl.hasError('matDatepickerMin') || dateControl.hasError('matDatepickerMax')) {
+  } @if (dateControl.hasError('matDatepickerMin')) {
   <mat-error>
-    {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
+    {{ minError | translate }}
+  </mat-error>
+  } @if (dateControl.hasError('matDatepickerMax')) {
+  <mat-error>
+    {{ maxError | translate }}
   </mat-error>
   }
 </mat-form-field>

@@ -89,6 +89,8 @@
           #dateChooser
           [from]="now"
           [(dateTime)]="dateTime"
+          [editable]="true"
+          [minError]="'WORKSPACE.SHARE.TIMEBASED.DATE_IN_PAST'"
         ></es-share-dialog-choose-date>
       </div>
       }

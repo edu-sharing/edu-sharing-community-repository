@@ -196,6 +196,7 @@
         "TIME_HINT": "HH:MM",
         "INVALID_RANGE": "The start date must be before the end date",
         "IN_PAST": "The start date must not be in the past",
+        "DATE_IN_PAST": "The date must not be in the past",
         "WITHOUT_LIMITS": "Without limits",
         "START": "Start",
         "END": "End",
