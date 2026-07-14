@@ -11,7 +11,7 @@ variables:
 
 default:
   #image: maven:3.8.4-eclipse-temurin-17
-  image: maven:3.9.9-eclipse-temurin-21-focal
+  image: maven:3.9.16-eclipse-temurin-21-noble
   services:
     - name: "$DIND_IMAGE"
       alias: docker
