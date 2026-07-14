@@ -215,6 +215,7 @@ body.isDarkTheme {
     --toastButtonColor: color-mix(in srgb, var(--primary), #000 60%);
 
     --mat-table-background-color: var(--backgroundTinted);
+    --mat-tree-container-background-color: var(--backgroundTinted);
 
     // lighten the dark monochrome mediatype icons in node-type-badge; hue-rotate keeps
     // any colored glyphs recognizable (standard dark-mode image inversion)
