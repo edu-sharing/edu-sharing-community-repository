@@ -34,6 +34,10 @@ mat-sidenav-container {
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        // Match the search page's filter card left inset: the global .es-mat-sidenav-content uses
+        // an 11px left margin, whereas the search filter (roundedContainerCard) uses 15px. Align
+        // the left edge so the rounded layout is identical when the filter is open.
+        margin-left: var(--roundedContainerMargin);
 
         .filter-bar-heading {
             flex-shrink: 0;
