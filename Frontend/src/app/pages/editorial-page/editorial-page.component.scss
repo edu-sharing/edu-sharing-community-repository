@@ -34,30 +34,61 @@ mat-sidenav-container {
         overflow: hidden;
     }
     .main-content {
-        // Static header rows; only the list below them scrolls.
+        // Unified secondary-bar header: breadcrumb left, toggle actionbar right.
         .top-area {
             flex-shrink: 0;
             display: flex;
             flex-direction: row;
+            align-items: center;
             justify-content: space-between;
-            padding: var(--roundedContainerMargin);
-            min-height: 68px;
+            gap: 10px;
+            padding: 0 var(--roundedContainerMargin);
+            height: vars.$secondaryBarHeight;
+            background-color: var(--roundedContainerBackground);
+            @include mixins.materialShadowBottom();
+            // paint the shadow above the sticky tab bar (z-index 2) and the scrolled content:
+            // both live in the same stacking context, so the header must outrank the tab bar.
+            position: relative;
+            z-index: 3;
+            > es-actionbar {
+                margin-left: auto;
+            }
             .close {
                 margin-left: auto;
             }
         }
-        > mat-tab-group {
-            flex-shrink: 0;
-            padding: 0;
-        }
-        // The node list is the only scrolling region.
-        > es-node-entries-wrapper {
-            display: block;
+        // Scroll region below the header: the tab bar sticks to its top while the option row
+        // (filter button) and the list scroll beneath it.
+        .content-scroll {
             flex: 1;
             min-height: 0;
+            display: flex;
+            flex-direction: column;
             overflow-y: auto;
             @include mixins.materialScrollbarLight();
-            padding: 0 var(--roundedContainerMargin);
+
+            > mat-tab-group {
+                flex-shrink: 0;
+                padding: 0;
+                position: sticky;
+                top: 0;
+                // opaque background on the sticky element itself (not just the header child) plus a
+                // z-index above the scrolling .option-area, so the filter button slides cleanly
+                // behind the tab bar instead of showing on top of it.
+                z-index: 2;
+                background: var(--roundedContainerBackground);
+                // taller tab bar: the theme's density styles re-declare this token on
+                // .mat-mdc-tab-header, so it must be set on the header element itself.
+                ::ng-deep mat-tab-header {
+                    --mat-tab-container-height: 60px;
+                }
+            }
+            > es-node-entries-wrapper {
+                display: block;
+                // grow to fill the region when the list is short; the region itself scrolls
+                flex: 1 0 auto;
+                padding: 0 var(--roundedContainerMargin);
+            }
         }
         .option-area {
             flex-shrink: 0;

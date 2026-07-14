@@ -74,6 +74,14 @@
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
+        <!-- Split actionbar (mirrors search/workspace): the header shows toggle options only; node
+          actions move to the bottom selection bar. -->
+        <es-actionbar
+          [class.display-none]="(mainComponent$ | async) !== null"
+          [numberOfAlwaysVisibleOptions]="3"
+          [showActionOptions]="false"
+          [showCaptions]="(observer.width$ | async) > 700"
+        ></es-actionbar>
         @if (editorialPageService.close()?.show) {
         <button class="close" mat-icon-button (click)="editorialPageService.close().callback()">
           <i esIcon="close"></i>
@@ -89,69 +97,67 @@
       <es-submit-assignment></es-submit-assignment>
       } @default {
       <span> Component "{{ component }}" not implemented </span>
-      } } } @if ((mainComponent$ | async) === null) { @if ((editorialPageService.observeTabs() |
-      async)?.length) { @if ((params$ | async).primaryMode !== 'suggestions') {
-      <mat-tab-group
-        class="mat-tab-group-shadow"
-        [selectedIndex]="tabSelection$ | async"
-        (selectedIndexChange)="tabSelection$.next($event)"
-      >
-        @for (tab of editorialPageService.observeTabs() | async; track tab) {
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <i [esIcon]="tab.icon"></i>
-            {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
-          </ng-template>
-        </mat-tab>
-        }
-      </mat-tab-group>
-      } }
-      <div class="option-area">
-        <div class="options-left">
-          <button
-            mat-stroked-button
-            color="primary"
-            (click)="filtersButtonClicked.next()"
-            [attr.aria-expanded]="filterBarVisible | async"
-          >
-            <i esIcon="filter_list" [aria]="false"></i>
-            {{ 'SEARCH.FILTERS' | translate }}
-          </button>
+      } } } @if ((mainComponent$ | async) === null) {
+      <!-- Scroll region below the header: the tab bar sticks to its top while the option row
+        (filter button) and the list scroll beneath it. -->
+      <div class="content-scroll">
+        @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
+        async).primaryMode !== 'suggestions') {
+        <mat-tab-group
+          [selectedIndex]="tabSelection$ | async"
+          (selectedIndexChange)="tabSelection$.next($event)"
+        >
+          @for (tab of editorialPageService.observeTabs() | async; track tab) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <i [esIcon]="tab.icon"></i>
+              {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+        } }
+        <div class="option-area">
+          <div class="options-left">
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="filtersButtonClicked.next()"
+              [attr.aria-expanded]="filterBarVisible | async"
+            >
+              <i esIcon="filter_list" [aria]="false"></i>
+              {{ 'SEARCH.FILTERS' | translate }}
+            </button>
+          </div>
         </div>
-        <!-- Split actionbar (mirrors search/workspace): the toolbar shows toggle options only; node
-          actions move to the bottom selection bar. -->
-        <es-actionbar
-          [class.display-none]="(mainComponent$ | async) !== null"
-          [numberOfAlwaysVisibleOptions]="3"
-          [showActionOptions]="false"
-          [showCaptions]="(observer.width$ | async) > 700"
-        ></es-actionbar>
+        @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
+        || mode === 'assignment' || mode === 'suggestions' ) {
+        <es-node-entries-wrapper
+          [primaryInstance]="true"
+          [dataSource]="dataSource"
+          [elementInteractionType]="InteractionType.Emitter"
+          [scope]="Scope.EditorialPage"
+          [infiniteScrollWindow]="false"
+          singleClickHint="static"
+          (clickItem)="click($event)"
+          (dblClickItem)="openItem($event)"
+          (fetchData)="fetchEvent($event)"
+          (selectionChange)="selectionChange($event)"
+          [columns]="columns()"
+          [displayType]="editorialPageService.displayType()"
+        >
+          <ng-template #empty>
+            <div class="empty">
+              {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
+            </div>
+          </ng-template>
+        </es-node-entries-wrapper>
+        } }
       </div>
       @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
       || mode === 'assignment' || mode === 'suggestions' ) {
-      <es-node-entries-wrapper
-        [primaryInstance]="true"
-        [dataSource]="dataSource"
-        [elementInteractionType]="InteractionType.Emitter"
-        [scope]="Scope.EditorialPage"
-        [infiniteScrollWindow]="false"
-        singleClickHint="static"
-        (clickItem)="click($event)"
-        (dblClickItem)="openItem($event)"
-        (fetchData)="fetchEvent($event)"
-        (selectionChange)="selectionChange($event)"
-        [columns]="columns()"
-        [displayType]="editorialPageService.displayType()"
-      >
-        <ng-template #empty>
-          <div class="empty">
-            {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
-          </div>
-        </ng-template>
-      </es-node-entries-wrapper>
-
-      <!-- Full-width selection bar pinned at the bottom of the card; mirrors the search-page
-        selection layout. Node actions render in #selectionActionbarRef. -->
+      <!-- Full-width selection bar pinned at the bottom of the card (outside the scroll region);
+        mirrors the search-page selection layout. Node actions render in #selectionActionbarRef. -->
       <div
         class="selection-action-bar"
         cdkOverlayOrigin
