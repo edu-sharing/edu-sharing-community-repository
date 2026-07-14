@@ -855,7 +855,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Entrée Wikidata",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Registre des organisations de recherche)"
+    "X-ROR": "ROR (Registre des organisations de recherche)",
+    "LINK_PERSISTENT_ID": "Ouvrir le profil"
   },
   "ICON_LABELS": {
     "more_vert": "Options",

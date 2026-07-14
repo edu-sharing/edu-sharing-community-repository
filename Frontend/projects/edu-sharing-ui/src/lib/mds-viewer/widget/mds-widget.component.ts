@@ -26,6 +26,16 @@ import { MdsViewerService } from '../mds-viewer.service';
 import { Values } from '../../services/search-helper.service';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsEditorInstanceServiceAbstract } from '../mds-editor-instance-service.abstract';
+import { VCard } from '../../util/VCard';
+import { VCardNamePipe } from '../../pipes/vcard-name.pipe';
+
+export interface VCardEntry {
+    name: string;
+    /** main link (url or mailto:), depending on the widget's link definition */
+    link: string | null;
+    /** persistent identifier link (ORCID/GND/ROR/Wikidata) */
+    persistentId: string | null;
+}
 
 export enum MdsType {
     Io = 'io',
@@ -148,6 +158,35 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         return this.value()?.every((v) => !v) || this.value()?.length === 0 || !this.value();
     });
     license$ = new BehaviorSubject<{ name: string; icon: string }>(null);
+
+    /**
+     * Structured vcard values with resolved links, mirroring the backend
+     * MetadataTemplateRenderer: a main link (url/email) plus a persistent-id
+     * link (ORCID/GND/ROR/Wikidata).
+     */
+    vcardEntries = computed<VCardEntry[]>(() => {
+        if (this.basicType() !== 'vcard') {
+            return [];
+        }
+        const linkType = this.getDefinition().link;
+        return (this.value() ?? []).filter(Boolean).map((v) => {
+            const vcard = new VCard(v);
+            let link: string | null = null;
+            if (linkType === 'email') {
+                link = vcard.email ? 'mailto:' + vcard.email : null;
+            } else if (!linkType) {
+                link = vcard.url || null;
+                if (link && !link.includes('://')) {
+                    link = 'http://' + link;
+                }
+            }
+            return {
+                name: new VCardNamePipe(this.translate).transform(v),
+                link,
+                persistentId: vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata || null,
+            };
+        });
+    });
 
     get headingLevel() {
         return this.viewInstance.headingLevel;

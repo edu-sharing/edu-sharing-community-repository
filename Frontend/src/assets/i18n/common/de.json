@@ -1064,7 +1064,8 @@
     "X-ORCID": "ORCID",
     "X-GND-URI": "GND-URI",
     "X-ROR": "ROR (Research Organization Registry)",
-    "X-Wikidata": "Wikidata-Eintrag"
+    "X-Wikidata": "Wikidata-Eintrag",
+    "LINK_PERSISTENT_ID": "Profil öffnen"
   },
   "VCARD_HINT": {
     "X-ORCID": "Verweis auf einen persistenten ORCID-Identifier. <a target='blank' href='https://orcid.org/'>Registrierung & Infos</a>",

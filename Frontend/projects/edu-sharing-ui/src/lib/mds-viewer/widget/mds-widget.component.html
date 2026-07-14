@@ -56,7 +56,19 @@
             </div>
           </div>
           <div *ngIf="basicType() === 'vcard'">
-            <div class="array-entry" *ngFor="let v of value()">{{ v | vcardName }}</div>
+            <div class="array-entry" *ngFor="let entry of vcardEntries()">
+              <a *ngIf="entry.link; else vcardPlain" [href]="entry.link" target="_blank">{{
+                entry.name
+              }}</a>
+              <ng-template #vcardPlain>{{ entry.name }}</ng-template>
+              <a
+                *ngIf="entry.persistentId"
+                class="vcard-persistent-id"
+                [href]="entry.persistentId"
+                target="_blank"
+                >{{ 'VCARD.LINK_PERSISTENT_ID' | translate }}</a
+              >
+            </div>
           </div>
           <div *ngIf="basicType() === 'slider'">
             <span class="slider-value">{{ value() }}</span

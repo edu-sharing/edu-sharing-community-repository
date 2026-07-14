@@ -44,6 +44,13 @@
             }
         }
     }
+    &.widget-type-vcard {
+        .vcard-persistent-id {
+            margin-left: 0.5em;
+            font-size: $fontSizeSmall;
+            white-space: nowrap;
+        }
+    }
     &.widget-type-tree {
         > div {
             display: flex;

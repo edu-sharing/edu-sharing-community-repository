@@ -964,7 +964,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Wikidata entry",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Research Organization Registry)"
+    "X-ROR": "ROR (Research Organization Registry)",
+    "LINK_PERSISTENT_ID": "Open profile"
   },
   "ICON_LABELS": {
     "more_vert": "Options",
