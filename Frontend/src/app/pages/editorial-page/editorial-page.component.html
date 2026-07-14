@@ -90,7 +90,7 @@
       } @default {
       <span> Component "{{ component }}" not implemented </span>
       } } } @if ((mainComponent$ | async) === null) { @if ((editorialPageService.observeTabs() |
-      async)?.length) {
+      async)?.length) { @if ((params$ | async).primaryMode !== 'suggestions') {
       <mat-tab-group
         class="mat-tab-group-shadow"
         [selectedIndex]="tabSelection$ | async"
@@ -105,7 +105,7 @@
         </mat-tab>
         }
       </mat-tab-group>
-      }
+      } }
       <div class="option-area">
         <div class="options-left">
           <button
