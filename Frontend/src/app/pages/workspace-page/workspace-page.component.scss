@@ -99,6 +99,11 @@ mat-sidenav-container {
     z-index: 2;
     background: $workspaceTreeBackground;
     border-radius: 0 0 0 var(--borderRadiusCards);
+    // when the bottom selection bar is shown, the tree no longer touches the card's bottom
+    // edge (the bar carries the rounded corner instead)
+    &.selection-bar-visible {
+        border-radius: 0;
+    }
     @include mixins.materialShadow();
     > es-workspace-tree {
         flex: 1;

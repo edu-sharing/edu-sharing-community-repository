@@ -83,7 +83,11 @@
           >
         </div>
         } @if (isLoggedIn) {
-        <div class="tree" [style.--treeOffset.px]="treeOffset">
+        <div
+          class="tree"
+          [style.--treeOffset.px]="treeOffset"
+          [class.selection-bar-visible]="selection.length"
+        >
           <es-workspace-tree
             [class.tree-quota]="user.person.quota.enabled"
             [path]="path"
