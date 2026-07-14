@@ -1,27 +1,37 @@
+<!-- Resizable filter bar similar to editorial page -->
 <div
-  class="filter-bar-container"
+  class="filter-bar-resizable"
+  esResizableSidenav
+  position="start"
+  storageKey="SEARCH_SIDENAV_LEFT_WIDTH"
+  [defaultWidthPx]="319"
+  [minWidth]="0"
+  [minWidthPx]="269"
+  [maxWidthPx]="619"
   [hidden]="!filterBarIsVisible.getValue() || (isMobileScreen | async)"
 >
-  <div class="filter-bar-heading">
-    <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
-    @if (searchFilters.getUserValue()) {
-    <button mat-button (click)="searchFilters.setUserValue(null)">
-      <i esIcon="undo"></i>
-      {{ 'CLEAR_FILTERS' | translate }}
-    </button>
-    }
-    <button
-      class="filter-bar-close-button"
-      mat-icon-button
-      (click)="filterBarIsVisible.setUserValue(false)"
-    >
-      <i esIcon="close" [aria]="true"></i>
-    </button>
-  </div>
-  <div class="filter-bar-body">
-    @if ((showingAllRepositories | async) === false) {
-    <es-search-page-filter-bar></es-search-page-filter-bar>
-    }
+  <div class="filter-bar-container">
+    <div class="filter-bar-heading">
+      <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+      @if (searchFilters.getUserValue()) {
+      <button mat-button (click)="searchFilters.setUserValue(null)">
+        <i esIcon="undo"></i>
+        {{ 'CLEAR_FILTERS' | translate }}
+      </button>
+      }
+      <button
+        class="filter-bar-close-button"
+        mat-icon-button
+        (click)="filterBarIsVisible.setUserValue(false)"
+      >
+        <i esIcon="close" [aria]="true"></i>
+      </button>
+    </div>
+    <div class="filter-bar-body">
+      @if ((showingAllRepositories | async) === false) {
+      <es-search-page-filter-bar></es-search-page-filter-bar>
+      }
+    </div>
   </div>
 </div>
 

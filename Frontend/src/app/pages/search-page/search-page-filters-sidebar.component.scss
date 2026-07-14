@@ -5,8 +5,19 @@
     display: flex;
 }
 
+// width-controlled wrapper that esResizableSidenav resizes and in which it inserts the drag handle
+.filter-bar-resizable {
+    display: block;
+    position: relative;
+    // Pre-init fallback (before the directive sets an inline width) so there is no width flash
+    width: 319px;
+    &[hidden] {
+        display: none;
+    }
+}
+
 .filter-bar-container {
-    width: 300px;
+    // Fills the resizable wrapper (minus its own margins), so dragging the wrapper resizes the card
     // Unify with the results view
     @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
     @include mixins.roundedContainerStaticScroll(
@@ -14,9 +25,11 @@
         vars.$mobileTabNavHeight
     );
     margin-right: 4px;
-    &[hidden] {
-        display: none;
-    }
+}
+
+// Center the drag handle in the gap between the filter card and the main container
+:host ::ng-deep .es-sidenav-resizer.start {
+    right: -9px;
 }
 
 .filter-bar-heading {
