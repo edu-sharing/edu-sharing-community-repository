@@ -1,5 +1,5 @@
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as *;
+@use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     // default fallback; will be set via scale observer in ts!
@@ -45,7 +45,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    @include materialScrollbarLight();
+    @include mixins.materialScrollbarLight();
 }
 
 es-render-wrapper-component {
@@ -68,7 +68,7 @@ es-render-wrapper-component {
         width: 100%;
         cursor: pointer;
         height: var(--previewHeight);
-        //@include blurImage(3px);
+        //@include mixins.blurImage(3px);
         filter: brightness(0.8);
         object-fit: cover;
     }
@@ -80,19 +80,17 @@ es-render-wrapper-component {
 }
 
 // Full-width sticky footer; matches the layout/size of the .selection-action-bar (as done for
-// the usages__footer): fixed 69px height (10px + 48px button + 1px border), rounded-card
-// background and divider border-top.
+// the usages__footer): unified $secondaryBarHeight, rounded-card background, top shadow.
 .sticky-bar {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    min-height: 69px;
+    min-height: $secondaryBarHeight;
     box-sizing: border-box;
     padding: 0 20px;
     background: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
-    box-shadow: 0px -2px 8px 0px #0000000f;
+    @include mixins.materialShadowTop();
     flex-shrink: 0;
     position: sticky;
     bottom: 0;

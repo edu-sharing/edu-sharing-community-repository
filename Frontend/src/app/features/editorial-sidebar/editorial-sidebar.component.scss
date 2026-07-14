@@ -6,11 +6,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 0 20px;
     gap: 5px;
     height: var(--editorialHeaderHeight);
+    @include mixins.materialShadowBottom();
+    // paint the shadow above the scrolled sidebar content
+    position: relative;
+    z-index: 1;
+    // heading style unified with the search filter bar's .filter-bar-title
     > div {
-        font-size: vars.$fontSizeXLarge;
+        font-size: 140%;
+        font-weight: 400;
         @include mixins.limitLineCount(1, 1.25);
         flex-grow: 1;
     }
@@ -24,7 +30,8 @@
     }
 }
 :host {
-    --editorialHeaderHeight: 88px;
+    // unified secondary-bar height
+    --editorialHeaderHeight: #{vars.$secondaryBarHeight};
     @media screen and (max-width: (vars.$mobileSidebarModal)) {
         position: fixed;
         z-index: vars.$dialogZIndex - 10;
@@ -92,6 +99,11 @@
     &.option-MANAGE_CONTENT {
         // set full height
         height: 100%;
+    }
+    &.option-VIEWS_AND_USAGE {
+        // breathing room below the sidebar header (leaves space for its shadow);
+        // SORT_INTO/MANAGE_CONTENT get theirs inside es-nodes-selector instead
+        padding-top: 20px;
     }
     &.option-PREVIEW,
     &.option-MANAGE_SUBMISSION,

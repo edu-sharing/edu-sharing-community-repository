@@ -63,9 +63,13 @@ es-node-entries-wrapper {
     flex-shrink: 0;
     align-items: center;
     gap: 10px;
-    padding: 10px 25px;
+    min-height: vars.$secondaryBarHeight;
+    padding: 0 25px;
     background-color: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
+    @include mixins.materialShadowTop();
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
 
     es-actionbar {
         padding-left: 10px;

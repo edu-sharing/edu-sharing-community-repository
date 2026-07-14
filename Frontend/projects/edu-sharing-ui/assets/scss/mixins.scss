@@ -38,6 +38,9 @@
 @mixin materialShadowBottom($opacity: 0.1) {
     box-shadow: 0 3px 3px rgba(0, 0, 0, $opacity);
 }
+@mixin materialShadowTop($opacity: 0.1) {
+    box-shadow: 0 -3px 3px rgba(0, 0, 0, $opacity);
+}
 @mixin materialShadowSmall($important: false) {
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) if($important, !important, null);
 }

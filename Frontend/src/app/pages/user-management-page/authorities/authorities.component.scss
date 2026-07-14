@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 // Fill the tab body (inside the rounded card) as a flex column: fixed header + internally
 // scrolling list, instead of the previous viewport-anchored `position: fixed` layout. The parent
@@ -190,10 +191,14 @@ $addToWidth: 450px;
     flex-shrink: 0;
     align-items: center;
     gap: 10px;
-    padding: 10px 25px;
+    min-height: $secondaryBarHeight;
+    padding: 0 25px;
     background-color: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
+    @include mixins.materialShadowTop();
     border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
 
     es-actionbar {
         padding-left: 10px;

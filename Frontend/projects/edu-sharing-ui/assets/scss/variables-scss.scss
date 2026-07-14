@@ -49,8 +49,9 @@ $itemSelectedBackground: $primaryVeryLight !default;
 $itemSelectedTextColor: $primaryMediumDark !default;
 $buttonHoverBackground: var(--buttonHoverBackground) !default;
 $workspaceNewBackground: $itemSelectedBackground !default;
-// the white bar height in search and es-workspace
-$secondaryBarHeight: 65px !default;
+// unified height of all secondary bars (workspace topbar, search-page tab nav, collections tab
+// header, sidebar headers and the bottom selection/footer bars)
+$secondaryBarHeight: 72px !default;
 $listItemSelectedBackground: var(--primaryBackground50) !default;
 $workspaceSelectedBackgroundEffect: linear-gradient(
         to right,

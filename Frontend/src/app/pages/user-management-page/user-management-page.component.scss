@@ -28,6 +28,15 @@ mat-tab-group {
     display: flex;
     flex-direction: column;
 
+    // unified secondary-bar height: the theme's density styles re-declare this token on
+    // .mat-mdc-tab-header, so it must be set on the header element itself (same pattern as the
+    // collections page). The shadow comes from the global .mat-tab-group-shadow class.
+    ::ng-deep mat-tab-header {
+        --mat-tab-container-height: #{$secondaryBarHeight};
+        // paint the shadow above the scrolled tab body
+        position: relative;
+        z-index: 1;
+    }
     ::ng-deep .mat-mdc-tab-body-wrapper {
         flex: 1;
         min-height: 0;

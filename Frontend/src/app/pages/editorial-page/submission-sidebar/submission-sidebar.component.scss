@@ -52,14 +52,22 @@ mat-tab-group {
         }
     }
 
+    // Full-width footer; matches the unified sidebar footer bars (see preview-content's
+    // .sticky-bar): $secondaryBarHeight, rounded-card background, top shadow.
     .actions {
         flex-shrink: 0;
-        background: var(--defaultBackground);
-        padding: 10px 20px;
+        background: var(--roundedContainerBackground);
+        min-height: vars.$secondaryBarHeight;
+        align-items: center;
+        padding: 0 20px;
         width: 100%;
         display: flex;
         justify-content: space-between;
         box-sizing: border-box;
+        @include mixins.materialShadowTop();
+        // paint the shadow above the scrolled content
+        position: relative;
+        z-index: 1;
     }
 
     .left {

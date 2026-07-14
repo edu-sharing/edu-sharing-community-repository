@@ -37,8 +37,8 @@ mat-sidenav-container {
         border-radius: var(--borderRadiusCards) var(--borderRadiusCards) 0 0;
         width: 100%;
         height: $workspaceBreadcrumbsHeight;
-        background-color: var(--backgroundColor);
-        @include mixins.materialShadow();
+        background-color: var(--roundedContainerBackground);
+        @include mixins.materialShadowBottom();
         display: flex;
         > es-breadcrumbs {
             padding-left: 30px;
@@ -56,9 +56,9 @@ mat-sidenav-container {
             border-radius: 0 var(--borderRadiusCards) 0 0;
             background: linear-gradient(
                 to right,
-                color-mix(in srgb, var(--backgroundColor) 1%, transparent) 0,
-                var(--backgroundColor) 10px,
-                var(--backgroundColor) 100%
+                color-mix(in srgb, var(--roundedContainerBackground) 1%, transparent) 0,
+                var(--roundedContainerBackground) 10px,
+                var(--roundedContainerBackground) 100%
             ); /* safari fix */
         }
     }
@@ -133,10 +133,14 @@ mat-sidenav-container {
     flex-shrink: 0;
     align-items: center;
     gap: 10px;
-    padding: 10px 25px;
+    min-height: $secondaryBarHeight;
+    padding: 0 25px;
     background-color: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
+    @include mixins.materialShadowTop();
     border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
 
     es-actionbar {
         padding-left: 10px;

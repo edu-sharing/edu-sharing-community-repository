@@ -24,11 +24,16 @@
     display: flex;
     align-items: center;
     padding: 0 20px;
-    height: 60px;
-    border-bottom: 1px solid var(--mat-divider-color);
+    height: vars.$secondaryBarHeight;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowBottom();
+    // paint the shadow above the scrolled filter body
+    position: relative;
+    z-index: 1;
+    // heading style unified with the editorial sidebar's .sidebar-header
     .filter-bar-title {
         flex-grow: 1;
-        font-size: 160%;
+        font-size: 140%;
         margin: 0;
         font-weight: 400;
     }

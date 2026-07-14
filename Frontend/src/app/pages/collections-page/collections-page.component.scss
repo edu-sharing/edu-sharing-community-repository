@@ -56,9 +56,13 @@ mat-sidenav-container {
     flex-shrink: 0;
     align-items: center;
     gap: 10px;
-    padding: 10px 25px;
+    min-height: $secondaryBarHeight;
+    padding: 0 25px;
     background-color: var(--roundedContainerBackground);
-    border-top: 1px solid var(--mat-divider-color);
+    @include mixins.materialShadowTop();
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
 
     es-actionbar {
         padding-left: 10px;
@@ -109,6 +113,13 @@ mat-tab-group {
     margin-bottom: 0;
     width: 100%;
     z-index: 15;
+    // unified secondary-bar height: the theme's density styles re-declare this token on
+    // .mat-mdc-tab-header, so setting it on the group (inherited) is not enough — it must be
+    // set on the header element itself (same pattern as nodes-selector's tabLayout2Line).
+    // The shadow comes from the global .mat-tab-group-shadow class.
+    ::ng-deep mat-tab-header {
+        --mat-tab-container-height: #{$secondaryBarHeight};
+    }
 }
 .collectionsContainer {
     width: 100%;
@@ -356,8 +367,8 @@ section {
         z-index: 1;
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(5px);
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-        height: 65px;
+        height: $secondaryBarHeight;
+        @include mixins.materialShadowBottom();
         padding-top: 22px;
         padding-bottom: 20px;
         padding-right: 50px;

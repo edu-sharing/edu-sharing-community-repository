@@ -9,9 +9,8 @@
     border-top-right-radius: var(--borderRadiusCards);
     padding: 10px 25px 0 25px;
     background-color: var(--roundedContainerBackground, #{vars.$backgroundColor});
-    border-left: 1px solid var(--borderLightPrimary);
-    border-top: 1px solid var(--borderLightPrimary);
-    border-right: 1px solid var(--borderLightPrimary);
+    // match the selection bar below: shadow instead of borders
+    @include mixins.materialShadowTop();
     // Gradient color used by the horizontal scroll-helper arrows of the card grid.
     --es-node-entries-scroll-gradient-color: #{vars.$backgroundColor};
 }

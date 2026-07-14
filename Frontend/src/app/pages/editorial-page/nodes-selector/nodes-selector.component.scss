@@ -30,6 +30,8 @@
     position: relative;
     height: 100%;
     overflow: hidden;
+    // breathing room between the sidebar header and the tabs (leaves space for the header shadow)
+    padding-top: 20px;
     // establish a query container so the tab labels react to this component's width, not the viewport
     container-type: inline-size;
 
@@ -76,18 +78,18 @@
     box-sizing: border-box;
 
     &.actionbar-visible {
-        padding-bottom: 54px;
+        padding-bottom: 76px;
     }
 }
 
 // Full-width sticky footer; matches the layout/size of the .selection-action-bar (as done for
-// the usages__footer): fixed 69px height, rounded-card background and divider border-top.
+// the usages__footer): unified $secondaryBarHeight, rounded-card background, top shadow.
 .tab-action-bar {
     flex: 0 0 auto;
     position: sticky;
     z-index: 1;
     background: var(--roundedContainerBackground);
-    min-height: 69px;
+    min-height: vars.$secondaryBarHeight;
     box-sizing: border-box;
     padding: 0 20px;
     bottom: 0;
@@ -95,8 +97,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    border-top: 1px solid var(--mat-divider-color);
-    box-shadow: 0px -2px 8px 0px #0000000f;
+    @include mixins.materialShadowTop();
 
     .back-btn {
         margin-right: auto;
