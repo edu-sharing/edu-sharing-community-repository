@@ -17,7 +17,7 @@ import org.springframework.security.saml2.provider.service.registration.OpenSaml
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistration;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.registration.Saml2MessageBinding;
-import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml4LogoutRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.logout.OpenSaml5LogoutRequestResolver;
 import org.springframework.security.saml2.provider.service.web.authentication.logout.Saml2LogoutRequestResolver;
 
 import java.util.List;
@@ -33,15 +33,15 @@ public class LogoutRequestResolverConfiguration {
 
     public static class LogoutRequestResolver implements Saml2LogoutRequestResolver {
         Logger logger = Logger.getLogger(LogoutRequestResolver.class);
-        OpenSaml4LogoutRequestResolver wrapped;
+        OpenSaml5LogoutRequestResolver wrapped;
         RelyingPartyRegistrationRepository registrations;
 
         public LogoutRequestResolver(RelyingPartyRegistrationRepository registrations){
             this.registrations = registrations;
-            this.wrapped = new OpenSaml4LogoutRequestResolver(registrations);
+            this.wrapped = new OpenSaml5LogoutRequestResolver(registrations);
             this.wrapped.setParametersConsumer((parameters) -> {
 
-                EntityDescriptor entityDescriptor = ((OpenSamlAssertingPartyDetails) parameters.getRelyingPartyRegistration().getAssertingPartyDetails()).getEntityDescriptor();
+                EntityDescriptor entityDescriptor = ((OpenSamlAssertingPartyDetails) parameters.getRelyingPartyRegistration().getAssertingPartyMetadata()).getEntityDescriptor();
                 if (entityDescriptor != null) {
                     List<RoleDescriptor> roleDescriptors = entityDescriptor.getRoleDescriptors();
                     if(roleDescriptors != null && roleDescriptors.size() > 0) {

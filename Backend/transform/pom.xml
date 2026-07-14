@@ -19,12 +19,12 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
-        <spring.boot.version>3.5.15</spring.boot.version>
-        <spring.version>6.2.16</spring.version>
+        <spring.boot.version>4.0.2</spring.boot.version>
+        <spring.version>7.0.3</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <alfresco.transform-core.version>5.2.4</alfresco.transform-core.version>
+        <alfresco.transform-core.version>5.4.0</alfresco.transform-core.version>
     </properties>
 
     <build>

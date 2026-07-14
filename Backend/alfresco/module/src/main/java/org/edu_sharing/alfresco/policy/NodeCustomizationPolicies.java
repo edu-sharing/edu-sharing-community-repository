@@ -56,7 +56,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
 import org.json.JSONObject;
 import org.springframework.extensions.surf.util.URLEncoder;
-import org.springframework.security.crypto.codec.Base64;
+import java.util.Base64;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -895,7 +895,8 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 }
             });
             contentWriter.setMimetype("image/png");
-            byte[] imageData = Base64.decode(previewImageBase64.getBytes());
+
+            byte[] imageData = Base64.getDecoder().decode(previewImageBase64.getBytes());
             if (imageData.length == 0) logger.warn("LENGTH OF IMAGE BYTE DATA IS 0 !! ");
             try {
                 ByteArrayInputStream is = new ByteArrayInputStream(imageData);
@@ -1057,7 +1058,7 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
                 int statusCode = client.executeMethod(method);
                 if (statusCode == HttpStatus.SC_OK) {
                     JSONObject result = new JSONObject(method.getResponseBodyAsString());
-                    return Base64.decode(result.getString("preview").getBytes(StandardCharsets.UTF_8));
+                    return Base64.getDecoder().decode(result.getString("preview").getBytes(StandardCharsets.UTF_8));
                 } else {
                     logger.warn("Playwright returned non-okay error code " + statusCode + ", " + url.toString());
                 }

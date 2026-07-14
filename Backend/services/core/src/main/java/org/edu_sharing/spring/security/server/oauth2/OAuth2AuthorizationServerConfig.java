@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
@@ -70,8 +70,8 @@ public class OAuth2AuthorizationServerConfig {
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatcher(new OrRequestMatcher(authorizationServerConfigurer.getEndpointsMatcher(),
-                        new AntPathRequestMatcher("/rest/authentication/v1/oauth2consent"),
-                        new AntPathRequestMatcher("/components/oauth2consent")))
+                        PathPatternRequestMatcher.withDefaults().matcher("/rest/authentication/v1/oauth2consent"),
+                        PathPatternRequestMatcher.withDefaults().matcher("/components/oauth2consent")))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
@@ -173,7 +173,7 @@ public class OAuth2AuthorizationServerConfig {
     public RequestCache requestCache() {
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setRequestMatcher(
-                new NegatedRequestMatcher(new AntPathRequestMatcher("/shibboleth/**"))
+                new NegatedRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth/**"))
         );
         return requestCache;
     }

@@ -12,7 +12,7 @@ public class GoogleOneTapAuthenticationToken extends AbstractAuthenticationToken
 
     // Constructor for authentication request (unauthenticated)
     public GoogleOneTapAuthenticationToken(String credential) {
-        super(null);
+        super((Collection<? extends GrantedAuthority>)null);
         this.principal = null;
         this.credential = credential;
         setAuthenticated(false);

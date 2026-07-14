@@ -35,7 +35,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.UrlUtils;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -63,12 +63,12 @@ public class SecurityConfigurationOAuth2 {
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatchers(matchers -> matchers
-                        .requestMatchers(new AntPathRequestMatcher("/login/oauth2/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/logout/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/oauth2"))
-                        .requestMatchers(new AntPathRequestMatcher("/oauth2/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth"))
-                        .requestMatchers(new AntPathRequestMatcher("/rest/authentication/v1/validateSSOSession/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/login/oauth2/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/logout/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/oauth2"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/oauth2/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/rest/authentication/v1/validateSSOSession/**"))
                 )
                 //.securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
@@ -81,8 +81,8 @@ public class SecurityConfigurationOAuth2 {
                          *
                          * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
                          */
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth")).authenticated()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/**")).permitAll()
                 )
 
                 .oauth2Login(login -> login
@@ -129,7 +129,7 @@ public class SecurityConfigurationOAuth2 {
 
                 if (!successTarget.startsWith("http")) {
                             UriComponents successUrlComp = UriComponentsBuilder
-                                    .fromHttpUrl(UrlUtils.buildFullRequestUrl(request)).build();
+                                    .fromUriString(UrlUtils.buildFullRequestUrl(request)).build();
 
                     idpRedirectUrl = successUrlComp.getScheme() + "://" + successUrlComp.getHost();
 
