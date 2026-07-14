@@ -6,6 +6,11 @@
     flex-direction: column;
     gap: 8px;
 
+    .event:hover {
+        @include mixins.materialShadowMediumLarge(false, 0.2);
+        background-color: rgb(var(--primaryBackground50));
+    }
+
     .event ::ng-deep {
         background-color: var(--defaultBackground);
         box-shadow: 0 2px 2px 0 #0000001f;
