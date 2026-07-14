@@ -295,6 +295,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     ngOnDestroy(): void {
+        console.log('destroy');
         this.destroyed$.next();
         this.destroyed$.complete();
     }
@@ -503,6 +504,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
+        this.clearSelection();
         this.searchFieldService.getCurrentInstance().patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
             showFiltersButton: !params.mainComponent,
