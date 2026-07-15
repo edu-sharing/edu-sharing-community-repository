@@ -137,6 +137,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Ricerca e invito di utenti esterni all'organizzazione in cartelle condivise",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Cercare e invitare utenti esterni all'organizzazione in cartelle condivise in sicurezza",
     "TOOLPERMISSION_COLLECTION_PINNING": "Appuntare le collezioni e gestire le collezioni appuntate",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Aggiungere materiali alle collezioni pubbliche",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creazione di raccolte di curriculum (attualmente non utilizzate)",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Dare un feedback su altre materiali",
     "TOOLPERMISSION_CONFIDENTAL": "Accesso all'area protetta (cassaforte)",
@@ -853,7 +854,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Voce di Wikidata",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Registro delle organizzazioni di ricerca)"
+    "X-ROR": "ROR (Registro delle organizzazioni di ricerca)",
+    "LINK_PERSISTENT_ID": "Apri profilo"
   },
   "ICON_LABELS": {
     "more_vert": "Opzioni",

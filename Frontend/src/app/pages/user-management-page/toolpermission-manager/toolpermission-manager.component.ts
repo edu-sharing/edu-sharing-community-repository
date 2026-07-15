@@ -104,6 +104,7 @@ export class ToolpermissionManagerComponent {
                 RestConstants.TOOLPERMISSION_COLLECTION_PINNING,
                 RestConstants.TOOLPERMISSION_VIDEO_AUDIO_CUT,
                 RestConstants.TOOLPERMISSION_COLLECTION_CHANGE_OWNER,
+                RestConstants.TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION,
             ],
         },
         {

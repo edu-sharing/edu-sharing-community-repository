@@ -36,44 +36,20 @@
         <div *ngIf="isEmpty()" class="widget-data widget-no-data widget-type-{{ basicType() }}">
           -
         </div>
-        <div
-          *ngIf="!isEmpty()"
-          class="widget-data widget-type-{{ basicType() }} {{
-            widget.definition.link ? 'widget-link' : ''
-          }}"
-          (click)="click()"
+        @if (!isEmpty()) { @if (linkHref(); as link) {
+        <a
+          class="widget-data widget-link widget-type-{{ basicType() }}"
+          [href]="link.href"
+          [attr.target]="link.target"
+          [attr.rel]="link.target === '_blank' ? 'noopener noreferrer' : null"
         >
-          <div *ngIf="['text', 'number', 'date'].includes(basicType())">{{ formatValue() }}</div>
-          <div *ngIf="basicType() === 'license' && (license$ | async) as license">
-            <img alt="" [src]="license.icon" /> {{ license.name }}
-          </div>
-          <div *ngIf="basicType() === 'array'">
-            <div class="array-entry" *ngFor="let v of value()">{{ v }}</div>
-          </div>
-          <div *ngIf="basicType() === 'tree'">
-            <div class="tree-entry" *ngFor="let v of rawValue">
-              <ng-container *ngTemplateOutlet="treeEntry; context: { path: v.path }"></ng-container>
-            </div>
-          </div>
-          <div *ngIf="basicType() === 'vcard'">
-            <div class="array-entry" *ngFor="let v of value()">{{ v | vcardName }}</div>
-          </div>
-          <div *ngIf="basicType() === 'slider'">
-            <span class="slider-value">{{ value() }}</span
-            ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
-          </div>
-          <div *ngIf="basicType() === 'duration'">
-            <span class="duration-value">{{ value()[0] | appMdsDuration }}</span>
-          </div>
-          <div *ngIf="basicType() === 'range'">
-            <span class="slider-value">{{ value()[0] }}</span
-            >-<span class="slider-value">{{ value()[1] }}</span>
-          </div>
-          <div *ngIf="basicType() === 'unknown'">
-            The widget type {{ widget.definition.type }} is currently not supported via angular
-            rendering
-          </div>
+          <ng-container *ngTemplateOutlet="widgetContent"></ng-container>
+        </a>
+        } @else {
+        <div class="widget-data widget-type-{{ basicType() }}">
+          <ng-container *ngTemplateOutlet="widgetContent"></ng-container>
         </div>
+        } }
       </div>
     </div>
     <!--<button mat-icon-button
@@ -84,6 +60,61 @@
     </button>-->
   </div>
 </es-mds-editor-widget-container>
+<ng-template #widgetContent>
+  <div *ngIf="['text', 'number', 'date'].includes(basicType())">{{ formatValue() }}</div>
+  <div *ngIf="basicType() === 'license' && (license$ | async) as license">
+    <img alt="" [src]="license.icon" /> {{ license.name }}
+  </div>
+  <div *ngIf="basicType() === 'array'">
+    <div class="array-entry" *ngFor="let v of value()">{{ v }}</div>
+  </div>
+  <div *ngIf="basicType() === 'tree'">
+    <div class="tree-entry" *ngFor="let v of rawValue">
+      <ng-container *ngTemplateOutlet="treeEntry; context: { path: v.path }"></ng-container>
+    </div>
+  </div>
+  <div *ngIf="basicType() === 'vcard'" class="vcard-list">
+    <div class="vcard-entry" *ngFor="let entry of vcardEntries()">
+      <i class="vcard-icon" [esIcon]="entry.icon" [aria]="false"></i>
+      <div class="vcard-body">
+        <a
+          *ngIf="entry.link; else vcardPlain"
+          class="vcard-name"
+          [href]="entry.link"
+          target="_blank"
+          >{{ entry.name }}</a
+        >
+        <ng-template #vcardPlain
+          ><span class="vcard-name">{{ entry.name }}</span></ng-template
+        >
+        <a
+          *ngIf="entry.persistentId"
+          class="vcard-persistent-id"
+          [href]="entry.persistentId"
+          target="_blank"
+          >{{ 'VCARD.LINK_PERSISTENT_ID' | translate }}</a
+        >
+      </div>
+    </div>
+  </div>
+  <div *ngIf="basicType() === 'slider'">
+    <span class="slider-value">{{ value() }}</span
+    ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
+  </div>
+  <div *ngIf="basicType() === 'duration'">
+    <span class="duration-value">{{ value()[0] | appMdsDuration }}</span>
+  </div>
+  <div *ngIf="basicType() === 'range'">
+    <span class="slider-value">{{ value()[0] }}</span
+    >-<span class="slider-value">{{ value()[1] }}</span>
+  </div>
+  <div *ngIf="basicType() === 'checkbox'">
+    {{ (value()?.[0] === 'true' ? 'YES' : 'NO') | translate }}
+  </div>
+  <div *ngIf="basicType() === 'unknown'">
+    The widget type {{ widget.definition.type }} is currently not supported via angular rendering
+  </div>
+</ng-template>
 <div class="edit-wrapper">
   <div #editWrapper><div #edit></div></div>
   <!--<button *ngIf="!!editWrapper.innerText.trim()" mat-icon-button><i esIcon="save"></i></button>-->
