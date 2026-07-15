@@ -440,24 +440,25 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin
-            .importCollections(
-                this.collectionsFile,
-                this.parentCollectionType == 'root'
-                    ? RestConstants.ROOT
-                    : this.parentCollection.ref.id,
-            )
-            .subscribe(
-                (data: any) => {
+        this.adminV1
+            .importCollections({
+                parent:
+                    this.parentCollectionType == 'root'
+                        ? RestConstants.ROOT
+                        : this.parentCollection.ref.id,
+                body: { xml: this.collectionsFile },
+            })
+            .subscribe({
+                next: (data) => {
                     this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED', { count: data.count });
                     this.globalProgress = false;
                     this.collectionsFile = null;
                 },
-                (error: any) => {
+                error: (error) => {
                     this.toast.error(error);
                     this.globalProgress = false;
                 },
-            );
+            });
     }
     public startUploadTempFile() {
         if (!this.uploadTempFile) {
