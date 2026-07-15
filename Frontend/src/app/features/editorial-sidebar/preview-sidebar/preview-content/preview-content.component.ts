@@ -197,7 +197,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         await this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setData({
             scope: this.editorialSidebarService.scope(),
-            activeObjects: [this.node],
+            activeObjects: [this.node()],
             customOptions: this.customOptions,
             postPrepareOptions: (options) => {
                 // no toggles in sidebar
