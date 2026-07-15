@@ -50,7 +50,7 @@
         }
     }
 
-    // non-interactive card (e.g. "coming soon"): no pointer, no hover, no elevation
+    // non-interactive card: no pointer, no hover, no elevation
     &.readonly {
         cursor: default;
         box-shadow: none;
@@ -60,22 +60,6 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
-}
-
-// badge (e.g. "coming soon") on the card's top-right border
-.stat-card__badge {
-    padding: 2px 8px;
-    position: absolute;
-    top: 0;
-    right: 8px;
-    // position on the top border (half above, half below) instead of inside the card
-    transform: translateY(-50%);
-    border-radius: var(--borderRadiusBadges);
-    font-size: 80%;
-    font-weight: bold;
-    line-height: 120%;
-    background: #6b7280;
-    color: var(--palette-primary-contrast-500);
 }
 
 // icon badge inside the card

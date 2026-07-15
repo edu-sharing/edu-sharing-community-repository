@@ -6,6 +6,7 @@ import {
     inject,
     input,
     signal,
+    untracked,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Node, StatisticV1Service, Usage, UsageV1Service } from 'ngx-edu-sharing-api';
@@ -22,8 +23,6 @@ export interface UsageMetric {
     icon: string;
     labelKey: string;
     value: number;
-    /** work-in-progress metric: not clickable, shows a "coming soon" badge */
-    comingSoon?: boolean;
     /** disabled metric: not clickable, dimmed */
     disabled?: boolean;
 }
@@ -57,6 +56,13 @@ const PLATFORM_NAMES = {
 /** Platform types relevant for the embedding table */
 export type EmbeddingPlatform = keyof typeof PLATFORM_NAMES;
 
+/** Preview (spoiler) titles for the not-yet-implemented per-metric detail views */
+const PREVIEW_TITLE_KEYS: { [metricId: string]: string } = {
+    view: 'WORKSPACE.METADATA.USAGES.PREVIEW_VIEWS_TITLE',
+    download: 'WORKSPACE.METADATA.USAGES.PREVIEW_DOWNLOADS_TITLE',
+    play: 'WORKSPACE.METADATA.USAGES.PREVIEW_PLAYS_TITLE',
+};
+
 /** The generic detail table for a selected metric */
 export interface UsageDetailTable {
     titleKey: string;
@@ -77,6 +83,10 @@ export interface UsageDetailRow {
     key: string;
     /** main text of the row (fallback when `node` is not set) */
     label: string;
+    /** i18n key for the row text; translated in the template (takes precedence over `label`) */
+    labelKey?: string;
+    /** render the row muted/dimmed – used for placeholder ("coming soon") rows */
+    muted?: boolean;
     /** cluster size badge – number of usages collapsed into this row (>1 only) */
     badge?: number;
     /** node whose title is rendered via the `nodeTitle` pipe (collections) */
@@ -181,22 +191,18 @@ export class UsagesPreviewComponent {
             icon: 'visibility',
             labelKey: 'WORKSPACE.METADATA.USAGE_TYPE.VIEW',
             value: this.viewCount(),
-            // detail view still work in progress
-            comingSoon: true,
         },
         {
             id: 'download',
             icon: 'file_download',
             labelKey: 'WORKSPACE.METADATA.USAGE_TYPE.DOWNLOAD',
             value: this.downloadCount(),
-            comingSoon: true,
         },
         {
             id: 'play',
             icon: 'play_arrow',
             labelKey: 'WORKSPACE.METADATA.USAGE_TYPE.PLAY',
             value: this.playCount(),
-            comingSoon: true,
         },
         {
             id: 'embedding',
@@ -208,7 +214,10 @@ export class UsagesPreviewComponent {
         },
     ]);
 
-    /** Currently selected metric id (embeddings is the only interactive metric) */
+    /**
+     * Currently selected metric id. Embeddings is the only metric with a detail view;
+     * the other cards are selectable but their details are still in development.
+     */
     private readonly selectedMetricId = signal<string>('embedding');
 
     /** The currently selected metric (undefined if its id is not in the list) */
@@ -273,22 +282,50 @@ export class UsagesPreviewComponent {
     });
 
     /**
-     * Detail tables for the currently selected metric (the embeddings view may show two
-     * tables). Empty for a multi-selection or metrics without detail data.
+     * Preview ("spoiler") of the not-yet-implemented views/downloads/plays detail views.
+     * Mirrors the embeddings table layout (same title/column structure) but shows a single
+     * "coming soon" placeholder row instead of real data.
+     */
+    private readonly previewTable = computed<UsageDetailTable | null>(() => {
+        const titleKey = PREVIEW_TITLE_KEYS[this.selectedMetricId()];
+        if (!titleKey) {
+            return null;
+        }
+        return {
+            titleKey,
+            columnKey: 'WORKSPACE.METADATA.USAGES.PREVIEW_COLUMN',
+            emptyKey: 'WORKSPACE.METADATA.USAGES.COMING_SOON',
+            rows: [
+                {
+                    key: 'coming-soon',
+                    icon: 'schedule',
+                    label: '',
+                    labelKey: 'WORKSPACE.METADATA.USAGES.COMING_SOON',
+                    muted: true,
+                },
+            ],
+        };
+    });
+
+    /**
+     * Detail tables for the currently selected metric. The embeddings view shows the real
+     * embeddings/collections tables; the other metrics show a single-row preview of the
+     * upcoming detail view.
      */
     protected readonly detailTables = computed<UsageDetailTable[]>(() => {
-        // per-node detail lists cannot be aggregated over a multi-selection –
-        // only the embeddings/usage count is shown, without detail tables
-        if (this.isMultiSelection()) {
-            return [];
-        }
         if (this.selectedMetricId() === 'embedding') {
+            // per-node detail lists cannot be aggregated over a multi-selection –
+            // only the embeddings/usage count is shown, without detail tables
+            if (this.isMultiSelection()) {
+                return [];
+            }
             return [this.embeddingsTable(), this.collectionsTable()].filter(
                 (table): table is UsageDetailTable => table != null,
             );
         }
-        // TODO: views / downloads / plays tables follow the same pattern once data exists
-        return [];
+        // views / downloads / plays: static preview of the upcoming detail view
+        const preview = this.previewTable();
+        return preview ? [preview] : [];
     });
 
     /** Whether the selected metric has at least one detail table to show. */
@@ -330,6 +367,19 @@ export class UsagesPreviewComponent {
             } else {
                 this.embeddings.set([]);
                 this.collectionUsages.set([]);
+            }
+        });
+
+        // keep the auto-selected card in sync with the selection: embeddings is the only
+        // metric with a detail view, so it stays selected for a single node. It is disabled
+        // for a multi-selection – in that case fall back to the first card (whose detail
+        // view is still in development). Only reacts to the selection size, so it never
+        // overrides a card the user picks manually within the same selection.
+        effect(() => {
+            if (this.isMultiSelection()) {
+                this.selectedMetricId.set(untracked(() => this.metrics()[0]?.id) ?? 'embedding');
+            } else {
+                this.selectedMetricId.set('embedding');
             }
         });
     }

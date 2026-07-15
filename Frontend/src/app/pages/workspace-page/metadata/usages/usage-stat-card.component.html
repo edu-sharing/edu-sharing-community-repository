@@ -8,9 +8,7 @@
   [attr.aria-pressed]="selectable() ? selected() : null"
   (click)="onActivate()"
 >
-  @if (badge(); as badgeText) {
-  <span class="stat-card__badge">{{ badgeText }}</span>
-  } @if (icon(); as iconName) {
+  @if (icon(); as iconName) {
   <span class="stat-card__icon-badge">
     <i class="stat-card__icon" [esIcon]="iconName" [style.color]="color()"></i>
   </span>

@@ -172,6 +172,19 @@
         // frame border already closes the list – avoid a double bottom line
         border-bottom: none;
     }
+
+    // placeholder ("coming soon") row of an upcoming-feature preview: dimmed + italic
+    &--muted {
+        font-style: italic;
+
+        .usage-row__label {
+            color: var(--textLight);
+        }
+
+        .usage-row__icon i {
+            color: var(--textLight);
+        }
+    }
 }
 
 .usage-row__icon {

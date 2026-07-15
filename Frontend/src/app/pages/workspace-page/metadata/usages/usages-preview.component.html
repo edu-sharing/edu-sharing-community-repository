@@ -54,12 +54,8 @@
       [icon]="metric.icon"
       [label]="metric.labelKey | translate"
       [value]="metric.value"
-      [selectable]="!metric.comingSoon"
       [selected]="isSelected(metric.id)"
       [disabled]="metric.disabled ?? false"
-      [badge]="
-        metric.comingSoon ? ('WORKSPACE.METADATA.USAGES.COMING_SOON' | translate) : undefined
-      "
       (toggle)="selectMetric(metric.id)"
     ></es-usage-stat-card>
     }
@@ -83,7 +79,7 @@
         @if (table.rows.length) {
         <ul class="usage-table__list">
           @for (row of table.rows; track row.key) {
-          <li class="usage-row">
+          <li class="usage-row" [class.usage-row--muted]="row.muted">
             @if (!row.source && (row.iconUrl || row.icon)) {
             <span class="usage-row__icon">
               @if (row.iconUrl) {
@@ -135,7 +131,7 @@
                   } @else if (row.node) {
                   {{ row.node | nodeTitle }}
                   } @else {
-                  {{ row.label }}
+                  {{ row.labelKey ? (row.labelKey | translate) : row.label }}
                   }
                 </span>
               </span>

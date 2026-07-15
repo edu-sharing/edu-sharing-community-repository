@@ -34,8 +34,6 @@ export class UsageStatCardComponent {
     readonly value = input<string | number | null>();
     /** optional accent color for the icon */
     readonly color = input<string>();
-    /** optional badge label shown top-right (e.g. "coming soon") */
-    readonly badge = input<string>();
     /** whether the user can toggle the card */
     readonly selectable = input(true);
     /** whether the card is currently selected */
