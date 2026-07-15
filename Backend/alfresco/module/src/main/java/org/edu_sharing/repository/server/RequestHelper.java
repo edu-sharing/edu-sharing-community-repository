@@ -1,12 +1,10 @@
 package org.edu_sharing.repository.server;
 
 import com.typesafe.config.Config;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.springframework.http.HttpRequest;
-
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 /**
  * provide information about the current request context and proxy related changes
@@ -33,7 +31,7 @@ public class RequestHelper {
     }
 
     private boolean isInternalNetworkCall() {
-        return String.valueOf(request.getLocalPort()).equals(ApplicationInfoList.getHomeRepository().getPort());
+        return ApplicationInfoList.isInternalPortRequest(request);
     }
 
     private Config getConfig() {

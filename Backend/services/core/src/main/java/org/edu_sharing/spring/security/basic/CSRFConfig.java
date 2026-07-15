@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
@@ -34,7 +35,8 @@ public class CSRFConfig {
             http.csrf((csrf) -> csrf
                     .sessionAuthenticationStrategy(eduSessionAuthenticationStrategy)
                     .csrfTokenRepository(tokenRepository)
-                    .csrfTokenRequestHandler(requestHandler));
+                    .csrfTokenRequestHandler(requestHandler)
+                    .ignoringRequestMatchers(ApplicationInfoList::isInternalPortRequest));
         }
         return http;
     }

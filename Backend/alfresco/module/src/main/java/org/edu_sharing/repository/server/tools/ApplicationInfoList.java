@@ -3,6 +3,7 @@
  */
 package org.edu_sharing.repository.server.tools;
 
+import jakarta.servlet.ServletRequest;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -210,6 +211,20 @@ public class ApplicationInfoList {
         }
         if (appInfoHome == null) logger.error("no home repository found. check your application files");
         return appInfoHome;
+    }
+
+    /**
+     * True if the request did not arrive on the configured home repository port, i.e. it bypassed
+     * the public reverse proxy (e.g. a service calling the internal Tomcat port such as 8080
+     * directly) and can be treated as trusted internal traffic.
+     */
+    public static boolean isInternalPortRequest(ServletRequest request) {
+        try {
+            int homePort = Integer.parseInt(getHomeRepository().getPort());
+            return request.getLocalPort() != homePort;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public static ApplicationInfo getRenderingService2() {
