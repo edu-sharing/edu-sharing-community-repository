@@ -25,6 +25,7 @@ This agent assists with development tasks in this Angular frontend project.
 
 -   Obey the tslint rules
 -   if, loops and other containers should always have braces
+-   newly generated elements in the angular templates should use the new angular braces syntax to make merging with newer code base versions easier
 
 ## Key Areas
 
