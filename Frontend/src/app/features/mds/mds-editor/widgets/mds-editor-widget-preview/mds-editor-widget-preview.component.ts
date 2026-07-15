@@ -10,8 +10,8 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { Node } from 'ngx-edu-sharing-api';
-import { OptionItem, RepoUrlService } from 'ngx-edu-sharing-ui';
+import { Node, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
+import { OptionItem, RepoUrlService, RestHelper } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject, combineLatest, forkJoin, fromEvent, interval, of } from 'rxjs';
 import { catchError, map, take, takeWhile } from 'rxjs/operators';
 import { FrameEventsService } from '../../../../../core-module/rest/services/frame-events.service';
@@ -33,6 +33,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
     private events = inject(FrameEventsService);
     mdsEditorInstance = inject(MdsEditorInstanceService);
     private nodeService = inject(RestNodeService);
+    private nodeServiceUnwrapped = inject(NodeServiceUnwrapped);
     private platformLocation = inject(PlatformLocation);
     private repoUrlService = inject(RepoUrlService);
     private router = inject(Router);
@@ -365,9 +366,15 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent {
         }
         return forkJoin(
             nodes.map((n) =>
-                this.nodeService
-                    .uploadNodePreview(n.ref.id, this.file, false)
-                    .pipe(map((n) => n.node)),
+                this.nodeServiceUnwrapped
+                    .changePreview({
+                        repository: n.ref.repo,
+                        node: n.ref.id,
+                        mimetype: RestHelper.guessMimeType(this.file),
+                        createVersion: false,
+                        body: { image: this.file },
+                    })
+                    .pipe(map((nodeEntry) => nodeEntry.node)),
             ),
         )
             .pipe(

@@ -36,4 +36,10 @@ export class RestHelper {
     public static hasAccessPermission(node: Node, permission: string): boolean {
         return node.access && node.access.indexOf(permission) != -1;
     }
+
+    public static guessMimeType(file: File): string {
+        let type = file.type;
+        if (type == 'application/x-zip-compressed') type = 'application/zip';
+        return type;
+    }
 }
