@@ -256,7 +256,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }[] = [];
     availableJobs: JobDescription[];
     excelFile: File;
-    excelAddToCollection: string;
+    excelAddToCollection = false;
     collectionsFile: File;
     uploadTempFile: File;
     uploadJobsFile: File;
@@ -466,17 +466,22 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin.uploadTempFile(this.uploadTempFile).subscribe(
-            (data: any) => {
-                this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE', { filename: data.file });
-                this.globalProgress = false;
-                this.uploadTempFile = null;
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.globalProgress = false;
-            },
-        );
+        this.adminV1
+            .uploadTemp({
+                name: this.uploadTempFile.name,
+                body: { file: this.uploadTempFile },
+            })
+            .subscribe({
+                next: (data) => {
+                    this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE', { filename: data.file });
+                    this.globalProgress = false;
+                    this.uploadTempFile = null;
+                },
+                error: (error) => {
+                    this.toast.error(error);
+                    this.globalProgress = false;
+                },
+            });
     }
     public importExcel() {
         if (!this.excelFile) {
@@ -488,19 +493,23 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin
-            .importExcel(this.excelFile, this.parentNode.ref.id, this.excelAddToCollection)
-            .subscribe(
-                (data: any) => {
+        this.adminV1
+            .importExcel({
+                parent: this.parentNode.ref.id,
+                addToCollection: this.excelAddToCollection,
+                body: { excel: this.excelFile },
+            })
+            .subscribe({
+                next: (data) => {
                     this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED', { rows: data.rows });
                     this.globalProgress = false;
                     this.excelFile = null;
                 },
-                (error: any) => {
+                error: (error) => {
                     this.toast.error(error);
                     this.globalProgress = false;
                 },
-            );
+            });
     }
     public configApp(app: Application) {
         window.open(app.configUrl);
@@ -684,22 +693,22 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             void this.storage.set('admin_oai', this.oai);
         }
         if (this.uploadOaiFile) {
-            this.admin
-                .importOAIXML(
-                    this.uploadOaiFile,
-                    this.oai.recordHandlerClassName,
-                    this.oai.binaryHandlerClassName,
-                )
-                .subscribe(
-                    (node) => {
+            this.adminV1
+                .importOaiXml({
+                    recordHandlerClassName: this.oai.recordHandlerClassName,
+                    binaryHandlerClassName: this.oai.binaryHandlerClassName,
+                    body: { xml: this.uploadOaiFile },
+                })
+                .subscribe({
+                    next: (node) => {
                         void this.debugNode(node);
                         this.globalProgress = false;
                     },
-                    (error) => {
+                    error: (error) => {
                         this.toast.error(error);
                         this.globalProgress = false;
                     },
-                );
+                });
         } else {
             this.admin
                 .importOAI(
