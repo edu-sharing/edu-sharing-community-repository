@@ -221,7 +221,7 @@ public class ApplicationInfoList {
     public static boolean isInternalPortRequest(ServletRequest request) {
         try {
             int homePort = Integer.parseInt(getHomeRepository().getPort());
-            return request.getLocalPort() != homePort;
+            return request.getLocalPort() == homePort;
         } catch (NumberFormatException e) {
             return false;
         }
