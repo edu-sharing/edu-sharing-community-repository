@@ -25,7 +25,7 @@ import {
 } from '../../core-module/core.module';
 import { DomSanitizer } from '@angular/platform-browser';
 import { TranslateService } from '@ngx-translate/core';
-import { ConnectorService, Node } from 'ngx-edu-sharing-api';
+import { ConnectorService, Node, NodeService } from 'ngx-edu-sharing-api';
 import { take } from 'rxjs/operators';
 import { Component, inject } from '@angular/core';
 import { Helper } from '../../core-module/rest/helper';
@@ -44,6 +44,7 @@ export class AppSharePageComponent {
     private router = inject(Router);
     private sanitizer = inject(DomSanitizer);
     private node = inject(RestNodeService);
+    private nodeService = inject(NodeService);
     private connectorService = inject(ConnectorService);
     private events = inject(FrameEventsService);
     private uiService = inject(UIService);
@@ -168,12 +169,13 @@ export class AppSharePageComponent {
                 .createNode(this.inbox.ref.id, RestConstants.CCM_TYPE_IO, [], prop, true)
                 .subscribe(
                     (data) => {
-                        this.node
-                            .uploadNodeContent(
+                        this.nodeService
+                            .changeContent(
+                                data.node.ref.repo,
                                 data.node.ref.id,
-                                this.file,
+                                this.mimetype || 'auto',
                                 RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                                this.mimetype,
+                                { file: this.file },
                             )
                             .subscribe(
                                 () => {

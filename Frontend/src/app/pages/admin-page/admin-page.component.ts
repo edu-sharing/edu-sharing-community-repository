@@ -17,6 +17,7 @@ import {
     AdminV1Service,
     NetworkService,
     Node,
+    NodeService,
     SessionStorageService,
     Store,
 } from 'ngx-edu-sharing-api';
@@ -131,6 +132,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private mediacenterService = inject(RestMediacenterService);
     private networkService = inject(NetworkService);
     private node = inject(RestNodeService);
+    private nodeService = inject(NodeService);
     private organization = inject(RestOrganizationService);
     private platformLocation = inject(PlatformLocation);
     private route = inject(ActivatedRoute);
@@ -915,13 +917,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 )
                 .subscribe(
                     (data) => {
-                        this.node
-                            .uploadNodeContent(
+                        this.nodeService
+                            .changeContent(
+                                data.node.ref.repo,
                                 data.node.ref.id,
-                                file,
+                                'auto',
                                 RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                { file },
                             )
-                            .subscribe(({ node }) => {
+                            .subscribe((node) => {
                                 this.getTemplates();
                                 this.toast.toast('ADMIN.FOLDERTEMPLATES.UPLOAD_DONE', {
                                     filename: node.name,
