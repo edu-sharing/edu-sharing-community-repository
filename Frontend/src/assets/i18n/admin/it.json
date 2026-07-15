@@ -345,7 +345,7 @@
         "custom_html_headers": "Dati arbitrari (ad esempio per i motori di ricerca o Google Analytics), che vengono integrati nell'area <head> della pagina.",
         "resolve_website_title": "Se vero, il repository risolve il titolo e i metadati durante la creazione dei collegamenti.",
         "url_dynamic": "Se true, tutti i collegamenti generati (ad esempio alle anteprime) sono sempre mappati al dominio richiedente del client. Se false, il valore viene sempre generato in base al protocollo, alla porta e al dominio del client.",
-        "allow_origin": "Elenco separato da virgole di tutti gli indirizzi di origine per i quali è consentito l'accesso CORS. Un valore vuoto consente CORS da qualsiasi dominio richiedente. Esempio: \"https://example.com\"",
+        "allow_origin": "Elenco separato da virgole di tutti gli indirizzi di origine per i quali è consentito l'accesso CORS. Un valore vuoto consente CORS da qualsiasi dominio richiedente. Un \"*\" all'interno di una voce funge da carattere jolly che corrisponde a qualsiasi carattere. Esempi: \"https://example.com\", \"https://*.example.com\", \"*\"",
         "notify_fetch_limit": "Numero massimo di oggetti Notify che possono essere creati quando si carica la cartella \" Condiviso da me\" / \" Condiviso con me\". I valori consigliati sono compresi tra 200 e 1000. 0 disabilita il limite",
         "cookie_attributes": "Flag per il cookie di sessione, in genere \"sicuro\", in modo che venga inviato solo tramite https. Si può anche configurare il comportamento dello stesso sito, ad esempio \"SameSite=None\".",
         "import_metadataset": "Set di metadati utilizzato per gli oggetti importati da questa sorgente"

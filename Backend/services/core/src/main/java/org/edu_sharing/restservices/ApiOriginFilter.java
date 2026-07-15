@@ -38,7 +38,7 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 			allow=true;
 		}
 		else if(origin!=null){
-			if(Arrays.stream(allowedOrigins.split(",")).anyMatch((o)->o.trim().equals(origin))) {
+			if(Arrays.stream(allowedOrigins.split(",")).anyMatch((o)->originMatches(o.trim(), origin))) {
 				res.addHeader("Access-Control-Allow-Origin", origin);
 				allow=true;
 			}
@@ -83,6 +83,28 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 			}
 		}
 		chain.doFilter(request, response);
+	}
+
+	/**
+	 * Matches a configured allowed-origin pattern against the request origin.
+	 * A "*" inside the pattern acts as a wildcard matching any sequence of characters,
+	 * e.g. "https://*.example.com" or "*".
+	 */
+	static boolean originMatches(String pattern, String origin) {
+		if(pattern.isEmpty() || origin == null) {
+			return false;
+		}
+		if(!pattern.contains("*")) {
+			return pattern.equals(origin);
+		}
+		StringBuilder regex = new StringBuilder();
+		for(String part : pattern.split("\\*", -1)) {
+			if(!regex.isEmpty()) {
+				regex.append(".*");
+			}
+			regex.append(java.util.regex.Pattern.quote(part));
+		}
+		return origin.matches(regex.toString());
 	}
 
 	public void destroy() {}
