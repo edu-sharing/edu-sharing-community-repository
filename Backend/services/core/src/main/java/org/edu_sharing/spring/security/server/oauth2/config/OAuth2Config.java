@@ -21,5 +21,8 @@ public class OAuth2Config {
         String accessTokenExpires;
         String refreshTokenExpires;
         boolean requireConsent;
+        // Spring Authorization Server 7.0 enables PKCE by default; keep it opt-in here so existing
+        // confidential clients that do not send a code_challenge keep working. Set to true to require PKCE.
+        boolean requireProofKey;
     }
 }

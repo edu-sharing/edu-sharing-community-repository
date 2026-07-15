@@ -48,7 +48,8 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/micrometer-commons-* \
         tomcat/webapps/alfresco/WEB-INF/lib/micrometer-observation-* \
         tomcat/webapps/alfresco/WEB-INF/lib/nimbus-jose-jwt-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/slf4j-api-*
+        tomcat/webapps/alfresco/WEB-INF/lib/slf4j-api-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-annotations-*
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 COPY --chown=worker:worker webapp/*.war tomcat/webapps/edu-sharing.war

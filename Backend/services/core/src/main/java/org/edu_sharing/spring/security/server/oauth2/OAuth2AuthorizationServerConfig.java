@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -118,7 +118,10 @@ public class OAuth2AuthorizationServerConfig {
                                 if(!c.getClientSecret().isEmpty()){
                                     builder.clientSecret(c.getClientSecret());
                                 }
-                                builder.clientSettings(ClientSettings.builder().requireAuthorizationConsent(c.isRequireConsent()).build());
+                                builder.clientSettings(ClientSettings.builder()
+                                        .requireAuthorizationConsent(c.isRequireConsent())
+                                        .requireProofKey(c.isRequireProofKey())
+                                        .build());
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
                                 TokenSettings.Builder tokenSettings = TokenSettings.builder();
                                 if(!c.getAccessTokenExpires().isEmpty()) {
