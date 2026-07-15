@@ -60,6 +60,7 @@ import { Toast } from '../../../services/toast';
 import {
     Ace,
     Acl,
+    CollectionServiceUnwrapped,
     CollectionsTypeConfig,
     ConfigService,
     Group,
@@ -103,6 +104,7 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
 })
 export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
     private collectionService = inject(RestCollectionService);
+    private collectionServiceUnwrapped = inject(CollectionServiceUnwrapped);
     private nodeService = inject(RestNodeService);
     private nodeApi = inject(NodeService);
     private connector = inject(RestConnectorService);
@@ -615,17 +617,22 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     }
     private saveImage(collection: EduData.Node): void {
         if (this.imageData != null) {
-            this.collectionService
-                .uploadCollectionImage(collection.ref.id, this.imageFile, 'image/png')
-                .subscribe(
-                    () => {
+            this.collectionServiceUnwrapped
+                .changeIconOfCollection({
+                    repository: collection.ref.repo,
+                    collection: collection.ref.id,
+                    mimetype: 'image/png',
+                    body: { file: this.imageFile },
+                })
+                .subscribe({
+                    next: () => {
                         this.navigateToCollectionId(collection.ref.id);
                     },
-                    (error) => {
+                    error: (error) => {
                         this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');
                         this.navigateToCollectionId(collection.ref.id);
                     },
-                );
+                });
         } else if (collection.preview == null) {
             this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
                 this.navigateToCollectionId(collection.ref.id);
