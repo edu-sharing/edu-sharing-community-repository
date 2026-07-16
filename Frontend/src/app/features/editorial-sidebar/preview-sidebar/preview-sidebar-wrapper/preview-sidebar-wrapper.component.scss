@@ -1,0 +1,96 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+// Transparent to layout, so its .preview-resizable child is the flex/sticky item in the host row.
+:host {
+    display: contents;
+}
+
+// Resizable, sticky preview column. Layout offsets come from CSS variables the host page sets
+// (--preview-panel-edge-inset for the right-edge gap, plus --sidebar-width / --navbar-height / etc.).
+.preview-resizable {
+    display: none;
+    flex-shrink: 0;
+    // don't stretch to the full content-row height; bound by content up to max-height
+    align-self: flex-start;
+
+    margin-right: calc(-1 * var(--preview-panel-edge-inset, 0px));
+    padding-right: var(--preview-panel-edge-inset, 0px);
+
+    // pre-init fallback width; esResizableSidenav overrides it with the saved width and min/max.
+    width: calc(var(--sidebar-width, 450px) + 34px + var(--preview-panel-edge-inset, 0px));
+    position: sticky;
+    top: calc(
+        var(--navbar-height, 0px) + var(--breadcrumb-height, 0px) + var(--sidebar-offset, 0px) / 2
+    );
+    max-height: calc(
+        100vh - var(--navbar-height, 0px) - var(--breadcrumb-height, 0px) -
+            var(--sidebar-offset, 0px)
+    );
+
+    &.open {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // Below the sidebar-modal breakpoint the modal shows instead, so hide the inline column.
+    // `display: none` keeps es-preview-sidebar in the DOM (still registered with the service).
+    @media screen and (max-width: vars.$mobileSidebarModal) {
+        &.open {
+            display: none;
+        }
+    }
+}
+
+// Center the drag handle in the 24px gap between content and card ((24 - 7) / 2 = 8.5px).
+// ::ng-deep because the directive creates the handle with no scoped encapsulation attribute.
+::ng-deep .es-sidenav-resizer.end {
+    left: 8.5px;
+}
+
+// Rounded card with the header (title + X). Fills the column minus its margins; the wider left
+// margin is the gap the drag handle sits in.
+.preview-panel {
+    flex: 1;
+    min-height: 0;
+    margin: 10px 10px 10px 24px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--roundedContainerBackground);
+    @include mixins.materialShadow();
+
+    // mirrors the editorial sidebar's header (title + X, shadow above the scrolled body)
+    .preview-panel-header {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+        padding: 0 20px;
+        height: vars.$secondaryBarHeight;
+        background: var(--roundedContainerBackground);
+        @include mixins.materialShadowBottom();
+        position: relative;
+        z-index: 1;
+
+        .preview-panel-title {
+            flex-grow: 1;
+            font-size: 140%;
+            font-weight: 400;
+            @include mixins.limitLineCount(1, 1.25);
+        }
+        .preview-panel-close {
+            flex-shrink: 0;
+            --mdc-icon-button-state-layer-size: 40px;
+        }
+    }
+
+    // the sidebar fills the remaining panel height and scrolls internally
+    es-preview-sidebar {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+    }
+}

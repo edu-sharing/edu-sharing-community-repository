@@ -68,7 +68,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
                 'aria-valuenow',
                 String(Math.round(lastValue)),
             );
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         } else {
             this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
             this.renderer.setAttribute(
@@ -76,7 +76,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
                 'aria-valuenow',
                 String(Math.round(defaultWidth)),
             );
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         }
     }
 
@@ -145,7 +145,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
 
     private stopResize = () => {
         if (this.dragging && this.sidenavContainer) {
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         }
         this.dragging = false;
     };
@@ -184,6 +184,6 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         void this.storage.delete(this.storageKey, Store.LocalStorage);
         const defaultWidth = this.getDefaultWidth();
         this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
-        this.sidenavContainer.updateContentMargins();
+        this.sidenavContainer?.updateContentMargins();
     };
 }

@@ -225,7 +225,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private mdsService = inject(MdsService);
     private optionsHelperService = inject(OptionsHelperDataService);
     private platformLocation = inject(PlatformLocation);
-    private previewSidebarService = inject(PreviewSidebarService);
+    protected previewSidebarService = inject(PreviewSidebarService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private searchFieldService = inject(SearchFieldService);

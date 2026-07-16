@@ -1,0 +1,53 @@
+<!-- Resizable, sticky preview column. Hidden via `.open` when no node is shown,
+  and below 900px (where the #modal shows instead). -->
+<div
+  class="preview-resizable"
+  [class.open]="previewSidebarService.getOpenState() | async"
+  esResizableSidenav
+  position="end"
+  [storageKey]="storageKey"
+  [defaultWidthPx]="defaultWidthPx"
+  [minWidth]="minWidth"
+  [minWidthPx]="minWidthPx"
+  [maxWidthPx]="maxWidthPx"
+>
+  <div class="preview-panel">
+    @if (previewSidebarService.getCurrentNode() | async; as previewNode) { @if ((isMobile$ | async)
+    === false) {
+    <div class="preview-panel-header">
+      <div class="preview-panel-title" [title]="previewNode | nodeTitle">
+        {{ previewNode | nodeTitle }}
+      </div>
+      <button
+        mat-icon-button
+        class="preview-panel-close"
+        [attr.aria-label]="'CLOSE' | translate"
+        (click)="close()"
+      >
+        <i esIcon="close" [aria]="true"></i>
+      </button>
+    </div>
+    } }
+    <!-- Inline preview (desktop). Kept mounted so it stays registered with PreviewSidebarService. -->
+    <es-preview-sidebar
+      [customOptions]="customOptions"
+      [editorMode]="editorMode"
+      [groupId]="groupId"
+    ></es-preview-sidebar>
+  </div>
+</div>
+
+<!-- Full-screen modal content for narrow screens; this wrapper opens/closes it via DialogsService. -->
+<ng-template #modal>
+  <div class="preview-sidebar-rendering-modal">
+    <es-preview-content
+      [node]="previewSidebarService.getCurrentNode() | async"
+      [customOptions]="customOptions"
+      [editorMode]="editorMode"
+      [groupId]="groupId"
+      [autoRender]="true"
+      [modal]="true"
+      class="modal"
+    ></es-preview-content>
+  </div>
+</ng-template>
