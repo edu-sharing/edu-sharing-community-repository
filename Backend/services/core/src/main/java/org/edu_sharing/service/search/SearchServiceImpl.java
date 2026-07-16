@@ -388,7 +388,12 @@ public class SearchServiceImpl implements SearchService {
 
 				if (toCompare.toLowerCase().contains(patternLower)){
 					list.add(authority);
-					continue;
+					if(patternIsUuid) {
+						// only one entry when an uuid was requested
+						break;
+					} else {
+						continue;
+					}
 				}
 
 				if (patternIsUuid) {
