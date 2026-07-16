@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MdsModule } from '../../features/mds/mds.module';
 import { SharedModule } from '../../shared/shared.module';
+import { TimeframeRangeToggleComponent } from '../../shared/components/timeframe-range-toggle/timeframe-range-toggle.component';
 import { AdminPageRoutingModule } from './admin-page-routing.module';
 import { AdminPageComponent } from './admin-page.component';
 import { AutocompleteComponent } from './autocomplete/autocomplete.component';
@@ -38,6 +39,7 @@ import { AdminMessagesComponent } from './messages/messages.component';
         SharedModule,
         AdminPageRoutingModule,
         AdminMessagesComponent,
+        TimeframeRangeToggleComponent,
         MdsModule,
         MonacoEditorModule.forRoot({
             baseUrl: window.location.origin + '/edu-sharing/assets/monaco/min/vs',

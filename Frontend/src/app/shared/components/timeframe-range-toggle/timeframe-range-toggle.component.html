@@ -1,0 +1,18 @@
+<mat-button-toggle-group
+  class="timeframe-range"
+  [value]="selectedRange()"
+  (change)="rangeChange.emit($event.value)"
+  [hideSingleSelectionIndicator]="true"
+  aria-label="{{ 'WORKSPACE.METADATA.USAGES.RANGE_LABEL' | translate }}"
+  data-test="timeframe-range-toggle"
+>
+  @for (days of rangeOptions(); track days) {
+  <mat-button-toggle class="timeframe-range__toggle" [value]="days">
+    @if (days < 0) {
+    {{ 'WORKSPACE.METADATA.USAGES.RANGE_ALL' | translate }}
+    } @else {
+    {{ 'WORKSPACE.METADATA.USAGES.RANGE_DAYS' | translate : { days } }}
+    }
+  </mat-button-toggle>
+  }
+</mat-button-toggle-group>

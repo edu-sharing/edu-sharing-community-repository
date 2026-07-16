@@ -32,44 +32,6 @@
     color: var(--textMain);
 }
 
-.usages__range {
-    width: 100%;
-    max-height: 40px;
-    border-radius: var(--borderRadiusBadges);
-    overflow: hidden;
-    @include mixins.materialShadowMedium(true, 0.15);
-
-    // border color
-    ::ng-deep &.mat-button-toggle-group-appearance-standard {
-        border-color: var(--borderGray);
-    }
-
-    // divider between the buttons
-    ::ng-deep .mat-button-toggle + .mat-button-toggle {
-        border-left-color: var(--borderGray);
-    }
-
-    // distribute the range buttons evenly across the full width.
-    ::ng-deep .mat-button-toggle {
-        flex: 1;
-        color: var(--textLight);
-        font-size: vars.$fontSizeSmall;
-        font-weight: bold;
-    }
-
-    // fit the button content within the 40px group height
-    // (the standard appearance defaults to a taller 48px line height).
-    ::ng-deep .mat-button-toggle-label-content {
-        line-height: 38px;
-    }
-
-    // only a slight background tint on the selected button.
-    ::ng-deep .mat-button-toggle-checked {
-        color: var(--primary);
-        background: var(--primaryBackground50);
-    }
-}
-
 .usages__cards {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -437,30 +399,6 @@
 
 // --- responsive: keep everything usable / non-overflowing on narrow widths ---
 @container (max-width: 520px) {
-    .usages__range {
-        display: flex !important;
-        flex-wrap: wrap;
-        max-height: none;
-
-        .usages__range-toggle {
-            flex: 1 1 50%;
-            box-sizing: border-box;
-            border-left: none;
-            border-right: 1px solid var(--borderGray);
-            border-bottom: 1px solid var(--borderGray);
-
-            /* No right border on every second button */
-            &:nth-child(2n) {
-                border-right: none;
-            }
-
-            /* No bottom border on the last row */
-            &:nth-last-child(-n + 2) {
-                border-bottom: none;
-            }
-        }
-    }
-
     // fewer, wider metric cards instead of four cramped columns
     .usages__cards {
         grid-template-columns: repeat(2, minmax(0, 1fr));

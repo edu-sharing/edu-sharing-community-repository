@@ -15,6 +15,10 @@ import { forkJoin } from 'rxjs';
 import { RestConnectorService, RestConstants } from '../../../../core-module/core.module';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import {
+    ALL_RANGE,
+    TimeframeRangeToggleComponent,
+} from '../../../../shared/components/timeframe-range-toggle/timeframe-range-toggle.component';
 import { UsageStatCardComponent } from './usage-stat-card.component';
 
 /** A single usage metric shown as a (selectable) card */
@@ -37,8 +41,8 @@ export interface CollectionUsageEntry {
     collectionUsageType?: string;
 }
 
-/** Predefined date range presets, expressed in days */
-const RANGE_OPTIONS = [7, 30, 90, 365] as const;
+/** Predefined date range presets, expressed in days (ALL_RANGE = all time) */
+const RANGE_OPTIONS = [7, 30, 90, ALL_RANGE] as const;
 
 /** Tracking action keys later mapped to the metric cards */
 const ACTION_VIEW = 'VIEW_MATERIAL';
@@ -116,7 +120,7 @@ export interface UsageDetailRow {
     templateUrl: 'usages-preview.component.html',
     styleUrls: ['usages-preview.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SharedModule, UsageStatCardComponent],
+    imports: [SharedModule, UsageStatCardComponent, TimeframeRangeToggleComponent],
 })
 export class UsagesPreviewComponent {
     private connector = inject(RestConnectorService);
@@ -430,7 +434,12 @@ export class UsagesPreviewComponent {
                 }
                 const dateTo = new Date();
                 const dateFrom = new Date();
-                dateFrom.setDate(dateFrom.getDate() - days);
+                // ALL_RANGE ("Gesamt") means all time: no lower bound (epoch start)
+                if (days === ALL_RANGE) {
+                    dateFrom.setTime(0);
+                } else {
+                    dateFrom.setDate(dateFrom.getDate() - days);
+                }
                 this.statisticApi
                     .getByNodes({
                         dateFrom: dateFrom.toISOString(),

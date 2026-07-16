@@ -707,6 +707,7 @@
       "SOURCE_SELECTED": "Selected objects",
       "SOURCE_MY": "My objects",
       "SOURCE_ORG": "Objects from my organization",
+      "SOURCE_ONLY_PUBLIC": "Only publicly visible elements",
       "OBJECT_TYPE_TITLE": "Select object type",
       "OBJECT_TYPE_ALL": "All",
       "OBJECT_TYPE_COLLECTIONS": "Collections",

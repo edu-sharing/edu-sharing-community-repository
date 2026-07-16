@@ -626,6 +626,7 @@
       "SOURCE_SELECTED": "Objets sélectionnés",
       "SOURCE_MY": "Mes objets",
       "SOURCE_ORG": "Objets de mon organisation",
+      "SOURCE_ONLY_PUBLIC": "Uniquement les éléments visibles publiquement",
       "OBJECT_TYPE_TITLE": "Choisir le type d'objet",
       "OBJECT_TYPE_ALL": "Tous",
       "OBJECT_TYPE_COLLECTIONS": "Collections",

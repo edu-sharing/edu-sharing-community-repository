@@ -50,6 +50,7 @@ import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
 import { WorkspaceExplorerComponent } from '../../workspace-page/explorer/explorer.component';
+import { ALL_RANGE } from '../../../shared/components/timeframe-range-toggle/timeframe-range-toggle.component';
 
 import {
     BarController,
@@ -198,8 +199,13 @@ export class AdminStatisticsComponent implements OnInit {
     // nodes mode ("by object") view controls — see statistics.component.html @if (nodesMode)
     contentSource: 'all' | 'selected' | 'my' | 'org' = 'selected';
     objectType: 'all' | 'collections' | 'content' = 'all';
-    periodExpanded = false;
-    /** display model for the single range calendar; query uses nodesStart/nodesEnd */
+    /** restrict the "by object" evaluation to published (publicly visible) nodes; n/a for "all content" */
+    onlyPublic = false;
+    /** preset day-ranges offered by the "by object" timeframe toggle (ALL_RANGE = "all") */
+    nodesRangeOptions = [7, 30, 90, ALL_RANGE];
+    /** selected preset range in days (null once a manual calendar range is picked) */
+    selectedNodesRange: number | null = 30;
+    /** display model for the range calendar; query uses nodesStart/nodesEnd */
     nodesRange: DateRange<Date>;
     hasSelectedStatistics = false;
     hasUserStatistics = false;
@@ -332,32 +338,6 @@ export class AdminStatisticsComponent implements OnInit {
     get nodesEnd() {
         return this._nodesEnd;
     }
-    /**
-     * Human readable label of the currently selected node statistics date range. When the range
-     * ends today it is relative to now and shown as "last XX days", otherwise as an absolute range.
-     */
-    get nodesPeriodLabel() {
-        const start = new Date(this._nodesStart);
-        const end = new Date(this._nodesEnd);
-        const now = new Date();
-        if (
-            end.getFullYear() === now.getFullYear() &&
-            end.getMonth() === now.getMonth() &&
-            end.getDate() === now.getDate()
-        ) {
-            start.setHours(0, 0, 0, 0);
-            end.setHours(0, 0, 0, 0);
-            const days = Math.round(
-                (end.getTime() - start.getTime()) / AdminStatisticsComponent.DAY_OFFSET,
-            );
-            return this.translate.instant('ADMIN.STATISTICS.PERIOD_LAST_DAYS', { days });
-        }
-        return (
-            this.formatDatePipe.transform(this._nodesStart, { relative: false, time: false }) +
-            ' – ' +
-            this.formatDatePipe.transform(this._nodesEnd, { relative: false, time: false })
-        );
-    }
     constructor() {
         void this.initColumns();
         this.groupedStart = new Date(
@@ -378,7 +358,26 @@ export class AdminStatisticsComponent implements OnInit {
         this.nodesEnd = new Date();
         this.nodesRange = new DateRange<Date>(this._nodesStart, this._nodesEnd);
     }
-    /** start/end toggle for the single inline range calendar in the "by object" panel */
+    /**
+     * Apply a preset from the "by object" timeframe toggle. Every preset ends "now"; ALL_RANGE
+     * ("Gesamt") means all time and therefore has no lower bound (epoch start), the others span
+     * the last `days` days.
+     */
+    changeNodesRange(days: number) {
+        this.selectedNodesRange = days;
+        const end = new Date();
+        const start = new Date(end.getTime());
+        if (days === ALL_RANGE) {
+            start.setTime(0);
+        } else {
+            start.setDate(start.getDate() - days);
+        }
+        this.nodesStart = start;
+        this.nodesEnd = end;
+        // reflect the preset in the calendar
+        this.nodesRange = new DateRange<Date>(start, end);
+    }
+    /** start/end toggle for the inline range calendar in the "by object" panel */
     selectNodesRange(date: Date) {
         if (!this.nodesRange.start || this.nodesRange.end) {
             // begin a new range
@@ -389,6 +388,8 @@ export class AdminStatisticsComponent implements OnInit {
                 date < start ? new DateRange(date, start) : new DateRange(start, date);
             this.nodesStart = this.nodesRange.start;
             this.nodesEnd = this.nodesRange.end;
+            // a manually picked range no longer matches any preset
+            this.selectedNodesRange = null;
         }
     }
     async ngOnInit() {
@@ -435,6 +436,10 @@ export class AdminStatisticsComponent implements OnInit {
             RestConstants.TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES,
         );
         this.initNodesSources();
+        // with explicit node ids the "by object" (Nach Objekt) tab is the relevant one → preselect it
+        if (this.hasSelectedNodes) {
+            this.currentTab = (this._mediacenter ? 1 : 0) + 2;
+        }
         this.finishedPreload = true;
         this.refresh();
     }
@@ -442,10 +447,11 @@ export class AdminStatisticsComponent implements OnInit {
     private initNodesSources() {
         if (this.hasSelectedNodes && this.hasSelectedStatistics) {
             this.contentSource = 'selected';
+        } else if (this.hasUserStatistics) {
+            // when no explicit nodes are passed, default to the user's own objects
+            this.contentSource = 'my';
         } else if (this.nodesPermission) {
             this.contentSource = 'all';
-        } else if (this.hasUserStatistics) {
-            this.contentSource = 'my';
         } else if (this.hasOrgStatistics) {
             this.contentSource = 'org';
         }
@@ -758,6 +764,7 @@ export class AdminStatisticsComponent implements OnInit {
                 dateFrom: this._nodesStart.toISOString(),
                 dateTo: this._nodesEnd.toISOString(),
                 maxResults: 50000,
+                published: this.onlyPublic,
             };
             let request: ReturnType<StatisticV1Service['getByNodes']>;
             if (this.contentSource === 'my') {
@@ -1039,6 +1046,7 @@ export class AdminStatisticsComponent implements OnInit {
         const range = {
             dateFrom: this._nodesStart.toISOString(),
             dateTo: this._nodesEnd.toISOString(),
+            published: this.onlyPublic,
         };
         let request: ReturnType<StatisticV1Service['getByNodesAsync']>;
         if (this.contentSource === 'all') {

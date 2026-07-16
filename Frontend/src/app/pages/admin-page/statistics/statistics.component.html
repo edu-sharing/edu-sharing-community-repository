@@ -1,10 +1,5 @@
-<mat-tab-group
-  mat-stretch-tabs
-  [(selectedIndex)]="currentTab"
-  [class.hide-tab-header]="hasSelectedNodes"
->
-  <!-- when invoked with explicit node ids only the "by object" tab is shown -->
-  @if (!hasSelectedNodes) { @if (_mediacenter) {
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="currentTab">
+  @if (_mediacenter) {
   <mat-tab label="{{ 'ADMIN.STATISTICS.ARCHIVED' | translate }}">
     <div class="stats-archived-table">
       <es-info-message mode="info">
@@ -179,7 +174,6 @@
       }
     </div>
   </mat-tab>
-  } @if (hasSelectedNodes || _mediacenter || nodesPermission || nodesMode) {
   <mat-tab label="{{ 'ADMIN.STATISTICS.NODES' | translate }}" class="stats-nodes">
     @if (nodesMode) {
     <!-- "by object" panel: choose a content source, a time range and run the evaluation -->
@@ -189,14 +183,6 @@
           {{ 'ADMIN.STATISTICS.SOURCE_TITLE' | translate }}
         </h4>
         <mat-radio-group class="source-group" [(ngModel)]="contentSource">
-          <mat-radio-button
-            value="all"
-            [disabled]="
-              ('TOOLPERMISSION_GLOBAL_STATISTICS_NODES' | esToolpermission | async) === false
-            "
-          >
-            {{ 'ADMIN.STATISTICS.SOURCE_ALL' | translate }}
-          </mat-radio-button>
           @if (hasSelectedNodes) {
           <mat-radio-button value="selected">
             {{ 'ADMIN.STATISTICS.SOURCE_SELECTED' | translate }}
@@ -218,25 +204,16 @@
             ></es-node-entries-wrapper>
             }
           </div>
-          } }
-          <mat-radio-button
-            value="my"
-            [disabled]="
-              ('TOOLPERMISSION_USER_STATISTICS_NODES' | esToolpermission | async) === false
-            "
-          >
+          } } @if ('TOOLPERMISSION_USER_STATISTICS_NODES' | esToolpermission | async) {
+          <mat-radio-button value="my">
             {{ 'ADMIN.STATISTICS.SOURCE_MY' | translate }}
           </mat-radio-button>
-          <mat-radio-button
-            value="org"
-            [disabled]="
-              ('TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES' | esToolpermission | async) ===
-                false || organizations.length === 0
-            "
-          >
+          } @if ( ('TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES' | esToolpermission | async) &&
+          organizations.length > 0 ) {
+          <mat-radio-button value="org">
             {{ 'ADMIN.STATISTICS.SOURCE_ORG' | translate }}
           </mat-radio-button>
-          @if (contentSource === 'org' && organizations.length > 1) {
+          } @if (contentSource === 'org' && organizations.length > 1) {
           <div class="org-suboptions">
             <mat-radio-group [(ngModel)]="selectedOrg">
               @for (org of organizations; track org.authorityName) {
@@ -246,17 +223,26 @@
               }
             </mat-radio-group>
           </div>
+          } @if ('TOOLPERMISSION_GLOBAL_STATISTICS_NODES' | esToolpermission | async) {
+          <mat-radio-button value="all">
+            {{ 'ADMIN.STATISTICS.SOURCE_ALL' | translate }}
+          </mat-radio-button>
           }
         </mat-radio-group>
 
-        <h4
-          class="mat-heading-4 clickable period-header"
-          (click)="periodExpanded = !periodExpanded"
-        >
-          <span>{{ 'ADMIN.STATISTICS.PERIOD' | translate }}: {{ nodesPeriodLabel }}</span>
-          <i [esIcon]="'keyboard_arrow_' + (periodExpanded ? 'up' : 'down')"></i>
-        </h4>
-        @if (periodExpanded) {
+        <!-- "published only" is not applicable to the global "all content" source -->
+        @if (contentSource !== 'all') {
+        <mat-slide-toggle class="source-only-public" [(ngModel)]="onlyPublic">
+          {{ 'ADMIN.STATISTICS.SOURCE_ONLY_PUBLIC' | translate }}
+        </mat-slide-toggle>
+        }
+
+        <es-timeframe-range-toggle
+          class="period-range"
+          [rangeOptions]="nodesRangeOptions"
+          [selectedRange]="selectedNodesRange"
+          (rangeChange)="changeNodesRange($event)"
+        ></es-timeframe-range-toggle>
         <div class="calendars">
           <div>
             <mat-calendar
@@ -266,7 +252,6 @@
             ></mat-calendar>
           </div>
         </div>
-        }
 
         <div class="start-button">
           <button
@@ -447,7 +432,6 @@
     </es-info-message>
     } } }
   </mat-tab>
-  }
 </mat-tab-group>
 
 @if ( !hasSelectedNodes && ((currentTab === 0 && !groupedLoading) || (currentTab === 1 &&

@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 $maxWidthContainer: 700px;
 .groups-button {
     display: flex;
@@ -61,7 +62,6 @@ $maxWidthContainer: 700px;
         padding: 10px;
         margin: 15px;
         background-color: var(--backgroundColor);
-        @include materialShadow();
         text-align: center;
         mat-calendar {
             width: 220px;
@@ -187,6 +187,11 @@ es-listTable {
         max-height: 260px;
         overflow-y: auto;
         margin: 5px 0 10px 30px;
+        @include mixins.materialShadowBottom();
+        border-radius: var(--borderRadiusCards);
+        es-node-entries-wrapper {
+            --mat-table-background-color: var(--backgroundColor);
+        }
     }
     // sub-radio to pick one of the user's organizations
     .org-suboptions {
@@ -199,14 +204,14 @@ es-listTable {
             flex-wrap: wrap;
         }
     }
-    .period-header {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        color: var(--primary);
-        > span {
-            flex-grow: 1;
-        }
+    // "published only" toggle below the source radios
+    .source-only-public {
+        display: block;
+        margin: 10px 0 5px;
+    }
+    .period-range {
+        display: block;
+        margin: 15px 0;
     }
     .start-button {
         display: flex;

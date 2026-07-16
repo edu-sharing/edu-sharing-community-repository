@@ -27,24 +27,11 @@
   <!-- date range selector -->
   <div class="usages__timeframe">
     <h3 class="usages__heading">{{ 'WORKSPACE.METADATA.USAGES.RANGE_LABEL' | translate }}</h3>
-    <mat-button-toggle-group
-      class="usages__range"
-      [value]="selectedRange()"
-      (change)="changeTimeframeRange($event.value)"
-      [hideSingleSelectionIndicator]="true"
-      aria-label="{{ 'WORKSPACE.METADATA.USAGES.RANGE_LABEL' | translate }}"
-      data-test="usages-range-toggle"
-    >
-      @for (days of rangeOptions; track days; let last = $last) {
-      <mat-button-toggle class="usages__range-toggle" [value]="days">
-        @if (last) {
-        {{ 'WORKSPACE.METADATA.USAGES.RANGE_ALL' | translate }}
-        } @else {
-        {{ 'WORKSPACE.METADATA.USAGES.RANGE_DAYS' | translate : { days } }}
-        }
-      </mat-button-toggle>
-      }
-    </mat-button-toggle-group>
+    <es-timeframe-range-toggle
+      [rangeOptions]="rangeOptions"
+      [selectedRange]="selectedRange()"
+      (rangeChange)="changeTimeframeRange($event)"
+    ></es-timeframe-range-toggle>
   </div>
 
   <!-- selectable metric cards -->
