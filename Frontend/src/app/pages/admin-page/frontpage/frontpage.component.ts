@@ -7,6 +7,7 @@ import {
     MdsHelperService,
     NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
 } from 'ngx-edu-sharing-ui';
@@ -43,7 +44,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
 
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
 
-    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
+    @Output() openNode = new EventEmitter<NodeClickEvent<NodeEntriesDataType>>();
     previewLoading = true;
     config: any;
     modes = ['collection', 'rating', 'views', 'downloads'];

@@ -29,6 +29,7 @@ import {
     ListItem,
     NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     NodeHelperService,
@@ -1671,7 +1672,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    openNodeRender(event: NodeClickEvent<Node>) {
+    openNodeRender(event: NodeClickEvent<NodeEntriesDataType>) {
         this.nodeHelperService.navigateToNode(event);
     }
 }
