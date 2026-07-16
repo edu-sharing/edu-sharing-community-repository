@@ -27,9 +27,11 @@ import {
     DateHelper,
     InteractionType,
     ListItem,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodeHelperService,
     Scope,
     TranslationsService,
     UIAnimation,
@@ -142,6 +144,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private toast = inject(Toast);
     private translate = inject(TranslateService);
     private translations = inject(TranslationsService);
+    private nodeHelperService = inject(NodeHelperService);
 
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
@@ -1668,8 +1671,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    openNodeRender(event: Node) {
-        const url = this.router.createUrlTree([UIConstants.ROUTER_PREFIX + 'render', event.ref.id]);
-        window.open(this.connector.getAbsoluteEdusharingUrl() + this.router.serializeUrl(url));
+    openNodeRender(event: NodeClickEvent<Node>) {
+        this.nodeHelperService.navigateToNode(event);
     }
 }

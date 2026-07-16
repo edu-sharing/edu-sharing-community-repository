@@ -33,6 +33,7 @@ import {
     InteractionType,
     ListCountsComponent,
     ListItem,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     Scope,
@@ -166,7 +167,7 @@ export class AdminStatisticsComponent implements OnInit {
                 this.hasOrgStatistics)
         );
     }
-    @Output() openNode = new EventEmitter<Node>();
+    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
     static DAY_OFFSET = 1000 * 60 * 60 * 24;
     static DEFAULT_OFFSET = AdminStatisticsComponent.DAY_OFFSET * 7; // 7 days
     static DEFAULT_OFFSET_NODES = AdminStatisticsComponent.DAY_OFFSET * 30; // 30 days

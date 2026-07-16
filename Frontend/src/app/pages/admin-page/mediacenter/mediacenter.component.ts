@@ -1,4 +1,4 @@
-import { Component, EventEmitter, NgZone, Output, ViewChild, inject } from '@angular/core';
+import { Component, EventEmitter, inject, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Group,
@@ -15,6 +15,7 @@ import {
     InteractionType,
     ListSortConfig,
     MdsHelperService,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -33,7 +34,6 @@ import { Helper } from '../../../core-module/rest/helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { Toast } from '../../../services/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -69,7 +69,7 @@ export class AdminMediacenterComponent {
     @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
     @ViewChild('nodeEntriesTable') nodeEntriesTable: NodeEntriesWrapperComponent<Node>;
     @ViewChild('groupEntriesTable') groupEntriesTable: NodeEntriesWrapperComponent<Node>;
-    @Output() openNode = new EventEmitter<Node>();
+    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])

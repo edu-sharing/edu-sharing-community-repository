@@ -200,7 +200,7 @@
               [showActions]="false"
               [displayType]="NodeEntriesDisplayType.Table"
               [columns]="columnsSelectedNodes"
-              (clickItem)="openNode.emit($event.element)"
+              (clickItem)="openNode.emit($event)"
             ></es-node-entries-wrapper>
             }
           </div>
@@ -279,7 +279,7 @@
         [showActions]="false"
         [displayType]="NodeEntriesDisplayType.Table"
         [columns]="columns"
-        (clickItem)="openNode.emit($event.element)"
+        (clickItem)="openNode.emit($event)"
       ></es-node-entries-wrapper>
       } }
       <div class="export">
@@ -424,7 +424,7 @@
       [checkbox]="false"
       [displayType]="NodeEntriesDisplayType.Table"
       [columns]="columns"
-      (clickItem)="openNode.emit($event.element)"
+      (clickItem)="openNode.emit($event)"
     ></es-node-entries-wrapper>
     } @if (!nodesNoData) {
     <es-info-message>

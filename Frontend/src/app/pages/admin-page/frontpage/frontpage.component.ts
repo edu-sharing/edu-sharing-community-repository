@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, EventEmitter, Output, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, inject, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import {
     ColumnType,
     InteractionType,
     MdsHelperService,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -42,7 +43,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
 
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
 
-    @Output() openNode = new EventEmitter<Node>();
+    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
     previewLoading = true;
     config: any;
     modes = ['collection', 'rating', 'views', 'downloads'];
@@ -172,9 +173,6 @@ export class AdminFrontpageComponent implements AfterViewInit {
                     }
                 },
             );
-    }
-    doOpenNode(node: { node: Node }) {
-        this.openNode.emit(node.node);
     }
 
     setCollection(collection: Node) {

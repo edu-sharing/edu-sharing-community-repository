@@ -223,8 +223,8 @@
       [checkbox]="false"
       [displayType]="NodeEntriesDisplayType.Grid"
       [elementInteractionType]="InteractionType.Emitter"
-      (clickItem)="openNode.emit($any($event.element))"
-      (dblClickItem)="openNode.emit($any($event.element))"
+      (clickItem)="openNode.emit($event)"
+      (dblClickItem)="openNode.emit($event)"
       [scope]="$any('dummy')"
     ></es-node-entries-wrapper>
     }
