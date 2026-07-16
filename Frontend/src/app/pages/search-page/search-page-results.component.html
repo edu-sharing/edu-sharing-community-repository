@@ -68,7 +68,7 @@
     "
     [initConfig]="{
       actionbar: actionbars(),
-      customOptions: primaryActionOptions || (searchPage.getCustomMaterialOptions | async)
+      customOptions: primaryActionOptions || (materialOptions | async)
     }"
     (clickItem)="onClick($event)"
     (dblClickItem)="onDblClick($event.element)"

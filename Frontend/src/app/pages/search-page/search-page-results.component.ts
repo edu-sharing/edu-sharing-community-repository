@@ -29,7 +29,7 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
-import { distinctUntilChanged, skip, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, skip, switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
@@ -102,7 +102,21 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
-    defaultCustomOptions: CustomOptions;
+
+    /** The "Filter" toggle painted in the toggles-only actionbar. Built in the constructor. */
+    private toggleSearchFilter: OptionItemToggle;
+    /**
+     * Options fed to the results actionbars: the shared material options (sidebar toggle,
+     * add-to-collection) with the "Filter" toggle merged in so it renders in `#actionbarToggles`.
+     */
+    readonly materialOptions = this.searchPage.getCustomMaterialOptions.pipe(
+        map(
+            (options): CustomOptions => ({
+                ...options,
+                addOptions: [...(options.addOptions ?? []), this.toggleSearchFilter],
+            }),
+        ),
+    );
 
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
@@ -146,10 +160,7 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         toggleSearchFilter.priority = 30;
         toggleSearchFilter.toggleType = 'primary';
         toggleSearchFilter.togglePosition = 'before';
-        this.defaultCustomOptions = {
-            useDefaultOptions: true,
-            addOptions: [toggleSearchFilter],
-        };
+        this.toggleSearchFilter = toggleSearchFilter;
     }
 
     async ngOnInit() {
