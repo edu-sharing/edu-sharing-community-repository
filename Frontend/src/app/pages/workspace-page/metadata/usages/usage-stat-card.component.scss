@@ -56,9 +56,15 @@
         box-shadow: none;
     }
 
+    // Disabled: recede the card (muted, flat, dimmed icon) but keep the label/value font unchanged.
     &:disabled {
-        opacity: 0.5;
         cursor: not-allowed;
+        background: var(--backgroundColor);
+        box-shadow: none;
+
+        .stat-card__icon-badge {
+            opacity: 0.5;
+        }
     }
 }
 
