@@ -98,6 +98,8 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
 
     constructor() {
         void this.renderHelperService.prepareRootUrl();
+        // offer the sidebar's fullscreen toggle once a node is actually being rendered
+        effect(() => this.editorialSidebarService.showFullscreenToggle.set(!!this.renderNode()));
         effect(() => {
             const node = this.node();
             this.renderNode.set(null);
@@ -145,6 +147,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     ngOnDestroy(): void {
+        this.editorialSidebarService.showFullscreenToggle.set(false);
         this.destroyed.next();
         this.destroyed.complete();
     }

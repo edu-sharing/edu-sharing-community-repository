@@ -47,6 +47,20 @@ export class EditorialSidebarService {
      * indicate that the sidebar should overlay a global progress spinner
      */
     readonly sidebarLoading = signal(false);
+    /**
+     * whether the sidebar is expanded to fullscreen. Reset whenever an option is
+     * newly opened or closed (see EditorialSidebarComponent).
+     */
+    readonly fullscreenActive = signal(false);
+    /**
+     * whether the fullscreen toggle should be offered. Set by the preview content once
+     * it renders a node; reset whenever an option is newly opened or closed.
+     */
+    readonly showFullscreenToggle = signal(false);
+
+    toggleFullscreen() {
+        this.fullscreenActive.update((v) => !v);
+    }
 
     constructor() {
         this.mainNavService
@@ -84,6 +98,8 @@ export class EditorialSidebarService {
     showOption(state: OptionState<OptionConfig>) {
         this._editorialSidebar.enabledOption.set(state);
         this.sidebarOpened.set(true);
+        this.showFullscreenToggle.set(false);
+        this.fullscreenActive.set(false);
     }
 
     patchOptionConfig(optionConfig: OptionConfig) {
@@ -97,6 +113,8 @@ export class EditorialSidebarService {
     close() {
         this._editorialSidebar?.enabledOption?.set(null);
         this.sidebarOpened.set(false);
+        this.showFullscreenToggle.set(false);
+        this.fullscreenActive.set(false);
         // The service is providedIn:'root' and shared across pages, so the selected nodes must be
         // reset too — otherwise the stale selection survives a scope change (e.g. search → collections).
         this.nodes.set(null);

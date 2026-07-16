@@ -32,6 +32,9 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { EditorialSidebarService } from './editorial-sidebar.service';
 import { provideReusableOptionsHelperData } from '../../services/options-helper-data.provider';
 import { trigger } from '@angular/animations';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
@@ -99,6 +102,9 @@ export type OptionState<T extends OptionConfig> = {
     standalone: false,
     providers: [provideReusableOptionsHelperData()],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    host: {
+        '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
+    },
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private dialogs = inject(DialogsService);
@@ -106,6 +112,13 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private nodeHelperService = inject(NodeHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
     private optionsHelperDataService = inject(OptionsHelperDataService);
+    private breakpointObserver = inject(BreakpointObserver);
+
+    /** true on desktop; below 900px ($mobileSidebarModal) the sidebar is a full-screen overlay */
+    readonly isDesktop = toSignal(
+        this.breakpointObserver.observe(['(max-width: 900px)']).pipe(map((r) => !r.matches)),
+        { initialValue: true },
+    );
 
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
@@ -137,6 +150,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         effect(() => {
             this.editorialSidebarService.nodes();
             void this.initOptions();
+        });
+        // reset fullscreen whenever an option is newly opened / closed / switched
+        effect(() => {
+            this.enabledOption();
+            this.editorialSidebarService.fullscreenActive.set(false);
         });
     }
 

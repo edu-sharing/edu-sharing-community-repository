@@ -13,6 +13,23 @@
     <div>
       {{ title() | translate }}
     </div>
+    @if (editorialSidebarService.showFullscreenToggle() && isDesktop()) {
+    <button
+      mat-icon-button
+      (click)="editorialSidebarService.toggleFullscreen()"
+      [attr.aria-label]="
+        (editorialSidebarService.fullscreenActive()
+          ? 'EDITORIAL.SIDEBAR.EXIT_FULLSCREEN'
+          : 'EDITORIAL.SIDEBAR.FULLSCREEN'
+        ) | translate
+      "
+    >
+      <i
+        [esIcon]="editorialSidebarService.fullscreenActive() ? 'fullscreen_exit' : 'fullscreen'"
+        [aria]="true"
+      ></i>
+    </button>
+    }
     <button mat-icon-button (click)="close()">
       <i esIcon="close" [aria]="true"></i>
     </button>

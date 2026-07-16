@@ -35,6 +35,15 @@
         margin: 0;
     }
 }
+// In fullscreen (class on the editorial-sidebar host ancestor) the preview fills the screen, so
+// size --containerHeight from the viewport instead of the width-derived 3:2 --previewHeight:
+// viewport minus the top nav, the card's top+bottom margins, the sidebar header and the sticky footer.
+:host-context(.fullscreen):not(.modal) es-render-wrapper-component {
+    --subtractSize: var(--mainnavCurrentHeight) - 2 * var(--roundedContainerMargin) -
+        var(--editorialHeaderHeight) - #{$secondaryBarHeight} - 80px;
+    --renderWrapperHeight: calc(100vh - var(--subtractSize));
+    --previewHeight: calc(70vh - var(--subtractSize));
+}
 ::ng-deep {
     .preview-sidebar-rendering-modal es-render-wrapper-component rs-root {
         min-height: calc(100vh - 200px);

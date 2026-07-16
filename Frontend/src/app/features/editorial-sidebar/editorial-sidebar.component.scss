@@ -58,6 +58,29 @@
         }
     }
 }
+// desktop fullscreen: cover the content area below the top nav (es-main-nav stays visible)
+:host.fullscreen {
+    position: fixed;
+    z-index: vars.$dialogZIndex - 10;
+    @include mixins.roundedContainerCard(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight,
+        $drawerNudge: false
+    );
+    // pin below the top nav; left/right/bottom pin to the viewport edges. The card's own
+    // margin (from roundedContainerCard) provides the gap, and top+bottom insets define the
+    // height — do not set an explicit height or it fights the margin and overflows.
+    inset: var(--mainnavCurrentHeight) 0 0 0;
+    isolation: isolate;
+    overflow: hidden;
+    &::after {
+        position: fixed;
+        z-index: -1;
+        content: '';
+        background: vars.$darkenColor;
+        inset: 0;
+    }
+}
 .option-show {
     animation: slide-fade 1s;
 }
