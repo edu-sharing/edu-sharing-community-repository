@@ -143,9 +143,10 @@ mat-sidenav-container {
     background-color: var(--roundedContainerBackground);
     @include mixins.materialShadowTop();
     border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
-    // paint the shadow above the scrolled content
+    // Paint the shadow above the content — including the tree column, which has z-index: 2 and an
+    // opaque background, so the bar must sit above it or the tree clips the upward shadow.
     position: relative;
-    z-index: 1;
+    z-index: 3;
 
     es-actionbar {
         padding-left: 10px;
