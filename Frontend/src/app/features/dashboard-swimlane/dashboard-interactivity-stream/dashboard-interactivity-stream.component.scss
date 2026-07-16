@@ -8,7 +8,7 @@
 
     .event:hover {
         @include mixins.materialShadowMediumLarge(false, 0.2);
-        background-color: rgb(var(--primaryBackground50));
+        background-color: var(--defaultBackground);
     }
 
     .event ::ng-deep {
