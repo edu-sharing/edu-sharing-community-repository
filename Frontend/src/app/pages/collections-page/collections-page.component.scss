@@ -1,4 +1,3 @@
-@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
@@ -56,7 +55,7 @@ mat-sidenav-container {
     flex-shrink: 0;
     align-items: center;
     gap: 10px;
-    min-height: $secondaryBarHeight;
+    min-height: vars.$secondaryBarHeight;
     padding: 0 25px;
     background-color: var(--roundedContainerBackground);
     @include mixins.materialShadowTop();
@@ -118,7 +117,7 @@ mat-tab-group {
     // set on the header element itself (same pattern as nodes-selector's tabLayout2Line).
     // The shadow comes from the global .mat-tab-group-shadow class.
     ::ng-deep mat-tab-header {
-        --mat-tab-container-height: #{$secondaryBarHeight};
+        --mat-tab-container-height: #{vars.$secondaryBarHeight};
     }
 }
 .collectionsContainer {
@@ -221,7 +220,7 @@ section {
     width: 100%;
 }
 .noAddPermissions {
-    color: $textLight;
+    color: vars.$textLight;
     padding-top: 10px;
 }
 .collection-header-image {
@@ -279,9 +278,11 @@ section {
     }
 }
 .breadcrumb-space {
-    padding: 15px 10px 15px 20px;
-    background: var(--defaultBackground);
-    @include materialShadow();
+    // Unified secondary-bar height/style, matching the tab header and the selection bar.
+    min-height: vars.$secondaryBarHeight;
+    padding: 0 10px 0 20px;
+    background: var(--roundedContainerBackground);
+    @include mixins.materialShadowBottom();
     display: flex;
     justify-content: space-between;
     gap: 10px;
@@ -293,7 +294,7 @@ section {
     z-index: 1;
 }
 
-@media only screen and (max-width: $mobileWidth+$mobileStage*3) {
+@media only screen and (max-width: vars.$mobileWidth + vars.$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {
             display: none;
@@ -309,12 +310,12 @@ section {
     }
 }
 
-@media screen and (max-width: ($mobileTabSwitchWidth)) {
+@media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
     .switchToSearch {
         display: none;
     }
 }
-@media only screen and (max-width: $mobileWidth) {
+@media only screen and (max-width: vars.$mobileWidth) {
     .collection-new-preview-headline {
         overflow-wrap: break-word;
         display: -webkit-box;
@@ -355,6 +356,8 @@ section {
         overflow-y: auto;
     }
     .breadcrumb-space {
+        // the breadcrumb becomes an absolute overlay here, so drop the fixed bar height/frame
+        min-height: 0;
         background: transparent;
         padding: 0;
         margin-top: 0;
@@ -367,7 +370,7 @@ section {
         z-index: 1;
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(5px);
-        height: $secondaryBarHeight;
+        height: vars.$secondaryBarHeight;
         @include mixins.materialShadowBottom();
         padding-top: 22px;
         padding-bottom: 20px;
