@@ -199,7 +199,8 @@ export class AdminStatisticsComponent implements OnInit {
     _customGroupMode: 'NODES' | 'USERS' = 'NODES';
     // nodes mode ("by object") view controls — see statistics.component.html @if (nodesMode)
     contentSource: 'all' | 'selected' | 'my' | 'org' = 'selected';
-    objectType: 'all' | 'collections' | 'content' = 'all';
+    /** object-type filter, values match the backend ContentType enum */
+    objectType: 'ALL' | 'COLLECTIONS' | 'FILES' = 'ALL';
     /** restrict the "by object" evaluation to published (publicly visible) nodes; n/a for "all content" */
     onlyPublic = false;
     /** preset day-ranges offered by the "by object" timeframe toggle (ALL_RANGE = "all") */
@@ -766,7 +767,9 @@ export class AdminStatisticsComponent implements OnInit {
                 dateTo: this._nodesEnd.toISOString(),
                 maxResults: 50000,
                 published: this.onlyPublic,
+                contentType: this.objectType,
             };
+            console.log(range);
             let request: ReturnType<StatisticV1Service['getByNodes']>;
             if (this.contentSource === 'my') {
                 request = this.statistics.getByUsers({
@@ -1048,6 +1051,7 @@ export class AdminStatisticsComponent implements OnInit {
             dateFrom: this._nodesStart.toISOString(),
             dateTo: this._nodesEnd.toISOString(),
             published: this.onlyPublic,
+            contentType: this.objectType,
         };
         let request: ReturnType<StatisticV1Service['getByNodesAsync']>;
         if (this.contentSource === 'all') {

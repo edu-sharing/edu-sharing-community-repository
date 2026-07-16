@@ -168,6 +168,9 @@ es-listTable {
 }
 .stats-nodes-view {
     padding: 0 20px 20px;
+    h4 {
+        margin-bottom: 8px;
+    }
     .source-selection {
         max-width: $maxWidthContainer;
         margin: auto;
@@ -212,6 +215,7 @@ es-listTable {
     .period-range {
         display: block;
         margin: 15px 0;
+        padding-top: 20px;
     }
     .start-button {
         display: flex;
