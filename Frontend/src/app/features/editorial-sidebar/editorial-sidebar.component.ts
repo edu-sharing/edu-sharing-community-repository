@@ -21,6 +21,7 @@ import {
     ElementType,
     HideMode,
     NodeHelperService,
+    NodesRightMode,
     OptionItem,
     OptionsHelperDataService,
     Target,
@@ -189,7 +190,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         );
         versionManagement.elementType = [ElementType.Node];
         versionManagement.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
-        versionManagement.scopes = ['workspace'];
+        versionManagement.scopes = ['workspace', 'search', 'suggestions'];
+        versionManagement.permissions = [RestConstants.PERMISSION_WRITE];
+        versionManagement.permissionsRightMode = NodesRightMode.Effective;
+        versionManagement.permissionsMode = HideMode.Hide;
         options.push(versionManagement);
 
         const showStatistics = new OptionItem(
@@ -198,7 +202,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             () => this.enabledOption.set({ trap: false, option: 'VIEWS_AND_USAGE' }),
         );
         showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
-        showStatistics.scopes = ['workspace', 'collections', 'search'];
+        showStatistics.scopes = ['workspace', 'collections', 'suggestions'];
         showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
         showStatistics.toolpermissionsMode = HideMode.Hide;
         showStatistics.group = DefaultGroups.View;
