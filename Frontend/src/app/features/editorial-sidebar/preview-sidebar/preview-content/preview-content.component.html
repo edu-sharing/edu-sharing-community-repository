@@ -70,10 +70,31 @@
 @if (!previewSidebarTemplateService.metadata) {
 <div class="sticky-bar">
   @if (editorMode === 'viewer') {
-  <a mat-stroked-button [routerLink]="allDetailsLink" class="all-details-link" color="primary">
-    <span>{{ 'ALL_DETAILS' | translate }}</span>
-    <i esIcon="arrow_forward"></i>
-  </a>
+  <div class="preview-navigation">
+    <button
+      mat-button
+      color="primary"
+      class="nav-button"
+      [disabled]="!editorialSidebarService.canStepPreview(-1)"
+      (click)="editorialSidebarService.stepPreview(-1)"
+    >
+      <i esIcon="arrow_back"></i>
+      <span>{{ 'EDITORIAL.SIDEBAR.PREVIOUS' | translate }}</span>
+    </button>
+    <a mat-stroked-button [routerLink]="allDetailsLink" class="all-details-link" color="primary">
+      <span>{{ 'ALL_DETAILS' | translate }}</span>
+    </a>
+    <button
+      mat-button
+      color="primary"
+      class="nav-button"
+      [disabled]="!editorialSidebarService.canStepPreview(1)"
+      (click)="editorialSidebarService.stepPreview(1)"
+    >
+      <span>{{ 'EDITORIAL.SIDEBAR.NEXT' | translate }}</span>
+      <i esIcon="arrow_forward"></i>
+    </button>
+  </div>
   } @if (editorMode !== 'viewer') {
   <button mat-flat-button class="save-button" color="primary" (click)="onSaveMds()">
     <span>{{ 'SAVE' | translate }}</span>

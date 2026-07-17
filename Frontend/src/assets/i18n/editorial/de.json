@@ -18,6 +18,8 @@
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
       "FULLSCREEN": "Vollbild",
       "EXIT_FULLSCREEN": "Vollbild beenden",
+      "PREVIOUS": "Vorherige",
+      "NEXT": "Nächste",
       "SUBMISSION": {
         "TAB_SUBMISSION": "Abgabe",
         "TAB_DISCUSSION": "Diskussion",

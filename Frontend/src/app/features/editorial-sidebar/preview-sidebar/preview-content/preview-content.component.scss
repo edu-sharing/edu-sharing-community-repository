@@ -106,13 +106,31 @@ es-render-wrapper-component {
     z-index: 1;
 }
 
+// three-column grid so the "all details" link stays centered while the
+// previous/next navigation buttons sit flush to the edges of the bar
+.preview-navigation {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+
+    .nav-button {
+        &:first-child {
+            justify-self: start;
+        }
+        &:last-child {
+            justify-self: end;
+        }
+    }
+}
+
 .all-details-link {
-    padding-right: 6px;
-    border-radius: 18px;
+    border-radius: var(--borderRadiusButtons);
+    justify-self: center;
 }
 
 .save-button {
-    border-radius: 18px;
+    border-radius: var(--borderRadiusButtons);
 }
 
 .preview-sidebar-body {

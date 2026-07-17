@@ -10,6 +10,7 @@ import {
 import {
     NodeClickEvent,
     NodeEntriesDataType,
+    NodeEntriesGlobalService,
     NodeEntriesWrapperComponent,
     Scope,
 } from 'ngx-edu-sharing-ui';
@@ -22,6 +23,7 @@ import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 })
 export class EditorialSidebarService {
     mainNavService = inject(MainNavService);
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
 
     /**
      * currently selected nodes
@@ -96,10 +98,15 @@ export class EditorialSidebarService {
     }
 
     showOption(state: OptionState<OptionConfig>) {
+        // only drop the fullscreen view when actually switching to a *different* option;
+        // re-showing the same option (stepping the preview) keeps it.
+        const optionChanged = this._editorialSidebar.enabledOption()?.option !== state.option;
         this._editorialSidebar.enabledOption.set(state);
         this.sidebarOpened.set(true);
-        this.showFullscreenToggle.set(false);
-        this.fullscreenActive.set(false);
+        if (optionChanged) {
+            this.showFullscreenToggle.set(false);
+            this.fullscreenActive.set(false);
+        }
     }
 
     patchOptionConfig(optionConfig: OptionConfig) {
@@ -160,13 +167,58 @@ export class EditorialSidebarService {
         this.nodes.set(selection.source.selected);
         const option = this._editorialSidebar.enabledOption()?.option;
         const selectionMode = option ? EDITORIAL_SIDEBAR_OPTIONS[option].selectionMode : 'none';
-        if (selection.source.selected.length === 0) {
+        const count = selection.source.selected.length;
+        if (count === 0) {
             this.close();
-        } else if (
-            (selection.source.selected.length === 1 && selectionMode === 'none') ||
-            (selection.source.selected.length >= 1 && selectionMode !== 'multi')
-        ) {
+        } else if (selectionMode === 'none' || (selectionMode === 'single' && count > 1)) {
+            // Only leave the current option when the new selection is no longer valid for it
+            // (an option that ignores selection, or more than one node for a single-selection
+            // option). Merely switching between valid selections keeps the option open — e.g.
+            // stepping the preview to the previous/next node.
             this._editorialSidebar.enabledOption.set(null);
         }
+    }
+
+    /**
+     * Resolve the index of the currently previewed node within the page's primary
+     * node-entries list (the "selection" the preview was opened from).
+     * Returns -1 when there is no primary list or the node is not part of it.
+     */
+    private getPreviewIndex(): { data: NodeEntriesDataType[]; index: number } {
+        const data =
+            this.nodeEntriesGlobalService.getPrimaryInstance()?.dataSource?.getData() ?? [];
+        const current = this.nodes()?.[0] as Node;
+        const index = current
+            ? data.findIndex((n) => (n as Node)?.ref?.id === current.ref?.id)
+            : -1;
+        return { data, index };
+    }
+
+    /**
+     * Whether a preview step by `offset` (e.g. -1 / +1) lands on an existing node
+     * of the primary list. Used to enable/disable the preview navigation buttons.
+     */
+    canStepPreview(offset: number): boolean {
+        const { data, index } = this.getPreviewIndex();
+        return index >= 0 && !!data[index + offset];
+    }
+
+    /**
+     * Move the preview to the previous/next node of the primary list and keep the
+     * list selection in sync. `handleSelection` keeps the PREVIEW option open for a
+     * single-node selection, so the enabled option is left untouched here — its
+     * reference stays stable and the fullscreen view is preserved while stepping.
+     */
+    stepPreview(offset: number): void {
+        const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
+        const { data, index } = this.getPreviewIndex();
+        const target = index >= 0 ? data[index + offset] : undefined;
+        if (!instance || !target) {
+            return;
+        }
+        // Use setSelection (single change emission) rather than clear()+select(): clear() would
+        // momentarily emit an empty selection, and `handleSelection` closes the sidebar on length 0.
+        instance.selection.setSelection(target);
+        this.nodes.set([target]);
     }
 }

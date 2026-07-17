@@ -73,12 +73,24 @@
     inset: var(--mainnavCurrentHeight) 0 0 0;
     isolation: isolate;
     overflow: hidden;
+    // grow-in when entering fullscreen (static <-> fixed can't be transitioned directly)
+    animation: fullscreen-enter var(--transitionNormal) ease;
     &::after {
         position: fixed;
         z-index: -1;
         content: '';
         background: vars.$darkenColor;
         inset: 0;
+    }
+}
+@keyframes fullscreen-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 .option-show {
