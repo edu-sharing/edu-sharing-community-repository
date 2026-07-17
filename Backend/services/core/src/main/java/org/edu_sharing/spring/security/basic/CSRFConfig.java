@@ -36,7 +36,11 @@ public class CSRFConfig {
                     .sessionAuthenticationStrategy(eduSessionAuthenticationStrategy)
                     .csrfTokenRepository(tokenRepository)
                     .csrfTokenRequestHandler(requestHandler)
-                    .ignoringRequestMatchers(ApplicationInfoList::isInternalPortRequest));
+                    .ignoringRequestMatchers(
+                            ApplicationInfoList::isInternalPortRequest,
+                            // stateless calls carrying an auth header (Basic/Bearer/EDU-Ticket)
+                            // don't rely on the session cookie, so CSRF protection is not needed
+                            request -> request.getHeader("Authorization") != null));
         }
         return http;
     }
