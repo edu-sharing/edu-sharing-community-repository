@@ -1114,6 +1114,9 @@
             "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
+          "public": {
+            "type": "boolean"
+          },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
           },
@@ -4698,6 +4701,9 @@
             "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
+          "public": {
+            "type": "boolean"
+          },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
           },
@@ -4876,6 +4882,9 @@
               "type": "integer"
             },
             "type": "object"
+          },
+          "public": {
+            "type": "boolean"
           },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
@@ -45331,6 +45340,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -45444,6 +45470,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -45566,6 +45609,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -45683,6 +45743,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -45807,6 +45884,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -45920,6 +46014,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],

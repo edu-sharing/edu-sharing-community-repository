@@ -16,6 +16,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
     DEFAULT,
     HOME_REPOSITORY,
+    ME,
     Node,
     NodeService,
     Organization,
@@ -769,11 +770,10 @@ export class AdminStatisticsComponent implements OnInit {
                 published: this.onlyPublic,
                 contentType: this.objectType,
             };
-            console.log(range);
             let request: ReturnType<StatisticV1Service['getByNodes']>;
             if (this.contentSource === 'my') {
                 request = this.statistics.getByUsers({
-                    userId: this.connector.getCurrentLogin()?.authorityName ?? '',
+                    userId: ME,
                     ...range,
                 });
             } else if (this.contentSource === 'org') {

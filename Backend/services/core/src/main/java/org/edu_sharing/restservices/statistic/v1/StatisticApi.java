@@ -22,6 +22,7 @@ import org.edu_sharing.restservices.tracking.v1.model.Tracking;
 import org.edu_sharing.restservices.tracking.v1.model.TrackingNode;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.statistic.StatisticsGlobal;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.tracking.GroupingType;
@@ -196,11 +197,12 @@ public class StatisticApi {
                                @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
-                               @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
+                               @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                               @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType) throws Throwable {
         if ("-me-".equals(userId)) {
             userId = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOwningUser(userId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE, contentType);
         return Response.ok().entity(trackingDAO.map(tracks)).build();
     }
 
@@ -218,11 +220,12 @@ public class StatisticApi {
                                     @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                     @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                     @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                                    @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
                                     @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties) {
         if ("-me-".equals(userId)) {
             userId = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        trackingDAO.scheduleNodeStatisticsByOwningUser(userId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, properties);
+        trackingDAO.scheduleNodeStatisticsByOwningUser(userId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, contentType, properties);
         return Response.ok().build();
     }
 
@@ -241,8 +244,9 @@ public class StatisticApi {
             @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
             @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
             @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+            @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
             @Parameter(description = "node ids to fetch data for") List<String> nodeIds) throws Throwable {
-        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByRange(nodeIds, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE, contentType);
         return Response.ok().entity(trackingDAO.map(tracks)).build();
     }
 
@@ -267,9 +271,10 @@ public class StatisticApi {
             @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
             @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
             @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+            @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
             GetByNodeIdsRequest request
             ) {
-        trackingDAO.scheduleNodeStatisticsByRange(request.nodeIds, dateFrom, dateTo, publishedOnly == Boolean.TRUE, request.properties);
+        trackingDAO.scheduleNodeStatisticsByRange(request.nodeIds, dateFrom, dateTo, publishedOnly == Boolean.TRUE, contentType, request.properties);
         return Response.ok().build();
     }
 
@@ -287,8 +292,9 @@ public class StatisticApi {
                                       @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                       @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                       @Parameter(description = "maximum results (up to 50.000)", required = true) @QueryParam("maxResults") int maxResults,
-                                      @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly) throws Throwable {
-        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE);
+                                      @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                                      @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType) throws Throwable {
+        Map<org.edu_sharing.service.model.NodeRef, StatisticEntry> tracks = trackingDAO.getNodeStatisticsByOrganization(orgId, dateFrom, dateTo, maxResults, publishedOnly == Boolean.TRUE, contentType);
         return Response.ok().entity(trackingDAO.map(tracks)).build();
     }
 
@@ -306,8 +312,9 @@ public class StatisticApi {
                                            @Parameter(description = "date range from in ISO 8601 format", required = true) @QueryParam("dateFrom") Date dateFrom,
                                            @Parameter(description = "date range to in ISO 8601 format", required = true) @QueryParam("dateTo") Date dateTo,
                                            @Parameter(description = "shows only statistics of published nodes ") @QueryParam("published") Boolean publishedOnly,
+                                           @Parameter(description = "Type of element", required = false) @QueryParam("contentType") SearchService.ContentType contentType,
                                            @Parameter(description = "properties to visualize in export", example = "[[\"cclom:title\"],[\"ccm:replicationsourceid\"],[\"ccm:lifecyclecontributer_publisher\"], [\"ccm:lifecyclecontributer_publisher\",\"X-ES-LOM-CONTRIBUTE-DATE\"]") List<List<String>> properties) throws Throwable {
-        trackingDAO.scheduleNodeStatisticsByOrganization(orgId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, properties);
+        trackingDAO.scheduleNodeStatisticsByOrganization(orgId, dateFrom, dateTo, publishedOnly == Boolean.TRUE, contentType, properties);
         return Response.ok().build();
     }
 

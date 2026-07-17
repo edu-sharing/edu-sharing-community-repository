@@ -51,8 +51,6 @@ import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.workspace_administration.NodeServiceInterceptor;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.generated.repository.backend.services.rest.client.model.ShareInfo;
-import org.edu_sharing.service.contributor.ContributorService;
-import org.edu_sharing.spring.ApplicationContextFactory;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.metadataset.v2.tools.MetadataElasticSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
@@ -2211,7 +2209,7 @@ public class SearchServiceElastic implements SearchService {
         return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));
     }
 
-    Query getContentTypeQuery(ContentType contentType) {
+    public Query getContentTypeQuery(ContentType contentType) {
         if (contentType == null || contentType.equals(ContentType.ALL)) {
             return QueryBuilders.matchAll().build()._toQuery();
         }
