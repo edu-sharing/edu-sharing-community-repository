@@ -175,6 +175,10 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             .observeValue()
             .pipe(distinctUntilChanged(), skip(1), takeUntil(this.destroyed))
             .subscribe(() => this.clearSelection());
+        // Clear the selection whenever a new query is issued so stale selections don't linger in the bottom bar.
+        this.results.searchQueryChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => this.clearSelection());
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
     }
 
@@ -208,6 +212,8 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     }
 
     updateSort(sort: ListSortConfig) {
+        // Re-sorting re-queries and replaces the result set, so drop any carried-over selection.
+        this.clearSelection();
         this.results.searchSort.setUserValue({
             active: sort.active,
             direction: sort.direction,
