@@ -70,6 +70,17 @@ export class RestConstants {
     public static CCM_TYPE_REMOTEOBJECT = 'ccm:remoteobject';
     public static CCM_TYPE_TOOL_INSTANCE = 'ccm:tool_instance';
     public static CCM_TYPE_SAVED_SEARCH = 'ccm:saved_search';
+
+    public static PERMISSION_OWNER = 'Owner';
+    public static PERMISSION_COLLABORATOR = 'Collaborator';
+    public static PERMISSION_DOWNLOAD_CONTENT = 'DownloadContent';
+    public static PERMISSION_COORDINATOR = 'Coordinator';
+    public static PERMISSION_ALL = 'All';
+    public static PERMISSION_WRITE = 'Write';
+    public static PERMISSION_DELETE = 'Delete';
+    public static PERMISSION_FEEDBACK = 'Feedback'; // Giving feedback for collections
+    public static PERMISSION_RATE = 'Rate';
+
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
     public static TOOLPERMISSION_INVITE_STREAM = 'TOOLPERMISSION_INVITE_STREAM';
