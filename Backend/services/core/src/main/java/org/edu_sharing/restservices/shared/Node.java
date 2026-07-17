@@ -128,9 +128,20 @@ public class Node implements Serializable {
     @Schema(description = "Contributors (authors, publishers) for the node")
     private List<Contributor> contributors;
 
+    private boolean isPublic;
+
+    /**
+     * Explicit getter on purpose: if the field carried the annotations directly, Lombok would
+     * generate the getter WITHOUT copying @JsonProperty over. Jackson would then derive an
+     * additional bean property "public" from the isPublic() getter, next to "isPublic".
+     * That extra "public" is not part of the OpenAPI definition and breaks generated Java clients:
+     * "The field `public` in the JSON string is not defined in the `Node` properties".
+     */
     @Schema(description = "Whether the node is public (shared to everyone)")
     @JsonProperty("isPublic")
-    private boolean isPublic;
+    boolean isPublic(){
+        return isPublic;
+    }
 
     /**
      * fake a node from a ref
