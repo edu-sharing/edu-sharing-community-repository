@@ -1766,6 +1766,9 @@ public class SearchServiceElastic implements SearchService {
                         )
                 )
         ));
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+        }
         return searchInternalWithChildQuery("recentUserEvents", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map userEvent = (Map) data.getInnerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
             return new SearchUserEvent(
@@ -1853,6 +1856,9 @@ public class SearchServiceElastic implements SearchService {
                         )
                 ))
         ))._toQuery();
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+        }
         return searchInternalWithChildQuery("shared", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
             return new SearchInviteEvent(
@@ -1876,7 +1882,14 @@ public class SearchServiceElastic implements SearchService {
 
         Query nestedQuery = Query.of(q -> q.nested(n -> n
                 .path("suggestions")
+                // parent score = sum of the child scores; each PENDING suggestion contributes
+                // exactly 1 (see the constant_score should below), so the score equals the
+                // number of pending suggestions the node has
+                .scoreMode(ChildScoreMode.Sum)
                 .query(nq -> nq.bool(b -> {
+                    // keep the should clause optional so the filters (or "match all" when none are
+                    // set) still decide which suggestions match; the should only affects scoring
+                    b = b.minimumShouldMatch("0");
                     if (statusFilter != null && !statusFilter.isEmpty()) {
                         b = b.must(m -> m.bool(sb -> {
                             sb = sb.minimumShouldMatch("1");
@@ -1901,6 +1914,14 @@ public class SearchServiceElastic implements SearchService {
                             return tb;
                         }));
                     }
+                    // score each matching pending suggestion with a constant 1 so it pushes highest counts to the top
+                    b = b.should(s -> s.constantScore(cs -> cs
+                            .filter(f -> f.term(t -> t
+                                    .field("suggestions.status")
+                                    .value(org.edu_sharing.service.suggestion.SuggestionStatus.PENDING.name())
+                            ))
+                            .boost(1.0f)
+                    ));
                     return b;
                 }))
                 .innerHits(ih -> ih
@@ -1914,9 +1935,16 @@ public class SearchServiceElastic implements SearchService {
         ));
 
         Query combinedQuery = BoolQuery.of(bool -> bool
-                .must(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
+                // write permissions only restrict the result set; keep them out of scoring so the
+                // score stays equal to the pending-suggestion count
+                .filter(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
                 .must(nestedQuery)
         )._toQuery();
+
+        // default ordering: nodes with the most pending suggestions first (score == pending count)
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_DESC);
+        }
 
         List<SearchFacet> requestedFacets = searchToken.getFacets();
         // we set facets null because the
@@ -2019,7 +2047,6 @@ public class SearchServiceElastic implements SearchService {
                 );
         processSpecialFilters(queryData, builder);
         searchToken.setElasticQuery(builder.build());
-        searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
         org.edu_sharing.repository.server.SearchResult<T> result = new org.edu_sharing.repository.server.SearchResult<>();
         ArrayList<T> list = new ArrayList<>();
