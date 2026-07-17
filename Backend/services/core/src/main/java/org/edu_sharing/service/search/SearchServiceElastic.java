@@ -1883,8 +1883,8 @@ public class SearchServiceElastic implements SearchService {
         Query nestedQuery = Query.of(q -> q.nested(n -> n
                 .path("suggestions")
                 // parent score = sum of the child scores; each PENDING suggestion contributes
-                // exactly 1 (see the constant_score should below), so the score equals the
-                // number of pending suggestions the node has
+                // PENDING_SUGGESTION_WEIGHT (see the constant_score should below), so the score is
+                // dominated by the number of pending suggestions the node has
                 .scoreMode(ChildScoreMode.Sum)
                 .query(nq -> nq.bool(b -> {
                     // keep the should clause optional so the filters (or "match all" when none are
@@ -1914,13 +1914,15 @@ public class SearchServiceElastic implements SearchService {
                             return tb;
                         }));
                     }
-                    // score each matching pending suggestion with a constant 1 so it pushes highest counts to the top
+                    // score each matching pending suggestion with a constant weight so it pushes highest counts to the top
                     b = b.should(s -> s.constantScore(cs -> cs
                             .filter(f -> f.term(t -> t
                                     .field("suggestions.status")
                                     .value(org.edu_sharing.service.suggestion.SuggestionStatus.PENDING.name())
                             ))
-                            .boost(1.0f)
+                            // weight per pending suggestion. The parent _score is the sum of the child score multiplied
+                            // to fix other constant query scores
+                            .boost(100.f)
                     ));
                     return b;
                 }))
@@ -1935,13 +1937,13 @@ public class SearchServiceElastic implements SearchService {
         ));
 
         Query combinedQuery = BoolQuery.of(bool -> bool
-                // write permissions only restrict the result set; keep them out of scoring so the
-                // score stays equal to the pending-suggestion count
+                // write permissions only restrict the result set; keep them out of scoring so they
+                // don't add to the pending-suggestion-weighted score
                 .filter(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
                 .must(nestedQuery)
         )._toQuery();
 
-        // default ordering: nodes with the most pending suggestions first (score == pending count)
+        // default ordering: nodes with the most pending suggestions first (score dominated by pending count)
         if (searchToken.getSortDefinition() == null) {
             searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_DESC);
         }
