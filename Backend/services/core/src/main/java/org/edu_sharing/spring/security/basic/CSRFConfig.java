@@ -38,9 +38,11 @@ public class CSRFConfig {
                     .csrfTokenRequestHandler(requestHandler)
                     .ignoringRequestMatchers(
                             ApplicationInfoList::isInternalPortRequest,
-                            // stateless calls carrying an auth header (Basic/Bearer/EDU-Ticket)
-                            // don't rely on the session cookie, so CSRF protection is not needed
-                            request -> request.getHeader("Authorization") != null));
+                            // stateless clients (scripts, server-to-server, token clients) send an
+                            // auth header but NO session cookie -> there is no ambient authority a
+                            // CSRF attack could ride on, so CSRF protection is not needed.
+                            request -> request.getHeader("Authorization") != null
+                                    && request.getRequestedSessionId() == null));
         }
         return http;
     }
