@@ -396,6 +396,12 @@ export class CollectionsPageComponent implements OnDestroy {
                     await this.collectionService.getCollection(id).toPromise()
                 ).collection;
             } catch (e) {
+                if (e.status === RestConstants.HTTP_NOT_FOUND) {
+                    // opened collection id does not exist -> inform user and go back to root
+                    this.toast.error(null, 'COLLECTIONS.ERROR_NOT_FOUND');
+                    this.navigate();
+                    return;
+                }
                 if (e.status === RestConstants.HTTP_FORBIDDEN) {
                     const login = await this.connector.isLoggedIn().toPromise();
                     if (login.statusCode === RestConstants.STATUS_CODE_OK) {
