@@ -183,6 +183,9 @@
   "CHANGE_STORAGE_LOCATION": "Selezionare",
   "STORAGE_LOCATION_UNSET": "Non impostato",
   "SUGGESTION": "Suggerimento",
+  "SUGGESTIONS": {
+    "count": "Numero"
+  },
   "CLICKTOREMOVE": "Fare clic per rimuovere",
   "NO_PERMISSIONS_FOR_SCOPE": "Non ci sono permessi per accedere a questo ambiente",
   "DATE_SELECT_YEAR": "Scegliere l'anno",

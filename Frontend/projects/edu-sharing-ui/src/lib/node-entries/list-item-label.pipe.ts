@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform, inject } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
@@ -26,7 +26,7 @@ export class ListItemLabelPipe implements PipeTransform {
             ASSIGNMENT: 'ASSIGNMENT',
             SUBMISSION: 'SUBMISSION',
             SHARE: 'SHARE',
-            SUGGESTION: 'SUGGESTION',
+            SUGGESTION: 'SUGGESTIONS',
         };
         if (item.label) {
             return rxjs.of(item.label);

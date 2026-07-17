@@ -194,6 +194,9 @@
   "STORAGE_LOCATION_UNSET": "Not set",
   "STORAGE_LOCATION_SAVE": "Use this location as default in the future",
   "SUGGESTION": "Suggestion",
+  "SUGGESTIONS": {
+    "count": "Count"
+  },
   "CLICKTOREMOVE": "Click to remove",
   "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
   "DATE_SELECT_YEAR": "Choose year",

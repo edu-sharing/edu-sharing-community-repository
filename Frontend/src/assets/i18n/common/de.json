@@ -210,6 +210,9 @@
   "STORAGE_LOCATION_UNSET": "Nicht gewählt",
   "STORAGE_LOCATION_SAVE": "Diesen Speicherort zukünftig als Standard verwenden.",
   "SUGGESTION": "Vorschlag",
+  "SUGGESTIONS": {
+    "count": "Anzahl"
+  },
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen.",
   "DATE_SELECT_YEAR": "Jahr wählen",
