@@ -4025,6 +4025,9 @@
           "caption": {
             "type": "string"
           },
+          "extended": {
+            "type": "boolean"
+          },
           "hideIfEmpty": {
             "type": "boolean"
           },
@@ -4097,6 +4100,9 @@
               "collapsed"
             ],
             "type": "string"
+          },
+          "extended": {
+            "type": "boolean"
           },
           "filterMode": {
             "enum": [
@@ -4181,6 +4187,9 @@
           },
           "placeholder": {
             "type": "string"
+          },
+          "searchable": {
+            "type": "boolean"
           },
           "step": {
             "format": "int32",
@@ -5096,6 +5105,9 @@
       "NodeRef": {
         "properties": {
           "archived": {
+            "type": "boolean"
+          },
+          "homeRepo": {
             "type": "boolean"
           },
           "id": {
@@ -6266,9 +6278,15 @@
             "format": "byte",
             "type": "string"
           },
+          "generated": {
+            "type": "boolean"
+          },
           "height": {
             "format": "int32",
             "type": "integer"
+          },
+          "icon": {
+            "type": "boolean"
           },
           "isGenerated": {
             "type": "boolean"
@@ -6300,11 +6318,17 @@
       },
       "PrimaryLogin": {
         "properties": {
+          "admin": {
+            "type": "boolean"
+          },
           "authorityName": {
             "type": "string"
           },
           "currentScope": {
             "type": "string"
+          },
+          "guest": {
+            "type": "boolean"
           },
           "isAdmin": {
             "type": "boolean"
@@ -6345,6 +6369,9 @@
           },
           "userHome": {
             "type": "string"
+          },
+          "validLogin": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7271,11 +7298,17 @@
       },
       "ScopeLogin": {
         "properties": {
+          "admin": {
+            "type": "boolean"
+          },
           "authorityName": {
             "type": "string"
           },
           "currentScope": {
             "type": "string"
+          },
+          "guest": {
+            "type": "boolean"
           },
           "isAdmin": {
             "type": "boolean"
@@ -7310,6 +7343,9 @@
           },
           "userHome": {
             "type": "string"
+          },
+          "validLogin": {
+            "type": "boolean"
           }
         },
         "required": [
