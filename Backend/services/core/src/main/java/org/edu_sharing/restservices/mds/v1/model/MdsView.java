@@ -16,7 +16,7 @@ public class MdsView {
     private MetadataTemplate.REL_TYPE rel;
     private boolean hideIfEmpty;
     @JsonProperty("isExtended")
-    private boolean isExtended;
+    private boolean extended;
 
     public MdsView() {
     }
@@ -25,7 +25,7 @@ public class MdsView {
         this.id = template.getId();
         this.caption = template.getCaption();
         this.hideIfEmpty = template.getHideIfEmpty();
-        this.isExtended = template.isExtended();
+        this.extended = template.isExtended();
         this.icon = template.getIcon();
         this.html = template.getHtml();
         this.rel = template.getRel();

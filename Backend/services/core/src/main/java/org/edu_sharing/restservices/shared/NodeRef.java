@@ -16,7 +16,7 @@ public class NodeRef implements Serializable, Comparable<NodeRef> {
 	private String repo = null;
 
 	@JsonProperty("isHomeRepo")
-	private boolean isHomeRepo = false;
+	private boolean homeRepo = false;
 
 	@JsonProperty(required = true)
 	private String id = null;
@@ -31,7 +31,7 @@ public class NodeRef implements Serializable, Comparable<NodeRef> {
 	}
 	public NodeRef(RepositoryDao repo,String nodeId) {
 		this.repo=repo.getId();
-		this.isHomeRepo=repo.isHomeRepo();
+		this.homeRepo=repo.isHomeRepo();
 		this.id=nodeId;
 	}
 

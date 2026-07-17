@@ -59,7 +59,7 @@ public class MdsWidget {
     private Integer defaultMax;
     private Integer step;
     @JsonProperty("isExtended")
-    private boolean isExtended;
+    private boolean extended;
     private String suggestionSource;
     /**
      * info if suggestions for new valuespace entries are allowed for this widget
@@ -74,7 +74,7 @@ public class MdsWidget {
     @Schema(description = "When true, a set defaultvalue will still trigger the search to show an active filter. When false (default), the defaultvalue will be shown as if no filter is active")
     private boolean countDefaultvalueAsFilter;
     @JsonProperty("isSearchable")
-    private boolean isSearchable;
+    private boolean searchable;
     private MdsWidgetCondition condition;
     private int maxlength;
     private MetadataWidget.InteractionType interactionType;
@@ -115,12 +115,12 @@ public class MdsWidget {
         this.format = widget.getFormat();
         this.template = widget.getTemplate();
         this.allowValuespaceSuggestions = widget.getSuggestionReceiver() != null;
-        this.isExtended = widget.isExtended();
+        this.extended = widget.isExtended();
         this.hideIfEmpty = widget.isHideIfEmpty();
         this.isRequired = widget.getRequired();
         this.inputPreprocessor = widget.getInputPreprocessor();
         this.allowempty = widget.isAllowempty();
-        this.isSearchable = widget.isSearchable();
+        this.searchable = widget.isSearchable();
         this.suggestionSource =widget.getSuggestionSource();
         if (widget.getCondition() != null) {
             this.condition = new MdsWidgetCondition();
