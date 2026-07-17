@@ -319,6 +319,12 @@ Internal Tomcat port detection uses `httpReq.getLocalPort()` compared to `Applic
 
 ---
 
+## Statistics & Tracking — `TrackingDAO`
+
+**File:** `Backend/services/core/src/main/java/org/edu_sharing/restservices/TrackingDAO.java`
+
+- The "by object" node-statistics filters (`published`, `contentType`, …) are declared as `@QueryParam` on `StatisticApi` (the six endpoints `getByUsers`/`getByNodes`/`getByOrganization` + their `*Async` scheduler variants) and threaded straight into `TrackingDAO`. There is **no** intermediate TrackingService / ibatis / SQL layer for these — each `getNodeStatisticsBy*` builds a `co.elastic.clients` `BoolQuery` executed via `SearchServiceElastic.search`. The global `all` / mediacenter path instead uses `getStatisticsNode` (DB-based) and takes **none** of these filters.
+
 ## i18n
 
 Backend i18n uses plain `.properties` files loaded by `I18nServer`.
