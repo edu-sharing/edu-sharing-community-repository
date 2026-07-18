@@ -244,18 +244,20 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             throw new RuntimeException(e);
         }
 
-        if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
-            // clear value's '"'
-            if (value.startsWith("\"") && value.endsWith("\"")) {
+       if (value.startsWith("\"") && value.endsWith("\"") || parameter.isExactMatching()) {
+           String valueRaw = value;
+           // clear value's '"'
+           if (value.startsWith("\"") && value.endsWith("\"")) {
                 value = value.substring(1, value.length() - 1);
             }
             //String statement = parameter.getStatement(value).replace("${value}", QueryParser.escape(value));
             String statement = QueryUtils.replacerFromSyntax(parameter.getSyntax()).replaceString(
                     parameter.getStatement(value),
                     "${value}", value);
+           // use valueRaw with real "raw" value if isExactMatching==true to support simple_query_string PHRASE
             statement = QueryUtils.replacerFromSyntax(parameter.getSyntax(), true).replaceString(
                     statement,
-                    "${valueRaw}", value);
+                    "${valueRaw}", parameter.isExactMatching() ? valueRaw : value);
             return statement;
         }
 

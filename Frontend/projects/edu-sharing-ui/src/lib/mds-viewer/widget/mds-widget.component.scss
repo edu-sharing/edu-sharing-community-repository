@@ -47,6 +47,7 @@
         .vcard-list {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 15px;
         }
         .vcard-entry {
