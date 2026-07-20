@@ -131,7 +131,7 @@ export class EditorialSidebarService {
      * handle a select event from the node entries wrapper component and trigger the sidebar
      */
     handleSelect(
-        nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>,
+        nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType> | undefined,
         event: NodeClickEvent<NodeEntriesDataType>,
         scope: Scope,
         previewConfig?: PreviewConfig,

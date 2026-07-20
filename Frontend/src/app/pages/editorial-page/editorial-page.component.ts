@@ -147,8 +147,9 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
     /** Bottom selection bar (actions-only); node actions render here, toggles stay in the toolbar. */
     readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
-    @ViewChild(NodeEntriesWrapperComponent)
-    nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>;
+    readonly nodeEntriesRef = viewChild<NodeEntriesWrapperComponent<NodeEntriesDataType>>(
+        NodeEntriesWrapperComponent,
+    );
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
@@ -212,6 +213,12 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         effect(() => {
             if (this.selection()?.selected.length !== 1) {
                 this.editorialSidebarService.sidebarOpened.set(false);
+            }
+            // Inject pending virtual nodes as soon as the node-entries wrapper exists. When returning
+            // from a main component the wrapper is re-created after change detection, so it may be
+            // absent at the moment the search result arrives — the signal query re-fires this then.
+            if (this.nodeEntriesRef()) {
+                this.injectVirtualNodes();
             }
         });
         // Editorial page requires a valid, non-guest login; redirect to login otherwise.
@@ -293,7 +300,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             (element: InviteEvent[]) => {
                 const elements = this.optionsHelperService.getObjects(
                     element,
-                    this.nodeEntriesRef.optionsHelper.getData(),
+                    this.nodeEntriesRef()!.optionsHelper.getData(),
                 );
                 void this.dialogs.openRejectShareDialog(elements);
             },
@@ -314,7 +321,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         };
         // Split actionbar (mirrors search/workspace): the toolbar actionbar shows toggle options
         // only; node actions move to the bottom selection bar.
-        void this.nodeEntriesRef?.initOptionsGenerator({
+        void this.nodeEntriesRef()?.initOptionsGenerator({
             actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
@@ -620,7 +627,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         this.dataSource.reset();
         this.clearSelection();
 
-        this.nodeEntriesRef?.setPaginator(pagination);
+        this.nodeEntriesRef()?.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
 
         if (routeConfig.primaryMode === 'activity') {
@@ -774,7 +781,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 ? { groupId: 'preview_sidebar_edit', editorMode: 'nodes' as const }
                 : undefined;
         this.editorialSidebarService.handleSelect(
-            this.nodeEntriesRef,
+            this.nodeEntriesRef(),
             event,
             Scope.EditorialPage,
             previewConfig,
@@ -837,14 +844,31 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        const tabId = this.editorialPageService.getTabId(this.tabSelection$.value);
+        this.injectVirtualNodes();
+    }
+
+    /**
+     * Injects the pending virtual nodes (e.g. a just-created/updated assignment) into the list.
+     * Called both after a search result and from the `nodeEntriesRef` effect, so it also fires
+     * once the node-entries wrapper is (re-)created after returning from a main component — when
+     * the wrapper was still undefined at the moment the search result arrived.
+     *
+     * The nodes are not consumed here: leaving the editor triggers the list search more than once
+     * and every reload replaces the data source, so we re-inject on each `setNewData`. They live
+     * for the session and are cleared on logout (see `EditorialPageService`). `addVirtualNodes`
+     * dedups (updates in place once the real search returns the node), so this never duplicates.
+     */
+    private injectVirtualNodes() {
+        const ref = this.nodeEntriesRef();
+        if (!ref) {
+            return;
+        }
         const virtualNodes = this.editorialPageService.getVirtualNodes(
             this.params$.value.primaryMode,
-            tabId,
+            this.editorialPageService.getTabId(this.tabSelection$.value),
         );
-        if (this.nodeEntriesRef && virtualNodes) {
-            this.nodeEntriesRef.addVirtualNodes(virtualNodes);
-            this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
+        if (virtualNodes?.length) {
+            ref.addVirtualNodes(virtualNodes);
         }
     }
     openItem(element: NodeClickEvent<NodeEntriesDataType>) {
@@ -857,12 +881,12 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     }
 
     clearSelection() {
-        this.nodeEntriesRef?.getSelection()?.clear();
+        this.nodeEntriesRef()?.getSelection()?.clear();
         this.selectionOverlayOpen = false;
         this.editorialSidebarService.sidebarOpened.set(false);
     }
 
     deselectNode(node: Node) {
-        this.nodeEntriesRef?.getSelection()?.deselect(node);
+        this.nodeEntriesRef()?.getSelection()?.deselect(node);
     }
 }
