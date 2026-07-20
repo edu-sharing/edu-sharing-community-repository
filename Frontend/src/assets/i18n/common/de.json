@@ -93,7 +93,6 @@
   "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
-  "SUGGESTIONS_EMPTY": "Bislang keine Elemente mit ausstehenden Vorschlägen",
   "PAGINATOR": {
     "itemsPerPageLabel": "Einträge pro Seite:",
     "firstPageLabel": "Erste Seite",

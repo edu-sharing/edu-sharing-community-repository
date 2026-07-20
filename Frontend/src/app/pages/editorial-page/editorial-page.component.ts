@@ -62,6 +62,7 @@ import {
     Scope,
     SearchHelperService,
     ToolpermissionPipe,
+    UIConstants,
     Values,
 } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -328,8 +329,38 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         this.destroyed$.complete();
     }
 
+    /**
+     * Informs the user that no elements can be created in the current editorial view and offers
+     * a shortcut to the workspace (mirrors the workspace "create not allowed" dialog).
+     */
+    private async showCreateNotAllowed(): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'EDITORIAL.CREATE_NOT_ALLOWED.TITLE',
+            message: 'EDITORIAL.CREATE_NOT_ALLOWED.MESSAGE',
+            buttons: [
+                {
+                    label: 'SIDEBAR.WORKSPACE',
+                    config: { color: 'primary', position: 'opposite' },
+                },
+                { label: 'CLOSE', config: { color: 'standard' } },
+            ],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'SIDEBAR.WORKSPACE') {
+                void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace']);
+            }
+        });
+    }
+
     private registerMode() {
         this.params$.subscribe(async (p) => {
+            // we disable here, assignment is the only component and will set it later
+            this.mainNav.patchMainNavConfig({
+                create: {
+                    allowed: 'EMIT_EVENT',
+                },
+                onCreateNotAllowed: () => this.showCreateNotAllowed(),
+            });
             this.editorialBreadcrumbService.mode.set(p.primaryMode);
             if (p.primaryMode === 'activity') {
                 this.columns.set({

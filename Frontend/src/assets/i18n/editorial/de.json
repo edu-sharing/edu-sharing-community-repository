@@ -1,5 +1,12 @@
 {
   "EDITORIAL": {
+    "CREATE_NOT_ALLOWED": {
+      "TITLE": "Anlegen nicht möglich",
+      "MESSAGE": "Sie können im aktuellen Bereich keine Elemente anlegen."
+    },
+    "SUGGESTIONS": {
+      "EMPTY": "Bislang keine Elemente mit ausstehenden Vorschlägen"
+    },
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen...",
       "ASSIGNMENT": "Aufgaben durchsuchen...",
