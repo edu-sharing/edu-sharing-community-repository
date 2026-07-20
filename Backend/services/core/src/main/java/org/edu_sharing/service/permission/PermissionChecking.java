@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -156,7 +157,12 @@ public class PermissionChecking {
         Object[] args = joinPoint.getArgs();
         Parameter[] parameters = method.getParameters();
 
-        LazyProvider<Set<String>> owningAuthorities = new LazyProvider<>(() -> authorityService.getMemberships(user));
+        LazyProvider<Set<String>> owningAuthorities = new LazyProvider<>(() -> {
+            // getMemberships only returns groups/roles the user is a member of, not the user's own authority
+            Set<String> memberships = new HashSet<>(authorityService.getMemberships(user));
+            memberships.add(user);
+            return memberships;
+        });
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
             Object arg = args[i];
