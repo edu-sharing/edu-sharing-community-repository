@@ -83,7 +83,11 @@ export class AdminMessagesComponent implements OnInit {
                         .includes(this.componentFilter().toLowerCase()) &&
                     !this.selectedComponents().find((f) => f === c),
             )
-            .sort(),
+            .sort((a, b) =>
+                this.translate
+                    .instant('SIDEBAR.' + a.toUpperCase())
+                    .localeCompare(this.translate.instant('SIDEBAR.' + b.toUpperCase())),
+            ),
     );
     config = signal<RepositoryConfig>(null);
 

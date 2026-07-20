@@ -128,7 +128,7 @@ export class MainNavService {
     private lastHeight = this.DefaultHeight;
     private _systemMessage = signal<SystemMessageDetails>(null);
     showSystemMessage = computed(() => this._systemMessage()?.message?.mode === 'bar');
-    readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin'];
+    readonly DefaultScopes = ['workspace', 'collections', 'search', 'render', 'admin', 'landing'];
     private customScopes: string[];
     /** the `currentScope` that was active right before the current one */
     private lastScope = new BehaviorSubject<string>(null);
