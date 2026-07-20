@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, OnInit, signal, ViewChild, inject } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PluginStatus, RestConstants, UIService } from '../../../core-module/core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -130,6 +130,9 @@ export class AdminMessagesComponent implements OnInit {
         if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
                 base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
+                // TinyMCE rewrites href/src relative to its document_base_url by
+                // default; keep admin-entered message URLs exactly as typed. (breaks angular logic)
+                convert_urls: false,
                 branding: false,
                 height: 200,
                 apiKey: '',
