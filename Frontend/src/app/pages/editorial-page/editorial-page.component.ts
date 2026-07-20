@@ -1,10 +1,10 @@
+import { PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
     Component,
     effect,
     inject,
     OnDestroy,
-    OnInit,
     signal,
     ViewChild,
     viewChild,
@@ -69,7 +69,6 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService, RECENT_ACTIVITY_EVENT_TYPES } from './editorial-page.service';
 import {
     debounceTime,
@@ -89,7 +88,10 @@ import {
     PrimaryMode,
 } from '../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { ConfigurationService } from '../../core-module/core.module';
+import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../core-module/rest/services/ui.service';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 type RouteConfig = {
@@ -103,7 +105,7 @@ type RouteConfig = {
     providers: [OptionsHelperService],
     standalone: false,
 })
-export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private breakpointObserver = inject(BreakpointObserver);
@@ -119,6 +121,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private searchHelperService = inject(SearchHelperService);
     private optionsHelperService = inject(OptionsHelperService);
     private ui = inject(UIService);
+    private connector = inject(RestConnectorService);
+    private platformLocation = inject(PlatformLocation);
+    private configurationService = inject(ConfigurationService);
     private authenticationService = inject(AuthenticationService);
     editorialPageService = inject(EditorialPageService);
     editorialBreadcrumbService = inject(EditorialBreadcrumbService);
@@ -208,6 +213,32 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.editorialSidebarService.sidebarOpened.set(false);
             }
         });
+        // Editorial page requires a valid, non-guest login; redirect to login otherwise.
+        // Init is gated behind the check so an unauthorized session never starts the page's flow.
+        this.connector.isLoggedIn().subscribe({
+            next: (login) => {
+                if (login.isValidLogin && !login.isGuest && !login.currentScope) {
+                    this.initEditorial();
+                } else if (!login.isValidLogin) {
+                    // No live session -> reconnect (the login page has no session to bounce back).
+                    this.ui.goToLogin();
+                } else {
+                    // A *valid* guest session: editorial is not available to guests, and /login
+                    // would just bounce the live session straight back here. Inform via toast and
+                    // leave to the configured default location instead.
+                    UIHelper.goToDefaultLocation(
+                        this.router,
+                        this.platformLocation,
+                        this.configurationService,
+                    );
+                }
+            },
+            error: () => this.ui.goToLogin(),
+        });
+    }
+
+    /** Page setup; runs only once a valid, non-guest session is confirmed. */
+    private initEditorial(): void {
         this.authenticationService
             .observeLoginInfo()
             .subscribe((loginInfo) => this.loginInfo$.next(loginInfo));
@@ -234,7 +265,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.searchFieldService
             .observeCurrentInstance()
             .pipe(
-                takeUntilDestroyed(),
+                takeUntil(this.destroyed$),
                 filter((i) => !!i),
                 first(),
             )
@@ -242,6 +273,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
+        this.route.queryParams.subscribe(this.queryParams$);
+        this.route.params.subscribe(this.params$);
+        this.registerMode();
     }
 
     ngAfterViewInit(): void {
@@ -286,12 +320,6 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 addOptions: [this.sidebarOptionToggle, reject],
             },
         });
-    }
-
-    async ngOnInit(): Promise<void> {
-        this.route.queryParams.subscribe(this.queryParams$);
-        this.route.params.subscribe(this.params$);
-        this.registerMode();
     }
 
     ngOnDestroy(): void {
