@@ -122,8 +122,6 @@
   },
   "collections_description": "Description :",
   "collections_content": "Contenu",
-  "collections_noContentAvailable": "Pas de contenu disponible",
-  "collections_howToAddContent": "Il suffit de cliquer sur le bouton \"Ajouter du matériel\" et d'utiliser le moteur de recherche pour trouver des contenus pour votre collection.",
   "collectionNew_preview": "aperçu de la collection",
   "collectionNew_setColor": "couleur de la collection :",
   "collectionNew_colorIndex": "couleur {{ index }}",

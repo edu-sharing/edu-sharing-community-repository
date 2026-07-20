@@ -55,21 +55,6 @@
           }
         </ng-template>
       </es-node-entries-wrapper>
-      @if (!isRootLevel && dataSourceCollections.isEmpty() && !dataSourceCollections.isLoading &&
-      isUserAllowedToEdit(collection)) {
-      <div>
-        @if (createAllowed()) {
-        <div class="collection-nocontent-big">
-          {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
-        </div>
-        <div class="section-headline collection-nocontent-container">
-          <div class="collection-nocontent-small">
-            {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
-          </div>
-        </div>
-        }
-      </div>
-      }
     </div>
   </section>
   @if (!isRootLevel) {
@@ -180,20 +165,6 @@
             </div>
           </div>
           }
-        </ng-template>
-        <ng-template #empty>
-          <div class="section-headline collection-nocontent-container">
-            <div class="collection-nocontent-big">
-              {{ 'collections_noContentAvailable' | translate }}
-            </div>
-            @if (isUserAllowedToEdit(collection)) {
-            <div class="section-headline collection-nocontent-container">
-              <div class="collection-nocontent-small">
-                {{ 'collections_howToAddContent' | translate }}
-              </div>
-            </div>
-            }
-          </div>
         </ng-template>
       </es-node-entries-wrapper>
     </div>
