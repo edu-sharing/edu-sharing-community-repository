@@ -159,6 +159,8 @@ export class RenderWrapperComponent implements OnChanges {
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [node],
+            selectedObjects: [node],
+            allObjects: [node],
             parent: { ref: { id: node.parent.id } },
             customOptions: {
                 useDefaultOptions: true,
@@ -184,16 +186,9 @@ export class RenderWrapperComponent implements OnChanges {
             this.version,
             this.repository,
         );
+        // register currently rendered node for sidebar interactions (incl. download-all btn + postPrepareOptions)
         this.addDownloadAllBtn(data.node);
         setTimeout(async () => {
-            // register currently rendered node for sidebar interactions
-            this.optionsHelper.setData({
-                scope: Scope.Render,
-                activeObjects: [data.node],
-                selectedObjects: [data.node],
-                allObjects: [data.node],
-            });
-            console.log('data', data.node);
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();
         });

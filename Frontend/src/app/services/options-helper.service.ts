@@ -398,6 +398,9 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 if ((item as AssignmentFile).referNode) {
                     item = (item as AssignmentFile).referNode;
                 }
+                if (data.customDownloadUrl) {
+                    return true;
+                }
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if (
                     item.downloadUrl != null &&
