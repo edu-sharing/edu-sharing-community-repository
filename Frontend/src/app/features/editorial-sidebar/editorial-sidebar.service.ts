@@ -163,6 +163,20 @@ export class EditorialSidebarService {
         }
     }
 
+    /**
+     * Programmatically select a single node and surface its options in the sidebar.
+     */
+    selectNode(node: Node) {
+        const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
+        if (!instance) {
+            return;
+        }
+        instance.selection.setSelection(node);
+        this.nodes.set([node]);
+        this._editorialSidebar?.enabledOption.set(null);
+        this.sidebarOpened.set(true);
+    }
+
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {
         this.nodes.set(selection.source.selected);
         const option = this._editorialSidebar.enabledOption()?.option;

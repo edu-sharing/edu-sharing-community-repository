@@ -675,6 +675,15 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.closeProgressSpinner();
                 }
             }
+            // Standalone upload (not driven by a host `onNodesChoosen` callback and not
+            // auto-closing): select the newly created node so the editorial sidebar switches
+            // from the upload tab to the created node's options.
+            if (
+                !this.option()?.optionConfig?.onNodesChoosen &&
+                !this.option()?.optionConfig?.autoClose
+            ) {
+                this.editorialSidebarService.selectNode(createdNodes[0] as Node);
+            }
         }
         this.addMaterialDialogComponent.selectedFiles.set([]);
     }
