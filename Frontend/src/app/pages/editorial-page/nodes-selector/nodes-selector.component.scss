@@ -224,3 +224,9 @@ es-info-message {
     justify-content: center;
     padding-top: 16px;
 }
+
+// in order to get a full-width hint in add-material-dialog,
+// different paddings have to be considered
+es-add-material-dialog {
+    --addMaterialHPadding: 20px;
+}
