@@ -48,6 +48,13 @@
     .preview-sidebar-rendering-modal es-render-wrapper-component rs-root {
         min-height: calc(100vh - 200px);
     }
+    rs-module-error {
+        height: var(--containerHeight);
+        display: flex;
+        padding: 0 20px;
+        justify-content: center;
+        align-items: center;
+    }
 }
 
 .preview-sidebar-scroll {
