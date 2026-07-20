@@ -64,7 +64,7 @@
         max-width: 20px;
         border-radius: 6px;
         // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-        background-color: var(--primaryBackground300);
+        background-color: var(--primaryBackground700);
     }
 }
 @mixin materialScrollbarLight() {
@@ -81,11 +81,11 @@
         max-width: 4px;
         border-radius: 10px;
         // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-        background-color: var(--primaryBackground100);
+        background-color: var(--primaryBackground300);
     }
     // Firefox
     scrollbar-width: thin;
-    scrollbar-color: var(--primaryBackground100) transparent;
+    scrollbar-color: var(--primaryBackground300) transparent;
 }
 @mixin removeDefaultFocus() {
     outline: none;
