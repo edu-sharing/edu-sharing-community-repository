@@ -16,6 +16,7 @@ import {
     Assignment,
     AssignmentFile,
     AssignmentV1Service,
+    ConnectorService,
     ME,
     Node,
     NodeService,
@@ -562,6 +563,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 state: TabType.UPLOAD,
                 upload: 'fast',
                 autoClose: true,
+                allowedConnectorIds: [ConnectorService.ID_ONLY_OFFICE, ConnectorService.ID_TINYMCE],
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,

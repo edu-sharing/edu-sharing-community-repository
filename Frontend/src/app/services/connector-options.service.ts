@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Connector, ConnectorService } from 'ngx-edu-sharing-api';
 import { DefaultGroups, ElementType, OptionItem, UIService } from 'ngx-edu-sharing-ui';
 import { Observable } from 'rxjs';
@@ -13,22 +13,36 @@ export class ConnectorOptionsService {
     private connectorApi = inject(ConnectorService);
     private ui = inject(UIService);
 
-    /** Observe the filtered list of regular + simple connectors. */
-    observeConnectors(): Observable<Connector[]> {
-        return this.connectorApi
-            .observeConnectorList()
-            .pipe(
-                map((list) =>
-                    this.filterConnectors(list?.connectors).concat(
-                        this.filterConnectors(list?.simpleConnectors),
-                    ),
-                ),
-            );
+    /**
+     * Observe the filtered list of regular + simple connectors.
+     *
+     * @param allowedConnectorIds optional whitelist — if set and non-empty, only connectors
+     *        whose id is contained are returned.
+     */
+    observeConnectors(allowedConnectorIds?: string[]): Observable<Connector[]> {
+        return this.connectorApi.observeConnectorList().pipe(
+            map((list) => {
+                const connectors = this.filterConnectors(list?.connectors).concat(
+                    this.filterConnectors(list?.simpleConnectors),
+                );
+                return allowedConnectorIds?.length
+                    ? connectors.filter((c) => allowedConnectorIds.includes(c.id))
+                    : connectors;
+            }),
+        );
     }
 
-    /** Observe the OptionItem[] for the create dropdown. */
-    buildOptions(onSelect: (connector: Connector) => void): Observable<OptionItem[]> {
-        return this.observeConnectors().pipe(
+    /**
+     * Observe the OptionItem[] for the create dropdown.
+     *
+     * @param onSelect called with the picked connector
+     * @param allowedConnectorIds optional whitelist of connector ids to offer
+     */
+    buildOptions(
+        onSelect: (connector: Connector) => void,
+        allowedConnectorIds?: string[],
+    ): Observable<OptionItem[]> {
+        return this.observeConnectors(allowedConnectorIds).pipe(
             map((connectors) =>
                 connectors.map((connector, i) => {
                     const option = new OptionItem(

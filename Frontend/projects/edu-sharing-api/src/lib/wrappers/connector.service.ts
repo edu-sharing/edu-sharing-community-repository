@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
@@ -13,6 +13,9 @@ import { AuthenticationService } from './authentication.service';
     providedIn: 'root',
 })
 export class ConnectorService {
+    public static readonly ID_ONLY_OFFICE = 'ONLY_OFFICE';
+    public static readonly ID_TINYMCE = 'TINYMCE';
+
     private authentication = inject(AuthenticationService);
     private connectorV1 = inject(ConnectorV1Service);
 

@@ -139,6 +139,11 @@ export type NodesSelectorConfig = {
      */
     allowCreate?: boolean;
     /**
+     * restrict the connector "Create" options to these connector ids (whitelist).
+     * If unset or empty, all available connectors are offered.
+     */
+    allowedConnectorIds?: string[];
+    /**
      * automatically close the sidebar after nodes are emitted
      */
     autoClose?: boolean;
@@ -418,7 +423,17 @@ export class NodesSelectorComponent implements OnInit {
 
     // upload tab
     inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
-    connectorOptions: WritableSignal<OptionItem[]> = signal([]);
+    connectorOptions: Signal<OptionItem[]> = toSignal(
+        toObservable(this.option).pipe(
+            switchMap((option) =>
+                this.connectorOptionsService.buildOptions(
+                    (connector) => void this.showCreateConnector({ connector }),
+                    option?.optionConfig?.allowedConnectorIds,
+                ),
+            ),
+        ),
+        { initialValue: [] },
+    );
 
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
@@ -427,9 +442,6 @@ export class NodesSelectorComponent implements OnInit {
     selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
 
     constructor() {
-        this.connectorOptionsService
-            .buildOptions((connector) => void this.showCreateConnector({ connector }))
-            .subscribe((options) => this.connectorOptions.set(options));
         effect(() => {
             const option = this.option();
             if (option?.optionConfig?.state) {
