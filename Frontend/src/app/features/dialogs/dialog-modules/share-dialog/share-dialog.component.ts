@@ -4,6 +4,7 @@ import {
     ApplicationRef,
     Component,
     EventEmitter,
+    inject,
     Input,
     OnInit,
     Output,
@@ -11,7 +12,6 @@ import {
     TemplateRef,
     ViewChild,
     WritableSignal,
-    inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabChangeEvent } from '@angular/material/tabs';
@@ -506,12 +506,14 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         );
         this.structureTreeConfig.showFileName = nodeIsDirectory;
         // count the number of tree children with type !== ccm:io
-        const children: Node[] = this._nodes?.length
-            ? (await firstValueFrom(this.nodeApi.getChildren(this._nodes[0].ref.id))).nodes
-            : [];
-        this.atLeastOneTreeChild.set(
-            children?.some((n) => n.type !== RestConstants.CCM_TYPE_IO) ?? false,
-        );
+        if (this._nodes[0].ref.id) {
+            const children: Node[] = this._nodes?.length
+                ? (await firstValueFrom(this.nodeApi.getChildren(this._nodes[0].ref.id))).nodes
+                : [];
+            this.atLeastOneTreeChild.set(
+                children?.some((n) => n.type !== RestConstants.CCM_TYPE_IO) ?? false,
+            );
+        }
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
             this.isAdmin = data.isAdmin;
         });
