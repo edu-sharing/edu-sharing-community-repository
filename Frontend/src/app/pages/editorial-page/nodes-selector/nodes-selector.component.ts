@@ -1374,6 +1374,7 @@ export class NodesSelectorComponent implements OnInit {
                     void this.uiService.editConnector(data.node, {
                         type: event.type as any,
                         win: event.window,
+                        data: event.data,
                         connectorType: connector,
                     });
                     this.emitNodes({
