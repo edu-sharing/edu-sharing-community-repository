@@ -3,11 +3,12 @@
     <!--<i esIcon="public"></i>-->
     {{ 'WORKSPACE.SHARE.PUBLISH_' + getType() | translate }}
   </h4>
-  @if (supportsLicensing()) { @if (restrictedAccessComponent?.restrictedAccess) {
+  @if (supportsLicensing()) { @if (restrictedAccessComponent?.restrictedAccess) { @if
+  (restrictedAccessComponent?.restrictedAccess) {
   <es-info-message mode="warning">
     {{ 'WORKSPACE.SHARE.PUBLISH.PUBLISH_RESTRICTED_ACCESS' | translate }}
   </es-info-message>
-  } @if (getLicense()) {
+  } } @if (getLicense()) {
   <es-info-message mode="info">
     {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_INFO' | translate : { license: getLicenseText() } }}
     {{ 'WORKSPACE.SHARE.PUBLISH.LICENSE_AUTHOR' | translate }}: {{ node | nodeAuthorName }}
@@ -145,11 +146,11 @@
                 </ng-container>
               </es-multi-line-label>
               <!--
-                  <h5>
-                    <span class="version-comment">{{ node | versionComment }}</span>
-                    <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
-                  </h5>
-                  -->
+                    <h5>
+                      <span class="version-comment">{{ node | versionComment }}</span>
+                      <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
+                    </h5>
+                    -->
             </mat-radio-button>
             <mat-radio-button
               [disabled]="
@@ -239,11 +240,11 @@
           </ng-container>
         </es-multi-line-label>
         <!--
-            <h5>
-              <span class="version-comment">{{ node | versionComment }}</span>
-              <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
-            </h5>
-            -->
+              <h5>
+                <span class="version-comment">{{ node | versionComment }}</span>
+                <span class="version-number">({{ node['properties']['cclom:version'][0] }})</span>
+              </h5>
+              -->
       </mat-radio-button>
     </mat-radio-group>
   </div>
