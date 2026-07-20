@@ -469,11 +469,13 @@ public class NodeApi {
             String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 
             SignedNodeEntry response = new SignedNodeEntry();
-            response.setNode(nodeDao.asNode());
+            Node nodeConverted = nodeDao.asNode();
+            response.setNode(nodeConverted);
             response.setJwt(nodeDao.getJWT());
             response.setSignedNode(encodedSignedNode);
             response.setSignature(encodedSignature);
             response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
+            response.setNodeUrls(new NodeUrls(nodeConverted, version));
 			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
 			if (rs != null) {
 				response.setRenderingBaseUrl(rs.getContentUrl());
