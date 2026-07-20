@@ -51,7 +51,7 @@
         td {
             text-align: left;
             padding: 8px 12px;
-            border-bottom: 1px solid var(--cardBorderColor, #e0e0e0);
+            border-bottom: 1px solid var(--borderLight, #e0e0e0);
         }
 
         td.ids span {
@@ -59,7 +59,8 @@
             margin-right: 6px;
             padding: 2px 6px;
             border-radius: 4px;
-            background: var(--cardBorderColor, #eee);
+            background: var(--borderLight, #eee);
+            color: var(--textBlack);
             font-size: 0.8em;
         }
 
