@@ -1114,9 +1114,6 @@
             "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
-          "public": {
-            "type": "boolean"
-          },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
           },
@@ -4701,9 +4698,6 @@
             "description": "Properties of the node; Dynamic key value pairs depending on the properties",
             "type": "object"
           },
-          "public": {
-            "type": "boolean"
-          },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
           },
@@ -4882,9 +4876,6 @@
               "type": "integer"
             },
             "type": "object"
-          },
-          "public": {
-            "type": "boolean"
           },
           "rating": {
             "$ref": "#/components/schemas/RatingDetails"
@@ -5327,6 +5318,18 @@
       "NodeText": {
         "properties": {
           "text": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NodeUrls": {
+        "description": "Precomputed URLs for the node, e.g. the repository base URL and, for LTI tool nodes, the LTI resource-link login initiation URL (including a short-lived JWT for single-use node IDs).",
+        "properties": {
+          "generateLtiResourceLink": {
+            "type": "string"
+          },
+          "repositoryBaseUrl": {
             "type": "string"
           }
         },
@@ -8039,6 +8042,9 @@
           },
           "node": {
             "$ref": "#/components/schemas/Node"
+          },
+          "nodeUrls": {
+            "$ref": "#/components/schemas/NodeUrls"
           },
           "renderingBaseUrl": {
             "type": "string"
