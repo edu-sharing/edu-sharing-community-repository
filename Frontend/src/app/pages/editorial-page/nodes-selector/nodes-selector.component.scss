@@ -41,12 +41,12 @@
 }
 
 .tab-main-view {
-    top: 0;
     box-sizing: border-box;
-    // take the available space
+    // min-height: 0 lets this flex child shrink so its internal scroll area activates and the
+    // footer keeps its own space below, instead of filling the full height and forcing the footer
+    // to overlap (which relied on z-index that Safari ignores for a sticky bar over the tab body).
     flex: 1 1 0;
-    // important to flexbox to work properly
-    min-height: 100%;
+    min-height: 0;
     overflow: hidden;
 
     &::ng-deep {
@@ -76,23 +76,22 @@
     flex: 1 1 0;
     // fix taking margins into account
     box-sizing: border-box;
-
-    &.actionbar-visible {
-        padding-bottom: 76px;
-    }
 }
 
-// Full-width sticky footer; matches the layout/size of the .selection-action-bar (as done for
+// Full-width footer; matches the layout/size of the .selection-action-bar (as done for
 // the usages__footer): unified $secondaryBarHeight, rounded-card background, top shadow.
 .tab-action-bar {
+    // In-flow footer below the tab group's scroll area (no position: sticky, which Safari paints
+    // behind the transformed tab body regardless of z-index).
     flex: 0 0 auto;
-    position: sticky;
+    // position: relative keeps the in-flow position but lifts the footer to the positioned paint
+    // layer, so its upward box-shadow paints over the tab content instead of being covered by it.
+    position: relative;
     z-index: 1;
     background: var(--roundedContainerBackground);
     min-height: vars.$secondaryBarHeight;
     box-sizing: border-box;
     padding: 0 20px;
-    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: flex-end;
