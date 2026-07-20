@@ -12,6 +12,14 @@ mat-stepper {
     max-width: 800px;
     width: 100%;
     margin: 0 auto;
+    &.hidden {
+        display: none;
+    }
+}
+.loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 60px 0;
 }
 .step-label {
     display: flex;

@@ -146,9 +146,9 @@ export class ManageAssignmentComponent {
         });
         this.route.queryParams
             .pipe(
-                map((p) => p.assignment),
-                distinctUntilChanged(),
-                switchMap((assignmentId) => {
+                distinctUntilChanged((a, b) => a.assignment === b.assignment && a.step === b.step),
+                switchMap((params) => {
+                    const assignmentId = params.assignment;
                     if (assignmentId) {
                         this.loadingFiles.set(true);
                         return combineLatest([
@@ -161,12 +161,17 @@ export class ManageAssignmentComponent {
                             this.assignmentService.getSubmissions({
                                 assignmentId,
                             }),
-                        ]);
+                        ]).pipe(map((result) => [...result, params.step] as const));
                     } else {
                         this.editorialBreadcrumbService.path.set([]);
                         this.assignment.set(this.EmptyAssignment);
                         this.submissions.set(null);
                         this.authorities.set(null);
+                        // reset back to the first step when switching to "new assignment"
+                        // (before resetting the form, as reset() also clears the step control)
+                        if (this.matStepper) {
+                            this.matStepper.reset();
+                        }
                         this.mainDataFormGroup.reset({
                             title: '',
                             summary: '',
@@ -178,7 +183,7 @@ export class ManageAssignmentComponent {
                     }
                 }),
             )
-            .subscribe(([assignment, files, submissions]) => {
+            .subscribe(([assignment, files, submissions, step]) => {
                 this.loadingFiles.set(false);
                 this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
                 this.assignment.set(assignment);
@@ -201,6 +206,13 @@ export class ManageAssignmentComponent {
                         } as NodeWithRole;
                     }),
                 );
+                // jump directly to the "assign" (invite) step when requested via query param
+                if (step === 'assign' && this.matStepper) {
+                    // the linear stepper only allows advancing when the previous step has been
+                    // interacted with and its control is valid (both true for existing assignments)
+                    this.matStepper.steps.first.interacted = true;
+                    this.matStepper.selectedIndex = 1;
+                }
             });
     }
 
@@ -316,12 +328,15 @@ export class ManageAssignmentComponent {
         } finally {
             this.saving.set(false);
         }
+        console.log('virtual node', newAssignment);
         this.editorialPageService.addVirtualNodes([newAssignment], 'assignment', 'created');
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParamsHandling: 'merge',
             queryParams: {
                 mainComponent: null,
+                assignment: null,
+                step: null,
                 filters: JSON.stringify({ 'virtual:assignmentType': ['created'] }),
             },
         });

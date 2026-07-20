@@ -1,4 +1,9 @@
-<mat-stepper [linear]="true" labelPosition="bottom">
+@if (loadingFiles()) {
+<div class="loading-container">
+  <es-spinner></es-spinner>
+</div>
+}
+<mat-stepper [linear]="true" labelPosition="bottom" [class.hidden]="loadingFiles()">
   <!-- Step 1: Title -->
   <mat-step
     state="main"

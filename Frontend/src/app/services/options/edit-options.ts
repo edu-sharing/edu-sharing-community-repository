@@ -217,6 +217,25 @@ export function createEditOptions({
     editAssignment.group = DefaultGroups.Edit;
     editAssignment.priority = 5;
 
+    const assignAssignment = new OptionItem('OPTIONS.ASSIGNMENT_ASSIGN', 'group_add', (object) =>
+        service.uiService.goToAssignment(service.getObjects(object, data)[0], 'assign'),
+    );
+    assignAssignment.elementType = [ElementType.Assignment];
+    assignAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+    assignAssignment.customShowCallback = async (objects) => {
+        const assignment = objects[0] as Assignment;
+        // user has access to permissions => so it's a coordinator
+        return (
+            assignment.type === 'SUBMISSION' &&
+            !['FINISHED', 'CANCELED'].includes(assignment.status) &&
+            new AssignmentPipe().transform(assignment, {
+                mode: 'permissions',
+            }) === 'COORDINATOR'
+        );
+    };
+    assignAssignment.group = DefaultGroups.Edit;
+    assignAssignment.priority = 6;
+
     const finishAssignment = new OptionItem(
         'OPTIONS.ASSIGNMENT_FINISH',
         'done_all',
@@ -305,6 +324,7 @@ export function createEditOptions({
         editCollection,
         pinCollection,
         editAssignment,
+        assignAssignment,
         finishAssignment,
         unblockNode,
         relationNode,
