@@ -667,7 +667,7 @@ public class NodeApi {
             return Response.status(Response.Status.OK).entity(response).build();
 
         } catch (Throwable t) {
-            if (t instanceof DAOSecurityException && ignoreAccessError) {
+            if (t instanceof DAOSecurityException && ignoreAccessError != null && ignoreAccessError) {
                 response.setScope("SHARED_FILES");
                 response.setNodes(parents);
                 return Response.status(Response.Status.OK).entity(response).build();
