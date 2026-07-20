@@ -9,9 +9,9 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
+import org.edu_sharing.spring.security.SSORegistrationService;
 import org.edu_sharing.spring.security.basic.*;
 import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
-import org.edu_sharing.spring.security.SSORegistrationService;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -34,8 +35,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -96,7 +97,10 @@ public class SecurityConfigurationOAuth2 {
                                 .authorizationRequestRepository(customAuthorizationRequestRepository())))
                 .sessionManagement(s -> s.sessionFixation().none())
                 //frontchannel logout triggerd by edu-sharing gui
-                .logout((logout) -> logout.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)))
+                //explicitly match GET /logout: the gui triggers logout via GET (window.location / ajax get).
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/logout"))
+                        .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)))
                 //backchannel logout
                 .oidcLogout((logout) ->
                         logout.backChannel(bcLogout ->
