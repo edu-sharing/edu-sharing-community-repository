@@ -104,6 +104,19 @@ export class ModuleInfoService {
     private checkUrlModule(node: Node): FrontendModuleConfig | null {
         const url = node.properties?.['ccm:wwwurl']?.[0] || '';
         const remoteRepositoryType = node.remote?.repository?.repositoryType?.toLowerCase() ?? '';
+        const checkSerlo = (): UrlModuleConfig | null => {
+            const replicationSource =
+                node.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE]?.[0] ?? '';
+            console.log('check replicationSource:', replicationSource);
+            if (replicationSource === 'serlo') {
+                return {
+                    embedding: UrlEmbeddings.SERLO,
+                    externalId:
+                        node.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCEID]?.[0] ?? '',
+                };
+            }
+            return null;
+        };
         const checkLearningApps = (): UrlModuleConfig | null => {
             if (remoteRepositoryType === 'learningapps') {
                 return {
@@ -264,6 +277,7 @@ export class ModuleInfoService {
         };
 
         const embedding =
+            checkSerlo() ??
             checkLearningApps() ??
             checkYouTube() ??
             checkVimeo() ??

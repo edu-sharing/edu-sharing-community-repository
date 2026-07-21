@@ -1,13 +1,4 @@
-import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    Input,
-    OnDestroy,
-    OnInit,
-    ViewChild,
-    inject,
-} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
@@ -23,7 +14,6 @@ import { GdprService } from '../../../gdpr.service';
 import { GdprConfig } from '../../dto/GdprConfig';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { EduSharingApiConfiguration } from 'ngx-edu-sharing-api';
 import { GlobalStateService } from 'ngx-rendering-service-api';
 
 @Component({
@@ -38,19 +28,17 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
     templateUrl: './url.component.html',
     styleUrl: './url.component.scss',
 })
-export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDestroy {
+export class UrlComponent implements RenderModule, OnInit, OnDestroy {
     private sanitizer = inject(DomSanitizer);
     private trackingService = inject(TrackingService);
     private gdprService = inject(GdprService);
     private translate = inject(TranslateService);
-    private apiConfig = inject(EduSharingApiConfiguration);
     private accessibilityService = inject(AccessibilityService);
     private globalStateService = inject(GlobalStateService);
 
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() isWebComponent: boolean = false;
-    @ViewChild('ltiFrame') ltiFrame: ElementRef<HTMLIFrameElement> | undefined;
     gdpr: GdprConfig | null = null;
     embedding?: UrlEmbeddings;
     externalId?: string;
@@ -61,18 +49,7 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
     isContrastMode: boolean = false;
     private hasBeenClicked: boolean = false;
     private contrastModeSubscription?: Subscription;
-    static readonly LTI_PATH =
-        '/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=';
     static readonly LTI_QUERY = '&editMode=false&launchPresentation=iframe';
-
-    ngAfterViewInit(): void {
-        if (!this.isWebComponent && this.ltiFrame !== undefined) {
-            const ltiIFrame = this.ltiFrame.nativeElement;
-            const targetHeight = window.innerHeight - ltiIFrame.getBoundingClientRect().top;
-            const height = targetHeight < 300 ? window.innerHeight : targetHeight;
-            ltiIFrame.height = height + 'px';
-        }
-    }
 
     async ngOnInit() {
         if (this.data?.module === 'SODIX') {
@@ -106,6 +83,8 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
             this.sanitizedUrl = this.getSodixUrl();
         } else if (this.embedding === UrlEmbeddings.YOUTUBE) {
             this.sanitizedUrl = this.getYoutubeUrl();
+        } else if (this.embedding === UrlEmbeddings.SERLO) {
+            this.sanitizedUrl = this.getSerloUrl();
         }
     }
 
@@ -161,17 +140,24 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         return this.sanitizer.bypassSecurityTrustResourceUrl(learningAppsUrl);
     }
 
-    getLtiUrl(): SafeResourceUrl {
-        const ltiUrl =
-            this.apiConfig.rootUrl +
-            UrlComponent.LTI_PATH +
-            this.node?.ref.id +
-            UrlComponent.LTI_QUERY;
-        return this.sanitizer.bypassSecurityTrustResourceUrl(ltiUrl);
+    getLtiUrl(): SafeResourceUrl | null {
+        // the backend-provided lti resource link (correct repo base + short-lived jwt for
+        // single-use node ids) is delivered as the virtual node property `virtual:ltiurl`
+        const url = this.node?.properties?.['virtual:ltiurl']?.[0];
+        return url
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(url + UrlComponent.LTI_QUERY)
+            : null;
     }
 
     getSodixUrl(): SafeResourceUrl {
         return this.sanitizer.bypassSecurityTrustResourceUrl(this.data?.items?.[0].link || '');
+    }
+
+    getSerloUrl(): SafeResourceUrl {
+        const serloUrl = `https://de.serlo.org/${
+            this.externalId ?? ''
+        }?contentOnly&hideBreadcrumbs`;
+        return this.sanitizer.bypassSecurityTrustResourceUrl(serloUrl);
     }
 
     onLinkClick() {

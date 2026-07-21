@@ -23,4 +23,5 @@ export enum UrlEmbeddings {
     PIXABAY,
     OERSI,
     BROCKHAUS,
+    SERLO,
 }
