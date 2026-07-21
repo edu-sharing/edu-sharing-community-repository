@@ -259,7 +259,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
-		data.setNodeUrls(new NodeUrls(node, nodeVersion));
+		data.setNodeUrls(new NodeUrls(node.getRef().getId(), node.getAspects(), nodeVersion));
 
         log.info("Preparing rendering data took {} ms", System.currentTimeMillis() - time);
 		return data;

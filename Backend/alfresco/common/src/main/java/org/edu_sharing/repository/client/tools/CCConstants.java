@@ -1111,6 +1111,11 @@ public class CCConstants {
 
     public final static String VIRT_PROP_ORIGINAL_DELETED = "{virtualproperty}originaldeleted";
 
+    /**
+     * Precomputed URLs for the node, e.g. for LTI tool nodes, the LTI resource-link login initiation URL.
+     */
+    public final static String VIRT_PROP_LTI_URL = "{virtualproperty}ltiurl";
+
     public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
     public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";

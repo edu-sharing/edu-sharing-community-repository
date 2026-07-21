@@ -5323,18 +5323,6 @@
         },
         "type": "object"
       },
-      "NodeUrls": {
-        "description": "Precomputed URLs for the node, e.g. the repository base URL and, for LTI tool nodes, the LTI resource-link login initiation URL (including a short-lived JWT for single-use node IDs).",
-        "properties": {
-          "generateLtiResourceLink": {
-            "type": "string"
-          },
-          "repositoryBaseUrl": {
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "NodeUsage": {
         "properties": {
           "appId": {
@@ -8042,9 +8030,6 @@
           },
           "node": {
             "$ref": "#/components/schemas/Node"
-          },
-          "nodeUrls": {
-            "$ref": "#/components/schemas/NodeUrls"
           },
           "renderingBaseUrl": {
             "type": "string"

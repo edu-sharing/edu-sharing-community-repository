@@ -2381,6 +2381,12 @@ public class NodeDao {
             }
 
         }
+        NodeUrls urls = new NodeUrls(nodeId, aspects, version);
+        if(StringUtils.isNotEmpty(urls.getGenerateLtiResourceLink())) {
+            properties.put(
+                    CCConstants.VIRT_PROP_LTI_URL, new String[]{urls.getGenerateLtiResourceLink()}
+            );
+        }
 
         return properties;
     }

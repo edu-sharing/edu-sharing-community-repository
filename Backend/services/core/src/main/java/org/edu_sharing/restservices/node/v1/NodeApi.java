@@ -475,7 +475,6 @@ public class NodeApi {
             response.setSignedNode(encodedSignedNode);
             response.setSignature(encodedSignature);
             response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
-            response.setNodeUrls(new NodeUrls(nodeConverted, version));
 			ApplicationInfo rs = ApplicationInfoList.getRenderingService2();
 			if (rs != null) {
 				response.setRenderingBaseUrl(rs.getContentUrl());
