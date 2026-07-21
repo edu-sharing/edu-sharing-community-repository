@@ -1,4 +1,4 @@
-import { EventEmitter, inject, Injectable, signal } from '@angular/core';
+import { effect, EventEmitter, inject, Injectable, signal, untracked } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EDITORIAL_SIDEBAR_OPTIONS,
@@ -76,6 +76,19 @@ export class EditorialSidebarService {
                 skip(1),
             )
             .subscribe(() => this.close());
+
+        // Re-opening the sidebar manually (toggle) only flips `sidebarOpened`; a prior close()
+        // cleared `nodes()` while the list selection stayed intact. Restore nodes from the live
+        // selection so all element options show again instead of only the create option.
+        effect(() => {
+            if (this.sidebarOpened() && !untracked(() => this.nodes())?.length) {
+                const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
+                const selected = instance?.selection?.selected;
+                if (selected?.length) {
+                    this.nodes.set(selected);
+                }
+            }
+        });
     }
 
     registerSidebar(editorialSidebar: EditorialSidebarComponent) {
