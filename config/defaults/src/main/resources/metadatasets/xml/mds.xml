@@ -849,7 +849,7 @@
       <icon>calendar_clock</icon>
       <valuespace_i18n_prefix>shareMaxAge_</valuespace_i18n_prefix>
       <type>radioVertical</type>
-      <defaultvalue>2592000</defaultvalue>
+      <defaultvalue>unlimited</defaultvalue>
       <values>
         <entry>2592000</entry>
         <entry>7776000</entry>
