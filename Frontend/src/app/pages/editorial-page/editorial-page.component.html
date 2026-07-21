@@ -30,8 +30,11 @@
       </div>
       <div class="filter-bar-body">
         @if (mdsGroup() && (searchValues$ | async) !== null) {
+        <!-- Keyed on the group so a mode switch recreates the wrapper: it treats groupId as stable
+          after init and won't re-init the editor when only the input changes. -->
+        @for (group of [mdsGroup()]; track group) {
         <es-mds-editor-wrapper
-          [groupId]="mdsGroup()"
+          [groupId]="group"
           [embedded]="true"
           [repository]="HOME_REPOSITORY"
           [mode]="'search'"
@@ -39,7 +42,7 @@
           [currentValues]="searchValues$ | async"
           (currentValuesChange)="updateMdsFilter($event)"
         ></es-mds-editor-wrapper>
-        }
+        } }
       </div>
     </div>
   </mat-sidenav>
