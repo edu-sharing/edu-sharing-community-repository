@@ -663,8 +663,10 @@ export class NodesSelectorComponent implements OnInit {
         // note: the nodes are added to the inbox node if the upload was successful,
         //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            this.emitNodes({ nodes: createdNodes, parent: this.parent() });
-            if (this.parent() && this.nodeHelperService.isNodeCollection(this.parent())) {
+            const isCollection =
+                this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+            this.emitNodes({ nodes: createdNodes, parent: this.parent(), created: true });
+            if (isCollection) {
                 try {
                     this.toast.showProgressSpinner();
                     this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
@@ -675,10 +677,11 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.closeProgressSpinner();
                 }
             }
-            // Standalone upload (not driven by a host `onNodesChoosen` callback and not
-            // auto-closing): select the newly created node so the editorial sidebar switches
-            // from the upload tab to the created node's options.
+            // Standalone upload: select the created node so the sidebar shows its options.
+            // Skipped for collections (added as an async reference — handled by the collection
+            // page via applyNodeEmitted).
             if (
+                !isCollection &&
                 !this.option()?.optionConfig?.onNodesChoosen &&
                 !this.option()?.optionConfig?.autoClose
             ) {
@@ -1361,6 +1364,7 @@ export class NodesSelectorComponent implements OnInit {
         parent?: Node;
         connectorId?: string;
         window?: Window;
+        created?: boolean;
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
         this.localEventsService.nodesCreated.emit(payload.nodes);
@@ -1402,6 +1406,7 @@ export class NodesSelectorComponent implements OnInit {
                         nodes: [data.node],
                         parent: this.parent(),
                         connectorId: connector.id,
+                        created: true,
                         window: event.window,
                     });
                 },

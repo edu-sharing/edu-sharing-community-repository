@@ -161,6 +161,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
     selection: Node[] = [];
+    /** Original node ids to auto-select once the references (re)load (a freshly *created* node). */
+    private selectAfterLoad: string[] = [];
+    /** True while a sidebar-add reload is in flight, so its selection-clear does not close the sidebar. */
+    private addInProgress = false;
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
@@ -264,6 +268,22 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 filter((n) => n.some((n1) => n1?.ref?.id === this.collection?.ref?.id)),
             )
             .subscribe(() => this.refreshContent());
+        this.editorialSidebarService.applyNodeEmitted
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((payload) => {
+                if (
+                    payload?.nodes?.length &&
+                    payload.parent?.ref?.id === this.collection?.ref?.id
+                ) {
+                    // Node added via the sidebar: keep the sidebar open across the reload, and for
+                    // a newly created node also queue it to be selected afterwards (mirrors the
+                    // workspace: create → select+show-options, include → add+keep-open).
+                    this.addInProgress = true;
+                    this.selectAfterLoad = payload.created
+                        ? payload.nodes.map((n) => n.ref.id)
+                        : [];
+                }
+            });
         this.authenticationService
             .observeLoginInfo()
             .pipe(takeUntil(this.destroyed$))
@@ -637,9 +657,35 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     handleSelection(selection: SelectionChange<Node>) {
         this.selection = selection.source.selected;
-        if (this.interactionType === InteractionType.DefaultActionLink) {
+        // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
+        // close the sidebar (selectPendingNodes decides the final state afterwards).
+        if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {
             this.editorialSidebarService.handleSelection(selection);
         }
+    }
+
+    /**
+     * After a sidebar-add reload:
+     * - included → keep open, reset selection
+     * - created → select the new reference and show its options.
+     */
+    private selectPendingNodes(references: CollectionReference[]) {
+        if (!this.addInProgress) {
+            return;
+        }
+        this.addInProgress = false;
+        const ids = this.selectAfterLoad;
+        this.selectAfterLoad = [];
+        if (!ids.length) {
+            return;
+        }
+        const toSelect = references.filter((r) => ids.includes(this.nodeHelper.getOriginalId(r)));
+        if (!toSelect.length) {
+            return;
+        }
+        // selecting drives handleSelection (now unguarded) → sidebar nodes/options; re-open it
+        this.listReferences?.getSelection().setSelection(...toSelect);
+        this.editorialSidebarService.sidebarOpened.set(true);
     }
 
     clearSelection() {
@@ -812,6 +858,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         .subscribe((refs) => {
                             this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.dataSourceReferences.isLoading = false;
+                            this.selectPendingNodes(refs.references);
                             this.finishCollectionLoading();
                         });
                 },
@@ -919,6 +966,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     private finishCollectionLoading(callback?: () => void) {
+        // safety net: clear the add-in-flight guard on any load path that does not run
+        // selectPendingNodes (e.g. root level), so later selections are not swallowed
+        this.addInProgress = false;
         void this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with

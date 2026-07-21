@@ -40,6 +40,9 @@ export class EditorialSidebarService {
         connectorId?: string;
         // only non-null when a connector is used
         window?: Window;
+        // true when the nodes were newly created (upload/link/connector) rather than existing
+        // nodes being included; hosts use it to select+show-options vs. just add+keep-open
+        created?: boolean;
     }>();
     configChange$ = new EventEmitter<OptionConfig>();
     scope = signal(Scope.Search);
