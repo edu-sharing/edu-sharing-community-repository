@@ -261,6 +261,10 @@ mat-tab-group {
         color: mat-css-vars.mat-css-color-primary(50);
     }
     --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
+    // keep disabled fields readable on the (dark) colored background
+    --mdc-outlined-text-field-disabled-input-text-color: rgba(255, 255, 255, 0.8);
+    --mdc-outlined-text-field-disabled-label-text-color: rgba(255, 255, 255, 0.8);
+    --mdc-outlined-text-field-disabled-outline-color: rgba(255, 255, 255, 0.5);
 }
 mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
     --mdc-switch-unselected-handle-color: #fff;

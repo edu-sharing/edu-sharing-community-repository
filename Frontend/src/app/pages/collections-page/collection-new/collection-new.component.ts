@@ -156,6 +156,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     buttons: DialogButton[];
     authorFreetext = false;
     authorFreetextAllowed = false;
+    authorFreetextFixedAllowed = false;
     mdsSet: string;
     imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
@@ -190,6 +191,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 // cleanup irrelevant data
                 this.currentCollection.rating = null;
                 this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
+                this.authorFreetextFixedAllowed = this.authorFreetext;
                 this.originalPermissions = perm.localPermissions;
                 this.properties = collection.properties;
                 this.newCollectionType = this.getTypeForCollection(this.currentCollection);
@@ -645,6 +647,7 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
         }
         if (type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+            this.authorFreetextFixedAllowed = true;
             this.switchToAuthorFreetext();
         }
         this.updateAvailableSteps();
