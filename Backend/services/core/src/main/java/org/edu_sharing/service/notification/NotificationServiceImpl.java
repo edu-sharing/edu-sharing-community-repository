@@ -260,7 +260,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Page<NotificationEventDTO> getNotifications(String receiverId, List<StatusDTO> status, Pageable pageable) {
-        return null;
+        return Page.empty();
     }
 
     @Override
