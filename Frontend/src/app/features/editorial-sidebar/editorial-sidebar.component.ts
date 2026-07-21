@@ -202,7 +202,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             () => this.enabledOption.set({ trap: false, option: 'VIEWS_AND_USAGE' }),
         );
         showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
-        showStatistics.scopes = ['workspace', 'collections', 'suggestions'];
+        showStatistics.scopes = ['workspace', 'search', 'collections', 'suggestions'];
         showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
         showStatistics.toolpermissionsMode = HideMode.Hide;
         showStatistics.group = DefaultGroups.View;
