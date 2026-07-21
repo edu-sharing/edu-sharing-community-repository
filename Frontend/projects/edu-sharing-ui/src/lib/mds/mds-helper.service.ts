@@ -142,6 +142,22 @@ export class MdsHelperService {
     }
 
     /**
+     * Whether the group renders any widget, i.e. one of its view templates references a
+     * defined widget.
+     */
+    static groupHasWidgets(mds: MdsDefinition, groupId: string): boolean {
+        const group = mds?.groups?.find((g) => g.id === groupId);
+        const views = (group?.views ?? [])
+            .map((viewId) => mds?.views?.find((v) => v.id === viewId))
+            .filter((v): v is NonNullable<typeof v> => !!v);
+        return views.some((view) =>
+            (mds.widgets ?? []).some((widget) =>
+                new RegExp(`<${widget.id}[> ]`).test(view.html ?? ''),
+            ),
+        );
+    }
+
+    /**
      * Find a template by id in the given mds
      */
     static findTemplate(mds: MdsDefinition, id: string) {

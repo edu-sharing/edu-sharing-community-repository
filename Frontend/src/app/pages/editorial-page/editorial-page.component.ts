@@ -2,6 +2,7 @@ import { PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
     Component,
+    computed,
     effect,
     inject,
     OnDestroy,
@@ -9,6 +10,7 @@ import {
     ViewChild,
     viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import {
     Assignment,
@@ -184,7 +186,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
     /**
-     * called when the first init was done (all fields have been parsed and initalized)
+     * called when the first init was done (all fields have been parsed and initialized)
      */
     init$ = new BehaviorSubject<boolean>(false);
     /**
@@ -192,6 +194,15 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
      */
     firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
+    private mdsDefinition = toSignal(this.mdsDefinition$);
+    /**
+     * whether the current mds group renders any filter widgets
+     */
+    readonly filtersAvailable = computed(() => {
+        const group = this.mdsGroup();
+        const mds = this.mdsDefinition();
+        return !!group && !!mds && MdsHelperService.groupHasWidgets(mds, group);
+    });
     readonly dataSource = new NodeDataSource<
         Node | NodeShare | NodeEvent | Assignment | NodeSuggestion
     >();
@@ -573,7 +584,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         this.clearSelection();
         this.searchFieldService.getCurrentInstance().patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
-            showFiltersButton: !params.mainComponent,
+            showFiltersButton: !params.mainComponent && this.filtersAvailable(),
         });
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}') as Values;

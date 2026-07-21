@@ -4,13 +4,13 @@
 </h1>
 
 <mat-sidenav-container
-  [class.mat-sidenav-container-left-open]="filterBarVisible | async"
+  [class.mat-sidenav-container-left-open]="(filterBarVisible | async) && filtersAvailable()"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav
     #leftSidenav
     [mode]="'side'"
-    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null"
+    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null && filtersAvailable()"
     position="start"
     class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
@@ -129,7 +129,7 @@
           </mat-tab>
           }
         </mat-tab-group>
-        } }
+        } } @if (filtersAvailable()) {
         <div class="option-area">
           <div class="options-left">
             <button
@@ -143,8 +143,8 @@
             </button>
           </div>
         </div>
-        @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
-        || mode === 'assignment' || mode === 'suggestions' ) {
+        } @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode ===
+        'share' || mode === 'assignment' || mode === 'suggestions' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"
           [dataSource]="dataSource"
