@@ -8,4 +8,9 @@ if [ $(basename $(pwd)) != "core-module" ]; then
     cd Frontend
 fi
 
+# GUI git clients (e.g. IDE-integrated VCS) invoke hooks with a minimal PATH that
+# does not include nvm-managed node, since it's normally only added by shell rc files.
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
 npx lint-staged
