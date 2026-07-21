@@ -168,6 +168,9 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
+    private isMobile = toSignal(this.isMobile$);
+    /** Guards the one-time auto-open of the filter bar on desktop page load. */
+    private filterBarAutoOpened = false;
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -582,10 +585,22 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
         this.clearSelection();
-        this.searchFieldService.getCurrentInstance().patchConfig({
+        const instance = this.searchFieldService.getCurrentInstance();
+        instance.patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
             showFiltersButton: !params.mainComponent && this.filtersAvailable(),
         });
+        // Auto-open the filter bar once on desktop load, but only when the group definitely has
+        // filter widgets; afterwards respect the user's manual open/close state.
+        if (
+            !this.filterBarAutoOpened &&
+            this.isMobile() === false &&
+            !params.mainComponent &&
+            this.filtersAvailable()
+        ) {
+            this.filterBarAutoOpened = true;
+            instance.filterBarIsVisible.setUserValue(true);
+        }
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}') as Values;
         const originalCriteria = Helper.deepCopy(criteria);
