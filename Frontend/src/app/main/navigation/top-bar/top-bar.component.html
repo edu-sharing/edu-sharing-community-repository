@@ -224,7 +224,11 @@
         [innerHTML]="mainNavService.systemMessage.message.message | safeHtml : { purify: true }"
       ></div>
       @if (mainNavService.systemMessage.message.repeat === 'repeat') {
-      <button mat-icon-button (click)="mainNavService.closeSystemMessage()">
+      <button
+        mat-icon-button
+        (click)="mainNavService.closeSystemMessage()"
+        [attr.aria-label]="'CLOSE' | translate"
+      >
         <i esIcon="close"></i>
       </button>
       }
