@@ -17,7 +17,7 @@ public class NodeUrls {
 
     public NodeUrls(String nodeId, List<String> aspects, String requestedVersion) {
         repositoryBaseUrl = URLHelper.getBaseUrl(true);
-        if(aspects.contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
+        if(aspects.contains(CCConstants.CCM_ASPECT_LTITOOL_NODE)){
             generateLtiResourceLink = repositoryBaseUrl + "/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=" + nodeId;
             if(Context.getCurrentInstance() != null){
                 if(Context.getCurrentInstance().isSingleUseNodeId(nodeId)){
