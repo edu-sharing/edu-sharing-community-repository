@@ -80,6 +80,12 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
      */
     @Input() modal = false;
 
+    /**
+     * whether the sticky footer bar (navigation / save) is shown.
+     * Hide it e.g. when the content is embedded in an external fullscreen view.
+     */
+    @Input() showStickyBar = true;
+
     @Input() customOptions: CustomOptions;
     /** Editor mode for the embedded mds-editor-wrapper. */
     @Input() editorMode: EditorMode = 'viewer';

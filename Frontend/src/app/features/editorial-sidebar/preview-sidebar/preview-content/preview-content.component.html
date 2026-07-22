@@ -67,7 +67,7 @@
     }
   </div>
 </div>
-@if (!previewSidebarTemplateService.metadata) {
+@if (showStickyBar && !previewSidebarTemplateService.metadata) {
 <div class="sticky-bar">
   @if (editorMode === 'viewer') {
   <div class="preview-navigation">

@@ -5,7 +5,7 @@
   </div>
   }
   <div class="sidebar-header">
-    @if (enabledOption() && !enabledOption().trap) {
+    @if (enabledOption() && !enabledOption().trap && !editorialSidebarService.fullscreenActive()) {
     <button mat-icon-button (click)="enabledOption.set(null)">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
@@ -29,10 +29,11 @@
         [aria]="true"
       ></i>
     </button>
-    }
+    } @if (!editorialSidebarService.fullscreenActive()) {
     <button mat-icon-button (click)="close()">
       <i esIcon="close" [aria]="true"></i>
     </button>
+    }
   </div>
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -63,6 +64,7 @@
           [node]="$any(editorialSidebarService.nodes())?.[0]"
           [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
           [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
+          [showStickyBar]="!editorialSidebarService.fullscreenActive()"
         ></es-preview-sidebar>
         }
       </div>

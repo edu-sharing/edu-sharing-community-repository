@@ -2,12 +2,12 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import {
     Component,
     EventEmitter,
+    inject,
     Input,
     OnDestroy,
     Output,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
@@ -50,6 +50,8 @@ export class PreviewSidebarComponent implements OnDestroy {
     @Input() editorMode: EditorMode;
     /** Group id forwarded to the embedded mds-editor-wrapper. */
     @Input() groupId: string;
+    /** whether the sticky footer bar (navigation / details / save) is shown. */
+    @Input() showStickyBar = true;
     /** Emits when the user clicked the "close" button. */
     @Output() closed = new EventEmitter<void>();
 
