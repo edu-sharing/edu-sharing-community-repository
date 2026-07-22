@@ -132,6 +132,7 @@ mat-tab-group {
         display: block;
         min-height: 0;
         overflow-y: auto;
+        overflow-x: hidden;
         @include mixins.materialScrollbarLight();
     }
     .collections-right {
