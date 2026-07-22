@@ -156,9 +156,9 @@ import {
     ShortcutManagementDialogResult,
 } from './dialog-modules/shortcut-management-dialog/shortcut-management-dialog-data';
 import {
-    SelectElementDialogData,
-    SelectElementDialogResult,
-} from './dialog-modules/select-element-dialog/select-element-dialog-data';
+    SelectFavoriteDialogData,
+    SelectFavoriteDialogResult,
+} from './dialog-modules/select-favorite-dialog/select-favorite-dialog-data';
 import {
     SharePublishMotivationDialogComponentData,
     SharePublishMotivationDialogResult,
@@ -1040,15 +1040,15 @@ export class DialogsService {
     }
 
     /**
-     * opens select element dialog
+     * opens select favorite dialog
      */
-    async openSelectElementDialog(
-        data: SelectElementDialogData,
-    ): Promise<CardDialogRef<SelectElementDialogData, SelectElementDialogResult>> {
-        const { SelectElementDialogComponent } = await import(
-            './dialog-modules/select-element-dialog/select-element-dialog.component'
+    async openSelectFavoriteDialog(
+        data: SelectFavoriteDialogData,
+    ): Promise<CardDialogRef<SelectFavoriteDialogData, SelectFavoriteDialogResult>> {
+        const { SelectFavoriteDialogComponent } = await import(
+            './dialog-modules/select-favorite-dialog/select-favorite-dialog.component'
         );
-        return this.cardDialog.open(SelectElementDialogComponent, {
+        return this.cardDialog.open(SelectFavoriteDialogComponent, {
             title: 'SHORTCUT_ENTRIES.SELECT_ELEMENT',
             avatar: { kind: 'icon', icon: 'call_made' },
             minWidth: 800,

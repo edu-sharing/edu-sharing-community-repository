@@ -196,6 +196,10 @@ export class NodesSelectorComponent implements OnInit {
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
     primaryMode = input<SidebarContext>();
+    /**
+     * tabs to hide from the otherwise supported set (e.g. to offer only a subset of views)
+     */
+    tabBlacklist = input<TabType[]>([]);
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
@@ -218,17 +222,20 @@ export class NodesSelectorComponent implements OnInit {
         });
     });
     supportedTabs: Signal<TabType[]> = computed(() => {
+        const blacklist = this.tabBlacklist() ?? [];
+        let tabs: TabType[];
         if (this.selectionMode() === 'source') {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
-                return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
+                tabs = [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
             } else {
-                return [TabType.WORKSPACE, TabType.UPLOAD];
+                tabs = [TabType.WORKSPACE, TabType.UPLOAD];
             }
+        } else if (this.allSelectedNodesFromHomeRepo()) {
+            tabs = [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
+        } else {
+            tabs = [TabType.COLLECTIONS];
         }
-        if (this.allSelectedNodesFromHomeRepo()) {
-            return [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
-        }
-        return [TabType.COLLECTIONS];
+        return tabs.filter((tab) => !blacklist.includes(tab));
     });
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();

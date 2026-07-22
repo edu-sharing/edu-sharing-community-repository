@@ -368,10 +368,10 @@ export class ShortcutEntriesComponent implements OnInit {
      * Opens a modal to select an element.
      */
     async selectElement() {
-        const selectElementDialogRef = await this.dialogs.openSelectElementDialog({
+        const selectFavoriteDialogRef = await this.dialogs.openSelectFavoriteDialog({
             firstElement: this.entriesOverflow(),
         });
-        selectElementDialogRef.afterClosed().subscribe(async (response) => {
+        selectFavoriteDialogRef.afterClosed().subscribe(async (response) => {
             // always reload the entries due to adding also being possible via the three-dot menu
             await this.retrieveEntriesAndSync();
         });

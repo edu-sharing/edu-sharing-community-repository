@@ -1,9 +1,9 @@
 import { Node } from 'ngx-edu-sharing-api';
 
-export class SelectElementDialogData {
+export class SelectFavoriteDialogData {
     firstElement: boolean;
 }
 
-export interface SelectElementDialogResult {
+export interface SelectFavoriteDialogResult {
     node: Node;
 }
