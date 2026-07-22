@@ -64,6 +64,7 @@ import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
+import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.usage.Usage;
@@ -442,6 +443,7 @@ public class CollectionServiceElastic implements CollectionService {
         final String fcurrentUsername = currentUsername;
 
         if (fcurrentUsername != null) {
+            Map<String, Object> props = asProps(collection);
             return AuthenticationUtil.runAsSystem(() -> {
                 String parentIdLocal = parentId;
                 if (parentIdLocal == null) {
@@ -451,7 +453,6 @@ public class CollectionServiceElastic implements CollectionService {
                     parentIdLocal = getHomePath();
                 }
 
-                Map<String, Object> props = asProps(collection);
                 try {
                     new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
                 } catch (Throwable e) {
@@ -646,8 +647,28 @@ public class CollectionServiceElastic implements CollectionService {
         props.put(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE, collection.getViewtype());
         props.put(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, collection.isLevel0());
         if (collection.getAuthorFreetext() != null && !collection.getAuthorFreetext().isEmpty()) {
-            ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
-            props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+            if (ToolPermissionServiceFactory.getInstance().hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER)) {
+                props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+            } else {
+                if (Objects.equals(collection.getType(), CCConstants.COLLECTIONTYPE_MEDIA_CENTER)) {
+                    // force use the displayname of the first mediacenter the user is admin of
+                    try {
+                        String mediacenter = searchService.getAllMediacenters().stream()
+                                .filter(localAuthorityService::hasAdminAccessToMediacenter)
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("Current user is not admin of any mediacenter"));
+                        String displayName = (String) localAuthorityService.getAuthorityProperty(mediacenter,
+                                CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME);
+                        props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, displayName);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+                }
+            }
+        } else {
+            props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, null);
         }
         return props;
     }
