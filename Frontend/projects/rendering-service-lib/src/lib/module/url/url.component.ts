@@ -231,11 +231,12 @@ export class UrlComponent implements RenderModule, OnInit, OnDestroy {
         const downloadUrl = additionalData?.['downloadUrl'] ?? undefined;
         this.globalStateService.setDownloadUrl(downloadUrl);
         this.url = jobData.link;
-        if (this.node.mimetype.startsWith('image')) {
+        const mimetype = this.node?.mimetype || '';
+        if (mimetype.startsWith('image')) {
             this.embedding = UrlEmbeddings.IMAGE;
-        } else if (this.node.mimetype.startsWith('video')) {
+        } else if (mimetype.startsWith('video')) {
             this.embedding = UrlEmbeddings.VIDEO;
-        } else if (this.node.mimetype.startsWith('audio')) {
+        } else if (mimetype.startsWith('audio')) {
             this.embedding = UrlEmbeddings.AUDIO;
         } else {
             this.embedding = UrlEmbeddings.LINK;
