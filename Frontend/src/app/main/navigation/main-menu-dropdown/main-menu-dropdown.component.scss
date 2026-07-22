@@ -1,16 +1,5 @@
-@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'sass:meta';
-
-$mainMenuHoverBackgroundColor: $itemSelectedBackground !default;
-$mainMenuAccentColor: var(--primary) !default;
-$mainMenuSelectedBackground: linear-gradient(
-        to right,
-        $mainMenuAccentColor 0,
-        $mainMenuAccentColor 5px,
-        rgba(0, 0, 0, 0) 5px,
-        rgba(0, 0, 0, 0) 5px
-    )
-    no-repeat;
+// Branding colors are global CSS custom properties (defaults defined in
+// variables.scss, overridable via the "themeColors" in client.config).
 
 // We cannot use `:host` here, since the `mat-menu` elements are rearranged
 // outside of the original container. Hence we rely on the `.mat-dropdown-menu`
@@ -19,42 +8,30 @@ $mainMenuSelectedBackground: linear-gradient(
     border-radius: 0px;
     .mat-mdc-menu-content {
         min-width: 250px;
+        background-color: var(--mainMenuBackgroundColor);
 
-        @if meta.global-variable-exists(mainMenuBackgroundColor) {
-            background-color: $mainMenuBackgroundColor;
-        }
         .mat-mdc-menu-item {
-            @if meta.global-variable-exists(mainMenuForegroundColor) {
-                &:not(:disabled) {
-                    > span {
-                        color: $mainMenuForegroundColor;
-                        @if meta.global-variable-exists(mainMenuForegroundColorIcon) {
-                            > i {
-                                color: $mainMenuForegroundColorIcon;
-                            }
-                        }
+            &:not(:disabled) {
+                > span {
+                    color: var(--mainMenuForegroundColor);
+                    > i {
+                        color: var(--mainMenuForegroundColorIcon);
                     }
                 }
             }
             &.mat-mdc-menu-item-selected {
-                background: $mainMenuSelectedBackground;
+                background: var(--mainMenuSelectedBackground);
             }
             &.cdk-focused {
-                @if meta.global-variable-exists(mainMenuBackgroundColor) {
-                    background-color: $mainMenuBackgroundColor;
-                }
+                background-color: var(--mainMenuBackgroundColor);
             }
             &:hover:not([disabled]),
             &.cdk-key-focused {
-                background-color: $mainMenuHoverBackgroundColor;
-                @if meta.global-variable-exists(mainMenuBackgroundColor) {
-                    > span {
-                        color: $mainMenuHoverForegroundColor;
-                        @if meta.global-variable-exists(mainMenuHoverForegroundColorIcon) {
-                            > i {
-                                color: $mainMenuHoverForegroundColorIcon;
-                            }
-                        }
+                background-color: var(--mainMenuHoverBackgroundColor);
+                > span {
+                    color: var(--mainMenuHoverForegroundColor);
+                    > i {
+                        color: var(--mainMenuHoverForegroundColor);
                     }
                 }
             }

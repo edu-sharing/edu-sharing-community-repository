@@ -44,6 +44,20 @@
     --buttonDisabled: #999;
     --workspaceTopBarBackground: #383838;
     --workspaceTopBarFontColor: #fff;
+    --mainMenuBackgroundColor: transparent;
+    --mainMenuForegroundColor: var(--primary);
+    --mainMenuForegroundColorIcon: var(--primary);
+    --mainMenuHoverBackgroundColor: var(--primaryBackground50);
+    --mainMenuHoverForegroundColor: var(--primary);
+    --mainMenuAccentColor: var(--primary);
+    --mainMenuSelectedBackground: linear-gradient(
+            to right,
+            var(--mainMenuAccentColor) 0,
+            var(--mainMenuAccentColor) 5px,
+            rgba(0, 0, 0, 0) 5px,
+            rgba(0, 0, 0, 0) 5px
+        )
+        no-repeat;
     --landingPageTopBarBackground: var(--workspaceTopBarBackground);
     --landingPageTopBarFontColor: var(--workspaceTopBarFontColor);
     --landingPageTopBarIconFilter: invert(0);
@@ -221,6 +235,7 @@ body.isDarkTheme {
     // lighten the dark monochrome mediatype icons in node-type-badge; hue-rotate keeps
     // any colored glyphs recognizable (standard dark-mode image inversion)
     --invertSvgFilter: invert(1) hue-rotate(180deg);
+    --mainMenuHoverBackgroundColor: var(--primaryBackground50);
 
     // chip colors: keep each hue but darken so the (now light) dark-theme text reads on top
     @each $key, $color in vars.$chip-colors {
