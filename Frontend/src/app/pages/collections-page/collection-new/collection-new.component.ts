@@ -195,6 +195,12 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.originalPermissions = perm.localPermissions;
                 this.properties = collection.properties;
                 this.newCollectionType = this.getTypeForCollection(this.currentCollection);
+                if (
+                    this.currentCollection.collection.type ===
+                    RestConstants.COLLECTIONTYPE_MEDIA_CENTER
+                ) {
+                    this.authorFreetextFixedAllowed = true;
+                }
                 this.hasCustomScope = false;
                 this.newCollectionStep = this.STEP_GENERAL;
                 if (
