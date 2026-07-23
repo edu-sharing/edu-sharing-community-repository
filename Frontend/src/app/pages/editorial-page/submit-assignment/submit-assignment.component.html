@@ -21,6 +21,7 @@
 } @if (selectedCorrectedFileUrl()) {
 <ngx-extended-pdf-viewer
   [src]="selectedCorrectedFileUrl()"
+  [enableDragAndDrop]="false"
   [height]="'auto'"
   [language]="language"
   [textLayer]="true"

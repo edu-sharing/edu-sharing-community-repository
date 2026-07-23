@@ -49,6 +49,7 @@
     @if (tabSelected() === 0) {
     <ngx-extended-pdf-viewer
       [src]="selectedSubmissionFileUrl()"
+      [enableDragAndDrop]="false"
       [height]="'100%'"
       [language]="language"
       [textLayer]="true"

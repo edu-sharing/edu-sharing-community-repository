@@ -1,11 +1,11 @@
 import {
     Component,
     HostListener,
+    inject,
     Input,
     OnChanges,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
@@ -19,6 +19,7 @@ import {
     RenderingServiceLibConfiguration,
 } from '../../../rendering-service-lib-configuration';
 import {
+    AnnotationEditorType,
     NgxExtendedPdfViewerComponent,
     NgxExtendedPdfViewerModule,
     pdfDefaultOptions,
@@ -44,6 +45,15 @@ export class PdfComponent implements RenderModule, OnChanges {
     @Input() assetUrl: string | undefined;
     restrictedView: boolean = false;
     fileData: Uint8Array | string | undefined;
+
+    constructor() {
+        // This is a view-only PDF widget — we never enable pdf.js' annotation
+        // editor. Disabling it (vs. the default NONE mode) stops pdf.js from
+        // constructing its AnnotationEditorUIManager, which otherwise registers
+        // document-level `dragover`/`drop` listeners (to paste dropped images
+        // into the stamp editor)
+        pdfDefaultOptions.annotationEditorMode = AnnotationEditorType.DISABLE;
+    }
 
     ngOnChanges(changes: SimpleChanges) {
         if (this.configuration && this.configuration.assetsUrl) {

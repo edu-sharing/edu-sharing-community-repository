@@ -67,6 +67,7 @@
   @if (initialized()) {
   <ngx-extended-pdf-viewer
     [(src)]="renderNodeId"
+    [enableDragAndDrop]="false"
     [height]="'auto'"
     [language]="language"
     [textLayer]="true"

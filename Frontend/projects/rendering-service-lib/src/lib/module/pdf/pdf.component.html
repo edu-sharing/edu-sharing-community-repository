@@ -2,6 +2,7 @@
 <div class="pdf-wrapper" [class.hide-all]="restrictedView">
   <ngx-extended-pdf-viewer
     [src]="fileData"
+    [enableDragAndDrop]="false"
     [showPrintButton]="!restrictedView"
     [showDownloadButton]="false"
     [showOpenFileButton]="false"
