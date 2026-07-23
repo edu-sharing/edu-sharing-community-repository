@@ -14,6 +14,10 @@
         cursor: pointer;
     }
 
+    &:disabled {
+        color: var(--buttonDisabled);
+    }
+
     &.primary-border {
         border-color: topicPageVars.$primary !important;
     }
