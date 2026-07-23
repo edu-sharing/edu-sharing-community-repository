@@ -426,7 +426,6 @@ public class CollectionServiceElastic implements CollectionService {
         originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
         return addToCollection(collectionId, originalNodeId, allowDuplicate);
     }
-
     @Override
     public Collection create(String parentId, Collection collection) throws Throwable {
 
@@ -443,16 +442,16 @@ public class CollectionServiceElastic implements CollectionService {
         final String fcurrentUsername = currentUsername;
 
         if (fcurrentUsername != null) {
+            String parentIdLocal;
+            if (parentId == null) {
+                collection.setLevel0(true);
+                parentIdLocal = getHomePath();
+            }else {
+                parentIdLocal = parentId;
+            }
+
             Map<String, Object> props = asProps(collection);
             return AuthenticationUtil.runAsSystem(() -> {
-                String parentIdLocal = parentId;
-                if (parentIdLocal == null) {
-
-                    collection.setLevel0(true);
-
-                    parentIdLocal = getHomePath();
-                }
-
                 try {
                     new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
                 } catch (Throwable e) {
