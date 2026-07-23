@@ -23,8 +23,8 @@
     // define variables to be used by both list components (for both parents and children)
     --column-browser-hover-color: #{topicPageVars.$surface-alt};
     --column-browser-focused-color: #{topicPageVars.$surface-selected};
-    --column-browser-badge-hover-color: #cacaca;
-    --column-browser-badge-focused-color: #ccd8e5;
+    --column-browser-badge-hover-color: var(--backgroundDim);
+    --column-browser-badge-focused-color: var(--primaryBackground100);
 }
 
 // styles for topics column browser
@@ -36,7 +36,7 @@
         overflow-x: auto;
         overflow-y: hidden;
         flex-grow: 1;
-        background: rgba(255, 255, 255, 0.4);
+        background: var(--color-readable-overlay);
 
         &.mobile {
             display: flex;
@@ -119,7 +119,7 @@ es-node-url ::ng-deep > a {
             text-align: center;
             vertical-align: middle;
             border-radius: 12px;
-            color: #333;
+            color: topicPageVars.$on-surface;
             background: topicPageVars.$surface-alt;
         }
     }
