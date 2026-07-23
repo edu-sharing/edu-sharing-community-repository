@@ -684,7 +684,7 @@ export class NodesSelectorComponent implements OnInit {
                     this.toast.closeProgressSpinner();
                 }
             }
-            // Standalone upload: select the created node so the sidebar shows its options.
+            // Standalone upload: select the created nodes so the sidebar shows their options.
             // Skipped for collections (added as an async reference — handled by the collection
             // page via applyNodeEmitted).
             if (
@@ -692,7 +692,7 @@ export class NodesSelectorComponent implements OnInit {
                 !this.option()?.optionConfig?.onNodesChoosen &&
                 !this.option()?.optionConfig?.autoClose
             ) {
-                this.editorialSidebarService.selectNode(createdNodes[0] as Node);
+                this.editorialSidebarService.selectNode(createdNodes as Node[]);
             }
         }
         this.addMaterialDialogComponent.selectedFiles.set([]);

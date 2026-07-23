@@ -180,15 +180,16 @@ export class EditorialSidebarService {
     }
 
     /**
-     * Programmatically select a single node and surface its options in the sidebar.
+     * Programmatically select one or more nodes and surface their options in the sidebar.
      */
-    selectNode(node: Node) {
+    selectNode(nodes: Node | Node[]) {
         const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
         if (!instance) {
             return;
         }
-        instance.selection.setSelection(node);
-        this.nodes.set([node]);
+        const nodeList = Array.isArray(nodes) ? nodes : [nodes];
+        instance.selection.setSelection(...nodeList);
+        this.nodes.set(nodeList);
         this._editorialSidebar?.enabledOption.set(null);
         this.sidebarOpened.set(true);
     }
