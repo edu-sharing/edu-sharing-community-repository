@@ -307,9 +307,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.topicPageGlobalService.getCustomSideMenuItems()) {
             this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
         }
-        this.hasCustomBreadcrumbExtension.set(
-            this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
-        );
         this.backToCollectionButtonVisible.set(
             this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );
@@ -464,7 +461,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
-    hasCustomBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     customSideMenuItems = signal<CustomSideMenuItem[]>([]);
     customSideMenuItemsBefore = computed(() =>
         this.customSideMenuItems().filter((item) => item.position === 'before'),

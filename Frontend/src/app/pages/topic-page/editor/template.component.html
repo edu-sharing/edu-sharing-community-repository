@@ -18,10 +18,6 @@
 }
 <main>
   @if (initialLoadSuccessfully() && showBreadcrumb()) {
-  <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
-  @if (hasCustomBreadcrumbExtension()) {
-  <div class="custom-breadcrumb-overflow-container"></div>
-  }
   <!-- BREADCRUMBS -->
   @if (parentEntries()) {
   <div class="template-breadcrumb">
