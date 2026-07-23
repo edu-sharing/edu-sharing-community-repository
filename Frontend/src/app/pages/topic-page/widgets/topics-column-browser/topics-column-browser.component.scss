@@ -76,7 +76,7 @@
 .item-link,
 es-node-url ::ng-deep > a {
     text-decoration: unset;
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
     display: inline-block;
 
     // make the text bold but invisible by default, so the browser calculates layout using bold width from the start

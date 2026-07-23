@@ -67,19 +67,19 @@ es-color-picker {
 .side-menu-header {
     margin-top: 0;
     padding-right: 24px;
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
     font-weight: topicPageVars.$font-weight-bold;
     font-size: topicPageVars.$font-size-x-large;
 }
 
 es-side-menu-wrapper {
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
 
     // color adjustments of specific elements
     &::ng-deep {
         mat-radio-button label,
         mat-checkbox label {
-            color: topicPageVars.$primary-dark;
+            color: topicPageVars.$on-surface;
         }
 
         mat-radio-button.mat-mdc-radio-button .mdc-radio {
@@ -296,7 +296,7 @@ es-side-menu-wrapper {
                             text-overflow: ellipsis;
                             hyphens: auto;
                             word-break: break-word;
-                            color: topicPageVars.$primary-dark;
+                            color: topicPageVars.$on-surface;
                         }
                     }
 
@@ -380,7 +380,7 @@ es-side-menu-wrapper {
                         height: 40px;
                         box-shadow: 0 4px 4px 0 #00000040;
                         background: topicPageVars.$surface-container-lowest;
-                        color: topicPageVars.$primary-dark;
+                        color: topicPageVars.$on-surface;
                     }
                 }
 
@@ -747,7 +747,7 @@ es-side-menu-wrapper {
 
 .template-header-container,
 .topic-page-content-wrapper {
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
 }
 
 .topic-page-content-wrapper {
@@ -759,7 +759,7 @@ es-side-menu-wrapper {
         &::ng-deep es-editable-text ::ng-deep {
             h2,
             h3 {
-                color: topicPageVars.$primary-dark;
+                color: topicPageVars.$on-surface;
             }
         }
     }

@@ -128,7 +128,7 @@
             font-weight: topicPageVars.$font-weight-bold;
             font-size: topicPageVars.$font-size-large;
             hyphens: auto;
-            color: topicPageVars.$primary-dark;
+            color: topicPageVars.$on-surface;
             @include mixin.limitLineCount(2, 1.25);
         }
     }
@@ -141,7 +141,7 @@
     text-align: right;
 
     button {
-        color: topicPageVars.$primary-dark;
+        color: topicPageVars.$on-surface;
     }
 }
 
