@@ -669,6 +669,10 @@
       "LIGHT": "Hell",
       "DARK": "Dunkel"
     },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Zu hellem Modus wechseln",
+      "DARK": "Zu dunklem Modus wechseln"
+    },
     "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
     "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
     "INDICATOR_ICONS_OPTION": {

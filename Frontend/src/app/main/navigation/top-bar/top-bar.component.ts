@@ -27,6 +27,7 @@ import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropd
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
     selector: 'es-top-bar',
@@ -41,10 +42,10 @@ export class TopBarComponent implements AfterViewInit {
     dialogs = inject(DialogsService);
     private sessionStorageService = inject(SessionStorageService);
     private accessibility = inject(AccessibilityService);
+    readonly theme = inject(ThemeService);
     elementRef = inject(ElementRef);
 
     readonly TemplateSlot = TemplateSlot;
-    readonly darkMode$ = this.accessibility.observe('darkMode');
     @ContentChild('createButton') createButtonRef: TemplateRef<any>;
     @ViewChild('createMenu') createMenu: CreateMenuComponent;
     @ViewChild('dropdownTriggerDummy') createMenuTrigger: MatMenuTrigger;
@@ -137,14 +138,10 @@ export class TopBarComponent implements AfterViewInit {
         );
     }
 
-    cycleDarkMode(current: DarkModeSetting) {
-        const next: DarkModeSetting =
-            current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto';
+    toggleDarkMode() {
+        // toggle darkmode -> dont toggle into auto mode through topbar
+        const next: DarkModeSetting = this.theme.isDarkMode() ? 'light' : 'dark';
         void this.accessibility.set({ darkMode: next });
-    }
-
-    darkModeIcon(mode: DarkModeSetting): string {
-        return mode === 'light' ? 'light_mode' : mode === 'dark' ? 'dark_mode' : 'brightness_auto';
     }
 
     protected readonly UIService = UIService;

@@ -169,23 +169,21 @@
           {{ chatCount }}
         </div>
       </button>
-      } @if (darkMode$ | async; as mode) {
+      }
       <button
         mat-icon-button
         class="darkModeToggle"
-        (click)="cycleDarkMode(mode)"
-        [title]="'ACCESSIBILITY.DARK_MODE_TITLE' | translate"
+        (click)="toggleDarkMode()"
+        [title]="
+          'ACCESSIBILITY.DARK_MODE_SWITCH.' + (theme.isDarkMode() ? 'LIGHT' : 'DARK') | translate
+        "
         [attr.aria-label]="
-          ('ACCESSIBILITY.DARK_MODE_TITLE' | translate) +
-          ': ' +
-          ('ACCESSIBILITY.DARK_MODE_OPTION.' +
-            (mode === 'auto' ? 'SYSTEM' : mode === 'light' ? 'LIGHT' : 'DARK') | translate)
+          'ACCESSIBILITY.DARK_MODE_SWITCH.' + (theme.isDarkMode() ? 'LIGHT' : 'DARK') | translate
         "
         data-test="dark-mode-toggle"
       >
-        <i [esIcon]="darkModeIcon(mode)"></i>
+        <i [esIcon]="theme.isDarkMode() ? 'dark_mode' : 'light_mode'"></i>
       </button>
-      }
       <es-notification-list class="notifications"></es-notification-list>
       @if (currentUser && showUser) { @if (!UIService.isMobileWidth()) {
       <button

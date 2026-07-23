@@ -519,6 +519,10 @@
       "LIGHT": "Light",
       "DARK": "Dark"
     },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Switch to light mode",
+      "DARK": "Switch to dark mode"
+    },
     "DRAG_AND_DROP_TITLE": "Move Content",
     "DRAG_AND_DROP_MESSAGE": "Content can be moved using drag and drop. For better accessibility, additional actions like \"forward\" and \"back\" buttons can be enabled, allowing movement without using a mouse.",
     "DRAG_AND_DROP_OPTION": {
