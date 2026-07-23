@@ -183,6 +183,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                 break;
             case GenericNodeEntriesDisplayType.ListView:
                 newDisplayType = NodeEntriesDisplayType.Table;
+                // the custom card is only injectable into a grid item type and cannot be rendered
+                // in the table (list) view -> remove it before re-rendering as a table
+                this.removeCustomCards();
                 void this.nodeEntries?.ngOnChanges();
                 this.elementRef.nativeElement.style.setProperty('--cardWidth', this.DEFAULT_WIDTH);
                 break;
@@ -780,6 +783,24 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             // workaround to check whether the custom card was already added (it is not a node with a ref ID)
             if (this.dataSource.getData()?.[positionToAdd]?.ref?.id) {
                 this.dataSource.getData().splice(positionToAdd, 0, this.cardSuggestRef);
+            }
+        }
+    }
+
+    /**
+     * Helper function to remove any injected custom card from the data source. Custom cards are
+     * non-node items (without a ref ID) and cannot be rendered in the table (list) view, so they
+     * must be removed when switching away from a grid item type.
+     */
+    private removeCustomCards(): void {
+        const data = this.dataSource.getData();
+        if (!data?.length) {
+            return;
+        }
+        // iterate backwards so splicing does not shift the indices still to be checked
+        for (let i: number = data.length - 1; i >= 0; i--) {
+            if (!data[i]?.ref?.id) {
+                data.splice(i, 1);
             }
         }
     }
