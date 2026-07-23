@@ -17,7 +17,7 @@ $height: 50px;
         flex-grow: 1;
         align-items: center;
         gap: 10px;
-        color: #fff;
+        color: var(--palette-primary-contrast-500);
         .title {
             margin-left: 13px;
             font-size: 120%;
