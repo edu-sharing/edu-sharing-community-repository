@@ -152,6 +152,14 @@ export type NodesSelectorConfig = {
      * Use this instead of subscribing to EditorialSidebarService.applyNodeEmitted globally to only listen to your current trigger session
      */
     onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
+    /**
+     * picker mode: restrict the selection to a single node of any type.
+     */
+    singleSelect?: boolean;
+    /**
+     * allow folders to be selected as sources, in addition to files and collections.
+     */
+    allowFolderSelection?: boolean;
 };
 
 @Component({
@@ -263,8 +271,18 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
+    // picker mode: a single node of any type is chosen and handed back (e.g. favorite dialog)
+    singleSelect: Signal<boolean> = computed(() => !!this.option()?.optionConfig?.singleSelect);
+    // whether folders may be picked as a source (workspace tab)
+    allowFolderSelection: Signal<boolean> = computed(
+        () => !!this.option()?.optionConfig?.allowFolderSelection,
+    );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
+            // picker mode: exactly one node (of any type) must be selected
+            if (this.singleSelect()) {
+                return this.onlyOneSelected() ? null : InvalidSelectionReason.INVALID_SELECTION;
+            }
             if (this.selectionMode() === 'source') {
                 if (
                     this.option().optionConfig?.applyCallback &&
@@ -424,7 +442,9 @@ export class NodesSelectorComponent implements OnInit {
                 node?.mediatype === 'collection' &&
                 this.parent()?.ref.id !== node?.ref.id &&
                 this.parent()?.parent?.id !== node?.ref.id) ||
-            node?.type === RestConstants.CCM_TYPE_IO,
+            node?.type === RestConstants.CCM_TYPE_IO ||
+            // opt-in: folders are selectable as well
+            (this.allowFolderSelection() && node?.mediatype === 'folder'),
     }));
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 

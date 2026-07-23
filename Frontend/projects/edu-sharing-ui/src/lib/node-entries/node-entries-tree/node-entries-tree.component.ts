@@ -251,10 +251,14 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
                 this.entriesService.selection.deselect(...childrenToDeselect);
             }
         };
-        // either multiple selection is allowed or a key press on cmd / strg is detected
+        // either multiple selection is allowed or a key press on cmd / strg is detected (and allowed)
         const multipleSelectionAllowed: boolean =
             this.entriesService.treeConfig?.multipleSelection || false;
-        const ctrlOrMetaKeyPressed: boolean = event && (event.ctrlKey || event.metaKey);
+        // 'emit' ctrlClickBehavior disables ctrl/cmd multi-selection (single-select pickers)
+        const ctrlOrMetaKeyPressed: boolean =
+            this.entriesService.ctrlClickBehavior !== 'emit' &&
+            !!event &&
+            (event.ctrlKey || event.metaKey);
         if (multipleSelectionAllowed || ctrlOrMetaKeyPressed) {
             // multi-select: add or remove the node from the selection
             if (this.entriesService.selection.isSelected(node)) {

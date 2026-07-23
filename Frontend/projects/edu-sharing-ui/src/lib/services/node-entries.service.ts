@@ -182,9 +182,10 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     showActions = new BehaviorSubject(true);
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
+        // 'emit' disables keyboard-modified multi-selection (ctrl/cmd + shift range) entirely
         if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {
             this.selection.toggle(data.element);
-        } else if (event.shiftKey) {
+        } else if (event.shiftKey && this.ctrlClickBehavior === 'multiselect') {
             this.expandSelectionTo(data.element);
         } else {
             this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
