@@ -4,7 +4,7 @@
     <div
       class="topic-text-wrapper"
       [class.bright-color]="isDarkColor(textBackgroundColor)"
-      [style.background]="textBackgroundColor"
+      [style.background]="headerBackgroundColor(textBackgroundColor)"
     >
       @if (editMode) {
       <es-color-picker

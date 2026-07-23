@@ -76,6 +76,7 @@ import {
     TemplateSlot,
 } from '../../../main/navigation/main-nav.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ThemeService } from '../../../services/theme.service';
 import {
     SearchEvent,
     SearchFieldService,
@@ -235,6 +236,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
+    private themeService = inject(ThemeService);
 
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
@@ -2516,6 +2518,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return false;
         }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
+    }
+
+    /**
+     * Resolves the background color to paint for a swimlane. In dark mode a bright custom color is
+     * adapted to a dark surface (so the theme's light text stays readable); already-dark colors
+     * and light mode are left as configured.
+     *
+     * @param color
+     */
+    swimlaneBackgroundColor(color: string): string {
+        return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
     }
 
     /**

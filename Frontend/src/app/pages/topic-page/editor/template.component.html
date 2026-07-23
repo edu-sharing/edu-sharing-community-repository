@@ -348,7 +348,7 @@
                 swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
               swimlane.type !== ACCORDION_TYPE &&
               swimlane.backgroundColor
-                ? swimlane.backgroundColor
+                ? swimlaneBackgroundColor(swimlane.backgroundColor)
                 : null
             "
           >
@@ -363,7 +363,7 @@
                   swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
                 swimlane.type === ACCORDION_TYPE &&
                 swimlane.backgroundColor
-                  ? swimlane.backgroundColor
+                  ? swimlaneBackgroundColor(swimlane.backgroundColor)
                   : null
               "
             >

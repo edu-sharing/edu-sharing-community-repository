@@ -36,6 +36,8 @@
     --textMain: #383838;
     --textWhite: #fff;
     --textBlack: #000;
+    // (light) text for a dark / brightly-colored surface
+    --textOnDarkSurface: var(--light-primary-text);
     --borderGray: #888;
     --borderLight: #eee;
     --borderDark: #333;
@@ -165,6 +167,8 @@ body.isDarkTheme {
     --textMain: #e6e6e6;
     --textWhite: #000;
     --textBlack: #fff;
+    // keep light on dark surfaces (see :root); --textMain is light in dark mode
+    --textOnDarkSurface: var(--textMain);
     --textLight: #cfcfcf;
     --textMediumLight: #c7c7c7;
     --borderGray: #c7c7c7;

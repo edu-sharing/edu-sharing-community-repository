@@ -1,10 +1,11 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { argbFromHex, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
+import { argbFromHex, Hct, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
 import { HueValue, MaterialCssVarsService } from 'angular-material-css-vars';
 import { ConfigService, ConfigThemeColor, ConfigThemeColors } from 'ngx-edu-sharing-api';
 import {
     AccessibilityService,
+    ColorHelper,
     DarkModeSetting,
     EDU_SHARING_UI_CONFIG,
     EduSharingUiConfiguration,
@@ -20,6 +21,8 @@ export enum Variable {
 
 /** HCT tone used to lift light brand colors onto dark surfaces (matches the default dark primary). */
 const DARK_TONE = 80;
+/** HCT tone for adapting a custom (bright) surface color to dark mode: a dark tint, hue kept. */
+const DARK_SURFACE_TONE = 30;
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
     private materialCssVarsService = inject(MaterialCssVarsService);
@@ -170,6 +173,46 @@ export class ThemeService {
             // non-hex / unparseable config value: leave untouched
             return hex;
         }
+    }
+
+    /**
+     * Adapts an arbitrary custom background color for use as a surface in dark mode. Colors that
+     * are brighter than {@link DARK_SURFACE_TONE} are pulled down to that tone (keeping hue and
+     * chroma) so they read as a dark surface with the theme's (light) text; colors that are
+     * already dark are returned unchanged, since they already work on the dark theme (with the
+     * bright text applied by `.bright-color`). Non-hex inputs (e.g. `rgb(...)`) are normalized to
+     * hex first; values that cannot be parsed (e.g. named colors) are returned untouched.
+     *
+     * @param color the configured background color (hex, rgb(), …)
+     */
+    toDarkSurfaceColor(color: string): string {
+        const hex = ThemeService.toHex(color);
+        if (!hex) {
+            return color;
+        }
+        try {
+            const hct = Hct.fromInt(argbFromHex(hex));
+            if (hct.tone <= DARK_SURFACE_TONE) {
+                // already dark enough to serve as a dark-mode surface
+                return color;
+            }
+            hct.tone = DARK_SURFACE_TONE;
+            return hexFromArgb(hct.toInt());
+        } catch {
+            return color;
+        }
+    }
+
+    /**
+     * Normalizes a CSS color to a `#rrggbb` hex string, or returns null when it cannot be parsed
+     * (handles `#rrggbb` and `rgb(...)`; named colors and other formats yield null).
+     */
+    private static toHex(color: string): string | null {
+        if (!color) {
+            return null;
+        }
+        const rgb = ColorHelper.cssColorToRgb(color.trim());
+        return rgb ? ColorHelper.rgbToHex(rgb) : null;
     }
 
     private applyDefaultColors(isDark: boolean) {

@@ -23,6 +23,7 @@ import {
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { ThemeService } from '../../../../services/theme.service';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
@@ -62,6 +63,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     private globalWidgetConfigService = inject(GlobalWidgetConfigService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private themeService = inject(ThemeService);
 
     // CONSTANTS
     private readonly DEFAULT_DESCRIPTION: string = '';
@@ -442,6 +444,17 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             return false;
         }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
+    }
+
+    /**
+     * Resolves the header text background color to paint. In dark mode a bright custom color is
+     * adapted to a dark surface (so the light text stays readable); already-dark colors and light
+     * mode are left as configured.
+     *
+     * @param color
+     */
+    headerBackgroundColor(color: string): string {
+        return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
     }
 
     protected readonly ROUTER_PREFIX: string = UIConstants.ROUTER_PREFIX;

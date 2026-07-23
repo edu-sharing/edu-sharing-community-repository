@@ -338,7 +338,8 @@ es-side-menu-wrapper {
                 position: relative;
 
                 &.bright-color {
-                    color: topicPageVars.$on-primary;
+                    // light text for the dark swimlane surface
+                    color: var(--textOnDarkSurface);
 
                     ::ng-deep {
                         .text-content,
@@ -348,11 +349,11 @@ es-side-menu-wrapper {
                         .mat-mdc-input-element::placeholder,
                         .mdc-label,
                         .mat-heading-4 {
-                            color: topicPageVars.$on-primary;
+                            color: var(--textOnDarkSurface);
                         }
 
                         .mat-mdc-input-element {
-                            caret-color: topicPageVars.$on-primary;
+                            caret-color: var(--textOnDarkSurface);
                         }
                     }
                 }

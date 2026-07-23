@@ -22,7 +22,8 @@
         gap: 16px;
 
         &.bright-color {
-            color: topicPageVars.$on-primary;
+            // light text for the dark header surface
+            color: var(--textOnDarkSurface);
 
             ::ng-deep {
                 .topic-header-title,
@@ -35,7 +36,7 @@
                 .mat-mdc-form-field.mat-focused .mdc-floating-label,
                 .mat-mdc-input-element::placeholder,
                 .color-picker-button .mdc-button__label {
-                    color: topicPageVars.$on-primary;
+                    color: var(--textOnDarkSurface);
                 }
 
                 .show-more-btn {
@@ -43,7 +44,7 @@
                 }
 
                 .mat-mdc-input-element {
-                    caret-color: topicPageVars.$on-primary;
+                    caret-color: var(--textOnDarkSurface);
                 }
             }
         }
