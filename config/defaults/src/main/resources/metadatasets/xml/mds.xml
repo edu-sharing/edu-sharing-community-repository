@@ -1881,7 +1881,8 @@
         ],
         "must_not": [
         {"match":{"type":"ccm:notify"}},
-        {"match":{"aspects":"ccm:collection_io_reference"}}
+        {"match":{"aspects":"ccm:collection_io_reference"}},
+        {"match":{"aspects":"ccm:page_variant"}}
         ],
         "minimum_should_match": 1
         }}
