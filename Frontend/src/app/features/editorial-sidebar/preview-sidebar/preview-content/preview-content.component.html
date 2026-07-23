@@ -81,7 +81,13 @@
       <i esIcon="arrow_back"></i>
       <span>{{ 'EDITORIAL.SIDEBAR.PREVIOUS' | translate }}</span>
     </button>
-    <a mat-stroked-button [routerLink]="allDetailsLink" class="all-details-link" color="primary">
+    <a
+      mat-stroked-button
+      [routerLink]="allDetailsLink"
+      [queryParams]="allDetailsParams"
+      class="all-details-link"
+      color="primary"
+    >
       <span>{{ 'ALL_DETAILS' | translate }}</span>
     </a>
     <button
