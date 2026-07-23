@@ -14,7 +14,6 @@ export const DEFAULT_PAGE_CONFIG_PROP: string = 'ccm:page_config';
 export const DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP: string =
     RestConstants.CCM_PROP_PAGE_CONFIG_PROPAGATE_REF;
 export const DEFAULT_PAGE_CONFIG_REF_PROP: string = RestConstants.CCM_PROP_PAGE_CONFIG_REF;
-export const DEFAULT_PAGE_TEMPLATE_ID: string = '-default_template-';
 export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
 export const DEFAULT_PAGE_VARIANT_GLOBAL_PROP: string = 'virtual:page_variant_global';

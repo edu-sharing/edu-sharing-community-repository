@@ -38,7 +38,6 @@ import {
     NodeEntries,
     ParentEntries,
     RestConstants as ApiRestConstants,
-    SearchService,
 } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
@@ -103,7 +102,6 @@ import {
     DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
     DEFAULT_PAGE_CONFIG_REF_PROP,
     DEFAULT_PAGE_NAME_PREFIX,
-    DEFAULT_PAGE_TEMPLATE_ID,
     DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
@@ -2333,15 +2331,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            // a "real" template source is any template except the default placeholder
+            // any template source is a "real" template (the default placeholder no longer exists)
             const isRealTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
-                retrieveNodeId(this.createVariantOrTemplateSelectedNode) !==
-                    DEFAULT_PAGE_TEMPLATE_ID;
-            // the default placeholder: template ref must be set to the new node's own ID after creation
-            const isDefaultTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
-                !isRealTemplateSource;
+                this.createVariantOrTemplateCopyOption === CopyOption.Template;
             if (isRealTemplateSource) {
                 // inherit template version from A and append the default own_counter to
                 // form the compound "{parent_sync}:{own_counter}" format used by non-root
@@ -2401,15 +2393,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // for the default template placeholder, set the template ref to the new node's own ID
-            if (isDefaultTemplateSource) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                        prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
-                    );
-            }
             // workaround: copy profiling properties separately to avoid crashes
             const updatedTemplateNode = await this.copyProfilingProperties(
                 this.createVariantOrTemplateSelectedNode,
@@ -2805,7 +2788,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         const templateRef: string =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
-        if (!templateRef || convertNodeRefIntoNodeId(templateRef) === DEFAULT_PAGE_TEMPLATE_ID) {
+        if (!templateRef) {
             this.templateVariantNode.set(null);
             return;
         }
