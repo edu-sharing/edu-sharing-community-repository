@@ -341,7 +341,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
-            throws DuplicateNodeException, Throwable {
+            throws Throwable {
         String finalId = mapNodeId(originalNodeId, sourceRepositoryId);
 
         /*
@@ -417,7 +417,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
-            throws DuplicateNodeException, Throwable {
+            throws Throwable {
         originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
         return addToCollection(collectionId, originalNodeId, allowDuplicate);
     }
@@ -438,33 +438,29 @@ public class CollectionServiceImpl implements CollectionService {
         final String fcurrentUsername = currentUsername;
 
         if (fcurrentUsername != null) {
+            String parentIdLocal;
+            if (parentId == null) {
+                collection.setLevel0(true);
+                parentIdLocal = getHomePath();
+            }else {
+                parentIdLocal = parentId;
+            }
+
             Map<String, Object> props = asProps(collection);
-            return AuthenticationUtil.runAsSystem(new RunAsWork<Collection>() {
-
-                @Override
-                public Collection doWork() throws Exception {
-                    String parentIdLocal = parentId;
-                    if (parentIdLocal == null) {
-
-                        collection.setLevel0(true);
-
-                        parentIdLocal = getHomePath();
-                    }
-
-                    try {
-                        new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
-                    } catch (Throwable e) {
-                        throw new Exception(e);
-                    }
-
-                    String collectionId = client.createNode(parentIdLocal, CCConstants.CCM_TYPE_MAP, props);
-                    client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
-                    client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
-
-                    client.setOwner(collectionId, fcurrentUsername);
-                    collection.setNodeId(collectionId);
-                    return collection;
+            return AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
+                } catch (Throwable e) {
+                    throw new Exception(e);
                 }
+
+                String collectionId = client.createNode(parentIdLocal, CCConstants.CCM_TYPE_MAP, props);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+                client.setOwner(collectionId, fcurrentUsername);
+                collection.setNodeId(collectionId);
+                return collection;
             });
         } else {
             throw new Exception("not authenticated");
