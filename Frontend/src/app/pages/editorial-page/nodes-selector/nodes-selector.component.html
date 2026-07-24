@@ -190,7 +190,7 @@
       #collectionsWrapperRef
       [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
       [singleSelect]="singleSelect()"
-      [ctrlClickBehavior]="'emit'"
+      [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
       [columns]="
         collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid
           ? collectionsGridColumns
