@@ -99,26 +99,36 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             Math.min(this.maxWidthPx, window.innerWidth * this.maxWidth),
         );
         this.renderer.setAttribute(this.resizer, 'aria-valuemax', String(calculatedMax));
+        // prevent the browser from treating a touch-drag on the handle as a scroll/zoom gesture,
+        // so pointermove events keep firing during a touch resize
+        this.renderer.setStyle(this.resizer, 'touch-action', 'none');
         this.renderer.insertBefore(
             this.el.nativeElement,
             this.resizer,
             this.el.nativeElement.firstChild,
         );
 
-        this.resizer.addEventListener('mousedown', this.startResize);
-        document.addEventListener('mousemove', this.onMouseMove);
-        document.addEventListener('mouseup', this.stopResize);
+        // Pointer events unify mouse, touch and pen — so resizing works on touch devices too.
+        // startResize captures the pointer on the handle (setPointerCapture), so all move/up
+        // events are delivered to the resizer even when the cursor/finger leaves it — no need
+        // for document-level listeners.
+        this.resizer.addEventListener('pointerdown', this.startResize);
+        this.resizer.addEventListener('pointermove', this.onPointerMove);
+        this.resizer.addEventListener('pointerup', this.stopResize);
+        this.resizer.addEventListener('pointercancel', this.stopResize);
         this.resizer.addEventListener('dblclick', this.resetToDefault);
         this.resizer.addEventListener('keydown', this.onKeyDown);
     }
 
-    private startResize = (event: MouseEvent) => {
+    private startResize = (event: PointerEvent) => {
         this.dragging = true;
+        // route all further pointer events to the handle until release (also on touch)
+        this.resizer.setPointerCapture?.(event.pointerId);
         event.preventDefault();
         event.stopPropagation();
     };
 
-    private onMouseMove = (event: MouseEvent) => {
+    private onPointerMove = (event: PointerEvent) => {
         if (!this.dragging) return;
 
         const containerWidth = window.innerWidth;
