@@ -188,7 +188,7 @@ export class CollectionsPageComponent implements OnDestroy {
                 this.editorialSidebarService.sidebarOpened,
             ),
         ];
-        this.sidebarOption[0].onlyDesktop = true;
+        //this.sidebarOption[0].onlyDesktop = true;
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),
