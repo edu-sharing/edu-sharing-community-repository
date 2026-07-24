@@ -149,6 +149,38 @@ mat-cell {
 .dropdown-dummy {
     position: fixed;
 }
+// primary cell wrapper: transparent to layout normally; with a sub title it stacks the two
+// lines and fills the cell (so a click anywhere selects, not just on the title text).
+.cell-primary-content {
+    display: contents;
+    &.has-sub-title {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        align-self: stretch;
+        gap: 4px;
+        padding: 8px 0;
+        width: 100%;
+        min-width: 0;
+        cursor: pointer;
+        // drop the tall single-line padding so the two lines stack compactly
+        ::ng-deep es-list-base {
+            padding: 0;
+            width: auto;
+            max-width: 100%;
+        }
+    }
+}
+.cell-sub-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    color: var(--textLight);
+    font-size: 11px;
+    line-height: 1.2;
+}
 .childobjects {
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 15px;

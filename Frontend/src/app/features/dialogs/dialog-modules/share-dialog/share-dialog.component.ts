@@ -464,23 +464,21 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 this.nodeApiLegacy
                     .getNodeMetadata(this._nodes[0].ref.id, [RestConstants.ALL])
                     .subscribe((data) => {
-                        let authority = data.node.properties[RestConstants.CM_CREATOR][0];
-                        let user = data.node.createdBy;
-
-                        if (data.node.properties[RestConstants.CM_OWNER]) {
-                            authority = data.node.properties[RestConstants.CM_OWNER][0];
-                            user = data.node.owner;
+                        // prefer the owner, fall back to the creator
+                        const authority =
+                            this.nodeHelperService.getNodeAuthority(
+                                data.node,
+                                RestConstants.CM_OWNER,
+                            ) ??
+                            this.nodeHelperService.getNodeAuthority(
+                                data.node,
+                                RestConstants.CM_CREATOR,
+                            );
+                        if (!authority) {
+                            return;
                         }
-                        this.owner = {
-                            authority: {
-                                authorityName: authority,
-                                authorityType: 'USER',
-                            },
-                            user: user,
-                            permissions: ['Owner'],
-                        };
-                        this.owner.user = user;
-                        this.iam.getUser(authority).subscribe(
+                        this.owner = { ...authority, permissions: ['Owner'] };
+                        this.iam.getUser(authority.authority.authorityName).subscribe(
                             (apiUser) => {
                                 this.owner.user = apiUser.person.profile as any;
                                 // force a refresh of the data for ui update

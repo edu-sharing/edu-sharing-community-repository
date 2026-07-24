@@ -1,7 +1,7 @@
 import { Directive, Input, Type } from '@angular/core';
 import { Group, Node, Person, ProposalNode, Statistics, Submission } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
-import { ListItem } from '../types/list-item';
+import { BaseListItem, ListItem } from '../types/list-item';
 
 @Directive()
 export class ListWidget {
@@ -17,13 +17,13 @@ export class ListWidget {
     >(null); // node (or group/user)
 
     @Input()
-    get item(): ListItem {
+    get item(): BaseListItem {
         return this.itemSubject.value;
     }
-    set item(value: ListItem) {
+    set item(value: BaseListItem) {
         this.itemSubject.next(value);
     }
-    protected readonly itemSubject = new BehaviorSubject<ListItem>(null);
+    protected readonly itemSubject = new BehaviorSubject<BaseListItem>(null);
 
     /**
      * Provide a label for non-obvious fields that describes the field the given value belongs to.

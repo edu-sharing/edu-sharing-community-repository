@@ -36,7 +36,7 @@ import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
 import { BorderBoxObserverDirective } from '../../directives/border-box-observer.directive';
-import { ListItem } from '../../types/list-item';
+import { BaseListItem, ListItem } from '../../types/list-item';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { Target } from '../../types/option-item';
@@ -384,6 +384,13 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true' ||
             this.nodeHelperService.isNodeRevoked(node)
         );
+    }
+
+    /**
+     * es-user-avatar user for a sub-title row that points at a person property (null otherwise).
+     */
+    authorForRow(node: T, item: BaseListItem): any {
+        return item ? this.nodeHelperService.getNodeAuthority(node as Node, item.name) : null;
     }
 
     selectSortChange(sort: Sort) {

@@ -7,6 +7,7 @@ import {
     ConfigService,
     NetworkService,
     Node,
+    Person,
     ProposalNode,
     RestConstants,
     ROOT,
@@ -401,6 +402,27 @@ export class NodeHelperService {
      */
     isNodeRevoked(node: Node) {
         return node?.aspects?.includes(RestConstants.CCM_ASPECT_REVOKED);
+    }
+
+    /**
+     * es-user-avatar-ready authority object for a node's person property (cm:creator/cm:modifier/
+     * cm:owner); null when that person is not set on the node.
+     */
+    getNodeAuthority(
+        node: Node,
+        property: string,
+    ): { authority: { authorityName: string; authorityType: 'USER' }; user: Person } | null {
+        const userByProperty: { [property: string]: Person } = {
+            'cm:creator': node?.createdBy,
+            'cm:modifier': node?.modifiedBy,
+            'cm:owner': node?.owner,
+        };
+        const user = userByProperty[property];
+        const authorityName = node?.properties?.[property]?.[0];
+        if (!user || !authorityName) {
+            return null;
+        }
+        return { authority: { authorityName, authorityType: 'USER' }, user };
     }
 
     /**
