@@ -8,7 +8,12 @@
 <es-edge-toggle
   [side]="'start'"
   [open]="filterBarOpen()"
-  [visible]="!isLoading() && filtersAvailable() && (mainComponent$ | async) === null"
+  [visible]="
+    !isLoading() &&
+    filtersAvailable() &&
+    (mainComponent$ | async) === null &&
+    (isMobile$ | async) === false
+  "
   [drawer]="leftSidenav()"
   [labelOpen]="'EDITORIAL.FILTER.OPEN'"
   [labelClose]="'EDITORIAL.FILTER.CLOSE'"

@@ -27,6 +27,12 @@
     }
 }
 
+// The edge-toggle tabs render in the body-level CDK overlay container, so a fullscreen editorial
+// sidebar (a component overlay outside that container) can't cover them via z-index.
+body:has(es-editorial-sidebar.fullscreen) .es-edge-toggle-pane {
+    display: none;
+}
+
 .cdk-visually-hidden {
     margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers
 }
