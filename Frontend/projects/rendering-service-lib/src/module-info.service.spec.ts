@@ -40,4 +40,37 @@ describe('ModuleInfoService', () => {
         expect(config.urlModuleConfig?.embedding).not.toBe(UrlEmbeddings.LINK);
         expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.SERLO);
     });
+
+    function vimeoNode(url: string): Node {
+        return {
+            properties: {
+                'ccm:wwwurl': [url],
+            },
+        } as unknown as Node;
+    }
+
+    it('extracts the vimeo id from a plain vimeo.com/<id> url', () => {
+        const config = service.getFrontendModuleSetting(vimeoNode('https://vimeo.com/12345'));
+
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.VIMEO);
+        expect(config.urlModuleConfig?.externalId).toBe('12345');
+    });
+
+    it('extracts id and query-param privacy hash from a player.vimeo.com url', () => {
+        const config = service.getFrontendModuleSetting(
+            vimeoNode('https://player.vimeo.com/video/12345?h=abcdef'),
+        );
+
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.VIMEO);
+        expect(config.urlModuleConfig?.externalId).toBe('12345?h=abcdef');
+    });
+
+    it('extracts id and path-form privacy hash from a vimeo.com/<id>/<token> url', () => {
+        const config = service.getFrontendModuleSetting(
+            vimeoNode('https://vimeo.com/12345/abcdef'),
+        );
+
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.VIMEO);
+        expect(config.urlModuleConfig?.externalId).toBe('12345?h=abcdef');
+    });
 });

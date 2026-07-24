@@ -154,7 +154,12 @@ export class ModuleInfoService {
                 const urlObject = new URL(url);
                 const segments = urlObject.pathname.split('/').filter(Boolean);
                 let externalId = segments[segments.length - 1] ?? '';
-                const h = urlObject.searchParams.get('h');
+                let h = urlObject.searchParams.get('h');
+                // path-form privacy hash for unlisted videos: vimeo.com/<videoId>/<hashToken>
+                if (segments[0] !== 'video' && segments.length > 1) {
+                    externalId = segments[0];
+                    h = segments[1];
+                }
                 if (h !== null) {
                     externalId += `?h=${h}`;
                 }
