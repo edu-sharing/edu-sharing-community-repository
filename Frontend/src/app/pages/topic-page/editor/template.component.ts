@@ -443,8 +443,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             (!this.initialLoadSuccessfully() || this.requestInProgress()),
     );
     anchorTrigger: number = 1;
-    @HostBinding('style.--anchor-item-bg-color') anchorItemColor: string;
+    anchorItemColor: string;
     initialAnchorItemColor: string;
+
+    @HostBinding('style.--anchor-item-bg-color')
+    get anchorItemBackgroundColor(): string | null {
+        if (!this.anchorItemColor) {
+            return null;
+        }
+        return this.themeService.isDarkMode()
+            ? this.themeService.toDarkSurfaceColor(this.anchorItemColor)
+            : this.anchorItemColor;
+    }
     swimlanes: Swimlane[] = [];
     swimlaneToEditForm: UntypedFormGroup;
     swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
@@ -2508,6 +2518,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     swimlaneBackgroundColor(color: string): string {
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
+    }
+
+    /**
+     * True when a dark custom anchor-item color is set, so the item text needs to be light. The
+     * check uses the original color (not the dark-adapted one): in dark mode a light color keeps
+     * the theme's already-light `$on-surface` text, while a dark color flips to `--textOnDarkSurface`.
+     */
+    isAnchorItemColorDark(): boolean {
+        return (
+            !!this.anchorItemColor &&
+            ColorHelper.getPreferredColor(this.anchorItemColor) === PreferredColor.Black
+        );
     }
 
     /**

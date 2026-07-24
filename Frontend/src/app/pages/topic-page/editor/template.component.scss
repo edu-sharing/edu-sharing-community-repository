@@ -798,6 +798,11 @@ es-side-menu-wrapper {
     }
 }
 
+// light text for a dark anchor-item surface
+.anchor-container.bright-color .item-text {
+    color: var(--textOnDarkSurface) !important;
+}
+
 // GENERAL OVERWRITES / FIXES
 // this is necessary for accordions to work properly
 es-editable-text {

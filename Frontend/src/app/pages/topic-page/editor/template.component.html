@@ -254,7 +254,11 @@
         >
           <!-- ANCHOR MENU -->
           @if (anchorSwimlanes.length > 0) {
-          <div class="anchor-container" [class.edit-mode]="editMode()">
+          <div
+            class="anchor-container"
+            [class.edit-mode]="editMode()"
+            [class.bright-color]="isAnchorItemColorDark()"
+          >
             <div class="anchor-menu">
               @for (anchor of anchorSwimlanes; track anchor.id; let i = $index) {
               <div class="anchor-item">
