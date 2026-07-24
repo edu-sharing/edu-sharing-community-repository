@@ -2,14 +2,18 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { BreakpointObserver } from '@angular/cdk/layout';
 import {
     Component,
+    computed,
     effect,
+    ElementRef,
     HostBinding,
     inject,
     OnDestroy,
     OnInit,
     TemplateRef,
     ViewChild,
+    viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, NodeService, Repository, SavedSearchesService } from 'ngx-edu-sharing-api';
@@ -50,7 +54,6 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     private mainNav = inject(MainNavService);
     private navigationScheduler = inject(NavigationScheduler);
     private router = inject(Router);
-    private optionsHelperService = inject(OptionsHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
     private route = inject(ActivatedRoute);
     private nodeService = inject(NodeService);
@@ -80,14 +83,24 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly isMobileScreen = this.getIsMobileScreen();
     private readonly destroyed = new Subject<void>();
 
+    // Always-visible tab ("Lasche") on the left edge that opens/closes the filter panel,
+    // mirroring the editorial sidebar/filter toggle (see es-edge-toggle in the template).
+    readonly filtersSidebar = viewChild('filtersSidebarEl', { read: ElementRef });
+    private readonly filterBarVisibleSig = toSignal(
+        this.searchFieldInternalService.filterBarVisible,
+    );
+    private readonly isMobileSig = toSignal(this.isMobileScreen);
+    /** whether the left filter panel is currently shown as a side panel (not on mobile) */
+    readonly filterBarOpen = computed(() => !!this.filterBarVisibleSig() && !this.isMobileSig());
+
     constructor() {
         this.registerSidebars();
         this.searchPage.init();
-        this.searchPage.sidebarOption.next(
-            this.optionsHelperService.getOptionItemToggleSidebar(
-                this.editorialSidebarService.sidebarOpened,
-            ),
-        );
+    }
+
+    /** open/close the filter panel (mirrors the former actionbar "Filter" toggle) */
+    toggleFilters(): void {
+        this.searchFieldInternalService.filtersButtonClicked.next();
     }
 
     ngOnInit(): void {

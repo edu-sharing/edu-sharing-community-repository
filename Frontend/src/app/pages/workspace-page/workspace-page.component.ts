@@ -122,7 +122,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     private nodeHelper = inject(NodeHelperService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private optionsHelperService = inject(OptionsHelperService);
     private searchField = inject(SearchFieldService);
     private session = inject(SessionStorageService);
     private storage = inject(TemporaryStorageService);
@@ -1091,10 +1090,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
                 this.config.instant('workspaceSharedToMeDefaultAll', false),
             ),
         );
-        const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.editorialSidebarService.sidebarOpened,
-        );
-        this.customOptions.addOptions = [sidebarToggle];
+        this.customOptions.addOptions = [];
     }
 
     private getLastLocationStorageId() {

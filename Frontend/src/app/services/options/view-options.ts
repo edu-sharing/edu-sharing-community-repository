@@ -317,6 +317,7 @@ export function createViewOptions({
         Scope.WorkspaceTree,
         Scope.CollectionsCollection,
         Scope.Search,
+        Scope.Render,
     ];
     showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
     showStatistics.toolpermissionsMode = HideMode.Hide;

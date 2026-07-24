@@ -74,6 +74,8 @@ export class RenderWrapperComponent implements OnChanges {
     @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
     @Output() closeClick = new EventEmitter<void>();
+    /** the currently rendered node, so a host (e.g. render2-page) can drive its editorial sidebar */
+    @Output() nodeChange = new EventEmitter<Node>();
 
     @ViewChild('childobjects') childobjects: ElementRef;
     /**
@@ -188,6 +190,8 @@ export class RenderWrapperComponent implements OnChanges {
         );
         // register currently rendered node for sidebar interactions (incl. download-all btn + postPrepareOptions)
         this.addDownloadAllBtn(data.node);
+        // surface the rendered node so a host can populate its editorial sidebar options
+        this.nodeChange.emit(data.node);
         setTimeout(async () => {
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();

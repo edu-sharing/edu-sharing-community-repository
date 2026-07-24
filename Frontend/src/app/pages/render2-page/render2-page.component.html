@@ -26,6 +26,7 @@
       [childId]="childId()"
       (closeClick)="close()"
       (childIdChange)="setChildId($event)"
+      (nodeChange)="editorialSidebarService.nodes.set($event ? [$event] : null)"
     ></es-render-wrapper-component>
   </mat-sidenav-content>
 </mat-sidenav-container>

@@ -1,0 +1,14 @@
+<ng-template #tab>
+  @if (visible()) {
+  <button
+    class="edge-toggle side-{{ side() }}"
+    [class.open]="open()"
+    type="button"
+    (click)="toggled.emit()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="(open() ? labelClose() : labelOpen()) | translate"
+  >
+    <i [esIcon]="icon()" [aria]="true"></i>
+  </button>
+  }
+</ng-template>

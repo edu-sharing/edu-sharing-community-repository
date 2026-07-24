@@ -12,6 +12,21 @@
     box-sizing: border-box;
 }
 
+// CDK overlay pane holding an es-edge-toggle tab. It lives in the body-level overlay container, so
+// this MUST be a global (unscoped) rule — a component style / ::ng-deep can't reach it.
+// GlobalPositionStrategy writes the tab's offset as margin-left/right; animate those so the tab
+// slides together with a transform-based drawer (e.g. mat-sidenav), using Material's drawer timing.
+// The '--static' variant opts out (used when the drawer animates its own size and a ResizeObserver
+// already tracks the edge live, so a transition here would only lag).
+.es-edge-toggle-pane {
+    z-index: 100;
+    transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        margin-right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    &.es-edge-toggle-pane--static {
+        transition: none;
+    }
+}
+
 .cdk-visually-hidden {
     margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers
 }

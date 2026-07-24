@@ -12,8 +12,15 @@
     // Pre-init fallback (before the directive sets an inline width) so there is no width flash
     width: 319px;
     &[hidden] {
-        display: none;
+        // Override the UA stylesheet's `[hidden] { display: none }`: display:none can't be
+        // transitioned, so the panel would snap instead of animate. Keep it displayed but collapse
+        // its width to 0 and clip the content so it animates open/closed.
+        display: block;
+        overflow: hidden;
+        width: 0 !important;
     }
+    // emulate transition behaviour of mat-sidenav containers
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .filter-bar-container {

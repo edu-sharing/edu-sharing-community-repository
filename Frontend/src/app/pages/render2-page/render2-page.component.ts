@@ -1,5 +1,5 @@
 import { Component, inject, Input, OnDestroy, signal, ViewChild } from '@angular/core';
-import { LocalEventsService, OptionsHelperDataService } from 'ngx-edu-sharing-ui';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -28,7 +28,12 @@ import { ConfigurationService } from '../../core-module/rest/services/configurat
         MatSidenavContent,
         EditorialSidebarModule,
     ],
-    providers: [OptionsHelperDataService],
+    // NOTE: do NOT provide OptionsHelperDataService here. Both es-render-wrapper-component and
+    // es-editorial-sidebar use provideReusableOptionsHelperData(), which reuses an ancestor
+    // instance — a page-level provider would make them share one options/selection channel, so the
+    // sidebar's setData() would clobber the render wrapper's actionbar options. Each must own its
+    // instance instead.
+    providers: [],
 })
 export class Render2PageComponent implements OnDestroy {
     private route = inject(ActivatedRoute);

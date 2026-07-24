@@ -19,13 +19,6 @@
         {{ 'CLEAR_FILTERS' | translate }}
       </button>
       }
-      <button
-        class="filter-bar-close-button"
-        mat-icon-button
-        (click)="filterBarIsVisible.setUserValue(false)"
-      >
-        <i esIcon="close" [aria]="true"></i>
-      </button>
     </div>
     <div class="filter-bar-body">
       @if ((showingAllRepositories | async) === false) {

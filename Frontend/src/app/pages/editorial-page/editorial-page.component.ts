@@ -4,6 +4,7 @@ import {
     Component,
     computed,
     effect,
+    ElementRef,
     inject,
     OnDestroy,
     signal,
@@ -12,6 +13,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ConnectedPosition } from '@angular/cdk/overlay';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import {
     Assignment,
     AuthenticationService,
@@ -60,7 +62,6 @@ import {
     NodeEntriesWrapperComponent,
     NodeHelperService,
     OptionItem,
-    OptionItemToggle,
     Scope,
     SearchHelperService,
     ToolpermissionPipe,
@@ -132,6 +133,11 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     editorialBreadcrumbService = inject(EditorialBreadcrumbService);
     private nodeHelperService = inject(NodeHelperService);
     private toolpermissionPipe = inject(ToolpermissionPipe);
+    private loadingScreenService = inject(LoadingScreenService);
+    /** hide the filter toggle tab while the global loading screen covers the app */
+    readonly isLoading = toSignal(this.loadingScreenService.observeIsLoading(), {
+        initialValue: true,
+    });
 
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
@@ -211,7 +217,6 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     >();
     columns = signal<ColumnType>(null);
     selection = signal<SelectionModel<NodeEntriesDataType | null>>(null);
-    private sidebarOptionToggle: OptionItemToggle;
     private pagination$ = new BehaviorSubject<{
         skipCount: number;
         maxItems: number;
@@ -219,6 +224,16 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
 
     readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
     readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
+
+    // Always-visible tab ("Lasche") on the left edge that opens/closes the filter drawer,
+    // mirroring the editorial sidebar's toggle (see es-edge-toggle in the template).
+    readonly leftSidenav = viewChild('leftSidenavEl', { read: ElementRef });
+    private readonly filterBarVisibleSig = toSignal(this.filterBarVisible);
+    private readonly mainComponentSig = toSignal(this.mainComponent$);
+    /** whether the left filter drawer is currently open (same condition as the mat-sidenav) */
+    readonly filterBarOpen = computed(
+        () => !!this.filterBarVisibleSig() && !this.mainComponentSig() && this.filtersAvailable(),
+    );
 
     constructor() {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
@@ -305,9 +320,6 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     }
 
     private prepareOptions() {
-        this.sidebarOptionToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.editorialSidebarService.sidebarOpened,
-        );
         const reject = new OptionItem(
             'EDITORIAL.OPTION.REJECT_SHARE',
             'cancel_schedule_send',
@@ -339,7 +351,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [this.sidebarOptionToggle, reject],
+                addOptions: [reject],
             },
         });
     }

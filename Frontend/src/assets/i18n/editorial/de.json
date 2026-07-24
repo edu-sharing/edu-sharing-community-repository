@@ -7,6 +7,10 @@
     "SUGGESTIONS": {
       "EMPTY": "Bislang keine Elemente mit ausstehenden Vorschlägen"
     },
+    "FILTER": {
+      "OPEN": "Filter öffnen",
+      "CLOSE": "Filter schließen"
+    },
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen...",
       "ASSIGNMENT": "Aufgaben durchsuchen...",
@@ -21,10 +25,13 @@
       "TITLE_COLLECTIONS": "Aktionen & Optionen",
       "TITLE_ACTIVITY": "Aktionen & Optionen",
       "TITLE_SUGGESTIONS": "Aktionen & Optionen",
+      "TITLE_RENDER": "Aktionen & Optionen",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
       "FULLSCREEN": "Vollbild",
       "EXIT_FULLSCREEN": "Vollbild beenden",
+      "OPEN": "Aktionen & Optionen öffnen",
+      "CLOSE": "Aktionen & Optionen schließen",
       "PREVIOUS": "Vorherige",
       "NEXT": "Nächste",
       "SUBMISSION": {

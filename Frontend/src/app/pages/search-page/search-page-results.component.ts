@@ -19,7 +19,6 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItem,
-    OptionItemToggle,
     Scope,
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
@@ -29,14 +28,13 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
-import { distinctUntilChanged, map, skip, switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, skip, switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
-import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 export type SearchFilter = {
     propertyFilters: Values;
@@ -60,7 +58,6 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     private frameEventsService = inject(FrameEventsService);
     private announcer = inject(LiveAnnouncer);
     private translate = inject(TranslateService);
-    private searchFieldInternalService = inject(SearchFieldInternalService);
 
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -103,20 +100,11 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
 
-    /** The "Filter" toggle painted in the toggles-only actionbar. Built in the constructor. */
-    private toggleSearchFilter: OptionItemToggle;
     /**
-     * Options fed to the results actionbars: the shared material options (sidebar toggle,
-     * add-to-collection) with the "Filter" toggle merged in so it renders in `#actionbarToggles`.
+     * Options fed to the results actionbars. The filter panel is now toggled via the left-edge
+     * es-edge-toggle tab (see search-page.component.html), not an actionbar toggle.
      */
-    readonly materialOptions = this.searchPage.getCustomMaterialOptions.pipe(
-        map(
-            (options): CustomOptions => ({
-                ...options,
-                addOptions: [...(options.addOptions ?? []), this.toggleSearchFilter],
-            }),
-        ),
-    );
+    readonly materialOptions = this.searchPage.getCustomMaterialOptions;
 
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
@@ -146,21 +134,6 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             .subscribe((elementsLoadedTranslation) => {
                 void this.announcer.announce(elementsLoadedTranslation);
             });
-
-        const toggleSearchFilter = new OptionItemToggle(
-            { enabled: 'SEARCH.FILTERS', disabled: 'SEARCH.FILTERS' },
-            { enabled: 'filter_list', disabled: 'filter_list' },
-            false,
-            () => this.toggleFilters(),
-        );
-        toggleSearchFilter.scopes = [Scope.Search];
-        toggleSearchFilter.constrains = [];
-        toggleSearchFilter.group = DefaultGroups.Toggles;
-        toggleSearchFilter.elementType = [];
-        toggleSearchFilter.priority = 30;
-        toggleSearchFilter.toggleType = 'primary';
-        toggleSearchFilter.togglePosition = 'before';
-        this.toggleSearchFilter = toggleSearchFilter;
     }
 
     async ngOnInit() {
@@ -185,10 +158,6 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     onClick(event: NodeClickEvent<Node>) {
         this.editorialSidebarService.handleSelect(this.nodeEntriesResults, event, Scope.Search);
         this.results.onClick(event.element);
-    }
-
-    toggleFilters(): void {
-        this.searchFieldInternalService.filtersButtonClicked.next();
     }
 
     ngOnDestroy(): void {

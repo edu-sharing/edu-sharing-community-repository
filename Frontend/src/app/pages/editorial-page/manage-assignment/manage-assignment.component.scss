@@ -5,6 +5,7 @@
     display: block;
     flex: 1;
     min-height: 0;
+    @include mixins.materialScrollbarLight();
     overflow-y: auto;
 }
 

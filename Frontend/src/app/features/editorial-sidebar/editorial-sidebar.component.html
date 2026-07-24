@@ -29,8 +29,15 @@
         [aria]="true"
       ></i>
     </button>
-    } @if (!editorialSidebarService.fullscreenActive()) {
-    <button mat-icon-button (click)="close()">
+    }
+    <!-- On mobile the panel is a full-screen overlay and the edge tab is hidden, so the header
+      carries an explicit close (X). On desktop the tab handles open/close instead. -->
+    @if (!isDesktop()) {
+    <button
+      mat-icon-button
+      (click)="close()"
+      [attr.aria-label]="'EDITORIAL.SIDEBAR.CLOSE' | translate"
+    >
       <i esIcon="close" [aria]="true"></i>
     </button>
     }
@@ -118,3 +125,16 @@
     </ng-template>
   </div>
 </div>
+
+<!-- Always-visible tab ("Lasche") to open/close the sidebar; replaces the former actionbar
+  toggle option and the header close (X) button. -->
+@if (!isModal()) {
+<es-edge-toggle
+  [side]="'end'"
+  [open]="editorialSidebarService.sidebarOpened()"
+  [visible]="
+    !editorialSidebarService.fullscreenActive() && !isLoading() && hasContent() && isDesktop()
+  "
+  (toggled)="editorialSidebarService.sidebarOpened.set(!editorialSidebarService.sidebarOpened())"
+></es-edge-toggle>
+}

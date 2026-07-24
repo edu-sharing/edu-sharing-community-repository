@@ -24,7 +24,7 @@ export function createReuseOptions({
     const sortInto = new OptionItem('OPTIONS.MANAGE_CONTENT', 'layers', (object) =>
         service.editorialSidebarService.showOption({
             option: 'MANAGE_CONTENT',
-            trap: true,
+            trap: false,
             optionConfig: {
                 state: TabType.COLLECTIONS,
                 selection:

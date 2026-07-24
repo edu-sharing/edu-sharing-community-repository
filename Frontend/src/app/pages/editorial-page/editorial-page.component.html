@@ -3,12 +3,23 @@
   {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
 </h1>
 
+<!-- Always-visible tab ("Lasche") on the left edge to open/close the filter drawer,
+  mirroring the editorial sidebar's toggle. -->
+<es-edge-toggle
+  [side]="'start'"
+  [open]="filterBarOpen()"
+  [visible]="!isLoading() && filtersAvailable() && (mainComponent$ | async) === null"
+  [drawer]="leftSidenav()"
+  [labelOpen]="'EDITORIAL.FILTER.OPEN'"
+  [labelClose]="'EDITORIAL.FILTER.CLOSE'"
+  (toggled)="filtersButtonClicked.next()"
+></es-edge-toggle>
 <mat-sidenav-container
   [class.mat-sidenav-container-left-open]="(filterBarVisible | async) && filtersAvailable()"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav
-    #leftSidenav
+    #leftSidenavEl
     [mode]="'side'"
     [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null && filtersAvailable()"
     position="start"
@@ -20,13 +31,6 @@
       <!-- Filter header similar to es-search-page-filters-sidebar -->
       <div class="filter-bar-heading">
         <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
-        <button
-          class="filter-bar-close-button"
-          mat-icon-button
-          (click)="filtersButtonClicked.next()"
-        >
-          <i esIcon="close" [aria]="true"></i>
-        </button>
       </div>
       <div class="filter-bar-body">
         @if (mdsGroup() && (searchValues$ | async) !== null) {
@@ -132,21 +136,7 @@
           </mat-tab>
           }
         </mat-tab-group>
-        } } @if (filtersAvailable()) {
-        <div class="option-area">
-          <div class="options-left">
-            <button
-              mat-stroked-button
-              color="primary"
-              (click)="filtersButtonClicked.next()"
-              [attr.aria-expanded]="filterBarVisible | async"
-            >
-              <i esIcon="filter_list" [aria]="false"></i>
-              {{ 'SEARCH.FILTERS' | translate }}
-            </button>
-          </div>
-        </div>
-        } @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode ===
+        } } @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode ===
         'share' || mode === 'assignment' || mode === 'suggestions' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"

@@ -15,7 +15,6 @@ import {
     ColorHelper,
     LocalEventsService,
     NodeEntriesDisplayType,
-    OptionItemToggle,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -76,7 +75,6 @@ export class CollectionsPageComponent implements OnDestroy {
     private nodeService = inject(RestNodeService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private optionsHelperService = inject(OptionsHelperService);
     private globalCollectionsPageServiceInternal = inject(GlobalCollectionsPageServiceInternal);
     private tempStorage = inject(TemporaryStorageService);
     private optionsService = inject(OptionsHelperDataService);
@@ -122,7 +120,6 @@ export class CollectionsPageComponent implements OnDestroy {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    sidebarOption: OptionItemToggle[];
     collection: Node;
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
@@ -183,12 +180,6 @@ export class CollectionsPageComponent implements OnDestroy {
     hasEditorial = false;
     hasMediacenter = false;
     constructor() {
-        this.sidebarOption = [
-            this.optionsHelperService.getOptionItemToggleSidebar(
-                this.editorialSidebarService.sidebarOpened,
-            ),
-        ];
-        //this.sidebarOption[0].onlyDesktop = true;
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
                 this.connector.isLoggedIn(),

@@ -1,0 +1,44 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+// NOTE: the CDK overlay pane (.es-edge-toggle-pane) is rendered in the body-level
+// .cdk-overlay-container, NOT inside this component's host — so its transition can't live here
+// (not even via ::ng-deep, which still anchors under :host). It is defined globally in
+// src/styles/main.scss instead.
+.edge-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    margin-top: 18px;
+    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+        margin-top: 2px;
+    }
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--backgroundContainerHigh);
+    color: var(--textBlack);
+    cursor: pointer;
+    z-index: 100;
+    i {
+        font-size: 26px;
+    }
+    &:hover {
+        background-color: var(--primaryBackground50);
+    }
+    // peek over the drawer edge on the docked side; peek a little more while open so the tab
+    // sits clearly on the panel's edge
+    &.side-end {
+        margin-right: -15px;
+        &.open {
+            margin-right: -27px;
+        }
+    }
+    &.side-start {
+        margin-left: -15px;
+        &.open {
+            margin-left: -27px;
+        }
+    }
+}

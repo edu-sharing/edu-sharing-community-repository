@@ -35,7 +35,20 @@ whether a tab bar will be shown. The body itself always lives in the same place 
         <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
       </div>
     </mat-sidenav>
-    <es-search-page-filters-sidebar></es-search-page-filters-sidebar>
+    <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter panel,
+      mirroring the editorial sidebar/filter toggle. -->
+    <es-edge-toggle
+      [side]="'start'"
+      [open]="filterBarOpen()"
+      [visible]="(showingAllRepositories | async) === false && (isMobileScreen | async) === false"
+      [drawer]="filtersSidebar()"
+      [measure]="'edge'"
+      [animatePane]="false"
+      [labelOpen]="'SEARCH.OPEN_FILTERS'"
+      [labelClose]="'SEARCH.CLOSE_FILTERS'"
+      (toggled)="toggleFilters()"
+    ></es-edge-toggle>
+    <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>
     <div class="main-content">
       @if (tabBarIsVisible) {
       <nav mat-tab-nav-bar [tabPanel]="tabPanel">
