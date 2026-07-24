@@ -880,6 +880,7 @@
     "ASSIGNMENT_SUBMISSION": "Abgaben",
     "ASSIGNMENT_EDIT": "Aufgabe bearbeiten",
     "ASSIGNMENT_ASSIGN": "Aufgabe zuweisen",
+    "ASSIGNMENT_COPY": "Aufgabe kopieren",
     "ASSIGNMENT_CANCEL": "Aufgabe abbrechen",
     "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
     "ASSIGNMENT_FINISH": "Aufgabe abschließen",
@@ -1126,7 +1127,8 @@
     "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen.",
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
-    "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen."
+    "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
+    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert."
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",

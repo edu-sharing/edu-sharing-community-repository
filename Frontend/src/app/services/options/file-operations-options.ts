@@ -6,7 +6,9 @@ import {
     OptionItem,
     Scope,
 } from 'ngx-edu-sharing-ui';
+import { Assignment } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../core-module/rest/rest-constants';
+import { ToastType } from '../toast';
 import { OptionsContext } from './options-context';
 
 export function createFileOperationsOptions({
@@ -88,5 +90,38 @@ export function createFileOperationsOptions({
     };
     pasteNodes.group = DefaultGroups.FileOperations;
 
-    return [linkMap, cutNodes, copyNodes, pasteNodes];
+    const copyAssignment = new OptionItem('OPTIONS.ASSIGNMENT_COPY', 'content_copy', (object) => {
+        const assignment = service.getObjects(object, data)[0] as Assignment;
+        service.toast.showProgressSpinner();
+        service.assignmentV1Service.copyAssignment({ assignmentId: assignment.ref.id }).subscribe({
+            next: (copy) => {
+                service.toast.show({
+                    type: 'info',
+                    subtype: ToastType.InfoSimple,
+                    message: 'TOAST.ASSIGNMENT_COPY',
+                });
+                service.toast.closeProgressSpinner();
+                service.uiService.goToAssignment(copy, 'edit');
+            },
+            error: (error) => {
+                service.toast.closeProgressSpinner();
+                service.toast.error(error);
+            },
+        });
+    });
+    copyAssignment.elementType = [ElementType.Assignment];
+    copyAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+    copyAssignment.customShowCallback = async (objects) => {
+        const assignment = objects[0] as Assignment;
+        // only the owner/creator of the assignment may copy it
+        return (
+            assignment.type === 'SUBMISSION' &&
+            !!assignment.creator?.authorityName &&
+            assignment.creator.authorityName === service.connector.getCurrentLogin()?.authorityName
+        );
+    };
+    copyAssignment.group = DefaultGroups.FileOperations;
+    copyAssignment.priority = 30;
+
+    return [linkMap, cutNodes, copyNodes, pasteNodes, copyAssignment];
 }
