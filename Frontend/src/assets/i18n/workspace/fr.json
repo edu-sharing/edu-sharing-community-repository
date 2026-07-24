@@ -360,6 +360,7 @@
       "PREVIEW_CHANGE": "Modifier l'image d'aperçu",
       "PREVIEW_UPLOAD": "Téléverser une image",
       "PREVIEW_FROM_SEARCH": "Choisir une image depuis la recherche",
+      "PREVIEW_DELETE": "Supprimer l'image",
       "PREVIEW_PASTE_CLIPBOARD": "Coller depuis le presse-papiers",
       "PREVIEW_CLIPBOARD_NO_IMAGE": "Le presse-papiers ne contient pas d'image.",
       "PREVIEW_CLIPBOARD_ERROR": "Le presse-papiers n'a pas pu être lu."

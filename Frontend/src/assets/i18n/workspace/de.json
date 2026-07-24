@@ -440,6 +440,7 @@
       "PREVIEW_CHANGE": "Vorschaubild ändern",
       "PREVIEW_UPLOAD": "Bild hochladen",
       "PREVIEW_FROM_SEARCH": "Bild aus Suche wählen",
+      "PREVIEW_DELETE": "Bild löschen",
       "PREVIEW_PASTE_CLIPBOARD": "Aus Zwischenablage einfügen",
       "PREVIEW_CLIPBOARD_NO_IMAGE": "Die Zwischenablage enthält kein Bild.",
       "PREVIEW_CLIPBOARD_ERROR": "Die Zwischenablage konnte nicht gelesen werden."

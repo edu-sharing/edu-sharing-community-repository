@@ -123,6 +123,7 @@ import { MdsEditorWidgetMultivalueButtonsComponent } from './mds-editor/widgets/
         AiPreviewImagesOverlayComponent,
         LicenseDetailsComponent,
         LicenseAiPipe,
+        MdsEditorWidgetPreviewComponent,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetCollectionsComponent,
         MdsEditorWidgetRelationsComponent,

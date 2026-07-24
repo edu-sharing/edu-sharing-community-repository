@@ -402,6 +402,7 @@
       "PREVIEW_CHANGE": "Change preview image",
       "PREVIEW_UPLOAD": "Upload image",
       "PREVIEW_FROM_SEARCH": "Select image from search",
+      "PREVIEW_DELETE": "Delete image",
       "PREVIEW_PASTE_CLIPBOARD": "Paste from clipboard",
       "PREVIEW_CLIPBOARD_NO_IMAGE": "The clipboard does not contain an image.",
       "PREVIEW_CLIPBOARD_ERROR": "The clipboard could not be read."

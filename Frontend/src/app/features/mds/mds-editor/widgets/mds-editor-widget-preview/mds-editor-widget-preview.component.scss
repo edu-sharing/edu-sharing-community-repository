@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
 // fix Firefox does not center component properly
 :host {
@@ -94,6 +95,75 @@ $height: 175px;
         left: 50%;
         > button {
             margin: 0 7px;
+        }
+    }
+}
+
+// standalone layout: fill the host's box edge-to-edge (full-width image + blurred backdrop),
+// e.g. when embedded in the collection create/edit card. The host defines the available height.
+:host.standalone {
+    width: 100%;
+    height: 100%;
+
+    .preview-wrapper {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+    }
+
+    .image-container {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+
+        es-preview-image,
+        .card-image-backdrop,
+        .delete-overlay {
+            width: 100%;
+            height: 100%;
+        }
+
+        // the backdrop blends its (0.7) blurred image over the card, not the widget's black box
+        .card-image-backdrop {
+            background-color: transparent;
+        }
+
+        // foreground image (direct child only): contained and centered, so the blurred backdrop
+        // shows through on the sides. Must NOT match the backdrop's <img> (see below).
+        > img {
+            width: auto;
+            max-width: 100%;
+            height: 100%;
+            &.local-file {
+                // keep the server-predicted 4:3 crop
+                width: auto;
+                aspect-ratio: 4 / 3;
+            }
+        }
+
+        // blurred backdrop image: oversized so the blur has no hard edges (matches the former
+        // collection `.blurred-image`). Fills the full width behind the centered foreground image.
+        .card-image-backdrop img {
+            @include blurImage(25px);
+
+            // lower the blur radius on short viewports (mirrors the former collection media query)
+            @media screen and (max-height: vars.$mobileHeight + vars.$mobileStage * 2) {
+                filter: blur(8px);
+            }
+        }
+
+        > .button-group {
+            left: auto;
+            right: 16px;
+            bottom: 16px;
+            margin-left: 0;
+
+            // drop the horizontal button spacing and use a slightly smaller fab in the card
+            > button {
+                margin: 0;
+                width: 48px;
+                height: 48px;
+            }
         }
     }
 }

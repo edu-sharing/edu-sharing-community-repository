@@ -356,6 +356,7 @@
       "PREVIEW_CHANGE": "Modifica l'immagine di anteprima",
       "PREVIEW_UPLOAD": "Carica immagine",
       "PREVIEW_FROM_SEARCH": "Scegli immagine dalla ricerca",
+      "PREVIEW_DELETE": "Elimina immagine",
       "PREVIEW_PASTE_CLIPBOARD": "Incolla dagli appunti",
       "PREVIEW_CLIPBOARD_NO_IMAGE": "Gli appunti non contengono immagini.",
       "PREVIEW_CLIPBOARD_ERROR": "Impossibile leggere gli appunti."
