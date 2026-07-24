@@ -117,7 +117,7 @@
       @if (searchCompleted() && (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)) {
       <es-node-entries-wrapper
         #searchWrapperRef
-        [checkbox]="!singleSelect()"
+        [singleSelect]="singleSelect()"
         [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
         [dragDrop]="{
           dragAllowed: selectionMode() !== 'target',
@@ -188,7 +188,8 @@
     !dataSourceCollectionsFlat.isEmpty() || dataSourceCollectionsFlat.isLoading ) {
     <es-node-entries-wrapper
       #collectionsWrapperRef
-      [checkbox]="!singleSelect() && collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
+      [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
+      [singleSelect]="singleSelect()"
       [ctrlClickBehavior]="'emit'"
       [columns]="
         collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid

@@ -129,6 +129,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() columns: ColumnType;
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
+    /** restrict selection to a single node; the checkbox then behaves like a radio */
+    @Input() singleSelect = false;
     /**
      * emits when the user re-configures the columns
      * should be used in order to save the new configuration
@@ -291,6 +293,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
+        this.entriesService.singleSelect = this.singleSelect;
         this.entriesService.displayType = this.displayType;
         if (changes.paginationStrategy) {
             this.entriesService.paginationStrategy = this.paginationStrategy;
