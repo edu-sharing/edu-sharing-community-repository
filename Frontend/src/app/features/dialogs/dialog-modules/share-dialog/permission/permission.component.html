@@ -168,30 +168,36 @@
           [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
         >
           @if (_permission.permissions.indexOf('Owner') > -1) {
-
-          <i class="material-icons align">home</i>
-          <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
-
+          <ng-container>
+            <i class="material-icons align">home</i>
+            <span>{{ 'WORKSPACE.SHARE.GROUP_OWNER' | translate }}</span>
+          </ng-container>
           } @if (_permission.permissions.indexOf('Consumer') > -1) {
-
-          <i class="material-icons align">remove_red_eye</i>
-          <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
-          @if (isEditable === true && !isEveryone) {
-          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
-          } } @if (_permission.permissions.indexOf('Collaborator') > -1) {
-
-          <i class="material-icons align">edit</i>
-          <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
-          @if (isEditable === true && !isEveryone) {
-          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
-          } } @if (_permission.permissions.indexOf('Coordinator') > -1 ||
+          <ng-container>
+            <i class="material-icons align">remove_red_eye</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
+            @if (isEditable === true && !isEveryone) {
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+            }
+          </ng-container>
+          } @if (_permission.permissions.indexOf('Collaborator') > -1) {
+          <ng-container>
+            <i class="material-icons align">edit</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
+            @if (isEditable === true && !isEveryone) {
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+            }
+          </ng-container>
+          } @if (_permission.permissions.indexOf('Coordinator') > -1 ||
           _permission.permissions.indexOf('All') > -1) {
-
-          <i class="material-icons align">work</i>
-          <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
-          @if (isEditable === true && !isEveryone) {
-          <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
-          } }
+          <ng-container>
+            <i class="material-icons align">work</i>
+            <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
+            @if (isEditable === true && !isEveryone) {
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
+            }
+          </ng-container>
+          }
         </button>
 
         @if (_permission.permissions.length === 0) {
