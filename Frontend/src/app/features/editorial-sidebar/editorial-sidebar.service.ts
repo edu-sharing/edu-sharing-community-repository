@@ -181,6 +181,11 @@ export class EditorialSidebarService {
 
     /**
      * Programmatically select one or more nodes and surface their options in the sidebar.
+     *
+     * The nodes are added to the primary list as virtual nodes before selecting, so the list
+     * itself reflects the selection. This matters for lists that do not otherwise contain the
+     * nodes (e.g. the search results grid only holds nodes matching the current query, so a
+     * freshly uploaded node would be selected in the model but invisible in the list)
      */
     selectNode(nodes: Node | Node[]) {
         const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
@@ -188,7 +193,7 @@ export class EditorialSidebarService {
             return;
         }
         const nodeList = Array.isArray(nodes) ? nodes : [nodes];
-        instance.selection.setSelection(...nodeList);
+        instance.list?.addVirtualNodes(nodeList, { select: true });
         this.nodes.set(nodeList);
         this._editorialSidebar?.enabledOption.set(null);
         this.sidebarOpened.set(true);
