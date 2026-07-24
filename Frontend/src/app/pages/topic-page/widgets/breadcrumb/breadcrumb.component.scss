@@ -46,7 +46,7 @@
                 padding-top: var(--breadcrumb-padding-y);
                 // add padding-bottom to avoid uneven centered text
                 padding-bottom: var(--breadcrumb-padding-y);
-                --disabled-config-select-color: #999;
+                --disabled-config-select-color: var(--buttonDisabled);
 
                 // color adjustments
                 @include mat.form-field-overrides(
