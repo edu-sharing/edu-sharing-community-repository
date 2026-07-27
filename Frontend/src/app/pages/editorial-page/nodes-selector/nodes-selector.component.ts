@@ -495,14 +495,10 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsGridColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
-        this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
-            repository: HOME_REPOSITORY,
-        });
-        // show the author as a second row below the title in the (searched) collections list view
-        const collectionsTitleColumn = this.collectionsTableColumns?.Default?.[0];
-        if (collectionsTitleColumn) {
-            collectionsTitleColumn.secondaryRow = new ListItem('NODE', RestConstants.CM_CREATOR);
-        }
+        this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId(
+            'collectionSidebar',
+            { repository: HOME_REPOSITORY },
+        );
     }
 
     /**

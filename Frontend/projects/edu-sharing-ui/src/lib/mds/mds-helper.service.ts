@@ -1,6 +1,6 @@
+import { Injectable, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    AuthenticationService,
     MdsDefinition,
     MdsIdentifier,
     MdsService,
@@ -8,16 +8,13 @@ import {
     MdsWidget,
     RestConstants,
 } from 'ngx-edu-sharing-api';
-import { Injectable, inject } from '@angular/core';
-import { ListItem, ListItemType } from '../types/list-item';
-import { isArray } from 'lodash';
 import { firstValueFrom } from 'rxjs';
+import { ListItem, ListItemType } from '../types/list-item';
 
 type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
 export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
 @Injectable()
 export class MdsHelperService {
-    private authentication = inject(AuthenticationService);
     private mdsService = inject(MdsService);
     private translate = inject(TranslateService);
 
@@ -112,6 +109,11 @@ export class MdsHelperService {
                 defaultColumns.push(new ListItem('GROUP', RestConstants.AUTHORITY_GROUPTYPE));
             } else if (name === 'searchCollections') {
                 defaultColumns.push(...ListItem.getCollectionDefaults());
+            } else if (name === 'collectionSidebar') {
+                const title = new ListItem('COLLECTION', RestConstants.CM_PROP_TITLE);
+                title.secondaryRow = new ListItem('COLLECTION', RestConstants.CM_CREATOR);
+                defaultColumns.push(title);
+                defaultColumns.push(new ListItem('COLLECTION', RestConstants.CM_PROP_C_CREATED));
             } else {
                 defaultColumns.push(new ListItem('NODE', RestConstants.LOM_PROP_TITLE));
             }
