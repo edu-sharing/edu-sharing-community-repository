@@ -244,9 +244,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         showStatistics.toolpermissionsMode = HideMode.Hide;
         showStatistics.group = DefaultGroups.View;
         options.push(showStatistics);
-
         const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
-            this.enabledOption.set({ trap: false, option: 'PREVIEW' }),
+            this.enabledOption.set({
+                trap: false,
+                option: 'PREVIEW',
+                optionConfig: {
+                    editorMode:
+                        this.optionsHelperDataService.getData().scope === 'suggestions'
+                            ? 'nodes'
+                            : 'viewer',
+                } as PreviewConfig,
+            }),
         );
         preview.customShowCallback = async () => {
             return this.optionsHelperDataService?.getData()?.scope !== 'render';

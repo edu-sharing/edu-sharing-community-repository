@@ -15,7 +15,9 @@
         margin-top: 2px;
     }
     padding: 0;
-    border: none;
+    // faint edge so the tab stays discernible against the dark page surface
+    // (the variable is transparent in light mode)
+    border: 1px solid var(--borderDarkModeOnly);
     border-radius: 50%;
     background-color: var(--backgroundContainerHigh);
     color: var(--textBlack);

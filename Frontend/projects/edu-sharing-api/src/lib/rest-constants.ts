@@ -170,6 +170,7 @@ export class RestConstants {
     public static CM_PROP_METADATASET_EDU_METADATASET = 'cm:edu_metadataset';
     public static CM_ARCHIVED_DATE = 'sys:archivedDate';
     public static CM_PROP_C_CREATED = 'cm:created';
+    public static CM_CREATOR = 'cm:creator';
     public static CCM_PROP_IO_ORIGINAL = 'ccm:original';
     public static CCM_PROP_EAF_PRODUCTIONYEAR = 'ccm:eaf_productionyear';
     public static EXIF_PROP_DATE_TIME_ORIGINAL = 'exif:dateTimeOriginal';

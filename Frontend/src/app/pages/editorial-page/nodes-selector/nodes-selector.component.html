@@ -90,7 +90,10 @@
               | translate
           "
           [(ngModel)]="searchText"
-          [disabled]="tabType === TabType.SEARCH && dataSourceSearch.isLoading"
+          [disabled]="
+            (tabType === TabType.SEARCH && dataSourceSearch.isLoading) ||
+            (tabType === TabType.COLLECTIONS && collectionsSearchRunning())
+          "
           (keydown.enter)="executeSearch()"
         />
         @if (searchText()) {
@@ -161,7 +164,6 @@
     <mat-button-toggle-group
       class="collection-display-type"
       [disabled]="
-        collectionsDisplayTypeToggleDisabled() ||
         (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
           ((dataSourceCollectionsTree.isLoadingSubject | async) ||
             dataSourceCollectionsTree.isEmpty())) ||
@@ -180,12 +182,18 @@
         <i esIcon="list"></i>
       </mat-button-toggle>
 
-      <mat-button-toggle [value]="NodeEntriesDisplayType.Tree">
+      <!-- the tree cannot display search results, so it stays disabled while searching -->
+      <mat-button-toggle
+        [value]="NodeEntriesDisplayType.Tree"
+        [disabled]="collectionsTreeToggleDisabled()"
+      >
         <i esIcon="account_tree"></i>
       </mat-button-toggle>
     </mat-button-toggle-group>
     <!-- tree or flat node entries component -->
-    @if ( collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
+    @if (collectionsSearchRunning()) {
+    <ng-container *ngTemplateOutlet="loading"></ng-container>
+    } @else if ( collectionsDisplayType() === NodeEntriesDisplayType.Tree ||
     !dataSourceCollectionsFlat.isEmpty() || dataSourceCollectionsFlat.isLoading ) {
     <es-node-entries-wrapper
       #collectionsWrapperRef
