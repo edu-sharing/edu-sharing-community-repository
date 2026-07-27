@@ -432,6 +432,10 @@ export class NodesSelectorComponent implements OnInit {
             this.searchSent() &&
             this.searchText() !== '',
     );
+    /** a collections search is running, i.e. the results are not available yet */
+    collectionsSearchRunning = computed(
+        () => this.collectionsTreeToggleDisabled() && !this.searchCompleted(),
+    );
     dataSourceCollectionsTree: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     dataSourceCollectionsFlat: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     @ViewChild('collectionsWrapperRef') collectionsWrapper!: NodeEntriesWrapperComponent<Node>;
@@ -593,6 +597,12 @@ export class NodesSelectorComponent implements OnInit {
             if (!this.dataSourceCollectionsFlat.isEmpty()) {
                 this.dataSourceCollectionsFlat.reset();
             }
+            // results are only available flat: open the list view right away, so the search
+            // progress is visible instead of the (still interactive) tree jumping away when the
+            // results arrive. An already chosen flat view (e.g. the cards) is kept.
+            if (this.collectionsDisplayType() === NodeEntriesDisplayType.Tree) {
+                this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            }
             if (!this.searchText()) {
                 this.dataSourceCollectionsFlat.setData([]);
             } else {
@@ -601,11 +611,6 @@ export class NodesSelectorComponent implements OnInit {
                     this.searchService.search(request),
                 );
                 this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
-            }
-            // results are only available flat: open the list view, but keep an already chosen
-            // flat view (e.g. the cards) when searching again
-            if (this.collectionsDisplayType() === NodeEntriesDisplayType.Tree) {
-                this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
             }
             this.searchCompleted.set(true);
             this.dataSourceCollectionsFlat.isLoading = false;
