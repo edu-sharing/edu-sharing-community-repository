@@ -669,17 +669,8 @@ export class NodesSelectorComponent implements OnInit {
             // reset the flat datasource
             this.dataSourceCollectionsFlat = new NodeDataSource<Node | any>();
             this.dataSourceCollectionsFlat.isLoading = true;
-            const collectionsTreeService = this.collectionsWrapper?.treeNodeService;
-            const deepestNode = this.findDeepestNodeFromDataMap(
-                collectionsTreeService?.getDataMap(),
-            )?.node;
-            if (!deepestNode) {
-                this.dataSourceCollectionsFlat.isLoading = false;
-                return;
-            }
-            // retrieve the children of the deepestNode to retrieve the level to be displayed
-            const nodes = collectionsTreeService?.getDataMap().get(deepestNode.parent.id);
-            if (!nodes?.length) {
+            const nodes = this.getDeepestExpandedTreeLevel();
+            if (!nodes.length) {
                 this.dataSourceCollectionsFlat.isLoading = false;
                 return;
             }
@@ -1375,39 +1366,27 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * Helper function to find the deepest node in a map containing refId to node children.
-     *
-     * @param dataMap
+     * The nodes of the deepest level that is currently expanded in the tree, i.e. the level the
+     * flat views should render when switching away from the tree.
      */
-    private findDeepestNodeFromDataMap(
-        dataMap: Map<string, Partial<Node>[]>,
-    ): { node: Partial<Node>; level: number } | null {
-        const rootNodes = dataMap.get('__root__') || [];
-        if (rootNodes.length === 0) return null;
-
-        let deepestNode: Partial<Node> | null = null;
-        let maxLevel = -1;
-
-        // BFS queue: [node, level]
-        const queue: [Partial<Node>, number][] = rootNodes.map((node) => [node, 0]);
-
-        while (queue.length > 0) {
-            const [currentNode, level] = queue.shift()!;
-
-            // update deepest if current is deeper
-            if (level > maxLevel) {
-                maxLevel = level;
-                deepestNode = currentNode;
-            }
-
-            // add children to queue
-            const children = dataMap.get(currentNode.ref.id) || [];
-            for (const child of children) {
-                queue.push([child, level + 1]);
-            }
+    private getDeepestExpandedTreeLevel(): Partial<Node>[] {
+        const treeNodeService = this.collectionsWrapper?.treeNodeService;
+        const renderedNodes = treeNodeService?.getCurrentData() ?? [];
+        if (!renderedNodes.length) {
+            return [];
         }
-
-        return deepestNode ? { node: deepestNode, level: maxLevel } : null;
+        const deepestLevel = Math.max(...renderedNodes.map((node) => node.level));
+        const deepestNodes = renderedNodes
+            .filter((node) => node.level === deepestLevel)
+            .map((node) => node.item);
+        // nothing is expanded: the top level only holds the (faked) group nodes, which cannot be
+        // displayed as regular entries, so use their collections instead
+        if (deepestLevel === 0) {
+            return deepestNodes.flatMap(
+                (group) => treeNodeService.getDataMap().get(group.ref.id) ?? [],
+            );
+        }
+        return deepestNodes;
     }
 
     /**
