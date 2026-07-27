@@ -493,13 +493,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             return o;
         });
         virtual.forEach((v: T) => {
-            const contains = this.dataSource
-                .getData()
-                .some((d) =>
-                    (d as Node).ref
-                        ? (d as Node).ref?.id === (v as Node).ref?.id
-                        : (d as User).authorityName === (v as User).authorityName,
-                );
+            const contains = !!this.findInDataSource(v);
             if (contains) {
                 if ((v as VirtualNode).override !== false) {
                     this.updateNodes([v]);
@@ -525,11 +519,29 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             }
         });
         if (options?.select !== false) {
+            // Select the instances the data source actually holds: for a node that was already
+            // in the list, `updateNodes` copies the data into the existing object, so the object
+            // passed in never enters the list. Selecting it would leave the selection model with
+            // an element the list does not contain (`SelectionModel` compares by identity), i.e.
+            // the row would render unselected (no checkbox) despite the virtual highlight.
             this.entriesService.selection.clear();
-            this.entriesService.selection.select(...virtual);
+            this.entriesService.selection.select(
+                ...virtual.map((v) => this.findInDataSource(v) ?? v),
+            );
         }
         this.virtualNodesAdded.emit(virtual as Node[]);
         this.changeDetectorRef.detectChanges();
+    }
+
+    /** the element of the data source representing `element`, matched by node id / authority name */
+    private findInDataSource(element: T): T | undefined {
+        return this.dataSource
+            .getData()
+            .find((d) =>
+                (d as Node).ref
+                    ? (d as Node).ref?.id === (element as Node).ref?.id
+                    : (d as User).authorityName === (element as User).authorityName,
+            );
     }
 
     setOptions(options: ListOptions): void {
