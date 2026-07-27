@@ -440,10 +440,14 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             return;
         }
         afterNextRender(
-            () =>
-                (this.elementRef.nativeElement as HTMLElement)
-                    .querySelector('.mat-row-selected, .grid-card.selected')
-                    ?.scrollIntoView({ block: 'center', inline: 'nearest' }),
+            () => {
+                const entry = (
+                    this.elementRef.nativeElement as HTMLElement
+                ).querySelector<HTMLElement>('.mat-row-selected, .grid-card.selected');
+                if (entry) {
+                    void this.uiService.scrollSmoothElementToChild(entry);
+                }
+            },
             { injector: this.injector },
         );
     }
