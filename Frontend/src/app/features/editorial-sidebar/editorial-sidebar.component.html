@@ -130,6 +130,7 @@
   toggle option and the header close (X) button. -->
 @if (!isModal()) {
 <es-edge-toggle
+  data-test="button-toggle-sidebar-editorial-options"
   [side]="'end'"
   [open]="editorialSidebarService.sidebarOpened()"
   [visible]="
