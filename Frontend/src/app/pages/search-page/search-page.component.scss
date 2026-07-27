@@ -73,10 +73,25 @@ main {
 
 es-preview-sidebar,
 es-search-page-filters-sidebar {
-    position: sticky;
+    // Deliberately NOT sticky/fixed: the body scrolls by the footer height to reveal `es-footer`
+    // below the cards, so anything pinned to the viewport here would keep sitting on the footer.
     flex-shrink: 0;
-    // top: var(--mainnavCurrentHeight);
     max-height: calc(100vh - var(--mainnavCurrentHeight));
+}
+
+// The global `mat-sidenav.es-mat-sidenav` rule (core-ui-module/styles/globals.scss) pins the drawer
+// to the viewport (`position: fixed; top: var(--mainnavCurrentHeight)`) and sizes its inner card off
+// `100vh`. That keeps the drawer's bottom edge at the viewport bottom, so once the body is scrolled
+// to reveal `es-footer` the drawer covers the footer strip. Position it inside the (in-flow)
+// mat-sidenav-container instead and derive the card height from that container, so it scrolls up
+// with the body exactly like the left filter panel.
+mat-sidenav.es-mat-sidenav {
+    position: absolute;
+    top: 0;
+    // matches the 15px top + 15px bottom margin the global rule puts on the content card
+    > .es-mat-sidenav-content {
+        height: calc(100% - 30px);
+    }
 }
 
 // Global content container, mirroring the editorial page's `.main-content` card. It also carries the
