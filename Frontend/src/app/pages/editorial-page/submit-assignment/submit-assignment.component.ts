@@ -562,7 +562,8 @@ export class SubmitAssignmentComponent implements OnDestroy {
             optionConfig: {
                 state: TabType.UPLOAD,
                 upload: 'fast',
-                autoClose: true,
+                // keep the sidebar open so several materials can be added one after another
+                autoClose: false,
                 allowedConnectorIds: [ConnectorService.ID_ONLY_OFFICE, ConnectorService.ID_TINYMCE],
                 applyCallback: (nodes) =>
                     nodes.every(
