@@ -631,7 +631,14 @@ export class NodesSelectorComponent implements OnInit {
     async onCollectionsDisplayTypeChange(event: MatButtonToggleChange): Promise<void> {
         const nextDisplayType = event.value;
         const existingDisplayType = this.collectionsDisplayType();
-        this.resetNodeEntriesSelections();
+        // the two flat views (Table/SmallGrid) share the same datasource & wrapper, so keep the
+        // selection when switching between them; only reset when the tree view is involved.
+        const switchingBetweenFlatViews =
+            existingDisplayType !== NodeEntriesDisplayType.Tree &&
+            nextDisplayType !== NodeEntriesDisplayType.Tree;
+        if (!switchingBetweenFlatViews) {
+            this.resetNodeEntriesSelections();
+        }
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
