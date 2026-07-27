@@ -161,7 +161,6 @@
     <mat-button-toggle-group
       class="collection-display-type"
       [disabled]="
-        collectionsDisplayTypeToggleDisabled() ||
         (collectionsDisplayType() === NodeEntriesDisplayType.Tree &&
           ((dataSourceCollectionsTree.isLoadingSubject | async) ||
             dataSourceCollectionsTree.isEmpty())) ||
@@ -180,7 +179,11 @@
         <i esIcon="list"></i>
       </mat-button-toggle>
 
-      <mat-button-toggle [value]="NodeEntriesDisplayType.Tree">
+      <!-- the tree cannot display search results, so it stays disabled while searching -->
+      <mat-button-toggle
+        [value]="NodeEntriesDisplayType.Tree"
+        [disabled]="collectionsTreeToggleDisabled()"
+      >
         <i esIcon="account_tree"></i>
       </mat-button-toggle>
     </mat-button-toggle-group>

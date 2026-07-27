@@ -422,7 +422,11 @@ export class NodesSelectorComponent implements OnInit {
     collectionsDisplayType: WritableSignal<NodeEntriesDisplayType> = signal(
         NodeEntriesDisplayType.Tree,
     );
-    collectionsDisplayTypeToggleDisabled = computed(
+    /**
+     * search results are only available as a flat list, so the tree view cannot be selected while
+     * a search is active (the flat views can).
+     */
+    collectionsTreeToggleDisabled = computed(
         () =>
             this.selectedTab() === TabType.COLLECTIONS &&
             this.searchSent() &&
@@ -598,7 +602,11 @@ export class NodesSelectorComponent implements OnInit {
                 );
                 this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
             }
-            this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            // results are only available flat: open the list view, but keep an already chosen
+            // flat view (e.g. the cards) when searching again
+            if (this.collectionsDisplayType() === NodeEntriesDisplayType.Tree) {
+                this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
+            }
             this.searchCompleted.set(true);
             this.dataSourceCollectionsFlat.isLoading = false;
         }
