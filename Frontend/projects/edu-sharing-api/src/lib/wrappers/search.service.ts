@@ -285,30 +285,28 @@ export class SearchService {
     loadMoreFacets(facet: SearchFacet, size: number): Observable<void> {
         const searchParams = this.getSearchParams();
         const currentFacetSize = this.facetsSubject.value[facet.property].values.length;
-        return this.searchV1
-            .search({
-                ...searchParams,
-                maxItems: 0,
-                body: {
-                    ...searchParams.body,
-                    facets: [facet],
-                    facetLimit: currentFacetSize + size,
-                },
-            })
-            .pipe(
-                map((results) => results.facets.find((f) => f.property === facet.property)),
-                switchMap((f) =>
-                    f
-                        ? this.mapFacet(f)
-                        : rxjs.throwError(
-                              `Did not receive requested facet for "${facet.property}"`,
-                          ),
-                ),
-                tap((f) =>
-                    this.facetsSubject.next({ ...this.facetsSubject.value, [facet.property]: f }),
-                ),
-                map(() => {}),
-            );
+        // Use `requestSearch` so that special search modes (`suggestions`, `shares`, …) hit their
+        // own endpoint instead of the generic search endpoint.
+        return this.requestSearch({
+            ...searchParams,
+            maxItems: 0,
+            body: {
+                ...searchParams.body,
+                facets: [facet],
+                facetLimit: currentFacetSize + size,
+            },
+        }).pipe(
+            map((results) => results.facets.find((f) => f.property === facet.property)),
+            switchMap((f) =>
+                f
+                    ? this.mapFacet(f)
+                    : rxjs.throwError(`Did not receive requested facet for "${facet.property}"`),
+            ),
+            tap((f) =>
+                this.facetsSubject.next({ ...this.facetsSubject.value, [facet.property]: f }),
+            ),
+            map(() => {}),
+        );
     }
 
     /**
