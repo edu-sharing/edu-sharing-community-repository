@@ -159,7 +159,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         () => this.assignment()?.permissions?.filter((p) => p.role === 'COORDINATOR') ?? [],
     );
     isOpenForSubmission = computed(() =>
-        ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
+        ['DRAFT', 'INPROGRESS'].includes(this.assignment()?.status),
     );
     isBeforeEndDate = computed(() => {
         // @TODO check endTime format vs delivered type
