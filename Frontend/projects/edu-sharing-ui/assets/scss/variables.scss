@@ -129,6 +129,8 @@
     --searchInputBorderColor: #ccc;
     --cardSeparatorLineColor: #ccc;
     --inputBorderColor: #9e9e9e;
+    // border only defined in dark-mode
+    --borderDarkModeOnly: transparent;
 
     --color-readable-overlay: rgba(255, 255, 255, 0.8);
     --color-darken: rgba(0, 0, 0, 0.2);
@@ -227,7 +229,8 @@ body.isDarkTheme {
     --searchInputBorderColor: #555;
     --cardSeparatorLineColor: #666;
     --inputBorderColor: #666;
-
+    // faint edge for surfaces that nearly match the page background in dark mode
+    --borderDarkModeOnly: #444;
     --color-readable-overlay: rgba(0, 0, 0, 0.6);
     --color-darken: rgba(255, 255, 255, 0.2);
     --toastBackground: #ededed;
