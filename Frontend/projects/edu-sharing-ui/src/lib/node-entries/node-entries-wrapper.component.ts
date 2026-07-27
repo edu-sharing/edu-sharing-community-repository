@@ -1,4 +1,5 @@
 import {
+    afterNextRender,
     AfterViewInit,
     ChangeDetectorRef,
     Component,
@@ -8,6 +9,7 @@ import {
     EventEmitter,
     HostBinding,
     inject,
+    Injector,
     Input,
     NgZone,
     OnChanges,
@@ -99,6 +101,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private templatesService = inject(NodeEntriesTemplatesService);
     private changeDetectorRef = inject(ChangeDetectorRef);
     private elementRef = inject(ElementRef);
+    private injector = inject(Injector);
     public treeNodeService = inject(TreeNodeService);
     // @TODO
     // private mainNav = inject(MainNavService);
@@ -427,6 +430,22 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.displayType = displayType;
         void this.ngOnChanges();
         this.displayTypeChange.emit(displayType);
+    }
+
+    /**
+     * Scrolls the first selected entry into view once the entries have been (re-)rendered.
+     */
+    scrollSelectionIntoView(): void {
+        if (!this.entriesService.selection?.selected?.length) {
+            return;
+        }
+        afterNextRender(
+            () =>
+                (this.elementRef.nativeElement as HTMLElement)
+                    .querySelector('.mat-row-selected, .grid-card.selected')
+                    ?.scrollIntoView({ block: 'center', inline: 'nearest' }),
+            { injector: this.injector },
+        );
     }
 
     updateNodes(nodes: void | T[]) {

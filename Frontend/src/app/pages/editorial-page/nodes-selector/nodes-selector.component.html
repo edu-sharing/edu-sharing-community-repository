@@ -126,7 +126,8 @@
         }"
         [columns]="searchColumns"
         [dataSource]="dataSourceSearch"
-        [(displayType)]="searchDisplayType"
+        [displayType]="searchDisplayType"
+        (displayTypeChange)="onSearchDisplayTypeChange($event)"
         [elementInteractionType]="InteractionType.Emitter"
         [initConfig]="{
           actionbar: actionbarSearchTab,

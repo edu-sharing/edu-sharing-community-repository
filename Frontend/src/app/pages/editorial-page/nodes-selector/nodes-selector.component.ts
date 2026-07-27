@@ -624,6 +624,17 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
+     * Reacts to the display type toggle of the search tab.
+     *
+     * @param displayType
+     */
+    onSearchDisplayTypeChange(displayType: NodeEntriesDisplayType): void {
+        this.searchDisplayType = displayType;
+        // the selection is kept across the switch, so keep it visible in the newly rendered view
+        this.searchWrapper?.scrollSelectionIntoView();
+    }
+
+    /**
      * Manually trigger the collections display type change.
      *
      * @param event
@@ -667,6 +678,10 @@ export class NodesSelectorComponent implements OnInit {
             this.dataSourceCollectionsFlat.isLoading = false;
         }
         this.collectionsDisplayType.set(nextDisplayType);
+        if (switchingBetweenFlatViews) {
+            // the kept selection must stay visible in the newly rendered view
+            this.collectionsWrapper?.scrollSelectionIntoView();
+        }
     }
 
     /**
