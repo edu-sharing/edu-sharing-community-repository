@@ -155,6 +155,12 @@ public class ErrorResponse {
                     .build();
         }
 
+        if(t instanceof DAONodeFileSizeExceededException){
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ErrorResponse(t)).type(MediaType.APPLICATION_JSON_TYPE).build();
     }

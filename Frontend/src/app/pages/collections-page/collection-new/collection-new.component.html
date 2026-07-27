@@ -244,7 +244,7 @@
               <i esIcon="person"></i>
               <span>{{ user | authorityName }}</span>
               <button
-                *ngIf="authorFreetextAllowed"
+                *ngIf="authorFreetextAllowed || authorFreetextFixedAllowed"
                 mat-icon-button
                 [attr.aria-label]="
                   'EDIT' | translate : { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }

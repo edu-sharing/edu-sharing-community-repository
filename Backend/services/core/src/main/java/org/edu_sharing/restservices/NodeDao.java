@@ -89,8 +89,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -98,6 +96,7 @@ import java.util.stream.Stream;
 public class NodeDao {
     private static final Logger logger = Logger.getLogger(NodeDao.class);
     private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+
     /**
      * also check @PermissionServiceHelper.PERMISSIONS
      */
@@ -984,10 +983,16 @@ public class NodeDao {
         final String user = AuthenticationUtil.getFullyAuthenticatedUser();
         final Context context = Context.getCurrentInstance();
         final String scope = NodeServiceInterceptor.getEduSharingScope();
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        List<Node> nodes = null;
+        List<Node> nodes;
         java.util.Collection<Callable<Node>> tasks = list.stream().map(
                 (nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
+                    // NodeConvertExecutorProvider's executor is shared across requests, and under
+                    // CallerRunsPolicy a task may even run on the calling request thread itself - so
+                    // the previous thread state is saved and restored here instead of being
+                    // unconditionally cleared, to avoid leaking (or wiping) another request's
+                    // context/scope on that thread.
+                    Context prevContext = Context.getCurrentInstance();
+                    String prevScope = NodeServiceInterceptor.getEduSharingScope();
                     try {
                         // apply thread variables to keep state of thread
                         Context.setInstance(context);
@@ -1010,12 +1015,17 @@ public class NodeDao {
                         logger.info("Toolpermission exception for node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
                         return null;
                     } finally {
-                        Context.release();
+                        if (prevContext != null) {
+                            Context.setInstance(prevContext);
+                        } else {
+                            Context.release();
+                        }
+                        NodeServiceInterceptor.setEduSharingScope(prevScope);
                     }
                 }, user)
         ).collect(Collectors.toList());
         try {
-            nodes = executor.invokeAll(tasks).stream()
+            nodes = NodeConvertExecutorProvider.get().getExecutor().invokeAll(tasks).stream()
                     .filter(Objects::nonNull)
                     .map((f) -> {
                         try {
@@ -1024,7 +1034,6 @@ public class NodeDao {
                             throw new RuntimeException(e);
                         }
                     }).filter(Objects::nonNull).collect(Collectors.toList());
-            executor.shutdown();
             return nodes;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

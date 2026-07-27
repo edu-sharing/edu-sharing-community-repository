@@ -508,7 +508,7 @@ public class SSOAuthorityMapper {
 
             // create LMS globalGroups
             organisationName = (organisationName == null) ? "" : organisationName;
-            if (StringUtils.isNotBlank(organisationName)) {
+            if (StringUtils.isNotBlank(lmsGlobalGroups) && StringUtils.isNotBlank(organisationName)) {
                 JSONArray globalGroupsJA = new JSONArray(lmsGlobalGroups);
 
 

@@ -74,6 +74,7 @@ import java.util.stream.Collectors;
 public class CollectionServiceImpl implements CollectionService {
 
     private NotificationService notificationService;
+    private AuthorityService localAuthorityService;
 
     public static CollectionService build(String appId) {
         CollectionServiceConfig config = (CollectionServiceConfig) ApplicationContextFactory.getApplicationContext().getBean("collectionServiceConfig");
@@ -146,6 +147,7 @@ public class CollectionServiceImpl implements CollectionService {
             this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
             this.permissionService = PermissionServiceFactory.getPermissionService(appId);
             this.notificationService = NotificationServiceFactoryUtility.getNotificationService(appId);
+            this.localAuthorityService = AuthorityServiceFactory.getAuthorityService(appId);
             ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
             policyBehaviourFilter = (BehaviourFilter) appContext.getBean("policyBehaviourFilter");
 
@@ -339,7 +341,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public void proposeForCollection(String collectionId, String originalNodeId, String sourceRepositoryId)
-            throws DuplicateNodeException, Throwable {
+            throws Throwable {
         String finalId = mapNodeId(originalNodeId, sourceRepositoryId);
 
         /*
@@ -415,7 +417,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public String addToCollection(String collectionId, String originalNodeId, String sourceRepositoryId, boolean allowDuplicate)
-            throws DuplicateNodeException, Throwable {
+            throws Throwable {
         originalNodeId = mapNodeId(originalNodeId, sourceRepositoryId);
         return addToCollection(collectionId, originalNodeId, allowDuplicate);
     }
@@ -436,33 +438,29 @@ public class CollectionServiceImpl implements CollectionService {
         final String fcurrentUsername = currentUsername;
 
         if (fcurrentUsername != null) {
-            return AuthenticationUtil.runAsSystem(new RunAsWork<Collection>() {
+            String parentIdLocal;
+            if (parentId == null) {
+                collection.setLevel0(true);
+                parentIdLocal = getHomePath();
+            }else {
+                parentIdLocal = parentId;
+            }
 
-                @Override
-                public Collection doWork() throws Exception {
-                    String parentIdLocal = parentId;
-                    if (parentIdLocal == null) {
-
-                        collection.setLevel0(true);
-
-                        parentIdLocal = getHomePath();
-                    }
-
-                    Map<String, Object> props = asProps(collection);
-                    try {
-                        new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
-                    } catch (Throwable e) {
-                        throw new Exception(e);
-                    }
-
-                    String collectionId = client.createNode(parentIdLocal, CCConstants.CCM_TYPE_MAP, props);
-                    client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
-                    client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
-
-                    client.setOwner(collectionId, fcurrentUsername);
-                    collection.setNodeId(collectionId);
-                    return collection;
+            Map<String, Object> props = asProps(collection);
+            return AuthenticationUtil.runAsSystem(() -> {
+                try {
+                    new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);
+                } catch (Throwable e) {
+                    throw new Exception(e);
                 }
+
+                String collectionId = client.createNode(parentIdLocal, CCConstants.CCM_TYPE_MAP, props);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_COLLECTION);
+                client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
+
+                client.setOwner(collectionId, fcurrentUsername);
+                collection.setNodeId(collectionId);
+                return collection;
             });
         } else {
             throw new Exception("not authenticated");
@@ -639,8 +637,28 @@ public class CollectionServiceImpl implements CollectionService {
         props.put(CCConstants.CCM_PROP_MAP_COLLECTIONVIEWTYPE, collection.getViewtype());
         props.put(CCConstants.CCM_PROP_MAP_COLLECTIONLEVEL0, collection.isLevel0());
         if (collection.getAuthorFreetext() != null && !collection.getAuthorFreetext().isEmpty()) {
-            ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
-            props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+            if (toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER)) {
+                props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, collection.getAuthorFreetext());
+            } else {
+                if (Objects.equals(collection.getType(), CCConstants.COLLECTIONTYPE_MEDIA_CENTER)) {
+                    // force use the displayname of the first mediacenter the user is admin of
+                    try {
+                        String mediacenter = searchService.getAllMediacenters().stream()
+                                .filter(localAuthorityService::hasAdminAccessToMediacenter)
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("Current user is not admin of any mediacenter"));
+                        String displayName = (String) localAuthorityService.getAuthorityProperty(mediacenter,
+                                CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME);
+                        props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, displayName);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_COLLECTION_CHANGE_OWNER);
+                }
+            }
+        } else {
+            props.put(CCConstants.CCM_PROP_MAP_COLLECTION_AUTHOR_FREETEXT, null);
         }
         return props;
     }
