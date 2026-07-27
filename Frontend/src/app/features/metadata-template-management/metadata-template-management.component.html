@@ -17,7 +17,7 @@
         @if (selectedTemplateIndex() === -1) {
         {{ i18nPrefix + 'METHODOLOGY.SELECT_TEMPLATE' | translate }}
         } @else {
-        {{ currentTemplate().name }}
+        {{ currentTemplate().name | translate }}
         }
         <i [esIcon]="trigger?.menuOpen ? 'arrow_drop_up' : 'arrow_drop_down'"></i>
       </button>

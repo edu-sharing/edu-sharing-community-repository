@@ -87,6 +87,8 @@
           "METADATA_SAVED_WRITE": "Metadata updated on {{writeCount}} element(s)",
           "METADATA_SUGGESTIONS": "Metadata stored as a suggestion on {{suggestionCount}} element(s), because of insufficient permissions",
           "METADATA_SKIPPED": "Metadata skipped on {{skippedCount}} element(s), because of insufficient permissions",
+          "NO_TEMPLATE": "No template",
+          "LAST_USED": "Last used",
           "SELECT_TEMPLATE": "Select template",
           "MANAGE_TEMPLATES": "Manage templates",
           "TEMPLATE_NAME": "Title of the template",

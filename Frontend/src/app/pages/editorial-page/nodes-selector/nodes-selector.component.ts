@@ -200,6 +200,8 @@ export class NodesSelectorComponent implements OnInit {
     protected readonly idPrefix: string = 'nodes-selector-tab';
 
     @ViewChild(AddMaterialDialogComponent) addMaterialDialogComponent: AddMaterialDialogComponent;
+    @ViewChild(MetadataTemplateManagementComponent)
+    metadataTemplateManagement: MetadataTemplateManagementComponent;
 
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
@@ -856,6 +858,8 @@ export class NodesSelectorComponent implements OnInit {
      */
     async saveMetadata(): Promise<void> {
         this.editorialSidebarService.sidebarLoading.set(true);
+        // keep the state the user saved so it can be offered again as "last used" template
+        await this.metadataTemplateManagement?.persistLastUsedValues();
         const source = this.selectedSourceNodes();
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
