@@ -38,6 +38,7 @@ whether a tab bar will be shown. The body itself always lives in the same place 
     <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter panel,
       mirroring the editorial sidebar/filter toggle. -->
     <es-edge-toggle
+      data-test="button-toggle-sidebar-filters-search"
       [side]="'start'"
       [open]="filterBarOpen()"
       [visible]="(showingAllRepositories | async) === false && (isMobileScreen | async) === false"
