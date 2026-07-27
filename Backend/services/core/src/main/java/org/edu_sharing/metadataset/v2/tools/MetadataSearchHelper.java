@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.metadataset.v2.*;
@@ -87,6 +88,16 @@ public class MetadataSearchHelper {
     }
 
     public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias) throws IllegalArgumentException {
+        return getSuggestions(repoId, mds, queryId, parameterId, value, criterias, null);
+    }
+
+    public static List<? extends Suggestion> getSuggestions(String repoId, MetadataSet mds, String queryId, String parameterId, String value, List<MdsQueryCriteria> criterias, String localeParam) throws IllegalArgumentException {
+
+        ApplicationInfo appInfo = "-home-".equals(repoId)
+                ? ApplicationInfoList.getHomeRepository()
+                : ApplicationInfoList.getRepositoryInfoById(repoId);
+        repoId = appInfo.getAppId();
+
         MetadataWidget widget = mds.findWidget(parameterId);
 
         String source = widget.getSuggestionSource();
@@ -105,7 +116,7 @@ public class MetadataSearchHelper {
             case MetadataReader.SUGGESTION_SOURCE_SEARCH ->
                     SearchServiceFactory.getInstance().getService(repoId).getSuggestions(mds, queryId, parameterId, value, criterias);
             case MetadataReader.SUGGESTION_SOURCE_MDS -> getSuggestionsMds(widget, value);
-            case MetadataReader.SUGGESTION_SOURCE_SQL -> getSuggestionsSql(widget, value);
+            case MetadataReader.SUGGESTION_SOURCE_SQL -> getSuggestionsSql(widget, value, localeParam);
             default ->
                     throw new IllegalArgumentException("Unknow suggestionSource " + source + " for widget " + parameterId +
                             ", use " + MetadataReader.SUGGESTION_SOURCE_MDS + ", " +
@@ -116,8 +127,35 @@ public class MetadataSearchHelper {
     }
 
     private static List<? extends Suggestion> getSuggestionsSql(MetadataWidget widget,
-                                                                String value) throws IllegalArgumentException {
+                                                                String value, String localeParam) throws IllegalArgumentException {
         String query = widget.getSuggestionQuery();
+
+        //default is english, german not present in dnb factual terms
+        String locale = "en";
+        if(localeParam == null) {
+            Context context = Context.getCurrentInstance();
+            if (context != null) {
+                String ctxLocale = null;
+                if (context.getRequest() != null) {
+                    String tmp = context.getRequest().getHeader("locale");
+                    if (StringUtils.isNotBlank(tmp)) {
+                        ctxLocale = tmp.split("_")[0];
+                    }
+                }
+                if (StringUtils.isBlank(ctxLocale) && (StringUtils.isNotBlank(context.getLocale()))) {
+                    ctxLocale = context.getLocale().split("_")[0];
+                    ;
+                }
+                if (StringUtils.isNotBlank(ctxLocale)) {
+                    locale = ctxLocale;
+                }
+            }
+        }else{
+            locale = localeParam;
+        }
+        query = query.replace("{{locale}}", locale);
+
+
         List<Suggestion> result = new ArrayList<>();
         Connection con;
         PreparedStatement statement;
@@ -146,11 +184,31 @@ public class MetadataSearchHelper {
                 Suggestion sqlKw = new Suggestion();
                 sqlKw.setKey(kwValue.trim());
 
+                String translation = null;
+                try{
+                    translation = resultSet.getString(3);
+                    sqlKw.setTranslation(translation);
+                }catch (SQLException e) {
+                    //no translation col in result
+                }
+
                 try {
-                    String displayString = resultSet.getString(2);
-                    sqlKw.setDisplayString(displayString);
+                    if (!StringUtils.isBlank(translation)) {
+                        sqlKw.setDisplayString(translation);
+                    }else{
+                        String displayString = resultSet.getString(2);
+                        sqlKw.setDisplayString(displayString);
+                    }
+
                 } catch (SQLException e) {
-                    //no display string in result
+                    //no display col in result
+                }
+
+                try{
+                    String url = resultSet.getString(4);
+                    sqlKw.setUrl(url);
+                }catch (SQLException e) {
+                    //no url col in result
                 }
 
                 result.add(sqlKw);
@@ -181,7 +239,7 @@ public class MetadataSearchHelper {
     }
 	private static String getSearchString(String field,String[] types) {
 		String result = "(";
-		
+
 		Iterator<String> iter = Arrays.asList(types).iterator();
 		while (iter.hasNext()) {
 			String key = iter.next();

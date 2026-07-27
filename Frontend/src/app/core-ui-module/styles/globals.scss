@@ -107,6 +107,9 @@
     &.end {
         left: 0;
     }
+    body.isDarkTheme & {
+        background-image: url('data:image/svg+xml,%3csvg%20width%3d%226%22%20height%3d%2220%22%20viewBox%3d%220%200%206%2020%22%20xmlns%3d%22http%3a//www.w3.org/2000/svg%22%20fill%3d%22none%22%3e%3ccircle%20cx%3d%223%22%20cy%3d%223%22%20r%3d%222%22%20fill%3d%22rgba(255%2c%20255%2c%20255%2c%200.6)%22/%3e%3ccircle%20cx%3d%223%22%20cy%3d%2210%22%20r%3d%222%22%20fill%3d%22rgba(255%2c%20255%2c%20255%2c%200.6)%22/%3e%3ccircle%20cx%3d%223%22%20cy%3d%2217%22%20r%3d%222%22%20fill%3d%22rgba(255%2c%20255%2c%20255%2c%200.6)%22/%3e%3c/svg%3e');
+    }
 }
 mat-sidenav.es-mat-sidenav {
     position: fixed;
@@ -118,7 +121,7 @@ mat-sidenav.es-mat-sidenav {
         border-radius: var(--borderRadiusCards);
         overflow: hidden;
         background-color: var(--roundedContainerBackground);
-        @include materialShadowSmall();
+        @include materialShadow();
     }
     .mat-sidenav-padding {
         padding: 20px 20px;
@@ -127,7 +130,7 @@ mat-sidenav.es-mat-sidenav {
 
 ngx-slider.ngx-slider {
     .ngx-slider-bar {
-        background: #e1e1e1;
+        background: var(--backgroundTinted);
         border-radius: 2px;
     }
     .ngx-slider-selection {
@@ -137,17 +140,17 @@ ngx-slider.ngx-slider {
         background-color: var(--primary);
     }
     .ngx-slider-pointer.ngx-slider-active:after {
-        background-color: var(--palette-primary-900);
+        background-color: var(--primaryBackground900);
     }
     .ngx-slider-tick.ngx-slider-selected {
-        background-color: var(--palette-primary-200);
+        background-color: var(--primaryBackground300);
     }
     .ngx-slider-bubble {
-        color: var(--palette-primary-900);
+        color: var(--primaryBackground900);
     }
     .ngx-slider-bubble.ngx-slider-limit {
         display: none;
-        color: var(--palette-primary-900);
+        color: var(--primaryBackground900);
     }
 }
 ngx-slider.ngx-slider-small {

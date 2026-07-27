@@ -3,7 +3,7 @@
   <div>
     @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
     <div class="youtube-wrapper">
-      <youtube-player [videoId]="externalId ?? ''" [disableCookies]="true"></youtube-player>
+      <iframe class="youtubeFrame" [src]="sanitizedUrl" allowfullscreen allow="fullscreen"></iframe>
     </div>
     } @if (embedding === UrlEmbeddings.VIMEO && externalId !== '') {
     <iframe class="vimeoFrame" [src]="sanitizedUrl"></iframe>
@@ -31,8 +31,8 @@
       allowfullscreen=""
       allow="autoplay; fullscreen"
     ></iframe>
-    } @if (embedding === UrlEmbeddings.LTI13TOOL && url !== '') {
-    <iframe #ltiFrame class="ltiFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
+    } @if (embedding === UrlEmbeddings.LTI13TOOL && sanitizedUrl) {
+    <iframe class="ltiFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
     } @if (embedding === UrlEmbeddings.SODIX) {
     <div class="sodixFrame">
       @if (node.mediatype === 'file-audio') {
@@ -40,6 +40,8 @@
       }
       <iframe class="sodix-type-{{ node.mediatype }}" [src]="sanitizedUrl"> </iframe>
     </div>
+    } @if (embedding === UrlEmbeddings.SERLO && externalId !== '') {
+    <iframe class="serloFrame" [src]="sanitizedUrl" allowfullscreen></iframe>
     } @if (embedding === UrlEmbeddings.LINK || embedding === UrlEmbeddings.PIXABAY || embedding ===
     UrlEmbeddings.OERSI || embedding === UrlEmbeddings.BROCKHAUS) {
     <div class="link-wrapper">

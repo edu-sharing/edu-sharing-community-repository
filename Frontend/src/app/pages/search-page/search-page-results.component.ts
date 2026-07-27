@@ -1,4 +1,12 @@
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    computed,
+    inject,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+    viewChild,
+} from '@angular/core';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -11,7 +19,6 @@ import {
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
     OptionItem,
-    OptionItemToggle,
     Scope,
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
@@ -21,13 +28,13 @@ import { GlobalSearchPageServiceInternal } from './global-search-page.service';
 import { Subject } from 'rxjs';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TranslateService } from '@ngx-translate/core';
-import { switchMap, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, skip, switchMap, takeUntil } from 'rxjs/operators';
 import { FrameEventsService } from '../../core-module/rest/services/frame-events.service';
 import { Values } from '../../features/mds/types/types';
 import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
-import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 
 export type SearchFilter = {
     propertyFilters: Values;
@@ -51,7 +58,6 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     private frameEventsService = inject(FrameEventsService);
     private announcer = inject(LiveAnnouncer);
     private translate = inject(TranslateService);
-    private searchFieldInternalService = inject(SearchFieldInternalService);
 
     readonly InteractionType = InteractionType;
     readonly Scope = Scope;
@@ -63,13 +69,26 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     @ViewChild('nodeEntriesResults')
     nodeEntriesResults: NodeEntriesWrapperComponent<Node>;
 
-    @ViewChild(ActionbarComponent)
-    set _actionbar(value: ActionbarComponent) {
-        // Avoid changed-after-checked error.
-        setTimeout(() => (this.actionbar = value));
-    }
-
-    actionbar: ActionbarComponent;
+    private readonly actionbarToggles = viewChild<ActionbarComponent>('actionbarToggles');
+    private readonly actionbarActions = viewChild<ActionbarComponent>('actionbarActions');
+    private readonly actionbarAddToCollection = viewChild<ActionbarComponent>(
+        'actionbarAddToCollection',
+    );
+    private readonly actionbarPrimaryBanner =
+        viewChild<ActionbarComponent>('actionbarPrimaryBanner');
+    /**
+     * All actionbars driven by the same computed options: the toggles-only title bar, the actions-only
+     * sticky selection bar, and the banner actionbars shown in add-to-collection / primary-action modes
+     * (these are mutually exclusive in the template; absent ones resolve to undefined and are filtered).
+     */
+    readonly actionbars = computed(() =>
+        [
+            this.actionbarToggles(),
+            this.actionbarActions(),
+            this.actionbarAddToCollection(),
+            this.actionbarPrimaryBanner(),
+        ].filter((bar): bar is ActionbarComponent => !!bar),
+    );
 
     readonly resultsDataSource = this.results.resultsDataSource;
     readonly collectionsDataSource = this.results.collectionsDataSource;
@@ -80,7 +99,25 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     readonly addToCollectionMode = this.searchPage.addToCollectionMode;
     readonly primaryAction = this.searchPage.primaryAction;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
-    defaultCustomOptions: CustomOptions;
+
+    /**
+     * Options fed to the results actionbars. The filter panel is now toggled via the left-edge
+     * es-edge-toggle tab (see search-page.component.html), not an actionbar toggle.
+     */
+    readonly materialOptions = this.searchPage.getCustomMaterialOptions;
+
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     constructor() {
         const results = this.results;
@@ -97,41 +134,30 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             .subscribe((elementsLoadedTranslation) => {
                 void this.announcer.announce(elementsLoadedTranslation);
             });
-
-        const toggleSearchFilter = new OptionItemToggle(
-            { enabled: 'SEARCH.FILTERS', disabled: 'SEARCH.FILTERS' },
-            { enabled: 'filter_list', disabled: 'filter_list' },
-            false,
-            () => this.toggleFilters(),
-        );
-        toggleSearchFilter.scopes = [Scope.Search];
-        toggleSearchFilter.constrains = [];
-        toggleSearchFilter.group = DefaultGroups.Toggles;
-        toggleSearchFilter.elementType = [];
-        toggleSearchFilter.priority = 30;
-        toggleSearchFilter.toggleType = 'primary';
-        toggleSearchFilter.togglePosition = 'before';
-        this.defaultCustomOptions = {
-            useDefaultOptions: true,
-            addOptions: [toggleSearchFilter],
-        };
     }
 
     async ngOnInit() {
         setTimeout(() => {
             this.searchPage.results = this.results;
             this.searchPage.showingAllRepositories.next(false);
+            // Reset any selection carried over from the "all repositories" view we navigated from.
+            this.clearSelection();
         });
+        // Clear the selection when the active repository changes (the component is reused across repos).
+        this.searchPage.activeRepository
+            .observeValue()
+            .pipe(distinctUntilChanged(), skip(1), takeUntil(this.destroyed))
+            .subscribe(() => this.clearSelection());
+        // Clear the selection whenever a new query is issued so stale selections don't linger in the bottom bar.
+        this.results.searchQueryChanged
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => this.clearSelection());
         this.previewMode = await this.configService.get('searchPreviewMode', 'Sidebar');
     }
 
     onClick(event: NodeClickEvent<Node>) {
         this.editorialSidebarService.handleSelect(this.nodeEntriesResults, event, Scope.Search);
         this.results.onClick(event.element);
-    }
-
-    toggleFilters(): void {
-        this.searchFieldInternalService.filtersButtonClicked.next();
     }
 
     ngOnDestroy(): void {
@@ -155,6 +181,8 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     }
 
     updateSort(sort: ListSortConfig) {
+        // Re-sorting re-queries and replaces the result set, so drop any carried-over selection.
+        this.clearSelection();
         this.results.searchSort.setUserValue({
             active: sort.active,
             direction: sort.direction,
@@ -192,5 +220,22 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
     selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
         this.searchPage.selection.next(selection.source.selected as Node[]);
         this.editorialSidebarService.handleSelection(selection);
+    }
+
+    clearSelection() {
+        this.nodeEntriesResults?.getSelection().clear();
+        // Reset the shared subject directly: clearing an already-empty wrapper emits no change event,
+        // so a stale selection (e.g. carried over from the "all repositories" view) wouldn't reset.
+        this.searchPage.selection.next([]);
+        this.selectionOverlayOpen = false;
+    }
+
+    /**
+     * Remove a single node from the selection (triggered by unchecking it in the selection overlay).
+     * Deselecting on the main wrapper's selection model fires `selectionChange`, which updates the
+     * shared `searchPage.selection` subject and thus shrinks the overlay's node list.
+     */
+    deselectNode(node: Node) {
+        this.nodeEntriesResults?.getSelection().deselect(node);
     }
 }

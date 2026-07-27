@@ -9,9 +9,9 @@ import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
+import org.edu_sharing.spring.security.SSORegistrationService;
 import org.edu_sharing.spring.security.basic.*;
 import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
-import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.edu_sharing.spring.security.openid.persistence.MyBatisOidcSessionRegistry;
 import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -26,7 +27,6 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
@@ -35,13 +35,11 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequ
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.UrlUtils;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Configuration
@@ -66,12 +64,12 @@ public class SecurityConfigurationOAuth2 {
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatchers(matchers -> matchers
-                        .requestMatchers(new AntPathRequestMatcher("/login/oauth2/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/logout/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/oauth2"))
-                        .requestMatchers(new AntPathRequestMatcher("/oauth2/**"))
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth"))
-                        .requestMatchers(new AntPathRequestMatcher("/rest/authentication/v1/validateSSOSession/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/login/oauth2/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/logout/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/oauth2"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/oauth2/**"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth"))
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/rest/authentication/v1/validateSSOSession/**"))
                 )
                 //.securityMatcher("/login/oauth2/**","/logout/**","/oauth2","/oauth2/**","/shibboleth","/rest/authentication/v1/validateSSOSession/**")
                 .authorizeHttpRequests((authorize) -> authorize
@@ -84,8 +82,8 @@ public class SecurityConfigurationOAuth2 {
                          *
                          * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
                          */
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth")).authenticated()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/**")).permitAll()
                 )
 
                 .oauth2Login(login -> login
@@ -99,7 +97,10 @@ public class SecurityConfigurationOAuth2 {
                                 .authorizationRequestRepository(customAuthorizationRequestRepository())))
                 .sessionManagement(s -> s.sessionFixation().none())
                 //frontchannel logout triggerd by edu-sharing gui
-                .logout((logout) -> logout.logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)))
+                //explicitly match GET /logout: the gui triggers logout via GET (window.location / ajax get).
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/logout"))
+                        .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)))
                 //backchannel logout
                 .oidcLogout((logout) ->
                         logout.backChannel(bcLogout ->
@@ -132,7 +133,7 @@ public class SecurityConfigurationOAuth2 {
 
                 if (!successTarget.startsWith("http")) {
                             UriComponents successUrlComp = UriComponentsBuilder
-                                    .fromHttpUrl(UrlUtils.buildFullRequestUrl(request)).build();
+                                    .fromUriString(UrlUtils.buildFullRequestUrl(request)).build();
 
                     idpRedirectUrl = successUrlComp.getScheme() + "://" + successUrlComp.getHost();
 
@@ -211,9 +212,7 @@ public class SecurityConfigurationOAuth2 {
 
     @Bean
     @RefreshScope
-    public ClientRegistrationRepository clientRegistrationRepository(OAuth2ConfigProvider configService) {
-        List<ClientRegistration> registrations = new ArrayList<>(
-                new OAuth2ClientPropertiesMapper(configService).asClientRegistrations().values());
-        return new InMemoryClientRegistrationRepository(registrations);
+    public ClientRegistrationRepository clientRegistrationRepository(SSORegistrationService ssoRegistrationService) {
+        return new InMemoryClientRegistrationRepository(ssoRegistrationService.getClientRegistrations());
     }
 }

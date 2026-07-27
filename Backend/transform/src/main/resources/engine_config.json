@@ -104,7 +104,8 @@
         {"sourceMediaType": "video/quicktime", "targetMediaType": "image/png"},
         {"sourceMediaType": "video/quicktime", "targetMediaType": "image/jpeg"},
         {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/png"},
-        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/jpeg"}
+        {"sourceMediaType": "video/x-matroska", "targetMediaType": "image/jpeg"},
+        {"sourceMediaType": "video/webm", "targetMediaType": "image/jpeg"}
       ],
       "transformOptions": [
         "eduVideoThumbnail",
@@ -164,7 +165,8 @@
         {"sourceMediaType": "video/x-ms-wmv", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/x-m4v", "targetMediaType": "alfresco-metadata-extract"},
         {"sourceMediaType": "video/3gpp", "targetMediaType": "alfresco-metadata-extract"},
-        {"sourceMediaType": "video/theora", "targetMediaType": "alfresco-metadata-extract"}
+        {"sourceMediaType": "video/theora", "targetMediaType": "alfresco-metadata-extract"},
+        {"sourceMediaType": "video/webm", "targetMediaType": "alfresco-metadata-extract"}
       ],
       "transformOptions": [
         "metadataOptions"

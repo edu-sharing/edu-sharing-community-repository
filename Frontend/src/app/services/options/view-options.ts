@@ -276,9 +276,12 @@ export function createViewOptions({
     viewAssignmentSubmission.group = DefaultGroups.View;
     viewAssignmentSubmission.priority = 5;
 
-    const infoVersions = new OptionItem('OPTIONS.WORKSPACE_METADATA', 'info', (node: Node) => {
+    const infoVersions = new OptionItem('OPTIONS.VERSION_MANAGEMENT', 'info', (object) => {
+        // set the acted-on node(s) so the sidebar has a selection (context-menu flow
+        // does not go through the list selection that normally populates this)
+        service.editorialSidebarService.nodes.set(service.getObjects(object, data));
         service.editorialSidebarService.showOption({
-            option: 'WORKSPACE_METADATA',
+            option: 'VERSION_MANAGEMENT',
             trap: false,
         });
     });
@@ -289,8 +292,37 @@ export function createViewOptions({
         Constrain.HomeRepository,
         Constrain.FilesAndDirectories,
     ];
+    infoVersions.permissions = [RestConstants.PERMISSION_WRITE];
+    infoVersions.permissionsRightMode = NodesRightMode.Effective;
+    infoVersions.permissionsMode = HideMode.Hide;
     infoVersions.priority = 20;
     infoVersions.showAsAction = false;
+
+    const showStatistics = new OptionItem(
+        'EDITORIAL.OPTIONS.VIEWS_AND_USAGE',
+        'bar_chart',
+        (object) => {
+            // set the acted-on node(s) so the sidebar has a selection (context-menu flow
+            // does not go through the list selection that normally populates this)
+            service.editorialSidebarService.nodes.set(service.getObjects(object, data));
+            service.editorialSidebarService.showOption({
+                option: 'VIEWS_AND_USAGE',
+                trap: false,
+            });
+        },
+    );
+    showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
+    showStatistics.scopes = [
+        Scope.WorkspaceList,
+        Scope.WorkspaceTree,
+        Scope.CollectionsCollection,
+        Scope.Search,
+        Scope.Render,
+    ];
+    showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+    showStatistics.toolpermissionsMode = HideMode.Hide;
+    showStatistics.group = DefaultGroups.View;
+    showStatistics.priority = 35;
 
     const downloadNode = service.getDownloadOption(data, false);
     const downloadNodeSafe = service.getDownloadOption(data, true);
@@ -437,6 +469,7 @@ export function createViewOptions({
         submitAssignment,
         viewAssignmentSubmission,
         infoVersions,
+        showStatistics,
         downloadNode,
         downloadNodeSafe,
         downloadMetadataNode,

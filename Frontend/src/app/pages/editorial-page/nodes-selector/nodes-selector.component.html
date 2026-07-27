@@ -22,7 +22,7 @@
   esToolpermission | async) ) {
   <mat-tab [id]="idPrefix + TabType.METHODOLOGY">
     <ng-template mat-tab-label>
-      <i esIcon="dashboard" class="tab-icon"></i>
+      <i esIcon="sell" class="tab-icon"></i>
       <span class="tab-label">{{ i18nPrefix + 'METHODOLOGY.TITLE' | translate }}</span>
     </ng-template>
     <ng-container
@@ -117,6 +117,8 @@
       @if (searchCompleted() && (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)) {
       <es-node-entries-wrapper
         #searchWrapperRef
+        [singleSelect]="singleSelect()"
+        [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
         [dragDrop]="{
           dragAllowed: selectionMode() !== 'target',
           dropAllowed: canDropOnSearchRef,
@@ -124,7 +126,8 @@
         }"
         [columns]="searchColumns"
         [dataSource]="dataSourceSearch"
-        [(displayType)]="searchDisplayType"
+        [displayType]="searchDisplayType"
+        (displayTypeChange)="onSearchDisplayTypeChange($event)"
         [elementInteractionType]="InteractionType.Emitter"
         [initConfig]="{
           actionbar: actionbarSearchTab,
@@ -187,6 +190,8 @@
     <es-node-entries-wrapper
       #collectionsWrapperRef
       [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
+      [singleSelect]="singleSelect()"
+      [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
       [columns]="
         collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid
           ? collectionsGridColumns
@@ -234,6 +239,7 @@
     <es-node-entries-wrapper
       #workspaceWrapperRef
       [checkbox]="false"
+      [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
       [dataSource]="dataSourceWorkspace"
       [displayType]="NodeEntriesDisplayType.Tree"
       [dragDrop]="{

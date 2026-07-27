@@ -424,6 +424,9 @@
                 <property name="ccm:usagecourseid">
                     <type>d:text</type>
                 </property>
+                <property name="ccm:usagecoursetitle">
+                    <type>d:text</type>
+                </property>
                 <!-- is a link to the original node id for collection references -->
                 <property name="ccm:usageparentnodeid">
                     <type>d:text</type>

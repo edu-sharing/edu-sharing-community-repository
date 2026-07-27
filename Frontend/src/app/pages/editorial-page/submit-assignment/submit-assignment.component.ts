@@ -16,9 +16,11 @@ import {
     Assignment,
     AssignmentFile,
     AssignmentV1Service,
+    ConnectorService,
     ME,
     Node,
     NodeService,
+    Permission,
     Submission,
     SubmissionFile,
 } from 'ngx-edu-sharing-api';
@@ -62,6 +64,7 @@ import {
     RepoUrlService,
     Scope,
     TranslationsService,
+    UserAvatarComponent,
 } from 'ngx-edu-sharing-ui';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { RestConnectorsService } from '../../../core-module/rest/services/rest-connectors.service';
@@ -81,6 +84,7 @@ import { EditorialPageService } from '../editorial-page.service';
 import { AssignmentConfig } from '../submission-sidebar/submission-sidebar.component';
 import { RenderWrapperComponent } from '../../render2-page/render-wrapper-component/render-wrapper.component';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ThemeService } from '../../../services/theme.service';
 
 /**
  * submits an individual assignment (for student)
@@ -95,6 +99,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         EditorComponent,
         RenderWrapperComponent,
         NgxExtendedPdfViewerModule,
+        UserAvatarComponent,
     ],
     providers: [OptionsHelperDataService],
 })
@@ -119,16 +124,19 @@ export class SubmitAssignmentComponent implements OnDestroy {
     private restConnectorsService = inject(RestConnectorsService);
     private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
     private nodeTitlePipe = inject(NodeTitlePipe);
+    private theme = inject(ThemeService);
 
     @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
         NodeEntriesWrapperComponent<Node>
     >;
-    readonly editorConfig = {
+    readonly editorConfig = computed(() => ({
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
-    };
+        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+    }));
     readonly destroyed$ = new Subject<void>();
     columns: ColumnType = {
         Default: [new ListItem('NODE', 'title')],
@@ -147,6 +155,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
     loading = signal(false);
     assignment = signal<Assignment>(null);
     submission = signal<Submission>(null);
+    coordinators = computed<Permission[]>(
+        () => this.assignment()?.permissions?.filter((p) => p.role === 'COORDINATOR') ?? [],
+    );
     isOpenForSubmission = computed(() =>
         ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
     );
@@ -552,6 +563,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 state: TabType.UPLOAD,
                 upload: 'fast',
                 autoClose: true,
+                allowedConnectorIds: [ConnectorService.ID_ONLY_OFFICE, ConnectorService.ID_TINYMCE],
                 applyCallback: (nodes) =>
                     nodes.every(
                         (n) => !this.nodeHelperService.isNodeCollection(n) && !n.isDirectory,

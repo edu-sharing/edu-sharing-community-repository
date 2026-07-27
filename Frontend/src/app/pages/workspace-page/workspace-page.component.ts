@@ -8,8 +8,10 @@ import {
     NgZone,
     OnDestroy,
     OnInit,
+    viewChild,
     ViewChild,
 } from '@angular/core';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -120,7 +122,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     private nodeHelper = inject(NodeHelperService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
-    private optionsHelperService = inject(OptionsHelperService);
     private searchField = inject(SearchFieldService);
     private session = inject(SessionStorageService);
     private storage = inject(TemporaryStorageService);
@@ -148,6 +149,22 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     @ViewChild(WorkspaceTreeComponent) treeComponent: WorkspaceTreeComponent;
     @ViewChild(RecycleMainComponent) recycleMainComponent: RecycleMainComponent;
     @ViewChild('actionbar') actionbarRef: ActionbarComponent;
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
+
+    /** Currently selected nodes, mirrored from explorer for the selection bar/overlay. */
+    selection: Node[] = [];
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     cardHasOpenModals$: Observable<boolean>;
     sidebarParent: Node;
@@ -521,8 +538,15 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
 
         if (this.isSafe) {
             const config = await this.configService.observeConfig().pipe(take(1)).toPromise();
-            if (config.themeColors?.colorSafe) {
-                this.themeService.applyFromConfigColors(config.themeColors.colorSafe);
+            // themeColors is a list discriminated by the `theme` attribute; prefer the entry for the
+            // active mode, falling back to the light set.
+            const dark = this.themeService.isDarkMode();
+            const themeColors =
+                config.themeColors?.find((c) =>
+                    dark ? c.theme === 'dark' : !c.theme || c.theme === 'light',
+                ) ?? config.themeColors?.find((c) => !c.theme || c.theme === 'light');
+            if (themeColors?.colorSafe) {
+                this.themeService.applyFromConfigColors(themeColors.colorSafe);
             }
         }
     }
@@ -706,6 +730,10 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     setRoot(root: NodeRoot) {
         this.root = root;
         this.searchQuery = null;
+        // The selection belongs to the previous view; reset it so the bottom bar/overlay don't carry
+        // a stale selection across the explorer/recycle switch.
+        this.selection = [];
+        this.selectionOverlayOpen = false;
         void this.routeTo(root, null, null);
         this.actionbarRef.invalidate();
     }
@@ -1062,10 +1090,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
                 this.config.instant('workspaceSharedToMeDefaultAll', false),
             ),
         );
-        const sidebarToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.editorialSidebarService.sidebarOpened,
-        );
-        this.customOptions.addOptions = [sidebarToggle];
+        this.customOptions.addOptions = [];
     }
 
     private getLastLocationStorageId() {
@@ -1073,6 +1098,39 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
             TemporaryStorageService.WORKSPACE_LAST_LOCATION +
             (this.isSafe ? RestConstants.SAFE_SCOPE : '')
         );
+    }
+
+    onSelectionChanged(nodes: Node[]) {
+        this.selection = nodes;
+    }
+
+    /** The node list backing the current view (explorer or recycle) — source of the selection. */
+    private get activeList() {
+        return this.root === 'RECYCLE'
+            ? this.recycleMainComponent?.list
+            : this.explorer?.nodeEntries;
+    }
+
+    /** Columns of the current view, used by the selection overlay. */
+    get selectionColumns() {
+        return this.root === 'RECYCLE'
+            ? this.recycleMainComponent?.columns
+            : this.explorer?.columns;
+    }
+
+    /** Display type of the current view, used by the selection overlay (recycle is always a table). */
+    get selectionDisplayType() {
+        return this.root === 'RECYCLE' ? NodeEntriesDisplayType.Table : this.displayType;
+    }
+
+    clearSelection() {
+        this.activeList?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
+    }
+
+    deselectNode(node: Node) {
+        this.activeList?.getSelection().deselect(node);
     }
 
     setDisplayType(displayType: NodeEntriesDisplayType, refreshRoute = true) {

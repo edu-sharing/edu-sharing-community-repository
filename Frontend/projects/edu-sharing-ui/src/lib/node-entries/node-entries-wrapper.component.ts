@@ -1,4 +1,5 @@
 import {
+    afterNextRender,
     AfterViewInit,
     ChangeDetectorRef,
     Component,
@@ -7,6 +8,8 @@ import {
     ElementRef,
     EventEmitter,
     HostBinding,
+    inject,
+    Injector,
     Input,
     NgZone,
     OnChanges,
@@ -18,7 +21,6 @@ import {
     Type,
     ViewChild,
     ViewContainerRef,
-    inject,
 } from '@angular/core';
 import { BehaviorSubject, interval, Subject } from 'rxjs';
 import {
@@ -99,6 +101,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private templatesService = inject(NodeEntriesTemplatesService);
     private changeDetectorRef = inject(ChangeDetectorRef);
     private elementRef = inject(ElementRef);
+    private injector = inject(Injector);
     public treeNodeService = inject(TreeNodeService);
     // @TODO
     // private mainNav = inject(MainNavService);
@@ -129,6 +132,8 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() columns: ColumnType;
     @Input() configureColumns: boolean;
     @Input() checkbox = true;
+    /** restrict selection to a single node; the checkbox then behaves like a radio */
+    @Input() singleSelect = false;
     /**
      * emits when the user re-configures the columns
      * should be used in order to save the new configuration
@@ -187,9 +192,19 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @Input() disableInfiniteScroll = false;
     /**
+     * Whether infinite scroll listens on the global scroll container (window/app container)
+     * or on the list element itself. Set to false when the list scrolls internally.
+     * (assuming there is any overflow container around)
+     */
+    @Input() infiniteScrollWindow = true;
+    /**
      *  show the icon column (table view only)
      */
     @Input() showIconColumn = true;
+    /**
+     *  show the actions (options) column (table view only)
+     */
+    @Input() showActions = true;
 
     @Output() fetchData = new EventEmitter<FetchEvent>();
     @Output() clickItem = new EventEmitter<NodeClickEvent<T>>();
@@ -281,6 +296,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
+        this.entriesService.singleSelect = this.singleSelect;
         this.entriesService.displayType = this.displayType;
         if (changes.paginationStrategy) {
             this.entriesService.paginationStrategy = this.paginationStrategy;
@@ -343,11 +359,15 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.entriesService.singleClickHint = this.singleClickHint;
         this.entriesService.ctrlClickBehavior = this.ctrlClickBehavior;
         this.entriesService.disableInfiniteScroll = this.disableInfiniteScroll;
+        this.entriesService.infiniteScrollWindow = this.infiniteScrollWindow;
         if (changes.showIconColumn) {
             this.entriesService.showIconColumn.next(this.showIconColumn);
         }
+        if (changes.showActions) {
+            this.entriesService.showActions.next(this.showActions);
+        }
 
-        if (changes['initConfig']) {
+        if (changes['initConfig'] && this.initConfig) {
             void this.initOptionsGenerator(this.initConfig);
         }
         if (this.componentRef) {
@@ -412,6 +432,22 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         this.displayTypeChange.emit(displayType);
     }
 
+    /**
+     * Scrolls the first selected entry into view once the entries have been (re-)rendered.
+     */
+    scrollSelectionIntoView(): void {
+        if (!this.entriesService.selection?.selected?.length) {
+            return;
+        }
+        afterNextRender(
+            () =>
+                (this.elementRef.nativeElement as HTMLElement)
+                    .querySelector('.mat-row-selected, .grid-card.selected')
+                    ?.scrollIntoView({ block: 'center', inline: 'nearest' }),
+            { injector: this.injector },
+        );
+    }
+
     updateNodes(nodes: void | T[]) {
         if (!nodes) {
             return;
@@ -457,13 +493,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             return o;
         });
         virtual.forEach((v: T) => {
-            const contains = this.dataSource
-                .getData()
-                .some((d) =>
-                    (d as Node).ref
-                        ? (d as Node).ref?.id === (v as Node).ref?.id
-                        : (d as User).authorityName === (v as User).authorityName,
-                );
+            const contains = !!this.findInDataSource(v);
             if (contains) {
                 if ((v as VirtualNode).override !== false) {
                     this.updateNodes([v]);
@@ -489,11 +519,29 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
             }
         });
         if (options?.select !== false) {
+            // Select the instances the data source actually holds: for a node that was already
+            // in the list, `updateNodes` copies the data into the existing object, so the object
+            // passed in never enters the list. Selecting it would leave the selection model with
+            // an element the list does not contain (`SelectionModel` compares by identity), i.e.
+            // the row would render unselected (no checkbox) despite the virtual highlight.
             this.entriesService.selection.clear();
-            this.entriesService.selection.select(...virtual);
+            this.entriesService.selection.select(
+                ...virtual.map((v) => this.findInDataSource(v) ?? v),
+            );
         }
         this.virtualNodesAdded.emit(virtual as Node[]);
         this.changeDetectorRef.detectChanges();
+    }
+
+    /** the element of the data source representing `element`, matched by node id / authority name */
+    private findInDataSource(element: T): T | undefined {
+        return this.dataSource
+            .getData()
+            .find((d) =>
+                (d as Node).ref
+                    ? (d as Node).ref?.id === (element as Node).ref?.id
+                    : (d as User).authorityName === (element as User).authorityName,
+            );
     }
 
     setOptions(options: ListOptions): void {

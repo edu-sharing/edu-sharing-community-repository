@@ -5,6 +5,7 @@ import freemarker.template.utility.ClassUtil;
 import lombok.Setter;
 import org.edu_sharing.repository.server.appcontext.AppContextServiceFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -49,7 +50,18 @@ public class AppContextLocatorAutoRegistrar implements BeanDefinitionRegistryPos
 
             bdb.setPrimary(true);
             bdb.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-            registry.registerBeanDefinition(beanName, bdb.getBeanDefinition());
+
+            AbstractBeanDefinition beanDefinition = bdb.getBeanDefinition();
+            /*
+             * Expose the produced interface type statically so that type-based lookups
+             * (e.g. NodeServiceFactory.getInstance() -> getBean(NodeServiceFactory.class))
+             * resolve the FactoryBean without having to instantiate it first. Without this
+             * attribute the produced type is only known via getObjectType() after instantiation,
+             * which fails during early startup phases (ContextRefreshedEvent listeners, Quartz
+             * jobs running while the context is still refreshing) with NoSuchBeanDefinitionException.
+             */
+            beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, typeInformation.interfaceType());
+            registry.registerBeanDefinition(beanName, beanDefinition);
 
 
         }

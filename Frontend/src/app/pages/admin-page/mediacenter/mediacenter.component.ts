@@ -1,4 +1,4 @@
-import { Component, EventEmitter, NgZone, Output, ViewChild, inject } from '@angular/core';
+import { Component, EventEmitter, inject, NgZone, Output, ViewChild } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     Group,
@@ -15,6 +15,7 @@ import {
     InteractionType,
     ListSortConfig,
     MdsHelperService,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
@@ -33,7 +34,6 @@ import { Helper } from '../../../core-module/rest/helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { Toast } from '../../../services/toast';
-import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { YES_OR_NO } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
@@ -69,7 +69,7 @@ export class AdminMediacenterComponent {
     @ViewChild('mediacenterMds') mediacenterMds: MdsEditorWrapperComponent;
     @ViewChild('nodeEntriesTable') nodeEntriesTable: NodeEntriesWrapperComponent<Node>;
     @ViewChild('groupEntriesTable') groupEntriesTable: NodeEntriesWrapperComponent<Node>;
-    @Output() openNode = new EventEmitter<Node>();
+    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
     // @TODO: declare the mediacenter type when it is finalized in backend
     mediacenters: any[];
     // original link to mediacenter object (contained in mediacenters[])
@@ -428,17 +428,19 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterServiceLegacy.importMediacenters(this.mediacentersFile).subscribe(
-            (data: any) => {
-                this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED', { rows: data.rows });
-                this.globalProgress = false;
-                this.mediacentersFile = null;
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.globalProgress = false;
-            },
-        );
+        this.mediacenterService
+            .importMediacenters({ body: { mediacenters: this.mediacentersFile } })
+            .subscribe({
+                next: (data) => {
+                    this.toast.toast('ADMIN.MEDIACENTER.IMPORT.IMPORTED', { rows: data.rows });
+                    this.globalProgress = false;
+                    this.mediacentersFile = null;
+                },
+                error: (error) => {
+                    this.toast.error(error);
+                    this.globalProgress = false;
+                },
+            });
     }
 
     public importOrganisations() {
@@ -447,17 +449,19 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterServiceLegacy.importOrganisations(this.organisationsFile).subscribe(
-            (data: any) => {
-                this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED', { rows: data.rows });
-                this.globalProgress = false;
-                this.organisationsFile = null;
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.globalProgress = false;
-            },
-        );
+        this.mediacenterService
+            .importOrganisations({ body: { organisations: this.organisationsFile } })
+            .subscribe({
+                next: (data) => {
+                    this.toast.toast('ADMIN.MEDIACENTER.ORGIMPORT.IMPORTED', { rows: data.rows });
+                    this.globalProgress = false;
+                    this.organisationsFile = null;
+                },
+                error: (error) => {
+                    this.toast.error(error);
+                    this.globalProgress = false;
+                },
+            });
     }
 
     // importMcOrgConnections
@@ -467,21 +471,24 @@ export class AdminMediacenterComponent {
             return;
         }
         this.globalProgress = true;
-        this.mediacenterServiceLegacy
-            .importMcOrgConnections(this.orgMcFile, this.removeSchoolsFromMC)
-            .subscribe(
-                (data: any) => {
+        this.mediacenterService
+            .importMcOrgConnections({
+                removeSchoolsFromMC: this.removeSchoolsFromMC,
+                body: { mcOrgs: this.orgMcFile },
+            })
+            .subscribe({
+                next: (data) => {
                     this.toast.toast('ADMIN.MEDIACENTER.ORG_MC_CONNECT.IMPORTED', {
                         rows: data.rows,
                     });
                     this.globalProgress = false;
                     this.orgMcFile = null;
                 },
-                (error: any) => {
+                error: (error) => {
                     this.toast.error(error);
                     this.globalProgress = false;
                 },
-            );
+            });
     }
 
     setMediacenterNodesSort(sort: ListSortConfig) {

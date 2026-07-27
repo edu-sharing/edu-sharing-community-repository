@@ -1,13 +1,10 @@
-import { Component, input, model, inject } from '@angular/core';
+import { Component, computed, inject, input, model } from '@angular/core';
 import { AssignmentFile, Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../shared/shared.module';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { NodeHelperService, NodesRightMode } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
-import { MatSelectChange } from '@angular/material/select';
 import { AssignmentBase } from '../manage-assignment/manage-assignment.component';
-import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject } from 'rxjs';
 
 type Role = 'SUPPLEMENTARY' | 'SUBMITTABLE';
 export type NodeWithRole = Node &
@@ -22,39 +19,37 @@ export type NodeWithRole = Node &
     imports: [SharedModule],
 })
 export class ManageAssignmentNodesComponent {
-    private translate = inject(TranslateService);
     nodeHelperService = inject(NodeHelperService);
 
     readonly ChangePermissions = RestConstants.ACCESS_CHANGE_PERMISSIONS;
     readonly = input<boolean>(false);
+    loading = input<boolean>(false);
+    role = input<Role>('SUBMITTABLE');
     assignment = model.required<AssignmentBase>();
     nodes = model.required<NodeWithRole[]>();
-    readonly translateReady$ = new BehaviorSubject<boolean>(false);
+
+    /** Nodes belonging to this section's role (defaulting a missing role to SUBMITTABLE). */
+    readonly roleNodes = computed(() =>
+        (this.nodes() || []).filter((n) => (n.documentRole || 'SUBMITTABLE') === this.role()),
+    );
 
     drop(event: CdkDragDrop<NodeWithRole[]>) {
-        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-        this.nodes.set(this.nodes());
-    }
-
-    constructor() {
-        // dirty hack for https://github.com/angular/components/issues/7923
-        this.translate.get('ANY').subscribe(() => this.translateReady$.next(true));
+        const ordered = this.roleNodes().slice();
+        moveItemInArray(ordered, event.previousIndex, event.currentIndex);
+        // Write the reordered role nodes back into the full list, keeping other roles in place.
+        let i = 0;
+        this.nodes.set(
+            this.nodes().map((n) =>
+                (n.documentRole || 'SUBMITTABLE') === this.role() ? ordered[i++] : n,
+            ),
+        );
     }
 
     remove(item: NodeWithRole) {
-        this.nodes().splice(this.nodes().indexOf(item), 1);
-        this.nodes.set(this.nodes());
+        this.nodes.set(this.nodes().filter((n) => n !== item));
     }
 
     protected readonly NodesRightMode = NodesRightMode;
-    compare(o1: any, o2: any) {
-        return false;
-    }
-
-    setRole(item: NodeWithRole, $event: MatSelectChange<Role>) {
-        item.documentRole = $event.value;
-        this.nodes.set(this.nodes());
-    }
 
     isLicenseMedia(item: NodeWithRole) {
         return item.properties?.[RestConstants.CCM_PROP_RESTRICTED_ACCESS]?.[0] === 'true';

@@ -1,10 +1,15 @@
 @use './common' as *;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - var(--mainnavHeight));
+    // Lock to the available viewport height (below the in-flow sticky main nav) and clip, so the
+    // page never produces a body scrollbar — the results card scrolls internally instead.
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
 }
 :host ::ng-deep {
     mat-sidenav-container mat-sidenav-content {
@@ -13,8 +18,13 @@
 }
 
 mat-progress-bar {
-    position: sticky;
-    top: var(--mainnavCurrentHeight);
+    // Overlay the top edge instead of sitting in flow: the fadeOut animation only animates opacity,
+    // so an in-flow bar would permanently occupy its ~4px height on top of the full-height card and
+    // push the page past the viewport (body scrollbar).
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     flex-shrink: 0;
     transition: unset;
     z-index: 2;
@@ -36,7 +46,7 @@ mat-progress-bar {
     width: 32px;
     flex-shrink: 0;
     img {
-        background-color: white;
+        background-color: var(--backgroundColor);
         height: 20px;
         width: 20px;
         border-radius: 2px;
@@ -55,31 +65,6 @@ mat-tab-nav-panel {
     background-color: unset;
 }
 
-.filter-bar-container {
-    width: 300px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-bar-heading {
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    height: 60px;
-    border-bottom: 1px solid var(--mat-divider-color);
-    .filter-bar-title {
-        flex-grow: 1;
-        font-size: 180%;
-        font-weight: normal;
-        margin: 0;
-    }
-    .filter-bar-close-button {
-        margin-right: -10px;
-        flex-shrink: 0;
-    }
-}
-
 main {
     display: flex;
     align-items: flex-start;
@@ -88,16 +73,61 @@ main {
 
 es-preview-sidebar,
 es-search-page-filters-sidebar {
-    position: sticky;
+    // Deliberately NOT sticky/fixed: the body scrolls by the footer height to reveal `es-footer`
+    // below the cards, so anything pinned to the viewport here would keep sitting on the footer.
     flex-shrink: 0;
-    // top: var(--mainnavCurrentHeight);
     max-height: calc(100vh - var(--mainnavCurrentHeight));
 }
 
-.search-page-body {
-    padding: 0 25px 25px;
+// The global `mat-sidenav.es-mat-sidenav` rule (core-ui-module/styles/globals.scss) pins the drawer
+// to the viewport (`position: fixed; top: var(--mainnavCurrentHeight)`) and sizes its inner card off
+// `100vh`. That keeps the drawer's bottom edge at the viewport bottom, so once the body is scrolled
+// to reveal `es-footer` the drawer covers the footer strip. Position it inside the (in-flow)
+// mat-sidenav-container instead and derive the card height from that container, so it scrolls up
+// with the body exactly like the left filter panel.
+mat-sidenav.es-mat-sidenav {
+    position: absolute;
+    top: 0;
+    // matches the 15px top + 15px bottom margin the global rule puts on the content card
+    > .es-mat-sidenav-content {
+        height: calc(100% - 30px);
+    }
+}
+
+// Global content container, mirroring the editorial page's `.main-content` card. It also carries the
+// mobile bottom-nav (es-main-menu-bottom) clearance so the sticky selection bar inside it stays clear.
+.main-content {
     flex-grow: 1;
     min-width: 0;
+    // Static rounded card whose content scrolls inside (same pattern as editorial-page).
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+
+    // The repository tab bar is a static header; only the body below it scrolls.
+    > nav {
+        flex-shrink: 0;
+        --mat-tab-container-height: #{vars.$secondaryBarHeight};
+        background-color: var(--roundedContainerBackground);
+        @include mixins.materialShadowBottom();
+        // paint the shadow above the scrolled content
+        position: relative;
+        z-index: 1;
+    }
+}
+
+// The content area below the tabs. Keeps the page's grey background. It does NOT scroll itself —
+// the routed results component scrolls internally so its selection footer bar stays outside the
+// scrollbar. Padding/scrollbar live on the inner scroll region of each results view.
+.search-page-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: vars.$backgroundColor;
 }
 .filter-bar-body {
     flex-grow: 1;

@@ -1,6 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
-@use 'sass:color';
 $fieldHeight: 40px;
 @mixin suggestionCardHeading {
     font-size: $fontSizeSmall;
@@ -90,7 +89,7 @@ form {
         height: unset;
         @each $property, $color in $chip-colors {
             &.filter-chip-#{$property} {
-                background-color: $color !important;
+                background-color: var(--chip-color-#{$property}) !important;
             }
         }
 
@@ -125,7 +124,11 @@ form {
     min-width: 0;
     flex: 1 0 0;
     &::placeholder {
-        color: color.mix($workspaceTopBarInputText, $workspaceTopBarInputBackground, 75%);
+        color: color-mix(
+            in srgb,
+            #{$workspaceTopBarInputText} 75%,
+            #{$workspaceTopBarInputBackground}
+        );
     }
 }
 
@@ -146,7 +149,7 @@ form {
     align-items: center;
     justify-content: center;
     margin-right: 0;
-    color: #{rgba($workspaceTopBarInputText, 0.8)};
+    color: color-mix(in srgb, #{$workspaceTopBarInputText} 80%, transparent);
     &.cdk-keyboard-focused {
         @include setGlobalKeyboardFocus('border');
     }

@@ -15,7 +15,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.RemoteAuthDescription;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.json.JSONObject;
 

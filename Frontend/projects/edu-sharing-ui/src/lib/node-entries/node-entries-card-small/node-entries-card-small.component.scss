@@ -25,6 +25,8 @@ $collectionIconSize: 25px;
     @include materialShadowBottom();
     > i {
         font-size: 12px;
+        width: 14px;
+        height: 14px;
     }
 }
 
@@ -37,11 +39,31 @@ $collectionIconSize: 25px;
     }
 }
 
+.card-small-checkbox {
+    position: absolute;
+    z-index: 2;
+    top: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+}
+
 .grid-card {
     cursor: pointer;
+    // reuse the .card-options / .card-options-area styling from node-entries-card.main
+    // (separator border, round option buttons, collection overlay background). the small
+    // card has no rating area or dropdown, so drop the main card's `1fr auto` grid — its
+    // 10px column-gap would otherwise reserve a gutter and stop the row filling full width
+    .card-options {
+        display: block;
+        .card-options-area {
+            justify-content: flex-end;
+            padding: 0 $entriesCardPaddingHorizontal $entriesCardPaddingVertical;
+        }
+    }
     &.grid-card-collection {
         // default fallback color
-        background-color: rgb(var(--palette-primary-300));
+        background-color: rgb(var(--primaryBackground300));
     }
     .card-assignment {
         display: flex;
@@ -81,7 +103,9 @@ $collectionIconSize: 25px;
         }
     }
     .card-meta {
-        background-color: rgba(255, 255, 255, 0.8);
+        //--defaultBackground: #1e1e1e;
+        background-color: var(--defaultBackground);
+        color: var(--textBlack);
         // grid-template-columns: 50%;
         padding-bottom: $entriesCardPaddingVertical;
 

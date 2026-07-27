@@ -1,13 +1,19 @@
+import { PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
     Component,
+    computed,
     effect,
+    ElementRef,
+    inject,
     OnDestroy,
-    OnInit,
     signal,
     ViewChild,
-    inject,
+    viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ConnectedPosition } from '@angular/cdk/overlay';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import {
     Assignment,
     AuthenticationService,
@@ -56,10 +62,10 @@ import {
     NodeEntriesWrapperComponent,
     NodeHelperService,
     OptionItem,
-    OptionItemToggle,
     Scope,
     SearchHelperService,
     ToolpermissionPipe,
+    UIConstants,
     Values,
 } from 'ngx-edu-sharing-ui';
 import { MainNavService } from '../../main/navigation/main-nav.service';
@@ -67,7 +73,6 @@ import {
     SearchEvent,
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorialPageService, RECENT_ACTIVITY_EVENT_TYPES } from './editorial-page.service';
 import {
     debounceTime,
@@ -87,7 +92,10 @@ import {
     PrimaryMode,
 } from '../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { ConfigurationService } from '../../core-module/core.module';
+import { RestConnectorService } from '../../core-module/rest/services/rest-connector.service';
 import { UIService } from '../../core-module/rest/services/ui.service';
+import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
 
 type RouteConfig = {
@@ -101,7 +109,7 @@ type RouteConfig = {
     providers: [OptionsHelperService],
     standalone: false,
 })
-export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private breakpointObserver = inject(BreakpointObserver);
@@ -117,11 +125,19 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private searchHelperService = inject(SearchHelperService);
     private optionsHelperService = inject(OptionsHelperService);
     private ui = inject(UIService);
+    private connector = inject(RestConnectorService);
+    private platformLocation = inject(PlatformLocation);
+    private configurationService = inject(ConfigurationService);
     private authenticationService = inject(AuthenticationService);
     editorialPageService = inject(EditorialPageService);
     editorialBreadcrumbService = inject(EditorialBreadcrumbService);
     private nodeHelperService = inject(NodeHelperService);
     private toolpermissionPipe = inject(ToolpermissionPipe);
+    private loadingScreenService = inject(LoadingScreenService);
+    /** hide the filter toggle tab while the global loading screen covers the app */
+    readonly isLoading = toSignal(this.loadingScreenService.observeIsLoading(), {
+        initialValue: true,
+    });
 
     readonly HOME_REPOSITORY = HOME_REPOSITORY;
     readonly PageCount = 25;
@@ -137,12 +153,30 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
     @ViewChild(ActionbarComponent) actionbarRef: ActionbarComponent;
-    @ViewChild(NodeEntriesWrapperComponent)
-    nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType>;
+    /** Bottom selection bar (actions-only); node actions render here, toggles stay in the toolbar. */
+    readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
+    readonly nodeEntriesRef = viewChild<NodeEntriesWrapperComponent<NodeEntriesDataType>>(
+        NodeEntriesWrapperComponent,
+    );
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
     private destroyed$ = new Subject<void>();
     isMobile$ = this.breakpointObserver
         .observe(['(max-width: 900px)'])
         .pipe(map(({ matches }) => matches));
+    private isMobile = toSignal(this.isMobile$);
+    /** Guards the one-time auto-open of the filter bar on desktop page load. */
+    private filterBarAutoOpened = false;
     /**
      * mds group, used to fetch the template group AND search query id!
      */
@@ -161,7 +195,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     mdsLoaded$ = new BehaviorSubject(false);
     searchEvent$: Observable<SearchEvent>;
     /**
-     * called when the first init was done (all fields have been parsed and initalized)
+     * called when the first init was done (all fields have been parsed and initialized)
      */
     init$ = new BehaviorSubject<boolean>(false);
     /**
@@ -169,12 +203,20 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
      */
     firstNavigation$ = new BehaviorSubject<boolean>(false);
     mdsDefinition$ = new BehaviorSubject<MdsDefinition>(null);
+    private mdsDefinition = toSignal(this.mdsDefinition$);
+    /**
+     * whether the current mds group renders any filter widgets
+     */
+    readonly filtersAvailable = computed(() => {
+        const group = this.mdsGroup();
+        const mds = this.mdsDefinition();
+        return !!group && !!mds && MdsHelperService.groupHasWidgets(mds, group);
+    });
     readonly dataSource = new NodeDataSource<
         Node | NodeShare | NodeEvent | Assignment | NodeSuggestion
     >();
     columns = signal<ColumnType>(null);
     selection = signal<SelectionModel<NodeEntriesDataType | null>>(null);
-    private sidebarOptionToggle: OptionItemToggle;
     private pagination$ = new BehaviorSubject<{
         skipCount: number;
         maxItems: number;
@@ -182,6 +224,16 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     readonly filtersButtonClicked = this.searchFieldInternalService.filtersButtonClicked;
     readonly filterBarVisible = this.searchFieldInternalService.filterBarVisible;
+
+    // Always-visible tab ("Lasche") on the left edge that opens/closes the filter drawer,
+    // mirroring the editorial sidebar's toggle (see es-edge-toggle in the template).
+    readonly leftSidenav = viewChild('leftSidenavEl', { read: ElementRef });
+    private readonly filterBarVisibleSig = toSignal(this.filterBarVisible);
+    private readonly mainComponentSig = toSignal(this.mainComponent$);
+    /** whether the left filter drawer is currently open (same condition as the mat-sidenav) */
+    readonly filterBarOpen = computed(
+        () => !!this.filterBarVisibleSig() && !this.mainComponentSig() && this.filtersAvailable(),
+    );
 
     constructor() {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
@@ -191,7 +243,39 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
             if (this.selection()?.selected.length !== 1) {
                 this.editorialSidebarService.sidebarOpened.set(false);
             }
+            // Inject pending virtual nodes as soon as the node-entries wrapper exists. When returning
+            // from a main component the wrapper is re-created after change detection, so it may be
+            // absent at the moment the search result arrives — the signal query re-fires this then.
+            if (this.nodeEntriesRef()) {
+                this.injectVirtualNodes();
+            }
         });
+        // Editorial page requires a valid, non-guest login; redirect to login otherwise.
+        // Init is gated behind the check so an unauthorized session never starts the page's flow.
+        this.connector.isLoggedIn().subscribe({
+            next: (login) => {
+                if (login.isValidLogin && !login.isGuest && !login.currentScope) {
+                    this.initEditorial();
+                } else if (!login.isValidLogin) {
+                    // No live session -> reconnect (the login page has no session to bounce back).
+                    this.ui.goToLogin();
+                } else {
+                    // A *valid* guest session: editorial is not available to guests, and /login
+                    // would just bounce the live session straight back here. Inform via toast and
+                    // leave to the configured default location instead.
+                    UIHelper.goToDefaultLocation(
+                        this.router,
+                        this.platformLocation,
+                        this.configurationService,
+                    );
+                }
+            },
+            error: () => this.ui.goToLogin(),
+        });
+    }
+
+    /** Page setup; runs only once a valid, non-guest session is confirmed. */
+    private initEditorial(): void {
         this.authenticationService
             .observeLoginInfo()
             .subscribe((loginInfo) => this.loginInfo$.next(loginInfo));
@@ -218,7 +302,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.searchFieldService
             .observeCurrentInstance()
             .pipe(
-                takeUntilDestroyed(),
+                takeUntil(this.destroyed$),
                 filter((i) => !!i),
                 first(),
             )
@@ -226,6 +310,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 this.searchEvent$ = instance.onSearchTriggered();
                 this.initSubscription();
             });
+        this.route.queryParams.subscribe(this.queryParams$);
+        this.route.params.subscribe(this.params$);
+        this.registerMode();
     }
 
     ngAfterViewInit(): void {
@@ -233,16 +320,13 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private prepareOptions() {
-        this.sidebarOptionToggle = this.optionsHelperService.getOptionItemToggleSidebar(
-            this.editorialSidebarService.sidebarOpened,
-        );
         const reject = new OptionItem(
             'EDITORIAL.OPTION.REJECT_SHARE',
             'cancel_schedule_send',
             (element: InviteEvent[]) => {
                 const elements = this.optionsHelperService.getObjects(
                     element,
-                    this.nodeEntriesRef.optionsHelper.getData(),
+                    this.nodeEntriesRef()!.optionsHelper.getData(),
                 );
                 void this.dialogs.openRejectShareDialog(elements);
             },
@@ -261,28 +345,55 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 )
             );
         };
-        void this.nodeEntriesRef?.initOptionsGenerator({
-            actionbar: this.actionbarRef,
+        // Split actionbar (mirrors search/workspace): the toolbar actionbar shows toggle options
+        // only; node actions move to the bottom selection bar.
+        void this.nodeEntriesRef()?.initOptionsGenerator({
+            actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [this.sidebarOptionToggle, reject],
+                addOptions: [reject],
             },
         });
     }
 
-    async ngOnInit(): Promise<void> {
-        this.route.queryParams.subscribe(this.queryParams$);
-        this.route.params.subscribe(this.params$);
-        this.registerMode();
-    }
-
     ngOnDestroy(): void {
+        console.log('destroy');
         this.destroyed$.next();
         this.destroyed$.complete();
     }
 
+    /**
+     * Informs the user that no elements can be created in the current editorial view and offers
+     * a shortcut to the workspace (mirrors the workspace "create not allowed" dialog).
+     */
+    private async showCreateNotAllowed(): Promise<void> {
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'EDITORIAL.CREATE_NOT_ALLOWED.TITLE',
+            message: 'EDITORIAL.CREATE_NOT_ALLOWED.MESSAGE',
+            buttons: [
+                {
+                    label: 'SIDEBAR.WORKSPACE',
+                    config: { color: 'primary', position: 'opposite' },
+                },
+                { label: 'CLOSE', config: { color: 'standard' } },
+            ],
+        });
+        dialogRef.afterClosed().subscribe((response) => {
+            if (response === 'SIDEBAR.WORKSPACE') {
+                void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace']);
+            }
+        });
+    }
+
     private registerMode() {
         this.params$.subscribe(async (p) => {
+            // we disable here, assignment is the only component and will set it later
+            this.mainNav.patchMainNavConfig({
+                create: {
+                    allowed: 'EMIT_EVENT',
+                },
+                onCreateNotAllowed: () => this.showCreateNotAllowed(),
+            });
             this.editorialBreadcrumbService.mode.set(p.primaryMode);
             if (p.primaryMode === 'activity') {
                 this.columns.set({
@@ -485,10 +596,23 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     private async processCurrentValues(params: Params, routeConfig: RouteConfig) {
-        this.searchFieldService.getCurrentInstance().patchConfig({
+        this.clearSelection();
+        const instance = this.searchFieldService.getCurrentInstance();
+        instance.patchConfig({
             placeholder: 'EDITORIAL.SEARCH_PLACEHOLDER.' + routeConfig.primaryMode.toUpperCase(),
-            showFiltersButton: !params.mainComponent,
+            showFiltersButton: !params.mainComponent && this.filtersAvailable(),
         });
+        // Auto-open the filter bar once on desktop load, but only when the group definitely has
+        // filter widgets; afterwards respect the user's manual open/close state.
+        if (
+            !this.filterBarAutoOpened &&
+            this.isMobile() === false &&
+            !params.mainComponent &&
+            this.filtersAvailable()
+        ) {
+            this.filterBarAutoOpened = true;
+            instance.filterBarIsVisible.setUserValue(true);
+        }
         const mds = await firstValueFrom(this.mdsDefinition$.pipe(filter((m) => !!m)));
         const criteria = JSON.parse(params.filters || '{}') as Values;
         const originalCriteria = Helper.deepCopy(criteria);
@@ -541,7 +665,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
         this.dataSource.reset();
         this.clearSelection();
 
-        this.nodeEntriesRef?.setPaginator(pagination);
+        this.nodeEntriesRef()?.setPaginator(pagination);
         // wait for mds and delay to make sure the facets are registered
 
         if (routeConfig.primaryMode === 'activity') {
@@ -695,7 +819,7 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
                 ? { groupId: 'preview_sidebar_edit', editorMode: 'nodes' as const }
                 : undefined;
         this.editorialSidebarService.handleSelect(
-            this.nodeEntriesRef,
+            this.nodeEntriesRef(),
             event,
             Scope.EditorialPage,
             previewConfig,
@@ -704,6 +828,9 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
 
     selectionChange(event: SelectionChange<NodeEntriesDataType>) {
         this.selection.set(event.source);
+        if (!event.source.selected.length) {
+            this.selectionOverlayOpen = false;
+        }
         this.editorialSidebarService.handleSelection(event);
     }
     fetchEvent(event: FetchEvent) {
@@ -755,21 +882,49 @@ export class EditorialPageComponent implements OnInit, AfterViewInit, OnDestroy 
     private setNewData(event: GenericSearchResults) {
         this.clearSelection();
         this.dataSource.setData(event.nodes, event.pagination);
-        const tabId = this.editorialPageService.getTabId(this.tabSelection$.value);
+        this.injectVirtualNodes();
+    }
+
+    /**
+     * Injects the pending virtual nodes (e.g. a just-created/updated assignment) into the list.
+     * Called both after a search result and from the `nodeEntriesRef` effect, so it also fires
+     * once the node-entries wrapper is (re-)created after returning from a main component — when
+     * the wrapper was still undefined at the moment the search result arrived.
+     *
+     * The nodes are not consumed here: leaving the editor triggers the list search more than once
+     * and every reload replaces the data source, so we re-inject on each `setNewData`. They live
+     * for the session and are cleared on logout (see `EditorialPageService`). `addVirtualNodes`
+     * dedups (updates in place once the real search returns the node), so this never duplicates.
+     */
+    private injectVirtualNodes() {
+        const ref = this.nodeEntriesRef();
+        if (!ref) {
+            return;
+        }
         const virtualNodes = this.editorialPageService.getVirtualNodes(
             this.params$.value.primaryMode,
-            tabId,
+            this.editorialPageService.getTabId(this.tabSelection$.value),
         );
-        if (this.nodeEntriesRef && virtualNodes) {
-            this.nodeEntriesRef.addVirtualNodes(virtualNodes);
-            this.editorialPageService.clearVirtualNodes(this.params$.value.primaryMode, tabId);
+        if (virtualNodes?.length) {
+            ref.addVirtualNodes(virtualNodes);
         }
     }
     openItem(element: NodeClickEvent<NodeEntriesDataType>) {
         void this.nodeHelperService.navigateToNode(element);
     }
-    private clearSelection() {
-        this.nodeEntriesRef?.getSelection()?.clear();
+
+    /** Selected elements as a node list, for the selection bar / overlay. */
+    get selectedNodes(): Node[] {
+        return (this.selection()?.selected ?? []) as Node[];
+    }
+
+    clearSelection() {
+        this.nodeEntriesRef()?.getSelection()?.clear();
+        this.selectionOverlayOpen = false;
         this.editorialSidebarService.sidebarOpened.set(false);
+    }
+
+    deselectNode(node: Node) {
+        this.nodeEntriesRef()?.getSelection()?.deselect(node);
     }
 }

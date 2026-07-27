@@ -2,6 +2,7 @@ import {
     Component,
     ComponentFactoryResolver,
     ElementRef,
+    inject,
     Injector,
     Input,
     OnChanges,
@@ -10,7 +11,6 @@ import {
     SimpleChanges,
     ViewChildren,
     ViewContainerRef,
-    inject,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import {
@@ -129,6 +129,10 @@ export class MdsViewerComponent implements OnChanges {
                 this.mds.widgets.map((definition) => {
                     return {
                         definition,
+                        // No dynamic-condition evaluation in pure viewer mode: the widget is always
+                        // shown. Provide the subject so MdsWidgetComponent.ngOnInit can subscribe
+                        // without hitting `undefined.pipe`.
+                        meetsDynamicCondition: new BehaviorSubject<boolean>(true),
                         getInitalValuesAsync: async () => {
                             return {
                                 jointValues: this.data[definition.id!!],

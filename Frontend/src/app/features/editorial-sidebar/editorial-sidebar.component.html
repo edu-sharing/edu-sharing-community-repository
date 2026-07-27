@@ -5,7 +5,7 @@
   </div>
   }
   <div class="sidebar-header">
-    @if (enabledOption() && !enabledOption().trap) {
+    @if (enabledOption() && !enabledOption().trap && !editorialSidebarService.fullscreenActive()) {
     <button mat-icon-button (click)="enabledOption.set(null)">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
@@ -13,9 +13,34 @@
     <div>
       {{ title() | translate }}
     </div>
-    <button mat-icon-button (click)="close()">
+    @if (editorialSidebarService.showFullscreenToggle() && isDesktop()) {
+    <button
+      mat-icon-button
+      (click)="editorialSidebarService.toggleFullscreen()"
+      [attr.aria-label]="
+        (editorialSidebarService.fullscreenActive()
+          ? 'EDITORIAL.SIDEBAR.EXIT_FULLSCREEN'
+          : 'EDITORIAL.SIDEBAR.FULLSCREEN'
+        ) | translate
+      "
+    >
+      <i
+        [esIcon]="editorialSidebarService.fullscreenActive() ? 'fullscreen_exit' : 'fullscreen'"
+        [aria]="true"
+      ></i>
+    </button>
+    }
+    <!-- On mobile the panel is a full-screen overlay and the edge tab is hidden, so the header
+      carries an explicit close (X). On desktop the tab handles open/close instead. -->
+    @if (!isDesktop()) {
+    <button
+      mat-icon-button
+      (click)="close()"
+      [attr.aria-label]="'EDITORIAL.SIDEBAR.CLOSE' | translate"
+    >
       <i esIcon="close" [aria]="true"></i>
     </button>
+    }
   </div>
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -28,10 +53,12 @@
           [parent]="parent()"
           [primaryMode]="primaryMode()"
         ></es-nodes-selector>
-        } @if (option === 'WORKSPACE_METADATA') {
+        } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"
         ></es-metadata-sidebar>
+        } @if (option === 'VIEWS_AND_USAGE') {
+        <es-usages-preview [nodes]="$any(editorialSidebarService.nodes())"></es-usages-preview>
         } @if (option === 'MANAGE_SUBMISSION') {
         <es-submission-sidebar
           [data]="$any(enabledOption().optionConfig)"
@@ -44,6 +71,7 @@
           [node]="$any(editorialSidebarService.nodes())?.[0]"
           [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
           [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
+          [showStickyBar]="!editorialSidebarService.fullscreenActive()"
         ></es-preview-sidebar>
         }
       </div>
@@ -97,3 +125,17 @@
     </ng-template>
   </div>
 </div>
+
+<!-- Always-visible tab ("Lasche") to open/close the sidebar; replaces the former actionbar
+  toggle option and the header close (X) button. -->
+@if (!isModal()) {
+<es-edge-toggle
+  data-test="button-toggle-sidebar-editorial-options"
+  [side]="'end'"
+  [open]="editorialSidebarService.sidebarOpened()"
+  [visible]="
+    !editorialSidebarService.fullscreenActive() && !isLoading() && hasContent() && isDesktop()
+  "
+  (toggled)="editorialSidebarService.sidebarOpened.set(!editorialSidebarService.sidebarOpened())"
+></es-edge-toggle>
+}

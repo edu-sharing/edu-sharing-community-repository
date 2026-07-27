@@ -40,6 +40,7 @@ public class MdsDao {
                 suggestion.setDisplayString(suggest.getDisplayString());
                 //suggestion.setReplacementString(suggest.getReplacementString());
                 suggestion.setKey(suggest.getKey());
+                suggestion.setTranslation(suggest.getTranslation());
                 suggestionsResult.add(suggestion);
             }
 

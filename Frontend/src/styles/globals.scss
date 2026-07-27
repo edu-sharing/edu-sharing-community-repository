@@ -12,6 +12,27 @@
     box-sizing: border-box;
 }
 
+// CDK overlay pane holding an es-edge-toggle tab. It lives in the body-level overlay container, so
+// this MUST be a global (unscoped) rule — a component style / ::ng-deep can't reach it.
+// GlobalPositionStrategy writes the tab's offset as margin-left/right; animate those so the tab
+// slides together with a transform-based drawer (e.g. mat-sidenav), using Material's drawer timing.
+// The '--static' variant opts out (used when the drawer animates its own size and a ResizeObserver
+// already tracks the edge live, so a transition here would only lag).
+.es-edge-toggle-pane {
+    z-index: 100;
+    transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        margin-right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    &.es-edge-toggle-pane--static {
+        transition: none;
+    }
+}
+
+// The edge-toggle tabs render in the body-level CDK overlay container, so a fullscreen editorial
+// sidebar (a component overlay outside that container) can't cover them via z-index.
+body:has(es-editorial-sidebar.fullscreen) .es-edge-toggle-pane {
+    display: none;
+}
+
 .cdk-visually-hidden {
     margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers
 }
@@ -41,9 +62,15 @@ body {
     -webkit-font-smoothing: antialiased;
     margin: 0;
 }
+
+body {
+    color: var(--textMain);
+    background-color: var(--backgroundColor);
+}
+
 // storybook no background
 body:not(.sb-show-main) {
-    background-color: $backgroundColor;
+    background-color: var(--backgroundColor);
 }
 a {
     color: var(--primary);
@@ -108,7 +135,7 @@ button.cdk-keyboard-focused {
 }
 .completer-row {
     color: var(--palette-foreground-text) !important;
-    background: #fff !important;
+    background: var(--defaultBackground) !important;
 }
 .completer-selected-row,
 .completer-row:hover {
@@ -127,7 +154,7 @@ button.cdk-keyboard-focused {
     top: -25px;
 }
 .noElementsInfo {
-    color: #767676;
+    color: var(--textMediumLight);
     font-size: 110%;
     width: 100%;
     float: left;
@@ -155,7 +182,7 @@ button.cdk-keyboard-focused {
     padding: 10px;
     height: 44px;
     color: var(--primary);
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     border-radius: 50%;
     @include clickable();
     @include materialShadowBottom();

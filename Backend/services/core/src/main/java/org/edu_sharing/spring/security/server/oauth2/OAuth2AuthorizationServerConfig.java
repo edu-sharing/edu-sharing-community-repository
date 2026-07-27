@@ -22,7 +22,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -31,7 +31,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
@@ -70,8 +70,8 @@ public class OAuth2AuthorizationServerConfig {
         http
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatcher(new OrRequestMatcher(authorizationServerConfigurer.getEndpointsMatcher(),
-                        new AntPathRequestMatcher("/rest/authentication/v1/oauth2consent"),
-                        new AntPathRequestMatcher("/components/oauth2consent")))
+                        PathPatternRequestMatcher.withDefaults().matcher("/rest/authentication/v1/oauth2consent"),
+                        PathPatternRequestMatcher.withDefaults().matcher("/components/oauth2consent")))
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
@@ -118,7 +118,10 @@ public class OAuth2AuthorizationServerConfig {
                                 if(!c.getClientSecret().isEmpty()){
                                     builder.clientSecret(c.getClientSecret());
                                 }
-                                builder.clientSettings(ClientSettings.builder().requireAuthorizationConsent(c.isRequireConsent()).build());
+                                builder.clientSettings(ClientSettings.builder()
+                                        .requireAuthorizationConsent(c.isRequireConsent())
+                                        .requireProofKey(c.isRequireProofKey())
+                                        .build());
                                 if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
                                 TokenSettings.Builder tokenSettings = TokenSettings.builder();
                                 if(!c.getAccessTokenExpires().isEmpty()) {
@@ -173,7 +176,7 @@ public class OAuth2AuthorizationServerConfig {
     public RequestCache requestCache() {
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setRequestMatcher(
-                new NegatedRequestMatcher(new AntPathRequestMatcher("/shibboleth/**"))
+                new NegatedRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth/**"))
         );
         return requestCache;
     }

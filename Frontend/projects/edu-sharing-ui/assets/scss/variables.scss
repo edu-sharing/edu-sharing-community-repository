@@ -1,11 +1,27 @@
 @forward './variables-scss';
+@use './variables-scss' as vars;
+
 /**
     declarations of dynamic css variables
     will only be included once via angular to prevent duplicate :root entries
  */
 :root {
     --primary: var(--palette-primary-500);
-    --warning: #cd2457;
+    --accent: var(--palette-accent-500);
+    --warn: var(--palette-warn-500);
+
+    --primaryBackground50: var(--palette-primary-50);
+    --primaryBackground100: var(--palette-primary-100);
+    --primaryBackground300: var(--palette-primary-300);
+    --primaryBackground700: var(--palette-primary-700);
+    --primaryBackground900: var(--palette-primary-900);
+
+    --primaryForeground800: var(--palette-primary-800);
+    --primaryForeground900: var(--palette-primary-900);
+
+    // gdpr button rs ("Zustimmen & Fortfahren")
+    --gdprButtonBackgroundColor: #008000;
+    --gdprButtonFontColor: #fff;
     --aiColor: #2c0799;
     --aiColorChipBg: color-mix(in srgb, var(--aiColor), #fff 75%);
     --aiColorText: #fff;
@@ -18,9 +34,32 @@
     --textLight: #585858;
     --textMediumLight: #888;
     --textMain: #383838;
+    --textWhite: #fff;
+    --textBlack: #000;
+    // (light) text for a dark / brightly-colored surface
+    --textOnDarkSurface: var(--light-primary-text);
+    --borderGray: #888;
+    --borderLight: #eee;
+    --borderDark: #333;
+    // a light border that uses the primary color
+    --borderLightPrimary: color-mix(in srgb, var(--primary) 15%, white);
     --buttonDisabled: #999;
     --workspaceTopBarBackground: #383838;
     --workspaceTopBarFontColor: #fff;
+    --mainMenuBackgroundColor: transparent;
+    --mainMenuForegroundColor: var(--primary);
+    --mainMenuForegroundColorIcon: var(--primary);
+    --mainMenuHoverBackgroundColor: var(--primaryBackground50);
+    --mainMenuHoverForegroundColor: var(--primary);
+    --mainMenuAccentColor: var(--primary);
+    --mainMenuSelectedBackground: linear-gradient(
+            to right,
+            var(--mainMenuAccentColor) 0,
+            var(--mainMenuAccentColor) 5px,
+            rgba(0, 0, 0, 0) 5px,
+            rgba(0, 0, 0, 0) 5px
+        )
+        no-repeat;
     --landingPageTopBarBackground: var(--workspaceTopBarBackground);
     --landingPageTopBarFontColor: var(--workspaceTopBarFontColor);
     --landingPageTopBarIconFilter: invert(0);
@@ -34,9 +73,11 @@
     --cardWidth: 270px;
     --borderRadiusCards: 20px;
     --borderRadiusBadges: 10px;
+    --borderRadiusButtons: 18px;
     --chipsSeperatorLineColor: #e2e2e2;
+    --colorStatusNeutral: #ddd;
     --colorStatusPositive: #40bf8e;
-    --colorStatusNegative: var(--warning);
+    --colorStatusNegative: #cd2457;
     --colorStatusWarning: #e98c1b;
     --colorStarActive: #ba7c00;
     --nodeVirtualColor: #42ca8d;
@@ -48,16 +89,14 @@
     --transitionNormal: 0.2s;
     --genericSeperatorLineColor: #ececec;
     --tableSeperatorLineColor: #d2d2d2;
-    --focusColor: var(--palette-primary-300);
+    --focusColor: var(--primaryBackground300);
     --focusWidth: 2px;
     --fontSizeXSmall: 85%;
     --buttonHoverBackground: rgba(var(--palette-primary-500-no-rgb), 0.08);
-    --topBarSearchFocusColor: var(--palette-primary-300);
-    --workspaceTopBarBackground: #383838;
-    --workspaceTopBarFontColor: #fff;
+    --topBarSearchFocusColor: var(--primaryBackground300);
     --workspaceTopBarSafeBackground: #963a3a;
     --workspaceTopBarNewAlpha: 0.08;
-    --itemSelectedTextColor: var(--palette-primary-700);
+    --itemSelectedTextColor: var(--primaryBackground700);
     --listItemSelectedBackground: var(--palette-primary-50);
     --listItemSelectedBackgroundEffect: linear-gradient(
             to right,
@@ -67,7 +106,147 @@
             var(--palette-primary-50) 5px
         )
         no-repeat;
+    // surfaces/text/borders promoted from SCSS literals in variables-scss.scss so
+    // they can flip in dark mode (see the body.isDarkTheme block below)
+    --backgroundElevatedColor: #fafafa;
+    --backgroundColor: #f3f3f3;
+    --backgroundTinted: #eee;
+    --backgroundContainerHigh: #e8e8e8;
+    --backgroundContainerHighest: #e3e2e2;
+    --backgroundDim: #dadada;
+    --backgroundOddColor: #fafbe6;
+    --cardLightBackground: #f9f9f9;
+    --actionDialogBackground: #eee;
+    --workspaceTreeBackground: #f7f7f7;
+    --workspaceTreeSelectedBackground: #fff;
+    --workspaceMetadataBackground: #f7f7f7;
+    --workspaceTopBarInputBackground: #eee;
+    --textVeryLight: #aaa;
+    --textRenderingLabels: #6f6f6f;
+    --placeholderColor: #767676;
+    --noResultsColor: rgba(0, 0, 0, 0.54);
+
+    --searchInputBorderColor: #ccc;
+    --cardSeparatorLineColor: #ccc;
+    --inputBorderColor: #9e9e9e;
+
+    --color-readable-overlay: rgba(255, 255, 255, 0.8);
+    --color-darken: rgba(0, 0, 0, 0.2);
+    --toastBackground: #333333;
+    --toastButtonColor: var(--palette-accent-200);
+
+    // chip colors (source-of-truth: $chip-colors map in variables-scss) — light values
+    @each $key, $color in vars.$chip-colors {
+        --chip-color-#{$key}: #{$color};
+    }
 }
+
 es-node-entries-wrapper {
     --es-node-entries-scroll-gradient-color: #fff;
+}
+
+/**
+    dark mode overrides
+
+    The `isDarkTheme` class is set on `document.body` by angular-material-css-vars
+    (see ThemeService.registerDarkMode). CSS custom properties are inherited, so
+    redefining them here overrides the :root values for the whole body subtree.
+ */
+body.isDarkTheme {
+    --light-primary-text: var(--palette-primary-contrast-500);
+
+    --primaryBackground50: color-mix(in srgb, var(--primary) 35%, black);
+    --primaryBackground100: color-mix(in srgb, var(--primary) 40%, black);
+    --primaryBackground300: color-mix(in srgb, var(--primary) 60%, black);
+    --primaryBackground700: color-mix(in srgb, var(--primary) 75%, white);
+    --primaryBackground900: color-mix(in srgb, var(--primary) 35%, white);
+
+    --primaryForeground800: color-mix(in srgb, var(--primary) 60%, white);
+    --primaryForeground900: color-mix(in srgb, var(--primary) 75%, white);
+
+    --textMain: #e6e6e6;
+    --textWhite: #000;
+    --textBlack: #fff;
+    // keep light on dark surfaces (see :root); --textMain is light in dark mode
+    --textOnDarkSurface: var(--textMain);
+    --textLight: #cfcfcf;
+    --textMediumLight: #c7c7c7;
+    --borderGray: #c7c7c7;
+    --borderLight: #383838;
+    --borderDark: #ccc;
+    --borderLightPrimary: color-mix(in srgb, var(--primary) 15%, black);
+    --buttonDisabled: #6f6f6f;
+    --roundedContainerBackground: #262626;
+    --landingPageShortcutBackground: #2a2a2a;
+    --footerBackground: #1a1a1a;
+    --genericSeperatorLineColor: #383838;
+    --tableSeperatorLineColor: #444;
+    --chipsSeperatorLineColor: #3a3a3a;
+    --focusColor: color-mix(in srgb, var(--primary), black 44%);
+
+    // light primary tint reads wrong on dark; use a translucent primary instead
+    //--listItemSelectedBackground: rgba(var(--palette-primary-500-no-rgb), 0.22);
+    --listItemSelectedBackground: color-mix(
+        in srgb,
+        var(--primary),
+        black 55%
+    ); // inverted primary 700
+    --listItemSelectedBackgroundEffect: linear-gradient(
+            to right,
+            var(--primary) 0,
+            var(--primary) 5px,
+            color-mix(in srgb, var(--primary), black 55%) 5px,
+            color-mix(in srgb, var(--primary), black 55%) 5px
+        )
+        no-repeat;
+    // AI chip: invert the light mix toward dark
+    --aiColorChipBg: color-mix(in srgb, var(--aiColor), #fff 30%);
+    --aiColorChipBorder: #555;
+    --aiColorChipRemove: #ccc;
+    // promoted surfaces (page background darkest, containers layer lighter on top)
+    --defaultBackground: #1e1e1e;
+    --backgroundColor: #2d2d2d;
+    --backgroundTinted: #242424;
+    --backgroundContainerHigh: #2a2a2a;
+    --backgroundContainerHighest: #303030;
+    --backgroundDim: #1a1a1a;
+    --backgroundElevatedColor: #242424;
+    --backgroundOddColor: #272727;
+    --cardLightBackground: #2a2a2a;
+    --actionDialogBackground: #2d2d2d;
+    --workspaceTreeBackground: #1f1f1f;
+    --workspaceTreeSelectedBackground: #2c2c2c;
+    --workspaceMetadataBackground: #1f1f1f;
+    --workspaceTopBarInputBackground: #333;
+    // promoted text
+    --textVeryLight: #777;
+    --textRenderingLabels: #b0b0b0;
+    --placeholderColor: #9a9a9a;
+    --noResultsColor: rgba(255, 255, 255, 0.54);
+    // promoted borders
+    --searchInputBorderColor: #555;
+    --cardSeparatorLineColor: #666;
+    --inputBorderColor: #666;
+
+    --color-readable-overlay: rgba(0, 0, 0, 0.6);
+    --color-darken: rgba(255, 255, 255, 0.2);
+    --toastBackground: #ededed;
+    --toastButtonColor: color-mix(in srgb, var(--primary), #000 60%);
+
+    --mat-table-background-color: var(--backgroundTinted);
+    --mat-tree-container-background-color: var(--backgroundTinted);
+
+    // lighten the dark monochrome mediatype icons in node-type-badge; hue-rotate keeps
+    // any colored glyphs recognizable (standard dark-mode image inversion)
+    --invertSvgFilter: invert(1) hue-rotate(180deg);
+    --mainMenuHoverBackgroundColor: var(--primaryBackground50);
+
+    // chip colors: keep each hue but darken so the (now light) dark-theme text reads on top
+    @each $key, $color in vars.$chip-colors {
+        --chip-color-#{$key}: color-mix(in srgb, #{$color}, black 62%);
+    }
+}
+
+body.isDarkTheme es-node-entries-wrapper {
+    --es-node-entries-scroll-gradient-color: #262626;
 }

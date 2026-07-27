@@ -15,6 +15,13 @@
             //font-weight: bold;
         }
     }
+    // when the surrounding container (not the screen) is narrow, show icon-only tabs.
+    // the container context is established via `container-type: inline-size` on the component :host.
+    @container (max-width: 450px) {
+        .tab-label {
+            display: none;
+        }
+    }
 }
 
 :host {
@@ -23,6 +30,10 @@
     position: relative;
     height: 100%;
     overflow: hidden;
+    // breathing room between the sidebar header and the tabs (leaves space for the header shadow)
+    padding-top: 20px;
+    // establish a query container so the tab labels react to this component's width, not the viewport
+    container-type: inline-size;
 
     ::ng-deep {
         @include tabLayout2Line();
@@ -30,12 +41,12 @@
 }
 
 .tab-main-view {
-    top: 0;
     box-sizing: border-box;
-    // take the available space
+    // min-height: 0 lets this flex child shrink so its internal scroll area activates and the
+    // footer keeps its own space below, instead of filling the full height and forcing the footer
+    // to overlap (which relied on z-index that Safari ignores for a sticky bar over the tab body).
     flex: 1 1 0;
-    // important to flexbox to work properly
-    min-height: 100%;
+    min-height: 0;
     overflow: hidden;
 
     &::ng-deep {
@@ -65,25 +76,27 @@
     flex: 1 1 0;
     // fix taking margins into account
     box-sizing: border-box;
-
-    &.actionbar-visible {
-        padding-bottom: 54px;
-    }
 }
 
+// Full-width footer; matches the layout/size of the .selection-action-bar (as done for
+// the usages__footer): unified $secondaryBarHeight, rounded-card background, top shadow.
 .tab-action-bar {
-    // fixed height
+    // In-flow footer below the tab group's scroll area (no position: sticky, which Safari paints
+    // behind the transformed tab body regardless of z-index).
     flex: 0 0 auto;
-    position: sticky;
+    // position: relative keeps the in-flow position but lifts the footer to the positioned paint
+    // layer, so its upward box-shadow paints over the tab content instead of being covered by it.
+    position: relative;
     z-index: 1;
-    background: #fff;
-    padding: 8px 20px;
-    bottom: 0;
+    background: var(--roundedContainerBackground);
+    min-height: vars.$secondaryBarHeight;
+    box-sizing: border-box;
+    padding: 0 20px;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    border-top: 1px solid #ccc;
-    box-sizing: border-box;
+    @include mixins.materialShadowTop();
 
     .back-btn {
         margin-right: auto;
@@ -210,4 +223,10 @@ es-info-message {
     display: flex;
     justify-content: center;
     padding-top: 16px;
+}
+
+// in order to get a full-width hint in add-material-dialog,
+// different paddings have to be considered
+es-add-material-dialog {
+    --addMaterialHPadding: 20px;
 }

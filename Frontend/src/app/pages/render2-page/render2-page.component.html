@@ -1,10 +1,33 @@
 @if (nodeId() && version()) {
-<es-render-wrapper-component
-  [nodeId]="nodeId()"
-  [repository]="repository()"
-  [version]="version()"
-  [showChildobjects]="true"
-  [childId]="childId()"
-  (childIdChange)="setChildId($event)"
-></es-render-wrapper-component>
+<mat-sidenav-container
+  [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
+>
+  <mat-sidenav
+    #rightSidenav
+    [mode]="'side'"
+    [opened]="editorialSidebarService.sidebarOpened()"
+    [defaultWidthPx]="600"
+    class="es-mat-sidenav"
+    storageKey="RENDER2_SIDENAV_RIGHT_WIDTH"
+    esResizableSidenav
+    position="end"
+  >
+    <div class="es-mat-sidenav-content">
+      <es-editorial-sidebar [primaryMode]="'render'"></es-editorial-sidebar>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <es-render-wrapper-component
+      [nodeId]="nodeId()"
+      [repository]="repository()"
+      [version]="version()"
+      [showChildobjects]="true"
+      [childId]="childId()"
+      (closeClick)="close()"
+      (childIdChange)="setChildId($event)"
+      (nodeChange)="editorialSidebarService.nodes.set($event ? [$event] : null)"
+    ></es-render-wrapper-component>
+  </mat-sidenav-content>
+</mat-sidenav-container>
 }

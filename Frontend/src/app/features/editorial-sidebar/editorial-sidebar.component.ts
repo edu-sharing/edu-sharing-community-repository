@@ -21,6 +21,7 @@ import {
     ElementType,
     HideMode,
     NodeHelperService,
+    NodesRightMode,
     OptionItem,
     OptionsHelperDataService,
     Target,
@@ -30,7 +31,12 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { EditorialSidebarService } from './editorial-sidebar.service';
+import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
+import { provideReusableOptionsHelperData } from '../../services/options-helper-data.provider';
 import { trigger } from '@angular/animations';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
@@ -43,7 +49,7 @@ import { EditorMode } from '../mds/types/types';
 export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 
-export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search';
+export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search' | 'render';
 export type SelectionMode = 'none' | 'single' | 'multi';
 
 export type EditorialSidebarOptionDescriptor = {
@@ -51,7 +57,8 @@ export type EditorialSidebarOptionDescriptor = {
 };
 
 export const EDITORIAL_SIDEBAR_OPTIONS = {
-    WORKSPACE_METADATA: { selectionMode: 'single' },
+    VERSION_MANAGEMENT: { selectionMode: 'single' },
+    VIEWS_AND_USAGE: { selectionMode: 'multi' },
     SHARE_QR: { selectionMode: 'single' },
     PREVIEW: { selectionMode: 'single' },
     /** sort into from right to left (i.e. also create or upload) */
@@ -95,8 +102,11 @@ export type OptionState<T extends OptionConfig> = {
     templateUrl: 'editorial-sidebar.component.html',
     styleUrls: ['editorial-sidebar.component.scss'],
     standalone: false,
-    providers: [OptionsHelperDataService],
+    providers: [provideReusableOptionsHelperData()],
     animations: [trigger('overlay', UIAnimation.openOverlay())],
+    host: {
+        '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
+    },
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private dialogs = inject(DialogsService);
@@ -104,6 +114,18 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private nodeHelperService = inject(NodeHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
     private optionsHelperDataService = inject(OptionsHelperDataService);
+    private breakpointObserver = inject(BreakpointObserver);
+    private loadingScreenService = inject(LoadingScreenService);
+    /** hide the toggle tab while the global loading screen covers the app */
+    readonly isLoading = toSignal(this.loadingScreenService.observeIsLoading(), {
+        initialValue: true,
+    });
+
+    /** true on desktop; below 900px ($mobileSidebarModal) the sidebar is a full-screen overlay */
+    readonly isDesktop = toSignal(
+        this.breakpointObserver.observe(['(max-width: 900px)']).pipe(map((r) => !r.matches)),
+        { initialValue: true },
+    );
 
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
@@ -126,6 +148,15 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     );
     options = signal<OptionItem[]>(null);
     /**
+     * Whether the sidebar has anything to show: either a specific option is open, or the option
+     * list is non-empty. `options() === null` means "not computed yet" (loading) and is treated as
+     * no-content so the tab doesn't flash. Used to hide the open/close tab and to avoid opening the
+     * panel to just the "no options" message.
+     */
+    readonly hasContent = computed(
+        () => !!this.enabledOption() || (this.options()?.length ?? 0) > 0,
+    );
+    /**
      * trigger to inform the editorial page to show a main component
      */
     @Output() showComponent = new EventEmitter<MainComponentType>();
@@ -135,6 +166,30 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         effect(() => {
             this.editorialSidebarService.nodes();
             void this.initOptions();
+        });
+        // reset fullscreen whenever an option is newly opened / closed / switched
+        effect(() => {
+            this.enabledOption();
+            this.editorialSidebarService.fullscreenActive.set(false);
+        });
+        // closing the sidebar (via the tab or any other path) resets the opened option, so a later
+        // open starts at the option overview instead of the previously shown option
+        effect(() => {
+            if (!this.editorialSidebarService.sidebarOpened()) {
+                this.enabledOption.set(null);
+            }
+        });
+        // never leave the panel open on an empty "no options" state: once the options have been
+        // computed (options() !== null) and there is nothing to show, close it. Guarded on the
+        // resolved (non-null) options so a recompute doesn't momentarily close a valid sidebar.
+        effect(() => {
+            if (
+                this.editorialSidebarService.sidebarOpened() &&
+                this.options() !== null &&
+                !this.hasContent()
+            ) {
+                this.editorialSidebarService.sidebarOpened.set(false);
+            }
         });
     }
 
@@ -151,6 +206,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private async initOptions() {
+        // mark as "loading" so hasContent()/the auto-close effect don't act on a stale list while
+        // the new options are (asynchronously) computed
+        this.options.set(null);
         const options = [];
         const shareElement = new OptionItem('EDITORIAL.OPTIONS.SHARE_QR', 'share', (nodes) =>
             this.dialogs.openQrDialog({
@@ -162,19 +220,38 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         shareElement.scopes = ['activity'];
         options.push(shareElement);
 
-        const workspaceMetadata = new OptionItem(
-            'EDITORIAL.OPTIONS.WORKSPACE_METADATA',
+        const versionManagement = new OptionItem(
+            'EDITORIAL.OPTIONS.VERSION_MANAGEMENT',
             'info',
-            () => this.enabledOption.set({ trap: false, option: 'WORKSPACE_METADATA' }),
+            () => this.enabledOption.set({ trap: false, option: 'VERSION_MANAGEMENT' }),
         );
-        workspaceMetadata.elementType = [ElementType.Node];
-        workspaceMetadata.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
-        workspaceMetadata.scopes = ['workspace'];
-        options.push(workspaceMetadata);
+        versionManagement.elementType = [ElementType.Node];
+        versionManagement.constrains = [Constrain.NoBulk, Constrain.HomeRepository];
+        versionManagement.scopes = ['workspace', 'search', 'suggestions'];
+        versionManagement.permissions = [RestConstants.PERMISSION_WRITE];
+        versionManagement.permissionsRightMode = NodesRightMode.Effective;
+        versionManagement.permissionsMode = HideMode.Hide;
+        options.push(versionManagement);
+
+        const showStatistics = new OptionItem(
+            'EDITORIAL.OPTIONS.VIEWS_AND_USAGE',
+            'bar_chart',
+            () => this.enabledOption.set({ trap: false, option: 'VIEWS_AND_USAGE' }),
+        );
+        showStatistics.constrains = [Constrain.HomeRepository, Constrain.User];
+        showStatistics.scopes = ['workspace', 'search', 'collections', 'suggestions', 'render'];
+        showStatistics.toolpermissions = [RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES];
+        showStatistics.toolpermissionsMode = HideMode.Hide;
+        showStatistics.group = DefaultGroups.View;
+        options.push(showStatistics);
 
         const preview = new OptionItem('EDITORIAL.OPTIONS.PREVIEW', 'preview', () =>
             this.enabledOption.set({ trap: false, option: 'PREVIEW' }),
         );
+        preview.customShowCallback = async () => {
+            return this.optionsHelperDataService?.getData()?.scope !== 'render';
+        };
+
         preview.group = DefaultGroups.View;
         preview.elementType = [ElementType.Node];
         preview.constrains = [Constrain.NoBulk, Constrain.Files];
@@ -233,7 +310,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         manageContent.group = DefaultGroups.Edit;
         manageContent.elementType = [ElementType.Node];
         manageContent.constrains = [Constrain.Files];
-        manageContent.scopes = ['workspace', 'collections', 'search'];
+        manageContent.scopes = ['workspace', 'collections', 'search', 'render'];
         options.push(manageContent);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),

@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -23,8 +24,8 @@ import org.springframework.security.saml2.provider.service.web.authentication.lo
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.AndRequestMatcher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.util.StringUtils;
 
@@ -62,8 +63,8 @@ public class SecurityConfigurationSaml {
                 .addFilterAfter(guestCleanupFilter, org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .securityMatcher("/login/**","/logout/**","/saml2","/saml2/**","/shibboleth")
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth")).authenticated()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/**")).permitAll()
                 )
 
                 .saml2Login((login) -> {
@@ -138,7 +139,7 @@ public class SecurityConfigurationSaml {
             public <O extends LogoutFilter> O postProcess(O logoutFilter) {
 
                 //switch to get
-                RequestMatcher logoutRequestMatcher = new AntPathRequestMatcher("/logout", "GET");
+                RequestMatcher logoutRequestMatcher = PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/logout");
                 Class<?>[] declaredClasses = Saml2LogoutConfigurer.class.getDeclaredClasses();
                 for (Class<?> innerClass : declaredClasses) {
                     if (innerClass.getName().contains("Saml2RequestMatcher")) {

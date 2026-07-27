@@ -53,10 +53,10 @@ mat-chip-row {
     &.indeterminate {
         background: repeating-linear-gradient(
             -45deg,
-            var(--palette-primary-50),
-            var(--palette-primary-50) 5px,
-            var(--palette-primary-100) 5px,
-            var(--palette-primary-100) 10px
+            var(--primaryBackground50),
+            var(--primaryBackground50) 5px,
+            var(--primaryBackground100) 5px,
+            var(--primaryBackground100) 10px
         );
     }
 }

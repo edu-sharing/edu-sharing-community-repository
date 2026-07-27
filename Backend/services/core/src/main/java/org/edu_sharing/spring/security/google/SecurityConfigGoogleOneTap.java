@@ -18,7 +18,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import java.util.List;
 
@@ -63,8 +63,8 @@ public class SecurityConfigGoogleOneTap {
                          *
                          * org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry diff 6.1 vs 6.2
                          */
-                        .requestMatchers(new AntPathRequestMatcher("/shibboleth")).authenticated()
-                        .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/shibboleth")).authenticated()
+                        .requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("/**")).permitAll()
                         .requestMatchers("/login/google").permitAll()
                 )
                 .authenticationManager(authenticationManager)

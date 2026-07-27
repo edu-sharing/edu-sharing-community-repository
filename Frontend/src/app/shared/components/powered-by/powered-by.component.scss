@@ -7,7 +7,7 @@
 
 .powered {
     font-size: 95%;
-    color: #fff;
+    color: var(--textWhite);
     opacity: 0.75;
     display: inline-flex;
     align-items: center;
@@ -22,5 +22,5 @@
 }
 
 .powered-color {
-    color: #000;
+    color: var(--textBlack);
 }

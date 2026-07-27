@@ -23,7 +23,9 @@
     </div>
     }
   </div>
-  <es-actionbar #actionbar></es-actionbar>
+  <!-- Split actionbar (mirrors search/workspace): the toolbar shows no-selection actions only;
+    node actions move to the bottom selection bar once something is selected. -->
+  <es-actionbar #actionbar [showActionOptions]="!selectedItems.length"></es-actionbar>
 </div>
 @if (toolpermissionAuthority) {
 <es-toolpermission-manager
@@ -491,6 +493,53 @@
     }
   </ng-template>
 </es-node-entries-wrapper>
+@if (!embedded) {
+<!-- Selected-item actions + selected-nodes overlay, mirroring the search-page selection bar.
+  Sits below the internally-scrolling list so the scrollbar stops above it. -->
+<div
+  class="selection-action-bar"
+  cdkOverlayOrigin
+  #selectionBar="cdkOverlayOrigin"
+  [class.visible]="selectedItems.length"
+>
+  <button
+    mat-icon-button
+    class="clear-selection"
+    (click)="clearSelection()"
+    [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+    matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+  >
+    <i esIcon="close"></i>
+  </button>
+  <button
+    mat-button
+    color="primary"
+    class="count"
+    (click)="selectionOverlayOpen = !selectionOverlayOpen"
+  >
+    {{ 'SEARCH.N_SELECTED' | translate : { count: selectedItems.length || 0 } }}
+    <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+  </button>
+  <es-actionbar #actionbarActions [showToggleOptions]="false" showCaptions="ifRoom"></es-actionbar>
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="selectionBar"
+  [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selectedItems.length"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+  [cdkConnectedOverlayHasBackdrop]="false"
+  (overlayOutsideClick)="selectionOverlayOpen = false"
+>
+  <es-search-selection-overlay
+    [nodes]="$any(selectedItems)"
+    [columns]="columns"
+    [displayType]="DisplayType.Table"
+    (deselect)="deselectNode($any($event))"
+  ></es-search-selection-overlay>
+</ng-template>
+}
 <ng-template #exclude>
   @if (isAdmin) {
   <form [formGroup]="excludeForm" class="exclude-form">
@@ -506,6 +555,7 @@
     </mat-form-field>
     @if (excludeForm.get('mode').value === 'assign') {
     <es-authority-search-input
+      [globalSearchAllowed]="true"
       [mode]="AuthoritySearchMode.Users"
       label="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER' | translate }}"
       placeholder="{{ 'PERMISSIONS.EXCLUDE.ASSIGN_USER_PLACEHOLDER' | translate }}"

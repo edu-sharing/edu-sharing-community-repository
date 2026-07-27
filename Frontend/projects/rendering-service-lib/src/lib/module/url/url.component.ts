@@ -1,19 +1,9 @@
-import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    Input,
-    OnDestroy,
-    OnInit,
-    ViewChild,
-    inject,
-} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { YouTubePlayer } from '@angular/youtube-player';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgOptimizedImage } from '@angular/common';
 import { RenderData } from '../../dto/RenderData';
@@ -24,7 +14,6 @@ import { GdprService } from '../../../gdpr.service';
 import { GdprConfig } from '../../dto/GdprConfig';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { EduSharingApiConfiguration } from 'ngx-edu-sharing-api';
 import { GlobalStateService } from 'ngx-rendering-service-api';
 
 @Component({
@@ -33,26 +22,23 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
         RenderingModule,
         MatButtonModule,
         MatIconModule,
-        YouTubePlayer,
         NgOptimizedImage,
         EduSharingUiModule,
     ],
     templateUrl: './url.component.html',
     styleUrl: './url.component.scss',
 })
-export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDestroy {
+export class UrlComponent implements RenderModule, OnInit, OnDestroy {
     private sanitizer = inject(DomSanitizer);
     private trackingService = inject(TrackingService);
     private gdprService = inject(GdprService);
     private translate = inject(TranslateService);
-    private apiConfig = inject(EduSharingApiConfiguration);
     private accessibilityService = inject(AccessibilityService);
     private globalStateService = inject(GlobalStateService);
 
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() isWebComponent: boolean = false;
-    @ViewChild('ltiFrame') ltiFrame: ElementRef<HTMLIFrameElement> | undefined;
     gdpr: GdprConfig | null = null;
     embedding?: UrlEmbeddings;
     externalId?: string;
@@ -63,22 +49,13 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
     isContrastMode: boolean = false;
     private hasBeenClicked: boolean = false;
     private contrastModeSubscription?: Subscription;
-    static readonly LTI_PATH =
-        '/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=';
     static readonly LTI_QUERY = '&editMode=false&launchPresentation=iframe';
-
-    ngAfterViewInit(): void {
-        if (!this.isWebComponent && this.ltiFrame !== undefined) {
-            const ltiIFrame = this.ltiFrame.nativeElement;
-            const targetHeight = window.innerHeight - ltiIFrame.getBoundingClientRect().top;
-            const height = targetHeight < 300 ? window.innerHeight : targetHeight;
-            ltiIFrame.height = height + 'px';
-        }
-    }
 
     async ngOnInit() {
         if (this.data?.module === 'SODIX') {
             this.processSodix();
+        } else if (this.data?.module === 'OMEGA') {
+            this.processOmega();
         } else {
             this.embedding = this.data?.frontendModuleConfig?.urlModuleConfig?.embedding;
             this.url = this.node?.properties?.['ccm:wwwurl']?.[0] || '';
@@ -104,6 +81,10 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
             this.sanitizedUrl = this.getLtiUrl();
         } else if (this.embedding === UrlEmbeddings.SODIX) {
             this.sanitizedUrl = this.getSodixUrl();
+        } else if (this.embedding === UrlEmbeddings.YOUTUBE) {
+            this.sanitizedUrl = this.getYoutubeUrl();
+        } else if (this.embedding === UrlEmbeddings.SERLO) {
+            this.sanitizedUrl = this.getSerloUrl();
         }
     }
 
@@ -119,6 +100,13 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         if (this.node?.ref.id && this.node?.ref.repo) {
             this.trackingService.trackGdprConsent(this.node.ref.id, this.node.ref.repo);
         }
+    }
+
+    getYoutubeUrl(): SafeResourceUrl {
+        const id = (this.externalId ?? '').split('?')[0];
+        const youtubeUrl = new URL(`https://www.youtube-nocookie.com/embed/${id}`);
+        youtubeUrl.searchParams.set('modestbranding', '1');
+        return this.sanitizer.bypassSecurityTrustResourceUrl(youtubeUrl.toString());
     }
 
     getVimeoUri(): SafeResourceUrl {
@@ -152,17 +140,24 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         return this.sanitizer.bypassSecurityTrustResourceUrl(learningAppsUrl);
     }
 
-    getLtiUrl(): SafeResourceUrl {
-        const ltiUrl =
-            this.apiConfig.rootUrl +
-            UrlComponent.LTI_PATH +
-            this.node?.ref.id +
-            UrlComponent.LTI_QUERY;
-        return this.sanitizer.bypassSecurityTrustResourceUrl(ltiUrl);
+    getLtiUrl(): SafeResourceUrl | null {
+        // the backend-provided lti resource link (correct repo base + short-lived jwt for
+        // single-use node ids) is delivered as the virtual node property `virtual:ltiurl`
+        const url = this.node?.properties?.['virtual:ltiurl']?.[0];
+        return url
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(url + UrlComponent.LTI_QUERY)
+            : null;
     }
 
     getSodixUrl(): SafeResourceUrl {
         return this.sanitizer.bypassSecurityTrustResourceUrl(this.data?.items?.[0].link || '');
+    }
+
+    getSerloUrl(): SafeResourceUrl {
+        const serloUrl = `https://de.serlo.org/${
+            this.externalId ?? ''
+        }?contentOnly&hideBreadcrumbs`;
+        return this.sanitizer.bypassSecurityTrustResourceUrl(serloUrl);
     }
 
     onLinkClick() {
@@ -228,6 +223,24 @@ export class UrlComponent implements RenderModule, OnInit, AfterViewInit, OnDest
         }
 
         this.embedding = UrlEmbeddings.SODIX;
+    }
+
+    private processOmega(): void {
+        const jobData = this.data?.items?.[0];
+        const additionalData = jobData?.additionalData;
+        const downloadUrl = additionalData?.['downloadUrl'] ?? undefined;
+        this.globalStateService.setDownloadUrl(downloadUrl);
+        this.url = jobData.link;
+        const mimetype = this.node?.mimetype || '';
+        if (mimetype.startsWith('image')) {
+            this.embedding = UrlEmbeddings.IMAGE;
+        } else if (mimetype.startsWith('video')) {
+            this.embedding = UrlEmbeddings.VIDEO;
+        } else if (mimetype.startsWith('audio')) {
+            this.embedding = UrlEmbeddings.AUDIO;
+        } else {
+            this.embedding = UrlEmbeddings.LINK;
+        }
     }
 
     protected readonly UrlEmbeddings = UrlEmbeddings;

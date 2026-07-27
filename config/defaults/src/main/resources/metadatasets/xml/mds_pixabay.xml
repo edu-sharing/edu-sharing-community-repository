@@ -106,5 +106,12 @@
 					<view>node_general_render</view>
 				</views>
 			</group>
+			<group>
+				<id>preview_sidebar</id>
+				<rendering>angular</rendering>
+				<views>
+					<view>node_general_render</view>
+				</views>
+			</group>
 		</groups>
 </metadataset>

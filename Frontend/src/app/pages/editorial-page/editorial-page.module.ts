@@ -14,11 +14,13 @@ import { AssignmentSubmissionComponent } from './assignment-submission/assignmen
 import { EditorialBreadcrumbService } from './editorial-breadcrumb/editorial-breadcrumb.service';
 import { SubmitAssignmentComponent } from './submit-assignment/submit-assignment.component';
 import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
+import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
 
 @NgModule({
     declarations: [EditorialPageComponent],
     imports: [
         ResizableSidenavDirective,
+        EdgeToggleComponent,
         EditorialBreadcrumbComponent,
         EditorialSidebarModule,
         ManageAssignmentComponent,

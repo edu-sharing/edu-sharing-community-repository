@@ -12,6 +12,8 @@
         [columns]="collectionsColumns"
         (clickItem)="clickItem.emit($event)"
         (fetchData)="loadMoreCollections()"
+        [infiniteScrollWindow]="false"
+        [checkbox]="false"
         [displayType]="NodeEntriesDisplayType.SmallGrid"
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
         [dragDrop]="{
@@ -50,17 +52,6 @@
           <div class="collection-nocontent-container collection-nocontent-big">
             <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
           </div>
-          } @if (!isRootLevel && isUserAllowedToEdit(collection)) {
-          <div>
-            <div class="collection-nocontent-big">
-              {{ 'COLLECTIONS.NO_SUBCOLLECTIONS' | translate }}
-            </div>
-            <div class="section-headline collection-nocontent-container">
-              <div class="collection-nocontent-small">
-                {{ 'COLLECTIONS.NO_SUBCOLLECTIONS_HINT' | translate }}
-              </div>
-            </div>
-          </div>
           }
         </ng-template>
       </es-node-entries-wrapper>
@@ -74,10 +65,10 @@
   ></es-collection-proposals>
   <section class="collections-cards-div" data-test="collection-content-materials">
     <es-actionbar
-      #actionbarReferences
+      #actionbarToggles
       class="actionbarMaterials"
       [class.display-none]="dataSourceReferences.isLoading"
-      [numberOfAlwaysVisibleOptions]="1"
+      [showActionOptions]="false"
     ></es-actionbar>
     <div
       class="references-wrapper"
@@ -98,6 +89,7 @@
             dropAllowed: canDropOnRef,
             dropped: dropOnRef,
           }"
+        [infiniteScrollWindow]="false"
         [sort]="{
             active: sortReferences.active,
             direction: sortReferences.direction,
@@ -173,20 +165,6 @@
             </div>
           </div>
           }
-        </ng-template>
-        <ng-template #empty>
-          <div class="section-headline collection-nocontent-container">
-            <div class="collection-nocontent-big">
-              {{ 'collections_noContentAvailable' | translate }}
-            </div>
-            @if (isUserAllowedToEdit(collection)) {
-            <div class="section-headline collection-nocontent-container">
-              <div class="collection-nocontent-small">
-                {{ 'collections_howToAddContent' | translate }}
-              </div>
-            </div>
-            }
-          </div>
         </ng-template>
       </es-node-entries-wrapper>
     </div>

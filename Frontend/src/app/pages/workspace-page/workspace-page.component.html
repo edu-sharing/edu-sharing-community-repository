@@ -5,7 +5,7 @@
     #rightSidenav
     [mode]="'side'"
     [opened]="editorialSidebarService.sidebarOpened()"
-    [defaultWidth]="0.3"
+    [defaultWidthPx]="600"
     class="es-mat-sidenav"
     storageKey="WORKSPACE_SIDENAV_RIGHT_WIDTH"
     esResizableSidenav
@@ -33,7 +33,9 @@
             (clickBreadcrumb)="openBreadcrumb($event)"
           ></es-breadcrumbs>
           }
-          <es-actionbar #actionbar></es-actionbar>
+          <!-- Split actionbar (mirrors collections/search): the topbar shows toggle options only;
+            node actions move to the bottom selection bar (for both the explorer and recycle views). -->
+          <es-actionbar #actionbar [showActionOptions]="false"></es-actionbar>
         </div>
       </div>
       @if (isBlocked) {
@@ -81,7 +83,11 @@
           >
         </div>
         } @if (isLoggedIn) {
-        <div class="tree" [style.--treeOffset.px]="treeOffset">
+        <div
+          class="tree"
+          [style.--treeOffset.px]="treeOffset"
+          [class.selection-bar-visible]="selection.length"
+        >
           <es-workspace-tree
             [class.tree-quota]="user.person.quota.enabled"
             [path]="path"
@@ -99,7 +105,12 @@
           }
         </div>
         } @if (root === 'RECYCLE') {
-        <es-recycle class="explorer" [actionbar]="actionbar"></es-recycle>
+        <es-recycle
+          class="explorer"
+          [actionbar]="actionbar"
+          [selectionActionbar]="selectionActionbar"
+          (selectionChanged)="onSelectionChanged($event)"
+        ></es-recycle>
         }
         <h1 esTitle class="cdk-visually-hidden">{{ 'WORKSPACE.TITLE' | translate }}</h1>
         @if (root !== 'RECYCLE') {
@@ -120,6 +131,8 @@
           [preventKeyevents]="cardHasOpenModals$ | async"
           [dataSource]="dataSource"
           [actionbar]="actionbar"
+          [selectionActionbar]="selectionActionbar"
+          (selectionChanged)="onSelectionChanged($event)"
           (searchGlobal)="searchGlobal($event)"
           (dropElement)="handleDrop($event)"
           (viewNode)="openNode($any($event), false)"
@@ -131,6 +144,55 @@
       } @if (globalProgress) {
       <es-global-progress></es-global-progress>
       }
+
+      <!-- Full-width selection bar; mirrors the search/collections selection layout. -->
+      <div
+        class="selection-action-bar"
+        cdkOverlayOrigin
+        #selectionBar="cdkOverlayOrigin"
+        [class.visible]="selection.length"
+      >
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearSelection()"
+          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="selectionOverlayOpen = !selectionOverlayOpen"
+        >
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selection.length || 0 } }}
+          <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        <es-actionbar
+          #selectionActionbarRef
+          [showToggleOptions]="false"
+          showCaptions="ifRoom"
+        ></es-actionbar>
+      </div>
+
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selection.length"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="selectionOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="selection"
+          [columns]="selectionColumns"
+          [displayType]="selectionDisplayType"
+          (deselect)="deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>

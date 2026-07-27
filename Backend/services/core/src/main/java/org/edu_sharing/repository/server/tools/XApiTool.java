@@ -90,7 +90,7 @@ public class XApiTool {
         header.put("X-Experience-API-Version","1.0.3");
         header.put("Content-Type","application/json");
         header.put("Authorization","Basic "+learningLocker.getApiKey());
-        return new HttpQueryTool().query(null, header, data);
+        return new org.edu_sharing.repository.server.tools.http.HttpQueryTool().query(null, header, data);
     }
 
     /**

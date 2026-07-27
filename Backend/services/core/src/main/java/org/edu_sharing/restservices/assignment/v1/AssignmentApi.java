@@ -156,6 +156,26 @@ public class AssignmentApi {
         return Response.ok().entity(assignment.getAssignment()).build();
     }
 
+    @POST
+    @Path("/{assignmentId}/copy")
+    @Operation(summary = "Copy an assignment", description = "Create a draft copy of an assignment, including its files, " +
+            "but without copying submissions or the source's permissions/roles. Only coordinators of the source assignment may copy it.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Assignment.class))),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response copyAssignment(@PathParam("assignmentId") String assignmentId) {
+        AssignmentDao copy = assignmentDaoFactory.copyAssignment(assignmentId);
+        return Response.ok().entity(copy.getAssignment()).build();
+    }
+
     @DELETE
     @Path("/{assignmentId}")
     @Operation(summary = "Delete a assignment", description = "Delete a assignment an all its related documents and submissions")

@@ -15,8 +15,9 @@
         display: flex;
     }
 
+    // Align to the rounded card's edge (inset by --roundedContainerMargin), not the viewport edge.
     &.position-left {
-        left: 0;
+        left: var(--roundedContainerMargin, 0);
 
         &::ng-deep es-side-menu-item {
             justify-content: flex-start !important;
@@ -24,10 +25,20 @@
     }
 
     &.position-right {
-        right: 0;
+        right: var(--roundedContainerMargin, 0);
 
         &::ng-deep es-side-menu-item {
             justify-content: flex-end !important;
+        }
+    }
+
+    // On mobile the card is full-bleed (margin 0), so pin back to the viewport edge.
+    @media screen and (max-width: vars.$mobileTabSwitchWidth) {
+        &.position-left {
+            left: 0;
+        }
+        &.position-right {
+            right: 0;
         }
     }
 }
@@ -49,6 +60,7 @@
     flex: 1;
     padding: 20px;
     background: topicPageVars.$surface-container-lowest;
+    border: 1px solid var(--borderLight);
     box-shadow: rgba(14, 30, 37, 0.12) 0 2px 4px 0, rgba(14, 30, 37, 0.32) 0 2px 16px 0;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;

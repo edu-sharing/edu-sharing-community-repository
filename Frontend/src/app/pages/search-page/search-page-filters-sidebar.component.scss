@@ -1,45 +1,77 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
 :host {
     display: flex;
-    border-right: 1px solid var(--mat-sidenav-container-divider-color);
+}
+
+// width-controlled wrapper that esResizableSidenav resizes and in which it inserts the drag handle
+.filter-bar-resizable {
+    display: block;
+    position: relative;
+    // Pre-init fallback (before the directive sets an inline width) so there is no width flash
+    width: 319px;
+    &[hidden] {
+        // Override the UA stylesheet's `[hidden] { display: none }`: display:none can't be
+        // transitioned, so the panel would snap instead of animate. Keep it displayed but collapse
+        // its width to 0 and clip the content so it animates open/closed.
+        display: block;
+        overflow: hidden;
+        width: 0 !important;
+    }
+    // emulate transition behaviour of mat-sidenav containers
+    transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .filter-bar-container {
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin: 10px;
-    border-radius: 10px;
-    &[hidden] {
-        display: none;
-    }
+    // Fills the resizable wrapper (minus its own margins), so dragging the wrapper resizes the card
+    // Unify with the results view
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+    margin-right: 4px;
+}
+
+// Center the drag handle in the gap between the filter card and the main container
+:host ::ng-deep .es-sidenav-resizer.start {
+    right: -9px;
 }
 
 .filter-bar-heading {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 0 20px;
-    height: 60px;
-    border-bottom: 1px solid var(--mat-divider-color);
+    height: vars.$secondaryBarHeight;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowBottom();
+    // paint the shadow above the scrolled filter body
+    position: relative;
+    z-index: 1;
+    // heading style unified with the editorial sidebar's .sidebar-header
     .filter-bar-title {
         flex-grow: 1;
-        font-size: 180%;
+        font-size: 140%;
         margin: 0;
         font-weight: 400;
     }
     .filter-bar-close-button {
-        margin-right: -10px;
         flex-shrink: 0;
-        height: 40px;
-        width: 40px;
+        // Resize via the MDC token so the icon stays centered. Overriding width/height directly
+        // keeps MDC's 48px-calibrated padding and pushes the glyph off-centre.
+        --mdc-icon-button-state-layer-size: 40px;
     }
 }
 
 .filter-bar-body {
     flex-grow: 1;
+    min-height: 0;
     overflow: auto;
     --container-padding: 20px;
     padding: var(--container-padding);
+    @include mixins.materialScrollbarLight();
 }
 
 .filters-dialog-content {

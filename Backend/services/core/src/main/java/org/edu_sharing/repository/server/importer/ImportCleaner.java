@@ -49,7 +49,7 @@ import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

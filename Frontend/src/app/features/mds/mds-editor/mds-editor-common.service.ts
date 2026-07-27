@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, forkJoin } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { RestConstants, RestMdsService, RestNodeService } from '../../../core-module/core.module';
+import { RestConstants, RestMdsService } from '../../../core-module/core.module';
 import { Values } from '../types/types';
 import {
     HOME_REPOSITORY,
@@ -32,7 +31,6 @@ export class UserPresentableError extends Error {
     providedIn: 'root',
 })
 export class MdsEditorCommonService {
-    private restNode = inject(RestNodeService);
     private nodeService = inject(NodeService);
     private mdsService = inject(RestMdsService);
     private suggestionsV1Service = inject(SuggestionsV1Service);
@@ -68,13 +66,13 @@ export class MdsEditorCommonService {
 
     async saveNodeContent(node: Node, file: File, versionComment?: string) {
         return firstValueFrom(
-            this.restNode
-                .uploadNodeContent(
-                    node.ref.id,
-                    file,
-                    versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
-                )
-                .pipe(map((r) => r.node)),
+            this.nodeService.changeContent(
+                node.ref.repo,
+                node.ref.id,
+                'auto',
+                versionComment || RestConstants.COMMENT_CONTENT_UPDATE,
+                { file },
+            ),
         );
     }
 

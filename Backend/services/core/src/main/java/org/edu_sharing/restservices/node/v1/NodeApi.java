@@ -469,7 +469,8 @@ public class NodeApi {
             String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 
             SignedNodeEntry response = new SignedNodeEntry();
-            response.setNode(nodeDao.asNode());
+            Node nodeConverted = nodeDao.asNode();
+            response.setNode(nodeConverted);
             response.setJwt(nodeDao.getJWT());
             response.setSignedNode(encodedSignedNode);
             response.setSignature(encodedSignature);
@@ -667,7 +668,7 @@ public class NodeApi {
             return Response.status(Response.Status.OK).entity(response).build();
 
         } catch (Throwable t) {
-            if (t instanceof DAOSecurityException && ignoreAccessError) {
+            if (t instanceof DAOSecurityException && ignoreAccessError != null && ignoreAccessError) {
                 response.setScope("SHARED_FILES");
                 response.setNodes(parents);
                 return Response.status(Response.Status.OK).entity(response).build();

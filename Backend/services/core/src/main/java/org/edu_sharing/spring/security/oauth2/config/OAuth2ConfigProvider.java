@@ -102,6 +102,11 @@ public class OAuth2ConfigProvider {
             });
         }
 
+        if(config.hasPath("defaultRegistration")){
+            String defaultRegistrationId = config.getString("defaultRegistration");
+            oAuth2ClientProperties.setDefaultRegistration(defaultRegistrationId);
+        }
+
         return oAuth2ClientProperties;
     }
 

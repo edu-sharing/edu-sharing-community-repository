@@ -1,19 +1,16 @@
 package org.edu_sharing.service.remote;
 
-import java.io.InputStream;
-import java.util.*;
-
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
 import org.edu_sharing.repository.server.MCAlfrescoBaseClient;
-import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.repository.server.importer.PersistentHandlerEdusharing;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
@@ -24,6 +21,11 @@ import org.edu_sharing.service.nodeservice.NodeServiceImpl;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class RemoteObjectService {
 
@@ -194,7 +196,10 @@ public class RemoteObjectService {
         // remove illegal data
         Map<String, Object> props = cleanupRemoteProperties(propsIn);
         return AuthenticationUtil.runAsSystem(() -> {
+            AuthenticationUtil.pushAuthentication();
             try {
+                // use system do not show these files (and path) associated associated with the current user
+                AuthenticationUtil.setFullyAuthenticatedUser("System");
                 Map<String, Object> searchProps = new HashMap<>();
                 searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_NODEID, finalRemoteNodeId);
                 searchProps.put(CCConstants.CCM_PROP_REMOTEOBJECT_REPOSITORYID, repInfo.getAppId());
@@ -236,6 +241,8 @@ public class RemoteObjectService {
                 }
             } catch (Throwable t) {
                 throw new RuntimeException(t);
+            } finally {
+                AuthenticationUtil.popAuthentication();
             }
         });
     }

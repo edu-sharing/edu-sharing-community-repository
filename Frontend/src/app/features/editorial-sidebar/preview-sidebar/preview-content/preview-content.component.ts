@@ -80,6 +80,12 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
      */
     @Input() modal = false;
 
+    /**
+     * whether the sticky footer bar (navigation / save) is shown.
+     * Hide it e.g. when the content is embedded in an external fullscreen view.
+     */
+    @Input() showStickyBar = true;
+
     @Input() customOptions: CustomOptions;
     /** Editor mode for the embedded mds-editor-wrapper. */
     @Input() editorMode: EditorMode = 'viewer';
@@ -98,6 +104,8 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
 
     constructor() {
         void this.renderHelperService.prepareRootUrl();
+        // offer the sidebar's fullscreen toggle once a node is actually being rendered
+        effect(() => this.editorialSidebarService.showFullscreenToggle.set(!!this.renderNode()));
         effect(() => {
             const node = this.node();
             this.renderNode.set(null);
@@ -110,6 +118,9 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void this.updateOptions();
             }
             if (node) {
+                // This needs to be configurable per module in rendering service.
+                // The logic belongs in the render component itself (toggleable via Input)
+                // Ticket: RENDER-138
                 void this.about.hasPlugin('rendering-service-2').then(async (has) => {
                     if (has) {
                         let module = 'default';
@@ -142,6 +153,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     ngOnDestroy(): void {
+        this.editorialSidebarService.showFullscreenToggle.set(false);
         this.destroyed.next();
         this.destroyed.complete();
     }
@@ -194,7 +206,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
         await this.optionsHelper.initComponents(this.actionbar);
         this.optionsHelper.setData({
             scope: this.editorialSidebarService.scope(),
-            activeObjects: [this.node],
+            activeObjects: [this.node()],
             customOptions: this.customOptions,
             postPrepareOptions: (options) => {
                 // no toggles in sidebar

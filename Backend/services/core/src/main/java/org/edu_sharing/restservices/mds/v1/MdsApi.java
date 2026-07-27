@@ -215,7 +215,17 @@ public class MdsApi {
     @POST
     @Path("/metadatasets/{repository}/{metadataset}/values_for_keys")
 
-    @Operation(summary = "Get values for keys.", description = "Get values for keys.")
+    @Operation(
+            summary = "Get values for keys.",
+            description = "Get values for keys.",
+            parameters = {
+                    @Parameter(
+                            name = "locale",
+                            in = ParameterIn.HEADER,
+                            description = "Requested locale, e.g. de_DE",
+                            schema = @Schema(type = "string", example = "de_DE")
+                    )
+            })
 
     @ApiResponses(
             value = {

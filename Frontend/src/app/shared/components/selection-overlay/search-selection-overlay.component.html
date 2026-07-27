@@ -1,0 +1,13 @@
+<es-node-entries-wrapper
+  [dataSource]="dataSource"
+  [scope]="Scope.Search"
+  [columns]="displayColumns()"
+  [showActions]="false"
+  [dragDrop]="{ dragAllowed: false }"
+  [checkbox]="true"
+  [tableConfig]="{ dataColumnLayout: 'limit', headers: false }"
+  [displayType]="effectiveDisplayType()"
+  [gridConfig]="{ layout: 'scroll' }"
+  [elementInteractionType]="InteractionType.None"
+  (selectionChange)="onSelectionChange($event)"
+></es-node-entries-wrapper>

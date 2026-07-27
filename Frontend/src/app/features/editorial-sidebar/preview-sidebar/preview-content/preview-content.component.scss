@@ -1,5 +1,5 @@
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as *;
+@use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     // default fallback; will be set via scale observer in ts!
@@ -35,9 +35,25 @@
         margin: 0;
     }
 }
+// In fullscreen (class on the editorial-sidebar host ancestor) the preview fills the screen, so
+// size --containerHeight from the viewport instead of the width-derived 3:2 --previewHeight:
+// viewport minus the top nav, the card's top+bottom margins, the sidebar header and the sticky footer.
+:host-context(.fullscreen):not(.modal) es-render-wrapper-component {
+    --subtractSize: var(--mainnavCurrentHeight) - 2 * var(--roundedContainerMargin) -
+        var(--editorialHeaderHeight) - #{$secondaryBarHeight} - 80px;
+    --renderWrapperHeight: calc(100vh - var(--subtractSize));
+    --previewHeight: calc(70vh - var(--subtractSize));
+}
 ::ng-deep {
     .preview-sidebar-rendering-modal es-render-wrapper-component rs-root {
         min-height: calc(100vh - 200px);
+    }
+    rs-module-error {
+        height: var(--containerHeight);
+        display: flex;
+        padding: 0 20px;
+        justify-content: center;
+        align-items: center;
     }
 }
 
@@ -45,7 +61,7 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    @include materialScrollbarLight();
+    @include mixins.materialScrollbarLight();
 }
 
 es-render-wrapper-component {
@@ -68,7 +84,7 @@ es-render-wrapper-component {
         width: 100%;
         cursor: pointer;
         height: var(--previewHeight);
-        //@include blurImage(3px);
+        //@include mixins.blurImage(3px);
         filter: brightness(0.8);
         object-fit: cover;
     }
@@ -79,26 +95,49 @@ es-render-wrapper-component {
     }
 }
 
+// Full-width sticky footer; matches the layout/size of the .selection-action-bar (as done for
+// the usages__footer): unified $secondaryBarHeight, rounded-card background, top shadow.
 .sticky-bar {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    padding: 10px 20px;
-    background: var(--backgroundColor, #fff);
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    min-height: $secondaryBarHeight;
+    box-sizing: border-box;
+    padding: 0 20px;
+    background: var(--roundedContainerBackground);
+    @include mixins.materialShadowTop();
     flex-shrink: 0;
     position: sticky;
     bottom: 0;
-    z-index: 1;
+    z-index: 2;
+}
+
+// three-column grid so the "all details" link stays centered while the
+// previous/next navigation buttons sit flush to the edges of the bar
+.preview-navigation {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+
+    .nav-button {
+        &:first-child {
+            justify-self: start;
+        }
+        &:last-child {
+            justify-self: end;
+        }
+    }
 }
 
 .all-details-link {
-    padding-right: 6px;
-    border-radius: 18px;
+    border-radius: var(--borderRadiusButtons);
+    justify-self: center;
 }
 
 .save-button {
-    border-radius: 18px;
+    border-radius: var(--borderRadiusButtons);
 }
 
 .preview-sidebar-body {

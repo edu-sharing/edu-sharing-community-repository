@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, OnInit, signal, ViewChild, inject } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PluginStatus, RestConstants, UIService } from '../../../core-module/core.module';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -25,6 +25,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { Toast } from 'ngx-edu-sharing-ui';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
     selector: 'es-admin-messages',
@@ -44,6 +45,7 @@ export class AdminMessagesComponent implements OnInit {
     private toast = inject(Toast);
     private sanitizer = inject(DomSanitizer);
     private adminV1Service = inject(AdminV1Service);
+    private theme = inject(ThemeService);
 
     @ViewChild('heading') headingRef: ElementRef;
     selectedContexts = signal<Context[]>([]);
@@ -81,7 +83,11 @@ export class AdminMessagesComponent implements OnInit {
                         .includes(this.componentFilter().toLowerCase()) &&
                     !this.selectedComponents().find((f) => f === c),
             )
-            .sort(),
+            .sort((a, b) =>
+                this.translate
+                    .instant('SIDEBAR.' + a.toUpperCase())
+                    .localeCompare(this.translate.instant('SIDEBAR.' + b.toUpperCase())),
+            ),
     );
     config = signal<RepositoryConfig>(null);
 
@@ -128,6 +134,9 @@ export class AdminMessagesComponent implements OnInit {
         if ((await this.configService.get<string>('admin.wysiwygType', 'TinyMCE')) === 'TinyMCE') {
             this.editorConfig = {
                 base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce/',
+                // TinyMCE rewrites href/src relative to its document_base_url by
+                // default; keep admin-entered message URLs exactly as typed. (breaks angular logic)
+                convert_urls: false,
                 branding: false,
                 height: 200,
                 apiKey: '',
@@ -139,6 +148,8 @@ export class AdminMessagesComponent implements OnInit {
                 toolbar:
                     'bold italic underline | link | alignleft aligncenter alignright alignjustify | removeformat | code | undo redo',
                 language: this.translate.getDefaultLang(),
+                skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+                content_css: this.theme.isDarkMode() ? 'dark' : 'default',
             };
         }
     }

@@ -11,7 +11,7 @@
     gap: 16px;
     height: 48px;
     padding: 0 12px;
-    background-color: var(--palette-primary-50);
+    background-color: var(--primaryBackground50);
 }
 
 .drag-preview-icon {
@@ -19,7 +19,7 @@
     height: 30px;
     padding: 3px;
     margin: 1px 0;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     border-radius: 50%;
     display: flex;
     justify-content: center;

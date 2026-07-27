@@ -1,0 +1,200 @@
+<div class="usages">
+  @if (!showStatisticsPreview()) {
+  <!-- folders / collections have no statistics preview; point to the dashboard -->
+  <div class="usages__feedback">
+    <span class="usages__feedback-icon"><i esIcon="info"></i></span>
+    <div class="usages__feedback-text">
+      <span class="usages__feedback-title">
+        {{ 'WORKSPACE.METADATA.USAGES.NO_PREVIEW_TITLE' | translate }}
+      </span>
+      <span class="usages__feedback-desc">
+        {{ 'WORKSPACE.METADATA.USAGES.NO_PREVIEW_TEXT' | translate }}
+      </span>
+    </div>
+    @if (showDashboardLink) {
+    <button
+      class="usages__feedback-action"
+      mat-stroked-button
+      color="primary"
+      (click)="goToDashboard()"
+    >
+      {{ 'WORKSPACE.METADATA.USAGES.DASHBOARD_LINK' | translate }}
+      <i esIcon="arrow_outward"></i>
+    </button>
+    }
+  </div>
+  } @else {
+  <!-- date range selector -->
+  <div class="usages__timeframe">
+    <h3 class="usages__heading">{{ 'WORKSPACE.METADATA.USAGES.RANGE_LABEL' | translate }}</h3>
+    <es-timeframe-range-toggle
+      [rangeOptions]="rangeOptions"
+      [selectedRange]="selectedRange()"
+      (rangeChange)="changeTimeframeRange($event)"
+    ></es-timeframe-range-toggle>
+  </div>
+
+  <!-- selectable metric cards -->
+  <div class="usages__cards">
+    @for (metric of metrics(); track metric.id) {
+    <es-usage-stat-card
+      [icon]="metric.icon"
+      [label]="metric.labelKey | translate"
+      [value]="metric.value"
+      [selected]="isSelected(metric.id)"
+      [disabled]="metric.disabled ?? false"
+      (toggle)="selectMetric(metric.id)"
+    ></es-usage-stat-card>
+    }
+  </div>
+
+  <!-- detail view for the current selection (only when there is data to show) -->
+  @if (hasDetail()) {
+  <div class="usages__detail">
+    @if (selectedMetric(); as metric) {
+    <!-- one or more generic metric tables (e.g. embeddings + collections) -->
+    @for (table of detailTables(); track table.titleKey) {
+    <div class="usage-table" [attr.data-test]="'usages-detail-' + metric.id">
+      <h4 class="usage-table__title">{{ table.titleKey | translate }}</h4>
+      <div class="usage-table__frame">
+        <div class="usage-table__head">
+          <span class="usage-table__head-label">{{ table.columnKey | translate }}</span>
+          @if (table.valueColumnKey) {
+          <span class="usage-table__head-value">{{ table.valueColumnKey | translate }}</span>
+          }
+        </div>
+        @if (table.rows.length) {
+        <ul class="usage-table__list">
+          @for (row of table.rows; track row.key) {
+          <li class="usage-row" [class.usage-row--muted]="row.muted">
+            @if (!row.source && (row.iconUrl || row.icon)) {
+            <span class="usage-row__icon">
+              @if (row.iconUrl) {
+              <img [src]="row.iconUrl" alt="" />
+              } @else {
+              <i [esIcon]="row.icon || 'school'"></i>
+              }
+            </span>
+            }
+            <span class="usage-row__label">
+              <span class="usage-row__title">
+                @if (row.source) {
+                <!-- embeddings: the platform logo + instance name form a single link to the
+                     instance. The course name stays plain text so it is not mistaken for a
+                     (not-yet-available) direct link to the course. -->
+                @if (row.sourceUrl) {
+                <a class="usage-row__link usage-row__source" [href]="row.sourceUrl" target="_blank">
+                  <span class="usage-row__source-icon">
+                    @if (row.iconUrl) {
+                    <img [src]="row.iconUrl" alt="" />
+                    } @else {
+                    <i [esIcon]="row.icon || 'school'"></i>
+                    }
+                  </span>
+                  <span class="usage-row__source-name">{{ row.source }}</span>
+                </a>
+                } @else {
+                <span class="usage-row__source">
+                  <span class="usage-row__source-icon">
+                    @if (row.iconUrl) {
+                    <img [src]="row.iconUrl" alt="" />
+                    } @else {
+                    <i [esIcon]="row.icon || 'school'"></i>
+                    }
+                  </span>
+                  <span class="usage-row__source-name">{{ row.source }}</span>
+                </span>
+                }
+                <span class="usage-row__source-sep">:</span>
+                }
+                <span class="usage-row__course">
+                  @if (row.link) {
+                  <a
+                    class="usage-row__link"
+                    [routerLink]="row.link"
+                    [queryParams]="row.queryParams"
+                    >{{ row.node ? (row.node | nodeTitle) : row.label }}</a
+                  >
+                  } @else if (row.node) {
+                  {{ row.node | nodeTitle }}
+                  } @else {
+                  {{ row.labelKey ? (row.labelKey | translate) : row.label }}
+                  }
+                </span>
+              </span>
+              @if (row.badge) {
+              <span
+                class="usage-row__badge"
+                [matTooltip]="
+                  'WORKSPACE.METADATA.USAGES.CLUSTERED_TOOLTIP' | translate : { count: row.badge }
+                "
+              >
+                {{ row.badge }}
+              </span>
+              }
+            </span>
+            @if (row.value !== undefined) {
+            <span class="usage-row__metrics">
+              <span class="usage-row__value">{{ row.value }}</span>
+              <span class="usage-row__percent">{{ row.percentLabel }}</span>
+              <span class="usage-row__bar">
+                <span class="usage-row__bar-fill" [style.width.%]="row.barPercent"></span>
+              </span>
+            </span>
+            }
+          </li>
+          }
+        </ul>
+        } @else {
+        <p class="usage-table__empty">{{ table.emptyKey | translate }}</p>
+        }
+      </div>
+      @if (table.totalLabelKey) {
+      <div class="usage-table__total">
+        <span>{{ table.totalLabelKey | translate }}</span>
+        <span class="usage-table__total-value">{{ table.total }}</span>
+      </div>
+      }
+    </div>
+    } }
+  </div>
+  } @else if (showNoUsagesHint()) {
+  <div class="usages__hint">
+    <span class="usages__hint-icon"><i esIcon="info"></i></span>
+    <span>{{ 'WORKSPACE.METADATA.USAGES.NO_USAGES_HINT' | translate }}</span>
+  </div>
+  }
+
+  <!-- feedback banner -->
+  <div class="usages__feedback">
+    <span class="usages__feedback-icon"><i esIcon="lightbulb"></i></span>
+    <div class="usages__feedback-text">
+      <span class="usages__feedback-title">
+        {{ 'WORKSPACE.METADATA.USAGES.FEEDBACK_TITLE' | translate }}
+      </span>
+      <span class="usages__feedback-desc">
+        {{ 'WORKSPACE.METADATA.USAGES.FEEDBACK_TEXT' | translate }}
+      </span>
+    </div>
+    <a
+      class="usages__feedback-action"
+      mat-stroked-button
+      color="primary"
+      [href]="feedbackUrl"
+      target="_blank"
+    >
+      {{ 'WORKSPACE.METADATA.USAGES.FEEDBACK_ACTION' | translate }}
+      <i esIcon="open_in_new"></i>
+    </a>
+  </div>
+
+  <!-- link to the full statistics dashboard (requires the statistics toolpermission) -->
+  @if (showDashboardLink) {
+  <div class="usages__footer">
+    <button mat-flat-button color="primary" (click)="goToDashboard()">
+      {{ 'WORKSPACE.METADATA.USAGES.DASHBOARD_LINK' | translate }}
+      <i esIcon="arrow_outward"></i>
+    </button>
+  </div>
+  } }
+</div>

@@ -49,7 +49,8 @@ export class ShareDialogUsageComponent {
                 name: info.general.referencedInName,
             });
         }
-        return usage.courseId;
+        // prefer the human-readable course title, fall back to the course id
+        return usage.courseTitle || usage.courseId;
     }
     public remove(usage: any) {
         if (this.showDelete && usage.type != 'INDIRECT') {

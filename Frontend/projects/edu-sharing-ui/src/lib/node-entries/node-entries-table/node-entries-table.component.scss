@@ -1,9 +1,10 @@
 @use 'sass:color';
 @use '../../../../assets/scss/mixins' as *;
+@use '../../../../assets/scss/variables-scss' as vars;
 
 $defaultColumnWidth: 145px;
 $minColumnWidth: 30%;
-$rowHeight: 58px;
+$rowHeight: vars.$nodeEntriesTableRowHeight;
 
 :host {
     display: flex;
@@ -40,7 +41,7 @@ $rowHeight: 58px;
         mat-cell es-node-url {
             width: 100%;
             a {
-                color: #000;
+                color: var(--textBlack);
             }
             &.cdk-keyboard-focused {
                 @include setGlobalKeyboardFocus('border');
@@ -104,7 +105,7 @@ mat-cell {
     &.dynamic-single-click {
         cursor: pointer;
         &:hover {
-            background-color: rgb(var(--palette-primary-50));
+            background-color: rgb(var(--primaryBackground50));
         }
     }
     &.mat-row-import-blocked {
@@ -148,6 +149,38 @@ mat-cell {
 .dropdown-dummy {
     position: fixed;
 }
+// primary cell wrapper: transparent to layout normally; with a sub title it stacks the two
+// lines and fills the cell (so a click anywhere selects, not just on the title text).
+.cell-primary-content {
+    display: contents;
+    &.has-sub-title {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        align-self: stretch;
+        gap: 4px;
+        padding: 8px 0;
+        width: 100%;
+        min-width: 0;
+        cursor: pointer;
+        // drop the tall single-line padding so the two lines stack compactly
+        ::ng-deep es-list-base {
+            padding: 0;
+            width: auto;
+            max-width: 100%;
+        }
+    }
+}
+.cell-sub-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    color: var(--textLight);
+    font-size: 11px;
+    line-height: 1.2;
+}
 .childobjects {
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 15px;
@@ -175,7 +208,7 @@ mat-cell {
         height: 36px;
         padding: 3px;
         margin: 1px 0;
-        background-color: #fff;
+        background-color: var(--backgroundColor);
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -189,7 +222,7 @@ mat-cell {
             height: auto;
         }
         > i {
-            color: #666;
+            color: var(--textMediumLight);
             font-size: 18px;
         }
     }

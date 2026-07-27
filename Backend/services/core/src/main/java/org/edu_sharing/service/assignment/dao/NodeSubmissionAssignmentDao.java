@@ -151,9 +151,9 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
     private LazyProvider<List<Assignment.Permission>> createLazyPermissionProvider(String nodeId) {
         return new LazyProvider<>(() -> {
             validateExists();
-            if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
-                return Collections.emptyList();
-            }
+            // coordinators see all permissions (incl. assignees); everyone else (e.g. assignees)
+            // is still allowed to see who has correction rights, i.e. the COORDINATOR permissions
+            boolean isCoordinator = AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId());
 
             return AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
@@ -175,6 +175,7 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                                 }, role);
                             })
                             .filter(Objects::nonNull)
+                            .filter(permission -> isCoordinator || permission.role() == Assignment.Role.COORDINATOR)
                             .toList()
             ));
         });
@@ -453,7 +454,8 @@ public class NodeSubmissionAssignmentDao extends BasicNodeDaoImpl implements Ass
                 getAllowAdditionalDocumentSubmissions(),
                 getModifiedDate(),
                 getPermissions(),
-                submissions
+                submissions,
+                AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())
         );
     }
 

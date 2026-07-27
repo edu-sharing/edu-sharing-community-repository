@@ -34,7 +34,12 @@ export enum InteractionType {
 
 export type ListOptions = { [key in Target]?: OptionItem[] };
 export type ListOptionsConfig = {
-    actionbar?: ActionbarComponent;
+    /**
+     * The actionbar(s) that receive the computed options. Pass an array to drive several
+     * actionbars from the same options (e.g. a toggles-only bar plus an actions-only sticky
+     * selection bar); they all stay in sync with the selection via the options helper.
+     */
+    actionbar?: ActionbarComponent | ActionbarComponent[];
     parent?: Node;
     customOptions?: CustomOptions;
 };
@@ -106,6 +111,8 @@ export type TableConfig = {
      * scroll: horizontal scrolling
      */
     dataColumnLayout: 'scroll' | 'limit';
+    /** whether to render the table header row; defaults to true when omitted */
+    headers?: boolean;
 };
 export type TreeConfig = {
     /**

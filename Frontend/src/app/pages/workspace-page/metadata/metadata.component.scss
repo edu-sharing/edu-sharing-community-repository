@@ -64,9 +64,9 @@ mat-tab-group ::ng-deep mat-tab-header {
 }
 
 .content-versions {
+    padding: 16px 24px;
     display: flex;
     flex-direction: column;
-    padding: 20px 12px;
     gap: 20px;
 }
 
@@ -75,37 +75,6 @@ p.description {
     margin-bottom: 12px;
 }
 
-canvas {
-    align-self: flex-start;
-    height: 250px;
-    width: 100% !important;
-}
-.statistic-value {
-    display: grid;
-    width: 100%;
-    padding: 0 3px 0 25px;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-
-    .point {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        float: left;
-        text-align: center;
-        color: #383838;
-        font-weight: bold;
-        font-size: 26px;
-        i {
-            color: $textLight;
-            font-size: 20px;
-        }
-    }
-}
-
-.usage-counter,
-.start-time-value {
-    font-weight: bold;
-}
 .license-value {
     padding-top: 4px;
     display: flex;

@@ -8,16 +8,16 @@ $cardLineHeight: 1.4;
     transition: all var(--transitionNormal);
     // to prevent click animation to float across the whole screen
     overflow: hidden;
-    background-color: #fff;
+    background-color: var(--backgroundElevatedColor);
     @include materialShadowBottom();
     display: grid;
     height: 100%;
     grid-template-columns: auto;
     @include contrastMode {
-        border: 1px solid rgba(black, 0.42);
+        border: 1px solid color-mix(var(--textBlack) 42%, transparent);
     }
     &.selected {
-        background-color: rgb(var(--palette-primary-50));
+        background-color: rgb(var(--primaryBackground50));
     }
     .dropdown-dummy {
         position: fixed;
@@ -48,14 +48,15 @@ $cardLineHeight: 1.4;
 
                 &:hover,
                 &:focus {
-                    background-color: #fff;
+                    background-color: var(--backgroundColor);
                 }
             }
         }
     }
     &:not(.grid-card-collection) {
         .card-top-bar {
-            background-color: var(--palette-primary-200);
+            //background-color: var(--palette-primary-200);
+            background-color: color-mix(in srgb, var(--primary), var(--textWhite) 80%);
         }
     }
     &.grid-card-virtual {
@@ -71,7 +72,8 @@ $cardLineHeight: 1.4;
         position: relative;
         .card-top-bar-collection-color {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.5);
+            background-color: color-mix(var(--defaultBackground) 50%, tranperant);
+            //rgba(255, 255, 255, 0.5);
             left: 0;
             top: 0;
             right: 0;
@@ -113,6 +115,7 @@ $cardLineHeight: 1.4;
         border: unset;
         padding: unset;
         background-color: unset;
+        color: unset;
     }
     .card-image-area {
         height: $imageHeight;
@@ -158,7 +161,7 @@ $cardLineHeight: 1.4;
                     font-size: 85%;
                 }
                 > es-list-base {
-                    color: #000;
+                    color: var(--textBlack);
                     flex-grow: 1;
                     margin: 5px 0;
                     // FIXME: This breaks `limitLineCount` via `-webkit-line-clamp`, which requires
@@ -193,22 +196,25 @@ $cardLineHeight: 1.4;
     }
     &.dynamic-single-click:hover {
         @include materialShadowMediumLarge(false, 0.2);
-        background-color: rgb(var(--palette-primary-50));
+        background-color: rgb(var(--primaryBackground50));
         // transform: scale(1.0075);
     }
     &.dynamic-single-click.grid-card-collection:hover .card-meta {
-        background-color: rgba(255, 255, 255, 0.9);
+        //background-color: rgba(255, 255, 255, 0.9);
+        background-color: var(--color-readable-overlay);
     }
     &.grid-card-collection {
         .card-meta {
-            background-color: rgba(255, 255, 255, 0.8);
+            //background-color: rgba(255, 255, 255, 0.8);
+            background-color: var(--color-readable-overlay);
         }
         .card-options {
-            background-color: rgba(255, 255, 255, 0.9);
+            //background-color: rgba(255, 255, 255, 0.9);
+            background-color: var(--color-readable-overlay);
         }
     }
     .card-options {
-        border-top: 1px solid #ddd;
+        border-top: 1px solid var(--tableSeperatorLineColor);
         // margin-top: 2px; white artefact on hover
     }
 }
@@ -265,7 +271,7 @@ $cardLineHeight: 1.4;
     .grid-card-collection es-node-url {
         a.cdk-keyboard-focused .card-meta {
             // @TDOO: better focus visibility is required
-            background-color: #fff;
+            background-color: var(--backgroundColor);
         }
     }
 }

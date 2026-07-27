@@ -206,7 +206,7 @@
             [columns]="nodeColumns"
             [configureColumns]="true"
             [sort]="mediacenterNodesSort"
-            (clickItem)="openNode.emit($event.element)"
+            (clickItem)="openNode.emit($event)"
             (sortChange)="setMediacenterNodesSort($event)"
             (fetchData)="loadMediacenterNodes()"
           ></es-node-entries-wrapper>

@@ -18,10 +18,6 @@
 }
 <main>
   @if (initialLoadSuccessfully() && showBreadcrumb()) {
-  <!-- WORKAROUND FOR VISUAL NAVBAR OVERFLOW -->
-  @if (hasCustomBreadcrumbExtension()) {
-  <div class="custom-breadcrumb-overflow-container"></div>
-  }
   <!-- BREADCRUMBS -->
   @if (parentEntries()) {
   <div class="template-breadcrumb">
@@ -258,7 +254,11 @@
         >
           <!-- ANCHOR MENU -->
           @if (anchorSwimlanes.length > 0) {
-          <div class="anchor-container" [class.edit-mode]="editMode()">
+          <div
+            class="anchor-container"
+            [class.edit-mode]="editMode()"
+            [class.bright-color]="isAnchorItemColorDark()"
+          >
             <div class="anchor-menu">
               @for (anchor of anchorSwimlanes; track anchor.id; let i = $index) {
               <div class="anchor-item">
@@ -348,7 +348,7 @@
                 swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
               swimlane.type !== ACCORDION_TYPE &&
               swimlane.backgroundColor
-                ? swimlane.backgroundColor
+                ? swimlaneBackgroundColor(swimlane.backgroundColor)
                 : null
             "
           >
@@ -363,7 +363,7 @@
                   swimlane.backgroundShape === SwimlaneBackgroundShape.None) &&
                 swimlane.type === ACCORDION_TYPE &&
                 swimlane.backgroundColor
-                  ? swimlane.backgroundColor
+                  ? swimlaneBackgroundColor(swimlane.backgroundColor)
                   : null
               "
             >
@@ -585,7 +585,16 @@
             }
           </ng-template>
         </div>
-        <es-preview-sidebar [customOptions]="customSidebarOptions"></es-preview-sidebar>
+        <!-- Preview panel: es-preview-sidebar-wrapper owns the resizable column, header/close chrome
+          and the mobile modal, read-only. Widths match the card size plus its right-edge gap. -->
+        <es-preview-sidebar-wrapper
+          [customOptions]="customSidebarOptions"
+          storageKey="TOPIC_PAGE_PREVIEW_SIDEBAR_WIDTH"
+          [defaultWidthPx]="555"
+          [minWidth]="0"
+          [minWidthPx]="455"
+          [maxWidthPx]="805"
+        ></es-preview-sidebar-wrapper>
       </div>
     </div>
   </div>

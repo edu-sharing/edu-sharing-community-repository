@@ -7,13 +7,13 @@ import {
     Component,
     ElementRef,
     HostBinding,
+    inject,
     NgZone,
     OnChanges,
     OnDestroy,
     SimpleChanges,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator } from '@angular/material/paginator';
@@ -36,7 +36,7 @@ import { NodeEntriesGlobalService } from '../node-entries-global.service';
 import { NodeEntriesService } from '../../services/node-entries.service';
 import { UIService } from '../../services/ui.service';
 import { BorderBoxObserverDirective } from '../../directives/border-box-observer.directive';
-import { ListItem } from '../../types/list-item';
+import { BaseListItem, ListItem } from '../../types/list-item';
 import { CanDrop, DragData } from '../../types/drag-drop';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import { Target } from '../../types/option-item';
@@ -252,8 +252,12 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
     }
 
     private getVisibleColumnNames(): Observable<string[]> {
-        return combineLatest([this.visibleDataColumns$, this.entriesService.showIconColumn]).pipe(
-            map(([visibleDataColumns, showIconColumn]) => {
+        return combineLatest([
+            this.visibleDataColumns$,
+            this.entriesService.showIconColumn,
+            this.entriesService.showActions,
+        ]).pipe(
+            map(([visibleDataColumns, showIconColumn, showActions]) => {
                 const columns = [];
                 if (this.entriesService.checkbox) {
                     columns.push('select');
@@ -261,7 +265,8 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
                 if (showIconColumn) {
                     columns.push('icon');
                 }
-                return columns.concat(visibleDataColumns.map((c) => c.name)).concat(['actions']);
+                const result = columns.concat(visibleDataColumns.map((c) => c.name));
+                return showActions ? result.concat(['actions']) : result;
             }),
             shareReplay(1),
         );
@@ -379,6 +384,13 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true' ||
             this.nodeHelperService.isNodeRevoked(node)
         );
+    }
+
+    /**
+     * es-user-avatar user for a sub-title row that points at a person property (null otherwise).
+     */
+    authorForRow(node: T, item: BaseListItem): any {
+        return item ? this.nodeHelperService.getNodeAuthority(node as Node, item.name) : null;
     }
 
     selectSortChange(sort: Sort) {

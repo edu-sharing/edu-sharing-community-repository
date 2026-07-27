@@ -15,7 +15,7 @@
 $headingHeight: 60px;
 .heading-group {
     width: 100%;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     position: sticky;
     top: 0;
     z-index: 1;

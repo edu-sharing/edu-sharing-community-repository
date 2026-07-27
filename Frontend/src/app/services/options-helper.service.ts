@@ -1,13 +1,4 @@
-import {
-    effect,
-    EventEmitter,
-    inject,
-    Injectable,
-    Injector,
-    OnDestroy,
-    runInInjectionContext,
-    WritableSignal,
-} from '@angular/core';
+import { EventEmitter, inject, Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -100,7 +91,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     public localEvents = inject(LocalEventsService);
     private mainNavService = inject(MainNavService);
     public editorialSidebarService = inject(EditorialSidebarService);
-    private injector = inject(Injector);
     private nodeList = inject(NodeListService);
     public nodeService = inject(NodeService);
     public nodeServiceLegacy = inject(RestNodeService);
@@ -246,13 +236,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             components.dropdown.ngOnChanges();
         }
         if (components.actionbar) {
-            components.actionbar.options = await this.getAvailableOptions(
-                Target.Actionbar,
-                [],
-                components,
-                data,
-            );
-            components.actionbar.invalidate();
+            const actionbars = (
+                Array.isArray(components.actionbar) ? components.actionbar : [components.actionbar]
+            ).filter(Boolean);
+            const options = await this.getAvailableOptions(Target.Actionbar, [], components, data);
+            for (const actionbar of actionbars) {
+                actionbar.options = options;
+                actionbar.invalidate();
+            }
         }
     }
 
@@ -397,11 +388,17 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                 if ((item as AssignmentFile).referNode) {
                     item = (item as AssignmentFile).referNode;
                 }
+                if (data.customDownloadUrl) {
+                    return true;
+                }
                 // if at least one is allowed -> allow download (download servlet will later filter invalid files)
                 if (
                     item.downloadUrl != null &&
                     item.properties &&
-                    (!item.properties[RestConstants.CCM_PROP_IO_WWWURL] ||
+                    (!(
+                        item.properties[RestConstants.CCM_PROP_IO_WWWURL] &&
+                        !item.properties[RestConstants.LOM_PROP_TECHNICAL_LOCATION]
+                    ) ||
                         !RestNetworkService.isFromHomeRepo(item)) &&
                     (item.accessEffective || item.access)?.includes(
                         RestConstants.PERMISSION_DOWNLOAD_CONTENT,
@@ -642,29 +639,5 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             this.toast.closeProgressSpinner();
             this.localEvents.nodesChanged.emit(results);
         });
-    }
-
-    /**
-     * get the toggle to open or close the right sidebar based on a signal state
-     */
-    getOptionItemToggleSidebar(state: WritableSignal<boolean>) {
-        const toggle = new OptionItemToggle(
-            {
-                enabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR_ENABLED',
-                disabled: 'EDITORIAL.OPTION.TOGGLE_SIDEBAR_DISABLED',
-            },
-            {
-                enabled: 'splitscreen_right',
-                disabled: 'view_column_2',
-            },
-            state(),
-            () => state.set(!state()),
-        );
-        runInInjectionContext(this.injector, () => {
-            effect(() => (toggle.toggleState = state()));
-        });
-        toggle.priority = 1000;
-        toggle.elementType = [];
-        return toggle;
     }
 }

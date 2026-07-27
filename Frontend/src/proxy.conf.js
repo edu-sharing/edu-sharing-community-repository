@@ -115,7 +115,12 @@ const PROXY_CONFIG = [
                     // replace all rs2 uris to local for cookie auth
                     const rs2 = new URL(process.env.RS2_URL);
                     const escapedHost = rs2.host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const escapedPath = rs2.pathname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    // drop a trailing slash from the path so it stays in the body after
+                    // replacement (pathname is at least "/", which the match would otherwise
+                    // swallow and glue "rendering2" onto the following segment)
+                    const escapedPath = rs2.pathname
+                        .replace(/\/$/, '')
+                        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     const regex = new RegExp(
                         `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
                         'g',

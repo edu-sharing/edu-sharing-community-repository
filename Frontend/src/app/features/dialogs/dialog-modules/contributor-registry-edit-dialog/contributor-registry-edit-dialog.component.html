@@ -1,0 +1,85 @@
+<div class="contributor-registry-edit">
+  <section class="group">
+    <h4>{{ 'ADMIN.CONTRIBUTORS.GROUP_KIND' | translate }}</h4>
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.KIND' | translate }}</mat-label>
+      <mat-select [(ngModel)]="model.kind" name="kind">
+        <mat-option value="PERSON">
+          {{ 'ADMIN.CONTRIBUTORS.KIND_PERSON' | translate }}
+        </mat-option>
+        <mat-option value="ORGANIZATION">
+          {{ 'ADMIN.CONTRIBUTORS.KIND_ORGANIZATION' | translate }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </section>
+
+  <section class="group">
+    <h4>{{ 'ADMIN.CONTRIBUTORS.GROUP_NAME' | translate }}</h4>
+    @if (model.kind === 'PERSON') {
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.TITLE' | translate }}</mat-label>
+      <input matInput [(ngModel)]="model.title" name="title" />
+    </mat-form-field>
+    <div class="row">
+      <mat-form-field>
+        <mat-label>{{ 'ADMIN.CONTRIBUTORS.GIVENNAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="model.givenname" name="givenname" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'ADMIN.CONTRIBUTORS.SURNAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="model.surname" name="surname" />
+      </mat-form-field>
+    </div>
+    }
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.ORG' | translate }}</mat-label>
+      <input matInput [(ngModel)]="model.org" name="org" />
+    </mat-form-field>
+  </section>
+
+  <section class="group">
+    <h4>{{ 'ADMIN.CONTRIBUTORS.GROUP_CONTACT' | translate }}</h4>
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.EMAIL' | translate }}</mat-label>
+      <input matInput [(ngModel)]="model.email" name="email" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.CONTRIBUTORS.URL' | translate }}</mat-label>
+      <input matInput [(ngModel)]="model.url" name="url" />
+    </mat-form-field>
+  </section>
+
+  <section class="group">
+    <h4>{{ 'ADMIN.CONTRIBUTORS.GROUP_IDS' | translate }}</h4>
+    <p class="hint">{{ 'ADMIN.CONTRIBUTORS.ID_HINT' | translate }}</p>
+    @if (model.kind === 'PERSON') {
+    <mat-form-field>
+      <mat-label>ORCID</mat-label>
+      <input matInput [(ngModel)]="model.orcid" name="orcid" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>GND</mat-label>
+      <input matInput [(ngModel)]="model.gnduri" name="gnduri" />
+    </mat-form-field>
+    } @else {
+    <mat-form-field>
+      <mat-label>ROR</mat-label>
+      <input matInput [(ngModel)]="model.ror" name="ror" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Wikidata</mat-label>
+      <input matInput [(ngModel)]="model.wikidata" name="wikidata" />
+    </mat-form-field>
+    }
+  </section>
+
+  @if (!isNew) {
+  <section class="group apply">
+    <mat-checkbox [(ngModel)]="applyToExisting" name="applyToExisting">
+      {{ 'ADMIN.CONTRIBUTORS.APPLY_TO_EXISTING' | translate }}
+    </mat-checkbox>
+    <p class="hint">{{ 'ADMIN.CONTRIBUTORS.APPLY_TO_EXISTING_HINT' | translate }}</p>
+  </section>
+  }
+</div>

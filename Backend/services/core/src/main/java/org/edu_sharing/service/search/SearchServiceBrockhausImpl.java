@@ -10,7 +10,7 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.NodeRef;
 import org.edu_sharing.service.nodeservice.NodeServiceBrockhausImpl;

@@ -79,7 +79,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     bridge = inject(BridgeService);
     private cordova = inject(CordovaService);
     private authentication = inject(AuthenticationService);
-    private themeService = inject(ThemeService);
+    protected themeService = inject(ThemeService);
     private loadingScreen = inject(LoadingScreenService);
     private mainNav = inject(MainNavService);
 
@@ -221,7 +221,7 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
                         }
                         this.loginUrl = configService.instant('loginUrl');
                         const allowLocal = configService.instant('loginAllowLocal', false);
-                        const hasProviders = this.registeredOauthProviders?.length > 0;
+                        const hasProviders = this.registeredOauthProviders?.length > 1;
                         if (
                             params.local !== 'true' &&
                             !allowLocal &&

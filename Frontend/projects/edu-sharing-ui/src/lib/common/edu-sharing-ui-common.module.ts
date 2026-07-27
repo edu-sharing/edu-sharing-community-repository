@@ -34,6 +34,7 @@ import { MdsViewerComponent } from '../mds-viewer/mds-viewer.component';
 import { SpinnerSmallComponent } from '../spinner-small/spinner-small.component';
 import { NodeUrlPipe } from '../pipes/node-url.pipe';
 import { ToolpermissionPipe } from '../pipes/toolpermission.pipe';
+import { GlobalAdminPipe } from '../pipes/global-admin.pipe';
 import { AuthorityNamePipe } from '../pipes/authority-name.pipe';
 import { HtmlTextPipe } from '../pipes/html-text.pipe';
 import { AssignmentPipe } from '../pipes/assignment.pipe';
@@ -84,6 +85,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         SpinnerSmallComponent,
         InfoMessageComponent,
         ToolpermissionPipe,
+        GlobalAdminPipe,
         MatButtonModule,
         MatBottomSheetModule,
         HtmlTextPipe,
@@ -122,6 +124,7 @@ import { DropdownBottomSheetComponent } from '../dropdown/dropdown-bottom-sheet/
         AssignmentPipe,
         NodeUrlComponent,
         ToolpermissionPipe,
+        GlobalAdminPipe,
         SortDropdownComponent,
         SpinnerComponent,
         SpinnerSmallComponent,

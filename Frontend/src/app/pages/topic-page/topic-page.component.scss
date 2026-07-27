@@ -1,0 +1,12 @@
+:host {
+    display: block;
+}
+
+// Page shell: a flex column filling the viewport below the main nav, light gray background in the margin.
+// Uses min-height so the body keeps scrolling on the window (the sticky breadcrumb and sidebar need that).
+.topic-page {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    background: var(--backgroundColor);
+}

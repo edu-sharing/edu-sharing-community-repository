@@ -1,50 +1,146 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
-mat-sidenav-container {
+// Page shell: lock to the available viewport height and clip, so the page never produces a body
+// scrollbar — the content card scrolls its list internally instead.
+:host {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--mainnavCurrentHeight));
     min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
+}
+:host ::ng-deep mat-sidenav-container mat-sidenav-content {
+    display: flex;
+    flex-direction: column;
+}
+
+// Included at the top level (not nested under mat-sidenav-container) so the mixin's open-drawer
+// margin selector (`mat-sidenav-container.…-open &`) resolves correctly.
+.main-content {
+    @include mixins.roundedContainerCard(vars.$mobileTabSwitchWidth, vars.$mobileTabNavHeight);
+    // Always a fixed-height card scrolling its list internally (both the list view and the
+    // has-main-component views).
+    @include mixins.roundedContainerStaticScroll(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight
+    );
+}
+
+mat-sidenav-container {
+    flex: 1;
+    min-height: 0;
     .es-mat-sidenav-content-mds {
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        // Match the search page's filter card left inset: the global .es-mat-sidenav-content uses
+        // an 11px left margin, whereas the search filter (roundedContainerCard) uses 15px. Align
+        // the left edge so the rounded layout is identical when the filter is open.
+        margin-left: var(--roundedContainerMargin);
+
+        .filter-bar-heading {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: vars.$secondaryBarHeight;
+            background-color: var(--roundedContainerBackground);
+            @include mixins.materialShadowBottom();
+            // paint the shadow above the scrolled filter body
+            position: relative;
+            z-index: 1;
+            // heading style unified with the search filter bar's .filter-bar-title
+            .filter-bar-title {
+                flex-grow: 1;
+                font-size: 140%;
+                margin: 0;
+                font-weight: 400;
+            }
+            .filter-bar-close-button {
+                flex-shrink: 0;
+                // Resize via the MDC token so the icon stays centered (matches the search sidebar).
+                --mdc-icon-button-state-layer-size: 40px;
+            }
+        }
+
+        .filter-bar-body {
+            flex-grow: 1;
+            min-height: 0;
+            overflow: auto;
+            --container-padding: 20px;
+            padding: var(--container-padding);
+            @include mixins.materialScrollbarLight();
+        }
     }
     .main-content {
-        min-height: calc(
-            100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-                var(--mainnavCurrentHeight)
-        );
-        margin: var(--roundedContainerMargin);
-        background-color: var(--roundedContainerBackground);
-        border-radius: var(--borderRadiusCards);
-        @include mixins.materialShadowSmall();
+        // Unified secondary-bar header: breadcrumb left, toggle actionbar right.
         .top-area {
+            flex-shrink: 0;
             display: flex;
             flex-direction: row;
+            align-items: center;
             justify-content: space-between;
-            padding: var(--roundedContainerMargin);
-            min-height: 68px;
-            es-editorial-breadcrumb {
+            gap: 10px;
+            // no left padding: the breadcrumb carries the 30px inset itself (mirrors the
+            // workspace `.topbarFrame > div > es-breadcrumbs`), so it lands 30px from the card edge.
+            padding: 0 var(--roundedContainerMargin) 0 0;
+            height: vars.$secondaryBarHeight;
+            background-color: var(--roundedContainerBackground);
+            @include mixins.materialShadowBottom();
+            // paint the shadow above the sticky tab bar (z-index 2) and the scrolled content:
+            // both live in the same stacking context, so the header must outrank the tab bar.
+            position: relative;
+            z-index: 3;
+            > es-editorial-breadcrumb {
+                // same left inset es-breadcrumbs gets from the workspace topbar
+                padding-left: 30px;
+                @media screen and (max-width: vars.$mobileTabSwitchWidth) {
+                    padding-left: 20px;
+                }
+            }
+            > es-actionbar {
+                margin-left: auto;
             }
             .close {
                 margin-left: auto;
             }
         }
-        > node-entries-wrapper {
-            display: block;
-            padding: 0 var(--roundedContainerMargin);
-        }
-        mat-tab-group {
-            padding: 0;
-        }
-        &.has-main-component {
+        // Scroll region below the header: the tab bar sticks to its top while the option row
+        // (filter button) and the list scroll beneath it.
+        .content-scroll {
+            flex: 1;
+            min-height: 0;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            height: calc(
-                100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-                    var(--mainnavCurrentHeight)
-            );
-            min-height: unset;
+            overflow-y: auto;
+            @include mixins.materialScrollbarLight();
+
+            > mat-tab-group {
+                flex-shrink: 0;
+                padding: 0;
+                position: sticky;
+                top: 0;
+                // opaque background on the sticky element itself (not just the header child) plus a
+                // z-index above the scrolling .option-area, so the filter button slides cleanly
+                // behind the tab bar instead of showing on top of it.
+                z-index: 2;
+                background: var(--roundedContainerBackground);
+                // taller tab bar: the theme's density styles re-declare this token on
+                // .mat-mdc-tab-header, so it must be set on the header element itself.
+                ::ng-deep mat-tab-header {
+                    --mat-tab-container-height: 60px;
+                }
+            }
+            > es-node-entries-wrapper {
+                display: block;
+                // grow to fill the region when the list is short; the region itself scrolls
+                flex: 1 0 auto;
+                padding: 0 var(--roundedContainerMargin);
+            }
         }
         .option-area {
+            flex-shrink: 0;
             display: flex;
             padding: 15px var(--roundedContainerMargin) 10px var(--roundedContainerMargin);
             .options-left {
@@ -52,26 +148,32 @@ mat-sidenav-container {
             }
         }
     }
-    @media screen and (max-width: vars.$mobileTabSwitchWidth) {
-        .main-content {
-            margin-bottom: calc(var(--roundedContainerMargin) + #{vars.$mobileTabNavHeight});
-            &.has-main-component {
-                height: calc(
-                    100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
-                        var(--mainnavCurrentHeight) - #{vars.$mobileTabNavHeight}
-                );
-            }
-        }
+}
+
+// Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    min-height: vars.$secondaryBarHeight;
+    padding: 0 var(--roundedContainerMargin);
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowTop();
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
+
+    es-actionbar {
+        padding-left: 10px;
     }
-    &.mat-sidenav-container-left-open {
-        .main-content {
-            margin-left: 4px;
-        }
+    &.visible {
+        display: flex;
     }
-    &.mat-sidenav-container-right-open {
-        .main-content {
-            margin-right: 4px;
-        }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
     }
 }
 

@@ -1,4 +1,4 @@
-import { Component, computed, effect, model, signal, inject, untracked } from '@angular/core';
+import { Component, computed, effect, inject, model, signal, untracked } from '@angular/core';
 import {
     ListItem,
     ListItemsModule,
@@ -27,6 +27,7 @@ import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.c
 import { TranslateService } from '@ngx-translate/core';
 import { PlatformLocation } from '@angular/common';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { ThemeService } from '../../../services/theme.service';
 
 export type AssignmentConfig = {
     submission: SubmissionWithAssignment;
@@ -72,13 +73,16 @@ export class SubmissionSidebarComponent {
     private assignmentV1Service = inject(AssignmentV1Service);
     private commentV1Service = inject(CommentV1Service);
     private formBuilder = inject(FormBuilder);
+    private theme = inject(ThemeService);
 
     //@ViewChild(CommentsListComponent) commentsRef: CommentsListComponent;
-    readonly editorConfig = {
+    readonly editorConfig = computed(() => ({
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
-    };
+        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+    }));
     submitFormGroup: FormGroup;
     data = model.required<SubmissionConfig>();
     showValidationNotes = signal(false);

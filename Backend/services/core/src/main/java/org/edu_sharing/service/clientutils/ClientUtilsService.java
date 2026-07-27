@@ -13,7 +13,7 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
@@ -230,7 +230,7 @@ public class ClientUtilsService {
 					}
 				} catch (HttpClientErrorException e) {
     				// Handle HTTP 400 errors (invalid input, node not found)
-    				logger.warn("Duplicate detection failed with HTTP " + e.getRawStatusCode() + ": " + e.getResponseBodyAsString());
+    				logger.warn("Duplicate detection failed with HTTP " + e.getStatusCode() + ": " + e.getResponseBodyAsString());
 				} catch (HttpServerErrorException e) {
 					// Handle HTTP 500 errors (server error)
 					logger.error("Duplicate detection service error: " + e.getResponseBodyAsString());

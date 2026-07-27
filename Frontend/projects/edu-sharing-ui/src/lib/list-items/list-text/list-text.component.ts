@@ -11,7 +11,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, merge } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { ListItem } from '../../types/list-item';
+import { BaseListItem, ListItem } from '../../types/list-item';
 import { ListWidget } from '../list-widget';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { MdsHelperService } from '../../mds/mds-helper.service';
@@ -72,7 +72,7 @@ export class ListTextComponent extends ListWidget implements OnInit {
         return this.nodeHelper.getWorkflowStatus(this.node as Node).current;
     }
 
-    getI18n(item: ListItem) {
+    getI18n(item: BaseListItem) {
         return (item.type === 'NODE_PROPOSAL' ? 'NODE_PROPOSAL' : 'NODE') + '.' + item.name;
     }
 

@@ -1,6 +1,6 @@
 @if (editorType === 'Monaco') {
 <ngx-monaco-editor
-  [options]="options"
+  [options]="editorOptions()"
   [ngModel]="ngModel"
   (ngModelChange)="ngModelChange.emit($event)"
   [ngModelOptions]="{ standalone: true }"

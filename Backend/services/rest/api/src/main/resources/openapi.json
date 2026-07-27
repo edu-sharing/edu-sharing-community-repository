@@ -320,6 +320,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "isCoordinator": {
+            "description": "Whether the current user is a coordinator of this assignment.",
+            "type": "boolean"
+          },
           "modified": {
             "format": "date-time",
             "type": "string"
@@ -373,6 +377,7 @@
           "allowAdditionalDocumentSubmissions",
           "created",
           "creator",
+          "isCoordinator",
           "permissions",
           "ref",
           "status",
@@ -1407,7 +1412,7 @@
         "type": "object"
       },
       "ConfigThemeColors": {
-        "description": "Theme color customization",
+        "description": "Theme color customization. An entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
         "properties": {
           "color": {
             "items": {
@@ -1420,6 +1425,12 @@
               "$ref": "#/components/schemas/ConfigThemeColor"
             },
             "type": "array"
+          },
+          "theme": {
+            "type": "string",
+            "xml": {
+              "attribute": true
+            }
           }
         },
         "type": "object"
@@ -1792,6 +1803,89 @@
         },
         "type": "object"
       },
+      "ContributorData": {
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "lastUpdated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "vcard": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "vcard"
+        ],
+        "type": "object"
+      },
+      "ContributorSearchResult": {
+        "properties": {
+          "contributors": {
+            "items": {
+              "$ref": "#/components/schemas/ContributorData"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "required": [
+          "contributors",
+          "pagination"
+        ],
+        "type": "object"
+      },
       "Copy": {
         "properties": {
           "entries": {
@@ -1885,6 +1979,51 @@
           "title",
           "type"
         ],
+        "type": "object"
+      },
+      "CreateContributorRequest": {
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "CreateQAEntryDTO": {
@@ -1985,6 +2124,9 @@
             "type": "string"
           },
           "courseId": {
+            "type": "string"
+          },
+          "courseTitle": {
             "type": "string"
           },
           "nodeId": {
@@ -4050,6 +4192,9 @@
             },
             "type": "array"
           },
+          "suggestionSource": {
+            "type": "string"
+          },
           "template": {
             "items": {
               "type": "string"
@@ -5195,7 +5340,13 @@
           "appUserMail": {
             "type": "string"
           },
+          "application": {
+            "$ref": "#/components/schemas/UsageApplication"
+          },
           "courseId": {
+            "type": "string"
+          },
+          "courseTitle": {
             "type": "string"
           },
           "created": {
@@ -6149,11 +6300,17 @@
       },
       "PrimaryLogin": {
         "properties": {
+          "admin": {
+            "type": "boolean"
+          },
           "authorityName": {
             "type": "string"
           },
           "currentScope": {
             "type": "string"
+          },
+          "guest": {
+            "type": "boolean"
           },
           "isAdmin": {
             "type": "boolean"
@@ -6194,6 +6351,9 @@
           },
           "userHome": {
             "type": "string"
+          },
+          "validLogin": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7120,11 +7280,17 @@
       },
       "ScopeLogin": {
         "properties": {
+          "admin": {
+            "type": "boolean"
+          },
           "authorityName": {
             "type": "string"
           },
           "currentScope": {
             "type": "string"
+          },
+          "guest": {
+            "type": "boolean"
           },
           "isAdmin": {
             "type": "boolean"
@@ -7159,6 +7325,9 @@
           },
           "userHome": {
             "type": "string"
+          },
+          "validLogin": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -8483,6 +8652,9 @@
           },
           "replacementString": {
             "type": "string"
+          },
+          "translation": {
+            "type": "string"
           }
         },
         "required": [
@@ -8795,6 +8967,54 @@
         },
         "type": "object"
       },
+      "UpdateContributorRequest": {
+        "properties": {
+          "applyToExisting": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "givenname": {
+            "type": "string"
+          },
+          "gnduri": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "PERSON",
+              "ORGANIZATION"
+            ],
+            "type": "string"
+          },
+          "orcid": {
+            "type": "string"
+          },
+          "org": {
+            "type": "string"
+          },
+          "ror": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "wikidata": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateQAEntryDTO": {
         "properties": {
           "answer": {
@@ -8887,7 +9107,13 @@
           "appUserMail": {
             "type": "string"
           },
+          "application": {
+            "$ref": "#/components/schemas/UsageApplication"
+          },
           "courseId": {
+            "type": "string"
+          },
+          "courseTitle": {
             "type": "string"
           },
           "created": {
@@ -8949,6 +9175,20 @@
           "resourceId",
           "usageVersion"
         ],
+        "type": "object"
+      },
+      "UsageApplication": {
+        "properties": {
+          "appCaption": {
+            "type": "string"
+          },
+          "appId": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "Usages": {
@@ -9717,7 +9957,11 @@
             "type": "array"
           },
           "themeColors": {
-            "$ref": "#/components/schemas/ConfigThemeColors"
+            "description": "Theme color customization. An entry with no theme attribute (or theme=\"light\") applies to light mode, theme=\"dark\" to dark mode. A dark entry is used as-is instead of deriving dark variants from the light colors client-side",
+            "items": {
+              "$ref": "#/components/schemas/ConfigThemeColors"
+            },
+            "type": "array"
           },
           "tutorial": {
             "$ref": "#/components/schemas/ConfigTutorial"
@@ -10372,8 +10616,99 @@
           "ADMIN v1"
         ]
       },
+      "post": {
+        "description": "register the specified application. Fails if the application is already registered, use PUT to update or insert.",
+        "operationId": "createApplication_1",
+        "parameters": [
+          {
+            "description": "Remote application metadata url",
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "register/add an application",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
       "put": {
-        "description": "register the specified application.",
+        "description": "register the specified application. If the application is already registered it is updated, otherwise it is added.",
         "operationId": "addApplication_1",
         "parameters": [
           {
@@ -10448,15 +10783,114 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "register/add an application",
+        "summary": "update or add an application",
         "tags": [
           "ADMIN v1"
         ]
       }
     },
     "/admin/v1/applications/xml": {
+      "post": {
+        "description": "register the xml file provided. Fails if the application is already registered, use PUT to update or insert.",
+        "operationId": "createApplication",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "xml": {
+                    "description": "XML file for app to register",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "xml"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Application"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "register/add an application via xml file",
+        "tags": [
+          "ADMIN v1"
+        ]
+      },
       "put": {
-        "description": "register the xml file provided.",
+        "description": "register the xml file provided. If the application is already registered it is updated, otherwise it is added.",
         "operationId": "addApplication",
         "requestBody": {
           "content": {
@@ -10539,7 +10973,7 @@
             "description": "Fatal error occured."
           }
         },
-        "summary": "register/add an application via xml file",
+        "summary": "update or add an application via xml file",
         "tags": [
           "ADMIN v1"
         ]
@@ -16466,6 +16900,98 @@
         ]
       }
     },
+    "/assignment/v1/{assignmentId}/copy": {
+      "post": {
+        "description": "Create a draft copy of an assignment, including its files, but without copying submissions or the source's permissions/roles. Only coordinators of the source assignment may copy it.",
+        "operationId": "copyAssignment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignmentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assignment"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Copy an assignment",
+        "tags": [
+          "Assignment v1"
+        ]
+      }
+    },
     "/assignment/v1/{assignmentId}/files": {
       "get": {
         "description": "get assignment files.",
@@ -21931,6 +22457,624 @@
         "summary": "List all available connectors",
         "tags": [
           "CONNECTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}": {
+      "get": {
+        "description": "Search the contributor registry (autocomplete / management list).",
+        "operationId": "getContributors",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "search word",
+            "in": "query",
+            "name": "searchWord",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "contributor kind",
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "enum": [
+                "PERSON",
+                "ORGANIZATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "max number of results",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContributorData"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "search managed contributors",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "post": {
+        "description": "Creates a contributor in the registry. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "createContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContributorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "create a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}/list": {
+      "get": {
+        "description": "Filtered, sorted and paginated management list of the contributor registry, including the total match count. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "listContributors",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "search word",
+            "in": "query",
+            "name": "searchWord",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "contributor kind",
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "enum": [
+                "PERSON",
+                "ORGANIZATION"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "only contributors carrying at least one of these id types",
+            "in": "query",
+            "name": "hasId",
+            "schema": {
+              "items": {
+                "enum": [
+                  "ORCID",
+                  "GND",
+                  "ROR",
+                  "WIKIDATA",
+                  "EMAIL"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort column",
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "default": "NAME",
+              "enum": [
+                "NAME",
+                "KIND",
+                "CREATED",
+                "LAST_UPDATED",
+                "IDS"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "sort direction",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "pagination offset",
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "max number of results",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorSearchResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "list managed contributors",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      }
+    },
+    "/contributor/v1/{repository}/{id}": {
+      "delete": {
+        "description": "Removes a contributor from the registry. The media keep their embedded contributor untouched. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "deleteContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "delete a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "get": {
+        "description": "Returns a single contributor of the registry by its id.",
+        "operationId": "getContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "get a single managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
+        ]
+      },
+      "put": {
+        "description": "Updates a contributor. With applyToExisting=true the change is propagated to all media carrying this contributor. Requires the TOOLPERMISSION_MANAGE_CONTRIBUTORS toolpermission.",
+        "operationId": "updateContributor",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of the contributor",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContributorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributorData"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "update a managed contributor",
+        "tags": [
+          "CONTRIBUTOR v1"
         ]
       }
     },
@@ -30091,6 +31235,15 @@
         "description": "Get values for keys.",
         "operationId": "getValues4Keys",
         "parameters": [
+          {
+            "description": "Requested locale, e.g. de_DE",
+            "in": "header",
+            "name": "locale",
+            "schema": {
+              "example": "de_DE",
+              "type": "string"
+            }
+          },
           {
             "description": "ID of repository (or \"-home-\" for home repository)",
             "in": "path",
@@ -41487,7 +42640,7 @@
             }
           },
           {
-            "description": "define which authority fields should be searched: ['firstname', 'lastname', 'email', 'uuid', 'url']",
+            "description": "DEPRECATED - no longer evaluated. Contributors are now served from the managed contributor registry.",
             "in": "query",
             "name": "fields",
             "schema": {
@@ -41498,7 +42651,7 @@
             }
           },
           {
-            "description": "define which contributor props should be searched: ['ccm:lifecyclecontributer_author', 'ccm:lifecyclecontributer_publisher', ..., 'ccm:metadatacontributer_creator', 'ccm:metadatacontributer_validator']",
+            "description": "DEPRECATED - no longer evaluated. The contributor registry is role-independent.",
             "in": "query",
             "name": "contributorProperties",
             "schema": {
@@ -43029,7 +44182,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
@@ -43153,7 +44305,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Get the operation log of share info",
         "tags": [
           "SHARING v1"
@@ -43239,7 +44390,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
@@ -43325,7 +44475,6 @@
             "description": "Fatal error occured."
           }
         },
-        "security": [],
         "summary": "Return share info objects.",
         "tags": [
           "SHARING v1"
@@ -44016,6 +45165,117 @@
         ]
       }
     },
+    "/statistic/v1/statistics/nodes/complete": {
+      "post": {
+        "description": "requires either toolpermission TOOLPERMISSION_GLOBAL_STATISTICS_NODES for global stats or to be admin of the requested mediacenter",
+        "operationId": "getStatisticsNodeAsync",
+        "parameters": [
+          {
+            "description": "date range from",
+            "in": "query",
+            "name": "dateFrom",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "date range to",
+            "in": "query",
+            "name": "dateTo",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "the mediacenter to filter for statistics",
+            "in": "query",
+            "name": "mediacenter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "description": "properties to visualize in export"
+        },
+        "responses": {
+          "200": {
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Schedules a asynchronous job to retrieve statistics for all node actions. The result will be added to your inbox in form of an csv.",
+        "tags": [
+          "STATISTIC v1"
+        ]
+      }
+    },
     "/statistic/v1/statistics/nodes/node/{id}": {
       "get": {
         "description": "requires admin",
@@ -44163,6 +45423,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -44276,6 +45553,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -44398,6 +45692,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -44515,6 +45826,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],
@@ -44639,6 +45967,23 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -44752,6 +46097,23 @@
             "name": "published",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
             }
           }
         ],

@@ -72,6 +72,12 @@ export class MdsEditorWidgetTreeComponent
     inputControl = new FormControl('');
     private hasFocus = true;
     isTree: boolean;
+    /**
+     * Free-text / suggestion badges (no fixed valuespace). Only these render the inline
+     * autocomplete input in the `valueSelection` layout; fixed badges and trees keep their
+     * existing browse button and are not affected.
+     */
+    isFreeBadges: boolean;
     showDropdownArrow: boolean;
     private ignoreNextFocusEvent = false;
     valueSelection: string = 'valueSelection';
@@ -191,6 +197,10 @@ export class MdsEditorWidgetTreeComponent
         this.isTree = [MdsWidgetType.MultiValueTree, MdsWidgetType.SingleValueTree].includes(
             this.widget.definition.type as MdsWidgetType,
         );
+        this.isFreeBadges = [
+            MdsWidgetType.MultiValueSuggestBadges,
+            MdsWidgetType.MultiValueBadges,
+        ].includes(this.widget.definition.type as MdsWidgetType);
         this.showDropdownArrow =
             this.isTree ||
             (this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&

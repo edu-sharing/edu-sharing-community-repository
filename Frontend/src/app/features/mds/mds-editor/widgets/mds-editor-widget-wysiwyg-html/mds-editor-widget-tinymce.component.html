@@ -28,7 +28,13 @@
       [placeholder]="widget.definition.placeholder"
     ></ngx-editor>
   </div>-->
-  @if (editorConfig) {
-  <editor #editor [init]="editorConfig" [(ngModel)]="html" (onBlur)="onBlur.emit()"></editor>
-  }
+  @if (editorConfig()) { @for (cfg of [editorConfig()]; track cfg.skin) {
+  <editor
+    #editor
+    [init]="cfg"
+    [(ngModel)]="html"
+    (onInit)="onEditorInit()"
+    (onBlur)="onBlur.emit()"
+  ></editor>
+  } }
 </es-mds-editor-widget-container>

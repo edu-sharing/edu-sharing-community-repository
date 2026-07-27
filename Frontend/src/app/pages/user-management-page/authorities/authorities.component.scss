@@ -1,9 +1,21 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+// Fill the tab body (inside the rounded card) as a flex column: fixed header + internally
+// scrolling list, instead of the previous viewport-anchored `position: fixed` layout. The parent
+// (.mat-mdc-tab-body-content, see user-management-page.component.scss) is a flex column, so grow into
+// it with flex rather than height:100% (which does not resolve reliably through Material's tab body).
+// In embedded mode (.addToList) the host height is set explicitly, so flex is simply ignored there.
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
 
 .topFrame {
-    position: fixed;
-    z-index: 1;
-    width: 100%;
+    flex-shrink: 0;
     padding: 15px 10px;
     display: flex;
     align-items: center;
@@ -165,11 +177,40 @@
 
 $addToWidth: 450px;
 .list {
-    overflow-y: auto;
-    position: fixed;
-    top: calc(var(--mainnavHeight) + 105px);
+    position: relative;
     width: 100%;
-    height: calc(100% - (calc(var(--mainnavHeight) + 105px)));
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+// Static footer pinned at the bottom of the card; the card's overflow:hidden rounds its corners.
+// Mirrors the search-/workspace-page selection bar.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    min-height: $secondaryBarHeight;
+    padding: 0 25px;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowTop();
+    border-radius: 0 0 var(--borderRadiusCards) var(--borderRadiusCards);
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
+
+    es-actionbar {
+        padding-left: 10px;
+    }
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
+    }
 }
 .searchEmbedded {
     padding: 10px;
@@ -197,7 +238,7 @@ label.search {
     height: calc(100% - 105px - var(--mainnavHeight));
     z-index: 2;
     padding-bottom: 20px;
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     @include materialShadow();
     .btns {
         padding: 10px;
@@ -268,8 +309,8 @@ label.search {
     .code {
         font-family: monospace;
         padding: 10px 30px;
-        background-color: #eee;
-        border: 1px solid #888;
+        background-color: var(--backgroundColor);
+        border: 1px solid var(--borderGray);
     }
     mat-form-field {
         margin-top: 30px;

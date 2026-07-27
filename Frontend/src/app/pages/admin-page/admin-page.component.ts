@@ -3,18 +3,21 @@ import { PlatformLocation } from '@angular/common';
 import {
     Component,
     ElementRef,
+    inject,
     OnDestroy,
     OnInit,
+    signal,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AboutService,
+    AdminV1Service,
     NetworkService,
     Node,
+    NodeService,
     SessionStorageService,
     Store,
 } from 'ngx-edu-sharing-api';
@@ -24,9 +27,12 @@ import {
     DateHelper,
     InteractionType,
     ListItem,
+    NodeClickEvent,
     NodeDataSource,
+    NodeEntriesDataType,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodeHelperService,
     Scope,
     TranslationsService,
     UIAnimation,
@@ -121,6 +127,7 @@ type Job = {
 export class AdminPageComponent implements OnInit, OnDestroy {
     private about = inject(AboutService);
     private admin = inject(RestAdminService);
+    private adminV1 = inject(AdminV1Service);
     private config = inject(ConfigurationService);
     private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
@@ -128,6 +135,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private mediacenterService = inject(RestMediacenterService);
     private networkService = inject(NetworkService);
     private node = inject(RestNodeService);
+    private nodeService = inject(NodeService);
     private organization = inject(RestOrganizationService);
     private platformLocation = inject(PlatformLocation);
     private route = inject(ActivatedRoute);
@@ -137,6 +145,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private toast = inject(Toast);
     private translate = inject(TranslateService);
     private translations = inject(TranslationsService);
+    private nodeHelperService = inject(NodeHelperService);
 
     readonly AuthoritySearchMode = AuthoritySearchMode;
     readonly SCOPES = Scope;
@@ -149,6 +158,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
     private queryParams: Params;
+    /** node ids passed via the `nodes` query param; switches the statistics view to "by object" mode */
+    statisticsNodeIds = signal<string[]>([]);
     jobsLoading = false;
 
     constructor() {
@@ -249,7 +260,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }[] = [];
     availableJobs: JobDescription[];
     excelFile: File;
-    excelAddToCollection: string;
+    excelAddToCollection = false;
     collectionsFile: File;
     uploadTempFile: File;
     uploadJobsFile: File;
@@ -433,24 +444,25 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin
-            .importCollections(
-                this.collectionsFile,
-                this.parentCollectionType == 'root'
-                    ? RestConstants.ROOT
-                    : this.parentCollection.ref.id,
-            )
-            .subscribe(
-                (data: any) => {
+        this.adminV1
+            .importCollections({
+                parent:
+                    this.parentCollectionType == 'root'
+                        ? RestConstants.ROOT
+                        : this.parentCollection.ref.id,
+                body: { xml: this.collectionsFile },
+            })
+            .subscribe({
+                next: (data) => {
                     this.toast.toast('ADMIN.IMPORT.COLLECTIONS_IMPORTED', { count: data.count });
                     this.globalProgress = false;
                     this.collectionsFile = null;
                 },
-                (error: any) => {
+                error: (error) => {
                     this.toast.error(error);
                     this.globalProgress = false;
                 },
-            );
+            });
     }
     public startUploadTempFile() {
         if (!this.uploadTempFile) {
@@ -458,17 +470,22 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin.uploadTempFile(this.uploadTempFile).subscribe(
-            (data: any) => {
-                this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE', { filename: data.file });
-                this.globalProgress = false;
-                this.uploadTempFile = null;
-            },
-            (error: any) => {
-                this.toast.error(error);
-                this.globalProgress = false;
-            },
-        );
+        this.adminV1
+            .uploadTemp({
+                name: this.uploadTempFile.name,
+                body: { file: this.uploadTempFile },
+            })
+            .subscribe({
+                next: (data) => {
+                    this.toast.toast('ADMIN.TOOLKIT.UPLOAD_TEMP_DONE', { filename: data.file });
+                    this.globalProgress = false;
+                    this.uploadTempFile = null;
+                },
+                error: (error) => {
+                    this.toast.error(error);
+                    this.globalProgress = false;
+                },
+            });
     }
     public importExcel() {
         if (!this.excelFile) {
@@ -480,19 +497,23 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.globalProgress = true;
-        this.admin
-            .importExcel(this.excelFile, this.parentNode.ref.id, this.excelAddToCollection)
-            .subscribe(
-                (data: any) => {
+        this.adminV1
+            .importExcel({
+                parent: this.parentNode.ref.id,
+                addToCollection: this.excelAddToCollection,
+                body: { excel: this.excelFile },
+            })
+            .subscribe({
+                next: (data) => {
                     this.toast.toast('ADMIN.IMPORT.EXCEL_IMPORTED', { rows: data.rows });
                     this.globalProgress = false;
                     this.excelFile = null;
                 },
-                (error: any) => {
+                error: (error) => {
                     this.toast.error(error);
                     this.globalProgress = false;
                 },
-            );
+            });
     }
     public configApp(app: Application) {
         window.open(app.configUrl);
@@ -588,7 +609,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         const file = event.target.files[0];
         if (!file) return;
         this.globalProgress = true;
-        this.admin.addApplicationXml(file).subscribe(
+        this.adminV1.addApplication({ body: { xml: file } }).subscribe(
             (data: any) => {
                 this.toast.toast('ADMIN.APPLICATIONS.APP_REGISTERED');
                 this.refreshAppList();
@@ -676,22 +697,22 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             void this.storage.set('admin_oai', this.oai);
         }
         if (this.uploadOaiFile) {
-            this.admin
-                .importOAIXML(
-                    this.uploadOaiFile,
-                    this.oai.recordHandlerClassName,
-                    this.oai.binaryHandlerClassName,
-                )
-                .subscribe(
-                    (node) => {
+            this.adminV1
+                .importOaiXml({
+                    recordHandlerClassName: this.oai.recordHandlerClassName,
+                    binaryHandlerClassName: this.oai.binaryHandlerClassName,
+                    body: { xml: this.uploadOaiFile },
+                })
+                .subscribe({
+                    next: (node) => {
                         void this.debugNode(node);
                         this.globalProgress = false;
                     },
-                    (error) => {
+                    error: (error) => {
                         this.toast.error(error);
                         this.globalProgress = false;
                     },
-                );
+                });
         } else {
             this.admin
                 .importOAI(
@@ -910,13 +931,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 )
                 .subscribe(
                     (data) => {
-                        this.node
-                            .uploadNodeContent(
+                        this.nodeService
+                            .changeContent(
+                                data.node.ref.repo,
                                 data.node.ref.id,
-                                file,
+                                'auto',
                                 RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                { file },
                             )
-                            .subscribe(({ node }) => {
+                            .subscribe((node) => {
                                 this.getTemplates();
                                 this.toast.toast('ADMIN.FOLDERTEMPLATES.UPLOAD_DONE', {
                                     filename: node.name,
@@ -1387,6 +1410,15 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             ) !== -1 ||
             this.loginResult.toolPermissions.indexOf(
                 RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_USER_STATISTICS_NODES,
+            ) !== -1 ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES,
             ) !== -1
         ) {
             this.buttons.splice(1, 0, {
@@ -1401,6 +1433,17 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             this.buttons.splice(3, 0, {
                 id: 'MEDIACENTER',
                 icon: 'domain',
+            });
+        }
+        if (
+            this.loginResult.isAdmin ||
+            this.loginResult.toolPermissions.indexOf(
+                RestConstants.TOOLPERMISSION_MANAGE_CONTRIBUTORS,
+            ) !== -1
+        ) {
+            this.buttons.push({
+                id: 'CONTRIBUTORS',
+                icon: 'people',
             });
         }
     }
@@ -1423,6 +1466,12 @@ export class AdminPageComponent implements OnInit, OnDestroy {
 
         this.route.queryParams.subscribe((data: Params) => {
             this.queryParams = data;
+            this.statisticsNodeIds.set(
+                (data.nodes ?? '')
+                    .split(',')
+                    .map((id: string) => id.trim())
+                    .filter(Boolean),
+            );
             if (data.mode) {
                 this.mode = data.mode;
                 if (this.getModeButton().factory) {
@@ -1435,7 +1484,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             } else this.setMode(this.buttons[0].id, true);
         });
         if (this.loginResult.isAdmin) {
-            if (this.queryParams?.skipWarning !== 'true') {
+            if (this.queryParams?.skipWarning !== 'true' && this.mode !== 'STATISTICS') {
                 void this.showWarningDialog();
             }
             this.admin.getServerUpdates().subscribe((data: ServerUpdate[]) => {
@@ -1623,8 +1672,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    openNodeRender(event: Node) {
-        const url = this.router.createUrlTree([UIConstants.ROUTER_PREFIX + 'render', event.ref.id]);
-        window.open(this.connector.getAbsoluteEdusharingUrl() + this.router.serializeUrl(url));
+    openNodeRender(event: NodeClickEvent<NodeEntriesDataType>) {
+        this.nodeHelperService.navigateToNode(event);
     }
 }

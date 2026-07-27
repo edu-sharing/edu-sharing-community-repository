@@ -15,8 +15,8 @@
         font-size: 60px;
     }
     &.dropActive {
-        border-color: var(--palette-primary-200);
-        background: var(--palette-primary-100);
+        border-color: var(--primaryBackground300);
+        background: var(--primaryBackground100);
         i {
             color: var(--primary);
         }
@@ -64,8 +64,8 @@ mat-form-field {
 }
 
 .lti-data {
-    margin: 20px $cardPadding * -1;
-    padding: 20px $cardPadding;
+    margin: 20px calc(var(--addMaterialHPadding, #{$cardPadding}) * -1);
+    padding: 20px var(--addMaterialHPadding, #{$cardPadding});
     .heading {
         font-size: 110%;
         font-weight: bold;
@@ -123,7 +123,7 @@ mat-form-field {
 }
 
 .location {
-    margin-top: 20px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     .caption {
@@ -133,8 +133,8 @@ mat-form-field {
     .picker-group {
         display: flex;
         align-items: center;
-        padding: 10px $cardPadding;
-        margin: 0 (-$cardPadding);
+        padding: 10px var(--addMaterialHPadding, #{$cardPadding});
+        margin: 0 calc(var(--addMaterialHPadding, #{$cardPadding}) * -1);
         background-color: $buttonHoverBackground;
         .no-breadcrumbs {
             display: flex;
@@ -162,7 +162,7 @@ mat-form-field {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    background-color: var(--palette-primary-50);
+    background-color: var(--primaryBackground50);
     > div {
         display: flex;
         align-items: center;

@@ -56,7 +56,7 @@ ngx-extended-pdf-viewer {
         justify-content: center;
         padding: 12px var(--roundedContainerMargin);
         flex-shrink: 0;
-        border: 1px solid var(--palette-primary-100);
+        border: 1px solid var(--primaryBackground100);
         @include mixins.materialShadowSmall();
         border-radius: var(--borderRadiusCards);
     }
@@ -93,7 +93,7 @@ ngx-extended-pdf-viewer {
         gap: 10px;
         padding-bottom: 20px;
         &:not(:last-child) {
-            border-bottom: 1px solid var(--palette-primary-300);
+            border-bottom: 1px solid var(--primaryBackground300);
         }
         > label {
             font-size: vars.$fontSizeLarge;
@@ -114,6 +114,24 @@ ngx-extended-pdf-viewer {
             }
             .badge {
                 @include card.assignmentBadge();
+            }
+            &.authority {
+                display: flex;
+                flex-direction: column;
+                &.created-by {
+                    padding-top: 5px;
+                }
+                > label {
+                    font-weight: bold;
+                }
+                .authority-entry {
+                    display: flex;
+                    align-items: center;
+                    font-weight: bold;
+                    gap: 10px;
+                    font-weight: bold;
+                    padding: 5px 0;
+                }
             }
         }
         &.feedback {

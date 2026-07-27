@@ -21,7 +21,12 @@
       <h1 esTitle class="cdk-visually-hidden">{{ 'LOGIN.TITLE' | translate }}</h1>
       <div class="branding">
         <img
-          [src]="'assets/images/logo.svg' | esAssetsPath"
+          [src]="
+            (themeService.isDarkMode()
+              ? 'assets/images/logo_darkmode.svg'
+              : 'assets/images/logo.svg'
+            ) | esAssetsPath
+          "
           esImageConfig
           alt="{{ 'LOGIN.APP_LOGO' | translate }}"
         />

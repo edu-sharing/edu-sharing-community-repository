@@ -38,7 +38,18 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/juniversalchardet-* \
         tomcat/webapps/alfresco/WEB-INF/lib/poi-* \
         tomcat/webapps/alfresco/WEB-INF/lib/xmpbox-* \
-        tomcat/webapps/alfresco/WEB-INF/lib/stax2-api-*
+        tomcat/webapps/alfresco/WEB-INF/lib/stax2-api-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/xz-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/joda-time-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jsoup-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/log4j-api-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/log4j-core-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/log4j-slf4j2-impl-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/micrometer-commons-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/micrometer-observation-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/nimbus-jose-jwt-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/slf4j-api-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-annotations-*
 
 COPY --chown=worker:worker artifacts/edu_sharing-community-repository-backend-tomcat-${org.edu_sharing:edu_sharing-community-repository-backend-tomcat:jar.version}.jar tomcat/lib/
 COPY --chown=worker:worker webapp/*.war tomcat/webapps/edu-sharing.war

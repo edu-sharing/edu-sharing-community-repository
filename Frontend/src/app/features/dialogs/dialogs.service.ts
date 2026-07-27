@@ -22,6 +22,10 @@ import {
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
 import {
+    ContributorRegistryEditDialogData,
+    ContributorRegistryEditDialogResult,
+} from './dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog-data';
+import {
     ContributorsDialogData,
     ContributorsDialogResult,
 } from './dialog-modules/contributors-dialog/contributors-dialog-data';
@@ -152,9 +156,9 @@ import {
     ShortcutManagementDialogResult,
 } from './dialog-modules/shortcut-management-dialog/shortcut-management-dialog-data';
 import {
-    SelectElementDialogData,
-    SelectElementDialogResult,
-} from './dialog-modules/select-element-dialog/select-element-dialog-data';
+    SelectFavoriteDialogData,
+    SelectFavoriteDialogResult,
+} from './dialog-modules/select-favorite-dialog/select-favorite-dialog-data';
 import {
     SharePublishMotivationDialogComponentData,
     SharePublishMotivationDialogResult,
@@ -442,6 +446,26 @@ export class DialogsService {
             contentPadding: 0,
             width: 600,
             height: 900,
+            closable: Closable.Standard,
+            data,
+        });
+    }
+
+    async openContributorRegistryEditDialog(
+        data: ContributorRegistryEditDialogData,
+    ): Promise<
+        CardDialogRef<ContributorRegistryEditDialogData, ContributorRegistryEditDialogResult>
+    > {
+        const title = await this.translate
+            .get('ADMIN.CONTRIBUTORS.' + (data.contributor ? 'EDIT' : 'CREATE'))
+            .toPromise();
+        const { ContributorRegistryEditDialogComponent } = await import(
+            './dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog.module'
+        );
+        return this.cardDialog.open(ContributorRegistryEditDialogComponent, {
+            title,
+            contentPadding: 0,
+            width: 600,
             closable: Closable.Standard,
             data,
         });
@@ -799,8 +823,9 @@ export class DialogsService {
             './dialog-modules/add-with-connector-dialog/add-with-connector-dialog.module'
         );
         return this.cardDialog.open(AddWithConnectorDialogComponent, {
-            width: 400,
-            maxWidth: 600,
+            width: 600,
+            maxWidth: 800,
+            contentPadding: data.connector?.mdsGroup ? 0 : 25,
             data,
             closable: Closable.Casual,
         });
@@ -1015,15 +1040,15 @@ export class DialogsService {
     }
 
     /**
-     * opens select element dialog
+     * opens select favorite dialog
      */
-    async openSelectElementDialog(
-        data: SelectElementDialogData,
-    ): Promise<CardDialogRef<SelectElementDialogData, SelectElementDialogResult>> {
-        const { SelectElementDialogComponent } = await import(
-            './dialog-modules/select-element-dialog/select-element-dialog.component'
+    async openSelectFavoriteDialog(
+        data: SelectFavoriteDialogData,
+    ): Promise<CardDialogRef<SelectFavoriteDialogData, SelectFavoriteDialogResult>> {
+        const { SelectFavoriteDialogComponent } = await import(
+            './dialog-modules/select-favorite-dialog/select-favorite-dialog.component'
         );
-        return this.cardDialog.open(SelectElementDialogComponent, {
+        return this.cardDialog.open(SelectFavoriteDialogComponent, {
             title: 'SHORTCUT_ENTRIES.SELECT_ELEMENT',
             avatar: { kind: 'icon', icon: 'call_made' },
             minWidth: 800,

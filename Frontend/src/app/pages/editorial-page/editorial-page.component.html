@@ -3,31 +3,57 @@
   {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
 </h1>
 
+<!-- Always-visible tab ("Lasche") on the left edge to open/close the filter drawer,
+  mirroring the editorial sidebar's toggle. -->
+<es-edge-toggle
+  data-test="button-toggle-sidebar-filters-editorial"
+  [side]="'start'"
+  [open]="filterBarOpen()"
+  [visible]="
+    !isLoading() &&
+    filtersAvailable() &&
+    (mainComponent$ | async) === null &&
+    (isMobile$ | async) === false
+  "
+  [drawer]="leftSidenav()"
+  [labelOpen]="'EDITORIAL.FILTER.OPEN'"
+  [labelClose]="'EDITORIAL.FILTER.CLOSE'"
+  (toggled)="filtersButtonClicked.next()"
+></es-edge-toggle>
 <mat-sidenav-container
-  [class.mat-sidenav-container-left-open]="filterBarVisible | async"
+  [class.mat-sidenav-container-left-open]="(filterBarVisible | async) && filtersAvailable()"
   [class.mat-sidenav-container-right-open]="editorialSidebarService.sidebarOpened()"
 >
   <mat-sidenav
-    #leftSidenav
+    #leftSidenavEl
     [mode]="'side'"
-    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null"
+    [opened]="(filterBarVisible | async) && (mainComponent$ | async) === null && filtersAvailable()"
     position="start"
     class="es-mat-sidenav"
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
     esResizableSidenav
   >
     <div class="es-mat-sidenav-content es-mat-sidenav-content-mds">
-      @if (mdsGroup() && (searchValues$ | async) !== null) {
-      <es-mds-editor-wrapper
-        [groupId]="mdsGroup()"
-        [embedded]="true"
-        [repository]="HOME_REPOSITORY"
-        [mode]="'search'"
-        (mdsLoaded)="mdsLoaded$.next(true)"
-        [currentValues]="searchValues$ | async"
-        (currentValuesChange)="updateMdsFilter($event)"
-      ></es-mds-editor-wrapper>
-      }
+      <!-- Filter header similar to es-search-page-filters-sidebar -->
+      <div class="filter-bar-heading">
+        <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+      </div>
+      <div class="filter-bar-body">
+        @if (mdsGroup() && (searchValues$ | async) !== null) {
+        <!-- Keyed on the group so a mode switch recreates the wrapper: it treats groupId as stable
+          after init and won't re-init the editor when only the input changes. -->
+        @for (group of [mdsGroup()]; track group) {
+        <es-mds-editor-wrapper
+          [groupId]="group"
+          [embedded]="true"
+          [repository]="HOME_REPOSITORY"
+          [mode]="'search'"
+          (mdsLoaded)="mdsLoaded$.next(true)"
+          [currentValues]="searchValues$ | async"
+          (currentValuesChange)="updateMdsFilter($event)"
+        ></es-mds-editor-wrapper>
+        } }
+      </div>
     </div>
   </mat-sidenav>
 
@@ -36,7 +62,7 @@
     #rightSidenav
     [mode]="'side'"
     [opened]="editorialSidebarService.sidebarOpened()"
-    [defaultWidth]="0.3"
+    [defaultWidthPx]="600"
     storageKey="EDITORIAL_SIDENAV_RIGHT_WIDTH"
     class="es-mat-sidenav"
     esResizableSidenav
@@ -74,6 +100,14 @@
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"
         ></es-editorial-breadcrumb>
+        <!-- Split actionbar (mirrors search/workspace): the header shows toggle options only; node
+          actions move to the bottom selection bar. -->
+        <es-actionbar
+          [class.display-none]="(mainComponent$ | async) !== null"
+          [numberOfAlwaysVisibleOptions]="3"
+          [showActionOptions]="false"
+          [showCaptions]="(observer.width$ | async) > 700"
+        ></es-actionbar>
         @if (editorialPageService.close()?.show) {
         <button class="close" mat-icon-button (click)="editorialPageService.close().callback()">
           <i esIcon="close"></i>
@@ -89,62 +123,100 @@
       <es-submit-assignment></es-submit-assignment>
       } @default {
       <span> Component "{{ component }}" not implemented </span>
-      } } } @if ((mainComponent$ | async) === null) { @if ((editorialPageService.observeTabs() |
-      async)?.length) {
-      <mat-tab-group
-        class="mat-tab-group-shadow"
-        [selectedIndex]="tabSelection$ | async"
-        (selectedIndexChange)="tabSelection$.next($event)"
-      >
-        @for (tab of editorialPageService.observeTabs() | async; track tab) {
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <i [esIcon]="tab.icon"></i>
-            {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
+      } } } @if ((mainComponent$ | async) === null) {
+      <!-- Scroll region below the header: the tab bar sticks to its top while the option row
+        (filter button) and the list scroll beneath it. -->
+      <div class="content-scroll">
+        @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
+        async).primaryMode !== 'suggestions') {
+        <mat-tab-group
+          [selectedIndex]="tabSelection$ | async"
+          (selectedIndexChange)="tabSelection$.next($event)"
+        >
+          @for (tab of editorialPageService.observeTabs() | async; track tab) {
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <i [esIcon]="tab.icon"></i>
+              {{ tab.caption ? tab.caption : ('EDITORIAL.TAB.' + tab.id | translate) }}
+            </ng-template>
+          </mat-tab>
+          }
+        </mat-tab-group>
+        } } @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode ===
+        'share' || mode === 'assignment' || mode === 'suggestions' ) {
+        <es-node-entries-wrapper
+          [primaryInstance]="true"
+          [dataSource]="dataSource"
+          [elementInteractionType]="InteractionType.Emitter"
+          [scope]="Scope.EditorialPage"
+          [infiniteScrollWindow]="false"
+          singleClickHint="static"
+          (clickItem)="click($event)"
+          (dblClickItem)="openItem($event)"
+          (fetchData)="fetchEvent($event)"
+          (selectionChange)="selectionChange($event)"
+          [columns]="columns()"
+          [displayType]="editorialPageService.displayType()"
+        >
+          <ng-template #empty>
+            <div class="empty">
+              {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
+            </div>
           </ng-template>
-        </mat-tab>
-        }
-      </mat-tab-group>
-      }
-      <div class="option-area">
-        <div class="options-left">
-          <button
-            mat-stroked-button
-            color="primary"
-            (click)="filtersButtonClicked.next()"
-            [attr.aria-expanded]="filterBarVisible | async"
-          >
-            <i esIcon="filter_list" [aria]="false"></i>
-            {{ 'SEARCH.FILTERS' | translate }}
-          </button>
-        </div>
-        <es-actionbar
-          [class.display-none]="(mainComponent$ | async) !== null"
-          [numberOfAlwaysVisibleOptions]="3"
-          [showCaptions]="(observer.width$ | async) > 700"
-        ></es-actionbar>
+        </es-node-entries-wrapper>
+        } }
       </div>
       @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
       || mode === 'assignment' || mode === 'suggestions' ) {
-      <es-node-entries-wrapper
-        [primaryInstance]="true"
-        [dataSource]="dataSource"
-        [elementInteractionType]="InteractionType.Emitter"
-        [scope]="Scope.EditorialPage"
-        singleClickHint="static"
-        (clickItem)="click($event)"
-        (dblClickItem)="openItem($event)"
-        (fetchData)="fetchEvent($event)"
-        (selectionChange)="selectionChange($event)"
-        [columns]="columns()"
-        [displayType]="editorialPageService.displayType()"
+      <!-- Full-width selection bar pinned at the bottom of the card (outside the scroll region);
+        mirrors the search-page selection layout. Node actions render in #selectionActionbarRef. -->
+      <div
+        class="selection-action-bar"
+        cdkOverlayOrigin
+        #selectionBar="cdkOverlayOrigin"
+        [class.visible]="selectedNodes.length"
       >
-        <ng-template #empty>
-          <div class="empty">
-            {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
-          </div>
-        </ng-template>
-      </es-node-entries-wrapper>
+        <button
+          mat-icon-button
+          class="clear-selection"
+          (click)="clearSelection()"
+          [attr.aria-label]="'SEARCH.CLEAR_SELECTION' | translate"
+          matTooltip="{{ 'SEARCH.CLEAR_SELECTION' | translate }}"
+        >
+          <i esIcon="close"></i>
+        </button>
+        <button
+          mat-button
+          color="primary"
+          class="count"
+          (click)="selectionOverlayOpen = !selectionOverlayOpen"
+        >
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selectedNodes.length || 0 } }}
+          <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+        </button>
+        <es-actionbar
+          #selectionActionbarRef
+          [showToggleOptions]="false"
+          showCaptions="ifRoom"
+        ></es-actionbar>
+      </div>
+
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="selectionBar"
+        [cdkConnectedOverlayOpen]="selectionOverlayOpen && !!selectedNodes.length"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayWidth]="selectionBar.elementRef.nativeElement.offsetWidth"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        (overlayOutsideClick)="selectionOverlayOpen = false"
+      >
+        <es-search-selection-overlay
+          [nodes]="selectedNodes"
+          [columns]="columns()"
+          [displayType]="editorialPageService.displayType()"
+          (deselect)="deselectNode($event)"
+        ></es-search-selection-overlay>
+      </ng-template>
       } } }
     </div>
   </mat-sidenav-content>

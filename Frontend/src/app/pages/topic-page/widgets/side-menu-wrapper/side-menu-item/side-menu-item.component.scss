@@ -10,8 +10,12 @@
     font-weight: topicPageVars.$font-weight-bold;
 
     &:not(:disabled) {
-        color: topicPageVars.$primary-dark;
+        color: topicPageVars.$on-surface;
         cursor: pointer;
+    }
+
+    &:disabled {
+        color: var(--buttonDisabled);
     }
 
     &.primary-border {

@@ -33,6 +33,7 @@
     <es-node-entries-wrapper
       [dataSource]="collections"
       [columns]="columns"
+      [checkbox]="false"
       [displayType]="NodeEntriesDisplayType.SmallGrid"
       [elementInteractionType]="InteractionType.Emitter"
       (clickItem)="saveToCollection($event.element)"

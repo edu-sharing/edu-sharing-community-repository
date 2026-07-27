@@ -1,46 +1,32 @@
 import {
-    ApplicationRef,
     Component,
     ElementRef,
     EventEmitter,
     HostListener,
-    NgZone,
     OnDestroy,
     OnInit,
     ViewChild,
     inject,
 } from '@angular/core';
-
 import { ActivatedRoute, Router } from '@angular/router';
-
 import {
-    ActionbarComponent,
     AuthorityNamePipe,
-    ColorHelper,
     ColumnType,
-    DefaultGroups,
-    ElementType,
     InteractionType,
     ListItem,
     LocalEventsService,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
-    OptionItem,
     OptionsHelperDataService,
-    PreferredColor,
-    Scope,
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-
 import * as EduData from '../../../core-module/core.module';
 import {
     ConfigurationHelper,
     ConfigurationService,
     DialogButton,
-    EventListener,
-    FrameEventsService,
     IamGroups,
     IamUser,
     NodeRef,
@@ -60,6 +46,7 @@ import { Toast } from '../../../services/toast';
 import {
     Ace,
     Acl,
+    CollectionServiceUnwrapped,
     CollectionsTypeConfig,
     ConfigService,
     Group,
@@ -68,18 +55,12 @@ import {
     SessionStorageService,
     Store,
 } from 'ngx-edu-sharing-api';
-import { TranslateService } from '@ngx-translate/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UIHelper } from '../../../core-ui-module/ui-helper';
-import { BridgeService } from '../../../services/bridge.service';
-import { NodeHelperService } from '../../../services/node-helper.service';
 import { Observable, Subject } from 'rxjs';
-import { PlatformLocation } from '@angular/common';
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { MdsEditorWrapperComponent } from '../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Values } from '../../../features/mds/types/types';
-import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import {
     ShareDialogData,
     ShareDialogResult,
@@ -101,42 +82,31 @@ type Step = 'NEW' | 'GENERAL' | 'METADATA' | 'PERMISSIONS' | 'SETTINGS' | 'EDITO
     providers: [OptionsHelperService, OptionsHelperDataService],
     standalone: false,
 })
-export class CollectionNewComponent implements EventListener, OnInit, OnDestroy {
+export class CollectionNewComponent implements OnInit, OnDestroy {
     private collectionService = inject(RestCollectionService);
+    private collectionServiceUnwrapped = inject(CollectionServiceUnwrapped);
     private nodeService = inject(RestNodeService);
     private nodeApi = inject(NodeService);
     private connector = inject(RestConnectorService);
-    private nodeHelper = inject(NodeHelperService);
     private uiService = inject(UIService);
     private iamService = inject(RestIamService);
     private mediacenterService = inject(RestMediacenterService);
     private route = inject(ActivatedRoute);
     private mdsService = inject(RestMdsService);
-    private eventService = inject(FrameEventsService);
     private localEvents = inject(LocalEventsService);
     private router = inject(Router);
-    private platformLocation = inject(PlatformLocation);
     private toast = inject(Toast);
-    private bridge = inject(BridgeService);
     private temporaryStorage = inject(TemporaryStorageService);
     private sessionStorageService = inject(SessionStorageService);
-    private zone = inject(NgZone);
-    private sanitizer = inject(DomSanitizer);
     private configLegacy = inject(ConfigurationService);
     private configService = inject(ConfigService);
-    private optionsHelper = inject(OptionsHelperService);
-    private optionsHelperDataService = inject(OptionsHelperDataService);
-    private ref = inject(ApplicationRef);
     private translations = inject(TranslationsService);
-    private translationService = inject(TranslateService);
     private loadingScreen = inject(LoadingScreenService);
     private mainNav = inject(MainNavService);
-    private dialogs = inject(DialogsService);
     private authorityNamePipe = inject(AuthorityNamePipe);
 
     @ViewChild('mds') mds: MdsEditorWrapperComponent;
     @ViewChild('organizations') organizationsRef: NodeEntriesWrapperComponent<Group>;
-    @ViewChild('imageActionbar') imageActionbar: ActionbarComponent;
     @ViewChild(ShareDialogComponent) shareDialogRef: ShareDialogComponent;
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -162,7 +132,8 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     public editorialColumns: ColumnType = {
         Default: [new ListItem('GROUP', RestConstants.AUTHORITY_DISPLAYNAME)],
     };
-    imageData: string | SafeUrl = null;
+    // truthy while a new preview image is pending upload (see onPreviewChange / saveImage)
+    imageData: string = null;
     private imageFile: File = null;
     readonly STEP_NEW = 'NEW';
     readonly STEP_GENERAL = 'GENERAL';
@@ -185,13 +156,11 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
 
-    @ViewChild('file') imageFileRef: ElementRef;
     @ViewChild('authorFreetextInput') authorFreetextInput: ElementRef<HTMLInputElement>;
     buttons: DialogButton[];
     authorFreetext = false;
     authorFreetextAllowed = false;
     mdsSet: string;
-    imageWindow: Window;
     editorialGroupsSelected: Group[] = [];
     editorialCollectionsConfig: CollectionsTypeConfig;
     shareConfig: ShareDialogData;
@@ -241,28 +210,27 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         });
     }
 
-    onEvent(event: string, data: Node): void {
-        if (event === FrameEventsService.EVENT_APPLY_NODE) {
-            const imageData = data.preview?.data;
-            if (imageData) {
-                this.imageData = this.sanitizer.bypassSecurityTrustUrl(imageData);
-                void this.updateImageOptions();
-                void fetch(imageData)
-                    .then((res) => res.blob())
-                    .then((blob) => {
-                        this.imageFile = blob as File;
-                    });
-                this.ref.tick();
-            } else {
-                console.info(data);
-                this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');
-            }
-            this.imageWindow?.close();
+    /**
+     * Reacts to es-mds-editor-widget-preview producing a new image or a delete request.
+     * The actual persistence happens in {@link saveImage} on save.
+     */
+    onPreviewChange(change: { file: File | null; delete: boolean }): void {
+        if (change.file) {
+            this.imageFile = change.file;
+            this.imageData = URL.createObjectURL(change.file);
+        } else if (change.delete) {
+            this.imageFile = null;
+            this.imageData = null;
+            // signals saveImage to remove the existing collection image
+            this.currentCollection.preview = null;
+        } else {
+            // pending image cleared -> keep the existing collection image untouched
+            this.imageFile = null;
+            this.imageData = null;
         }
     }
 
     constructor() {
-        this.eventService.addListener(this, this.destroyed);
         this.translations.waitForInit().subscribe(() => {
             this.connector.isLoggedIn().subscribe((data) => {
                 this.mdsService.getSets().subscribe(async (mdsSets) => {
@@ -348,7 +316,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                                         .subscribe((node: EduData.NodeWrapper) => {
                                             this.setCollection(node.node).subscribe(() => {
                                                 this.updateAvailableSteps();
-                                                void this.updateImageOptions();
                                                 this.isLoading = false;
                                                 if (!this.loadingTask.isDone) {
                                                     this.loadingTask.done();
@@ -433,17 +400,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             return RestConstants.COLLECTIONSCOPE_MY;
         }
     }
-    private saveCollection() {
-        this.collectionService.updateCollection(this.currentCollection).subscribe(
-            () => {
-                this.navigateToCollectionId(this.currentCollection.ref.id);
-            },
-            (error: any) => {
-                this.nodeHelper.handleNodeError(this.currentCollection.title, error);
-                //this.toast.error(error)
-            },
-        );
-    }
     setPermissions(permissions: ShareDialogResult) {
         if (permissions) {
             this.permissionsInfo = permissions;
@@ -527,33 +483,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         }
     }
 
-    imageDataChanged(event: any): void {
-        // get files and check if available
-        let files = event.target.files;
-        if (typeof files == 'undefined') {
-            return;
-        }
-        if (files.length <= 0) {
-            return;
-        }
-
-        // get first file
-        let file: File = files[0];
-
-        // check if file type is correct
-        let validType = false;
-        if (file.type.startsWith('image')) validType = true;
-        //if (file.type=="image/jpeg") validType = true;
-        //if (file.type=="image/gif") validType = true;
-        if (!validType) {
-            return;
-        }
-
-        // remember file for upload
-        this.imageFile = file;
-        this.imageData = this.sanitizer.bypassSecurityTrustUrl(URL.createObjectURL(file));
-        void this.updateImageOptions();
-    }
     handleError(error: any) {
         if (error.status == RestConstants.DUPLICATE_NODE_RESPONSE) {
             this.toast.error(null, 'COLLECTIONS.TOAST.DUPLICATE_NAME');
@@ -615,17 +544,22 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     }
     private saveImage(collection: EduData.Node): void {
         if (this.imageData != null) {
-            this.collectionService
-                .uploadCollectionImage(collection.ref.id, this.imageFile, 'image/png')
-                .subscribe(
-                    () => {
+            this.collectionServiceUnwrapped
+                .changeIconOfCollection({
+                    repository: collection.ref.repo,
+                    collection: collection.ref.id,
+                    mimetype: 'image/png',
+                    body: { file: this.imageFile },
+                })
+                .subscribe({
+                    next: () => {
                         this.navigateToCollectionId(collection.ref.id);
                     },
-                    (error) => {
+                    error: (error) => {
                         this.toast.error(null, 'COLLECTIONS.TOAST.ERROR_IMAGE_APPLY');
                         this.navigateToCollectionId(collection.ref.id);
                     },
-                );
+                });
         } else if (collection.preview == null) {
             this.collectionService.deleteCollectionImage(collection.ref.id).subscribe(() => {
                 this.navigateToCollectionId(collection.ref.id);
@@ -731,7 +665,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         }
         this.updateButtons();
     }
-    setCollectionGeneral() {}
     currentStepPosition() {
         return this.availableSteps.indexOf(this.newCollectionStep);
     }
@@ -935,7 +868,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
             this.setCollectionType(RestConstants.COLLECTIONTYPE_EDITORIAL);
         }
         this.updateAvailableSteps();
-        void this.updateImageOptions();
         this.isLoading = false;
         if (!this.loadingTask.isDone) {
             this.loadingTask.done();
@@ -971,14 +903,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
         });
     }
 
-    deleteImage() {
-        this.imageData = null;
-        this.imageFile = null;
-        this.imageFileRef.nativeElement.value = null;
-        this.currentCollection.preview = null;
-        void this.updateImageOptions();
-    }
-
     private updateButtons() {
         /**
          *  <a class="waves-effect btn" tabindex="0" (keyup.enter)="setCollectionGeneral()" (click)="setCollectionGeneral()">
@@ -993,7 +917,6 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
                 this.goToNextStep(),
             ),
         ];
-        setTimeout(() => this.updateImageOptions());
     }
 
     switchToAuthorFreetext() {
@@ -1016,52 +939,5 @@ export class CollectionNewComponent implements EventListener, OnInit, OnDestroy 
     cancelAuthorFreetext() {
         this.authorFreetext = false;
         this.currentCollection.collection.authorFreetext = null;
-    }
-
-    async updateImageOptions() {
-        const imageOptions = [
-            new OptionItem('COLLECTIONS.NEW.IMAGE.SEARCH', 'search', () => {
-                this.imageWindow = UIHelper.openSearchWithReurl(
-                    this.platformLocation,
-                    this.router,
-                    'WINDOW',
-                    { queryParams: { reurlCreate: false, reurlTypes: ['image'] } },
-                ) as Window;
-                /*this.route
-                r.navigate([], {
-                        relativeTo: this.route,
-                        queryParams: {
-                            collection: JSON.stringify(this.currentCollection)
-                        }
-                    }).then(() => {
-                    });*/
-            }),
-            new OptionItem('COLLECTIONS.NEW.IMAGE.UPLOAD', 'file_upload', () =>
-                this.imageFileRef.nativeElement.click(),
-            ),
-        ];
-        imageOptions[0].group = DefaultGroups.Edit;
-        imageOptions[1].group = DefaultGroups.Edit;
-        if (
-            this.imageData ||
-            (this.currentCollection.preview && !this.currentCollection.preview.isIcon)
-        ) {
-            imageOptions.push(
-                new OptionItem('COLLECTIONS.NEW.IMAGE.DELETE', 'delete', () => this.deleteImage()),
-            );
-            imageOptions[2].group = DefaultGroups.Delete;
-        }
-        void this.optionsHelperDataService.initComponents(this.imageActionbar);
-        this.optionsHelperDataService.setData({
-            scope: Scope.CollectionsCollection,
-            customOptions: {
-                useDefaultOptions: false,
-                addOptions: imageOptions.map((i) => {
-                    i.elementType = [ElementType.NoneOrUnknown];
-                    return i;
-                }),
-            },
-        });
-        await this.optionsHelperDataService.refreshComponents();
     }
 }

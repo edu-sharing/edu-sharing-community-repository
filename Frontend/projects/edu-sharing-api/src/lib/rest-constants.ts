@@ -70,6 +70,17 @@ export class RestConstants {
     public static CCM_TYPE_REMOTEOBJECT = 'ccm:remoteobject';
     public static CCM_TYPE_TOOL_INSTANCE = 'ccm:tool_instance';
     public static CCM_TYPE_SAVED_SEARCH = 'ccm:saved_search';
+
+    public static PERMISSION_OWNER = 'Owner';
+    public static PERMISSION_COLLABORATOR = 'Collaborator';
+    public static PERMISSION_DOWNLOAD_CONTENT = 'DownloadContent';
+    public static PERMISSION_COORDINATOR = 'Coordinator';
+    public static PERMISSION_ALL = 'All';
+    public static PERMISSION_WRITE = 'Write';
+    public static PERMISSION_DELETE = 'Delete';
+    public static PERMISSION_FEEDBACK = 'Feedback'; // Giving feedback for collections
+    public static PERMISSION_RATE = 'Rate';
+
     public static TOOLPERMISSION_INVITE = 'TOOLPERMISSION_INVITE';
     public static TOOLPERMISSION_INVITE_TIMEBASED = 'TOOLPERMISSION_INVITE_TIMEBASED';
     public static TOOLPERMISSION_INVITE_STREAM = 'TOOLPERMISSION_INVITE_STREAM';
@@ -114,6 +125,11 @@ export class RestConstants {
     public static TOOLPERMISSION_CREATE_MAP_LINK = 'TOOLPERMISSION_CREATE_MAP_LINK';
     public static TOOLPERMISSION_GLOBAL_STATISTICS_USER = 'TOOLPERMISSION_GLOBAL_STATISTICS_USER';
     public static TOOLPERMISSION_GLOBAL_STATISTICS_NODES = 'TOOLPERMISSION_GLOBAL_STATISTICS_NODES';
+    public static TOOLPERMISSION_SELECTIVE_STATISTICS_NODES =
+        'TOOLPERMISSION_SELECTIVE_STATISTICS_NODES';
+    public static TOOLPERMISSION_USER_STATISTICS_NODES = 'TOOLPERMISSION_USER_STATISTICS_NODES';
+    public static TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES =
+        'TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES';
     public static TOOLPERMISSION_CONNECTOR_PREFIX = 'TOOLPERMISSION_CONNECTOR_';
     public static TOOLPERMISSION_REPOSITORY_PREFIX = 'TOOLPERMISSION_REPOSITORY_';
     public static TOOLPERMISSION_VIDEO_AUDIO_CUT = 'TOOLPERMISSION_VIDEO_AUDIO_CUT';
@@ -126,6 +142,7 @@ export class RestConstants {
     public static TOOLPERMISSION_MANAGE_RELATIONS = 'TOOLPERMISSION_MANAGE_RELATIONS';
     public static TOOLPERMISSION_BAPI = 'TOOLPERMISSION_BAPI';
     public static TOOLPERMISSION_MANAGE_QA = 'TOOLPERMISSION_MANAGE_QA';
+    public static TOOLPERMISSION_MANAGE_CONTRIBUTORS = 'TOOLPERMISSION_MANAGE_CONTRIBUTORS';
     public static TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS =
         'TOOLPERMISSION_CONTROL_RESTRICTED_ACCESS';
     public static CCM_PROP_IMPORT_BLOCKED = 'ccm:importblocked';
@@ -275,6 +292,8 @@ export class RestConstants {
         'script_writer',
         'instructional_designer',
         'subject_matter_expert',
+        'sprecher',
+        'darsteller',
     ];
     public static CONTRIBUTOR_ROLES_METADATA = ['creator', 'validator', 'provider'];
 

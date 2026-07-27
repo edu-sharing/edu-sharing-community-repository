@@ -1,0 +1,41 @@
+.contributor-registry-edit {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px;
+
+    .group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 16px;
+
+        h4 {
+            margin: 0 0 8px;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        mat-form-field {
+            width: 100%;
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+
+            mat-form-field {
+                flex: 1;
+            }
+        }
+
+        .hint {
+            margin: 0 0 8px;
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+    }
+
+    .group.apply {
+        border-top: 1px solid var(--cardBorderColor, #e0e0e0);
+        padding-top: 16px;
+    }
+}

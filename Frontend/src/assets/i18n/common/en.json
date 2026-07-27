@@ -158,6 +158,10 @@
     "TOOLPERMISSION_USAGE_STATISTIC": "Fetch information about the usage of all nodes of the repository",
     "TOOLPERMISSION_COMMENT_WRITE": "Creating comments on objects",
     "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "View stats of material access of the repository",
+    "TOOLPERMISSION_SELECTIVE_STATISTICS_NODES": "View access stats of individual materials",
+    "TOOLPERMISSION_USER_STATISTICS_NODES": "View access stats of your own materials",
+    "TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES": "View access stats of your organization's materials",
+    "TOOLPERMISSION_EDITORIAL_SUGGESTIONS": "Manage the editorial view & metadata suggestions.",
     "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "View stats of user interaction (login, logout) access of the repository",
     "TOOLPERMISSION_MEDIACENTER_MANAGE": "Change basic data (Address, Catalogs) from media centers where the given user is admin of",
     "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- and audio-files can be cutted when added into collections",
@@ -178,6 +182,7 @@
     "TOOLPERMISSION_SUGGESTION_WRITE": "Add metadata suggestions to materials",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Show methodology tab when sorting materials.",
     "TOOLPERMISSION_MANAGE_QA": "Manage quality assurance of materials",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Manage, add and delete contributors (authors, organizations) with persistent ids.",
     "TOOLPERMISSION_BAPI": "Access to the Bildungs-API (BAPI) of the repository"
   },
   "NO_WRITE_PERMISSIONS": "No permissions",
@@ -189,6 +194,9 @@
   "STORAGE_LOCATION_UNSET": "Not set",
   "STORAGE_LOCATION_SAVE": "Use this location as default in the future",
   "SUGGESTION": "Suggestion",
+  "SUGGESTIONS": {
+    "count": "Count"
+  },
   "CLICKTOREMOVE": "Click to remove",
   "NO_PERMISSIONS_FOR_SCOPE": "No permissions to access this environment",
   "DATE_SELECT_YEAR": "Choose year",
@@ -258,6 +266,8 @@
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",
     "itemsPerPageLabel": "Entries per page:",
+    "firstPageLabel": "First page",
+    "lastPageLabel": "Last page",
     "nextPageLabel": "Next page",
     "previousPageLabel": "Previous page"
   },
@@ -502,6 +512,17 @@
       "CONTRAST": "Improved contrast",
       "STANDARD": "Standard contrast"
     },
+    "DARK_MODE_TITLE": "Dark Mode",
+    "DARK_MODE_MESSAGE": "Choose a light or dark color scheme, or follow your device's system setting.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Use system setting",
+      "LIGHT": "Light",
+      "DARK": "Dark"
+    },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Switch to light mode",
+      "DARK": "Switch to dark mode"
+    },
     "DRAG_AND_DROP_TITLE": "Move Content",
     "DRAG_AND_DROP_MESSAGE": "Content can be moved using drag and drop. For better accessibility, additional actions like \"forward\" and \"back\" buttons can be enabled, allowing movement without using a mouse.",
     "DRAG_AND_DROP_OPTION": {
@@ -698,11 +719,12 @@
     "EDIT_SIMPLE": "Quick-Edit",
     "COLLECTION_EDIT": "Edit",
     "SHOW_TOPIC_PAGE": "Go to topic page",
+    "SHOW_STATISTICS": "Show statistics",
     "COLLECTION_PIN": "Pin collection",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "View feedback",
     "OPEN": "Open",
-    "WORKSPACE_METADATA": "Statistics & Versioning",
+    "VERSION_MANAGEMENT": "Version management",
     "DOWNLOAD": "Download",
     "DOWNLOAD_ALL": "download zip",
     "DOWNLOAD_METADATA": "download metadata",
@@ -719,7 +741,7 @@
     "METADATA": "Details",
     "COLLECTION": "Add to collection",
     "COLLECTION_OTHER": "Add to other collection",
-    "ADD_SHORTCUT": "Add to shortcuts",
+    "ADD_SHORTCUT": "Add favorite",
     "STREAM": "Add to stream",
     "LICENSE": "Assign a license",
     "CONTRIBUTOR": "Contributors",
@@ -752,6 +774,7 @@
     "ASSIGNMENT_SUBMIT": "Submit",
     "ASSIGNMENT_SUBMISSION": "Submissions",
     "ASSIGNMENT_EDIT": "Edit assignment",
+    "ASSIGNMENT_ASSIGN": "Assign assignment",
     "ASSIGNMENT_CANCEL": "Cancel assignment",
     "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
     "ASSIGNMENT_FINISH": "Finish assignment",
@@ -946,6 +969,7 @@
       "GENERIC_BAD_REQUEST": "Bad request",
       "GENERIC_MODULE_NOT_AVAILABLE": "The rendering module needed to display the object is not available.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "This object is not supported by the rendering service.",
+      "GENERIC_ACCESS_DENIED": "There are no permissions available for the requested element.",
       "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
     },
     "GDPR": {
@@ -1564,8 +1588,7 @@
     "MODAL_HINT_INCLUDED": "This element is already included in your shortcut entries and cannot be added again.",
     "REPLACE_TITLE": "Replace tile",
     "REPLACE_MESSAGE": "Do you really want to replace the tile with the selected element?",
-    "SELECT_ELEMENT": "Select element",
-    "SELECT_ELEMENT_INFO": "Select an element and click on \"apply\" or use the option in the three-dot menu to add a shortcut.",
+    "SELECT_ELEMENT": "Select favorite",
     "search": "Search",
     "workspace": "Workspace",
     "mycollections": "My Collections",

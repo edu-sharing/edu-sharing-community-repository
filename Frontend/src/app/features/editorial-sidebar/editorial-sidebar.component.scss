@@ -2,21 +2,28 @@
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .sidebar-header {
-    background-color: #fff;
+    background-color: var(--roundedContainerBackground);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 0 20px;
     gap: 5px;
     height: var(--editorialHeaderHeight);
+    @include mixins.materialShadowBottom();
+    border-radius: var(--borderRadiusCards) var(--borderRadiusCards) 0 0;
+    // paint the shadow above the scrolled sidebar content
+    position: relative;
+    z-index: 1;
+    // heading style unified with the search filter bar's .filter-bar-title
     > div {
-        font-size: vars.$fontSizeXLarge;
+        font-size: 140%;
+        font-weight: 400;
         @include mixins.limitLineCount(1, 1.25);
         flex-grow: 1;
     }
 }
 ::ng-deep {
-    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+    @media screen and (max-width: (vars.$mobileSidebarModal)) {
         .mat-drawer-transition .mat-drawer-content,
         .mat-drawer-transition .mat-drawer {
             transition: none !important;
@@ -24,8 +31,9 @@
     }
 }
 :host {
-    --editorialHeaderHeight: 88px;
-    @media screen and (max-width: (vars.$mobileTabSwitchWidth)) {
+    // unified secondary-bar height
+    --editorialHeaderHeight: #{vars.$secondaryBarHeight};
+    @media screen and (max-width: (vars.$mobileSidebarModal)) {
         position: fixed;
         z-index: vars.$dialogZIndex - 10;
         left: var(--roundedContainerMargin);
@@ -51,6 +59,41 @@
         }
     }
 }
+// desktop fullscreen: cover the content area below the top nav (es-main-nav stays visible)
+:host.fullscreen {
+    position: fixed;
+    z-index: vars.$dialogZIndex - 10;
+    @include mixins.roundedContainerCard(
+        vars.$mobileTabSwitchWidth,
+        vars.$mobileTabNavHeight,
+        $drawerNudge: false
+    );
+    // pin below the top nav; left/right/bottom pin to the viewport edges. The card's own
+    // margin (from roundedContainerCard) provides the gap, and top+bottom insets define the
+    // height — do not set an explicit height or it fights the margin and overflows.
+    inset: var(--mainnavCurrentHeight) 0 0 0;
+    isolation: isolate;
+    overflow: hidden;
+    // grow-in when entering fullscreen (static <-> fixed can't be transitioned directly)
+    animation: fullscreen-enter var(--transitionNormal) ease;
+    &::after {
+        position: fixed;
+        z-index: -1;
+        content: '';
+        background: vars.$darkenColor;
+        inset: 0;
+    }
+}
+@keyframes fullscreen-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
 .option-show {
     animation: slide-fade 1s;
 }
@@ -69,7 +112,7 @@
     }
 }
 .sidebar-container {
-    background-color: #fff;
+    background-color: var(--roundedContainerBackground);
     overflow-x: hidden;
     overflow-y: auto;
     height: 0;
@@ -79,20 +122,28 @@
 .option {
     padding: 0 20px;
     height: 100%;
-    &.option-WORKSPACE_METADATA,
+    &.option-VERSION_MANAGEMENT,
     &.option-PREVIEW,
     &.option-SORT_INTO,
+    &.option-MANAGE_CONTENT,
     &.option-MANAGE_SUBMISSION {
         // has own padding cause of tabs
         padding: 0;
     }
 
-    &.option-SORT_INTO {
+    &.option-SORT_INTO,
+    &.option-MANAGE_CONTENT {
         // set full height
         height: 100%;
     }
+    &.option-VIEWS_AND_USAGE {
+        // breathing room below the sidebar header (leaves space for its shadow);
+        // SORT_INTO/MANAGE_CONTENT get theirs inside es-nodes-selector instead
+        padding-top: 20px;
+    }
     &.option-PREVIEW,
-    &.option-MANAGE_SUBMISSION {
+    &.option-MANAGE_SUBMISSION,
+    &.option-VIEWS_AND_USAGE {
         display: flex;
         flex-direction: column;
         min-height: 100%;
@@ -111,7 +162,7 @@
     .entry {
         display: flex;
         align-items: center;
-        padding: 10px 20px;
+        padding: 16px 20px;
         //color: var(--primary);
         gap: 20px;
         &.cdk-keyboard-focused {
@@ -125,7 +176,7 @@
             opacity: 0.75;
         }
         &:hover {
-            background-color: var(--palette-primary-50);
+            background-color: var(--primaryBackground50);
         }
         .icon {
             font-size: 30px;

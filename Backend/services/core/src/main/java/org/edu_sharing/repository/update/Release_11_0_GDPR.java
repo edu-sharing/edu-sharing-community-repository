@@ -28,6 +28,7 @@ public class Release_11_0_GDPR {
     @UpdateRoutine(
             id = "Release_11_0_GDPR",
             description = "Migrate edu_dataprotection_queue to aspects",
+            isNonTransactional = true,
             order = 0,
             auto = true)
     public void execute() {

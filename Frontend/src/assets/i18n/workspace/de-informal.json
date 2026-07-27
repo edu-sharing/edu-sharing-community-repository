@@ -57,7 +57,7 @@
     },
     "CREATE_REASON": {
       "SEARCH": "Du befindest dich sich aktuell in einer Suchansicht und kannst hier keine Elemente ablegen.",
-      "PERMISSIONS": "Du haast im aktuellen Ordner keine Rechte, Elemente hinzuzufügen.",
+      "PERMISSIONS": "Du hast im aktuellen Ordner keine Rechte, Elemente hinzuzufügen.",
       "VIRTUAL": "Du befindest dich in einem Ordner, wo das Ablegen von Elementen nicht möglich ist.",
       "GENERAL": "Navigiere in einen anderen Ordner und füge die Elemente dort hinzu."
     },

@@ -31,13 +31,13 @@ es-spinner-small {
 .card-title-element {
     font-size: 140%;
     font-weight: bold;
-    border-bottom: 1px solid #888;
+    border-bottom: 1px solid var(--borderGray);
     padding: 10px;
-    background-color: #f7f7f7;
+    background-color: var(--backgroundColor);
     i {
         margin-left: 10px;
         margin-right: 10px;
-        color: #666;
+        color: var(--textMediumLight);
         position: relative;
         top: 5px;
     }

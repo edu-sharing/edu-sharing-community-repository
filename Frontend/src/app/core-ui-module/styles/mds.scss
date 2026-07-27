@@ -42,13 +42,13 @@
     i {
         margin-left: 10px;
         margin-right: 10px;
-        color: #666;
+        color: var(--textMediumLight);
         position: relative;
         top: 5px;
     }
 }
 .mdsMainCard .mdsGroup {
-    background-color: #fff;
+    background-color: var(--backgroundColor);
 }
 es-mds .mdsGroup {
     width: 100%;
@@ -338,7 +338,7 @@ es-mds .mdsGroup {
         display: flex;
         margin-top: -14px;
         margin-right: 10px;
-        color: #666;
+        color: var(--textMediumLight);
     }
     .mdsAuthor {
         float: left;
@@ -388,7 +388,7 @@ es-mds .mdsGroup {
                     min-width: $tableIconSize;
                     width: $tableIconSize;
                     height: $tableIconSize;
-                    background: #fff;
+                    background: var(--defaultBackground);
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
@@ -489,7 +489,7 @@ es-mds .mdsGroup {
 }
 .mdsExtendedSearch {
     margin: 0 -20px;
-    background: #fff;
+    background: var(--defaultBackground);
     padding: 10px 20px;
     .switch {
         margin-top: 10px;

@@ -12,7 +12,7 @@
     }
     .topBarSearch form input,
     .topBarSearch form i {
-        color: #505050 !important;
+        color: var(--textLight) !important;
     }
     .userMenu {
         position: absolute !important;

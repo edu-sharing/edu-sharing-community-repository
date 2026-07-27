@@ -1,21 +1,19 @@
 import {
     AfterViewInit,
     Component,
+    EventEmitter,
+    inject,
     Input,
     OnDestroy,
     OnInit,
+    Output,
+    Signal,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
+import { SelectionChange } from '@angular/cdk/collections';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    ArchiveV1Service,
-    GenericAuthority,
-    HOME_REPOSITORY,
-    Node,
-    PROPERTY_FILTER_ALL,
-} from 'ngx-edu-sharing-api';
+import { ArchiveV1Service, HOME_REPOSITORY, Node, PROPERTY_FILTER_ALL } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     ColumnType,
@@ -83,6 +81,10 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     dataSource = new NodeDataSource();
 
     @Input() actionbar: ActionbarComponent;
+    /** Bottom selection bar (actions-only) owned by the workspace page; node actions render here. */
+    @Input() selectionActionbar?: Signal<ActionbarComponent | undefined>;
+    /** Mirrors the selection to the page so the bottom selection bar / overlay can react. */
+    @Output() selectionChanged = new EventEmitter<Node[]>();
 
     public columns: ColumnType = {
         Default: [
@@ -158,9 +160,13 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit(): void {
         void this.refresh();
-        void this.list.initOptionsGenerator({
-            actionbar: this.actionbar,
-            customOptions: this.options,
+        // Split actionbar (mirrors explorer): node actions go to the page's bottom selection bar.
+        // Deferred so the page-level selection actionbar view query is resolved (see collections).
+        setTimeout(() => {
+            void this.list.initOptionsGenerator({
+                actionbar: [this.actionbar, this.selectionActionbar?.()].filter(Boolean),
+                customOptions: this.options,
+            });
         });
     }
 
@@ -309,6 +315,10 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
 
     click(event: NodeClickEvent<NodeEntriesDataType>) {
         this.list.getSelection().toggle(event.element as Node);
+    }
+
+    selectionChange(selection: SelectionChange<NodeEntriesDataType>) {
+        this.selectionChanged.emit(selection.source.selected as Node[]);
     }
 
     updateSort(sort: ListSortConfig) {

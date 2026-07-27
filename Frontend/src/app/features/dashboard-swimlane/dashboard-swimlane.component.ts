@@ -149,7 +149,25 @@ export class DashboardSwimlaneComponent {
     toggleVisibility() {
         this.open.next(!this.open.value);
         void this.storage.set(this.getStorageKey(), this.open.value);
-        setTimeout(() => this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({}));
+        setTimeout(() => this.wireCardOptions());
+    }
+
+    /**
+     * Wire the per-card list options for this swimlane's entries. The collections swimlane
+     * on the dashboard is not a node picker, so it must not wire per-card options (that would
+     * paint an empty options strip on the small cards). Only do so in the picker case
+     * (reurl + applyCollections), mirroring the search / collections picker.
+     */
+    private wireCardOptions() {
+        if (this.swimlane().id === 'collections' && !this.isCollectionPicker()) {
+            return;
+        }
+        void this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({});
+    }
+
+    private isCollectionPicker(): boolean {
+        const queryParams = this.router.routerState.snapshot.root.queryParams;
+        return !!queryParams.reurl && queryParams.applyCollections === 'true';
     }
 
     private getStorageKey() {
@@ -310,7 +328,7 @@ export class DashboardSwimlaneComponent {
     private async fetch(observable: Observable<NodeEntriesData>) {
         this.nodes.set(await firstValueFrom(observable));
         // this.nodes.set({nodes: [], pagination: {} as any});
-        void this.nodeNodeEntriesWrapperComponent?.initOptionsGenerator({});
+        this.wireCardOptions();
     }
 
     private async setGlobalOptions(optionItems: OptionItem[]) {

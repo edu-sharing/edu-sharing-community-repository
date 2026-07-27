@@ -1,0 +1,16 @@
+// let the nodes-selector control its own padding
+::ng-deep .card-content:has(.select-favorite-dialog) {
+    padding: 0 !important;
+}
+
+.select-favorite-dialog {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--roundedContainerBackground);
+
+    es-nodes-selector {
+        flex: 1;
+        min-height: 0;
+    }
+}

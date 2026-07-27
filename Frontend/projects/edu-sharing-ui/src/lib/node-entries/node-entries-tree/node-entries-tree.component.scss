@@ -30,7 +30,7 @@ mat-tree-node {
     transition: background-color 0.15s ease;
 
     &:not(.selected):hover {
-        background-color: rgb(var(--palette-primary-50));
+        background-color: rgb(var(--primaryBackground50));
     }
 
     &.selected {
@@ -148,7 +148,7 @@ mat-tree-node {
         width: 100%;
 
         .placeholder {
-            background: #eee;
+            background: var(--backgroundTinted);
             height: 20px;
             border-radius: 4px;
         }

@@ -365,6 +365,10 @@ public class LTIApi {
             if (courseId != null) {
                 ltiSessionObject.setContextId(courseId);
             }
+            String courseTitle = (String)context.get("title");
+            if (courseTitle != null) {
+                ltiSessionObject.setContextTitle(courseTitle);
+            }
         }
 
 
@@ -513,6 +517,7 @@ public class LTIApi {
                                 ltiSessionObject.getEduSharingAppId(),
                                 ltiSessionObject.getContextId(),
                                 nodeId,
+                                ltiSessionObject.getContextTitle(),
                                 (String) AuthorityServiceFactory.getInstance().getLocalService().getUserInfo(user).get(CCConstants.PROP_USER_EMAIL),
                                 null,null,-1,null,
                                 null, //TODO moodle does not deliver such information

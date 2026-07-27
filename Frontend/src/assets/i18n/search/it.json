@@ -7,6 +7,8 @@
     "DID_YOU_MEAN": "Intendeva",
     "COLLECTIONS": "Collezioni",
     "MATERIALS": "I materiali",
+    "N_SELECTED": "{{count}} selezionati",
+    "CLEAR_SELECTION": "Annulla selezione",
     "FRONTPAGE": "Materiali consigliati",
     "IGNORED_PARAMETERS": "Il risultato contiene oggetti che potrebbero non corrispondere a tutti i criteri di ricerca indicati.",
     "MAINSEARCHFIELD": "Campo di input per la ricerca",

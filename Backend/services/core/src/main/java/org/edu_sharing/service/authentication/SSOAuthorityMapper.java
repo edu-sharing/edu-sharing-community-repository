@@ -129,11 +129,17 @@ public class SSOAuthorityMapper {
         return mappingConfig.isAuthByAppCheckClientIp();
     }
 
-    public static String mapAdminAuthority(String authority, String appid) {
+    public static String mapAdminAuthority(String authority, String appId) {
         // when coming from the native app, do not scope
-        if (ApplicationInfoList.getHomeRepository().getAppId().equals(appid)) {
+        if (ApplicationInfoList.getHomeRepository().getAppId().equals(appId)) {
             return authority;
         }
+
+        ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
+        if (appInfo != null && appInfo.isAllowAdminLogin()) {
+            return authority;
+        }
+
         return AuthenticationUtil.runAsSystem(() -> {
             ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
             ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean("ServiceRegistry");
@@ -152,7 +158,7 @@ public class SSOAuthorityMapper {
             }
 
             if (scope) {
-                return authority + "@" + appid;
+                return authority + "@" + appId;
             } else {
                 return authority;
             }
@@ -244,7 +250,6 @@ public class SSOAuthorityMapper {
         if (SSO_TYPE_AuthByApp.equals(ssoType)) {
             tmpUserName = mapAdminAuthority(tmpUserName, ssoAttributes.get(PARAM_AUTHBYAPP_APP_ID));
         }
-
 
         final String originalUsername = tmpUserName;
 
@@ -375,7 +380,7 @@ public class SSOAuthorityMapper {
                         }
                     personService.createPerson(personProperties);
                     }finally {
-                        OnUpdatePersonPropertiesPolicy.constructPersonFolders.set(null);
+                        OnUpdatePersonPropertiesPolicy.constructPersonFolders.remove();
                     }
                 } else if (updateUser) {
 
@@ -513,11 +518,11 @@ public class SSOAuthorityMapper {
 
                             Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
                             if (!authoritiesForUser.contains(alfrescoGroupName)) {
-                                log.debug("will add " + userName + " in " + alfrescoGroupName);
+                                log.debug("will add {} in {}", userName, alfrescoGroupName);
                                 authorityService.addAuthority(alfrescoGroupName, userName);
                             }
                         } else {
-                            log.error("Authority " + groupName + " does not exist!");
+                            log.error("Authority {} does not exist!", groupName);
                         }
                     }
 
@@ -528,7 +533,7 @@ public class SSOAuthorityMapper {
                         log.debug("condition for alfresco group " + mappingGroup.getGroup() + " does not match will remove membership if exists");
                         Set<String> authoritiesForUser = authorityService.getAuthoritiesForUser(userName);
                         if (authoritiesForUser.contains(alfrescoGroupName)) {
-                            log.debug("will remove " + userName + " from " + alfrescoGroupName);
+                            log.debug("will remove {} from {}", userName, alfrescoGroupName);
                             authorityService.removeAuthority(alfrescoGroupName, userName);
                         }
                     }
@@ -664,7 +669,7 @@ public class SSOAuthorityMapper {
         for (Map.Entry<String, String> entry : ssoAttributes.entrySet()) {
             logString.append(entry.getKey()).append(": ").append(entry.getValue()).append("; ");
         }
-        log.error("missing:" + missing + " got:(" + logString + ")");
+        log.error("missing:{} got:({})", missing, logString);
     }
 
 }

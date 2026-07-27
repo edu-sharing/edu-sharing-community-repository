@@ -1,14 +1,52 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-:host ::ng-deep {
-    // fix that cards are over the main nav
-    // will break the left main nav
-    /*.mat-tab-body.mat-tab-body-active {
-    z-index: 97;
-  }*/
+// Page shell: lock to the available viewport height (below the in-flow sticky main nav) and clip, so
+// the page never produces a body scrollbar — the tab body scrolls internally instead.
+:host {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
 }
+
+// The rounded card: fixed height, scrolls its content internally (same as workspace/search pages).
+.main-content {
+    @include mixins.roundedContainerCard($mobileTabSwitchWidth, $mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll($mobileTabSwitchWidth, $mobileTabNavHeight);
+}
+
+// The tab group fills the card. Percentage-height (`:host { height: 100% }`) does not reliably
+// resolve through Material's tab-body wrapper, so make the whole chain a flex column instead: the
+// wrapper/body/content fill, and the hosted component (es-permissions-authorities) grows into them
+// via flex. That lets its internal list stretch and keeps the selection footer pinned to the bottom
+// even when only a few rows are shown.
 mat-tab-group {
-    position: absolute;
-    top: var(--mainnavHeight);
-    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    // unified secondary-bar height: the theme's density styles re-declare this token on
+    // .mat-mdc-tab-header, so it must be set on the header element itself (same pattern as the
+    // collections page). The shadow comes from the global .mat-tab-group-shadow class.
+    ::ng-deep mat-tab-header {
+        --mat-tab-container-height: #{$secondaryBarHeight};
+        // paint the shadow above the scrolled tab body
+        position: relative;
+        z-index: 1;
+    }
+    ::ng-deep .mat-mdc-tab-body-wrapper {
+        flex: 1;
+        min-height: 0;
+    }
+    ::ng-deep .mat-mdc-tab-body-content {
+        display: flex;
+        flex-direction: column;
+    }
+    ::ng-deep es-permissions-authorities {
+        flex: 1;
+        min-height: 0;
+    }
 }

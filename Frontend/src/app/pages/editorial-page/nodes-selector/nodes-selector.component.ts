@@ -139,6 +139,11 @@ export type NodesSelectorConfig = {
      */
     allowCreate?: boolean;
     /**
+     * restrict the connector "Create" options to these connector ids (whitelist).
+     * If unset or empty, all available connectors are offered.
+     */
+    allowedConnectorIds?: string[];
+    /**
      * automatically close the sidebar after nodes are emitted
      */
     autoClose?: boolean;
@@ -147,6 +152,14 @@ export type NodesSelectorConfig = {
      * Use this instead of subscribing to EditorialSidebarService.applyNodeEmitted globally to only listen to your current trigger session
      */
     onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
+    /**
+     * picker mode: restrict the selection to a single node of any type.
+     */
+    singleSelect?: boolean;
+    /**
+     * allow folders to be selected as sources, in addition to files and collections.
+     */
+    allowFolderSelection?: boolean;
 };
 
 @Component({
@@ -191,6 +204,10 @@ export class NodesSelectorComponent implements OnInit {
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
     primaryMode = input<SidebarContext>();
+    /**
+     * tabs to hide from the otherwise supported set (e.g. to offer only a subset of views)
+     */
+    tabBlacklist = input<TabType[]>([]);
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
@@ -213,17 +230,20 @@ export class NodesSelectorComponent implements OnInit {
         });
     });
     supportedTabs: Signal<TabType[]> = computed(() => {
+        const blacklist = this.tabBlacklist() ?? [];
+        let tabs: TabType[];
         if (this.selectionMode() === 'source') {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
-                return [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
+                tabs = [TabType.SEARCH, TabType.COLLECTIONS, TabType.WORKSPACE, TabType.UPLOAD];
             } else {
-                return [TabType.WORKSPACE, TabType.UPLOAD];
+                tabs = [TabType.WORKSPACE, TabType.UPLOAD];
             }
+        } else if (this.allSelectedNodesFromHomeRepo()) {
+            tabs = [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
+        } else {
+            tabs = [TabType.COLLECTIONS];
         }
-        if (this.allSelectedNodesFromHomeRepo()) {
-            return [TabType.METHODOLOGY, TabType.COLLECTIONS, TabType.WORKSPACE];
-        }
-        return [TabType.COLLECTIONS];
+        return tabs.filter((tab) => !blacklist.includes(tab));
     });
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();
@@ -251,8 +271,18 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
+    // picker mode: a single node of any type is chosen and handed back (e.g. favorite dialog)
+    singleSelect: Signal<boolean> = computed(() => !!this.option()?.optionConfig?.singleSelect);
+    // whether folders may be picked as a source (workspace tab)
+    allowFolderSelection: Signal<boolean> = computed(
+        () => !!this.option()?.optionConfig?.allowFolderSelection,
+    );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
+            // picker mode: exactly one node (of any type) must be selected
+            if (this.singleSelect()) {
+                return this.onlyOneSelected() ? null : InvalidSelectionReason.INVALID_SELECTION;
+            }
             if (this.selectionMode() === 'source') {
                 if (
                     this.option().optionConfig?.applyCallback &&
@@ -412,13 +442,25 @@ export class NodesSelectorComponent implements OnInit {
                 node?.mediatype === 'collection' &&
                 this.parent()?.ref.id !== node?.ref.id &&
                 this.parent()?.parent?.id !== node?.ref.id) ||
-            node?.type === RestConstants.CCM_TYPE_IO,
+            node?.type === RestConstants.CCM_TYPE_IO ||
+            // opt-in: folders are selectable as well
+            (this.allowFolderSelection() && node?.mediatype === 'folder'),
     }));
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
     inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
-    connectorOptions: WritableSignal<OptionItem[]> = signal([]);
+    connectorOptions: Signal<OptionItem[]> = toSignal(
+        toObservable(this.option).pipe(
+            switchMap((option) =>
+                this.connectorOptionsService.buildOptions(
+                    (connector) => void this.showCreateConnector({ connector }),
+                    option?.optionConfig?.allowedConnectorIds,
+                ),
+            ),
+        ),
+        { initialValue: [] },
+    );
 
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
@@ -427,9 +469,6 @@ export class NodesSelectorComponent implements OnInit {
     selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
 
     constructor() {
-        this.connectorOptionsService
-            .buildOptions((connector) => void this.showCreateConnector({ connector }))
-            .subscribe((options) => this.connectorOptions.set(options));
         effect(() => {
             const option = this.option();
             if (option?.optionConfig?.state) {
@@ -459,6 +498,11 @@ export class NodesSelectorComponent implements OnInit {
         this.collectionsTableColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
             repository: HOME_REPOSITORY,
         });
+        // show the author as a second row below the title in the (searched) collections list view
+        const collectionsTitleColumn = this.collectionsTableColumns?.Default?.[0];
+        if (collectionsTitleColumn) {
+            collectionsTitleColumn.secondaryRow = new ListItem('NODE', RestConstants.CM_CREATOR);
+        }
     }
 
     /**
@@ -580,6 +624,17 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
+     * Reacts to the display type toggle of the search tab.
+     *
+     * @param displayType
+     */
+    onSearchDisplayTypeChange(displayType: NodeEntriesDisplayType): void {
+        this.searchDisplayType = displayType;
+        // the selection is kept across the switch, so keep it visible in the newly rendered view
+        this.searchWrapper?.scrollSelectionIntoView();
+    }
+
+    /**
      * Manually trigger the collections display type change.
      *
      * @param event
@@ -587,7 +642,14 @@ export class NodesSelectorComponent implements OnInit {
     async onCollectionsDisplayTypeChange(event: MatButtonToggleChange): Promise<void> {
         const nextDisplayType = event.value;
         const existingDisplayType = this.collectionsDisplayType();
-        this.resetNodeEntriesSelections();
+        // the two flat views (Table/SmallGrid) share the same datasource & wrapper, so keep the
+        // selection when switching between them; only reset when the tree view is involved.
+        const switchingBetweenFlatViews =
+            existingDisplayType !== NodeEntriesDisplayType.Tree &&
+            nextDisplayType !== NodeEntriesDisplayType.Tree;
+        if (!switchingBetweenFlatViews) {
+            this.resetNodeEntriesSelections();
+        }
         // switching from tree view into a flat view -> find the deepest level of the tree to be displayed
         if (
             existingDisplayType === NodeEntriesDisplayType.Tree &&
@@ -616,6 +678,10 @@ export class NodesSelectorComponent implements OnInit {
             this.dataSourceCollectionsFlat.isLoading = false;
         }
         this.collectionsDisplayType.set(nextDisplayType);
+        if (switchingBetweenFlatViews) {
+            // the kept selection must stay visible in the newly rendered view
+            this.collectionsWrapper?.scrollSelectionIntoView();
+        }
     }
 
     /**
@@ -651,8 +717,10 @@ export class NodesSelectorComponent implements OnInit {
         // note: the nodes are added to the inbox node if the upload was successful,
         //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            this.emitNodes({ nodes: createdNodes, parent: this.parent() });
-            if (this.parent() && this.nodeHelperService.isNodeCollection(this.parent())) {
+            const isCollection =
+                this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+            this.emitNodes({ nodes: createdNodes, parent: this.parent(), created: true });
+            if (isCollection) {
                 try {
                     this.toast.showProgressSpinner();
                     this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
@@ -662,6 +730,16 @@ export class NodesSelectorComponent implements OnInit {
                     console.error(e);
                     this.toast.closeProgressSpinner();
                 }
+            }
+            // Standalone upload: select the created nodes so the sidebar shows their options.
+            // Skipped for collections (added as an async reference — handled by the collection
+            // page via applyNodeEmitted).
+            if (
+                !isCollection &&
+                !this.option()?.optionConfig?.onNodesChoosen &&
+                !this.option()?.optionConfig?.autoClose
+            ) {
+                this.editorialSidebarService.selectNode(createdNodes as Node[]);
             }
         }
         this.addMaterialDialogComponent.selectedFiles.set([]);
@@ -1340,6 +1418,7 @@ export class NodesSelectorComponent implements OnInit {
         parent?: Node;
         connectorId?: string;
         window?: Window;
+        created?: boolean;
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
         this.localEventsService.nodesCreated.emit(payload.nodes);
@@ -1374,12 +1453,14 @@ export class NodesSelectorComponent implements OnInit {
                     void this.uiService.editConnector(data.node, {
                         type: event.type as any,
                         win: event.window,
+                        data: event.data,
                         connectorType: connector,
                     });
                     this.emitNodes({
                         nodes: [data.node],
                         parent: this.parent(),
                         connectorId: connector.id,
+                        created: true,
                         window: event.window,
                     });
                 },

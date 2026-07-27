@@ -2,15 +2,16 @@ import {
     Component,
     ContentChild,
     EventEmitter,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     OnInit,
     Output,
+    Signal,
     SimpleChanges,
     TemplateRef,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
@@ -78,6 +79,7 @@ import { BridgeService } from '../../../services/bridge.service';
 import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
+import { ConnectedPosition } from '@angular/cdk/overlay';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { GlobalCollectionsPageService } from '../global-collections-page.service';
 import {
@@ -145,13 +147,36 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      * (the options service is inited in the content component)
      */
     @Input() getInfobar: () => CollectionInfoBarComponent;
+    /** The page-level selection actionbar (rendered full-width in the bottom selection bar), provided
+     * as the page's `viewChild` signal so it resolves lazily/reactively. */
+    @Input() selectionActionbar: Signal<ActionbarComponent | undefined>;
     @Input() isRootLevel: boolean;
     @Input() createAllowed: () => boolean;
     @Output() clickItem = new EventEmitter<NodeClickEvent<Node | CollectionReference>>();
     @ContentChild('empty') emptyRef: TemplateRef<unknown>;
-    @ViewChild('actionbarReferences') actionbarReferences: ActionbarComponent;
+    /** Toggles-only bar above the list (display type / sort). */
+    @ViewChild('actionbarToggles') actionbarToggles: ActionbarComponent;
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
+
+    /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
+    selection: Node[] = [];
+    /** Original node ids to auto-select once the references (re)load (a freshly *created* node). */
+    private selectAfterLoad: string[] = [];
+    /** True while a sidebar-add reload is in flight, so its selection-clear does not close the sidebar. */
+    private addInProgress = false;
+    /** Whether the selected-nodes overlay above the selection bar is open. */
+    selectionOverlayOpen = false;
+    /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
+    readonly overlayPositions: ConnectedPosition[] = [
+        {
+            originX: 'start',
+            originY: 'top',
+            overlayX: 'start',
+            overlayY: 'bottom',
+            offsetY: 0,
+        },
+    ];
 
     private mainNavUpdateTrigger = new Subject<void>();
     sortCollectionColumns: ListItemSort[] = [
@@ -243,6 +268,22 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 filter((n) => n.some((n1) => n1?.ref?.id === this.collection?.ref?.id)),
             )
             .subscribe(() => this.refreshContent());
+        this.editorialSidebarService.applyNodeEmitted
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((payload) => {
+                if (
+                    payload?.nodes?.length &&
+                    payload.parent?.ref?.id === this.collection?.ref?.id
+                ) {
+                    // Node added via the sidebar: keep the sidebar open across the reload, and for
+                    // a newly created node also queue it to be selected afterwards (mirrors the
+                    // workspace: create → select+show-options, include → add+keep-open).
+                    this.addInProgress = true;
+                    this.selectAfterLoad = payload.created
+                        ? payload.nodes.map((n) => n.ref.id)
+                        : [];
+                }
+            });
         this.authenticationService
             .observeLoginInfo()
             .pipe(takeUntil(this.destroyed$))
@@ -263,6 +304,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     async ngOnInit() {
+        this.registerMainNav();
+        this.mainNavUpdateTrigger.next();
         const mdsSets = await ConfigurationHelper.getAvailableMds(
             RestConstants.HOME_REPOSITORY,
             this.mdsService,
@@ -279,8 +322,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             .observeConfig()
             .pipe(takeUntil(this.destroyed$))
             .subscribe((config) => (this.config = config));
-        this.registerMainNav();
-        this.mainNavUpdateTrigger.next();
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -290,7 +331,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
             this.createSubCollectionOptionItem.name =
                 'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
-            void this.listCollections?.initOptionsGenerator({});
+            // Per-card options for the sub-collections list are wired (gated on the picker
+            // params) in finishCollectionLoading; wiring them unconditionally here would
+            // paint an empty options strip on the small cards in normal browsing.
             if (this.isRootLevel) {
                 // display root collections with tabs
 
@@ -613,9 +656,50 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     handleSelection(selection: SelectionChange<Node>) {
-        if (this.interactionType === InteractionType.DefaultActionLink) {
+        this.selection = selection.source.selected;
+        // While a sidebar-add reload is in flight, swallow the selection-clear so it does not
+        // close the sidebar (selectPendingNodes decides the final state afterwards).
+        if (this.interactionType === InteractionType.DefaultActionLink && !this.addInProgress) {
             this.editorialSidebarService.handleSelection(selection);
         }
+    }
+
+    /**
+     * After a sidebar-add reload:
+     * - included → keep open, reset selection
+     * - created → select the new reference and show its options.
+     */
+    private selectPendingNodes(references: CollectionReference[]) {
+        if (!this.addInProgress) {
+            return;
+        }
+        this.addInProgress = false;
+        const ids = this.selectAfterLoad;
+        this.selectAfterLoad = [];
+        if (!ids.length) {
+            return;
+        }
+        const toSelect = references.filter((r) => ids.includes(this.nodeHelper.getOriginalId(r)));
+        if (!toSelect.length) {
+            return;
+        }
+        // selecting drives handleSelection (now unguarded) → sidebar nodes/options; re-open it
+        this.listReferences?.getSelection().setSelection(...toSelect);
+        this.editorialSidebarService.sidebarOpened.set(true);
+    }
+
+    clearSelection() {
+        this.listReferences?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
+    }
+
+    /**
+     * Remove a single node from the selection (triggered by unchecking it in the selection overlay).
+     * Deselecting on the list's selection model fires `selectionChange`, which updates `selection`.
+     */
+    deselectNode(node: Node) {
+        this.listReferences?.getSelection().deselect(node as CollectionReference);
     }
     private clickElementEvent(event: NodeClickEvent<CollectionReference | ProposalNode>) {
         if (this.interactionType === InteractionType.DefaultActionLink) {
@@ -689,8 +773,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavUpdateTrigger.pipe(takeUntil(this.destroyed$)).subscribe(async () => {
             this.mainNavService.patchMainNavConfig({
                 create: {
-                    allowed: this.createAllowed(),
-                    allowBinary: !this.isRootLevel && (await this.isAllowedToAddContent()),
+                    allowed: this.createAllowed() || this.isAllowedToAddContent(),
+                    allowBinary: !this.isRootLevel && this.isAllowedToAddContent(),
                     parent: this.collection ?? null,
                 },
             });
@@ -701,6 +785,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.dataSourceCollections.reset();
         this.dataSourceReferences.reset();
         this.listReferences?.getSelection().clear();
+        this.selection = [];
+        this.selectionOverlayOpen = false;
         this.dataSourceCollections.isLoading = true;
         this.dataSourceReferences.isLoading = true;
 
@@ -772,6 +858,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                         .subscribe((refs) => {
                             this.dataSourceReferences.setData(refs.references, refs.pagination);
                             this.dataSourceReferences.isLoading = false;
+                            this.selectPendingNodes(refs.references);
                             this.finishCollectionLoading();
                         });
                 },
@@ -879,6 +966,9 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     private finishCollectionLoading(callback?: () => void) {
+        // safety net: clear the add-in-flight guard on any load path that does not run
+        // selectPendingNodes (e.g. root level), so later selections are not swallowed
+        this.addInProgress = false;
         void this.mainNavService.getMainNav()?.refreshBanner();
 
         // Cannot trivially reference the add button for the tutorial with
@@ -901,9 +991,16 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         setTimeout(() => {
             this.setOptionsCollection();
             void this.listReferences?.initOptionsGenerator({
-                actionbar: this.actionbarReferences,
+                actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
                 parent: this.collection,
             });
+            // in reurl picker mode with applyCollections, wire options on the sub-collections
+            // list too so their cards expose the APPLY action (mirrors the search page). The
+            // one-shot call in ngOnChanges runs before the view/data are ready and is unreliable.
+            const queryParams = this.route.snapshot.queryParams;
+            if (queryParams.reurl && queryParams.applyCollections === 'true') {
+                void this.listCollections?.initOptionsGenerator({});
+            }
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
             }

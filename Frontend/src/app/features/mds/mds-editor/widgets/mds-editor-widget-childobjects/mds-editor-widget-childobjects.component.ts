@@ -10,7 +10,7 @@ import { RestUtilitiesService } from '../../../../../core-module/rest/services/r
 import { NodeHelperService } from '../../../../../services/node-helper.service';
 import { Toast } from '../../../../../services/toast';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
-import { Node } from 'ngx-edu-sharing-api';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { Constraints, Values } from '../../../types/types';
 import { MdsEditorInstanceService } from '../../mds-editor-instance.service';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
@@ -37,6 +37,7 @@ interface ChildobjectEdit {
 export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidgetComponent {
     mdsEditorValues = inject(MdsEditorInstanceService);
     private nodeApi = inject(RestNodeService);
+    private nodeService = inject(NodeService);
     private connector = inject(RestConnectorService);
     private utilities = inject(RestUtilitiesService);
     private nodeHelper = inject(NodeHelperService);
@@ -246,11 +247,13 @@ export class MdsEditorWidgetChildobjectsComponent implements OnInit, NativeWidge
                                     RestConstants.CCM_ASSOC_CHILDIO,
                                 )
                                 .subscribe((data) => {
-                                    this.nodeApi
-                                        .uploadNodeContent(
+                                    this.nodeService
+                                        .changeContent(
+                                            data.node.ref.repo,
                                             data.node.ref.id,
-                                            child.file,
+                                            'auto',
                                             RestConstants.COMMENT_MAIN_FILE_UPLOAD,
+                                            { file: child.file },
                                         )
                                         .subscribe(
                                             () => {

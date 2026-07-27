@@ -70,9 +70,9 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
 
         permissions = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
-            if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
-                return Collections.emptyList();
-            }
+            // coordinators see all permissions; everyone else is still allowed to see who has
+            // correction rights, i.e. the COORDINATOR permissions
+            boolean isCoordinator = AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId());
 
             return AuthenticationUtil.runAsSystem(CheckedRunAsWork.wrap(() ->
                     Arrays.stream(permissionService.getPermissions(getNodeId()).getAces())
@@ -86,6 +86,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                                 return new Assignment.Permission(new Authority(ace), role);
                             })
                             .filter(Objects::nonNull)
+                            .filter(permission -> isCoordinator || permission.role() == Assignment.Role.COORDINATOR)
                             .toList()
             ));
         }));
@@ -95,9 +96,9 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
         super(nodeRef);
         permissions = registerLazyProvider(new LazyProvider<>(() -> {
             validateExists();
-            if (!AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())) {
-                return Collections.emptyList();
-            }
+            // coordinators see all permissions; everyone else is still allowed to see who has
+            // correction rights, i.e. the COORDINATOR permissions
+            boolean isCoordinator = AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId());
 
             String user = AuthenticationUtil.getRunAsUser();
             return nodeRef.getPermissions()
@@ -114,6 +115,7 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                         return new Assignment.Permission(new Authority(user, y), role);
                     })
                     .filter(Objects::nonNull)
+                    .filter(permission -> isCoordinator || permission.role() == Assignment.Role.COORDINATOR)
                     .toList();
         }));
     }
@@ -254,7 +256,8 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
                 getModifiedDate(),
                 getPermissions(),
                 // TODO filter by permission
-                Collections.emptyList()
+                Collections.emptyList(),
+                AssignmentUtil.isAssignmentCoordinator(permissionService, getNodeId())
         );
     }
 

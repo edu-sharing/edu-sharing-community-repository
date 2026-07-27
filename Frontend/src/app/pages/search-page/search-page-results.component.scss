@@ -1,6 +1,25 @@
 @use './common' as *;
 @use 'variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use '../../../../projects/edu-sharing-ui/src/lib/actionbar/actionbar.component' as actionbar;
+
+// Fill the page's scroll area and split it into an internal scroll region + a static footer bar,
+// so the scrollbar stops above the selection bar instead of running alongside it.
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.results-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 25px;
+    @include mixins.materialScrollbarLight();
+}
 
 .add-to-collection-banner {
     @include addToCollectionBanner;
@@ -35,6 +54,34 @@ es-node-entries-wrapper {
 }
 :host ::ng-deep .empty-container {
     width: 100%;
+}
+
+// Static footer of the results view (sibling of .results-scroll), so the scrollbar ends above it.
+// The .main-content card's `overflow: hidden` rounds its bottom corners.
+.selection-action-bar {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    min-height: vars.$secondaryBarHeight;
+    padding: 0 25px;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowTop();
+    // paint the shadow above the scrolled content
+    position: relative;
+    z-index: 1;
+
+    es-actionbar {
+        padding-left: 10px;
+    }
+    &.visible {
+        display: flex;
+    }
+
+    .count {
+        font-weight: 500;
+        white-space: nowrap;
+    }
 }
 
 .filters-button {

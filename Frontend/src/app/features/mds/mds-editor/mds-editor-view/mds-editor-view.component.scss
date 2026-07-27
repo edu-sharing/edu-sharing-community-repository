@@ -27,11 +27,11 @@
         text-align: start;
     }
     .header-icon {
-        color: #666;
+        color: var(--textMediumLight);
         margin-right: 10px;
     }
     .toggle-icon {
-        color: #666;
+        color: var(--textMediumLight);
         width: 40px;
         transition: transform 0.2s ease;
         &.toggle-icon-expanded {

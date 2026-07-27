@@ -1,5 +1,6 @@
 package org.edu_sharing.repository.server.importer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.CollectionUtils;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -12,13 +13,16 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ *
+ */
 public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterface{
 
     static String STATEMENT_EXISTS = "SELECT * from edu_factual_term WHERE factual_term_ident=?";
 
-    static String STATEMENT_INSERT = "INSERT INTO edu_factual_term(factual_term_ident, factual_term_value, factual_term_synonyms) VALUES(?, ?, ?)";
+    static String STATEMENT_INSERT = "INSERT INTO edu_factual_term(factual_term_ident, factual_term_value, factual_term_synonyms, factual_term_url, factual_term_ml) VALUES(?, ?, ?, ?, ?)";
 
-    static String STATEMENT_UPDATE = "UPDATE edu_factual_term SET factual_term_ident=?, factual_term_value=?, factual_term_synonyms=? WHERE factual_term_ident=?";
+    static String STATEMENT_UPDATE = "UPDATE edu_factual_term SET factual_term_ident=?, factual_term_value=?, factual_term_synonyms=?, factual_term_url=?, factual_term_ml=? WHERE factual_term_ident=?";
 
     static String STATEMENT_MATCHES = "select CASE WHEN factual_term_synonyms IS NULL THEN factual_term_value WHEN array_length(factual_term_synonyms,1) = 1 THEN format('%s (%s)',factual_term_value, factual_term_synonyms[1])  ELSE format('%s (%s, %s)',factual_term_value, factual_term_synonyms[1], factual_term_synonyms[2]) END from edu_factual_term where lower(factual_term_value) like ? order by char_length(factual_term_value) limit 10";
 
@@ -38,6 +42,8 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
     static String COL_IDENT = "factual_term_ident";
     static String COL_VALUE = "factual_term_value";
     static String COL_SYNONYMS = "factual_term_synonyms";
+    static String COL_URL = "factual_term_url";
+    static String COL_ML = "factual_term_ml";
 
     Logger logger = Logger.getLogger(PersistenHandlerKeywordsDNBMarc.class);
 
@@ -73,6 +79,15 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
             synonyms = "{"+synonyms+"}";
         }
 
+        String url = (String) props.get(RecordHandlerKeywordsDNBMarc.URL);
+        RecordHandlerKeywordsDNBMarc.Languages newLanguages = (RecordHandlerKeywordsDNBMarc.Languages)props.get(RecordHandlerKeywordsDNBMarc.LANGUAGES);
+        String newLanguagesString = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if(!newLanguages.values.isEmpty()){
+            newLanguages.values.forEach((key, value1) -> value1.forEach(v -> v.setValue(fixCombiningDiaresis(v.getValue()))));
+            newLanguagesString = mapper.writeValueAsString(newLanguages);
+        }
+
         Map<String,Object> cols = get(id);
         if(cols == null){
             logger.info("creating:" + id);
@@ -90,6 +105,8 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                // statement.setString(3,jsArray.toString());
 
                 statement.setObject(3,synonyms,java.sql.Types.OTHER);
+                statement.setString(4, url);
+                statement.setObject(5, newLanguagesString,java.sql.Types.OTHER);
 
                 statement.executeUpdate();
                 con.commit();
@@ -101,8 +118,16 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
 
             List<String> existingSyn = (cols.get(COL_SYNONYMS) == null) ? new ArrayList<>() : new ArrayList<>((List<String>)cols.get(COL_SYNONYMS));
             List<String> newSyn = (synonymCollection == null) ? new ArrayList<>() : new ArrayList<>(synonymCollection);
+
+
+            String ml = (String)cols.get(COL_ML);
+            RecordHandlerKeywordsDNBMarc.Languages existingLanguages = (ml == null) ? new RecordHandlerKeywordsDNBMarc.Languages() : mapper.readValue(ml,RecordHandlerKeywordsDNBMarc.Languages.class);
+
             if(value.equals(cols.get(COL_VALUE))
-                    && CollectionUtils.isEqualCollection(existingSyn,newSyn) ){
+                    && CollectionUtils.isEqualCollection(existingSyn,newSyn)
+                    && java.util.Objects.equals(url, cols.get(COL_URL))
+                    && java.util.Objects.equals(newLanguages,existingLanguages)
+            ){
                 logger.info(id +" didn't change");
                 return null;
             }
@@ -128,7 +153,9 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                 statement.setString(1, id);
                 statement.setString(2, value);
                 statement.setObject(3,synonyms,java.sql.Types.OTHER);
-                statement.setString(4, id);
+                statement.setString(4, url);
+                statement.setObject(5, newLanguagesString,java.sql.Types.OTHER);
+                statement.setString(6, id);
 
                 statement.executeUpdate();
                 con.commit();
@@ -138,6 +165,18 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
         }
 
         return null;
+    }
+
+    private String toDatabaseArray(Set<String> collection) {
+        if(collection == null || collection.isEmpty()){
+            return null;
+        }
+
+        collection = collection.stream().map(s -> fixCombiningDiaresis(s)).collect(Collectors.toSet());
+        collection = collection.stream().map(s -> s.replace("\"","\\\"")).collect(Collectors.toSet());
+        String result = collection.stream().collect(Collectors.joining("\",\"", "\"", "\""));
+        result = "{"+result+"}";
+        return result;
     }
 
     private String displayFormat(String value, List<String> synonyms){
@@ -181,6 +220,12 @@ public class PersistenHandlerKeywordsDNBMarc implements PersistentHandlerInterfa
                 result.put(COL_ID,resultSet.getString(COL_ID));
                 result.put(COL_IDENT,resultSet.getString(COL_IDENT));
                 result.put(COL_VALUE,resultSet.getString(COL_VALUE));
+                String url = resultSet.getString(COL_URL);
+                if(url != null) result.put(COL_URL,url);
+
+                String ml = resultSet.getString(COL_ML);
+                if(ml != null) result.put(COL_ML,ml);
+
                 Array array = resultSet.getArray(COL_SYNONYMS);
                 if(array != null){
                     List<String> synonyms = Arrays.asList((String[])array.getArray());

@@ -24,8 +24,8 @@ import org.edu_sharing.repository.server.rendering.RenderingErrorServlet;
 import org.edu_sharing.repository.server.rendering.RenderingException;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpException;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpException;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.DAOException;
 import org.edu_sharing.restservices.NodeDao;
@@ -259,7 +259,7 @@ public class RenderingServiceImpl implements RenderingService{
 
 		// context/config
 		data.setConfigValues(ConfigServiceFactory.getCurrentConfig().values);
-		data.setNodeUrls(new NodeUrls(node, nodeVersion));
+		data.setNodeUrls(new NodeUrls(node.getRef().getId(), nodeDao.getAspectsNative(), nodeVersion));
 
         log.info("Preparing rendering data took {} ms", System.currentTimeMillis() - time);
 		return data;

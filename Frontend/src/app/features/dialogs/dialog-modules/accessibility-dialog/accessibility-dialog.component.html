@@ -16,6 +16,24 @@
     'ACCESSIBILITY.CONTRAST_MODE_OPTION.CONTRAST' | translate
   }}</mat-radio-button>
 </mat-radio-group>
+<label for="darkMode">{{ 'ACCESSIBILITY.DARK_MODE_TITLE' | translate }}</label>
+<p id="darkModeDescription">{{ 'ACCESSIBILITY.DARK_MODE_MESSAGE' | translate }}</p>
+<mat-radio-group
+  id="darkMode"
+  [(ngModel)]="settings.darkMode"
+  aria-describedby="darkModeDescription"
+  (change)="updateSettings()"
+>
+  <mat-radio-button value="auto">{{
+    'ACCESSIBILITY.DARK_MODE_OPTION.SYSTEM' | translate
+  }}</mat-radio-button>
+  <mat-radio-button value="light">{{
+    'ACCESSIBILITY.DARK_MODE_OPTION.LIGHT' | translate
+  }}</mat-radio-button>
+  <mat-radio-button value="dark">{{
+    'ACCESSIBILITY.DARK_MODE_OPTION.DARK' | translate
+  }}</mat-radio-button>
+</mat-radio-group>
 <label for="indicatorIcons">{{ 'ACCESSIBILITY.INDICATOR_ICONS_TITLE' | translate }}</label>
 <p id="contrastModeDescription">{{ 'ACCESSIBILITY.INDICATOR_ICONS_MESSAGE' | translate }}</p>
 <mat-radio-group

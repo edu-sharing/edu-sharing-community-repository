@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnDestroy, OnInit, Renderer2, inject } from '@angular/core';
+import { Directive, ElementRef, inject, Input, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { MatSidenavContainer } from '@angular/material/sidenav';
 import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
@@ -18,9 +18,14 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     @Input() minWidth = 0.2;
     @Input() minWidthPx = 400;
     /**
-     * default width (is calculated based on the full screen with [0...1]
+     * default width (is calculated based on the full screen with [0...1]).
+     * ignored when {@link defaultWidthPx} is set.
      */
     @Input() defaultWidth = 0.3;
+    /**
+     * default width in absolute pixels. takes precedence over {@link defaultWidth} when set.
+     */
+    @Input() defaultWidthPx: number = null;
     @Input() maxWidth = 0.5;
     @Input() maxWidthPx = 800;
     private resizer!: HTMLElement;
@@ -40,19 +45,30 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         await this.setInitialWidth();
     }
 
+    private getDefaultWidth(): number {
+        return this.defaultWidthPx ?? window.innerWidth * this.defaultWidth;
+    }
+
     private async setInitialWidth() {
-        const defaultWidth = window.innerWidth * this.defaultWidth;
+        const defaultWidth = this.getDefaultWidth();
         if (this.storageKey) {
-            const lastValue = this.applyWidthConstrains(
-                await this.storage.get<number>(this.storageKey, defaultWidth, Store.LocalStorage),
+            let storageValue = await this.storage.get<number>(
+                this.storageKey,
+                defaultWidth,
+                Store.LocalStorage,
             );
+            if (storageValue === 0) {
+                storageValue = defaultWidth;
+            }
+            const lastValue = this.applyWidthConstrains(storageValue);
+
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
             this.renderer.setAttribute(
                 this.resizer,
                 'aria-valuenow',
                 String(Math.round(lastValue)),
             );
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         } else {
             this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
             this.renderer.setAttribute(
@@ -60,7 +76,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
                 'aria-valuenow',
                 String(Math.round(defaultWidth)),
             );
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         }
     }
 
@@ -83,26 +99,36 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             Math.min(this.maxWidthPx, window.innerWidth * this.maxWidth),
         );
         this.renderer.setAttribute(this.resizer, 'aria-valuemax', String(calculatedMax));
+        // prevent the browser from treating a touch-drag on the handle as a scroll/zoom gesture,
+        // so pointermove events keep firing during a touch resize
+        this.renderer.setStyle(this.resizer, 'touch-action', 'none');
         this.renderer.insertBefore(
             this.el.nativeElement,
             this.resizer,
             this.el.nativeElement.firstChild,
         );
 
-        this.resizer.addEventListener('mousedown', this.startResize);
-        document.addEventListener('mousemove', this.onMouseMove);
-        document.addEventListener('mouseup', this.stopResize);
+        // Pointer events unify mouse, touch and pen — so resizing works on touch devices too.
+        // startResize captures the pointer on the handle (setPointerCapture), so all move/up
+        // events are delivered to the resizer even when the cursor/finger leaves it — no need
+        // for document-level listeners.
+        this.resizer.addEventListener('pointerdown', this.startResize);
+        this.resizer.addEventListener('pointermove', this.onPointerMove);
+        this.resizer.addEventListener('pointerup', this.stopResize);
+        this.resizer.addEventListener('pointercancel', this.stopResize);
         this.resizer.addEventListener('dblclick', this.resetToDefault);
         this.resizer.addEventListener('keydown', this.onKeyDown);
     }
 
-    private startResize = (event: MouseEvent) => {
+    private startResize = (event: PointerEvent) => {
         this.dragging = true;
+        // route all further pointer events to the handle until release (also on touch)
+        this.resizer.setPointerCapture?.(event.pointerId);
         event.preventDefault();
         event.stopPropagation();
     };
 
-    private onMouseMove = (event: MouseEvent) => {
+    private onPointerMove = (event: PointerEvent) => {
         if (!this.dragging) return;
 
         const containerWidth = window.innerWidth;
@@ -129,7 +155,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
 
     private stopResize = () => {
         if (this.dragging && this.sidenavContainer) {
-            this.sidenavContainer.updateContentMargins();
+            this.sidenavContainer?.updateContentMargins();
         }
         this.dragging = false;
     };
@@ -166,8 +192,8 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
 
     private resetToDefault = async () => {
         void this.storage.delete(this.storageKey, Store.LocalStorage);
-        const defaultWidth = window.innerWidth * this.defaultWidth;
+        const defaultWidth = this.getDefaultWidth();
         this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
-        this.sidenavContainer.updateContentMargins();
+        this.sidenavContainer?.updateContentMargins();
     };
 }

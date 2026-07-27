@@ -52,7 +52,7 @@
             min-width: $tableIconSize;
             width: $tableIconSize;
             height: $tableIconSize;
-            background: #fff;
+            background: var(--defaultBackground);
             border-radius: 50%;
             display: flex;
             align-items: center;

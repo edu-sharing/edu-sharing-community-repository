@@ -9,6 +9,7 @@
   [dataSource]="dataSource"
   (sortChange)="updateSort($event)"
   (clickItem)="click($event)"
+  (selectionChange)="selectionChange($event)"
   (fetchData)="refresh($event)"
 >
   <ng-template #empty>

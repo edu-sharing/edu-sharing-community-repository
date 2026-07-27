@@ -13,6 +13,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { SearchPageFilterBarComponent } from './search-page-filter-bar.component';
 import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
 import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
+import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
 
 @NgModule({
     declarations: [
@@ -33,6 +34,7 @@ import { EditorialSidebarModule } from '../../features/editorial-sidebar/editori
         MdsModule,
         FooterComponent,
         ResizableSidenavDirective,
+        EdgeToggleComponent,
     ],
     // This module is lazy-loaded and should not export anything.
     exports: [],

@@ -90,7 +90,8 @@
     "INVITE_LOCAL_RESULTS": "Dans mes organisations",
     "INVITE_GLOBAL_RESULTS": "Résultats globaux",
     "INVITE_RECENT_AUTHORITIES": "Récemment invité",
-    "FILE_LOCATION": "Lieu de stockage",
+    "FILE_LOCATION": "Emplacement de stockage",
+    "CHANGE_FILE_LOCATION": "Modifier l'emplacement de stockage",
     "CHOOSE_LOCATION_TITLE": "Localisation",
     "CHOOSE_LOCATION_DESCRIPTION": "Choisir un répertoire pour le stockage",
     "TREE_MORE_ITEMS": "+ {{count}} plus de dossiers",
@@ -280,10 +281,36 @@
       "FORKED_PARENT": "Est une variante de",
       "FORKED_CHILDS": "A {{count}}} variante(s)",
       "USAGE_TYPE": {
-        "LMS": "LMS-Cours",
-        "COLLECTION": "Collections",
         "DOWNLOAD": "Téléchargements",
-        "VIEW": "Points de vue"
+        "VIEW": "Points de vue",
+        "PLAY": "Lectures",
+        "USED": "Utilisé"
+      },
+      "USAGES": {
+        "RANGE_LABEL": "Période",
+        "RANGE_DAYS": "{{days}} derniers jours",
+        "RANGE_ALL": "Total",
+        "COMING_SOON": "Bientôt disponible",
+        "PREVIEW_COLUMN": "École / Organisation",
+        "PREVIEW_VIEWS_TITLE": "Vues depuis",
+        "PREVIEW_DOWNLOADS_TITLE": "Téléchargements depuis",
+        "PREVIEW_PLAYS_TITLE": "Lectures depuis",
+        "DASHBOARD_LINK": "Vers le tableau de bord",
+        "NO_PREVIEW_TITLE": "Aucun aperçu des statistiques disponible",
+        "NO_PREVIEW_TEXT": "Aucune statistique n'est disponible dans le panneau latéral pour la sélection actuelle. Vous trouverez d'autres analyses dans le tableau de bord.",
+        "NO_SELECTION": "Sélectionnez un indicateur pour voir ses détails.",
+        "NO_EMBEDDINGS": "Cet élément n'est actuellement intégré nulle part.",
+        "EMBEDDINGS_TITLE": "Vues via les intégrations",
+        "EMBEDDINGS_COLUMN": "Cours/Dossier",
+        "EMBEDDINGS_TOTAL": "Total des vues via intégration",
+        "CLUSTERED_TOOLTIP": "{{count}} utilisations dans le même cours sont regroupées.",
+        "NO_USAGES_HINT": "Aucune utilisation n'a encore été trouvée pour cet élément.",
+        "COLLECTIONS_TITLE": "Utilisé dans des collections",
+        "COLLECTIONS_COLUMN": "Collection",
+        "NO_COLLECTIONS": "Cet élément n'est utilisé dans aucune collection.",
+        "FEEDBACK_TITLE": "La fonction de statistiques continue d'évoluer",
+        "FEEDBACK_TEXT": "Avez-vous des idées ou des souhaits pour d'autres analyses ? Vos retours nous intéressent.",
+        "FEEDBACK_ACTION": "Donner un avis"
       },
       "COMMENT": {
         "NONE": "[Non défini].",
@@ -330,7 +357,14 @@
       "REPLACE_PREVIEW": "Remplacer l'aperçu",
       "DELETE_PREVIEW": "Supprimer l'aperçu",
       "UPDATED": "Informations mises à jour",
-      "PREVIEW_DELETED": "La vignette est supprimée"
+      "PREVIEW_DELETED": "La vignette est supprimée",
+      "PREVIEW_CHANGE": "Modifier l'image d'aperçu",
+      "PREVIEW_UPLOAD": "Téléverser une image",
+      "PREVIEW_FROM_SEARCH": "Choisir une image depuis la recherche",
+      "PREVIEW_DELETE": "Supprimer l'image",
+      "PREVIEW_PASTE_CLIPBOARD": "Coller depuis le presse-papiers",
+      "PREVIEW_CLIPBOARD_NO_IMAGE": "Le presse-papiers ne contient pas d'image.",
+      "PREVIEW_CLIPBOARD_ERROR": "Le presse-papiers n'a pas pu être lu."
     },
     "REVERTED_VERSION": "La version a été inversée avec succès",
     "NODE_TEMPLATE": {
@@ -417,6 +451,8 @@
         "SCRIPT_WRITER": "scénariste",
         "INSTRUCTIONAL_DESIGNER": "concepteur pédagogique",
         "SUBJECT_MATTER_EXPERT": "expert en la matière",
+        "SPRECHER": "narrateur",
+        "DARSTELLER": "acteur",
         "CREATOR": "créateur",
         "PROVIDER": "fournisseur"
       }
@@ -551,7 +587,7 @@
       "TITLE_CREATE_LTI": "Créer un nouvel objet {{ tool }}",
       "NEW_TOOL": "Nouvel outil",
       "EDIT_TOOL": "Modifier les informations sur l'outil",
-      "CREATE_LOCATION": "Emplacement du fichier :",
+      "CREATE_LOCATION": "Emplacement de stockage :",
       "MANAGE_CONFIGS": "Gérer les configurations",
       "CREATE_NAME_PLACEHOLDER": "Saisir le nom...",
       "NEW_CONFIG": "Créer une configuration",

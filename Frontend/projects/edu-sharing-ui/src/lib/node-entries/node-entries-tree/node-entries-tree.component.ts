@@ -251,10 +251,14 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
                 this.entriesService.selection.deselect(...childrenToDeselect);
             }
         };
-        // either multiple selection is allowed or a key press on cmd / strg is detected
+        // either multiple selection is allowed or a key press on cmd / strg is detected (and allowed)
         const multipleSelectionAllowed: boolean =
             this.entriesService.treeConfig?.multipleSelection || false;
-        const ctrlOrMetaKeyPressed: boolean = event && (event.ctrlKey || event.metaKey);
+        // 'emit' ctrlClickBehavior disables ctrl/cmd multi-selection (single-select pickers)
+        const ctrlOrMetaKeyPressed: boolean =
+            this.entriesService.ctrlClickBehavior !== 'emit' &&
+            !!event &&
+            (event.ctrlKey || event.metaKey);
         if (multipleSelectionAllowed || ctrlOrMetaKeyPressed) {
             // multi-select: add or remove the node from the selection
             if (this.entriesService.selection.isSelected(node)) {
@@ -373,9 +377,13 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     private async initializeTree(): Promise<void> {
         this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
         this.dataSource = new DynamicDataSource(this.treeControl, this.treeNodeService);
-        // retrieve the current nodes from the data source and initialize the tree with it
-        const alreadyInitialized = this.treeNodeService.getDataMap().size > 0;
+        // Base "already initialized" on the rendered data (currentData), not dataMap: a global
+        // nodesChanged can populate dataMap (via refreshTree) before the tree is built, leaving
+        // currentData empty — that would otherwise skip init and render a blank tree permanently.
+        const alreadyInitialized = this.treeNodeService.getCurrentData().length > 0;
         if (!alreadyInitialized) {
+            // discard any dataMap entries populated prematurely, then build from the data source
+            this.treeNodeService.resetData();
             const nodes: Node[] = this.entriesService.dataSource.getData() as Node[];
             await this.treeNodeService.initializeTreeData(nodes);
         }

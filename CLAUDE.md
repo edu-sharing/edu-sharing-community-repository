@@ -137,6 +137,24 @@ There are two independent Spring application contexts; using the wrong one will 
 
 ---
 
+### Context-Aware Services — `AppContextServiceFactory`
+
+Services that must resolve a different implementation per repository (local vs. remote providers like DDB, Brockhaus, …) are obtained through a typed factory instead of `getBean(...)`:
+
+```java
+SearchService s = SearchServiceFactory.getInstance().getService(repoDao.getId()); // by repo/app id
+SearchService s = SearchServiceFactory.getInstance().getLocalService();           // home repo
+```
+
+**Adding a new context-aware service** (pattern mirrored by `SearchService`/`ContributorService`):
+1. Declare an interface `XServiceFactory extends AppContextServiceFactory<XService>` with a static `getInstance()` (see `SearchServiceFactory`). `AppContextLocatorAutoRegistrar` auto-registers a proxy bean for any such interface under `org.edu_sharing` — **no XML/bean config needed**.
+2. Provide a fallback no-op `XServiceAdapter` (`@Lazy @Service implements XService`) for contexts without a real impl (see `SearchServiceAdapter`).
+3. Register the impl(s) in **`AppContextConfig.java`** (the `AppContextRegistry` builder): `fallbackAppContext()` → adapter, `localAppContext()` + `ElasticSearchProvider` → real impl, other providers fall through to the adapter.
+
+**Gotcha — register AOP-proxied beans by name, not by class.** `defineBean(XService.class, XServiceImpl.class)` resolves via `getBean(XServiceImpl.class)`. If the impl carries `@Permission`/`@HasRole` it is wrapped in a **JDK dynamic proxy** on the interface, which is *not* assignable to `XServiceImpl` → `NoSuchBeanDefinitionException` at the first `getService(...)` call (startup validation may not catch it). Register such beans by their bean name instead: `defineBean(XService.class, "xServiceImpl")` (default name = decapitalized class name). This is why `nodeService`, `permissionService`, `contributorServiceImpl`, … are referenced as strings while non-proxied impls/adapters use `.class`.
+
+---
+
 ### `@NodePermission` on Static Methods
 
 The `@NodePermission` annotation is processed by `PermissionChecking` via AOP, which **does not intercept static methods**. On a static method, add the annotation to the parameter for documentation, then enforce it manually:
@@ -145,6 +163,8 @@ The `@NodePermission` annotation is processed by `PermissionChecking` via AOP, w
 ApplicationContextFactory.getApplicationContext().getBean(PermissionChecking.class)
     .checkNodePermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
 ```
+
+`PermissionChecking` is a Spring `@Aspect @Component` (proxy-based AOP), so the same annotations (`@Permission`, `@HasRole`, `@NodePermission`) are **only enforced on calls that go through the bean proxy** — i.e. external callers. A **self-invocation** (one method in a bean calling another annotated method on `this`) bypasses the check entirely. Gotcha: a `@Queued`/async method that internally calls an annotated getter does **not** trigger that getter's `@Permission`; enforce the toolpermission explicitly at the entry point (e.g. `ToolPermissionHelper.throwIfToolpermissionMissing(...)`) instead of relying on the annotation.
 
 ---
 
@@ -298,6 +318,12 @@ Processes every `/rest/*` request. Supports Basic auth, Bearer (OAuth2), and EDU
 Internal Tomcat port detection uses `httpReq.getLocalPort()` compared to `ApplicationInfoList.getHomeRepository().getPort()` (returns `String`, not `int`). Requests arriving on the internal port bypass 2FA checks.
 
 ---
+
+## Statistics & Tracking — `TrackingDAO`
+
+**File:** `Backend/services/core/src/main/java/org/edu_sharing/restservices/TrackingDAO.java`
+
+- The "by object" node-statistics filters (`published`, `contentType`, …) are declared as `@QueryParam` on `StatisticApi` (the six endpoints `getByUsers`/`getByNodes`/`getByOrganization` + their `*Async` scheduler variants) and threaded straight into `TrackingDAO`. There is **no** intermediate TrackingService / ibatis / SQL layer for these — each `getNodeStatisticsBy*` builds a `co.elastic.clients` `BoolQuery` executed via `SearchServiceElastic.search`. The global `all` / mediacenter path instead uses `getStatisticsNode` (DB-based) and takes **none** of these filters.
 
 ## i18n
 

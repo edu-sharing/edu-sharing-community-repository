@@ -1,3 +1,7 @@
+:host ::ng-deep {
+    background-color: var(--defaultBackground);
+}
+
 .rs-error-wrapper {
     width: 100%;
     justify-self: center;

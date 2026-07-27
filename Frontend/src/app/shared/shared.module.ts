@@ -32,7 +32,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
-import { AuthorityNamePipe, EduSharingUiModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { environment } from '../../environments/environment';
 import { AuthorityRowComponent } from './components/authority-search-input/authority-row/authority-row.component';
@@ -67,6 +67,7 @@ import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
 import { SmallCollectionComponent } from './components/small-collection/small-collection.component';
 import { ImprintPrivacyComponent } from './components/imprint-privacy-footer/imprint-privacy.component';
+import { SearchSelectionOverlayComponent } from './components/selection-overlay/search-selection-overlay.component';
 import { extensionSchemas } from '../extension/extension-schemas';
 import { extensionUiProviders } from '../extension/extension-ui-providers';
 
@@ -95,6 +96,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         PoweredByComponent,
         RegisterCustomPropertyDirective,
         SafeHtmlPipe,
+        SearchSelectionOverlayComponent,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,
@@ -195,6 +197,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         RegisterCustomPropertyDirective,
         RouterModule,
         SafeHtmlPipe,
+        SearchSelectionOverlayComponent,
         SkipTargetDirective,
         SmallCollectionComponent,
         SplitNewLinesPipe,

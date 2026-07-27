@@ -23,6 +23,7 @@ import { NodesDragSourceDirective } from '../directives/drag-nodes/nodes-drag-so
 import { NodesDragDirective } from '../directives/drag-nodes/nodes-drag.directive';
 import { NodesDropTargetDirective } from '../directives/drag-nodes/nodes-drop-target.directive';
 import { ListItemsModule } from '../list-items/list-items.module';
+import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 import { DragPreviewComponent } from './drag-preview/drag-preview.component';
 import { ListItemLabelPipe } from './list-item-label.pipe';
 import { NodeEntriesCardGridComponent } from './node-entries-card-grid/node-entries-card-grid.component';
@@ -74,6 +75,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         DragDropModule,
         EduSharingUiCommonModule,
         ListItemsModule,
+        UserAvatarComponent,
         MatCheckboxModule,
         MatButtonModule,
         MatBadgeModule,

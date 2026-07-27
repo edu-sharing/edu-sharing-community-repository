@@ -2,12 +2,12 @@ import { trigger } from '@angular/animations';
 import {
     Component,
     EventEmitter,
+    inject,
     Input,
     OnDestroy,
     OnInit,
     Output,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -536,7 +536,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         connectorType: Connector = null,
     ) {
         const preferEdit = parameters?.['preferEdit']?.[0] === 'true';
-        void this.uiService.editConnector(node, { type, win, connectorType, preferEdit });
+        void this.uiService.editConnector(node, {
+            type,
+            win,
+            connectorType,
+            preferEdit,
+            data: parameters,
+        });
     }
 
     pickMaterialFromSearch() {

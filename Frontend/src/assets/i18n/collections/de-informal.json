@@ -1,7 +1,6 @@
 {
   "COLLECTIONS": {
     "TUTORIAL_HEADING": "Einsammeln was dir gefällt",
-    "NO_SUBCOLLECTIONS_HINT": "Du kannst weitere Sammlungen über den \"Neu\"-Button anlegen",
     "CREATE": {
       "PRIVATE_DESCRIPTION": "Außer Dir kann die Sammlung niemand sehen. Du kannst die Sammlung später für andere freigeben oder veröffentlichen.",
       "SHARED_DESCRIPTION": "Sammle gemeinsam mit Freunden und Kollegen. Dabei kannst Du festlegen, wer was tun darf.",
@@ -24,6 +23,5 @@
     },
     "PERMISSIONS_STATUS_MY": "Aktuell ist die Sammlung nur für Dich sichtbar."
   },
-  "collections_howToAddContent": "Du kannst in der Suchumgebung nach geeigneten Materialien für Deine Sammlung suchen. Klicke einfach auf ein geeignetes Material und wähle dann die Option 'zu Sammlung hinzufügen' aus.",
   "collections_noOrgaCollections": "Du wurdest bisher zu keiner Sammlung eingeladen."
 }

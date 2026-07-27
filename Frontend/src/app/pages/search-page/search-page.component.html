@@ -13,67 +13,78 @@
   "
 ></mat-progress-bar>
 
-@if (tabBarIsVisible) {
-<nav mat-tab-nav-bar [tabPanel]="tabPanel">
-  @if (availableRepositories.getValue().length > 1) {
-  <a
-    mat-tab-link
-    [routerLink]="['./all']"
-    [queryParams]="queryParamsAllRepositories"
-    (click)="goToAll()"
-    routerLinkActive
-    #routerLinkActive="routerLinkActive"
-    [active]="routerLinkActive.isActive"
+<!-- Explicitly check if `tabBarIsVisible !== null`, so we don't insert the body before we know
+whether a tab bar will be shown. The body itself always lives in the same place now. -->
+@if (tabBarIsVisible !== null) {
+<main>
+  <mat-sidenav-container
+    [class.mat-sidenav-container-right-open]="this.editorialSidebarService.sidebarOpened()"
   >
-    {{ 'SEARCH.REPOSITORY_ALL' | translate }}
-  </a>
-  } @for (repository of availableRepositories.getValue(); track repository) {
-  <a
-    mat-tab-link
-    (click)="goToRepository(repository)"
-    [active]="repository.id === activeRepository.getValue()"
-  >
-    <div class="repository-icon">
-      <img [src]="repository | repositoryIcon" alt="" />
+    <mat-sidenav
+      #rightSidenav
+      [mode]="'side'"
+      [opened]="this.editorialSidebarService.sidebarOpened()"
+      [defaultWidthPx]="600"
+      [maxWidth]="0.5"
+      class="es-mat-sidenav"
+      storageKey="SEARCH_SIDENAV_RIGHT_WIDTH"
+      esResizableSidenav
+      position="end"
+    >
+      <div class="es-mat-sidenav-content">
+        <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
+      </div>
+    </mat-sidenav>
+    <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter panel,
+      mirroring the editorial sidebar/filter toggle. -->
+    <es-edge-toggle
+      data-test="button-toggle-sidebar-filters-search"
+      [side]="'start'"
+      [open]="filterBarOpen()"
+      [visible]="(showingAllRepositories | async) === false && (isMobileScreen | async) === false"
+      [drawer]="filtersSidebar()"
+      [measure]="'edge'"
+      [animatePane]="false"
+      [labelOpen]="'SEARCH.OPEN_FILTERS'"
+      [labelClose]="'SEARCH.CLOSE_FILTERS'"
+      (toggled)="toggleFilters()"
+    ></es-edge-toggle>
+    <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>
+    <div class="main-content">
+      @if (tabBarIsVisible) {
+      <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+        @if (availableRepositories.getValue().length > 1) {
+        <a
+          mat-tab-link
+          [routerLink]="['./all']"
+          [queryParams]="queryParamsAllRepositories"
+          (click)="goToAll()"
+          routerLinkActive
+          #routerLinkActive="routerLinkActive"
+          [active]="routerLinkActive.isActive"
+        >
+          {{ 'SEARCH.REPOSITORY_ALL' | translate }}
+        </a>
+        } @for (repository of availableRepositories.getValue(); track repository) {
+        <a
+          mat-tab-link
+          (click)="goToRepository(repository)"
+          [active]="repository.id === activeRepository.getValue()"
+        >
+          <div class="repository-icon">
+            <img [src]="repository | repositoryIcon" alt="" />
+          </div>
+          {{ repository.title }}
+        </a>
+        }
+      </nav>
+      }
+      <mat-tab-nav-panel #tabPanel class="search-page-body">
+        <router-outlet></router-outlet>
+      </mat-tab-nav-panel>
     </div>
-    {{ repository.title }}
-  </a>
-  }
-</nav>
-<mat-tab-nav-panel #tabPanel>
-  <ng-container *ngTemplateOutlet="tabBody"></ng-container>
-</mat-tab-nav-panel>
-}
-<!-- Explicitly check if `tabBarIsVisible === false`, so we don't insert the body before we know
-where. -->
-@if (tabBarIsVisible === false) {
-<ng-container *ngTemplateOutlet="tabBody"></ng-container>
+  </mat-sidenav-container>
+</main>
 }
 
 <es-footer scope="search"></es-footer>
-
-<ng-template #tabBody>
-  <main>
-    <mat-sidenav-container>
-      <mat-sidenav
-        #rightSidenav
-        [mode]="'side'"
-        [opened]="this.editorialSidebarService.sidebarOpened()"
-        [defaultWidth]="0.3"
-        [maxWidth]="0.5"
-        class="es-mat-sidenav"
-        storageKey="SEARCH_SIDENAV_RIGHT_WIDTH"
-        esResizableSidenav
-        position="end"
-      >
-        <div class="es-mat-sidenav-content">
-          <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
-        </div>
-      </mat-sidenav>
-      <es-search-page-filters-sidebar></es-search-page-filters-sidebar>
-      <div class="search-page-body">
-        <router-outlet></router-outlet>
-      </div>
-    </mat-sidenav-container>
-  </main>
-</ng-template>

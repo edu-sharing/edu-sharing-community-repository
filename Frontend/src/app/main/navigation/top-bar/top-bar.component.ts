@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { ConfigService, Node, SessionStorageService, User } from 'ngx-edu-sharing-api';
-import { OptionItem, UIService } from 'ngx-edu-sharing-ui';
+import { AccessibilityService, DarkModeSetting, OptionItem, UIService } from 'ngx-edu-sharing-ui';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ConfigurationHelper, RestConnectorService } from '../../../core-module/core.module';
@@ -27,6 +27,7 @@ import { MainMenuDropdownComponent } from '../main-menu-dropdown/main-menu-dropd
 import { MainMenuSidebarComponent } from '../main-menu-sidebar/main-menu-sidebar.component';
 import { MainNavCreateConfig, MainNavService, TemplateSlot } from '../main-nav.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
     selector: 'es-top-bar',
@@ -40,6 +41,8 @@ export class TopBarComponent implements AfterViewInit {
     mainNavService = inject(MainNavService);
     dialogs = inject(DialogsService);
     private sessionStorageService = inject(SessionStorageService);
+    private accessibility = inject(AccessibilityService);
+    readonly theme = inject(ThemeService);
     elementRef = inject(ElementRef);
 
     readonly TemplateSlot = TemplateSlot;
@@ -133,6 +136,12 @@ export class TopBarComponent implements AfterViewInit {
         this.mainNavService.updateHeight(
             this.topbarRef.nativeElement?.getBoundingClientRect().height,
         );
+    }
+
+    toggleDarkMode() {
+        // toggle darkmode -> dont toggle into auto mode through topbar
+        const next: DarkModeSetting = this.theme.isDarkMode() ? 'light' : 'dark';
+        void this.accessibility.set({ darkMode: next });
     }
 
     protected readonly UIService = UIService;

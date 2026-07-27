@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { EventEmitter, Injectable, signal, WritableSignal, inject } from '@angular/core';
+import { EventEmitter, inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import {
@@ -129,6 +129,8 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.options$.next(options);
     }
     checkbox: boolean;
+    /** when true, the checkbox acts like a radio: selecting one node deselects the others */
+    singleSelect = false;
     globalOptionsSubject = new BehaviorSubject<OptionItem[]>([]);
     set globalOptions(globalOptions: OptionItem[]) {
         this.globalOptionsSubject.next(globalOptions);
@@ -177,12 +179,15 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     singleClickHint: 'dynamic' | 'static';
     ctrlClickBehavior: CtrlClickBehavior = 'multiselect';
     disableInfiniteScroll: boolean;
+    infiniteScrollWindow = true;
     showIconColumn = new BehaviorSubject(true);
+    showActions = new BehaviorSubject(true);
 
     onClicked({ event, ...data }: NodeClickEvent<T> & { event: MouseEvent }) {
+        // 'emit' disables keyboard-modified multi-selection (ctrl/cmd + shift range) entirely
         if ((event.ctrlKey || event.metaKey) && this.ctrlClickBehavior === 'multiselect') {
             this.selection.toggle(data.element);
-        } else if (event.shiftKey) {
+        } else if (event.shiftKey && this.ctrlClickBehavior === 'multiselect') {
             this.expandSelectionTo(data.element);
         } else {
             this.clickItem.emit({ ...data, ctrlKey: event.ctrlKey || event.metaKey });
@@ -190,6 +195,14 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
 
     onCheckboxChanged(node: T, checked: boolean) {
+        // single-select: the checkbox acts like a radio — keep only the chosen node selected
+        if (this.singleSelect) {
+            this.selection.clear();
+            if (checked) {
+                this.selection.select(node);
+            }
+            return;
+        }
         if (this.uiService.shiftKeyPressed) {
             this.expandSelectionTo(node);
         }

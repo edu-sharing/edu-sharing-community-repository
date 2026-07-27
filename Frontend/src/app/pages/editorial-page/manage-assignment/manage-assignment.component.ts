@@ -1,4 +1,4 @@
-import { Component, computed, signal, ViewChild, inject } from '@angular/core';
+import { Component, computed, inject, signal, ViewChild } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -33,6 +33,7 @@ import { EditorialBreadcrumbService } from '../editorial-breadcrumb/editorial-br
 import { NodesSelectorConfig } from '../nodes-selector/nodes-selector.component';
 import { EditorialPageService } from '../editorial-page.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { ThemeService } from '../../../services/theme.service';
 
 export type AssignmentBase = Pick<Assignment, 'title' | 'type' | 'summary'>;
 
@@ -78,12 +79,15 @@ export class ManageAssignmentComponent {
     private editorialPageService = inject(EditorialPageService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private editorialBreadcrumbService = inject(EditorialBreadcrumbService);
+    private theme = inject(ThemeService);
 
-    readonly editorConfig = {
+    readonly editorConfig = computed(() => ({
         ...AssignmentEditorConfig,
         base_url: this.platformLocation.getBaseHrefFromDOM() + 'assets/tinymce',
         language: this.translateService.getDefaultLang(),
-    };
+        skin: this.theme.isDarkMode() ? 'oxide-dark' : 'oxide',
+        content_css: this.theme.isDarkMode() ? 'dark' : 'default',
+    }));
     now = new Date().getTime();
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
@@ -94,6 +98,7 @@ export class ManageAssignmentComponent {
     } as Assignment;
     assignment = signal<Assignment>(this.EmptyAssignment);
     saving = signal(false);
+    loadingFiles = signal(false);
     authorities = signal<Permission[]>(null);
     mainDataFormGroup: FormGroup;
     nodes = signal<NodeWithRole[]>(null);
@@ -101,6 +106,10 @@ export class ManageAssignmentComponent {
     submissionsWithContent = computed(() =>
         this.submissions()?.filter((s) => s.submissionStatus !== 'NOT_STARTED'),
     );
+    readonly fileSections: { role: NodeWithRole['documentRole'] }[] = [
+        { role: 'SUBMITTABLE' },
+        { role: 'SUPPLEMENTARY' },
+    ];
     validateMainForm() {
         this.mainDataFormGroup.markAllAsTouched();
         if (!this.mainDataFormGroup.valid) {
@@ -137,10 +146,11 @@ export class ManageAssignmentComponent {
         });
         this.route.queryParams
             .pipe(
-                map((p) => p.assignment),
-                distinctUntilChanged(),
-                switchMap((assignmentId) => {
+                distinctUntilChanged((a, b) => a.assignment === b.assignment && a.step === b.step),
+                switchMap((params) => {
+                    const assignmentId = params.assignment;
                     if (assignmentId) {
+                        this.loadingFiles.set(true);
                         return combineLatest([
                             this.assignmentService.getAssignment({
                                 assignmentId,
@@ -151,12 +161,17 @@ export class ManageAssignmentComponent {
                             this.assignmentService.getSubmissions({
                                 assignmentId,
                             }),
-                        ]);
+                        ]).pipe(map((result) => [...result, params.step] as const));
                     } else {
                         this.editorialBreadcrumbService.path.set([]);
                         this.assignment.set(this.EmptyAssignment);
                         this.submissions.set(null);
                         this.authorities.set(null);
+                        // reset back to the first step when switching to "new assignment"
+                        // (before resetting the form, as reset() also clears the step control)
+                        if (this.matStepper) {
+                            this.matStepper.reset();
+                        }
                         this.mainDataFormGroup.reset({
                             title: '',
                             summary: '',
@@ -168,7 +183,8 @@ export class ManageAssignmentComponent {
                     }
                 }),
             )
-            .subscribe(([assignment, files, submissions]) => {
+            .subscribe(([assignment, files, submissions, step]) => {
+                this.loadingFiles.set(false);
                 this.editorialBreadcrumbService.path.set([{ title: assignment.title }]);
                 this.assignment.set(assignment);
                 this.submissions.set(submissions);
@@ -190,10 +206,17 @@ export class ManageAssignmentComponent {
                         } as NodeWithRole;
                     }),
                 );
+                // jump directly to the "assign" (invite) step when requested via query param
+                if (step === 'assign' && this.matStepper) {
+                    // the linear stepper only allows advancing when the previous step has been
+                    // interacted with and its control is valid (both true for existing assignments)
+                    this.matStepper.steps.first.interacted = true;
+                    this.matStepper.selectedIndex = 1;
+                }
             });
     }
 
-    showFileDialog() {
+    showFileDialog(documentRole: NodeWithRole['documentRole'] = 'SUBMITTABLE') {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
             optionConfig: {
@@ -219,7 +242,7 @@ export class ManageAssignmentComponent {
                                     (node) =>
                                         ({
                                             ...node,
-                                            documentRole: 'SUBMITTABLE',
+                                            documentRole,
                                         } as NodeWithRole),
                                 ),
                         ),
@@ -305,12 +328,15 @@ export class ManageAssignmentComponent {
         } finally {
             this.saving.set(false);
         }
+        console.log('virtual node', newAssignment);
         this.editorialPageService.addVirtualNodes([newAssignment], 'assignment', 'created');
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParamsHandling: 'merge',
             queryParams: {
                 mainComponent: null,
+                assignment: null,
+                step: null,
                 filters: JSON.stringify({ 'virtual:assignmentType': ['created'] }),
             },
         });

@@ -1,4 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+$maxWidthContainer: 700px;
 .groups-button {
     display: flex;
     justify-content: center;
@@ -7,12 +9,15 @@
 .groups-template-select {
     display: flex;
     justify-content: center;
-    max-width: 600px;
+    max-width: $maxWidthContainer;
     width: 100%;
     margin: auto;
     ::ng-deep .mat-form-field-wrapper {
         width: 100%;
     }
+}
+.no-data {
+    justify-content: center;
 }
 .modes {
     display: flex;
@@ -56,8 +61,7 @@
     > div {
         padding: 10px;
         margin: 15px;
-        background-color: #fff;
-        @include materialShadow();
+        background-color: var(--backgroundColor);
         text-align: center;
         mat-calendar {
             width: 220px;
@@ -107,7 +111,13 @@ es-listTable {
 }
 
 .export {
-    padding: 0 30px 20px 20px;
+    max-width: $maxWidthContainer;
+    padding-top: 30px;
+    width: 100%;
+    margin: auto;
+    es-info-message {
+        padding-bottom: 20px;
+    }
     > h4 {
         > span {
             flex-grow: 1;
@@ -122,6 +132,21 @@ es-listTable {
             margin-bottom: 20px;
         }
     }
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+    .export-properties-mode {
+        margin-bottom: 20px;
+    }
+    .export-properties-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-height: 260px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
 }
 :host ::ng-deep {
     .mat-tab-body {
@@ -131,5 +156,70 @@ es-listTable {
             overflow: visible !important;
             width: 100%;
         }
+    }
+    // hide the tab bar when "Nach Objekt" is the only available tab
+    .hide-tab-header .mat-mdc-tab-header {
+        display: none;
+    }
+}
+.groups-template-select,
+.modes {
+    padding-top: 30px;
+}
+.stats-nodes-view {
+    padding: 0 20px 20px;
+    h4 {
+        margin-bottom: 8px;
+    }
+    .source-selection {
+        max-width: $maxWidthContainer;
+        margin: auto;
+    }
+    .source-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .type-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    // list of the passed objects: show at most ~4 rows, scroll the rest inside the container
+    .selected-nodes {
+        max-height: 260px;
+        overflow-y: auto;
+        margin: 5px 0 10px 30px;
+        @include mixins.materialShadowBottom();
+        border-radius: var(--borderRadiusCards);
+        es-node-entries-wrapper {
+            --mat-table-background-color: var(--backgroundColor);
+        }
+    }
+    // sub-radio to pick one of the user's organizations
+    .org-suboptions {
+        display: flex;
+        flex-direction: column;
+        margin: 0 0 10px 35px;
+        > mat-radio-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    }
+    // "published only" toggle below the source radios
+    .source-only-public {
+        display: block;
+        margin: 10px 0 5px;
+    }
+    .period-range {
+        display: block;
+        margin: 15px 0;
+        padding-top: 20px;
+    }
+    .start-button {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
     }
 }

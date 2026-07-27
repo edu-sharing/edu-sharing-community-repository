@@ -76,7 +76,8 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 methodName.equals("getPublishedCopies") ||
                 methodName.equals("getOriginalNode") ||
                 methodName.equals("getPrimaryParent") ||
-                methodName.equals("getVersionHistory")) {
+                methodName.equals("getVersionHistory") ||
+                methodName.equals("copyNode")) {
             argumentId = 0;
         }
 
@@ -307,7 +308,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
                 !Arrays.asList(
                         CallSourceHelper.CallSource.Render, CallSourceHelper.CallSource.Preview,
                         CallSourceHelper.CallSource.Sitemap, CallSourceHelper.CallSource.ToolConnector,
-                        CallSourceHelper.CallSource.RatingApi, CallSourceHelper.CallSource.Oai
+                        CallSourceHelper.CallSource.RatingApi, CallSourceHelper.CallSource.Oai, CallSourceHelper.CallSource.Download
                 ).contains(CallSourceHelper.getCallSource())
         ) {
             logger.debug("Skipping collection permission check for call source " + CallSourceHelper.getCallSource());

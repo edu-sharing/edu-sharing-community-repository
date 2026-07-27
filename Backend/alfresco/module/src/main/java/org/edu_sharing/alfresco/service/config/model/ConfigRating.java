@@ -16,5 +16,5 @@ public class ConfigRating implements Serializable {
 	}
 	@Schema(description = "Rating mode configuration")
 	@XmlElement
-	public RatingMode mode;
+	public RatingMode mode = RatingMode.none;
 }

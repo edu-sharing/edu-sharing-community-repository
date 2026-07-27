@@ -67,7 +67,7 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
     }
 
     /**
-     * Opens the overlay next to a given trigger HTML element.
+     * Opens the overlay below a given trigger HTML element.
      *
      * @param trigger
      */
@@ -78,10 +78,10 @@ export class AiPreviewImagesOverlayComponent implements OnInit {
             .withPositions([
                 {
                     originX: 'end',
-                    originY: 'center',
-                    overlayX: 'start',
-                    overlayY: 'center',
-                    offsetX: 10,
+                    originY: 'bottom',
+                    overlayX: 'end',
+                    overlayY: 'top',
+                    offsetY: 10,
                 },
             ])
             .withPush(false);

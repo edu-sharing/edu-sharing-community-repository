@@ -30,7 +30,7 @@
     > div:first-child {
         flex-grow: 1;
     }
-    background-color: #f8f8f8;
+    background-color: var(--backgroundElevatedColor);
     padding: 5px 20px;
     .license-img {
         height: 1.4em;
@@ -43,7 +43,7 @@
     overflow-y: auto;
     display: flex;
     justify-content: center;
-    background-color: #fff;
+    background-color: var(--defaultBackground);
     > es-mds-viewer ::ng-deep {
         .mds-viewer {
             width: 340px;

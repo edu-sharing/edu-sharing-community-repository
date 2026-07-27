@@ -20,7 +20,7 @@ export type ListItemType =
  this.columns.push(new ListItem(RestConstants.CM_NAME));
  this.columns.push(new ListItem(RestConstants.CM_ARCHIVED_DATE));
  */
-export class ListItem {
+export class BaseListItem {
     /**
      * Should this item be shown by default
      * @type {boolean}
@@ -36,6 +36,7 @@ export class ListItem {
      * custom format string for date fields, may be null
      */
     public format: string;
+
     constructor(
         public type: ListItemType,
         public name: string,
@@ -43,6 +44,20 @@ export class ListItem {
             showLabel: false,
         },
     ) {}
+}
+
+/**
+ * A list item info, which is basically a column
+ * Example:
+ this.columns.push(new ListItem(RestConstants.CM_NAME));
+ this.columns.push(new ListItem(RestConstants.CM_ARCHIVED_DATE));
+ */
+export class ListItem extends BaseListItem {
+    /**
+     * Optional second row (sub title) under this column in the primary table cell; typed
+     * BaseListItem so a sub title cannot itself define a secondaryRow (no recursion).
+     */
+    public secondaryRow: BaseListItem;
 
     static getCollectionDefaults() {
         let columns = [];
@@ -53,7 +68,7 @@ export class ListItem {
     }
 
     static getSuggestionDefaults() {
-        return [new ListItem('NODE', 'title'), new ListItem('SUGGESTION', 'count')];
+        return [new ListItem('NODE', 'cm:title'), new ListItem('SUGGESTION', 'count')];
     }
 }
 export class ListItemSort extends ListItem {

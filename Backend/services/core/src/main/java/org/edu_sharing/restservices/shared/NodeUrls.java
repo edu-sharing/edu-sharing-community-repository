@@ -7,6 +7,7 @@ import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.lti13.LTIJWTUtil;
 
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 @Data
 public class NodeUrls {
@@ -14,15 +15,16 @@ public class NodeUrls {
     private String repositoryBaseUrl;
     private String generateLtiResourceLink;
 
-    public NodeUrls(Node node, String requestedVersion) {
+    public NodeUrls(String nodeId, List<String> aspects, String requestedVersion) {
         repositoryBaseUrl = URLHelper.getBaseUrl(true);
-        if(node.getAspects().contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_LTITOOL_NODE))){
-            generateLtiResourceLink = repositoryBaseUrl + "/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=" + node.getRef().getId();
+        if(aspects.contains(CCConstants.CCM_ASPECT_LTITOOL_NODE)){
+            generateLtiResourceLink = repositoryBaseUrl + "/rest/ltiplatform/v13/generateLoginInitiationFormResourceLink?nodeId=" + nodeId;
             if(Context.getCurrentInstance() != null){
-                if(Context.getCurrentInstance().isSingleUseNodeId(node.getRef().getId())){
+                if(Context.getCurrentInstance().isSingleUseNodeId(nodeId)){
                     //generate short living jwt
+                    // @TODO will this be supported with Ticket access of RS2?
                     try {
-                        String jwt = LTIJWTUtil.getShortAccessJwt(node.getRef().getId(),60);
+                        String jwt = LTIJWTUtil.getShortAccessJwt(nodeId,60);
                         generateLtiResourceLink +="&jwt="+jwt;
                     } catch (GeneralSecurityException e) {
                         throw new RuntimeException(e);

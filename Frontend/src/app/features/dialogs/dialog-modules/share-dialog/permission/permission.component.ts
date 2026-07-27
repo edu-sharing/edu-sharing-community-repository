@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { AuthenticationService } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/core.module';
 import { ExtendedAce } from '../share-dialog.component';
 import { TypeResult } from '../choose-type/choose-type.component';
-import { Helper, Toast } from 'ngx-edu-sharing-ui';
+import { fromBeforeToValidator, notInPastValidator } from './timebased.validators';
 
 @Component({
     selector: 'es-share-dialog-permission',
@@ -13,13 +14,21 @@ import { Helper, Toast } from 'ngx-edu-sharing-ui';
 })
 export class ShareDialogPermissionComponent implements OnInit {
     private authenticationService = inject(AuthenticationService);
-    private toast = inject(Toast);
 
     public _permission: ExtendedAce = null;
     public invalidPermission = false;
     public isEveryone: boolean;
     permissionTimebased: boolean;
-    timebased: ExtendedAce;
+    readonly timebasedForm = new FormGroup(
+        {
+            from: new FormControl<number | null>(
+                { value: null, disabled: true },
+                { validators: [notInPastValidator] },
+            ),
+            to: new FormControl<number | null>({ value: null, disabled: true }),
+        },
+        { validators: [fromBeforeToValidator] },
+    );
 
     async ngOnInit() {
         this.permissionTimebased = await this.authenticationService.hasToolpermission(
@@ -82,18 +91,63 @@ export class ShareDialogPermissionComponent implements OnInit {
         return Math.max(from || new Date().getTime()) + 1000 * 60 * 60 * 24;
     }
 
+    get fromEnabled(): boolean {
+        return this.timebasedForm.controls.from.enabled;
+    }
+    get toEnabled(): boolean {
+        return this.timebasedForm.controls.to.enabled;
+    }
+    /** Current from/to values including disabled controls (used for the datepicker bounds). */
+    get timebasedRaw(): { from: number | null; to: number | null } {
+        return this.timebasedForm.getRawValue();
+    }
+
     openTimebased() {
-        this.timebased = Helper.deepCopy(this._permission);
+        this.setTimebasedControl('from', this._permission.from ?? null);
+        this.setTimebasedControl('to', this._permission.to ?? null);
+        this.timebasedForm.markAsPristine();
         this.timebasedOpen = true;
     }
 
+    toggleFrom(checked: boolean) {
+        this.setTimebasedControl('from', checked ? this.getDateTomorrow() : null, true);
+    }
+    toggleTo(checked: boolean) {
+        this.setTimebasedControl(
+            'to',
+            checked ? this.getDateTomorrow(this.timebasedRaw.from) : null,
+            true,
+        );
+    }
+
+    private setTimebasedControl(name: 'from' | 'to', value: number | null, markDirty = false) {
+        const control = this.timebasedForm.controls[name];
+        control.setValue(value);
+        if (value != null) {
+            control.enable();
+        } else {
+            control.disable();
+        }
+        if (markDirty) {
+            control.markAsDirty();
+        }
+    }
+
+    onTimebasedKeydown(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            event.stopPropagation();
+            this.timebasedOpen = false;
+        }
+    }
+
     saveTimebased() {
-        if (this.timebased.from && this.timebased.to && this.timebased.from > this.timebased.to) {
-            this.toast.error(null, 'WORKSPACE.SHARE.TIMEBASED.INVALID_DATE');
+        if (this.timebasedForm.invalid) {
+            this.timebasedForm.markAllAsTouched();
             return;
         }
-        this._permission.from = this.timebased.from;
-        this._permission.to = this.timebased.to;
+        const { from, to } = this.timebasedForm.getRawValue();
+        this._permission.from = from;
+        this._permission.to = to;
         this.timebasedOpen = false;
     }
 }

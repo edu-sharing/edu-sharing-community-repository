@@ -17,7 +17,7 @@ import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
-import org.edu_sharing.repository.server.tools.HttpQueryTool;
+import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.restservices.ltiplatform.v13.LTIPlatformConstants;
 import org.edu_sharing.restservices.ltiplatform.v13.model.OpenIdConfiguration;
 import org.edu_sharing.service.admin.AdminServiceFactory;

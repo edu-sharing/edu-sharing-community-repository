@@ -699,7 +699,7 @@ export class MdsEditorInstanceService
             if (
                 await firstValueFrom(
                     this.mdsEditorInstanceService.networkService.isHomeRepository(
-                        this.repositoryId,
+                        this.repositoryId ?? RestConstants.HOME_REPOSITORY,
                     ),
                 )
             ) {

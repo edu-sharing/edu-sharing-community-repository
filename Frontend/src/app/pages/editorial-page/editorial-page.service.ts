@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject } from 'rxjs';
-import { MdsWidget, UserEvent } from 'ngx-edu-sharing-api';
+import { AuthenticationService, MdsWidget, UserEvent } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
 import { PrimaryMode } from '../../features/editorial-sidebar/editorial-sidebar.component';
 
@@ -41,6 +42,15 @@ export class EditorialPageService {
     private virtualNodes$ = new BehaviorSubject<{ [key: string]: NodeEntriesDataType[] }>({});
     private tabs$ = new BehaviorSubject<EditorialTab[]>(null);
     private tabWidgetId$ = new BehaviorSubject<string>(null);
+
+    constructor() {
+        // Virtual nodes are optimistic entries kept for the whole session; drop them whenever the
+        // logged-in user changes, so they cannot leak across logout or a user switch.
+        inject(AuthenticationService)
+            .observeUserChanges()
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => this.virtualNodes$.next({}));
+    }
 
     buildSearchCriteria(tab: number) {
         if (this.tabWidgetId$.value) {

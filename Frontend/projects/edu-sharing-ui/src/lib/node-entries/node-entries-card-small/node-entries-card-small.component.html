@@ -15,8 +15,18 @@
   [style.background-color]="nodeHelper.isNodeCollection(node) ? node.collection.color : null"
   (contextmenu)="openContextmenu($event)"
   (keydown.ContextMenu)="openContextmenu($event)"
+  [class.selected]="entriesService.selection.isSelected(node)"
 >
-  @if (templatesService.overlay) {
+  @if (entriesService.checkbox) {
+  <div class="card-small-checkbox">
+    <mat-checkbox
+      [checked]="entriesService.selection.isSelected(node)"
+      (change)="entriesService.onCheckboxChanged(node, $event.checked)"
+      color="primary"
+      aria-label="{{ 'SELECT' | translate : { element: (node | nodeTitle) } }}"
+    ></mat-checkbox>
+  </div>
+  } @if (templatesService.overlay) {
   <div
     class="card-overlay"
     (click)="
@@ -43,6 +53,17 @@
   } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
   <ng-container *ngTemplateOutlet="image"></ng-container>
   <ng-container *ngTemplateOutlet="meta"></ng-container>
+  }
+  <!-- bottom options strip (e.g. the APPLY button in picker mode). Assignments use the
+       top-right three-dot menu instead, so they never get this strip. -->
+  @if (!nodeHelper.isNodeAssignment(node) && entriesService.options?.[Target.List]?.length) {
+  <div class="card-options">
+    <div class="card-options-area">
+      @for (option of optionsOnCard(); track option) {
+      <es-option-button [option]="option" [node]="node"></es-option-button>
+      }
+    </div>
+  </div>
   }
 </div>
 <ng-template #image let-playAnimation="playAnimation">

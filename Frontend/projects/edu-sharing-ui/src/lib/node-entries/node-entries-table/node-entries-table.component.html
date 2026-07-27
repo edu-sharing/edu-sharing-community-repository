@@ -33,11 +33,13 @@
   [matSortActive]="entriesService.sort?.active"
   [matSortDirection]="entriesService.sort?.direction"
   esInfiniteScroll
+  [scrollWindow]="entriesService.infiniteScrollWindow"
   (scrolled)="loadData('scroll')"
 >
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select" [sticky]="isScroll">
     <mat-header-cell *matHeaderCellDef>
+      @if (!entriesService.singleSelect) {
       <mat-checkbox
         [ngModel]="entriesService.selection.selected.length > 0"
         [indeterminate]="
@@ -48,6 +50,7 @@
         color="primary"
         aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
+      }
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
       <mat-checkbox
@@ -137,40 +140,57 @@
       [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
       attr.data-test="table-cell-{{ column.name }}"
     >
-      @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
-      <es-node-url cdkMonitorSubtreeFocus [node]="node" [mode]="first ? 'link' : 'wrapper'">
-        <es-list-base
-          [forceText]="true"
-          [node]="node"
-          [item]="column"
-          esCheckTextOverflow
-          #text="esCheckTextOverflow"
-          [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
-          matTooltipTouchGestures="off"
-        ></es-list-base>
-      </es-node-url>
-      } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
-      <es-list-base
-        [forceText]="true"
-        [node]="node"
-        [item]="column"
+      <!-- single click target for the cell: display:contents normally (catches es-list-base
+           clicks via bubbling), a real box filling the cell in the sub-title case. -->
+      <div
+        class="cell-primary-content"
+        [class.has-sub-title]="first && !!column.secondaryRow"
         (click)="
-          entriesService.onClicked({
-            event: $event,
-            element: node,
-            source: ClickSource.Metadata,
-            attribute: column,
-          })
+          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
+            entriesService.onClicked({
+              event: $event,
+              element: node,
+              source: ClickSource.Metadata,
+              attribute: column,
+            })
         "
         (dblclick)="
-          entriesService.dblClickItem.emit({
-            element: node,
-            source: ClickSource.Metadata,
-            attribute: column,
-          })
+          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
+            entriesService.dblClickItem.emit({
+              element: node,
+              source: ClickSource.Metadata,
+              attribute: column,
+            })
         "
-      ></es-list-base>
-      } @if (first) { @if (node.properties?.['virtual:childobjectcount'] > 0) {
+      >
+        @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
+        <es-node-url cdkMonitorSubtreeFocus [node]="node" [mode]="first ? 'link' : 'wrapper'">
+          <es-list-base
+            [forceText]="true"
+            [node]="node"
+            [item]="column"
+            esCheckTextOverflow
+            #text="esCheckTextOverflow"
+            [matTooltip]="text.hasTextOverflow() ? cell.innerText : null"
+            matTooltipTouchGestures="off"
+          ></es-list-base>
+        </es-node-url>
+        } @if (entriesService.elementInteractionType !== InteractionType.DefaultActionLink) {
+        <es-list-base [forceText]="true" [node]="node" [item]="column"></es-list-base>
+        } @if (first && column.secondaryRow) {
+        <div class="cell-sub-title">
+          @if (authorForRow(node, column.secondaryRow); as author) {
+          <es-user-avatar size="xxsmall" [user]="author"></es-user-avatar>
+          }
+          <es-list-base
+            [forceText]="true"
+            [node]="node"
+            [item]="column.secondaryRow"
+          ></es-list-base>
+        </div>
+        }
+      </div>
+      @if (first) { @if (node.properties?.['virtual:childobjectcount'] > 0) {
       <div class="childobjects">
         <div
           class="childobject-count"
@@ -186,8 +206,9 @@
       } }
     </mat-cell>
   </ng-container>
-  }
+  } @if (entriesService.tableConfig?.headers !== false) {
   <mat-header-row mat-header-row *matHeaderRowDef="visibleColumnNames$ | async"></mat-header-row>
+  }
   <mat-row
     mat-row
     matRipple

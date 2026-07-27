@@ -3,15 +3,23 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
+import org.edu_sharing.repository.server.tools.UserEnvironmentTool;
 import org.edu_sharing.restservices.assignment.v1.model.Assignment;
+import org.edu_sharing.restservices.assignment.v1.model.AssignmentFileRequest;
+import org.edu_sharing.restservices.assignment.v1.model.CreateAssignmentRequest;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.assignment.*;
 import org.edu_sharing.service.nodeservice.NodeService;
+import org.edu_sharing.service.nodeservice.NodeServiceHelper;
+import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -29,8 +39,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AssignmentDaoFactory {
 
+    private static final Pattern COPY_TITLE_PATTERN = Pattern.compile("^(.*) \\(Kopie(?: - (\\d+))?\\)$");
+
     private final NodeService nodeService;
     private final SearchService searchService;
+    private final PermissionService permissionService;
+    private final UserEnvironmentTool userEnvironmentTool;
+    private final AssignmentConfig assignmentConfig;
 
     /**
      * Retrieves an instance of {@link AssignmentDao} based on the provided node identifier.
@@ -71,7 +86,68 @@ public class AssignmentDaoFactory {
         };
     }
 
+    /**
+     * Creates a draft copy of an existing assignment, including its assignment files
+     * (deep-copied for {@link Assignment.Type#SUBMISSION}), but without copying
+     * submissions or the source's permissions/roles. Only coordinators of the source
+     * assignment (or admins) are allowed to copy it.
+     *
+     * @param sourceNodeId the node id of the assignment to copy
+     * @return the newly created assignment DAO
+     */
+    public AssignmentDao copyAssignment(@NotNull @NonNull String sourceNodeId) {
+        AssignmentDao source = assignmentDaoByNodeId(sourceNodeId);
+        if (!AssignmentUtil.isAssignmentCoordinator(permissionService, sourceNodeId)) {
+            throw new AccessDeniedException("Only coordinators are allowed to copy an assignment");
+        }
 
+        List<AssignmentFileRequest> files = source.getAssignmentFiles().stream()
+                .map(f -> new AssignmentFileRequest(f.getReferNodeId(), f.getDocumentRole(), f.isDone() != null ? false: null))
+                .toList();
+
+        CreateAssignmentRequest request = new CreateAssignmentRequest(
+                null,
+                nextCopyTitle(source.getTitle()),
+                source.getSummary(),
+                source.getEndDate(),
+                Assignment.Status.DRAFT,
+                source.getType(),
+                Boolean.TRUE.equals(source.getAllowAdditionalDocumentSubmissions()),
+                Collections.emptyList(),
+                files);
+
+        AssignmentDao copy = assignmentDaoByType(source.getType());
+        copy.createOrUpdate(request);
+        return copy;
+    }
+
+    /**
+     * Computes the title for a new copy of an assignment, appending an incrementing
+     * counter if sibling copies of the same assignment already exist: "Title (Kopie)",
+     * "Title (Kopie - 2)", "Title (Kopie - 3)", ...
+     */
+    private String nextCopyTitle(String sourceTitle) {
+        Matcher matcher = COPY_TITLE_PATTERN.matcher(sourceTitle);
+        String baseTitle = matcher.matches() ? matcher.group(1) : sourceTitle;
+
+        Set<String> siblingTitles = AuthenticationUtil.runAsSystem(() -> {
+            String assignmentFolder = userEnvironmentTool.getEdu_SharingAssignmentFolder();
+            String parentFolder = NodeServiceHelper.getContainerId(assignmentFolder, assignmentConfig.getNodePattern());
+            return nodeService.getChildrenChildAssociationRefType(parentFolder, CCConstants.CCM_TYPE_ASSIGNMENT)
+                    .stream()
+                    .map(ChildAssociationRef::getChildRef)
+                    .map(ref -> NodeServiceHelper.getProperty(ref, CCConstants.CM_PROP_TITLE))
+                    .collect(Collectors.toSet());
+        });
+
+        int counter = 1;
+        String candidate;
+        do {
+            candidate = counter == 1 ? baseTitle + " (Kopie)" : baseTitle + " (Kopie - " + counter + ")";
+            counter++;
+        } while (siblingTitles.contains(candidate));
+        return candidate;
+    }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

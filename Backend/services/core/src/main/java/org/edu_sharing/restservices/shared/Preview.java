@@ -25,9 +25,9 @@ public class Preview implements Serializable {
   @JsonProperty(required = true)
   private Integer height;
   @JsonProperty(required = true, value = "isIcon")
-  private boolean isIcon;
+  private boolean icon;
   @JsonProperty("isGenerated")
-  private boolean isGenerated;
+  private boolean generated;
   private String type;
   private String mimetype;
   @Schema(type = "string", format = "byte")

@@ -35,6 +35,8 @@ import java.util.List;
  *                                           This field is mandatory.
  * @param submissions                        A list of submissions associated with this assignment.
  *                                           This field is mandatory.
+ * @param isCoordinator                      Whether the current user is a coordinator of this assignment.
+ *                                           This field is mandatory.
  */
 public record Assignment(
         @NotNull
@@ -73,7 +75,10 @@ public record Assignment(
         List<Permission> permissions,
         @NotNull
         @JsonProperty(required = true)
-        List<Submission> submissions
+        List<Submission> submissions,
+        @Schema(description = "Whether the current user is a coordinator of this assignment.")
+        @JsonProperty(required = true)
+        boolean isCoordinator
 ) {
 
     @Schema(description = """

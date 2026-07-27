@@ -1027,6 +1027,8 @@ public class CCConstants {
     public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_RELATIONS = "TOOLPERMISSION_MANAGE_RELATIONS";
     public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_QA = "TOOLPERMISSION_MANAGE_QA";
 
+    public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_CONTRIBUTORS = "TOOLPERMISSION_MANAGE_CONTRIBUTORS";
+
     public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
     public final static String CCM_VALUE_TOOLPERMISSION_MEDIACENTER_MANAGE = "TOOLPERMISSION_MEDIACENTER_MANAGE";
@@ -1108,6 +1110,11 @@ public class CCConstants {
     public final static String VIRT_PROP_LICENSE_ICON = "{virtualproperty}licenseicon";
 
     public final static String VIRT_PROP_ORIGINAL_DELETED = "{virtualproperty}originaldeleted";
+
+    /**
+     * Precomputed URLs for the node, e.g. for LTI tool nodes, the LTI resource-link login initiation URL.
+     */
+    public final static String VIRT_PROP_LTI_URL = "{virtualproperty}ltiurl";
 
     public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
@@ -1547,6 +1554,7 @@ public class CCConstants {
     public static final String CCM_TYPE_USAGE = "{http://www.campuscontent.de/model/1.0}usage";
     public static final String CCM_PROP_USAGE_APPID = "{http://www.campuscontent.de/model/1.0}usageappid";
     public static final String CCM_PROP_USAGE_COURSEID = "{http://www.campuscontent.de/model/1.0}usagecourseid";
+    public static final String CCM_PROP_USAGE_COURSETITLE = "{http://www.campuscontent.de/model/1.0}usagecoursetitle";
     public static final String CCM_PROP_USAGE_PARENTNODEID = "{http://www.campuscontent.de/model/1.0}usageparentnodeid";
     public static final String CCM_PROP_USAGE_APPUSER = "{http://www.campuscontent.de/model/1.0}usageappuser";
     public static final String CCM_PROP_USAGE_APPUSERMAIL = "{http://www.campuscontent.de/model/1.0}usageappusermail";

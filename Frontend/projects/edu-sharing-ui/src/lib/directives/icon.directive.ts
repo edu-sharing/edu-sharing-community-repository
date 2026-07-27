@@ -44,6 +44,7 @@ export class IconDirective implements OnInit, OnDestroy {
     private originalId$ = new BehaviorSubject<string>(null);
     private iconContext$ = new BehaviorSubject<string>(null);
     private _id: string;
+    private _customClass: string;
     private _aria: boolean;
     private altTextSpan: HTMLElement;
     private isReady = false;
@@ -107,16 +108,36 @@ export class IconDirective implements OnInit, OnDestroy {
     }
 
     private async setIcon(id: string, context: string, iconsConfig: IconsConfig) {
-        if (this._id) {
-            this.element.nativeElement.classList.remove(
-                'edu-icons',
-                'custom-icons',
-                'material-icons',
-            );
-            if (this.svg) {
-                this.renderer.removeChild(this.element.nativeElement, this.svg);
-            }
+        this.element.nativeElement.classList.remove('edu-icons', 'custom-icons', 'material-icons');
+        if (this._customClass) {
+            // the mapped class (e.g. a `fa-*` class) carries the glyph via a CSS custom property,
+            // so it must be dropped explicitly — otherwise the previous icon keeps winning the
+            // cascade and the icon appears frozen when the input changes.
+            this.element.nativeElement.classList.remove(this._customClass);
+            this._customClass = null;
         }
+        if (this.svg) {
+            this.renderer.removeChild(this.element.nativeElement, this.svg);
+            this.svg = null;
+        }
+        this.element.nativeElement.innerText = '';
+
+        // resolve the config override first, so a mapping may also point at an `svg-` icon and an
+        // `svg-` icon can itself be overridden
+        let customClass: string = null;
+        let mapping = null;
+        if (context) {
+            mapping = iconsConfig?.filter((i) => i.original === id && i.context === context);
+        }
+        if (!mapping?.length) {
+            mapping = iconsConfig?.filter((i) => i.original === id && !i.context);
+        }
+        if (mapping?.length === 1) {
+            id = mapping[0].replace || '';
+            customClass = mapping[0].cssClass;
+        }
+        this._id = id;
+
         if (id.startsWith('svg-')) {
             try {
                 const iconName = id.slice(4);
@@ -125,6 +146,8 @@ export class IconDirective implements OnInit, OnDestroy {
 
                 const svgText = await firstValueFrom(this.http.get(path, { responseType: 'text' }));
 
+                // a newer icon was requested while this one was loading
+                if (this._id !== id) return;
                 if (!svgText) return;
 
                 const parser = new DOMParser();
@@ -139,12 +162,6 @@ export class IconDirective implements OnInit, OnDestroy {
                 svgElement.classList.add('svg-icons');
                 this.svg = svgElement;
 
-                // remove possible existing SVG element to avoid duplicate icons
-                const existingSvg = this.element.nativeElement.querySelector('.svg-icons');
-                if (existingSvg) {
-                    this.renderer.removeChild(this.element.nativeElement, existingSvg);
-                }
-
                 this.renderer.appendChild(this.element.nativeElement, this.svg);
 
                 if (this._aria) {
@@ -157,19 +174,6 @@ export class IconDirective implements OnInit, OnDestroy {
                 return;
             }
         }
-        let customClass: string = null;
-        let mapping = null;
-        if (context) {
-            mapping = iconsConfig?.filter((i) => i.original === id && i.context === context);
-        }
-        if (!mapping?.length) {
-            mapping = iconsConfig?.filter((i) => i.original === id && !i.context);
-        }
-        if (mapping?.length === 1) {
-            id = mapping[0].replace || '';
-            customClass = mapping[0].cssClass;
-        }
-        this._id = id;
         if (this._aria) {
             this.updateAria();
         }
@@ -179,12 +183,17 @@ export class IconDirective implements OnInit, OnDestroy {
             id = id.substring(4);
         } else if (id?.startsWith('custom-') || customClass) {
             cssClass = 'custom-icons';
-            id = id.substring(7);
+            // only strip the prefix when it is actually present — a mapping may supply just a
+            // `cssClass` and leave the id (or an empty replacement) untouched
+            if (id?.startsWith('custom-')) {
+                id = id.substring(7);
+            }
         } else {
             cssClass = 'material-icons';
         }
         this.element.nativeElement.classList.add(cssClass);
         if (customClass) {
+            this._customClass = customClass;
             this.element.nativeElement.classList.add(customClass);
         }
         this.element.nativeElement.innerText = id;

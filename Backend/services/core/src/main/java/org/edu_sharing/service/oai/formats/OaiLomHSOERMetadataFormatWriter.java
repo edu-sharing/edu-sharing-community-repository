@@ -22,12 +22,14 @@ import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.metadataset.v2.MetadataWidget;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.forms.VCardTool;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.util.PropertyMapper;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
@@ -114,6 +116,7 @@ public class OaiLomHSOERMetadataFormatWriter extends AbstractMetadataFormatWrite
             .withSchemaLocation("http://www.w3.org/2001/XMLSchema-instance https://www.oerbw.de/hsoerlom https://w3id.org/dini-ag-kim/hs-oer-lom-profil/latest/schemas/hs-oer-lom.xsd")
             .withNamespace("https://www.oerbw.de/hsoerlom")
             .withTransformer(MetadataFormat.identity());
+
 
     @NotNull
     @Override
@@ -202,17 +205,26 @@ public class OaiLomHSOERMetadataFormatWriter extends AbstractMetadataFormatWrite
             addLanguageAttribute(context, context.createAndAppendElement("langstring", context.createAndAppendElement("keyword", general), keyword));
         }
 
-        int i = 0;
-        List<String> i18n = propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD_DISPLAY);
         for (String keyword : propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD)) {
             Element keywordElement = context.createAndAppendElement("keyword", general);
-            if(i < i18n.size()) {
-                addLanguageAttribute(context, context.createAndAppendElement("langstring", keywordElement, i18n.get(i)));
+
+            String url = null;
+            for (String language : List.of("de", "en")) {
+                List<? extends Suggestion> suggest = MetadataSearchHelper.getSuggestions("-home-", getMds(), "ngsearch",
+                        CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD), keyword, null,language);
+                if(suggest != null && !suggest.isEmpty() && suggest.get(0).getTranslation() != null) {
+                    addLanguageAttribute(context.createAndAppendElement("langstring", keywordElement, suggest.get(0).getTranslation()),language);
+                }
+                if(suggest != null && !suggest.isEmpty() && suggest.get(0).getUrl() != null) {
+                    url = suggest.get(0).getUrl();
+                }
             }
+            if(url != null){
+                addLanguageAttribute(context.createAndAppendElement("langstring", keywordElement, url),"x-none");
+            }
+
             // @TODO: in 11.0, use and provide the GND-URI here
             context.createAndAppendElement("id", keywordElement, keyword);
-
-            i++;
         }
 
     }

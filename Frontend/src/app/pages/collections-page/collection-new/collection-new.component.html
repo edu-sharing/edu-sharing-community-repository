@@ -142,75 +142,27 @@
     >
       <div class="collection-general">
         <div class="collectionImage">
-          <div class="image-upload-field">
-            <input
-              #file
-              type="file"
-              accept="image/*"
-              name="userFile"
-              (change)="imageDataChanged($event)"
-              class="image-upload-field-input"
-            />
-          </div>
-          <div class="button-icon">
-            <es-actionbar
-              #imageActionbar
-              appearance="round"
-              [numberOfAlwaysVisibleOptions]="0"
-              [numberOfAlwaysVisibleOptionsMobile]="0"
-            ></es-actionbar>
-          </div>
-          <!-- Making the image area clickable poses a violation of accessibility rules. Merge
-              christopher/fix/image-click-areas to remove. -->
-          @if (!imageData && !(currentCollection.preview && !currentCollection.preview.isIcon)) {
-          <div
-            (keyup.enter)="file.click()"
-            (click)="file.click()"
-            class="card-collection-icon-container"
+          <!-- reuse the MDS preview widget so the image sources (upload / clipboard / search)
+               stay in sync with the node preview widget. Host-controlled: it hands back the
+               chosen file/delete via (previewChange) and this component persists it on save -->
+          <es-mds-editor-widget-preview
+            [standalone]="true"
+            [deleteAsOption]="true"
+            [standaloneNode]="$any(currentCollection)"
+            (previewChange)="onPreviewChange($event)"
           >
-            <div class="card-image-distance"></div>
-            <div
-              class="card-image-icon-container"
-              [style.background-color]="currentCollection.collection.color"
-            >
-              <i esIcon="layers"></i>
-            </div>
-          </div>
-          } @if (!imageData && currentCollection.preview && !currentCollection.preview.isIcon) {
-          <div
-            (keyup.enter)="file.click()"
-            (click)="file.click()"
-            class="card-collection-icon-container"
-          >
-            <img
-              class="blurred-image"
-              [src]="
-                currentCollection
-                  | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true }
-                  | async
-              "
-            />
-            <img
-              [src]="
-                currentCollection
-                  | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true }
-                  | async
-              "
-              class="card-image-preview"
-            />
-          </div>
-          } @if (imageData) {
-          <div
-            class="card-collection-image-container"
-            (keyup.enter)="file.click()"
-            (click)="file.click()"
-          >
-            <div class="card-image-container">
-              <img [src]="imageData" class="blurred-image" />
-              <img [src]="imageData" class="card-image-preview" />
-            </div>
-          </div>
-          }
+            <ng-template #previewPlaceholder>
+              <div class="card-collection-icon-container">
+                <div class="card-image-distance"></div>
+                <div
+                  class="card-image-icon-container"
+                  [style.background-color]="currentCollection.collection.color"
+                >
+                  <i esIcon="layers"></i>
+                </div>
+              </div>
+            </ng-template>
+          </es-mds-editor-widget-preview>
         </div>
         <div
           class="collection-new-preview-infoarea"

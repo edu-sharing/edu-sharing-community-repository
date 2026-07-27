@@ -1,3 +1,282 @@
 {
-  "EDITORIAL": {}
+  "EDITORIAL": {
+    "CREATE_NOT_ALLOWED": {
+      "TITLE": "Creating not possible",
+      "MESSAGE": "You cannot create elements in the current area."
+    },
+    "SUGGESTIONS": {
+      "EMPTY": "No elements with pending suggestions so far"
+    },
+    "FILTER": {
+      "OPEN": "Open filters",
+      "CLOSE": "Close filters"
+    },
+    "SEARCH_PLACEHOLDER": {
+      "ACTIVITY": "Search activities...",
+      "ASSIGNMENT": "Search assignments...",
+      "SUGGESTIONS": "Search contents...",
+      "SHARE": "Search shares..."
+    },
+    "SIDEBAR": {
+      "TITLE_SHARE": "Shares",
+      "TITLE_ASSIGNMENT": "Actions & options",
+      "TITLE_WORKSPACE": "Actions & options",
+      "TITLE_SEARCH": "Actions & options",
+      "TITLE_COLLECTIONS": "Actions & options",
+      "TITLE_ACTIVITY": "Actions & options",
+      "TITLE_SUGGESTIONS": "Actions & options",
+      "TITLE_RENDER": "Actions & options",
+      "NO_OPTIONS_SELECTION": "There are no actions available that apply to all of the selected elements.\nPlease change your selection",
+      "NO_OPTIONS_NO_SELECTION": "There are no general actions available for the current view\nYou can select elements to get actions",
+      "FULLSCREEN": "Fullscreen",
+      "EXIT_FULLSCREEN": "Exit fullscreen",
+      "OPEN": "Open actions & options",
+      "CLOSE": "Close actions & options",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "SUBMISSION": {
+        "TAB_SUBMISSION": "Submission",
+        "TAB_DISCUSSION": "Discussion",
+        "SUBMISSION_FROM": "From",
+        "SUBMISSION_TITLE": "Assignment",
+        "SUBMISSION_STATE": "Status",
+        "SUBMISSION_DATE": "Submission date",
+        "NOT_STARTED": "Nothing has been handed in for this submission yet",
+        "RETURN_DATE": "Correction date",
+        "PREVIOUS": "Previous",
+        "NEXT": "Next",
+        "SEND_BACK": "Save",
+        "SUBMISSION_ATTACHMENT": "Attached files",
+        "ASSIGNMENT_MATERIAL": "Working material",
+        "USER_NOTES": "Note on the submission",
+        "INTERNAL_NOTE_SHOW": "Add personal notes",
+        "INTERNAL_NOTE": "Personal note",
+        "FEEDBACK": "Give feedback",
+        "ATTACHMENT_EMPTY": "No files submitted"
+      }
+    },
+    "OPTION": {
+      "REJECT_SHARE": "Hide share",
+      "TOGGLE_SIDEBAR_ENABLED": "Hide sidebar",
+      "TOGGLE_SIDEBAR_DISABLED": "Show sidebar"
+    },
+    "OPTIONS": {
+      "SHARE_QR": "Share QR code",
+      "SHARE_QR_DESCRIPTION": "Show a QR code for sharing the content",
+      "MANAGE_CONTENT": "Sort in",
+      "MANAGE_CONTENT_DESCRIPTION": "Here you can sort the selected elements into another location",
+      "SORT_INTO": "Add content",
+      "SORT_INTO_DESCRIPTION": "With this panel you can use another view on the right as a source to add content from.",
+      "CREATE_ASSIGNMENT": "New assignment",
+      "MANAGE_SUBMISSION": "Edit submission",
+      "CREATE_ASSIGNMENT_DESCRIPTION": "Create a new assignment",
+      "PREVIEW": "Preview",
+      "SUBMISSION_REMOVE": "Remove element",
+      "PREVIEW_DESCRIPTION": "Show a preview of the content including the most important metadata",
+      "VERSION_MANAGEMENT": "Version management",
+      "VERSION_MANAGEMENT_DESCRIPTION": "Show and restore the versions of the content",
+      "VIEWS_AND_USAGE": "Views & usage",
+      "VIEWS_AND_USAGE_DESCRIPTION": "Show the views, downloads, plays and usages of the content",
+      "NODES_SELECTOR": {
+        "UPLOAD": {
+          "TITLE": "Add new"
+        },
+        "METHODOLOGY": {
+          "TITLE": "Metadata",
+          "INFO": "Add metadata to find your material more easily.\nYou can save your selection as a template and reuse it.",
+          "METADATA_SAVED_WRITE": "Metadata updated on {{writeCount}} element(s)",
+          "METADATA_SUGGESTIONS": "Metadata stored as a suggestion on {{suggestionCount}} element(s), because of insufficient permissions",
+          "METADATA_SKIPPED": "Metadata skipped on {{skippedCount}} element(s), because of insufficient permissions",
+          "SELECT_TEMPLATE": "Select template",
+          "MANAGE_TEMPLATES": "Manage templates",
+          "TEMPLATE_NAME": "Title of the template",
+          "EDIT_TEMPLATE": {
+            "DIALOG_TITLE": "Edit template"
+          },
+          "DELETE_TEMPLATE": {
+            "DIALOG_TITLE": "Delete template",
+            "CONFIRMATION_MESSAGE": "Do you really want to delete this template?"
+          },
+          "CREATE_TEMPLATE": {
+            "BUTTON_LABEL": "Save selection as template",
+            "DIALOG_TITLE": "Create a new template"
+          }
+        },
+        "NO_SEARCH_RESULTS": "No results could be found.",
+        "SEARCH": {
+          "PLACEHOLDER": "Search for contents"
+        },
+        "COLLECTIONS": {
+          "EMPTY_MESSAGE": "So far you have neither created your own collection nor been given access to a collection.",
+          "PLACEHOLDER": "Search for collections",
+          "RECENT_COLLECTIONS": "Recently used",
+          "MY_COLLECTIONS": "My collections",
+          "EDITORIAL_COLLECTIONS": "Editorial collections"
+        },
+        "WORKSPACE": {
+          "EMPTY_MESSAGE": "So far you have created neither your own nor shared contents.",
+          "MY_CONTENTS": "My contents",
+          "SHARED_CONTENTS": "Shared contents"
+        },
+        "COPY": {
+          "SINGLE": "Copy selected content",
+          "MULTIPLE": "Copy selected contents",
+          "TARGET": "Sort in here",
+          "ERROR": "An error occurred while copying the contents."
+        },
+        "INVALID_SELECTION_REASON": {
+          "invalidCombination": "The selected contents cannot be copied (together).",
+          "invalidSelection": "The current selection is invalid.",
+          "missingPrivileges": "You do not have the required permissions to copy these contents.",
+          "atLeastRootOrChildrenSelected": "To copy, either the checkbox for the main collection or for the sub-collections must be set."
+        },
+        "CONFIGURE_CONFIG": {
+          "INFO_HEADING": "How we save storage space:",
+          "INFO_MESSAGE": "By default, contents are not copied but linked and shared. This does not count towards your quota. Links to the original contents are inserted into the copied collection shells. Contents added later at the original location will not be shared.",
+          "CONFIG_HEADING": "Configure copy process",
+          "COPY": "Copy",
+          "INCLUDE_MAIN": "Include main collection",
+          "INCLUDE_SUB": {
+            "SINGLE": "Include 1 sub-collection",
+            "MULTIPLE": "Include {{count}} sub-collections"
+          },
+          "INCLUDE_ITEMS": {
+            "SINGLE": "Include 1 content",
+            "MULTIPLE": "Include {{count}} contents"
+          },
+          "NO_CONFIG_OPTIONS": "There are no further copy options for this content."
+        }
+      }
+    },
+    "TITLE": "Manage",
+    "TITLE_ASSIGNMENT": "Assignments",
+    "TITLE_SUGGESTIONS": "Content-Checking",
+    "BREADCRUMB": {
+      "HOME": "Home",
+      "ACTIVITY": "Activities",
+      "SUGGESTIONS": "Content-Checking",
+      "ASSIGNMENT": "Assignments",
+      "SHARE": "Shares"
+    },
+    "ACTIVITY": {
+      "EMPTY": "No recent activities found"
+    },
+    "SUBMIT_ASSIGNMENT": {
+      "TAB_ASSIGNMENT": "Assignment",
+      "TAB_SUBMIT": "Submissions",
+      "SUBMIT_CONFIRM_TITLE": "Hand in assignment?",
+      "SUBMIT_CONFIRM_INFO": "Do you want to hand in the assignment?\n\nImportant: Once handed in, no further changes are possible!",
+      "REMOVE_FILE_CONFIRM_TITLE": "Remove submission file?",
+      "REMOVE_FILE_CONFIRM_INFO": "Do you really want to remove \"{{ title }}\" from the submission?",
+      "SUBMITTED": "The assignment has been handed in",
+      "VALIDATION_READY": "Feedback on your submission is available.",
+      "VALIDATION_SCROLL": "Go to feedback",
+      "NOTES_SAVED": "Note has been saved",
+      "USER_NOTES": "Note on the submission",
+      "SUBMIT_DETAILS": "Submission details",
+      "START_TIME": "Handed out",
+      "END_TIME": "Due date",
+      "SUBMISSION_TIME": "Handed in",
+      "CREATED_BY": "Assignment created",
+      "CORRECTION_RIGHTS": "Correction rights",
+      "SUBMISSION_SENT": "This assignment has already been handed in",
+      "ADD_ASSIGNMENT_MATERIAL": "Add more material",
+      "REPLACE_ASSIGNMENT_MATERIAL": "Hand in working material",
+      "POLLING_CONNECTOR": "Document is being edited...",
+      "POLLING_CONNECTOR_SUBTITLE": "Changes are saved automatically.",
+      "POLLING_CONNECTOR_HINT": "When you are done, simply close the document tab.",
+      "POLLING_CONNECTOR_WRITEBACK": "Document is being saved...",
+      "POLLING_CONNECTOR_WRITEBACK_SUBTITLE": "Please wait a moment.",
+      "SUBMITTABLE_SUBMIT": "Material(s)",
+      "SUBMITTABLE": "Working material",
+      "SUPPLEMENTARY": "Supplementary material",
+      "SUBMIT": "Hand in submission",
+      "FEEDBACK": {
+        "TITLE": "Feedback on the submission",
+        "FEEDBACK": "Feedback",
+        "CORRECTED": "Corrected working material"
+      }
+    },
+    "ASSIGNMENT": {
+      "STEP": {
+        "MAIN": "Create",
+        "INVITE": "Assign"
+      },
+      "EMPTY": "No assignments found",
+      "MAIN_TITLE_CREATE": "Create new assignment",
+      "MAIN_TITLE_EDIT": "Edit assignment",
+      "PERMISSIONS_TITLE": "Assign assignment",
+      "SAVE_DRAFT": "Save draft",
+      "SUBMIT": "Hand out assignment",
+      "SELECT_FILE": "Attach",
+      "RESET_DRAFT_MESSAGE": "The assignment will be withdrawn for all learners and turned back into a draft. This is only possible as long as nothing has been handed in yet.",
+      "SAVE_FINISH_MESSAGE": "The assignment will be marked as completed for everyone involved.\n It will be moved from the \"Active\" area to \"Completed\".\n\nAfterwards, further submissions or changes to the feedback are no longer possible.",
+      "ERROR": {
+        "FIELD_TITLE": "Please enter a title",
+        "FIELD_SUMMARY": "Please enter a description",
+        "NO_SUBMITTABLE_FILE": "Please add at least one submittable file or allow additional submissions",
+        "OWN_AUTHORITY": "You cannot assign the assignment to yourself",
+        "MISSING_AUTHORITIES": "Please assign the assignment",
+        "MISSING_AUTHORITIES_ASSIGNEE": "For this assignment type, at least one person or group must be invited with the role \"Complete\""
+      },
+      "SUBMISSIONS": {
+        "EMPTY": "No submissions have been created for this assignment yet",
+        "VIEW_ORIGINAL": "Original file",
+        "VIEW_CORRECT": "Correct",
+        "CORRECTED": "Corrected",
+        "SAVE_CORRECTED": "Return correction",
+        "ALL_CORRECTED": "The assignment has been marked as fully corrected",
+        "CHANGES_SAVED": "Correction saved",
+        "FINISH_ALL_CONFIRM_TITLE": "Return correction",
+        "FINISH_ALL_CONFIRM_MESSAGE": "All submissions have been corrected.\nThe feedback will now be visible to all students.",
+        "FINISH_ALL_MISSING_MESSAGE": "{{ count }} submissions have not been corrected yet.\nThose students will not receive any feedback.\nThis step cannot be undone.",
+        "FINISH_ALL_CONFIRM_BUTTON": "Return correction",
+        "FINISH_ALL_MISSING_CONFIRM_BUTTON": "Return anyway",
+        "SAVE_EDIT": "Save changes",
+        "UNSAVED_CHANGES_TITLE": "Unsaved changes",
+        "UNSAVED_CHANGES_MESSAGE": "You have made unsaved changes to the correction. Do you want to save them now?"
+      },
+      "FORM": {
+        "TITLE": "Title",
+        "SUMMARY": "Description",
+        "ADD_FILE": "Add material",
+        "AUTHORITY_ROLE": "Role",
+        "DELETE": "Delete",
+        "GROUP_MULTIPLY": "When the assignment is handed out, all members of the group are assigned individually",
+        "AUTHORITIES_EMPTY": "Not assigned yet",
+        "HAS_SUBMISSIONS": "There are already submissions. The files can therefore no longer be changed",
+        "FILES_EMPTY": "No attached files yet",
+        "FILES_INVITE": "A share on this element is added automatically for the people of this assignment",
+        "FILES_NO_ACCESS": "Not all people may have access to this element.",
+        "FILES_LICENSE_MEDIA": "Licensed medium. Passing on access is not possible. Only available to people who have access to it",
+        "FILES_ROLE": "Material type",
+        "FILES_ALLOW_ADDITIONAL": "additional materials",
+        "FILES_ALLOW_ADDITIONAL_DETAILS": "Handing in additional materials is allowed",
+        "END": "Due date",
+        "END_DETAILS": "Specifies whether the assignment has a due date",
+        "ROLE": {
+          "SUPPLEMENTARY": "Supplementary material",
+          "SUBMITTABLE": "Working material (copy template)"
+        },
+        "SECTION": {
+          "SUBMITTABLE": {
+            "TITLE": "Working material",
+            "DESCRIPTION": "To be worked on by students and required for the submission."
+          },
+          "SUPPLEMENTARY": {
+            "TITLE": "Supplementary material",
+            "DESCRIPTION": "Additional information – no editing or submission required."
+          }
+        },
+        "PERMISSION_ROLE": {
+          "ASSIGNEE_GROUP": "complete per person",
+          "ASSIGNEE_USER": "Complete",
+          "COORDINATOR": "Correct"
+        }
+      }
+    },
+    "SHARE": {
+      "EMPTY": "No shares found"
+    }
+  }
 }

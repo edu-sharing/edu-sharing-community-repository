@@ -49,6 +49,11 @@ mat-chip-grid {
     display: flex;
     flex-grow: 1;
 }
+// Standalone autocomplete field used in the `valueSelection` layout (free-text / suggestion
+// badges), rendered below the selected-value cards. Uses the default Material outline appearance.
+.value-selection-input {
+    width: 100%;
+}
 .suggestion-card {
     width: 100%;
     min-width: 350px;
@@ -64,10 +69,10 @@ mat-chip-row {
     &.indeterminate {
         background: repeating-linear-gradient(
             -45deg,
-            var(--palette-primary-50),
-            var(--palette-primary-50) 5px,
-            var(--palette-primary-100) 5px,
-            var(--palette-primary-100) 10px
+            var(--primaryBackground50),
+            var(--primaryBackground50) 5px,
+            var(--primaryBackground100) 5px,
+            var(--primaryBackground100) 10px
         );
     }
 }
@@ -86,7 +91,7 @@ mat-chip-row {
     font-size: 14px;
     line-height: 1;
     color: $textLight;
-    background: var(--palette-primary-50);
+    background: var(--primaryBackground50);
     margin: 4px;
 
     .mat-chip-label {
@@ -131,7 +136,7 @@ mat-chip-row {
     min-height: 32px;
     width: 100%;
     box-shadow: 0 2px 4px 0 #00000026;
-    background: #fafafa;
+    background: var(--backgroundElevatedColor);
     font-size: 12px;
 
     // fix material button label not set to 100% width

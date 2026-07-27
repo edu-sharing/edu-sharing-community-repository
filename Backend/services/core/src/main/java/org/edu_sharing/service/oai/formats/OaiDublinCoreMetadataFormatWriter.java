@@ -2,10 +2,12 @@ package org.edu_sharing.service.oai.formats;
 
 import io.gdcc.xoai.dataprovider.model.MetadataFormat;
 import org.apache.commons.lang3.StringUtils;
+import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.VCardConverter;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.service.license.LicenseService;
+import org.edu_sharing.service.search.Suggestion;
 import org.edu_sharing.service.util.PropertyMapper;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.jetbrains.annotations.NotNull;
@@ -114,7 +116,16 @@ public class OaiDublinCoreMetadataFormatWriter extends AbstractMetadataFormatWri
         context.createAndAppendElement("dc:description", root, propertyMapper.getString(CCConstants.LOM_PROP_GENERAL_DESCRIPTION));
         context.createAndAppendElement("dc:language", root, propertyMapper.getString(CCConstants.LOM_PROP_GENERAL_LANGUAGE));
         context.createAndAppendElement("dc:subject", root, propertyMapper.getStringList(CCConstants.LOM_PROP_GENERAL_KEYWORD));
-        context.createAndAppendElement("dc:subject", root, propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD).stream().map(x -> String.format("https://d-nb.info/gnd/%s-%s", x.substring(1, x.length() - 1), x.substring(x.length() - 1))).collect(Collectors.toList()));
+        context.createAndAppendElement("dc:subject", root, propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD).stream()
+                .map(x -> {
+                    List<? extends Suggestion> suggest = MetadataSearchHelper.getSuggestions("-home-", getMds(), "ngsearch",
+                            CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPL_CLASSIFICATION_KEYWORD), x, null,"de");
+                    if(suggest != null && !suggest.isEmpty() && suggest.get(0).getUrl() != null) {
+                        return suggest.get(0).getUrl();
+                    }
+                   return "";
+                })
+                .collect(Collectors.toList()));
         context.createAndAppendElement("dc:subject", root, propertyMapper.getStringList(CCConstants.CCM_PROP_IO_REPL_TAXON_ID));
 
         context.createAndAppendElement("dc:creator", root, propertyMapper.getString(CCConstants.CCM_PROP_IO_UNIVERSITY));

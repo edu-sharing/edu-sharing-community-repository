@@ -1378,8 +1378,12 @@ public class SearchServiceElastic implements SearchService {
 
     enum CONTRIBUTOR_PROP {firstname, lastname, email, url, uid}
 
-    ;
-
+    /**
+     * @deprecated Replaced by the managed contributor registry
+     * ({@link org.edu_sharing.service.contributor.ContributorService#search}). Kept only for backwards
+     * compatibility; the contributor autocomplete no longer calls this.
+     */
+    @Deprecated
     @Override
     public Set<SearchVCard> searchContributors(String suggest, List<String> fields, List<String> contributorProperties, ContributorKind contributorKind) throws IOException {
         checkClient();
@@ -1441,6 +1445,7 @@ public class SearchServiceElastic implements SearchService {
                                 .query(nq -> nq
                                         .bool(contributorQuery.build())))));
 
+        log.info("Query: {}", searchRequest);
         SearchResponse<Map> searchResponse = client
                 .withTransportOptions(this::getRequestOptions)
                 .search(searchRequest, Map.class);
@@ -1474,6 +1479,69 @@ public class SearchServiceElastic implements SearchService {
                 })
                 .map((k) -> new SearchVCard(k.stringValue())).
                 collect(Collectors.toCollection(HashSet::new));
+    }
+
+    /**
+     * Enumerate ALL distinct contributor vcard strings in the index that carry a persistent X- id
+     * (X-ORCID / X-GND-URI / X-ROR / X-Wikidata - same filter the autocomplete uses). A filter
+     * sub-aggregation restricts the nested contributor docs to those with an X- id already in ES, so
+     * we never page through the (potentially millions of) contributors without one. Fully paginated
+     * via the composite after-key - not capped like the terms aggregation used for autocomplete.
+     */
+    @Override
+    public Set<String> getAllContributorVCards() throws IOException {
+        checkClient();
+        Set<String> result = new HashSet<>();
+        Map<String, FieldValue> afterKey = null;
+        do {
+            final Map<String, FieldValue> after = afterKey;
+            SearchRequest searchRequest = SearchRequest.of(req -> req
+                    .index(WORKSPACE_INDEX)
+                    .size(0)
+                    .aggregations("contributor", aggr -> aggr
+                            .nested(nes -> nes.path("contributor"))
+                            .aggregations("withId", filtered -> filtered
+                                    .filter(f -> f.bool(b -> b
+                                            .minimumShouldMatch("1")
+                                            .should(s -> s.exists(e -> e.field("contributor.X-ORCID")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-GND-URI")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-ROR")))
+                                            .should(s -> s.exists(e -> e.field("contributor.X-Wikidata")))))
+                                    .aggregations("vcards", vcardAggr -> vcardAggr
+                                            .composite(comp -> {
+                                                comp.size(1000)
+                                                        .sources(List.of(Map.of("vcard",
+                                                                CompositeAggregationSource.of(src -> src
+                                                                        .terms(t -> t.field("contributor.vcard"))))));
+                                                if (after != null) {
+                                                    comp.after(after);
+                                                }
+                                                return comp;
+                                            })))));
+
+            log.info("Query: {}", searchRequest);
+            SearchResponse<Map> searchResponse = client
+                    .withTransportOptions(this::getRequestOptions)
+                    .search(searchRequest, Map.class);
+
+            CompositeAggregate composite = searchResponse.aggregations()
+                    .get("contributor").nested()
+                    .aggregations().get("withId").filter()
+                    .aggregations().get("vcards").composite();
+
+            List<CompositeBucket> buckets = composite.buckets().array();
+            if (buckets.isEmpty()) {
+                break;
+            }
+            for (CompositeBucket bucket : buckets) {
+                FieldValue value = bucket.key().get("vcard");
+                if (value != null && value.isString()) {
+                    result.add(value.stringValue());
+                }
+            }
+            afterKey = composite.afterKey();
+        } while (afterKey != null && !afterKey.isEmpty());
+        return result;
     }
 
     // TODO should we generalize this? Just a dirty hack
@@ -1698,6 +1766,9 @@ public class SearchServiceElastic implements SearchService {
                         )
                 )
         ));
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+        }
         return searchInternalWithChildQuery("recentUserEvents", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map userEvent = (Map) data.getInnerHits().get("userEvent").hits().hits().get(0).source().to(Map.class).get("userEvent");
             return new SearchUserEvent(
@@ -1785,6 +1856,9 @@ public class SearchServiceElastic implements SearchService {
                         )
                 ))
         ))._toQuery();
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+        }
         return searchInternalWithChildQuery("shared", searchCriteria, searchToken, null, childQuery, (data) -> {
             Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
             return new SearchInviteEvent(
@@ -1808,7 +1882,14 @@ public class SearchServiceElastic implements SearchService {
 
         Query nestedQuery = Query.of(q -> q.nested(n -> n
                 .path("suggestions")
+                // parent score = sum of the child scores; each PENDING suggestion contributes
+                // PENDING_SUGGESTION_WEIGHT (see the constant_score should below), so the score is
+                // dominated by the number of pending suggestions the node has
+                .scoreMode(ChildScoreMode.Sum)
                 .query(nq -> nq.bool(b -> {
+                    // keep the should clause optional so the filters (or "match all" when none are
+                    // set) still decide which suggestions match; the should only affects scoring
+                    b = b.minimumShouldMatch("0");
                     if (statusFilter != null && !statusFilter.isEmpty()) {
                         b = b.must(m -> m.bool(sb -> {
                             sb = sb.minimumShouldMatch("1");
@@ -1833,6 +1914,16 @@ public class SearchServiceElastic implements SearchService {
                             return tb;
                         }));
                     }
+                    // score each matching pending suggestion with a constant weight so it pushes highest counts to the top
+                    b = b.should(s -> s.constantScore(cs -> cs
+                            .filter(f -> f.term(t -> t
+                                    .field("suggestions.status")
+                                    .value(org.edu_sharing.service.suggestion.SuggestionStatus.PENDING.name())
+                            ))
+                            // weight per pending suggestion. The parent _score is the sum of the child score multiplied
+                            // to fix other constant query scores
+                            .boost(100.f)
+                    ));
                     return b;
                 }))
                 .innerHits(ih -> ih
@@ -1846,9 +1937,16 @@ public class SearchServiceElastic implements SearchService {
         ));
 
         Query combinedQuery = BoolQuery.of(bool -> bool
-                .must(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
+                // write permissions only restrict the result set; keep them out of scoring so they
+                // don't add to the pending-suggestion-weighted score
+                .filter(wq -> wq.bool(b -> getWritePermissionsQuery(b)))
                 .must(nestedQuery)
         )._toQuery();
+
+        // default ordering: nodes with the most pending suggestions first (score dominated by pending count)
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_DESC);
+        }
 
         List<SearchFacet> requestedFacets = searchToken.getFacets();
         // we set facets null because the
@@ -1951,7 +2049,6 @@ public class SearchServiceElastic implements SearchService {
                 );
         processSpecialFilters(queryData, builder);
         searchToken.setElasticQuery(builder.build());
-        searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
         SearchResultNodeRef queryResult = search(searchToken, true);
         org.edu_sharing.repository.server.SearchResult<T> result = new org.edu_sharing.repository.server.SearchResult<>();
         ArrayList<T> list = new ArrayList<>();
@@ -2141,7 +2238,7 @@ public class SearchServiceElastic implements SearchService {
         return list.subList(Math.min(skipCount, list.size()), Math.min(list.size(), skipCount + maxValues));
     }
 
-    Query getContentTypeQuery(ContentType contentType) {
+    public Query getContentTypeQuery(ContentType contentType) {
         if (contentType == null || contentType.equals(ContentType.ALL)) {
             return QueryBuilders.matchAll().build()._toQuery();
         }

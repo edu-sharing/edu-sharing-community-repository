@@ -13,6 +13,7 @@ import {
     TabType,
 } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
 import { Node } from 'ngx-edu-sharing-api';
+import { SelectionModel } from '@angular/cdk/collections';
 
 export function createReuseOptions({
     service,
@@ -23,12 +24,13 @@ export function createReuseOptions({
     const sortInto = new OptionItem('OPTIONS.MANAGE_CONTENT', 'layers', (object) =>
         service.editorialSidebarService.showOption({
             option: 'MANAGE_CONTENT',
-            trap: true,
+            trap: false,
             optionConfig: {
                 state: TabType.COLLECTIONS,
                 selection:
-                    components.list?.getSelection() ||
-                    service.nodeEntriesGlobalService?.getPrimaryInstance()?.selection,
+                    components?.list?.getSelection() ||
+                    service.nodeEntriesGlobalService?.getPrimaryInstance()?.selection ||
+                    new SelectionModel(false, service.getObjects(object, data)),
             } as NodesSelectorConfig,
         }),
     );

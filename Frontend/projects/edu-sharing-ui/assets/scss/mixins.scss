@@ -13,9 +13,23 @@
     text-overflow: ellipsis;
     display: -webkit-box;
     line-height: ($lineHeight + em) if($important, !important, null);
-    max-height: ($count * $lineHeight + em) if($important, !important, null);
     -webkit-line-clamp: $count if($important, !important, null); /* number of lines to show */
     -webkit-box-orient: vertical;
+
+    /* Fallback for engines without any clamp support:
+       crop via max-height (no ellipsis possible there) */
+    @supports not (-webkit-line-clamp: 1) {
+        display: block;
+        max-height: ($count * $lineHeight + em) if($important, !important, null);
+    }
+
+    /* Standard property for new Chromium — kept inside @supports so
+       browsers do not report "unknown property: line-clamp" */
+    @supports (line-clamp: 1) {
+        display: block;
+        line-clamp: $count if($important, !important, null); /* number of lines to show */
+    }
+
     /* autoprefixer: off */
 }
 @mixin materialShadow($important: false) {
@@ -23,6 +37,9 @@
 }
 @mixin materialShadowBottom($opacity: 0.1) {
     box-shadow: 0 3px 3px rgba(0, 0, 0, $opacity);
+}
+@mixin materialShadowTop($opacity: 0.1) {
+    box-shadow: 0 -3px 3px rgba(0, 0, 0, $opacity);
 }
 @mixin materialShadowSmall($important: false) {
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) if($important, !important, null);
@@ -47,7 +64,7 @@
         max-width: 20px;
         border-radius: 6px;
         // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-        background-color: var(--palette-primary-200);
+        background-color: var(--primaryBackground700);
     }
 }
 @mixin materialScrollbarLight() {
@@ -64,14 +81,79 @@
         max-width: 4px;
         border-radius: 10px;
         // -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-        background-color: var(--palette-primary-100);
+        background-color: var(--primaryBackground300);
     }
     // Firefox
     scrollbar-width: thin;
-    scrollbar-color: var(--palette-primary-100) transparent;
+    scrollbar-color: var(--primaryBackground300) transparent;
 }
 @mixin removeDefaultFocus() {
     outline: none;
+}
+// Rounded "card" frame for a page's main content area (margin, background, radius, shadow).
+// Includes the mobile bottom-nav (es-main-menu-bottom) margin-bottom clearance. The mobile
+// breakpoint + nav height are passed in because the breakpoint vars live in `variables-scss`,
+// which forwards this file (importing it here would be a circular dependency).
+//
+// Open-drawer nudge: when the card sits inside an open mat-sidenav drawer the card shrinks its
+// margin on that side (to 4px) so it sits closer to the drawer edge. This relies on the host page
+// adding the marker class(es) to its `<mat-sidenav-container>` itself — they are NOT set by Angular
+// Material:
+//   [class.mat-sidenav-container-left-open]="…"   // a left drawer / filter bar is open
+//   [class.mat-sidenav-container-right-open]="…"  // a right drawer (e.g. editorial sidebar) is open
+// Pages currently wiring this: editorial-page (both), search-page & collections-page (right only),
+// workspace-page (right). Without the binding the nudge simply never applies.
+//
+// IMPORTANT: include this mixin on a TOP-LEVEL `.main-content` selector, not nested under
+// `mat-sidenav-container { … }`. The nudge rule is `mat-sidenav-container.…-open &`; if `&` already
+// contains `mat-sidenav-container` the selector gains a second, non-matching ancestor.
+// $drawerNudge: when true (default) the card nudges 4px toward an open sidenav drawer edge.
+// Disable it (pass false) for cards that span the full width regardless of the drawer, e.g. a
+// fullscreen overlay that pins itself to the viewport.
+@mixin roundedContainerCard($mobileBreakpoint, $mobileNavHeight, $drawerNudge: true) {
+    margin: var(--roundedContainerMargin);
+    background-color: var(--roundedContainerBackground);
+    border-radius: var(--borderRadiusCards);
+    @include materialShadow();
+    // At the mobile breakpoint, drop the card framing and go full-screen (edge to edge), only
+    // leaving room at the bottom for the fixed mobile bottom nav (es-main-menu-bottom).
+    @media screen and (max-width: $mobileBreakpoint) {
+        margin: 0;
+        margin-bottom: #{$mobileNavHeight};
+        border-radius: 0;
+        box-shadow: none;
+    }
+    // When the card lives inside an open mat-sidenav drawer, sit it closer to the drawer edge.
+    // Scoped above the mobile breakpoint, where the card is full-screen (no side margins).
+    @if $drawerNudge {
+        @media screen and (min-width: ($mobileBreakpoint + 1px)) {
+            mat-sidenav-container.mat-sidenav-container-left-open & {
+                margin-left: 4px;
+            }
+            mat-sidenav-container.mat-sidenav-container-right-open & {
+                margin-right: 4px;
+            }
+        }
+    }
+}
+// Makes a rounded container a static card whose content scrolls internally (instead of the body
+// scrolling). Pair with `@include roundedContainerCard()` and give the scrolling child
+// `flex: 1; min-height: 0; overflow-y: auto`. The height accounts for the container margins, the
+// main nav, and the mobile bottom nav.
+@mixin roundedContainerStaticScroll($mobileBreakpoint, $mobileNavHeight) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: unset;
+    height: calc(
+        100vh - var(--roundedContainerMargin) - var(--roundedContainerMargin) -
+            var(--mainnavCurrentHeight)
+    );
+    // Full-screen at the mobile breakpoint (margins are removed by roundedContainerCard): fill the
+    // viewport minus the main nav and the fixed mobile bottom nav.
+    @media screen and (max-width: $mobileBreakpoint) {
+        height: calc(100vh - var(--mainnavCurrentHeight) - #{$mobileNavHeight});
+    }
 }
 @mixin setGlobalKeyboardFocus($mode: 'outline') {
     //respect element border radius

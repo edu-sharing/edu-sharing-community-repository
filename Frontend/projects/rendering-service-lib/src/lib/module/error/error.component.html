@@ -1,8 +1,8 @@
 <div class="rs-error-wrapper">
-  <es-info-message mode="error">
+  <es-info-message [mode]="mode()">
     <div class="rs-error-message">
       <h3>{{ 'RENDERING.ERROR.GENERIC_ERROR_MESSAGE' | translate }}</h3>
-      <div>{{ errorMessage | translate }}</div>
+      <div>{{ errorMessage() | translate }}</div>
     </div>
   </es-info-message>
 </div>

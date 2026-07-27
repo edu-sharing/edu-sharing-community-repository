@@ -47,6 +47,7 @@ export {
     AssignmentV1Service,
     ArchiveV1Service,
     AdminV1Service,
+    StatisticV1Service,
     ConfigV1Service,
     StreamV1Service,
     ClientutilsV1Service,
@@ -66,4 +67,7 @@ export {
     RatingV1Service,
     RenderingV1Service,
     UsageV1Service,
+    ContributorV1Service,
 } from './lib/api/services';
+export * from './lib/api/models/contributor-data';
+export * from './lib/api/models/contributor-search-result';

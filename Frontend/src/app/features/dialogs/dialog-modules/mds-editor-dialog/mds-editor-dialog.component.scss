@@ -1,5 +1,4 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'sass:color';
 
 $expandToggleWidthThreshold: 400px;
 
@@ -18,7 +17,7 @@ es-input-fill-progress {
         display: flex;
         padding: 0 20px;
         justify-content: flex-end;
-        background-color: #f7f7f7;
+        background-color: var(--backgroundElevatedColor);
         @media only screen and (min-width: $expandToggleWidthThreshold) {
             z-index: 11;
             background-color: unset;
@@ -29,14 +28,8 @@ es-input-fill-progress {
             height: 39px;
             background: linear-gradient(
                 to right,
-                rgba(
-                        color.channel($workspaceMetadataBackground, 'red', $space: rgb),
-                        color.channel($workspaceMetadataBackground, 'green', $space: rgb),
-                        color.channel($workspaceMetadataBackground, 'blue', $space: rgb),
-                        0.0001
-                    )
-                    0,
-                $workspaceMetadataBackground 15px
+                transparent 0,
+                #{$workspaceMetadataBackground} 15px
             );
         }
     }

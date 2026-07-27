@@ -1,5 +1,16 @@
 {
   "EDITORIAL": {
+    "CREATE_NOT_ALLOWED": {
+      "TITLE": "Anlegen nicht möglich",
+      "MESSAGE": "Sie können im aktuellen Bereich keine Elemente anlegen."
+    },
+    "SUGGESTIONS": {
+      "EMPTY": "Bislang keine Elemente mit ausstehenden Vorschlägen"
+    },
+    "FILTER": {
+      "OPEN": "Filter öffnen",
+      "CLOSE": "Filter schließen"
+    },
     "SEARCH_PLACEHOLDER": {
       "ACTIVITY": "Aktivitätenliste durchsuchen...",
       "ASSIGNMENT": "Aufgaben durchsuchen...",
@@ -8,12 +19,21 @@
     },
     "SIDEBAR": {
       "TITLE_SHARE": "Freigaben",
-      "TITLE_ASSIGNMENT": "Aufgaben",
+      "TITLE_ASSIGNMENT": "Aktionen & Optionen",
       "TITLE_WORKSPACE": "Aktionen & Optionen",
       "TITLE_SEARCH": "Aktionen & Optionen",
       "TITLE_COLLECTIONS": "Aktionen & Optionen",
+      "TITLE_ACTIVITY": "Aktionen & Optionen",
+      "TITLE_SUGGESTIONS": "Aktionen & Optionen",
+      "TITLE_RENDER": "Aktionen & Optionen",
       "NO_OPTIONS_SELECTION": "Für die gewählte Auswahl an Elementen stehen keine übergreifenden Aktionen zur Verfügung.\nBitte ändern Sie die Auswahl",
       "NO_OPTIONS_NO_SELECTION": "Für die gewählte Ansicht stehen keine allgemeinen Aktionen zur Verfügung\nSie können Elemente auswählen, um Aktionen zu erhalten",
+      "FULLSCREEN": "Vollbild",
+      "EXIT_FULLSCREEN": "Vollbild beenden",
+      "OPEN": "Aktionen & Optionen öffnen",
+      "CLOSE": "Aktionen & Optionen schließen",
+      "PREVIOUS": "Vorherige",
+      "NEXT": "Nächste",
       "SUBMISSION": {
         "TAB_SUBMISSION": "Abgabe",
         "TAB_DISCUSSION": "Diskussion",
@@ -41,6 +61,8 @@
       "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },
     "OPTIONS": {
+      "SHARE_QR": "QR-Code teilen",
+      "SHARE_QR_DESCRIPTION": "Einen QR-Code zum Teilen des Inhalts anzeigen",
       "MANAGE_CONTENT": "Einsortieren",
       "MANAGE_CONTENT_DESCRIPTION": "Hier können Sie die gewählten Elemente einsortieren",
       "SORT_INTO": "Inhalt hinzufügen",
@@ -51,15 +73,17 @@
       "PREVIEW": "Vorschau",
       "SUBMISSION_REMOVE": "Element entfernen",
       "PREVIEW_DESCRIPTION": "Eine Vorschau des Inhalts inkl. der wichtigsten Metadaten anzeigen",
-      "WORKSPACE_METADATA": "Statistik, Versionen & Details",
-      "WORKSPACE_METADATA_DESCRIPTION": "Verwendungsstatistiken, Versionsverwaltung und allgemeine Details anzeigen",
+      "VERSION_MANAGEMENT": "Versionsverwaltung",
+      "VERSION_MANAGEMENT_DESCRIPTION": "Die Versionen des Inhalts anzeigen und wiederherstellen",
+      "VIEWS_AND_USAGE": "Aufrufe & Nutzung",
+      "VIEWS_AND_USAGE_DESCRIPTION": "Die Aufrufe, Downloads, Wiedergaben und Verwendungen des Inhalts anzeigen",
       "NODES_SELECTOR": {
         "UPLOAD": {
           "TITLE": "Neu Hinzufügen"
         },
         "METHODOLOGY": {
-          "TITLE": "Pädagogik",
-          "INFO": "Finde schneller, was du suchst. Baue dir Tagging-Vorlagen und tagge Material.\n Baue dir damit deine typischen Filter für die Suche.",
+          "TITLE": "Metadaten",
+          "INFO": "Ergänze Metadaten, um dein Material leichter wiederzufinden.\nDeine Auswahl kannst du als Vorlage speichern und wiederverwenden.",
           "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
           "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
           "METADATA_SKIPPED": "Metadaten an {{skippedCount}} Element(en) übersprungen, da keine ausreichenden Rechte vorhanden sind",
@@ -153,6 +177,8 @@
       "START_TIME": "Ausgegeben",
       "END_TIME": "Abgabe bis",
       "SUBMISSION_TIME": "Abgegeben",
+      "CREATED_BY": "Aufgabe erstellt",
+      "CORRECTION_RIGHTS": "Korrekturrechte",
       "SUBMISSION_SENT": "Diese Aufgabe wurde bereits abgegeben",
       "ADD_ASSIGNMENT_MATERIAL": "Weiteres Material hinzufügen",
       "REPLACE_ASSIGNMENT_MATERIAL": "Arbeitsmaterial einreichen",
@@ -217,7 +243,6 @@
         "AUTHORITY_ROLE": "Rolle",
         "DELETE": "Löschen",
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",
-        "FILES": "Angehängte Dateien",
         "AUTHORITIES_EMPTY": "Noch nicht zugewiesen",
         "HAS_SUBMISSIONS": "Es gibt bereits Abgaben. Die Dateien können daher nicht mehr geändert werden",
         "FILES_EMPTY": "Noch keine angehängten Dateien",
@@ -232,6 +257,16 @@
         "ROLE": {
           "SUPPLEMENTARY": "Begleitmaterial",
           "SUBMITTABLE": "Arbeitsmaterial (Kopiervorlage)"
+        },
+        "SECTION": {
+          "SUBMITTABLE": {
+            "TITLE": "Arbeitsmaterial",
+            "DESCRIPTION": "Von Schüler:innen zu bearbeiten und für die Abgabe erforderlich."
+          },
+          "SUPPLEMENTARY": {
+            "TITLE": "Begleitmaterial",
+            "DESCRIPTION": "Zusätzliche Informationen – keine Bearbeitung oder Abgabe erforderlich."
+          }
         },
         "PERMISSION_ROLE": {
           "ASSIGNEE_GROUP": "je Person erledigen",

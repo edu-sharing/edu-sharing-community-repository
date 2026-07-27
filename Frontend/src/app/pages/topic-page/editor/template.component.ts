@@ -38,7 +38,6 @@ import {
     NodeEntries,
     ParentEntries,
     RestConstants as ApiRestConstants,
-    SearchService,
 } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import {
@@ -76,6 +75,7 @@ import {
     TemplateSlot,
 } from '../../../main/navigation/main-nav.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ThemeService } from '../../../services/theme.service';
 import {
     SearchEvent,
     SearchFieldService,
@@ -102,7 +102,6 @@ import {
     DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP,
     DEFAULT_PAGE_CONFIG_REF_PROP,
     DEFAULT_PAGE_NAME_PREFIX,
-    DEFAULT_PAGE_TEMPLATE_ID,
     DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
@@ -225,7 +224,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private mdsService = inject(MdsService);
     private optionsHelperService = inject(OptionsHelperDataService);
     private platformLocation = inject(PlatformLocation);
-    private previewSidebarService = inject(PreviewSidebarService);
+    protected previewSidebarService = inject(PreviewSidebarService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private searchFieldService = inject(SearchFieldService);
@@ -235,6 +234,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
+    private themeService = inject(ThemeService);
 
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
@@ -305,9 +305,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.topicPageGlobalService.getCustomSideMenuItems()) {
             this.customSideMenuItems.set(this.topicPageGlobalService.getCustomSideMenuItems());
         }
-        this.hasCustomBreadcrumbExtension.set(
-            this.topicPageGlobalService.hasCustomBreadcrumbExtension(),
-        );
         this.backToCollectionButtonVisible.set(
             this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );
@@ -446,8 +443,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             (!this.initialLoadSuccessfully() || this.requestInProgress()),
     );
     anchorTrigger: number = 1;
-    @HostBinding('style.--anchor-item-bg-color') anchorItemColor: string;
+    anchorItemColor: string;
     initialAnchorItemColor: string;
+
+    @HostBinding('style.--anchor-item-bg-color')
+    get anchorItemBackgroundColor(): string | null {
+        if (!this.anchorItemColor) {
+            return null;
+        }
+        return this.themeService.isDarkMode()
+            ? this.themeService.toDarkSurfaceColor(this.anchorItemColor)
+            : this.anchorItemColor;
+    }
     swimlanes: Swimlane[] = [];
     swimlaneToEditForm: UntypedFormGroup;
     swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
@@ -462,7 +469,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
-    hasCustomBreadcrumbExtension: WritableSignal<boolean> = signal(false);
     customSideMenuItems = signal<CustomSideMenuItem[]>([]);
     customSideMenuItemsBefore = computed(() =>
         this.customSideMenuItems().filter((item) => item.position === 'before'),
@@ -2335,15 +2341,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            // a "real" template source is any template except the default placeholder
+            // any template source is a "real" template (the default placeholder no longer exists)
             const isRealTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
-                retrieveNodeId(this.createVariantOrTemplateSelectedNode) !==
-                    DEFAULT_PAGE_TEMPLATE_ID;
-            // the default placeholder: template ref must be set to the new node's own ID after creation
-            const isDefaultTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template &&
-                !isRealTemplateSource;
+                this.createVariantOrTemplateCopyOption === CopyOption.Template;
             if (isRealTemplateSource) {
                 // inherit template version from A and append the default own_counter to
                 // form the compound "{parent_sync}:{own_counter}" format used by non-root
@@ -2403,15 +2403,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
                 properties,
             );
-            // for the default template placeholder, set the template ref to the new node's own ID
-            if (isDefaultTemplateSource) {
-                pageConfigVariantNode =
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(pageConfigVariantNode),
-                        DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                        prependWorkspacePrefix(retrieveNodeId(pageConfigVariantNode)),
-                    );
-            }
             // workaround: copy profiling properties separately to avoid crashes
             const updatedTemplateNode = await this.copyProfilingProperties(
                 this.createVariantOrTemplateSelectedNode,
@@ -2516,6 +2507,29 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return false;
         }
         return ColorHelper.getPreferredColor(color) === PreferredColor.Black;
+    }
+
+    /**
+     * Resolves the background color to paint for a swimlane. In dark mode a bright custom color is
+     * adapted to a dark surface (so the theme's light text stays readable); already-dark colors
+     * and light mode are left as configured.
+     *
+     * @param color
+     */
+    swimlaneBackgroundColor(color: string): string {
+        return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
+    }
+
+    /**
+     * True when a dark custom anchor-item color is set, so the item text needs to be light. The
+     * check uses the original color (not the dark-adapted one): in dark mode a light color keeps
+     * the theme's already-light `$on-surface` text, while a dark color flips to `--textOnDarkSurface`.
+     */
+    isAnchorItemColorDark(): boolean {
+        return (
+            !!this.anchorItemColor &&
+            ColorHelper.getPreferredColor(this.anchorItemColor) === PreferredColor.Black
+        );
     }
 
     /**
@@ -2796,7 +2810,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         }
         const templateRef: string =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
-        if (!templateRef || convertNodeRefIntoNodeId(templateRef) === DEFAULT_PAGE_TEMPLATE_ID) {
+        if (!templateRef) {
             this.templateVariantNode.set(null);
             return;
         }

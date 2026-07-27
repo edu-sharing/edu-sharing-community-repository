@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MdsModule } from '../../features/mds/mds.module';
 import { SharedModule } from '../../shared/shared.module';
+import { TimeframeRangeToggleComponent } from '../../shared/components/timeframe-range-toggle/timeframe-range-toggle.component';
 import { AdminPageRoutingModule } from './admin-page-routing.module';
 import { AdminPageComponent } from './admin-page.component';
 import { AutocompleteComponent } from './autocomplete/autocomplete.component';
@@ -11,6 +12,7 @@ import { LtiAdminComponent } from './lti-admin/lti-admin.component';
 import { LtitoolAdminComponent } from './ltitool-admin/ltitool-admin.component';
 import { LuceneTemplateMemoryComponent } from './lucene-template-memory/lucene-template-memory.component';
 import { AdminMediacenterComponent } from './mediacenter/mediacenter.component';
+import { AdminContributorsComponent } from './contributors/contributors.component';
 import { AdminPluginsComponent } from './plugins/plugins.component';
 import { AdminStatisticsComponent } from './statistics/statistics.component';
 import { CodeEditorComponent } from './code-editor/code-editor';
@@ -22,6 +24,7 @@ import { AdminMessagesComponent } from './messages/messages.component';
         AdminConfigComponent,
         AdminFrontpageComponent,
         AdminMediacenterComponent,
+        AdminContributorsComponent,
         AdminPageComponent,
         AdminPluginsComponent,
         AdminContextComponent,
@@ -36,6 +39,7 @@ import { AdminMessagesComponent } from './messages/messages.component';
         SharedModule,
         AdminPageRoutingModule,
         AdminMessagesComponent,
+        TimeframeRangeToggleComponent,
         MdsModule,
         MonacoEditorModule.forRoot({
             baseUrl: window.location.origin + '/edu-sharing/assets/monaco/min/vs',

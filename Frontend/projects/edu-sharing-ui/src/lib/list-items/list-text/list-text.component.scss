@@ -5,6 +5,7 @@
 }
 span {
     display: block;
+    color: var(--textBlack);
 }
 span.assignment-summary {
     @include mixins.limitLineCount(3, 1.25);

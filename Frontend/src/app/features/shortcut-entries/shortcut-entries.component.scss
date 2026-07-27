@@ -171,7 +171,7 @@ $tileSize: 124px;
         text-align: center;
         font-size: $fontSizeXSmall;
         color: #fff;
-        background-color: var(--warning);
+        background-color: var(--warn);
     }
 
     // wrapper for the main icon of the entry
@@ -213,6 +213,21 @@ $tileSize: 124px;
         &.reset-padding {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
+            // top-align the field so its floating label stays fully visible;
+            // only the invisible mdc subscript area crops at the bottom edge
+            align-items: flex-start;
+
+            // while renaming, the title hosts a mat-form-field instead of text;
+            // chrome >= 150 crops non-text content inside a -webkit-line-clamp box,
+            // so drop the clamp while the input is shown
+            .entry-title {
+                display: block;
+                width: 100%;
+                -webkit-line-clamp: unset;
+                max-height: none;
+                overflow: visible;
+                padding-bottom: 0;
+            }
         }
 
         .entry-title {
@@ -296,7 +311,7 @@ $tileSize: 124px;
     .line {
         flex: 1;
         height: 1px;
-        background-color: #ccc;
+        background-color: var(--backgroundTinted);
         margin: 0 8px;
     }
 

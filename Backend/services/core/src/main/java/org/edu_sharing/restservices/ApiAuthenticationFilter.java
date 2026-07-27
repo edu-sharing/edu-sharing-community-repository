@@ -144,7 +144,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                 "/_about",
                 "/config",
                 "/register",
-                "/sharing",
+                "/sharing/v1/sharing",
                 "/lti/v13/oidc/login_initiations",
                 "/lti/v13/lti13",
                 "/lti/v13/registration/dynamic",

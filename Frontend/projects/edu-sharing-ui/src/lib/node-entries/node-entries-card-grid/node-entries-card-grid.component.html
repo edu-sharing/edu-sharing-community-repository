@@ -92,6 +92,7 @@
     #grid
     (esBorderBoxObserver)="onGridSizeChanges()"
     esInfiniteScroll
+    [scrollWindow]="entriesService.infiniteScrollWindow"
     (scroll)="updateScrollState()"
     (scrolled)="!visibleItemsLimited && loadData('scroll')"
   >

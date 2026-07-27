@@ -95,6 +95,8 @@
   "DISABLED": "deaktiviert",
   "PAGINATOR": {
     "itemsPerPageLabel": "Einträge pro Seite:",
+    "firstPageLabel": "Erste Seite",
+    "lastPageLabel": "Letzte Seite",
     "nextPageLabel": "Nächste Seite",
     "previousPageLabel": "Vorherige Seite",
     "getRangeLabel": "Seite {{page}} von {{pageCount}}"
@@ -165,6 +167,10 @@
     "TOOLPERMISSION_USAGE_STATISTIC": "Informationen über die Verwendung aller Objekte dieses Repositories abfragen.",
     "TOOLPERMISSION_COMMENT_WRITE": "Kommentare an Objekten verfassen.",
     "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Statistiken zur Verwendung von Materialien dieses Repositories anzeigen.",
+    "TOOLPERMISSION_SELECTIVE_STATISTICS_NODES": "Statistiken zur Verwendung einzelner Materialien anzeigen.",
+    "TOOLPERMISSION_USER_STATISTICS_NODES": "Statistiken zur Verwendung der eigenen Materialien anzeigen.",
+    "TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES": "Statistiken zur Verwendung der Materialien der eigenen Organisation anzeigen.",
+    "TOOLPERMISSION_EDITORIAL_SUGGESTIONS": "Redaktionsansicht & Metadaten-Vorschläge verwalten.",
     "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Statistiken zu Nutzenden-Logins (Login, Logout) dieses Repositories anzeigen.",
     "TOOLPERMISSION_MEDIACENTER_MANAGE": "Ändern der Basisdaten (Anschrift, Kataloge) von Medienzentren, bei welchen die nutzende Person Verwaltungsrechte hat.",
     "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Video- & Audiodateien dürfen in Sammlungen beliebig zugeschnitten gespeichert werden.",
@@ -184,6 +190,7 @@
     "TOOLPERMISSION_SUGGESTION_WRITE": "Vorschläge für Metadaten an Elementen erstellen.",
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen.",
     "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Beteiligte (Autorinnen/Autoren, Organisationen) mit persistenten IDs verwalten, hinzufügen und löschen.",
     "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",
@@ -203,6 +210,9 @@
   "STORAGE_LOCATION_UNSET": "Nicht gewählt",
   "STORAGE_LOCATION_SAVE": "Diesen Speicherort zukünftig als Standard verwenden.",
   "SUGGESTION": "Vorschlag",
+  "SUGGESTIONS": {
+    "count": "Anzahl"
+  },
   "CLICKTOREMOVE": "Klicken zum Entfernen",
   "NO_PERMISSIONS_FOR_SCOPE": "Keine Berechtigungen, um diesen Bereich anzuzeigen.",
   "DATE_SELECT_YEAR": "Jahr wählen",
@@ -652,6 +662,17 @@
       "STANDARD": "Standard-Ansicht",
       "CONTRAST": "Verstärkter Kontrast"
     },
+    "DARK_MODE_TITLE": "Dunkelmodus",
+    "DARK_MODE_MESSAGE": "Wählen Sie ein helles oder dunkles Farbschema oder übernehmen Sie die Systemeinstellung Ihres Geräts.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Systemeinstellung verwenden",
+      "LIGHT": "Hell",
+      "DARK": "Dunkel"
+    },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Zu hellem Modus wechseln",
+      "DARK": "Zu dunklem Modus wechseln"
+    },
     "INDICATOR_ICONS_TITLE": "Bedeutungstragende Symbole",
     "INDICATOR_ICONS_MESSAGE": "Inhalt durch Symbole vermitteln. Die Bedeutung eines Symbols wird angezeigt, wenn der Mauszeiger über das Symbol bewegt wird. Das ist bei reiner Tastatur-Nutzung jedoch nicht möglich.",
     "INDICATOR_ICONS_OPTION": {
@@ -803,13 +824,14 @@
     "EDIT_SIMPLE": "Schnell-Bearbeitung",
     "COLLECTION_EDIT": "Bearbeiten",
     "SHOW_TOPIC_PAGE": "Zur Themenseite",
+    "SHOW_STATISTICS": "Statistiken anzeigen",
     "COLLECTION_PIN": "Sammlung pinnen",
     "MATERIAL_FEEDBACK": "Feedback...",
     "MATERIAL_FEEDBACK_VIEW": "Feedback ansehen",
     "COLLECTION_PROPOSAL_ACCEPT": "Vorschlag bestätigen",
     "COLLECTION_PROPOSAL_DECLINE": "Vorschlag ablehnen",
     "OPEN": "Öffnen",
-    "WORKSPACE_METADATA": "Statistik & Versionen",
+    "VERSION_MANAGEMENT": "Versionsverwaltung",
     "DOWNLOAD": "Herunterladen",
     "DOWNLOAD_SAFE": "Archivieren",
     "DOWNLOAD_ALL": "Zip herunterladen",
@@ -827,7 +849,7 @@
     "METADATA": "Details",
     "COLLECTION": "In Sammlung",
     "COLLECTION_OTHER": "In weitere Sammlung",
-    "ADD_SHORTCUT": "Shortcut hinzufügen",
+    "ADD_SHORTCUT": "Favorit hinzufügen",
     "STREAM": "Auf Stream",
     "LICENSE": "Lizenz",
     "CONTRIBUTOR": "Beteiligte",
@@ -857,6 +879,8 @@
     "ASSIGNMENT_SUBMIT": "Abgeben",
     "ASSIGNMENT_SUBMISSION": "Abgaben",
     "ASSIGNMENT_EDIT": "Aufgabe bearbeiten",
+    "ASSIGNMENT_ASSIGN": "Aufgabe zuweisen",
+    "ASSIGNMENT_COPY": "Aufgabe kopieren",
     "ASSIGNMENT_CANCEL": "Aufgabe abbrechen",
     "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
     "ASSIGNMENT_FINISH": "Aufgabe abschließen",
@@ -1073,6 +1097,7 @@
       "GENERIC_BAD_REQUEST": "Ungültige Anfrage",
       "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
+      "GENERIC_ACCESS_DENIED": "Für das angeforderte Element sind keine Berechtigungen vorhanden.",
       "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
     },
     "GDPR": {
@@ -1102,7 +1127,8 @@
     "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen.",
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
-    "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen."
+    "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
+    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert."
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",
@@ -1638,8 +1664,7 @@
     "MODAL_HINT_INCLUDED": "Das Element wurde bereits zu Ihren Shortcuts hinzugefügt und kann nicht erneut hinzugefügt werden.",
     "REPLACE_TITLE": "Kachel ersetzen",
     "REPLACE_MESSAGE": "Wollen Sie diese Kachel wirklich durch das ausgewählte Element ersetzen?",
-    "SELECT_ELEMENT": "Element auswählen",
-    "SELECT_ELEMENT_INFO": "Wählen Sie ein Element aus und klicken auf \"übernehmen\" oder benutzen Sie die Option im Dreipunktmenü zum Hinzufügen eines Shortcuts.",
+    "SELECT_ELEMENT": "Favorit auswählen",
     "search": "Suche",
     "workspace": "Workspace",
     "mycollections": "Meine Sammlungen",

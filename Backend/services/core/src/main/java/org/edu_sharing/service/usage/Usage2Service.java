@@ -19,7 +19,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ISO8601DateFormat;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoClient;
@@ -27,6 +26,8 @@ import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.restservices.NodeDao;
+import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.collection.CollectionService;
 import org.edu_sharing.service.collection.CollectionServiceFactory;
@@ -35,7 +36,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 public class Usage2Service {
@@ -91,22 +91,19 @@ public class Usage2Service {
 
 	public List<Usage> getUsagesByCourse(String appId, String courseId) throws UsageException{
 
-		AuthenticationUtil.RunAsWork<List<Usage>> runAs = new AuthenticationUtil.RunAsWork<List<Usage>>(){
-			@Override
-			public List<Usage> doWork() throws Exception {
-				List<Usage> result = new ArrayList<>();
-				try{
-					Map<String,Map<String,Object>> usages =  usageDao.getUsagesByCourse(appId, courseId);
-					for(Map.Entry<String, Map<String,Object>> entry : usages.entrySet()){
-						result.add(getUsageResult(entry.getValue()));
-					}
-				}catch(Exception e){
-                log.error(e.getMessage(), e);
-					throw new UsageException(e.getMessage(), e);
+		AuthenticationUtil.RunAsWork<List<Usage>> runAs = () -> {
+			List<Usage> result = new ArrayList<>();
+			try{
+				Map<String,Map<String,Object>> usages =  usageDao.getUsagesByCourse(appId, courseId);
+				for(Map.Entry<String, Map<String,Object>> entry : usages.entrySet()){
+					result.add(getUsageResult(entry.getValue()));
 				}
-
-				return result;
+			}catch(Exception e){
+                log.error(e.getMessage(), e);
+				throw new UsageException(e.getMessage(), e);
 			}
+
+			return result;
 		};
 
 		return AuthenticationUtil.runAsSystem(runAs);
@@ -154,7 +151,7 @@ public class Usage2Service {
 	}
 
 
-	public Usage setUsage(String repoId, String userIn, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
+	public Usage setUsage(String repoId, String userIn, String lmsId, String courseId, String parentNodeId, String courseTitle, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String _version, String resourceId, String xmlParams) throws UsageException{
         if (StringUtils.isBlank(userIn) || StringUtils.isBlank(lmsId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(parentNodeId)) {
 			throw new UsageException(MISSING_PARAM, null);
 		}
@@ -173,8 +170,8 @@ public class Usage2Service {
 						if(nodeService.hasAspect(StoreRef.PROTOCOL_WORKSPACE,StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(),usageNodeId, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)){
 							usageNodeId=NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,usageNodeId),CCConstants.CCM_PROP_IO_ORIGINAL);
 						}
-						boolean hasPublishPerm = ((MCAlfrescoClient)RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
-								(Map<String, String>)null)).hasPermissions(usageNodeId, user, new String[]{CCConstants.PERMISSION_CC_PUBLISH});
+						List<String> perm = NodeDao.getNode(RepositoryDao.getHomeRepository(), usageNodeId).getPermissions(user);
+						boolean hasPublishPerm = perm != null && perm.contains(CCConstants.PERMISSION_CC_PUBLISH);
 
 						if(!hasPublishPerm){
                         log.info("User {} has no publish permission on {}", user, usageNodeId);
@@ -185,7 +182,7 @@ public class Usage2Service {
 						}
 					}
 
-                return setUsageInternal(user, lmsId, courseId, parentNodeId, userMail, fromUsed, toUsed, distinctPersons, _version, resourceId, xmlParams);
+                return setUsageInternal(user, lmsId, courseId, parentNodeId, courseTitle, userMail, fromUsed, toUsed, distinctPersons, _version, resourceId, xmlParams);
 				}catch(Throwable e){
                 log.error(e.getMessage(), e);
 					throw new UsageException(e.getMessage(), e);
@@ -199,7 +196,7 @@ public class Usage2Service {
 	 * this method will not run as system and will not check any permissions
 	 * used by collections
 	 */
-	public Usage setUsageInternal(String user, String lmsId, String courseId, String parentNodeId, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String version, String resourceId, String xmlParams) throws Exception{
+	public Usage setUsageInternal(String user, String lmsId, String courseId, String parentNodeId, String courseTitle, String userMail, Calendar fromUsed, Calendar toUsed, int distinctPersons, String version, String resourceId, String xmlParams) throws Exception{
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> usage = usageDao.getUsage(lmsId, courseId, parentNodeId, resourceId);
 		String guid = null;
@@ -208,7 +205,7 @@ public class Usage2Service {
 			guid = NodeServiceHelper.getProperty(personRef, CCConstants.CM_PROP_PERSON_GUID);
 		}
 
-		if(guid == null){
+		if(StringUtils.isBlank(guid)){
 			guid = user;
 		}
 
@@ -216,6 +213,9 @@ public class Usage2Service {
 		properties.put(CCConstants.CCM_PROP_USAGE_COURSEID, courseId);
 		properties.put(CCConstants.CCM_PROP_USAGE_PARENTNODEID, parentNodeId);
 		properties.put(CCConstants.CCM_PROP_USAGE_APPUSER, user);
+		if(StringUtils.isNotBlank(courseTitle)) {
+			properties.put(CCConstants.CCM_PROP_USAGE_COURSETITLE, courseTitle);
+		}
 		properties.put(CCConstants.CCM_PROP_USAGE_APPUSERMAIL, userMail);
 		if(fromUsed != null){
 			properties.put(CCConstants.CCM_PROP_USAGE_FROM, ISO8601DateFormat.format(fromUsed.getTime()));
@@ -236,14 +236,14 @@ public class Usage2Service {
 			version = (version == null) ? (String)serviceRegistry.getNodeService().getProperty(new NodeRef(AlfServicesWrapper.storeRef,parentNodeId),ContentModel.PROP_VERSION_LABEL) : version;
 		}
 
-		if(version != null){
+		if(StringUtils.isNotBlank(version)){
 			properties.put(CCConstants.CCM_PROP_USAGE_VERSION, version);
 		}
 
 		properties.put(CCConstants.CCM_PROP_USAGE_RESSOURCEID, resourceId);
 		properties.put(CCConstants.CCM_PROP_USAGE_XMLPARAMS, xmlParams);
 
-		if(guid != null){
+		if(StringUtils.isNotBlank(guid)){
 			properties.put(CCConstants.CCM_PROP_USAGE_GUID, guid);
 		}
 
@@ -251,11 +251,9 @@ public class Usage2Service {
 		// if null only set counter @TODO Unique constraint in Schema that
 		// prevents bypassing unique with standard alfresco services
 
-		String usageNodeId = null;
+		String usageNodeId;
 		if (usage != null) {
             log.info("usage != null");
-			String counter = (String) usage.get(CCConstants.CCM_PROP_USAGE_COUNTER);
-
 			usageNodeId = (String) usage.get(CCConstants.SYS_PROP_NODE_UID);
             log.info("usageNodeId:{}", usageNodeId);
 
@@ -347,20 +345,17 @@ public class Usage2Service {
 	public boolean deleteUsage(String repoId, String user, String lmsId, String courseId, String parentNodeId, String resourceId) throws UsageException {
         log.info("starting");
 
-    	AuthenticationUtil.RunAsWork<Boolean> runAs = new AuthenticationUtil.RunAsWork<Boolean> () {
-    		@Override
-    		public Boolean doWork() throws Exception {
-    			try{
-    				usageDao.removeUsage(lmsId, courseId, parentNodeId, resourceId);
+    	AuthenticationUtil.RunAsWork<Boolean> runAs = () -> {
+    		try{
+    			usageDao.removeUsage(lmsId, courseId, parentNodeId, resourceId);
 
-    				//remove IO from cache so that the gui gets the new usage count
-    				repositoryCache.remove(parentNodeId);
+    			//remove IO from cache so that the gui gets the new usage count
+    			repositoryCache.remove(parentNodeId);
 
-    				return true;
-    			}catch(Exception e){
-                    log.error(e.getMessage(), e);
-    				throw new UsageException(e.getMessage(), e);
-    			}
+    			return true;
+    		}catch(Exception e){
+                log.error(e.getMessage(), e);
+    			throw new UsageException(e.getMessage(), e);
     		}
     	};
     	return AuthenticationUtil.runAsSystem(runAs);
@@ -373,6 +368,7 @@ public class Usage2Service {
 		usageResult.setAppUser((String) usage.get(CCConstants.CCM_PROP_USAGE_APPUSER));
 		usageResult.setAppUserMail((String) usage.get(CCConstants.CCM_PROP_USAGE_APPUSERMAIL));
 		usageResult.setCourseId((String) usage.get(CCConstants.CCM_PROP_USAGE_COURSEID));
+		usageResult.setCourseTitle((String) usage.get(CCConstants.CCM_PROP_USAGE_COURSETITLE));
 
 		String maxPersonsString = (String) usage.get(CCConstants.CCM_PROP_USAGE_MAXPERSONS);
 		if(maxPersonsString != null) usageResult.setDistinctPersons(Integer.valueOf(maxPersonsString));
@@ -381,7 +377,7 @@ public class Usage2Service {
 		usageResult.setUsageXmlParams((String) usage.get(CCConstants.CCM_PROP_USAGE_XMLPARAMS));
 
 		Object usageFrom = usage.get(CCConstants.CCM_PROP_USAGE_FROM);
-        log.info("CCM_PROP_USAGE_FROM:" + usageFrom);
+        log.info("CCM_PROP_USAGE_FROM:{}", usageFrom);
 
 		if(usageFrom != null){
 			Calendar calFrom = Calendar.getInstance();

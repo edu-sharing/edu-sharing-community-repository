@@ -268,14 +268,21 @@ public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams
             logger.info("Tracking db done for " + mediacenter + " (" + data.size() + " elements), fetching all licensed nodes...");
             List<NodeRef> nodes = mediacenterService.getAllLicensedNodes(mediacenter, Collections.emptyMap(), null);
             logger.info(mediacenter + " has currently " + nodes.size() + " licensed nodes");
+            // The licensed nodes are the source of truth for the report. Filter them on the
+            // ccm:io_editorial_state that Elasticsearch already delivered in memory (calling
+            // NodeServiceHelper.getPropertyNative per node instead would load the full property map of
+            // every node into the Alfresco L2 caches and blow up the heap) and merge in the tracking
+            // counts collected above.
+            data = new HashMap<>();
             for (NodeRef n : nodes) {
-                org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
-                if (data.containsKey(mappedRef)) {
+                if (n.getProperties() != null && !"restricted_mz".equals(n.getProperties().get(CCConstants.CCM_PROP_IO_EDITORIAL_STATE))) {
                     continue;
                 }
-                data.put(mappedRef, new StatisticEntry());
+                org.alfresco.service.cmr.repository.NodeRef mappedRef = new org.alfresco.service.cmr.repository.NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
+                StatisticEntry entry = data.get(mappedRef);
+                data.put(mappedRef, entry != null ? entry : new StatisticEntry());
             }
-            data = filterNonMediacenterMedia(data);
+            logger.info(mediacenter + " remaining " + data.size() + " elements after filtering for non-mediacenter elements");
         }
         String nodeId = generateCSVNode(mediacenter, "nach-Medien", startDate, endDate, reportType);
         try {

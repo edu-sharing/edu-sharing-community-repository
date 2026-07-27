@@ -5,12 +5,12 @@ import {
     Component,
     ElementRef,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     OnDestroy,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { UIAnimation } from '../util/ui-animation';
@@ -54,6 +54,17 @@ export class ActionbarComponent implements OnChanges, AfterViewInit, OnDestroy {
      *   Responds to the actual rendered width, not a fixed breakpoint.
      */
     @Input() showCaptions: 'auto' | false | true | 'ifRoom' = 'auto';
+    /**
+     * Render the toggle options (togglePosition before/after). Default `true`.
+     * Set to `false` to paint only the action options (e.g. a second actionbar
+     * that shares the same options but should not repeat the toggles).
+     */
+    @Input() showToggleOptions = true;
+    /**
+     * Render the action options (always-visible buttons + overflow dropdown).
+     * Default `true`. Set to `false` to paint only the toggle options.
+     */
+    @Input() showActionOptions = true;
     /**
      * Visual style of the actionbar
      *

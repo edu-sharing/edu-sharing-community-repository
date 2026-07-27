@@ -28,7 +28,7 @@ export class NodeEntriesCardSmallComponent<T extends Node> {
     @Input() dropdown: DropdownComponent;
 
     optionsOnCard() {
-        const options = this.entriesService.options[Target.List];
+        const options = this.entriesService.options?.[Target.List] ?? [];
         const always = options.filter((o) => o.showAlways);
         if (always.some((o) => o.showCallback([this.node]))) {
             return always;

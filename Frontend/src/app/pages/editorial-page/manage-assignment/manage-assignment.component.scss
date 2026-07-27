@@ -5,6 +5,7 @@
     display: block;
     flex: 1;
     min-height: 0;
+    @include mixins.materialScrollbarLight();
     overflow-y: auto;
 }
 
@@ -12,6 +13,14 @@ mat-stepper {
     max-width: 800px;
     width: 100%;
     margin: 0 auto;
+    &.hidden {
+        display: none;
+    }
+}
+.loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 60px 0;
 }
 .step-label {
     display: flex;
@@ -41,8 +50,26 @@ mat-stepper {
     border-color: vars.$warning;
 }
 .files {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 30px 0 20px 0;
+}
+.file-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .file-section-title {
+        font-weight: 600;
+    }
+    .file-section-description {
+        color: var(--textLight);
+    }
+    es-manage-assignment-nodes {
+        display: block;
+    }
     > button {
-        margin-top: 10px;
+        align-self: flex-start;
     }
 }
 .navigation {

@@ -1,9 +1,13 @@
 <div class="group">
   @if (isDeleted) {
   <div class="deleted-info">
-    <div class="line"><hr /></div>
+    <div class="line">
+      <hr />
+    </div>
     <div class="info">{{ 'WORKSPACE.SHARE.DELETED' | translate }}</div>
-    <div class="line"><hr /></div>
+    <div class="line">
+      <hr />
+    </div>
   </div>
   }
   <div class="container">
@@ -15,7 +19,127 @@
       <span class="secondary">{{ _permission | permissionName : { field: 'secondary' } }}</span>
     </div>
     <div class="permission" [class.readOnly]="!isEditable">
+      @if (permissionTimebased && (inherit || ((isEditable === 'timebasedOnly' || isEditable ===
+      true) && timebasedAllowed))) {
+      <button
+        mat-icon-button
+        (click)="openTimebased()"
+        [class.timebased-active]="_permission.from || _permission.to"
+        [disabled]="inherit"
+        matTooltip="{{
+          'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
+            | translate : { permissions: _permission.permissions.join(', ') }
+        }}"
+        cdkOverlayOrigin
+        #timebasedTrigger="cdkOverlayOrigin"
+      >
+        <i esIcon="alarm"></i>
+        <ng-template
+          cdkConnectedOverlay
+          [cdkConnectedOverlayHasBackdrop]="true"
+          (backdropClick)="timebasedOpen = false"
+          (overlayKeydown)="onTimebasedKeydown($event)"
+          [cdkConnectedOverlayOrigin]="timebasedTrigger"
+          [cdkConnectedOverlayPositions]="[
+            {
+              originX: 'end',
+              originY: 'bottom',
+              overlayX: 'end',
+              overlayY: 'top'
+            },
+            {
+              originX: 'end',
+              originY: 'bottom',
+              overlayX: 'end',
+              overlayY: 'bottom'
+            }
+          ]"
+          [cdkConnectedOverlayOpen]="timebasedOpen"
+        >
+          <div
+            class="timebased-overlay"
+            cdkTrapFocus
+            [cdkTrapFocusAutoCapture]="true"
+            [formGroup]="timebasedForm"
+          >
+            <div class="content">
+              <mat-checkbox
+                [ngModel]="fromEnabled"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="toggleFrom($event)"
+                >{{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
+              </mat-checkbox>
+              @if (fromEnabled) {
+              <div>
+                <es-share-dialog-choose-date
+                  formControlName="from"
+                  [from]="currentDate"
+                  [to]="timebasedRaw.to"
+                ></es-share-dialog-choose-date>
+                @if (timebasedForm.controls.from.hasError('inPast')) {
+                <div class="timebased-error" role="alert">
+                  {{ 'WORKSPACE.SHARE.TIMEBASED.IN_PAST' | translate }}
+                </div>
+                }
+              </div>
+              }
+              <mat-checkbox
+                [ngModel]="toEnabled"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="toggleTo($event)"
+                >{{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
+              </mat-checkbox>
+              @if (toEnabled) {
+              <div>
+                <es-share-dialog-choose-date
+                  formControlName="to"
+                  [from]="timebasedRaw.from || currentDate"
+                ></es-share-dialog-choose-date>
+              </div>
+              } @if (timebasedForm.hasError('fromAfterTo')) {
+              <div class="timebased-error" role="alert">
+                {{ 'WORKSPACE.SHARE.TIMEBASED.INVALID_RANGE' | translate }}
+              </div>
+              }
+              <div class="actions">
+                <button mat-button color="primary" (click)="timebasedOpen = null">
+                  {{ 'CANCEL' | translate }}
+                </button>
+                <button
+                  mat-flat-button
+                  color="primary"
+                  (click)="saveTimebased()"
+                  [disabled]="timebasedForm.invalid"
+                >
+                  {{ 'SAVE' | translate }}
+                </button>
+              </div>
+            </div>
+            <!-- <div class="close">
+                <button mat-icon-button (click)="timebasedOpen = false">
+                  <i esIcon="close"></i>
+                </button>
+              </div> -->
+          </div>
+        </ng-template>
+      </button>
+      } @if ((_permission.from || _permission.to) && timebasedInvalid) {
+      <i
+        esIcon="warning"
+        class="timebased-invalid"
+        [matTooltip]="'WORKSPACE.SHARE.TIMEBASED.INVALID_STATE' | translate"
+      ></i>
+      }
+      <div class="publish">
+        @if (_permission.permissions.indexOf('Coordinator') > -1 ||
+        _permission.permissions.indexOf('CCPublish') > -1) {
+        <i class="material-icons" matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}"
+          >public</i
+        >
+        }
+      </div>
       <!-- This template displays the overlay content and is connected to the button -->
+
       @if (invalidPermission) {
       <div
         title="{{
@@ -53,9 +177,7 @@
             <i class="material-icons align">remove_red_eye</i>
             <span>{{ 'WORKSPACE.SHARE.TYPE_VIEWER' | translate }}</span>
             @if (isEditable === true && !isEveryone) {
-            <span class="select">
-              <i class="material-icons align">keyboard_arrow_down</i>
-            </span>
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
             }
           </ng-container>
           } @if (_permission.permissions.indexOf('Collaborator') > -1) {
@@ -63,24 +185,21 @@
             <i class="material-icons align">edit</i>
             <span>{{ 'WORKSPACE.SHARE.TYPE_COWORKER' | translate }}</span>
             @if (isEditable === true && !isEveryone) {
-            <span class="select">
-              <i class="material-icons align">keyboard_arrow_down</i>
-            </span>
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
             }
           </ng-container>
-          } @if ( _permission.permissions.indexOf('Coordinator') > -1 ||
-          _permission.permissions.indexOf('All') > -1 ) {
+          } @if (_permission.permissions.indexOf('Coordinator') > -1 ||
+          _permission.permissions.indexOf('All') > -1) {
           <ng-container>
             <i class="material-icons align">work</i>
             <span>{{ 'WORKSPACE.SHARE.TYPE_COORDINATOR' | translate }}</span>
             @if (isEditable === true && !isEveryone) {
-            <span class="select">
-              <i class="material-icons align">keyboard_arrow_down</i>
-            </span>
+            <span class="select"><i class="material-icons align">keyboard_arrow_down</i></span>
             }
           </ng-container>
           }
         </button>
+
         @if (_permission.permissions.length === 0) {
         <div></div>
         } @if (showChooseType) {
@@ -98,129 +217,6 @@
         }
       </div>
       }
-
-      <div>
-        @if ( permissionTimebased && (inherit || ((isEditable === 'timebasedOnly' || isEditable ===
-        true) && timebasedAllowed)) ) {
-        <button
-          mat-button
-          (click)="openTimebased()"
-          [class.timebased-active]="_permission.from || _permission.to"
-          [disabled]="inherit"
-          matTooltip="{{
-            'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
-              | translate : { permissions: _permission.permissions.join(', ') }
-          }}"
-          cdkOverlayOrigin
-          #timebasedTrigger="cdkOverlayOrigin"
-        >
-          <i esIcon="schedule"></i>
-          @if (!_permission.from && !_permission.to) {
-          <span>
-            {{ 'WORKSPACE.SHARE.TIMEBASED.WITHOUT_LIMITS' | translate }}
-          </span>
-          } @else { @if (_permission.from) {
-          {{ 'WORKSPACE.SHARE.TIMEBASED.START' | translate }}
-          } @if (_permission.from && _permission.to) { - & } @if (_permission.to) {
-          {{ 'WORKSPACE.SHARE.TIMEBASED.END' | translate }}
-          } @if (_permission.from || _permission.to) { -{{
-            'WORKSPACE.SHARE.TIMEBASED.TIME' | translate
-          }}
-          } }
-          <i esIcon="keyboard_arrow_down"></i>
-          <ng-template
-            cdkConnectedOverlay
-            [cdkConnectedOverlayHasBackdrop]="true"
-            (backdropClick)="timebasedOpen = false"
-            [cdkConnectedOverlayOrigin]="timebasedTrigger"
-            [cdkConnectedOverlayPositions]="[
-              {
-                originX: 'end',
-                originY: 'bottom',
-                overlayX: 'end',
-                overlayY: 'top'
-              },
-              {
-                originX: 'end',
-                originY: 'bottom',
-                overlayX: 'end',
-                overlayY: 'bottom'
-              }
-            ]"
-            [cdkConnectedOverlayOpen]="timebasedOpen"
-          >
-            <div class="timebased-overlay">
-              <div class="content">
-                <mat-checkbox
-                  [ngModel]="!!timebased.from"
-                  (ngModelChange)="
-                    $event ? (timebased.from = getDateTomorrow()) : (timebased.from = null)
-                  "
-                >
-                  {{ 'WORKSPACE.SHARE.TIMEBASED.FROM_CHECKBOX' | translate }}
-                </mat-checkbox>
-                @if (!!timebased.from) {
-                <div>
-                  <es-share-dialog-choose-date
-                    [(dateTime)]="timebased.from"
-                    [from]="currentDate"
-                    [to]="timebased.to"
-                  ></es-share-dialog-choose-date>
-                </div>
-                }
-                <mat-checkbox
-                  [ngModel]="!!timebased.to"
-                  (ngModelChange)="
-                    $event
-                      ? (timebased.to = getDateTomorrow(timebased.from))
-                      : (timebased.to = null)
-                  "
-                >
-                  {{ 'WORKSPACE.SHARE.TIMEBASED.TO_CHECKBOX' | translate }}
-                </mat-checkbox>
-                @if (!!timebased.to) {
-                <div>
-                  <es-share-dialog-choose-date
-                    [(dateTime)]="timebased.to"
-                    [from]="timebased.from || currentDate"
-                  ></es-share-dialog-choose-date>
-                </div>
-                }
-                <div class="actions">
-                  <button mat-button color="primary" (click)="timebasedOpen = null">
-                    {{ 'CANCEL' | translate }}
-                  </button>
-                  <button mat-flat-button color="primary" (click)="saveTimebased()">
-                    {{ 'SAVE' | translate }}
-                  </button>
-                </div>
-              </div>
-              <!-- <div class="close">
-              <button mat-icon-button (click)="timebasedOpen = false">
-                <i esIcon="close"></i>
-              </button>
-            </div> -->
-            </div>
-          </ng-template>
-        </button>
-        }
-      </div>
-      @if ((_permission.from || _permission.to) && timebasedInvalid) {
-      <i
-        esIcon="warning"
-        class="timebased-invalid"
-        [matTooltip]="'WORKSPACE.SHARE.TIMEBASED.INVALID_STATE' | translate"
-      ></i>
-      }
-
-      <div class="publish">
-        @if ( _permission.permissions.indexOf('Coordinator') > -1 ||
-        _permission.permissions.indexOf('CCPublish') > -1 ) {
-        <i class="material-icons" matTooltip="{{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}">
-          public
-        </i>
-        }
-      </div>
     </div>
     <div>
       @if (showDelete) {

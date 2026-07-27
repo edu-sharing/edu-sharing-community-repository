@@ -94,7 +94,7 @@ public class SecurityConfigurationSamlRelyingParties {
      */
     String getRelyingPartyId(RelyingPartyRegistration.Builder b){
         try {
-            String entityId = b.build().getAssertingPartyDetails().getEntityId();
+            String entityId = b.build().getAssertingPartyMetadata().getEntityId();
             if(!entityId.startsWith("http://") && !entityId.startsWith("https://")) {
                 entityId = "http://" + entityId;
             }

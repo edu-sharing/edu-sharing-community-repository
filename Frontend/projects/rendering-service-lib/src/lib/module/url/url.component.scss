@@ -16,7 +16,8 @@
 
     .vimeoFrame,
     .preziFrame,
-    .eduUrlFrame {
+    .eduUrlFrame,
+    .youtubeFrame {
         width: 100%;
         aspect-ratio: 16/9;
         border: none;
@@ -60,6 +61,13 @@
         border: none;
         width: 100%;
         max-width: 100%;
+        height: var(--containerHeight);
+    }
+
+    .serloFrame {
+        border: none;
+        width: 100%;
+        height: var(--containerHeight);
     }
 
     .gdpr-wrapper {
@@ -117,8 +125,8 @@
                         font-size: 0.875rem;
                     }
                     button {
-                        background-color: green;
-                        color: white;
+                        background-color: var(--gdprButtonBackgroundColor);
+                        color: var(--gdprButtonFontColor);
                     }
                 }
             }

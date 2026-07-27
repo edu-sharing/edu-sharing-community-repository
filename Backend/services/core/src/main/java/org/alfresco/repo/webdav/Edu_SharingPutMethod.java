@@ -28,8 +28,10 @@ package org.alfresco.repo.webdav;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ContentMetadataExtracter;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport; //edu-sharing fix
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
+import org.alfresco.repo.transaction.TransactionListenerAdapter; //edu-sharing fix
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.model.FileExistsException;
 import org.alfresco.service.cmr.model.FileFolderService;
@@ -226,12 +228,14 @@ public class Edu_SharingPutMethod extends WebDAVMethod implements ActivityPostPr
         // empty content because it's probably part of a compound operation to
         // create a new single version
         boolean disabledVersioning = false;
+        boolean nodeWasEmptyBeforePut = false; //edu-sharing fix
         
         try
         {
             // Disable versioning if we are overwriting an empty file with content
             NodeRef nodeRef = contentNodeInfo.getNodeRef();
             ContentData contentData = (ContentData)getNodeService().getProperty(nodeRef, ContentModel.PROP_CONTENT);
+            nodeWasEmptyBeforePut = !ContentData.hasContent(contentData) || contentData.getSize() == 0; //edu-sharing fix
             if ((contentData == null || contentData.getSize() == 0) && getNodeService().hasAspect(nodeRef, ContentModel.ASPECT_VERSIONABLE))
             {
                 getDAVHelper().getPolicyBehaviourFilter().disableBehaviour(nodeRef, ContentModel.ASPECT_VERSIONABLE);
@@ -258,17 +262,6 @@ public class Edu_SharingPutMethod extends WebDAVMethod implements ActivityPostPr
             if (nodeLockInfo != null && nodeLockInfo.isExclusive() && !(ContentData.hasContent(contentData) && contentData.getSize() > 0))
             {
                 getNodeService().addAspect(contentNodeInfo.getNodeRef(), ContentModel.ASPECT_NO_CONTENT, null);
-            }
-
-            /**
-             * edu-sharing fix: remove the no content aspect when new content > 0 so that onContentUpdatePolicies work when content is written
-             */
-            if(m_request.getContentLength() > 0){
-
-                if(getNodeService().hasAspect(contentNodeInfo.getNodeRef(), ContentModel.ASPECT_NO_CONTENT)){
-                    getNodeService().removeAspect(contentNodeInfo.getNodeRef(), ContentModel.ASPECT_NO_CONTENT);
-                }
-
             }
 
             // Ask for the document metadata to be extracted
@@ -304,25 +297,75 @@ public class Edu_SharingPutMethod extends WebDAVMethod implements ActivityPostPr
         }
         catch (Throwable e) 
         {
-            // check if the node was marked with noContent aspect previously by lock method AND
-            // we are about to give up
-            if (noContent && RetryingTransactionHelper.extractRetryCause(e) == null)
+            //edu-sharing fix: clean up an orphan placeholder node when the PUT is rejected and we are
+            //about to give up. The stock Alfresco code only handled a node created by a previous LOCK
+            //(noContent) and deleted it in the SAME transaction (requiresNew=false), so the delete was
+            //rolled back together with the failing PUT and the node was never actually removed. That is
+            //the case that leaves an empty metadata node behind for the macOS WebDAV client, which creates
+            //the node in a separate, already committed request (LOCK or an initial 0-byte PUT) before the
+            //real content PUT that is then rejected by the virus scan / mimetype validation policy. A
+            //direct-PUT client (e.g. Linux davfs2) creates the node in the same transaction, so the
+            //rollback alone removes it. Trigger for any node that had no real content before this PUT (so
+            //an existing file that already had content is never deleted) and run the delete in a fresh
+            //transaction AFTER this one has completed and released its lock on the node. We clean up on
+            //BOTH outcomes (rollback and commit): today this catch always rethrows -> rollback, but not
+            //gating on the outcome keeps the cleanup as unconditional as the original code intended; the
+            //exists()/empty re-check below makes it a no-op when the node legitimately ended up with content.
+            if ((noContent || nodeWasEmptyBeforePut) && RetryingTransactionHelper.extractRetryCause(e) == null)
             {
-                // remove the 0 bytes content if save operation failed or was cancelled
                 final NodeRef nodeRef = contentNodeInfo.getNodeRef();
-                getTransactionService().getRetryingTransactionHelper().doInTransaction(
-                        new RetryingTransactionCallback<String>()
+                AlfrescoTransactionSupport.bindListener(new TransactionListenerAdapter()
+                {
+                    @Override
+                    public void afterRollback()
+                    {
+                        removeOrphanPlaceholder();
+                    }
+
+                    @Override
+                    public void afterCommit()
+                    {
+                        removeOrphanPlaceholder();
+                    }
+
+                    private void removeOrphanPlaceholder()
+                    {
+                        try
                         {
-                            public String execute() throws Throwable
-                            {
-                                getNodeService().deleteNode(nodeRef);
-                                if (logger.isDebugEnabled())
-                                {
-                                    logger.debug("Put failed. DELETE  " + getPath());
-                                }
-                                return null;
-                            }
-                        }, false, false);
+                            getTransactionService().getRetryingTransactionHelper().doInTransaction(
+                                    new RetryingTransactionCallback<Void>()
+                                    {
+                                        public Void execute() throws Throwable
+                                        {
+                                            if (!getNodeService().exists(nodeRef))
+                                            {
+                                                // created in the rolled-back transaction (direct PUT) - nothing to do
+                                                return null;
+                                            }
+                                            // only remove it while it is still an empty placeholder
+                                            ContentData cd = (ContentData) getNodeService().getProperty(nodeRef, ContentModel.PROP_CONTENT);
+                                            if (!ContentData.hasContent(cd) || cd.getSize() == 0)
+                                            {
+                                                if (getServiceRegistry().getLockService().isLocked(nodeRef)) {
+                                                    getServiceRegistry().getLockService().unlock(nodeRef);
+                                                }
+                                                getNodeService().addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+                                                getNodeService().deleteNode(nodeRef);
+                                                if (logger.isDebugEnabled())
+                                                {
+                                                    logger.debug("Put failed. DELETE  " + getPath());
+                                                }
+                                            }
+                                            return null;
+                                        }
+                                    }, false, true);
+                        }
+                        catch (Throwable cleanupError)
+                        {
+                            logger.warn("Failed to remove orphan WebDAV node after rejected PUT: " + nodeRef, cleanupError);
+                        }
+                    }
+                });
             }
             throw new WebDAVServerException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }

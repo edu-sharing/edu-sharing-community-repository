@@ -103,7 +103,7 @@ $imagePath: '../../../../assets/images/collections/';
     }
 }
 .createCollection {
-    background-color: #fff;
+    background-color: var(--backgroundColor);
     .headline {
         font-size: 110%;
         padding: 20px 20px;
@@ -149,7 +149,7 @@ $imagePath: '../../../../assets/images/collections/';
             padding-left: 20px;
             i {
                 display: flex;
-                background-color: #fff;
+                background-color: var(--backgroundColor);
                 width: 50px;
                 height: 50px;
                 align-items: center;
@@ -241,7 +241,7 @@ $imagePath: '../../../../assets/images/collections/';
             cursor: pointer;
         }
         .color-selected {
-            border: 2px solid #333;
+            border: 2px solid var(--borderDark);
         }
     }
 }
@@ -285,7 +285,7 @@ $imagePath: '../../../../assets/images/collections/';
 .collectionImage {
     position: relative;
     height: 240px;
-    background-color: white;
+    background-color: var(--backgroundColor);
     overflow: hidden;
 }
 
@@ -293,13 +293,13 @@ $imagePath: '../../../../assets/images/collections/';
     position: relative;
     min-height: 120px;
     padding: 16px;
-    color: #000;
+    color: var(--textBlack);
     transition: $transitionNormal all;
 
     --mat-form-field-outlined-hover-label-text-color: #333;
 
     @include placeholder {
-        color: #333;
+        color: var(--textLight);
     }
 
     input,
@@ -384,7 +384,7 @@ $imagePath: '../../../../assets/images/collections/';
     vertical-align: middle;
     width: 100%;
     height: 240px;
-    background-color: white;
+    background-color: var(--backgroundColor);
     color: white;
     cursor: pointer;
 }
@@ -409,7 +409,7 @@ $imagePath: '../../../../assets/images/collections/';
     margin-left: auto;
     margin-right: auto;
     text-align: center;
-    background-color: white;
+    background-color: var(--backgroundColor);
     vertical-align: middle;
 }
 

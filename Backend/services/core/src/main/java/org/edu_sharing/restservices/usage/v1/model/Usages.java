@@ -15,15 +15,12 @@ import org.edu_sharing.restservices.shared.Node;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.v3.oas.annotations.media.Schema;;
-
 @Data
 public class Usages {
 
     private List<Usage> usages;
 
     public Usages() {
-        // TODO Auto-generated constructor stub
     }
 
     public Usages(List<Usage> usages) {
@@ -38,6 +35,7 @@ public class Usages {
         private String appUserMail;
         @JsonProperty(required = true)
         private String courseId;
+        private String courseTitle;
         private Integer distinctPersons;
         private Calendar fromUsed;
         @JsonProperty(required = true)
@@ -57,6 +55,7 @@ public class Usages {
         private String guid;
         private String appSubtype;
         private String appType;
+        private UsageApplication application;
         private String type;
         private Date created;
         private Date modified;
@@ -81,6 +80,14 @@ public class Usages {
     }
 
     @Data
+    public static class UsageApplication {
+        private String appId;
+        private String appCaption;
+        private String domain;
+    }
+
+    @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class CollectionUsage extends Usage {
         private Node collection;
         private CollectionUsageType collectionUsageType;

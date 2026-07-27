@@ -5,20 +5,27 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    inject,
     Input,
     OnInit,
     Output,
     ViewChild,
-    inject,
 } from '@angular/core';
+import { DateRange } from '@angular/material/datepicker';
 import { TranslateService } from '@ngx-translate/core';
 import {
     DEFAULT,
     HOME_REPOSITORY,
+    ME,
     Node,
+    NodeService,
+    Organization,
+    OrganizationV1Service,
     SearchResults,
     SearchService,
     SessionStorageService,
+    StatisticV1Service,
+    Tracking,
 } from 'ngx-edu-sharing-api';
 import {
     AuthorityNamePipe,
@@ -27,6 +34,7 @@ import {
     InteractionType,
     ListCountsComponent,
     ListItem,
+    NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
     Scope,
@@ -39,12 +47,12 @@ import { Helper } from '../../../core-module/rest/helper';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestHelper } from '../../../core-module/rest/rest-helper';
 import { ConfigurationService } from '../../../core-module/rest/services/configuration.service';
-import { RestAdminService } from '../../../core-module/rest/services/rest-admin.service';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
-import { RestStatisticsService } from '../../../core-module/rest/services/rest-statistics.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast } from '../../../services/toast';
+import { WorkspaceExplorerComponent } from '../../workspace-page/explorer/explorer.component';
+import { ALL_RANGE } from '../../../shared/components/timeframe-range-toggle/timeframe-range-toggle.component';
 
 import {
     BarController,
@@ -57,7 +65,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
 Chart.register(
     BarController,
@@ -76,6 +84,8 @@ type GroupTemplate = {
     unfold?: string;
     type?: 'NODES' | 'USERS';
 };
+
+type StatisticsGrouping = 'None' | 'Daily' | 'Monthly' | 'Yearly' | 'Node';
 
 @Component({
     selector: 'es-admin-statistics',
@@ -106,8 +116,9 @@ type GroupTemplate = {
     standalone: false,
 })
 export class AdminStatisticsComponent implements OnInit {
-    private admin = inject(RestAdminService);
-    private statistics = inject(RestStatisticsService);
+    private statistics = inject(StatisticV1Service);
+    private orgService = inject(OrganizationV1Service);
+    private nodeApi = inject(NodeService);
     private uiService = inject(UIService);
     private toast = inject(Toast);
     private storage = inject(SessionStorageService);
@@ -134,9 +145,33 @@ export class AdminStatisticsComponent implements OnInit {
         this._mediacenter = mediacenter;
         this.refresh();
     }
-    @Output() openNode = new EventEmitter<Node>();
+    private _nodeIds: string[];
+    @Input() set nodes(nodeIds: string[]) {
+        this._nodeIds = nodeIds;
+        this.refresh();
+    }
+    /** whether the caller passed an explicit list of node ids (enables the "selected objects" source) */
+    get hasSelectedNodes() {
+        return !!this._nodeIds?.length;
+    }
+    /**
+     * The "by object" panel is shown (instead of the global tabbed view) when the caller passed
+     * node ids or the user has the user/organization by-object statistics permissions. Never in a
+     * mediacenter context (that keeps its own tabbed view).
+     */
+    get nodesMode() {
+        return (
+            !this._mediacenter &&
+            (this.hasSelectedNodes ||
+                this.nodesPermission ||
+                this.hasUserStatistics ||
+                this.hasOrgStatistics)
+        );
+    }
+    @Output() openNode = new EventEmitter<NodeClickEvent<Node>>();
     static DAY_OFFSET = 1000 * 60 * 60 * 24;
     static DEFAULT_OFFSET = AdminStatisticsComponent.DAY_OFFSET * 7; // 7 days
+    static DEFAULT_OFFSET_NODES = AdminStatisticsComponent.DAY_OFFSET * 30; // 30 days
     static DEFAULT_OFFSET_SINGLE = AdminStatisticsComponent.DAY_OFFSET * 3; // 3 days
     today = new Date();
     _groupedStart = new Date();
@@ -163,6 +198,25 @@ export class AdminStatisticsComponent implements OnInit {
     nodesNoData: boolean;
     _singleMode: 'NODES' | 'USERS' = 'NODES';
     _customGroupMode: 'NODES' | 'USERS' = 'NODES';
+    // nodes mode ("by object") view controls — see statistics.component.html @if (nodesMode)
+    contentSource: 'all' | 'selected' | 'my' | 'org' = 'selected';
+    /** object-type filter, values match the backend ContentType enum */
+    objectType: 'ALL' | 'COLLECTIONS' | 'FILES' = 'ALL';
+    /** restrict the "by object" evaluation to published (publicly visible) nodes; n/a for "all content" */
+    onlyPublic = false;
+    /** preset day-ranges offered by the "by object" timeframe toggle (ALL_RANGE = "all") */
+    nodesRangeOptions = [7, 30, 90, ALL_RANGE];
+    /** selected preset range in days (null once a manual calendar range is picked) */
+    selectedNodesRange: number | null = 30;
+    /** display model for the range calendar; query uses nodesStart/nodesEnd */
+    nodesRange: DateRange<Date>;
+    hasSelectedStatistics = false;
+    hasUserStatistics = false;
+    hasOrgStatistics = false;
+    organizations: Organization[] = [];
+    selectedOrg: string;
+    /** preview of the explicitly selected objects (shown under the "selected objects" source) */
+    selectedNodesDataSource = new NodeDataSource<Node>();
     singleData: any[];
     singleDataRows: string[];
     groupedChart: any;
@@ -170,6 +224,12 @@ export class AdminStatisticsComponent implements OnInit {
     columns: ColumnType;
     currentTab = 0;
     exportProperties: string;
+    /** initial default for exportProperties (node columns), used by the reset button */
+    exportPropertiesDefault: string;
+    /** edit the export properties as free text or pick from a list of available columns */
+    exportPropertiesMode: 'input' | 'list' = 'input';
+    /** available columns for the "list" export properties mode */
+    availableExportColumns: ListItem[] = [];
     showModes = false;
     groupModeTemplates: GroupTemplate[];
     currentTemplate: GroupTemplate;
@@ -178,7 +238,9 @@ export class AdminStatisticsComponent implements OnInit {
     archivedNodesColumns = {
         Default: [new ListItem('NODE', RestConstants.LOM_PROP_TITLE)],
     } as ColumnType;
-
+    columnsSelectedNodes = {
+        Default: [new ListItem('NODE', RestConstants.CM_NAME)],
+    } as ColumnType;
     set groupedStart(groupedStart: Date) {
         this._groupedStart = groupedStart;
         this._groupedStart.setHours(0, 0, 0);
@@ -293,8 +355,45 @@ export class AdminStatisticsComponent implements OnInit {
             new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET,
         );
         this.customGroupEnd = new Date();
-        this.nodesStart = new Date(new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET);
+        this.nodesStart = new Date(
+            new Date().getTime() - AdminStatisticsComponent.DEFAULT_OFFSET_NODES,
+        );
         this.nodesEnd = new Date();
+        this.nodesRange = new DateRange<Date>(this._nodesStart, this._nodesEnd);
+    }
+    /**
+     * Apply a preset from the "by object" timeframe toggle. Every preset ends "now"; ALL_RANGE
+     * ("Gesamt") means all time and therefore has no lower bound (epoch start), the others span
+     * the last `days` days.
+     */
+    changeNodesRange(days: number) {
+        this.selectedNodesRange = days;
+        const end = new Date();
+        const start = new Date(end.getTime());
+        if (days === ALL_RANGE) {
+            start.setTime(0);
+        } else {
+            start.setDate(start.getDate() - days);
+        }
+        this.nodesStart = start;
+        this.nodesEnd = end;
+        // reflect the preset in the calendar
+        this.nodesRange = new DateRange<Date>(start, end);
+    }
+    /** start/end toggle for the inline range calendar in the "by object" panel */
+    selectNodesRange(date: Date) {
+        if (!this.nodesRange.start || this.nodesRange.end) {
+            // begin a new range
+            this.nodesRange = new DateRange(date, null);
+        } else {
+            const start = this.nodesRange.start;
+            this.nodesRange =
+                date < start ? new DateRange(date, start) : new DateRange(start, date);
+            this.nodesStart = this.nodesRange.start;
+            this.nodesEnd = this.nodesRange.end;
+            // a manually picked range no longer matches any preset
+            this.selectedNodesRange = null;
+        }
     }
     async ngOnInit() {
         this.groupModeTemplates = await this.config
@@ -330,10 +429,70 @@ export class AdminStatisticsComponent implements OnInit {
         this.userPermission = this.connector.hasToolPermissionInstant(
             RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
         );
+        this.hasSelectedStatistics = this.connector.hasToolPermissionInstant(
+            RestConstants.TOOLPERMISSION_SELECTIVE_STATISTICS_NODES,
+        );
+        this.hasUserStatistics = this.connector.hasToolPermissionInstant(
+            RestConstants.TOOLPERMISSION_USER_STATISTICS_NODES,
+        );
+        this.hasOrgStatistics = this.connector.hasToolPermissionInstant(
+            RestConstants.TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES,
+        );
+        this.initNodesSources();
+        // with explicit node ids the "by object" (Nach Objekt) tab is the relevant one → preselect it
+        if (this.hasSelectedNodes) {
+            this.currentTab = (this._mediacenter ? 1 : 0) + 2;
+        }
         this.finishedPreload = true;
         this.refresh();
     }
+    /** choose the default "by object" source and load the user's organizations (for the org source) */
+    private initNodesSources() {
+        if (this.hasSelectedNodes && this.hasSelectedStatistics) {
+            this.contentSource = 'selected';
+        } else if (this.hasUserStatistics) {
+            // when no explicit nodes are passed, default to the user's own objects
+            this.contentSource = 'my';
+        } else if (this.nodesPermission) {
+            this.contentSource = 'all';
+        } else if (this.hasOrgStatistics) {
+            this.contentSource = 'org';
+        }
+        if (this.hasOrgStatistics) {
+            this.orgService
+                .getOrganizations({ repository: HOME_REPOSITORY, onlyMemberships: true })
+                .subscribe((data) => {
+                    this.organizations = data.organizations ?? [];
+                    if (this.organizations.length) {
+                        this.selectedOrg = this.organizations[0].authorityName;
+                    }
+                });
+        }
+    }
+    /** fetch the explicitly selected objects for the preview list under the "selected objects" source */
+    private loadSelectedNodes() {
+        if (!this.hasSelectedNodes) {
+            return;
+        }
+        this.selectedNodesDataSource.reset();
+        this.selectedNodesDataSource.isLoading = true;
+        forkJoin(this._nodeIds.map((id) => this.nodeApi.getNode(id))).subscribe({
+            next: (nodes) => {
+                this.selectedNodesDataSource.setData(nodes);
+                this.selectedNodesDataSource.isLoading = false;
+            },
+            error: () => {
+                this.selectedNodesDataSource.isLoading = false;
+            },
+        });
+    }
     refresh() {
+        // load the selected objects preview for the "by object" panel (if any were passed)
+        this.loadSelectedNodes();
+        // invoked with explicit node ids → only the "by object" tab is shown, skip the other tabs
+        if (this.hasSelectedNodes) {
+            return;
+        }
         void this.refreshArchived();
         this.refreshGroups();
         this.refreshSingle();
@@ -346,52 +505,54 @@ export class AdminStatisticsComponent implements OnInit {
         }
         this.groupedLoading = true;
         this.statistics
-            .getStatisticsNode(
-                this._groupedStart,
-                new Date(this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
-                this._groupedMode,
-                this.getMediacenter(),
-            )
-            .subscribe(
-                (dataNode) => {
+            .getStatisticsNode({
+                dateFrom: this._groupedStart.getTime(),
+                dateTo: this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
+                grouping: this._groupedMode as StatisticsGrouping,
+                mediacenter: this.getMediacenter(),
+            })
+            .subscribe({
+                next: (dataNodeRaw) => {
+                    const dataNode = dataNodeRaw as unknown as NodeStatistics[];
                     if (this._groupedMode !== 'None') {
                         this.statistics
-                            .getStatisticsUser(
-                                this._groupedStart,
-                                new Date(
+                            .getStatisticsUser({
+                                dateFrom: this._groupedStart.getTime(),
+                                dateTo:
                                     this._groupedEnd.getTime() +
-                                        AdminStatisticsComponent.DAY_OFFSET,
-                                ),
-                                this._groupedMode,
-                                this.getMediacenter(),
-                            )
-                            .subscribe(
-                                (dataUser) => {
-                                    this.processGroupData(dataNode, dataUser);
+                                    AdminStatisticsComponent.DAY_OFFSET,
+                                grouping: this._groupedMode as StatisticsGrouping,
+                                mediacenter: this.getMediacenter(),
+                            })
+                            .subscribe({
+                                next: (dataUser) => {
+                                    this.processGroupData(
+                                        dataNode,
+                                        dataUser as unknown as Statistics[],
+                                    );
                                 },
-                                (error) => {
+                                error: () => {
                                     this.processGroupData(dataNode, null);
                                 },
-                            );
+                            });
                     } else {
                         this.processGroupData(dataNode, null);
                     }
                 },
-                (error) => {
+                error: () => {
                     this.statistics
-                        .getStatisticsUser(
-                            this._groupedStart,
-                            new Date(
+                        .getStatisticsUser({
+                            dateFrom: this._groupedStart.getTime(),
+                            dateTo:
                                 this._groupedEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
-                            ),
-                            this._groupedMode,
-                            this.getMediacenter(),
-                        )
+                            grouping: this._groupedMode as StatisticsGrouping,
+                            mediacenter: this.getMediacenter(),
+                        })
                         .subscribe((dataUser) => {
-                            this.processGroupData(null, dataUser);
+                            this.processGroupData(null, dataUser as unknown as Statistics[]);
                         });
                 },
-            );
+            });
     }
 
     getMediacenter(): string {
@@ -586,32 +747,54 @@ export class AdminStatisticsComponent implements OnInit {
         this.nodesDataSource = new NodeDataSource<Node>();
         this.nodesDataSource.isLoading = true;
         this.nodesNoData = true;
+        const handleData = (data: { node?: Node }[]) => {
+            this.nodesDataSource.isLoading = false;
+            this.nodesNoData = data.length === 0;
+            this.nodesDataSource.setData(
+                data.map((stat) => {
+                    (stat.node as any).counts = stat;
+                    return stat.node;
+                }),
+            );
+        };
+        const handleError = (error: any) => {
+            this.toast.error(error);
+            this.nodesDataSource.isLoading = false;
+            this.nodesNoData = true;
+        };
+        if (this.nodesMode && this.contentSource !== 'all') {
+            const range = {
+                dateFrom: this._nodesStart.toISOString(),
+                dateTo: this._nodesEnd.toISOString(),
+                maxResults: 50000,
+                published: this.onlyPublic,
+                contentType: this.objectType,
+            };
+            let request: ReturnType<StatisticV1Service['getByNodes']>;
+            if (this.contentSource === 'my') {
+                request = this.statistics.getByUsers({
+                    userId: ME,
+                    ...range,
+                });
+            } else if (this.contentSource === 'org') {
+                request = this.statistics.getByOrganization({ orgId: this.selectedOrg, ...range });
+            } else {
+                request = this.statistics.getByNodes({ ...range, body: this._nodeIds });
+            }
+            request.subscribe({ next: handleData, error: handleError });
+            return;
+        }
+        // contentSource 'all' (global, DB based) and the mediacenter view use getStatisticsNode
         const group = this.config.instant('admin.statistics.nodeGroup');
         this.statistics
-            .getStatisticsNode(
-                this._nodesStart,
-                new Date(this._nodesEnd.getTime()),
-                'Node',
-                this.getMediacenter(),
-                group ? [group] : null,
-            )
-            .subscribe(
-                (data) => {
-                    this.nodesDataSource.isLoading = false;
-                    this.nodesNoData = data.length === 0;
-                    this.nodesDataSource.setData(
-                        data.map((stat) => {
-                            (stat.node as any).counts = stat;
-                            return stat.node;
-                        }),
-                    );
-                },
-                (error) => {
-                    this.toast.error(error);
-                    this.nodesDataSource.isLoading = false;
-                    this.nodesNoData = true;
-                },
-            );
+            .getStatisticsNode({
+                dateFrom: this._nodesStart.getTime(),
+                dateTo: this._nodesEnd.getTime(),
+                grouping: 'Node',
+                mediacenter: this.getMediacenter(),
+                additionalFields: group ? [group] : null,
+            })
+            .subscribe({ next: handleData, error: handleError });
     }
     getValidMode(mode: 'NODES' | 'USERS') {
         if (!this._mediacenter) {
@@ -640,13 +823,13 @@ export class AdminStatisticsComponent implements OnInit {
                 'authority_mediacenter',
             ].concat(this.additionalGroups || []);
             this.statistics
-                .getStatisticsNode(
-                    this._singleStart,
-                    new Date(this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
-                    'None',
-                    this.getMediacenter(),
-                    this.additionalGroups,
-                )
+                .getStatisticsNode({
+                    dateFrom: this._singleStart.getTime(),
+                    dateTo: this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
+                    grouping: 'None',
+                    mediacenter: this.getMediacenter(),
+                    additionalFields: this.additionalGroups,
+                })
                 .subscribe((result) => {
                     this.singleData = result.map((entry) => {
                         return {
@@ -669,13 +852,13 @@ export class AdminStatisticsComponent implements OnInit {
                 'authority_mediacenter',
             ].concat(this.additionalGroups || []);
             this.statistics
-                .getStatisticsUser(
-                    this._singleStart,
-                    new Date(this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
-                    'None',
-                    this.getMediacenter(),
-                    this.additionalGroups,
-                )
+                .getStatisticsUser({
+                    dateFrom: this._singleStart.getTime(),
+                    dateTo: this._singleEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
+                    grouping: 'None',
+                    mediacenter: this.getMediacenter(),
+                    additionalFields: this.additionalGroups,
+                })
                 .subscribe((result) => {
                     this.singleData = result.map((entry) => {
                         return {
@@ -700,7 +883,7 @@ export class AdminStatisticsComponent implements OnInit {
         this.customGroupData = null;
         this.customGroupLoading = true;
         this.customGroupRows = [];
-        const handleResult = (result: Statistics[]) => {
+        const handleResult = (result: Tracking[]) => {
             this.customGroupRows = ['action'].concat(this.customGroup).concat('count');
             if (this.customUnfold) {
                 // add all found values as a matrix
@@ -791,28 +974,28 @@ export class AdminStatisticsComponent implements OnInit {
         const mode = this.getValidMode(this._customGroupMode);
         if (mode === 'NODES') {
             this.statistics
-                .getStatisticsNode(
-                    this._customGroupStart,
-                    new Date(this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
-                    'None',
-                    this.getMediacenter(),
-                    this.customUnfold ? [this.customUnfold] : null,
-                    [this.customGroup],
-                )
+                .getStatisticsNode({
+                    dateFrom: this._customGroupStart.getTime(),
+                    dateTo: this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
+                    grouping: 'None',
+                    mediacenter: this.getMediacenter(),
+                    additionalFields: this.customUnfold ? [this.customUnfold] : null,
+                    groupField: [this.customGroup],
+                })
                 .subscribe((result) => {
                     handleResult(result);
                 });
         }
         if (mode === 'USERS') {
             this.statistics
-                .getStatisticsUser(
-                    this._customGroupStart,
-                    new Date(this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET),
-                    'None',
-                    this.getMediacenter(),
-                    this.customUnfold ? [this.customUnfold] : null,
-                    [this.customGroup],
-                )
+                .getStatisticsUser({
+                    dateFrom: this._customGroupStart.getTime(),
+                    dateTo: this._customGroupEnd.getTime() + AdminStatisticsComponent.DAY_OFFSET,
+                    grouping: 'None',
+                    mediacenter: this.getMediacenter(),
+                    additionalFields: this.customUnfold ? [this.customUnfold] : null,
+                    groupField: [this.customGroup],
+                })
                 .subscribe((result) => {
                     handleResult(result);
                 });
@@ -824,6 +1007,86 @@ export class AdminStatisticsComponent implements OnInit {
         return data ? Object.keys(data)[0] : null;
     }
 
+    /**
+     * Export the "by object" statistics. Every source schedules an async server job (`.../complete`)
+     * that delivers a CSV to the user's inbox. "all" uses the range endpoint without node ids (which
+     * the backend treats as "all content").
+     */
+    /** reset the export properties textarea to the initial default (node columns) */
+    resetExportProperties() {
+        this.exportProperties = this.exportPropertiesDefault;
+        void this.storage.set('admin_statistics_properties', this.exportProperties);
+    }
+
+    /** currently selected export property names (comma or newline separated) */
+    private exportColumnNames(): string[] {
+        return this.exportProperties
+            .split(/[\n,]/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+    }
+
+    isExportColumnSelected(column: ListItem): boolean {
+        return this.exportColumnNames().includes(column.name);
+    }
+
+    toggleExportColumn(column: ListItem, selected: boolean) {
+        const names = this.exportColumnNames().filter((n) => n !== column.name);
+        if (selected) {
+            names.push(column.name);
+        }
+        this.exportProperties = names.join('\n');
+        void this.storage.set('admin_statistics_properties', this.exportProperties);
+    }
+
+    startExport() {
+        void this.storage.set('admin_statistics_properties', this.exportProperties);
+        // one property per entry, separated by comma or newline; nested VCard paths are not entered here
+        const properties = this.exportProperties
+            .split(/[\n,]/)
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .map((p) => [p]);
+        const range = {
+            dateFrom: this._nodesStart.toISOString(),
+            dateTo: this._nodesEnd.toISOString(),
+            published: this.onlyPublic,
+            contentType: this.objectType,
+        };
+        let request: ReturnType<StatisticV1Service['getByNodesAsync']>;
+        if (this.contentSource === 'all') {
+            // global, DB based; uses epoch millis like getStatisticsNode
+            request = this.statistics.getStatisticsNodeAsync({
+                dateFrom: this._nodesStart.getTime(),
+                dateTo: this._nodesEnd.getTime(),
+                mediacenter: this.getMediacenter(),
+                body: properties,
+            });
+        } else if (this.contentSource === 'my') {
+            request = this.statistics.getByUsersAsync({
+                userId: this.connector.getCurrentLogin()?.authorityName ?? '',
+                ...range,
+                body: properties,
+            });
+        } else if (this.contentSource === 'org') {
+            request = this.statistics.getByOrganizationAsync({
+                orgId: this.selectedOrg,
+                ...range,
+                body: properties,
+            });
+        } else {
+            // 'selected' (explicit node ids)
+            request = this.statistics.getByNodesAsync({
+                ...range,
+                body: { nodeIds: this._nodeIds, properties },
+            });
+        }
+        request.subscribe({
+            next: () => this.toast.toast('ADMIN.STATISTICS.EXPORT_SCHEDULED'),
+            error: (error) => this.toast.error(error),
+        });
+    }
+
     export() {
         let csvHeadersTranslated: string[];
         let csvHeadersMapping: string[];
@@ -832,7 +1095,10 @@ export class AdminStatisticsComponent implements OnInit {
         let to: Date;
         // node export
         const tabOffset = this._mediacenter ? 1 : 0;
-        switch (this.currentTab) {
+        // when invoked with node ids only the "by object" tab is shown (currentTab 0), so the
+        // export must target the node data regardless of the index
+        const exportTab = this.hasSelectedNodes ? tabOffset + 2 : this.currentTab;
+        switch (exportTab) {
             // chart per day/month/year data
             case tabOffset + 0: {
                 from = this.groupedStart;
@@ -1040,11 +1306,13 @@ export class AdminStatisticsComponent implements OnInit {
         } else {
             this.columns = { Default: [new ListItem('NODE', RestConstants.CM_NAME)] };
         }
+        // virtual properties are computed at read time and cannot be exported as columns
+        this.availableExportColumns = WorkspaceExplorerComponent.getColumns(this.connector).filter(
+            (c) => !c.name.startsWith('virtual:'),
+        );
+        this.exportPropertiesDefault = this.columns.Default.map((c) => c.name).join('\n');
         void this.storage
-            .get<string>(
-                'admin_statistics_properties',
-                this.columns.Default.map((c) => c.name).join('\n'),
-            )
+            .get<string>('admin_statistics_properties', this.exportPropertiesDefault)
             .then((p) => (this.exportProperties = p));
 
         this.columns.Default = this.columns.Default.concat([

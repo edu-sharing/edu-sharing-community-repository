@@ -6,8 +6,10 @@
   (change)="setPreview($event)"
   (cancel)="$event.stopPropagation()"
 />
+<!-- collapsed menu with options to change the preview image -->
+<es-dropdown #previewDropdown [options]="previewOptions" position="right"></es-dropdown>
 <div class="preview-wrapper">
-  @if (mdsEditorInstance.editorMode === 'inline') {
+  @if (inline) {
   <mat-label>{{ 'WORKSPACE.EDITOR.PREVIEW' | translate }}</mat-label>
   } @if (loading$ | async) {
   <div class="loading">
@@ -15,6 +17,10 @@
   </div>
   }
   <div class="image-container">
+    @if (showPlaceholder) {
+    <ng-container *ngTemplateOutlet="placeholderTemplate"></ng-container>
+    } @else {
+    <!-- the delete message overlays the still-visible image (which keeps the container sized) -->
     @if (delete) {
     <div class="delete-overlay">
       <i esIcon="delete"></i>
@@ -23,39 +29,33 @@
     } @if (!(!node?.preview?.isIcon || file)) {
     <es-preview-image [node]="node"></es-preview-image>
     } @if (!node?.preview?.isIcon || file) {
-    <img [src]="src$ | async" (load)="loading$.next(false)" />
+    <img [src]="src$ | async" [class.local-file]="!!file" (load)="loading$.next(false)" />
     <div class="card-image-backdrop">
       <img [src]="src$ | async" alt="" />
     </div>
-    }
+    } }
     <div class="button-group">
-      @if (mdsEditorInstance.hasAi | async) {
+      @if (previewOptions.length) {
       <button
         esElementRef
         #overlayRef="esElementRef"
         mat-fab
         [color]="$any('white')"
-        (click)="showOverlay()"
+        [matMenuTriggerFor]="previewDropdown.menu"
+        (menuOpened)="onPreviewMenuOpened()"
+        [matTooltip]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
+        [attr.aria-label]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
       >
-        <i esIcon="brush"></i>
+        <i [esIcon]="deleteAsOption ? 'more_vert' : 'edit'"></i>
       </button>
-      } @if (mdsEditorInstance.editorMode !== 'viewer') {
-      <button mat-fab [color]="$any('white')" (click)="fileInput.click()">
-        <i esIcon="upload"></i>
-      </button>
-      } @if ( mdsEditorInstance.editorMode !== 'viewer' && !delete && (file || getType() ===
-      'TYPE_USERDEFINED') ) {
-      <button
-        mat-fab
-        [color]="$any('white')"
-        (click)="file ? (file = null) : (delete = true); updateSrc()"
-      >
+      } @if (editable && !deleteAsOption && canDeletePreview) {
+      <button mat-fab [color]="$any('white')" (click)="deletePreview()">
         <i esIcon="delete"></i>
       </button>
       }
     </div>
     <!-- Overlay template -->
-    @if (mdsEditorInstance.hasAi | async) {
+    @if (hasAi$ | async) {
     <es-ai-preview-images-overlay
       #aiPreviewImagesOverlay
       [file]="file"
@@ -67,7 +67,7 @@
     ></es-ai-preview-images-overlay>
     }
   </div>
-  @if ((hasChanges | async) && mdsEditorInstance.editorMode === 'inline') {
+  @if ((hasChanges | async) && inline) {
   <div class="save">
     <button mat-flat-button color="primary" (click)="foreSave()">{{ 'SAVE' | translate }}</button>
   </div>

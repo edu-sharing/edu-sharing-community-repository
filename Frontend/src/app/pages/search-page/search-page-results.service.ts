@@ -1,4 +1,4 @@
-import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
+import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
@@ -99,6 +99,8 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     readonly loadingCollections = new BehaviorSubject<boolean>(true);
     readonly loadingProgress = new BehaviorSubject<number>(0);
     readonly diffCount = new BehaviorSubject<number>(0);
+    /** Emits whenever a new search query is issued (search string / filters / sort changed). */
+    readonly searchQueryChanged = new Subject<void>();
     // stores the state of the primary, configurable node entries component
     readonly state = new BehaviorSubject<SearchPageState>({
         displayType: NodeEntriesDisplayType.Grid,
@@ -207,6 +209,8 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
         searchRequestParams
             .pipe(
                 tap(() => this.loadingContent.next(true)),
+                // A new query replaces the whole result set, so drop any carried-over selection.
+                tap(() => this.searchQueryChanged.next()),
                 // debounce so facet list is initialized also on navigation
                 debounceTime(1),
                 map((params) => this._getSearchRemote(params)),

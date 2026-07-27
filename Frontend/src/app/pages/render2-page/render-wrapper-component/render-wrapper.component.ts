@@ -3,20 +3,20 @@ import {
     ElementRef,
     EventEmitter,
     HostBinding,
+    inject,
     Input,
     OnChanges,
     Output,
     signal,
     SimpleChanges,
     ViewChild,
-    inject,
 } from '@angular/core';
 import {
     ActionbarComponent,
     CombinedRenderData,
     DefaultGroups,
-    ElementType,
     EduSharingUiModule,
+    ElementType,
     OptionItem,
     OptionsHelperDataService,
     RenderHelperService,
@@ -31,6 +31,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { HOME_REPOSITORY, Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
+import { provideReusableOptionsHelperData } from '../../../services/options-helper-data.provider';
 
 @Component({
     selector: 'es-render-wrapper-component',
@@ -45,7 +47,7 @@ import { NodeHelperService } from '../../../services/node-helper.service';
         MdsModule,
     ],
     // required for optional mds module
-    providers: [OptionsHelperDataService, RenderHelperService],
+    providers: [provideReusableOptionsHelperData(), RenderHelperService],
 })
 export class RenderWrapperComponent implements OnChanges {
     private renderHelperService = inject(RenderHelperService);
@@ -53,6 +55,7 @@ export class RenderWrapperComponent implements OnChanges {
     private nodeHelper = inject(NodeHelperService);
     private translations = inject(TranslationsService);
     private optionsHelper = inject(OptionsHelperDataService);
+    private editorialSidebarService = inject(EditorialSidebarService);
 
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @Input() showTopbar = true;
@@ -70,6 +73,9 @@ export class RenderWrapperComponent implements OnChanges {
      */
     @HostBinding('class.full-width') @Input() fullWidth = false;
     @Output() childIdChange = new EventEmitter<string>();
+    @Output() closeClick = new EventEmitter<void>();
+    /** the currently rendered node, so a host (e.g. render2-page) can drive its editorial sidebar */
+    @Output() nodeChange = new EventEmitter<Node>();
 
     @ViewChild('childobjects') childobjects: ElementRef;
     /**
@@ -137,27 +143,35 @@ export class RenderWrapperComponent implements OnChanges {
      */
     private addDownloadAllBtn(node: Node) {
         const children = this.children();
-        if (!node || !children?.length) {
-            return;
+        const addOptions = [];
+        if (node && children?.length) {
+            const parent = this.parentNode();
+            const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
+                void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
+            });
+            downloadAll.elementType = [
+                ElementType.Node,
+                ElementType.NodeChild,
+                ElementType.NodePublishedCopy,
+            ];
+            downloadAll.group = DefaultGroups.View;
+            downloadAll.priority = 35;
+            addOptions.push(downloadAll);
         }
-        const parent = this.parentNode();
-        const downloadAll = new OptionItem('OPTIONS.DOWNLOAD_ALL', 'archive', () => {
-            void this.nodeHelper.downloadNodes([parent].concat(children), parent.name + '.zip');
-        });
-        downloadAll.elementType = [
-            ElementType.Node,
-            ElementType.NodeChild,
-            ElementType.NodePublishedCopy,
-        ];
-        downloadAll.group = DefaultGroups.View;
-        downloadAll.priority = 35;
         this.optionsHelper.setData({
             scope: Scope.Render,
             activeObjects: [node],
+            selectedObjects: [node],
+            allObjects: [node],
             parent: { ref: { id: node.parent.id } },
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [downloadAll],
+                addOptions,
+            },
+            postPrepareOptions: (o) => {
+                o.filter((o) => o.name === 'OPTIONS.DOWNLOAD').forEach((download) => {
+                    download.showAsAction = true;
+                });
             },
         });
     }
@@ -168,12 +182,16 @@ export class RenderWrapperComponent implements OnChanges {
         this.loading.set(true);
         delete this.data()?.request;
         this.data.set(this.data());
+        this.optionsHelper;
         const data = await this.renderHelperService.getRenderData(
             nodeId,
             this.version,
             this.repository,
         );
+        // register currently rendered node for sidebar interactions (incl. download-all btn + postPrepareOptions)
         this.addDownloadAllBtn(data.node);
+        // surface the rendered node so a host can populate its editorial sidebar options
+        this.nodeChange.emit(data.node);
         setTimeout(async () => {
             await this.optionsHelper.initComponents(this.actionbar);
             await this.optionsHelper.refreshComponents();
@@ -187,7 +205,7 @@ export class RenderWrapperComponent implements OnChanges {
         // void this.setNodeById(child ? child.ref.id : this.nodeId);
     }
     goBack() {
-        window.history.back();
+        this.closeClick.emit();
     }
 
     private canScroll(direction: 'left' | 'right') {

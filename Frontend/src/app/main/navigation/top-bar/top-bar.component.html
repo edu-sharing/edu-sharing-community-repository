@@ -170,6 +170,20 @@
         </div>
       </button>
       }
+      <button
+        mat-icon-button
+        class="darkModeToggle"
+        (click)="toggleDarkMode()"
+        [title]="
+          'ACCESSIBILITY.DARK_MODE_SWITCH.' + (theme.isDarkMode() ? 'LIGHT' : 'DARK') | translate
+        "
+        [attr.aria-label]="
+          'ACCESSIBILITY.DARK_MODE_SWITCH.' + (theme.isDarkMode() ? 'LIGHT' : 'DARK') | translate
+        "
+        data-test="dark-mode-toggle"
+      >
+        <i [esIcon]="theme.isDarkMode() ? 'dark_mode' : 'light_mode'"></i>
+      </button>
       <es-notification-list class="notifications"></es-notification-list>
       @if (currentUser && showUser) { @if (!UIService.isMobileWidth()) {
       <button
@@ -208,7 +222,11 @@
         [innerHTML]="mainNavService.systemMessage.message.message | safeHtml : { purify: true }"
       ></div>
       @if (mainNavService.systemMessage.message.repeat === 'repeat') {
-      <button mat-icon-button (click)="mainNavService.closeSystemMessage()">
+      <button
+        mat-icon-button
+        (click)="mainNavService.closeSystemMessage()"
+        [attr.aria-label]="'CLOSE' | translate"
+      >
         <i esIcon="close"></i>
       </button>
       }

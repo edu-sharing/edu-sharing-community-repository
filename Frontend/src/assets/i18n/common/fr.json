@@ -150,6 +150,10 @@
     "TOOLPERMISSION_USAGE_STATISTIC": "Obtenir des informations sur l'utilisation de tous les nœuds du référentiel",
     "TOOLPERMISSION_COMMENT_WRITE": "Création de commentaires sur les objets",
     "TOOLPERMISSION_GLOBAL_STATISTICS_NODES": "Voir les statistiques d'accès à la ressource du dépôt",
+    "TOOLPERMISSION_SELECTIVE_STATISTICS_NODES": "Voir les statistiques d'accès à des ressources individuelles",
+    "TOOLPERMISSION_USER_STATISTICS_NODES": "Voir les statistiques d'accès à vos propres ressources",
+    "TOOLPERMISSION_ORGANIZATION_STATISTICS_NODES": "Voir les statistiques d'accès aux ressources de votre organisation",
+    "TOOLPERMISSION_EDITORIAL_SUGGESTIONS": "Gérer la vue éditoriale et les suggestions de métadonnées.",
     "TOOLPERMISSION_GLOBAL_STATISTICS_USER": "Visualiser les statistiques d'interaction des utilisateur-trices (connexion, déconnexion) avec l'accès au référentiel.",
     "TOOLPERMISSION_MEDIACENTER_MANAGE": "Modifier les données de base (adresses, catalogues) des centres de médias dont l'utilisateur-trice est administrateur-trice.",
     "TOOLPERMISSION_VIDEO_AUDIO_CUT": "Les fichiers vidéo et audio peuvent être coupés lorsqu'ils sont ajoutés aux collections.",
@@ -162,6 +166,7 @@
     "TOOLPERMISSION_SIGNUP_GROUP": "S'inscrire à une organisation/un groupe (ne s'applique qu'aux organisations/groupes configurés pour l'inscription)",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Rechercher et trouver des utilisateurs en dehors de l'organisation sans avoir à saisir l'intégralité de l'identifiant de l'utilisateur",
     "TOOLPERMISSION_MANAGE_RELATIONS": "Gérer et créer des relations entre les éléments",
+    "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Gérer, ajouter et supprimer les contributeurs (auteurs, organisations) avec des identifiants persistants.",
     "TOOLPERMISSION_RATE_WRITE": "L'autorisation de noter les matériaux (nécessite TOOLPERMISSION_RATE_READ)",
     "TOOLPERMISSION_COLLECTION_PROPOSAL": "Suggérer des documents pour des collections pour lesquelles l'utilisateur n'a pas de droits d'écriture",
     "TOOLPERMISSION_RATE_READ": "Le droit de consulter les revues de matériel",
@@ -178,6 +183,9 @@
   "CHANGE_STORAGE_LOCATION": "Sélectionner",
   "STORAGE_LOCATION_UNSET": "Non défini",
   "SUGGESTION": "Suggestion",
+  "SUGGESTIONS": {
+    "count": "Nombre"
+  },
   "CLICKTOREMOVE": "Cliquez pour supprimer",
   "NO_PERMISSIONS_FOR_SCOPE": "Aucune autorisation d'accès à cet environnement",
   "DATE_SELECT_YEAR": "Choisir l'année",
@@ -628,6 +636,7 @@
     "SHOW_ALL_OPTIONS": "Plus d'actions",
     "APPLY": "Appliquer",
     "SHOW": "Avant-première et informations",
+    "SHOW_STATISTICS": "Afficher les statistiques",
     "SHOW_IN_FOLDER": "Emplacement de stockage ouvert",
     "DEBUG": "Débogage",
     "INVITE": "Invitation",
@@ -1196,6 +1205,8 @@
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} de {{pageCount}}",
     "itemsPerPageLabel": "Entrées par page :",
+    "firstPageLabel": "Première page",
+    "lastPageLabel": "Dernière page",
     "nextPageLabel": "Page suivante",
     "previousPageLabel": "Page précédente"
   },

@@ -1,7 +1,11 @@
 import { Component, importProvidersFrom, Input } from '@angular/core';
 import { Decorator } from '@storybook/angular';
-import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { useGlobals } from 'storybook/preview-api';
+import { MaterialCssVarsModule, MaterialCssVarsService } from 'angular-material-css-vars';
 import { ThemeService, Variable } from '../src/app/services/theme.service';
+
+/** Tracks the last seen dark-mode value so we only re-select the Theme picker on a real toggle. */
+let lastDarkMode: string | undefined;
 
 export interface Themes {
     [name: string]: Theme;
@@ -23,7 +27,14 @@ export class StorybookThemeWrapperComponent {
         }
     }
 
-    constructor(private themeService: ThemeService) {}
+    @Input() set darkMode(isDark: boolean) {
+        this.materialCssVarsService.setDarkTheme(!!isDark);
+    }
+
+    constructor(
+        private themeService: ThemeService,
+        private materialCssVarsService: MaterialCssVarsService,
+    ) {}
 }
 
 /**
@@ -31,6 +42,17 @@ export class StorybookThemeWrapperComponent {
  */
 export function withTheme<TArgs = unknown>(themes: Themes): Decorator<TArgs> {
     return (storyFn, storyContext) => {
+        const [globals, updateGlobals] = useGlobals();
+        const darkMode = globals['darkMode'];
+        let themeKey = globals['theme'];
+        // On a dark-mode toggle, move the Theme picker to the matching palette. Only on an actual
+        // change, so a manual Theme selection isn't overridden between toggles.
+        if (darkMode !== lastDarkMode) {
+            lastDarkMode = darkMode;
+            themeKey = darkMode === 'dark' ? 'darkModeColors' : 'default';
+            updateGlobals({ theme: themeKey });
+        }
+
         const story = storyFn();
 
         story.moduleMetadata ??= {};
@@ -43,10 +65,11 @@ export function withTheme<TArgs = unknown>(themes: Themes): Decorator<TArgs> {
         );
 
         story.props ??= {};
-        story.props.theme = themes[storyContext.globals['theme']];
+        story.props.theme = themes[themeKey];
+        story.props.darkMode = darkMode === 'dark';
 
         story.template =
-            `<es-storybook-theme-wrapper [theme]="theme">` +
+            `<es-storybook-theme-wrapper [theme]="theme" [darkMode]="darkMode">` +
             `</es-storybook-theme-wrapper>` +
             story.template;
 

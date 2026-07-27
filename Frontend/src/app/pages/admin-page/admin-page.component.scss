@@ -1,19 +1,35 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 @use 'admin.variables' as admin;
 @use 'sass:color';
 
-.main {
+// Page shell: lock to the available viewport height (below the in-flow sticky main nav) and clip, so
+// the page never produces a body scrollbar — the card scrolls its content internally instead.
+:host {
     display: flex;
-    width: 100%;
-    min-height: 100%;
+    flex-direction: column;
+    height: calc(100vh - var(--mainnavCurrentHeight));
+    min-height: calc(100vh - var(--mainnavCurrentHeight));
+    overflow: hidden;
+}
+
+.main {
+    // The rounded card (same mixins as workspace/search): fixed height, scrolls its content
+    // internally. roundedContainerStaticScroll sets flex-direction:column, so restore row here.
+    @include mixins.roundedContainerCard($mobileTabSwitchWidth, $mobileTabNavHeight);
+    @include mixins.roundedContainerStaticScroll($mobileTabSwitchWidth, $mobileTabNavHeight);
+    flex-direction: row;
     .main-nav {
-        position: fixed;
+        // In-flow left column (was viewport-fixed); fills the card height and scrolls its button
+        // list internally. The card's overflow:hidden rounds its left corners.
+        flex-shrink: 0;
         display: flex;
         flex-direction: column;
-        background-color: #fff;
-        height: calc(100% - var(--mainnavHeight));
+        background-color: var(--backgroundColor);
         overflow-y: auto;
         width: admin.$sidenavWidth;
+        border-right: 1px solid var(--mat-divider-color);
+        @include mixins.materialScrollbarLight();
         > div {
             height: 100%;
             .button {
@@ -36,11 +52,13 @@
         }
     }
     .main-content {
+        // The only scrolling region of the card; fills the space next to the nav.
         padding: 20px;
-        width: 100%;
         min-width: 0;
-        margin-left: admin.$sidenavWidth;
-        flex-grow: 1;
+        min-height: 0;
+        flex: 1;
+        overflow-y: auto;
+        @include mixins.materialScrollbarLight();
         .btn-flat {
             min-height: 36px;
             height: auto;
@@ -124,7 +142,11 @@
         .check {
             display: flex;
             flex-direction: row;
-            background-color: color.adjust($colorStatusPositive, $lightness: 40%);
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusPositive) 15%,
+                var(--backgroundColor)
+            );
             padding: 10px 10px;
             margin: 2px 0;
             .data {
@@ -151,7 +173,7 @@
                         margin-right: 5px;
                     }
                     .solution-link {
-                        color: var(--palette-primary-900);
+                        color: var(--primaryForeground900);
                         text-transform: uppercase;
                         font-weight: bold;
                     }
@@ -162,13 +184,25 @@
                 margin-bottom: 5px;
             }
             &.check-fail {
-                background-color: color.adjust($warning, $lightness: 35%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusNegative) 30%,
+                    var(--backgroundColor)
+                );
             }
             &.check-info {
-                background-color: color.adjust($colorStatusNeutral, $lightness: 45%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusNeutral) 10%,
+                    var(--backgroundColor)
+                );
             }
             &.check-warn {
-                background-color: color.adjust($warningMedium, $lightness: 50%);
+                background-color: color-mix(
+                    in srgb,
+                    var(--colorStatusWarning) 15%,
+                    var(--backgroundColor)
+                );
             }
         }
     }
@@ -326,7 +360,7 @@
 }
 .tableRow {
     display: table-row;
-    background-color: color.adjust($colorStatusPositive, $lightness: 50%);
+    background-color: color-mix(in srgb, var(--colorStatusPositive) 20%, var(--backgroundColor));
     div {
         display: table-cell;
         padding: 5px 10px;
@@ -338,7 +372,7 @@
         }
     }
     &.table-not-executed {
-        background-color: color.adjust($warningMedium, $lightness: 50%);
+        background-color: color-mix(in srgb, var(--colorStatusWarning) 20%, var(--backgroundColor));
     }
 }
 .header {
@@ -596,7 +630,7 @@
             padding: 10px 20px;
         }
         .row-detail {
-            background-color: #fff;
+            background-color: var(--backgroundColor);
             padding-bottom: 10px;
             width: 100%;
             .log {
@@ -680,17 +714,37 @@
             width: 40px;
             color: $textLight;
         }
+
         .status-fine {
-            background-color: #dcffd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusPositive) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-aborted {
-            background-color: #eee;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusNeutral) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-warning {
-            background-color: #ffffd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusWarning) 20%,
+                var(--backgroundColor)
+            );
         }
+
         .status-error {
-            background-color: #ffdcd8;
+            background-color: color-mix(
+                in srgb,
+                var(--colorStatusNegative) 20%,
+                var(--backgroundColor)
+            );
         }
     }
 }
@@ -742,9 +796,6 @@
                 display: none;
             }
             width: admin.$sidenavWidthMobile;
-        }
-        .main-content {
-            margin-left: admin.$sidenavWidthMobile;
         }
     }
 }

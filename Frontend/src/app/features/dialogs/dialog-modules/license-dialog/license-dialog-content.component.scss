@@ -8,7 +8,7 @@
 
 :host ::ng-deep {
     .mat-tab-labels {
-        background-color: #fff;
+        background-color: var(--backgroundColor);
     }
     .mat-checkbox-layout {
         white-space: normal !important;
@@ -151,6 +151,8 @@ fieldset {
 .currentLicenseIcon {
     height: 40px;
     width: auto;
+
+    filter: var(--invertSvgFilter, none);
 }
 
 .currentLicenseDescription {
@@ -213,6 +215,7 @@ fieldset {
         width: 100%;
         display: flex;
         gap: 20px;
+        color: var(--textMain);
         background: $cardLightBackground;
         border: none;
         align-items: center;

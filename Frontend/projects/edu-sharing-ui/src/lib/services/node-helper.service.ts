@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
     ApiHelpersService,
     Assignment,
@@ -7,6 +7,7 @@ import {
     ConfigService,
     NetworkService,
     Node,
+    Person,
     ProposalNode,
     RestConstants,
     ROOT,
@@ -38,7 +39,7 @@ export class NodeHelperService {
     protected configuration = inject(EduSharingUiConfiguration);
     protected repoUrlService = inject(RepoUrlService);
     protected platformLocation = inject(PlatformLocation);
-    protected toast = inject(Toast);
+    protected toast = inject(Toast, { optional: true });
     protected router = inject(Router, { optional: true });
 
     readonly LICENSE_URLS = {
@@ -357,7 +358,7 @@ export class NodeHelperService {
                     queryParams: { id: node.ref.id },
                 };
             } else if (node.ref) {
-                const fromHome = node.ref.isHomeRepo || false; //this.networkService.isFromHomeRepository(node);
+                const fromHome = node.ref.isHomeRepo !== false; // -> this is a promise! this.networkService.isFromHomeRepository(node)
                 data = {
                     routerLink: short
                         ? UIConstants.ROUTER_PREFIX_SHORT + node.ref.id
@@ -401,6 +402,27 @@ export class NodeHelperService {
      */
     isNodeRevoked(node: Node) {
         return node?.aspects?.includes(RestConstants.CCM_ASPECT_REVOKED);
+    }
+
+    /**
+     * es-user-avatar-ready authority object for a node's person property (cm:creator/cm:modifier/
+     * cm:owner); null when that person is not set on the node.
+     */
+    getNodeAuthority(
+        node: Node,
+        property: string,
+    ): { authority: { authorityName: string; authorityType: 'USER' }; user: Person } | null {
+        const userByProperty: { [property: string]: Person } = {
+            'cm:creator': node?.createdBy,
+            'cm:modifier': node?.modifiedBy,
+            'cm:owner': node?.owner,
+        };
+        const user = userByProperty[property];
+        const authorityName = node?.properties?.[property]?.[0];
+        if (!user || !authorityName) {
+            return null;
+        }
+        return { authority: { authorityName, authorityType: 'USER' }, user };
     }
 
     /**
@@ -507,7 +529,7 @@ export class NodeHelperService {
 
     public handleNodeError(name: string, error: any): number {
         if (error.status === RestConstants.DUPLICATE_NODE_RESPONSE) {
-            this.toast.error(null, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
+            this.toast?.error(null, 'WORKSPACE.TOAST.DUPLICATE_NAME', {
                 name,
             });
             return error.status;
@@ -516,12 +538,12 @@ export class NodeHelperService {
                 'org.alfresco.service.cmr.repository.CyclicChildRelationshipException',
             )
         ) {
-            this.toast.error(null, 'WORKSPACE.TOAST.CYCLIC_NODE', {
+            this.toast?.error(null, 'WORKSPACE.TOAST.CYCLIC_NODE', {
                 name,
             });
             return error.status;
         }
-        this.toast.error(error);
+        this.toast?.error(error);
         return error.status;
     }
 

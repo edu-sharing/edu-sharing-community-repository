@@ -1,4 +1,9 @@
-<mat-stepper [linear]="true" labelPosition="bottom">
+@if (loadingFiles()) {
+<div class="loading-container">
+  <es-spinner></es-spinner>
+</div>
+}
+<mat-stepper [linear]="true" labelPosition="bottom" [class.hidden]="loadingFiles()">
   <!-- Step 1: Title -->
   <mat-step
     state="main"
@@ -19,33 +24,45 @@
         >{{ 'EDITORIAL.ASSIGNMENT.FORM.SUMMARY' | translate }}
         <span aria-hidden="true" class="mat-mdc-form-field-required-marker">*</span></mat-label
       >
+      @for (cfg of [editorConfig()]; track cfg.skin) {
       <editor
-        [init]="editorConfig"
+        [init]="cfg"
         formControlName="summary"
         [class.editor-invalid]="
           mainDataFormGroup.get('summary').invalid && mainDataFormGroup.get('summary').touched
         "
       ></editor>
-      <mat-label>{{ 'EDITORIAL.ASSIGNMENT.FORM.FILES' | translate }}</mat-label>
+      }
       <div class="files">
         @if (submissionsWithContent()?.length > 0) {
         <es-info-message class="submissions">{{
           'EDITORIAL.ASSIGNMENT.FORM.HAS_SUBMISSIONS' | translate
         }}</es-info-message>
+        } @for (section of fileSections; track section.role) {
+        <div class="file-section">
+          <div class="file-section-title">
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.SECTION.' + section.role + '.TITLE' | translate }}
+          </div>
+          <div class="file-section-description">
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.SECTION.' + section.role + '.DESCRIPTION' | translate }}
+          </div>
+          <es-manage-assignment-nodes
+            [role]="section.role"
+            [assignment]="assignment()"
+            [loading]="loadingFiles()"
+            [readonly]="submissionsWithContent()?.length > 0"
+            [(nodes)]="nodes"
+          ></es-manage-assignment-nodes>
+          <button
+            mat-stroked-button
+            color="primary"
+            (click)="showFileDialog(section.role)"
+            [disabled]="submissionsWithContent()?.length > 0"
+          >
+            <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
+          </button>
+        </div>
         }
-        <es-manage-assignment-nodes
-          [assignment]="assignment()"
-          [readonly]="submissionsWithContent()?.length > 0"
-          [nodes]="nodes()"
-        ></es-manage-assignment-nodes>
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="showFileDialog()"
-          [disabled]="submissionsWithContent()?.length > 0"
-        >
-          <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
-        </button>
       </div>
       <mat-slide-toggle formControlName="allowAdditionalDocumentSubmissions" class="toggle-reverse">
         <es-multi-line-label>
@@ -77,6 +94,8 @@
           #dateChooser
           [from]="now"
           [(dateTime)]="dateTime"
+          [editable]="true"
+          [minError]="'WORKSPACE.SHARE.TIMEBASED.DATE_IN_PAST'"
         ></es-share-dialog-choose-date>
       </div>
       }

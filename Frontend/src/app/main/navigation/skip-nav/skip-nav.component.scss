@@ -4,7 +4,7 @@
     position: fixed;
     padding: 20px;
     margin: 6px 10px;
-    background-color: white;
+    background-color: var(--backgroundColor);
     z-index: 1000;
     &:not(:focus) {
         clip: rect(1px, 1px, 1px, 1px);

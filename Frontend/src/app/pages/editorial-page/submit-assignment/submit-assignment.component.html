@@ -21,6 +21,7 @@
 } @if (selectedCorrectedFileUrl()) {
 <ngx-extended-pdf-viewer
   [src]="selectedCorrectedFileUrl()"
+  [enableDragAndDrop]="false"
   [height]="'auto'"
   [language]="language"
   [textLayer]="true"
@@ -154,7 +155,9 @@
         <ng-container *ngTemplateOutlet="summary"></ng-container>
         <form [formGroup]="submitFormGroup" class="block">
           <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.USER_NOTES' | translate }}</label>
-          <editor [init]="editorConfig" formControlName="userNotes"></editor>
+          @for (cfg of [editorConfig()]; track cfg.skin) {
+          <editor [init]="cfg" formControlName="userNotes"></editor>
+          }
         </form>
         <ng-container *ngTemplateOutlet="submitDetails"></ng-container>
 
@@ -304,6 +307,24 @@
       <div id="submitTime">
         {{ submissionDate | formatDate : { relative: false, time: true, date: true } }}
       </div>
+    </div>
+    } @if (assignment().creator; as creator) {
+    <div class="authority created-by">
+      <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.CREATED_BY' | translate }}:</label>
+      <div class="authority-entry">
+        <es-user-avatar size="xsmall" [user]="creator"></es-user-avatar>
+        <span>{{ creator | authorityName }}</span>
+      </div>
+    </div>
+    } @if (coordinators().length) {
+    <div class="authority correction-rights">
+      <label>{{ 'EDITORIAL.SUBMIT_ASSIGNMENT.CORRECTION_RIGHTS' | translate }}:</label>
+      @for (coordinator of coordinators(); track coordinator.authority.authorityName) {
+      <div class="authority-entry">
+        <es-user-avatar size="xsmall" [user]="coordinator.authority"></es-user-avatar>
+        <span>{{ coordinator.authority | authorityName }}</span>
+      </div>
+      }
     </div>
     }
   </div>

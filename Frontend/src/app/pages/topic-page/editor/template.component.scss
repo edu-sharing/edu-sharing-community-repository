@@ -8,6 +8,7 @@
     --border-radius: 24px;
     --content-max-width: 1440px;
     --navbar-height: var(--mainnavHeight, 89px);
+    --breadcrumb-height: 76px;
     --sidebar-offset: 16px;
     --sidebar-width: 450px;
     --offcanvas-menu-width: 48px;
@@ -16,6 +17,23 @@
     --mat-fab-small-container-shape: 4px;
     display: flex;
     flex-direction: column;
+
+    // Rounded card frame. `overflow: clip` rounds the corners without making a scroll box, so the
+    // page still scrolls on the window (the sticky breadcrumb and preview sidebar rely on that).
+    margin: var(--roundedContainerMargin);
+    border-radius: var(--borderRadiusCards);
+    overflow: clip;
+    background: topicPageVars.$surface-container-lowest;
+    @include topicPageVars.materialShadow();
+}
+
+// On mobile, drop the frame so the page uses the full width (like the other pages).
+@media screen and (max-width: topicPageVars.$mobileTabSwitchWidth) {
+    :host {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
 }
 
 .reloading-indicator-bg {
@@ -49,19 +67,19 @@ es-color-picker {
 .side-menu-header {
     margin-top: 0;
     padding-right: 24px;
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
     font-weight: topicPageVars.$font-weight-bold;
     font-size: topicPageVars.$font-size-x-large;
 }
 
 es-side-menu-wrapper {
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
 
     // color adjustments of specific elements
     &::ng-deep {
         mat-radio-button label,
         mat-checkbox label {
-            color: topicPageVars.$primary-dark;
+            color: topicPageVars.$on-surface;
         }
 
         mat-radio-button.mat-mdc-radio-button .mdc-radio {
@@ -278,7 +296,7 @@ es-side-menu-wrapper {
                             text-overflow: ellipsis;
                             hyphens: auto;
                             word-break: break-word;
-                            color: topicPageVars.$primary-dark;
+                            color: topicPageVars.$on-surface;
                         }
                     }
 
@@ -320,7 +338,8 @@ es-side-menu-wrapper {
                 position: relative;
 
                 &.bright-color {
-                    color: topicPageVars.$on-primary;
+                    // light text for the dark swimlane surface
+                    color: var(--textOnDarkSurface);
 
                     ::ng-deep {
                         .text-content,
@@ -330,11 +349,11 @@ es-side-menu-wrapper {
                         .mat-mdc-input-element::placeholder,
                         .mdc-label,
                         .mat-heading-4 {
-                            color: topicPageVars.$on-primary;
+                            color: var(--textOnDarkSurface);
                         }
 
                         .mat-mdc-input-element {
-                            caret-color: topicPageVars.$on-primary;
+                            caret-color: var(--textOnDarkSurface);
                         }
                     }
                 }
@@ -361,7 +380,7 @@ es-side-menu-wrapper {
                         height: 40px;
                         box-shadow: 0 4px 4px 0 #00000040;
                         background: topicPageVars.$surface-container-lowest;
-                        color: topicPageVars.$primary-dark;
+                        color: topicPageVars.$on-surface;
                     }
                 }
 
@@ -728,7 +747,7 @@ es-side-menu-wrapper {
 
 .template-header-container,
 .topic-page-content-wrapper {
-    color: topicPageVars.$primary-dark;
+    color: topicPageVars.$on-surface;
 }
 
 .topic-page-content-wrapper {
@@ -740,7 +759,7 @@ es-side-menu-wrapper {
         &::ng-deep es-editable-text ::ng-deep {
             h2,
             h3 {
-                color: topicPageVars.$primary-dark;
+                color: topicPageVars.$on-surface;
             }
         }
     }
@@ -777,6 +796,11 @@ es-side-menu-wrapper {
         color: #fff;
         background-color: topicPageVars.$pink-default;
     }
+}
+
+// light text for a dark anchor-item surface
+.anchor-container.bright-color .item-text {
+    color: var(--textOnDarkSurface) !important;
 }
 
 // GENERAL OVERWRITES / FIXES
@@ -829,18 +853,16 @@ es-editable-text {
     }
 }
 
-// adjust style of es-preview-sidebar for topic page
-:host es-preview-sidebar ::ng-deep .preview-sidebar {
-    margin: 10px;
-    max-height: calc(100vh - var(--navbar-height) - 2 * var(--sidebar-offset));
-    width: var(--sidebar-width);
-    max-width: 550px;
-    position: sticky;
-    top: calc(var(--navbar-height) + var(--sidebar-offset));
-    border-radius: 16px;
-    display: flex;
-    overflow: hidden;
+// The resizable preview column lives in es-preview-sidebar-wrapper. Here we only pass the gap on
+// its right edge (rounded margin + offcanvas menu) so its drag-resize math stays correct.
+es-preview-sidebar-wrapper {
+    --preview-panel-edge-inset: calc(
+        var(--roundedContainerMargin) + var(--offcanvas-menu-width) + var(--offcanvas-offset)
+    );
+}
 
+// Adjust style of es-preview-sidebar for topic page
+:host es-preview-sidebar ::ng-deep .preview-sidebar {
     .preview-sidebar-body .mds-views {
         width: calc(var(--sidebar-width) - 2 * 15px);
     }

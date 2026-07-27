@@ -15,9 +15,7 @@ export class AssignmentPipe implements PipeTransform {
         },
     ): Permission['role'] | number | 'high' | 'low' {
         if (args.mode === 'permissions') {
-            return assignment.permissions?.some((p) => p.role === 'COORDINATOR')
-                ? 'COORDINATOR'
-                : 'ASSIGNEE';
+            return assignment.isCoordinator ? 'COORDINATOR' : 'ASSIGNEE';
         }
         if (args.mode === 'endTimePriority') {
             const now = new Date().getTime();

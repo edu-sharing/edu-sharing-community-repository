@@ -39,6 +39,8 @@
         "TECHNICAL_IMPLEMENTER": "Technische Umsetzung",
         "EDUCATIONAL_VALIDATOR": "Bildungsvalidation",
         "SCRIPT_WRITER": "Scriptwriting",
+        "SPRECHER": "Sprecherin/Sprecher",
+        "DARSTELLER": "Darstellerin/Darsteller",
         "CREATOR": "Erstellung",
         "PROVIDER": "Herausgeberschaft"
       }
