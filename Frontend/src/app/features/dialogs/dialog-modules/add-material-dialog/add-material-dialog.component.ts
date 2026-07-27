@@ -354,6 +354,27 @@ export class AddMaterialDialogComponent implements OnInit {
         this.selectedFiles.update((files) => files.filter((f) => f !== file));
         this.setState('');
     }
+
+    /**
+     * Clears the entered link and the picked files. Needed when the component is embedded
+     * (i.e. not used as a dialog that gets destroyed) and stays open for the next upload.
+     */
+    reset(): void {
+        this.selectedFiles.set([]);
+        // silent: the valueChanges pipeline would re-fetch the website information for ''
+        this.linkControl.setValue('', { emitEvent: false });
+        this.websiteInformation = null;
+        this.loadingWebsiteInformation = false;
+        this.hideFileUpload.set(false);
+        this.ltiActivated = false;
+        this.ltiConsumerKey = null;
+        this.ltiSharedSecret = null;
+        if (this.file) {
+            // allows re-picking the same file, which would otherwise not fire a change event
+            this.file.nativeElement.value = '';
+        }
+        this.setState('');
+    }
 }
 
 // Adapted from https://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url

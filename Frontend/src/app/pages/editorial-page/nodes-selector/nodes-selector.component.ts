@@ -742,7 +742,8 @@ export class NodesSelectorComponent implements OnInit {
                 this.editorialSidebarService.selectNode(createdNodes as Node[]);
             }
         }
-        this.addMaterialDialogComponent.selectedFiles.set([]);
+        // the sidebar may stay open (autoClose: false), so clear the link/file input for the next one
+        this.addMaterialDialogComponent.reset();
     }
 
     // DRAG-AND-DROP RELATED FUNCTIONS

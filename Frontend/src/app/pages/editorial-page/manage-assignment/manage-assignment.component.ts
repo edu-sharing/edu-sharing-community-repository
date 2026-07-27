@@ -222,7 +222,8 @@ export class ManageAssignmentComponent {
             optionConfig: {
                 upload: 'fast',
                 allowCreate: false,
-                autoClose: true,
+                // keep the sidebar open so several materials can be added one after another
+                autoClose: false,
                 applyLabel: 'EDITORIAL.ASSIGNMENT.SELECT_FILE',
                 applyCallback: (nodes) =>
                     nodes.every(
