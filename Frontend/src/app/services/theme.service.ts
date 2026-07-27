@@ -11,7 +11,7 @@ import {
     EduSharingUiConfiguration,
 } from 'ngx-edu-sharing-ui';
 import { combineLatest, fromEvent } from 'rxjs';
-import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, startWith } from 'rxjs/operators';
 
 export enum Variable {
     Primary = 'primary',
@@ -103,7 +103,12 @@ export class ThemeService {
         const queryTheme = this.toThemeSetting(
             this.router.routerState.root.snapshot.queryParamMap.get('theme'),
         );
-        this.applyTheme(this.resolveIsDark(queryTheme ?? 'auto', browserDark));
+        this.accessibility
+            .observe('darkMode')
+            .pipe(first())
+            .subscribe((storedMode) => {
+                this.applyTheme(this.resolveIsDark(queryTheme ?? storedMode, browserDark));
+            });
         this.fetchConfig();
     }
 
