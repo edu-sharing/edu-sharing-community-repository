@@ -363,7 +363,7 @@
       "TITLE_CREATE_LTI": "Create new {{ tool }} object",
       "NEW_TOOL": "New tool",
       "EDIT_TOOL": "Edit tool info",
-      "CREATE_LOCATION": "File location:",
+      "CREATE_LOCATION": "Storage location:",
       "MANAGE_CONFIGS": "Manage configurations",
       "CREATE_NAME_PLACEHOLDER": "Enter name...",
       "NEW_CONFIG": "Create configuration",
