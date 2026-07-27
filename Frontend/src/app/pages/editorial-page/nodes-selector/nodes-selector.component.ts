@@ -1354,6 +1354,9 @@ export class NodesSelectorComponent implements OnInit {
             body: {
                 criteria,
                 resolveCollections: true,
+                // the backend defaults this to false, which leaves `createdBy` without a name
+                // as the collections list shows the creator, the lookup is required
+                resolveUsernames: searchForCollections,
             },
         };
     }
