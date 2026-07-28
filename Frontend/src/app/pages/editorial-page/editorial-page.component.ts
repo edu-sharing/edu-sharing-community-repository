@@ -652,7 +652,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             this.mdsLoaded$.pipe(
                 filter((v) => v),
                 first(),
-                delay(1),
+                delay(200), // safety margin so the facet widgets subscribe before search() (FF/Safari)
             ),
         );
         this.init$.next(true);
