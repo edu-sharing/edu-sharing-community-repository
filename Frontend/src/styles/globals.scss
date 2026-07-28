@@ -29,7 +29,9 @@
 
 // The edge-toggle tabs render in the body-level CDK overlay container, so a fullscreen editorial
 // sidebar (a component overlay outside that container) can't cover them via z-index.
-body:has(es-editorial-sidebar.fullscreen) .es-edge-toggle-pane {
+// Same reason: an es-global-progress is painted inside the page content and overflows by toggle
+body:has(es-editorial-sidebar.fullscreen) .es-edge-toggle-pane,
+body:has(es-global-progress) .es-edge-toggle-pane {
     display: none;
 }
 
