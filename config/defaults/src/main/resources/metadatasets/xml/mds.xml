@@ -2077,6 +2077,7 @@
         </statement>
         <multiple>true</multiple>
         <multiplejoin>AND</multiplejoin>
+        <exactMatching>false</exactMatching>
       </property>
       <property name="parent">
         <statement>{"wildcard":{"fullpath":"${valueRaw}*"}}</statement>
