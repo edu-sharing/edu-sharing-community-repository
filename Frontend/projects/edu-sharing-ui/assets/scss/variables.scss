@@ -243,6 +243,9 @@ body.isDarkTheme {
     // any colored glyphs recognizable (standard dark-mode image inversion)
     --invertSvgFilter: invert(1) hue-rotate(180deg);
     --mainMenuHoverBackgroundColor: var(--primaryBackground50);
+    --mainMenuBackgroundColor: transparent;
+    --mainMenuForegroundColor: var(--primary);
+    --mainMenuForegroundColorIcon: var(--primary);
 
     // chip colors: keep each hue but darken so the (now light) dark-theme text reads on top
     @each $key, $color in vars.$chip-colors {
