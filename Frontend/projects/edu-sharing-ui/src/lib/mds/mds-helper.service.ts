@@ -15,6 +15,12 @@ type ColumnTypeInternal<T extends string> = { [k in T]?: ListItem[] };
 export type ColumnType = ColumnTypeInternal<'Default' | 'Table'>;
 @Injectable()
 export class MdsHelperService {
+    /**
+     * lists that are not expected to be configured in the mds: they always use the frontend
+     * defaults below, so a missing backend definition is not a misconfiguration
+     */
+    private static readonly FRONTEND_ONLY_COLUMN_LISTS = ['collectionSidebar'];
+
     private mdsService = inject(MdsService);
     private translate = inject(TranslateService);
 
@@ -77,7 +83,7 @@ export class MdsHelperService {
         }
         if (!columns?.Default?.length) {
             const defaultColumns = [];
-            if (mdsSet !== null) {
+            if (mdsSet !== null && !MdsHelperService.FRONTEND_ONLY_COLUMN_LISTS.includes(name)) {
                 console.warn(
                     'mds does not define columns for ' + name + ', invalid configuration!',
                 );
