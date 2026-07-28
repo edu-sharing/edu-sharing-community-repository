@@ -471,6 +471,7 @@ export class NodesSelectorComponent implements OnInit {
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     workspaceTreeConfig = computed<TreeConfig>(() => ({
         showFileName: true,
+        showFiles: true,
         selectionMode: this.selectionMode(),
         isValidSourceCallback: (node: Node) =>
             (this.allowCollectionCopy() &&
@@ -1275,7 +1276,6 @@ export class NodesSelectorComponent implements OnInit {
         this.dataSourceWorkspace.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const params = {
-            filter: ['folders'],
             skipCount: 0,
             maxItems: 100,
             sortProperties: [RestConstants.CM_NAME],
