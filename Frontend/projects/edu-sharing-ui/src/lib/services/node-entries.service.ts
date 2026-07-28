@@ -129,8 +129,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
         this.options$.next(options);
     }
     checkbox: boolean;
-    /** when true, the checkbox acts like a radio: selecting one node deselects the others */
-    singleSelect = false;
     globalOptionsSubject = new BehaviorSubject<OptionItem[]>([]);
     set globalOptions(globalOptions: OptionItem[]) {
         this.globalOptionsSubject.next(globalOptions);
@@ -195,14 +193,6 @@ export class NodeEntriesService<T extends NodeEntriesDataType> {
     }
 
     onCheckboxChanged(node: T, checked: boolean) {
-        // single-select: the checkbox acts like a radio — keep only the chosen node selected
-        if (this.singleSelect) {
-            this.selection.clear();
-            if (checked) {
-                this.selection.select(node);
-            }
-            return;
-        }
         if (this.uiService.shiftKeyPressed) {
             this.expandSelectionTo(node);
         }

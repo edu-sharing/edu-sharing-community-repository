@@ -44,9 +44,11 @@ export class SelectFavoriteDialogComponent {
         trap: true,
         optionConfig: {
             applyLabel: 'OPTIONS.ADD_SHORTCUT',
-            // pick exactly one node (file, folder or collection) as the favorite/shortcut
-            singleSelect: true,
+            // exactly one node (file, folder or collection) becomes the favorite/shortcut
+            applyCallback: (nodes) => nodes.length === 1,
             allowFolderSelection: true,
+            // only the list view is needed here
+            allowSearchViewSwitch: false,
             onNodesChoosen: (result) => void this.addShortcut(result.nodes?.[0]),
         },
     };

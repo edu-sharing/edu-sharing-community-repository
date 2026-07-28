@@ -117,6 +117,11 @@
         margin-top: 16px;
         margin-left: auto;
     }
+
+    // the hidden actionbar no longer spaces the list off the search field
+    &.no-view-switch > es-node-entries-wrapper {
+        margin-top: 16px;
+    }
 }
 
 .info-message {

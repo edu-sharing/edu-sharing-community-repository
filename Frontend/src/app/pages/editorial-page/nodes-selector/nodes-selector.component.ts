@@ -153,13 +153,13 @@ export type NodesSelectorConfig = {
      */
     onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
     /**
-     * picker mode: restrict the selection to a single node of any type.
-     */
-    singleSelect?: boolean;
-    /**
      * allow folders to be selected as sources, in addition to files and collections.
      */
     allowFolderSelection?: boolean;
+    /**
+     * whether the search tab offers the list/cards display type switch (default: true)
+     */
+    allowSearchViewSwitch?: boolean;
 };
 
 @Component({
@@ -273,18 +273,16 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
-    // picker mode: a single node of any type is chosen and handed back (e.g. favorite dialog)
-    singleSelect: Signal<boolean> = computed(() => !!this.option()?.optionConfig?.singleSelect);
+    // opt-out for consumers that only need the list view in the search tab
+    allowSearchViewSwitch: Signal<boolean> = computed(
+        () => this.option()?.optionConfig?.allowSearchViewSwitch !== false,
+    );
     // whether folders may be picked as a source (workspace tab)
     allowFolderSelection: Signal<boolean> = computed(
         () => !!this.option()?.optionConfig?.allowFolderSelection,
     );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
-            // picker mode: exactly one node (of any type) must be selected
-            if (this.singleSelect()) {
-                return this.onlyOneSelected() ? null : InvalidSelectionReason.INVALID_SELECTION;
-            }
             if (this.selectionMode() === 'source') {
                 if (
                     this.option().optionConfig?.applyCallback &&
@@ -296,8 +294,13 @@ export class NodesSelectorComponent implements OnInit {
                 if (!this.isSelectStep() && !this.atLeastRootOrChildrenSelected()) {
                     return InvalidSelectionReason.AT_LEAST_ROOT_OR_CHILDREN_SELECTED;
                 }
-                // copy collection dialog
-                if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
+                // copy collection dialog, plus (opt-in) a single folder as source
+                if (
+                    this.onlyOneSelected() &&
+                    (this.selectedNodes()[0].mediatype === 'collection' ||
+                        (this.allowFolderSelection() &&
+                            this.selectedNodes()[0].mediatype === 'folder'))
+                ) {
                     return null;
                 }
                 if (!this.onlyFilesSelected()) {

@@ -39,7 +39,6 @@
   <!-- Checkbox Column -->
   <ng-container matColumnDef="select" [sticky]="isScroll">
     <mat-header-cell *matHeaderCellDef>
-      @if (!entriesService.singleSelect) {
       <mat-checkbox
         [ngModel]="entriesService.selection.selected.length > 0"
         [indeterminate]="
@@ -50,7 +49,6 @@
         color="primary"
         aria-label="{{ 'LIST_TABLE.TOGGLE_ALL' | translate }}"
       ></mat-checkbox>
-      }
     </mat-header-cell>
     <mat-cell *matCellDef="let node">
       <mat-checkbox
