@@ -258,7 +258,10 @@
       "FORM": {
         "TITLE": "Titel",
         "SUMMARY": "Beschreibung",
-        "ADD_FILE": "Material hinzufügen",
+        "ADD_FILE": {
+          "SUBMITTABLE": "Arbeitsmaterial hinzufügen",
+          "SUPPLEMENTARY": "Begleitmaterial hinzufügen"
+        },
         "AUTHORITY_ROLE": "Rolle",
         "DELETE": "Löschen",
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",

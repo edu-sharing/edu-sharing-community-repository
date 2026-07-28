@@ -219,6 +219,8 @@ export class ManageAssignmentComponent {
     showFileDialog(documentRole: NodeWithRole['documentRole'] = 'SUBMITTABLE') {
         this.editorialSidebarService.showOption({
             option: 'SORT_INTO',
+            // same label as the triggering button, so the panel states which material type is added
+            title: 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE.' + documentRole,
             optionConfig: {
                 upload: 'fast',
                 allowCreate: false,

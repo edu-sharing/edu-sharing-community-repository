@@ -258,7 +258,10 @@
       "FORM": {
         "TITLE": "Title",
         "SUMMARY": "Description",
-        "ADD_FILE": "Add material",
+        "ADD_FILE": {
+          "SUBMITTABLE": "Add working material",
+          "SUPPLEMENTARY": "Add supplementary material"
+        },
         "AUTHORITY_ROLE": "Role",
         "DELETE": "Delete",
         "GROUP_MULTIPLY": "When the assignment is handed out, all members of the group are assigned individually",

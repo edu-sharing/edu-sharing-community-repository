@@ -60,7 +60,8 @@
             (click)="showFileDialog(section.role)"
             [disabled]="submissionsWithContent()?.length > 0"
           >
-            <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
+            <i esIcon="add"></i>
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE.' + section.role | translate }}
           </button>
         </div>
         }
