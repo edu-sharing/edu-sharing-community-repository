@@ -147,7 +147,7 @@ public class CollectionServiceImpl implements CollectionService {
             this.toolPermissionService = ToolPermissionServiceFactory.getInstance();
             this.permissionService = PermissionServiceFactory.getPermissionService(appId);
             this.notificationService = NotificationServiceFactoryUtility.getNotificationService(appId);
-            this.localAuthorityService = AuthorityServiceFactory.getAuthorityService(appId);
+            this.localAuthorityService = AuthorityServiceFactory.getLocalService();
             ApplicationContext appContext = AlfAppContextGate.getApplicationContext();
             policyBehaviourFilter = (BehaviourFilter) appContext.getBean("policyBehaviourFilter");
 
