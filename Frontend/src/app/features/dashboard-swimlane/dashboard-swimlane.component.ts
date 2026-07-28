@@ -272,8 +272,8 @@ export class DashboardSwimlaneComponent {
             for (const [key, types] of Object.entries(RECENT_ACTIVITY_EVENT_TYPES)) {
                 events.splice(i++, 0, {
                     key,
-                    result: await firstValueFrom(
-                        this.searchService.search({
+                    result: (await firstValueFrom(
+                        this.searchService.requestSearch({
                             metadataset: DEFAULT,
                             query: null,
                             searchMode: 'recentActivity',
@@ -285,7 +285,7 @@ export class DashboardSwimlaneComponent {
                                 criteria: [],
                             },
                         }),
-                    ),
+                    )) as SearchResultGeneric<NodeEvent>,
                     params: {
                         filters: JSON.stringify({ 'virtual:activityType': [key] }),
                     },
@@ -302,8 +302,10 @@ export class DashboardSwimlaneComponent {
             ].forEach(async (k, i) => {
                 events.splice(i, 0, {
                     key: k[0],
-                    result: await firstValueFrom(
-                        this.searchService.search({
+                    // Stateless requestSearch (see recentActivity above): keep the shared
+                    // SearchService state untouched so the editorial share page fetches its facets.
+                    result: (await firstValueFrom(
+                        this.searchService.requestSearch({
                             metadataset: DEFAULT,
                             query: null,
                             searchMode: 'shares',
@@ -315,7 +317,7 @@ export class DashboardSwimlaneComponent {
                                 criteria: [],
                             },
                         }),
-                    ),
+                    )) as SearchResultGeneric<NodeShare>,
                     params: {
                         filters: JSON.stringify({ 'virtual:shareDirection': [k[1]] }),
                     },
