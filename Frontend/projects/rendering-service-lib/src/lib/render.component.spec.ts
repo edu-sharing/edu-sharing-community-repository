@@ -85,7 +85,7 @@ describe('RenderComponent module selection', () => {
 
     it('uses the backend module when renderdata succeeds', async () => {
         renderService.getRenderDataToken.and.returnValue(
-            of({ jobId: null, module: 'IMAGE', objectLinks: [] }),
+            of({ deferred: false, jobId: null, module: 'IMAGE', objectLinks: [] }),
         );
         const app = createComponent({ ref: { id: 'id', repo: 'repo' }, properties: {} } as Node);
         const data = await awaitRenderData(app);
