@@ -1,11 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-.missing-value-msg {
-    flex: 0 1 calc(50% - 4px);
-    color: var(--placeholderColor);
-}
-
 .value-selection-wrapper {
     margin-bottom: 16px;
     display: grid;
