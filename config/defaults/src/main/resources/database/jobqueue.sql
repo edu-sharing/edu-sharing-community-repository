@@ -17,9 +17,6 @@ create table public.edu_job_queue
     ttl          interval            not null
 );
 
-alter table public.edu_job_queue
-    owner to repository;
-
 create unique index edu_job_queue_job_hash_uindex
     on public.edu_job_queue (job_hash)
     where (is_unique = true);
