@@ -136,10 +136,16 @@
         // set full height
         height: 100%;
     }
-    &.option-VIEWS_AND_USAGE {
+    &.option-VIEWS_AND_USAGE,
+    &.option-ADD_COLLECTION {
         // breathing room below the sidebar header (leaves space for its shadow);
         // SORT_INTO/MANAGE_CONTENT get theirs inside es-nodes-selector instead
         padding-top: 20px;
+    }
+    &.option-ADD_COLLECTION {
+        // the content is a short list of cards, so it must not be stretched to the full height
+        height: auto;
+        padding-bottom: 20px;
     }
     &.option-PREVIEW,
     &.option-MANAGE_SUBMISSION,

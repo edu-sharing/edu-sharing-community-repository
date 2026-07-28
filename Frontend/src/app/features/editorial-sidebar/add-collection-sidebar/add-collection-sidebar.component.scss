@@ -1,0 +1,81 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.intro {
+    .heading {
+        font-size: vars.$fontSizeLarge;
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+    .description {
+        color: var(--textLight);
+        font-size: var(--fontSizeXSmall);
+    }
+}
+.choices {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.choice {
+    @include mixins.removeButtonDefaultStyles();
+    @include mixins.clickable();
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+    text-align: left;
+    padding: 20px;
+    background-color: var(--cardLightBackground);
+    border: 1px solid var(--borderLightPrimary);
+    border-radius: var(--borderRadiusButtons);
+    &:hover {
+        background-color: var(--primaryBackground50);
+    }
+    &.cdk-keyboard-focused,
+    &:focus-visible {
+        @include mixins.setGlobalKeyboardFocus('border');
+    }
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--borderLightPrimary);
+        color: var(--primary);
+        i {
+            font-size: 28px;
+        }
+    }
+    .text {
+        flex-grow: 1;
+        min-width: 0;
+        .title {
+            font-size: vars.$fontSizeXLarge;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: var(--textMain);
+        }
+        .description {
+            color: var(--textLight);
+            font-size: var(--fontSizeXSmall);
+        }
+        .action {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            margin-top: 16px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+    }
+}

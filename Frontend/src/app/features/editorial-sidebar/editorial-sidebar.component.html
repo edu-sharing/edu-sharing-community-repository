@@ -53,6 +53,8 @@
           [parent]="parent()"
           [primaryMode]="primaryMode()"
         ></es-nodes-selector>
+        } @if (option === 'ADD_COLLECTION') {
+        <es-add-collection-sidebar [parent]="parent()"></es-add-collection-sidebar>
         } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"

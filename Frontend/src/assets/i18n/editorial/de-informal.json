@@ -1,3 +1,10 @@
 {
-  "EDITORIAL": {}
+  "EDITORIAL": {
+    "SIDEBAR": {
+      "ADD_COLLECTION": {
+        "HEADING": "Wie möchtest du fortfahren?",
+        "DESCRIPTION": "Wähle aus, ob du eine neue Sammlung erstellen oder eine bestehende kopieren möchtest."
+      }
+    }
+  }
 }

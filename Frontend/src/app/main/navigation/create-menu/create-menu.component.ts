@@ -276,6 +276,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             ['collections', 'landing'].includes(this.scope)
         ) {
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
+                // new collection always creates a new collection (selection to create or copy is skipped here)
                 this.uiService.goToCollection(this._parent, 'new'),
             );
             newCollection.elementType = [ElementType.NoneOrUnknown];

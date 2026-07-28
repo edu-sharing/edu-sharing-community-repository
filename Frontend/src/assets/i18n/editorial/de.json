@@ -53,6 +53,21 @@
         "INTERNAL_NOTE": "Persönliche Notiz",
         "FEEDBACK": "Feedback geben",
         "ATTACHMENT_EMPTY": "Keine Dateien abgegeben"
+      },
+      "ADD_COLLECTION": {
+        "TITLE": "Sammlung hinzufügen",
+        "HEADING": "Wie möchten Sie fortfahren?",
+        "DESCRIPTION": "Wählen Sie aus, ob Sie eine neue Sammlung erstellen oder eine bestehende kopieren möchten.",
+        "CREATE": {
+          "TITLE": "Sammlung erstellen",
+          "DESCRIPTION": "Eine neue Sammlung an diesem Ort anlegen und anschließend gestalten.",
+          "ACTION": "Erstellen"
+        },
+        "COPY": {
+          "TITLE": "Bestehende Sammlung hinzufügen",
+          "DESCRIPTION": "Eine bestehende Sammlung inklusive gewünschter Inhalte und Untersammlungen hierher kopieren.",
+          "ACTION": "Kopieren"
+        }
       }
     },
     "OPTION": {
@@ -148,7 +163,9 @@
           },
           "NO_CONFIG_OPTIONS": "Für diesen Inhalt existieren keine weiteren Kopieroptionen."
         }
-      }
+      },
+      "ADD_COLLECTION": "Sammlung hinzufügen",
+      "ADD_COLLECTION_DESCRIPTION": "Eine neue Sammlung erstellen oder eine bestehende Sammlung hierher kopieren"
     },
     "TITLE": "Verwalten",
     "TITLE_ASSIGNMENT": "Aufgaben",

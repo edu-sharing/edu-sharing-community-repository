@@ -160,6 +160,18 @@ export type NodesSelectorConfig = {
      * whether the search tab offers the list/cards display type switch (default: true)
      */
     allowSearchViewSwitch?: boolean;
+    /**
+     * tabs to hide from the otherwise supported set. Merged with the `tabBlacklist` input, so a
+     * caller that only has the option config at hand (e.g. via the editorial sidebar) can restrict
+     * the offered tabs as well.
+     */
+    tabBlacklist?: TabType[];
+    /**
+     * allow an existing collection to be picked as the source and copied into the current parent
+     * (incl. the configuration step). Only the dedicated "add collection" flow opts in — otherwise
+     * a collection can not be sorted into another one.
+     */
+    allowCollectionCopy?: boolean;
 };
 
 @Component({
@@ -210,6 +222,11 @@ export class NodesSelectorComponent implements OnInit {
      * tabs to hide from the otherwise supported set (e.g. to offer only a subset of views)
      */
     tabBlacklist = input<TabType[]>([]);
+    /** the blacklist of the input combined with the one of the option config */
+    private effectiveTabBlacklist = computed<TabType[]>(() => [
+        ...(this.tabBlacklist() ?? []),
+        ...(this.option()?.optionConfig?.tabBlacklist ?? []),
+    ]);
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
@@ -232,7 +249,7 @@ export class NodesSelectorComponent implements OnInit {
         });
     });
     supportedTabs: Signal<TabType[]> = computed(() => {
-        const blacklist = this.tabBlacklist() ?? [];
+        const blacklist = this.effectiveTabBlacklist();
         let tabs: TabType[];
         if (this.selectionMode() === 'source') {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
@@ -281,6 +298,10 @@ export class NodesSelectorComponent implements OnInit {
     allowFolderSelection: Signal<boolean> = computed(
         () => !!this.option()?.optionConfig?.allowFolderSelection,
     );
+    // whether an existing collection may be picked as a source and copied into the parent
+    allowCollectionCopy: Signal<boolean> = computed(
+        () => !!this.option()?.optionConfig?.allowCollectionCopy,
+    );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
             if (this.selectionMode() === 'source') {
@@ -297,7 +318,8 @@ export class NodesSelectorComponent implements OnInit {
                 // copy collection dialog, plus (opt-in) a single folder as source
                 if (
                     this.onlyOneSelected() &&
-                    (this.selectedNodes()[0].mediatype === 'collection' ||
+                    ((this.allowCollectionCopy() &&
+                        this.selectedNodes()[0].mediatype === 'collection') ||
                         (this.allowFolderSelection() &&
                             this.selectedNodes()[0].mediatype === 'folder'))
                 ) {
@@ -451,7 +473,8 @@ export class NodesSelectorComponent implements OnInit {
         showFileName: true,
         selectionMode: this.selectionMode(),
         isValidSourceCallback: (node: Node) =>
-            (this.parent()?.mediatype === 'collection' &&
+            (this.allowCollectionCopy() &&
+                this.parent()?.mediatype === 'collection' &&
                 node?.mediatype === 'collection' &&
                 this.parent()?.ref.id !== node?.ref.id &&
                 this.parent()?.parent?.id !== node?.ref.id) ||
@@ -1055,7 +1078,10 @@ export class NodesSelectorComponent implements OnInit {
                 const copyParams = {
                     repository: HOME_REPOSITORY,
                     sourceCollection: selectedNode.ref.id,
-                    targetCollection: this.parent().ref.id,
+                    // the collections root is not a real node: omitting the target copies the
+                    // collection into the level0 (root) collections
+                    targetCollection:
+                        this.parent().ref.id === ROOT ? undefined : this.parent().ref.id,
                     copyRoot: this.copyRoot(),
                     copyChildCollections: this.copyChildCollections(),
                     copyRefs: this.copyRefs(),
