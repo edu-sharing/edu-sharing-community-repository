@@ -14,7 +14,7 @@
     "generate-api:prettify-code": "prettier -w 'src/lib/api/**/*.ts' --end-of-line auto",
     "generate-api": "npm run generate-api:generate-code && npm run generate-api:prettify-code && cp build/openapi.json src/lib/api/openapi.json",
     "generate-api-if-needed": "(test -d src/lib/api && cmp -s build/openapi.json src/lib/api/openapi.json) || npm run generate-api",
-    "fetch-api": "curl -L -o build/openapi.json http://localhost:10100/rendering/v3/api-docs",
+    "fetch-api": "curl -L -o build/openapi.json http://repository.127.0.0.1.nip.io/rendering/v3/api-docs",
     "publish": "npm run build && cd dist && npm publish",
     "build": "ng build"
   },

@@ -10,6 +10,7 @@ export {
 export { ApiRequestConfiguration } from './lib/api-request-configuration';
 export * from './lib/constants';
 export * from './lib/edu-sharing-api.module';
+export * from './lib/utils/decorators/cached-share-replay';
 export * from './lib/models';
 export * from './lib/api/models/search-result';
 export * from './lib/api/models/search-result-node';

@@ -24,8 +24,10 @@ import {
 import {
     BehaviorSubject,
     debounceTime,
+    defer,
     exhaustMap,
     firstValueFrom,
+    from,
     interval,
     map,
     Subject,
@@ -36,7 +38,7 @@ import { ImageComponent } from './module/image/image.component';
 import { RenderingApiModule } from './rendering-api.module';
 import { VideoComponent } from './module/video/video.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { EduSharingApiModule, Node } from 'ngx-edu-sharing-api';
+import { EduSharingApiModule, KeyCache, Node } from 'ngx-edu-sharing-api';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AssetStateItem, RenderData } from './dto/RenderData';
 import { PdfComponent } from './module/pdf/pdf.component';
@@ -120,6 +122,16 @@ export class RenderComponent implements OnChanges, OnInit {
     finished = new Subject<void>();
     someButNotAllFinished = new Subject<Boolean>();
     progress$ = new BehaviorSubject<{ module: string; progress?: number } | null>(null);
+    // Last render response that produced a polling job; kept so reloadLinks() can re-poll it.
+    private latestRenderResponse: RenderDataResponse | undefined;
+    // Short-lived (20s) cache of the fully-resolved on-demand links, keyed by node id, so repeated
+    // download/open requests for the same node replay the finished links with no network calls
+    // (no on-demand POST and no job polling).
+    private static readonly onDemandCache = new KeyCache<RenderData | null>();
+    private static readonly ON_DEMAND_CACHE_SECONDS = 20;
+    // True while a manual link refresh is in flight; blocks re-entrant reloadLinks() calls so at
+    // most one refresh runs per rendered object. Read by templates to disable the reload control.
+    refreshing = false;
 
     constructor() {
         this.loadData
@@ -141,55 +153,18 @@ export class RenderComponent implements OnChanges, OnInit {
                                   render.getRenderDataTokenSessionSafe(this.request!!),
                               )
                             : await firstValueFrom(render.getRenderDataToken(this.request!!));
-                        // Case 1: no job returned => no polling needed
-                        if (renderResponseData.jobId === null) {
+                        // Case 0: module deferred its links => no fetch/poll yet; the consumer
+                        // renders its action UI and calls fetchLinks() on click.
+                        if (renderResponseData.deferred) {
+                            this.handleDeferredResponse(renderResponseData);
+                            // Case 1: no job returned => no polling needed
+                        } else if (renderResponseData.jobId === null) {
                             this.handleRenderingResponseWithoutJob(renderResponseData);
                         } else {
+                            // Keep the response around so reloadLinks() can re-poll this same job.
+                            this.latestRenderResponse = renderResponseData;
                             this.progress$.next({ module: renderResponseData.module ?? '' });
-                            interval(renderResponseData.module === 'VIDEO' ? 2000 : 500)
-                                .pipe(
-                                    takeUntil(this.finished),
-                                    takeUntilDestroyed(this.destroyRef),
-                                    exhaustMap(() =>
-                                        jobInfoService
-                                            .getJobInfo({ jobId: renderResponseData.jobId!! })
-                                            .pipe(),
-                                    ),
-                                )
-                                .subscribe({
-                                    next: async (jobInfo) => {
-                                        // Some, but not all, jobs are in a final status (this means some are still QUEUED or PROCESSING)
-                                        if (
-                                            jobInfo.jobs.some((j) => j.status === 'FINISHED') &&
-                                            jobInfo.status !== 'FINISHED' &&
-                                            jobInfo.status !== 'PARTIALLY_FAILED'
-                                        ) {
-                                            this.handleJobInfoWithSubJobsInProgress(
-                                                renderResponseData,
-                                                jobInfo,
-                                            );
-                                            // main job finished or partially failed
-                                        } else if (
-                                            jobInfo.status === 'FINISHED' ||
-                                            jobInfo.status === 'PARTIALLY_FAILED'
-                                        ) {
-                                            this.handleFinishedOrPartialJobInfo(
-                                                renderResponseData,
-                                                jobInfo,
-                                            );
-                                            // Main job failed => no module but error page
-                                        } else if (jobInfo.status === 'FAILED') {
-                                            this.handleFailedMainJob(jobInfo);
-                                        } else {
-                                            // no finished jobs -> show either one progress bar with race leader (progress 0-100)
-                                            // or queue position (progress (-inf,-1])
-                                            this.handleMainJobWithNoSubJobInFinalStatus(jobInfo);
-                                        }
-                                    },
-                                    error: (error) => {
-                                        this.handleApiError(error);
-                                    },
-                                });
+                            this.startJobPolling(jobInfoService, renderResponseData);
                         }
                     } catch (error) {
                         // 415 = backend has no module for this media type -> frontend module fallback
@@ -238,6 +213,7 @@ export class RenderComponent implements OnChanges, OnInit {
     }
 
     handleApiError(error: any) {
+        this.refreshing = false;
         const publicMessage = error?.error?.userMessage ?? 'GENERIC_ERROR_MESSAGE';
         const data: RenderData = {
             module: 'ERROR',
@@ -245,6 +221,166 @@ export class RenderComponent implements OnChanges, OnInit {
         };
         this.renderData$.next(data);
         this.finished.next();
+    }
+
+    /**
+     * Obtain the render links on demand and poll until they arrive. Call this from a
+     * download/open/playout button:
+     *  - deferred render (no job yet, e.g. paid-media/download Sodix): triggers an on-demand fetch
+     *    for the node, always yielding a fresh (non-expired) link;
+     *  - already-fetched render (e.g. an embedded iframe whose short-lived link expired): re-fetches
+     *    fresh links for the existing job.
+     * Resolves with the finished `RenderData` once the links arrive — `items[0].link` = playout,
+     * `items[0].additionalData.downloadUrl` = download (also mirrored on `renderData$` and, for
+     * Sodix, `GlobalStateService.downloadUrl$`). Single-flight: while a fetch is already running (or
+     * nothing to fetch) it returns the current `renderData$` value without starting a new fetch.
+     */
+    async fetchLinks(): Promise<RenderData | null> {
+        if (this.refreshing) {
+            return this.renderData$.value;
+        }
+        // Iframe expiry reload (existing job): force a fresh refresh, never cached.
+        if (this.latestRenderResponse?.jobId) {
+            const started = await this.refetchExistingJob(this.latestRenderResponse);
+            if (!started) {
+                return this.renderData$.value;
+            }
+            // Polling runs fire-and-forget and signals completion via `finished`.
+            await firstValueFrom(this.finished);
+            return this.renderData$.value;
+        }
+        // Deferred/download: resolved links cached per node for 20s (a hit does no network at all).
+        return this.fetchDeferredCached();
+    }
+
+    /** @deprecated kept for the iframe reload control; delegates to {@link fetchLinks}. */
+    async reloadLinks(): Promise<void> {
+        await this.fetchLinks();
+    }
+
+    /** @returns true if a poll was started (so callers should await completion via `finished`). */
+    private async refetchExistingJob(renderResponseData: RenderDataResponse): Promise<boolean> {
+        if (!renderResponseData.jobId) {
+            return false;
+        }
+        this.refreshing = true;
+        const { jobInfo: jobInfoService } = this.resolveServices(this.request?.renderingBaseUrl);
+        try {
+            // Backend re-enqueues the module's fetch (POST /public/job/refresh); it is idempotent
+            // while a refresh is already in flight. `refreshing` is cleared once polling reaches a
+            // final state (see the handle* methods below).
+            await firstValueFrom(jobInfoService.refresh({ jobId: renderResponseData.jobId }));
+            this.startJobPolling(jobInfoService, renderResponseData);
+            return true;
+        } catch (error) {
+            this.handleApiError(error);
+            return false;
+        }
+    }
+
+    /**
+     * On-demand links for a deferred node, with the whole trigger→poll→finished flow memoized per
+     * node id for 20s (shareReplay). A cache hit replays the finished links with no on-demand POST
+     * and no job polling; the result is (re)applied to `renderData$` so the view and download-url
+     * state update. Deliberately does not touch `latestRenderResponse`, so repeat fetchLinks() calls
+     * stay on this cached path rather than the forced refresh.
+     */
+    private async fetchDeferredCached(): Promise<RenderData | null> {
+        const nodeId = this.node?.ref?.id;
+        const token = this.request?.token;
+        if (!nodeId || !token) {
+            return this.renderData$.value;
+        }
+        this.refreshing = true;
+        try {
+            const data = await firstValueFrom(
+                RenderComponent.onDemandCache.get(
+                    nodeId,
+                    () => defer(() => from(this.runDeferredFetch(nodeId, token))),
+                    'shareReplay',
+                    RenderComponent.ON_DEMAND_CACHE_SECONDS,
+                ),
+            );
+            // Emit a fresh reference so a cache hit still triggers the module component's OnChanges
+            // (open the tab / publish the download url), even though the links are unchanged.
+            if (data) {
+                this.renderData$.next({ ...data });
+            }
+            return data;
+        } catch (error) {
+            this.handleApiError(error);
+            return this.renderData$.value;
+        } finally {
+            this.refreshing = false;
+        }
+    }
+
+    /** Runs one on-demand fetch + poll to completion and resolves with the finished links. */
+    private async runDeferredFetch(nodeId: string, token: string): Promise<RenderData | null> {
+        const services = this.resolveServices(this.request?.renderingBaseUrl);
+        const response = await firstValueFrom(
+            services.render.getRenderDataOnDemandToken(nodeId, token),
+        );
+        if (!response.jobId) {
+            return null;
+        }
+        this.progress$.next({ module: response.module ?? '' });
+        this.startJobPolling(services.jobInfo, response);
+        await firstValueFrom(this.finished);
+        return this.renderData$.value;
+    }
+
+    private handleDeferredResponse(renderResponseData: RenderDataResponse) {
+        // No links fetched yet; leave latestRenderResponse unset so fetchLinks() uses the node
+        // (on-demand) path, and surface the module + deferred flag so the consumer can render its UI.
+        this.latestRenderResponse = undefined;
+        this.renderData$.next({
+            module: renderResponseData.module ?? '',
+            deferred: true,
+        });
+        this.finished.next();
+    }
+
+    private startJobPolling(
+        jobInfoService: JobInfoControllerService,
+        renderResponseData: RenderDataResponse,
+    ) {
+        interval(renderResponseData.module === 'VIDEO' ? 2000 : 500)
+            .pipe(
+                takeUntil(this.finished),
+                takeUntilDestroyed(this.destroyRef),
+                exhaustMap(() =>
+                    jobInfoService.getJobInfo({ jobId: renderResponseData.jobId!! }).pipe(),
+                ),
+            )
+            .subscribe({
+                next: async (jobInfo) => {
+                    // Some, but not all, jobs are in a final status (this means some are still QUEUED or PROCESSING)
+                    if (
+                        jobInfo.jobs.some((j) => j.status === 'FINISHED') &&
+                        jobInfo.status !== 'FINISHED' &&
+                        jobInfo.status !== 'PARTIALLY_FAILED'
+                    ) {
+                        this.handleJobInfoWithSubJobsInProgress(renderResponseData, jobInfo);
+                        // main job finished or partially failed
+                    } else if (
+                        jobInfo.status === 'FINISHED' ||
+                        jobInfo.status === 'PARTIALLY_FAILED'
+                    ) {
+                        this.handleFinishedOrPartialJobInfo(renderResponseData, jobInfo);
+                        // Main job failed => no module but error page
+                    } else if (jobInfo.status === 'FAILED') {
+                        this.handleFailedMainJob(jobInfo);
+                    } else {
+                        // no finished jobs -> show either one progress bar with race leader (progress 0-100)
+                        // or queue position (progress (-inf,-1])
+                        this.handleMainJobWithNoSubJobInFinalStatus(jobInfo);
+                    }
+                },
+                error: (error) => {
+                    this.handleApiError(error);
+                },
+            });
     }
 
     async ngOnInit() {
@@ -379,10 +515,12 @@ export class RenderComponent implements OnChanges, OnInit {
             items: items,
         };
         this.renderData$.next(data);
+        this.refreshing = false;
         this.finished.next();
     }
 
     handleFailedMainJob(jobInfo: JobInfoReply) {
+        this.refreshing = false;
         const data: RenderData = {
             module: 'ERROR',
             publicErrorMessage: jobInfo.userMessage ?? 'GENERIC_ERROR_MESSAGE',

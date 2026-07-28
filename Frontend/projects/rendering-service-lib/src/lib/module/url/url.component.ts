@@ -1,9 +1,20 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    OnInit,
+    Output,
+    SimpleChanges,
+    inject,
+} from '@angular/core';
 import { RenderingModule } from '../../rendering.module';
 import { RenderModule } from '../RenderModule';
 import { Node } from 'ngx-edu-sharing-api';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgOptimizedImage } from '@angular/common';
 import { RenderData } from '../../dto/RenderData';
@@ -22,13 +33,14 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
         RenderingModule,
         MatButtonModule,
         MatIconModule,
+        MatProgressSpinnerModule,
         NgOptimizedImage,
         EduSharingUiModule,
     ],
     templateUrl: './url.component.html',
     styleUrl: './url.component.scss',
 })
-export class UrlComponent implements RenderModule, OnInit, OnDestroy {
+export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy {
     private sanitizer = inject(DomSanitizer);
     private trackingService = inject(TrackingService);
     private gdprService = inject(GdprService);
@@ -39,6 +51,10 @@ export class UrlComponent implements RenderModule, OnInit, OnDestroy {
     @Input() data: RenderData | undefined;
     @Input() node: Node | undefined;
     @Input() isWebComponent: boolean = false;
+    // Emitted when the user asks for a fresh link (e.g. an expired Sodix playout URL).
+    @Output() reload = new EventEmitter<void>();
+    // True while a refresh is in flight; disables the reload control to prevent repeat triggers.
+    @Input() reloading = false;
     gdpr: GdprConfig | null = null;
     embedding?: UrlEmbeddings;
     externalId?: string;
@@ -49,17 +65,13 @@ export class UrlComponent implements RenderModule, OnInit, OnDestroy {
     isContrastMode: boolean = false;
     private hasBeenClicked: boolean = false;
     private contrastModeSubscription?: Subscription;
+    // True while a fresh link is being fetched for the Sodix "to original page" button: shows a
+    // spinner, disables the button, and marks that the fetched link should be opened once it lands.
+    loading = false;
     static readonly LTI_QUERY = '&editMode=false&launchPresentation=iframe';
 
     async ngOnInit() {
-        if (this.data?.module === 'SODIX') {
-            this.processSodix();
-        } else if (this.data?.module === 'OMEGA') {
-            this.processOmega();
-        } else {
-            this.embedding = this.data?.frontendModuleConfig?.urlModuleConfig?.embedding;
-            this.url = this.node?.properties?.['ccm:wwwurl']?.[0] || '';
-        }
+        this.setupContent();
         this.contrastModeSubscription = this.accessibilityService
             .observe('contrastMode')
             .subscribe((value) => {
@@ -68,6 +80,56 @@ export class UrlComponent implements RenderModule, OnInit, OnDestroy {
         if (this.node) {
             this.gdpr = await this.gdprService.getGdprConfig(this.node);
             await this.getGdprText();
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // A fresh link (e.g. after fetchLinks()) arrives as a new `data` input; recompute the
+        // embedding/url so the iframe/link updates. The first change is handled by ngOnInit.
+        if (changes['data'] && !changes['data'].firstChange) {
+            this.setupContent();
+            // A fetch triggered by the "to original page" button just resolved: stop the spinner and
+            // open the freshly-fetched link in a new tab.
+            if (this.loading) {
+                this.loading = false;
+                if (this.url) {
+                    window.open(this.url, '_blank');
+                    this.onLinkClick();
+                }
+            }
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.contrastModeSubscription?.unsubscribe();
+    }
+
+    /** Ask the host RenderComponent to fetch fresh links for the current job. */
+    onReload(): void {
+        this.reload.emit();
+    }
+
+    /**
+     * "To original page": fetch a FRESH link on every click (the backend re-fetches from Sodix),
+     * show a spinner while it loads, and open the result in a new tab once it arrives (see
+     * ngOnChanges). Guarded so a click is ignored while a fetch is already running.
+     */
+    onFetchAndOpen(): void {
+        if (this.loading) {
+            return;
+        }
+        this.loading = true;
+        this.reload.emit();
+    }
+
+    private setupContent(): void {
+        if (this.data?.module === 'SODIX') {
+            this.processSodix();
+        } else if (this.data?.module === 'OMEGA') {
+            this.processOmega();
+        } else {
+            this.embedding = this.data?.frontendModuleConfig?.urlModuleConfig?.embedding;
+            this.url = this.node?.properties?.['ccm:wwwurl']?.[0] || '';
         }
         this.previewUrl = this.node?.preview?.url ?? '';
         this.externalId = this.data?.frontendModuleConfig?.urlModuleConfig?.externalId;
@@ -86,10 +148,6 @@ export class UrlComponent implements RenderModule, OnInit, OnDestroy {
         } else if (this.embedding === UrlEmbeddings.SERLO) {
             this.sanitizedUrl = this.getSerloUrl();
         }
-    }
-
-    ngOnDestroy(): void {
-        this.contrastModeSubscription?.unsubscribe();
     }
 
     consentToGdprWarning() {

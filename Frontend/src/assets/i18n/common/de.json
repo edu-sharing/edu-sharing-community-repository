@@ -1081,6 +1081,7 @@
     "QUEUED": "Warteschlange",
     "QUEUE_POSITION": "Position in der Warteschlange",
     "OPEN_IN_NEW_TAB": "In neuem Tab öffnen",
+    "RELOAD_LINK": "Link neu laden",
     "REVOKED": {
       "DETAILS_EMPTY": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. Es sind nur noch die Metadaten des ursprünglichen Elements verfügbar.\n\nWeitere Details finden Sie in der Begründung unten.",
       "DETAILS": "Der Herausgebende bzw. die Redaktion hat dieses Objekt zurückgezogen. \n\nWeitere Details finden Sie in der Begründung unten.",
