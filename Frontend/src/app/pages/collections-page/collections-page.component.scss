@@ -39,12 +39,6 @@ mat-sidenav.es-mat-sidenav {
     }
 }
 
-// `Make the drawer transparent so the sidebar card's
-// margin exposes that same background and both sides match.
-mat-sidenav.es-mat-sidenav {
-    --mat-sidenav-container-background-color: transparent;
-}
-
 // Global content container, mirroring the search/editorial page `.main-content` card.
 .main-content {
     flex-grow: 1;
