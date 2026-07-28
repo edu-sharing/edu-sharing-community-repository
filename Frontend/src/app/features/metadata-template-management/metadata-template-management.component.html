@@ -1,8 +1,5 @@
 <div class="methodology-container">
   @if (!templateSelection()) {
-  <es-info-message mode="info" [closable]="true">
-    {{ i18nPrefix + 'METHODOLOGY.INFO' | translate }}
-  </es-info-message>
   <div class="template-actions">
     <div class="template-selection">
       <es-dropdown #dropdown [options]="templateOptions()">

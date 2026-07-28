@@ -98,7 +98,6 @@
         },
         "METHODOLOGY": {
           "TITLE": "Metadaten",
-          "INFO": "Ergänze Metadaten, um dein Material leichter wiederzufinden.\nDeine Auswahl kannst du als Vorlage speichern und wiederverwenden.",
           "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
           "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
           "METADATA_SKIPPED": "Metadaten an {{skippedCount}} Element(en) übersprungen, da keine ausreichenden Rechte vorhanden sind",

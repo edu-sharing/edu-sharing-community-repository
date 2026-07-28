@@ -98,7 +98,6 @@
         },
         "METHODOLOGY": {
           "TITLE": "Metadata",
-          "INFO": "Add metadata to find your material more easily.\nYou can save your selection as a template and reuse it.",
           "METADATA_SAVED_WRITE": "Metadata updated on {{writeCount}} element(s)",
           "METADATA_SUGGESTIONS": "Metadata stored as a suggestion on {{suggestionCount}} element(s), because of insufficient permissions",
           "METADATA_SKIPPED": "Metadata skipped on {{skippedCount}} element(s), because of insufficient permissions",
