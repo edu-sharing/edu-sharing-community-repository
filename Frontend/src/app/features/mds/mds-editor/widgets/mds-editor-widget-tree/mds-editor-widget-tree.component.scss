@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     position: relative;
@@ -21,7 +22,7 @@ mat-chip-grid {
     }
 }
 .mat-chip-label {
-    @include limitLineLength(200px);
+    @include mixins.limitLineLength(200px);
 }
 .suggestion-badge {
     position: absolute;
@@ -120,12 +121,12 @@ mat-chip-row {
     }
 
     .accept {
-        @include clickable();
+        @include mixins.clickable();
         color: var(--colorStatusPositive);
     }
 
     .decline {
-        @include clickable();
+        @include mixins.clickable();
         color: $colorStatusNegative !important;
     }
 }
@@ -135,7 +136,7 @@ mat-chip-row {
     border-radius: 6px;
     min-height: 32px;
     width: 100%;
-    box-shadow: 0 2px 4px 0 #00000026;
+    @include mixins.materialShadowBottom();
     background: var(--backgroundElevatedColor);
     font-size: 12px;
 

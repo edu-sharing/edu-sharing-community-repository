@@ -4,7 +4,7 @@
 .methodology-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 4px;
 
     .dropdown-selection,
     .template-toggle,
@@ -12,6 +12,10 @@
         &:not(.mat-mdc-button-disabled) {
             color: var(--primary);
         }
+    }
+
+    .create-template {
+        margin-top: 8px;
     }
 
     .template-actions {
@@ -66,6 +70,17 @@
                     flex-shrink: 0;
                 }
             }
+        }
+    }
+
+    // custom adjustments for the mds-editor-wrapper:
+    // * add gap between metadata fields
+    // * remove additional padding of keyword input
+    es-mds-editor-wrapper ::ng-deep .content {
+        gap: 4px;
+
+        es-mds-editor-widget-container .ripple-container {
+            padding: 0;
         }
     }
 }
