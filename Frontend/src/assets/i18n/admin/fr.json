@@ -183,6 +183,22 @@
           "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "Le module Elasticsearch transforme les objets, y compris les statistiques et les métadonnées, en une structure d'index Elasticsearch spéciale et permet des recherches efficaces et très détaillées."
         },
+        "edu_sharing-community-repository-plugin-kafka-backend-alfresco-module": {
+          "TITLE": "Plugin Kafka edu-sharing",
+          "DESCRIPTION": "Le plugin fournit un courtier de messages Kafka permettant de regrouper et de mettre à disposition les notifications, par exemple pour les partages, via un point d'accès unique."
+        },
+        "edu_sharing-community-repository-plugin-remote-backend-alfresco-module": {
+          "TITLE": "Plugin Remote edu-sharing",
+          "DESCRIPTION": "Le plugin permet l'intégration fédérée d'autres instances edu-sharing dans la recherche."
+        },
+        "edu_sharing-community-repository-plugin-mongo-backend-alfresco-module": {
+          "TITLE": "Plugin Mongo edu-sharing",
+          "DESCRIPTION": "Le plugin fournit une base MongoDB pour les métadonnées supplémentaires telles que les suggestions, les relations ou les évaluations."
+        },
+        "edu_sharing-community-repository-plugin-cluster-backend-alfresco-module": {
+          "TITLE": "Plugin Cluster edu-sharing",
+          "DESCRIPTION": "Le plugin permet de répartir le backend edu-sharing sur plusieurs instances (répartition de charge) avec un cache distribué."
+        },
         "alfresco-trashcan-cleaner project": {
           "TITLE": "Nettoyeur de poubelles",
           "DESCRIPTION": "Le nettoyeur de corbeille supprime régulièrement les anciens contenus de la corbeille de tous les utilisateurs."
