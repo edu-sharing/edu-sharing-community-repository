@@ -30,9 +30,7 @@
       ></i>
     </button>
     }
-    <!-- On mobile the panel is a full-screen overlay and the edge tab is hidden, so the header
-      carries an explicit close (X). On desktop the tab handles open/close instead. -->
-    @if (!isDesktop()) {
+    <!-- explicit close button -->
     <button
       mat-icon-button
       (click)="close()"
@@ -40,7 +38,6 @@
     >
       <i esIcon="close" [aria]="true"></i>
     </button>
-    }
   </div>
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
