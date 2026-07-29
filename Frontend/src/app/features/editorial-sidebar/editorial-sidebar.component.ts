@@ -314,7 +314,16 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
             'splitscreen_vertical_add',
-            () => this.enabledOption.set({ trap: false, option: 'SORT_INTO' }),
+            () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: 'SORT_INTO',
+                    optionConfig: {
+                        // an existing collection may be picked and copied into the current parent;
+                        // only takes effect when that parent is a collection itself
+                        allowCollectionCopy: true,
+                    } as NodesSelectorConfig,
+                }),
         );
         createAssignment.group = DefaultGroups.Primary;
         sortInto.customShowCallback = async () => {
