@@ -46,6 +46,7 @@ export class SelectFavoriteDialogComponent {
             applyLabel: 'OPTIONS.ADD_SHORTCUT',
             // exactly one node (file, folder or collection) becomes the favorite/shortcut
             applyCallback: (nodes) => nodes.length === 1,
+            allowCollectionSelection: true,
             allowFolderSelection: true,
             // only the list view is needed here
             allowSearchViewSwitch: false,

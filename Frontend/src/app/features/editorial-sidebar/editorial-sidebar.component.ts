@@ -321,7 +321,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                     optionConfig: {
                         // an existing collection may be picked and copied into the current parent;
                         // only takes effect when that parent is a collection itself
-                        allowCollectionCopy: true,
+                        allowCollectionSelection: true,
                     } as NodesSelectorConfig,
                 }),
         );

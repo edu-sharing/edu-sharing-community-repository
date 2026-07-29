@@ -66,8 +66,8 @@ export class AddCollectionSidebarComponent {
                 applyLabel: this.i18nPrefix + 'TITLE',
                 // the flow ends with the copy, so close the sidebar afterwards
                 autoClose: true,
-                // this is the only flow that may copy a whole collection
-                allowCollectionCopy: true,
+                // an existing collection is the source here, and the parent is its copy target
+                allowCollectionSelection: true,
                 // only existing collections may be picked as the source
                 tabBlacklist: [
                     TabType.SEARCH,

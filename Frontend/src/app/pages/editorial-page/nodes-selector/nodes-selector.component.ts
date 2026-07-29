@@ -153,7 +153,7 @@ export type NodesSelectorConfig = {
      */
     onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
     /**
-     * allow folders to be selected as sources, in addition to files and collections.
+     * allow folders to be selected as sources, in addition to files.
      */
     allowFolderSelection?: boolean;
     /**
@@ -167,11 +167,9 @@ export type NodesSelectorConfig = {
      */
     tabBlacklist?: TabType[];
     /**
-     * allow an existing collection to be picked as the source and copied into the current parent
-     * (incl. the configuration step). Only the dedicated "add collection" flow opts in — otherwise
-     * a collection can not be sorted into another one.
+     * allow collections to be selected as sources, in addition to files.
      */
-    allowCollectionCopy?: boolean;
+    allowCollectionSelection?: boolean;
 };
 
 @Component({
@@ -298,9 +296,9 @@ export class NodesSelectorComponent implements OnInit {
     allowFolderSelection: Signal<boolean> = computed(
         () => !!this.option()?.optionConfig?.allowFolderSelection,
     );
-    // whether an existing collection may be picked as a source and copied into the parent
-    allowCollectionCopy: Signal<boolean> = computed(
-        () => !!this.option()?.optionConfig?.allowCollectionCopy,
+    // whether an existing collection may be picked as a source (copy target permitting, see copyNodes)
+    allowCollectionSelection: Signal<boolean> = computed(
+        () => !!this.option()?.optionConfig?.allowCollectionSelection,
     );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
@@ -318,7 +316,7 @@ export class NodesSelectorComponent implements OnInit {
                 // copy collection dialog, plus (opt-in) a single folder as source
                 if (
                     this.onlyOneSelected() &&
-                    ((this.allowCollectionCopy() &&
+                    ((this.allowCollectionSelection() &&
                         this.selectedNodes()[0].mediatype === 'collection') ||
                         (this.allowFolderSelection() &&
                             this.selectedNodes()[0].mediatype === 'folder'))
@@ -474,7 +472,7 @@ export class NodesSelectorComponent implements OnInit {
         showFiles: true,
         selectionMode: this.selectionMode(),
         isValidSourceCallback: (node: Node) =>
-            (this.allowCollectionCopy() &&
+            (this.allowCollectionSelection() &&
                 this.parent()?.mediatype === 'collection' &&
                 node?.mediatype === 'collection' &&
                 this.parent()?.ref.id !== node?.ref.id &&
