@@ -41,6 +41,7 @@ import { RenderWrapperComponent } from '../../render2-page/render-wrapper-compon
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { ThemeService } from '../../../services/theme.service';
 import { GenericDialogButton } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 
 /**
@@ -65,6 +66,7 @@ export class AssignmentSubmissionComponent implements OnDestroy {
     private assignmentService = inject(AssignmentV1Service);
     private dialogs = inject(DialogsService);
     private authorityNamePipe = inject(AuthorityNamePipe);
+    protected theme = inject(ThemeService);
 
     @ViewChild(NgxExtendedPdfViewerComponent)
     pdfViewer: NgxExtendedPdfViewerComponent;

@@ -125,7 +125,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     private restConnectorsService = inject(RestConnectorsService);
     private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
     private nodeTitlePipe = inject(NodeTitlePipe);
-    private theme = inject(ThemeService);
+    protected theme = inject(ThemeService);
 
     @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
