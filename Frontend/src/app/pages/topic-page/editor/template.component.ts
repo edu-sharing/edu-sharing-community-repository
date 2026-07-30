@@ -1279,36 +1279,38 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * template publishing, so publishing never copies the previously saved values.
      *
      * @param changesMap
-     * @returns false if the variant config is invalid and nothing was persisted
+     * @returns the ID of the node the changes were written to (the currently selected variant if
+     *          there was nothing to persist), or null if the variant config is invalid
      */
     private async persistPageVariantChanges(
         changesMap: Map<string, string | string[]>,
-    ): Promise<boolean> {
+    ): Promise<string | null> {
         if (!changesMap?.size) {
-            return true;
+            return retrieveNodeId(this.pageVariantNode());
         }
+        // may replace the selected variant by an own copy when the page config is inherited
         await this.checkForCustomPageNodeExistence();
         const pageVariant: PageVariantConfig = this.retrievePageVariant();
         if (!pageVariant) {
-            return false;
+            return null;
         }
+        // resolve the target once: `pageVariantNode` is re-assigned from the cached
+        // `pageVariantConfigs.nodes` entry in several places, so re-reading it per iteration could
+        // scatter the writes across nodes
+        const targetNodeId: string = retrieveNodeId(this.pageVariantNode());
         // iterate changes map and persist them
         let index: number = 0;
         for (const [key, value] of changesMap.entries()) {
             // more than one change exist
             // persist change without reloading the page variant
             if (changesMap.size > index + 1) {
-                await this.topicPageHelperService.setProperty(
-                    retrieveNodeId(this.pageVariantNode()),
-                    key,
-                    value,
-                );
+                await this.topicPageHelperService.setProperty(targetNodeId, key, value);
             }
             // persist change with reloading the page variant and update the configs accordingly
             else {
                 this.pageVariantNode.set(
                     await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(this.pageVariantNode()),
+                        targetNodeId,
                         key,
                         value,
                     ),
@@ -1317,7 +1319,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
             index++;
         }
-        return true;
+        return targetNodeId;
     }
 
     /**
@@ -2490,6 +2492,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Writes the variable dimension values of a changes map (everything except the title) onto a
+     * given node. Used when publishing a global template so the copy carries the parameters the
+     * user just entered, even if the source node it was built from was not up to date.
+     *
+     * @param targetNodeId
+     * @param changesMap
+     * @returns the updated node or null if there was nothing to write
+     */
+    private async applyPersistedParametersToNode(
+        targetNodeId: string,
+        changesMap: Map<string, string | string[]>,
+    ): Promise<Node | null> {
+        const parameterChanges: [string, string | string[]][] = Array.from(
+            changesMap?.entries() ?? [],
+        ).filter(([key]) => key !== RestConstants.LOM_PROP_TITLE);
+        if (!parameterChanges.length) {
+            return null;
+        }
+        for (const [key, value] of parameterChanges) {
+            await this.topicPageHelperService.setProperty(targetNodeId, key, value);
+        }
+        return await this.topicPageHelperService.getNode(targetNodeId);
+    }
+
+    /**
      * Copies profiling properties from a source node to a target node if they are present.
      */
     private async copyProfilingProperties(
@@ -3197,17 +3224,30 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         try {
             // persist the still unsaved settings changes first (same as "apply changes"), so the
             // published template carries the values currently shown in the configuration menu
-            if (!(await this.persistPageVariantChanges(changesMap))) {
+            const sourceNodeId: string = await this.persistPageVariantChanges(changesMap);
+            if (!sourceNodeId) {
                 return;
             }
-            // read the source only now: persisting the changes replaces the page variant node
-            const sourceNode: Node = this.pageVariantNode();
-            // build the properties of the new global template based on the source variant
+            // re-read the source by the ID the changes were written to instead of using the local
+            // signal: `pageVariantNode` is re-assigned from the cached `pageVariantConfigs.nodes`
+            // entry in several places (variant selection, `retrievePageVariant`), so it may point
+            // at an outdated node object — the copy would then be built from stale metadata
+            const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
+            this.pageVariantNode.set(sourceNode);
+            await this.updatePageVariantConfigs(false);
+            // build the properties of the new global template based on the source variant. The
+            // title is taken over unchanged: a copy suffix only obscures which variant a global
+            // template originated from (and stacks up on every republish)
             const properties: { [key: string]: string | string[] } =
-                await this.topicPageHelperService.retrievePageVariantProperties(
-                    sourceNode,
-                    '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
-                );
+                await this.topicPageHelperService.retrievePageVariantProperties(sourceNode);
+            // overlay the title that was just persisted: it is the value the user entered, so the
+            // published template must carry it regardless of the state of the source node
+            const changedTitle: string | string[] = changesMap?.get(RestConstants.LOM_PROP_TITLE);
+            if (changedTitle) {
+                properties[RestConstants.LOM_PROP_TITLE] = Array.isArray(changedTitle)
+                    ? changedTitle[0]
+                    : changedTitle;
+            }
             // mark as a (root) template with an initial version; the template ref is set to the
             // new node's own ID once it has been created
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
@@ -3241,6 +3281,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             if (updatedTemplateNode) {
                 globalTemplateNode = updatedTemplateNode;
+            }
+            // overlay the parameter values that were just persisted (same reason as the title;
+            // written separately from the creation for the same reason as the profiling props)
+            const templateWithChanges: Node = await this.applyPersistedParametersToNode(
+                retrieveNodeId(globalTemplateNode),
+                changesMap,
+            );
+            if (templateWithChanges) {
+                globalTemplateNode = templateWithChanges;
             }
             // copy + relink the swimlane widget nodes and persist the config. A public template
             // is a clean skeleton: editorial members (breadcrumb) and topic header are dropped, and
@@ -3277,6 +3326,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 ),
             );
             await this.updatePageVariantConfigs(false);
+            // the settings changes were persisted along the way, so close the menu like "apply
+            // changes" does — leaving it open suggests there is still something to save
+            this.closeSideMenus();
             this.topicPageHelperService.openSaveConfigToast(
                 this.i18nPrefix + 'ADD_TO_GLOBAL.SUCCESS_MESSAGE',
             );
