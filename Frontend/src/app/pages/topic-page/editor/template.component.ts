@@ -2746,11 +2746,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             return;
         }
-        // update the page variant node inside the page variant configs
-        const index = this.pageVariantConfigs.nodes.findIndex(
+        // update the page variant node inside the page variant configs. The configs may not be
+        // loaded at all (e.g. in template mode, where the edited node is a child of the propagate
+        // config node and `pageConfigNode` was reset), so both the list and a missing entry are
+        // tolerated — this is a local cache refresh and must never fail the calling operation.
+        const nodes: Node[] = this.pageVariantConfigs?.nodes;
+        if (!nodes?.length) {
+            return;
+        }
+        const index: number = nodes.findIndex(
             (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
         );
-        this.pageVariantConfigs.nodes[index] = this.pageVariantNode();
+        if (index === -1) {
+            return;
+        }
+        nodes[index] = this.pageVariantNode();
     }
 
     /**
