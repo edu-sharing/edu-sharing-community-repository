@@ -18,10 +18,12 @@ import {
     Node,
     Pagination,
     PROPERTY_FILTER_ALL,
+    SearchRequestParams,
     SearchResults,
     SearchService,
 } from 'ngx-edu-sharing-api';
 import {
+    FetchEvent,
     InteractionType,
     ListItem,
     ListItemSort,
@@ -111,12 +113,14 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         ],
     };
     dataSource: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
-    sortActive: string;
+    // newest first: a freshly published template has to be visible without paging or searching
+    sortActive: string = RestConstants.CM_MODIFIED_DATE;
     readonly sortColumns = [
         new ListItemSort('NODE', RestConstants.LOM_PROP_TITLE),
         new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
     ];
-    sortDirection: SortDirection = 'asc';
+    sortDirection: SortDirection = 'desc';
+    private readonly MAX_ITEMS_PER_REQUEST: number = 50;
 
     // whether the initial node was attempted to be selected
     private initialSelectionMade: boolean = false;
@@ -218,6 +222,69 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     }
 
     /**
+     * Builds the search request for the global page variant templates.
+     *
+     * @param skipCount
+     */
+    private createTemplateSearchRequest(skipCount: number = 0): SearchRequestParams {
+        const criteria: MdsQueryCriteria[] = [
+            {
+                property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+                values: ['true'],
+            },
+        ];
+        if (this.searchValue) {
+            criteria.push({
+                property: 'ngsearchword',
+                values: [this.searchValue.trim()],
+            });
+        }
+        if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
+            criteria.push(...this.searchHelperService.convertCritieria(this.searchFilters, []));
+        }
+        return {
+            query: DEFAULT_PAGE_VARIANT_QUERY_ID,
+            repository: HOME_REPOSITORY,
+            sortProperties: [this.sortActive],
+            sortAscending: [this.sortDirection === 'asc'],
+            maxItems: this.MAX_ITEMS_PER_REQUEST,
+            skipCount,
+            propertyFilter: [PROPERTY_FILTER_ALL],
+            contentType: CONTENT_TYPE_ALL,
+            metadataset: this.genericWidgetGlobalService.getDefaultMds(),
+            body: {
+                criteria,
+            },
+        };
+    }
+
+    /**
+     * Loads the next page of global page variant templates, triggered by the fetchData output of
+     * the node entries wrapper. Without this, the list would be capped at the first request and a
+     * newly created template could be missing from it entirely.
+     *
+     * @param event
+     */
+    async loadMore(event: FetchEvent): Promise<void> {
+        if (
+            this.selectedOption !== CopyOption.Template ||
+            !this.dataSource.hasMore() ||
+            this.dataSource.isLoading
+        ) {
+            return;
+        }
+        this.dataSource.isLoading = true;
+        try {
+            const searchResult: SearchResults = await firstValueFrom(
+                this.searchService.search(this.createTemplateSearchRequest(event.offset)),
+            );
+            this.dataSource.appendData(searchResult.nodes ?? []);
+        } finally {
+            this.dataSource.isLoading = false;
+        }
+    }
+
+    /**
      * Updates the list of page variants based on the selected copy option and search criteria.
      */
     async updateList(): Promise<void> {
@@ -226,37 +293,11 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         // distinguish between template and topic page mode
         if (this.selectedOption === CopyOption.Template) {
             // in template mode, search for global page variant templates only
-            const criteria: MdsQueryCriteria[] = [
-                {
-                    property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
-                    values: ['true'],
-                },
-            ];
-            if (this.searchValue) {
-                criteria.push({
-                    property: 'ngsearchword',
-                    values: [this.searchValue.trim()],
-                });
-            }
-            if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
-                criteria.push(...this.searchHelperService.convertCritieria(this.searchFilters, []));
-            }
             const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search({
-                    query: DEFAULT_PAGE_VARIANT_QUERY_ID,
-                    repository: HOME_REPOSITORY,
-                    sortProperties: [this.sortActive],
-                    sortAscending: [this.sortDirection === 'asc'],
-                    maxItems: 100,
-                    propertyFilter: [PROPERTY_FILTER_ALL],
-                    contentType: CONTENT_TYPE_ALL,
-                    metadataset: this.genericWidgetGlobalService.getDefaultMds(),
-                    body: {
-                        criteria,
-                    },
-                }),
+                this.searchService.search(this.createTemplateSearchRequest()),
             );
             nodes = searchResult.nodes ?? [];
+            pagination = searchResult.pagination;
         } else {
             // in topic page mode, display existing page variants
             nodes = this.pageVariantConfigNodes;
@@ -324,10 +365,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
             }
         }
         // update the data source
-        this.dataSource.setData(nodes);
-        if (pagination) {
-            this.dataSource.setPagination(pagination);
-        }
+        this.dataSource.setData(nodes, pagination ?? null);
         // give the node entries wrapper time to render the list
         setTimeout(async () => {
             this.nodeEntries.getSelection().clear();

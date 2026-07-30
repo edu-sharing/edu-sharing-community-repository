@@ -116,6 +116,7 @@
       columns: sortColumns,
     }"
       (clickItem)="onNodeClick($event)"
+      (fetchData)="loadMore($event)"
       (sortChange)="onSort($event)"
     >
       <!-- placeholder template for empty content -->
