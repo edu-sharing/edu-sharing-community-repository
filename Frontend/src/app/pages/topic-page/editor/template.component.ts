@@ -1292,7 +1292,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return retrieveNodeId(this.pageVariantNode());
         }
         // may replace the selected variant by an own copy when the page config is inherited
-        await this.checkForCustomPageNodeExistence();
+        const pageConfigCreated: boolean = await this.checkForCustomPageNodeExistence();
         const pageVariant: PageVariantConfig = this.retrievePageVariant();
         if (!pageVariant) {
             return null;
@@ -1302,27 +1302,44 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // scatter the writes across nodes
         const targetNodeId: string = retrieveNodeId(this.pageVariantNode());
         // iterate changes map and persist them
-        let index: number = 0;
         for (const [key, value] of changesMap.entries()) {
-            // more than one change exist
-            // persist change without reloading the page variant
-            if (changesMap.size > index + 1) {
-                await this.topicPageHelperService.setProperty(targetNodeId, key, value);
-            }
-            // persist change with reloading the page variant and update the configs accordingly
-            else {
-                this.pageVariantNode.set(
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        targetNodeId,
-                        key,
-                        value,
-                    ),
-                );
-                await this.updatePageVariantConfigs(false);
-            }
-            index++;
+            await this.topicPageHelperService.setProperty(targetNodeId, key, value);
         }
+        // a custom page config was just created: the in-memory collection node does not carry its
+        // ref yet, so the next variant resolution would fall back to the inherited page config and
+        // display the values from before these changes
+        if (pageConfigCreated) {
+            this.collectionNode = await this.topicPageHelperService.getNode(
+                retrieveNodeId(this.collectionNode),
+            );
+        }
+        await this.syncPageVariantNode(targetNodeId);
         return targetNodeId;
+    }
+
+    /**
+     * Re-reads the variant list of the current page config from the server and points
+     * `pageVariantNode` at the given node. The UI resolves the selected variant from that list, so
+     * writing a node without refreshing it would keep the previous values on screen.
+     *
+     * @param nodeId
+     */
+    private async syncPageVariantNode(nodeId: string): Promise<void> {
+        if (retrieveNodeId(this.pageConfigNode)) {
+            await this.updatePageVariantConfigs(true);
+        }
+        const reloadedNode: Node = this.pageVariantConfigs?.nodes?.find(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        this.pageVariantNode.set(
+            reloadedNode ?? (await this.topicPageHelperService.getNode(nodeId)),
+        );
+        const reloadedIndex: number = this.pageVariantConfigs?.nodes?.findIndex(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        if (reloadedIndex >= 0) {
+            this.pageVariantNodeIndex = reloadedIndex;
+        }
     }
 
     /**
@@ -3250,7 +3267,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // at an outdated node object — the copy would then be built from stale metadata
             const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
             this.pageVariantNode.set(sourceNode);
-            await this.updatePageVariantConfigs(false);
             // build the properties of the new global template based on the source variant. The
             // title is taken over unchanged: a copy suffix only obscures which variant a global
             // template originated from (and stacks up on every republish)
