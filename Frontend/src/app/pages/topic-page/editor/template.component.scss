@@ -94,8 +94,7 @@ es-side-menu-wrapper {
 .template-mode ::ng-deep {
     .block {
         border-radius: 0 !important;
-        border-left: none !important;
-        border-right: none !important;
+        border: none !important;
     }
     .message-container {
         text-align: center;
