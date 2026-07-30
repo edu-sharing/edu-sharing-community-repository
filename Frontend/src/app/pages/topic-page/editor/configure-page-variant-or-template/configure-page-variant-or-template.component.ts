@@ -46,7 +46,8 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
 
-    @Output() addToGlobalTemplatesClicked: EventEmitter<void> = new EventEmitter<void>();
+    @Output() addToGlobalTemplatesClicked: EventEmitter<Map<string, string | string[]>> =
+        new EventEmitter<Map<string, string | string[]>>();
     @Output() applyChangesClicked: EventEmitter<Map<string, string | string[]>> = new EventEmitter<
         Map<string, string | string[]>
     >();
@@ -81,6 +82,14 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         );
     });
     variableInputValid: WritableSignal<boolean> = signal(true);
+    invalidParametersTooltip: Signal<string> = computed(() =>
+        this.variableInputValid()
+            ? null
+            : this.translateService.instant(
+                  this.i18nPrefix +
+                      (this.isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS'),
+              ),
+    );
     furtherExistingPageVariants: Signal<Node[]> = computed(() =>
         this.pageVariantConfigNodes().filter(
             (n) => retrieveNodeId(n) !== retrieveNodeId(this.pageVariantNode),
@@ -146,15 +155,25 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
 
     /**
      * Emits the event to publish the current variant/template into the global templates folder.
+     * The still unsaved settings changes are passed along so the host can persist them first —
+     * otherwise the published template would carry the previously saved values.
      */
     addToGlobalTemplates(): void {
-        this.addToGlobalTemplatesClicked.emit();
+        this.addToGlobalTemplatesClicked.emit(this.collectChanges());
     }
 
     /**
      * Processes the variables input and emits the apply changes event.
      */
     applyChanges(): void {
+        this.applyChangesClicked.emit(this.collectChanges());
+    }
+
+    /**
+     * Collects the settings changes (title + variable dimensions) that differ from the values
+     * currently persisted on the page variant node.
+     */
+    private collectChanges(): Map<string, string | string[]> {
         const outputMap = new Map<string, string | string[]>();
 
         // process variable selections
@@ -173,7 +192,7 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         if (this.titleInput !== this.pageVariantNode.title) {
             outputMap.set(RestConstants.LOM_PROP_TITLE, this.titleInput);
         }
-        this.applyChangesClicked.emit(outputMap);
+        return outputMap;
     }
 
     /**

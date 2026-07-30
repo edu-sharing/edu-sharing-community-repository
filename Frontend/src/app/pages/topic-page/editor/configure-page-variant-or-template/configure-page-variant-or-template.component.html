@@ -52,24 +52,20 @@
       </button>
     </div>
     @if (addToGlobalTemplatesEnabled()) {
-    <button
-      mat-stroked-button
-      class="btn-outline-primary"
-      color="primary"
-      (click)="addToGlobalTemplates()"
-    >
-      <i esIcon="public"></i>
-      {{ dynamicI18nPrefix() + 'ADD_TO_GLOBAL_TEMPLATES' | translate }}
-    </button>
+    <div [matTooltip]="invalidParametersTooltip()">
+      <button
+        mat-stroked-button
+        class="btn-outline-primary"
+        color="primary"
+        [disabled]="!variableInputValid()"
+        (click)="addToGlobalTemplates()"
+      >
+        <i esIcon="public"></i>
+        {{ dynamicI18nPrefix() + 'ADD_TO_GLOBAL_TEMPLATES' | translate }}
+      </button>
+    </div>
     }
-    <div
-      [matTooltip]="
-        !variableInputValid()
-          ? (i18nPrefix + (isDuplicate() ? 'DUPLICATE_PARAMETERS' : 'DEFINE_PARAMETERS')
-            | translate)
-          : null
-      "
-    >
+    <div [matTooltip]="invalidParametersTooltip()">
       <button
         mat-flat-button
         color="primary"

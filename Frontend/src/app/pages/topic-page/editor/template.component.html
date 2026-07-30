@@ -223,7 +223,7 @@
               [templateNode]="templateVariantNode()"
               [templateUpdateAvailable]="templateUpdateAvailable()"
               [viewModes]="['checkbox', 'checkbox']"
-              (addToGlobalTemplatesClicked)="addCurrentVariantToGlobalTemplates()"
+              (addToGlobalTemplatesClicked)="addCurrentVariantToGlobalTemplates($event)"
               (applyChangesClicked)="applyPageVariant($event)"
               (deletePageVariantClicked)="deletePageVariant()"
               (regenerateClicked)="regeneratePageVariant()"

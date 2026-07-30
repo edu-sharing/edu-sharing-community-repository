@@ -1260,36 +1260,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
+            if (!(await this.persistPageVariantChanges(changesMap))) {
                 this.endEditing();
                 return;
-            }
-            // iterate changes map and persist them
-            let index: number = 0;
-            for (const [key, value] of changesMap.entries()) {
-                // more than one change exist
-                // persist change without reloading the page variant
-                if (changesMap.size > index + 1) {
-                    await this.topicPageHelperService.setProperty(
-                        retrieveNodeId(this.pageVariantNode()),
-                        key,
-                        value,
-                    );
-                }
-                // persist change with reloading the page variant and update the configs accordingly
-                else {
-                    this.pageVariantNode.set(
-                        await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                            retrieveNodeId(this.pageVariantNode()),
-                            key,
-                            value,
-                        ),
-                    );
-                    await this.updatePageVariantConfigs(false);
-                }
-                index++;
             }
             this.closeSideMenus();
             this.endEditing();
@@ -1298,6 +1271,53 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.endEditing();
             this.topicPageHelperService.displayErrorToast();
         }
+    }
+
+    /**
+     * Persists the pending settings changes (title + variable dimensions) on the currently
+     * selected page variant node and refreshes it. Shared by "apply changes" and the global
+     * template publishing, so publishing never copies the previously saved values.
+     *
+     * @param changesMap
+     * @returns false if the variant config is invalid and nothing was persisted
+     */
+    private async persistPageVariantChanges(
+        changesMap: Map<string, string | string[]>,
+    ): Promise<boolean> {
+        if (!changesMap?.size) {
+            return true;
+        }
+        await this.checkForCustomPageNodeExistence();
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        if (!pageVariant) {
+            return false;
+        }
+        // iterate changes map and persist them
+        let index: number = 0;
+        for (const [key, value] of changesMap.entries()) {
+            // more than one change exist
+            // persist change without reloading the page variant
+            if (changesMap.size > index + 1) {
+                await this.topicPageHelperService.setProperty(
+                    retrieveNodeId(this.pageVariantNode()),
+                    key,
+                    value,
+                );
+            }
+            // persist change with reloading the page variant and update the configs accordingly
+            else {
+                this.pageVariantNode.set(
+                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                        retrieveNodeId(this.pageVariantNode()),
+                        key,
+                        value,
+                    ),
+                );
+                await this.updatePageVariantConfigs(false);
+            }
+            index++;
+        }
+        return true;
     }
 
     /**
@@ -3167,13 +3187,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * resulting template is self-contained. The source variant is left untouched except for its
      * template reference (repointed to the new global template) and its template version (reset).
      */
-    async addCurrentVariantToGlobalTemplates(): Promise<void> {
-        const sourceNode: Node = this.pageVariantNode();
-        if (!sourceNode || !this.canAddToGlobalTemplates()) {
+    async addCurrentVariantToGlobalTemplates(
+        changesMap?: Map<string, string | string[]>,
+    ): Promise<void> {
+        if (!this.pageVariantNode() || !this.canAddToGlobalTemplates()) {
             return;
         }
         this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
         try {
+            // persist the still unsaved settings changes first (same as "apply changes"), so the
+            // published template carries the values currently shown in the configuration menu
+            if (!(await this.persistPageVariantChanges(changesMap))) {
+                return;
+            }
+            // read the source only now: persisting the changes replaces the page variant node
+            const sourceNode: Node = this.pageVariantNode();
             // build the properties of the new global template based on the source variant
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
