@@ -31,6 +31,7 @@ const PROXY_CONFIG = [
         ],
         target: process.env.BACKEND_URL,
         secure: false,
+        ws: true,
         changeOrigin: true,
         bypass(req, res, proxyOptions) {
             if (req.method !== 'POST' && req.url.startsWith('/edu-sharing/share')) {
