@@ -55,7 +55,6 @@
         "ATTACHMENT_EMPTY": "Keine Dateien abgegeben"
       },
       "ADD_COLLECTION": {
-        "TITLE": "Sammlung hinzufügen",
         "HEADING": "Wie möchten Sie fortfahren?",
         "DESCRIPTION": "Wählen Sie aus, ob Sie eine neue Sammlung erstellen oder eine bestehende kopieren möchten.",
         "CREATE": {

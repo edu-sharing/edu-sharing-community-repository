@@ -419,7 +419,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.editorialSidebarService.showOption({
             option: 'ADD_COLLECTION',
             trap: false,
-            title: 'EDITORIAL.SIDEBAR.ADD_COLLECTION.TITLE',
         });
     }
 

@@ -290,7 +290,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             this.enabledOption.set({
                 trap: false,
                 option: 'ADD_COLLECTION',
-                title: 'EDITORIAL.SIDEBAR.ADD_COLLECTION.TITLE',
             }),
         );
         addCollection.group = DefaultGroups.Create;
