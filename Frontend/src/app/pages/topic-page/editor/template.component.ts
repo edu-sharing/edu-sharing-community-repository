@@ -247,6 +247,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     )?.value;
     readonly i18nPrefix: string = 'TOPIC_PAGE.';
     readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
+    readonly createPageTemplateTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_TEMPLATE';
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
@@ -969,13 +970,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
         if (pageConfigPropagateRef) {
             this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
+            // a collection holds at most one page template, so drop a create option that was added
+            // while none existed yet (e.g. the template was just created in this session)
+            await this.removeCustomMainNavOptions(this.createPageTemplateTitle);
         }
         // page config propagate ref does not yet exist
         else {
             // add a create page template option to the "new" button
-            const createTemplateName: string = 'TOPIC_PAGE.NAVIGATION.NEW_PAGE_TEMPLATE';
             const createPageTemplate = new OptionItem(
-                createTemplateName,
+                this.createPageTemplateTitle,
                 'edu-add_page_template',
                 () => {
                     void this.createPageTemplate();
@@ -989,7 +992,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
                 .customCreateOptions;
             const existingCreateOptions = currentConfig?.addOptions || [];
-            if (!existingCreateOptions.find((o) => o.name === createTemplateName)) {
+            if (!existingCreateOptions.find((o) => o.name === this.createPageTemplateTitle)) {
                 this.mainNavService.patchMainNavConfig({
                     customCreateOptions: {
                         ...currentConfig,
@@ -2060,23 +2063,36 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageConfigNode = null;
         this.selectedVariantPosition = -1;
         this.closeSideMenus();
-        // remove create button for new page variant
-        // retrieve existing options from main nav config to extend them
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.filter(
-                    (o) => o.name !== this.createPageVariantTitle,
-                ),
-            },
-        });
+        // remove the create buttons for a new page variant and a new page template: neither can be
+        // created while the template itself is being edited
+        await this.removeCustomMainNavOptions(
+            this.createPageVariantTitle,
+            this.createPageTemplateTitle,
+        );
         await this.retrievePageConfigAndSelectVariant();
     }
 
     // HELPER FUNCTIONS
+    /**
+     * Removes custom create options from the main nav config by their (i18n) name.
+     *
+     * @param names
+     */
+    private async removeCustomMainNavOptions(...names: string[]): Promise<void> {
+        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
+            .customCreateOptions;
+        const existingCreateOptions = currentConfig?.addOptions || [];
+        if (!existingCreateOptions.some((o) => names.includes(o.name))) {
+            return;
+        }
+        this.mainNavService.patchMainNavConfig({
+            customCreateOptions: {
+                ...currentConfig,
+                addOptions: existingCreateOptions.filter((o) => !names.includes(o.name)),
+            },
+        });
+    }
+
     /**
      * Helper function to add custom options to the main nav config.
      */
