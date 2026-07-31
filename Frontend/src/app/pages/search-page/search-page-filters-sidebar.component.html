@@ -1,10 +1,11 @@
 <!-- Resizable filter bar similar to editorial page -->
+@if (defaultWidthPx(); as defaultWidth) {
 <div
   class="filter-bar-resizable"
   esResizableSidenav
   position="start"
   storageKey="SEARCH_SIDENAV_LEFT_WIDTH"
-  [defaultWidthPx]="319"
+  [defaultWidthPx]="defaultWidth"
   [minWidth]="0"
   [minWidthPx]="269"
   [maxWidthPx]="619"
@@ -27,6 +28,7 @@
     </div>
   </div>
 </div>
+}
 
 <ng-template #filtersDialogContent>
   <es-search-page-filter-bar class="filters-dialog-content"></es-search-page-filter-bar>
