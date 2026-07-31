@@ -299,6 +299,20 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
+    /** the generic "login via external provider" hint (config.loginUrl) is rendered */
+    showLoginUrl(): boolean {
+        return !!this.config?.loginUrl && !this.showProviders() && !this.isSafeLogin;
+    }
+
+    /**
+     * Hide the oauth provider buttons if the generic loginUrl hint is already shown and there is
+     * exactly one provider -- both would offer the very same external login.
+     */
+    showOauthProviders(): boolean {
+        const count = this.registeredOauthProviders?.length ?? 0;
+        return count > 0 && !(count === 1 && this.showLoginUrl());
+    }
+
     checkConditions(event: Event) {
         this.disabled = !this.username || this.currentProvider; // || !this.password;
         this.updateButtons();

@@ -133,7 +133,7 @@
               }
             </div>
           </form>
-          @if (config.loginUrl && !showProviders() && !isSafeLogin) {
+          @if (showLoginUrl()) {
           <div class="useUrl">
             <div>{{ 'LOGIN.USE_URL_TEXT' | translate }}</div>
             <es-mat-link (clickOnLink)="openLoginUrl()" class="goto">
@@ -163,7 +163,7 @@
         </div>
         }
       </div>
-      @if (registeredOauthProviders?.length) {
+      @if (showOauthProviders()) {
       <div class="oauth-providers">
         <h4 class="mat-heading-4">{{ 'LOGIN.OAUTH.TITLE' | translate }}</h4>
         <div>
