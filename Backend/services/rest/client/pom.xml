@@ -51,8 +51,8 @@
 
   <modules>
     <module>java</module>
-    <module>php</module>
-    <module>typescript</module>
+<!--    <module>php</module>-->
+<!--    <module>typescript</module>-->
   </modules>
 
 </project>

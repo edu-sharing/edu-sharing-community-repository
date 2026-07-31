@@ -389,7 +389,7 @@
         <version>${project.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
         <version>${project.version}</version>
@@ -401,7 +401,7 @@
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
-      </dependency>
+      </dependency>-->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -409,12 +409,12 @@
         <version>${project.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
         <version>${project.version}</version>
         <type>zip</type>
-      </dependency>
+      </dependency>-->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
