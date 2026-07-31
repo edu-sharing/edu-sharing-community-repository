@@ -25,7 +25,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 
 import { MatButtonModule } from '@angular/material/button';
-import { RenderComponent, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
+import { RenderComponent, RenderData, RenderingServiceLibModule } from 'ngx-rendering-service-lib';
 import { MdsModule } from '../../../features/mds/mds.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { HOME_REPOSITORY, Node, NodeService, RestConstants } from 'ngx-edu-sharing-api';
@@ -58,6 +58,7 @@ export class RenderWrapperComponent implements OnChanges {
     private editorialSidebarService = inject(EditorialSidebarService);
 
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
+    @ViewChild(RenderComponent) private renderComponent?: RenderComponent;
     @Input() showTopbar = true;
     @Input() showMetadata = true;
     /**
@@ -169,8 +170,31 @@ export class RenderWrapperComponent implements OnChanges {
                 addOptions,
             },
             postPrepareOptions: (o) => {
+                const isSodix =
+                    node?.properties?.['ccm:replicationsource']?.[0]?.toLowerCase() === 'sodix';
                 o.filter((o) => o.name === 'OPTIONS.DOWNLOAD').forEach((download) => {
                     download.showAsAction = true;
+                    // Only Sodix links expire and are refreshable. Leave every other node's default
+                    // download (and its show condition) untouched — fetching would 400 on a
+                    // non-refreshable module and error out the render.
+                    if (!isSodix) {
+                        return;
+                    }
+                    // Deferred Sodix nodes have no url up front, so force the button visible...
+                    download.customShowCallback = async () => true;
+                    // ...and fetch a fresh (non-expired) url on every click before downloading it.
+                    download.callback = async () => {
+                        const data = await this.fetchLinks();
+                        const url = data?.items?.[0]?.additionalData?.['downloadUrl'];
+                        if (url) {
+                            this.nodeHelper.downloadUrl(url, 'download', {
+                                node,
+                                triggerTrackingEvent: true,
+                            });
+                        } else {
+                            void this.nodeHelper.downloadNode(node);
+                        }
+                    };
                 });
             },
         });
@@ -178,6 +202,26 @@ export class RenderWrapperComponent implements OnChanges {
     async refresh() {
         await this.setNodeById(this.childId || this.nodeId);
     }
+
+    /**
+     * Request fresh render links for the currently displayed node without a full re-render
+     * (e.g. when a short-lived link such as a Sodix playout URL has expired). Delegates to the
+     * embedded rendering component, which re-fetches via the backend and swaps in the new link.
+     */
+    reloadLinks(): void {
+        void this.renderComponent?.reloadLinks();
+    }
+
+    /**
+     * Fetch fresh render links on demand for the currently displayed node and resolve once they
+     * arrive — e.g. to refresh an expired Sodix download/playout URL before acting on it.
+     * `items[0].link` is the playout URL, `items[0].additionalData.downloadUrl` the download URL.
+     * Returns null if no rendering component is mounted yet.
+     */
+    fetchLinks(): Promise<RenderData | null> {
+        return this.renderComponent?.fetchLinks() ?? Promise.resolve(null);
+    }
+
     private async setNodeById(nodeId: string) {
         this.loading.set(true);
         delete this.data()?.request;

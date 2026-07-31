@@ -7,7 +7,12 @@
   } @loading {
   <ng-container *ngTemplateOutlet="loading"></ng-container>
   } @defer (when data?.module === 'SODIX' || data?.module === 'OMEGA'){
-  <rs-module-url [data]="data" [node]="node"></rs-module-url>
+  <rs-module-url
+    [data]="data"
+    [node]="node"
+    [reloading]="refreshing"
+    (reload)="reloadLinks()"
+  ></rs-module-url>
   } @loading {
   <ng-container *ngTemplateOutlet="loading"></ng-container>
   } @defer (when data?.module === 'VIDEO'){

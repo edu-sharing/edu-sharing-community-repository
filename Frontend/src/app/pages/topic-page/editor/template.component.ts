@@ -247,6 +247,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     )?.value;
     readonly i18nPrefix: string = 'TOPIC_PAGE.';
     readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
+    readonly createPageTemplateTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_TEMPLATE';
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
@@ -969,13 +970,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
         if (pageConfigPropagateRef) {
             this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
+            // a collection holds at most one page template, so drop a create option that was added
+            // while none existed yet (e.g. the template was just created in this session)
+            await this.removeCustomMainNavOptions(this.createPageTemplateTitle);
         }
         // page config propagate ref does not yet exist
         else {
             // add a create page template option to the "new" button
-            const createTemplateName: string = 'TOPIC_PAGE.NAVIGATION.NEW_PAGE_TEMPLATE';
             const createPageTemplate = new OptionItem(
-                createTemplateName,
+                this.createPageTemplateTitle,
                 'edu-add_page_template',
                 () => {
                     void this.createPageTemplate();
@@ -989,7 +992,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
                 .customCreateOptions;
             const existingCreateOptions = currentConfig?.addOptions || [];
-            if (!existingCreateOptions.find((o) => o.name === createTemplateName)) {
+            if (!existingCreateOptions.find((o) => o.name === this.createPageTemplateTitle)) {
                 this.mainNavService.patchMainNavConfig({
                     customCreateOptions: {
                         ...currentConfig,
@@ -1260,36 +1263,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
+            if (!(await this.persistPageVariantChanges(changesMap))) {
                 this.endEditing();
                 return;
-            }
-            // iterate changes map and persist them
-            let index: number = 0;
-            for (const [key, value] of changesMap.entries()) {
-                // more than one change exist
-                // persist change without reloading the page variant
-                if (changesMap.size > index + 1) {
-                    await this.topicPageHelperService.setProperty(
-                        retrieveNodeId(this.pageVariantNode()),
-                        key,
-                        value,
-                    );
-                }
-                // persist change with reloading the page variant and update the configs accordingly
-                else {
-                    this.pageVariantNode.set(
-                        await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                            retrieveNodeId(this.pageVariantNode()),
-                            key,
-                            value,
-                        ),
-                    );
-                    await this.updatePageVariantConfigs(false);
-                }
-                index++;
             }
             this.closeSideMenus();
             this.endEditing();
@@ -1297,6 +1273,72 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             console.error(err);
             this.endEditing();
             this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Persists the pending settings changes (title + variable dimensions) on the currently
+     * selected page variant node and refreshes it. Shared by "apply changes" and the global
+     * template publishing, so publishing never copies the previously saved values.
+     *
+     * @param changesMap
+     * @returns the ID of the node the changes were written to (the currently selected variant if
+     *          there was nothing to persist), or null if the variant config is invalid
+     */
+    private async persistPageVariantChanges(
+        changesMap: Map<string, string | string[]>,
+    ): Promise<string | null> {
+        if (!changesMap?.size) {
+            return retrieveNodeId(this.pageVariantNode());
+        }
+        // may replace the selected variant by an own copy when the page config is inherited
+        const pageConfigCreated: boolean = await this.checkForCustomPageNodeExistence();
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        if (!pageVariant) {
+            return null;
+        }
+        // resolve the target once: `pageVariantNode` is re-assigned from the cached
+        // `pageVariantConfigs.nodes` entry in several places, so re-reading it per iteration could
+        // scatter the writes across nodes
+        const targetNodeId: string = retrieveNodeId(this.pageVariantNode());
+        // iterate changes map and persist them
+        for (const [key, value] of changesMap.entries()) {
+            await this.topicPageHelperService.setProperty(targetNodeId, key, value);
+        }
+        // a custom page config was just created: the in-memory collection node does not carry its
+        // ref yet, so the next variant resolution would fall back to the inherited page config and
+        // display the values from before these changes
+        if (pageConfigCreated) {
+            this.collectionNode = await this.topicPageHelperService.getNode(
+                retrieveNodeId(this.collectionNode),
+            );
+        }
+        await this.syncPageVariantNode(targetNodeId);
+        return targetNodeId;
+    }
+
+    /**
+     * Re-reads the variant list of the current page config from the server and points
+     * `pageVariantNode` at the given node. The UI resolves the selected variant from that list, so
+     * writing a node without refreshing it would keep the previous values on screen.
+     *
+     * @param nodeId
+     */
+    private async syncPageVariantNode(nodeId: string): Promise<void> {
+        if (retrieveNodeId(this.pageConfigNode)) {
+            await this.updatePageVariantConfigs(true);
+        }
+        const reloadedNode: Node = this.pageVariantConfigs?.nodes?.find(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        this.pageVariantNode.set(
+            reloadedNode ?? (await this.topicPageHelperService.getNode(nodeId)),
+        );
+        const reloadedIndex: number = this.pageVariantConfigs?.nodes?.findIndex(
+            (n: Node) => retrieveNodeId(n) === nodeId,
+        );
+        if (reloadedIndex >= 0) {
+            this.pageVariantNodeIndex = reloadedIndex;
         }
     }
 
@@ -2038,23 +2080,36 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.pageConfigNode = null;
         this.selectedVariantPosition = -1;
         this.closeSideMenus();
-        // remove create button for new page variant
-        // retrieve existing options from main nav config to extend them
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.filter(
-                    (o) => o.name !== this.createPageVariantTitle,
-                ),
-            },
-        });
+        // remove the create buttons for a new page variant and a new page template: neither can be
+        // created while the template itself is being edited
+        await this.removeCustomMainNavOptions(
+            this.createPageVariantTitle,
+            this.createPageTemplateTitle,
+        );
         await this.retrievePageConfigAndSelectVariant();
     }
 
     // HELPER FUNCTIONS
+    /**
+     * Removes custom create options from the main nav config by their (i18n) name.
+     *
+     * @param names
+     */
+    private async removeCustomMainNavOptions(...names: string[]): Promise<void> {
+        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
+            .customCreateOptions;
+        const existingCreateOptions = currentConfig?.addOptions || [];
+        if (!existingCreateOptions.some((o) => names.includes(o.name))) {
+            return;
+        }
+        this.mainNavService.patchMainNavConfig({
+            customCreateOptions: {
+                ...currentConfig,
+                addOptions: existingCreateOptions.filter((o) => !names.includes(o.name)),
+            },
+        });
+    }
+
     /**
      * Helper function to add custom options to the main nav config.
      */
@@ -2470,6 +2525,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Writes the variable dimension values of a changes map (everything except the title) onto a
+     * given node. Used when publishing a global template so the copy carries the parameters the
+     * user just entered, even if the source node it was built from was not up to date.
+     *
+     * @param targetNodeId
+     * @param changesMap
+     * @returns the updated node or null if there was nothing to write
+     */
+    private async applyPersistedParametersToNode(
+        targetNodeId: string,
+        changesMap: Map<string, string | string[]>,
+    ): Promise<Node | null> {
+        const parameterChanges: [string, string | string[]][] = Array.from(
+            changesMap?.entries() ?? [],
+        ).filter(([key]) => key !== RestConstants.LOM_PROP_TITLE);
+        if (!parameterChanges.length) {
+            return null;
+        }
+        for (const [key, value] of parameterChanges) {
+            await this.topicPageHelperService.setProperty(targetNodeId, key, value);
+        }
+        return await this.topicPageHelperService.getNode(targetNodeId);
+    }
+
+    /**
      * Copies profiling properties from a source node to a target node if they are present.
      */
     private async copyProfilingProperties(
@@ -2746,11 +2826,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             return;
         }
-        // update the page variant node inside the page variant configs
-        const index = this.pageVariantConfigs.nodes.findIndex(
+        // update the page variant node inside the page variant configs. The configs may not be
+        // loaded at all (e.g. in template mode, where the edited node is a child of the propagate
+        // config node and `pageConfigNode` was reset), so both the list and a missing entry are
+        // tolerated — this is a local cache refresh and must never fail the calling operation.
+        const nodes: Node[] = this.pageVariantConfigs?.nodes;
+        if (!nodes?.length) {
+            return;
+        }
+        const index: number = nodes.findIndex(
             (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
         );
-        this.pageVariantConfigs.nodes[index] = this.pageVariantNode();
+        if (index === -1) {
+            return;
+        }
+        nodes[index] = this.pageVariantNode();
     }
 
     /**
@@ -3157,19 +3247,39 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * resulting template is self-contained. The source variant is left untouched except for its
      * template reference (repointed to the new global template) and its template version (reset).
      */
-    async addCurrentVariantToGlobalTemplates(): Promise<void> {
-        const sourceNode: Node = this.pageVariantNode();
-        if (!sourceNode || !this.canAddToGlobalTemplates()) {
+    async addCurrentVariantToGlobalTemplates(
+        changesMap?: Map<string, string | string[]>,
+    ): Promise<void> {
+        if (!this.pageVariantNode() || !this.canAddToGlobalTemplates()) {
             return;
         }
         this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
         try {
-            // build the properties of the new global template based on the source variant
+            // persist the still unsaved settings changes first (same as "apply changes"), so the
+            // published template carries the values currently shown in the configuration menu
+            const sourceNodeId: string = await this.persistPageVariantChanges(changesMap);
+            if (!sourceNodeId) {
+                return;
+            }
+            // re-read the source by the ID the changes were written to instead of using the local
+            // signal: `pageVariantNode` is re-assigned from the cached `pageVariantConfigs.nodes`
+            // entry in several places (variant selection, `retrievePageVariant`), so it may point
+            // at an outdated node object — the copy would then be built from stale metadata
+            const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
+            this.pageVariantNode.set(sourceNode);
+            // build the properties of the new global template based on the source variant. The
+            // title is taken over unchanged: a copy suffix only obscures which variant a global
+            // template originated from (and stacks up on every republish)
             const properties: { [key: string]: string | string[] } =
-                await this.topicPageHelperService.retrievePageVariantProperties(
-                    sourceNode,
-                    '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
-                );
+                await this.topicPageHelperService.retrievePageVariantProperties(sourceNode);
+            // overlay the title that was just persisted: it is the value the user entered, so the
+            // published template must carry it regardless of the state of the source node
+            const changedTitle: string | string[] = changesMap?.get(RestConstants.LOM_PROP_TITLE);
+            if (changedTitle) {
+                properties[RestConstants.LOM_PROP_TITLE] = Array.isArray(changedTitle)
+                    ? changedTitle[0]
+                    : changedTitle;
+            }
             // mark as a (root) template with an initial version; the template ref is set to the
             // new node's own ID once it has been created
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
@@ -3203,6 +3313,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             if (updatedTemplateNode) {
                 globalTemplateNode = updatedTemplateNode;
+            }
+            // overlay the parameter values that were just persisted (same reason as the title;
+            // written separately from the creation for the same reason as the profiling props)
+            const templateWithChanges: Node = await this.applyPersistedParametersToNode(
+                retrieveNodeId(globalTemplateNode),
+                changesMap,
+            );
+            if (templateWithChanges) {
+                globalTemplateNode = templateWithChanges;
             }
             // copy + relink the swimlane widget nodes and persist the config. A public template
             // is a clean skeleton: editorial members (breadcrumb) and topic header are dropped, and
@@ -3239,6 +3358,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 ),
             );
             await this.updatePageVariantConfigs(false);
+            // the settings changes were persisted along the way, so close the menu like "apply
+            // changes" does — leaving it open suggests there is still something to save
+            this.closeSideMenus();
             this.topicPageHelperService.openSaveConfigToast(
                 this.i18nPrefix + 'ADD_TO_GLOBAL.SUCCESS_MESSAGE',
             );

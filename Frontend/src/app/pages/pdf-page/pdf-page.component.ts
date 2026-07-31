@@ -16,6 +16,7 @@ import { RestConstants } from '../../core-module/rest/rest-constants';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
+import { ThemeService } from '../../services/theme.service';
 import { Toast } from '../../services/toast';
 
 @Component({
@@ -29,6 +30,7 @@ export class PdfPageComponent implements AfterViewInit, OnDestroy, OnInit {
     private nodeApi = inject(NodeService);
     private pdfViewerService = inject(NgxExtendedPdfViewerService);
     private platformLocation = inject(PlatformLocation);
+    protected themeService = inject(ThemeService);
     private toast = inject(Toast);
     private translations = inject(TranslationsService);
 

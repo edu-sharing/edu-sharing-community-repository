@@ -184,8 +184,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         new ListItemSort('NODE', RestConstants.CM_MODIFIED_DATE),
         new ListItemSort('NODE', RestConstants.CCM_PROP_COLLECTION_ORDERED_POSITION, 'ascending'),
     ];
-    createSubCollectionOptionItem = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', () =>
-        this.onCreateCollection(),
+    createSubCollectionOptionItem = new OptionItem(
+        'EDITORIAL.OPTIONS.ADD_COLLECTION',
+        'layers',
+        () => this.onAddCollection(),
     );
     sortReferences: ListSortConfig = {
         active: null,
@@ -328,9 +330,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (changes.collection?.currentValue) {
             this.dataSourceCollections.reset();
             this.dataSourceReferences.reset();
-
-            this.createSubCollectionOptionItem.name =
-                'OPTIONS.' + (this.isRootLevel ? 'NEW_COLLECTION' : 'NEW_SUB_COLLECTION');
             // Per-card options for the sub-collections list are wired (gated on the picker
             // params) in finishCollectionLoading; wiring them unconditionally here would
             // paint an empty options strip on the small cards in normal browsing.
@@ -411,6 +410,18 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         }
         return true;
     }
+    /**
+     * Entry point of the "add collection" flow: the user first decides in the sidebar whether a new
+     * collection is created or an existing one copied to the current location. Works on the root
+     * level as well — the copy then targets the level0 collections.
+     */
+    onAddCollection() {
+        this.editorialSidebarService.showOption({
+            option: 'ADD_COLLECTION',
+            trap: false,
+        });
+    }
+
     onCreateCollection() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             void this.router.navigate(

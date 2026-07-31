@@ -53,6 +53,20 @@
         "INTERNAL_NOTE": "Persönliche Notiz",
         "FEEDBACK": "Feedback geben",
         "ATTACHMENT_EMPTY": "Keine Dateien abgegeben"
+      },
+      "ADD_COLLECTION": {
+        "HEADING": "Wie möchten Sie fortfahren?",
+        "DESCRIPTION": "Wählen Sie aus, ob Sie eine neue Sammlung erstellen oder eine bestehende kopieren möchten.",
+        "CREATE": {
+          "TITLE": "Sammlung erstellen",
+          "DESCRIPTION": "Eine neue Sammlung an diesem Ort anlegen und anschließend gestalten.",
+          "ACTION": "Erstellen"
+        },
+        "COPY": {
+          "TITLE": "Bestehende Sammlung hinzufügen",
+          "DESCRIPTION": "Eine bestehende Sammlung inklusive gewünschter Inhalte und Untersammlungen hierher kopieren.",
+          "ACTION": "Kopieren"
+        }
       }
     },
     "OPTION": {
@@ -83,10 +97,11 @@
         },
         "METHODOLOGY": {
           "TITLE": "Metadaten",
-          "INFO": "Ergänze Metadaten, um dein Material leichter wiederzufinden.\nDeine Auswahl kannst du als Vorlage speichern und wiederverwenden.",
           "METADATA_SAVED_WRITE": "Metadaten an {{writeCount}} Element(en) aktualisiert",
           "METADATA_SUGGESTIONS": "Metadaten an {{suggestionCount}} Element(en) als Vorschlag hinterlegt, da keine ausreichenden Rechte vorhanden sind",
           "METADATA_SKIPPED": "Metadaten an {{skippedCount}} Element(en) übersprungen, da keine ausreichenden Rechte vorhanden sind",
+          "NO_TEMPLATE": "keine Vorlage",
+          "LAST_USED": "Zuletzt verwendet",
           "SELECT_TEMPLATE": "Vorlage auswählen",
           "MANAGE_TEMPLATES": "Vorlagen verwalten",
           "TEMPLATE_NAME": "Titel der Vorlage",
@@ -146,7 +161,9 @@
           },
           "NO_CONFIG_OPTIONS": "Für diesen Inhalt existieren keine weiteren Kopieroptionen."
         }
-      }
+      },
+      "ADD_COLLECTION": "Sammlung hinzufügen",
+      "ADD_COLLECTION_DESCRIPTION": "Eine neue Sammlung erstellen oder eine bestehende Sammlung hierher kopieren"
     },
     "TITLE": "Verwalten",
     "TITLE_ASSIGNMENT": "Aufgaben",
@@ -239,7 +256,10 @@
       "FORM": {
         "TITLE": "Titel",
         "SUMMARY": "Beschreibung",
-        "ADD_FILE": "Material hinzufügen",
+        "ADD_FILE": {
+          "SUBMITTABLE": "Arbeitsmaterial hinzufügen",
+          "SUPPLEMENTARY": "Begleitmaterial hinzufügen"
+        },
         "AUTHORITY_ROLE": "Rolle",
         "DELETE": "Löschen",
         "GROUP_MULTIPLY": "Beim Austeilen der Aufgabe werden alle Mitglieder der Gruppe als Einzel-Personen zugewiesen",

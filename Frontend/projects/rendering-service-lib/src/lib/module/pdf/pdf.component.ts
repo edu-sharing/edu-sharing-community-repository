@@ -1,9 +1,11 @@
 import {
     Component,
+    DestroyRef,
     HostListener,
     inject,
     Input,
     OnChanges,
+    signal,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -46,6 +48,9 @@ export class PdfComponent implements RenderModule, OnChanges {
     restrictedView: boolean = false;
     fileData: Uint8Array | string | undefined;
 
+    // Mirrors the app's applied dark-mode state. The library must not depend on the app's `ThemeService
+    protected isDarkTheme = signal(document.body.classList.contains('isDarkTheme'));
+
     constructor() {
         // This is a view-only PDF widget — we never enable pdf.js' annotation
         // editor. Disabling it (vs. the default NONE mode) stops pdf.js from
@@ -53,6 +58,13 @@ export class PdfComponent implements RenderModule, OnChanges {
         // document-level `dragover`/`drop` listeners (to paste dropped images
         // into the stamp editor)
         pdfDefaultOptions.annotationEditorMode = AnnotationEditorType.DISABLE;
+
+        // Keep the viewer theme in sync with live dark-mode toggles.
+        const observer = new MutationObserver(() =>
+            this.isDarkTheme.set(document.body.classList.contains('isDarkTheme')),
+        );
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        inject(DestroyRef).onDestroy(() => observer.disconnect());
     }
 
     ngOnChanges(changes: SimpleChanges) {

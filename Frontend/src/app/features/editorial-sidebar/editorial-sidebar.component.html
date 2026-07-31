@@ -30,9 +30,7 @@
       ></i>
     </button>
     }
-    <!-- On mobile the panel is a full-screen overlay and the edge tab is hidden, so the header
-      carries an explicit close (X). On desktop the tab handles open/close instead. -->
-    @if (!isDesktop()) {
+    <!-- explicit close button -->
     <button
       mat-icon-button
       (click)="close()"
@@ -40,7 +38,6 @@
     >
       <i esIcon="close" [aria]="true"></i>
     </button>
-    }
   </div>
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -53,6 +50,8 @@
           [parent]="parent()"
           [primaryMode]="primaryMode()"
         ></es-nodes-selector>
+        } @if (option === 'ADD_COLLECTION') {
+        <es-add-collection-sidebar [parent]="parent()"></es-add-collection-sidebar>
         } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"

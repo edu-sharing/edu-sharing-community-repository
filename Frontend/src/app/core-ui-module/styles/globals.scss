@@ -114,6 +114,10 @@
 mat-sidenav.es-mat-sidenav {
     position: fixed;
     top: var(--mainnavCurrentHeight);
+
+    // keep the drawer transarent so it matches the color from the rest of the page
+    --mat-sidenav-container-background-color: transparent;
+
     div.es-mat-sidenav-content {
         margin: 15px 11px 15px 11px;
         //min-height: calc(100vh - 10px - 15px - 15px - var(--mainnavCurrentHeight));

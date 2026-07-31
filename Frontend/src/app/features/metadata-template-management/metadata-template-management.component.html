@@ -1,8 +1,5 @@
 <div class="methodology-container">
   @if (!templateSelection()) {
-  <es-info-message mode="info">
-    {{ i18nPrefix + 'METHODOLOGY.INFO' | translate }}
-  </es-info-message>
   <div class="template-actions">
     <div class="template-selection">
       <es-dropdown #dropdown [options]="templateOptions()">
@@ -17,7 +14,7 @@
         @if (selectedTemplateIndex() === -1) {
         {{ i18nPrefix + 'METHODOLOGY.SELECT_TEMPLATE' | translate }}
         } @else {
-        {{ currentTemplate().name }}
+        {{ currentTemplate().name | translate }}
         }
         <i [esIcon]="trigger?.menuOpen ? 'arrow_drop_up' : 'arrow_drop_down'"></i>
       </button>

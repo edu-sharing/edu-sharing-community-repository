@@ -153,13 +153,23 @@ export type NodesSelectorConfig = {
      */
     onNodesChoosen?: (result: { nodes: Node[]; connectorId?: string; window?: Window }) => void;
     /**
-     * picker mode: restrict the selection to a single node of any type.
-     */
-    singleSelect?: boolean;
-    /**
-     * allow folders to be selected as sources, in addition to files and collections.
+     * allow folders to be selected as sources, in addition to files.
      */
     allowFolderSelection?: boolean;
+    /**
+     * whether the search tab offers the list/cards display type switch (default: true)
+     */
+    allowSearchViewSwitch?: boolean;
+    /**
+     * tabs to hide from the otherwise supported set. Merged with the `tabBlacklist` input, so a
+     * caller that only has the option config at hand (e.g. via the editorial sidebar) can restrict
+     * the offered tabs as well.
+     */
+    tabBlacklist?: TabType[];
+    /**
+     * allow collections to be selected as sources, in addition to files.
+     */
+    allowCollectionSelection?: boolean;
 };
 
 @Component({
@@ -200,6 +210,8 @@ export class NodesSelectorComponent implements OnInit {
     protected readonly idPrefix: string = 'nodes-selector-tab';
 
     @ViewChild(AddMaterialDialogComponent) addMaterialDialogComponent: AddMaterialDialogComponent;
+    @ViewChild(MetadataTemplateManagementComponent)
+    metadataTemplateManagement: MetadataTemplateManagementComponent;
 
     option = input<OptionState<NodesSelectorConfig>>();
     parent = input<Node>();
@@ -208,6 +220,11 @@ export class NodesSelectorComponent implements OnInit {
      * tabs to hide from the otherwise supported set (e.g. to offer only a subset of views)
      */
     tabBlacklist = input<TabType[]>([]);
+    /** the blacklist of the input combined with the one of the option config */
+    private effectiveTabBlacklist = computed<TabType[]>(() => [
+        ...(this.tabBlacklist() ?? []),
+        ...(this.option()?.optionConfig?.tabBlacklist ?? []),
+    ]);
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
@@ -230,7 +247,7 @@ export class NodesSelectorComponent implements OnInit {
         });
     });
     supportedTabs: Signal<TabType[]> = computed(() => {
-        const blacklist = this.tabBlacklist() ?? [];
+        const blacklist = this.effectiveTabBlacklist();
         let tabs: TabType[];
         if (this.selectionMode() === 'source') {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
@@ -271,18 +288,20 @@ export class NodesSelectorComponent implements OnInit {
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
     );
-    // picker mode: a single node of any type is chosen and handed back (e.g. favorite dialog)
-    singleSelect: Signal<boolean> = computed(() => !!this.option()?.optionConfig?.singleSelect);
+    // opt-out for consumers that only need the list view in the search tab
+    allowSearchViewSwitch: Signal<boolean> = computed(
+        () => this.option()?.optionConfig?.allowSearchViewSwitch !== false,
+    );
     // whether folders may be picked as a source (workspace tab)
     allowFolderSelection: Signal<boolean> = computed(
         () => !!this.option()?.optionConfig?.allowFolderSelection,
     );
+    // whether an existing collection may be picked as a source (copy target permitting, see copyNodes)
+    allowCollectionSelection: Signal<boolean> = computed(
+        () => !!this.option()?.optionConfig?.allowCollectionSelection,
+    );
     invalidSelectionReason: Signal<InvalidSelectionReason | null> = computed(
         (): InvalidSelectionReason | null => {
-            // picker mode: exactly one node (of any type) must be selected
-            if (this.singleSelect()) {
-                return this.onlyOneSelected() ? null : InvalidSelectionReason.INVALID_SELECTION;
-            }
             if (this.selectionMode() === 'source') {
                 if (
                     this.option().optionConfig?.applyCallback &&
@@ -294,8 +313,14 @@ export class NodesSelectorComponent implements OnInit {
                 if (!this.isSelectStep() && !this.atLeastRootOrChildrenSelected()) {
                     return InvalidSelectionReason.AT_LEAST_ROOT_OR_CHILDREN_SELECTED;
                 }
-                // copy collection dialog
-                if (this.onlyOneSelected() && this.selectedNodes()[0].mediatype === 'collection') {
+                // copy collection dialog, plus (opt-in) a single folder as source
+                if (
+                    this.onlyOneSelected() &&
+                    ((this.allowCollectionSelection() &&
+                        this.selectedNodes()[0].mediatype === 'collection') ||
+                        (this.allowFolderSelection() &&
+                            this.selectedNodes()[0].mediatype === 'folder'))
+                ) {
                     return null;
                 }
                 if (!this.onlyFilesSelected()) {
@@ -444,9 +469,11 @@ export class NodesSelectorComponent implements OnInit {
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     workspaceTreeConfig = computed<TreeConfig>(() => ({
         showFileName: true,
+        showFiles: true,
         selectionMode: this.selectionMode(),
         isValidSourceCallback: (node: Node) =>
-            (this.parent()?.mediatype === 'collection' &&
+            (this.allowCollectionSelection() &&
+                this.parent()?.mediatype === 'collection' &&
                 node?.mediatype === 'collection' &&
                 this.parent()?.ref.id !== node?.ref.id &&
                 this.parent()?.parent?.id !== node?.ref.id) ||
@@ -742,7 +769,8 @@ export class NodesSelectorComponent implements OnInit {
                 this.editorialSidebarService.selectNode(createdNodes as Node[]);
             }
         }
-        this.addMaterialDialogComponent.selectedFiles.set([]);
+        // the sidebar may stay open (autoClose: false), so clear the link/file input for the next one
+        this.addMaterialDialogComponent.reset();
     }
 
     // DRAG-AND-DROP RELATED FUNCTIONS
@@ -855,6 +883,8 @@ export class NodesSelectorComponent implements OnInit {
      */
     async saveMetadata(): Promise<void> {
         this.editorialSidebarService.sidebarLoading.set(true);
+        // keep the state the user saved so it can be offered again as "last used" template
+        await this.metadataTemplateManagement?.persistLastUsedValues();
         const source = this.selectedSourceNodes();
         // convert the extended values to a flat object with the metadata keys as keys and the enabled values as values
         const values: MdsExtendedValues = this.currentExtendedValues() ?? {};
@@ -1047,7 +1077,10 @@ export class NodesSelectorComponent implements OnInit {
                 const copyParams = {
                     repository: HOME_REPOSITORY,
                     sourceCollection: selectedNode.ref.id,
-                    targetCollection: this.parent().ref.id,
+                    // the collections root is not a real node: omitting the target copies the
+                    // collection into the level0 (root) collections
+                    targetCollection:
+                        this.parent().ref.id === ROOT ? undefined : this.parent().ref.id,
                     copyRoot: this.copyRoot(),
                     copyChildCollections: this.copyChildCollections(),
                     copyRefs: this.copyRefs(),
@@ -1241,7 +1274,6 @@ export class NodesSelectorComponent implements OnInit {
         this.dataSourceWorkspace.isLoading = true;
         let initialData: Partial<Node>[] = [];
         const params = {
-            filter: ['folders'],
             skipCount: 0,
             maxItems: 100,
             sortProperties: [RestConstants.CM_NAME],

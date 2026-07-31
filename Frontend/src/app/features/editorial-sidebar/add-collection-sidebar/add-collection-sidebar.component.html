@@ -1,0 +1,26 @@
+<div class="intro">
+  <div class="heading">{{ i18nPrefix + 'HEADING' | translate }}</div>
+  <div class="description">{{ i18nPrefix + 'DESCRIPTION' | translate }}</div>
+</div>
+<div class="choices">
+  @for (choice of choices; track choice.id) {
+  <button
+    type="button"
+    class="choice"
+    [attr.data-test]="'button-add-collection-' + choice.id"
+    (click)="choice.action()"
+  >
+    <div class="icon">
+      <i [esIcon]="choice.icon"></i>
+    </div>
+    <div class="text">
+      <div class="title">{{ i18nPrefix + choice.id + '.TITLE' | translate }}</div>
+      <div class="description">{{ i18nPrefix + choice.id + '.DESCRIPTION' | translate }}</div>
+      <div class="action">
+        <span>{{ i18nPrefix + choice.id + '.ACTION' | translate }}</span>
+        <i esIcon="arrow_forward"></i>
+      </div>
+    </div>
+  </button>
+  }
+</div>

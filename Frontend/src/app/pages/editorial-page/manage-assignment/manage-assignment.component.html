@@ -54,12 +54,14 @@
             [(nodes)]="nodes"
           ></es-manage-assignment-nodes>
           <button
+            type="button"
             mat-stroked-button
             color="primary"
             (click)="showFileDialog(section.role)"
             [disabled]="submissionsWithContent()?.length > 0"
           >
-            <i esIcon="add"></i> {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE' | translate }}
+            <i esIcon="add"></i>
+            {{ 'EDITORIAL.ASSIGNMENT.FORM.ADD_FILE.' + section.role | translate }}
           </button>
         </div>
         }
@@ -100,8 +102,10 @@
       </div>
       }
       <div class="navigation">
-        <button mat-button color="primary" (click)="cancel()">{{ 'CANCEL' | translate }}</button>
-        <button mat-flat-button color="primary" (click)="validateMainForm()">
+        <button type="button" mat-button color="primary" (click)="cancel()">
+          {{ 'CANCEL' | translate }}
+        </button>
+        <button type="button" mat-flat-button color="primary" (click)="validateMainForm()">
           {{ 'NEXT' | translate }}
         </button>
       </div>

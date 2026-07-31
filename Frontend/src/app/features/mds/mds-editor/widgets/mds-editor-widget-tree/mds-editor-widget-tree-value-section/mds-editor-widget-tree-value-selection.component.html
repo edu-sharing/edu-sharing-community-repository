@@ -1,7 +1,5 @@
+@if (selectedValues()?.length) {
 <div class="value-selection-wrapper">
-  @if (!selectedValues()?.length) {
-  <div class="missing-value-msg">Noch keine Auswahl vorhanden.</div>
-  } @else {
   <ng-container [formGroup]="form">
     <ng-container formArrayName="selections">
       @for (value of selectionsArray.controls; track trackByIndex($index); let i = $index) {
@@ -41,5 +39,5 @@
       }
     </ng-container>
   </ng-container>
-  }
 </div>
+}

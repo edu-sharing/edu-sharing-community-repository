@@ -61,6 +61,27 @@ export class RenderControllerWrapperService extends RenderControllerService {
         );
     }
 
+    /**
+     * On-demand fetch for a node whose links were deferred at initial render (see
+     * RenderDataResponse.deferred). Reuses the session established by the initial render request,
+     * so only the bearer token is needed. Returns a fresh job to poll for the links.
+     */
+    getRenderDataOnDemandToken(
+        nodeId: string,
+        token: string,
+        context?: HttpContext,
+    ): Observable<RenderDataResponse> {
+        const rb = new RequestBuilder(this.rootUrl, '/public/renderdata/ondemand', 'post');
+        rb.header('Authorization', 'Bearer ' + token);
+        rb.query('nodeId', nodeId, {});
+        return this.http
+            .request(rb.build({ responseType: 'json', accept: 'application/json', context }))
+            .pipe(
+                filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
+                map((r: HttpResponse<any>) => (r as StrictHttpResponse<RenderDataResponse>).body),
+            );
+    }
+
     private getRenderDataToken$Response(
         params: RenderDataRequestWithToken,
         context?: HttpContext,

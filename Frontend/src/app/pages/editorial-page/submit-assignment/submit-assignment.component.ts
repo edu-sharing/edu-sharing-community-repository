@@ -74,6 +74,7 @@ import { AssignmentEditorConfig } from '../manage-assignment/manage-assignment.c
 import { PlatformLocation } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { NodesSelectorConfig, TabType } from '../nodes-selector/nodes-selector.component';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { Toast, ToastType } from '../../../services/toast';
@@ -124,7 +125,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
     private restConnectorsService = inject(RestConnectorsService);
     private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
     private nodeTitlePipe = inject(NodeTitlePipe);
-    private theme = inject(ThemeService);
+    protected theme = inject(ThemeService);
 
     @ViewChild('feedback') feedbackRef: ElementRef;
     @ViewChildren(NodeEntriesWrapperComponent) nodeEntriesRef: QueryList<
@@ -159,7 +160,7 @@ export class SubmitAssignmentComponent implements OnDestroy {
         () => this.assignment()?.permissions?.filter((p) => p.role === 'COORDINATOR') ?? [],
     );
     isOpenForSubmission = computed(() =>
-        ['DRAFT', 'INPROGRESS'].includes(this.assignment().status),
+        ['DRAFT', 'INPROGRESS'].includes(this.assignment()?.status),
     );
     isBeforeEndDate = computed(() => {
         // @TODO check endTime format vs delivered type
@@ -383,7 +384,12 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.connectorPolling().forEach(({ subscription }) => subscription.unsubscribe());
     }
 
-    private async createVariantAndEdit(node: Node): Promise<void> {
+    /**
+     * @param node
+     * @param connectorWindow pre-opened in the click gesture (see initOptions) — must be passed on,
+     * a window opened after the awaits below is popup-blocked and replaces the current tab instead
+     */
+    private async createVariantAndEdit(node: Node, connectorWindow: Window | null): Promise<void> {
         // if a submission file already exists for this node (whether looked up from the RO list
         // by assignment file or from the submission list by variant content), edit it rather than
         // forking a new variant
@@ -399,9 +405,13 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 const variantNode = await firstValueFrom(this.nodeService.getNode(originalId));
                 const connectorId =
                     this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
-                const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
+                const win = await this.uiService.editConnector(variantNode, {
+                    win: connectorWindow,
+                    preferEdit: true,
+                });
                 this.startConnectorPolling(existing, variantNode, win, connectorId);
             } catch (e) {
+                connectorWindow?.close();
                 this.toast.error(e, null);
             } finally {
                 this.toast.closeProgressSpinner();
@@ -433,12 +443,16 @@ export class SubmitAssignmentComponent implements OnDestroy {
             // the connector edits the variant (fork); the submission file's content is what the
             // list displays and what polling/overlay track
             const connectorId = this.restConnectorsService.connectorSupportsEdit(variantNode)?.id;
-            const win = await this.uiService.editConnector(variantNode, { preferEdit: true });
+            const win = await this.uiService.editConnector(variantNode, {
+                win: connectorWindow,
+                preferEdit: true,
+            });
             // register polling BEFORE rendering the list so the overlay's
             // pollingNodeIds() check is already populated on first render
             this.startConnectorPolling(newFiles[0], variantNode, win, connectorId);
             this.syncSubmissionDataSource();
         } catch (e) {
+            connectorWindow?.close();
             this.toast.error(e, null);
         } finally {
             this.toast.closeProgressSpinner();
@@ -562,7 +576,8 @@ export class SubmitAssignmentComponent implements OnDestroy {
             optionConfig: {
                 state: TabType.UPLOAD,
                 upload: 'fast',
-                autoClose: true,
+                // keep the sidebar open so several materials can be added one after another
+                autoClose: false,
                 allowedConnectorIds: [ConnectorService.ID_ONLY_OFFICE, ConnectorService.ID_TINYMCE],
                 applyCallback: (nodes) =>
                     nodes.every(
@@ -608,7 +623,10 @@ export class SubmitAssignmentComponent implements OnDestroy {
             'OPTIONS.EDIT_CONNECTOR',
             'edit',
             (node, nodes) => {
-                void this.createVariantAndEdit(node ?? nodes?.[0]);
+                // open the tab synchronously while still inside the click gesture, otherwise the
+                // popup blocker rejects it after the awaits in createVariantAndEdit
+                const win = UIHelper.getNewWindow(this.restConnectorsService.getRestConnector());
+                void this.createVariantAndEdit(node ?? nodes?.[0], win);
             },
         );
         editConnectorNode.customShowCallback = async (nodes) => {

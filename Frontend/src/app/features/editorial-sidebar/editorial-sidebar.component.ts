@@ -65,6 +65,8 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     SORT_INTO: { selectionMode: 'none' },
     /** manage content is sort into from left to right ("Einsortieren") */
     MANAGE_CONTENT: { selectionMode: 'multi' },
+    /** entry step to either create a new collection or copy an existing one to this location */
+    ADD_COLLECTION: { selectionMode: 'none' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
     VIEW_ASSIGNMENT: { selectionMode: 'single' },
 } as const satisfies Record<string, EditorialSidebarOptionDescriptor>;
@@ -284,10 +286,43 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         createAssignment.customShowCallback = async () => !this.component();
         options.push(createAssignment);
 
+        const addCollection = new OptionItem('EDITORIAL.OPTIONS.ADD_COLLECTION', 'layers', () =>
+            this.enabledOption.set({
+                trap: false,
+                option: 'ADD_COLLECTION',
+            }),
+        );
+        addCollection.group = DefaultGroups.Create;
+        addCollection.elementType = [ElementType.NoneOrUnknown];
+        addCollection.scopes = ['collections'];
+        addCollection.toolpermissions = [RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS];
+        addCollection.toolpermissionsMode = HideMode.Hide;
+        addCollection.customShowCallback = async () => {
+            const parent = this.parent();
+            // on the collections root there is no parent node to check, the toolpermission decides
+            if (!parent || parent.ref?.id === ROOT) {
+                return true;
+            }
+            return (
+                this.nodeHelperService.isNodeCollection(parent) &&
+                parent.access?.includes(RestConstants.ACCESS_ADD_CHILDREN)
+            );
+        };
+        options.push(addCollection);
+
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',
             'splitscreen_vertical_add',
-            () => this.enabledOption.set({ trap: false, option: 'SORT_INTO' }),
+            () =>
+                this.enabledOption.set({
+                    trap: false,
+                    option: 'SORT_INTO',
+                    optionConfig: {
+                        // an existing collection may be picked and copied into the current parent;
+                        // only takes effect when that parent is a collection itself
+                        allowCollectionSelection: true,
+                    } as NodesSelectorConfig,
+                }),
         );
         createAssignment.group = DefaultGroups.Primary;
         sortInto.customShowCallback = async () => {

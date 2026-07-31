@@ -2,6 +2,7 @@
 @use 'sass:color';
 
 .block {
+    position: relative;
     display: flex;
     flex-grow: 1;
     align-items: center;
@@ -11,6 +12,27 @@
         display: flex;
         flex-direction: column;
         width: 100%;
+    }
+    // keep the text clear of the absolutely positioned close button
+    .message-container:has(+ .close-button) {
+        padding-right: 16px;
+    }
+    .close-button {
+        padding: 8px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        color: inherit;
+        --mdc-icon-button-state-layer-size: 32px;
+        i {
+            font-size: 18px;
+            line-height: 18px;
+        }
     }
     &.warning {
         background-color: color-mix(in srgb, var(--colorStatusWarning), var(--textWhite) 75%);

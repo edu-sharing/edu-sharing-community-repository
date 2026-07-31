@@ -41,16 +41,29 @@ export class MetadataTemplateManagementComponent implements OnInit {
     private storage = inject(SessionStorageService);
 
     protected readonly i18nPrefix: string = 'EDITORIAL.OPTIONS.NODES_SELECTOR.';
-    initialTemplates: Template[] = [
-        {
-            id: uuidv4(),
-            name: 'keine Vorlage',
-            values: {},
-        },
-    ];
+    private readonly emptyTemplate: Template = {
+        id: 'empty-template',
+        name: this.i18nPrefix + 'METHODOLOGY.NO_TEMPLATE',
+        values: {},
+    };
     customTemplates: WritableSignal<Template[]> = signal([]);
+    /** the value state as it was when the user last hit "save", restored on re-open */
+    lastUsedValues: WritableSignal<MdsExtendedValues> = signal(null);
     selectedTemplateIndex: WritableSignal<number> = signal(-1);
-    templates = computed(() => [...this.initialTemplates, ...this.customTemplates()]);
+    /** the empty template, followed by the "last used" entry as soon as there is a saved state */
+    initialTemplates = computed<Template[]>(() => [
+        this.emptyTemplate,
+        ...(this.lastUsedValues()
+            ? [
+                  {
+                      id: 'last-used-template',
+                      name: this.i18nPrefix + 'METHODOLOGY.LAST_USED',
+                      values: this.lastUsedValues(),
+                  },
+              ]
+            : []),
+    ]);
+    templates = computed(() => [...this.initialTemplates(), ...this.customTemplates()]);
     currentTemplate = computed(() =>
         this.templates()?.[this.selectedTemplateIndex()]
             ? this.templates()[this.selectedTemplateIndex()]
@@ -81,11 +94,30 @@ export class MetadataTemplateManagementComponent implements OnInit {
 
     async ngOnInit() {
         await this.updateCustomTemplates();
-        if (this.customTemplates()?.length) {
-            const lastIndex = await this.storage.get<number>(this.metadataTemplateslastUsedKey);
-            if (lastIndex != null && lastIndex < this.customTemplates().length) {
-                void this.selectTemplate(lastIndex);
-            }
+        const lastUsed = await this.storage.get<MdsExtendedValues>(
+            this.metadataTemplateslastUsedKey,
+        );
+        if (this.hasValues(lastUsed)) {
+            this.lastUsedValues.set(lastUsed);
+            // the "last used" entry is always inserted right after the empty template
+            void this.selectTemplate(1);
+        }
+    }
+
+    /**
+     * Stores the current value state as the "last used" state. To be called by the host whenever the
+     * user saves the metadata, so the selection is restored the next time the view is opened.
+     */
+    async persistLastUsedValues(): Promise<void> {
+        const values = this.selectedValues();
+        await this.storage.set(this.metadataTemplateslastUsedKey, values ?? {});
+        const hadLastUsed = !!this.lastUsedValues();
+        this.lastUsedValues.set(this.hasValues(values) ? values : null);
+        // adding/removing the entry shifts all following templates, so keep the selection in place
+        if (hadLastUsed !== !!this.lastUsedValues() && this.selectedTemplateIndex() >= 1) {
+            this.selectedTemplateIndex.update((index) =>
+                this.lastUsedValues() ? index + 1 : index - 1,
+            );
         }
     }
 
@@ -199,6 +231,13 @@ export class MetadataTemplateManagementComponent implements OnInit {
 
     // HELPERS
     /**
+     * Helper function to check whether a value state holds any metadata at all.
+     */
+    private hasValues(values: MdsExtendedValues): boolean {
+        return !!values && Object.keys(values).length > 0;
+    }
+
+    /**
      * Helper function to retrieve the custom templates.
      */
     private async updateCustomTemplates(): Promise<void> {
@@ -215,9 +254,6 @@ export class MetadataTemplateManagementComponent implements OnInit {
      */
     private async selectTemplate(index: number) {
         this.selectedTemplateIndex.set(index);
-        if ((await this.storage.get<number>(this.metadataTemplateslastUsedKey, index)) !== index) {
-            void this.storage.set(this.metadataTemplateslastUsedKey, index);
-        }
         // wait for the view being rendered
         setTimeout(() => {
             void this.mdsEditor.reInit();

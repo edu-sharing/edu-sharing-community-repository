@@ -1,18 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-.missing-value-msg {
-    flex: 0 1 calc(50% - 4px);
-    height: 61px;
-    border-radius: 8px;
-    padding: 4px 32px 4px 12px;
-    color: var(--placeholderColor);
-    border: 1px solid var(--placeholderColor);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .value-selection-wrapper {
     margin-bottom: 16px;
     display: grid;
@@ -20,10 +8,11 @@
     gap: 8px;
 
     .selected-value-card {
-        height: 61px;
+        height: 52px;
         border-radius: 8px;
         padding: 4px 32px 4px 12px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        background: var(--backgroundElevatedColor);
+        @include mixins.materialShadowBottom();
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -44,7 +33,6 @@
         }
 
         .title {
-            font-size: vars.$fontSizeLarge;
             font-weight: bold;
             color: vars.$textMain;
         }

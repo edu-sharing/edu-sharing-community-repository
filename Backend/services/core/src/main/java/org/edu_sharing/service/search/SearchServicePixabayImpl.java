@@ -214,7 +214,7 @@ public class SearchServicePixabayImpl extends SearchServiceAdapter{
 				sortBy="latest";
 			}
 			int page=1 + searchToken.getFrom()/searchToken.getMaxResult();
-			String uri="&q="+URLEncoder.encodeUriComponent(searchWord)+
+			String uri="&q="+URLEncoder.encodeUriComponent(searchWord.trim().replaceAll("\\s+", "+"))+
 					"&editors_choice="+editorsChoice+
 					"&image_type="+imageType+
 					"&orientation="+orientation+

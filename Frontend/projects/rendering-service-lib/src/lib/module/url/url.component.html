@@ -1,7 +1,31 @@
 <div class="url-wrapper">
   @if (gdpr === null) {
   <div>
-    @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
+    @if (data?.module === 'SODIX' && embedding === UrlEmbeddings.SODIX) {
+    <button
+      mat-icon-button
+      class="reload-link"
+      (click)="onReload()"
+      [disabled]="reloading"
+      [attr.aria-label]="'RENDERING.RELOAD_LINK' | translate"
+      [title]="'RENDERING.RELOAD_LINK' | translate"
+    >
+      <i esIcon="refresh"></i>
+    </button>
+    } @if (data?.module === 'SODIX' && embedding === UrlEmbeddings.LINK) {
+    <div class="link-wrapper">
+      <img [src]="previewUrl" alt="preview" />
+      <button mat-flat-button color="primary" [disabled]="loading" (click)="onFetchAndOpen()">
+        <div class="link-label">
+          @if (loading) {
+          <mat-progress-spinner mode="indeterminate" [diameter]="18"></mat-progress-spinner>
+          } @else {
+          {{ 'SHARING.LINK' | translate }}<i esIcon="open_in_new"></i>
+          }
+        </div>
+      </button>
+    </div>
+    } @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
     <div class="youtube-wrapper">
       <iframe class="youtubeFrame" [src]="sanitizedUrl" allowfullscreen allow="fullscreen"></iframe>
     </div>
@@ -42,8 +66,9 @@
     </div>
     } @if (embedding === UrlEmbeddings.SERLO && externalId !== '') {
     <iframe class="serloFrame" [src]="sanitizedUrl" allowfullscreen></iframe>
-    } @if (embedding === UrlEmbeddings.LINK || embedding === UrlEmbeddings.PIXABAY || embedding ===
-    UrlEmbeddings.OERSI || embedding === UrlEmbeddings.BROCKHAUS) {
+    } @if (data?.module !== 'SODIX' && (embedding === UrlEmbeddings.LINK || embedding ===
+    UrlEmbeddings.PIXABAY || embedding === UrlEmbeddings.OERSI || embedding ===
+    UrlEmbeddings.BROCKHAUS)) {
     <div class="link-wrapper">
       <img [src]="previewUrl" alt="preview" />
       <a mat-flat-button color="primary" [href]="url" target="_blank" (click)="onLinkClick()">

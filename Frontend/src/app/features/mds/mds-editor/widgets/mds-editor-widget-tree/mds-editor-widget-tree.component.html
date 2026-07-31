@@ -126,7 +126,7 @@
           #inputElement
           [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
           [matChipInputFor]="chipList"
-          (keyup.enter)="addSelectedTreeNode()"
+          (keyup)="$event.key === 'Enter' && addSelectedTreeNode()"
           (focus)="openOverlay($event)"
           (blur)="onBlurInput($event)"
         />
@@ -161,7 +161,7 @@
       [formControl]="inputControl"
       #inputElement
       [placeholder]="widget.definition.placeholder"
-      (keyup.enter)="addSelectedTreeNode()"
+      (keyup)="$event.key === 'Enter' && addSelectedTreeNode()"
       (focus)="openOverlay($event)"
       (blur)="onBlurInput($event)"
     />

@@ -111,17 +111,16 @@
     } @if (isSelectStep()) { @switch (tabType) {
     <!-- SEARCH TAB -->
     @case (TabType.SEARCH) {
-    <div class="search-container">
+    <div class="search-container" [class.no-view-switch]="!allowSearchViewSwitch()">
+      <!-- the display type switch is the bar's only option, so hide it when it is not offered -->
       <es-actionbar
         #actionbarSearchTab
         class="actionbar-search"
-        [class.display-none]="dataSourceSearch.isEmpty()"
+        [class.display-none]="dataSourceSearch.isEmpty() || !allowSearchViewSwitch()"
       ></es-actionbar>
       @if (searchCompleted() && (!dataSourceSearch.isEmpty() || dataSourceSearch.isLoading)) {
       <es-node-entries-wrapper
         #searchWrapperRef
-        [singleSelect]="singleSelect()"
-        [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
         [dragDrop]="{
           dragAllowed: selectionMode() !== 'target',
           dropAllowed: canDropOnSearchRef,
@@ -132,10 +131,14 @@
         [displayType]="searchDisplayType"
         (displayTypeChange)="onSearchDisplayTypeChange($event)"
         [elementInteractionType]="InteractionType.Emitter"
-        [initConfig]="{
-          actionbar: actionbarSearchTab,
-          customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
-        }"
+        [initConfig]="
+          allowSearchViewSwitch()
+            ? {
+                actionbar: actionbarSearchTab,
+                customOptions: { supportedOptions: ['OPTIONS.SWITCH_TO_CARDS_VIEW'] }
+              }
+            : null
+        "
         [scope]="Scope.Search"
         (clickItem)="selectOnClick(searchWrapperRef, $event)"
         (fetchData)="loadMore($event)"
@@ -198,8 +201,6 @@
     <es-node-entries-wrapper
       #collectionsWrapperRef
       [checkbox]="collectionsDisplayType() !== NodeEntriesDisplayType.Tree"
-      [singleSelect]="singleSelect()"
-      [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
       [columns]="
         collectionsDisplayType() === NodeEntriesDisplayType.SmallGrid
           ? collectionsGridColumns
@@ -247,7 +248,6 @@
     <es-node-entries-wrapper
       #workspaceWrapperRef
       [checkbox]="false"
-      [ctrlClickBehavior]="singleSelect() ? 'emit' : 'multiselect'"
       [dataSource]="dataSourceWorkspace"
       [displayType]="NodeEntriesDisplayType.Tree"
       [dragDrop]="{

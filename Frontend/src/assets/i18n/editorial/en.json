@@ -53,6 +53,21 @@
         "INTERNAL_NOTE": "Personal note",
         "FEEDBACK": "Give feedback",
         "ATTACHMENT_EMPTY": "No files submitted"
+      },
+      "ADD_COLLECTION": {
+        "TITLE": "Add collection",
+        "HEADING": "How would you like to proceed?",
+        "DESCRIPTION": "Choose whether you want to create a new collection or copy an existing one.",
+        "CREATE": {
+          "TITLE": "Create collection",
+          "DESCRIPTION": "Create a new collection at this location and design it afterwards.",
+          "ACTION": "Create"
+        },
+        "COPY": {
+          "TITLE": "Add existing collection",
+          "DESCRIPTION": "Copy an existing collection including the desired contents and sub-collections to this location.",
+          "ACTION": "Copy"
+        }
       }
     },
     "OPTION": {
@@ -83,10 +98,11 @@
         },
         "METHODOLOGY": {
           "TITLE": "Metadata",
-          "INFO": "Add metadata to find your material more easily.\nYou can save your selection as a template and reuse it.",
           "METADATA_SAVED_WRITE": "Metadata updated on {{writeCount}} element(s)",
           "METADATA_SUGGESTIONS": "Metadata stored as a suggestion on {{suggestionCount}} element(s), because of insufficient permissions",
           "METADATA_SKIPPED": "Metadata skipped on {{skippedCount}} element(s), because of insufficient permissions",
+          "NO_TEMPLATE": "No template",
+          "LAST_USED": "Last used",
           "SELECT_TEMPLATE": "Select template",
           "MANAGE_TEMPLATES": "Manage templates",
           "TEMPLATE_NAME": "Title of the template",
@@ -146,7 +162,9 @@
           },
           "NO_CONFIG_OPTIONS": "There are no further copy options for this content."
         }
-      }
+      },
+      "ADD_COLLECTION": "Add collection",
+      "ADD_COLLECTION_DESCRIPTION": "Create a new collection or copy an existing collection to this location"
     },
     "TITLE": "Manage",
     "TITLE_ASSIGNMENT": "Assignments",
@@ -239,7 +257,10 @@
       "FORM": {
         "TITLE": "Title",
         "SUMMARY": "Description",
-        "ADD_FILE": "Add material",
+        "ADD_FILE": {
+          "SUBMITTABLE": "Add working material",
+          "SUPPLEMENTARY": "Add supplementary material"
+        },
         "AUTHORITY_ROLE": "Role",
         "DELETE": "Delete",
         "GROUP_MULTIPLY": "When the assignment is handed out, all members of the group are assigned individually",
