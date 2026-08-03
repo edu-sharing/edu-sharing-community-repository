@@ -58,6 +58,7 @@ import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.rpc.ACE;
 import org.edu_sharing.repository.client.rpc.ACL;
 import org.edu_sharing.repository.client.rpc.EduGroup;
+import org.edu_sharing.repository.client.rpc.User;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -67,6 +68,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LogTime;
 import org.edu_sharing.repository.server.tools.StringTool;
 import org.edu_sharing.repository.server.tools.URLTool;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
 import org.edu_sharing.restservices.shared.Contributor;
@@ -143,6 +145,7 @@ public class SearchServiceElastic implements SearchService {
     private final NodeService nodeService;
     private final AuthenticationToolAPI authTool;
     private final Repository repositoryHelper;
+    private final UserCache userCache;
 
 
     @PostConstruct
@@ -2176,35 +2179,52 @@ public class SearchServiceElastic implements SearchService {
 
         List<String> list = new ArrayList<>();
         if (pattern != null && !pattern.isEmpty()) {
+            String patternLower = pattern.toLowerCase();
+            // if the pattern is a UUID (e.g. an esuid based username) it can only ever match the
+            // authority name, never a display/first/last name, so we can skip the expensive resolution
+            boolean patternIsUuid = isUuid(pattern);
             for (String authority : list2) {
 
-                org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
 
                 String name = authority;
 
                 String toCompare = name;
 
-                if (name.startsWith(org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX)) {
-                    name = name.substring(org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX.length());
+                if (toCompare.toLowerCase().contains(patternLower)){
+                    list.add(authority);
+                    if(patternIsUuid) {
+                        // only one entry when an uuid was requested
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
 
+                if (patternIsUuid) {
+                    continue;
+                }
+
+                if (name.startsWith(org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX)) {
+                    org.alfresco.service.cmr.repository.NodeRef authorityNodeRef = authorityService.getAuthorityNodeRef(authority);
                     if (authorityNodeRef != null) {
                         String displayName = (String) nodeService.getProperty(authorityNodeRef, ContentModel.PROP_AUTHORITY_DISPLAY_NAME);
                         if (displayName != null) {
                             toCompare += displayName;
                         }
                     }
-
-
                 } else {
-                    if (authorityNodeRef != null) {
-                        String firstName = (String) nodeService.getProperty(authorityNodeRef, ContentModel.PROP_FIRSTNAME);
-                        String lastName = (String) nodeService.getProperty(authorityNodeRef, ContentModel.PROP_LASTNAME);
-                        if (firstName != null) {
-                            toCompare += firstName;
-                        }
-                        if (lastName != null) {
-                            toCompare += lastName;
-                        }
+                    User user = userCache.getUser(name);
+                    String firstName = null;
+                    String lastName = null;
+                    if(user != null){
+                        firstName = user.getGivenName();
+                        lastName = user.getSurname();
+                    }
+                    if(firstName != null) {
+                        toCompare+=firstName;
+                    }
+                    if(lastName != null) {
+                        toCompare+=lastName;
                     }
                 }
 
@@ -2232,6 +2252,15 @@ public class SearchServiceElastic implements SearchService {
         int count = list.size();
         list = limitList(list, skipCount, maxValues);
         return new SearchResult<>(list, skipCount, count);
+    }
+
+    private static boolean isUuid(String value) {
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private <T> List<T> limitList(List<T> list, int skipCount, int maxValues) {

@@ -107,6 +107,8 @@ public class Values implements Serializable {
 	@XmlElement public String searchSidenavMode;
 	@Schema(description = "Right sidebar mode: 'Sidebar' (default with preview if RS2 active) or 'RenderingPage' (direct jump to render page)")
 	@XmlElement public SearchPreviewMode searchPreviewMode;
+	@Schema(description = "Initial width (in pixels) of the search filter bar sidebar. The user may still resize it")
+	@XmlElement public Integer searchFilterBarWidth;
 	@Schema(description = "Collections configuration (allowed colors, special types like editorial)")
 	@XmlElement public Collections collections;
 	@Schema(description = "License agreement display settings (node IDs with HTML content per language)")

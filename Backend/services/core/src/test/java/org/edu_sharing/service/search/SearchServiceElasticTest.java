@@ -14,6 +14,7 @@ import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.metadataset.v2.MetadataQuery;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
+import org.edu_sharing.repository.server.tools.cache.UserCache;
 import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +57,8 @@ class SearchServiceElasticTest {
     private AuthenticationToolAPI authTool;
     @Mock
     private Repository repositoryHelper;
+    @Mock
+    private UserCache cache;
 
     @Mock
     private org.edu_sharing.service.authority.AuthorityService eduAuthorityService;
@@ -70,6 +73,7 @@ class SearchServiceElasticTest {
         authenticationUtilMockedStatic = Mockito.mockStatic(AuthenticationUtil.class);
 
 
+
         underTest = new SearchServiceElastic(
                 permissionsModelDAO,
                 guestService,
@@ -82,7 +86,8 @@ class SearchServiceElasticTest {
                 toolPermissionService,
                 nodeService,
                 authTool,
-                repositoryHelper);
+                repositoryHelper,
+                cache);
     }
 //
     @AfterEach()

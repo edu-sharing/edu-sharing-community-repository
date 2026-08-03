@@ -371,7 +371,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         downloadNode.priority = 40;
         downloadNode.customShowCallback = async (nodes) => {
             return (
-                !!data.customDownloadUrl ||
+                (!!data.customDownloadUrl && !safe) ||
                 nodes.some((n) =>
                     (n as Node).properties?.[RestConstants.CCM_PROP_EDUSCOPENAME]?.includes(
                         RestConstants.SAFE_SCOPE,

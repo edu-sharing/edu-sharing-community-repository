@@ -754,6 +754,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                     searchMode: 'suggestions',
                     metadataset: DEFAULT,
                     query: null,
+                    status: ['PENDING'],
                     repository: HOME_REPOSITORY,
                     type: tabCriteria[this.TabWidgetSuggestions] as any,
                     contentType: 'ALL',
