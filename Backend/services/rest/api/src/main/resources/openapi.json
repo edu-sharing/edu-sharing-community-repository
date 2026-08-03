@@ -9911,6 +9911,11 @@
           "reportProblem": {
             "$ref": "#/components/schemas/ConfigReportProblem"
           },
+          "searchFilterBarWidth": {
+            "description": "Initial width (in pixels) of the search filter bar sidebar. The user may still resize it",
+            "format": "int32",
+            "type": "integer"
+          },
           "searchGroupResults": {
             "description": "If true, show repositories separately as lists in 'All' view",
             "type": "boolean"
