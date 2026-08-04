@@ -31,6 +31,7 @@
     </button>
     }
     <!-- explicit close button -->
+    @if (!editorialSidebarService.fullscreenActive()) {
     <button
       mat-icon-button
       (click)="close()"
@@ -38,6 +39,7 @@
     >
       <i esIcon="close" [aria]="true"></i>
     </button>
+    }
   </div>
   <div class="sidebar-container">
     <ng-container *ngTemplateOutlet="content"></ng-container>
