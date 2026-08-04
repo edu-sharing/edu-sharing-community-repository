@@ -20,7 +20,8 @@
     &.status-HAS_SUBMISSIONS {
         background-color: color-mix(in srgb, var(--colorStatusWarning), 60% transparent);
     }
-    &.status-SENDBACK {
+    &.status-SENDBACK,
+    &.status-CORRECTED {
         background-color: color-mix(in srgb, var(--colorStatusPositive), 60% transparent);
     }
     &.type-SUBMISSION {
