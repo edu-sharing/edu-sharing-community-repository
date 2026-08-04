@@ -5,6 +5,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.node.NodeArchiveServicePolicies;
 import org.alfresco.repo.node.NodeServicePolicies;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePolicy, NodeServicePolicies.BeforeDeleteNodePolicy, ShareInfoService, ShareInfoOpLogService {
+public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePolicy, NodeServicePolicies.BeforeDeleteNodePolicy, NodeArchiveServicePolicies.BeforePurgeNodePolicy, ShareInfoService, ShareInfoOpLogService {
 
     private final ShareInfoMapper shareInfoMapper;
     private final ShareInfoOpLogMapper shareInfoOpLogMapper;
@@ -59,24 +60,64 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
                 QName.createQName(CCConstants.CCM_TYPE_MAP),
                 new JavaBehaviour(this, "onDeleteNode"));
 
+        policyComponent.bindClassBehaviour(NodeArchiveServicePolicies.BeforePurgeNodePolicy.QNAME,
+                QName.createQName(CCConstants.CCM_TYPE_IO),
+                new JavaBehaviour(this, "beforePurgeNode"));
+
+        policyComponent.bindClassBehaviour(NodeArchiveServicePolicies.BeforePurgeNodePolicy.QNAME,
+                QName.createQName(CCConstants.CCM_TYPE_MAP),
+                new JavaBehaviour(this, "beforePurgeNode"));
+
         log.info("ShareInfoService initialized");
     }
 
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
-        if (childAssocRef.getTypeQName().equals(QName.createQName(CCConstants.CCM_TYPE_IO)) || childAssocRef.getTypeQName().equals(QName.createQName(CCConstants.CCM_TYPE_MAP))) {
-            retryingTransactionHelper.doInTransaction(() -> {
-                List<Long> longs = shareInfoMapper.deleteByNodeId(childAssocRef.getChildRef().getId());
-                List<ShareInfoOplogData> oplogs = longs.stream()
-                        .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
-                        .toList();
-
-                if (!oplogs.isEmpty()) {
-                    shareInfoOpLogMapper.createAll(oplogs);
-                }
-                return null;
-            });
+        // node is only moved to the trashcan here - share infos are cleaned up once it is purged (see beforePurgeNode),
+        // since the archive store is exempt from OnDeleteNodePolicy and this would never fire again for the purge itself
+        if (isNodeArchived) {
+            return;
         }
+
+        // binding is already scoped to ccm:io/ccm:map (see init()), no further type check needed here
+        deleteShareInfoForNode(childAssocRef.getChildRef().getId());
+    }
+
+    @Override
+    public void beforePurgeNode(NodeRef nodeRef) {
+        deleteShareInfoForNode(nodeRef.getId());
+
+        // purging a folder does not fire beforePurgeNode for its children, so walk the primary
+        // hierarchy ourselves - this must happen recursively, since maps can be nested arbitrarily
+        // deep. currently only io/map children are handled, since those are the only types that
+        // can carry share infos today - if other types become share-able in the future, they need
+        // to be added to isIoOrMap() as well
+        if (QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeService.getType(nodeRef))) {
+            nodeService.getChildAssocs(nodeRef).stream()
+                    .filter(ChildAssociationRef::isPrimary)
+                    .map(ChildAssociationRef::getChildRef)
+                    .filter(this::isIoOrMap)
+                    .forEach(this::beforePurgeNode);
+        }
+    }
+
+    private boolean isIoOrMap(NodeRef nodeRef) {
+        QName type = nodeService.getType(nodeRef);
+        return QName.createQName(CCConstants.CCM_TYPE_IO).equals(type) || QName.createQName(CCConstants.CCM_TYPE_MAP).equals(type);
+    }
+
+    private void deleteShareInfoForNode(String nodeId) {
+        retryingTransactionHelper.doInTransaction(() -> {
+            List<Long> longs = shareInfoMapper.deleteByNodeId(nodeId);
+            List<ShareInfoOplogData> oplogs = longs.stream()
+                    .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
+                    .toList();
+
+            if (!oplogs.isEmpty()) {
+                shareInfoOpLogMapper.createAll(oplogs);
+            }
+            return null;
+        });
     }
 
     @Override
