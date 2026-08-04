@@ -73,6 +73,8 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void onDeleteNode(ChildAssociationRef childAssocRef, boolean isNodeArchived) {
+        log.debug("onDeleteNode: nodeId={}, isNodeArchived={}", childAssocRef.getChildRef().getId(), isNodeArchived);
+
         // node is only moved to the trashcan here - share infos are cleaned up once it is purged (see beforePurgeNode),
         // since the archive store is exempt from OnDeleteNodePolicy and this would never fire again for the purge itself
         if (isNodeArchived) {
@@ -85,6 +87,8 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void beforePurgeNode(NodeRef nodeRef) {
+        log.debug("beforePurgeNode: nodeId={}", nodeRef.getId());
+
         deleteShareInfoForNode(nodeRef.getId());
 
         // purging a folder does not fire beforePurgeNode for its children, so walk the primary
@@ -109,6 +113,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     private void deleteShareInfoForNode(String nodeId) {
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> longs = shareInfoMapper.deleteByNodeId(nodeId);
+            log.debug("deleteShareInfoForNode: nodeId={}, deletedShareIds={}", nodeId, longs);
             List<ShareInfoOplogData> oplogs = longs.stream()
                     .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
                     .toList();
@@ -123,8 +128,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     @Override
     public void beforeDeleteNode(NodeRef nodeRef) {
         String userName = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_USER_USERNAME);
+        log.debug("beforeDeleteNode: nodeId={}, userName={}", nodeRef.getId(), userName);
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> longs = shareInfoMapper.deleteBySharedWithOrSharedByAndShareStatus(userName, userName, ShareStatus.SHARED);
+            log.debug("beforeDeleteNode: userName={}, deletedShareIds={}", userName, longs);
             List<ShareInfoOplogData> oplogs = longs.stream()
                     .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
                     .toList();
@@ -139,7 +146,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onRemovedPermissionEvent(RemovedPermissionEvent event) {
+        log.debug("onRemovedPermissionEvent: nodeId={}, creator={}, permissions={}", event.node_id(), event.creator(), event.permissions());
+
         if (!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()) {
+            log.debug("onRemovedPermissionEvent: skipped, createSharesOnPermissionChanged is false");
             return;
         }
 
@@ -150,6 +160,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
                     .collect(Collectors.toSet());
 
             List<Long> longs = shareInfoMapper.deleteAllByNodeIdAndSharedByAndShareStatusAndSharedWithIn(event.node_id(), event.creator(), ShareStatus.SHARED, sharesToRemove);
+            log.debug("onRemovedPermissionEvent: nodeId={}, sharesToRemove={}, deletedShareIds={}", event.node_id(), sharesToRemove, longs);
             List<ShareInfoOplogData> oplogs = longs.stream()
                     .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
                     .toList();
@@ -163,7 +174,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @EventListener
     public void onAddedPermissionEvent(AddedPermissionsEvent event) {
+        log.debug("onAddedPermissionEvent: nodeId={}, creator={}, permissions={}", event.node_id(), event.creator(), event.permissions());
+
         if (!ShareInfoContextHolder.getContext().isCreateSharesOnPermissionChanged()) {
+            log.debug("onAddedPermissionEvent: skipped, createSharesOnPermissionChanged is false");
             return;
         }
 
@@ -178,7 +192,9 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
                     .map(ShareInfoData::getSharedWith)
                     .collect(Collectors.toSet());
 
+            log.debug("onAddedPermissionEvent: nodeId={}, sharesFromEvent={}, knownShares={}", event.node_id(), sharesToAdd, knownShares);
             sharesToAdd.removeAll(knownShares);
+            log.debug("onAddedPermissionEvent: nodeId={}, newSharesToAdd={}", event.node_id(), sharesToAdd);
 
             if (sharesToAdd.isEmpty()) {
                 return null;
@@ -221,6 +237,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date) {
+        log.debug("createShare: nodeId={}, sharedBy={}, sharedWith={}, shareType={}, date={}", nodeId, sharedBy, sharedWith, shareType, date);
         Exception error = retryingTransactionHelper.doInTransaction(() -> {
             ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, date);
             try {
@@ -240,16 +257,20 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void rejectShare(@NonNull String nodeId) {
+        String userName = AuthenticationUtil.getRunAsUser();
+        log.debug("rejectShare: nodeId={}, userName={}", nodeId, userName);
+
         if (AuthenticationUtil.isRunAsUserTheSystemUser()) {
             throw new IllegalStateException("System user cannot reject shares");
         }
 
         retryingTransactionHelper.doInTransaction(() -> {
             try {
-                ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, AuthenticationUtil.getRunAsUser(), ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
+                ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, userName, ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
                 shareInfoMapper.create(shareInfoData);
                 shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
             } catch (DuplicateKeyException e) {
+                log.debug("rejectShare: nodeId={}, userName={} already rejected", nodeId, userName);
                 return null;
             }
             return null;
@@ -258,11 +279,14 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void unrejectShare(@NonNull String nodeId) {
+        log.debug("unrejectShare: nodeId={}, userName={}", nodeId, AuthenticationUtil.getRunAsUser());
+
         if (AuthenticationUtil.isRunAsUserTheSystemUser()) {
             throw new IllegalStateException("System user cannot reject shares");
         }
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> ids = shareInfoMapper.deleteAllByNodeIdAndSharedByIsNullAndShareStatusAndSharedWithIn(nodeId, ShareStatus.REJECTED, List.of(AuthenticationUtil.getRunAsUser()));
+            log.debug("unrejectShare: nodeId={}, deletedShareIds={}", nodeId, ids);
             if (ids.isEmpty()) {
                 return null;
             }
@@ -277,12 +301,15 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public void removeShares(List<Long> shareIds) {
+        log.debug("removeShares: shareIds={}", shareIds);
+
         if (shareIds.isEmpty()) {
             return;
         }
 
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> deletedIds = shareInfoMapper.deleteAll(shareIds);
+            log.debug("removeShares: deletedShareIds={}", deletedIds);
             List<ShareInfoOplogData> oplogs = deletedIds.stream()
                     .map(x -> new ShareInfoOplogData(null, x, OpLogAction.DELETE, new Date()))
                     .toList();
@@ -297,8 +324,10 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     @Override
     @Transactional
     public void removeShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith) {
+        log.debug("removeShare: nodeId={}, sharedBy={}, sharedWith={}", nodeId, sharedBy, sharedWith);
         retryingTransactionHelper.doInTransaction(() -> {
             List<Long> longs = shareInfoMapper.deleteAllByNodeIdAndSharedByAndShareStatusAndSharedWithIn(nodeId, sharedBy, ShareStatus.SHARED, List.of(sharedWith));
+            log.debug("removeShare: nodeId={}, deletedShareIds={}", nodeId, longs);
             List<ShareInfoOplogData> oplogs = longs.stream()
                     .map(id -> new ShareInfoOplogData(null, id, OpLogAction.DELETE, new Date()))
                     .toList();
@@ -311,43 +340,55 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
 
     @Override
     public List<ShareInfo> getShares(@NonNull NodeRef nodeRef) {
+        String userName = AuthenticationUtil.getRunAsUser();
+        log.debug("getShares: nodeId={}, userName={}", nodeRef.getId(), userName);
         if (!AuthenticationUtil.isRunAsUserTheSystemUser()
-                && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
+                && !authorityService.isAdminAuthority(userName)) {
+            log.debug("getShares: nodeId={}, userName={} is not admin, denying access", nodeRef.getId(), userName);
             throw new InsufficientPermissionException("You are not allowed to access all shares of this node");
         }
-        return shareInfoMapper.getAllSharesByNodeId(nodeRef.getId()).stream().map(ShareInfo.class::cast).toList();
+        List<ShareInfo> shares = shareInfoMapper.getAllSharesByNodeId(nodeRef.getId()).stream().map(ShareInfo.class::cast).toList();
+        log.debug("getShares: nodeId={}, returning {} shares", nodeRef.getId(), shares.size());
+        return shares;
     }
 
     @Override
     public List<ShareInfo> getShares(@NonNull List<Long> shareIds) {
+        String userName = AuthenticationUtil.getRunAsUser();
+        log.debug("getShares: shareIds={}, userName={}", shareIds, userName);
         if (!AuthenticationUtil.isRunAsUserTheSystemUser()
-                && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
+                && !authorityService.isAdminAuthority(userName)) {
+            log.debug("getShares: shareIds={}, userName={} is not admin, denying access", shareIds, userName);
             throw new InsufficientPermissionException("You are not allowed to access shares of this node");
         }
 
         if (shareIds.isEmpty()) {
             return List.of();
         }
-        return shareInfoMapper.getAllSharesByIdIn(shareIds).stream().map(ShareInfo.class::cast).toList();
+        List<ShareInfo> shares = shareInfoMapper.getAllSharesByIdIn(shareIds).stream().map(ShareInfo.class::cast).toList();
+        log.debug("getShares: shareIds={}, returning {} shares", shareIds, shares.size());
+        return shares;
     }
 
 
     /**
      * Retrieves a list of ShareInfoOplog entries based on the specified parameters.
      *
-     * @param afterTxId   the transaction ID after which the oplogs should be fetched;
-     *                    if null, this parameter will be ignored.
-     * @param afterDate   the start date after which the oplogs should be fetched;
-     *                    if null, this parameter will be ignored. (exclusive)
-     * @param untilDate   the end date until which the oplogs should be fetched;
-     *                    if null, this parameter will be ignored. (inklusiv)
-     * @param limit       the maximum number of oplogs to retrieve.
-     * @return            a list of ShareInfoOplog objects matching the specified criteria.
+     * @param afterTxId the transaction ID after which the oplogs should be fetched;
+     *                  if null, this parameter will be ignored.
+     * @param afterDate the start date after which the oplogs should be fetched;
+     *                  if null, this parameter will be ignored. (exclusive)
+     * @param untilDate the end date until which the oplogs should be fetched;
+     *                  if null, this parameter will be ignored. (inklusiv)
+     * @param limit     the maximum number of oplogs to retrieve.
+     * @return a list of ShareInfoOplog objects matching the specified criteria.
      * @throws InsufficientPermissionException if the current user does not have sufficient permissions
      *                                         to access the oplogs.
      */
     @Override
     public List<ShareInfoOplog> getOplogs(Long afterTxId, Date afterDate, Date untilDate, int limit) {
+        log.debug("getOplogs: afterTxId={}, afterDate={}, untilDate={}, limit={}", afterTxId, afterDate, untilDate, limit);
+
         if (!AuthenticationUtil.isRunAsUserTheSystemUser()
                 && !authorityService.isAdminAuthority(AuthenticationUtil.getRunAsUser())) {
             throw new InsufficientPermissionException("You are not allowed to access oplogs");
@@ -357,13 +398,14 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         if (afterTxId != null) {
             oplogs = shareInfoOpLogMapper.getAllAfterId(afterTxId, limit);
         } else if (afterDate != null) {
-            oplogs = untilDate!= null
+            oplogs = untilDate != null
                     ? shareInfoOpLogMapper.getAllBetweenTimestamp(afterDate, untilDate, limit)
                     : shareInfoOpLogMapper.getAllAfterTimestamp(afterDate, limit);
         } else {
             oplogs = shareInfoOpLogMapper.getAll(limit);
         }
 
+        log.debug("getOplogs: returning {} entries", oplogs.size());
         return oplogs.stream().map(ShareInfoOplog.class::cast).toList();
     }
 }
