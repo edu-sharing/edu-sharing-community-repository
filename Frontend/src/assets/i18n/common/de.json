@@ -1705,13 +1705,13 @@
     "SHOW_MORE_FOR": "Alle {{ element }} anzeigen",
     "NO_RESULTS": "Keine Elemente verfügbar",
     "featured-media": {
-      "TITLE": "Ihre Mediathek"
+      "TITLE": "Mediathek"
     },
     "collections": {
-      "TITLE": "Ihre Sammlungen"
+      "TITLE": "Sammlungen"
     },
     "shares": {
-      "TITLE": "Letzte Freigaben für Sie",
+      "TITLE": "Letzte Freigaben",
       "SUBTITLE": {
         "fromUser": "von mir",
         "toUser": "an mich",
