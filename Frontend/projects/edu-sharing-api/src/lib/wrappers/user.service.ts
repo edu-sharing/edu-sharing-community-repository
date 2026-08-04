@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { Observable, Subject } from 'rxjs';
 import {
+    debounceTime,
     distinctUntilKeyChanged,
     first,
     map,
@@ -145,6 +146,7 @@ export class UserService {
             .pipe(
                 startWith(void 0 as void),
                 switchMap(() => this.authentication.observeLoginInfo().pipe(take(1))),
+                debounceTime(0),
                 switchReplay((loginInfo) => {
                     if (loginInfo.isValidLogin) {
                         return this.getUserInner(ME, HOME_REPOSITORY);
