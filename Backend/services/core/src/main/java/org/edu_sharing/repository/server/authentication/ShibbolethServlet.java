@@ -101,7 +101,12 @@ public class ShibbolethServlet extends SpringHttpServlet {
             redirectUrl = (String) session.getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
         }
 
-        String headerUserName = req.getRemoteUser();
+        Map<String, String> ssoMap = new HashMap<>() {{
+            put(CCConstants.CM_PROP_PERSON_USERNAME, req.getRemoteUser());
+        }};
+        mapAttributes(ssoMap, req);
+        String headerUserName = ssoMap.get(CCConstants.CM_PROP_PERSON_USERNAME);
+
         // headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
 		if (validAuthInfo != null ) {
@@ -121,7 +126,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
                 log.info("end session for user:{}", validAuthInfo.get(CCConstants.AUTH_USERNAME));
                 authTool.logout(validAuthInfo.get(CCConstants.AUTH_TICKET));
                 session.invalidate();
-                req.getSession(true);
+                session = req.getSession(true);
             }
         }
 
@@ -133,11 +138,6 @@ public class ShibbolethServlet extends SpringHttpServlet {
             if (req.getCharacterEncoding() == null) {
                 req.setCharacterEncoding("UTF-8");
             }
-
-            Map<String, String> ssoMap = new HashMap<>() {{
-                put(CCConstants.CM_PROP_PERSON_USERNAME, headerUserName);
-            }};
-            mapAttributes(ssoMap, req);
 
             authService.authenticateBySSO(ssoMap);
 
