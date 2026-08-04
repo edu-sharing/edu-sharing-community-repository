@@ -18,6 +18,12 @@ public interface GlobalShareService {
 	void removeShare(String nodeId, String shareNodeId);
 	
 	Share[] getShares(String nodeId);
+
+	/**
+	 * same as {@link #getShares(String)}, but for a node in a store other than the default workspace
+	 * (e.g. the archive/trashcan store)
+	 */
+	Share[] getShares(NodeRef nodeRef);
 	
 	Share getShare(String nodeId, String token);
 

@@ -130,6 +130,22 @@ public class NodeRunner {
     @Getter
     @Setter
     private StoreRef elasticStore = StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
+
+    /**
+     * collect nodes by aspect via a CMIS/TMDQ query instead of traversing the tree.
+     * If set (and non-empty), takes precedence over {@link #elastic} and the recursive traversal.
+     */
+    @Getter
+    @Setter
+    private List<String> aspects;
+
+    /**
+     * stores to collect from when {@link #aspects} is used; defaults to workspace only
+     */
+    @Getter
+    @Setter
+    private List<StoreRef> aspectStores = List.of(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE);
+
     /**
      * custom nodes list to iterate over
      */
@@ -162,6 +178,12 @@ public class NodeRunner {
 
             if(nodesList != null) {
                 nodes = new ArrayList<>(nodesList);
+            } else if(aspects != null && !aspects.isEmpty()) {
+                log.info("collecting nodes by aspect: {}", aspects);
+                if (runAsSystem)
+                    nodes = AuthenticationUtil.runAsSystem(() -> new NodeCollectorCmis(aspects, aspectStores, types).getNodes());
+                else
+                    nodes = new NodeCollectorCmis(aspects, aspectStores, types).getNodes();
             } else if(StringUtils.isBlank(elastic)) {
                 if (runAsSystem)
                     nodes = AuthenticationUtil.runAsSystem(() -> nodeService.getChildrenRecursive(startFolderStore, startFolder, types, recurseMode));

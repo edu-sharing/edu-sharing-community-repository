@@ -221,15 +221,20 @@ public class GlobalShareServiceImpl implements GlobalShareService {
 
     @Override
     public Share[] getShares(String nodeId) {
+        return getShares(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
+    }
+
+    @Override
+    public Share[] getShares(NodeRef nodeRef) {
 
         Set<QName> qnameSet = new HashSet<>();
         qnameSet.add(SHARE_TYPE);
-        List<ChildAssociationRef> childNodeRefs = nodeService.getChildAssocs(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), qnameSet);
+        List<ChildAssociationRef> childNodeRefs = nodeService.getChildAssocs(nodeRef, qnameSet);
 
         List<Share> result = new ArrayList<>();
         for (ChildAssociationRef childRef : childNodeRefs) {
             Map<QName, Serializable> props = nodeService.getProperties(childRef.getChildRef());
-            Share share = getNodeShareObject(nodeId, childRef.getChildRef());
+            Share share = getNodeShareObject(nodeRef.getId(), childRef.getChildRef());
             result.add(share);
         }
         return result.toArray(new Share[0]);
