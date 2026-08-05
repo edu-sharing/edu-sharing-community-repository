@@ -535,12 +535,12 @@ public class IamApi {
 
     public Response updateUserStatus(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = "users", required = true) @QueryParam("users") List<String> users,
+            @Parameter(description = "user", required = true) @QueryParam("user") List<String> user,
             @Parameter(description = "the new status to set", required = true) @PathParam("status") PersonLifecycleService.PersonStatus status,
             @Parameter(description = "notify the user via mail", required = true, schema = @Schema(defaultValue = "true")) @QueryParam("notify") Boolean notifyMail,
             @Context HttpServletRequest req) {
         try {
-            PersonDao.setStatus(users,status,notifyMail);
+            PersonDao.setStatus(user,status,notifyMail);
             return Response.status(Response.Status.OK).build();
         } catch (DAOValidationException t) {
             logger.warn(t.getMessage(), t);
