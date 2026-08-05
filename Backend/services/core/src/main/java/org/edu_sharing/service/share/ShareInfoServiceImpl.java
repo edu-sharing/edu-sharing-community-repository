@@ -242,7 +242,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
             ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, date);
             try {
                 shareInfoMapper.create(shareInfoData);
-                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, date));
+                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
                 return null;
             } catch (DuplicateKeyException e) {
                 log.warn("Share already exists: {}", shareInfoData);
