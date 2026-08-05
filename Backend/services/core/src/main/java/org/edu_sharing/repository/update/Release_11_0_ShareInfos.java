@@ -4,6 +4,7 @@ package org.edu_sharing.repository.update;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.version.Version2Model;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -13,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.rpc.Share;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.importer.OAIPMHLOMImporter;
+import org.edu_sharing.repository.server.jobs.helper.NodeCollectorCmis;
 import org.edu_sharing.repository.server.jobs.helper.NodeRunner;
 import org.edu_sharing.repository.server.update.UpdateRoutine;
 import org.edu_sharing.repository.server.update.UpdateService;
@@ -42,6 +44,13 @@ public class Release_11_0_ShareInfos {
      * count is always logged alongside it, this only bounds the log line's size for a mass failure.
      */
     private static final int MAX_LOGGED_FAILED_NODES = 100;
+
+    /**
+     * how often (in processed nodes) the progress line is logged - the last node is always logged
+     * too (via the {@code done == total} check in {@link #execute(boolean)}), so short test runs
+     * still produce at least one progress line.
+     */
+    private static final int PROGRESS_LOG_INTERVAL = 1000;
 
     private final NodeService nodeService;
     private final ShareInfoServiceImpl shareInfoService;
@@ -78,19 +87,28 @@ public class Release_11_0_ShareInfos {
             async = true,
             blocking = false)
     public void execute(boolean test) {
+        List<StoreRef> stores = List.of(
+                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
+                StoreRef.STORE_REF_ARCHIVE_SPACESSTORE,
+                VERSION_STORE);
+        // only nodes that ever had permissions set or a link share created carry one of these aspects -
+        // collecting by aspect avoids traversing the whole (workspace/archive/version) repository tree
+        List<String> aspects = List.of(CCConstants.CCM_ASPECT_PERMISSION_HISTORY, CCConstants.CCM_ASPECT_SHARES);
+        List<String> types = List.of(CCConstants.CCM_TYPE_IO, CCConstants.CCM_TYPE_MAP);
+
+        // collected up front (instead of letting NodeRunner do it internally via setAspects/
+        // setAspectStores) so the total is known before the "starting" log line and progress can be
+        // logged as a percentage - NodeCollectorCmis already deduplicates its result
+        List<NodeRef> nodes = AuthenticationUtil.runAsSystem(
+                () -> new NodeCollectorCmis(aspects, stores, types).getNodes());
+        int total = nodes.size();
+
         NodeRunner runner = new NodeRunner();
         runner.setRunAsSystem(true);
-        runner.setTypes(List.of(CCConstants.CCM_TYPE_IO, CCConstants.CCM_TYPE_MAP));
         runner.setThreaded(true);
         runner.setTransaction(NodeRunner.TransactionMode.LocalRetrying);
         runner.setKeepModifiedDate(true);
-        // only nodes that ever had permissions set or a link share created carry one of these aspects -
-        // collecting by aspect avoids traversing the whole (workspace/archive/version) repository tree
-        runner.setAspects(List.of(CCConstants.CCM_ASPECT_PERMISSION_HISTORY, CCConstants.CCM_ASPECT_SHARES));
-        runner.setAspectStores(List.of(
-                StoreRef.STORE_REF_WORKSPACE_SPACESSTORE,
-                StoreRef.STORE_REF_ARCHIVE_SPACESSTORE,
-                VERSION_STORE));
+        runner.setNodesList(nodes);
 
         Stats stats = new Stats();
         long startTime = System.currentTimeMillis();
@@ -103,10 +121,15 @@ public class Release_11_0_ShareInfos {
                 stats.failed.remove(nodeRef);
 
                 int done = stats.processed.incrementAndGet();
-                if (done % 1000 == 0) {
+                if (done % PROGRESS_LOG_INTERVAL == 0 || done == total) {
                     long elapsedSeconds = Math.max(1, (System.currentTimeMillis() - startTime) / 1000);
-                    log.info("ShareInfos update progress: {} node(s) processed, {} failed so far, {}s elapsed, {} node(s)/s",
-                            done, stats.failed.size(), elapsedSeconds, done / elapsedSeconds);
+                    long rate = Math.max(1, done / elapsedSeconds);
+                    // done can slightly exceed total if LocalRetrying re-runs an already-succeeded node
+                    // after a commit failure - cap at 100% instead of showing e.g. 100.03%
+                    int percent = (int) Math.min(100, (100L * done) / total);
+                    long etaSeconds = Math.max(0, (total - done) / rate);
+                    log.info("ShareInfos update progress: {}/{} node(s) processed ({}%), {} failed so far, {}s elapsed, {} node(s)/s, ETA ~{}s",
+                            done, total, percent, stats.failed.size(), elapsedSeconds, rate, etaSeconds);
                 }
             } catch (Exception e) {
                 // NodeRunner runs tasks in a thread pool and never reads back the per-node Futures, so
@@ -121,8 +144,12 @@ public class Release_11_0_ShareInfos {
             }
         });
 
-        log.info("Starting ShareInfos update (test={}, stores={}, aspects={}, types={}, threads={})",
-                test, runner.getAspectStores(), runner.getAspects(), runner.getTypes(), OAIPMHLOMImporter.getThreadCount());
+        log.info("Starting ShareInfos update (test={}, total={} node(s), stores={}, aspects={}, types={}, threads={})",
+                test, total, stores, aspects, types, OAIPMHLOMImporter.getThreadCount());
+        if (total == 0) {
+            log.info("ShareInfos update finished (test={}): no matching nodes found, nothing to do", test);
+            return;
+        }
         int collected = runner.run();
         long durationSeconds = Math.max(1, (System.currentTimeMillis() - startTime) / 1000);
 
