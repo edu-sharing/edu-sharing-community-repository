@@ -119,6 +119,7 @@ public class RenderingServlet extends SpringHttpServlet {
                 String encodedSignature = Base64.getEncoder().encodeToString(signedNode.getSignature());
                 String jwt = nodeDao.getJWT();
                 response = "<edu-sharing-render"
+                        + " ngCspNonce=\"" + nonce + "\""
                         + " encoded_node=\"" + encodedNode + "\""
                         + " signature=\"" + encodedSignature + "\""
                         + " jwt=\"" + jwt + "\""
