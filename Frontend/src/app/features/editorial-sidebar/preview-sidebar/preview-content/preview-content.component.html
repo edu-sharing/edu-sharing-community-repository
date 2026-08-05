@@ -1,5 +1,12 @@
 <div class="preview-sidebar-scroll" (esBorderBoxObserver)="onContentResize($event)">
-  @if (renderNode()) {
+  @if (renderNode()) { @if (previewSidebarTemplateService.render) {
+  <ng-container
+    *ngTemplateOutlet="
+      previewSidebarTemplateService.render;
+      context: { element: renderNode(), modal }
+    "
+  ></ng-container>
+  } @else {
   <es-render-wrapper-component
     [showTopbar]="false"
     [showMetadata]="false"
@@ -7,7 +14,7 @@
     [repository]="renderNode().ref.repo"
     [fullWidth]="!modal"
   ></es-render-wrapper-component>
-  } @if (!renderNode()) {
+  } } @if (!renderNode()) {
   <div class="preview-sidebar-image-container">
     <img
       class="preview-sidebar-image"

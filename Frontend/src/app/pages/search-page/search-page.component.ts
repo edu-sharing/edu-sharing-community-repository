@@ -28,6 +28,7 @@ import { MainNavService } from '../../main/navigation/main-nav.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { NavigationScheduler } from './navigation-scheduler';
 import { SearchPageService } from './search-page.service';
+import { UserModifiableValue } from './user-modifiable-values';
 import { OptionsHelperService } from '../../services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
@@ -76,7 +77,11 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     readonly availableRepositories = this.searchPage.availableRepositories;
     readonly activeRepository = this.searchPage.activeRepository;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
-    filterBarIsVisible = this.searchPage.filterBarIsVisible;
+    // Assigned by `SearchPageService.registerSearchField()` during `searchPage.init()`, i.e. after
+    // this class' field initializers have run---so it has to be read lazily via a getter.
+    get filterBarIsVisible(): UserModifiableValue<boolean> {
+        return this.searchPage.filterBarIsVisible;
+    }
     readonly searchString = this.searchPage.searchString;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly loadingProgress = this.searchPage.loadingProgress;

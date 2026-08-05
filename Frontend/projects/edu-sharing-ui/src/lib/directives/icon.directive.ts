@@ -35,6 +35,9 @@ type IconsConfig = Array<{
     selector: 'i[esIcon], i.material-icons',
 })
 export class IconDirective implements OnInit, OnDestroy {
+    /** compiled `context` patterns of the icons config, `null` for invalid expressions */
+    private static contextPatterns = new Map<string, RegExp | null>();
+
     private element = inject<ElementRef<HTMLElement>>(ElementRef);
     private http = inject(HttpClient);
     private translate = inject(TranslateService);
@@ -107,6 +110,25 @@ export class IconDirective implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * The `context` of an icons config entry is a regular expression, matched against the whole
+     * context of the icon (i.e. it is implicitly anchored, so a plain string still behaves like an
+     * exact match).
+     */
+    private static matchesContext(entry: IconsConfig[0], context: string): boolean {
+        if (!IconDirective.contextPatterns.has(entry.context)) {
+            let pattern: RegExp | null;
+            try {
+                pattern = new RegExp(`^(?:${entry.context})$`);
+            } catch (error) {
+                console.error(`Invalid regex in icons config context "${entry.context}"`, error);
+                pattern = null;
+            }
+            IconDirective.contextPatterns.set(entry.context, pattern);
+        }
+        return IconDirective.contextPatterns.get(entry.context)?.test(context) ?? false;
+    }
+
     private async setIcon(id: string, context: string, iconsConfig: IconsConfig) {
         this.element.nativeElement.classList.remove('edu-icons', 'custom-icons', 'material-icons');
         if (this._customClass) {
@@ -125,14 +147,16 @@ export class IconDirective implements OnInit, OnDestroy {
         // resolve the config override first, so a mapping may also point at an `svg-` icon and an
         // `svg-` icon can itself be overridden
         let customClass: string = null;
-        let mapping = null;
-        if (context) {
-            mapping = iconsConfig?.filter((i) => i.original === id && i.context === context);
-        }
+        // the context regex is matched against '' when the icon sets no context, so a pattern like
+        // `.*` also covers context-less icons (use `.+` to require a context)
+        let mapping: IconsConfig = iconsConfig?.filter(
+            (i) => i.original === id && i.context && IconDirective.matchesContext(i, context ?? ''),
+        );
         if (!mapping?.length) {
             mapping = iconsConfig?.filter((i) => i.original === id && !i.context);
         }
-        if (mapping?.length === 1) {
+        if (mapping?.length) {
+            // the first matching entry wins — with regex contexts, more than one entry may match
             id = mapping[0].replace || '';
             customClass = mapping[0].cssClass;
         }

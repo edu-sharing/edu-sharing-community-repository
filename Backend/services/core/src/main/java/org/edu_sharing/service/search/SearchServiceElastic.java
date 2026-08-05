@@ -1807,6 +1807,12 @@ public class SearchServiceElastic implements SearchService {
                                                 .value(username)
                                         ));
                                     } else if (direction.equals(UserShareDirection.toUser)) {
+                                        // fix: sometimes collections get invited the own user
+                                        // but shared with me should not show them
+                                        b = b.mustNot(m -> m.term(t -> t
+                                                        .field("share.sharedBy")
+                                                        .value(username)
+                                        ));
                                         b = b.must(m -> m.term(t -> t
                                                 .field("share.sharedWith")
                                                 .value(username)

@@ -319,7 +319,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                 window.close();
             } else {
                 if (this.fromLogin && !AppComponent.isRedirectedFromLogin()) {
-                    UIHelper.goToDefaultLocation(
+                    void UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
                         this.configLegacy,

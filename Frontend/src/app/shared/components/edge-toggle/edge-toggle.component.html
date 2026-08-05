@@ -8,7 +8,7 @@
     [attr.aria-expanded]="open()"
     [attr.aria-label]="(open() ? labelClose() : labelOpen()) | translate"
   >
-    <i [esIcon]="icon()" [aria]="false"></i>
+    <i [esIcon]="icon()" [aria]="false" esIconContext="edge-toggle"></i>
   </button>
   }
 </ng-template>

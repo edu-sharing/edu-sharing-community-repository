@@ -263,7 +263,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                     // A *valid* guest session: editorial is not available to guests, and /login
                     // would just bounce the live session straight back here. Inform via toast and
                     // leave to the configured default location instead.
-                    UIHelper.goToDefaultLocation(
+                    void UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
                         this.configurationService,

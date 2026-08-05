@@ -17,7 +17,6 @@ import org.edu_sharing.service.contributor.ContributorServiceAdapter;
 import org.edu_sharing.service.dashboard.DashboardConfigService;
 import org.edu_sharing.service.feedback.FeedbackService;
 import org.edu_sharing.service.feedback.FeedbackServiceAdapter;
-import org.edu_sharing.service.feedback.FeedbackServiceImpl;
 import org.edu_sharing.service.nodeservice.*;
 import org.edu_sharing.service.notification.NotificationService;
 import org.edu_sharing.service.organization.OrganizationService;
@@ -59,7 +58,7 @@ public class AppContextConfig {
                 .defineBean(PermissionService.class, "permissionService")
                 .defineBean(SearchService.class, SearchServiceElastic.class)
                 .defineBean(CommentService.class, CommentServiceImpl.class)
-                .defineBean(FeedbackService.class, FeedbackServiceImpl.class)
+                .defineBean(FeedbackService.class, "feedbackServiceImpl")
                 .defineBean(RatingService.class, "ratingService")
                 .defineBean(RelationService.class, "relationService")
                 .defineBean(NodeRelationTraceService.class, NodeRelationTraceService.class)
@@ -77,7 +76,7 @@ public class AppContextConfig {
                 .defineBean(PermissionService.class, "permissionService")
                 .defineBean(SearchService.class, SearchServiceElastic.class)
                 .defineBean(CommentService.class, CommentServiceImpl.class)
-                .defineBean(FeedbackService.class, FeedbackServiceImpl.class)
+                .defineBean(FeedbackService.class, "feedbackServiceImpl")
                 .defineBean(RatingService.class, "ratingService")
                 .defineBean(RelationService.class, "relationService")
                 .defineBean(NodeRelationTraceService.class, NodeRelationTraceService.class)

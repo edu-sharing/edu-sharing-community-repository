@@ -387,7 +387,7 @@ export class NodesSelectorComponent implements OnInit {
     workspaceAction = model<'move' | 'copy'>('move');
     canMoveWorkspaceNodes = computed(
         () =>
-            this.option().optionConfig &&
+            this.option()?.optionConfig &&
             this.selectedSourceNodes()?.length &&
             this.selectedSourceNodes().every(
                 (n: Node) => !n.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),

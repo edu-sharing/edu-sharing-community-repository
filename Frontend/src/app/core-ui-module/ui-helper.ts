@@ -4,7 +4,7 @@ import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Ace, LoginInfo, Node } from 'ngx-edu-sharing-api';
 import { ListItem, OPEN_URL_MODE, UIConstants } from 'ngx-edu-sharing-ui';
-import { Observable, Observer } from 'rxjs';
+import { firstValueFrom, Observable, Observer } from 'rxjs';
 import { first, take } from 'rxjs/operators';
 import { BridgeService } from '../services/bridge.service';
 import { MdsInfo, ParentList } from '../core-module/rest/data-object';
@@ -366,18 +366,20 @@ export class UIHelper {
         return columns;
     }
 
-    static goToDefaultLocation(
+    static async goToDefaultLocation(
         router: Router,
         platformLocation: PlatformLocation,
         configService: ConfigurationService,
         replaceUrl = false,
     ) {
-        let defaultLocation = this.getDefaultLocation(configService);
+        const defaultLocation = await this.getDefaultLocation(configService);
         RouterHelper.navigateToAbsoluteUrl(platformLocation, router, defaultLocation, replaceUrl);
     }
 
-    static getDefaultLocation(configService: ConfigurationService) {
-        let defaultLocation = configService.instant('loginDefaultLocation', 'landing');
+    static async getDefaultLocation(configService: ConfigurationService): Promise<string> {
+        let defaultLocation = await firstValueFrom<string>(
+            configService.get('loginDefaultLocation', 'landing'),
+        );
         if (!defaultLocation.match(/https?:\/\/*/)) {
             defaultLocation = UIConstants.ROUTER_PREFIX + defaultLocation;
         }

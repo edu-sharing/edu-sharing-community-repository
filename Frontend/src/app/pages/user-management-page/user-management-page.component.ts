@@ -63,7 +63,7 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
                                         .length > 0;
                                 if (!hasAccess) {
                                     this.toast.error(null, 'TOAST.API_FORBIDDEN');
-                                    UIHelper.goToDefaultLocation(
+                                    void UIHelper.goToDefaultLocation(
                                         this.router,
                                         this.platformLocation,
                                         this.config,
