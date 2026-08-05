@@ -1,6 +1,6 @@
 <!---h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }} </h1-->
 <h1 esTitle class="cdk-visually-hidden">
-  {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode().toUpperCase() | translate }}
+  {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
 </h1>
 
 <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter drawer,
@@ -70,7 +70,7 @@
   >
     <div class="es-mat-sidenav-content">
       <es-editorial-sidebar
-        [primaryMode]="(params$ | async).primaryMode"
+        [primaryMode]="(params$ | async)?.primaryMode"
         [component]="mainComponent$ | async"
         (showComponent)="goToComponent($event)"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
@@ -142,7 +142,7 @@
           </mat-tab>
           }
         </mat-tab-group>
-        } } @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode ===
+        } } @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode ===
         'share' || mode === 'assignment' || mode === 'suggestions' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"
@@ -160,13 +160,13 @@
         >
           <ng-template #empty>
             <div class="empty">
-              {{ 'EDITORIAL.' + mode.toUpperCase() + '.EMPTY' | translate }}
+              {{ 'EDITORIAL.' + mode?.toUpperCase() + '.EMPTY' | translate }}
             </div>
           </ng-template>
         </es-node-entries-wrapper>
         } }
       </div>
-      @if ((params$ | async).primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
+      @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
       || mode === 'assignment' || mode === 'suggestions' ) {
       <!-- Full-width selection bar pinned at the bottom of the card (outside the scroll region);
         mirrors the search-page selection layout. Node actions render in #selectionActionbarRef. -->
@@ -223,7 +223,7 @@
 </mat-sidenav-container>
 @if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
-  [primaryMode]="(params$ | async).primaryMode"
+  [primaryMode]="(params$ | async)?.primaryMode"
   [isModal]="true"
   (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
 ></es-editorial-sidebar>
