@@ -25,7 +25,6 @@ import org.edu_sharing.service.share.ibatis.ShareInfoMapper;
 import org.edu_sharing.service.share.ibatis.ShareInfoOpLogMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.event.EventListener;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -181,7 +180,7 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
             return;
         }
 
-        Exception error = retryingTransactionHelper.doInTransaction(() -> {
+        retryingTransactionHelper.doInTransaction(() -> {
             Set<String> sharesToAdd = event.permissions()
                     .stream()
                     .map(AccessPermission::getAuthority)
@@ -210,49 +209,38 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
                             ShareType.AUTHORITY,
                             new Date()
                     )).toList();
-            try {
-                shareInfoMapper.createAll(shareInfos);
 
-                List<ShareInfoOplogData> oplogs = shareInfos.stream()
-                        .map(x -> new ShareInfoOplogData(null, x.getId(), OpLogAction.CREATE, new Date()))
+            // knownShares above is only a best-effort pre-filter (it doesn't check sharedBy/status/type),
+            // so createAll still relies on ON CONFLICT DO NOTHING to skip any remaining duplicates
+            List<Long> ids = shareInfoMapper.createAll(shareInfos);
+            if (!ids.isEmpty()) {
+                List<ShareInfoOplogData> oplogs = ids.stream()
+                        .map(id -> new ShareInfoOplogData(null, id, OpLogAction.CREATE, new Date()))
                         .toList();
-
                 shareInfoOpLogMapper.createAll(oplogs);
-            } catch (DuplicateKeyException e) {
-                log.warn("Some shares already exists: {}", shareInfos);
-                return e;
             }
             return null;
         });
-
-        if (error != null) {
-            throw new RuntimeException(error);
-        }
     }
 
     @Override
-    public void createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType) {
-        createShare(nodeId, sharedBy, sharedWith, shareType, new Date());
+    public boolean createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType) {
+        return createShare(nodeId, sharedBy, sharedWith, shareType, new Date());
     }
 
     @Override
-    public void createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date) {
+    public boolean createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date) {
         log.debug("createShare: nodeId={}, sharedBy={}, sharedWith={}, shareType={}, date={}", nodeId, sharedBy, sharedWith, shareType, date);
-        Exception error = retryingTransactionHelper.doInTransaction(() -> {
+        return retryingTransactionHelper.doInTransaction(() -> {
             ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, sharedBy, sharedWith, ShareStatus.SHARED, shareType, date);
-            try {
-                shareInfoMapper.create(shareInfoData);
-                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
-                return null;
-            } catch (DuplicateKeyException e) {
-                log.warn("Share already exists: {}", shareInfoData);
-                return e;
+            Long id = shareInfoMapper.create(shareInfoData);
+            if (id == null) {
+                log.debug("Share already exists, skipping: {}", shareInfoData);
+                return false;
             }
+            shareInfoOpLogMapper.create(new ShareInfoOplogData(null, id, OpLogAction.CREATE, new Date()));
+            return true;
         });
-
-        if (error != null) {
-            throw new RuntimeException(error);
-        }
     }
 
     @Override
@@ -265,14 +253,13 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         }
 
         retryingTransactionHelper.doInTransaction(() -> {
-            try {
-                ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, userName, ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
-                shareInfoMapper.create(shareInfoData);
-                shareInfoOpLogMapper.create(new ShareInfoOplogData(null, shareInfoData.getId(), OpLogAction.CREATE, new Date()));
-            } catch (DuplicateKeyException e) {
+            ShareInfoData shareInfoData = new ShareInfoData(null, nodeId, null, userName, ShareStatus.REJECTED, ShareType.AUTHORITY, new Date());
+            Long id = shareInfoMapper.create(shareInfoData);
+            if (id == null) {
                 log.debug("rejectShare: nodeId={}, userName={} already rejected", nodeId, userName);
                 return null;
             }
+            shareInfoOpLogMapper.create(new ShareInfoOplogData(null, id, OpLogAction.CREATE, new Date()));
             return null;
         });
     }

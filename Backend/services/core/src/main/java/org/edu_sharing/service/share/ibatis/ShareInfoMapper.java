@@ -13,13 +13,30 @@ import java.util.List;
 @Mapper
 public interface ShareInfoMapper {
 
-    @Insert("INSERT INTO edu_share_info(node_id, shared_by, shared_with, share_status, share_type, timestamp) VALUES (#{nodeId}, #{sharedBy}, #{sharedWith}, #{shareStatus}, #{shareType}, #{timestamp})")
-    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
-    void create(ShareInfoData shareInfoData);
+    /**
+     * Returns the new row's id, or {@code null} if a row with the same
+     * (node_id, shared_by, shared_with, share_status, share_type) already existed - see the unique
+     * index in share.sql. This is used to make share creation idempotent (e.g. for
+     * Release_11_0_ShareInfos, which may re-see the same legacy share on every run): a plain INSERT
+     * would throw a DuplicateKeyException that aborts the whole surrounding transaction on Postgres,
+     * not just this statement, so callers can't simply catch it and continue.
+     * <p>
+     * {@code flushCache} is required because MyBatis would otherwise answer this @Select from its
+     * local statement cache within the same SqlSession/transaction instead of re-executing it.
+     */
+    @Select("INSERT INTO edu_share_info(node_id, shared_by, shared_with, share_status, share_type, timestamp) VALUES (#{nodeId}, #{sharedBy}, #{sharedWith}, #{shareStatus}, #{shareType}, #{timestamp}) ON CONFLICT DO NOTHING RETURNING id")
+    @Options(flushCache = Options.FlushCachePolicy.TRUE)
+    Long create(ShareInfoData shareInfoData);
 
-    @Insert("<script>INSERT INTO edu_share_info(node_id, shared_by, shared_with, share_status, share_type, timestamp) VALUES <foreach collection='shareInfoDatas' item='item' separator=','> (#{item.nodeId}, #{item.sharedBy}, #{item.sharedWith}, #{item.shareStatus}, #{item.shareType}, #{item.timestamp})</foreach> </script>")
-    @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
-    void createAll(List<ShareInfoData> shareInfoDatas);
+    /**
+     * Same idempotency as {@link #create}, but note that ON CONFLICT DO NOTHING only guards against
+     * conflicts with rows already in the table - it does not deduplicate the input list against
+     * itself. The only caller (ShareInfoServiceImpl.onAddedPermissionEvent) builds its list from a
+     * Set with constant nodeId/sharedBy/status/type, so that's not a concern there.
+     */
+    @Select("<script>INSERT INTO edu_share_info(node_id, shared_by, shared_with, share_status, share_type, timestamp) VALUES <foreach collection='shareInfoDatas' item='item' separator=','> (#{item.nodeId}, #{item.sharedBy}, #{item.sharedWith}, #{item.shareStatus}, #{item.shareType}, #{item.timestamp})</foreach> ON CONFLICT DO NOTHING RETURNING id</script>")
+    @Options(flushCache = Options.FlushCachePolicy.TRUE)
+    List<Long> createAll(List<ShareInfoData> shareInfoDatas);
 
     @Delete("DELETE FROM edu_share_info WHERE id = #{id}")
     void delete(ShareInfoData shareInfoData);

@@ -19,7 +19,6 @@ import org.edu_sharing.repository.server.update.UpdateService;
 import org.edu_sharing.service.share.GlobalShareService;
 import org.edu_sharing.service.share.ShareInfoServiceImpl;
 import org.edu_sharing.service.share.ShareType;
-import org.springframework.dao.DuplicateKeyException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -235,20 +234,16 @@ public class Release_11_0_ShareInfos {
                     log.warn("Link share {} for {} has no creator, falling back to sharedBy={}", nodeRefShare, nodeRef, shareCreator);
                 }
 
-                try {
-                    if (!test) {
-                        shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK, rawDate);
-                    }
+                // createShare is idempotent (see ShareInfoMapper.create) - link shares are derived from
+                // the ccm:share child nodes, which this routine never removes, so a re-run always sees
+                // them again and is expected to hit the same rows here
+                if (test || shareInfoService.createShare(nodeRef.getId(), shareCreator, shareNodeId, ShareType.LINK, rawDate)) {
+                    stats.linkShares.incrementAndGet();
                     log.debug("Created link share for {}: by: {} - with: {}", nodeRef, shareCreator, nodeRefShare);
-                } catch (RuntimeException e) {
-                    if (isDuplicateShare(e)) {
-                        log.debug("Link share for {} by {} with {} already exists, skipping", nodeRef, shareCreator, nodeRefShare);
-                        stats.duplicatesSkipped.incrementAndGet();
-                    } else {
-                        throw e;
-                    }
+                } else {
+                    stats.duplicatesSkipped.incrementAndGet();
+                    log.debug("Link share for {} by {} with {} already exists, skipping", nodeRef, shareCreator, nodeRefShare);
                 }
-                stats.linkShares.incrementAndGet();
                 users.remove(shareCreator);
             }
 
@@ -266,20 +261,17 @@ public class Release_11_0_ShareInfos {
                     stats.sharesSkippedDueToMissingData.incrementAndGet();
                     continue;
                 }
-                try {
-                    if (!test) {
-                        shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY, rawDate);
-                    }
+                // createShare is idempotent (see ShareInfoMapper.create) - duplicates are expected here
+                // since this routine can run while the system is live, e.g. a permission change may
+                // have already created the same ShareInfo via onAddedPermissionEvent before this node
+                // was migrated
+                if (test || shareInfoService.createShare(nodeRef.getId(), sharedBy, authority, ShareType.AUTHORITY, rawDate)) {
+                    stats.authorityShares.incrementAndGet();
                     log.debug("Created authority share for {}: by: {} - with: {}", nodeRef, sharedBy, authority);
-                } catch (RuntimeException e) {
-                    if (isDuplicateShare(e)) {
-                        log.debug("Authority share for {} by {} with {} already exists, skipping", nodeRef, sharedBy, authority);
-                        stats.duplicatesSkipped.incrementAndGet();
-                    } else {
-                        throw e;
-                    }
+                } else {
+                    stats.duplicatesSkipped.incrementAndGet();
+                    log.debug("Authority share for {} by {} with {} already exists, skipping", nodeRef, sharedBy, authority);
                 }
-                stats.authorityShares.incrementAndGet();
             }
 
             if (!users.isEmpty()) {
@@ -297,17 +289,6 @@ public class Release_11_0_ShareInfos {
             removeProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_PH_ACTION), isVersionStore);
         }
         log.debug("ShareInfos for {} updated", nodeRef);
-    }
-
-    /**
-     * ShareInfoServiceImpl.createShare wraps the DuplicateKeyException from its retrying transaction
-     * into a plain RuntimeException (see ShareInfoServiceImpl.createShare), so callers can't catch
-     * DuplicateKeyException directly and must inspect the cause instead. Duplicates are expected here
-     * since this routine can run while the system is live - e.g. a permission change may have already
-     * created the same ShareInfo via onAddedPermissionEvent before this node was migrated.
-     */
-    private boolean isDuplicateShare(RuntimeException e) {
-        return e.getCause() instanceof DuplicateKeyException;
     }
 
     /**
