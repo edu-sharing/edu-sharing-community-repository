@@ -2,6 +2,9 @@ export class RestConstants {
     public static USERHOME = '-userhome-';
     public static TOPIC_PAGE_TEMPLATES = '-topic_page_templates-';
     public static DUPLICATE_NODE_RESPONSE = 409;
+    public static HTTP_UNAUTHORIZED = 401;
+    public static HTTP_FORBIDDEN = 403;
+    public static HTTP_NOT_FOUND = 404;
     // use not the maximum int value to prevent overflows in repository
     public static COUNT_UNLIMITED = 1247483647;
 

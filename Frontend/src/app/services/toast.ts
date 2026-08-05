@@ -1,7 +1,7 @@
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, Injector, OnDestroy, inject } from '@angular/core';
+import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -12,9 +12,9 @@ import {
     ToastDuration,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
-import { RestConnectorService } from '../core-module/core.module';
+import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { catchError, filter, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../core-module/rest/rest-constants';
 import { CardDialogRef } from '../features/dialogs/card-dialog/card-dialog-ref';
 import {
@@ -218,10 +218,34 @@ export class Toast extends ToastAbstract implements OnDestroy {
         customAction: CustomAction = null,
         toastMessage: ToastMessage = null,
     ): void {
+        void this.showError(
+            errorObject,
+            message,
+            translationParameters,
+            dialogTitle,
+            dialogMessage,
+            customAction,
+            toastMessage,
+        );
+    }
+
+    /**
+     * Async part of `error()`: parsing an error may need to wait for the current login state
+     * (e.g. to decide whether a `403` means "session gone" -> login redirect).
+     */
+    private async showError(
+        errorObject: any,
+        message: string,
+        translationParameters: any,
+        dialogTitle: string,
+        dialogMessage: string,
+        customAction: CustomAction,
+        toastMessage: ToastMessage,
+    ): Promise<void> {
         // If this is called by the default error handler given to ngx-edu-sharing-api und you want
         // to prevent the toast message, provide an error handler when subscribing and call
         // `error.preventDefault()`.
-        const parsingResult = this.parseErrorObject({
+        const parsingResult = await this.parseErrorObject({
             errorObject,
             message,
             translationParameters,
@@ -416,7 +440,7 @@ export class Toast extends ToastAbstract implements OnDestroy {
      *
      * @returns false if the error toast should not be shown
      */
-    public parseErrorObject({
+    public async parseErrorObject({
         errorObject,
         message,
         translationParameters,
@@ -428,14 +452,15 @@ export class Toast extends ToastAbstract implements OnDestroy {
         translationParameters: any | null;
         dialogTitle: string;
         dialogMessage: string;
-    }):
+    }): Promise<
         | {
               message: string;
               translationParameters: any;
               dialogTitle: string;
               dialogMessage: string;
           }
-        | false {
+        | false
+    > {
         let error = errorObject;
         let errorInfo = '';
         let json: any = null;
@@ -534,8 +559,16 @@ export class Toast extends ToastAbstract implements OnDestroy {
                 message = 'TOAST.API_FORBIDDEN';
                 dialogTitle = null;
 
-                const login = this.injector.get(RestConnectorService).getCurrentLogin();
-                if (login && login.isGuest) {
+                // Do not rely on a cached login state here: when the error arrives early,
+                // the login information may not be fetched yet and a
+                // `null` state would silently skip the login redirect.
+                const login = await firstValueFrom(
+                    this.injector
+                        .get(AuthenticationService)
+                        .observeLoginInfo()
+                        .pipe(catchError(() => of(null))),
+                );
+                if (login && (login.isGuest || !login.isValidLogin)) {
                     if (!this.injector.get(BridgeService).isRunningCordova()) {
                         this.toast('TOAST.API_FORBIDDEN_LOGIN');
                         this.goToLogin();
