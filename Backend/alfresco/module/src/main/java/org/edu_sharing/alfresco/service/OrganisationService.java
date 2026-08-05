@@ -161,7 +161,7 @@ public class OrganisationService {
     public Map<QName, Serializable> getOrganisation(String orgName) {
 
         //prevent a normal group gets switched to an organisation
-        if (!hasOrganisationPrefix(orgName)) {
+        if (orgName.startsWith(AuthorityType.GROUP.getPrefixString()) && !hasOrganisationPrefix(orgName)) {
             log.error("orgName {} is not an Organisation", orgName);
             return null;
         }
