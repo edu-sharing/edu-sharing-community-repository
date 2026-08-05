@@ -2471,7 +2471,7 @@
         "description": "Array of icon identifier replacements (original identifier, replace with)",
         "properties": {
           "context": {
-            "description": "Context for this replacement (null = all contexts)",
+            "description": "Context in which this replacement applies, as a regular expression matched against the whole context reported by the frontend (a plain string therefore acts as an exact match, e.g. 'mds', 'option', 'collection-scope'; 'sidebar-.*' matches all sidebar contexts). Icons that report no context are matched against the empty string, so '.*' also covers them while '.+' requires a context; '(?!edge-toggle$|sidebar-navigate$).*' applies everywhere except those two contexts. Empty/null = applies to all contexts, but such an entry is only used if no entry with a matching context exists. If several entries match, the first one in the list wins",
             "type": "string"
           },
           "cssClass": {
