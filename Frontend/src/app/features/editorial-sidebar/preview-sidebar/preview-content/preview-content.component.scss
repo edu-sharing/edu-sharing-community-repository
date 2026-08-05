@@ -26,7 +26,8 @@
 // the preview height instead of the default viewport-based calculation.
 // In modal mode the render wrapper keeps its default layout (block host, no
 // fullWidth, viewport-based height).
-:host(:not(.modal)) es-render-wrapper-component {
+// use ng-deep in case a custom render template is present in service
+:host(:not(.modal)) ::ng-deep es-render-wrapper-component {
     display: flex;
     //min-height: var(--previewHeight);
     --renderWrapperHeight: var(--previewHeight);
@@ -38,7 +39,8 @@
 // In fullscreen (class on the editorial-sidebar host ancestor) the preview fills the screen, so
 // size --containerHeight from the viewport instead of the width-derived 3:2 --previewHeight:
 // viewport minus the top nav, the card's top+bottom margins, the sidebar header and the sticky footer.
-:host-context(.fullscreen):not(.modal) es-render-wrapper-component {
+// use ng-deep in case a custom render template is present in service
+:host-context(.fullscreen):not(.modal) ::ng-deep es-render-wrapper-component {
     --subtractSize: var(--mainnavCurrentHeight) - 2 * var(--roundedContainerMargin) -
         var(--editorialHeaderHeight) - #{$secondaryBarHeight} - 80px;
     --renderWrapperHeight: calc(100vh - var(--subtractSize));
