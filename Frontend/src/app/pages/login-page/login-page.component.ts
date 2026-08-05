@@ -456,7 +456,11 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         } else if (data?.currentScope === RestConstants.SAFE_SCOPE) {
             void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace', 'safe']);
         } else {
-            UIHelper.goToDefaultLocation(this.router, this.platformLocation, this.configService);
+            void UIHelper.goToDefaultLocation(
+                this.router,
+                this.platformLocation,
+                this.configService,
+            );
         }
     }
 

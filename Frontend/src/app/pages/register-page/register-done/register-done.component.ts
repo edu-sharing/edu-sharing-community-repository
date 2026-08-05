@@ -111,7 +111,7 @@ export class RegisterDoneComponent {
                     if (this.cordova.isRunningCordova()) {
                         this.cordova.goToLogin();
                     } else {
-                        UIHelper.goToDefaultLocation(
+                        void UIHelper.goToDefaultLocation(
                             this.router,
                             this.platformLocation,
                             this.config,

@@ -112,7 +112,7 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
             setTimeout(() => this.setParams());
             this.connector.isLoggedIn().subscribe((data) => {
                 if (data.statusCode === 'OK') {
-                    UIHelper.goToDefaultLocation(
+                    void UIHelper.goToDefaultLocation(
                         this.router,
                         this.platformLocation,
                         this.configServiceLegacy,

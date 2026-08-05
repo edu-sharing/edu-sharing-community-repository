@@ -101,7 +101,7 @@ export class Render2PageComponent implements OnDestroy {
             return;
         }
         if (this.fromLogin && !AppComponent.isRedirectedFromLogin()) {
-            UIHelper.goToDefaultLocation(
+            void UIHelper.goToDefaultLocation(
                 this.router,
                 this.platformLocation,
                 this.configService,
@@ -121,17 +121,14 @@ export class Render2PageComponent implements OnDestroy {
                 RouterHelper.navigateToAbsoluteUrl(this.platformLocation, this.router, last, true);
                 return;
             }
-            this.mainNav.patchMainNavConfig({ showNavigation: true });
             setTimeout(() => {
-                this.mainNav.getMainNav().topBar?.toggleMenuSidebar();
-                this.mainNav
-                    .getMainNav()
-                    .topBar.closeScopeSelector.pipe(takeUntil(this.destroyed$))
-                    .subscribe(() => {
-                        this.mainNav.patchMainNavConfig({ showNavigation: false });
-                    });
+                void UIHelper.goToDefaultLocation(
+                    this.router,
+                    this.platformLocation,
+                    this.configService,
+                );
             });
-        }, 250);
+        }, 500);
     }
 
     private refresh() {
