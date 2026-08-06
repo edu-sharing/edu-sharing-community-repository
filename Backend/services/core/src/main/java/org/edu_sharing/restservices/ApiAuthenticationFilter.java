@@ -32,6 +32,14 @@ import java.util.Map;
 
 public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
 
+    /**
+     * Response header telling the caller whether the request was answered as a
+     * real authenticated user ("true") or as a guest/anonymous user ("false").
+     * Needed because a guest may still receive a 200 response (with a reduced
+     * subset of data) so the HTTP status alone does not reveal the auth state.
+     */
+    public static final String HEADER_AUTHENTICATED = "X-Edu-Authenticated";
+
     Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 
     private TokenService tokenService;
@@ -109,6 +117,12 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
             }
 
         }
+
+        AuthorityService authorityService = AuthorityServiceFactory.getLocalService();
+        boolean authenticated = validatedAuth != null && !authorityService.isGuest();
+        httpResp.addHeader("Access-Control-Expose-Headers", HEADER_AUTHENTICATED);
+        httpResp.setHeader(HEADER_AUTHENTICATED, String.valueOf(authenticated));
+
         Config accessConfig = LightbendConfigLoader.get().getConfig("security.access");
         List<String> AUTHLESS_ENDPOINTS = Arrays.asList(
                 "/authentication",
