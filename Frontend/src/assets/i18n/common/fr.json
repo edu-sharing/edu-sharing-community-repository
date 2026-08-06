@@ -173,7 +173,10 @@
     "TOOLPERMISSION_INVITE_TIMEBASED": "Créer des autorisations à durée limitée.",
     "TOOLPERMISSION_SUGGESTION_READ": "Récupérer des suggestions de métadonnées sur les éléments.",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Proposer des suggestions de métadonnées pour les éléments.",
-    "TOOLPERMISSION_METADATA_METHODOLOGY": "Afficher l'onglet méthodologie lors du classement des éléments."
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Afficher l'onglet méthodologie lors du classement des éléments.",
+    "TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS": "Créer des devoirs",
+    "TOOLPERMISSION_MANAGE_QA": "Gérer l'assurance qualité des matériels",
+    "TOOLPERMISSION_BAPI": "Accès à l'API éducative (BAPI) du référentiel"
   },
   "NO_WRITE_PERMISSIONS": "Aucune autorisation",
   "NODE_SEARCH": "Éléments de recherche...",
@@ -229,7 +232,14 @@
     "SECURE_SHORT": "Sûr",
     "PERMISSIONS_SHORT": "Utilisateurs",
     "LOGIN_SHORT": "Connexion",
-    "ADMIN_SHORT": "Administrateur"
+    "ADMIN_SHORT": "Administrateur",
+    "LANDING": "Page d'accueil",
+    "LANDING_SHORT": "Accueil",
+    "TASKS": "Devoirs",
+    "TASKS_SHORT": "Devoirs",
+    "EDITORIAL_SUGGESTIONS": "Vérification des contenus",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Vérifier",
+    "RENDER": "Rendu"
   },
   "WORKFLOW": {
     "100_unchecked": "Pas de statut",
@@ -420,7 +430,10 @@
     "file-csv": "Fichier CSV",
     "file-serlo": "Dossier Serlo",
     "file-geogebra": "Fichier Geogebra",
-    "file-curriculum": "Kanban-Board"
+    "file-curriculum": "Kanban-Board",
+    "file-markdown": "fichier markdown",
+    "file-git-repository": "dépôt git",
+    "file-jupyter-notebook": "notebook jupyter"
   },
   "PERMISSION_TYPE": {
     "Consumer": "Visionneuse",
@@ -458,6 +471,23 @@
     "CONTRAST_MODE_OPTION": {
       "CONTRAST": "Amélioration du contraste",
       "STANDARD": "Contraste standard"
+    },
+    "DARK_MODE_TITLE": "Mode sombre",
+    "DARK_MODE_MESSAGE": "Choisissez un thème de couleurs clair ou sombre, ou reprenez le réglage système de votre appareil.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Utiliser le réglage système",
+      "LIGHT": "Clair",
+      "DARK": "Sombre"
+    },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Passer en mode clair",
+      "DARK": "Passer en mode sombre"
+    },
+    "DRAG_AND_DROP_TITLE": "Déplacer des contenus",
+    "DRAG_AND_DROP_MESSAGE": "Les contenus peuvent être déplacés par glisser-déposer. Pour une meilleure accessibilité, des actions supplémentaires telles que les boutons « suivant » et « précédent » peuvent être activées afin de permettre le déplacement sans souris.",
+    "DRAG_AND_DROP_OPTION": {
+      "STANDARD": "Glisser-déposer standard",
+      "EXTENDED": "Actions supplémentaires sur le contenu"
     }
   },
   "AUTHORITY_TYPE_GROUP": "Groupe",
@@ -693,7 +723,23 @@
     "EDIT_REVOCATION": "Raison de la modification",
     "SELECT_ALL": "Tout sélectionner",
     "DESELECT": "Désélectionnez tout",
-    "EDIT_CONNECTOR": "Modifier"
+    "EDIT_CONNECTOR": "Modifier",
+    "VIEW_ELEMENT": "Ouvrir",
+    "APPLY_FILTER": "Reprendre le résultat de recherche",
+    "SHOW_TOPIC_PAGE": "Aller à la page thématique",
+    "VERSION_MANAGEMENT": "Gestion des versions",
+    "ADD_SHORTCUT": "Ajouter aux favoris",
+    "NEW_ASSIGNMENT": "Nouveau devoir",
+    "ASSIGNMENT_SUBMIT": "Remettre",
+    "ASSIGNMENT_SUBMISSION": "Remises",
+    "ASSIGNMENT_EDIT": "Modifier le devoir",
+    "ASSIGNMENT_ASSIGN": "Attribuer le devoir",
+    "ASSIGNMENT_COPY": "Copier le devoir",
+    "ASSIGNMENT_CANCEL": "Annuler le devoir",
+    "ASSIGNMENT_CANCEL_CONFIRM": "Voulez-vous vraiment annuler ce devoir ? Cette action est irréversible.",
+    "ASSIGNMENT_FINISH": "Terminer le devoir",
+    "ASSIGNMENT_FINISH_CONFIRM": "Voulez-vous vraiment terminer ce devoir ? Cette action est irréversible.",
+    "MANAGE_CONTENT": "Classer"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Commentaire sur la version",
@@ -749,7 +795,29 @@
       "TYPE_AI": "IA",
       "TYPE_USER": "personne",
       "APPLY": "accepter",
-      "DECLINE": "refuser"
+      "DECLINE": "refuser",
+      "TOP_LABEL": "Suggestions",
+      "TOOLTIP": "Suggestion de {{author}} le {{date}}",
+      "SHOW_ALL_VALUES": "Afficher toutes les valeurs",
+      "TOAST": {
+        "DECLINED": "La suggestion a été refusée",
+        "INVALID_VALUE": "La valeur suggérée était invalide et n'a pas pu être utilisée"
+      },
+      "USER_PROPOSALS": {
+        "LABEL": "Métadonnées de la communauté"
+      }
+    },
+    "AI": {
+      "GENERATE_ALL_TITLE": "Générer les métadonnées",
+      "GENERATE_ALL_INFO": "Générer des suggestions pour tous les champs de métadonnées pouvant être traités par l'IA",
+      "GENERATE_ALL_BUTTON": "Générer les suggestions de l'IA",
+      "GENERATE_ASYNC_STARTED": "Les suggestions sont en cours de génération. Le formulaire sera complété automatiquement dès que les données seront disponibles",
+      "GENERATE_ASYNC_FINISHED": "Les suggestions sont maintenant disponibles",
+      "DRAWING_STYLES": {
+        "HEADING": "Génération d'images par IA",
+        "LABEL": "Choisir le style",
+        "REGENERATE": "Générer à nouveau"
+      }
     }
   },
   "SIMPLE_EDIT": {
@@ -848,7 +916,10 @@
     "DOWNLOAD_TRY_AGAIN": "Réessayer",
     "STORAGE_LOCATION_SAVED": "Le dossier \"{{name}}\" sera utilisé par défaut pour les téléchargements à l'avenir.",
     "STORAGE_LOCATION_RESET": "Le dossier par défaut pour les téléchargements a été réinitialisé",
-    "OPTION_DISABLED_OR_UNAVAILABLE": "L'action demandée n'est malheureusement pas disponible."
+    "OPTION_DISABLED_OR_UNAVAILABLE": "L'action demandée n'est malheureusement pas disponible.",
+    "ASSIGNMENT_CANCEL": "Le devoir a été annulé.",
+    "ASSIGNMENT_FINISH": "Le devoir a été terminé.",
+    "ASSIGNMENT_COPY": "Le devoir a été copié."
   },
   "VCARD": {
     "Givenname": "Prénom",
@@ -881,7 +952,8 @@
     "file_upload": "téléchargement de fichiers",
     "delete": "supprimer",
     "add": "Nouveau",
-    "redo": "Appliquer"
+    "redo": "Appliquer",
+    "edit": "Modifier"
   },
   "FILL_STATUS": {
     "REQUIRED": "champs obligatoires",
@@ -1172,7 +1244,8 @@
     "VE": "Venezuela",
     "VN": "Vietnam",
     "YE": "Yémen",
-    "ZA": "Afrique du Sud"
+    "ZA": "Afrique du Sud",
+    "BE": "Belgique"
   },
   "ROCKETCHAT": {
     "TITLE": "Chat"
@@ -1411,12 +1484,23 @@
       "isBasedOn": "est basé sur",
       "references": "se réfère à",
       "hasPart": "a une partie de",
-      "isBasisFor": "est la base de"
+      "isBasisFor": "est la base de",
+      "isDuplicateOf": "est un doublon de",
+      "requires": "nécessite",
+      "isRequiredBy": "est nécessaire pour",
+      "replaces": "remplace",
+      "isReplacedBy": "est remplacé par",
+      "hasFormat": "a pour format",
+      "isFormatOf": "est un format de"
     },
     "RELATION_TYPE_FULLY": {
       "isPartOf": "fait partie de (isPartOf)",
       "isBasedOn": "est basé sur (isBasedOn)",
-      "references": "se réfère à (références)"
+      "references": "se réfère à (références)",
+      "isDuplicateOf": "est un doublon de (isDuplicateOf)",
+      "requires": "nécessite (requires)",
+      "replaces": "remplace (replaces)",
+      "hasFormat": "a pour format (hasFormat)"
     },
     "NOT_SUPPORTED_REMOTELY": "Les relations entre éléments externes ne sont actuellement pas prises en charge."
   },
@@ -1442,7 +1526,222 @@
       "DETAILS": "L'éditeur/l'équipe éditoriale a retiré cet article. Seules les métadonnées de l'article original restent disponibles.\n\nVous trouverez plus de détails dans l'explication ci-dessous.",
       "DATE": "Date de suppression",
       "REASON": "Motif de la suppression",
-      "FEEDBACK": "Contactez l'équipe éditoriale"
+      "FEEDBACK": "Contactez l'équipe éditoriale",
+      "DETAILS_EMPTY": "L'éditeur ou l'équipe éditoriale a retiré cet objet. Seules les métadonnées de l'élément d'origine restent disponibles.\n\nVous trouverez plus de détails dans la justification ci-dessous."
+    },
+    "GO_TO_COURSE": "Aller au cours",
+    "AUTHORED_BY": "par",
+    "CONVERTING": "Conversion",
+    "QUEUED": "File d'attente",
+    "QUEUE_POSITION": "Position dans la file d'attente",
+    "OPEN_IN_NEW_TAB": "Ouvrir dans un nouvel onglet",
+    "RELOAD_LINK": "Recharger le lien",
+    "ERROR": {
+      "GENERIC_ERROR_MESSAGE": "Une erreur est survenue.",
+      "RS2_NOT_CONFIGURED": "Le service de rendu 2 n'est actuellement pas connecté à ce référentiel.",
+      "ERROR_PROCESSING_JOB": "La tâche de rendu pour l'affichage de l'objet n'a pas pu être terminée.",
+      "GENERIC_CONVERSION_ERROR": "La conversion de l'objet a échoué.",
+      "GENERIC_NOT_FOUND": "La ressource n'a pas pu être trouvée.",
+      "GENERIC_BAD_REQUEST": "Requête invalide",
+      "GENERIC_MODULE_NOT_AVAILABLE": "Le module de rendu nécessaire à l'affichage de l'objet n'est pas disponible.",
+      "GENERIC_OBJECT_NOT_SUPPORTED": "Cet objet n'est pas pris en charge par le service de rendu.",
+      "GENERIC_ACCESS_DENIED": "Aucune autorisation n'est disponible pour l'élément demandé.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "La requête n'a pas pu être traitée par le serveur"
+    },
+    "GDPR": {
+      "EXTERNAL_SITE": "Site externe",
+      "EXTERNAL_CONTENT": "Contenu externe",
+      "GDPR_REGULATIONS": "règles de protection des données",
+      "AGREE_AND_CONTINUE": "Accepter et continuer",
+      "FURTHER_INFORMATION": "Plus d'informations ici : ",
+      "EXTERNAL_SITE_INFO": "L'ouverture du site externe peut entraîner un transfert de données. Veuillez consulter nos ",
+      "EXTERNAL_SOURCE": "une source externe",
+      "EXTERNAL_CONTENT_INFO": "Vous êtes sur le point de charger et d'afficher des contenus provenant de {{EXTERNAL_RESOURCE}}. Des données personnelles peuvent être transmises et traitées à l'extérieur."
     }
+  },
+  "NOTICE": "Remarque",
+  "SHOW": "afficher",
+  "ORIGINAL_ACCESS_DENIED": "Accès refusé",
+  "ORIGINAL_ACCESS_DENIED_INFO": "Aucune autorisation pour afficher les détails de ce matériel",
+  "ORIGINAL_ACCESS_DENIED_MORE": "Plus d'informations",
+  "ALL_DETAILS": "Tous les détails",
+  "SHARE": {
+    "sharedBy": "Partagé par",
+    "timestamp": "date"
+  },
+  "ASSIGNMENT": {
+    "CARD_TYPE": "Devoir",
+    "title": "Titre",
+    "status": "Statut",
+    "endTime": "Date limite de remise",
+    "submissionStatus": "Statut de la remise",
+    "type": "Type de devoir",
+    "summary": "Description",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "SUBMISSION": "Remise"
+    },
+    "STATUS": {
+      "DRAFT": "Brouillon",
+      "INPROGRESS": "Distribué",
+      "CORRECTED": "Corrigé",
+      "SENDBACK": "Renvoyé",
+      "TO_SUBMIT": "Ouvert",
+      "SUBMITTED": "Remis",
+      "HAS_SUBMISSIONS": "À corriger",
+      "CANCELED": "Annulé",
+      "FINISHED": "Terminé"
+    },
+    "SUBMISSION_STATUS": {
+      "NOT_STARTED": "Ouvert",
+      "PENDING": "Ouvert",
+      "WITHDRAWN": "Retiré",
+      "FINISHED": "Remis"
+    },
+    "VALIDATION_STATUS": {
+      "NOT_STARTED": "À corriger",
+      "PENDING": "En cours de correction",
+      "FINISHED": "Corrigé"
+    }
+  },
+  "SUBMISSION": {
+    "assignee": "Nom",
+    "submissionStatus": "Statut de la remise",
+    "validationStatus": "Statut de la correction"
+  },
+  "EVENT": {
+    "eventType": "Action",
+    "timestamp": "Date",
+    "TYPE": {
+      "CREATE_MATERIAL": "créé",
+      "EDIT_MATERIAL": "modifié",
+      "DOWNLOAD_MATERIAL": "téléchargé",
+      "ADD_MATERIAL_TO_COLLECTION": "matériel ajouté",
+      "VIEW_COLLECTION": "consulté",
+      "VIEW_MATERIAL": "consulté",
+      "VIEW_MATERIAL_EMBEDDED": "consulté",
+      "VIEW_MATERIAL_PLAY_MEDIA": "lu",
+      "OPEN_EXTERNAL_LINK": "lien ouvert",
+      "ARCHIVE_MATERIAL": "archivé/supprimé",
+      "DELETE_MATERIAL": "supprimé",
+      "MOVE_MATERIAL": "déplacé",
+      "COPY_MATERIAL": "copié",
+      "REVERT_MATERIAL_VERSION": "version restaurée",
+      "CHANGE_MATERIAL_CONTENT": "modifié (contenu)",
+      "CHANGE_MATERIAL_OWNER": "modifié (propriétaire changé)",
+      "FORK_MATERIAL": "créé comme variante",
+      "COMMENT_MATERIAL": "commenté",
+      "RATE_MATERIAL": "évalué",
+      "UNRATE_MATERIAL": "évaluation supprimée",
+      "LINK_SHARE_MATERIAL": "partagé par lien",
+      "LINK_UNSHARE_MATERIAL": "partage par lien supprimé",
+      "FEEDBACK_MATERIAL": "retour donné",
+      "REPORT_MATERIAL": "signalé",
+      "EDIT_MATERIAL_RELATION": "relations modifiées"
+    }
+  },
+  "SHARE_REJECT": {
+    "TITLE": "Masquer le partage",
+    "MESSAGE": "Voulez-vous masquer le ou les partages ? Ils n'apparaîtront plus dans cette liste. Votre accès aux éléments, par exemple via la recherche, reste toutefois inchangé.",
+    "CONFIRM": "Masquer",
+    "TOAST_DONE": "{{count}} partage(s) masqué(s)"
+  },
+  "PDF_EDITOR": {
+    "HEADING": "Saisir l'ID du contenu ou sélectionner un contenu via la recherche{{suffix}}",
+    "EDIT_MODE": "Mode édition",
+    "SAVE_ID": "Appliquer l'ID",
+    "OPEN_SEARCH": "Ouvrir la recherche",
+    "SAVE_CHANGES": "Enregistrer les modifications",
+    "LOAD_CONTENT_TITLE": "Charger le contenu",
+    "LOAD_CONTENT_MESSAGE": "Voulez-vous vraiment remplacer le PDF déjà chargé ? Les modifications seront perdues.",
+    "WRONG_FILE_FORMAT": "Le contenu sélectionné n'est pas un fichier PDF. Veuillez sélectionner un autre contenu.",
+    "CHANGES_SAVED_SUCCESSFULLY": "Vos modifications ont été enregistrées avec succès."
+  },
+  "LANDING_PAGE": {
+    "TITLE": "Page d'accueil",
+    "SEARCH_PLACEHOLDER": "Rechercher dans la médiathèque..."
+  },
+  "SHORTCUT_ENTRIES": {
+    "CHANGE_TITLE": "Modifier le titre",
+    "EXPAND": "Déplier les tuiles",
+    "COLLAPSE": "Replier les tuiles",
+    "RENAME": "Renommer",
+    "DELETE": "Supprimer",
+    "BACK": "Déplacer vers la gauche",
+    "FORWARD": "Déplacer vers la droite",
+    "MODAL_HINT_REPLACE": "Pour ajouter une nouvelle tuile, vous devez soit supprimer une tuile existante, soit sélectionner une tuile à remplacer.",
+    "MODAL_HINT_ADD_REPLACE": "Ajoutez une nouvelle tuile via [+] ou sélectionnez une tuile existante à remplacer.",
+    "MODAL_HINT_INCLUDED": "Cet élément a déjà été ajouté à vos raccourcis et ne peut pas être ajouté à nouveau.",
+    "REPLACE_TITLE": "Remplacer la tuile",
+    "REPLACE_MESSAGE": "Voulez-vous vraiment remplacer cette tuile par l'élément sélectionné ?",
+    "SELECT_ELEMENT": "Sélectionner un favori",
+    "search": "Recherche",
+    "workspace": "Espace de travail",
+    "mycollections": "Mes collections",
+    "invitedcollections": "Collections partagées",
+    "publiccollections": "Collections publiques",
+    "aboutme": "Mon profil",
+    "documentation": "Aller à la documentation",
+    "OPTIONS_FOR": "Actions pour {{element}}",
+    "ADD_ENTRY": "Ajouter une tuile de raccourci"
+  },
+  "DASHBOARD_SWIMLANE": {
+    "EXPAND": "Déplier {{ element }}",
+    "COLLAPSE": "Replier {{ element }}",
+    "ACTIVITY": {
+      "ACTION_TEXT_PREFIX": "",
+      "ACTION_TEXT_SUFFIX": "le",
+      "EMPTY": "Aucune activité récente",
+      "TIMEGROUP": {
+        "Today": "aujourd'hui",
+        "Yesterday": "hier",
+        "Last7Days": "7 derniers jours",
+        "Last30Days": "30 derniers jours",
+        "Older": "plus ancien"
+      }
+    },
+    "assignments": {
+      "TITLE": "Devoirs"
+    },
+    "SHARE": {
+      "EMPTY": "Aucun partage",
+      "INFO_MESSAGE": "partagé"
+    },
+    "SHOW_MORE": "Afficher tout",
+    "SHOW_MORE_FOR": "Afficher tous les {{ element }}",
+    "NO_RESULTS": "Aucun élément disponible",
+    "featured-media": {
+      "TITLE": "Médiathèque"
+    },
+    "collections": {
+      "TITLE": "Collections"
+    },
+    "shares": {
+      "TITLE": "Derniers partages",
+      "SUBTITLE": {
+        "fromUser": "de ma part",
+        "toUser": "pour moi",
+        "toUserGroups": "pour mes groupes"
+      }
+    },
+    "recent-activities": {
+      "TITLE": "Dernières activités",
+      "SUBTITLE": {
+        "viewed": "Consulté",
+        "created": "Créé",
+        "edited": "Modifié"
+      }
+    }
+  },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Télécharger les métadonnées",
+    "MESSAGE": "Dans quel format souhaitez-vous télécharger les métadonnées ?",
+    "TYPE_PDF": "fichier pdf",
+    "TYPE_TEXT": "fichier texte"
+  },
+  "STATISTICS": {
+    "SELECTIVE_MATERIALS": "materiels_selectionnes",
+    "MATERIALS": "materiels",
+    "TO": "à"
   }
 }

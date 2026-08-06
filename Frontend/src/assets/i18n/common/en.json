@@ -473,7 +473,8 @@
     "file-csv": "CSV file",
     "file-serlo": "Serlo file",
     "file-curriculum": "kanban board",
-    "file-geogebra": "Geogebra file"
+    "file-geogebra": "Geogebra file",
+    "file-markdown": "markdown file"
   },
   "PERMISSION_TYPE": {
     "Consumer": "Viewer",
@@ -779,7 +780,10 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
     "ASSIGNMENT_FINISH": "Finish assignment",
     "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone.",
-    "EDIT_CONNECTOR": "Edit"
+    "EDIT_CONNECTOR": "Edit",
+    "NEW_ASSIGNMENT": "New assignment",
+    "ASSIGNMENT_COPY": "Copy assignment",
+    "MANAGE_CONTENT": "Sort in"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Version comment",
@@ -850,6 +854,13 @@
       "DECLINE": "Decline",
       "USER_PROPOSALS": {
         "LABEL": "Community Metadata"
+      },
+      "TOP_LABEL": "Suggestions",
+      "TOOLTIP": "Suggestion by {{author}} on {{date}}",
+      "SHOW_ALL_VALUES": "Show all values",
+      "TOAST": {
+        "DECLINED": "The suggestion has been declined",
+        "INVALID_VALUE": "The suggested value was invalid and could not be used"
       }
     }
   },
@@ -1000,7 +1011,8 @@
     "STORAGE_LOCATION_RESET": "The default folder for uploads has been reset",
     "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable",
     "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
-    "ASSIGNMENT_FINISH": "The assignment has been finished."
+    "ASSIGNMENT_FINISH": "The assignment has been finished.",
+    "ASSIGNMENT_COPY": "The assignment has been copied."
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",
@@ -1039,7 +1051,8 @@
     "file_upload": "file upload",
     "delete": "delete",
     "add": "New",
-    "redo": "Apply"
+    "redo": "Apply",
+    "edit": "Edit"
   },
   "FILL_STATUS": {
     "REQUIRED": "mandatory fields",
@@ -1570,7 +1583,8 @@
       "requires": "requires (requires)",
       "replaces": "replaces (replaces)",
       "hasFormat": "has format (hasFormat)"
-    }
+    },
+    "NOT_SUPPORTED_REMOTELY": "Relations of external elements are currently not supported."
   },
   "LANDING_PAGE": {
     "TITLE": "Landing page",
@@ -1602,12 +1616,132 @@
   },
   "DASHBOARD_SWIMLANE": {
     "EXPAND": "Expand {{ element }}",
-    "COLLAPSE": "Collapse {{ element }}"
+    "COLLAPSE": "Collapse {{ element }}",
+    "ACTIVITY": {
+      "ACTION_TEXT_PREFIX": "",
+      "ACTION_TEXT_SUFFIX": "on",
+      "EMPTY": "No recent activities",
+      "TIMEGROUP": {
+        "Today": "today",
+        "Yesterday": "yesterday",
+        "Last7Days": "last 7 days",
+        "Last30Days": "last 30 days",
+        "Older": "older"
+      }
+    },
+    "assignments": {
+      "TITLE": "Assignments"
+    },
+    "SHARE": {
+      "EMPTY": "No shares",
+      "INFO_MESSAGE": "shared"
+    },
+    "SHOW_MORE": "Show all",
+    "SHOW_MORE_FOR": "Show all {{ element }}",
+    "NO_RESULTS": "No elements available",
+    "featured-media": {
+      "TITLE": "Media library"
+    },
+    "collections": {
+      "TITLE": "Collections"
+    },
+    "shares": {
+      "TITLE": "Recent shares",
+      "SUBTITLE": {
+        "fromUser": "by me",
+        "toUser": "with me",
+        "toUserGroups": "with my groups"
+      }
+    },
+    "recent-activities": {
+      "TITLE": "Recent activities",
+      "SUBTITLE": {
+        "viewed": "Viewed",
+        "created": "Created",
+        "edited": "Edited"
+      }
+    }
   },
   "STATISTICS": {
     "SELECTIVE_MATERIALS": "selective_materials",
     "MATERIALS": "materials",
     "TO": "to"
   },
-  "NOT_SUPPORTED_REMOTELY": "Relations to external elements are not supported."
+  "ASSIGNMENT": {
+    "CARD_TYPE": "Assignment",
+    "title": "Title",
+    "status": "Status",
+    "endTime": "Due date",
+    "submissionStatus": "Submission status",
+    "type": "Assignment type",
+    "summary": "Description",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "SUBMISSION": "Submission"
+    },
+    "STATUS": {
+      "DRAFT": "Draft",
+      "INPROGRESS": "Assigned",
+      "CORRECTED": "Corrected",
+      "SENDBACK": "Returned",
+      "TO_SUBMIT": "Open",
+      "SUBMITTED": "Submitted",
+      "HAS_SUBMISSIONS": "To be corrected",
+      "CANCELED": "Canceled",
+      "FINISHED": "Finished"
+    },
+    "SUBMISSION_STATUS": {
+      "NOT_STARTED": "Open",
+      "PENDING": "Open",
+      "WITHDRAWN": "Withdrawn",
+      "FINISHED": "Submitted"
+    },
+    "VALIDATION_STATUS": {
+      "NOT_STARTED": "To be corrected",
+      "PENDING": "Being corrected",
+      "FINISHED": "Corrected"
+    }
+  },
+  "SUBMISSION": {
+    "assignee": "Name",
+    "submissionStatus": "Submission status",
+    "validationStatus": "Correction status"
+  },
+  "EVENT": {
+    "eventType": "Action",
+    "timestamp": "Time",
+    "TYPE": {
+      "CREATE_MATERIAL": "created",
+      "EDIT_MATERIAL": "edited",
+      "DOWNLOAD_MATERIAL": "downloaded",
+      "ADD_MATERIAL_TO_COLLECTION": "added material",
+      "VIEW_COLLECTION": "viewed",
+      "VIEW_MATERIAL": "viewed",
+      "VIEW_MATERIAL_EMBEDDED": "viewed",
+      "VIEW_MATERIAL_PLAY_MEDIA": "played",
+      "OPEN_EXTERNAL_LINK": "opened link",
+      "ARCHIVE_MATERIAL": "archived/deleted",
+      "DELETE_MATERIAL": "deleted",
+      "MOVE_MATERIAL": "moved",
+      "COPY_MATERIAL": "copied",
+      "REVERT_MATERIAL_VERSION": "reverted version",
+      "CHANGE_MATERIAL_CONTENT": "edited (content)",
+      "CHANGE_MATERIAL_OWNER": "edited (owner changed)",
+      "FORK_MATERIAL": "created as variant",
+      "COMMENT_MATERIAL": "commented",
+      "RATE_MATERIAL": "rated",
+      "UNRATE_MATERIAL": "removed rating",
+      "LINK_SHARE_MATERIAL": "shared as link",
+      "LINK_UNSHARE_MATERIAL": "removed the link share",
+      "FEEDBACK_MATERIAL": "gave feedback",
+      "REPORT_MATERIAL": "reported",
+      "EDIT_MATERIAL_RELATION": "changed relations"
+    }
+  },
+  "SHARE_REJECT": {
+    "TITLE": "Hide share",
+    "MESSAGE": "Do you want to hide the share(s)? They will no longer be displayed in this list. Your access to the elements, e.g. via the search, remains unaffected.",
+    "CONFIRM": "Hide",
+    "TOAST_DONE": "{{count}} share(s) hidden"
+  }
 }
