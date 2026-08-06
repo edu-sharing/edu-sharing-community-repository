@@ -16,7 +16,6 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.service.connector.*;
-import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -30,6 +29,7 @@ import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authentication.oauth2.TokenService;
 import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
+import org.edu_sharing.service.connector.SimpleConnectorAttributes;
 import org.edu_sharing.service.editlock.EditLockService;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
@@ -112,30 +112,54 @@ public class ConnectorServlet extends SpringHttpServlet {
 
 		Connector connector = null;
 		if(connectorId != null) {
-			connector = ConnectorServiceFactory.getConnectorList().getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
-			Optional<SimpleConnector> simpleConnector = ConnectorServiceFactory.getConnectorList().getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
-			if(simpleConnector.isPresent()) {
-				HashMap<String, Serializable> properties = handleSimpleConnector(convertParameters(req), simpleConnector.orElse(null), nodeRefOriginal);
-				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
-				try {
-					// try to re-fetch to obey Node Interceptors!
-					Map<String, Object> propertiesWritten = NodeServiceHelper.getProperties(nodeRefOriginal);
-					resp.sendRedirect((String) propertiesWritten.get(CCConstants.CCM_PROP_IO_WWWURL));
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				}
-				resp.sendRedirect((String) properties.get(CCConstants.CCM_PROP_IO_WWWURL));
-				// @TODO: redirect resp to the generated element/uri
-				return;
-			}
-			if(connector == null){
-				logger.error("no valid connector");
+			// use the unfiltered list, so a missing toolpermission leads to a 403 and not to an "unknown connector" error
+			ConnectorList connectorList = ConnectorServiceFactory.getConnectorService().getConnectorList();
+			connector = connectorList.getConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny().orElse(null);
+			Optional<SimpleConnector> simpleConnector = connectorList.getSimpleConnectors() == null
+					? Optional.empty()
+					: connectorList.getSimpleConnectors().stream().filter(c -> c.getId().equals(connectorId)).findAny();
+
+			if(connector == null && simpleConnector.isEmpty()){
+				logger.error("no valid connector " + connectorId);
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,"no valid connector");
 				return;
 			}
 
 			if(!ToolPermissionServiceFactory.getInstance().hasToolPermissionForConnector(connectorId)){
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				return;
+			}
+
+			if(simpleConnector.isPresent()) {
+				Map<String, String[]> requestParameters = convertParameters(req);
+				HashMap<String, Serializable> properties;
+				if(simpleConnector.get().getApi() == null) {
+					if(StringUtils.isEmpty(simpleConnector.get().getUrl())) {
+						logger.error("simple connector " + connectorId + " has neither an \"api\" nor an \"url\" configured");
+						resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "no valid connector");
+						return;
+					}
+					properties = handleSimpleConnectorUrl(requestParameters, simpleConnector.get());
+				} else {
+					// the target is provided by the api result / the postRequestHandler
+					properties = handleSimpleConnector(requestParameters, simpleConnector.get(), nodeRefOriginal);
+				}
+				String redirect = extractSimpleConnectorTarget(simpleConnector.get(), properties);
+				NodeServiceFactory.getInstance().getLocalService().updateNodeNative(nodeRefOriginal.getId(), properties);
+				if(redirect == null) {
+					try {
+						// try to re-fetch to obey Node Interceptors!
+						redirect = (String) NodeServiceHelper.getProperties(nodeRefOriginal).get(CCConstants.CCM_PROP_IO_WWWURL);
+					} catch (Throwable e) {
+						redirect = (String) properties.get(CCConstants.CCM_PROP_IO_WWWURL);
+					}
+				}
+				if(StringUtils.isEmpty(redirect)) {
+					logger.error("simple connector " + connectorId + " did not provide any target url (" + CCConstants.CCM_PROP_IO_WWWURL + ")");
+					resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "no valid connector");
+					return;
+				}
+				resp.sendRedirect(redirect);
 				return;
 			}
 		}
@@ -241,9 +265,42 @@ public class ConnectorServlet extends SpringHttpServlet {
 		return converted;
 	}
 
+	/**
+	 * a connector without an api: the configured url is the target of the element
+	 */
+	HashMap<String, Serializable> handleSimpleConnectorUrl(Map<String, String[]> requestParameters, SimpleConnector simpleConnector) {
+		HashMap<String, Serializable> properties = simpleConnectorBaseProperties(simpleConnector);
+		properties.put(CCConstants.CCM_PROP_IO_WWWURL,
+				SimpleConnectorAttributes.replaceForUrl(requestParameters, simpleConnector.getUrl()));
+		return properties;
+	}
+
+	/**
+	 * @return the target url in case it should not be stored on the element
+	 *         ({@link SimpleConnector.RedirectMode#Redirect}, the url is removed from the given properties),
+	 *         null in case it has to be resolved from the element after the properties were written
+	 *         ({@link SimpleConnector.RedirectMode#Link})
+	 */
+	String extractSimpleConnectorTarget(SimpleConnector simpleConnector, Map<String, Serializable> properties) {
+		if(SimpleConnector.RedirectMode.Redirect.equals(simpleConnector.getRedirectMode())) {
+			return (String) properties.remove(CCConstants.CCM_PROP_IO_WWWURL);
+		}
+		return null;
+	}
+
+	/**
+	 * properties marking the element as being handled by the given connector
+	 */
+	private HashMap<String, Serializable> simpleConnectorBaseProperties(SimpleConnector simpleConnector) {
+		HashMap<String, Serializable> properties = new HashMap<>();
+		properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
+		properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
+		return properties;
+	}
+
 	HashMap<String, Serializable> handleSimpleConnector(Map<String, String[]> requestParameters, SimpleConnector simpleConnector, NodeRef nodeRefOriginal) throws UnsupportedEncodingException, SimpleErrorWithDetailsException {
 		RequestBuilder builder = null;
-		String url = replaceSimpleConnectorAttributes(requestParameters, simpleConnector.getApi().getUrl(), (data) -> URLEncoder.encode(StringUtils.join(data)));
+		String url = SimpleConnectorAttributes.replaceForUrl(requestParameters, simpleConnector.getApi().getUrl());
 		if(simpleConnector.getApi().getMethod().equals(SimpleConnector.SimpleConnectorApi.Method.Post)) {
 			builder = RequestBuilder.post(url);
 			try {
@@ -265,9 +322,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 		String resultStr = new HttpQueryTool().query(builder);
 		try {
 			JSONObject result = new JSONObject(resultStr);
-			HashMap<String, Serializable> properties = new HashMap<>();
-		properties.put(CCConstants.CCM_PROP_CCRESSOURCETYPE, RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR);
-		properties.put(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE, simpleConnector.getId());
+			HashMap<String, Serializable> properties = simpleConnectorBaseProperties(simpleConnector);
 		if(StringUtils.isNotEmpty(simpleConnector.getApi().getPostRequestHandler())) {
 			SimpleConnector.ConnectorRequest request = new SimpleConnector.ConnectorRequest(
 					requestParameters, simpleConnector, nodeRefOriginal
@@ -290,7 +345,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 	@NotNull
 	private List<BasicNameValuePair> mapSimpleConnectorBody(Map<String, String[]> requestParameters, SimpleConnector simpleConnector) {
 		List<BasicNameValuePair> pairs = simpleConnector.getApi().getBody().entrySet().stream()
-				.map((e) -> new BasicNameValuePair(e.getKey(), replaceSimpleConnectorAttributes(requestParameters, e.getValue().toString(), StringUtils::join)))
+				.map((e) -> new BasicNameValuePair(e.getKey(), SimpleConnectorAttributes.replace(requestParameters, e.getValue().toString(), StringUtils::join)))
 				.filter(f -> StringUtils.isNotBlank(f.getValue()))
 				.collect(Collectors.toList());
 		if (StringUtils.isNotEmpty(simpleConnector.getApi().getBodyHandler())) {
@@ -302,20 +357,6 @@ public class ConnectorServlet extends SpringHttpServlet {
 			}
 		}
 		return pairs;
-	}
-
-	private interface Formatter {
-		String format(String[] value);
-	}
-	private String replaceSimpleConnectorAttributes(Map<String, String[]> requestParameters, String strToReplace, Formatter format) {
-		for (Map.Entry<String, String[]> parameter: requestParameters.entrySet()) {
-			strToReplace = strToReplace.replace("{{" + parameter.getKey() + "}}", format.format(parameter.getValue()));
-		}
-		// allow global variables that are also allowed for queries
-		strToReplace = MetadataSearchHelper.replaceCommonQueryVariables(strToReplace);
-		// replace other, unkown attributes with empty value
-		strToReplace = strToReplace.replaceAll("\\{\\{.*}}", "");
-		return strToReplace;
 	}
 
 	public void pushToConnector(JSONObject jsonObject, ApplicationInfo connectorAppInfo, HttpServletResponse resp) throws Exception{

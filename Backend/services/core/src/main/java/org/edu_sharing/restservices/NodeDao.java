@@ -136,6 +136,11 @@ public class NodeDao {
      * Disabling is recommended when not needed to improve performance
      */
     public boolean resolveUsernames = true;
+
+    /**
+     * resolve additional links (like for lti oder simple connector rendering)
+     */
+    public boolean resolveAdditionalLinks = false;
     // id of the object by the remote repository (null if not a remote object)
     private String remoteId;
     private RepositoryDao remoteRepository;
@@ -2381,14 +2386,21 @@ public class NodeDao {
             }
 
         }
-        NodeUrls urls = new NodeUrls(nodeId, aspects, version);
-        if(StringUtils.isNotEmpty(urls.getGenerateLtiResourceLink())) {
-            properties.put(
-                    CCConstants.getValidLocalName(CCConstants.VIRT_PROP_LTI_URL),
-                    new String[]{urls.getGenerateLtiResourceLink()}
-            );
+        if(resolveAdditionalLinks) {
+            NodeUrls urls = new NodeUrls(nodeId, aspects, version, props, getNativeType());
+            if (StringUtils.isNotEmpty(urls.getGenerateLtiResourceLink())) {
+                properties.put(
+                        CCConstants.getValidLocalName(CCConstants.VIRT_PROP_LTI_URL),
+                        new String[]{urls.getGenerateLtiResourceLink()}
+                );
+            }
+            if (StringUtils.isNotEmpty(urls.getConnectorRenderUrl())) {
+                properties.put(
+                        CCConstants.getValidLocalName(CCConstants.VIRT_PROP_CONNECTOR_RENDER_URL),
+                        new String[]{urls.getConnectorRenderUrl()}
+                );
+            }
         }
-
         return properties;
     }
 

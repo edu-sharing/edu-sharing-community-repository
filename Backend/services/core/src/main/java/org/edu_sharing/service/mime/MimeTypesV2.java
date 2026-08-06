@@ -399,6 +399,9 @@ public class MimeTypesV2 {
 			return "file-video";
 		if(mimetype.equals("text/csv"))
 			return "file-csv";
+		// "text/x-web-markdown" is the mimetype alfresco resolves for .md files
+		if(mimetype.equals("text/x-web-markdown") || mimetype.equals("text/markdown") || mimetype.equals("text/x-markdown"))
+			return "file-markdown";
 		if(mimetype.startsWith("text"))
 			return "file-txt";
 		if(mimetype.equals("application/x-ipynb+json"))
@@ -524,6 +527,9 @@ public class MimeTypesV2 {
 			extensionMimeMap.put("txt", "text/plain");
 
 			extensionMimeMap.put("properties", "text/plain");
+
+			extensionMimeMap.put("md", "text/x-web-markdown");
+			extensionMimeMap.put("markdown", "text/x-web-markdown");
 
 			extensionMimeMap.put("pdf","application/pdf");
 
