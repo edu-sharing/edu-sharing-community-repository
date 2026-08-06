@@ -66,6 +66,49 @@ export class TreeNodeService {
             .subscribe((nodes: Node[]) => {
                 void this.refreshTree(nodes, true);
             });
+        this.localEventsService.nodesMoved
+            .pipe(takeUntilDestroyed())
+            .subscribe(({ nodes, source, target }) => this.handleNodesMoved(nodes, source, target));
+    }
+
+    /** Applies a move: drops the nodes from their former parent and reloads the target. */
+    private handleNodesMoved(nodes: Node[], source: Partial<Node>, target: Node): void {
+        const movedIds: string[] = nodes.map((node) => node.ref.id);
+        for (const [parentId, children] of this.dataMap.entries()) {
+            this.dataMap.set(
+                parentId,
+                children.filter((child) => !movedIds.includes(child.ref.id)),
+            );
+        }
+        const updatedNodes: Node[] = [];
+        const sourceId: string = source?.ref?.id ?? nodes[0]?.parent?.id;
+        if (sourceId) {
+            updatedNodes.push({ ref: { id: sourceId } } as Node);
+        }
+        if (target?.ref?.id) {
+            this.invalidateChildren(target.ref.id, true);
+            updatedNodes.push(target);
+        }
+        if (updatedNodes.length) {
+            this.nodesChanged.emit(updatedNodes);
+        }
+    }
+
+    /**
+     * Drops the cached children of a node so they are re-requested on the next expand.
+     * `gainedChildren` additionally marks the node as expandable.
+     */
+    private invalidateChildren(nodeId: string, gainedChildren: boolean = false): void {
+        this.dataMap.delete(nodeId);
+        this.parentIdToLastLoadedNodeId.delete(nodeId);
+        this.emptyFolders = this.emptyFolders.filter((id) => id !== nodeId);
+        if (gainedChildren) {
+            this.emptyParentIds = this.emptyParentIds.filter((id) => id !== nodeId);
+            const treeNode = this.currentData.find((data) => data.item.ref.id === nodeId);
+            if (treeNode) {
+                treeNode.expandable = true;
+            }
+        }
     }
 
     /**
@@ -439,6 +482,9 @@ export class TreeNodeService {
                             entry[1].filter((v) => v.ref.id !== nodeId),
                         );
                     }
+                } else if (this.folderTypes.includes(node.type)) {
+                    // a changed folder may have gained children
+                    this.invalidateChildren(nodeId, true);
                 }
                 updatedNodes.push(node);
             }
