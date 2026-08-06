@@ -190,9 +190,12 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] =
                 this.author.author.toVCardString();
         } else if (values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
+            // backend treats `null` as "property not provided" and would keep the old value.
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [];
         } else {
-            delete values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0];
+            // the author was cleared: drop the first entry (the author vcard) and keep any
+            // remaining contributors
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].splice(0, 1);
         }
         return values;
     }

@@ -1784,6 +1784,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     @Override
     public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
         // when interceptors are active, use set instead to trigger interceptors
+        // some sync remove of properties for others
         if (!PropertiesInterceptorFactory.getPropertiesSetInterceptors().isEmpty()) {
             setProperty(storeProtocol, storeId, nodeId, property, null, true);
         } else {
@@ -1944,11 +1945,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         }
         if (properties != null) {
             updateNodeNative(nodeRef.getStoreRef(), nodeRef.getId(), properties);
-            nodeService.setProperties(nodeRef, properties.entrySet().stream().collect(
-                    HashMap::new,
-                    (m, entry) -> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
-                    HashMap::putAll
-            ));
+            // @TODO check if second properties update still necessary
+            nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef,properties));
         } else {
             nodeService.setProperty(nodeRef, prop, value);
         }
