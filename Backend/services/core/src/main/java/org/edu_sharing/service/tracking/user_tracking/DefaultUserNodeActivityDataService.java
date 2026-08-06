@@ -2,18 +2,20 @@ package org.edu_sharing.service.tracking.user_tracking;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.edu_sharing.spring.conditions.ConditionalOnMissingBean;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Fallback implementation, registered as a bean via {@link UserTrackingConfig} when no other
+ * {@link UserNodeActivityDataService} (e.g. from plugin-mongo) is available. Must not be a
+ * scanned {@code @Component}/{@code @Service} itself, since {@code @ConditionalOnMissingBean}
+ * only works reliably on {@code @Bean} methods, not on scanned classes (see
+ * {@link UserTrackingConfig}).
+ */
 @Slf4j
-@Service
-@ConditionalOnMissingBean(UserNodeActivityDataService.class)
 public class DefaultUserNodeActivityDataService implements UserNodeActivityDataService {
 
     @PostConstruct
@@ -23,7 +25,7 @@ public class DefaultUserNodeActivityDataService implements UserNodeActivityDataS
 
     @NotNull
     @Override
-    public List<UserNodeActivity> getDataForAllUsers(@NotNull Date after, @NotNull Date until, int limit) {
+    public List<UserNodeActivity> getDataForAllUsers(@NotNull Date after, Date until, int limit) {
         return Collections.emptyList();
     }
 
