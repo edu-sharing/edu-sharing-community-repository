@@ -257,7 +257,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
-        this.storage.remove('workspace_clipboard');
+        // the clipboard is kept when leaving the workspace, it is also used by the collections page
         if (this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
