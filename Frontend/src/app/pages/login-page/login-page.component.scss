@@ -41,6 +41,7 @@ es-powered-by {
     position: fixed;
     left: 0;
     bottom: 5%;
+    z-index: $dialogNonModalZIndex + 1;
 }
 .powered-down {
     top: calc(50% + 375px);
