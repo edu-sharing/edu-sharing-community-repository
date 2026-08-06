@@ -510,9 +510,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     private async initOptions() {
-        // Split actionbar (mirrors collections/search): the topbar actionbar (toggles-only in the
-        // explorer view via showActionOptions) shows toggle options; the bottom selection bar shows
-        // node actions. refreshComponents keeps both in sync.
+        // Split actionbar (mirrors collections/search): the topbar shows the toggles and the
+        // selection-independent actions, the bottom selection bar shows the node actions.
+        // refreshComponents keeps both in sync.
         const selectionBar = this.selectionActionbar?.();
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: [this.actionbar, selectionBar].filter(Boolean),
