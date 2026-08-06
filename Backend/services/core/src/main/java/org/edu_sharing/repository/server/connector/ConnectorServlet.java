@@ -132,6 +132,7 @@ public class ConnectorServlet extends SpringHttpServlet {
 
 			if(simpleConnector.isPresent()) {
 				Map<String, String[]> requestParameters = convertParameters(req);
+				requestParameters.put("originalNodeId", new String[]{ resolveReferenceOriginalNodeId(nodeId) });
 				HashMap<String, Serializable> properties;
 				if(simpleConnector.get().getApi() == null) {
 					if(StringUtils.isEmpty(simpleConnector.get().getUrl())) {
@@ -263,6 +264,21 @@ public class ConnectorServlet extends SpringHttpServlet {
 		HashMap<String, String[]> converted = new HashMap<>();
 		IteratorUtils.toList(req.getParameterNames().asIterator()).forEach(key -> converted.put(key.toString(), req.getParameterValues(key.toString())));
 		return converted;
+	}
+
+	/**
+	 * the id of the original node, i.e. for collection references and published copies.
+	 * falls back to the given node id if the node has no original
+	 * (runs as system since the current user may not have permissions on the original)
+	 */
+	private String resolveReferenceOriginalNodeId(String nodeId) {
+		try {
+			return AuthenticationUtil.runAsSystem(() ->
+					NodeServiceFactory.getInstance().getLocalService().getReferenceOriginalNode(nodeId).getId());
+		} catch (Throwable t) {
+			logger.warn("Could not resolve original node id for " + nodeId + ": " + t.getMessage(), t);
+			return nodeId;
+		}
 	}
 
 	/**
