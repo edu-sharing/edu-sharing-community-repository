@@ -461,7 +461,8 @@ public class NodeApi {
             node = NodeDao.mapNodeConstants(repoDao, node);
 
             NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, node, version);
-
+            // resolve the additional, dynamic links for the rs2
+            nodeDao.resolveAdditionalLinks = true;
             Base64.Encoder encoder = Base64.getEncoder();
             SignedNode signedNode = nodeDao.getSignedNode();
 

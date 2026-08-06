@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.connector.Connector;
 import org.edu_sharing.alfresco.service.connector.ConnectorList;
+import org.edu_sharing.alfresco.service.connector.SimpleConnector;
 import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionBaseService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
@@ -125,11 +126,18 @@ public class ToolPermissionService extends ToolPermissionBaseService {
 	protected void addConnectorToolpermissions(List<String> toInit) {
 		ConnectorList connectorList =  ConnectorServiceFactory.getConnectorList(this);
 		for(Connector c : connectorList.getConnectors()){
-			String tp = CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + c.getId();
-			toInit.add(tp);
-
-			String tp_safe = tp + "_safe";
-			toInit.add(tp_safe);
+			addConnectorToolpermission(toInit, c.getId());
 		}
+		if(connectorList.getSimpleConnectors() != null) {
+			for (SimpleConnector c : connectorList.getSimpleConnectors()) {
+				addConnectorToolpermission(toInit, c.getId());
+			}
+		}
+	}
+
+	private void addConnectorToolpermission(List<String> toInit, String connectorId) {
+		String tp = CCConstants.CCM_VALUE_TOOLPERMISSION_CONNECTOR_PREFIX + connectorId;
+		toInit.add(tp);
+		toInit.add(tp + "_safe");
 	}
 }

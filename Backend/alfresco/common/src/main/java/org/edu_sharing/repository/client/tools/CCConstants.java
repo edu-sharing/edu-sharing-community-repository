@@ -1116,6 +1116,11 @@ public class CCConstants {
      */
     public final static String VIRT_PROP_LTI_URL = "{virtualproperty}ltiurl";
 
+    /**
+     * Precomputed URL to render the node, provided by the simple connector the node was created with.
+     */
+    public final static String VIRT_PROP_CONNECTOR_RENDER_URL = "{virtualproperty}connectorrenderurl";
+
     public final static String TOOL_HOMEFOLDER = "EDU_TOOL";
 
     public static final String TEMPLATE_NODE_NAME = ".METADATA_TEMPLATE";

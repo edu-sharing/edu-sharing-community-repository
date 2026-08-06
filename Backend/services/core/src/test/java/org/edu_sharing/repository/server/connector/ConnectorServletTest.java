@@ -1,6 +1,7 @@
 package org.edu_sharing.repository.server.connector;
 
 import com.github.davidmoten.guavamini.Maps;
+import org.edu_sharing.alfresco.action.RessourceInfoExecuter;
 import org.edu_sharing.alfresco.service.connector.SimpleConnector;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SimpleErrorWithDetailsException;
@@ -59,5 +60,63 @@ class ConnectorServletTest {
                 Map.entry("curriculum_description", new String[]{"Sample-Kanban Description " + UUID.randomUUID()})
         ), connector, null);
         assertThat(result.get(CCConstants.CCM_PROP_IO_WWWURL).toString(), CoreMatchers.containsString("https://curriculum-dev.schulcampus-rlp.de/kanbans/"));
+    }
+
+    @Test
+    void handleSimpleConnectorUrlWithoutApi() {
+        SimpleConnector connector = simpleConnectorWithUrl("https://example.tld/md-editor/?nodeId={{nodeId}}&hidePicker=true");
+
+        HashMap<String, Serializable> result = underTest.handleSimpleConnectorUrl(
+                Map.of("nodeId", new String[]{"4711"}), connector
+        );
+
+        assertThat(result.get(CCConstants.CCM_PROP_IO_WWWURL),
+                CoreMatchers.is("https://example.tld/md-editor/?nodeId=4711&hidePicker=true"));
+        assertThat(result.get(CCConstants.CCM_PROP_CCRESSOURCETYPE),
+                CoreMatchers.is(RessourceInfoExecuter.CCM_RESSOURCETYPE_CONNECTOR));
+        assertThat(result.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE), CoreMatchers.is("markdown"));
+    }
+
+    @Test
+    void handleSimpleConnectorUrlDropsUnknownVariables() {
+        SimpleConnector connector = simpleConnectorWithUrl("https://example.tld/md-editor/?nodeId={{unknown}}");
+
+        HashMap<String, Serializable> result = underTest.handleSimpleConnectorUrl(Map.of(), connector);
+
+        assertThat(result.get(CCConstants.CCM_PROP_IO_WWWURL), CoreMatchers.is("https://example.tld/md-editor/?nodeId="));
+    }
+
+    @Test
+    void extractSimpleConnectorTargetRedirectModeRedirect() {
+        SimpleConnector connector = simpleConnectorWithUrl("https://example.tld/md-editor/");
+        connector.setRedirectMode(SimpleConnector.RedirectMode.Redirect);
+        HashMap<String, Serializable> properties = underTest.handleSimpleConnectorUrl(Map.of(), connector);
+
+        String redirect = underTest.extractSimpleConnectorTarget(connector, properties);
+
+        assertThat(redirect, CoreMatchers.is("https://example.tld/md-editor/"));
+        // the target must not be stored on the element, but the connector markers must remain
+        assertThat(properties.containsKey(CCConstants.CCM_PROP_IO_WWWURL), CoreMatchers.is(false));
+        assertThat(properties.get(CCConstants.CCM_PROP_CCRESSOURCESUBTYPE), CoreMatchers.is("markdown"));
+    }
+
+    @Test
+    void extractSimpleConnectorTargetRedirectModeLinkIsDefault() {
+        SimpleConnector connector = simpleConnectorWithUrl("https://example.tld/md-editor/");
+        HashMap<String, Serializable> properties = underTest.handleSimpleConnectorUrl(Map.of(), connector);
+
+        String redirect = underTest.extractSimpleConnectorTarget(connector, properties);
+
+        // the target is resolved from the element, so it has to be kept in the properties
+        assertThat(connector.getRedirectMode(), CoreMatchers.is(SimpleConnector.RedirectMode.Link));
+        assertThat(redirect, CoreMatchers.nullValue());
+        assertThat(properties.get(CCConstants.CCM_PROP_IO_WWWURL), CoreMatchers.is("https://example.tld/md-editor/"));
+    }
+
+    private SimpleConnector simpleConnectorWithUrl(String url) {
+        SimpleConnector connector = new SimpleConnector();
+        connector.setId("markdown");
+        connector.setUrl(url);
+        return connector;
     }
 }

@@ -630,6 +630,7 @@
     "file-audio": "Audio",
     "file-txt": "Textdatei",
     "file-csv": "CSV-Datei",
+    "file-markdown": "Markdown-Datei",
     "file-video": "Video",
     "file-qti": "ONYX-Datei",
     "file-h5p": "H5P-Datei",
