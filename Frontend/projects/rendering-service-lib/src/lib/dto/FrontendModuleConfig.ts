@@ -24,4 +24,5 @@ export enum UrlEmbeddings {
     OERSI,
     BROCKHAUS,
     SERLO,
+    SIMPLECONNECTOR,
 }

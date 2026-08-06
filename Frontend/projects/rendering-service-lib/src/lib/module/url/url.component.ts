@@ -141,6 +141,8 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
             this.sanitizedUrl = this.getLearningAppsUrl();
         } else if (this.embedding === UrlEmbeddings.LTI13TOOL) {
             this.sanitizedUrl = this.getLtiUrl();
+        } else if (this.embedding === UrlEmbeddings.SIMPLECONNECTOR) {
+            this.sanitizedUrl = this.getConnectorRenderUrl();
         } else if (this.embedding === UrlEmbeddings.SODIX) {
             this.sanitizedUrl = this.getSodixUrl();
         } else if (this.embedding === UrlEmbeddings.YOUTUBE) {
@@ -205,6 +207,13 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
         return url
             ? this.sanitizer.bypassSecurityTrustResourceUrl(url + UrlComponent.LTI_QUERY)
             : null;
+    }
+
+    getConnectorRenderUrl(): SafeResourceUrl | null {
+        // the backend-provided render url for simple connector nodes is delivered as the virtual
+        // node property `virtual:connectorrenderurl` and goes into the iframe as-is
+        const url = this.node?.properties?.['virtual:connectorrenderurl']?.[0];
+        return url ? this.sanitizer.bypassSecurityTrustResourceUrl(url) : null;
     }
 
     getSodixUrl(): SafeResourceUrl {

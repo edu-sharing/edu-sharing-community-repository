@@ -16,7 +16,7 @@ export class ModuleInfoService {
     /** module name by `<category>:<value>` key, populated once from the modules-info endpoint */
     private moduleMappings: Map<string, string> | null = null;
 
-    async getModuleInfo(node: Node): Promise<ModuleInfo> {
+    async getModuleInfo(node: Node, isWebComponent: boolean = false): Promise<ModuleInfo> {
         const backendModule = await this.getAvailableBackendModule(node);
         if (backendModule !== null) {
             return {
@@ -24,7 +24,7 @@ export class ModuleInfoService {
                 urlType: null,
             };
         }
-        const frontendModule = this.getFrontendModuleSetting(node);
+        const frontendModule = this.getFrontendModuleSetting(node, isWebComponent);
         return {
             module: frontendModule.module,
             urlType: frontendModule.urlModuleConfig?.embedding ?? null,
@@ -92,18 +92,30 @@ export class ModuleInfoService {
         return this.moduleMappings;
     }
 
-    getFrontendModuleSetting(node: Node): FrontendModuleConfig {
+    getFrontendModuleSetting(node: Node, isWebComponent: boolean = false): FrontendModuleConfig {
         return (
-            this.checkUrlModule(node) ?? {
+            this.checkUrlModule(node, isWebComponent) ?? {
                 module: 'default',
                 urlModuleConfig: null,
             }
         );
     }
 
-    private checkUrlModule(node: Node): FrontendModuleConfig | null {
+    private checkUrlModule(
+        node: Node,
+        isWebComponent: boolean = false,
+    ): FrontendModuleConfig | null {
         const url = node.properties?.['ccm:wwwurl']?.[0] || '';
         const remoteRepositoryType = node.remote?.repository?.repositoryType?.toLowerCase() ?? '';
+        // the backend-provided render url for simple connector nodes is delivered as the virtual
+        // node property `virtual:connectorrenderurl`; its presence is the backend telling us this
+        // node can be rendered inline
+        const connectorRenderUrl = node.properties?.['virtual:connectorrenderurl']?.[0] || '';
+        // a simple connector rendering is not embeddable: as a web component the node falls through
+        // to the default module rather than to any url embedding
+        if (connectorRenderUrl && isWebComponent) {
+            return null;
+        }
         const checkSerlo = (): UrlModuleConfig | null => {
             const replicationSource =
                 node.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE]?.[0] ?? '';
@@ -183,6 +195,15 @@ export class ModuleInfoService {
             if (url.length > 0 && node.mimetype?.startsWith('audio')) {
                 return {
                     embedding: UrlEmbeddings.AUDIO,
+                    externalId: '',
+                };
+            }
+            return null;
+        };
+        const checkSimpleConnector = (): UrlModuleConfig | null => {
+            if (connectorRenderUrl) {
+                return {
+                    embedding: UrlEmbeddings.SIMPLECONNECTOR,
                     externalId: '',
                 };
             }
@@ -282,6 +303,9 @@ export class ModuleInfoService {
         };
 
         const embedding =
+            // a backend-provided render url wins outright: it is only ever present when the
+            // backend means for the node to be rendered inline
+            checkSimpleConnector() ??
             checkSerlo() ??
             checkLearningApps() ??
             checkYouTube() ??

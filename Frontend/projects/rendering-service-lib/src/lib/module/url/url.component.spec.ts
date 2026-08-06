@@ -57,4 +57,25 @@ describe('UrlComponent', () => {
 
         expect(component.getLtiUrl()).toBeNull();
     });
+
+    it('uses the virtual:connectorrenderurl property unchanged for simple connectors', () => {
+        const sanitizer = TestBed.inject(DomSanitizer);
+        const spy = spyOn(sanitizer, 'bypassSecurityTrustResourceUrl').and.callThrough();
+        component.node = {
+            ref: { id: 'abc' },
+            properties: {
+                'virtual:connectorrenderurl': ['https://connector.tld/render?nodeId=abc'],
+            },
+        } as unknown as Node;
+
+        component.getConnectorRenderUrl();
+
+        expect(spy).toHaveBeenCalledWith('https://connector.tld/render?nodeId=abc');
+    });
+
+    it('returns null for a simple connector when virtual:connectorrenderurl is missing', () => {
+        component.node = { ref: { id: 'abc' }, properties: {} } as unknown as Node;
+
+        expect(component.getConnectorRenderUrl()).toBeNull();
+    });
 });

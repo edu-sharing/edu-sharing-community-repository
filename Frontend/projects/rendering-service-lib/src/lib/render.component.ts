@@ -445,7 +445,7 @@ export class RenderComponent implements OnChanges, OnInit {
     private renderFrontendModule(moduleInfo: ModuleInfoService) {
         const frontendModule: FrontendModuleConfig =
             this.node !== undefined
-                ? moduleInfo.getFrontendModuleSetting(this.node)
+                ? moduleInfo.getFrontendModuleSetting(this.node, this.isWebComponent)
                 : { module: 'default', urlModuleConfig: null };
         this.renderData$.next({
             module: frontendModule.module,

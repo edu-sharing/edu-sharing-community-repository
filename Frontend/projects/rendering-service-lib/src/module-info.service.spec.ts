@@ -73,4 +73,43 @@ describe('ModuleInfoService', () => {
         expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.VIMEO);
         expect(config.urlModuleConfig?.externalId).toBe('12345?h=abcdef');
     });
+
+    function simpleConnectorNode(): Node {
+        return {
+            properties: {
+                'virtual:connectorrenderurl': ['https://connector.tld/render?nodeId=abc'],
+                'ccm:wwwurl': ['https://connector.tld/edit?nodeId=abc'],
+            },
+        } as unknown as Node;
+    }
+
+    it('routes a node with a connector render url to the url module with the SIMPLECONNECTOR embedding', () => {
+        const config = service.getFrontendModuleSetting(simpleConnectorNode());
+
+        expect(config.module).toBe('url');
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.SIMPLECONNECTOR);
+    });
+
+    it('prefers the connector render url over the generic link detector', () => {
+        // a connector node also has a wwwurl, which would otherwise match checkLink()
+        const config = service.getFrontendModuleSetting(simpleConnectorNode());
+
+        expect(config.urlModuleConfig?.embedding).not.toBe(UrlEmbeddings.LINK);
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.SIMPLECONNECTOR);
+    });
+
+    it('falls through to the default module for a connector node as a web component', () => {
+        const config = service.getFrontendModuleSetting(simpleConnectorNode(), true);
+
+        expect(config.module).toBe('default');
+        expect(config.urlModuleConfig).toBeNull();
+    });
+
+    it('still applies other url embeddings as a web component', () => {
+        // the web component fall-through is scoped to connector nodes only
+        const config = service.getFrontendModuleSetting(vimeoNode('https://vimeo.com/12345'), true);
+
+        expect(config.module).toBe('url');
+        expect(config.urlModuleConfig?.embedding).toBe(UrlEmbeddings.VIMEO);
+    });
 });

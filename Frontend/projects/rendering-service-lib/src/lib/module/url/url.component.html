@@ -57,6 +57,8 @@
     ></iframe>
     } @if (embedding === UrlEmbeddings.LTI13TOOL && sanitizedUrl) {
     <iframe class="ltiFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
+    } @if (embedding === UrlEmbeddings.SIMPLECONNECTOR && sanitizedUrl) {
+    <iframe class="connectorFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
     } @if (embedding === UrlEmbeddings.SODIX) {
     <div class="sodixFrame">
       @if (node.mediatype === 'file-audio') {
