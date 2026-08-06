@@ -78,6 +78,9 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     standalone: false,
 })
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
+    /** storage key of the user-customized column layout (versioned to discard legacy layouts) */
+    private static readonly COLUMNS_STORAGE_KEY = 'workspaceColumns_10.0';
+
     private connector = inject(RestConnectorService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private translate = inject(TranslateService);
@@ -489,11 +492,17 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
 
     initColumns() {
         this.config.get('workspaceColumns').subscribe((data: string[]) => {
-            void this.storage.get<ListItem[]>('workspaceColumns_10.0').then((columns) => {
-                this.columns = {
-                    Default: WorkspaceExplorerComponent.getColumns(this.connector, columns, data),
-                };
-            });
+            void this.storage
+                .get<ListItem[]>(WorkspaceExplorerComponent.COLUMNS_STORAGE_KEY)
+                .then((columns) => {
+                    this.columns = {
+                        Default: WorkspaceExplorerComponent.getColumns(
+                            this.connector,
+                            columns,
+                            data,
+                        ),
+                    };
+                });
         });
     }
 
@@ -510,9 +519,9 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     private async initOptions() {
-        // Split actionbar (mirrors collections/search): the topbar actionbar (toggles-only in the
-        // explorer view via showActionOptions) shows toggle options; the bottom selection bar shows
-        // node actions. refreshComponents keeps both in sync.
+        // Split actionbar (mirrors collections/search): the topbar shows the toggles and the
+        // selection-independent actions, the bottom selection bar shows the node actions.
+        // refreshComponents keeps both in sync.
         const selectionBar = this.selectionActionbar?.();
         await this.nodeEntries?.initOptionsGenerator({
             actionbar: [this.actionbar, selectionBar].filter(Boolean),
@@ -581,7 +590,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     saveColumns(columns: ListItem[]) {
-        void this.storage.set('workspaceColumns', columns);
+        void this.storage.set(WorkspaceExplorerComponent.COLUMNS_STORAGE_KEY, columns);
     }
 
     selectionChange(selection: SelectionChange<NodeEntriesDataType>) {

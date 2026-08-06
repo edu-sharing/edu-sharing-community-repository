@@ -257,7 +257,7 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
-        this.storage.remove('workspace_clipboard');
+        // the clipboard is kept when leaving the workspace, it is also used by the collections page
         if (this.currentFolder) {
             this.storage.set(this.getLastLocationStorageId(), this.currentFolder.ref.id);
         }
@@ -436,28 +436,36 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
             );
     }
 
-    private copyNode(target: DropTarget, source: Node[], position = 0) {
+    private copyNode(target: DropTarget, source: Node[], position = 0, created: Node[] = []) {
         this.globalProgress = true;
         if (position >= source.length) {
-            this.finishMoveCopy(target, source, true);
+            this.finishMoveCopy(target, source, true, created);
             this.globalProgress = false;
             return;
         }
         this.node
             .copyNode((target as Node).ref?.id || RestConstants.USERHOME, source[position].ref.id)
-            .subscribe(
-                (data: NodeWrapper) => {
-                    this.copyNode(target, source, position + 1);
+            .subscribe({
+                next: (data: NodeWrapper) => {
+                    if (data?.node) {
+                        created.push(data.node);
+                    }
+                    this.copyNode(target, source, position + 1, created);
                 },
-                (error: any) => {
+                error: (error: any) => {
                     this.nodeHelper.handleNodeError(source[position].name, error);
                     source.splice(position, 1);
-                    this.copyNode(target, source, position + 1);
+                    this.copyNode(target, source, position + 1, created);
                 },
-            );
+            });
     }
 
-    private finishMoveCopy(target: DropTarget, source: Node[], copy: boolean) {
+    private finishMoveCopy(
+        target: DropTarget,
+        source: Node[],
+        copy: boolean,
+        created: Node[] = [],
+    ) {
         this.toast.closeProgressSpinner();
         const info: any = {
             to: (target as Node).name || this.translate.instant('WORKSPACE.MY_FILES'),
@@ -466,10 +474,31 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy,
         };
         if (source.length) {
             this.toast.toast('WORKSPACE.TOAST.PASTE_DRAG', info);
+            this.emitMoveCopyEvents(target, source, copy, created);
         }
         this.globalProgress = false;
         this.refresh();
         this.treeComponent?.refresh();
+    }
+
+    /** Announces the new node locations so other views can update their source and target. */
+    private emitMoveCopyEvents(target: DropTarget, source: Node[], copy: boolean, created: Node[]) {
+        const targetNode = target as Node;
+        if (!targetNode?.ref?.id) {
+            return;
+        }
+        if (copy) {
+            if (created.length) {
+                this.localEvents.nodesCreated.emit(created);
+            }
+            this.localEvents.nodesChanged.emit([targetNode]);
+        } else {
+            this.localEvents.nodesMoved.emit({
+                nodes: source,
+                source: { ref: source[0]?.parent } as Node,
+                target: targetNode,
+            });
+        }
     }
 
     private async initialize() {

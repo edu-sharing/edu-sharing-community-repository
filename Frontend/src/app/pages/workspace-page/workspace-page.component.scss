@@ -49,7 +49,8 @@ mat-sidenav-container {
             position: absolute;
             right: 0;
             height: 100%;
-            padding: 0 10px;
+            // wider inset on the right so labelled action buttons keep clear of the card corner
+            padding: 0 20px 0 10px;
             display: flex;
             align-items: center;
             z-index: 62;

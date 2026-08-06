@@ -5,11 +5,14 @@ import {
     AssignmentFile,
     AssignmentV1Service,
     AuthenticationService,
+    CollectionService as ApiCollectionService,
+    HOME_REPOSITORY,
     NetworkService,
     Node,
     NodeListErrorResponses,
     NodeListService,
     NodeService,
+    ROOT,
 } from 'ngx-edu-sharing-api';
 import {
     ClipboardObject,
@@ -30,6 +33,7 @@ import {
     TemporaryStorageService,
 } from 'ngx-edu-sharing-ui';
 import {
+    firstValueFrom,
     forkJoin as observableForkJoin,
     lastValueFrom,
     Observable,
@@ -82,6 +86,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     public nodeHelper = inject(NodeHelperService);
     private bridge = inject(BridgeService);
     private collectionService = inject(RestCollectionService);
+    private collectionApiService = inject(ApiCollectionService);
     public configService = inject(ConfigurationService);
     private globalOptionsService = inject(GlobalOptionsService);
     public nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
@@ -144,6 +149,104 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         });
     }
 
+    /** Whether the clipboard holds collections. */
+    clipboardContainsCollections(): boolean {
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        return !!clip?.nodes?.length && clip.nodes.every((node) => this.isCollection(node));
+    }
+
+    /** Whether the clipboard holds files, the only nodes a collection can reference. */
+    clipboardContainsCollectableNodes(): boolean {
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        return (
+            !!clip?.nodes?.length &&
+            clip.nodes.every(
+                (node) => !this.isCollection(node) && node.type === RestConstants.CCM_TYPE_IO,
+            )
+        );
+    }
+
+    private isCollection(node: Node): boolean {
+        return !!node?.collection || !!node?.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION);
+    }
+
+    /** Pastes the clipboard into a collection: collections are copied, files added as references. */
+    private async pasteIntoCollection(target: Node): Promise<void> {
+        if (this.clipboardContainsCollections()) {
+            return this.pasteCollections(target);
+        }
+        this.addClipboardNodesToCollection(target);
+    }
+
+    /** Adds the clipboard nodes to the given collection, they become collection references. */
+    private addClipboardNodesToCollection(target: Node): void {
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        if (!clip?.nodes?.length || !target) {
+            return;
+        }
+        // a collection references the original, not a reference node copied inside a collection
+        const nodes = clip.nodes.map((node) => ({
+            ...node,
+            ref: { ...node.ref, id: this.nodeHelper.getOriginalId(node) },
+        }));
+        this.toast.showProgressSpinner();
+        // `addToCollection` reports the result, handles duplicates and emits the node events itself
+        this.uiService.addToCollection(target, nodes, false, () => {
+            this.storage.remove('workspace_clipboard');
+            this.toast.closeProgressSpinner();
+        });
+    }
+
+    /**
+     * Copies the clipboard collection(s) into the target collection, including child collections,
+     * references and permissions.
+     */
+    private async pasteCollections(target: Node): Promise<void> {
+        const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        if (!clip?.nodes?.length || !target) {
+            return;
+        }
+        this.toast.showProgressSpinner();
+        try {
+            let skippedRefs = 0;
+            for (const source of clip.nodes) {
+                const copyResponse = await firstValueFrom(
+                    this.collectionApiService.copyCollection({
+                        repository: HOME_REPOSITORY,
+                        sourceCollection: source.ref.id,
+                        // the collections root is not a real node, omitting the target copies
+                        // into the level0 collections
+                        targetCollection: target.ref.id === ROOT ? undefined : target.ref.id,
+                        copyRoot: true,
+                        copyChildCollections: true,
+                        copyRefs: true,
+                        copyPermissions: true,
+                    }),
+                );
+                skippedRefs +=
+                    copyResponse?.entries?.filter(
+                        (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
+                    )?.length ?? 0;
+                if (copyResponse?.root) {
+                    this.localEvents.nodesCreated.emit([copyResponse.root]);
+                }
+            }
+            this.storage.remove('workspace_clipboard');
+            if (skippedRefs > 0) {
+                this.toast.toast('COLLECTIONS.TOAST.COPIED_NO_PUBLISH_PERMISSION', {
+                    count: skippedRefs,
+                });
+            } else {
+                this.toast.toast('COLLECTIONS.TOAST.COPIED');
+            }
+            this.localEvents.nodesChanged.emit([target]);
+        } catch (error) {
+            this.toast.error(error);
+        } finally {
+            this.toast.closeProgressSpinner();
+        }
+    }
+
     pasteNode(
         components: OptionsHelperComponents,
         data: OptionData,
@@ -151,6 +254,15 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         nodes: Node[] = [],
     ) {
         const clip = this.storage.get('workspace_clipboard') as ClipboardObject;
+        // a collection target is not pasted node by node
+        if (this.isCollection(data.parent)) {
+            void this.pasteIntoCollection(data.parent);
+            return;
+        }
+        // collections can only be pasted into another collection
+        if (this.clipboardContainsCollections()) {
+            return;
+        }
         if (!this.canAddObjects(data)) {
             return;
         }

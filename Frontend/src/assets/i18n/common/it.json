@@ -173,7 +173,10 @@
     "TOOLPERMISSION_INVITE_TIMEBASED": "Creare autorizzazioni limitate nel tempo.",
     "TOOLPERMISSION_SUGGESTION_READ": "Recupera suggerimenti per i metadati sugli elementi.",
     "TOOLPERMISSION_SUGGESTION_WRITE": "Crea suggerimenti per i metadati sugli elementi.",
-    "TOOLPERMISSION_METADATA_METHODOLOGY": "Mostra la scheda metodologia quando si classificano gli elementi."
+    "TOOLPERMISSION_METADATA_METHODOLOGY": "Mostra la scheda metodologia quando si classificano gli elementi.",
+    "TOOLPERMISSION_CREATE_ELEMENTS_ASSIGNMENTS": "Creare compiti",
+    "TOOLPERMISSION_MANAGE_QA": "Gestire il controllo qualità dei materiali",
+    "TOOLPERMISSION_BAPI": "Accesso all'API didattica (BAPI) del repository"
   },
   "NO_WRITE_PERMISSIONS": "Nessun permesso",
   "NODE_SEARCH": "Elementi di ricerca...",
@@ -229,7 +232,14 @@
     "SECURE_SHORT": "Sicuro",
     "PERMISSIONS_SHORT": "Utenti",
     "LOGIN_SHORT": "Accesso",
-    "ADMIN_SHORT": "Admin"
+    "ADMIN_SHORT": "Admin",
+    "LANDING": "Pagina iniziale",
+    "LANDING_SHORT": "Inizio",
+    "TASKS": "Compiti",
+    "TASKS_SHORT": "Compiti",
+    "EDITORIAL_SUGGESTIONS": "Verifica dei contenuti",
+    "EDITORIAL_SUGGESTIONS_SHORT": "Verifica",
+    "RENDER": "Rendering"
   },
   "WORKFLOW": {
     "100_unchecked": "Nessuno stato",
@@ -292,7 +302,8 @@
     "ccm:educationalintendedenduserrole": "Gruppo target",
     "ccm:eaf_sequence_title": "Titolo della sequenza",
     "ccm:collection_ordered_position": "Smistamento manuale",
-    "random": "Casualmente"
+    "random": "Casualmente",
+    "cclom:size": "dimensione"
   },
   "COOKIE_INFO": {
     "ACCEPT": " Accettare",
@@ -419,7 +430,10 @@
     "file-csv": "File CSV",
     "file-serlo": "File Serlo",
     "file-geogebra": "File Geogebra",
-    "file-curriculum": "Kanban-Board"
+    "file-curriculum": "Kanban-Board",
+    "file-markdown": "file markdown",
+    "file-git-repository": "repository git",
+    "file-jupyter-notebook": "jupyter notebook"
   },
   "PERMISSION_TYPE": {
     "Consumer": "Visualizzatore",
@@ -457,6 +471,23 @@
     "CONTRAST_MODE_OPTION": {
       "CONTRAST": "Miglioramento del contrasto",
       "STANDARD": "Contrasto standard"
+    },
+    "DARK_MODE_TITLE": "Modalità scura",
+    "DARK_MODE_MESSAGE": "Scegliete uno schema di colori chiaro o scuro oppure utilizzate l'impostazione di sistema del vostro dispositivo.",
+    "DARK_MODE_OPTION": {
+      "SYSTEM": "Usa l'impostazione di sistema",
+      "LIGHT": "Chiaro",
+      "DARK": "Scuro"
+    },
+    "DARK_MODE_SWITCH": {
+      "LIGHT": "Passa alla modalità chiara",
+      "DARK": "Passa alla modalità scura"
+    },
+    "DRAG_AND_DROP_TITLE": "Spostare i contenuti",
+    "DRAG_AND_DROP_MESSAGE": "I contenuti possono essere spostati tramite trascinamento. Per una migliore accessibilità è possibile attivare azioni aggiuntive, come i pulsanti «avanti» e «indietro», che consentono lo spostamento anche senza mouse.",
+    "DRAG_AND_DROP_OPTION": {
+      "STANDARD": "Trascinamento standard",
+      "EXTENDED": "Azioni aggiuntive sul contenuto"
     }
   },
   "AUTHORITY_TYPE_GROUP": "Gruppo",
@@ -692,7 +723,23 @@
     "EDIT_REVOCATION": "Modifica motivo",
     "SELECT_ALL": "Seleziona tutto",
     "DESELECT": "Deseleziona tutto",
-    "EDIT_CONNECTOR": "Modifica"
+    "EDIT_CONNECTOR": "Modifica",
+    "VIEW_ELEMENT": "Apri",
+    "APPLY_FILTER": "Applica il risultato della ricerca",
+    "SHOW_TOPIC_PAGE": "Vai alla pagina tematica",
+    "VERSION_MANAGEMENT": "Gestione delle versioni",
+    "ADD_SHORTCUT": "Aggiungi ai preferiti",
+    "NEW_ASSIGNMENT": "Nuovo compito",
+    "ASSIGNMENT_SUBMIT": "Consegna",
+    "ASSIGNMENT_SUBMISSION": "Consegne",
+    "ASSIGNMENT_EDIT": "Modifica compito",
+    "ASSIGNMENT_ASSIGN": "Assegna compito",
+    "ASSIGNMENT_COPY": "Copia compito",
+    "ASSIGNMENT_CANCEL": "Annulla compito",
+    "ASSIGNMENT_CANCEL_CONFIRM": "Volete davvero annullare questo compito? L'operazione non può essere annullata.",
+    "ASSIGNMENT_FINISH": "Concludi compito",
+    "ASSIGNMENT_FINISH_CONFIRM": "Volete davvero concludere questo compito? L'operazione non può essere annullata.",
+    "MANAGE_CONTENT": "Ordina"
   },
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Commento versione",
@@ -748,7 +795,29 @@
       "TYPE_AI": "IA",
       "TYPE_USER": "persona",
       "APPLY": "Accettare",
-      "DECLINE": "Rifiutare"
+      "DECLINE": "Rifiutare",
+      "TOP_LABEL": "Suggerimenti",
+      "TOOLTIP": "Suggerimento di {{author}} del {{date}}",
+      "SHOW_ALL_VALUES": "Mostra tutti i valori",
+      "TOAST": {
+        "DECLINED": "Il suggerimento è stato rifiutato",
+        "INVALID_VALUE": "Il valore suggerito non era valido e non è stato possibile utilizzarlo"
+      },
+      "USER_PROPOSALS": {
+        "LABEL": "Metadati della community"
+      }
+    },
+    "AI": {
+      "GENERATE_ALL_TITLE": "Genera metadati",
+      "GENERATE_ALL_INFO": "Genera suggerimenti per tutti i campi di metadati che possono essere elaborati dall'IA",
+      "GENERATE_ALL_BUTTON": "Genera suggerimenti IA",
+      "GENERATE_ASYNC_STARTED": "I suggerimenti sono in fase di generazione. Il modulo verrà completato automaticamente appena i dati saranno disponibili",
+      "GENERATE_ASYNC_FINISHED": "I suggerimenti sono ora disponibili",
+      "DRAWING_STYLES": {
+        "HEADING": "Generazione di immagini con IA",
+        "LABEL": "Scegli lo stile",
+        "REGENERATE": "Genera di nuovo"
+      }
     }
   },
   "SIMPLE_EDIT": {
@@ -847,7 +916,10 @@
     "DOWNLOAD_TRY_AGAIN": "Riprova",
     "STORAGE_LOCATION_SAVED": "La cartella \"{{name}}\" sarà utilizzata di default per i caricamenti in futuro.",
     "STORAGE_LOCATION_RESET": "La cartella predefinita per i caricamenti è stata ripristinata",
-    "OPTION_DISABLED_OR_UNAVAILABLE": "Purtroppo l'azione richiesta non è disponibile."
+    "OPTION_DISABLED_OR_UNAVAILABLE": "Purtroppo l'azione richiesta non è disponibile.",
+    "ASSIGNMENT_CANCEL": "Il compito è stato annullato.",
+    "ASSIGNMENT_FINISH": "Il compito è stato concluso.",
+    "ASSIGNMENT_COPY": "Il compito è stato copiato."
   },
   "VCARD": {
     "Givenname": "Nome",
@@ -880,7 +952,8 @@
     "file_upload": "caricamento di file",
     "delete": "cancellare",
     "add": "Nuovo",
-    "redo": "Applicare"
+    "redo": "Applicare",
+    "edit": "Modifica"
   },
   "FILL_STATUS": {
     "REQUIRED": "campi obbligatori",
@@ -1171,7 +1244,8 @@
     "VE": "Venezuela",
     "VN": "Vietnam",
     "YE": "Yemen",
-    "ZA": "Sudafrica"
+    "ZA": "Sudafrica",
+    "BE": "Belgio"
   },
   "ROCKETCHAT": {
     "TITLE": "Chat"
@@ -1410,12 +1484,23 @@
       "isBasedOn": "si basa su",
       "references": "si riferisce a",
       "hasPart": "ha una parte di",
-      "isBasisFor": "è la base di"
+      "isBasisFor": "è la base di",
+      "isDuplicateOf": "è un duplicato di",
+      "requires": "richiede",
+      "isRequiredBy": "è richiesto da",
+      "replaces": "sostituisce",
+      "isReplacedBy": "è sostituito da",
+      "hasFormat": "ha il formato",
+      "isFormatOf": "è un formato di"
     },
     "RELATION_TYPE_FULLY": {
       "isPartOf": "fa parte di (isPartOf)",
       "isBasedOn": "è basato su (isBasedOn)",
-      "references": "si riferisce a (riferimenti)"
+      "references": "si riferisce a (riferimenti)",
+      "isDuplicateOf": "è un duplicato di (isDuplicateOf)",
+      "requires": "richiede (requires)",
+      "replaces": "sostituisce (replaces)",
+      "hasFormat": "ha il formato (hasFormat)"
     },
     "NOT_SUPPORTED_REMOTELY": "Le relazioni tra elementi esterni non sono attualmente supportate."
   },
@@ -1441,7 +1526,222 @@
       "DETAILS": "L'editore/redazione ha ritirato questo articolo. Sono ancora disponibili solo i metadati dell'articolo originale. Ulteriori dettagli sono disponibili nella spiegazione seguente.",
       "DATE": "Data di cancellazione",
       "REASON": "Motivo dell'eliminazione",
-      "FEEDBACK": "Contatta la redazione"
+      "FEEDBACK": "Contatta la redazione",
+      "DETAILS_EMPTY": "L'editore o la redazione ha ritirato questo oggetto. Sono disponibili soltanto i metadati dell'elemento originale.\n\nUlteriori dettagli si trovano nella motivazione qui sotto."
+    },
+    "GO_TO_COURSE": "Vai al corso",
+    "AUTHORED_BY": "di",
+    "CONVERTING": "Conversione",
+    "QUEUED": "In coda",
+    "QUEUE_POSITION": "Posizione in coda",
+    "OPEN_IN_NEW_TAB": "Apri in una nuova scheda",
+    "RELOAD_LINK": "Ricarica il link",
+    "ERROR": {
+      "GENERIC_ERROR_MESSAGE": "Si è verificato un errore.",
+      "RS2_NOT_CONFIGURED": "Il rendering service 2 attualmente non è collegato a questo repository.",
+      "ERROR_PROCESSING_JOB": "Il job di rendering per la visualizzazione dell'oggetto non è stato completato.",
+      "GENERIC_CONVERSION_ERROR": "La conversione dell'oggetto è fallita.",
+      "GENERIC_NOT_FOUND": "Non è stato possibile trovare la risorsa.",
+      "GENERIC_BAD_REQUEST": "Richiesta non valida",
+      "GENERIC_MODULE_NOT_AVAILABLE": "Il modulo di rendering necessario per visualizzare l'oggetto non è disponibile.",
+      "GENERIC_OBJECT_NOT_SUPPORTED": "Questo oggetto non è supportato dal rendering service.",
+      "GENERIC_ACCESS_DENIED": "Non sono disponibili autorizzazioni per l'elemento richiesto.",
+      "GENERIC_INTERNAL_SERVER_ERROR": "Il server non ha potuto elaborare la richiesta"
+    },
+    "GDPR": {
+      "EXTERNAL_SITE": "Sito esterno",
+      "EXTERNAL_CONTENT": "Contenuto esterno",
+      "GDPR_REGULATIONS": "norme sulla protezione dei dati",
+      "AGREE_AND_CONTINUE": "Accetta e continua",
+      "FURTHER_INFORMATION": "Ulteriori informazioni qui: ",
+      "EXTERNAL_SITE_INFO": "All'apertura del sito esterno potrebbero essere trasmessi dati. Consultate le nostre ",
+      "EXTERNAL_SOURCE": "una fonte esterna",
+      "EXTERNAL_CONTENT_INFO": "Stai per caricare e visualizzare contenuti da {{EXTERNAL_RESOURCE}}. In questo modo potrebbero essere trasmessi ed elaborati esternamente dati personali."
     }
+  },
+  "NOTICE": "Nota",
+  "SHOW": "mostra",
+  "ORIGINAL_ACCESS_DENIED": "Accesso negato",
+  "ORIGINAL_ACCESS_DENIED_INFO": "Nessuna autorizzazione per visualizzare i dettagli di questo materiale",
+  "ORIGINAL_ACCESS_DENIED_MORE": "Ulteriori informazioni",
+  "ALL_DETAILS": "Tutti i dettagli",
+  "SHARE": {
+    "sharedBy": "Condiviso da",
+    "timestamp": "data"
+  },
+  "ASSIGNMENT": {
+    "CARD_TYPE": "Compito",
+    "title": "Titolo",
+    "status": "Stato",
+    "endTime": "Termine di consegna",
+    "submissionStatus": "Stato della consegna",
+    "type": "Tipo di compito",
+    "summary": "Descrizione",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "SUBMISSION": "Consegna"
+    },
+    "STATUS": {
+      "DRAFT": "Bozza",
+      "INPROGRESS": "Assegnato",
+      "CORRECTED": "Corretto",
+      "SENDBACK": "Restituito",
+      "TO_SUBMIT": "Aperto",
+      "SUBMITTED": "Consegnato",
+      "HAS_SUBMISSIONS": "Da correggere",
+      "CANCELED": "Annullato",
+      "FINISHED": "Concluso"
+    },
+    "SUBMISSION_STATUS": {
+      "NOT_STARTED": "Aperto",
+      "PENDING": "Aperto",
+      "WITHDRAWN": "Ritirato",
+      "FINISHED": "Consegnato"
+    },
+    "VALIDATION_STATUS": {
+      "NOT_STARTED": "Da correggere",
+      "PENDING": "In correzione",
+      "FINISHED": "Corretto"
+    }
+  },
+  "SUBMISSION": {
+    "assignee": "Nome",
+    "submissionStatus": "Stato della consegna",
+    "validationStatus": "Stato della correzione"
+  },
+  "EVENT": {
+    "eventType": "Azione",
+    "timestamp": "Data",
+    "TYPE": {
+      "CREATE_MATERIAL": "creato",
+      "EDIT_MATERIAL": "modificato",
+      "DOWNLOAD_MATERIAL": "scaricato",
+      "ADD_MATERIAL_TO_COLLECTION": "materiale aggiunto",
+      "VIEW_COLLECTION": "visualizzato",
+      "VIEW_MATERIAL": "visualizzato",
+      "VIEW_MATERIAL_EMBEDDED": "visualizzato",
+      "VIEW_MATERIAL_PLAY_MEDIA": "riprodotto",
+      "OPEN_EXTERNAL_LINK": "link aperto",
+      "ARCHIVE_MATERIAL": "archiviato/cancellato",
+      "DELETE_MATERIAL": "cancellato",
+      "MOVE_MATERIAL": "spostato",
+      "COPY_MATERIAL": "copiato",
+      "REVERT_MATERIAL_VERSION": "versione ripristinata",
+      "CHANGE_MATERIAL_CONTENT": "modificato (contenuto)",
+      "CHANGE_MATERIAL_OWNER": "modificato (proprietario cambiato)",
+      "FORK_MATERIAL": "creato come variante",
+      "COMMENT_MATERIAL": "commentato",
+      "RATE_MATERIAL": "valutato",
+      "UNRATE_MATERIAL": "valutazione rimossa",
+      "LINK_SHARE_MATERIAL": "condiviso come link",
+      "LINK_UNSHARE_MATERIAL": "condivisione del link rimossa",
+      "FEEDBACK_MATERIAL": "feedback inviato",
+      "REPORT_MATERIAL": "segnalato",
+      "EDIT_MATERIAL_RELATION": "relazioni modificate"
+    }
+  },
+  "SHARE_REJECT": {
+    "TITLE": "Nascondi condivisione",
+    "MESSAGE": "Volete nascondere la condivisione o le condivisioni? In futuro non saranno più visualizzate in questo elenco. Il vostro accesso agli elementi, ad esempio tramite la ricerca, rimane però invariato.",
+    "CONFIRM": "Nascondi",
+    "TOAST_DONE": "{{count}} condivisione/i nascosta/e"
+  },
+  "PDF_EDITOR": {
+    "HEADING": "Inserire l'ID del contenuto o selezionare un contenuto tramite la ricerca{{suffix}}",
+    "EDIT_MODE": "Modalità di modifica",
+    "SAVE_ID": "Applica ID",
+    "OPEN_SEARCH": "Apri la ricerca",
+    "SAVE_CHANGES": "Salva le modifiche",
+    "LOAD_CONTENT_TITLE": "Carica contenuto",
+    "LOAD_CONTENT_MESSAGE": "Volete davvero sovrascrivere il PDF già caricato? Le modifiche andranno perse.",
+    "WRONG_FILE_FORMAT": "Il contenuto selezionato non è un file PDF. Selezionate un altro contenuto.",
+    "CHANGES_SAVED_SUCCESSFULLY": "Le vostre modifiche sono state salvate con successo."
+  },
+  "LANDING_PAGE": {
+    "TITLE": "Pagina iniziale",
+    "SEARCH_PLACEHOLDER": "Cerca nella mediateca..."
+  },
+  "SHORTCUT_ENTRIES": {
+    "CHANGE_TITLE": "Modifica il titolo",
+    "EXPAND": "Espandi i riquadri",
+    "COLLAPSE": "Comprimi i riquadri",
+    "RENAME": "Rinomina",
+    "DELETE": "Cancella",
+    "BACK": "Sposta a sinistra",
+    "FORWARD": "Sposta a destra",
+    "MODAL_HINT_REPLACE": "Per aggiungere un nuovo riquadro dovete cancellare un riquadro esistente oppure selezionare un riquadro da sostituire.",
+    "MODAL_HINT_ADD_REPLACE": "Aggiungete un nuovo riquadro con [+] oppure selezionate un riquadro esistente da sostituire.",
+    "MODAL_HINT_INCLUDED": "L'elemento è già stato aggiunto ai vostri collegamenti e non può essere aggiunto di nuovo.",
+    "REPLACE_TITLE": "Sostituisci il riquadro",
+    "REPLACE_MESSAGE": "Volete davvero sostituire questo riquadro con l'elemento selezionato?",
+    "SELECT_ELEMENT": "Seleziona un preferito",
+    "search": "Ricerca",
+    "workspace": "Spazio di lavoro",
+    "mycollections": "Le mie collezioni",
+    "invitedcollections": "Collezioni condivise",
+    "publiccollections": "Collezioni pubbliche",
+    "aboutme": "Il mio profilo",
+    "documentation": "Vai alla documentazione",
+    "OPTIONS_FOR": "Azioni per {{element}}",
+    "ADD_ENTRY": "Aggiungi un riquadro di collegamento"
+  },
+  "DASHBOARD_SWIMLANE": {
+    "EXPAND": "Espandi {{ element }}",
+    "COLLAPSE": "Comprimi {{ element }}",
+    "ACTIVITY": {
+      "ACTION_TEXT_PREFIX": "",
+      "ACTION_TEXT_SUFFIX": "il",
+      "EMPTY": "Nessuna attività recente",
+      "TIMEGROUP": {
+        "Today": "oggi",
+        "Yesterday": "ieri",
+        "Last7Days": "ultimi 7 giorni",
+        "Last30Days": "ultimi 30 giorni",
+        "Older": "più vecchi"
+      }
+    },
+    "assignments": {
+      "TITLE": "Compiti"
+    },
+    "SHARE": {
+      "EMPTY": "Nessuna condivisione",
+      "INFO_MESSAGE": "condiviso"
+    },
+    "SHOW_MORE": "Mostra tutti",
+    "SHOW_MORE_FOR": "Mostra tutti {{ element }}",
+    "NO_RESULTS": "Nessun elemento disponibile",
+    "featured-media": {
+      "TITLE": "Mediateca"
+    },
+    "collections": {
+      "TITLE": "Collezioni"
+    },
+    "shares": {
+      "TITLE": "Ultime condivisioni",
+      "SUBTITLE": {
+        "fromUser": "da parte mia",
+        "toUser": "a me",
+        "toUserGroups": "ai miei gruppi"
+      }
+    },
+    "recent-activities": {
+      "TITLE": "Ultime attività",
+      "SUBTITLE": {
+        "viewed": "Visualizzato",
+        "created": "Creato",
+        "edited": "Modificato"
+      }
+    }
+  },
+  "DOWNLOAD_METADATA": {
+    "TITLE": "Scarica i metadati",
+    "MESSAGE": "In quale formato volete scaricare i metadati?",
+    "TYPE_PDF": "file pdf",
+    "TYPE_TEXT": "file di testo"
+  },
+  "STATISTICS": {
+    "SELECTIVE_MATERIALS": "materiali_selezionati",
+    "MATERIALS": "materiali",
+    "TO": "a"
   }
 }

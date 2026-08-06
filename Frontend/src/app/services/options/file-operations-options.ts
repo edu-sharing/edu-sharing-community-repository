@@ -51,9 +51,13 @@ export function createFileOperationsOptions({
     const copyNodes = new OptionItem('OPTIONS.COPY', 'content_copy', (node) =>
         service.cutCopyNode(data, node, true),
     );
-    // do not allow copy of map links if tp is missing
+    // map links and collections each require their own creation toolpermission
     copyNodes.customEnabledCallback = async (node) =>
-        node.every((n) => !n.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION)) &&
+        (node?.some((n) => n.aspects?.includes(RestConstants.CCM_ASPECT_COLLECTION))
+            ? service.connector.hasToolPermissionInstant(
+                  RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS,
+              )
+            : true) &&
         (node?.some((n) => service.getTypeSingle(n) === ElementType.MapRef)
             ? service.connector.hasToolPermissionInstant(
                   RestConstants.TOOLPERMISSION_CREATE_MAP_LINK,
@@ -61,13 +65,43 @@ export function createFileOperationsOptions({
             : true);
     copyNodes.elementType = [ElementType.Node, ElementType.SavedSearch, ElementType.MapRef];
     copyNodes.constrains = [Constrain.HomeRepository, Constrain.User];
-    copyNodes.scopes = [Scope.WorkspaceList, Scope.WorkspaceTree];
+    // collections and their references are copied into another collection
+    copyNodes.scopes = [
+        Scope.WorkspaceList,
+        Scope.WorkspaceTree,
+        Scope.CollectionsCollection,
+        Scope.CollectionsReferences,
+    ];
     copyNodes.keyboardShortcut = {
         keyCode: 'KeyC',
         modifiers: ['Ctrl/Cmd'],
     };
     copyNodes.group = DefaultGroups.FileOperations;
     copyNodes.priority = 20;
+
+    // pastes the clipboard into the opened collection
+    const pasteIntoCollection = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
+        service.pasteNode(
+            components,
+            { parent: service.getObjects(node, data)[0], scope: null },
+            false,
+        ),
+    );
+    pasteIntoCollection.constrains = [
+        Constrain.NoBulk,
+        Constrain.Collections,
+        Constrain.HomeRepository,
+        Constrain.User,
+    ];
+    pasteIntoCollection.customShowCallback = async () =>
+        service.clipboardContainsCollections() || service.clipboardContainsCollectableNodes();
+    pasteIntoCollection.permissions = [RestConstants.ACCESS_WRITE];
+    pasteIntoCollection.permissionsMode = HideMode.Hide;
+    pasteIntoCollection.scopes = [Scope.CollectionsCollection];
+    pasteIntoCollection.showAsAction = true;
+    // lowest group/priority to be the first entry of the collection options
+    pasteIntoCollection.group = DefaultGroups.Primary;
+    pasteIntoCollection.priority = 5;
 
     const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
         service.pasteNode(components, data),
@@ -83,6 +117,8 @@ export function createFileOperationsOptions({
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
         RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES,
     ];
+    // collections can only be pasted into another collection
+    pasteNodes.customShowCallback = async () => !service.clipboardContainsCollections();
     pasteNodes.scopes = [Scope.WorkspaceList];
     pasteNodes.keyboardShortcut = {
         keyCode: 'KeyV',
@@ -123,5 +159,5 @@ export function createFileOperationsOptions({
     copyAssignment.group = DefaultGroups.FileOperations;
     copyAssignment.priority = 30;
 
-    return [linkMap, cutNodes, copyNodes, pasteNodes, copyAssignment];
+    return [linkMap, cutNodes, copyNodes, pasteNodes, pasteIntoCollection, copyAssignment];
 }

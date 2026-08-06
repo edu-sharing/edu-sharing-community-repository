@@ -10,9 +10,17 @@ import java.util.List;
 
 public interface ShareInfoService {
 
-    void createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType);
+    /**
+     * @return {@code true} if a new ShareInfo row was created, {@code false} if an identical share
+     * (same node, sharedBy, sharedWith, status and type) already existed and this call was a no-op.
+     */
+    boolean createShare(@NonNull String nodeId, @NonNull String sharedBy, @NonNull String sharedWith, @NonNull ShareType shareType);
 
-    void createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date);
+    /**
+     * @return {@code true} if a new ShareInfo row was created, {@code false} if an identical share
+     * (same node, sharedBy, sharedWith, status and type) already existed and this call was a no-op.
+     */
+    boolean createShare(@NotNull String nodeId, @NotNull String sharedBy, @NotNull String sharedWith, @NotNull ShareType shareType, @NotNull Date date);
 
     void rejectShare(@NonNull String nodeId);
 

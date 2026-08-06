@@ -73,6 +73,13 @@
         height: var(--containerHeight);
     }
 
+    .connectorFrame {
+        border: none;
+        width: 100%;
+        max-width: 100%;
+        height: var(--containerHeight);
+    }
+
     .serloFrame {
         border: none;
         width: 100%;

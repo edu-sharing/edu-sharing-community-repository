@@ -47,6 +47,36 @@ public class SimpleConnector implements Serializable {
 
 	@Optional private SimpleConnectorApi api;
 
+	/**
+	 * target the user gets redirected to when no {@link #api} is configured
+	 * supports the same variables as the api url, e.g. {{nodeId}}
+	 */
+	@Optional private String url;
+
+	/**
+	 * url to render (view) an element of this connector, e.g. embedded by the rendering service
+	 * supports the same variables as the {@link #url}, e.g. {{nodeId}}
+	 * it is provided as the virtual property virtual:connectorrenderurl
+	 */
+	@Optional private String renderUrl;
+
+	@Optional private RedirectMode redirectMode = RedirectMode.Link;
+
+	/**
+	 * how the target of the connector is handled, i.e. the {@link #url}
+	 * or, for a connector with an {@link #api}, the url provided by the api result
+	 */
+	public enum RedirectMode {
+		/**
+		 * the url is stored as the ccm:wwwurl of the element, i.e. it becomes a link element
+		 * note that the stored url will NOT be updated when the connector config changes
+		 */
+		Link,
+		/**
+		 * the url is only used for the redirect and is resolved again on every open of the element
+		 */
+		Redirect
+	}
 
 	@Optional private String mdsGroup;
 
