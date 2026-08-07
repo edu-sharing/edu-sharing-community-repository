@@ -29,6 +29,7 @@ public class RepoTools {
     public  Logger logger = Logger.getLogger(RepoTools.class);
 
     private final LightbendConfigLoader configLoader;
+    private final EduAuthentication authService;
 
     public static ApplicationInfo getApplicationInfo(String iss, String clientId, String ltiDeploymentId) throws LTIException {
 
@@ -86,7 +87,6 @@ public class RepoTools {
     }
 
     public String authenticate(HttpServletRequest req, Map<String,String> ssoMap){
-        ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
         AuthenticationToolAPI authTool = AuthenticationToolAPI.getInstance();
         Map<String,String> validAuthInfo = authTool.validateAuthentication(req.getSession());
 
@@ -108,7 +108,6 @@ public class RepoTools {
             }
         }
 
-        EduAuthentication authService =  (EduAuthentication)eduApplicationContext.getBean("authenticationService");
         authService.authenticateBySSO(ssoMap);
         String ticket = authService.getCurrentTicket();
         authTool.storeAuthInfoInSession(userName, ticket,CCConstants.AUTH_TYPE_LTI, req.getSession());
