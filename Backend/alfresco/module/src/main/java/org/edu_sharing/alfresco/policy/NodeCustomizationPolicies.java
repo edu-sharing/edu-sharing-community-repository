@@ -31,9 +31,11 @@ import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.alfresco.util.TempFileProvider;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -63,6 +65,9 @@ import org.springframework.security.crypto.codec.Base64;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -414,11 +419,10 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
     static void verifyMimetype(ContentReader reader, String filename, Map<String, List<String>> allowList, boolean allowUnknownMimetypes) throws NodeMimetypeUnknownValidationException {
         // String reportedMimeType = reader.getMimetype();
         try {
-            if (reader == null) {
+            if (reader == null || !reader.exists()) {
                 return;
             }
-            InputStream inputStream = reader.getContentInputStream();
-            MediaType mediaType = getMediaType(filename, inputStream);
+            MediaType mediaType = resolveMediaType(filename, reader);
             // we allow the text content for the repository config object
             if(Objects.equals(filename, CCConstants.CCM_VALUE_IO_NAME_CONFIG_NODE_NAME) && mediaType.equals(MediaType.TEXT_PLAIN)) {
                 return;
@@ -449,21 +453,114 @@ public class NodeCustomizationPolicies implements OnContentUpdatePolicy, OnCreat
         }
     }
 
-    public static MediaType getMediaType(String filename, InputStream inputStream) throws IOException {
+    /**
+     * Above this size Tika's DefaultZipContainerDetector would spool the stream to disk itself anyway
+     * (see its markLimit, default 16 MB) - only without any cleanup and after buffering that much on
+     * the heap first. We spool ourselves instead so the temp file is guaranteed to be deleted again.
+     */
+    private static final long DETECTION_SPOOL_THRESHOLD = 16L * 1024 * 1024;
+
+    /**
+     * TikaConfig.getDefaultConfig() builds the whole parser + detector registry via the java
+     * ServiceLoader on every call, so it must not be invoked per detection. Lazily held (instead of a
+     * plain static final field) so that a Tika init failure can't take down class loading of this
+     * policy - and with it the whole Spring context - as a NoClassDefFoundError. Detector implementations
+     * are documented to be thread safe.
+     */
+    private static final class TikaDetectorHolder {
+        private static final Detector DETECTOR = TikaConfig.getDefaultConfig().getDetector();
+    }
+
+    /**
+     * Filename based overrides that must win over content based detection. Returns null if none applies.
+     */
+    private static MediaType getMediaTypeByFilename(String filename) {
         // Jupyter notebooks are valid JSON, so Tika would report application/json.
         // Force the dedicated notebook mimetype based on the .ipynb extension.
         if (filename != null && filename.toLowerCase().endsWith(".ipynb")) {
             return MediaType.parse("application/x-ipynb+json");
         }
-        TikaConfig config = TikaConfig.getDefaultConfig();
-        Detector detector = config.getDetector();
-        TikaInputStream stream = TikaInputStream.get(inputStream);
+        return null;
+    }
+
+    private static Metadata detectionMetadata(String filename) {
         Metadata metadata = new Metadata();
         if (StringUtils.isNotBlank(filename)) {
             metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, filename);
         }
+        return metadata;
+    }
 
-        return detector.detect(stream, metadata);
+    /**
+     * Preferred entry point: file based detection. For zip based office formats (pptx/docx/xlsx/odt/...)
+     * this makes Tika read only the zip central directory instead of spooling the whole file to /tmp and
+     * buffering up to 16 MB on the heap first (see DefaultZipContainerDetector#markLimit).
+     */
+    public static MediaType getMediaType(String filename, Path path) throws IOException {
+        MediaType byFilename = getMediaTypeByFilename(filename);
+        if (byFilename != null) {
+            return byFilename;
+        }
+        Metadata metadata = detectionMetadata(filename);
+        // a throwaway Metadata is passed to get(...): TikaInputStream.get(Path, Metadata) would otherwise
+        // set RESOURCE_NAME_KEY to the (irrelevant) content store file name, overriding our real hint
+        try (TikaInputStream stream = TikaInputStream.get(path, new Metadata())) {
+            return TikaDetectorHolder.DETECTOR.detect(stream, metadata);
+        }
+    }
+
+    /**
+     * Detects the media type of the given stream. The stream is consumed and closed by this method.
+     */
+    public static MediaType getMediaType(String filename, InputStream inputStream) throws IOException {
+        MediaType byFilename = getMediaTypeByFilename(filename);
+        if (byFilename != null) {
+            return byFilename;
+        }
+        Metadata metadata = detectionMetadata(filename);
+        try (TikaInputStream stream = TikaInputStream.get(inputStream)) {
+            return TikaDetectorHolder.DETECTOR.detect(stream, metadata);
+        }
+    }
+
+    /**
+     * Detects the media type of an in memory buffer, e.g. for images loaded fully into a byte[] already.
+     */
+    public static MediaType getMediaType(String filename, byte[] data) throws IOException {
+        MediaType byFilename = getMediaTypeByFilename(filename);
+        if (byFilename != null) {
+            return byFilename;
+        }
+        Metadata metadata = detectionMetadata(filename);
+        try (TikaInputStream stream = TikaInputStream.get(data)) {
+            return TikaDetectorHolder.DETECTOR.detect(stream, metadata);
+        }
+    }
+
+    /**
+     * Detects the media type of the content behind the given reader. If the reader is backed by a local
+     * file (the default file content store) the store file is used directly - no copy at all. Larger,
+     * non file based content is spooled once, deterministically, and the temp file is always cleaned up.
+     * <p>
+     * Deliberately named differently from the getMediaType(...) overloads: a same-named overload taking
+     * a ContentReader would force javac's overload resolution in every module that merely calls
+     * getMediaType(...) - even unrelated ones without alfresco-data-model on their compile classpath - to
+     * resolve ContentReader, breaking their build even though this overload is package-private.
+     */
+    static MediaType resolveMediaType(String filename, ContentReader reader) throws IOException {
+        if (reader instanceof FileContentReader && ((FileContentReader) reader).exists()) {
+            return getMediaType(filename, ((FileContentReader) reader).getFile().toPath());
+        }
+        if (reader.getSize() > DETECTION_SPOOL_THRESHOLD) {
+            File tempFile = TempFileProvider.createTempFile("edu_mimedetect_", ".bin");
+            try (InputStream in = reader.getContentInputStream()) {
+                Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                return getMediaType(filename, tempFile.toPath());
+            } finally {
+                FileUtils.deleteQuietly(tempFile);
+            }
+        }
+        return getMediaType(filename, reader.getContentInputStream());
     }
 
     @Override
