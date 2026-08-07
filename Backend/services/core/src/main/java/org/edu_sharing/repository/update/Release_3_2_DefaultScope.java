@@ -22,8 +22,6 @@ import org.edu_sharing.repository.server.update.UpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import static org.edu_sharing.service.lti13.RepoTools.logger;
-
 @Slf4j
 @UpdateService
 public class Release_3_2_DefaultScope {

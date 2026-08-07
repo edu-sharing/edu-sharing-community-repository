@@ -28,6 +28,7 @@ import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -126,7 +127,7 @@ public class LTIJWTUtil {
                     if(tmpDeploymentId == null) tmpDeploymentId = claims.get(LTIConstants.LTI_DEPLOYMENT_ID, String.class);
                     // We are dealing with RS256 encryption, so we have some Oauth utils to manage the keys and
                     // convert them to keys from the string stored in DB. There are for sure other ways to manage this.
-                    platform = new RepoTools().getApplicationInfo(claims.getIssuer(),tmpClientId,tmpDeploymentId);
+                    platform = RepoTools.getApplicationInfo(claims.getIssuer(),tmpClientId,tmpDeploymentId);
                 } catch (LTIException ex) {
                     logger.error("no platform with " + claims.getIssuer() +" " + clientId + " registered", ex);
                     return null;
@@ -453,7 +454,7 @@ public class LTIJWTUtil {
         if(deploymentId == null){
             throw new ValidationException("missing deploymentId");
         }
-        String appId = new RepoTools().getAppId(null,clientId,deploymentId);
+        String appId = RepoTools.getAppId(null,clientId,deploymentId);
         ApplicationInfo appInfo = ApplicationInfoList.getRepositoryInfoById(appId);
         if(appInfo == null){
             throw new ValidationException("no application found for registrationId:" + clientId + " deploymentId:"+deploymentId);

@@ -80,6 +80,9 @@ public class LTIApi {
     @Autowired
     RegistrationService registrationService;
 
+    @Autowired
+    RepoTools repoTools;
+
     @POST
     @SecurityRequirements
     @Path("/oidc/login_initiations")
@@ -151,8 +154,8 @@ public class LTIApi {
     }
 
     private Response loginInitiationsCore(String iss, String clientId, String ltiDeploymentId, HttpServletRequest req) throws Exception {
-        RepoTools repoTools = new RepoTools();
-        ApplicationInfo platform = repoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
+
+        ApplicationInfo platform = RepoTools.getApplicationInfo(iss, clientId, ltiDeploymentId);
         Tool tool = Config.getTool(platform, req,true);
 
         // get data from request
@@ -355,7 +358,7 @@ public class LTIApi {
         ltiSessionObject.setIss(jws.getBody().get(LTIConstants.LTI_PARAM_ISS,String.class));
         ltiSessionObject.setNonce(jws.getBody().get(LTIConstants.LTI_NONCE,String.class));
         ltiSessionObject.setMessageType(ltiMessageType);
-        ltiSessionObject.setEduSharingAppId(new RepoTools().getAppId(ltiSessionObject.getIss(),
+        ltiSessionObject.setEduSharingAppId(RepoTools.getAppId(ltiSessionObject.getIss(),
                 jws.getBody().getAudience(),
                 ltiSessionObject.getDeploymentId()));
 
@@ -378,8 +381,8 @@ public class LTIApi {
         if(!ltiMessageType.equals(LTIConstants.LTI_MESSAGE_TYPE_DEEP_LINKING) &&
                 !ApplicationInfoList.getRepositoryInfoById(ltiSessionObject.getEduSharingAppId()).isLtiSyncReaders()){
             //authenticationComponent.setCurrentUser(AuthorityServiceImpl.PROXY_USER);
-            RepoTools.authenticate(req,
-                    RepoTools.mapToSSOMap(CCConstants.PROXY_USER, null, null, null));
+            repoTools.authenticate(req,
+                    repoTools.mapToSSOMap(CCConstants.PROXY_USER, null, null, null));
         }else{
             String user = jws.getBody().getSubject();
             Map<String,String> ext = ( Map<String,String>)jws.getBody().get("https://purl.imsglobal.org/spec/lti/claim/ext",Map.class);
@@ -412,8 +415,8 @@ public class LTIApi {
             String givenName = jws.getBody().get(LTIConstants.LTI_GIVEN_NAME, String.class);
             String email = jws.getBody().get(LTIConstants.LTI_EMAIL, String.class);
 
-            String authenticatedUsername = RepoTools.authenticate(req,
-                    RepoTools.mapToSSOMap(user, givenName, familyName, email));
+            String authenticatedUsername = repoTools.authenticate(req,
+                    repoTools.mapToSSOMap(user, givenName, familyName, email));
         }
 
         URI toRedirectTo = null;
@@ -791,7 +794,7 @@ public class LTIApi {
             String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
             String iss = claims.getBody().getIssuer();
             String clientId = claims.getBody().getAudience();
-            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+            String appId = RepoTools.getAppId(iss,clientId,deploymentId);
 
             return AuthenticationUtil.runAs(() -> {
 
@@ -850,7 +853,7 @@ public class LTIApi {
             String deploymentId = claims.getBody().get(LTIConstants.LTI_DEPLOYMENT_ID,String.class);
             String iss = claims.getBody().getIssuer();
             String clientId = claims.getBody().getAudience();
-            String appId = new RepoTools().getAppId(iss,clientId,deploymentId);
+            String appId = RepoTools.getAppId(iss,clientId,deploymentId);
 
             return AuthenticationUtil.runAs(() -> {
                 ApiTool.handleUsagePermissions(node, req.getSession(), appId, contextId, usageService);
