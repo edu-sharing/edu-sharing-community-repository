@@ -58,6 +58,7 @@ whether a tab bar will be shown. The body itself always lives in the same place 
           mat-tab-link
           [routerLink]="['./all']"
           [queryParams]="queryParamsAllRepositories"
+          queryParamsHandling="merge"
           (click)="goToAll()"
           routerLinkActive
           #routerLinkActive="routerLinkActive"

@@ -47,7 +47,12 @@ own OptionsHelperService instance and take exclusive control of the actionbar. -
         }
       </h2>
       @if (repo.dataSource.getTotal() > repo.dataSource.getData().length) {
-      <a mat-button [routerLink]="['..']" [queryParams]="getShowMoreQueryParams(repo.id)">
+      <a
+        mat-button
+        [routerLink]="['..']"
+        [queryParams]="getShowMoreQueryParams(repo.id)"
+        queryParamsHandling="merge"
+      >
         {{ 'SHOW_MORE' | translate }}
         <i esIcon="keyboard_arrow_right"></i>
       </a>
