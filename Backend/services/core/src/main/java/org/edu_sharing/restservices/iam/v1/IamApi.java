@@ -521,7 +521,7 @@ public class IamApi {
 
     @PUT
     @Path("/people/{repository}/status/{status}")
-    @Operation(summary = "update the user status.", description = "update the user status. (admin rights are required.)")
+    @Operation(summary = "update the status of multiple users.", description = "update the status of multiple users. (admin rights are required.)")
 
     @ApiResponses(
             value = {
@@ -535,7 +535,7 @@ public class IamApi {
 
     public Response updateUserStatus(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
-            @Parameter(description = "user", required = true) @QueryParam("user") List<String> user,
+            @Parameter(description = "user", required = true) List<String> user,
             @Parameter(description = "the new status to set", required = true) @PathParam("status") PersonLifecycleService.PersonStatus status,
             @Parameter(description = "notify the user via mail", required = true, schema = @Schema(defaultValue = "true")) @QueryParam("notify") Boolean notifyMail,
             @Context HttpServletRequest req) {
@@ -1452,7 +1452,7 @@ public class IamApi {
 
     @PUT
     @Path("/groups/{repository}/{group}/members")
-    @Operation(summary = "Add member to the group.", description = "Add member to the group. (admin rights are required.)")
+    @Operation(summary = "Add members to the group.", description = "Add members to the group. (admin rights are required.)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Void.class))),
@@ -1466,7 +1466,7 @@ public class IamApi {
     public Response addMembership(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "groupname", required = true) @PathParam("group") String group,
-            @Parameter(description = "authorityNames of member", required = true) @QueryParam("member") List<String> member,
+            @Parameter(description = "authorityNames of member", required = true) List<String> member,
             @Context HttpServletRequest req) {
         try {
             addMember(repository, group, member);
@@ -1514,7 +1514,7 @@ public class IamApi {
 
     @DELETE
     @Path("/groups/{repository}/{group}/members")
-    @Operation(summary = "Delete member from the group.", description = "Delete member from the group. (admin rights are required.)")
+    @Operation(summary = "Delete members from the group.", description = "Delete members from the group. (admin rights are required.)")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "OK.", content = @Content(schema = @Schema(implementation = Void.class))),
@@ -1527,7 +1527,7 @@ public class IamApi {
     public Response deleteMembership(
             @Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository,
             @Parameter(description = "groupname", required = true) @PathParam("group") String group,
-            @Parameter(description = "authorityName of members", required = true) @QueryParam("member") List<String> member,
+            @Parameter(description = "authorityName of members", required = true) List<String> member,
             @Context HttpServletRequest req) {
 
         try {
