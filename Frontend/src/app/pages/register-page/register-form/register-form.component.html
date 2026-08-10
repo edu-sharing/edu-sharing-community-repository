@@ -34,15 +34,25 @@
     <input matInput type="text" formControlName="organization" />
   </mat-form-field>
   <div class="accept">
-    <mat-checkbox formControlName="agree">{{ 'REGISTER.ACCEPT' | translate }}</mat-checkbox>
-    @if (privacyUrl) {
-    <a class="clickable imprint" (click)="openPrivacy()">{{
-      'REGISTER.PRIVACY-LINK' | translate
-    }}</a>
-    }
+    <mat-checkbox formControlName="agree">
+      <es-multi-line-label>
+        <ng-container slot="label">
+          {{ 'REGISTER.ACCEPT' | translate }}
+        </ng-container>
+        @if (privacyUrl) {
+        <ng-container slot="description">
+          <a class="description" (click)="openPrivacy()">{{
+            'REGISTER.PRIVACY-LINK' | translate
+          }}</a>
+        </ng-container>
+        }
+      </es-multi-line-label>
+    </mat-checkbox>
   </div>
-  <mat-checkbox formControlName="allowNotifications">{{
-    'REGISTER.NEWSLETTER' | translate
-  }}</mat-checkbox>
+  <mat-checkbox formControlName="allowNotifications">
+    <es-multi-line-label>
+      <ng-container slot="label">{{ 'REGISTER.NEWSLETTER' | translate }} </ng-container>
+    </es-multi-line-label>
+  </mat-checkbox>
 </form>
 }
