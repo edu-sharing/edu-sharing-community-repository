@@ -39,6 +39,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.alfresco.service.transaction.TransactionService;
 import org.alfresco.util.ISO8601DateFormat;
 import org.alfresco.util.TempFileProvider;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,6 +86,7 @@ import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -1592,48 +1594,64 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:" + nodeID + " store:" + store + " mimetype:" + mimetype + " property:" + property);
 
-        File tempFile = TempFileProvider.createTempFile("edu_mimedetect.", ".bin");
-        RetryingTransactionCallback<NodeRef> callback = () -> {
+        final NodeRef nodeRef = new NodeRef(store, nodeID);
 
-            NodeRef nodeRef = new NodeRef(store, nodeID);
-            final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
-            contentWriter.addListener(() -> {
-                log.debug("Content Stream was closed for:"+nodeRef);
-                log.debug(" size:" + contentWriter.getContentData().getSize() +
-                        ", URL:" + contentWriter.getContentData().getContentUrl() +
-                        ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
-                        ", ContentData ToString:" + contentWriter.getContentData().toString());
-            });
-
-            String finalMimeType = mimetype;
-            contentWriter.setEncoding(encoding);
-            InputStream finalContent = content;
-            if (StringUtils.isBlank(finalMimeType)) {
-                //finalMimeType = MCAlfrescoAPIClient.this.guessMimetype(MCAlfrescoAPIClient.this.getProperty(storeRef, nodeID, CCConstants.CM_NAME));
-
-                Files.copy(content, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                try(InputStream in = Files.newInputStream(tempFile.toPath()) ){
-                    String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
-                    MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, in);
-                    finalMimeType = mediaType.toString();
-                }
-                finalContent = Files.newInputStream(tempFile.toPath());
+        // Spool once, outside of the retrying transaction: the incoming stream (e.g. a Jersey multipart
+        // stream) is not repeatable. If the transaction below got retried after already having consumed
+        // it, the write would silently end up with empty/truncated content.
+        File tempFile = null;
+        if (StringUtils.isBlank(mimetype)) {
+            tempFile = TempFileProvider.createTempFile("edu_mimedetect_", ".bin");
+            try (InputStream in = content) {
+                Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-
-            try(InputStream in = finalContent){
-                contentWriter.setMimetype(finalMimeType);
-                contentWriter.putContent(in);
-            }
-            return nodeRef;
-        };
-        TransactionService transactionService = serviceRegistry.getTransactionService();
-        NodeRef nodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
-        log.debug("finished content writing tx:"+nodeRef);
-        tempFile.delete();
-        if(onComplete != null && nodeRef != null) {
-            onComplete.run();
         }
-        new ThumbnailHandling().thumbnailHandling(nodeRef);
+        final Path detectionSource = tempFile == null ? null : tempFile.toPath();
+
+        try {
+            RetryingTransactionCallback<NodeRef> callback = () -> {
+
+                final ContentWriter contentWriter = contentService.getWriter(nodeRef, QName.createQName(property), true);
+                contentWriter.addListener(() -> {
+                    log.debug("Content Stream was closed for:"+nodeRef);
+                    log.debug(" size:" + contentWriter.getContentData().getSize() +
+                            ", URL:" + contentWriter.getContentData().getContentUrl() +
+                            ", MimeType:" + contentWriter.getContentData().getMimetype() + "" +
+                            ", ContentData ToString:" + contentWriter.getContentData().toString());
+                });
+
+                String finalMimeType = mimetype;
+                contentWriter.setEncoding(encoding);
+                InputStream finalContent;
+                if (detectionSource != null) {
+                    String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
+                    // file based detection: Tika only reads the zip central directory for office formats
+                    // instead of spooling the whole file to /tmp again (see NodeCustomizationPolicies)
+                    MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, detectionSource);
+                    finalMimeType = mediaType.toString();
+                    finalContent = Files.newInputStream(detectionSource);
+                } else {
+                    finalContent = content;
+                }
+
+                try(InputStream in = finalContent){
+                    contentWriter.setMimetype(finalMimeType);
+                    contentWriter.putContent(in);
+                }
+                return nodeRef;
+            };
+            TransactionService transactionService = serviceRegistry.getTransactionService();
+            NodeRef resultNodeRef = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false);
+            log.debug("finished content writing tx:"+resultNodeRef);
+            if(onComplete != null && resultNodeRef != null) {
+                onComplete.run();
+            }
+            new ThumbnailHandling().thumbnailHandling(resultNodeRef);
+        } finally {
+            if (tempFile != null) {
+                FileUtils.deleteQuietly(tempFile);
+            }
+        }
     }
 
     public void setUserDefinedPreview(String nodeId, byte[] content, String fileName) {

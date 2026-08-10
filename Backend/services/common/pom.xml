@@ -64,6 +64,15 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- transitively required to reference NodeCustomizationPolicies (it implements Alfresco policy
+         interfaces from alfresco-repository, e.g. ContentServicePolicies); "provided" is not exported
+         by edu_sharing-community-repository-backend-alfresco-module, so it must be declared here too -->
+    <dependency>
+      <groupId>org.alfresco</groupId>
+      <artifactId>alfresco-repository</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
