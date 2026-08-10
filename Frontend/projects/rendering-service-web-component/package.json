@@ -10,7 +10,6 @@
     "start": "ng serve",
     "preview": "ng build --configuration=development rendering-service && npm run serve",
     "build": "ng build rendering-service",
-    "build-amd": "ng build rendering-service-amd",
     "publish-npm": "npm run build && cp {package.json,README.md} ../../dist/web-components/rendering-service && cd ../../dist/web-components/rendering-service && npm publish",
     "serve": "source ../../.env && http-server --gzip --port 4200 --proxy $BACKEND_URL example"
   },
