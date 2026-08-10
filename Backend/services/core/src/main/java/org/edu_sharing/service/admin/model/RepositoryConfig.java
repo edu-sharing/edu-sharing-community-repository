@@ -76,10 +76,16 @@ public class RepositoryConfig implements Serializable {
     @NoArgsConstructor
     public static class Frontpage implements Serializable{
         public enum Mode{
+            @JsonPropertyDescription("use nodes from a collection id")
             collection,
+            @JsonPropertyDescription("nodes ranked by ratings")
             rating,
+            @JsonPropertyDescription("nodes ranked by views (tracking db)")
             views,
-            downloads
+            @JsonPropertyDescription("nodes ranked by downloads (tracking db)")
+            downloads,
+            @JsonPropertyDescription("random order, no statistic based sorting")
+            random
         };
 
         private int totalCount=50;
@@ -90,6 +96,9 @@ public class RepositoryConfig implements Serializable {
         private List<Query> queries;
         // the id of the collection, if mode == collection
         private String collection;
+        // an elastic dsl query which is always applied (no condition), ignored if mode == collection
+        @Schema(description = "Elasticsearch DSL query which is always applied (without any condition). Not supported for mode collection")
+        private String globalQuery;
 
         @Data
         public static class Query {

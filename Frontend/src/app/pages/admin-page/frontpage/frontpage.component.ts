@@ -47,7 +47,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
     @Output() openNode = new EventEmitter<NodeClickEvent<NodeEntriesDataType>>();
     previewLoading = true;
     config: any;
-    modes = ['collection', 'rating', 'views', 'downloads'];
+    modes = ['collection', 'rating', 'views', 'downloads', 'random'];
     conditionTypes = ['TOOLPERMISSION'];
     form: UntypedFormGroup;
     previewNodesDataSource = new NodeDataSource();
@@ -55,7 +55,12 @@ export class AdminFrontpageComponent implements AfterViewInit {
     previewError: string;
     collectionName = '';
     chooseCollection = false;
-    codeOptions = { minimap: { enabled: false }, language: 'json' };
+    codeOptions = {
+        minimap: { enabled: false },
+        language: 'json',
+        autoIndent: true,
+        automaticLayout: true,
+    };
     toolpermissions: any;
 
     constructor() {
@@ -77,11 +82,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
             },
             { validator: [ValidateForm] },
         );
-        this.form.valueChanges.subscribe((values) => {
-            values.timespanAll
-                ? this.form.get('timespan').disable({ emitEvent: false })
-                : this.form.get('timespan').enable({ emitEvent: false });
-        });
+        this.form.valueChanges.subscribe(() => this.updateFieldStates());
         this.mdsService.getMetadataSet({}).subscribe((set) => {
             this.previewColumns = this.mdsHelperService.getColumns(set, 'search');
         });
@@ -95,9 +96,33 @@ export class AdminFrontpageComponent implements AfterViewInit {
         void this.nodeEntries.initOptionsGenerator({});
     }
 
+    onModeChange() {
+        this.updateFieldStates();
+    }
+
+    /**
+     * timespan is only relevant for the statistic based modes and totalCount is redundant in random
+     * mode (elastic already shuffles the whole pool), so both get disabled - and therefore excluded
+     * from the form validation - where they don't apply
+     */
+    private updateFieldStates() {
+        const isRandom = this.config?.frontpage?.mode === 'random';
+        this.setEnabled('timespan', !this.form.getRawValue().timespanAll && !isRandom);
+        this.setEnabled('totalCount', !isRandom);
+    }
+
+    private setEnabled(control: string, enabled: boolean) {
+        if (enabled) {
+            this.form.get(control).enable({ emitEvent: false });
+        } else {
+            this.form.get(control).disable({ emitEvent: false });
+        }
+    }
+
     save() {
-        for (const key of Object.keys(this.form.value)) {
-            this.config.frontpage[key] = this.form.value[key];
+        const values = this.form.getRawValue();
+        for (const key of Object.keys(values)) {
+            this.config.frontpage[key] = values[key];
         }
         this.toast.showProgressSpinner();
         this.adminService.updateRepositoryConfig(this.config).subscribe(() => {
@@ -109,7 +134,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
     private async update() {
         try {
             this.config = await this.adminService.getRepositoryConfig().toPromise();
-            const values = this.form.value;
+            const values = this.form.getRawValue();
             for (const key of Object.keys(values)) {
                 values[key] = this.config.frontpage[key];
             }
@@ -118,6 +143,7 @@ export class AdminFrontpageComponent implements AfterViewInit {
                 values.timespan = this.form.get('timespan').value;
             }
             this.form.setValue(values);
+            this.updateFieldStates();
             this.toast.closeProgressSpinner();
             if (this.config.frontpage.collection) {
                 this.collectionService

@@ -862,7 +862,8 @@
         "collection": "Collection",
         "rating": "Best rated elements",
         "views": "Most frequently accessed elements",
-        "downloads": "Most frequently downloaded items"
+        "downloads": "Most frequently downloaded items",
+        "random": "Random elements"
       },
       "COLLECTION_LABEL": "Selected collection",
       "COLLECTION_HINT": "Select the collection whose materials you want to display on the home page",
@@ -885,11 +886,13 @@
       "DISPLAY_COUNT_HINT": "Number of elements to be displayed when opening the start page",
       "TOTAL_COUNT_OUT_OF_RANGE": "The total number of elements must be >= the displayed elements",
       "PREVIEW": "Preview of the elements",
-      "PREVIEW_HINT": "Note: The preview shown here has the following limitations:<ul><li>Adjustments just made must be saved first</li><li>All materials are displayed, regardless of the visibility of a user</li><li>The elements of the start page are updated depending on a cache (usually at night)</li></ul>",
+      "PREVIEW_HINT": "Note: The preview shown here has the following limitations:<ul><li>Adjustments just made must be saved first</li><li>All materials are displayed, regardless of the visibility of a user</li></ul>",
       "PREVIEW_ERROR": {
         "ELASTICSEARCH": "The connection to Elasticsearch has failed",
         "UNKNOWN": "An unknown error occurred when retrieving the contents for the start page"
       },
+      "GLOBAL_QUERY_LABEL": "Global query",
+      "GLOBAL_QUERY_HINT": "A query which is always linked as an \"AND\" condition, regardless of any conditions. Must conform to the Elasticsearch query language (DSL)",
       "CUSTOM_QUERY_LABEL": "Additional Query",
       "CUSTOM_QUERY_HINT": "A query that is additionally displayed as \"AND\" condition is linked. Can be arbitrarily further nested and must conform to the Elasticsearch query language (DSL)",
       "CUSTOM_QUERY_HINT_HELP": "Open documentation",
@@ -903,7 +906,8 @@
       "CONDITION_TYPE": {
         "TOOLPERMISSION": "Toolpermission"
       },
-      "TOTAL_COUNT_LARGER_HINT": "If total number of elements > number of displayed elements, the selected number of elements to be displayed is always randomly chosen from this pool."
+      "TOTAL_COUNT_LARGER_HINT": "If total number of elements > number of displayed elements, the selected number of elements to be displayed is always randomly chosen from this pool.",
+      "RANDOM_HINT": "In mode \"Random elements\" the displayed elements are picked randomly from all matching elements on every request."
     },
     "LTI": {
       "HEADER": "LTI platform registration",
