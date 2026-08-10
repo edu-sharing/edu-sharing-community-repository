@@ -15,6 +15,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.*;
 import org.alfresco.service.namespace.QName;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Equator;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.service.EduSharingCustomPermissionService;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -36,7 +38,6 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.notification.NotificationServiceFactory;
 import org.edu_sharing.service.permission.events.AddedPermissionsEvent;
 import org.edu_sharing.service.permission.events.RemovedPermissionEvent;
-import org.edu_sharing.service.share.*;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
@@ -272,8 +273,38 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
         }
     }
 
+    /**
+     * Equates ACEs by authority, permission and access status only.
+     * <p>
+     * AccessPermissionImpl (what {@link PermissionService#getAllSetPermissions(NodeRef)} returns) also
+     * compares the position
+     * <p>
+     * The position cannot be trusted to describe the node's current state: it is read
+     * verbatim from the stored ACL member row, while "does this node inherit" is a separate flag on the
+     * ACL itself ({@code AbstractPermissionsDaoComponentImpl.createSimpleNodePermissionEntry} passes the
+     * two independently, and getAllSetPermissions keeps only the position). Nodes can therefore report
+     * ACEs with position &gt; 0 although inheritance is already disabled - the materialized ancestor ACEs
+     * are only truncated by {@code AclDAOImpl.disableInheritanceImpl}, which bails out when the flag is
+     * already {@code false}, never runs for {@code ACLType.OLD}, and is deferred to {@code FixedAclUpdater}
+     * for large subtrees. So position is not a reliable discriminator here in either direction, and
+     * comparing without it is the only stable option.
+     */
+    private static final Equator<AccessPermission> COMPARE_ACCESS_PERMISSION_IGNORE_POSITION = new Equator<>() {
+        @Override
+        public boolean equate(AccessPermission o1, AccessPermission o2) {
+            return Objects.equals(o1.getAuthority(), o2.getAuthority())
+                    && Objects.equals(o1.getPermission(), o2.getPermission())
+                    && o1.getAccessStatus() == o2.getAccessStatus();
+        }
+
+        @Override
+        public int hash(AccessPermission o) {
+            return Objects.hash(o.getAuthority(), o.getPermission(), o.getAccessStatus());
+        }
+    };
+
     private void removePermissionInternal(NodeRef nodeRef, String authority, String permission) {
-        Set<AccessPermission> removedPermissions = permissionService.getAllSetPermissions(nodeRef);
+        Set<AccessPermission> beforeChange = permissionService.getAllSetPermissions(nodeRef);
 
         permissionService.deletePermission(
                 nodeRef,
@@ -281,7 +312,7 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
                 permission);
 
         Set<AccessPermission> afterChange = permissionService.getAllSetPermissions(nodeRef);
-        removedPermissions.removeAll(afterChange);
+        Set<AccessPermission> removedPermissions = new HashSet<>(CollectionUtils.removeAll(beforeChange, afterChange, COMPARE_ACCESS_PERMISSION_IGNORE_POSITION));
 
         if(!removedPermissions.isEmpty()) {
             String user = AuthenticationUtil.getRunAsUser();
@@ -818,11 +849,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             String user = AuthenticationUtil.getRunAsUser();
             Set<AccessPermission> afterChange = permissionService.getAllSetPermissions(nodeRef);
 
-            Set<AccessPermission> addedPermissions = new HashSet<>(afterChange);
-            addedPermissions.removeAll(beforeChange);
-
-            Set<AccessPermission> removedPermissions = new HashSet<>(beforeChange);
-            removedPermissions.removeAll(afterChange);
+            Set<AccessPermission> addedPermissions = new HashSet<>(CollectionUtils.removeAll(afterChange, beforeChange, COMPARE_ACCESS_PERMISSION_IGNORE_POSITION));
+            Set<AccessPermission> removedPermissions = new HashSet<>(CollectionUtils.removeAll(beforeChange, afterChange, COMPARE_ACCESS_PERMISSION_IGNORE_POSITION));
 
             if(!addedPermissions.isEmpty()){
                 applicationEventPublisher.publishEvent(new AddedPermissionsEvent(nodeId, user, addedPermissions));
@@ -848,11 +876,8 @@ public class PermissionServiceImpl implements org.edu_sharing.service.permission
             String user = AuthenticationUtil.getRunAsUser();
             Set<AccessPermission> afterChange = permissionService.getAllSetPermissions(nodeRef);
 
-            Set<AccessPermission> addedPermissions = new HashSet<>(afterChange);
-            addedPermissions.removeAll(beforeChange);
-
-            Set<AccessPermission> removedPermissions = new HashSet<>(beforeChange);
-            removedPermissions.removeAll(afterChange);
+            Set<AccessPermission> addedPermissions = new HashSet<>(CollectionUtils.removeAll(afterChange, beforeChange, COMPARE_ACCESS_PERMISSION_IGNORE_POSITION));
+            Set<AccessPermission> removedPermissions = new HashSet<>(CollectionUtils.removeAll(beforeChange, afterChange, COMPARE_ACCESS_PERMISSION_IGNORE_POSITION));
 
             if(!addedPermissions.isEmpty()){
                 applicationEventPublisher.publishEvent(new AddedPermissionsEvent(nodeId, user, addedPermissions));
