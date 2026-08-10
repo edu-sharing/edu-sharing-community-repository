@@ -7,6 +7,7 @@ import {
     ViewChild,
     viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -88,6 +89,15 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
             this.actionbarAddToCollection(),
             this.actionbarPrimaryBanner(),
         ].filter((bar): bar is ActionbarComponent => !!bar),
+    );
+
+    private readonly searchString = toSignal(this.searchPage.searchString.observeValue());
+    /**
+     * i18n key for the results heading. While a search word is active, a separate key is used so
+     * deployments can customize that state independently (in Core both keys hold the same string).
+     */
+    readonly materialsTitle = computed(() =>
+        this.searchString() ? 'SEARCH.MATERIALS_NGSEARCHWORD' : 'SEARCH.MATERIALS',
     );
 
     readonly resultsDataSource = this.results.resultsDataSource;
