@@ -267,9 +267,10 @@
     }
 
     <!-- UPLOAD TAB -->
-    @case (TabType.UPLOAD) { @if (!inboxNode()) {
+    <!-- the inbox is only needed as the upload target when we choose the parent ourselves -->
+    @case (TabType.UPLOAD) { @if (chooseParent() && !inboxNode()) {
     <es-spinner></es-spinner>
-    } @if (inboxNode()) {
+    } @else {
     <es-add-material-dialog
       #material
       [dialogData]="{

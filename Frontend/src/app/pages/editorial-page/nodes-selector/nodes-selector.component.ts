@@ -59,7 +59,7 @@ import {
     TreeConfig,
 } from 'ngx-edu-sharing-ui';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, firstValueFrom, map, of, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, map, of, shareReplay, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     CollectionReference,
@@ -484,7 +484,12 @@ export class NodesSelectorComponent implements OnInit {
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
-    inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
+    // only required when this component picks the upload target itself (`chooseParent`) or when a
+    // node is created via a connector — the view must not block on it otherwise
+    private readonly inboxNode$ = this.nodeHelperService
+        .getDefaultInboxFolder()
+        .pipe(shareReplay(1));
+    inboxNode = toSignal(this.inboxNode$, { initialValue: null });
     connectorOptions: Signal<OptionItem[]> = toSignal(
         toObservable(this.option).pipe(
             switchMap((option) =>
@@ -1469,8 +1474,11 @@ export class NodesSelectorComponent implements OnInit {
         event: AddWithConnectorDialogResult,
     ): Promise<void> {
         const props = this.nodeHelperService.propertiesFromConnector(event);
+        // the connector node is always created in the inbox — resolve it now, since the view may
+        // not have needed (and thus not awaited) it
+        const inboxNode = this.inboxNode() ?? (await firstValueFrom(this.inboxNode$));
         this.restNodeService
-            .createNode(this.inboxNode().ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
+            .createNode(inboxNode.ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
             .subscribe(
                 (data) => {
                     void this.uiService.editConnector(data.node, {
