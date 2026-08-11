@@ -27,6 +27,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     /** public autocomplete - no toolpermission required */
     @Override
+    @Permission(requiresUser = true)
     public List<ContributorEntry> search(String searchWord, SearchService.ContributorKind kind, int limit) {
         return contributorMapper.search(StringUtils.trimToNull(searchWord), kind, limit <= 0 ? 50 : limit);
     }
@@ -81,6 +82,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     /** ungated - no toolpermission (see {@link ContributorService#registerVCardsIfAbsent}) */
     @Override
+    @Permission(requiresUser = true)
     public List<ContributorEntry> registerVCardsIfAbsent(Collection<String> vcards, String creator) {
         List<ContributorEntry> created = new ArrayList<>();
         Set<String> seenKeys = new HashSet<>();
@@ -153,16 +155,16 @@ public class ContributorServiceImpl implements ContributorService {
             throw new IllegalArgumentException("contributor must not be null");
         }
         if (!hasAnyId(entry)) {
-            throw new IllegalArgumentException("a contributor must carry at least one id (ORCID, GND, ROR, Wikidata or email)");
+            throw new IllegalArgumentException("a contributor must carry at least one id (ORCID, GND, ROR or Wikidata) - email alone is not sufficient");
         }
     }
 
+    /** email alone must not qualify - only ORCID/GND/ROR/Wikidata make an entry a manageable contributor */
     private boolean hasAnyId(ContributorEntry entry) {
         return StringUtils.isNotBlank(entry.getOrcid())
                 || StringUtils.isNotBlank(entry.getGnduri())
                 || StringUtils.isNotBlank(entry.getRor())
-                || StringUtils.isNotBlank(entry.getWikidata())
-                || StringUtils.isNotBlank(entry.getEmail());
+                || StringUtils.isNotBlank(entry.getWikidata());
     }
 
     private SearchService.ContributorKind deriveKind(ContributorEntry entry) {

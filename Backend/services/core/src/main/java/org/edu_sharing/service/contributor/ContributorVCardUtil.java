@@ -39,8 +39,9 @@ public class ContributorVCardUtil {
         String wikidata = trimToNull(data.get(CCConstants.VCARD_T_X_WIKIDATA));
         String email = trimToNull(data.get(CCConstants.VCARD_EMAIL));
 
-        // an entry is only part of a person/organization record if it carries at least one id
-        if (orcid == null && gnduri == null && ror == null && wikidata == null && email == null) {
+        // an entry is only part of a person/organization record if it carries at least one persistent id -
+        // email alone must not trigger implicit creation of a registry entry
+        if (orcid == null && gnduri == null && ror == null && wikidata == null) {
             return null;
         }
 
