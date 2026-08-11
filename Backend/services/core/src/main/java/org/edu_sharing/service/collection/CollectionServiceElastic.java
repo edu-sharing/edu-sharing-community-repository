@@ -463,6 +463,8 @@ public class CollectionServiceElastic implements CollectionService {
                 client.addAspect(collectionId, CCConstants.CCM_ASPECT_POSITIONABLE);
 
                 client.setOwner(collectionId, fcurrentUsername);
+                // collections never inherit the permissions of their parent initially, it can later be set via setPermissions from Frontend
+                eduPermissionService.setPermissionInherit(collectionId, false);
                 collection.setNodeId(collectionId);
                 return collection;
             });
