@@ -196,6 +196,27 @@ public class AssignmentApi {
         return Response.ok().build();
     }
 
+    @DELETE
+    @Path("/{assignmentId}/permanent")
+    @Operation(summary = "Permanently delete an assignment", description = "Permanently deletes a finished or canceled assignment and all its related documents and submissions, " +
+            "without moving it to the recycle bin. Only allowed for the assignment's creator.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200),
+                    @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
+    public Response deleteAssignmentPermanently(@PathParam("assignmentId") String assignmentId) {
+        AssignmentDao assignment = assignmentDaoFactory.assignmentDaoByNodeId(assignmentId);
+        assignment.deletePermanently();
+        return Response.ok().build();
+    }
+
     /***********************
      * Assignment File API *
      ***********************/
