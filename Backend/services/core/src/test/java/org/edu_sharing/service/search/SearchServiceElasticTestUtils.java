@@ -1,5 +1,6 @@
 package org.edu_sharing.service.search;
 
+import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.json.JsonpUtils;
@@ -28,6 +29,13 @@ public class SearchServiceElasticTestUtils
     }
 
     public static void assertQuery(String expected, BoolQuery.Builder actual) {
+        assertEquals(indentJson(expected), indentJson(actual));
+    }
+    public static String indentJson(SortOptions sort) {
+        return indentJson(JsonpUtils.toJsonString(sort, mapper));
+    }
+
+    public static void assertSort(String expected, SortOptions actual) {
         assertEquals(indentJson(expected), indentJson(actual));
     }
     public static void assertFacet(String expected, Aggregation agg) {

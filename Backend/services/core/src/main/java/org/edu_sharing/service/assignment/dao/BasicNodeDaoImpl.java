@@ -60,6 +60,16 @@ abstract class BasicNodeDaoImpl implements BasicNodeDao {
         nodeService.removeNode(nodeId, null, true);
     }
 
+    /**
+     * Permanently removes the node, bypassing the recycle bin as well as the ACL checks that
+     * {@link org.edu_sharing.service.nodeservice.NodeService#removeNode(String, String, boolean)}
+     * enforces recursively on descendant nodes.
+     */
+    protected void doDeletePermanently() {
+        log.debug("Permanently deleting {} {}", this.getClass().getSimpleName(), nodeId);
+        nodeService.removeNodeForce(StoreRef.PROTOCOL_WORKSPACE, StoreRef.STORE_REF_WORKSPACE_SPACESSTORE.getIdentifier(), nodeId, false);
+    }
+
     @NotNull
     protected <T> LazyProvider<T> registerLazyProvider(@NotNull LazyProvider<T> lazyProvider) {
         Objects.requireNonNull(lazyProvider, "lazyProviders cannot be null");

@@ -267,9 +267,10 @@
     }
 
     <!-- UPLOAD TAB -->
-    @case (TabType.UPLOAD) { @if (!inboxNode()) {
+    <!-- the inbox is only needed as the upload target when we choose the parent ourselves -->
+    @case (TabType.UPLOAD) { @if (chooseParent() && !inboxNode()) {
     <es-spinner></es-spinner>
-    } @if (inboxNode()) {
+    } @else {
     <es-add-material-dialog
       #material
       [dialogData]="{
@@ -281,12 +282,12 @@
       }"
       (dialogResult)="uploadMaterialDialogResult($event)"
     ></es-add-material-dialog>
-    @if ( !material.selectedFiles()?.length && connectorOptions().length &&
+    @if ( !material.selectedFiles()?.length && createOptions().length &&
     option()?.optionConfig?.allowCreate !== false ) {
     <div class="upload-create-row">
       <es-dropdown
         #connectorDropdown
-        [options]="connectorOptions()"
+        [options]="createOptions()"
         [showDisabled]="false"
         position="right"
       ></es-dropdown>
@@ -422,4 +423,14 @@
   </div>
   }
 </div>
+}
+
+<!-- LTI TOOL CREATE DIALOG -->
+@if (createToolType(); as tool) {
+<es-create-ltitool
+  [tool]="tool"
+  [parent]="uploadParent()"
+  (cancel)="cancelLtiTool($event)"
+  (create)="createLtiTool($event)"
+></es-create-ltitool>
 }

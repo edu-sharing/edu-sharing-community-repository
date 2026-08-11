@@ -35,10 +35,12 @@ import {
     SearchResults,
     SearchService,
     SuggestionsV1Service,
+    Tool,
 } from 'ngx-edu-sharing-api';
 import {
     CanDrop,
     ColumnType,
+    CustomOptions,
     DragData,
     DropSource,
     FetchEvent,
@@ -59,7 +61,7 @@ import {
     TreeConfig,
 } from 'ngx-edu-sharing-ui';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, firstValueFrom, map, of, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, map, of, shareReplay, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     CollectionReference,
@@ -70,6 +72,11 @@ import { RestCollectionService } from '../../../core-module/rest/services/rest-c
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { RestNodeService } from '../../../core-module/rest/services/rest-node.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
+import {
+    LtiToolDialogResult,
+    LtiToolOptionsService,
+} from '../../../services/lti-tool-options.service';
+import { OptionsHelperService } from '../../../services/options-helper.service';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import {
@@ -135,7 +142,7 @@ export type NodesSelectorConfig = {
      */
     applyLabel?: string;
     /**
-     * whether to show the connector "Create" button in the upload tab (default: true)
+     * whether to show the "Create" button in the upload tab (default: true)
      */
     allowCreate?: boolean;
     /**
@@ -143,6 +150,12 @@ export type NodesSelectorConfig = {
      * If unset or empty, all available connectors are offered.
      */
     allowedConnectorIds?: string[];
+    /**
+     * custom options to merge into the "Create" dropdown, same semantics as the main nav's
+     * `customCreateOptions`. Note that `useDefaultOptions: false` drops the connector and LTI tool
+     * options.
+     */
+    customCreateOptions?: CustomOptions;
     /**
      * automatically close the sidebar after nodes are emitted
      */
@@ -201,6 +214,7 @@ export class NodesSelectorComponent implements OnInit {
     private authenticationService = inject(AuthenticationService);
     private aboutService = inject(AboutService);
     private connectorOptionsService = inject(ConnectorOptionsService);
+    private ltiToolOptionsService = inject(LtiToolOptionsService);
     private dialogs = inject(DialogsService);
     private searchService = inject(SearchService);
     private toast = inject(Toast);
@@ -484,7 +498,12 @@ export class NodesSelectorComponent implements OnInit {
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
     // upload tab
-    inboxNode = toSignal(this.nodeHelperService.getDefaultInboxFolder(), { initialValue: null });
+    // only required when this component picks the upload target itself (`chooseParent`) or when a
+    // node is created via a connector — the view must not block on it otherwise
+    private readonly inboxNode$ = this.nodeHelperService
+        .getDefaultInboxFolder()
+        .pipe(shareReplay(1));
+    inboxNode = toSignal(this.inboxNode$, { initialValue: null });
     connectorOptions: Signal<OptionItem[]> = toSignal(
         toObservable(this.option).pipe(
             switchMap((option) =>
@@ -496,6 +515,21 @@ export class NodesSelectorComponent implements OnInit {
         ),
         { initialValue: [] },
     );
+    ltiToolOptions: Signal<OptionItem[]> = toSignal(
+        this.ltiToolOptionsService.buildOptions((tool) => this.createToolType.set(tool)),
+        { initialValue: [] },
+    );
+    /** the connector + LTI tool options of the "Create" dropdown, merged with the custom ones */
+    createOptions: Signal<OptionItem[]> = computed(() =>
+        OptionsHelperService.applyExternalOptions(
+            [...this.connectorOptions(), ...this.ltiToolOptions()],
+            this.option()?.optionConfig?.customCreateOptions,
+        ),
+    );
+    /** the LTI tool the create dialog is currently open for */
+    createToolType: WritableSignal<Tool | null> = signal(null);
+    /** the folder a newly created element is placed in */
+    uploadParent = computed(() => (this.chooseParent() ? this.inboxNode() : this.parent()));
 
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
@@ -1469,8 +1503,11 @@ export class NodesSelectorComponent implements OnInit {
         event: AddWithConnectorDialogResult,
     ): Promise<void> {
         const props = this.nodeHelperService.propertiesFromConnector(event);
+        // the connector node is always created in the inbox — resolve it now, since the view may
+        // not have needed (and thus not awaited) it
+        const inboxNode = this.inboxNode() ?? (await firstValueFrom(this.inboxNode$));
         this.restNodeService
-            .createNode(this.inboxNode().ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
+            .createNode(inboxNode.ref.id, RestConstants.CCM_TYPE_IO, [], props, false)
             .subscribe(
                 (data) => {
                     void this.uiService.editConnector(data.node, {
@@ -1492,6 +1529,29 @@ export class NodesSelectorComponent implements OnInit {
                     this.nodeHelperService.handleNodeError(event.name, error);
                 },
             );
+    }
+
+    /**
+     * Creates the node(s) for the confirmed LTI tool dialog and emits them like a connector
+     * creation.
+     */
+    async createLtiTool(event: LtiToolDialogResult): Promise<void> {
+        const tool = this.createToolType();
+        const nodes = await this.ltiToolOptionsService.createFromDialogResult(
+            tool,
+            event,
+            // resolved lazily: the popup window must be opened before the inbox lookup is awaited
+            () => this.uploadParent() ?? firstValueFrom(this.inboxNode$),
+        );
+        this.createToolType.set(null);
+        if (nodes.length) {
+            this.emitNodes({ nodes, parent: this.parent(), created: true });
+        }
+    }
+
+    cancelLtiTool(event: LtiToolDialogResult): void {
+        this.ltiToolOptionsService.cancelDialogResult(event);
+        this.createToolType.set(null);
     }
 
     protected readonly DEFAULT = DEFAULT;

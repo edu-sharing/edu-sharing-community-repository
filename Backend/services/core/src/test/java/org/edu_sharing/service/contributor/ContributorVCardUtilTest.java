@@ -39,7 +39,7 @@ class ContributorVCardUtilTest {
 
     @Test
     void vcardWithoutAnyIdIsNotManageable() {
-        // no persistent id and no email -> not part of the registry
+        // no persistent id -> not part of the registry
         ContributorEntry source = ContributorEntry.builder()
                 .givenname("Jane")
                 .surname("Doe")
@@ -49,15 +49,14 @@ class ContributorVCardUtilTest {
     }
 
     @Test
-    void emailAloneIsEnoughToBeManageable() {
+    void emailAloneIsNotEnoughToBeManageable() {
+        // email must not trigger implicit creation of a registry entry - only ORCID/GND/ROR/Wikidata do
         ContributorEntry source = ContributorEntry.builder()
                 .givenname("Jane")
                 .surname("Doe")
                 .email("jane@example.org")
                 .build();
-        ContributorEntry parsed = ContributorVCardUtil.fromVCardString(ContributorVCardUtil.toVCardString(source));
-        assertNotNull(parsed);
-        assertEquals("jane@example.org", parsed.getEmail());
+        assertNull(ContributorVCardUtil.fromVCardString(ContributorVCardUtil.toVCardString(source)));
     }
 
     @Test
@@ -207,12 +206,10 @@ class ContributorVCardUtilTest {
     }
 
     @Test
-    void toEntriesReturnsSinglePersonForEmailOnly() {
+    void toEntriesReturnsEmptyForEmailOnly() {
         String vcard = ContributorVCardUtil.toVCardString(ContributorEntry.builder()
                 .givenname("Jane").email("jane@example.org").build());
-        List<ContributorEntry> entries = ContributorVCardUtil.toEntries(vcard);
-        assertEquals(1, entries.size());
-        assertEquals(SearchService.ContributorKind.PERSON, entries.get(0).getKind());
+        assertTrue(ContributorVCardUtil.toEntries(vcard).isEmpty());
     }
 
     @Test

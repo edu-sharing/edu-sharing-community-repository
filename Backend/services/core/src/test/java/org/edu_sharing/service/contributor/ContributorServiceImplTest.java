@@ -121,6 +121,13 @@ class ContributorServiceImplTest {
     }
 
     @Test
+    void createRejectsEntryWithOnlyEmail() {
+        // email alone must not qualify - only ORCID/GND/ROR/Wikidata make an entry manageable
+        ContributorEntry entry = ContributorEntry.builder().givenname("Jane").surname("Doe").email("jane@example.org").build();
+        assertThrows(IllegalArgumentException.class, () -> underTest.create(entry));
+    }
+
+    @Test
     void createDerivesOrganizationKindAndStampsTimestampsAndVcard() {
         ContributorEntry entry = ContributorEntry.builder()
                 .org("Example Org").ror("https://ror.org/1").wikidata("Q1").build();
@@ -199,6 +206,19 @@ class ContributorServiceImplTest {
     void registerVCardsIfAbsentSkipsVCardsWithoutPersistentId() {
         // vcard carries only a name, no X- id -> not manageable
         List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard("Doe", null)), "editor");
+
+        assertTrue(created.isEmpty());
+        verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());
+        verify(contributorMapper, never()).create(any());
+    }
+
+    @Test
+    void registerVCardsIfAbsentSkipsVCardsWithOnlyEmail() {
+        // email alone must not trigger implicit registration - only ORCID/GND/ROR/Wikidata do
+        String vcard = ContributorVCardUtil.toVCardString(
+                ContributorEntry.builder().surname("Doe").email("doe@example.org").build());
+
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard), "editor");
 
         assertTrue(created.isEmpty());
         verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());

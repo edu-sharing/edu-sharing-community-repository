@@ -77,7 +77,7 @@
     <ng-template #title>
       <div class="title-container title-container{{ getContainerClass() }}">
         <h2 class="mat-heading-2">
-          {{ 'SEARCH.MATERIALS' | translate }}
+          {{ materialsTitle() | translate }}
           @if (!resultsDataSource.isLoading) { @if (!resultsDataSource.isEmpty()) {
           <span class="count count{{ getContainerClass() }}">
             &nbsp;({{ resultsDataSource.getTotal() }})

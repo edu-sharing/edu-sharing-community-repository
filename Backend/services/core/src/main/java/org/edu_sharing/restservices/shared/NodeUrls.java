@@ -69,8 +69,23 @@ public class NodeUrls {
                 .filter(connector -> supportsNode(connector, properties, nodeType))
                 .findAny()
                 .map(connector -> SimpleConnectorAttributes.replaceForUrl(
-                        Map.of("nodeId", new String[]{nodeId}), connector.getRenderUrl()))
+                        connectorAttributes(nodeId, connector.getRenderUrl()), connector.getRenderUrl()))
                 .orElse(null);
+    }
+
+    /**
+     * the attributes supported in a renderUrl. The original node id (collection references) is only
+     * resolved if the url actually uses it, since it requires an additional node lookup
+     */
+    private static Map<String, String[]> connectorAttributes(String nodeId, String renderUrl) {
+        if(!renderUrl.contains("{{" + SimpleConnectorAttributes.ATTRIBUTE_ORIGINAL_NODE_ID + "}}")) {
+            return Map.of(SimpleConnectorAttributes.ATTRIBUTE_NODE_ID, new String[]{nodeId});
+        }
+        return Map.of(
+                SimpleConnectorAttributes.ATTRIBUTE_NODE_ID, new String[]{nodeId},
+                SimpleConnectorAttributes.ATTRIBUTE_ORIGINAL_NODE_ID,
+                        new String[]{SimpleConnectorAttributes.resolveReferenceOriginalNodeId(nodeId)}
+        );
     }
 
     /**

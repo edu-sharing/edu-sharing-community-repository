@@ -98,10 +98,9 @@ export function createFileOperationsOptions({
     pasteIntoCollection.permissions = [RestConstants.ACCESS_WRITE];
     pasteIntoCollection.permissionsMode = HideMode.Hide;
     pasteIntoCollection.scopes = [Scope.CollectionsCollection];
-    pasteIntoCollection.showAsAction = true;
-    // lowest group/priority to be the first entry of the collection options
-    pasteIntoCollection.group = DefaultGroups.Primary;
-    pasteIntoCollection.priority = 5;
+    // listed directly below the copy option
+    pasteIntoCollection.group = DefaultGroups.FileOperations;
+    pasteIntoCollection.priority = 25;
 
     const pasteNodes = new OptionItem('OPTIONS.PASTE', 'content_paste', (node) =>
         service.pasteNode(components, data),

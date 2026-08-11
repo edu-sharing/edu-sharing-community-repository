@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Error {{statusCode}}</title>
-        <style>
+        <style nonce="{{nonce}}">
         div.es-rendering-error {
             font-family:arial,sans-serif;
             margin:30px;
@@ -37,6 +37,9 @@
             left:10px;
             top:calc(50% - 12px);
         }
+        .es-rendering-warning path {
+            fill-rule:nonzero;
+        }
         </style>
     </head>
 <body>
@@ -47,7 +50,7 @@
          data-error-exception="{{exception}}">
         <div class="es-rendering-message">
             <svg class="es-rendering-warning">
-                <path id="warning" d="M1,21l22,0l-11,-19l-11,19Zm3.47,-2l7.53,-13.01l7.53,13.01l-15.06,0Zm6.53,-3l2,0l0,2l-2,0l0,-2Zm0,-6l2,0l0,4l-2,0l0,-4Z" style="fill-rule:nonzero;"/>
+                <path id="warning" d="M1,21l22,0l-11,-19l-11,19Zm3.47,-2l7.53,-13.01l7.53,13.01l-15.06,0Zm6.53,-3l2,0l0,2l-2,0l0,-2Zm0,-6l2,0l0,4l-2,0l0,-4Z"/>
             </svg>
             <span>{{message}}</span></div>
     </div>

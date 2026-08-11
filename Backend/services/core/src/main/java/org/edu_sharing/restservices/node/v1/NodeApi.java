@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -669,7 +670,8 @@ public class NodeApi {
             return Response.status(Response.Status.OK).entity(response).build();
 
         } catch (Throwable t) {
-            if (t instanceof DAOSecurityException && ignoreAccessError != null && ignoreAccessError) {
+            if ((t instanceof DAOSecurityException || t instanceof AccessDeniedException)
+                    && ignoreAccessError != null && ignoreAccessError) {
                 response.setScope("SHARED_FILES");
                 response.setNodes(parents);
                 return Response.status(Response.Status.OK).entity(response).build();

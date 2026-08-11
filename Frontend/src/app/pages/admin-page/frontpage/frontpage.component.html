@@ -26,6 +26,7 @@
             id="mode"
             [(ngModel)]="config.frontpage.mode"
             [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="onModeChange()"
           >
             @for (mode of modes; track mode) {
             <mat-option [value]="mode">{{ 'ADMIN.FRONTPAGE.MODE.' + mode | translate }}</mat-option>
@@ -48,7 +49,7 @@
           />
         </mat-form-field>
       </div>
-      } @if (config.frontpage.mode !== 'collection') {
+      } @if (config.frontpage.mode !== 'collection' && config.frontpage.mode !== 'random') {
       <div class="config-timespan">
         <mat-form-field>
           <mat-label
@@ -76,6 +77,7 @@
     } @if (config.frontpage.mode !== 'collection') {
     <div>
       <div class="group">
+        @if (config.frontpage.mode !== 'random') {
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LABEL' | translate }}</mat-label>
           <mat-hint>{{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_HINT' | translate }}</mat-hint>
@@ -92,6 +94,7 @@
           </mat-error>
           }
         </mat-form-field>
+        }
         <mat-form-field>
           <mat-label>{{ 'ADMIN.FRONTPAGE.DISPLAY_COUNT_LABEL' | translate }}</mat-label>
           <mat-hint>{{ 'ADMIN.FRONTPAGE.DISPLAY_COUNT_HINT' | translate }}</mat-hint>
@@ -105,11 +108,26 @@
         </mat-form-field>
       </div>
       <div class="group-info">
-        @if (form.get('totalCount').value > form.get('displayCount').value) {
+        @if (config.frontpage.mode === 'random') {
+        <es-info-message>
+          {{ 'ADMIN.FRONTPAGE.RANDOM_HINT' | translate }}
+        </es-info-message>
+        } @else if (form.get('totalCount').value > form.get('displayCount').value) {
         <es-info-message>
           {{ 'ADMIN.FRONTPAGE.TOTAL_COUNT_LARGER_HINT' | translate }}
         </es-info-message>
         }
+      </div>
+      <div class="group">
+        <div class="monaco-editor">
+          <mat-label>{{ 'ADMIN.FRONTPAGE.GLOBAL_QUERY_LABEL' | translate }}</mat-label>
+          <es-code-editor
+            [options]="codeOptions"
+            [(ngModel)]="config.frontpage.globalQuery"
+            [ngModelOptions]="{ standalone: true }"
+          ></es-code-editor>
+          <mat-hint>{{ 'ADMIN.FRONTPAGE.GLOBAL_QUERY_HINT' | translate }}</mat-hint>
+        </div>
       </div>
       @for (query of config.frontpage.queries; track query) {
       <div class="group queries">

@@ -37,9 +37,8 @@
       [disabled]="_publishDisabled"
       (change)="_setPublish($event)"
       class="collection-item"
-      title="{{ 'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate }}"
     >
-      <div class="toggle">
+      <div class="toggle" [matTooltip]="'WORKSPACE.SHARE.PUBLISHER_TOOLTIP' | translate">
         <i class="material-icons"> public </i>
         <span>
           {{ 'WORKSPACE.SHARE.PUBLISHER' | translate }}

@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
+import org.edu_sharing.repository.server.SecurityHeadersFilter;
 import org.edu_sharing.repository.server.tools.http.HttpException;
 import org.edu_sharing.repository.server.tools.I18nServer;
 
@@ -42,6 +43,8 @@ public class RenderingErrorServlet extends SpringHttpServlet {
             }
             File index = new File(Context.getGlobalContext().getRealPath("rendering-error.html"));
             String html = FileUtils.readFileToString(index);
+            String nonce = SecurityHeadersFilter.ngCspNonce.get();
+            html = html.replace("{{nonce}}", nonce == null ? "" : nonce);
             if(exception!=null) {
                 logger.warn("Rendering error", exception);
                 String exceptionName="";

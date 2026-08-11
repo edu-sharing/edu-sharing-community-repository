@@ -11,14 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import {
-    ConfigService,
-    ConnectorService,
-    LtiPlatformService,
-    Node,
-    Tool,
-    Tools,
-} from 'ngx-edu-sharing-api';
+import { ConnectorService, Node, Tool } from 'ngx-edu-sharing-api';
 import {
     Constrain,
     DateHelper,
@@ -67,6 +60,10 @@ import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
+import {
+    LtiToolDialogResult,
+    LtiToolOptionsService,
+} from '../../../services/lti-tool-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import {
@@ -88,14 +85,12 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private cardDialogService = inject(CardDialogService);
     private connector = inject(RestConnectorService);
     private connectorApi = inject(ConnectorService);
-    private configService = inject(ConfigService);
     private mainNavService = inject(MainNavService);
     private dialogs = inject(DialogsService);
     private event = inject(FrameEventsService);
     private uiService = inject(UIService);
     private iam = inject(RestIamService);
     private iamService = inject(RestIamService);
-    private ltiPlatformService = inject(LtiPlatformService);
     private nodeHelper = inject(NodeHelperService);
     private localEventsService = inject(LocalEventsService);
     private nodeService = inject(RestNodeService);
@@ -109,6 +104,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     private uploadDialog = inject(UploadDialogService);
     private editorialSidebarService = inject(EditorialSidebarService);
     private connectorOptionsService = inject(ConnectorOptionsService);
+    private ltiToolOptionsService = inject(LtiToolOptionsService);
     private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
 
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
@@ -147,10 +143,10 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     connectorList: Connector[];
     connectorOptions: OptionItem[] = [];
+    ltiToolOptions: OptionItem[] = [];
     fileIsOver = false;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
-    tools: Tools;
     createToolType: Tool = null;
 
     showPicker: boolean; // keep public - used by extensions
@@ -195,21 +191,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 this.mainNavConfig = config;
                 void this.updateOptions();
             });
-        this.configService
-            .observeEndpointAllowed('LTI')
-            .pipe(filter((allowed) => allowed))
-            .subscribe(() =>
-                this.ltiPlatformService.getTools().subscribe(
-                    (t) => {
-                        this.tools = t;
-                        void this.updateOptions();
-                    },
-                    (error) => {
-                        // ignore errors
-                        error.preventDefault();
-                    },
-                ),
-            );
+        this.ltiToolOptionsService
+            .buildOptions((tool) => void this.showCreateLtiTool(tool))
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((options) => {
+                this.ltiToolOptions = options;
+                void this.updateOptions();
+            });
     }
 
     ngOnInit(): void {
@@ -325,18 +313,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 this.options.push(camera);
             }
 
-            if (this.tools?.tools.length > 0) {
-                this.options = this.options.concat(
-                    this.tools.tools.map((tool, i) => {
-                        const option = new OptionItem(tool.name, 'edit', () =>
-                            this.showCreateLtiTool(tool),
-                        );
-                        option.elementType = [ElementType.NoneOrUnknown];
-                        option.group = DefaultGroups.CreateLtiTools;
-                        option.priority = i;
-                        return option;
-                    }),
-                );
+            if (this.ltiToolOptions?.length) {
+                this.options = this.options.concat(this.ltiToolOptions);
             }
         }
         if (this.mainNavConfig?.customCreateOptions) {
@@ -591,94 +569,17 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             );
     }
 
-    createLtiTool(event: any) {
-        if (this.createToolType.customContentOption) {
-            this.createLtiContentOptionNode(event.name);
-            return;
-        } else {
-            if (!event.nodes) {
-                return;
-            }
-            this.afterCreateLtiTool(event.nodes, null, event.name);
-        }
+    async createLtiTool(event: LtiToolDialogResult) {
+        const tool = this.createToolType;
+        const nodes = await this.ltiToolOptionsService.createFromDialogResult(tool, event, () =>
+            this.getParent(),
+        );
+        this.createToolType = null;
+        nodes.forEach((node) => this.createElement.emit([node]));
     }
 
-    createLtiContentOptionNode(name: string) {
-        // @TODO cordova handling
-        //fix popup problem
-        let w = window.open('');
-        if (name == undefined) {
-            return;
-        }
-        const properties = RestHelper.createNameProperty(name);
-        void this.getParent().then((parent) => {
-            this.nodeService
-                .createNode(parent.ref.id, RestConstants.CCM_TYPE_IO, [], properties)
-                .subscribe(
-                    (data) => {
-                        this.ltiPlatformService
-                            .convertToLtiResourceLink(data.node.ref.id, this.createToolType.appId)
-                            .subscribe(
-                                (result: any) => {
-                                    let nodesArr: Node[] = [];
-                                    nodesArr.push(data.node);
-                                    this.afterCreateLtiTool(nodesArr, w, name);
-                                },
-                                (error: any) => {
-                                    this.nodeHelper.handleNodeError(name, error);
-                                    w.close();
-                                },
-                            );
-                    },
-                    (error: any) => {
-                        this.nodeHelper.handleNodeError(name, error);
-                        w.close();
-                    },
-                );
-        });
-    }
-
-    afterCreateLtiTool(nodes: Node[], w: Window, name: string) {
-        if (nodes) {
-            nodes.forEach((n) => {
-                if (this.createToolType.customContentOption == true) {
-                    UIHelper.openLTIResourceLink(w, n);
-
-                    this.createElement.emit([n]);
-                    this.createToolType = null;
-                } else {
-                    const prop = RestHelper.createNameProperty(n.name);
-                    this.nodeService.editNodeMetadata(n.ref.id, prop).subscribe(
-                        (data) => {
-                            this.createElement.emit([data.node]);
-                            this.createToolType = null;
-                        },
-                        (error: any) => {
-                            if (
-                                this.nodeHelper.handleNodeError(n.name, error) ===
-                                RestConstants.DUPLICATE_NODE_RESPONSE
-                            ) {
-                                // this.createConnectorName = name;
-                            }
-                        },
-                    );
-                }
-            });
-        }
-    }
-
-    cancelLtiTool(event: any) {
-        let nodes: Node[] = event.nodes;
-        if (nodes) {
-            nodes.forEach((n) => {
-                this.nodeService.deleteNode(n.ref.id, false).subscribe(
-                    (data) => {},
-                    (error) => {
-                        this.nodeHelper.handleNodeError(n.name, error);
-                    },
-                );
-            });
-        }
+    cancelLtiTool(event: LtiToolDialogResult) {
+        this.ltiToolOptionsService.cancelDialogResult(event);
         this.createToolType = null;
     }
     dropEnabled() {

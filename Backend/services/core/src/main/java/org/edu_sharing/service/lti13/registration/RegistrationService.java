@@ -47,6 +47,8 @@ public class RegistrationService {
 
     private final VersionService versionService;
 
+    private final RepoTools repoTools;
+
     @NotNull
     public OpenIdConfiguration getLtiPlatformOpenIdConfiguration() {
         ApplicationInfo homeRepository = ApplicationInfoList.getHomeRepository();
@@ -269,7 +271,7 @@ public class RegistrationService {
                                   String keyId,
                                   DynamicRegistrationToken token) throws Exception{
         Map<String,String> properties = new HashMap<>();
-        String appId = new RepoTools().getAppId(openIdConfiguration.getIssuer(),clientId,deploymentId);
+        String appId = RepoTools.getAppId(openIdConfiguration.getIssuer(),clientId,deploymentId);
         properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTIPLATFORM);
         properties.put(ApplicationInfo.KEY_LTI_DEPLOYMENT_ID, deploymentId);
@@ -435,7 +437,7 @@ public class RegistrationService {
          * leave out the issuer here, cause edu-sharing as a platform generates a registrationId and deploymentId.
          * for tools no issuer is defined in standard.
          */
-        String appId = new RepoTools().getAppId(null, clientId, Integer.toString(lastDeploymentId));
+        String appId = RepoTools.getAppId(null, clientId, Integer.toString(lastDeploymentId));
         properties.put(ApplicationInfo.KEY_APPID, appId);
         properties.put(ApplicationInfo.KEY_APPCAPTION,clientName);
         properties.put(ApplicationInfo.KEY_TYPE, ApplicationInfo.TYPE_LTITOOL);

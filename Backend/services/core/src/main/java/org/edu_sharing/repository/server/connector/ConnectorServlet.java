@@ -132,6 +132,8 @@ public class ConnectorServlet extends SpringHttpServlet {
 
 			if(simpleConnector.isPresent()) {
 				Map<String, String[]> requestParameters = convertParameters(req);
+				requestParameters.put(SimpleConnectorAttributes.ATTRIBUTE_ORIGINAL_NODE_ID,
+						new String[]{ SimpleConnectorAttributes.resolveReferenceOriginalNodeId(nodeId) });
 				HashMap<String, Serializable> properties;
 				if(simpleConnector.get().getApi() == null) {
 					if(StringUtils.isEmpty(simpleConnector.get().getUrl())) {

@@ -787,7 +787,8 @@
         "collection": "Collection",
         "rating": "Éléments les mieux notés",
         "views": "Éléments les plus fréquemment consultés",
-        "downloads": "Articles les plus fréquemment téléchargés"
+        "downloads": "Articles les plus fréquemment téléchargés",
+        "random": "Éléments aléatoires"
       },
       "COLLECTION_LABEL": "Collection sélectionnée",
       "COLLECTION_HINT": "Sélectionnez la collection dont vous souhaitez afficher les documents sur la page d'accueil.",
@@ -807,15 +808,18 @@
       "TOTAL_COUNT_LABEL": "Nombre total d'éléments",
       "TOTAL_COUNT_HINT": "Nombre total d'éléments sélectionnés. Si cette valeur est >= au nombre d'éléments affichés, le nombre sélectionné d'éléments affichés est toujours choisi de manière aléatoire dans ce pool.",
       "TOTAL_COUNT_LARGER_HINT": "Si le nombre total d'éléments est supérieur au nombre d'éléments affichés, le nombre d'éléments à afficher est toujours sélectionné de manière aléatoire dans cette réserve.",
+      "RANDOM_HINT": "Dans le mode \"Éléments aléatoires\", les éléments affichés sont choisis aléatoirement parmi tous les éléments correspondants à chaque appel.",
       "DISPLAY_COUNT_LABEL": "Nombre d'éléments affichés",
       "DISPLAY_COUNT_HINT": "Nombre d'éléments à afficher lors de l'ouverture de la page d'accueil",
       "TOTAL_COUNT_OUT_OF_RANGE": "Le nombre total d'éléments doit être >= aux éléments affichés.",
       "PREVIEW": "Aperçu des éléments",
-      "PREVIEW_HINT": "Remarque : l'aperçu présenté ici présente les limitations suivantes:<ul><li>Les ajustements qui viennent d'être effectués doivent d'abord être sauvegardés</li><li>Tous les matériaux sont affichés, quelle que soit la visibilité d'un utilisateur</li><li>Les éléments de la page d'accueil sont mis à jour en fonction d'un cache (généralement la nuit)</li></ul>",
+      "PREVIEW_HINT": "Remarque : l'aperçu présenté ici présente les limitations suivantes:<ul><li>Les ajustements qui viennent d'être effectués doivent d'abord être sauvegardés</li><li>Tous les matériaux sont affichés, quelle que soit la visibilité d'un utilisateur</li></ul>",
       "PREVIEW_ERROR": {
         "ELASTICSEARCH": "La connexion à Elasticsearch a échoué",
         "UNKNOWN": "Une erreur inconnue s'est produite lors de la récupération du contenu de la page d'accueil."
       },
+      "GLOBAL_QUERY_LABEL": "Requête globale",
+      "GLOBAL_QUERY_HINT": "Une requête qui est toujours liée en tant que condition \"AND\", indépendamment des conditions. Elle doit être conforme au langage de requête Elasticsearch (DSL)",
       "CUSTOM_QUERY_LABEL": "Requête supplémentaire",
       "CUSTOM_QUERY_HINT": "Une requête qui est également affichée en tant que condition \"AND\" est liée. Elle peut être imbriquée de manière arbitraire et doit être conforme au langage de requête Elasticsearch (DSL).",
       "CUSTOM_QUERY_HINT_HELP": "Documentation ouverte",

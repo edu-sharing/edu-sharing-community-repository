@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.QueryUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -30,11 +31,20 @@ import static org.edu_sharing.service.search.SearchServiceElastic.WORKSPACE_INDE
 
 public class NodeFrontpage {
 
-    private final SearchServiceElastic searchServiceElastic =  ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
+    private static final String STATISTIC_SORT_SCRIPT = SearchServiceElastic.loadScript("frontpage-ratings.properties");
+
+    private final SearchServiceElastic searchServiceElastic;
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
-    private final CollectionService collectionService = CollectionServiceFactory.getInstance().getLocalService();
+    private final CollectionService collectionService;
 
     public NodeFrontpage(){
+        this(ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class),
+                CollectionServiceFactory.getInstance().getLocalService());
+    }
+
+    NodeFrontpage(SearchServiceElastic searchServiceElastic, CollectionService collectionService){
+        this.searchServiceElastic = searchServiceElastic;
+        this.collectionService = collectionService;
     }
 
 
@@ -52,6 +62,51 @@ public class NodeFrontpage {
             return collectionService.getChildren(config.getCollection(), null,sortDefinition, Collections.singletonList("files"));
         }
 
+        BoolQuery.Builder query = buildQuery(config);
+
+        boolean randomMode = RepositoryConfig.Frontpage.Mode.random.equals(config.getMode());
+        SortOptions sortOptions = buildSortOptions(config);
+        // in random mode elastic already shuffles the whole pool, so there is no need to fetch more
+        // than the elements we're going to display
+        int fetchCount = randomMode ? config.getDisplayCount() : config.getTotalCount();
+
+        SearchRequest searchRequest = SearchRequest.of(req->req
+                .index(WORKSPACE_INDEX)
+                .from(0)
+                // fetch more because we might need buffer for invalid permissions
+                .size(fetchCount)
+                .trackTotalHits(track->track.enabled(true))
+                .query(q -> q.bool(query.build()))
+                .sort(sortOptions)
+        );
+
+        SearchResponse<Map> searchResult = searchServiceElastic.searchNative(searchRequest);
+        List<NodeRef> result=new ArrayList<>();
+        Set<String> authorities = searchServiceElastic.getUserAuthorities();
+        String user = AuthenticationUtil.getFullyAuthenticatedUser();
+        boolean isAdmin = AuthorityServiceHelper.isAdmin();
+        for(Hit<Map> hit : searchResult.hits().hits()){
+            result.add(searchServiceElastic.transformSearchHit(isAdmin, authorities, user,hit.source(),false));
+        }
+        result = result.subList(0, Math.min(result.size(), fetchCount));
+        if(!randomMode && config.getDisplayCount()<config.getTotalCount()) {
+            Set<NodeRef> randoms = new HashSet<>();
+            // grab a random count of elements (equals displayCount) of the whole array
+            while (randoms.size() < config.getDisplayCount() && randoms.size()<result.size()) {
+                randoms.add(result.get(new Random().nextInt(result.size())));
+            }
+            return randoms;
+        }
+        return result;
+    }
+
+    /**
+     * builds the elastic query for all modes except {@link RepositoryConfig.Frontpage.Mode#collection}:
+     * the base restrictions (readable io's in the workspace store, no collection references), the
+     * unconditional {@link RepositoryConfig.Frontpage#getGlobalQuery()} and all configured queries whose
+     * condition currently matches - all combined via "must"
+     */
+    BoolQuery.Builder buildQuery(RepositoryConfig.Frontpage config){
         BoolQuery.Builder query = new BoolQuery.Builder()
                 .must(
                         m -> m.bool(searchServiceElastic::getReadPermissionsQuery))
@@ -64,6 +119,11 @@ public class NodeFrontpage {
                 .mustNot(
                         m -> m.term(t -> t.field("aspects").value("ccm:collection_io_reference"))
                 );
+
+        if(StringUtils.isNotBlank(config.getGlobalQuery())) {
+            String globalQuery = QueryUtils.replaceCommonQueryParams(config.getGlobalQuery(),QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL));
+            query.must(must->must.wrapper(new ReadableWrapperQueryBuilder(globalQuery).build()));
+        }
 
         if(config.getQueries()!=null && !config.getQueries().isEmpty()) {
             // filter all queries with matching toolpermissions, than concat them via "must"
@@ -80,48 +140,28 @@ public class NodeFrontpage {
                 query.must(must->must.wrapper(new ReadableWrapperQueryBuilder(queryString).build()));
             });
         }
+        return query;
+    }
 
-
-        String sortingScript = SearchServiceElastic.loadScript("frontpage-ratings.properties");
-
-        Script sortingScriptInline = new Script.Builder().
-                lang("painless")
-                .source(sortingScript)
+    /**
+     * random mode is sorted by a plain random script, all other modes are sorted by the accumulated
+     * statistic fields of the given timespan
+     */
+    SortOptions buildSortOptions(RepositoryConfig.Frontpage config){
+        if(RepositoryConfig.Frontpage.Mode.random.equals(config.getMode())){
+            return SortOptions.of(so -> so.script(
+                    s -> s.type(ScriptSortType.Number).script(
+                            script -> script.lang("painless").source("Math.random()"))
+            ));
+        }
+        Script sortingScriptInline = new Script.Builder()
+                .lang("painless")
+                .source(STATISTIC_SORT_SCRIPT)
                 .params("fields", getFieldNames(config))
                 .build();
-
-        SearchRequest searchRequest = SearchRequest.of(req->req
-                .index(WORKSPACE_INDEX)
-                .from(0)
-                // fetch more because we might need buffer for invalid permissions
-                .size(config.getTotalCount())
-                .trackTotalHits(track->track.enabled(true))
-                .query(q -> q.bool(query.build()))
-                .sort(
-                        SortOptions.of(so -> so.script(
-                                s -> s.mode(SortMode.Max).type(ScriptSortType.Number).order(SortOrder.Desc).script(sortingScriptInline))
-                        )
-                )
-        );
-
-        SearchResponse<Map> searchResult = searchServiceElastic.searchNative(searchRequest);
-        List<NodeRef> result=new ArrayList<>();
-        Set<String> authorities = searchServiceElastic.getUserAuthorities();
-        String user = AuthenticationUtil.getFullyAuthenticatedUser();
-        boolean isAdmin = AuthorityServiceHelper.isAdmin();
-        for(Hit<Map> hit : searchResult.hits().hits()){
-            result.add(searchServiceElastic.transformSearchHit(isAdmin, authorities, user,hit.source(),false));
-        }
-        result = result.subList(0, Math.min(result.size(), config.getTotalCount()));
-        if(config.getDisplayCount()<config.getTotalCount()) {
-            Set<NodeRef> randoms = new HashSet<>();
-            // grab a random count of elements (equals displayCount) of the whole array
-            while (randoms.size() < config.getDisplayCount() && randoms.size()<result.size()) {
-                randoms.add(result.get(new Random().nextInt(result.size())));
-            }
-            return randoms;
-        }
-        return result;
+        return SortOptions.of(so -> so.script(
+                s -> s.mode(SortMode.Max).type(ScriptSortType.Number).order(SortOrder.Desc).script(sortingScriptInline)
+        ));
     }
 
     private JsonData getFieldNames(RepositoryConfig.Frontpage config){

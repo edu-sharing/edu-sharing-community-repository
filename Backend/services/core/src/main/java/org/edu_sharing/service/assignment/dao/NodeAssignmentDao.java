@@ -3,6 +3,7 @@ package org.edu_sharing.service.assignment.dao;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.rpc.ACE;
@@ -358,5 +359,27 @@ final class NodeAssignmentDao extends BasicNodeDaoImpl implements AssignmentDao 
     @Override
     public SubmissionDao createSubmissionByUserId(String username) {
         throw new UnsupportedOperationException("Submissions are not supported for assignment of type " + getType());
+    }
+
+    @Override
+    public void deletePermanently() {
+        if (!exists()) {
+            return;
+        }
+
+        if (!AssignmentUtil.isCreator(getCreator())) {
+            throw new AccessDeniedException("Only the creator of assignment " + nodeId + " is allowed to permanently delete it");
+        }
+
+        if (!AssignmentUtil.canDeletePermanently(getStatus())) {
+            throw new IllegalStateException("Assignment " + nodeId + " must be finished or canceled to be permanently deleted");
+        }
+
+        log.debug("Permanently deleting assignment {}", nodeId);
+        AuthenticationUtil.runAsSystem(() -> {
+            doDeletePermanently();
+            return null;
+        });
+        refresh();
     }
 }

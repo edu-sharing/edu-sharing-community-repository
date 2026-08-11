@@ -787,7 +787,8 @@
         "collection": "Collezione",
         "rating": "Elementi più votati",
         "views": "Elementi di accesso più frequenti",
-        "downloads": "Gli articoli scaricati più di frequente"
+        "downloads": "Gli articoli scaricati più di frequente",
+        "random": "Elementi casuali"
       },
       "COLLECTION_LABEL": "Collezione selezionata",
       "COLLECTION_HINT": "Selezionare la collezione di cui si desidera visualizzare i materiali nella pagina iniziale.",
@@ -810,11 +811,13 @@
       "DISPLAY_COUNT_HINT": "Numero di elementi da visualizzare all'apertura della pagina iniziale",
       "TOTAL_COUNT_OUT_OF_RANGE": "Il numero totale di elementi deve essere >= agli elementi visualizzati.",
       "PREVIEW": "Anteprima degli elementi",
-      "PREVIEW_HINT": "Nota: l'anteprima qui mostrata ha le seguenti limitazioni:<ul><li>Le regolazioni appena effettuate devono essere prima salvate</li><li>Tutti i materiali sono visualizzati, indipendentemente dalla visibilità di un utente</li><li>Gli elementi della pagina iniziale sono aggiornati in base a una cache (di solito di notte)</li></ul>",
+      "PREVIEW_HINT": "Nota: l'anteprima qui mostrata ha le seguenti limitazioni:<ul><li>Le regolazioni appena effettuate devono essere prima salvate</li><li>Tutti i materiali sono visualizzati, indipendentemente dalla visibilità di un utente</li></ul>",
       "PREVIEW_ERROR": {
         "ELASTICSEARCH": "La connessione a Elasticsearch è fallita",
         "UNKNOWN": "Si è verificato un errore sconosciuto durante il recupero dei contenuti per la pagina iniziale"
       },
+      "GLOBAL_QUERY_LABEL": "Query globale",
+      "GLOBAL_QUERY_HINT": "Una query che viene sempre collegata come condizione \"AND\", indipendentemente dalle condizioni. Deve essere conforme al linguaggio di query di Elasticsearch (DSL)",
       "CUSTOM_QUERY_LABEL": "Domanda supplementare",
       "CUSTOM_QUERY_HINT": "Una query che viene visualizzata anche come condizione \"AND\" è collegata. Può essere ulteriormente annidata in modo arbitrario e deve essere conforme al linguaggio di query (DSL) di Elasticsearch.",
       "CUSTOM_QUERY_HINT_HELP": "Documentazione aperta",
@@ -828,7 +831,8 @@
       "CONDITION_TYPE": {
         "TOOLPERMISSION": "Strumentopermesso"
       },
-      "TOTAL_COUNT_LARGER_HINT": "Se il numero totale di elementi è maggiore degli elementi visualizzati, il numero selezionato di elementi da visualizzare viene sempre scelto in modo casuale da questo pool."
+      "TOTAL_COUNT_LARGER_HINT": "Se il numero totale di elementi è maggiore degli elementi visualizzati, il numero selezionato di elementi da visualizzare viene sempre scelto in modo casuale da questo pool.",
+      "RANDOM_HINT": "Nella modalità \"Elementi casuali\" gli elementi visualizzati vengono scelti casualmente tra tutti gli elementi corrispondenti a ogni richiesta."
     },
     "LTI": {
       "HEADER": "Registrazione della piattaforma LTI",

@@ -382,7 +382,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             setTimeout(() => this.cancel());
             return;
         }
-        if (isDirectory.values().next()) {
+        if (isDirectory.values().next().value) {
             this.currentType = [RestConstants.ACCESS_CONSUMER];
         }
         if (this.data.currentPermissions) {

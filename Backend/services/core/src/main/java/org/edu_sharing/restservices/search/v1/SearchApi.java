@@ -562,8 +562,6 @@ public class SearchApi {
 					.map(entry -> new SearchVCard(entry.getVcard()))
 					.collect(Collectors.toCollection(HashSet::new));
 
-			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
-			Set<SearchVCard> result = SearchServiceFactory.getInstance().getService(repoDao.getId()).searchContributors(searchWord, fields, contributorProperties, contributorKind);
 			return Response.status(Response.Status.OK).entity(contributors).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);

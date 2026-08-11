@@ -651,6 +651,14 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     applyExternalOptions(options: OptionItem[], customOptionsIn: CustomOptions) {
+        return OptionsHelperService.applyExternalOptions(options, customOptionsIn);
+    }
+
+    /**
+     * Merges `customOptionsIn` into `options`. Stateless, so it can also be used by components that
+     * do not have an `OptionsHelperService` instance available
+     */
+    static applyExternalOptions(options: OptionItem[], customOptionsIn: CustomOptions) {
         if (!customOptionsIn) {
             return options;
         }

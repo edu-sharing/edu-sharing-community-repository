@@ -1306,6 +1306,13 @@
       ]]></html>
     </template>
     <template>
+      <id>browser_extension_preview</id>
+      <html><![CDATA[
+          <preview>
+          <cm:name>
+      ]]></html>
+    </template>
+    <template>
       <id>topic_page_variant_configuration</id>
       <html><![CDATA[
           <ccm:page_variant_profiling_target_group type="checkboxVertical" isExtended="false">
@@ -1535,6 +1542,13 @@
       <rendering>angular</rendering>
       <views>
         <view>topic_page_profiling</view>
+      </views>
+    </group>
+    <group>
+      <id>browser_extension_preview</id>
+      <rendering>angular</rendering>
+      <views>
+        <view>browser_extension_preview</view>
       </views>
     </group>
     <group>

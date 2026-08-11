@@ -105,4 +105,17 @@ public interface AssignmentDao extends BasicNodeDao {
     void setStatus(Assignment.Status status);
 
     SubmissionDao createSubmissionByUserId(String username);
+
+    /**
+     * Permanently deletes a finished or canceled assignment, including all its submissions and
+     * files, without moving it to the recycle bin. Unlike {@link #delete()}, this operation is
+     * restricted to the assignment's creator (or an admin) and does not require
+     * {@code AssignmentCoordinator} permission on every descendant node, since the underlying
+     * removal runs unchecked. This mainly matters for assignments of type
+     * {@link Assignment.Type#SUBMISSION}, whose subtree can contain submissions/files owned by
+     * assignees rather than the coordinator.
+     *
+     * @throws IllegalStateException if the assignment is not in status {@code FINISHED} or {@code CANCELED}
+     */
+    void deletePermanently();
 }
