@@ -213,6 +213,19 @@ class ContributorServiceImplTest {
     }
 
     @Test
+    void registerVCardsIfAbsentSkipsVCardsWithOnlyEmail() {
+        // email alone must not trigger implicit registration - only ORCID/GND/ROR/Wikidata do
+        String vcard = ContributorVCardUtil.toVCardString(
+                ContributorEntry.builder().surname("Doe").email("doe@example.org").build());
+
+        List<ContributorEntry> created = underTest.registerVCardsIfAbsent(List.of(vcard), "editor");
+
+        assertTrue(created.isEmpty());
+        verify(contributorMapper, never()).findByAnyId(any(), any(), any(), any(), any());
+        verify(contributorMapper, never()).create(any());
+    }
+
+    @Test
     void registerVCardsIfAbsentDeduplicatesSameIdWithinCall() {
         when(contributorMapper.findByAnyId(any(), any(), any(), any(), any())).thenReturn(List.of());
         // same orcid twice (different formatting) -> only one insert
