@@ -367,6 +367,8 @@ public class Edu_SharingPutMethod extends WebDAVMethod implements ActivityPostPr
                     }
                 });
             }
+            //edu-sharing fix: the rejection is turned into a status code and a reason for the client
+            //centrally in ExceptionHandler, which also catches the rejections raised at commit time.
             throw new WebDAVServerException(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
         finally
