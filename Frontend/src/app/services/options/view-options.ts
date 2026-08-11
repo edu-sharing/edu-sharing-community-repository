@@ -276,7 +276,7 @@ export function createViewOptions({
     viewAssignmentSubmission.group = DefaultGroups.View;
     viewAssignmentSubmission.priority = 5;
 
-    const infoVersions = new OptionItem('OPTIONS.VERSION_MANAGEMENT', 'info', (object) => {
+    const infoVersions = new OptionItem('OPTIONS.VERSION_MANAGEMENT', 'history', (object) => {
         // set the acted-on node(s) so the sidebar has a selection (context-menu flow
         // does not go through the list selection that normally populates this)
         service.editorialSidebarService.nodes.set(service.getObjects(object, data));
