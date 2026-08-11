@@ -280,6 +280,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
     private Map<String, String> applyValidatedAuth(AuthenticationToolAPI authTool, String username, HttpSession session, HttpServletRequest httpReq, HttpServletResponse httpResp) {
         authTool.authenticateUser(username, session, CCConstants.AUTH_TYPE_DEFAULT);
         CSRFConfig.csrfInitCookie(httpReq, httpResp);
+        // 2fa second step: the session still holds the toolpermissions computed for the guest user
+        ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
         return authTool.validateAuthentication(session);
     }
 
