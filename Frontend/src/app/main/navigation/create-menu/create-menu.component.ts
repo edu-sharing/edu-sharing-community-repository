@@ -60,10 +60,7 @@ import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
-import {
-    LtiToolDialogResult,
-    LtiToolOptionsService,
-} from '../../../services/lti-tool-options.service';
+import { LtiToolOptionsService } from '../../../services/lti-tool-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import {
@@ -147,7 +144,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     fileIsOver = false;
     cardHasOpenModals$: Observable<boolean>;
     options: OptionItem[];
-    createToolType: Tool = null;
 
     showPicker: boolean; // keep public - used by extensions
     private params: Params;
@@ -484,7 +480,19 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     async showCreateLtiTool(tool: Tool) {
-        this.createToolType = tool;
+        const parent = await this.getParent();
+        const dialogRef = await this.dialogs.openCreateLtiToolDialog({ tool, parent });
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (!result) {
+                return;
+            }
+            const nodes = await this.ltiToolOptionsService.createFromDialogResult(
+                tool,
+                result,
+                () => parent,
+            );
+            nodes.forEach((node) => this.createElement.emit([node]));
+        });
     }
 
     private openCamera() {
@@ -569,19 +577,6 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             );
     }
 
-    async createLtiTool(event: LtiToolDialogResult) {
-        const tool = this.createToolType;
-        const nodes = await this.ltiToolOptionsService.createFromDialogResult(tool, event, () =>
-            this.getParent(),
-        );
-        this.createToolType = null;
-        nodes.forEach((node) => this.createElement.emit([node]));
-    }
-
-    cancelLtiTool(event: LtiToolDialogResult) {
-        this.ltiToolOptionsService.cancelDialogResult(event);
-        this.createToolType = null;
-    }
     dropEnabled() {
         return this.mainNavConfig.create?.globalDrop !== false;
     }

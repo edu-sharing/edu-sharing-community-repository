@@ -523,7 +523,7 @@ export class NodesSelectorComponent implements OnInit {
         { initialValue: [] },
     );
     ltiToolOptions: Signal<OptionItem[]> = toSignal(
-        this.ltiToolOptionsService.buildOptions((tool) => this.createToolType.set(tool)),
+        this.ltiToolOptionsService.buildOptions((tool) => void this.showCreateLtiTool(tool)),
         { initialValue: [] },
     );
     /** the connector + LTI tool options of the "Create" dropdown, merged with the custom ones */
@@ -533,8 +533,6 @@ export class NodesSelectorComponent implements OnInit {
             this.option()?.optionConfig?.customCreateOptions,
         ),
     );
-    /** the LTI tool the create dialog is currently open for */
-    createToolType: WritableSignal<Tool | null> = signal(null);
     /** the folder a newly created element is placed in */
     uploadParent = computed(() => (this.chooseParent() ? this.inboxNode() : this.parent()));
 
@@ -1548,26 +1546,24 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * Creates the node(s) for the confirmed LTI tool dialog and emits them like a connector
-     * creation.
+     * Opens the LTI tool create dialog and emits the created node(s) like a connector creation.
      */
-    async createLtiTool(event: LtiToolDialogResult): Promise<void> {
-        const tool = this.createToolType();
-        const nodes = await this.ltiToolOptionsService.createFromDialogResult(
-            tool,
-            event,
-            // resolved lazily: the popup window must be opened before the inbox lookup is awaited
-            () => this.uploadParent() ?? firstValueFrom(this.inboxNode$),
-        );
-        this.createToolType.set(null);
-        if (nodes.length) {
-            this.emitNodes({ nodes, parent: this.parent(), created: true });
-        }
-    }
-
-    cancelLtiTool(event: LtiToolDialogResult): void {
-        this.ltiToolOptionsService.cancelDialogResult(event);
-        this.createToolType.set(null);
+    async showCreateLtiTool(tool: Tool): Promise<void> {
+        const parent = this.uploadParent() ?? (await firstValueFrom(this.inboxNode$));
+        const dialogRef = await this.dialogs.openCreateLtiToolDialog({ tool, parent });
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (!result) {
+                return;
+            }
+            const nodes = await this.ltiToolOptionsService.createFromDialogResult(
+                tool,
+                result,
+                () => parent,
+            );
+            if (nodes.length) {
+                this.emitNodes({ nodes, parent: this.parent(), created: true });
+            }
+        });
     }
 
     protected readonly DEFAULT = DEFAULT;

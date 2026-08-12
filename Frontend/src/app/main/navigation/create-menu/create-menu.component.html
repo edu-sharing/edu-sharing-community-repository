@@ -8,15 +8,7 @@
   position="right"
 ></es-dropdown>
 
-@if (createToolType !== null) {
-<es-create-ltitool
-  [tool]="createToolType"
-  [parent]="_parent"
-  (cancel)="cancelLtiTool($event)"
-  (create)="createLtiTool($event)"
->
-</es-create-ltitool>
-} @if ((cardHasOpenModals$ | async) === false) {
+@if ((cardHasOpenModals$ | async) === false) {
 <div
   esFileDrop
   [window]="true"
