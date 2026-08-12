@@ -442,7 +442,10 @@ export function createViewOptions({
     const feedbackMaterialView = new OptionItem(
         'OPTIONS.MATERIAL_FEEDBACK_VIEW',
         'speaker_notes',
-        (object) => (management.materialViewFeedback = service.getObjects(object, data)[0]),
+        (object) =>
+            void service.dialogs.openViewFeedbackDialog({
+                node: service.getObjects(object, data)[0],
+            }),
     );
     feedbackMaterialView.constrains = [
         Constrain.HomeRepository,
