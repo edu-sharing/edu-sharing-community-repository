@@ -2250,7 +2250,7 @@
           "default_operator": "and"
           }
           },
-          {"wildcard":{"nodeRef.id": {"value":"*${value}*", "case_insensitive": true }}},
+          {"term":{"nodeRef.id": {"value":"${valueRaw}", "case_insensitive": true }}},
           {"wildcard":{"properties.cm:title.keyword": {"value":"*${value}*", "case_insensitive": true }}}
           ]
           }}
