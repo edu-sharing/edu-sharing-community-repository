@@ -10,6 +10,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.edu_sharing.metadataset.v2.*;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
 import org.edu_sharing.restservices.search.v1.model.SearchFacet;
+import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.SearchServiceElasticTestUtils;
 import org.edu_sharing.service.search.model.SearchToken;
@@ -205,7 +206,7 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}}",
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}}]}}}",
                 result.get("test_facet")
         );
 
@@ -223,13 +224,13 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}}]}}" +
                         "}",
                 result.get("test_facet"));
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet2\":{\"terms\":{\"field\":\"properties.test_facet2.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}}]}}" +
                         "}",
                 result.get("test_facet2")
         );
@@ -259,7 +260,7 @@ class MetadataElasticSearchHelperTest {
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"multi_terms\":{\"min_doc_count\":4,\"size\":250,\"terms\":[{\"field\":\"facet1\",\"missing\":\"\"},{\"field\":\"facet2\",\"missing\":\"\"}]}}}," +
                         "\"meta\":{\"type\":\"multi_terms\"}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -286,54 +287,43 @@ class MetadataElasticSearchHelperTest {
         assertNotNull(builder.build().runtimeMappings().get(MetadataElasticSearchHelper.GEOPOINT_RUNTIME_FIELD).script());
         assertEquals(1, result.size());
         SearchServiceElasticTestUtils.assertFacet(
-                "{\n" +
-                        "  \"aggregations\": {\n" +
-                        "    \"test_facet\": {\n" +
-                        "      \"geotile_grid\": {\n" +
-                        "        \"field\": \"geo_point_runtime\",\n" +
-                        "        \"precision\": 7.0\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"filter\": {\n" +
-                        "    \"bool\": {\n" +
-                        "      \"must\": [\n" +
-                        "        {\n" +
-                        "          \"bool\": {\n" +
-                        "            \"must\": [\n" +
-                        "              {\n" +
-                        "                \"wrapper\": {\n" +
-                        "                  \"query\": \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n" +
-                        "                }\n" +
-                        "              }\n" +
-                        "            ]\n" +
-                        "          }\n" +
-                        "        },\n" +
-                        "        {\n" +
-                        "          \"bool\": {}\n" +
-                        "        }\n" +
-                        "      ]\n" +
-                        "    }\n" +
-                        "  }\n" +
+                "{" +
+                        "\"aggregations\":{\"test_facet\":{\"geotile_grid\":{\"field\":\"geo_point_runtime\",\"precision\":7.0}}}," +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}}]}}" +
                         "}",
                 result.get("test_facet")
         );
     }
 
 
-    @Test
-    void getAggregationsAppliesGlobalConditionsAsTopLevelQuery() {
-        SearchToken token = new SearchToken();
-        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
-        parameter.setName("test_facet");
-        query.setParameters(Collections.singletonList(parameter));
+    /** base64 of a statement, the form {@link ReadableWrapperQueryBuilder} puts into a wrapper query */
+    private static String encoded(String statement) {
+        return Base64.getEncoder().encodeToString(statement.getBytes());
+    }
 
-        List<SearchFacet> facets = Arrays.asList(
-                new SearchFacet("test_facet", null),
-                new SearchFacet("test_facet2", null));
-        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
-        parameter2.setName("test_facet2");
-        query.setParameters(Arrays.asList(parameter, parameter2));
+    private MetadataQueryParameter multiParameter(String name, MetadataQueryParameter.ParameterJoinStrategy join, String field) {
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
+        parameter.setName(name);
+        parameter.setMultiple(true);
+        parameter.setMultiplejoin(join);
+        parameter.setStatements(new HashMap<>() {{
+            put(null, "{\"match\":{\"" + field + "\":\"${value}\"}}");
+        }});
+        return parameter;
+    }
+
+    @Test
+    void getAggregationsHoistsSharedQueryAndKeepsOnlyFacetDifference() {
+        SearchToken token = new SearchToken();
+        // an "AND" joined criterion is identical for every facet -> shared
+        MetadataQueryParameter shared = multiParameter("shared_param", MetadataQueryParameter.ParameterJoinStrategy.AND, "shared_field");
+        // an "OR" joined criterion is subject to excludeOwn -> differs per facet
+        MetadataQueryParameter own = multiParameter("own_param", MetadataQueryParameter.ParameterJoinStrategy.OR, "own_field");
+        query.setParameters(Arrays.asList(shared, own));
+
+        Map<String, String[]> parameters = new HashMap<>();
+        parameters.put("shared_param", new String[]{"s"});
+        parameters.put("own_param", new String[]{"o"});
 
         BoolQuery globalConditions = new BoolQuery.Builder()
                 .must(must -> must.term(t -> t.field("permissions.read").value("GROUP_EVERYONE")))
@@ -341,37 +331,90 @@ class MetadataElasticSearchHelperTest {
 
         SearchRequest.Builder builder = new SearchRequest.Builder().index("workspace");
         Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(builder, mds, query,
-                Collections.emptyMap(), facets, Collections.emptySet(), globalConditions._toQuery(), token);
+                parameters,
+                Arrays.asList(new SearchFacet("own_param", null), new SearchFacet("other_facet", null)),
+                Collections.singleton(own),
+                globalConditions._toQuery(),
+                token);
 
-        // the shared conditions are evaluated once as top level query ...
-        SearchRequest request = builder.build();
-        assertNotNull(request.query(), "expected globalConditions to be applied as top level query");
-        assertEquals(
-                JsonpUtils.toJsonString(globalConditions._toQuery(), new JacksonJsonpMapper()),
-                JsonpUtils.toJsonString(request.query(), new JacksonJsonpMapper()));
+        String sharedClause = encoded("{\"match\":{\"shared_field\":\"s\"}}");
+        String ownClause = encoded("{\"match\":{\"own_field\":\"o\"}}");
+        String baseQuery = encoded(basequery);
 
-        // ... and therefore must not be repeated in any facet's filter sub aggregation
+        // the facet independent part is evaluated exactly once, as the top level query
+        String topLevel = JsonpUtils.toJsonString(builder.build().query(), new JacksonJsonpMapper());
+        assertTrue(topLevel.contains(baseQuery), "base query belongs into the top level query, got: " + topLevel);
+        assertTrue(topLevel.contains(sharedClause), "shared criterion belongs into the top level query, got: " + topLevel);
+        assertTrue(topLevel.contains("permissions.read"), "globalConditions belong into the top level query, got: " + topLevel);
+        // the excludeOwn criterion must not be hoisted, it differs per facet
+        assertFalse(topLevel.contains(ownClause), "excludeOwn criterion must stay per facet, got: " + topLevel);
+
+        // the facet that owns the criterion drops it (exclude own) and has nothing else left
+        String ownFacet = JsonpUtils.toJsonString(result.get("own_param"), new JacksonJsonpMapper());
+        assertFalse(ownFacet.contains(ownClause), "own_param must not filter by its own criterion, got: " + ownFacet);
+        assertTrue(ownFacet.contains("match_all"), "no difference left, expected a match_all filter, got: " + ownFacet);
+
+        // every other facet still applies it
+        String otherFacet = JsonpUtils.toJsonString(result.get("other_facet"), new JacksonJsonpMapper());
+        assertTrue(otherFacet.contains(ownClause), "other_facet must filter by own_param, got: " + otherFacet);
+
+        // and neither of them repeats the shared part
         for (Map.Entry<String, Aggregation> agg : result.entrySet()) {
             String json = JsonpUtils.toJsonString(agg.getValue(), new JacksonJsonpMapper());
-            assertFalse(json.contains("permissions.read"),
-                    "facet " + agg.getKey() + " must not duplicate globalConditions, got: " + json);
+            assertFalse(json.contains(sharedClause), "facet " + agg.getKey() + " duplicates the shared criterion: " + json);
+            assertFalse(json.contains("permissions.read"), "facet " + agg.getKey() + " duplicates globalConditions: " + json);
         }
+    }
+
+    @Test
+    void getAggregationsDoesNotHoistWhenQueryIsOrJoined() {
+        SearchToken token = new SearchToken();
+        // tree(A + B) != tree(A) AND tree(B) for a "should" joined query, so the split must not happen
+        query.setJoin("OR");
+        MetadataQueryParameter shared = multiParameter("shared_param", MetadataQueryParameter.ParameterJoinStrategy.AND, "shared_field");
+        query.setParameters(Collections.singletonList(shared));
+
+        BoolQuery globalConditions = new BoolQuery.Builder()
+                .must(must -> must.term(t -> t.field("permissions.read").value("GROUP_EVERYONE")))
+                .build();
+
+        SearchRequest.Builder builder = new SearchRequest.Builder().index("workspace");
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(builder, mds, query,
+                new HashMap<>() {{
+                    put("shared_param", new String[]{"s"});
+                }},
+                Collections.singletonList(new SearchFacet("shared_param", null)), Collections.emptySet(),
+                globalConditions._toQuery(), token);
+
+        // only globalConditions are hoisted, the matching tree stays in the facet filter
+        assertEquals(
+                JsonpUtils.toJsonString(globalConditions._toQuery(), new JacksonJsonpMapper()),
+                JsonpUtils.toJsonString(builder.build().query(), new JacksonJsonpMapper()));
+        String facet = JsonpUtils.toJsonString(result.get("shared_param"), new JacksonJsonpMapper());
+        assertTrue(facet.contains(encoded(basequery)), "expected the complete tree per facet, got: " + facet);
+        assertTrue(facet.contains(encoded("{\"match\":{\"shared_field\":\"s\"}}")), "expected the criterion per facet, got: " + facet);
     }
 
     @Test
     void getAggregationsKeepsCallerTopLevelQueryWhenGlobalConditionsAreNull() {
         SearchToken token = new SearchToken();
-        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
-        parameter.setName("test_facet");
-        query.setParameters(Collections.singletonList(parameter));
+        MetadataQueryParameter shared = multiParameter("shared_param", MetadataQueryParameter.ParameterJoinStrategy.AND, "shared_field");
+        query.setParameters(Collections.singletonList(shared));
 
         SearchRequest.Builder builder = new SearchRequest.Builder().index("workspace");
-        MetadataElasticSearchHelper.applyAggregations(builder, mds, query, Collections.emptyMap(),
-                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(builder, mds, query,
+                new HashMap<>() {{
+                    put("shared_param", new String[]{"s"});
+                }},
+                Collections.singletonList(new SearchFacet("shared_param", null)), Collections.emptySet(),
                 null, token);
 
         assertNull(builder.build().query(),
                 "callers passing null set their own top level query, applyAggregations must not touch it");
+        // ... which is why the facet filter has to keep carrying the complete tree here
+        String facet = JsonpUtils.toJsonString(result.get("shared_param"), new JacksonJsonpMapper());
+        assertTrue(facet.contains(encoded(basequery)), "expected the complete tree per facet, got: " + facet);
+        assertTrue(facet.contains(encoded("{\"match\":{\"shared_field\":\"s\"}}")), "expected the criterion per facet, got: " + facet);
     }
 
     @Test
@@ -430,7 +473,7 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -448,14 +491,14 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"include\":[\"a\"],\"min_doc_count\":1,\"size\":1}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet_selected")
         );
@@ -485,7 +528,7 @@ class MetadataElasticSearchHelperTest {
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"multi_terms\":{\"min_doc_count\":4,\"size\":250,\"terms\":[{\"field\":\"facet1\",\"missing\":\"\"},{\"field\":\"facet2\",\"missing\":\"\"}]}}}," +
                         "\"meta\":{\"type\":\"multi_terms\"}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{\"should\":[{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet1\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet2\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"match_all\":{}},{\"bool\":{\"should\":[{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet1\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet2\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -511,69 +554,14 @@ class MetadataElasticSearchHelperTest {
         );
         assertEquals(1, result.size());
         SearchServiceElasticTestUtils.assertFacet(
-                "{\n" +
-                        "  \"aggregations\": {\n" +
-                        "    \"test_facet\": {\n" +
-                        "      \"aggregations\": {\n" +
-                        "        \"test_facet_nested\": {\n" +
-                        "          \"terms\": {\n" +
-                        "            \"field\": \"contributor.displayname.keyword\",\n" +
-                        "            \"min_doc_count\": 4,\n" +
-                        "            \"size\": 250\n" +
-                        "          }\n" +
-                        "        }\n" +
-                        "      },\n" +
-                        "      \"nested\": {\n" +
-                        "        \"path\": \"contributor\"\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"filter\": {\n" +
-                        "    \"bool\": {\n" +
-                        "      \"must\": [\n" +
-                        "        {\n" +
-                        "          \"bool\": {\n" +
-                        "            \"must\": [\n" +
-                        "              {\n" +
-                        "                \"bool\": {\n" +
-                        "                  \"must\": [\n" +
-                        "                    {\n" +
-                        "                      \"wrapper\": {\n" +
-                        "                        \"query\": \"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"\n" +
-                        "                      }\n" +
-                        "                    }\n" +
-                        "                  ]\n" +
-                        "                }\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"bool\": {}\n" +
-                        "              }\n" +
-                        "            ]\n" +
-                        "          }\n" +
-                        "        },\n" +
-                        "        {\n" +
-                        "          \"nested\": {\n" +
-                        "            \"path\": \"contributor\",\n" +
-                        "            \"query\": {\n" +
-                        "              \"bool\": {\n" +
-                        "                \"minimum_should_match\": \"1\",\n" +
-                        "                \"should\": [\n" +
-                        "                  {\n" +
-                        "                    \"wildcard\": {\n" +
-                        "                      \"contributor.displayname.keyword\": {\n" +
-                        "                        \"case_insensitive\": true,\n" +
-                        "                        \"value\": \"*A B C*\"\n" +
-                        "                      }\n" +
-                        "                    }\n" +
-                        "                  }\n" +
-                        "                ]\n" +
-                        "              }\n" +
-                        "            }\n" +
-                        "          }\n" +
-                        "        }\n" +
-                        "      ]\n" +
-                        "    }\n" +
-                        "  }\n" +
+                "{" +
+                        "\"aggregations\":{\"test_facet\":{" +
+                        "\"aggregations\":{\"test_facet_nested\":{\"terms\":{\"field\":\"contributor.displayname.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
+                        "\"nested\":{\"path\":\"contributor\"}}}," +
+                        "\"filter\":{\"bool\":{\"must\":[" +
+                        "{\"bool\":{\"must\":[{\"match_all\":{}}]}}," +
+                        "{\"nested\":{\"path\":\"contributor\",\"query\":{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"contributor.displayname.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}}}" +
+                        "]}}" +
                         "}",
                 result.get("test_facet")
         );
