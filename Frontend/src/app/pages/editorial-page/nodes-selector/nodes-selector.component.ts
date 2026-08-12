@@ -1469,7 +1469,6 @@ export class NodesSelectorComponent implements OnInit {
         created?: boolean;
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
-        this.localEventsService.nodesCreated.emit(payload.nodes);
         this.option()?.optionConfig?.onNodesChoosen?.({
             nodes: payload.nodes,
             connectorId: payload.connectorId,
@@ -1483,6 +1482,9 @@ export class NodesSelectorComponent implements OnInit {
         // already been added by `copyNodes` and must not be added a second time.
         if (payload.created && this.parentIsCollection()) {
             this.addCreatedNodesToCollection(payload.nodes);
+        } else if (payload.created) {
+            // emit manually since addCreatedNodesToCollection will emit itself the added to collectionn nodes (no duplicates)
+            this.localEventsService.nodesCreated.emit(payload.nodes);
         }
     }
 
