@@ -1,0 +1,31 @@
+<div class="caption">{{ 'WORKSPACE.FILE_LOCATION' | translate }}</div>
+<div class="picker-group">
+  @if ((parent$ | async) === null) {
+  <div class="no-breadcrumbs">
+    {{ 'STORAGE_LOCATION_UNSET' | translate }}
+  </div>
+  } @if (breadcrumbs) {
+  <es-breadcrumbs
+    short="always"
+    [clickable]="false"
+    [showLanding]="false"
+    [home]="breadcrumbs.homeLabel"
+    [homeIcon]="breadcrumbs.homeIcon"
+  ></es-breadcrumbs>
+  }
+  <div class="change">
+    <button
+      mat-button
+      color="primary"
+      (click)="chooseParent()"
+      [attr.aria-label]="'WORKSPACE.CHANGE_FILE_LOCATION' | translate"
+    >
+      {{ 'CHANGE_STORAGE_LOCATION' | translate }}
+    </button>
+  </div>
+</div>
+@if (showSaveParent) {
+<mat-checkbox [(ngModel)]="saveParent" (ngModelChange)="setSaveParent($event)"
+  >{{ 'STORAGE_LOCATION_SAVE' | translate }}
+</mat-checkbox>
+}
