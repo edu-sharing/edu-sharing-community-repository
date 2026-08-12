@@ -205,7 +205,7 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}}]}}}",
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}}",
                 result.get("test_facet")
         );
 
@@ -223,13 +223,13 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
                         "}",
                 result.get("test_facet"));
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet2\":{\"terms\":{\"field\":\"properties.test_facet2.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
                         "}",
                 result.get("test_facet2")
         );
@@ -259,7 +259,7 @@ class MetadataElasticSearchHelperTest {
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"multi_terms\":{\"min_doc_count\":4,\"size\":250,\"terms\":[{\"field\":\"facet1\",\"missing\":\"\"},{\"field\":\"facet2\",\"missing\":\"\"}]}}}," +
                         "\"meta\":{\"type\":\"multi_terms\"}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -311,9 +311,6 @@ class MetadataElasticSearchHelperTest {
                         "        },\n" +
                         "        {\n" +
                         "          \"bool\": {}\n" +
-                        "        },\n" +
-                        "        {\n" +
-                        "          \"bool\": {}\n" +
                         "        }\n" +
                         "      ]\n" +
                         "    }\n" +
@@ -323,6 +320,59 @@ class MetadataElasticSearchHelperTest {
         );
     }
 
+
+    @Test
+    void getAggregationsAppliesGlobalConditionsAsTopLevelQuery() {
+        SearchToken token = new SearchToken();
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
+        parameter.setName("test_facet");
+        query.setParameters(Collections.singletonList(parameter));
+
+        List<SearchFacet> facets = Arrays.asList(
+                new SearchFacet("test_facet", null),
+                new SearchFacet("test_facet2", null));
+        MetadataQueryParameter parameter2 = new MetadataQueryParameter(query.getSyntax(), null);
+        parameter2.setName("test_facet2");
+        query.setParameters(Arrays.asList(parameter, parameter2));
+
+        BoolQuery globalConditions = new BoolQuery.Builder()
+                .must(must -> must.term(t -> t.field("permissions.read").value("GROUP_EVERYONE")))
+                .build();
+
+        SearchRequest.Builder builder = new SearchRequest.Builder().index("workspace");
+        Map<String, Aggregation> result = MetadataElasticSearchHelper.applyAggregations(builder, mds, query,
+                Collections.emptyMap(), facets, Collections.emptySet(), globalConditions._toQuery(), token);
+
+        // the shared conditions are evaluated once as top level query ...
+        SearchRequest request = builder.build();
+        assertNotNull(request.query(), "expected globalConditions to be applied as top level query");
+        assertEquals(
+                JsonpUtils.toJsonString(globalConditions._toQuery(), new JacksonJsonpMapper()),
+                JsonpUtils.toJsonString(request.query(), new JacksonJsonpMapper()));
+
+        // ... and therefore must not be repeated in any facet's filter sub aggregation
+        for (Map.Entry<String, Aggregation> agg : result.entrySet()) {
+            String json = JsonpUtils.toJsonString(agg.getValue(), new JacksonJsonpMapper());
+            assertFalse(json.contains("permissions.read"),
+                    "facet " + agg.getKey() + " must not duplicate globalConditions, got: " + json);
+        }
+    }
+
+    @Test
+    void getAggregationsKeepsCallerTopLevelQueryWhenGlobalConditionsAreNull() {
+        SearchToken token = new SearchToken();
+        MetadataQueryParameter parameter = new MetadataQueryParameter(query.getSyntax(), null);
+        parameter.setName("test_facet");
+        query.setParameters(Collections.singletonList(parameter));
+
+        SearchRequest.Builder builder = new SearchRequest.Builder().index("workspace");
+        MetadataElasticSearchHelper.applyAggregations(builder, mds, query, Collections.emptyMap(),
+                Collections.singletonList(new SearchFacet("test_facet", null)), Collections.emptySet(),
+                null, token);
+
+        assertNull(builder.build().query(),
+                "callers passing null set their own top level query, applyAggregations must not touch it");
+    }
 
     @Test
     void getAggregationsCombineWithSuggestions() {
@@ -380,7 +430,7 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -398,14 +448,14 @@ class MetadataElasticSearchHelperTest {
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"min_doc_count\":4,\"size\":250}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
         SearchServiceElasticTestUtils.assertFacet(
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"terms\":{\"field\":\"properties.test_facet.keyword\",\"include\":[\"a\"],\"min_doc_count\":1,\"size\":1}}}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}},{\"wrapper\":{\"query\":\"eyJ3aWxkY2FyZCI6eyJwcm9wZXJ0aWVzLnRlc3RfZmFjZXQua2V5d29yZCI6eyJjYXNlX2luc2Vuc2l0aXZlIjp0cnVlLCJ2YWx1ZSI6IiphKiJ9fX0=\"}}]}},{\"bool\":{}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"properties.test_facet\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}},{\"wildcard\":{\"properties.test_facet.keyword\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}" +
                         "}",
                 result.get("test_facet_selected")
         );
@@ -435,7 +485,7 @@ class MetadataElasticSearchHelperTest {
                 "{" +
                         "\"aggregations\":{\"test_facet\":{\"multi_terms\":{\"min_doc_count\":4,\"size\":250,\"terms\":[{\"field\":\"facet1\",\"missing\":\"\"},{\"field\":\"facet2\",\"missing\":\"\"}]}}}," +
                         "\"meta\":{\"type\":\"multi_terms\"}," +
-                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{}},{\"bool\":{\"should\":[{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet1\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet2\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}]}}" +
+                        "\"filter\":{\"bool\":{\"must\":[{\"bool\":{\"must\":[{\"wrapper\":{\"query\":\"eyJleGlzdHMiOnsiZmllbGQiOiAidHlwZSJ9fQ==\"}}]}},{\"bool\":{}},{\"bool\":{\"should\":[{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet1\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}},{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"wildcard\":{\"facet2\":{\"case_insensitive\":true,\"value\":\"*A B C*\"}}}]}}]}}]}}" +
                         "}",
                 result.get("test_facet")
         );
@@ -494,9 +544,6 @@ class MetadataElasticSearchHelperTest {
                         "                    }\n" +
                         "                  ]\n" +
                         "                }\n" +
-                        "              },\n" +
-                        "              {\n" +
-                        "                \"bool\": {}\n" +
                         "              },\n" +
                         "              {\n" +
                         "                \"bool\": {}\n" +

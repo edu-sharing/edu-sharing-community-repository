@@ -23,6 +23,7 @@ import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -305,15 +306,22 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      * @param parameters
      * @param facets
      * @param excludeOwn
-     * @param globalConditions
+     * @param globalConditions conditions that apply to every facet alike (permissions, store, ...).
+     *                         They are applied <b>once</b> as the request's top level query instead of being
+     *                         repeated inside each facet's filter sub-aggregation, so elastic evaluates them a
+     *                         single time for all facets. Pass {@code null} when the caller sets its own top
+     *                         level query which already contains them.
      * @param searchToken
      * @return
      * @throws IllegalArgumentException
      */
-    public static Map<String, Aggregation> applyAggregations(SearchRequest.Builder searchRequestBuilder, MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+    public static Map<String, Aggregation> applyAggregations(SearchRequest.Builder searchRequestBuilder, MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets, Set<MetadataQueryParameter> excludeOwn, @Nullable Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         Map<String, Aggregation> result = new HashMap<>();
         String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
+        if (globalConditions != null) {
+            searchRequestBuilder.query(globalConditions);
+        }
         for (SearchFacet facet : facets) {
 
             Map<String, String[]> tmp = new HashMap<>(parameters == null ? Collections.emptyMap() : parameters);
@@ -323,10 +331,10 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
 
             BoolQuery.Builder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
             BoolQuery.Builder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
+            // globalConditions are intentionally not repeated here, they are applied as the top level query
             BoolQuery.Builder fullFilterQuery = new BoolQuery.Builder()
                     .must(must -> must.bool(qbFilter.build()))
-                    .must(must -> must.bool(qbNoFilter.build()))
-                    .must(globalConditions);
+                    .must(must -> must.bool(qbNoFilter.build()));
 
             List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
                     new MetadataQueryParameter.MetadataQueryFacetItem(
