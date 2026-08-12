@@ -924,7 +924,7 @@ public class PersonDao {
                 String lastName = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_LASTNAME);
                 String firstName = (String)nodeService.getProperty(nodeRef, ContentModel.PROP_FIRSTNAME);;
                 if(email != null && !email.isEmpty()) {
-                    NotificationServiceFactoryUtility.getLocalService()
+                    NotificationServiceFactory.getInstance().getLocalService()
                             .notifyPersonStatusChanged(
                                     email,
                                     firstName,
