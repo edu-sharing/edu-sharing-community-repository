@@ -367,7 +367,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 trap: false,
                 optionConfig: {
                     state: TabType.UPLOAD,
-                    allowCreate: false,
+                    allowCreate: true,
                     autoClose: false,
                     upload: 'default',
                 } as NodesSelectorConfig,

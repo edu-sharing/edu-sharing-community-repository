@@ -242,6 +242,13 @@ export class NodesSelectorComponent implements OnInit {
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
+    /**
+     * the target parent is a collection, i.e. newly created nodes (which always land in the inbox)
+     * have to be referenced into it explicitly
+     */
+    private parentIsCollection = computed(
+        () => !!this.parent() && this.nodeHelperService.isNodeCollection(this.parent()),
+    );
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -775,28 +782,14 @@ export class NodesSelectorComponent implements OnInit {
             default:
                 break;
         }
-        // note: the nodes are added to the inbox node if the upload was successful,
-        //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            const isCollection =
-                this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+            // a collection parent is referenced by `emitNodes`, common to all creation paths
             this.emitNodes({ nodes: createdNodes, parent: this.parent(), created: true });
-            if (isCollection) {
-                try {
-                    this.toast.showProgressSpinner();
-                    this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
-                        this.toast.closeProgressSpinner();
-                    });
-                } catch (e) {
-                    console.error(e);
-                    this.toast.closeProgressSpinner();
-                }
-            }
             // Standalone upload: select the created nodes so the sidebar shows their options.
             // Skipped for collections (added as an async reference — handled by the collection
             // page via applyNodeEmitted).
             if (
-                !isCollection &&
+                !this.parentIsCollection() &&
                 !this.option()?.optionConfig?.onNodesChoosen &&
                 !this.option()?.optionConfig?.autoClose
             ) {
@@ -1486,6 +1479,29 @@ export class NodesSelectorComponent implements OnInit {
         });
         if (this.option()?.optionConfig?.autoClose) {
             this.editorialSidebarService.close();
+        }
+        // Newly created nodes (upload, link, connector, LTI tool) are always placed in the inbox,
+        // so a collection parent needs an explicit reference. Copied nodes (`created` unset) have
+        // already been added by `copyNodes` and must not be added a second time.
+        if (payload.created && this.parentIsCollection()) {
+            this.addCreatedNodesToCollection(payload.nodes);
+        }
+    }
+
+    /**
+     * References freshly created nodes into the collection parent. Deliberately runs after the
+     * `applyNodeEmitted` emission above, so the collection page has flagged the incoming nodes
+     * before the add triggers its reload.
+     */
+    private addCreatedNodesToCollection(nodes: Node[]): void {
+        try {
+            this.toast.showProgressSpinner();
+            this.uiService.addToCollection(this.parent(), nodes, false, () => {
+                this.toast.closeProgressSpinner();
+            });
+        } catch (e) {
+            console.error(e);
+            this.toast.closeProgressSpinner();
         }
     }
 
