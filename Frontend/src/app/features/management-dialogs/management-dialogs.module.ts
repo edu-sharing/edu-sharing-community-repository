@@ -3,14 +3,9 @@ import { SharedModule } from '../../shared/shared.module';
 import { MdsModule } from '../mds/mds.module';
 import { AddStreamComponent } from './add-stream/add-stream.component';
 import { WorkspaceManagementDialogsComponent } from './management-dialogs.component';
-import { ViewMaterialFeedbackComponent } from './view-material-feedback/view-material-feedback.component';
 
 @NgModule({
-    declarations: [
-        WorkspaceManagementDialogsComponent,
-        AddStreamComponent,
-        ViewMaterialFeedbackComponent,
-    ],
+    declarations: [WorkspaceManagementDialogsComponent, AddStreamComponent],
     imports: [SharedModule, MdsModule],
     exports: [WorkspaceManagementDialogsComponent],
 })

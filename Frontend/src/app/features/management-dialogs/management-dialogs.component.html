@@ -5,11 +5,6 @@
   (cancelStream)="closeStream()"
   (done)="closeStream()"
 ></es-add-stream>
-} @if (materialViewFeedback) {
-<es-view-material-feedback
-  [node]="materialViewFeedback"
-  (closeFeedback)="closeMaterialViewFeedback()"
-></es-view-material-feedback>
 } @if (addToCollection) {
 <es-collection-chooser
   class="dialog-right"

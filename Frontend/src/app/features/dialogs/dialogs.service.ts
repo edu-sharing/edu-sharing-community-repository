@@ -115,6 +115,7 @@ import {
     ShareDialogData,
     ShareDialogResult,
 } from './dialog-modules/share-dialog/share-dialog-data';
+import { ViewFeedbackDialogData } from './dialog-modules/view-feedback-dialog/view-feedback-dialog-data';
 import {
     ShareHistoryDialogData,
     ShareHistoryDialogResult,
@@ -669,6 +670,22 @@ export class DialogsService {
             width: 600,
             data,
             closable: Closable.Standard,
+        });
+    }
+
+    async openViewFeedbackDialog(
+        data: ViewFeedbackDialogData,
+    ): Promise<CardDialogRef<ViewFeedbackDialogData, void>> {
+        const { ViewFeedbackDialogComponent } = await import(
+            './dialog-modules/view-feedback-dialog/view-feedback-dialog.component'
+        );
+        return this.cardDialog.open(ViewFeedbackDialogComponent, {
+            title: 'FEEDBACK.VIEW_TITLE',
+            ...(await this.cardDialogUtils.configForNode(data.node)),
+            width: 600,
+            minHeight: 500,
+            data,
+            closable: Closable.Casual,
         });
     }
 
