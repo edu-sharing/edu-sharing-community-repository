@@ -1,0 +1,4 @@
+// Overwrite this file in extensions to add styles to the rendering web component build
+// (project `rendering-service`, output `dist/web-components/rendering-service/styles.css`, embedded
+// by `RenderingServlet`). It is the last entry of that project's `styles` array, so its rules win
+// ties in the cascade. In the core build it is empty.
