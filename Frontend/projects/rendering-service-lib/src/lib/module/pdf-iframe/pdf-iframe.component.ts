@@ -1,4 +1,5 @@
 import {
+    CSP_NONCE,
     Component,
     ElementRef,
     Input,
@@ -31,6 +32,12 @@ export class PdfIframeComponent implements RenderModule, OnChanges {
     configuration = inject<RenderingServiceLibConfiguration>(RENDERING_SERVICE_LIB_CONFIG, {
         optional: true,
     });
+    /**
+     * The iframe below has no `src`, so its document inherits the CSP of this page. Everything written
+     * into it — our own <style>, the scripts and, most importantly, the styles that the angular app
+     * booting inside the iframe injects at runtime — therefore needs this page's nonce.
+     */
+    private cspNonce = inject(CSP_NONCE, { optional: true });
 
     @ViewChild('iframe') iframe!: ElementRef<HTMLIFrameElement>;
     @Input() data: RenderData | undefined;
@@ -75,18 +82,26 @@ export class PdfIframeComponent implements RenderModule, OnChanges {
                 widget.node = this.node;
                 widget.assetUrl = this.componentBaseUrl + '/assets';
             };
+            const nonceAttribute = this.cspNonce ? ` nonce="${this.cspNonce}"` : '';
             iframeDoc.open();
             iframeDoc.write(`<!DOCTYPE html><html><head>
-        <style>
+        <style${nonceAttribute}>
           html, body { margin: 0; padding: 0; height: 100%; }
           es-pdf { display: block; height: 100%; }
           ${containerHeight ? `:root { --containerHeight: ${containerHeight}; }` : ''}
         </style>
 </head><body>
-      <script src="${this.componentBaseUrl}/runtime.js" type="module"></script>
-      <script src="${this.componentBaseUrl}/polyfills.js" type="module"></script>
-      <script src="${this.componentBaseUrl}/vendor.js" type="module"></script>
-      <script src="${this.componentBaseUrl}/main.js" type="module"></script>
+      <!--
+        the angular app inside the iframe resolves the CSP_NONCE token via its default factory, which
+        looks up \`document.body.querySelector('[ngCspNonce]')\` — on the iframe document, so the marker
+        of the hosting page does not apply here. ngx-extended-pdf-viewer reads the same token for its
+        dynamically generated css and its pdf.js script tags.
+      -->
+      ${this.cspNonce ? `<div ngCspNonce="${this.cspNonce}" hidden></div>` : ''}
+      <script${nonceAttribute} src="${this.componentBaseUrl}/runtime.js" type="module"></script>
+      <script${nonceAttribute} src="${this.componentBaseUrl}/polyfills.js" type="module"></script>
+      <script${nonceAttribute} src="${this.componentBaseUrl}/vendor.js" type="module"></script>
+      <script${nonceAttribute} src="${this.componentBaseUrl}/main.js" type="module"></script>
       <es-pdf></es-pdf>
 </body></html>`);
             iframeDoc.close();
