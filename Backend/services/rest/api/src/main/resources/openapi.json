@@ -24070,7 +24070,7 @@
     },
     "/iam/v1/groups/{repository}/{group}/members": {
       "delete": {
-        "description": "Delete members from the group. (admin rights are required.)",
+        "description": "Delete members from the group. (admin rights are required.) The whole list is processed within a single transaction, i.e. if one member fails, no member is removed. At most 1000 members are accepted per request, larger requests are rejected with 400. A batch size of 100 is recommended. Batches must not be sent in parallel for the same group, since all of them write to the same group node and would only run into transaction retries.",
         "operationId": "deleteMembership_1",
         "parameters": [
           {
@@ -24320,7 +24320,7 @@
         ]
       },
       "put": {
-        "description": "Add members to the group. (admin rights are required.)",
+        "description": "Add members to the group. (admin rights are required.) The whole list is processed within a single transaction, i.e. if one member fails, no member is added. At most 1000 members are accepted per request, larger requests are rejected with 400. A batch size of 100 is recommended. Batches must not be sent in parallel for the same group, since all of them write to the same group node and would only run into transaction retries.",
         "operationId": "addMembership_1",
         "parameters": [
           {
@@ -25495,7 +25495,7 @@
     },
     "/iam/v1/people/{repository}/status/{status}": {
       "put": {
-        "description": "update the status of multiple users. (admin rights are required.)",
+        "description": "update the status of multiple users. (admin rights are required.) The whole list is processed within a single transaction, i.e. if one user fails, the status of no user is changed. At most 1000 users are accepted per request, at most 100 if notify is enabled, since the notification mails are sent synchronously, one per user. Larger requests are rejected with 400. A batch size of 100 (20 with notify enabled) is recommended.",
         "operationId": "updateUserStatus_1",
         "parameters": [
           {
