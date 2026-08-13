@@ -20,19 +20,35 @@ export class InputDialogComponent {
 
     control = new FormControl('');
 
+    private confirmButton: DialogButton;
+
     constructor() {
         this.initButtons();
     }
 
+    /** Confirms the dialog, e.g. triggered by the enter key. Ignored while the input is empty. */
+    confirm(): void {
+        if (this.confirmButton.disabled) {
+            return;
+        }
+        this.confirmButton.callback();
+    }
+
     private initButtons(): void {
-        const buttons = [
-            new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
-            new DialogButton('SAVE', { color: 'primary' }, () =>
-                this.dialogRef.close(this.control.value.trim()),
-            ),
-        ];
-        buttons[1].disabled = true;
-        this.control.valueChanges.subscribe((value) => (buttons[1].disabled = !value.trim()));
-        this.dialogRef.patchConfig({ buttons });
+        this.confirmButton = new DialogButton(
+            this.data.confirmLabel ?? 'SAVE',
+            { color: 'primary' },
+            () => this.dialogRef.close(this.control.value.trim()),
+        );
+        this.confirmButton.disabled = true;
+        this.control.valueChanges.subscribe(
+            (value) => (this.confirmButton.disabled = !value.trim()),
+        );
+        this.dialogRef.patchConfig({
+            buttons: [
+                new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
+                this.confirmButton,
+            ],
+        });
     }
 }
