@@ -9386,6 +9386,10 @@
           "nodeId": {
             "type": "string"
           },
+          "occurredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
           "timestamp": {
             "format": "date-time",
             "type": "string"
@@ -9400,6 +9404,7 @@
         "required": [
           "id",
           "nodeId",
+          "occurredAt",
           "timestamp",
           "type",
           "username"
@@ -44628,7 +44633,7 @@
             }
           },
           {
-            "description": "OpLog id to filter opLogs from",
+            "description": "OpLog id to filter opLogs from. Without 'after', a standalone id cursor. Together with 'after', a tiebreaker for opLogs sharing the exact same 'after' timestamp, forming a combined (timestamp, id) cursor.",
             "in": "query",
             "name": "opLogId",
             "schema": {
