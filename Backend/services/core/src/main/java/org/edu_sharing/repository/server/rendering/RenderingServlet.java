@@ -93,6 +93,14 @@ public class RenderingServlet extends SpringHttpServlet {
         }
         resp.getWriter().write("</head>");
         resp.getWriter().write("<body class= \"eduservlet-render-body\">");
+        /*
+         * angular resolves the CSP_NONCE token via its default factory, which looks up
+         * `document.body.querySelector('[ngCspNonce]')`. Without it, angular itself and the material cdk
+         * (MediaMatcher) inject <style> elements without a nonce, which are blocked by our style-src policy.
+         * The marker must be inside the body (not the head) and must be present regardless of whether the
+         * rendering content or an error page follows below.
+         */
+        resp.getWriter().write("<div ngCspNonce=\"" + nonce + "\" hidden></div>");
         String response;
         try {
             NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, node_id);
