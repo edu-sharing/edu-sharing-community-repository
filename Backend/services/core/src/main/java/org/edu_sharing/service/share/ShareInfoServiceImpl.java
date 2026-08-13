@@ -361,8 +361,14 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
     /**
      * Retrieves a list of ShareInfoOplog entries based on the specified parameters.
      *
-     * @param afterTxId the transaction ID after which the oplogs should be fetched;
-     *                  if null, this parameter will be ignored.
+     * @param afterTxId the transaction ID after which the oplogs should be fetched.
+     *                  If afterDate is null, this is a standalone id cursor and afterTxId's own
+     *                  value is excluded (id &gt; afterTxId), ignoring any date bounds.
+     *                  If afterDate is also given, afterTxId instead acts as a tiebreaker for
+     *                  oplog rows sharing the exact same afterDate timestamp - together they form
+     *                  a (timestamp, id) cursor, so a caller can page through a timestamp range
+     *                  without ever skipping or re-fetching a row. Null is treated as "no lower
+     *                  id bound", i.e. every row at afterDate is included.
      * @param afterDate the start date after which the oplogs should be fetched;
      *                  if null, this parameter will be ignored. (exclusive)
      * @param untilDate the end date until which the oplogs should be fetched;
@@ -382,12 +388,13 @@ public class ShareInfoServiceImpl implements NodeServicePolicies.OnDeleteNodePol
         }
 
         List<ShareInfoOplogData> oplogs;
-        if (afterTxId != null) {
-            oplogs = shareInfoOpLogMapper.getAllAfterId(afterTxId, limit);
-        } else if (afterDate != null) {
+        if (afterDate != null) {
+            long afterId = afterTxId != null ? afterTxId : Long.MIN_VALUE;
             oplogs = untilDate != null
-                    ? shareInfoOpLogMapper.getAllBetweenTimestamp(afterDate, untilDate, limit)
-                    : shareInfoOpLogMapper.getAllAfterTimestamp(afterDate, limit);
+                    ? shareInfoOpLogMapper.getAllBetweenTimestamp(afterDate, afterId, untilDate, limit)
+                    : shareInfoOpLogMapper.getAllAfterTimestamp(afterDate, afterId, limit);
+        } else if (afterTxId != null) {
+            oplogs = shareInfoOpLogMapper.getAllAfterId(afterTxId, limit);
         } else {
             oplogs = shareInfoOpLogMapper.getAll(limit);
         }
