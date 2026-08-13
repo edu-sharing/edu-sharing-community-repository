@@ -547,7 +547,7 @@ public class IamApi {
             @Parameter(description = "notify the user via mail", required = true, schema = @Schema(defaultValue = "true")) @QueryParam("notify") Boolean notifyMail,
             @Context HttpServletRequest req) {
         try {
-            PersonDao.setStatus(user,status,notifyMail);
+            PersonDao.setStatus(user,status,notifyMail == null ? true : notifyMail);
             return Response.status(Response.Status.OK).build();
         } catch (DAOValidationException t) {
             logger.warn(t.getMessage(), t);
