@@ -602,7 +602,14 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         if (this.ui.isMobile() && (event.element as Node).isDirectory) {
             this.openNode.emit(event.element);
         } else {
-            this.editorialSidebarService.handleSelect(this.nodeEntries, event, Scope.WorkspaceList);
+            // in the workspace, clicking the already selected element must not deselect it
+            this.editorialSidebarService.handleSelect(
+                this.nodeEntries,
+                event,
+                Scope.WorkspaceList,
+                undefined,
+                false,
+            );
         }
     }
 
