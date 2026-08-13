@@ -398,12 +398,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             properties[RestConstants.CM_PROP_METADATASET_EDU_FORCEMETADATASET] = ['true'];
         }
         this.nodeService
-            .createNode(
-                (await this.getParent()).ref.id,
-                RestConstants.CM_TYPE_FOLDER,
-                [],
-                properties,
-            )
+            .createNode((await this.getParent()).ref.id, RestConstants.CCM_TYPE_MAP, [], properties)
             .subscribe(
                 (data) => {
                     this.toast.closeProgressSpinner();
