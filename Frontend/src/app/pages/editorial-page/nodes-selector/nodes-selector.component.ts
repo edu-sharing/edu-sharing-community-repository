@@ -242,6 +242,13 @@ export class NodesSelectorComponent implements OnInit {
     chooseParent = computed(
         () => !this.parent() || this.nodeHelperService.isNodeCollection(this.parent()),
     );
+    /**
+     * the target parent is a collection, i.e. newly created nodes (which always land in the inbox)
+     * have to be referenced into it explicitly
+     */
+    private parentIsCollection = computed(
+        () => !!this.parent() && this.nodeHelperService.isNodeCollection(this.parent()),
+    );
 
     selectedTab: WritableSignal<TabType> = signal(null);
     selectedTabId = computed(() => this.supportedTabs().indexOf(this.selectedTab()));
@@ -516,7 +523,7 @@ export class NodesSelectorComponent implements OnInit {
         { initialValue: [] },
     );
     ltiToolOptions: Signal<OptionItem[]> = toSignal(
-        this.ltiToolOptionsService.buildOptions((tool) => this.createToolType.set(tool)),
+        this.ltiToolOptionsService.buildOptions((tool) => void this.showCreateLtiTool(tool)),
         { initialValue: [] },
     );
     /** the connector + LTI tool options of the "Create" dropdown, merged with the custom ones */
@@ -526,8 +533,6 @@ export class NodesSelectorComponent implements OnInit {
             this.option()?.optionConfig?.customCreateOptions,
         ),
     );
-    /** the LTI tool the create dialog is currently open for */
-    createToolType: WritableSignal<Tool | null> = signal(null);
     /** the folder a newly created element is placed in */
     uploadParent = computed(() => (this.chooseParent() ? this.inboxNode() : this.parent()));
 
@@ -775,28 +780,14 @@ export class NodesSelectorComponent implements OnInit {
             default:
                 break;
         }
-        // note: the nodes are added to the inbox node if the upload was successful,
-        //       thus, adding them to the collection is necessary
         if (createdNodes?.length) {
-            const isCollection =
-                this.parent() && this.nodeHelperService.isNodeCollection(this.parent());
+            // a collection parent is referenced by `emitNodes`, common to all creation paths
             this.emitNodes({ nodes: createdNodes, parent: this.parent(), created: true });
-            if (isCollection) {
-                try {
-                    this.toast.showProgressSpinner();
-                    this.uiService.addToCollection(this.parent(), createdNodes, false, () => {
-                        this.toast.closeProgressSpinner();
-                    });
-                } catch (e) {
-                    console.error(e);
-                    this.toast.closeProgressSpinner();
-                }
-            }
             // Standalone upload: select the created nodes so the sidebar shows their options.
             // Skipped for collections (added as an async reference — handled by the collection
             // page via applyNodeEmitted).
             if (
-                !isCollection &&
+                !this.parentIsCollection() &&
                 !this.option()?.optionConfig?.onNodesChoosen &&
                 !this.option()?.optionConfig?.autoClose
             ) {
@@ -1478,7 +1469,6 @@ export class NodesSelectorComponent implements OnInit {
         created?: boolean;
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
-        this.localEventsService.nodesCreated.emit(payload.nodes);
         this.option()?.optionConfig?.onNodesChoosen?.({
             nodes: payload.nodes,
             connectorId: payload.connectorId,
@@ -1486,6 +1476,32 @@ export class NodesSelectorComponent implements OnInit {
         });
         if (this.option()?.optionConfig?.autoClose) {
             this.editorialSidebarService.close();
+        }
+        // Newly created nodes (upload, link, connector, LTI tool) are always placed in the inbox,
+        // so a collection parent needs an explicit reference. Copied nodes (`created` unset) have
+        // already been added by `copyNodes` and must not be added a second time.
+        if (payload.created && this.parentIsCollection()) {
+            this.addCreatedNodesToCollection(payload.nodes);
+        } else if (payload.created) {
+            // emit manually since addCreatedNodesToCollection will emit itself the added to collectionn nodes (no duplicates)
+            this.localEventsService.nodesCreated.emit(payload.nodes);
+        }
+    }
+
+    /**
+     * References freshly created nodes into the collection parent. Deliberately runs after the
+     * `applyNodeEmitted` emission above, so the collection page has flagged the incoming nodes
+     * before the add triggers its reload.
+     */
+    private addCreatedNodesToCollection(nodes: Node[]): void {
+        try {
+            this.toast.showProgressSpinner();
+            this.uiService.addToCollection(this.parent(), nodes, false, () => {
+                this.toast.closeProgressSpinner();
+            });
+        } catch (e) {
+            console.error(e);
+            this.toast.closeProgressSpinner();
         }
     }
 
@@ -1532,26 +1548,24 @@ export class NodesSelectorComponent implements OnInit {
     }
 
     /**
-     * Creates the node(s) for the confirmed LTI tool dialog and emits them like a connector
-     * creation.
+     * Opens the LTI tool create dialog and emits the created node(s) like a connector creation.
      */
-    async createLtiTool(event: LtiToolDialogResult): Promise<void> {
-        const tool = this.createToolType();
-        const nodes = await this.ltiToolOptionsService.createFromDialogResult(
-            tool,
-            event,
-            // resolved lazily: the popup window must be opened before the inbox lookup is awaited
-            () => this.uploadParent() ?? firstValueFrom(this.inboxNode$),
-        );
-        this.createToolType.set(null);
-        if (nodes.length) {
-            this.emitNodes({ nodes, parent: this.parent(), created: true });
-        }
-    }
-
-    cancelLtiTool(event: LtiToolDialogResult): void {
-        this.ltiToolOptionsService.cancelDialogResult(event);
-        this.createToolType.set(null);
+    async showCreateLtiTool(tool: Tool): Promise<void> {
+        const parent = this.uploadParent() ?? (await firstValueFrom(this.inboxNode$));
+        const dialogRef = await this.dialogs.openCreateLtiToolDialog({ tool, parent });
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (!result) {
+                return;
+            }
+            const nodes = await this.ltiToolOptionsService.createFromDialogResult(
+                tool,
+                result,
+                () => parent,
+            );
+            if (nodes.length) {
+                this.emitNodes({ nodes, parent: this.parent(), created: true });
+            }
+        });
     }
 
     protected readonly DEFAULT = DEFAULT;

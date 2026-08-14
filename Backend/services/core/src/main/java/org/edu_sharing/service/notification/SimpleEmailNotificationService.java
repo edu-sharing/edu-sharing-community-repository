@@ -68,7 +68,7 @@ public class SimpleEmailNotificationService {
         replace.put("id", event.nodeId());
         replace.put("link", URLHelper.getNgRenderNodeUrl(event.nodeId(), null, true));
         replace.put("link.static", URLHelper.getNgRenderNodeUrl(event.nodeId(), null, false));
-        MailTemplate.applyNodePropertiesToMap("nodeId.", event.nodeProperties(), replace);
+        MailTemplate.applyNodePropertiesToMap("node.", event.nodeProperties(), replace);
 
         if(Context.getCurrentInstance() != null && Context.getCurrentInstance().getRequest() != null) {
             // add request headers to evaluate in template (i.e. user-agent)
@@ -140,7 +140,7 @@ public class SimpleEmailNotificationService {
                 MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), event.nodeId(), replace, "link");
                 replace.put("status", I18nAngular.getTranslationAngular("common", "WORKFLOW." + event.status()));
                 receiverMail.applyToMap("", replace);
-                MailTemplate.applyNodePropertiesToMap("nodeId.", event.nodeProperties(), replace);
+                MailTemplate.applyNodePropertiesToMap("node.", event.nodeProperties(), replace);
 
                 String template = "invited_workflow";
                 MailTemplate.sendMail(sender.getFullName(), sender.getEmail(), receiverMail.getEmail(), template, replace);
@@ -207,7 +207,7 @@ public class SimpleEmailNotificationService {
         replace.put("parentId", event.mdsValue().getParent());
         replace.put("parentCaption", event.mdsValue().getParent() == null ? null : event.widgetDefinition().getValuesAsMap().get(event.mdsValue().getParent()).getCaption());
         if(!event.nodeIds().isEmpty()) {
-            MailTemplate.applyNodePropertiesToMap("nodeId.", event.nodePropertiesList().get(0), replace);
+            MailTemplate.applyNodePropertiesToMap("node.", event.nodePropertiesList().get(0), replace);
             MailTemplate.addContentLinks(ApplicationInfoList.getHomeRepository(), event.nodeIds().get(0), replace, "link");
         }
         String[] receivers = event.widgetDefinition().getSuggestionReceiver().split(",");
@@ -253,7 +253,7 @@ public class SimpleEmailNotificationService {
         Map<String, String> replace = new HashMap<>();
         receiver.applyToMap("", replace);
         sender.applyToMap("inviter.", replace);
-        MailTemplate.applyNodePropertiesToMap("nodeId.", event.nodeProperties(), replace);
+        MailTemplate.applyNodePropertiesToMap("node.", event.nodeProperties(), replace);
         replace.put("name", name.trim());
         replace.put("message", event.mailText().replace("\n", "<br />").trim());
         replace.put("permissions", permText.trim());

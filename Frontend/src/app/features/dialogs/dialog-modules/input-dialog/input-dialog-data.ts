@@ -7,6 +7,8 @@ export class InputDialogData<P extends string = string> {
     messageParameters?: { [key in P]: string };
     /** Label of the input field. Will be translated. */
     label: string;
+    /** Label of the confirm button. Will be translated. Defaults to `SAVE`. */
+    confirmLabel?: string;
 }
 
 export class InputDialogConfig extends InputDialogData {

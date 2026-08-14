@@ -16,23 +16,16 @@ import {
     ClientutilsV1Service,
     Node,
     RestConstants,
-    SessionStorageService,
     UserQuota,
     UserService,
     WebsiteInformation,
 } from 'ngx-edu-sharing-api';
-import { ListItem, notNull, UIAnimation } from 'ngx-edu-sharing-ui';
+import { ListItem, UIAnimation } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { catchError, debounce, filter, finalize, map, switchMap, tap } from 'rxjs/operators';
-import {
-    ConfigurationService,
-    DialogButton,
-    ParentList,
-    RestNodeService,
-} from '../../../../core-module/core.module';
+import { debounce, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { ConfigurationService, DialogButton } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
-import { BreadcrumbsService } from '../../../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService, DialogTemplate } from '../../dialogs.service';
@@ -48,7 +41,6 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
         trigger('cardAnimation', UIAnimation.cardAnimation()),
         trigger('openOverlay', UIAnimation.openOverlay()),
     ],
-    providers: [BreadcrumbsService],
     standalone: false,
 })
 export class AddMaterialDialogComponent implements OnInit {
@@ -57,12 +49,9 @@ export class AddMaterialDialogComponent implements OnInit {
         AddMaterialDialogData,
         AddMaterialDialogResult
     > | null>(CardDialogRef<AddMaterialDialogData, AddMaterialDialogResult>, { optional: true });
-    private breadcrumbsService = inject(BreadcrumbsService);
     private clientUtils = inject(ClientutilsV1Service);
     private configService = inject(ConfigurationService);
     dialogs = inject(DialogsService);
-    private nodeService = inject(RestNodeService);
-    private storageService = inject(SessionStorageService);
     private toast = inject(Toast);
     private userService = inject(UserService);
 
@@ -75,12 +64,6 @@ export class AddMaterialDialogComponent implements OnInit {
     private disabled = true;
 
     protected readonly linkControl = new FormControl('');
-    protected showSaveParent = false;
-    protected saveParent = false;
-    protected breadcrumbs: {
-        homeLabel: string;
-        homeIcon: string;
-    };
     protected ltiEnabled: boolean;
     protected ltiActivated: boolean;
     protected ltiConsumerKey: string;
@@ -103,7 +86,6 @@ export class AddMaterialDialogComponent implements OnInit {
     }
 
     constructor() {
-        this.registerParentListener();
         this.userService
             .observeCurrentUser()
             .pipe(takeUntilDestroyed())
@@ -111,24 +93,6 @@ export class AddMaterialDialogComponent implements OnInit {
         this.configService
             .get('upload.lti.enabled', false)
             .subscribe((ltiEnabled) => (this.ltiEnabled = ltiEnabled));
-    }
-
-    private registerParentListener() {
-        this.parent$
-            .pipe(
-                takeUntilDestroyed(),
-                filter((p) => !!p),
-            )
-            .subscribe((parent) => {
-                this.breadcrumbs = null;
-                this.breadcrumbsService.setNodePath(null);
-                this.getBreadcrumbs(parent)
-                    .pipe(filter(notNull))
-                    .subscribe((breadcrumbs) => {
-                        this.breadcrumbs = breadcrumbs;
-                        this.breadcrumbsService.setNodePath(breadcrumbs.nodes);
-                    });
-            });
     }
 
     ngOnInit(): void {
@@ -253,22 +217,8 @@ export class AddMaterialDialogComponent implements OnInit {
         this.dialogRef?.patchConfig({ closable: Closable.Standard });
     }
 
-    async chooseParent() {
-        const dialogRef = await this.dialogs.openFileChooserDialog({
-            pickDirectory: true,
-            title: 'WORKSPACE.CHOOSE_LOCATION_TITLE',
-            subtitle: 'WORKSPACE.CHOOSE_LOCATION_DESCRIPTION',
-        });
-        dialogRef.afterClosed().subscribe((nodes) => {
-            if (nodes) {
-                this.parentSelected(nodes);
-            }
-        });
-    }
-
-    parentSelected(event: Node[]) {
-        this.showSaveParent = true;
-        this.parent$.next(event[0]);
+    parentSelected(parent: Node) {
+        this.parent$.next(parent);
         // dialog-specific patches
         this.updateButtons();
         this.dialogRef?.patchConfig({ closable: Closable.Standard });
@@ -283,68 +233,6 @@ export class AddMaterialDialogComponent implements OnInit {
 
     canSave() {
         return !(this.disabled || (this.currentData.chooseParent && !this.parent$.value));
-    }
-
-    private getBreadcrumbs(node: Node) {
-        if (node && node.ref.id !== RestConstants.USERHOME) {
-            return this.nodeService.getNodeParents(node.ref.id).pipe(
-                map((parentList) => this.getBreadcrumbsByParentList(parentList)),
-                catchError(() =>
-                    rxjs.of(
-                        this.getBreadcrumbsByParentList({
-                            nodes: [node],
-                            pagination: null,
-                            scope: 'UNKNOWN',
-                        }),
-                    ),
-                ),
-            );
-        } else {
-            return rxjs.of(null);
-        }
-    }
-
-    private getBreadcrumbsByParentList(parentList: ParentList) {
-        const nodes = parentList.nodes.reverse();
-        switch (parentList.scope) {
-            case 'MY_FILES':
-            // api will return null if fullPath was requested (i.e. as admin)
-            case null:
-                return {
-                    nodes,
-                    homeLabel: 'WORKSPACE.MY_FILES',
-                    homeIcon: 'person',
-                };
-            case 'SHARED_FILES':
-                return {
-                    nodes,
-                    homeLabel: 'WORKSPACE.SHARED_FILES',
-                    homeIcon: 'group',
-                };
-            case 'UNKNOWN':
-                return {
-                    nodes,
-                    homeLabel: 'WORKSPACE.RESTRICTED_FOLDER',
-                    homeIcon: 'folder',
-                };
-            default:
-                console.warn(`Unknown scope "${parentList.scope}"`);
-                return {
-                    nodes,
-                    homeLabel: null,
-                    homeIcon: null,
-                };
-        }
-    }
-
-    async setSaveParent(status: boolean) {
-        if (status) {
-            await this.storageService.set('defaultInboxFolder', this.parent$.value.ref.id);
-            this.toast.toast('TOAST.STORAGE_LOCATION_SAVED', { name: this.parent$.value.name });
-        } else {
-            await this.storageService.delete('defaultInboxFolder');
-            this.toast.toast('TOAST.STORAGE_LOCATION_RESET');
-        }
     }
 
     protected readonly TemplateSlot = TemplateSlot;

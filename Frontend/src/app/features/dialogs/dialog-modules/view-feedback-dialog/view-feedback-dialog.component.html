@@ -1,0 +1,24 @@
+<div class="feedback">
+  @if (feedbacks()?.length === 0) {
+  <h2 class="empty">{{ 'FEEDBACK.VIEW_EMPTY' | translate }}</h2>
+  } @for (feedback of feedbacks(); track feedback) {
+  <div class="feedback-container">
+    <div class="main-data">
+      <div class="author">
+        <es-user-avatar
+          icon="person"
+          [user]="{ authorityName: feedback.authority }"
+          size="xsmall"
+        ></es-user-avatar>
+        {{ 'FEEDBACK.CREATOR' | translate : { creator: feedback.authority } }}
+      </div>
+      <div class="date">
+        {{ feedback.modifiedAt | formatDate : { relative: true, time: true } }}
+      </div>
+    </div>
+    <div class="meta-data">
+      <es-mds-viewer [data]="feedback.data" groupId="material_feedback_view"></es-mds-viewer>
+    </div>
+  </div>
+  }
+</div>

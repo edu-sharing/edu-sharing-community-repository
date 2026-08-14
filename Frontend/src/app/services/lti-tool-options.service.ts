@@ -8,9 +8,9 @@ import { UIHelper } from '../core-ui-module/ui-helper';
 import { NodeHelperService } from './node-helper.service';
 
 /**
- * The payload emitted by `es-create-ltitool`'s `create` / `cancel` outputs.
+ * The result of the `CreateLtiToolDialogComponent`.
  */
-export type LtiToolDialogResult = { nodes?: Node[]; name?: string };
+export type LtiToolDialogResult = { nodes?: Node[]; name?: string; window?: Window };
 
 /**
  * Builds the "create via LTI tool" option list and performs the node creation for the picked tool.
@@ -69,15 +69,16 @@ export class LtiToolOptionsService {
     }
 
     /**
-     * Creates the node(s) for a confirmed `es-create-ltitool` dialog and returns them.
+     * Creates the node(s) for a confirmed `CreateLtiToolDialogComponent` and returns them.
      *
-     * Must be called synchronously from the dialog's `create` handler: for a `customContentOption`
-     * tool the popup window is opened here and would otherwise be killed by the popup blocker.
+     * For a `customContentOption` tool the dialog already opened the popup window (within the user
+     * gesture) and hands it over via `result.window` — do not open one here, it would be killed by
+     * the popup blocker.
      *
      * @param tool the tool the dialog was opened for
      * @param result the dialog result
      * @param resolveParent resolves the folder the node is created in — only called (and awaited)
-     *        for `customContentOption` tools, after the window was opened
+     *        for `customContentOption` tools
      */
     createFromDialogResult(
         tool: Tool,
@@ -85,10 +86,7 @@ export class LtiToolOptionsService {
         resolveParent: () => Node | Promise<Node>,
     ): Promise<Node[]> {
         if (tool.customContentOption) {
-            // fix popup problem: the window must be opened within the user gesture, i.e. before
-            // the parent lookup is awaited
-            const win = window.open('');
-            return this.createContentOptionNode(tool, result.name, resolveParent, win);
+            return this.createContentOptionNode(tool, result.name, resolveParent, result.window);
         }
         return this.renameCreatedNodes(result.nodes ?? []);
     }

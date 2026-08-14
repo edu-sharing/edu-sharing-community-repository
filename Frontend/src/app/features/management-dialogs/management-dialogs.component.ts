@@ -85,8 +85,6 @@ export class WorkspaceManagementDialogsComponent {
     @Input() addNodesStream: Node[];
     @Output() addNodesStreamChange = new EventEmitter();
     @Input() nodeSimpleEditChange = new EventEmitter<Node[]>();
-    @Input() materialViewFeedback: Node;
-    @Output() materialViewFeedbackChange = new EventEmitter<Node>();
     @Output() refresh = new EventEmitter<Node[] | void>();
     @Output() closeAddToCollection = new EventEmitter();
     @Output() storedAddToCollection = new EventEmitter<{
@@ -212,11 +210,6 @@ export class WorkspaceManagementDialogsComponent {
                 callback();
             }
         });
-    }
-
-    closeMaterialViewFeedback() {
-        this.materialViewFeedback = null;
-        this.materialViewFeedbackChange.emit(null);
     }
 
     declineProposals(nodes: ProposalNode[]) {

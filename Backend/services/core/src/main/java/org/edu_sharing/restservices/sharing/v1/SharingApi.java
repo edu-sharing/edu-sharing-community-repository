@@ -196,7 +196,7 @@ public class SharingApi {
             })
     public List<ShareInfoOplog> getOpLog(
             @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repId,
-            @Parameter(description = "OpLog id to filter opLogs from") @QueryParam("opLogId") Long opLogId,
+            @Parameter(description = "OpLog id to filter opLogs from. Without 'after', a standalone id cursor. Together with 'after', a tiebreaker for opLogs sharing the exact same 'after' timestamp, forming a combined (timestamp, id) cursor.") @QueryParam("opLogId") Long opLogId,
             @Parameter(description = "Date to filter opLogs from (exclusive)") @QueryParam("after") Date after,
             @Parameter(description = "Date to filter opLogs until (inklusive)") @QueryParam("until") Date until,
             @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "500")) @QueryParam("maxItems") Integer maxItems

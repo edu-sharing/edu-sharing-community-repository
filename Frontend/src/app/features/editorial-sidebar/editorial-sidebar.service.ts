@@ -145,24 +145,30 @@ export class EditorialSidebarService {
 
     /**
      * handle a select event from the node entries wrapper component and trigger the sidebar
+     *
+     * @param allowDeselect when false, clicking the already (solely) selected element keeps it
+     * selected instead of toggling it off
      */
     handleSelect(
         nodeEntriesRef: NodeEntriesWrapperComponent<NodeEntriesDataType> | undefined,
         event: NodeClickEvent<NodeEntriesDataType>,
         scope: Scope,
         previewConfig?: PreviewConfig,
+        allowDeselect = true,
     ) {
         this.scope.set(scope);
-        if (
-            !(
-                nodeEntriesRef?.getSelection()?.selected.length === 1 &&
-                nodeEntriesRef?.getSelection()?.selected[0] === event.element
-            )
-        ) {
+        const isSoleSelection =
+            nodeEntriesRef?.getSelection()?.selected.length === 1 &&
+            nodeEntriesRef?.getSelection()?.selected[0] === event.element;
+        if (!isSoleSelection) {
             nodeEntriesRef?.getSelection()?.clear();
             this.sidebarOpened.set(false);
         }
-        nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
+        if (isSoleSelection && !allowDeselect) {
+            nodeEntriesRef?.getSelection()?.select(event.element as Node);
+        } else {
+            nodeEntriesRef?.getSelection()?.toggle(event.element as Node);
+        }
         if (nodeEntriesRef?.getSelection()?.selected.length === 0) {
             this.sidebarOpened.set(false);
         } else if (

@@ -424,13 +424,3 @@
   }
 </div>
 }
-
-<!-- LTI TOOL CREATE DIALOG -->
-@if (createToolType(); as tool) {
-<es-create-ltitool
-  [tool]="tool"
-  [parent]="uploadParent()"
-  (cancel)="cancelLtiTool($event)"
-  (create)="createLtiTool($event)"
-></es-create-ltitool>
-}

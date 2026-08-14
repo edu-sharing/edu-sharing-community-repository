@@ -104,6 +104,12 @@ export class NodeService {
         assocType?: string;
 
         /**
+         * whether the given properties have to obey the metadataset (default true). Set to false
+         * to write properties that are not part of the mds of the created node (e.g. ccm:maptype).
+         */
+        obeyMds?: boolean;
+
+        /**
          * properties, example: {"{http://www.alfresco.org/model/content/1.0}name": ["test"]}
          */
         body: {

@@ -49,7 +49,6 @@ import { MultiLineLabelComponent } from './components/multi-line-label/multi-lin
 import { PoweredByComponent } from './components/powered-by/powered-by.component';
 import { TutorialComponent } from './components/tutorial/tutorial.component';
 import { UserQuotaComponent } from './components/user-quota/user-quota.component';
-import { CreateLtitoolComponent } from './dialogs/create-ltitool/create-ltitool.component';
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
@@ -81,7 +80,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         CalendarComponent,
         CardComponent,
         CollectionChooserComponent,
-        CreateLtitoolComponent,
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
@@ -145,7 +143,6 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         CardComponent,
         CollectionChooserComponent,
         CommonModule,
-        CreateLtitoolComponent,
         DragDropModule,
         EduSharingUiModule,
         ElementRefDirective,

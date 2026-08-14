@@ -1,0 +1,27 @@
+<form (ngSubmit)="updateButtons()">
+  @for (node of nodes; track node; let i = $index) {
+  <mat-form-field>
+    <mat-label>{{ 'NODE.cm:name' | translate }}</mat-label>
+    <input
+      matInput
+      type="text"
+      name="filename"
+      [ngModelOptions]="{ standalone: true }"
+      [(ngModel)]="nodes[i].name"
+    />
+  </mat-form-field>
+  } @if (tool.customContentOption && nodes.length === 0) {
+  <mat-form-field>
+    <mat-label>{{ 'NODE.cm:name' | translate }}</mat-label>
+    <input
+      matInput
+      type="text"
+      name="filename"
+      [ngModelOptions]="{ standalone: true }"
+      [(ngModel)]="name"
+      (ngModelChange)="updateButtons()"
+      cdkFocusInitial
+    />
+  </mat-form-field>
+  }
+</form>

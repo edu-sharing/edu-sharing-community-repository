@@ -6,5 +6,5 @@
 
 <mat-form-field>
   <mat-label>{{ data.label | translate }}</mat-label>
-  <input matInput autofocus [formControl]="control" />
+  <input matInput autofocus [formControl]="control" (keydown.enter)="confirm()" />
 </mat-form-field>

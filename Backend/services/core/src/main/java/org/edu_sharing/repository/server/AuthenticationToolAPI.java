@@ -288,7 +288,7 @@ public class AuthenticationToolAPI extends AuthenticationToolAbstract {
         }
 
         public void authenticateUser(String username, HttpSession session,String authType){
-            authenticationComponent.setCurrentUser(username);
+            authenticationComponent.setCurrentUser(username, AuthenticationComponent.UserNameValidationMode.CHECK);
             storeAuthInfoInSession(username, authenticationService.getCurrentTicket(), authType, session);
         }
 

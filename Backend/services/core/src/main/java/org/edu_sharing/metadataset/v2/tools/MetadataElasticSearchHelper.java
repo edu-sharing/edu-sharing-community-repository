@@ -23,6 +23,7 @@ import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SharedToMeType;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -305,28 +306,71 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
      * @param parameters
      * @param facets
      * @param excludeOwn
-     * @param globalConditions
+     * @param globalConditions conditions that apply to every facet alike (permissions, store, ...).
+     *                         When given, they are applied <b>once</b> as the request's top level query - together
+     *                         with the whole facet independent part of the matching tree (base query, search term,
+     *                         all criteria that are not subject to {@code excludeOwn}) - instead of being repeated
+     *                         inside every facet's filter sub-aggregation. Each facet's filter then only carries its
+     *                         own difference. Pass {@code null} when the caller sets its own top level query which
+     *                         already contains all of that; in that case the complete tree is built per facet.
      * @param searchToken
      * @return
      * @throws IllegalArgumentException
      */
-    public static Map<String, Aggregation> applyAggregations(SearchRequest.Builder searchRequestBuilder, MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets, Set<MetadataQueryParameter> excludeOwn, Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
+    public static Map<String, Aggregation> applyAggregations(SearchRequest.Builder searchRequestBuilder, MetadataSet mds, MetadataQuery query, Map<String, String[]> parameters, List<SearchFacet> facets, Set<MetadataQueryParameter> excludeOwn, @Nullable Query globalConditions, SearchToken searchToken) throws IllegalArgumentException {
         MetadataQueries queries = mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL);
         Map<String, Aggregation> result = new HashMap<>();
         String currentLocale = AuthenticationToolAPI.getInstance().getCurrentLocale();
+
+        Set<String> excludeOwnNames = excludeOwn.stream()
+                .map(MetadataQueryParameter::getName)
+                .collect(Collectors.toSet());
+        /*
+         * Only an "AND" joined query may be split up: tree(A + B) == tree(A) AND tree(B) does not hold when the
+         * parameters are joined via "should".
+         */
+        boolean hoistSharedQuery = globalConditions != null && "AND".equals(query.getJoin());
+        if (hoistSharedQuery) {
+            // everything that is identical for every facet is evaluated a single time as the top level query
+            Map<String, String[]> sharedParameters = new HashMap<>(parameters == null ? Collections.emptyMap() : parameters);
+            sharedParameters.keySet().removeAll(excludeOwnNames);
+            BoolQuery sharedFilter = getElasticSearchQuery(searchToken, queries, query, sharedParameters, true).build();
+            BoolQuery sharedNoFilter = getElasticSearchQuery(searchToken, queries, query, sharedParameters, false).build();
+            searchRequestBuilder.query(q -> q.bool(shared -> shared
+                    .must(must -> must.bool(sharedFilter))
+                    .must(must -> must.bool(sharedNoFilter))
+                    .must(globalConditions)));
+        } else if (globalConditions != null) {
+            searchRequestBuilder.query(globalConditions);
+        }
+
         for (SearchFacet facet : facets) {
 
             Map<String, String[]> tmp = new HashMap<>(parameters == null ? Collections.emptyMap() : parameters);
+            if (hoistSharedQuery) {
+                // the shared part is already applied as top level query, keep only this facet's own difference
+                tmp.keySet().retainAll(excludeOwnNames);
+            }
+
             if (excludeOwn.stream().anyMatch(mdqp -> mdqp.getName().equals(facet.getProperty()))) {
                 tmp.remove(facet.getProperty());
             }
 
-            BoolQuery.Builder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
-            BoolQuery.Builder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
-            BoolQuery.Builder fullFilterQuery = new BoolQuery.Builder()
-                    .must(must -> must.bool(qbFilter.build()))
-                    .must(must -> must.bool(qbNoFilter.build()))
-                    .must(globalConditions);
+            /*
+             * The filter sub-aggregation only carries what is specific to this facet. Everything shared
+             * (base query, search term, globalConditions, ...) is already applied as the top level query.
+             */
+            BoolQuery.Builder fullFilterQuery = new BoolQuery.Builder();
+            if (hoistSharedQuery && tmp.isEmpty()) {
+                // nothing facet specific left, but the response parsing expects a filter aggregation
+                fullFilterQuery.must(must -> must.matchAll(matchAll -> matchAll));
+            } else {
+                BoolQuery.Builder qbFilter = getElasticSearchQuery(searchToken, queries, query, tmp, true);
+                BoolQuery.Builder qbNoFilter = getElasticSearchQuery(searchToken, queries, query, tmp, false);
+                fullFilterQuery
+                        .must(must -> must.bool(qbFilter.build()))
+                        .must(must -> must.bool(qbNoFilter.build()));
+            }
 
             List<MetadataQueryParameter.MetadataQueryFacetItem> fieldName = Collections.singletonList(
                     new MetadataQueryParameter.MetadataQueryFacetItem(

@@ -25,7 +25,12 @@ export function createPrimaryOptions({
     applyNode.permissions = [RestConstants.ACCESS_CC_PUBLISH];
     applyNode.permissionsRightMode = NodesRightMode.Effective;
     applyNode.permissionsMode = HideMode.Disable;
-    applyNode.constrains = [Constrain.NoBulk, Constrain.ReurlMode, Constrain.User];
+    applyNode.constrains = [
+        Constrain.NoBulk,
+        Constrain.ReurlMode,
+        // opt-in for callers whose users pick as guests, e.g. a public embedding of the picker
+        ...(queryParams.allowGuest === 'true' ? [] : [Constrain.User]),
+    ];
     applyNode.showAsAction = true;
     applyNode.showAlways = true;
     applyNode.group = DefaultGroups.Primary;

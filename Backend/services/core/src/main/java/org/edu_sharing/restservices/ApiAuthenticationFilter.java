@@ -87,9 +87,7 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                     try {
                         String userName = oAuth2TokenService.extractUsername(accessToken);
                         if(userName == null) {
-                            httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            httpResp.flushBuffer();
-                            httpResp.getWriter().print("Could not verify access token");
+                            rejectBearerToken(httpResp, "Could not verify access token");
                             return;
                         }
 
@@ -113,8 +111,14 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                         validatedAuth = authTool.validateAuthentication(session);
                     }*/
                     } catch (Exception ex) {
-
+                        // A caller that presents a bearer token must not silently continue with another
+                        // identity. Without this, validatedAuth keeps the session authentication read
+                        // above - with a guest configured that is the guest, so a token naming a user
+                        // that does not exist in the repository would answer 200 with guest data
+                        // instead of failing.
                         logger.error(ex.getMessage(), ex);
+                        rejectBearerToken(httpResp, "Could not authenticate access token");
+                        return;
                     }
                 }else logger.warn("got oauth token but oauth2 service is not available");
             } else if (authHdr.length() > 10 && authHdr.substring(0, 10).equalsIgnoreCase(CCConstants.AUTH_HEADER_EDU_TICKET)) {
@@ -283,6 +287,19 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         // 2fa second step: the session still holds the toolpermissions computed for the guest user
         ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
         return authTool.validateAuthentication(session);
+    }
+
+    /**
+     * Rejects a request that carried a bearer token which could not be turned into a valid session.
+     * <p>
+     * Uses setStatus instead of sendError so that the response is not replaced by the error page of
+     * the webapp, matching how the rest of this filter answers.
+     */
+    private static void rejectBearerToken(HttpServletResponse httpResp, String message) throws IOException {
+        httpResp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        httpResp.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
+        httpResp.getWriter().print(message);
+        httpResp.flushBuffer();
     }
 
     public static Map<String, String> httpBasicAuth(HttpServletRequest httpReq, String authHdr) {

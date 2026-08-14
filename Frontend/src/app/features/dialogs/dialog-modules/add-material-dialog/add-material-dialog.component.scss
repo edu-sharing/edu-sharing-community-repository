@@ -122,42 +122,6 @@ mat-form-field {
     margin-top: 12px;
 }
 
-.location {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    .caption {
-        float: left;
-        margin-bottom: 5px;
-    }
-    .picker-group {
-        display: flex;
-        align-items: center;
-        padding: 10px var(--addMaterialHPadding, #{$cardPadding});
-        margin: 0 calc(var(--addMaterialHPadding, #{$cardPadding}) * -1);
-        background-color: $buttonHoverBackground;
-        .no-breadcrumbs {
-            display: flex;
-            width: 100%;
-            justify-content: center;
-            color: $textLight;
-        }
-        .change {
-            flex-grow: 1;
-            font-weight: bold;
-            min-width: 20%;
-            text-align: right;
-        }
-    }
-    > mat-checkbox {
-        display: flex;
-        margin-top: 20px;
-    }
-    & ::ng-deep .breadcrumb {
-        max-height: unset !important;
-        flex-wrap: wrap;
-    }
-}
 .file-selection {
     display: flex;
     flex-direction: column;

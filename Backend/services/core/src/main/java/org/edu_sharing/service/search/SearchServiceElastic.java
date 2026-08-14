@@ -732,7 +732,9 @@ public class SearchServiceElastic implements SearchService {
                     facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
                     aggregations = null;
                 } else {
-                    aggregations = MetadataElasticSearchHelper.applyAggregations(searchRequestBuilder, mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), queryBuilderGlobalConditions._toQuery(), searchToken);
+                    // globalConditions are passed as null: this request already carries queryBuilderGlobalConditions
+                    // in its own top level query (see below), so the facet filters must not repeat them
+                    aggregations = MetadataElasticSearchHelper.applyAggregations(searchRequestBuilder, mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), null, searchToken);
                     for (Map.Entry<String, Aggregation> agg : aggregations.entrySet()) {
                         // we use a higher facet limit since the facets will be filtered for the containing string!
                         searchRequestBuilder.aggregations(agg.getKey(), agg.getValue());

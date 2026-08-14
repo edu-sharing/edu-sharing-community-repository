@@ -22,6 +22,10 @@ import {
     ContributorEditDialogResult,
 } from './dialog-modules/contributor-edit-dialog/contributor-edit-dialog-data';
 import {
+    CreateLtiToolDialogData,
+    CreateLtiToolDialogResult,
+} from './dialog-modules/create-lti-tool-dialog/create-lti-tool-dialog-data';
+import {
     ContributorRegistryEditDialogData,
     ContributorRegistryEditDialogResult,
 } from './dialog-modules/contributor-registry-edit-dialog/contributor-registry-edit-dialog-data';
@@ -111,6 +115,7 @@ import {
     ShareDialogData,
     ShareDialogResult,
 } from './dialog-modules/share-dialog/share-dialog-data';
+import { ViewFeedbackDialogData } from './dialog-modules/view-feedback-dialog/view-feedback-dialog-data';
 import {
     ShareHistoryDialogData,
     ShareHistoryDialogResult,
@@ -668,6 +673,22 @@ export class DialogsService {
         });
     }
 
+    async openViewFeedbackDialog(
+        data: ViewFeedbackDialogData,
+    ): Promise<CardDialogRef<ViewFeedbackDialogData, void>> {
+        const { ViewFeedbackDialogComponent } = await import(
+            './dialog-modules/view-feedback-dialog/view-feedback-dialog.component'
+        );
+        return this.cardDialog.open(ViewFeedbackDialogComponent, {
+            title: 'FEEDBACK.VIEW_TITLE',
+            ...(await this.cardDialogUtils.configForNode(data.node)),
+            width: 600,
+            minHeight: 500,
+            data,
+            closable: Closable.Casual,
+        });
+    }
+
     async openSendFeedbackDialog(
         data: SendFeedbackDialogData,
     ): Promise<CardDialogRef<SendFeedbackDialogData, SendFeedbackDialogResult>> {
@@ -826,6 +847,19 @@ export class DialogsService {
             width: 600,
             maxWidth: 800,
             contentPadding: data.connector?.mdsGroup ? 0 : 25,
+            data,
+            closable: Closable.Casual,
+        });
+    }
+
+    async openCreateLtiToolDialog(
+        data: CreateLtiToolDialogData,
+    ): Promise<CardDialogRef<CreateLtiToolDialogData, CreateLtiToolDialogResult>> {
+        const { CreateLtiToolDialogComponent } = await import(
+            './dialog-modules/create-lti-tool-dialog/create-lti-tool-dialog.component'
+        );
+        return this.cardDialog.open(CreateLtiToolDialogComponent, {
+            width: 600,
             data,
             closable: Closable.Casual,
         });
