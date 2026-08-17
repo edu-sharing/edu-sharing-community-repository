@@ -219,27 +219,37 @@ public class DownloadServlet extends SpringHttpServlet {
 
         }
         if (is == null || is.available() == 0) {
-            if (mode.equals(Mode.passthrough)) {
-                Throwable throwable = handleStreamFromLocation(nodeId, new org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable>() {
-                    @Override
-                    public void handle(InputStream is) {
-                        try {
-							setHeaders(resp, name, null);
-                            //resp.setHeader("Content-Length",""+is.available());
-                            StreamUtils.copy(is, bufferOut);
-                        } catch (Throwable e) {
-                            this.setResult(e);
+            String externalLocation = getExternalLocation(nodeService, nodeRef);
+            if (externalLocation != null) {
+                if (mode.equals(Mode.passthrough)) {
+                    Throwable throwable = handleStreamFromLocation(externalLocation, new org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable>() {
+                        @Override
+                        public void handle(InputStream is) {
+                            try {
+                                setHeaders(resp, name, null);
+                                //resp.setHeader("Content-Length",""+is.available());
+                                StreamUtils.copy(is, bufferOut);
+                            } catch (Throwable e) {
+                                this.setResult(e);
+                            }
                         }
+                    });
+                    if (throwable != null) {
+                        throw throwable;
                     }
-                });
-                if (throwable != null) {
-                    throw throwable;
+                    return;
+                } else if (mode.equals(Mode.redirect)) {
+                    resp.sendRedirect(externalLocation);
+                    return;
                 }
-                return;
-            } else if (mode.equals(Mode.redirect)) {
-                resp.sendRedirect(nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.LOM_PROP_TECHNICAL_LOCATION));
-                return;
             }
+            // no local content and no external location -> return an empty (0 byte) file with valid headers
+            if (mimeType == null) {
+                mimeType = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.LOM_PROP_TECHNICAL_FORMAT);
+            }
+            setHeaders(resp, name, mimeType);
+            resp.setHeader("Content-Length", "0");
+            return;
         }
 		setHeaders(resp, name,mimeType);
         if (length != null) {
@@ -249,17 +259,26 @@ public class DownloadServlet extends SpringHttpServlet {
     }
 
     /**
-     * tries to fetch the stream from the node's technical location, if available
-     *
-     * @param nodeId
-     * @return
+     * fetches the stream from the given (external) location
      */
-    private Throwable handleStreamFromLocation(String nodeId, org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable> callback) {
-        String location = NodeServiceHelper.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId), CCConstants.LOM_PROP_TECHNICAL_LOCATION);
-        if (location == null)
-            return null;
+    private Throwable handleStreamFromLocation(String location, org.edu_sharing.repository.server.tools.http.HttpQueryTool.Callback<Throwable> callback) {
         new org.edu_sharing.repository.server.tools.http.HttpQueryTool().queryStream(location, callback);
         return callback.getResult();
+    }
+
+    /**
+     * returns the technical location (cclom:location) of the node, but only if it points to an external, resolvable url.
+     * Every locally created io gets a "ccrep://&lt;appId&gt;/&lt;nodeId&gt;" self reference assigned by
+     * {@code NodeCustomizationPolicies}, which must never be used as a redirect target or download source.
+     *
+     * @return the external location or null if there is none
+     */
+    private static String getExternalLocation(NodeService nodeService, NodeRef nodeRef) {
+        String location = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.LOM_PROP_TECHNICAL_LOCATION);
+        if (StringUtils.isBlank(location) || location.startsWith(CCConstants.CCREP_PROTOCOL)) {
+            return null;
+        }
+        return location;
     }
 
     private String checkAndGetCollectionRef(String nodeId) throws InsufficientPermissionException {
