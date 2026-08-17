@@ -1646,6 +1646,9 @@
     "CONFIRM": "Masquer",
     "TOAST_DONE": "{{count}} partage(s) masqué(s)"
   },
+  "SHARE_UNREJECT": {
+    "TOAST_DONE": "{{count}} partage(s) réaffiché(s)"
+  },
   "PDF_EDITOR": {
     "HEADING": "Saisir l'ID du contenu ou sélectionner un contenu via la recherche{{suffix}}",
     "EDIT_MODE": "Mode édition",

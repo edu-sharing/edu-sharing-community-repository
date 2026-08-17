@@ -72,6 +72,7 @@
     },
     "OPTION": {
       "REJECT_SHARE": "Hide share",
+      "UNREJECT_SHARE": "Show share again",
       "TOGGLE_SIDEBAR_ENABLED": "Hide sidebar",
       "TOGGLE_SIDEBAR_DISABLED": "Show sidebar"
     },

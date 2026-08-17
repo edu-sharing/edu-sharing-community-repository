@@ -4,5 +4,9 @@ public enum UserShareDirection {
     fromUser,
     toUser,
     toUserGroups,
-    // @TODO: add a "rejectedByUser" to search for all shares with current status REJECTED for this user
+    /**
+     * all shares to the user (or one of the user's groups) that the user has rejected (hidden).
+     * These are filtered out of all other directions.
+     */
+    rejectedByUser,
 }

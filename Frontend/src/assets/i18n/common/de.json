@@ -612,6 +612,9 @@
     "CONFIRM": "Ausblenden",
     "TOAST_DONE": "{{count}} Freigabe(n) ausgeblendet"
   },
+  "SHARE_UNREJECT": {
+    "TOAST_DONE": "{{count}} Freigabe(n) wieder eingeblendet"
+  },
   "CREATE_NODE": {
     "tool_definition": "Neue Toolbeschreibung anlegen",
     "tool_instance": "Neue Konfiguration für Tool {{ parent }} anlegen"

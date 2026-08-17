@@ -1646,6 +1646,9 @@
     "CONFIRM": "Nascondi",
     "TOAST_DONE": "{{count}} condivisione/i nascosta/e"
   },
+  "SHARE_UNREJECT": {
+    "TOAST_DONE": "{{count}} condivisione/i di nuovo visibile/i"
+  },
   "PDF_EDITOR": {
     "HEADING": "Inserire l'ID del contenuto o selezionare un contenuto tramite la ricerca{{suffix}}",
     "EDIT_MODE": "Modalità di modifica",

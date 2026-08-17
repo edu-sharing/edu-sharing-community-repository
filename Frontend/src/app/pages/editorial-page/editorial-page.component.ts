@@ -102,6 +102,14 @@ type RouteConfig = {
     primaryMode: PrimaryMode;
 };
 
+/**
+ * In share mode `SearchService` flattens the `InviteEvent` onto the node as a `share` sub-object
+ * (see `NodeShare`), which is not part of the `Node` type.
+ */
+function getShare(node: unknown): InviteEvent | undefined {
+    return (node as { share?: InviteEvent })?.share;
+}
+
 @Component({
     selector: 'es-editorial-page',
     templateUrl: 'editorial-page.component.html',
@@ -362,9 +370,32 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 this.params$.value.primaryMode === 'share' &&
                 nodes.every(
                     (n) =>
-                        (n as unknown as { share: InviteEvent }).share?.sharedBy.authorityName !==
-                        this.loginInfo$.value?.authorityName,
+                        getShare(n)?.shareStatus !== 'REJECTED' &&
+                        getShare(n)?.sharedBy.authorityName !==
+                            this.loginInfo$.value?.authorityName,
                 )
+            );
+        };
+
+        const unreject = new OptionItem(
+            'EDITORIAL.OPTION.UNREJECT_SHARE',
+            'cancel_schedule_send',
+            (element: InviteEvent[]) => {
+                const elements = this.optionsHelperService.getObjects(
+                    element,
+                    this.nodeEntriesRef()!.optionsHelper.getData(),
+                );
+                void this.dialogs.unrejectShares(elements);
+            },
+        );
+        unreject.elementType = [ElementType.Node, ElementType.SavedSearch];
+        unreject.constrains = [Constrain.User];
+        unreject.group = DefaultGroups.Primary;
+        unreject.showAsAction = true;
+        unreject.customShowCallback = async (nodes) => {
+            return (
+                this.params$.value.primaryMode === 'share' &&
+                nodes.every((n) => getShare(n)?.shareStatus === 'REJECTED')
             );
         };
         // Split actionbar (mirrors search/workspace): the toolbar actionbar shows toggle options
@@ -373,7 +404,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [reject],
+                addOptions: [reject, unreject],
             },
         });
     }
