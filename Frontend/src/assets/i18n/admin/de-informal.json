@@ -41,6 +41,10 @@
         "CORS": {
           "SOLUTION": "Prüfe, welche Systeme ggf. AJAX-Requests senden können. Wechsel anschließend zu \"Quellen\" und bearbeite das Feld \"allow_origin\" in der homeApplication.properties.xml.\nWenn Du  die edu-sharing App benutzt, füge als Eintrag \"http://localhost:54361\" hinzu."
         },
+        "RS2": {
+          "STATUS_FAIL": "Die Module des Renderingservice 2 ({{url}}) konnten nicht abgerufen werden: {{message}}. Der Renderingservice 2 ist fehlerhaft oder nicht erreichbar, Inhalte können dadurch möglicherweise nicht angezeigt werden",
+          "SOLUTION": "Prüfe den Renderingservice 2: Ist die konfigurierte URL {{url}} erreichbar, läuft der Dienst und was melden dessen Logdateien?"
+        },
         "RS_XSS": {
           "STATUS_INFO": "Das Repository liegt auf einer anderen Domain ({{repo}}) als der Renderingservice ({{render}}). Der Zustand der CORS-Konfiguration ist jedoch ungültig. Prüfe die CORS-Konfiguration",
           "SOLUTION": "Repository und Renderingservice sollten aus Sicherheitsgründen auf unterschiedlichen (Sub-)Domains liegen. Weitere Informationen findest Du in der Dokumentation."

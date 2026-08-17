@@ -117,6 +117,7 @@ export { OAuth2Consent } from './api/models/o-auth-2-consent';
 export { SearchResultNode as SearchResults } from './api/models/search-result-node';
 export { SearchResultInvite } from './api/models/search-result-invite';
 export { InviteEvent } from './api/models/invite-event';
+export { JobInfo } from './api/models/job-info';
 export { SearchParameters } from './api/models/search-parameters';
 export { Repo as Repository } from './api/models/repo';
 export { RefDashboardShortcutEntry } from './api/models/ref-dashboard-shortcut-entry';

@@ -13,9 +13,7 @@ import {
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
-    AboutService,
     AdminV1Service,
-    NetworkService,
     Node,
     NodeService,
     SessionStorageService,
@@ -38,7 +36,7 @@ import {
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
-import { defer, Observable, Observer, Subject } from 'rxjs';
+import { defer, firstValueFrom, Observable, Observer, Subject } from 'rxjs';
 import { SuggestItem } from './autocomplete/autocomplete.component';
 import {
     Application,
@@ -73,6 +71,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
 import { WorkspaceExplorerComponent } from '../workspace-page/explorer/explorer.component';
+import { AdminSystemChecksService } from './admin-system-checks.service';
 import { delay, repeat, takeUntil, tap } from 'rxjs/operators';
 
 type LuceneData = {
@@ -123,9 +122,10 @@ type Job = {
     styleUrls: ['admin-page.component.scss'],
     animations: [trigger('openOverlay', UIAnimation.openOverlay(UIAnimation.ANIMATION_TIME_FAST))],
     standalone: false,
+    providers: [AdminSystemChecksService],
 })
 export class AdminPageComponent implements OnInit, OnDestroy {
-    private about = inject(AboutService);
+    readonly systemChecks = inject(AdminSystemChecksService);
     private admin = inject(RestAdminService);
     private adminV1 = inject(AdminV1Service);
     private config = inject(ConfigurationService);
@@ -133,7 +133,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private dialogs = inject(DialogsService);
     private mainNav = inject(MainNavService);
     private mediacenterService = inject(RestMediacenterService);
-    private networkService = inject(NetworkService);
     private node = inject(RestNodeService);
     private nodeService = inject(NodeService);
     private organization = inject(RestOrganizationService);
@@ -163,6 +162,13 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     jobsLoading = false;
 
     constructor() {
+        this.systemChecks.setActions({
+            goToApplications: () => this.setMode('APPLICATIONS'),
+            editHomeApplication: () => {
+                this.setMode('APPLICATIONS');
+                this.editApp(this.editableXmls.filter((xml) => xml.name == 'HOMEAPP')[0]);
+            },
+        });
         this.translations.waitForInit().subscribe(() => {
             this.getTemplates();
             this.connector.isLoggedIn().subscribe((data: LoginResult) => {
@@ -178,8 +184,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             });
         });
     }
-    static RS_CONFIG_HELP =
-        'https://docs.edu-sharing.com/confluence/edp/de/installation-en/installation-of-the-edu-sharing-rendering-service';
     mailTemplates = [
         'invited',
         'invited_workflow',
@@ -279,8 +283,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     public templates: string[];
     public eduGroupSuggestions: SuggestItem[];
     public eduGroupsSelected: SuggestItem[] = [];
-    systemChecks: any = [];
-    tpChecks: any = [];
     mailReceiver: string;
     mailTemplate: string;
     private loginResult: LoginResult;
@@ -1055,178 +1057,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         this.updateJobLogs();
         this.jobsLoading = false;
     }
-    getMajorVersion(version: string) {
-        const v = version.split('.');
-        if (v.length < 3) return version;
-        v.splice(2, v.length - 2);
-        return v.join('.');
-    }
-    runTpChecks() {
-        const checks = [
-            RestConstants.TOOLPERMISSION_USAGE_STATISTIC,
-            RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
-            RestConstants.TOOLPERMISSION_PUBLISH_COPY,
-            RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_USER,
-            RestConstants.TOOLPERMISSION_GLOBAL_STATISTICS_NODES,
-        ];
-        this.tpChecks = [];
-        this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tp) => {
-            checks.forEach((c) => {
-                this.tpChecks.push({
-                    name: c,
-                    status: tp[c].explicit === 'ALLOWED' ? 'FAIL' : 'OK',
-                });
-            });
-        });
-    }
-    runChecks() {
-        this.systemChecks = [];
-
-        // check versions render service
-        this.about.getAbout().subscribe(
-            (about) => {
-                const repositoryVersion = this.getMajorVersion(about.version.repository);
-                const renderServiceVersion = this.getMajorVersion(about.version.renderservice);
-                this.systemChecks.push({
-                    name: 'RENDERING',
-                    status:
-                        repositoryVersion == 'unknown'
-                            ? 'WARN'
-                            : repositoryVersion == renderServiceVersion
-                            ? 'OK'
-                            : 'FAIL',
-                    translate: about.version,
-                    callback: () => {
-                        this.setMode('APPLICATIONS');
-                    },
-                });
-            },
-            (error) => {
-                this.systemChecks.push({
-                    name: 'RENDERING',
-                    status: 'FAIL',
-                    error,
-                    callback: () => {
-                        this.setMode('APPLICATIONS');
-                    },
-                });
-            },
-        );
-        // check if appid is changed
-        this.networkService.getRepositories().subscribe((repositories) => {
-            const id = repositories.filter((repo) => repo.isHomeRepo)[0].id;
-            this.systemChecks.push({
-                name: 'APPID',
-                status: id == 'local' ? 'WARN' : 'OK',
-                translate: { id },
-                callback: () => {
-                    this.setMode('APPLICATIONS');
-                    this.editApp(this.editableXmls.filter((xml) => xml.name == 'HOMEAPP')[0]);
-                },
-            });
-        });
-        this.node.getNodePermissions(RestConstants.USERHOME).subscribe(
-            (data) => {
-                let status = 'OK';
-                for (const perm of data.permissions.localPermissions.permissions) {
-                    if (perm.authority.authorityName == RestConstants.AUTHORITY_EVERYONE) {
-                        status = 'FAIL';
-                    }
-                }
-                this.systemChecks.push(this.createSystemCheck('COMPANY_HOME', status));
-            },
-            (error) => {
-                this.systemChecks.push(this.createSystemCheck('COMPANY_HOME', 'FAIL', error));
-            },
-        );
-        this.admin.getJobs().subscribe((jobs) => {
-            let count = 0;
-            for (const job of jobs) {
-                if (job.status == 'Running') {
-                    count++;
-                }
-            }
-            this.systemChecks.push({
-                name: 'JOBS_RUNNING',
-                status: count == 0 ? 'OK' : 'WARN',
-                translate: { count },
-            });
-        });
-        // check status of nodeReport + mail server
-        this.admin.getConfigMerged().subscribe((config) => {
-            const mail = config.repository.mail;
-            if (this.config.instant('nodeReport', false)) {
-                this.systemChecks.push({
-                    name: 'MAIL_REPORT',
-                    status: mail.report.receivers && mail.server.smtp.host ? 'OK' : 'FAIL',
-                    translate: {
-                        receivers: mail.report?.receivers?.join(', '),
-                    },
-                });
-            }
-            this.systemChecks.push({
-                name: 'MAIL_SETUP',
-                status: mail.server.smtp.host ? 'OK' : 'FAIL',
-                translate: mail.server.smtp,
-            });
-        });
-        this.admin.getApplicationXML(RestConstants.HOME_APPLICATION_XML).subscribe((home) => {
-            this.systemChecks.push({
-                name: 'CORS',
-                status: home.allow_origin
-                    ? home.allow_origin.indexOf('http://localhost:54361') != -1
-                        ? 'OK'
-                        : 'INFO'
-                    : 'FAIL',
-                translate: home,
-                callback: () => {
-                    this.setMode('APPLICATIONS');
-                    this.editApp(this.editableXmls.filter((xml) => xml.name == 'HOMEAPP')[0]);
-                },
-            });
-            const domainRepo = home.domain;
-            let domainRender: string;
-            try {
-                domainRender = new URL(home.contenturl).host;
-            } catch (e) {
-                console.warn(e);
-            }
-            this.systemChecks.push({
-                name: 'RS_XSS',
-                status: domainRepo == domainRender ? 'FAIL' : home.allow_origin ? 'OK' : 'INFO',
-                translate: { repo: domainRepo, render: domainRender },
-                callback: () => {
-                    window.open(AdminPageComponent.RS_CONFIG_HELP);
-                },
-            });
-        });
-    }
-    private createSystemCheck(name: string, status: string, error: any = null) {
-        const check: any = {
-            name,
-            status,
-            error,
-        };
-        if (name == 'COMPANY_HOME') {
-            check.callback = () => {
-                this.node.getNodeMetadata(RestConstants.USERHOME).subscribe((node) => {
-                    UIHelper.goToWorkspaceFolder(this.router, null, node.node.parent.id);
-                });
-            };
-        }
-        return check;
-    }
-    getChecks(checks: any) {
-        checks.sort((a: any, b: any) => {
-            const status: any = { FAIL: 0, WARN: 1, INFO: 2, OK: 3 };
-            const statusA = status[a.status];
-            const statusB = status[b.status];
-            if (statusA != statusB) return statusA < statusB ? -1 : 1;
-            return a.name.localeCompare(b.name);
-        });
-        return checks;
-    }
-
     testMail() {
         this.globalProgress = true;
         this.admin.testMail(this.mailReceiver, this.mailTemplate).subscribe(
@@ -1500,8 +1330,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
                 this.lucene = data;
             });
             this.reloadJobStatus([]);
-            this.runTpChecks();
-            this.runChecks();
+            this.systemChecks.runToolpermissionChecks();
+            this.systemChecks.runSystemChecks();
             this.admin.getAllJobs().subscribe((jobs) => {
                 this.availableJobs = jobs;
                 this.prepareJobClasses();
@@ -1608,18 +1438,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             void this.router.navigate([UIConstants.ROUTER_PREFIX, 'workspace']);
         }
         return false;
-    }
-
-    fixTp(check: any) {
-        this.tpChecks = [];
-        this.admin.getToolpermissions(RestConstants.AUTHORITY_EVERYONE).subscribe((tpIn) => {
-            const tp: any = {};
-            Object.keys(tpIn).forEach((k) => (tp[k] = tpIn[k].explicit));
-            tp[check.name] = 'UNDEFINED';
-            this.admin
-                .setToolpermissions(RestConstants.AUTHORITY_EVERYONE, tp)
-                .subscribe(() => this.runTpChecks());
-        });
     }
 
     supportsUpload(job: JobDescription) {

@@ -1,7 +1,9 @@
 import { Injectable, Injector, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import {
+    ModuleInfoControllerService,
     RenderDataRequestWithToken,
+    RenderModuleInfo,
     RSApiConfiguration,
     SessionControllerService,
 } from 'ngx-rendering-service-api';
@@ -37,6 +39,40 @@ export class RenderHelperService {
     private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
     private configuration = inject(EduSharingUiConfiguration);
     private optionsHelperDataService = inject(OptionsHelperDataService, { optional: true });
+
+    /**
+     * Whether rendering service 2 is available on this repository.
+     *
+     * Single source of truth for the "rs2 or legacy rendering" decision -
+     * do not re-implement the plugin lookup in components.
+     */
+    async hasRenderingService2(): Promise<boolean> {
+        return !!(await this.aboutService.hasPlugin(RestConstants.PLUGIN_RENDERING_SERVICE_2));
+    }
+
+    /**
+     * The configured url of rendering service 2 (without trailing slash), `null` if not configured.
+     */
+    async getRenderingService2Url(): Promise<string | null> {
+        const about = await firstValueFrom(this.aboutService.getAbout());
+        return about.renderingService2?.url?.replace(/\/+$/, '') ?? null;
+    }
+
+    /**
+     * Fetches the module infos of rendering service 2, i.e. the modules it can render with.
+     *
+     * Rejects if the service is not configured, unreachable or reports an error - which makes it
+     * usable as a health check for rendering service 2.
+     */
+    async getRenderingService2Modules(repoId: string): Promise<RenderModuleInfo[]> {
+        if (!(await this.getRenderingService2Url())) {
+            throw new Error('no rendering service 2 url was configured');
+        }
+        await this.prepareRootUrl();
+        return firstValueFrom(
+            this.injector.get(ModuleInfoControllerService).getModulesInfo({ repoId }),
+        );
+    }
 
     /**
      * Logs the current user out of rendering service 2.

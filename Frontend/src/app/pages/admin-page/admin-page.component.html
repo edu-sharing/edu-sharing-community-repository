@@ -68,9 +68,9 @@
       <div class="heading">{{ 'ADMIN.INFO.SYSTEM_CHECKS' | translate }}</div>
       <div class="checks">
         <div class="reload">
-          <i class="material-icons clickable" (click)="runChecks()">refresh</i>
+          <i class="material-icons clickable" (click)="systemChecks.runSystemChecks()">refresh</i>
         </div>
-        @for (check of getChecks(systemChecks); track check) {
+        @for (check of systemChecks.systemChecks(); track check) {
         <div
           class="check"
           [class.check-fail]="check.status === 'FAIL'"
@@ -94,7 +94,7 @@
               <div>
                 {{ 'ADMIN.INFO.CHECK.' + check.name + '.SOLUTION' | translate : check.translate }}
                 <div>
-                  @if (check.status !== 'OK' && check.callback) {
+                  @if (check.callback) {
                   <button
                     mat-button
                     color="primary"
@@ -119,10 +119,12 @@
       <div class="heading">{{ 'ADMIN.INFO.SYSTEM_TP_CHECKS' | translate }}</div>
       <div class="checks-toolpermissions">
         <div class="reload">
-          <i class="material-icons clickable" (click)="runTpChecks()">refresh</i>
+          <i class="material-icons clickable" (click)="systemChecks.runToolpermissionChecks()"
+            >refresh</i
+          >
         </div>
         <div class="info">{{ 'ADMIN.INFO.TP_CHECK.INFO' | translate }}</div>
-        @for (check of getChecks(tpChecks); track check) {
+        @for (check of systemChecks.toolpermissionChecks(); track check) {
         <div
           class="check"
           [class.check-fail]="check.status === 'FAIL'"
@@ -142,7 +144,7 @@
                     mat-button
                     color="primary"
                     class="solution-link clickable"
-                    (click)="fixTp(check)"
+                    (click)="systemChecks.fixToolpermission(check)"
                   >
                     {{ 'ADMIN.INFO.TP_CHECK.AUTO_FIX_LINK' | translate }}
                   </button>
