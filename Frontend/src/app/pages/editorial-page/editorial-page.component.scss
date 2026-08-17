@@ -182,3 +182,47 @@ mat-sidenav-container {
     color: var(--textLight);
     padding: 20px 0;
 }
+
+// Mobile: the filter drawer presents as a modal overlay card with its own scrim, using the same
+// mixin as the editorial sidebar. The drawer stays mode="side"; only its presentation changes, so
+// the mds editor instance (and thus the current filter values) survives opening/closing.
+mat-sidenav.es-mat-sidenav[position='start'] {
+    @include mixins.mobileModalOverlay(
+        vars.$mobileSidebarModal,
+        vars.$mobileTabNavHeight,
+        vars.$dialogZIndex - 10
+    ) {
+        // override the inline width written by esResizableSidenav (min. 400px)
+        width: auto !important;
+        max-width: none !important;
+        // Material hides a closed drawer via `:not(.mat-drawer-opened):not(.mat-drawer-animating)`,
+        // but with the transitions removed (see disableDrawerTransitions) no `transitionend` fires,
+        // so `.mat-drawer-animating` can stay on and the closed overlay keeps painting next to the
+        // right sidebar. Take it out of the layout ourselves instead of relying on that rule.
+        &:not(.mat-drawer-opened) {
+            display: none;
+        }
+        // resizing is pointless once the card spans the viewport width
+        ::ng-deep .es-sidenav-resizer {
+            display: none;
+        }
+        // the overlay itself provides margin and height; the inner card just fills it
+        div.es-mat-sidenav-content {
+            margin: 0;
+            height: 100%;
+        }
+        .es-mat-sidenav-content-mds {
+            margin-left: 0;
+        }
+    }
+}
+::ng-deep {
+    @include mixins.disableDrawerTransitions(vars.$mobileSidebarModal);
+}
+// mode stays "side", so MatDrawerContainer would push the content by the (now full-width) drawer —
+// the overlay must not move the content at all.
+@media screen and (max-width: (vars.$mobileSidebarModal)) {
+    mat-sidenav-container ::ng-deep mat-sidenav-content {
+        margin-left: 0 !important;
+    }
+}

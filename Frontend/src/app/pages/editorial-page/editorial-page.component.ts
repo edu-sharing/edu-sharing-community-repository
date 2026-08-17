@@ -235,10 +235,32 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         () => !!this.filterBarVisibleSig() && !this.mainComponentSig() && this.filtersAvailable(),
     );
 
+    /**
+     * Close the filter drawer explicitly (the search field's filters button only toggles). Used by
+     * the mobile overlay's close button, where no edge tab is available.
+     */
+    closeFilters(): void {
+        this.searchFieldService.getCurrentInstance()?.filterBarIsVisible.setUserValue(false);
+    }
+
     constructor() {
         /*this.isMobile$.pipe(first()).subscribe((mobile) => {
             this.editorialSidebarService.sidebarOpened.set(!mobile);
         });*/
+        // On mobile both drawers present as overlay cards on the same insets, so only one may be
+        // open at a time — the filter overlay would otherwise paint on top of the right sidebar
+        // (its drawer carries our dialog z-index, while the sidebar is confined to its own drawer's
+        // stacking context). Each effect only closes the *other* panel, so they can't ping-pong.
+        effect(() => {
+            if (this.isMobile() && this.editorialSidebarService.sidebarOpened()) {
+                this.closeFilters();
+            }
+        });
+        effect(() => {
+            if (this.isMobile() && this.filterBarOpen()) {
+                this.editorialSidebarService.sidebarOpened.set(false);
+            }
+        });
         effect(() => {
             if (this.selection()?.selected.length !== 1) {
                 this.editorialSidebarService.sidebarOpened.set(false);

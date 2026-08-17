@@ -10,7 +10,7 @@
 $mobileWidth: 700px !default;
 $mobileStage: 100px !default;
 $mobileTabSwitchWidth: $mobileWidth + $mobileStage * 2 !default;
-// the width at which point the sidebar will become a modal
+// the width at which point the sidebar (left/right) will become a modal
 $mobileSidebarModal: $mobileTabSwitchWidth !default;
 
 // row height of the node-entries table

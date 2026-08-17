@@ -23,40 +23,20 @@
     }
 }
 ::ng-deep {
-    @media screen and (max-width: (vars.$mobileSidebarModal)) {
-        .mat-drawer-transition .mat-drawer-content,
-        .mat-drawer-transition .mat-drawer {
-            transition: none !important;
-        }
-    }
+    @include mixins.disableDrawerTransitions(vars.$mobileSidebarModal);
 }
 :host {
     // unified secondary-bar height
     --editorialHeaderHeight: #{vars.$secondaryBarHeight};
-    @media screen and (max-width: (vars.$mobileSidebarModal)) {
-        position: fixed;
-        z-index: vars.$dialogZIndex - 10;
-        left: var(--roundedContainerMargin);
-        top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
-        right: var(--roundedContainerMargin);
-        --editorialSidebarHeight: calc(
-            100vh - #{vars.$mobileTabNavHeight} - var(--mainnavCurrentHeight) - var(
-                    --roundedContainerMargin
-                ) * 2
-        );
-        height: var(--editorialSidebarHeight);
-        //bottom: calc(#{vars.$mobileTabNavHeight} + var(--roundedContainerMargin));
-        isolation: isolate;
-        border-radius: var(--borderRadiusCards);
-        overflow: hidden;
-        &::after {
-            isolation: isolate;
-            position: fixed;
-            z-index: -1;
-            content: '';
-            background: vars.$darkenColor;
-            inset: 0;
-        }
+    // On mobile the sidebar presents as a modal overlay card — the same mixin the editorial page's
+    // filter drawer uses.
+    @include mixins.mobileModalOverlay(
+        vars.$mobileSidebarModal,
+        vars.$mobileTabNavHeight,
+        vars.$dialogZIndex - 10
+    ) {
+        // legacy alias for children sizing against the overlay height (see preview-content)
+        --editorialSidebarHeight: var(--mobileModalHeight);
     }
 }
 // desktop fullscreen: cover the content area below the top nav (es-main-nav stays visible)

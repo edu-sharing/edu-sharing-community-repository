@@ -37,6 +37,19 @@
       <!-- Filter header similar to es-search-page-filters-sidebar -->
       <div class="filter-bar-heading">
         <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+        <!-- On mobile the panel is an overlay card without the edge tab, so it needs an explicit
+          close button (mirrors the editorial sidebar's header X). -->
+        @if (isMobile$ | async) {
+        <button
+          mat-icon-button
+          class="filter-bar-close-button"
+          data-test="button-close-sidebar-filters-editorial"
+          (click)="closeFilters()"
+          [attr.aria-label]="'EDITORIAL.FILTER.CLOSE' | translate"
+        >
+          <i esIcon="close" [aria]="true"></i>
+        </button>
+        }
       </div>
       <div class="filter-bar-body">
         @if (mdsGroup() && (searchValues$ | async) !== null) {

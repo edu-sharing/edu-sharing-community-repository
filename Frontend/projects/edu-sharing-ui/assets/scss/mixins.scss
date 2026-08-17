@@ -155,6 +155,51 @@
         height: calc(100vh - var(--mainnavCurrentHeight) - #{$mobileNavHeight});
     }
 }
+// Presents an element as a modal overlay card below $mobileBreakpoint: pinned below the main nav
+// with the page margins on all sides, leaving room for the fixed mobile bottom nav, and painting
+// its own scrim behind itself (no CDK overlay involved). Used by the editorial sidebar and by the
+// editorial page's filter drawer so both appear as the same kind of mobile dialog.
+// $zIndex is passed in because $dialogZIndex lives in variables-scss, which forwards this file.
+// Exposes the resulting height as --mobileModalHeight for children that need to size against it.
+// Accepts @content, emitted inside the media query.
+@mixin mobileModalOverlay($mobileBreakpoint, $mobileNavHeight, $zIndex) {
+    @media screen and (max-width: $mobileBreakpoint) {
+        position: fixed;
+        z-index: $zIndex;
+        top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
+        left: var(--roundedContainerMargin);
+        right: var(--roundedContainerMargin);
+        --mobileModalHeight: calc(
+            100vh - #{$mobileNavHeight} - var(--mainnavCurrentHeight) - var(
+                    --roundedContainerMargin
+                ) * 2
+        );
+        height: var(--mobileModalHeight);
+        isolation: isolate;
+        border-radius: var(--borderRadiusCards);
+        overflow: hidden;
+        &::after {
+            isolation: isolate;
+            position: fixed;
+            z-index: -1;
+            content: '';
+            background: $darkenColor;
+            inset: 0;
+        }
+        @content;
+    }
+}
+// Kills the mat-drawer slide animation below $mobileBreakpoint, where the drawer is presented as a
+// modal overlay (see mobileModalOverlay) and should appear instantly instead of sliding in.
+// Place inside a `::ng-deep` context — the selectors target Angular Material internals.
+@mixin disableDrawerTransitions($mobileBreakpoint) {
+    @media screen and (max-width: $mobileBreakpoint) {
+        .mat-drawer-transition .mat-drawer-content,
+        .mat-drawer-transition .mat-drawer {
+            transition: none !important;
+        }
+    }
+}
 @mixin setGlobalKeyboardFocus($mode: 'outline') {
     //respect element border radius
     @include removeDefaultFocus();
