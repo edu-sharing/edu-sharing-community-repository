@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 
 @Data
@@ -21,8 +22,13 @@ public class Application extends ApplicationSimple {
 		setRepositoryType(appInfo.getRepositoryType());
 		setXml(appInfo.getXml());
 		setFile(appInfo.getAppFileName());
-		if (ApplicationInfo.TYPE_RENDERSERVICE.equals(getType()) && getContentUrl() != null) {
-			setConfigUrl(appInfo.getContentUrl().replace("/application/esmain/index.php", "/admin"));
+		if (getContentUrl() != null) {
+			if (ApplicationInfo.TYPE_RENDERSERVICE.equals(getType())) {
+				setConfigUrl(getContentUrl().replace("/application/esmain/index.php", "/admin"));
+			} else if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(getType())) {
+				// rendering service 2: the content url is the base url of the service
+				setConfigUrl(StringUtils.removeEnd(getContentUrl(), "/rendering") + "/rendering-admin");
+			}
 		}
 	}
 }
