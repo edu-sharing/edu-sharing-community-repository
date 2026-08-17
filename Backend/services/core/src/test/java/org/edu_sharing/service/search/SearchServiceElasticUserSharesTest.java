@@ -1,5 +1,7 @@
 package org.edu_sharing.service.search;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import com.google.gson.JsonParser;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -33,6 +35,7 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 /**
@@ -122,10 +125,21 @@ class SearchServiceElasticUserSharesTest {
     }
 
     /**
-     * @param directionConditions the direction specific part of the SHARED has_child bool query
-     * @param rejectedClause      either {@code "must"} (rejectedByUser tab) or {@code "must_not"}
+     * The elastic client serializes object keys in its own order, which says nothing about the
+     * query semantics - so compare the parsed trees (order insensitive) instead of the strings.
      */
-    private static String expectedQuery(String directionConditions, String rejectedClause) {
+    private static void assertQuery(String expected, BoolQuery.Builder actual) {
+        String actualJson = SearchServiceElasticTestUtils.indentJson(actual);
+        assertEquals(JsonParser.parseString(expected), JsonParser.parseString(actualJson),
+                () -> "actual query:\n" + actualJson);
+    }
+
+    /**
+     * @param directionConditions the direction specific part of the SHARED has_child bool query
+     * @param rejectedTab         whether the rejectedByUser tab is queried: its REJECTED has_child
+     *                            flips from must_not to must
+     */
+    private static String expectedQuery(String directionConditions, boolean rejectedTab) {
         String rejectedByUser = """
                 {
                   "has_child": {
@@ -140,7 +154,6 @@ class SearchServiceElasticUserSharesTest {
                     }
                   }
                 }""";
-        //language=JSON
         String shared = """
                 {
                   "has_child": {
@@ -169,28 +182,27 @@ class SearchServiceElasticUserSharesTest {
                     }
                   }
                 }""".formatted(directionConditions);
-        return """
-                { "bool": { "must": [ %s ], "%s": [ %s ] } }
-                """.formatted(
-                "must".equals(rejectedClause) ? shared + "," + rejectedByUser : shared,
-                rejectedClause,
-                "must".equals(rejectedClause) ? "" : rejectedByUser);
+        return rejectedTab
+                ? """
+                { "bool": { "must": [ %s, %s ] } }""".formatted(shared, rejectedByUser)
+                : """
+                { "bool": { "must": [ %s ], "must_not": [ %s ] } }""".formatted(shared, rejectedByUser);
     }
 
     @Test
     void getUserSharesQueryFromUser() {
-        SearchServiceElasticTestUtils.assertQuery(
+        assertQuery(
                 expectedQuery("""
                         "must": [
                           { "term": { "share.shareStatus": { "value": "SHARED" } } },
                           { "term": { "share.sharedBy": { "value": "tester" } } }
-                        ]""", "must_not"),
+                        ]""", false),
                 underTest.getUserSharesQuery(UserShareDirection.fromUser, null, ORIGIN_DATE));
     }
 
     @Test
     void getUserSharesQueryToUserAppliesMaxAge() {
-        SearchServiceElasticTestUtils.assertQuery(
+        assertQuery(
                 expectedQuery("""
                         "must": [
                           { "term": { "share.shareStatus": { "value": "SHARED" } } },
@@ -199,13 +211,13 @@ class SearchServiceElasticUserSharesTest {
                         ],
                         "must_not": [
                           { "term": { "share.sharedBy": { "value": "tester" } } }
-                        ]""", "must_not"),
+                        ]""", false),
                 underTest.getUserSharesQuery(UserShareDirection.toUser, 60L, ORIGIN_DATE));
     }
 
     @Test
     void getUserSharesQueryToUserGroupsSkipsEveryone() {
-        SearchServiceElasticTestUtils.assertQuery(
+        assertQuery(
                 expectedQuery("""
                         "must": [
                           { "term": { "share.shareStatus": { "value": "SHARED" } } }
@@ -213,7 +225,7 @@ class SearchServiceElasticUserSharesTest {
                         "minimum_should_match": "1",
                         "should": [
                           { "term": { "share.sharedWith": { "value": "GROUP_class_a" } } }
-                        ]""", "must_not"),
+                        ]""", false),
                 underTest.getUserSharesQuery(UserShareDirection.toUserGroups, null, ORIGIN_DATE));
     }
 
@@ -223,7 +235,7 @@ class SearchServiceElasticUserSharesTest {
      */
     @Test
     void getUserSharesQueryRejectedByUser() {
-        SearchServiceElasticTestUtils.assertQuery(
+        assertQuery(
                 expectedQuery("""
                         "must": [
                           { "term": { "share.shareStatus": { "value": "SHARED" } } }
@@ -235,7 +247,7 @@ class SearchServiceElasticUserSharesTest {
                         "should": [
                           { "term": { "share.sharedWith": { "value": "tester" } } },
                           { "term": { "share.sharedWith": { "value": "GROUP_class_a" } } }
-                        ]""", "must"),
+                        ]""", true),
                 underTest.getUserSharesQuery(UserShareDirection.rejectedByUser, null, ORIGIN_DATE));
     }
 }
