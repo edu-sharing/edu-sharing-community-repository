@@ -119,7 +119,7 @@ public class NodeServiceInterceptor implements MethodInterceptor {
         } catch (InvalidNodeRefException t) {
             logger.debug("InvalidNodeRefException while verifying if object is remote object: " + t.getMessage());
         } catch (Throwable t) {
-            logger.info("Unexpected error while verifying if object is remote object: " + t.getMessage());
+            logger.info("Unexpected error while verifying if object is remote object (" + nodeId + "): " + t.getMessage());
         }
     }
 
