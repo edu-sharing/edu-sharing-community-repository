@@ -44389,7 +44389,8 @@
               "enum": [
                 "fromUser",
                 "toUser",
-                "toUserGroups"
+                "toUserGroups",
+                "rejectedByUser"
               ],
               "type": "string"
             }
