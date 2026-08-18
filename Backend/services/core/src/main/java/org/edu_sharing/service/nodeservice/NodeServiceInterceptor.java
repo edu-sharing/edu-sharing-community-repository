@@ -8,6 +8,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.usage.ContentQuotaException;
 import org.alfresco.service.namespace.QName;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -26,13 +27,12 @@ import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.stream.StreamServiceFactory;
 import org.edu_sharing.service.stream.StreamServiceHelper;
 import org.edu_sharing.service.toolpermission.ToolPermissionHelper;
-import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -150,23 +150,60 @@ public class NodeServiceInterceptor implements MethodInterceptor {
     }
 
     /**
-     * checks if the quota must be ignored (basically if the request was initiated by a connector)
-     * and run the task accordingly
+     * Runs the invocation regularly first and only falls back to temporarily disabling the user's quota
+     * (which is allowed if the request was initiated by a connector) if the quota really was the reason for
+     * the call to fail.
      */
     private static Object checkIgnoreQuota(MethodInvocation invocation) throws Throwable {
-        if (ContextManagementFilter.accessTool.get() != null &&
-                ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
+        if (ContextManagementFilter.accessTool.get() == null ||
+                !ApplicationInfo.TYPE_CONNECTOR.equals(ContextManagementFilter.accessTool.get().getApplicationInfo().getType())
         ) {
+            return invocation.proceed();
+        }
+        try {
+            return invocation.proceed();
+        } catch (ContentQuotaException quotaException) {
+            if (!rewindStreamArguments(invocation)) {
+                logger.warn("Quota of the current user blocked " + invocation.getMethod().getName()
+                        + " and the call can not be repeated because its data was already consumed."
+                        + " Pass a stream that supports mark/reset to make it repeatable.");
+                throw quotaException;
+            }
+            logger.info("Quota of the current user blocked " + invocation.getMethod().getName()
+                    + ", retrying with the quota temporarily disabled: " + quotaException.getMessage());
             return ignoreQuota(() -> {
                 try {
                     return invocation.proceed();
-                } catch (Throwable t) {
-                    logger.error(t.getMessage(), t);
-                    throw new RuntimeException(t);
+                } catch (Exception e) {
+                    throw e;
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
                 }
             });
         }
-        return invocation.proceed();
+    }
+
+    /**
+     * Rewinds all stream arguments of the invocation so that it can be run a second time
+     *
+     * @return false if any of them can not be read again
+     */
+    private static boolean rewindStreamArguments(MethodInvocation invocation) {
+        for (Object argument : invocation.getArguments()) {
+            if (!(argument instanceof InputStream stream)) {
+                continue;
+            }
+            if (!stream.markSupported()) {
+                return false;
+            }
+            try {
+                stream.reset();
+            } catch (IOException e) {
+                logger.warn("Could not reset " + stream.getClass().getName() + ": " + e.getMessage());
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

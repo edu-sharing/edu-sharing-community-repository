@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.NodeRefVersion;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
+import org.edu_sharing.repository.server.tools.BodyPartInputStream;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LRMITool;
 import org.edu_sharing.repository.server.tools.transaction.RetryingTransaction;
@@ -1774,15 +1775,17 @@ public class NodeApi {
             @Parameter(description = RestConstants.MESSAGE_NODE_ID, required = true) @PathParam("node") String node,
             @Parameter(description = "comment, leave empty = no new version, otherwise new version is generated", required = false) @QueryParam("versionComment") String versionComment,
             @Parameter(description = "MIME-Type", required = true) @QueryParam("mimetype") String mimetype,
-            //@FormDataParam("file") InputStream inputStream,
-            @Parameter(description = "file upload", schema = @Schema(name = "file", type = "string", format = "binary")) @FormDataParam("file") InputStream inputStream,
-//	    @FormDataParam("file") FormDataContentDisposition fileDetail,
+            @Parameter(description = "file upload", schema = @Schema(name = "file", type = "string", format = "binary")) @FormDataParam("file") FormDataBodyPart filePart,
             @Context HttpServletRequest req) {
 
         try {
 
             RepositoryDao repoDao = RepositoryDao.getRepository(repository);
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+            // wrap the part instead of taking a plain InputStream: the content write may be attempted more
+            // than once (transaction retry, quota fallback) and then needs to read the upload again
+            InputStream inputStream = filePart == null ? null : new BodyPartInputStream(filePart);
 
             //use tika framework for mimetype detection
             NodeDao newNode = nodeDao.changeContent(inputStream, null, versionComment);
