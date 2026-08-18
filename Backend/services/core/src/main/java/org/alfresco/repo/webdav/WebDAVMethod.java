@@ -1472,9 +1472,20 @@ public abstract class WebDAVMethod
      */
     protected int getStatusForAccessDeniedException()
     {
-        if (m_request != null && m_request.getHeader(WebDAV.HEADER_USER_AGENT) != null)
+        return getStatusForAccessDeniedException(m_request);
+    }
+
+    /**
+     * edu-sharing fix: same mapping, reachable without a WebDAVMethod instance. A content rejection
+     * (blocked mimetype, virus scan hit) can be raised at transaction commit, in which case it only
+     * surfaces in ExceptionHandler - which still has to answer macOS clients with the 500 they are
+     * deliberately given here instead of a 403.
+     */
+    static int getStatusForAccessDeniedException(HttpServletRequest request)
+    {
+        if (request != null && request.getHeader(WebDAV.HEADER_USER_AGENT) != null)
         {
-            String userAgent = m_request.getHeader(WebDAV.HEADER_USER_AGENT);
+            String userAgent = request.getHeader(WebDAV.HEADER_USER_AGENT);
 
             for (Entry<String, Integer> entry : accessDeniedStatusCodes.entrySet())
             {

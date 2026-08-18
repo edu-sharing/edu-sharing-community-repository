@@ -32,7 +32,33 @@ public class NgErrorServlet extends HttpServlet {
 		handleRequest(req, resp);
 	}
 
+	/**
+	 * edu-sharing fix: true when the request that failed was addressed to the WebDAV servlet, which
+	 * web.xml maps to /webdav/*. During an error dispatch the original URI is only reachable as a
+	 * request attribute.
+	 */
+	private static boolean isWebDAVRequest(HttpServletRequest req) {
+		Object errorUri = req.getAttribute("jakarta.servlet.error.request_uri");
+		String uri = (errorUri != null) ? errorUri.toString() : req.getRequestURI();
+		if (uri == null) {
+			return false;
+		}
+		String webdavPath = req.getContextPath() + "/webdav";
+		return uri.equals(webdavPath) || uri.startsWith(webdavPath + "/");
+	}
+
 	private static void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		if (isWebDAVRequest(req)) {
+			// edu-sharing fix: a WebDAV client can do nothing with an HTML or JSON error page, and
+			// producing one actively destroys the answer the WebDAV servlet already assembled:
+			// ErrorFilter.handleError() calls resp.reset() for every client that does not ask for
+			// text/html, which drops the status code and every response header - among them the
+			// X-MSDAVEXT_ERROR that carries the reason a rejected upload failed. Returning right
+			// here leaves that response untouched. The forward itself is harmless, it only resets
+			// the body buffer, and Tomcat marks the error as reported once we return normally, so
+			// no ErrorReportValve output is appended either.
+			return;
+		}
 		try {
 			Object errorMessage= req.getAttribute("jakarta.servlet.error.message");
 			Object errorCode= req.getAttribute("jakarta.servlet.error.status_code");

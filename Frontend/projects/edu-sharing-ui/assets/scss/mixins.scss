@@ -173,24 +173,24 @@
 @mixin setGlobalInsetFocus() {
     //respect element border radius
     @include removeDefaultFocus();
-    box-shadow: inset 0 0 0 $focusWidth $focusColor !important;
+    box-shadow: inset 0 0 0 var(--focusWidth) var(--focusColor) !important;
     @media (pointer: coarse) {
         box-shadow: none !important;
     }
 }
-@mixin setGlobalKeyboardFocus($mode: 'outline', $color: $focusColor) {
+@mixin setGlobalKeyboardFocus($mode: 'outline', $color: var(--focusColor)) {
     //respect element border radius
     @include removeDefaultFocus();
     @if $mode== 'outline' {
-        outline: $focusWidth solid $color;
+        outline: var(--focusWidth) solid $color;
         outline-offset: 2px;
     } @else if $mode== 'border' {
-        border: $focusWidth solid $color;
+        border: var(--focusWidth) solid $color;
     }
 }
 @mixin setGlobalDashedFocus() {
     @include removeDefaultFocus();
-    outline: $focusWidth dashed $focusColor;
+    outline: var(--focusWidth) dashed var(--focusColor);
 }
 
 @mixin focusShadow($dark: true, $strength: 0.1) {
@@ -226,10 +226,10 @@
 @mixin blurBackground($radius: 5px) {
     backdrop-filter: blur($radius);
 }
-@mixin setGlobalFocus($color: $focusColor) {
+@mixin setGlobalFocus($color: var(--focusColor)) {
     //respect element border radius
     @include removeDefaultFocus();
-    box-shadow: 0 0 0 $focusWidth $color !important;
+    box-shadow: 0 0 0 var(--focusWidth) $color !important;
 }
 
 @mixin removeButtonDefaultStyles {
