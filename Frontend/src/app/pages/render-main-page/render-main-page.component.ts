@@ -1,7 +1,5 @@
 import { AfterViewInit, Component, signal, inject } from '@angular/core';
-import { AboutService } from 'ngx-edu-sharing-api';
-import { firstValueFrom } from 'rxjs';
-import { SpinnerComponent } from 'ngx-edu-sharing-ui';
+import { RenderHelperService, SpinnerComponent } from 'ngx-edu-sharing-ui';
 import { RenderLegacyPageComponent } from '../render-legacy-page/render-legacy-page.component';
 import { Render2PageComponent } from '../render2-page/render2-page.component';
 import { CommonModule } from '@angular/common';
@@ -17,7 +15,7 @@ import { ActivatedRoute, Params } from '@angular/router';
     imports: [CommonModule, RenderLegacyPageComponent, Render2PageComponent, SpinnerComponent],
 })
 export class RenderMainPageComponent implements AfterViewInit {
-    private about = inject(AboutService);
+    private renderHelper = inject(RenderHelperService);
     private route = inject(ActivatedRoute);
 
     renderer = signal<'legacy' | 'render2'>(null);
@@ -33,11 +31,7 @@ export class RenderMainPageComponent implements AfterViewInit {
                 return;
             }
             this.renderer.set(
-                (await firstValueFrom(this.about.getAbout())).plugins?.find(
-                    (f) => f.id === 'rendering-service-2',
-                )
-                    ? 'render2'
-                    : 'legacy',
+                (await this.renderHelper.hasRenderingService2()) ? 'render2' : 'legacy',
             );
         } catch (e) {
             console.warn(e);

@@ -19,9 +19,6 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.MCAlfrescoAPIClient;
-import org.edu_sharing.repository.server.MCBaseClient;
-import org.edu_sharing.repository.server.RepoFactory;
-import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.RecurseMode;
@@ -45,32 +42,26 @@ public class RepositoryCacheTool {
      * <p>
      * usefull when a cache is already filled but must be refreshed
      */
-    public void buildNewCache(Map<String, String> authenticationInfo, String rootfolderId) throws Throwable {
-        Map<String, Map<String, Object>> newCache = new ConcurrentHashMap<String, Map<String, Object>>();
+    public void buildNewCache(String rootfolderId) {
+        Map<String, Map<String, Object>> newCache = new ConcurrentHashMap<>();
 
-        MCBaseClient mcBaseClient = RepoFactory.getInstance(ApplicationInfoList.getHomeRepository().getAppId(),
-                authenticationInfo);
-        if (mcBaseClient instanceof MCAlfrescoAPIClient) {
-            long startMillies = System.currentTimeMillis();
-            log.info("starting getChildrenRecursive");
-            Map<NodeRef, Map<String, Object>> childRecursive = buildCache(rootfolderId, CCConstants.CCM_TYPE_IO);
-            log.info("getChildrenRecursive returned.starting to copy to cachemap. size:{}", childRecursive.size());
-            for (Map.Entry<NodeRef, Map<String, Object>> entry : childRecursive.entrySet()) {
-                newCache.put(entry.getKey().getId(), entry.getValue());
-            }
-
-            long endMillies = System.currentTimeMillis();
-            long diff = (endMillies - startMillies) / 1000;
-            long diffMinutes = diff / 60;
-            log.info("copy to cachemap finished in seconds:{} around {} minutes size:{} linking the new cache to the cache reference", diff, diffMinutes, newCache.size());
-
-            repositoryCache.setCache(newCache);
-            // clear facet cache
-            FacetCache.getFacetCache().clear();
-            log.info("Facets cleared");
-        } else {
-            log.error("cache rebuilding is only available for MCAlfrescoAPIClient");
+        long startMillies = System.currentTimeMillis();
+        log.info("starting getChildrenRecursive");
+        Map<NodeRef, Map<String, Object>> childRecursive = buildCache(rootfolderId, CCConstants.CCM_TYPE_IO);
+        log.info("getChildrenRecursive returned.starting to copy to cachemap. size:{}", childRecursive.size());
+        for (Map.Entry<NodeRef, Map<String, Object>> entry : childRecursive.entrySet()) {
+            newCache.put(entry.getKey().getId(), entry.getValue());
         }
+
+        long endMillies = System.currentTimeMillis();
+        long diff = (endMillies - startMillies) / 1000;
+        long diffMinutes = diff / 60;
+        log.info("copy to cachemap finished in seconds:{} around {} minutes size:{} linking the new cache to the cache reference", diff, diffMinutes, newCache.size());
+
+        repositoryCache.setCache(newCache);
+        // clear facet cache
+        FacetCache.getFacetCache().clear();
+        log.info("Facets cleared");
     }
 
     private static final int THREAD_COUNT = Math.max(1, Math.min(3, Runtime.getRuntime().availableProcessors() - 1));
@@ -87,7 +78,7 @@ public class RepositoryCacheTool {
      * usefull after a server reboot cause it's adjuvant to the cachbuilding by user
      * actions
      */
-    public void buildStickyCache(Map<String, String> authenticationInfo, String rootfolderId) throws Throwable {
+    public void buildStickyCache(String rootfolderId) throws Throwable {
 
 
         log.info("preparing first level subfolders for folder: {}", nodeService.getProperty(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, rootfolderId), ContentModel.PROP_NAME));

@@ -71,6 +71,7 @@
     },
     "OPTION": {
       "REJECT_SHARE": "Freigabe ausblenden",
+      "UNREJECT_SHARE": "Freigabe wieder einblenden",
       "TOGGLE_SIDEBAR_ENABLED": "Seitenleiste ausblenden",
       "TOGGLE_SIDEBAR_DISABLED": "Seitenleiste einblenden"
     },

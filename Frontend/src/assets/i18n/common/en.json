@@ -1743,5 +1743,8 @@
     "MESSAGE": "Do you want to hide the share(s)? They will no longer be displayed in this list. Your access to the elements, e.g. via the search, remains unaffected.",
     "CONFIRM": "Hide",
     "TOAST_DONE": "{{count}} share(s) hidden"
+  },
+  "SHARE_UNREJECT": {
+    "TOAST_DONE": "{{count}} share(s) shown again"
   }
 }

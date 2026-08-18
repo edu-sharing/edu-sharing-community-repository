@@ -1042,7 +1042,7 @@ public class SearchServiceElastic implements SearchService {
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());
             } else {
-                log.warn("Permission query matched more than one node {} {}", nodeId, StringUtils.join(permissions));
+                log.warn("Permission query matched more than one node {} ({} matches) {}", nodeId, searchResult.hits().total() == null ? 0 : searchResult.hits().total().value(), StringUtils.join(permissions));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -1787,9 +1787,55 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public org.edu_sharing.repository.server.SearchResult<SearchInviteEvent> getUserShares(UserShareDirection direction, Long maxAge, Map<String, String[]> searchCriteria, SearchToken searchToken) throws Exception {
+        boolean rejected = UserShareDirection.rejectedByUser.equals(direction);
+        Query childQuery = getUserSharesQuery(direction, maxAge, Instant.now()).build()._toQuery();
+        if (searchToken.getSortDefinition() == null) {
+            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+        }
+        return searchInternalWithChildQuery("shared", searchCriteria, searchToken, null, childQuery, (data) -> {
+            Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
+            return new SearchInviteEvent(
+                    data.getNodeRef(),
+                    share.get("id").toString(),
+                    share.get("sharedBy").toString(),
+                    share.get("sharedWith").toString(),
+                    new Date((Long) share.get("timestamp")),
+                    ShareInfo.ShareTypeEnum.valueOf(share.get("shareType").toString()),
+                    // the innerHit is always the SHARED child (it carries sharedBy); report the
+                    // effective status so clients can offer to un-reject the share
+                    rejected
+                            ? ShareInfo.ShareStatusEnum.REJECTED
+                            : ShareInfo.ShareStatusEnum.valueOf(share.get("shareStatus").toString())
+            );
+        });
+    }
+
+    /**
+     * Builds the has-child query for {@link #getUserShares}.
+     *
+     * @param originDate reference date of the recency decay score - passed in so the query is
+     *                   deterministic and testable
+     */
+    BoolQuery.Builder getUserSharesQuery(UserShareDirection direction, Long maxAge, Instant originDate) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
-        Query childQuery = BoolQuery.of(bool -> bool.must(
-                Query.of(q2 -> q2.hasChild(hc -> hc
+        boolean rejected = UserShareDirection.rejectedByUser.equals(direction);
+        // a node the user has rejected (hidden) carries an additional share child with status
+        // REJECTED and sharedWith = the user itself (see ShareInfoServiceImpl.rejectShare)
+        Query rejectedByUserQuery = Query.of(q2 -> q2.hasChild(hc -> hc
+                .type("share")
+                .query(cq -> cq.bool(qcb -> qcb.must(
+                                mnbm -> mnbm.term(t -> t
+                                        .field("share.sharedWith")
+                                        .value(username)
+                                )).must(
+                                mnbm -> mnbm.term(t -> t
+                                        .field("share.shareStatus")
+                                        .value("REJECTED")
+                                )
+                        ))
+                )
+        ));
+        Query sharedQuery = Query.of(q2 -> q2.hasChild(hc -> hc
                         .type("share")
                         .scoreMode(ChildScoreMode.Min)
                         .query(cq -> cq.functionScore(fs -> fs
@@ -1827,6 +1873,26 @@ public class SearchServiceElastic implements SearchService {
                                                     .value(group)
                                             ));
                                         }
+                                    } else if (direction.equals(UserShareDirection.rejectedByUser)) {
+                                        // a share can only be rejected by its receiver, so this is
+                                        // the union of toUser and toUserGroups. The SHARED child is
+                                        // matched here (not the REJECTED one) because it is the one
+                                        // carrying sharedBy - see the innerHits mapping in getUserShares.
+                                        b = b.mustNot(m -> m.term(t -> t
+                                                .field("share.sharedBy")
+                                                .value(username)
+                                        ));
+                                        b.minimumShouldMatch("1");
+                                        b = b.should(m -> m.term(t -> t
+                                                .field("share.sharedWith")
+                                                .value(username)
+                                        ));
+                                        for (String group : getAllMemberships(username, false)) {
+                                            b = b.should(m -> m.term(t -> t
+                                                    .field("share.sharedWith")
+                                                    .value(group)
+                                            ));
+                                        }
                                     }
                                     return b;
                                 }))
@@ -1834,7 +1900,7 @@ public class SearchServiceElastic implements SearchService {
                                 .functions(f -> f.scriptScore(ss -> ss
                                         .script(script -> script
                                                 .source("decayDateLinear(params.originDate, '1m', '0', 1.5, doc['share.timestamp'].value)")
-                                                .params(Map.of("originDate", JsonData.of(Instant.now().toString())
+                                                .params(Map.of("originDate", JsonData.of(originDate.toString())
                                                         )
                                                 )
                                         )))
@@ -1850,38 +1916,15 @@ public class SearchServiceElastic implements SearchService {
                                         )
                                 )
                         )
-                ))).mustNot(
-                // filter rejected
-                Query.of(q2 -> q2.hasChild(hc -> hc
-                        .type("share")
-                        .query(cq -> cq.bool(qcb -> qcb.must(
-                                        mnbm -> mnbm.term(t -> t
-                                                .field("share.sharedWith")
-                                                .value(username)
-                                        )).must(
-                                        mnbm -> mnbm.term(t -> t
-                                                .field("share.shareStatus")
-                                                .value("REJECTED")
-                                        )
-                                ))
-                        )
-                ))
-        ))._toQuery();
-        if (searchToken.getSortDefinition() == null) {
-            searchToken.setSortDefinition(SortDefinition.SORT_DEFINITION_SCORE_ASC);
+                ));
+        BoolQuery.Builder builder = QueryBuilders.bool().must(sharedQuery);
+        // the "rejected" direction lists exactly what all other directions filter out
+        if (rejected) {
+            builder.must(rejectedByUserQuery);
+        } else {
+            builder.mustNot(rejectedByUserQuery);
         }
-        return searchInternalWithChildQuery("shared", searchCriteria, searchToken, null, childQuery, (data) -> {
-            Map share = (Map) data.getInnerHits().get("share").hits().hits().get(0).source().to(Map.class).get("share");
-            return new SearchInviteEvent(
-                    data.getNodeRef(),
-                    share.get("id").toString(),
-                    share.get("sharedBy").toString(),
-                    share.get("sharedWith").toString(),
-                    new Date((Long) share.get("timestamp")),
-                    ShareInfo.ShareTypeEnum.valueOf(share.get("shareType").toString()),
-                    ShareInfo.ShareStatusEnum.valueOf(share.get("shareStatus").toString())
-            );
-        });
+        return builder;
     }
 
     @Override

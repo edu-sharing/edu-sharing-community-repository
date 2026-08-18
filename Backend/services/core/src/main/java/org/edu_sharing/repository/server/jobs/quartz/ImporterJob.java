@@ -267,7 +267,7 @@ public class ImporterJob extends AbstractInterruptableJob {
 				if (urlImport != null) {
 					RecordHandlerLOM recordHandlerLom = new RecordHandlerLOM(null);
 					((OAIPMHLOMImporter) importer).importOAIObjectsFromFile(urlImport, recordHandlerLom);
-					new RefreshCacheExecuter().excecute(null, true, null);
+					new RefreshCacheExecuter().excecute(null, true);
 					return;
 				}
 
@@ -283,7 +283,7 @@ public class ImporterJob extends AbstractInterruptableJob {
 		}
 		// refresh cache after importing
 		if (!isInterrupted && !(idList != null && idList.length > 0))
-			new RefreshCacheExecuter().excecute(null, true, null);
+			new RefreshCacheExecuter().excecute(null, true);
 
 		} catch (Throwable e) {
 			logger.error(e.getMessage(),e);

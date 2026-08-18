@@ -334,13 +334,18 @@
           "SOLUTION": "Prüfen Sie, welche Systeme ggf. AJAX-Requests senden können. Wechseln Sie anschließend zu \"Quellen\" und bearbeiten Sie das Feld \"allow_origin\" in der homeApplication.properties.xml.\nWenn Sie die edu-sharing App benutzen, fügen Sie als Eintrag \"http://localhost:54361\" hinzu",
           "SOLUTION_LINK": "homeApplication.properties.xml bearbeiten"
         },
+        "RS2": {
+          "TITLE": "Renderingservice 2 Verfügbarkeit",
+          "STATUS_OK": "Der Renderingservice 2 ({{url}}) ist erreichbar und liefert {{modules}} Rendering-Module aus",
+          "STATUS_FAIL": "Die Module des Renderingservice 2 ({{url}}) konnten nicht abgerufen werden: {{message}}. Der Renderingservice 2 ist fehlerhaft oder nicht erreichbar, Inhalte können dadurch möglicherweise nicht angezeigt werden",
+          "SOLUTION": "Prüfen Sie den Renderingservice 2: Ist die konfigurierte URL {{url}} erreichbar, läuft der Dienst und was melden dessen Logdateien?"
+        },
         "RS_XSS": {
           "TITLE": "Renderingservice-Konfiguration für Cross-Side-Scripting",
           "STATUS_OK": "Das Repository liegt auf einer anderen Domain ({{repo}}) als der Renderingservice ({{render}}). Dadurch können von Nutzenden generierte Javascripte nicht auf die API zugreifen",
           "STATUS_INFO": "Das Repository liegt auf einer anderen Domain ({{repo}}) als der Renderingservice ({{render}}). Der Zustand der CORS-Konfiguration ist jedoch ungültig. Prüfen Sie die CORS-Konfiguration",
           "STATUS_FAIL": "Repository und Renderingservice liegen auf derselben Domain ({{repo}}). Javascripte, die auf dem Renderingservice ausgeführt werden, haben dadurch Zugriff auf die API und ggf. Cookies.",
-          "SOLUTION": "Repository und Renderingservice sollten aus Sicherheitsgründen auf unterschiedlichen (Sub-)Domains liegen. Weitere Informationen finden Sie in der Dokumentation",
-          "SOLUTION_LINK": "Dokumentation öffnen"
+          "SOLUTION": "Repository und Renderingservice sollten aus Sicherheitsgründen auf unterschiedlichen (Sub-)Domains liegen. Weitere Informationen finden Sie in der Dokumentation"
         }
       },
       "SYSTEM_TP_CHECKS": "Berechtigungsprüfung",

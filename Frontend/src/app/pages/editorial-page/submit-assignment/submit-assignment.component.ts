@@ -102,7 +102,12 @@ import { ThemeService } from '../../../services/theme.service';
         NgxExtendedPdfViewerModule,
         UserAvatarComponent,
     ],
-    providers: [OptionsHelperDataService],
+    // NOTE: do NOT provide OptionsHelperDataService here. The nested es-render-wrapper-component
+    // (single file preview) uses provideReusableOptionsHelperData(), which reuses an ancestor
+    // instance — it would then setData()/initComponents() on ours and replace the preview
+    // actionbar's options with the render page's default options. See render2-page.component.ts
+    // for the same trap. The preview actionbar owns a private instance instead.
+    providers: [],
 })
 export class SubmitAssignmentComponent implements OnDestroy {
     private route = inject(ActivatedRoute);
@@ -123,7 +128,9 @@ export class SubmitAssignmentComponent implements OnDestroy {
     private formBuilder = inject(FormBuilder);
     private uiService = inject(UIService);
     private restConnectorsService = inject(RestConnectorsService);
-    private assignmentFileOptionsHelper = inject(OptionsHelperDataService);
+    /** private instance, see the providers note on the component */
+    private assignmentFileOptionsHelper = new OptionsHelperDataService();
+    private connectorApi = inject(ConnectorService);
     private nodeTitlePipe = inject(NodeTitlePipe);
     protected theme = inject(ThemeService);
 
@@ -232,17 +239,10 @@ export class SubmitAssignmentComponent implements OnDestroy {
     constructor() {
         this.initOptions();
         effect(() => {
-            const node = this.selectedAssignmentFile();
-            const mode = this.selectedFileMode();
-            if (!node || !this._actionbarRef) {
-                return;
-            }
-            this.actionbarOptionData.activeObjects = [node];
-            this.assignmentFileOptionsHelper.setData({
-                ...this.actionbarOptionData,
-                customOptions: this.configForMode(mode)?.customOptions,
-            });
-            void this.assignmentFileOptionsHelper.refreshComponents();
+            // read synchronously so the effect tracks both signals
+            this.selectedAssignmentFile();
+            this.selectedFileMode();
+            void this.syncActionbar();
         });
         this.language = this.translationsService.getLocale();
         effect(() => {
@@ -382,6 +382,8 @@ export class SubmitAssignmentComponent implements OnDestroy {
         this.destroyed$.next();
         this.destroyed$.complete();
         this.connectorPolling().forEach(({ subscription }) => subscription.unsubscribe());
+        // not DI-managed, so tear it down ourselves
+        this.assignmentFileOptionsHelper.ngOnDestroy();
     }
 
     /**
@@ -834,6 +836,10 @@ export class SubmitAssignmentComponent implements OnDestroy {
                 // enforce refresh so that customShowCallback can get re-evaluated
                 void n.optionsHelper.refreshComponents();
             });
+            // same for the standalone actionbar of the single file preview (if one is open)
+            if (this._actionbarRef && this.selectedAssignmentFile()) {
+                void this.assignmentFileOptionsHelper.refreshComponents();
+            }
             this.toast.show({
                 type: 'info',
                 subtype: ToastType.InfoSimple,
@@ -910,6 +916,11 @@ export class SubmitAssignmentComponent implements OnDestroy {
             customOptions: this.configForMode(mode)?.customOptions,
         });
         await this.assignmentFileOptionsHelper.initComponents(this._actionbarRef);
+        // Unlike the node entries cards (which re-evaluate `showCallback` on every render), the
+        // actionbar evaluates it exactly once and drops the option for good. The edit option's
+        // `customShowCallback` goes through `connectorSupportsEdit`, which reads a connector list
+        // that is filled asynchronously - so wait for it, otherwise "edit" is silently missing.
+        await firstValueFrom(this.connectorApi.observeConnectorList());
         void this.assignmentFileOptionsHelper.refreshComponents();
     }
 

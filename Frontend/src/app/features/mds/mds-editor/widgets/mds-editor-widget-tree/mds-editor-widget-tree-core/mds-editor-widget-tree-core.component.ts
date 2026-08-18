@@ -5,17 +5,22 @@ import {
     ElementRef,
     EventEmitter,
     Input,
-    OnChanges,
     OnDestroy,
     OnInit,
     Output,
-    SimpleChanges,
     ViewChild,
     inject,
 } from '@angular/core';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, from, Observable, of, ReplaySubject } from 'rxjs';
+import {
+    catchError,
+    debounceTime,
+    distinctUntilChanged,
+    map,
+    switchMap,
+    takeUntil,
+} from 'rxjs/operators';
 import { MdsEditorInstanceService, Widget } from '../../../mds-editor-instance.service';
 import { DisplayValue } from '../../DisplayValues';
 import { Tree, TreeNode } from '../tree';
@@ -33,11 +38,14 @@ let nextUniqueId = 0;
     styleUrls: ['./mds-editor-widget-tree-core.component.scss'],
     standalone: false,
 })
-export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDestroy {
+export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
     private toast = inject(Toast);
     changeDetectorRef = inject(ChangeDetectorRef);
     private mdsEditorInstanceService = inject(MdsEditorInstanceService);
     private mdsService = inject(MdsV1Service);
+
+    /** Time to wait after the last keystroke before an autocomplete request is sent. */
+    private static readonly FILTER_DEBOUNCE_MS = 250;
 
     readonly uid = `app-mds-editor-widget-tree-core-${nextUniqueId++}`;
     @ViewChild('input') input: ElementRef;
@@ -98,24 +106,26 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         this.filterString$
             .pipe(
                 map((filterString) => (filterString?.length >= 2 ? filterString : null)),
+                // debounce first, then drop repeated values, so a burst of keystrokes results in
+                // exactly one request per settled filter string
+                debounceTime(MdsEditorWidgetTreeCoreComponent.FILTER_DEBOUNCE_MS),
                 distinctUntilChanged(),
+                // `switchMap` discards the result of an outdated request, so a slow response can
+                // never overwrite the tree of a newer one
+                switchMap((filterString) =>
+                    this.fetchSuggestedTree(filterString).pipe(
+                        map((tree) => ({ filterString, tree })),
+                    ),
+                ),
                 takeUntil(this.destroyed$),
             )
-            .subscribe(async (filterString) => {
-                if (
-                    ['multivalueSuggestBadges', 'multivalueFixedBadges'].includes(
-                        this.widget.definition.type,
-                    )
-                ) {
-                    // fetch suggestions from api / async
-                    const suggestedValues = await this.widget.getSuggestedValues(filterString);
-                    suggestedValues.map((suggestedValue) =>
-                        this.component.toDisplayValue(suggestedValue),
-                    );
-                    this.tree = Tree.generateTree(suggestedValues, [], []);
+            .subscribe(({ filterString, tree }) => {
+                if (tree) {
+                    this.tree = tree;
                     this.filterDataSource();
                 }
                 this.filterNodes(filterString);
+                this.changeDetectorRef.markForCheck();
             });
         this.treeControl.expansionModel.changed.subscribe((change) => {
             for (const expandedNode of change.added) {
@@ -126,10 +136,22 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnChanges, OnDe
         });
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.filterString) {
-            this.filterString$.next(changes.filterString.currentValue);
+    /**
+     * Resolves the tree to display for the given filter string, or `null` if the current widget
+     * type does not fetch its values remotely (the existing tree is kept in that case).
+     */
+    private fetchSuggestedTree(filterString: string): Observable<Tree | null> {
+        if (
+            !['multivalueSuggestBadges', 'multivalueFixedBadges'].includes(
+                this.widget.definition.type,
+            )
+        ) {
+            return of(null);
         }
+        return from(this.widget.getSuggestedValues(filterString)).pipe(
+            map((suggestedValues) => Tree.generateTree(suggestedValues, [], [])),
+            catchError(() => of(null)),
+        );
     }
 
     findNodeByKeyOrCaption(keyOrCaption: string, treeRoot = this.dataSource.data): TreeNode {

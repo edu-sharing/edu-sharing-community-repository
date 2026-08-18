@@ -503,13 +503,18 @@
           "SOLUTION": "Check which systems can send AJAX requests if necessary. Then navigate to \"sources\" and edit the field \"allow_origin\" in the homeApplication.properties.xml.\nIf you use the edu-sharing app, add \"http://localhost:54361\" as an entry",
           "SOLUTION_LINK": "edit homeApplication.properties.xml"
         },
+        "RS2": {
+          "TITLE": "Rendering Service 2 Availability",
+          "STATUS_OK": "The rendering service 2 ({{url}}) is reachable and provides {{modules}} rendering modules",
+          "STATUS_FAIL": "The modules of the rendering service 2 ({{url}}) could not be fetched: {{message}}. The rendering service 2 is faulty or unreachable, content may therefore not be displayed",
+          "SOLUTION": "Check the rendering service 2: is the configured url {{url}} reachable, is the service running and what do its log files report?"
+        },
         "RS_XSS": {
           "TITLE": "Rendering Service Configuration for Cross-Side Scripting",
           "STATUS_OK": "The repository is located on a different domain ({{{repo}}) than the rendering service ({{{render}}). This prevents user-generated javascripts from accessing the API",
           "STATUS_INFO": " The repository is located on a different domain ({{{repo}}) than the rendering service ({{{render}}). However, the state of the CORS configuration is invalid. Check the CORS configuration",
           "STATUS_FAIL": "Repository and rendering service are on the same domain ({{{repo}}). Java scripts that are executed on the rendering service therefore have access to the API and possibly cookies.",
-          "SOLUTION": "Repository and rendering service should be located on different (sub-)domains for security reasons. For more information, see the documentation",
-          "SOLUTION_LINK": "Open documentation"
+          "SOLUTION": "Repository and rendering service should be located on different (sub-)domains for security reasons. For more information, see the documentation"
         }
       },
       "SYSTEM_TP_CHECKS": "Permission checks",

@@ -20,6 +20,7 @@
     .audio-wrapper {
         video[poster] {
             object-fit: cover;
+            object-position: center;
         }
     }
 
@@ -177,7 +178,7 @@
         display: flex;
         justify-content: center;
     }
-
+    .audio-wrapper video,
     .video-wrapper video {
         width: 100%;
         height: auto;

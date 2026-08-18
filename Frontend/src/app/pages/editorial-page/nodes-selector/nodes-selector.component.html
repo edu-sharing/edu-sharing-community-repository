@@ -218,6 +218,7 @@
         dropped: dropOnCollection
       }"
       [elementInteractionType]="InteractionType.Emitter"
+      [treeConfig]="collectionsTreeConfig()"
       (clickItem)="selectOnClick(collectionsWrapperRef, $event)"
       (fetchData)="loadMore($event, true)"
       (selectionChange)="onNodeSelectionChange($event)"

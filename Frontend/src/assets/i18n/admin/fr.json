@@ -422,13 +422,18 @@
           "SOLUTION": "Vérifiez quels systèmes peuvent envoyer des requêtes AJAX si nécessaire. Naviguez ensuite vers \"sources\" et modifiez le champ \"allow_origin\" dans le fichier homeApplication.properties.xml.\nSi vous utilisez l'application edu-sharing, ajoutez \"http://localhost:54361\" comme entrée.",
           "SOLUTION_LINK": "modifier homeApplication.properties.xml"
         },
+        "RS2": {
+          "TITLE": "Disponibilité du service de rendu 2",
+          "STATUS_OK": "Le service de rendu 2 ({{url}}) est accessible et fournit {{modules}} modules de rendu",
+          "STATUS_FAIL": "Les modules du service de rendu 2 ({{url}}) n'ont pas pu être récupérés : {{message}}. Le service de rendu 2 est défectueux ou inaccessible, les contenus risquent donc de ne pas être affichés",
+          "SOLUTION": "Vérifiez le service de rendu 2 : l'url configurée {{url}} est-elle accessible, le service fonctionne-t-il et que signalent ses fichiers journaux ?"
+        },
         "RS_XSS": {
           "TITLE": "Configuration du service de rendu pour le Cross-Side Scripting",
           "STATUS_OK": "Le référentiel est situé sur un domaine différent ({{{repo}}) de celui du service de rendu ({{{render}}). Cela empêche les javascripts générés par l'utilisateur d'accéder à l'API",
           "STATUS_INFO": " Le référentiel est situé sur un domaine différent ({{repo}}) de celui du service de rendu ({{{render}}). Cependant, l'état de la configuration CORS est invalide. Vérifier la configuration CORS",
           "STATUS_FAIL": "Le référentiel et le service de rendu sont sur le même domaine ({{{repo}}). Les scripts Java exécutés sur le service de rendu ont donc accès à l'API et éventuellement aux cookies.",
-          "SOLUTION": "Le dépôt et le service de rendu doivent être situés dans des (sous-)domaines différents pour des raisons de sécurité. Pour plus d'informations, voir la documentation",
-          "SOLUTION_LINK": "Documentation ouverte"
+          "SOLUTION": "Le dépôt et le service de rendu doivent être situés dans des (sous-)domaines différents pour des raisons de sécurité. Pour plus d'informations, voir la documentation"
         }
       },
       "SYSTEM_TP_CHECKS": "Contrôle des autorisations",

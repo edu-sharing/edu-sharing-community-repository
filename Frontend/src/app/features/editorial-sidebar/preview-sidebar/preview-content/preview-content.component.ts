@@ -12,7 +12,7 @@ import {
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
-import { AboutService, NetworkService, Node } from 'ngx-edu-sharing-api';
+import { NetworkService, Node } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
     CustomOptions,
@@ -54,7 +54,6 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     networkService = inject(NetworkService);
     private renderHelperService = inject(RenderHelperService);
     router = inject(Router);
-    about = inject(AboutService);
 
     /**
      all modules in this list will be automatically rendered without confirmation
@@ -121,7 +120,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 // This needs to be configurable per module in rendering service.
                 // The logic belongs in the render component itself (toggleable via Input)
                 // Ticket: RENDER-138
-                void this.about.hasPlugin('rendering-service-2').then(async (has) => {
+                void this.renderHelperService.hasRenderingService2().then(async (has) => {
                     if (has) {
                         let module = 'default';
                         if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
@@ -167,7 +166,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     async onShowContentClick(): Promise<void> {
-        if (await this.about.hasPlugin('rendering-service-2')) {
+        if (await this.renderHelperService.hasRenderingService2()) {
             this.renderNode.set(this.node());
             /*let dialogRefPromise: Promise<CardDialogRef>;
 

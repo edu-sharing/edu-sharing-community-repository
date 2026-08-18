@@ -33,7 +33,12 @@
     <iframe class="vimeoFrame" [src]="sanitizedUrl"></iframe>
     } @if (embedding === UrlEmbeddings.AUDIO && url !== '') {
     <div class="audio-wrapper">
-      <video controls style="max-width: 100%" [src]="url" poster="assets/img/audio.svg"></video>
+      <video
+        controls
+        style="max-width: 100%"
+        [src]="url"
+        poster="themes/default/images/common/mime-types/previews/file-audio.svg"
+      ></video>
     </div>
     } @if (embedding === UrlEmbeddings.IMAGE && url !== '') {
     <div class="image-wrapper">

@@ -234,6 +234,8 @@ export class NodesSelectorComponent implements OnInit {
      * tabs to hide from the otherwise supported set (e.g. to offer only a subset of views)
      */
     tabBlacklist = input<TabType[]>([]);
+    /** config of the collections tree */
+    collectionsTreeConfig = input<TreeConfig>({ showFiles: true });
     /** the blacklist of the input combined with the one of the option config */
     private effectiveTabBlacklist = computed<TabType[]>(() => [
         ...(this.tabBlacklist() ?? []),

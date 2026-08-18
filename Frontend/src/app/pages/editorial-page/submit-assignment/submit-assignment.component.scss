@@ -231,6 +231,28 @@ ngx-extended-pdf-viewer {
         font-size: vars.$fontSizeSmall;
     }
 }
+#toolbarViewer {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    #toolbarViewerRight {
+        margin-left: auto;
+    }
+
+    &.medium {
+        pdf-zoom-toolbar {
+            display: none;
+        }
+    }
+
+    &.small {
+        #toolbarViewerLeft {
+            display: none;
+        }
+    }
+}
 :host ::ng-deep {
     .summary {
         @include card.assignmentSummary();

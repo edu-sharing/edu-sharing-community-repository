@@ -841,6 +841,7 @@
         <entry icon="person">toUser</entry>
         <entry icon="group">toUserGroups</entry>
         <entry icon="send">fromUser</entry>
+        <entry icon="cancel_schedule_send">rejectedByUser</entry>
       </values>
     </widget>
     <widget>

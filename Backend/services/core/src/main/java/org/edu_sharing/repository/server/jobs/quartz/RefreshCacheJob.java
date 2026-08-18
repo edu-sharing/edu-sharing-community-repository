@@ -36,8 +36,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import java.util.HashMap;
-
 
 @JobDescription(description = "Re-Build/warmup cache for the IMP-OBJ or a custom folder")
 public class RefreshCacheJob extends AbstractInterruptableJob {
@@ -67,25 +65,16 @@ public class RefreshCacheJob extends AbstractInterruptableJob {
 			sticky = true;
 		}
 		
-		HashMap authInfo = (HashMap)jobDataMap.get("authInfo");
-		
 		try {
-			if(authInfo == null) {
-				RunAsWork<Void> runAs = new RunAsWork<Void>() {
-					@Override
-					public Void doWork() throws Exception {
-						try {
-							new RefreshCacheExecuter().excecute(rootFolderId, sticky, authInfo);
-						} catch (Throwable e) {
-							logger.error(e);
-						}
-						return null;
-					}
-				};
-				AuthenticationUtil.runAsSystem(runAs);
-			}else {
-				new RefreshCacheExecuter().excecute(rootFolderId, sticky, authInfo);
-			}
+			RunAsWork<Void> runAs = () -> {
+				try {
+					new RefreshCacheExecuter().excecute(rootFolderId, sticky);
+				} catch (Throwable e) {
+					logger.error(e);
+				}
+				return null;
+			};
+			AuthenticationUtil.runAsSystem(runAs);
 		} catch (Throwable e) {
 			logger.error("I will throw an JobExecutionException:"+e.getMessage());
 			throw new JobExecutionException(e);

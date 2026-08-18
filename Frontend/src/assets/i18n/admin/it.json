@@ -422,13 +422,18 @@
           "SOLUTION": "Controllare quali sistemi possono inviare richieste AJAX, se necessario. Quindi navigare in \"sources\" e modificare il campo \"allow_origin\" nel file homeApplication.properties.xml.\nSe si utilizza l'applicazione edu-sharing, aggiungere \"http://localhost:54361\" come voce",
           "SOLUTION_LINK": "modificare homeApplication.properties.xml"
         },
+        "RS2": {
+          "TITLE": "Disponibilità del servizio di rendering 2",
+          "STATUS_OK": "Il servizio di rendering 2 ({{url}}) è raggiungibile e fornisce {{modules}} moduli di rendering",
+          "STATUS_FAIL": "Non è stato possibile recuperare i moduli del servizio di rendering 2 ({{url}}): {{message}}. Il servizio di rendering 2 è difettoso o non raggiungibile, pertanto i contenuti potrebbero non essere visualizzati",
+          "SOLUTION": "Controllare il servizio di rendering 2: l'url configurato {{url}} è raggiungibile, il servizio è in esecuzione e cosa riportano i suoi file di log?"
+        },
         "RS_XSS": {
           "TITLE": "Configurazione del servizio di rendering per il Cross-Side Scripting",
           "STATUS_OK": "Il repository si trova su un dominio diverso ({{repo}}) rispetto al servizio di rendering ({{render}}). Questo impedisce ai javascript generati dall'utente di accedere alle API.",
           "STATUS_INFO": " Il repository si trova su un dominio diverso ({{repo}}) rispetto al servizio di rendering ({{render}}). Tuttavia, lo stato della configurazione CORS non è valido. Controllare la configurazione CORS",
           "STATUS_FAIL": "Il repository e il servizio di rendering sono sullo stesso dominio ({{{repo}}). Gli script Java eseguiti sul servizio di rendering hanno quindi accesso alle API ed eventualmente ai cookie.",
-          "SOLUTION": "Il repository e il servizio di rendering devono essere situati su (sotto)domini diversi per motivi di sicurezza. Per ulteriori informazioni, vedere la documentazione",
-          "SOLUTION_LINK": "Documentazione aperta"
+          "SOLUTION": "Il repository e il servizio di rendering devono essere situati su (sotto)domini diversi per motivi di sicurezza. Per ulteriori informazioni, vedere la documentazione"
         }
       },
       "SYSTEM_TP_CHECKS": "Controlli dei permessi",

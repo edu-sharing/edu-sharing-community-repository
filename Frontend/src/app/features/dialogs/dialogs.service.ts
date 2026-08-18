@@ -804,6 +804,30 @@ export class DialogsService {
         });
     }
 
+    /**
+     * Counterpart of `openRejectShareDialog`: makes previously hidden shares visible again.
+     * Non-destructive and trivially reversible, so it runs without a confirmation dialog.
+     */
+    async unrejectShares(shares: NodeShare[]): Promise<NodeShare[]> {
+        await firstValueFrom(
+            from(
+                shares.map((s) =>
+                    this.sharingV1Service.unrejectShare({
+                        node: s.ref.id,
+                        repository: s.ref.repo,
+                    }),
+                ),
+            ).pipe(
+                concatMap((req) => req),
+                toArray(),
+            ),
+        );
+        // the nodes leave the "rejected" tab they were listed in
+        this.localEvents.nodesDeleted.emit(shares);
+        this.injector.get(Toast).toast('SHARE_UNREJECT.TOAST_DONE', { count: shares.length });
+        return shares;
+    }
+
     async openDeleteNodesDialog(
         data: DeleteNodesDialogData,
     ): Promise<CardDialogRef<DeleteNodesDialogData, DeleteNodesDialogResult>> {
