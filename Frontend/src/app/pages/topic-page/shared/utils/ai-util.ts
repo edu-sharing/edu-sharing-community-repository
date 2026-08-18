@@ -4,11 +4,14 @@ import { BapiConfigObject } from '../types/bapi-config-object';
 
 /**
  * Returns the message content of the first choices of a given completion result.
+ * An absent result (e.g. a failed generation) yields an empty string.
  *
  * @param completionResult
  */
-export const retrieveResultString = (completionResult: CreateChatCompletionResponse): string => {
-    return completionResult.choices[0]?.message?.content ?? '';
+export const retrieveResultString = (
+    completionResult: CreateChatCompletionResponse | null,
+): string => {
+    return completionResult?.choices?.[0]?.message?.content ?? '';
 };
 
 /**

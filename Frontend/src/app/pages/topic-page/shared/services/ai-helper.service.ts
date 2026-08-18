@@ -49,7 +49,7 @@ export class AiHelperService {
         configId: string | NodeConfig,
         variables: { [key: string]: string[] } = {},
         contextNodeId: string,
-    ): Promise<CreateChatCompletionResponse> {
+    ): Promise<CreateChatCompletionResponse | null> {
         const user: string = await this.getCurrentUser();
         let config: NodeConfig | MdsConfig;
         if (typeof configId === 'string') {
@@ -57,23 +57,30 @@ export class AiHelperService {
         } else {
             config = configId;
         }
-        return firstValueFrom(
-            this.eduSharingLlmService.chatCompletions({
-                body: {
-                    configIds: [
-                        retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),
-                        retrieveMdsConfig(
-                            this.globalWidgetConfigService.defaultAiChatCompletionConfigId,
-                        ),
-                        config,
-                    ],
-                    contextNodeId,
-                    metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
-                    user,
-                    variables,
-                },
-            }),
-        );
+        // a failing prompt must not break the rendering of the surrounding page,
+        // so errors (e.g. a missing or expired B-API authorization) resolve to no result
+        try {
+            return await firstValueFrom(
+                this.eduSharingLlmService.chatCompletions({
+                    body: {
+                        configIds: [
+                            retrieveMdsConfig(this.globalWidgetConfigService.defaultAiConfigId),
+                            retrieveMdsConfig(
+                                this.globalWidgetConfigService.defaultAiChatCompletionConfigId,
+                            ),
+                            config,
+                        ],
+                        contextNodeId,
+                        metadataSet: this.genericWidgetGlobalService.getDefaultMds(),
+                        user,
+                        variables,
+                    },
+                }),
+            );
+        } catch (error) {
+            console.warn('AI text generation failed', error);
+            return null;
+        }
     }
 
     /**

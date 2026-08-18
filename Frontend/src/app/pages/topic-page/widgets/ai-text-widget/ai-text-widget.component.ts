@@ -137,6 +137,8 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
                     })
                     .catch((error) => {
                         console.error('KI Widget: An error occurred', error);
+                        // the spinner must not stay visible when the display action failed
+                        this.reloadingIndicator.set(false);
                     });
             }
         });
@@ -433,8 +435,13 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
      * Postload action to execute edit mode actions.
      */
     async postLoadAction(): Promise<void> {
-        await this.editModeDisplayAction(this.editMode());
-        this.initialized.set(true);
+        try {
+            await this.editModeDisplayAction(this.editMode());
+        } finally {
+            // the widget always has to leave its loading state, even without a generated text
+            this.initialized.set(true);
+            this.disabled.set(false);
+        }
     }
 
     /**

@@ -381,8 +381,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     );
                 const responseText: string = retrieveResultString(promptResponse);
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'headline');
-                // make sure to sync both headline and prompt
-                this.headline = prompt;
+                // make sure to sync both headline and prompt; outside of the editor a prompt
+                // without a result stays empty so that its raw text is never rendered
+                this.headline = !responseText && !this.editMode() ? '' : prompt;
                 headlineSyncedWithPrompt = true;
                 if (prompt && responseText) {
                     this.headlineMapping = new PromptToTextMapping(prompt, responseText);
@@ -404,7 +405,9 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                     );
                 const responseText: string = retrieveResultString(promptResponse);
                 const prompt: string = retrievePromptFromAiConfig(aiConfig, 'description');
-                this.description = prompt;
+                // outside of the editor a prompt without a result stays empty so that its raw
+                // text is never rendered
+                this.description = !responseText && !this.editMode() ? '' : prompt;
                 descriptionSyncedWithPrompt = true;
                 if (responseText) {
                     this.descriptionMapping = new PromptToTextMapping(prompt, responseText);
@@ -720,15 +723,27 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             // mark as initialized
             this.initialized.set(true);
         }
-        // potential pre-processing action
-        if (this.widgetInstance.preLoadAction) {
-            await this.widgetInstance.preLoadAction();
-        }
-        // read widget configuration and set widget values
-        await this.readWidgetConfig();
-        // potential post-processing action
-        if (this.widgetInstance.postLoadAction) {
-            await this.widgetInstance.postLoadAction();
+        // config reading and the pre-/post-load actions may hit the AI backend, which can fail
+        // (e.g. unauthorized); the widget is still rendered with whatever content is available
+        try {
+            // potential pre-processing action
+            if (this.widgetInstance.preLoadAction) {
+                await this.widgetInstance.preLoadAction();
+            }
+            // read widget configuration and set widget values
+            await this.readWidgetConfig();
+            // potential post-processing action
+            if (this.widgetInstance.postLoadAction) {
+                await this.widgetInstance.postLoadAction();
+            }
+        } catch (error) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.WIDGET.GENERIC_WIDGET.ERROR_LOADING_WIDGET'),
+                error,
+            );
+            this.updateInProgress.set(false);
+            this.widgetInstance.updateInProgress.set(false);
+            this.widgetInstance.initialized.set(true);
         }
         // make sure to update the i18n labels and visibility of the configuration options
         this.updateCommonConfigurationOptions();
@@ -776,22 +791,26 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         }
 
         // if at least a widget config or an AI config is defined, set the values in the widget
-        if (
-            (widgetConfig && Object.keys(widgetConfig)?.length) ||
-            (aiConfig && Object.keys(aiConfig)?.length)
-        ) {
-            if (this.widgetInstance.setWidgetValues) {
-                const result: void | Promise<void> = this.widgetInstance.setWidgetValues(
-                    widgetConfig,
-                    aiConfig,
-                );
-                if (result instanceof Promise) {
-                    await result;
+        try {
+            if (
+                (widgetConfig && Object.keys(widgetConfig)?.length) ||
+                (aiConfig && Object.keys(aiConfig)?.length)
+            ) {
+                if (this.widgetInstance.setWidgetValues) {
+                    const result: void | Promise<void> = this.widgetInstance.setWidgetValues(
+                        widgetConfig,
+                        aiConfig,
+                    );
+                    if (result instanceof Promise) {
+                        await result;
+                    }
                 }
+                await this.updateCommonProperties(widgetConfig, aiConfig);
             }
-            await this.updateCommonProperties(widgetConfig, aiConfig);
+        } finally {
+            // the widget always has to leave its loading state, even if applying the config failed
+            this.widgetInstance.initialized.set(true);
         }
-        this.widgetInstance.initialized.set(true);
     }
 
     /**
