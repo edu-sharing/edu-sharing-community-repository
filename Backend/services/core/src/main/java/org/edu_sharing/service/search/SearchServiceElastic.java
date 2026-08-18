@@ -1042,7 +1042,7 @@ public class SearchServiceElastic implements SearchService {
                         Boolean.parseBoolean(restrictedAccess)
                 ).stream().filter(permissions::contains).collect(Collectors.toList());
             } else {
-                log.warn("Permission query matched more than one node {} {}", nodeId, StringUtils.join(permissions));
+                log.warn("Permission query matched more than one node {} ({} matches) {}", nodeId, searchResult.hits().total() == null ? 0 : searchResult.hits().total().value(), StringUtils.join(permissions));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
