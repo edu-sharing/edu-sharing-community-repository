@@ -1,14 +1,19 @@
-import { effect, EventEmitter, inject, Injectable, signal, untracked } from '@angular/core';
+import { effect, EventEmitter, inject, Injectable, signal, Type, untracked } from '@angular/core';
 import { Node } from 'ngx-edu-sharing-api';
 import {
     EDITORIAL_SIDEBAR_OPTIONS,
     EditorialSidebarComponent,
+    EditorialSidebarOption,
+    EditorialSidebarOptionDescriptor,
     OptionConfig,
     OptionState,
     PreviewConfig,
+    SelectionMode,
 } from './editorial-sidebar.component';
 import {
+    ElementType,
     NodeClickEvent,
+    OptionGroup,
     NodeEntriesDataType,
     NodeEntriesGlobalService,
     NodeEntriesWrapperComponent,
@@ -18,12 +23,80 @@ import { SelectionChange } from '@angular/cdk/collections';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
+/**
+ * An option another module contributes to the sidebar. The sidebar knows nothing about it beyond
+ * this description: it offers it in the option list and renders `component` when it is opened, so
+ * the implementation can live outside of the core (see `custom-global-extensions` of an extension).
+ */
+export type CustomSidebarOption = {
+    /** identifies the option; also the value of `OptionState.option` while it is open */
+    id: string;
+    /** i18n key (or plain text) for the entry in the option list and the panel heading */
+    label: string;
+    icon: string;
+    /** rendered while the option is open (via `ngComponentOutlet`, so it must be standalone) */
+    component: Type<unknown>;
+    /**
+     * Defaults to `'any'`: a contributed option is usually about the current context rather than
+     * about the selection, and would otherwise be dropped the moment something is selected.
+     */
+    selectionMode?: SelectionMode;
+    /** `OptionItem` fields passed through to restrict where the entry is offered */
+    group?: OptionGroup;
+    scopes?: string[];
+    /**
+     * Which selections the option is offered for. Defaults to every type, i.e. independent of the
+     * selection — unlike `OptionItem`, which defaults to `[ElementType.Node]` and would hide the
+     * entry whenever nothing (or something else) is selected.
+     */
+    elementType?: ElementType[];
+};
+
 @Injectable({
     providedIn: 'root',
 })
 export class EditorialSidebarService {
     mainNavService = inject(MainNavService);
     private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+
+    private readonly customOptions = signal<CustomSidebarOption[]>([]);
+
+    /**
+     * Contribute an option to the sidebar. Registering the same id twice replaces the previous
+     * registration rather than offering the option twice.
+     */
+    registerCustomOption(option: CustomSidebarOption) {
+        this.customOptions.update((options) => [
+            ...options.filter((existing) => existing.id !== option.id),
+            option,
+        ]);
+    }
+
+    unregisterCustomOption(id: string) {
+        this.customOptions.update((options) => options.filter((existing) => existing.id !== id));
+    }
+
+    getCustomOptions(): CustomSidebarOption[] {
+        return this.customOptions();
+    }
+
+    getCustomOption(id: EditorialSidebarOption): CustomSidebarOption | null {
+        return this.customOptions().find((option) => option.id === id) ?? null;
+    }
+
+    /**
+     * How the given option behaves — from the sidebar's own table, else from the registration.
+     */
+    getOptionDescriptor(option: EditorialSidebarOption): EditorialSidebarOptionDescriptor {
+        const builtIn = (
+            EDITORIAL_SIDEBAR_OPTIONS as Record<string, EditorialSidebarOptionDescriptor>
+        )[option];
+        if (builtIn) {
+            return builtIn;
+        }
+        const custom = this.getCustomOption(option);
+        return { selectionMode: custom?.selectionMode ?? 'any' };
+    }
 
     /**
      * currently selected nodes
@@ -47,6 +120,12 @@ export class EditorialSidebarService {
     configChange$ = new EventEmitter<OptionConfig>();
     scope = signal(Scope.Search);
     private _editorialSidebar: EditorialSidebarComponent;
+    /**
+     * Whether a sidebar is present on the current page, i.e. whether an option can be shown at all.
+     * A signal, so hosts outside the page can react to it (the plain `editorialSidebar` getter
+     * cannot be observed).
+     */
+    readonly sidebarAvailable = signal(false);
     readonly sidebarOpened = signal(false);
     /**
      * indicate that the sidebar should overlay a global progress spinner
@@ -101,6 +180,7 @@ export class EditorialSidebarService {
             throw new Error('Duplicate registration of editorial sidebar');
         }
         this._editorialSidebar = editorialSidebar;
+        this.sidebarAvailable.set(true);
     }
 
     unregisterSidebar(editorialSidebar: EditorialSidebarComponent) {
@@ -108,6 +188,7 @@ export class EditorialSidebarService {
             throw new Error('This sidebar is not registered');
         }
         this._editorialSidebar = null;
+        this.sidebarAvailable.set(false);
     }
     get editorialSidebar(): EditorialSidebarComponent {
         return this._editorialSidebar;
@@ -208,8 +289,14 @@ export class EditorialSidebarService {
     handleSelection(selection: SelectionChange<NodeEntriesDataType>) {
         this.nodes.set(selection.source.selected);
         const option = this._editorialSidebar.enabledOption()?.option;
-        const selectionMode = option ? EDITORIAL_SIDEBAR_OPTIONS[option].selectionMode : 'none';
+        const selectionMode = option ? this.getOptionDescriptor(option).selectionMode : 'none';
         const count = selection.source.selected.length;
+        // `any` outlives every selection change: such an option may have been opened by a host right
+        // when nodes were added, and the list selects them immediately afterwards — closing on that
+        // would drop the option in the same moment it appeared.
+        if (selectionMode === 'any') {
+            return;
+        }
         if (count === 0) {
             this.close();
         } else if (selectionMode === 'none' || (selectionMode === 'single' && count > 1)) {
