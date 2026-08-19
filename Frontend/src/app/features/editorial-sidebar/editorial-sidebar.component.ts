@@ -334,8 +334,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 );
             return validParent && isMapOrFolder;
         };
+        // selection-less option: the permissions are checked against `parent` (see setData below)
         sortInto.permissions = [RestConstants.ACCESS_ADD_CHILDREN];
-        sortInto.permissionsMode = HideMode.Disable;
+        sortInto.permissionsMode = HideMode.Hide;
         sortInto.elementType = [ElementType.NoneOrUnknown];
         sortInto.scopes = ['collections', 'workspace'];
         options.push(sortInto);
@@ -357,6 +358,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         options.push(manageContent);
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
+            parent: this.parent(),
             activeObjects: this.editorialSidebarService.nodes(),
             selectedObjects: this.editorialSidebarService.nodes(),
             allObjects: this.editorialSidebarService.nodes(),
@@ -368,10 +370,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         const options$ = new BehaviorSubject(
             await this.optionsHelperDataService.getAvailableOptions(Target.Actionbar),
         );
-        void this.uiService.updateOptionEnabledState(
-            options$,
-            this.parent() ? [this.parent()] : null,
-        );
+        // no explicit objects: the enabled state resolves the selection (or, for selection-less
+        // options, the `parent` from the options data) on its own
+        void this.uiService.updateOptionEnabledState(options$);
         this.options.set(options$.value);
         return options;
     }

@@ -110,9 +110,22 @@ public class MetadataSet implements Serializable {
 		}
 	}
 	public MetadataWidget findWidget(String widgetId) {
+		List<MetadataWidget> candidates = new ArrayList<>();
 		for(MetadataWidget widget : widgets){
-			if(widget.getId().equals(widgetId))
-				return widget;
+			if(widget.getId().equals(widgetId)) {
+				if(widget.getTemplate() == null || widget.getTemplate().isEmpty()) {
+					return widget;
+				}
+				candidates.add(widget);
+			}
+		}
+		if(!candidates.isEmpty()) {
+			MetadataWidget widget = candidates.get(0);
+			if(candidates.size() > 1) {
+				logger.info("Widget " + widgetId + " has no variant without template in the mds " + id
+						+ ", using the first one (template: " + widget.getTemplate() + ")");
+			}
+			return widget;
 		}
 		throw new IllegalArgumentException("Widget "+widgetId+" was not found in the mds "+id);
 	}
