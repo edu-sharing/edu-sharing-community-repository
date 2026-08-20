@@ -17,6 +17,7 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.SignedNode;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -122,10 +123,12 @@ public class RenderingServlet extends SpringHttpServlet {
             if (rs2 != null) {
                 String webComponentBase = URLHelper.getBaseUrlFromRequest(req) + "/web-components/rendering-service/";
                 NodeDao nodeDao = NodeDao.getNode(RepositoryDao.getHomeRepository(), node_id);
-                SignedNode signedNode = nodeDao.getSignedNode();
+                // build the node only once, it is expensive
+                Node nodeConverted = nodeDao.asNode();
+                SignedNode signedNode = NodeDao.getSignedNode(nodeConverted);
                 String encodedNode = Base64.getEncoder().encodeToString(signedNode.getNode().getBytes());
                 String encodedSignature = Base64.getEncoder().encodeToString(signedNode.getSignature());
-                String jwt = nodeDao.getJWT();
+                String jwt = NodeDao.getJWT(nodeConverted);
 
                 response = "<style nonce=\"" + nonce + "\">"
                         // max height: full viewport minus the static bar at the bottom

@@ -465,16 +465,18 @@ public class NodeApi {
             NodeDao nodeDao = NodeDao.getNodeWithVersion(repoDao, node, version);
             // resolve the additional, dynamic links for the rs2
             nodeDao.resolveAdditionalLinks = true;
+            // build the node only once, it is expensive and signature, jwt and response must
+            // describe the very same state anyway
+            Node nodeConverted = nodeDao.asNode();
             Base64.Encoder encoder = Base64.getEncoder();
-            SignedNode signedNode = nodeDao.getSignedNode();
+            SignedNode signedNode = NodeDao.getSignedNode(nodeConverted);
 
             String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
             String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 
             SignedNodeEntry response = new SignedNodeEntry();
-            Node nodeConverted = nodeDao.asNode();
             response.setNode(nodeConverted);
-            response.setJwt(nodeDao.getJWT());
+            response.setJwt(NodeDao.getJWT(nodeConverted));
             response.setSignedNode(encodedSignedNode);
             response.setSignature(encodedSignature);
             response.setSignatureAlgorithm(signedNode.getSignatureAlgorithm());
@@ -2505,7 +2507,7 @@ public class NodeApi {
 //			node=NodeDao.mapNodeConstants(repoDao,node);
 //
             NodeDao nodeDao = NodeDao.getNode(repoDao, node);
-            return Response.status(Response.Status.OK).entity(nodeDao.getJWT()).build();
+            return Response.status(Response.Status.OK).entity(NodeDao.getJWT(nodeDao.asNode())).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }

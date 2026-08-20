@@ -27,6 +27,7 @@ import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.restservices.about.v1.model.AboutPlugins;
 import org.edu_sharing.restservices.about.v1.model.PluginInfo;
+import org.edu_sharing.restservices.shared.Node;
 import org.edu_sharing.restservices.shared.SignedNode;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
@@ -167,7 +168,9 @@ public class RenderingTool {
 					NodeDao node = NodeDao.getNode(RepositoryDao.getHomeRepository(), nodeId);
 					Base64.Encoder encoder = Base64.getEncoder();
 
-					SignedNode signedNode = node.getSignedNode();
+					// build the node only once, it is expensive
+					Node nodeConverted = node.asNode();
+					SignedNode signedNode = NodeDao.getSignedNode(nodeConverted);
 					String encodedSignedNode = encoder.encodeToString(signedNode.getNode().getBytes());
 					String encodedSignature = encoder.encodeToString(signedNode.getSignature());
 					RenderDataRequest request = RenderDataRequest.builder()
@@ -180,7 +183,7 @@ public class RenderingTool {
 							.build();
 					String response = restClient.post()
 							.uri("/rendering/public/renderdata")
-							.header("Authorization", "Bearer " + node.getJWT())
+							.header("Authorization", "Bearer " + NodeDao.getJWT(nodeConverted))
 							.contentType(MediaType.APPLICATION_JSON)
 							.body(request)
 							.retrieve()

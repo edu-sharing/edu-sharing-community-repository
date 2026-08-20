@@ -603,6 +603,9 @@ public class PersonDao {
     }
 
     public UserSimple asPersonSimple(boolean resolveOrganizations) {
+        return asPersonSimple(resolveOrganizations, true);
+    }
+    public UserSimple asPersonSimple(boolean resolveOrganizations, boolean resolveHomeFolder) {
         UserSimple data = new UserSimple();
         data.setAuthorityName(getAuthorityName());
         data.setAuthorityType(Authority.Type.USER);
@@ -615,7 +618,7 @@ public class PersonDao {
         if (resolveOrganizations) {
             data.setOrganizations(OrganizationDao.mapOrganizations(getParentOrganizations()));
         }
-        if (isCurrentUserOrAdmin()) {
+        if (isCurrentUserOrAdmin() && resolveHomeFolder) {
             NodeRef homeDir = new NodeRef();
             homeDir.setRepo(repoDao.getId());
             homeDir.setId(getHomeFolder());
