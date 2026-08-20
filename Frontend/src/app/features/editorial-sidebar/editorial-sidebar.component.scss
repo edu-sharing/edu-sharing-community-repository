@@ -106,9 +106,16 @@
     &.option-PREVIEW,
     &.option-SORT_INTO,
     &.option-MANAGE_CONTENT,
-    &.option-MANAGE_SUBMISSION {
+    &.option-MANAGE_SUBMISSION,
+    // a registered option is unknown here, so it brings its own padding
+    &.option-custom {
         // has own padding cause of tabs
         padding: 0;
+    }
+    &.option-custom {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
 
     &.option-SORT_INTO,
@@ -196,4 +203,11 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+// an option contributed by another module fills the panel; its component brings its own layout
+.custom-option {
+    display: flex;
+    flex: 1;
+    min-height: 0;
 }

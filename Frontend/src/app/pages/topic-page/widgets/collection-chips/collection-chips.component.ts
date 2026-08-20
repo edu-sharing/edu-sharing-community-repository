@@ -75,14 +75,14 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     ];
     dragging: boolean = false;
     initialized: WritableSignal<boolean> = signal(false);
-    list: Node[];
+    list: Node[] = [];
     updateInProgress: WritableSignal<boolean> = signal(false);
     showMore: WritableSignal<boolean> = signal(false);
 
     protected readonly visibleList: Signal<Node[]> = computed(() =>
         this.editMode() || this.showMore() || !this.displayLimit
-            ? this.list
-            : this.list.slice(0, this.displayLimit),
+            ? this.list ?? []
+            : (this.list ?? []).slice(0, this.displayLimit),
     );
 
     constructor() {
@@ -152,8 +152,18 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
             this.list = [];
             return;
         }
-        // load the sub-collections, filter them by editorial state and sort by name and ccm:collection_ordered_position afterward
-        this.list = (await this.topicPageHelperService.getSubCollections(this.contextNodeId))
+        let subCollections: Node[];
+        try {
+            subCollections = await this.topicPageHelperService.getSubCollections(
+                this.contextNodeId,
+            );
+        } catch {
+            // children may be inaccessible (e.g. missing read permission) - render nothing
+            this.list = [];
+            return;
+        }
+        // filter them by editorial state and sort by name and ccm:collection_ordered_position afterward
+        this.list = subCollections
             .filter(
                 (c: Node) =>
                     !c.properties[RestConstants.CCM_PROP_IO_EDITORIAL_STATE]?.includes(

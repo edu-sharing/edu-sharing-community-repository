@@ -297,10 +297,17 @@ public class NodeDao {
         }
     }
 
-    public SignedNode getSignedNode() {
+    /**
+     * Signs an already converted node. Building a node is expensive (metadata conversion, permission
+     * and elastic lookups), so callers that also need the {@link Node} itself or the jwt should build
+     * it once and pass it to {@link #getSignedNode(Node)} and {@link #getJWT(Node)}.
+     * <p>
+     * Static on purpose: the signature covers nothing but the given node, so it must not look like
+     * it mixes in the state of whichever NodeDao instance it was called on.
+     */
+    public static SignedNode getSignedNode(Node node) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            Node node = asNode();
             String serializedNode = objectMapper.writeValueAsString(node);
 
             Signing signing = new Signing();
@@ -2420,15 +2427,18 @@ public class NodeDao {
         return values;
     }
 
-    public String getJWT() throws GeneralSecurityException {
+    /**
+     * Builds the jwt for an already converted node, see {@link #getSignedNode(Node)}.
+     */
+    public static String getJWT(Node node) throws GeneralSecurityException {
         String user;
         if(ContextManagementFilter.accessTool.get() != null && ContextManagementFilter.accessTool.get().getUserId() != null) {
             user = ContextManagementFilter.accessTool.get().getUserId();
         } else{
             user = AuthenticationUtil.getFullyAuthenticatedUser();
         }
-        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
-        Node node = asNode();
+        // only profile is required so asPersonSimple is the faster method
+        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPersonSimple(false, false).getProfile();
 
         java.util.Collection<String> permissions;
         if (node instanceof CollectionReference) {
@@ -2453,16 +2463,20 @@ public class NodeDao {
             }
         }
 
-        String replicationSource = Arrays.stream(getProperties()
+        // the node already carries the converted properties, re-reading them would repeat the
+        // (expensive) metadata conversion
+        Map<String, String[]> properties = node.getProperties() == null ? Collections.emptyMap() : node.getProperties();
+
+        String replicationSource = Arrays.stream(properties
                         .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
                 .findFirst()
                 .orElse(null);
 
-        String resourceType = Arrays.stream(getProperties().getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[0]))
+        String resourceType = Arrays.stream(properties.getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[0]))
                 .findFirst()
                 .orElse(null);
 
-        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType, userProfile);
+        return JwtTokenUtil.generateToken(user, node.getRef().getId(), permissions, node.getMimetype(), node.getMediatype(), replicationSource, resourceType, userProfile);
     }
 
     private String getMimetype() {

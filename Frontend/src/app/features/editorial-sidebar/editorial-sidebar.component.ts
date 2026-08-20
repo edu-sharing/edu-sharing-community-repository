@@ -50,7 +50,12 @@ export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
 
 export type SidebarContext = PrimaryMode | 'collections' | 'workspace' | 'search' | 'render';
-export type SelectionMode = 'none' | 'single' | 'multi';
+/**
+ * How an option relates to the list selection. `none` is dropped as soon as anything is selected,
+ * `single`/`multi` while the selection no longer fits, and `any` survives every selection change —
+ * for an option that is about the current context rather than about what is selected.
+ */
+export type SelectionMode = 'none' | 'single' | 'multi' | 'any';
 
 export type EditorialSidebarOptionDescriptor = {
     selectionMode: SelectionMode;
@@ -71,7 +76,12 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     VIEW_ASSIGNMENT: { selectionMode: 'single' },
 } as const satisfies Record<string, EditorialSidebarOptionDescriptor>;
 
-export type EditorialSidebarOption = keyof typeof EDITORIAL_SIDEBAR_OPTIONS;
+/**
+ * One of the sidebar's own options, or the id of an option another module registered via
+ * `EditorialSidebarService.registerCustomOption`. `string & {}` keeps the autocomplete for the
+ * built-in ones while allowing any registered id.
+ */
+export type EditorialSidebarOption = keyof typeof EDITORIAL_SIDEBAR_OPTIONS | (string & {});
 
 export type PreviewConfig = {
     /** override the editorMode of the embedded mds-editor-wrapper. Default: 'viewer'. */
@@ -138,6 +148,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     primaryMode = input.required<SidebarContext>();
     enabledOption = signal<OptionState<unknown>>(null);
     isModal = input<boolean>(false);
+    /**
+     * Whether to render the edge tab that opens and closes the sidebar. Hosts that offer their own
+     * way in — a launcher button, a menu entry — turn it off.
+     */
+    showEdgeToggle = input<boolean>(true);
 
     //@Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
@@ -145,10 +160,19 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private readonly destroyed = new Subject<void>();
     readonly title = computed(() =>
         this.enabledOption()
-            ? this.enabledOption().title || 'EDITORIAL.OPTIONS.' + this.enabledOption().option
+            ? this.enabledOption().title ||
+              this.customOption()?.label ||
+              'EDITORIAL.OPTIONS.' + this.enabledOption().option
             : 'EDITORIAL.SIDEBAR.TITLE_' + this.primaryMode()?.toUpperCase(),
     );
     options = signal<OptionItem[]>(null);
+    /**
+     * The registration of the currently enabled option, if it is one another module contributed.
+     * Reactive: the registrations are a signal, so the panel follows a late registration.
+     */
+    readonly customOption = computed(() =>
+        this.editorialSidebarService.getCustomOption(this.enabledOption()?.option),
+    );
     /**
      * Whether the sidebar has anything to show: either a specific option is open, or the option
      * list is non-empty. `options() === null` means "not computed yet" (loading) and is treated as
@@ -167,6 +191,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         this.editorialSidebarService.registerSidebar(this);
         effect(() => {
             this.editorialSidebarService.nodes();
+            // read synchronously so a registration arriving after the first run is picked up
+            // (`initOptions` awaits before it reads them, which would not be tracked)
+            this.editorialSidebarService.getCustomOptions();
             void this.initOptions();
         });
         // reset fullscreen whenever an option is newly opened / closed / switched
@@ -356,6 +383,23 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         manageContent.constrains = [Constrain.Files];
         manageContent.scopes = ['workspace', 'collections', 'search', 'render'];
         options.push(manageContent);
+
+        // options other modules registered — the sidebar knows nothing about them beyond how to
+        // offer and render them (see `EditorialSidebarService.registerCustomOption`)
+        for (const custom of this.editorialSidebarService.getCustomOptions()) {
+            const option = new OptionItem(custom.label, custom.icon, () =>
+                this.enabledOption.set({ trap: false, option: custom.id }),
+            );
+            option.group = custom.group ?? DefaultGroups.Primary;
+            // Offered whatever is selected: `isOptionAvailable` hides an option whose `elementType`
+            // does not cover the current selection, and `OptionItem` defaults to `[Node]` — both
+            // would make a context option disappear at the wrong moment.
+            option.elementType = custom.elementType ?? Object.values(ElementType);
+            if (custom.scopes) {
+                option.scopes = custom.scopes;
+            }
+            options.push(option);
+        }
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
             parent: this.parent(),

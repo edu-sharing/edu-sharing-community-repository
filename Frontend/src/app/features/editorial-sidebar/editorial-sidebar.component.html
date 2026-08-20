@@ -45,7 +45,10 @@
     <ng-container *ngTemplateOutlet="content"></ng-container>
     <ng-template #content>
       @if (enabledOption()?.option; as option) {
-      <div class="option option-{{ option | propertySlug }}">
+      <div
+        class="option option-{{ option | propertySlug }}"
+        [class.option-custom]="!!customOption()"
+      >
         @if (option === 'SORT_INTO' || option === 'MANAGE_CONTENT') {
         <es-nodes-selector
           [option]="enabledOption()"
@@ -67,6 +70,9 @@
         ></es-submission-sidebar>
         } @if (option === 'VIEW_ASSIGNMENT') {
         <es-assignment-sidebar [data]="$any(enabledOption().optionConfig)"></es-assignment-sidebar>
+        } @if (customOption(); as custom) {
+        <!-- an option another module registered; the sidebar only renders what it was handed -->
+        <ng-container *ngComponentOutlet="custom.component"></ng-container>
         } @if (option === 'PREVIEW') {
         <es-preview-sidebar
           [node]="$any(editorialSidebarService.nodes())?.[0]"
@@ -129,7 +135,7 @@
 
 <!-- Always-visible tab ("Lasche") to open/close the sidebar; replaces the former actionbar
   toggle option and the header close (X) button. -->
-@if (!isModal()) {
+@if (!isModal() && showEdgeToggle()) {
 <es-edge-toggle
   data-test="button-toggle-sidebar-editorial-options"
   [side]="'end'"
