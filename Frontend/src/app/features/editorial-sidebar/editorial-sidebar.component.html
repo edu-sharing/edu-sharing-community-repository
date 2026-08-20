@@ -135,7 +135,7 @@
 
 <!-- Always-visible tab ("Lasche") to open/close the sidebar; replaces the former actionbar
   toggle option and the header close (X) button. -->
-@if (!isModal()) {
+@if (!isModal() && showEdgeToggle()) {
 <es-edge-toggle
   data-test="button-toggle-sidebar-editorial-options"
   [side]="'end'"

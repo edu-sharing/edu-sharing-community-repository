@@ -148,6 +148,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     primaryMode = input.required<SidebarContext>();
     enabledOption = signal<OptionState<unknown>>(null);
     isModal = input<boolean>(false);
+    /**
+     * Whether to render the edge tab that opens and closes the sidebar. Hosts that offer their own
+     * way in — a launcher button, a menu entry — turn it off.
+     */
+    showEdgeToggle = input<boolean>(true);
 
     //@Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
