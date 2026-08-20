@@ -1848,7 +1848,7 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
         }
     }
 
-    public synchronized Version createVersion(String nodeId) throws Exception {
+    public Version createVersion(String nodeId) throws Exception {
 
         VersionService versionService = serviceRegistry.getVersionService();
         NodeRef nodeRef = new NodeRef(storeRef, nodeId);
