@@ -128,15 +128,28 @@ public class AppContextServiceLocator {
      */
     @NotNull
     public <T> T get(@NotNull @NonNull Class<T> type, @NotNull @NonNull String appId) {
-        ApplicationInfo repositoryInfoById = "-home-".equals(appId)
+        return get(type, resolveApplicationInfo(appId));
+    }
+
+    /**
+     * Resolves the {@code ApplicationInfo} for the given application ID. The reserved ID
+     * {@code -home-} resolves to the home repository.
+     *
+     * @param appId the application ID to resolve; must not be null
+     * @return the resolved {@code ApplicationInfo}; never null
+     * @throws IllegalArgumentException if no {@code ApplicationInfo} is found for the specified {@code appId}
+     */
+    @NotNull
+    public ApplicationInfo resolveApplicationInfo(@NotNull @NonNull String appId) {
+        ApplicationInfo appInfo = "-home-".equals(appId)
                 ? ApplicationInfoList.getHomeRepository()
                 : ApplicationInfoList.getRepositoryInfoById(appId);
 
-        if (repositoryInfoById == null) {
+        if (appInfo == null) {
             throw new IllegalArgumentException("No repository found for contextName " + appId);
         }
 
-        return get(type, repositoryInfoById);
+        return appInfo;
     }
 
     /**
