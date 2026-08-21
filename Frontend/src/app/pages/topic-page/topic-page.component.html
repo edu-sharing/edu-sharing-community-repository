@@ -1,10 +1,32 @@
 <div class="topic-page">
-  @if (topicPageLoaded()) {
-  <es-template-page
-    #templateComponent
-    [collectionId]="topicCollectionId()"
-    [variantId]="topicVariantId()"
-  ></es-template-page>
-  }
+  <div class="topic-page-body">
+    @if (topicPageLoaded()) {
+    <es-template-page
+      #templateComponent
+      [collectionId]="topicCollectionId()"
+      [variantId]="topicVariantId()"
+    ></es-template-page>
+    }
+    <!-- Extension column beside the page: a panel another module contributes (the editorial
+      sidebar hosting the chat assistant). Sticky, so it stays in view while the page scrolls on the
+      window, and kept mounted while it is closed — the panel registers itself on creation, and only
+      a registered sidebar offers its options. -->
+    @if (customSidebarExtension(); as sidebarExtension) {
+    <div
+      #sidebarColumnRef
+      class="custom-sidebar-extension"
+      [class.open]="editorialSidebarService.sidebarOpened()"
+      esResizableSidenav
+      position="end"
+      storageKey="TOPIC_PAGE_CUSTOM_SIDEBAR_WIDTH"
+      [defaultWidthPx]="600"
+      [minWidth]="0"
+      [minWidthPx]="400"
+      [maxWidthPx]="800"
+    >
+      <ng-container *ngComponentOutlet="sidebarExtension"></ng-container>
+    </div>
+    }
+  </div>
   <es-footer></es-footer>
 </div>

@@ -16,6 +16,8 @@
     }
 
     // Align to the rounded card's edge (inset by --roundedContainerMargin), not the viewport edge.
+    // On the right, --sideMenuRightInset additionally clears a panel standing beside the page (the
+    // topic page's extension column), so the tabs stay with the page instead of on top of it.
     &.position-left {
         left: var(--roundedContainerMargin, 0);
 
@@ -25,7 +27,7 @@
     }
 
     &.position-right {
-        right: var(--roundedContainerMargin, 0);
+        right: calc(var(--roundedContainerMargin, 0px) + var(--sideMenuRightInset, 0px));
 
         &::ng-deep es-side-menu-item {
             justify-content: flex-end !important;
@@ -38,7 +40,7 @@
             left: 0;
         }
         &.position-right {
-            right: 0;
+            right: var(--sideMenuRightInset, 0px);
         }
     }
 }
