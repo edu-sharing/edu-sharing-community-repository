@@ -1,3 +1,5 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
 :host {
     display: block;
 }
@@ -9,4 +11,67 @@
     flex-direction: column;
     min-height: calc(100vh - var(--mainnavCurrentHeight));
     background: var(--backgroundColor);
+}
+
+// Page body: the topic page and the extension column side by side, above the footer.
+.topic-page-body {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+es-template-page {
+    flex: 1;
+    min-width: 0;
+}
+
+// Extension column at the page's outer edge. Sticky and viewport-high, since the page itself
+// scrolls on the window. `display: none` while closed keeps the panel mounted (and its sidebar
+// registered) instead of tearing it down.
+.custom-sidebar-extension {
+    display: none;
+    flex-shrink: 0;
+    align-self: flex-start;
+    box-sizing: border-box;
+    // pre-init fallback width; esResizableSidenav overrides it with the saved width and min/max
+    width: 600px;
+    // same gap to the viewport edge as the page card beside it; the top gap comes from `top`
+    padding-right: var(--roundedContainerMargin);
+    position: sticky;
+    top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
+    // runs down to the bottom of the viewport
+    height: calc(100vh - var(--mainnavCurrentHeight) - var(--roundedContainerMargin));
+
+    &.open {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // The handle is created by the directive without this component's encapsulation attribute,
+    // hence ::ng-deep. A hover tint so it reads as grabbable against the page background.
+    ::ng-deep .es-sidenav-resizer.end {
+        left: 0;
+        width: 8px;
+        border-radius: 4px;
+        &:hover {
+            background-color: var(--backgroundTinted);
+        }
+    }
+}
+
+// Below the tab-switch breakpoint the page is too narrow to stand beside a panel, so the column
+// covers it instead of squeezing it. The bottom inset clears the fixed mobile navigation.
+@media screen and (max-width: vars.$mobileTabSwitchWidth) {
+    .custom-sidebar-extension.open {
+        position: fixed;
+        top: var(--mainnavCurrentHeight);
+        right: 0;
+        bottom: vars.$mobileTabNavHeight;
+        left: 0;
+        // beats the inline width the resize directive restores from storage
+        width: auto !important;
+        height: auto;
+        padding: 0;
+        z-index: 98;
+    }
 }

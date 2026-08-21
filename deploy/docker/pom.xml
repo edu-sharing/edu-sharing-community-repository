@@ -119,7 +119,7 @@
     </docker.edu_sharing.community.common.varnish.exporter.tag>
 
     <docker.from.openjdk.17.liberica.debian>
-      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.19
+      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.20
     </docker.from.openjdk.17.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
