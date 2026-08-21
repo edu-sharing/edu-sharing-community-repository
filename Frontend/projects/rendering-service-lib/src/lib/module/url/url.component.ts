@@ -298,15 +298,24 @@ export class UrlComponent implements RenderModule, OnInit, OnChanges, OnDestroy 
         const downloadUrl = additionalData?.['downloadUrl'] ?? undefined;
         this.globalStateService.setDownloadUrl(downloadUrl);
         this.url = jobData.link;
-        const mimetype = this.node?.mimetype || '';
-        if (mimetype.startsWith('image')) {
-            this.embedding = UrlEmbeddings.IMAGE;
-        } else if (mimetype.startsWith('video')) {
-            this.embedding = UrlEmbeddings.VIDEO;
-        } else if (mimetype.startsWith('audio')) {
-            this.embedding = UrlEmbeddings.AUDIO;
-        } else {
+        // mimetype of the node can sometimes be wrong (wrong import data vs playout data)
+        // if we detect that the url is a html file, we always offer link
+        if (
+            this.url?.toLowerCase()?.endsWith('.htm') ||
+            this.url?.toLowerCase()?.endsWith('.html')
+        ) {
             this.embedding = UrlEmbeddings.LINK;
+        } else {
+            const mimetype = this.node?.mimetype || '';
+            if (mimetype.startsWith('image')) {
+                this.embedding = UrlEmbeddings.IMAGE;
+            } else if (mimetype.startsWith('video')) {
+                this.embedding = UrlEmbeddings.VIDEO;
+            } else if (mimetype.startsWith('audio')) {
+                this.embedding = UrlEmbeddings.AUDIO;
+            } else {
+                this.embedding = UrlEmbeddings.LINK;
+            }
         }
     }
 
