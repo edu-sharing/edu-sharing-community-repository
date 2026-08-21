@@ -3934,7 +3934,8 @@
           "dataType": {
             "enum": [
               "Dynamic",
-              "JsonData"
+              "JsonData",
+              "FlattenedData"
             ],
             "type": "string"
           }

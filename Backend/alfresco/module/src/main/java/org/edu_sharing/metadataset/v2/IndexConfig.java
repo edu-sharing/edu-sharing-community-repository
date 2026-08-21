@@ -10,7 +10,8 @@ public class IndexConfig implements Serializable {
 
     public enum DataType {
         Dynamic, // for native type use as fallback if nothing is specified.
-        JsonData // for Text fields containing Json
+        JsonData, // for Text fields containing Json
+        FlattenedData // for Text field containing Json with changing structure
     }
 
     /**
