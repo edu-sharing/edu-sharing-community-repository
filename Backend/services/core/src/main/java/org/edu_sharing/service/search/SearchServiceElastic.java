@@ -613,8 +613,8 @@ public class SearchServiceElastic implements SearchService {
         Set<String> authorities = getUserAuthorities();
         String user = authenticationService.getCurrentUserName();
         boolean isAdmin = AuthorityServiceHelper.isAdmin();
+        String scrollId = null;
         try {
-            String scrollId = null;
             while (true) {
                 ResponseBody<Map> searchResponse;
                 if (scrollId == null) {
@@ -645,6 +645,15 @@ public class SearchServiceElastic implements SearchService {
             log.error(e.getMessage(), e);
             log.error(searchRequest.toString());
             throw e;
+        } finally {
+            if (scrollId != null) {
+                final String usedScrollId = scrollId;
+                try {
+                    clearScrollNative(new ClearScrollRequest.Builder().scrollId(usedScrollId).build());
+                } catch (Exception e) {
+                    log.warn("could not clear scroll context {}: {}", usedScrollId, e.getMessage());
+                }
+            }
         }
         log.info("result count: " + data.size());
         sr.setStartIDX(0);
@@ -2922,6 +2931,7 @@ public class SearchServiceElastic implements SearchService {
         SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder().index(index)
                 .query(query._toQuery())
                 .scroll(Time.of(time -> time.time("60s")))
+                .size(100)
                 .trackTotalHits(new TrackHits.Builder().enabled(true).build())
                 .source(src -> src
                         .filter(filter -> filter.excludes(appendDefaultExcludes(new ArrayList<>())))
