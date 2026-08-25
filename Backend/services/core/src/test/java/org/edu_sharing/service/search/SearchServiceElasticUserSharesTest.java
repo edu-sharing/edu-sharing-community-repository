@@ -210,7 +210,8 @@ class SearchServiceElasticUserSharesTest {
                           { "term": { "share.sharedWith": { "value": "tester" } } }
                         ],
                         "must_not": [
-                          { "term": { "share.sharedBy": { "value": "tester" } } }
+                          { "term": { "share.sharedBy": { "value": "tester" } } },
+                          { "term": { "share.sharedBy": { "value": "System" } } }
                         ]""", false),
                 underTest.getUserSharesQuery(UserShareDirection.toUser, 60L, ORIGIN_DATE));
     }
@@ -221,6 +222,9 @@ class SearchServiceElasticUserSharesTest {
                 expectedQuery("""
                         "must": [
                           { "term": { "share.shareStatus": { "value": "SHARED" } } }
+                        ],
+                        "must_not": [
+                          { "term": { "share.sharedBy": { "value": "System" } } }
                         ],
                         "minimum_should_match": "1",
                         "should": [
