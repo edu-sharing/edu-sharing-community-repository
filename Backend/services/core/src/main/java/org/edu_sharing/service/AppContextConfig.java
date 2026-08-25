@@ -51,6 +51,7 @@ public class AppContextConfig {
                 .defineBean(RenderingService.class, RenderingService.class)
                 .defineBean(CollectionService.class, CollectionService.class)
                 .defineBean(ContributorService.class, ContributorServiceAdapter.class)
+                .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .done()
 
                 .localAppContext()
