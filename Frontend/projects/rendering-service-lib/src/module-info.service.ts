@@ -13,8 +13,11 @@ import { ModuleInfo } from './lib/dto/ModuleInfo';
 export class ModuleInfoService {
     private service = inject(ModuleInfoControllerService);
 
-    /** module name by `<category>:<value>` key, populated once from the modules-info endpoint */
-    private moduleMappings: Map<string, string> | null = null;
+    /**
+     * module name by `<category>:<value>` key, populated from the modules-info endpoint once per
+     * repository - the mappings differ per repo, so they must not be shared between them
+     */
+    private moduleMappings = new Map<string, Map<string, string>>();
 
     async getModuleInfo(node: Node, isWebComponent: boolean = false): Promise<ModuleInfo> {
         const backendModule = await this.getAvailableBackendModule(node);
@@ -62,7 +65,8 @@ export class ModuleInfoService {
     }
 
     private async getModuleMappings(repoId: string): Promise<Map<string, string>> {
-        if (this.moduleMappings === null) {
+        const cached = this.moduleMappings.get(repoId);
+        if (cached === undefined) {
             const result = await firstValueFrom(this.service.getModulesInfo({ repoId }));
             const mappings = new Map<string, string>();
             result.forEach(({ name, typeMapping }) => {
@@ -87,9 +91,10 @@ export class ModuleInfoService {
                     mappings.set(`mimeTypePrefix:${typeMapping.mimeTypePrefix}`, name);
                 }
             });
-            this.moduleMappings = mappings;
+            this.moduleMappings.set(repoId, mappings);
+            return mappings;
         }
-        return this.moduleMappings;
+        return cached;
     }
 
     getFrontendModuleSetting(node: Node, isWebComponent: boolean = false): FrontendModuleConfig {

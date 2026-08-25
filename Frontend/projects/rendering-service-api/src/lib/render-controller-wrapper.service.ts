@@ -2,7 +2,7 @@
 /* eslint-disable */
 import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { delay, Observable, ReplaySubject, switchMap, tap, timer } from 'rxjs';
+import { finalize, Observable, ReplaySubject, switchMap, timer } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { RenderControllerService } from './api/services';
 import { RenderDataRequest } from './api/models/render-data-request';
@@ -18,6 +18,11 @@ export type RenderDataRequestWithToken = RenderDataRequest & {
 };
 @Injectable({ providedIn: 'root' })
 export class RenderControllerWrapperService extends RenderControllerService {
+    /**
+     * Opens once the first render-data request of this page has run, letting the queued-up
+     * requests of any further render components through. Replayed, so components that mount
+     * later still see it.
+     */
     private firstRequestCompleted$ = new ReplaySubject<void>(1);
     private firstRequestStarted = false;
 
@@ -35,9 +40,12 @@ export class RenderControllerWrapperService extends RenderControllerService {
         if (!this.firstRequestStarted) {
             this.firstRequestStarted = true;
             return this.getRenderDataToken$Response(params, context).pipe(
-                tap(() => {
-                    this.firstRequestCompleted$.next();
-                }),
+                // the gate has to open on every outcome, not just on success: a failing first
+                // request (e.g. 415 for a node the backend has no module for, which the caller
+                // recovers from with a frontend module) would otherwise deadlock every other
+                // render component on the page. Unsubscribing counts too, so a component that is
+                // destroyed while its request is in flight does not block the rest either.
+                finalize(() => this.firstRequestCompleted$.next()),
                 map((resp) => resp.body!),
                 switchMap((data) => timer(50).pipe(map(() => data))),
             );

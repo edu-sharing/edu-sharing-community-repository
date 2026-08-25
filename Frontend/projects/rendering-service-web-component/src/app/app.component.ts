@@ -2,6 +2,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import {
     AfterViewInit,
     Component,
+    ElementRef,
     inject,
     Input,
     OnChanges,
@@ -23,6 +24,7 @@ import { PdfComponent } from 'ngx-rendering-service-lib';
 export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     private renderHelperService = inject(RenderHelperService);
     private translations = inject(TranslationsService);
+    private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
     @ViewChild(PdfComponent) pdfComponent: PdfComponent;
     @Input() encoded_node: string;
@@ -70,7 +72,12 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
         this.targetBlank = this.target_blank;
         if (this.component_height !== null && this.component_height > 0) {
             const containerHeight = this.component_height - this.footer_height;
-            document.documentElement.style.setProperty('--containerHeight', `${containerHeight}px`);
+            // on the host, not on <html>: the modules read this through inheritance, and several
+            // elements on one page each need their own height instead of the last one's
+            this.elementRef.nativeElement.style.setProperty(
+                '--containerHeight',
+                `${containerHeight}px`,
+            );
             this.overlayHeight = `${Math.min(300, containerHeight)}px`;
         }
     }
