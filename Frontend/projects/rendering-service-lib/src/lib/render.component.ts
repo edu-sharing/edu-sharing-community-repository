@@ -129,6 +129,9 @@ export class RenderComponent implements OnChanges, OnInit {
     // (no on-demand POST and no job polling).
     private static readonly onDemandCache = new KeyCache<RenderData | null>();
     private static readonly ON_DEMAND_CACHE_SECONDS = 20;
+    // In-flight/settled service worker registrations of this page, keyed by scope + worker url,
+    // so components sharing a worker share one registration (see setUpServiceWorker).
+    private static readonly serviceWorkerSetups = new Map<string, Promise<void>>();
     // True while a manual link refresh is in flight; blocks re-entrant reloadLinks() calls so at
     // most one refresh runs per rendered object. Read by templates to disable the reload control.
     refreshing = false;
@@ -401,41 +404,69 @@ export class RenderComponent implements OnChanges, OnInit {
         }
         // await firstValueFrom(this.translationsService.initialize())
 
+        const serviceWorkerUrl =
+            this.serviceWorkerUrl ??
+            this.platformLocation.getBaseHrefFromDOM() + 'edu-service-worker.js';
+        const scope = this.serviceWorkerUrl ? '/' : this.platformLocation.getBaseHrefFromDOM();
         try {
-            const reg = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(reg?.map((r: ServiceWorkerRegistration) => r.unregister()));
-            const serviceWorkerUrl =
-                this.serviceWorkerUrl ??
-                this.platformLocation.getBaseHrefFromDOM() + 'edu-service-worker.js';
-            const scope = this.serviceWorkerUrl ? '/' : this.platformLocation.getBaseHrefFromDOM();
-            const registration = await navigator.serviceWorker.register(serviceWorkerUrl, {
-                scope: scope,
-            });
-            if (registration.waiting) {
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            }
-            this.serviceWorkerReady = true;
-            this.loadData.next();
-            registration.onupdatefound = () => {
-                const newWorker = registration.installing;
-                if (newWorker) {
-                    newWorker.onstatechange = () => {
-                        if (newWorker.state === 'installed') {
-                            if (navigator.serviceWorker.controller) {
-                                newWorker.postMessage({ type: 'SKIP_WAITING' });
-                            }
-                        }
-                    };
-                }
-            };
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                console.info('Service Worker controlling this page.');
-            });
+            await RenderComponent.setUpServiceWorker(serviceWorkerUrl, scope);
         } catch (error) {
             console.warn('Error during service worker registration:', error);
-            this.serviceWorkerReady = true;
-            this.loadData.next();
         }
+        // rendering goes ahead either way - a missing service worker degrades the render, a
+        // component stuck on `serviceWorkerReady === false` never renders at all
+        this.serviceWorkerReady = true;
+        this.loadData.next();
+    }
+
+    /**
+     * Registers the render service worker, at most once per page and worker url.
+     *
+     * The registration is a page-wide resource: all render components on a page share one worker,
+     * so doing this per component would have each of them tear down and re-register the worker its
+     * siblings are already using.
+     */
+    private static setUpServiceWorker(url: string, scope: string): Promise<void> {
+        const key = `${scope}\n${url}`;
+        let setup = RenderComponent.serviceWorkerSetups.get(key);
+        if (setup === undefined) {
+            setup = RenderComponent.registerServiceWorker(url, scope);
+            RenderComponent.serviceWorkerSetups.set(key, setup);
+        }
+        return setup;
+    }
+
+    private static async registerServiceWorker(url: string, scope: string): Promise<void> {
+        const wantedScriptUrl = new URL(url, window.location.href).href;
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        // drop leftovers from earlier versions, but never the worker we are about to use: the
+        // page (and any sibling component) may already be relying on it
+        await Promise.all(
+            registrations
+                .filter(
+                    (r) => (r.active ?? r.waiting ?? r.installing)?.scriptURL !== wantedScriptUrl,
+                )
+                .map((r) => r.unregister()),
+        );
+        const registration = await navigator.serviceWorker.register(url, { scope });
+        if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+        registration.onupdatefound = () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+                newWorker.onstatechange = () => {
+                    if (newWorker.state === 'installed') {
+                        if (navigator.serviceWorker.controller) {
+                            newWorker.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    }
+                };
+            }
+        };
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.info('Service Worker controlling this page.');
+        });
     }
 
     async ngOnChanges(_: SimpleChanges) {
