@@ -169,15 +169,14 @@ export class ImageWrapperComponent implements OnInit {
             const uploadedNode: Node = await this.topicPageHelperService.getNode(
                 userUploadedNodeId,
             );
-            if (uploadedNode.preview?.url) {
+            if (uploadedNode?.preview?.url) {
                 // reset both sources before loading the new one
                 resetSources();
                 this.imageNode = uploadedNode;
+                return;
             }
-            return;
-        }
-        // user has selected an AI generated image
-        if (aiGeneratedImage) {
+        } else if (aiGeneratedImage) {
+            // user has selected an AI generated image
             try {
                 const imageData: ImagesResponse = regenerateNecessary
                     ? await this.aiHelperService.updateAiImage(
@@ -198,11 +197,13 @@ export class ImageWrapperComponent implements OnInit {
                 console.error(error);
             }
         }
-        // neither option is true or the user has explicitly deleted the image and wants to reset to the image of the fallback node
+        // no own image available: fall back to the preview of the fallback node,
+        // unless that preview is only the generic type icon
         if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
             // reset both sources before loading the new one
             resetSources();
             this.imageNode = this.fallbackNode;
+            return;
         }
         // reset both sources, if no condition matches
         resetSources();
