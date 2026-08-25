@@ -790,10 +790,9 @@ public class NodeDao {
             this.nodeService = NodeServiceFactory.getInstance().getService(repoDao.getId());
             this.guestService = AlfAppContextGate.getApplicationContext().getBean(GuestService.class);
             this.permissionService = PermissionServiceFactory.getInstance().getService(repoDao.getId());
-            try {
-                this.authorityService = AuthorityServiceFactory.getInstance().getService(repoDao.getId());
-            } catch (RuntimeException ignored) {
-            }
+            // remote providers (brockhaus, ddb, pixabay, ...) do not provide an own authority
+            // service, users are always resolved against the local/home repository
+            this.authorityService = AuthorityServiceFactory.getInstance().getLocalService();
 
             // call getProperties on demand
             if (nodeRef.getProperties() == null || nodeRef.getProperties().isEmpty()) {
