@@ -1870,11 +1870,21 @@ public class SearchServiceElastic implements SearchService {
                                                         .field("share.sharedBy")
                                                         .value(username)
                                         ));
+                                        // hide shares from the System user in general
+                                        b = b.mustNot(m -> m.term(t -> t
+                                                .field("share.sharedBy")
+                                                .value("System")
+                                        ));
                                         b = b.must(m -> m.term(t -> t
                                                 .field("share.sharedWith")
                                                 .value(username)
                                         ));
                                     } else if (direction.equals(UserShareDirection.toUserGroups)) {
+                                        // hide shares from the System user in general
+                                        b = b.mustNot(m -> m.term(t -> t
+                                                .field("share.sharedBy")
+                                                .value("System")
+                                        ));
                                         b.minimumShouldMatch("1");
                                         for (String group : getAllMemberships(username, false)) {
                                             b = b.should(m -> m.term(t -> t
