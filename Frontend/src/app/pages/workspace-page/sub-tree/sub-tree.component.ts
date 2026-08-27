@@ -7,7 +7,9 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    QueryList,
     ViewChild,
+    ViewChildren,
     inject,
 } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
@@ -60,6 +62,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
     @ViewChild('dropdown') dropdown: DropdownComponent;
     @ViewChild('dropdownTrigger') dropdownTrigger: MatMenuTrigger;
     @ViewChild('subTreeWrapper', { static: true }) subTreeWrapperRef: ElementRef<HTMLElement>;
+    @ViewChildren('childTree') private childTrees: QueryList<WorkspaceSubTreeComponent>;
     dropdownLeft: number;
     dropdownTop: number;
 
@@ -308,6 +311,7 @@ export class WorkspaceSubTreeComponent implements OnInit, OnDestroy {
                 this.loading.emit(false);
                 this.isLoading = false;
                 this.expandCurrentPath();
+                this.childTrees?.forEach((tree) => tree.refresh());
             });
     }
 

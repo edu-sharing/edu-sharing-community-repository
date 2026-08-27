@@ -377,10 +377,10 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.registerNodesMoved();
         combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
-                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 distinctUntilChanged((a, b) => {
-                    return Helper.objectEquals(a[0], b[0]) && a[1] === b[1];
+                    return Helper.objectEquals(a[0], b[0]) && a[1] === b[1] && a[2] === b[2];
                 }),
+                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 debounceTime(10),
             )
             .subscribe(async (value) => {
