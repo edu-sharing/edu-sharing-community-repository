@@ -7,7 +7,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
-import org.edu_sharing.alfresco.service.config.model.ShortCutVisibility;
+import org.edu_sharing.alfresco.service.config.model.ConfigVisibility;
 import org.edu_sharing.alfresco.service.config.model.ShortcutConfig;
 import org.edu_sharing.alfresco.service.config.model.ShortcutConfigEntry;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -116,7 +116,7 @@ public class DashboardConfigServiceImpl implements DashboardConfigService {
 
         return shortcutConfig.entries.stream()
                 .filter(x -> StringUtils.isBlank(x.toolPermission) || toolPermissionService.hasToolPermission(x.toolPermission))
-                .filter(x -> x.defaultVisibility == ShortCutVisibility.VISIBLE)
+                .filter(x -> x.defaultVisibility == ConfigVisibility.VISIBLE)
                 .limit(shortcutConfig.maxEntries)
                 .map(x -> new DashboardShortcut.DefaultDashboardShortcut(x.id, null))
                 .collect(Collectors.toList());

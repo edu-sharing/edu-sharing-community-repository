@@ -2,10 +2,10 @@ package org.edu_sharing.alfresco.service.config.model;
 
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
-public class ShortCutVisibilityAdapter extends XmlAdapter<String, ShortCutVisibility> {
+public class ConfigVisibilityAdapter extends XmlAdapter<String, ConfigVisibility> {
     @Override
-    public ShortCutVisibility unmarshal(String v) {
-        for (ShortCutVisibility visibility : ShortCutVisibility.values()) {
+    public ConfigVisibility unmarshal(String v) {
+        for (ConfigVisibility visibility : ConfigVisibility.values()) {
             if (visibility.toString().equalsIgnoreCase(v)) {
                 return visibility;
             }
@@ -14,7 +14,7 @@ public class ShortCutVisibilityAdapter extends XmlAdapter<String, ShortCutVisibi
     }
 
     @Override
-    public String marshal(ShortCutVisibility v) {
+    public String marshal(ConfigVisibility v) {
         return v.toString();
     }
 }

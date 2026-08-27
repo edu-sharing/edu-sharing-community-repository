@@ -36,8 +36,8 @@ public class Values implements Serializable {
 	@XmlElement public String accessDeniedInfoUrl;
 	@Schema(description = "Whether user profiles can be edited within edu-sharing (not used if editProfileUrl is set)")
 	@XmlElement public Boolean editProfile;
-	@Schema(description = "Default displayed columns in workspace")
-	@XmlElement public String[] workspaceColumns;
+	@Schema(description = "Available workspace columns, their default visibility and per base area overrides")
+	@XmlElement public ConfigWorkspaceColumns workspaceColumns;
 	@Schema(description = "Default view for shared materials: false = only direct shares, true = all shares")
 	@XmlElement public boolean workspaceSharedToMeDefaultAll;
 	@Schema(description = "Array of navigation items to hide (e.g. 'workspace', 'search', 'collections', 'login', 'permissions', 'safe', 'stream')")

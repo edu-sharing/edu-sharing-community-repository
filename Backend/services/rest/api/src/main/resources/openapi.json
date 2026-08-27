@@ -1510,6 +1510,52 @@
         },
         "type": "object"
       },
+      "ConfigWorkspaceColumns": {
+        "description": "Available workspace columns, their default visibility and per base area overrides",
+        "properties": {
+          "areas": {
+            "description": "Per base area overrides. An area not listed here uses the global column list",
+            "items": {
+              "$ref": "#/components/schemas/ConfigWorkspaceColumnsArea"
+            },
+            "type": "array",
+            "xml": {
+              "name": "area"
+            }
+          },
+          "columns": {
+            "description": "Columns available in the workspace. A column not listed here is not offered in the column chooser. The order defines the column order",
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceColumnConfigEntry"
+            },
+            "type": "array",
+            "xml": {
+              "name": "column"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "ConfigWorkspaceColumnsArea": {
+        "description": "Per base area overrides. An area not listed here uses the global column list",
+        "properties": {
+          "columns": {
+            "description": "Columns available in this area. Replaces the global column list entirely",
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceColumnConfigEntry"
+            },
+            "type": "array",
+            "xml": {
+              "name": "column"
+            }
+          },
+          "root": {
+            "description": "Workspace base area this override applies to: 'MY_FILES', 'SHARED_FILES' or 'WORKFLOW_RECEIVE'",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Connector": {
         "properties": {
           "filetypes": {
@@ -10011,12 +10057,7 @@
             "$ref": "#/components/schemas/ConfigWorkflow"
           },
           "workspaceColumns": {
-            "description": "Default displayed columns in workspace",
-            "items": {
-              "description": "Default displayed columns in workspace",
-              "type": "string"
-            },
-            "type": "array"
+            "$ref": "#/components/schemas/ConfigWorkspaceColumns"
           },
           "workspaceSharedToMeDefaultAll": {
             "description": "Default view for shared materials: false = only direct shares, true = all shares",
@@ -10201,6 +10242,24 @@
           "time": {
             "format": "int64",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "WorkspaceColumnConfigEntry": {
+        "description": "Columns available in this area. Replaces the global column list entirely",
+        "properties": {
+          "defaultVisibility": {
+            "description": "Whether the column is displayed by default ('visible') or only offered in the column chooser ('hidden')",
+            "enum": [
+              "visible",
+              "hidden"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Property name of the column, e.g. 'cm:name' or 'ccm:university'. Any node property is allowed. The column label is resolved via the i18n key 'NODE.<id>'",
+            "type": "string"
           }
         },
         "type": "object"
