@@ -123,12 +123,15 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
                 void this.renderHelperService.hasRenderingService2().then(async (has) => {
                     if (has) {
                         let module = 'default';
+                        // the rs2 backend check for modules is relatively expensive
+                        // so we always do the auto render since we have full screen mode anyway
+                        /*
                         if (await firstValueFrom(this.networkService.isFromHomeRepository(node))) {
                             // in this stage, we don't know external rs2 url so we can only resolve it for the local rs2
                             module = (await this.moduleInfoService.getModuleInfo(node)).module;
-                        }
-                        console.info('rs module', module);
-                        if (this.autoRender || this.AutoRenderModules.includes(module)) {
+                            console.info('rs module', module);
+                        }*/
+                        if (this.autoRender || true) {
                             void this.onShowContentClick();
                         }
                     } else {
