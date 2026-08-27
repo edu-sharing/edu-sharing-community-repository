@@ -31,14 +31,13 @@ export class ApiStateService {
      * Updates the authentication state as reported by the backend. Called by the `ApiInterceptor`
      * for each response carrying the `X-Edu-Authenticated` header.
      */
-    updateAuthenticated(authenticated: boolean): void {
+    updateAuthenticated(authenticated: boolean, triggerLost: boolean): void {
         const previous = this.authenticated$.value;
         if (previous === authenticated) {
             return;
         }
         this.authenticated$.next(authenticated);
-        if (previous === true && !authenticated) {
-            console.info('trigger loss');
+        if (previous === true && !authenticated && triggerLost) {
             this.authenticationLostSubject.next();
         }
     }

@@ -70,16 +70,15 @@ export class ApiInterceptor implements HttpInterceptor {
      * can be detected.
      */
     private trackAuthenticationState(response: HttpResponseBase, req: HttpRequest<unknown>): void {
-        // Requests handling the login state itself may legitimately change the state (login,
-        // logout, 2fa) and must not be interpreted as an unexpected session loss.
-        if (req.url.includes('/authentication/')) {
-            return;
-        }
         let authenticated = response.headers.get(ApiInterceptor.HEADER_AUTHENTICATED);
         // Header is missing on backends that do not support it yet -> keep the last known state.
         if (authenticated === null) {
             return;
         }
-        this.apiStateService.updateAuthenticated(authenticated === 'true');
+        // trigger loss only when it wasn't an authentication url since it's expected to switch there
+        this.apiStateService.updateAuthenticated(
+            authenticated === 'true',
+            req.url.includes('/authentication/') === false,
+        );
     }
 }
