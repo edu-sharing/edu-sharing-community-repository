@@ -11,7 +11,7 @@ import {
     inject,
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { AuthenticationService } from 'ngx-edu-sharing-api';
+import { ApiStateService, AuthenticationService } from 'ngx-edu-sharing-api';
 import {
     AccessibilityService,
     AppContainerService,
@@ -59,6 +59,7 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     private configuration = inject(ConfigurationService);
     private scrollPositionRestoration = inject(ScrollPositionRestorationService);
     private legacyRestService = inject(RestNetworkService);
+    private apiState = inject(ApiStateService);
 
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
@@ -198,23 +199,20 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
         if (this.bridge.isRunningCordova()) {
             return;
         }
+        // The backend announces the authentication state of every rest response via the
+        // `X-Edu-Authenticated` header. If a session silently expired (e.g. repository restart),
+        // the user is degraded to guest without any error status, so we have to react to the
+        // reported state change ourselves.
+        this.apiState.observeAuthenticationLost().subscribe(() => {
+            console.warn('backend reports a lost authentication, redirecting to login');
+            this.authentication.forceLoginInfoRefresh();
+            if (!this.isLoginExemptRoute(this.getCurrentRoute())) {
+                this.ui.goToLogin();
+            }
+        });
         this.authentication.observeLoginInfo().subscribe(async (loginInfo) => {
-            // dirty hack: location + router components return null values
-            const route = window.location.pathname.substring(
-                this.injector.get(PlatformLocation).getBaseHrefFromDOM()?.length ?? 0,
-            );
-            if (
-                !loginInfo.isValidLogin &&
-                !(
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'login') ||
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'register') ||
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'error') ||
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'message') ||
-                    // public link sharing
-                    route.startsWith(UIConstants.ROUTER_PREFIX + 'sharing') ||
-                    route.startsWith('shibboleth')
-                )
-            ) {
+            const route = this.getCurrentRoute();
+            if (!loginInfo.isValidLogin && !this.isLoginExemptRoute(route)) {
                 this.ui.goToLogin();
             } else if (loginInfo.isGuest) {
                 this.configuration.get('loginSilentMode').subscribe((mode: string) => {
@@ -253,6 +251,26 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
                 })*/
             }
         });
+    }
+
+    /** dirty hack: location + router components return null values */
+    private getCurrentRoute(): string {
+        return window.location.pathname.substring(
+            this.injector.get(PlatformLocation).getBaseHrefFromDOM()?.length ?? 0,
+        );
+    }
+
+    /** Routes that are reachable without a valid session and must not redirect to the login. */
+    private isLoginExemptRoute(route: string): boolean {
+        return (
+            route.startsWith(UIConstants.ROUTER_PREFIX + 'login') ||
+            route.startsWith(UIConstants.ROUTER_PREFIX + 'register') ||
+            route.startsWith(UIConstants.ROUTER_PREFIX + 'error') ||
+            route.startsWith(UIConstants.ROUTER_PREFIX + 'message') ||
+            // public link sharing
+            route.startsWith(UIConstants.ROUTER_PREFIX + 'sharing') ||
+            route.startsWith('shibboleth')
+        );
     }
 
     private registerContrastMode(): void {
