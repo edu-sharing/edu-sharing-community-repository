@@ -154,6 +154,7 @@
           </div>
           } @if (isSafeLogin && loginSafeFailed) {
           <div
+            role="alert"
             innerHTML="{{
               'LOGIN.ERROR_SAFE_DETAIL'
                 | translate : { safeAccountUrl: config.register.recoverUrlSafe }
