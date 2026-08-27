@@ -22,4 +22,9 @@
     .hide-all * {
         display: none !important;
     }
+
+    // Fix for documents exceeding standard A4
+    ::ng-deep html[data-pdfjsprinting] {
+        height: 100%;
+    }
 }
