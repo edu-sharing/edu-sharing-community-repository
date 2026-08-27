@@ -179,12 +179,15 @@
         <div class="cell-sub-title">
           @if (authorForRow(node, column.secondaryRow); as author) {
           <es-user-avatar size="xxsmall" [user]="author"></es-user-avatar>
-          }
+          } @if (collectionAuthorFreetext(node, column.secondaryRow); as authorFreetext) {
+          <span>{{ authorFreetext }}</span>
+          } @else {
           <es-list-base
             [forceText]="true"
             [node]="node"
             [item]="column.secondaryRow"
           ></es-list-base>
+          }
         </div>
         }
       </div>

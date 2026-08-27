@@ -393,6 +393,17 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         return item ? this.nodeHelperService.getNodeAuthority(node as Node, item.name) : null;
     }
 
+    /**
+     * Free-text author of a collection, replacing the person name of an author sub-title row;
+     * null unless the row names a person and the collection defines a free-text author.
+     */
+    collectionAuthorFreetext(node: T, item: BaseListItem): string | null {
+        if (!this.authorForRow(node, item)) {
+            return null;
+        }
+        return (node as Node)?.collection?.authorFreetext ?? null;
+    }
+
     selectSortChange(sort: Sort) {
         this.entriesService.sort.active = sort.active;
         this.entriesService.sort.direction = sort.direction;

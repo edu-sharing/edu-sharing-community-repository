@@ -177,9 +177,13 @@ mat-cell {
     align-items: center;
     gap: 6px;
     max-width: 100%;
-    color: var(--textLight);
+    color: var(--textMain);
     font-size: 11px;
     line-height: 1.2;
+    // list widgets color their own text, keep the muted sub-title color
+    ::ng-deep span {
+        color: inherit;
+    }
 }
 .childobjects {
     background-color: rgba(0, 0, 0, 0.05);
