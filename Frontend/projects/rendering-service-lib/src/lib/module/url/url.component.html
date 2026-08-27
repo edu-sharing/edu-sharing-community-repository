@@ -43,7 +43,7 @@
     } @if (embedding === UrlEmbeddings.IMAGE && url !== '') {
     <div class="image-wrapper">
       <img
-        [ngSrc]="url"
+        [src]="url"
         [alt]="node?.title ?? 'Edu-Sharing image'"
         [title]="node?.title ?? 'Edu-Sharing image'"
       />
