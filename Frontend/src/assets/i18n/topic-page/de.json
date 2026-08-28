@@ -395,10 +395,9 @@
         "TEMPLATE": "Vorlage"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Themenseiten aus:",
-        "ARIA": "Auswahl der Sammlung, in der gesucht wird",
-        "THIS_COLLECTION": "Aktueller Sammlung",
-        "ALL_COLLECTIONS": "Allen Sammlungen"
+        "LABEL": "Gefiltert:",
+        "CHIP": "Aktuelle Sammlung",
+        "TOOLTIP": "Nur Themenseiten dieser Sammlung anzeigen"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",

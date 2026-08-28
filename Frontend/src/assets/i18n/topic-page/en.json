@@ -395,10 +395,9 @@
         "TEMPLATE": "Template"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Topic pages from:",
-        "ARIA": "Selection of the collection to search in",
-        "THIS_COLLECTION": "Current collection",
-        "ALL_COLLECTIONS": "All collections"
+        "LABEL": "Filtered:",
+        "CHIP": "Current collection",
+        "TOOLTIP": "Show only topic pages of this collection"
       },
       "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",

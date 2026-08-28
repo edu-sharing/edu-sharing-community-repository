@@ -94,20 +94,14 @@
       <span class="collection-filter-label">
         {{ i18nPrefix + 'COLLECTION_FILTER.LABEL' | translate }}
       </span>
-      <mat-button-toggle-group
-        class="select-copy-option-btn-group collection-filter-toggle-group"
-        name="collectionFilter"
-        [attr.aria-label]="i18nPrefix + 'COLLECTION_FILTER.ARIA' | translate"
-        [value]="collectionFilterActive"
+      <mat-checkbox
+        class="collection-filter-chip"
+        [checked]="collectionFilterActive"
+        [matTooltip]="i18nPrefix + 'COLLECTION_FILTER.TOOLTIP' | translate"
         (change)="onCollectionFilterChange($event)"
       >
-        <mat-button-toggle [value]="true">
-          {{ i18nPrefix + 'COLLECTION_FILTER.THIS_COLLECTION' | translate }}
-        </mat-button-toggle>
-        <mat-button-toggle [value]="false">
-          {{ i18nPrefix + 'COLLECTION_FILTER.ALL_COLLECTIONS' | translate }}
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+        {{ i18nPrefix + 'COLLECTION_FILTER.CHIP' | translate }}
+      </mat-checkbox>
     </div>
     }
 

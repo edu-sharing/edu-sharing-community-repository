@@ -146,12 +146,18 @@
 
     .collection-filter-label {
         color: topicPageVars.$secondary-text;
-        font-size: topicPageVars.$font-size-small;
     }
 
-    // same pill as the copy option group above, but flattened to filter size
-    .collection-filter-toggle-group {
-        --mat-button-toggle-height: 32px;
-        --mat-button-toggle-label-text-size: #{topicPageVars.$font-size-small};
+    // the checkbox is rendered as a filter pill holding its own label
+    .collection-filter-chip {
+        --mat-checkbox-label-text-color: #{topicPageVars.$on-surface};
+        --mat-checkbox-label-text-size: #{topicPageVars.$font-size-small};
+        border-radius: 16px;
+        background-color: topicPageVars.$surface-container-highest;
+        padding-right: 12px;
+
+        ::ng-deep .mdc-form-field {
+            height: 32px;
+        }
     }
 }

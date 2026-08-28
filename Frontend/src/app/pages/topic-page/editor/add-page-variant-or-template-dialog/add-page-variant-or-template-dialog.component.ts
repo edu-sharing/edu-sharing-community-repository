@@ -10,7 +10,7 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
-import { MatButtonToggleChange } from '@angular/material/button-toggle';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { SortDirection } from '@angular/material/sort';
 import {
     CONTENT_TYPE_ALL,
@@ -252,8 +252,8 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
      *
      * @param event
      */
-    protected onCollectionFilterChange(event: MatButtonToggleChange): void {
-        this.collectionFilterActive = event.value;
+    protected onCollectionFilterChange(event: MatCheckboxChange): void {
+        this.collectionFilterActive = event.checked;
         // the result list is a different one, so the referenced variant has to be looked up and
         // sorted to the top again
         this.initialSelectionMade = false;

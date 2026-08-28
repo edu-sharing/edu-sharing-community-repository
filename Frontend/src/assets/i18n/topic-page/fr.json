@@ -370,10 +370,9 @@
         "TEMPLATE": "Modèle"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Pages thématiques de :",
-        "ARIA": "Sélection de la collection dans laquelle rechercher",
-        "THIS_COLLECTION": "La collection actuelle",
-        "ALL_COLLECTIONS": "Toutes les collections"
+        "LABEL": "Filtré :",
+        "CHIP": "Collection actuelle",
+        "TOOLTIP": "N'afficher que les pages thématiques de cette collection"
       },
       "SEARCH_PLACEHOLDER": "Rechercher des modèles de page thématique",
       "SEARCH": "Recherche",
