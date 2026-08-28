@@ -14,14 +14,20 @@ import {
     FileUploadProgressDialogData,
     FileUploadProgressDialogResult,
 } from './file-upload-progress-dialog-data';
-import { map, switchMap } from 'rxjs/operators';
 import { DialogsService } from '../../dialogs.service';
-import { from, of } from 'rxjs';
-import { Node, NodeService } from 'ngx-edu-sharing-api';
+import { ApiErrorResponse, Node, NodeService } from 'ngx-edu-sharing-api';
+import { firstValueFrom } from 'rxjs';
+
+/** What to do with a file that already exists at the target location. */
+type DuplicateDecision = 'keep' | 'overwrite' | 'cancel';
 
 /**
  * A dialog that handles uploading a given list of files and shows a progress bar per file to the
  * user.
+ *
+ * Duplicates are not detected upfront: Files are always created with `renameIfExists=false` first,
+ * so the backend reports an existing file with a `409` response. Only then the user is asked how to
+ * proceed (unless `duplicateBehaviour` already defines it).
  */
 @Component({
     selector: 'es-file-upload-progress-dialog',
@@ -48,8 +54,12 @@ export class FileUploadProgressDialogComponent implements OnInit {
     }[] = [];
     private resultList: Node[] = [];
     private error = false;
-    private existingNodes: Node[];
+    /** The decision the user made for the first duplicate, applied to the whole batch. */
+    private duplicateDecision: DuplicateDecision = null;
+    /** Lazily fetched children of the target folder, only required to overwrite an existing file. */
+    private childNodes: Node[] = null;
     processed = 0;
+    /** Bound to the radio group of the "file exists" dialog: `true` = keep both files. */
     keep = true;
     @ViewChild('existingFiles') existingFilesRef: TemplateRef<undefined>;
 
@@ -62,66 +72,8 @@ export class FileUploadProgressDialogComponent implements OnInit {
         for (const file of this.data.files) {
             this.progress.push({ name: file.name, progress: { progress: 0 } });
         }
-        // check for existing child nodes with the same file name
-        this._existingNodes()
-            .pipe(
-                switchMap((existingNodes: Node[]) => {
-                    this.existingNodes = existingNodes;
-                    if (
-                        !this.data.duplicateBehaviour ||
-                        this.data.duplicateBehaviour === 'ask-user'
-                    ) {
-                        // open the dialog only if this dialog is still open...
-                        if (this.dialogRef.getLifecycleState() !== 'open') return of(false);
-                        // if some files are already present as nodes then inform the user and ask whether
-                        // to keep or overwrite the files
-                        this.existingNodes = existingNodes;
-                        if (existingNodes.length > 0) {
-                            return from(this._openExistingDialog(existingNodes));
-                        }
-                        // if there are no existing nodes of the same name just proceed and upload
-                        return of(true);
-                    } else {
-                        this.keep = this.data.duplicateBehaviour === 'unique';
-                        return of(true);
-                    }
-                }),
-            )
-            .subscribe((doUpload) => {
-                if (doUpload) {
-                    this._updateSubtitle();
-                    this._upload(0);
-                } else {
-                    this._done('FINISHED');
-                }
-            });
-    }
-
-    private async _openExistingDialog(existingNodes: Node[]) {
-        const multiple = existingNodes.length > 1;
-        let fileName, message, messageParameters;
-        if (multiple) {
-            fileName = null;
-            message = 'WORKSPACE.UPLOAD_EXISTS.MULTIPLE';
-            messageParameters = null;
-        } else {
-            fileName = existingNodes[0].name;
-            message = 'WORKSPACE.UPLOAD_EXISTS.SINGLE';
-            messageParameters = { fileName: fileName };
-        }
-        const dialogRef = await this.dialogs.openGenericDialog({
-            title: 'WORKSPACE.UPLOAD_EXISTS.TITLE',
-            message,
-            messageParameters,
-            contentTemplate: this.existingFilesRef,
-            context: { $implicit: multiple },
-            buttons: [
-                { label: 'CANCEL', config: { color: 'standard' } },
-                { label: 'WORKSPACE.UPLOAD_EXISTS.UPLOAD', config: { color: 'primary' } },
-            ],
-        });
-        const result = await dialogRef.afterClosed().toPromise();
-        return result !== 'CANCEL';
+        this._updateSubtitle();
+        this._upload(0);
     }
 
     private _done(status: 'CANCELED' | 'FINISHED') {
@@ -136,34 +88,6 @@ export class FileUploadProgressDialogComponent implements OnInit {
         } else {
             this.dialogRef.close(null);
         }
-    }
-
-    /**
-     * Returns all child nodes of the parent which match the file name of a
-     * file to be uploaded.
-     * @private
-     */
-    private _existingNodes() {
-        // get all children to compare against them
-        return this.nodeService
-            .getChildren(this._getParent(), [RestConstants.FILTER_FILES], {
-                propertyFilter: [],
-            })
-            .pipe(
-                map((children) => {
-                    let existing = [];
-                    const fileNames = Array.from(this.data.files).map((file) => file.name);
-                    const childNodes = children.nodes;
-                    for (let i = 0; i < childNodes.length; i++) {
-                        const childNode = childNodes[i];
-                        const childFileName = childNode.name;
-                        if (fileNames.some((fName) => fName == childFileName)) {
-                            existing.push(childNode);
-                        }
-                    }
-                    return existing;
-                }),
-            );
     }
 
     private _getParent(): string {
@@ -194,70 +118,186 @@ export class FileUploadProgressDialogComponent implements OnInit {
             }, 50);
             return;
         }
-        const nextUpload = (node: Node) => () => {
-            this.resultList.push(node);
-            this.progress[number].progress.progress = 100;
-            this.processed++;
-            this._updateSubtitle();
-            this._upload(number + 1);
-        };
-        const nextError = (node: Node) => (error: any) => {
-            this.error = true;
-            this.progress[number].error = this._mapError(error, node);
-            this.progress[number].progress.progress = -1;
-            this._upload(number + 1);
-        };
-        // check whether the file is already existing and if so
-        // if the user also chose to overwrite the old one only create a new version
-        const existingNode = this.existingNodes.find((node) => node.name == file.name);
-        if (existingNode && !this.keep) {
-            this.nodeApi
-                .changeContent(
-                    existingNode.ref.repo,
-                    existingNode.ref.id,
-                    'auto',
-                    RestConstants.COMMENT_CONTENT_UPDATE,
-                    { file },
-                )
-                .subscribe({ next: nextUpload(existingNode), error: nextError(existingNode) });
-        } else {
-            this.nodeApi
-                .createChild({
-                    repository: RestConstants.HOME_REPOSITORY,
-                    node: this._getParent(),
-                    type: RestConstants.CCM_TYPE_IO,
-                    renameIfExists: this.keep,
-                    body: RestHelper.createNameProperty(file.name),
-                })
-                .subscribe({
-                    next: (node: Node) => {
-                        const start = new Date().getTime();
-                        this.nodeApi
-                            .changeContent(
-                                node.ref.repo,
-                                node.ref.id,
-                                'auto',
-                                RestConstants.COMMENT_MAIN_FILE_UPLOAD,
-                                { file },
-                                ({ loaded, total }) => {
-                                    const elapsed = (new Date().getTime() - start) / 1000;
-                                    this.progress[number].progress = {
-                                        start,
-                                        loaded,
-                                        total,
-                                        elapsed,
-                                        progress: total ? Math.round((loaded / total) * 100) : 0,
-                                        remaining: loaded
-                                            ? ((total - loaded) * elapsed) / loaded
-                                            : 0,
-                                    };
-                                },
-                            )
-                            .subscribe({ next: nextUpload(node), error: nextError(node) });
-                    },
-                    error: nextError(null),
-                });
+        void this._uploadFile(number, file);
+    }
+
+    private async _uploadFile(number: number, file: File): Promise<void> {
+        let node: Node;
+        try {
+            // in 'unique' mode duplicates are renamed by the backend, in any other mode we let the
+            // backend tell us about an existing file via a 409 response
+            node = await this._createChild(file, this.data.duplicateBehaviour === 'unique');
+        } catch (error) {
+            if (!this._isDuplicateError(error)) {
+                this._failed(number, error, null);
+                return;
+            }
+            // the toast/error handler must not report the (expected) conflict
+            (error as ApiErrorResponse).preventDefault?.();
+            const decision = await this._resolveDuplicate(file);
+            if (decision === 'cancel') {
+                // keep the files uploaded so far, but don't continue with the remaining ones
+                this._done('FINISHED');
+                return;
+            }
+            if (decision === 'overwrite') {
+                const existingNode = await this._findExistingNode(file.name);
+                if (existingNode) {
+                    try {
+                        await this._changeContent(
+                            number,
+                            existingNode,
+                            file,
+                            RestConstants.COMMENT_CONTENT_UPDATE,
+                        );
+                    } catch (error) {
+                        // don't delete the existing node, it is not ours
+                        this._failed(number, error, null);
+                        return;
+                    }
+                    this._succeeded(number, existingNode);
+                    return;
+                }
+                // the existing node could not be resolved -> fall back to keeping both files
+            }
+            try {
+                node = await this._createChild(file, true);
+            } catch (error) {
+                this._failed(number, error, null);
+                return;
+            }
         }
+        try {
+            await this._changeContent(number, node, file, RestConstants.COMMENT_MAIN_FILE_UPLOAD);
+        } catch (error) {
+            this._failed(number, error, node);
+            return;
+        }
+        this._succeeded(number, node);
+    }
+
+    private _createChild(file: File, renameIfExists: boolean): Promise<Node> {
+        return firstValueFrom(
+            this.nodeApi.createChild({
+                repository: RestConstants.HOME_REPOSITORY,
+                node: this._getParent(),
+                type: RestConstants.CCM_TYPE_IO,
+                renameIfExists,
+                body: RestHelper.createNameProperty(file.name),
+            }),
+        );
+    }
+
+    private _changeContent(
+        number: number,
+        node: Node,
+        file: File,
+        versionComment: string,
+    ): Promise<Node> {
+        const start = new Date().getTime();
+        return this.nodeApi
+            .changeContent(
+                node.ref.repo,
+                node.ref.id,
+                'auto',
+                versionComment,
+                { file },
+                ({ loaded, total }) => {
+                    const elapsed = (new Date().getTime() - start) / 1000;
+                    this.progress[number].progress = {
+                        start,
+                        loaded,
+                        total,
+                        elapsed,
+                        progress: total ? Math.round((loaded / total) * 100) : 0,
+                        remaining: loaded ? ((total - loaded) * elapsed) / loaded : 0,
+                    };
+                },
+            )
+            .toPromise();
+    }
+
+    private _succeeded(number: number, node: Node): void {
+        this.resultList.push(node);
+        this.progress[number].progress.progress = 100;
+        this.processed++;
+        this._updateSubtitle();
+        this._upload(number + 1);
+    }
+
+    private _failed(number: number, error: any, node: Node): void {
+        this.error = true;
+        this.progress[number].error = this._mapError(error, node);
+        this.progress[number].progress.progress = -1;
+        this._upload(number + 1);
+    }
+
+    private _isDuplicateError(error: any): boolean {
+        return error?.status === RestConstants.DUPLICATE_NODE_RESPONSE;
+    }
+
+    /**
+     * Determines how to handle a file that already exists at the target location. The user is asked
+     * at most once per dialog, the decision is applied to all remaining files.
+     */
+    private async _resolveDuplicate(file: File): Promise<DuplicateDecision> {
+        if (this.data.duplicateBehaviour === 'replace') {
+            return 'overwrite';
+        }
+        if (this.duplicateDecision) {
+            return this.duplicateDecision;
+        }
+        // don't open the dialog if this dialog has already been closed
+        if (this.dialogRef.getLifecycleState() !== 'open') {
+            return 'cancel';
+        }
+        this.duplicateDecision = await this._openExistingDialog(file.name);
+        return this.duplicateDecision;
+    }
+
+    private async _openExistingDialog(fileName: string): Promise<DuplicateDecision> {
+        // the decision applies to all files of this upload
+        const multiple = this.data.files.length > 1;
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: 'WORKSPACE.UPLOAD_EXISTS.TITLE',
+            message: multiple
+                ? 'WORKSPACE.UPLOAD_EXISTS.MULTIPLE'
+                : 'WORKSPACE.UPLOAD_EXISTS.SINGLE',
+            messageParameters: multiple ? null : { fileName },
+            contentTemplate: this.existingFilesRef,
+            context: { $implicit: multiple },
+            buttons: [
+                { label: 'CANCEL', config: { color: 'standard' } },
+                { label: 'WORKSPACE.UPLOAD_EXISTS.UPLOAD', config: { color: 'primary' } },
+            ],
+        });
+        const result = await dialogRef.afterClosed().toPromise();
+        if (result === 'CANCEL') {
+            return 'cancel';
+        }
+        return this.keep ? 'keep' : 'overwrite';
+    }
+
+    /**
+     * Resolves the already existing node with the given file name inside the target folder. The
+     * children are only fetched when an existing file actually needs to be overwritten.
+     */
+    private async _findExistingNode(fileName: string): Promise<Node | null> {
+        if (!this.childNodes) {
+            try {
+                const children = await this.nodeApi
+                    .getChildren(this._getParent(), {
+                        filter: [RestConstants.FILTER_FILES],
+                        maxItems: RestConstants.COUNT_UNLIMITED,
+                    })
+                    .toPromise();
+                this.childNodes = children.nodes;
+            } catch (error) {
+                console.warn(error);
+                return null;
+            }
+        }
+        return this.childNodes.find((node) => node.name === fileName) ?? null;
     }
 
     private _updateSubtitle(): void {
