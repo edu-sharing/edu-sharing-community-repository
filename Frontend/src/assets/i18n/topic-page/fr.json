@@ -1,7 +1,7 @@
 {
   "TOPIC_PAGE": {
     "NAVIGATION": {
-      "NEW_PAGE_VARIANT": "Nouvelle variante de page thématique",
+      "NEW_PAGE_VARIANT": "Nouvelle page thématique",
       "NEW_PAGE_TEMPLATE": "Nouveau modèle de page thématique",
       "TITLE": "Page thématique",
       "SEARCH_PLACEHOLDER": "Rechercher du contenu sur la page thématique ..."
@@ -352,7 +352,7 @@
     "DEFAULT_PAGE_TEMPLATE_NAME": "Modèle de page",
     "DEFAULT_PAGE_VARIANT_NAME": "Variante de page",
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Créer une nouvelle variante de page thématique",
+      "HEADING": "Créer une nouvelle page thématique",
       "EXISTING_VARIANT": {
         "INFO_HEADING": "Attention : des variantes de cette page thématique existent déjà.",
         "INFO_LIST_TEXT": "Avant d'en créer une nouvelle, veuillez vérifier :",
@@ -368,6 +368,13 @@
         "ARIA": "Sélection de la base de copie",
         "TOPIC_PAGE": "Page thématique",
         "TEMPLATE": "Modèle"
+      },
+      "COLLECTION_FILTER": {
+        "LABEL": "Filtré :",
+        "CHIP": "Collection : {{collection}}",
+        "CHIP_FALLBACK": "Collection actuelle",
+        "NONE": "Toutes les collections",
+        "REMOVE": "Supprimer le filtre de collection"
       },
       "SEARCH_PLACEHOLDER": "Rechercher des modèles de page thématique",
       "SEARCH": "Recherche",

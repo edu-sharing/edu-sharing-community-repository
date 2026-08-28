@@ -89,6 +89,43 @@
   </mat-form-field>
 
   <div class="search-filters-and-results">
+    @if (collectionFilterApplicable()) {
+    <div class="collection-filter">
+      <span class="collection-filter-label">
+        {{ i18nPrefix + 'COLLECTION_FILTER.LABEL' | translate }}
+      </span>
+      @if (collectionFilterActive) {
+      <mat-chip-set>
+        <mat-chip
+          class="collection-filter-chip"
+          [removable]="true"
+          (removed)="removeCollectionFilter()"
+        >
+          <span class="mat-chip-label">
+            {{
+              collectionName()
+                ? (i18nPrefix + 'COLLECTION_FILTER.CHIP'
+                  | translate : { collection: collectionName() })
+                : (i18nPrefix + 'COLLECTION_FILTER.CHIP_FALLBACK' | translate)
+            }}
+          </span>
+          <i
+            esIcon="close"
+            matChipRemove
+            [aria]="false"
+            [matTooltip]="i18nPrefix + 'COLLECTION_FILTER.REMOVE' | translate"
+            [attr.aria-label]="i18nPrefix + 'COLLECTION_FILTER.REMOVE' | translate"
+          ></i>
+        </mat-chip>
+      </mat-chip-set>
+      } @else {
+      <span class="collection-filter-none">
+        {{ i18nPrefix + 'COLLECTION_FILTER.NONE' | translate }}
+      </span>
+      }
+    </div>
+    }
+
     <es-mds-editor-wrapper
       class="page-variant-search-filters"
       groupId="topic_page_variant_search"

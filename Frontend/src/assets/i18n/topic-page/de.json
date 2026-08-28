@@ -1,7 +1,7 @@
 {
   "TOPIC_PAGE": {
     "NAVIGATION": {
-      "NEW_PAGE_VARIANT": "Neue Themenseiten-Variante",
+      "NEW_PAGE_VARIANT": "Neue Themenseite",
       "NEW_PAGE_TEMPLATE": "Neue Themenseiten-Vorlage",
       "TITLE": "Themenseite",
       "SEARCH_PLACEHOLDER": "Suche nach Inhalten auf der Themenseite ..."
@@ -373,7 +373,7 @@
       "SUCCESS_MESSAGE": "Die Seite wurde erfolgreich zu den globalen Vorlagen hinzugefügt"
     },
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Neue Themenseiten-Variante erstellen",
+      "HEADING": "Neue Themenseite erstellen",
       "NEW_TOPIC_PAGE": {
         "INFO_HEADING": "Es gibt noch keine Themenseite zu dieser Sammlung.",
         "INFO_TEXT": "Wähle eine Vorlage aus, die als Grundlage für eine neue Themenseite-Variante verwendet werden soll."
@@ -393,6 +393,13 @@
         "ARIA": "Auswahl der Kopier-Grundlage",
         "TOPIC_PAGE": "Themenseite",
         "TEMPLATE": "Vorlage"
+      },
+      "COLLECTION_FILTER": {
+        "LABEL": "Gefiltert:",
+        "CHIP": "Sammlung: {{collection}}",
+        "CHIP_FALLBACK": "Aktuelle Sammlung",
+        "NONE": "Alle Sammlungen",
+        "REMOVE": "Sammlungsfilter entfernen"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",

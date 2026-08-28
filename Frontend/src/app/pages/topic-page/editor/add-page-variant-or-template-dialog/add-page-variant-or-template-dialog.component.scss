@@ -125,3 +125,28 @@
         }
     }
 }
+
+// active collection filter, shown as a removable chip above the metadata filters
+.collection-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .collection-filter-label {
+        color: topicPageVars.$secondary-text;
+        font-size: topicPageVars.$font-size-small;
+    }
+
+    .collection-filter-none {
+        color: topicPageVars.$secondary-text;
+        font-size: topicPageVars.$font-size-small;
+        font-style: italic;
+    }
+
+    .collection-filter-chip {
+        --mdc-chip-label-text-color: #{topicPageVars.$on-surface};
+        background-color: topicPageVars.$surface-container-highest;
+    }
+}

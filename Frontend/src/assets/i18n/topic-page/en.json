@@ -1,7 +1,7 @@
 {
   "TOPIC_PAGE": {
     "NAVIGATION": {
-      "NEW_PAGE_VARIANT": "New topic page variant",
+      "NEW_PAGE_VARIANT": "New topic page",
       "NEW_PAGE_TEMPLATE": "New topic page template",
       "TITLE": "Topic page",
       "SEARCH_PLACEHOLDER": "Search for content on the topic page..."
@@ -373,7 +373,7 @@
       "SUCCESS_MESSAGE": "The page was successfully added to the global templates"
     },
     "CREATE_PAGE_VARIANT": {
-      "HEADING": "Create new topic page variant",
+      "HEADING": "Create new topic page",
       "NEW_TOPIC_PAGE": {
         "INFO_HEADING": "There is no topic page for this collection yet.",
         "INFO_TEXT": "Select a template to use as the basis for a new topic page variant."
@@ -393,6 +393,13 @@
         "ARIA": "Selection of copy source",
         "TOPIC_PAGE": "Topic page",
         "TEMPLATE": "Template"
+      },
+      "COLLECTION_FILTER": {
+        "LABEL": "Filtered:",
+        "CHIP": "Collection: {{collection}}",
+        "CHIP_FALLBACK": "Current collection",
+        "NONE": "All collections",
+        "REMOVE": "Remove collection filter"
       },
       "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",
