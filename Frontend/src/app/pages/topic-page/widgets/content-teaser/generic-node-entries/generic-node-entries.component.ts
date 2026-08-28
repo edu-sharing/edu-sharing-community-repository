@@ -860,7 +860,9 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      * @param currentPagination
      */
     async fetchData(currentPagination: any): Promise<void> {
-        this.dataSource.isLoading = true;
+        // 'page' (not `true`) marks a follow-up page: the grid then renders its spinner and the
+        // "load more" fallback inline as the trailing tile instead of below the list.
+        this.dataSource.isLoading = 'page';
         // in edit mode, all requested nodes are shown, while in view mode, some requested nodes might be omitted, which has to be taken into account
         // TODO: an alternative solution might be replacing the offset calculation by this.allRequestedNodes.length
         const offsetToTakeIntoAccount: number = this.hasEditRightsAndIsEditMode
