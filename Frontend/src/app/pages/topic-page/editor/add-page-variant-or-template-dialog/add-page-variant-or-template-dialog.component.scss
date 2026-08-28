@@ -3,6 +3,8 @@
 :host {
     display: block;
     width: 800px;
+    // the dialog shrinks with the viewport, the fixed width is only the preferred one
+    max-width: 100%;
 }
 
 .add-page-variant-or-template-dialog {
@@ -15,6 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 16px;
 }
 
@@ -95,6 +98,12 @@
 }
 
 .search-filters-and-results {
+    // the result table keeps its column widths, so it scrolls on its own instead of widening the dialog
+    .topic-page-entries-wrapper {
+        display: block;
+        overflow-x: auto;
+    }
+
     .empty {
         padding: 8px 16px;
         width: 100%;
@@ -107,6 +116,7 @@
 .page-variant-search-filters ::ng-deep {
     .content {
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 16px;
 
         // remove unnecessary margin-bottom from widgets
