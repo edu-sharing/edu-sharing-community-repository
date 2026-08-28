@@ -10,6 +10,7 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
+import { MatButtonToggleChange } from '@angular/material/button-toggle';
 import { SortDirection } from '@angular/material/sort';
 import {
     CONTENT_TYPE_ALL,
@@ -77,8 +78,6 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     @Input() dialogRef: CardDialogRef;
     // the collection the topic page belongs to — its subtree is searched for existing page variants
     collectionNodeId: InputSignal<string> = input<string>(null);
-    // title of that collection, used as the label of the collection filter chip
-    collectionName: InputSignal<string> = input<string>(null);
     @Input() pageConfigRef: string;
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
@@ -249,12 +248,14 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     }
 
     /**
-     * Drops the collection restriction so that page variants of all collections are searched.
+     * Switches the search between the collection the topic page belongs to and all collections.
+     *
+     * @param event
      */
-    protected removeCollectionFilter(): void {
-        this.collectionFilterActive = false;
-        // the widened result list is a different one, so the referenced variant has to be looked up
-        // and sorted to the top again
+    protected onCollectionFilterChange(event: MatButtonToggleChange): void {
+        this.collectionFilterActive = event.value;
+        // the result list is a different one, so the referenced variant has to be looked up and
+        // sorted to the top again
         this.initialSelectionMade = false;
         void this.updateList();
     }

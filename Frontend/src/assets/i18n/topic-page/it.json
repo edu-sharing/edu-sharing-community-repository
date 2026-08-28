@@ -370,11 +370,10 @@
         "TEMPLATE": "Modello"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Filtrato:",
-        "CHIP": "Raccolta: {{collection}}",
-        "CHIP_FALLBACK": "Raccolta corrente",
-        "NONE": "Tutte le raccolte",
-        "REMOVE": "Rimuovi il filtro della raccolta"
+        "LABEL": "Pagine tematiche da:",
+        "ARIA": "Selezione della raccolta in cui cercare",
+        "THIS_COLLECTION": "Raccolta corrente",
+        "ALL_COLLECTIONS": "Tutte le raccolte"
       },
       "SEARCH_PLACEHOLDER": "Cerca modelli di pagina tematica",
       "SEARCH": "Ricerca",

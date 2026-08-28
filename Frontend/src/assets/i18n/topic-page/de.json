@@ -395,11 +395,10 @@
         "TEMPLATE": "Vorlage"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Gefiltert:",
-        "CHIP": "Sammlung: {{collection}}",
-        "CHIP_FALLBACK": "Aktuelle Sammlung",
-        "NONE": "Alle Sammlungen",
-        "REMOVE": "Sammlungsfilter entfernen"
+        "LABEL": "Themenseiten aus:",
+        "ARIA": "Auswahl der Sammlung, in der gesucht wird",
+        "THIS_COLLECTION": "Aktueller Sammlung",
+        "ALL_COLLECTIONS": "Allen Sammlungen"
       },
       "SEARCH_PLACEHOLDER": "Durchsuche Themenseiten-Varianten",
       "SEARCH": "Suche",

@@ -395,11 +395,10 @@
         "TEMPLATE": "Template"
       },
       "COLLECTION_FILTER": {
-        "LABEL": "Filtered:",
-        "CHIP": "Collection: {{collection}}",
-        "CHIP_FALLBACK": "Current collection",
-        "NONE": "All collections",
-        "REMOVE": "Remove collection filter"
+        "LABEL": "Topic pages from:",
+        "ARIA": "Selection of the collection to search in",
+        "THIS_COLLECTION": "Current collection",
+        "ALL_COLLECTIONS": "All collections"
       },
       "SEARCH_PLACEHOLDER": "Search for topic page variant",
       "SEARCH": "Search",

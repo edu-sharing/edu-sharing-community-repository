@@ -126,7 +126,7 @@
     }
 }
 
-// active collection filter, shown as a removable chip above the metadata filters
+// collection scope of the page variant search, shown above the metadata filters
 .collection-filter {
     display: flex;
     align-items: center;
@@ -139,14 +139,9 @@
         font-size: topicPageVars.$font-size-small;
     }
 
-    .collection-filter-none {
-        color: topicPageVars.$secondary-text;
-        font-size: topicPageVars.$font-size-small;
-        font-style: italic;
-    }
-
-    .collection-filter-chip {
-        --mdc-chip-label-text-color: #{topicPageVars.$on-surface};
-        background-color: topicPageVars.$surface-container-highest;
+    // same pill as the copy option group above, but flattened to filter size
+    .collection-filter-toggle-group {
+        --mat-button-toggle-height: 32px;
+        --mat-button-toggle-label-text-size: #{topicPageVars.$font-size-small};
     }
 }

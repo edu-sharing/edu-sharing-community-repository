@@ -94,35 +94,20 @@
       <span class="collection-filter-label">
         {{ i18nPrefix + 'COLLECTION_FILTER.LABEL' | translate }}
       </span>
-      @if (collectionFilterActive) {
-      <mat-chip-set>
-        <mat-chip
-          class="collection-filter-chip"
-          [removable]="true"
-          (removed)="removeCollectionFilter()"
-        >
-          <span class="mat-chip-label">
-            {{
-              collectionName()
-                ? (i18nPrefix + 'COLLECTION_FILTER.CHIP'
-                  | translate : { collection: collectionName() })
-                : (i18nPrefix + 'COLLECTION_FILTER.CHIP_FALLBACK' | translate)
-            }}
-          </span>
-          <i
-            esIcon="close"
-            matChipRemove
-            [aria]="false"
-            [matTooltip]="i18nPrefix + 'COLLECTION_FILTER.REMOVE' | translate"
-            [attr.aria-label]="i18nPrefix + 'COLLECTION_FILTER.REMOVE' | translate"
-          ></i>
-        </mat-chip>
-      </mat-chip-set>
-      } @else {
-      <span class="collection-filter-none">
-        {{ i18nPrefix + 'COLLECTION_FILTER.NONE' | translate }}
-      </span>
-      }
+      <mat-button-toggle-group
+        class="select-copy-option-btn-group collection-filter-toggle-group"
+        name="collectionFilter"
+        [attr.aria-label]="i18nPrefix + 'COLLECTION_FILTER.ARIA' | translate"
+        [value]="collectionFilterActive"
+        (change)="onCollectionFilterChange($event)"
+      >
+        <mat-button-toggle [value]="true">
+          {{ i18nPrefix + 'COLLECTION_FILTER.THIS_COLLECTION' | translate }}
+        </mat-button-toggle>
+        <mat-button-toggle [value]="false">
+          {{ i18nPrefix + 'COLLECTION_FILTER.ALL_COLLECTIONS' | translate }}
+        </mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
     }
 
