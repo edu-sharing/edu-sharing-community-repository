@@ -92,7 +92,11 @@
     #grid
     (esBorderBoxObserver)="onGridSizeChanges()"
     esInfiniteScroll
-    [scrollWindow]="entriesService.infiniteScrollWindow"
+    [scrollWindow]="layout === 'scroll' ? false : entriesService.infiniteScrollWindow"
+    [infiniteScrollAxis]="layout === 'scroll' ? 'horizontal' : 'vertical'"
+    [infiniteScrollDistance]="
+      layout === 'scroll' ? InfiniteScrollDistance.scroll : InfiniteScrollDistance.grid
+    "
     (scroll)="updateScrollState()"
     (scrolled)="!visibleItemsLimited && loadData('scroll')"
   >
@@ -170,21 +174,31 @@
     } } @if ( (entriesService.globalOptionsSubject | async)?.length &&
     entriesService.globalOptionsPosition === 'after' ) {
     <es-node-entries-global-options [displayType]="displayType"> </es-node-entries-global-options>
+    } @if (layout === 'scroll' && (showLoadMore || isLoadingPage)) {
+    <div class="load-more load-more-card" role="none">
+      @if (isLoadingPage) {
+      <ng-container *ngTemplateOutlet="loading"></ng-container>
+      } @else {
+      <ng-container *ngTemplateOutlet="loadMoreButton"></ng-container>
+      }
+    </div>
     }
   </div>
 </div>
-} } @if ( !entriesService.dataSource.isLoading && entriesService.dataSource.hasMore() &&
-!visibleItemsLimited && entriesService.paginationStrategy === 'infinite-scroll' && layout !==
-'scroll' ) {
+} } @if (layout !== 'scroll' && showLoadMore) {
 <div class="load-more">
-  <button mat-button color="primary" (click)="loadData('button')">
+  <ng-container *ngTemplateOutlet="loadMoreButton"></ng-container>
+</div>
+}
+
+<ng-template #loadMoreButton>
+  <button mat-button color="primary" data-test="load-more" (click)="loadData('button')">
     <i esIcon="refresh"></i>
     <span>{{ 'LOAD_MORE' | translate }}</span>
   </button>
-</div>
-} @if ( entriesService.dataSource.isLoading === true || entriesService.dataSource.isLoading ===
-'initial' || (entriesService.dataSource.isLoading === 'page' && entriesService.paginationStrategy
-=== 'infinite-scroll') ) {
+</ng-template>
+@if ( entriesService.dataSource.isLoading === true || entriesService.dataSource.isLoading ===
+'initial' || (isLoadingPage && layout !== 'scroll') ) {
 <ng-container *ngTemplateOutlet="loading"></ng-container>
 }
 

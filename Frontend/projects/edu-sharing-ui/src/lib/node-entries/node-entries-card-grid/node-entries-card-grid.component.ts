@@ -59,6 +59,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      * a value of 1 would mean to scroll the full width of the entire content
      */
     readonly ScrollingOffsetPercentage = 0.4;
+    /**
+     * Look-ahead for loading the next page, as a multiple of the viewport size: loading starts
+     * once less than `(value - 1) x viewport` of unseen content remains.
+     *
+     * The horizontal strip loads later than a vertical list, where a whole viewport of
+     * unseen content is a comfortable buffer but a strip-width worth of cards is not.
+     */
+    readonly InfiniteScrollDistance = { grid: 1.5, scroll: 1.2 };
 
     columnChooserVisible$ = new BehaviorSubject(false);
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
@@ -168,9 +176,38 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
+    /**
+     * Whether the "load more" fallback button should be offered.
+     *
+     * Applies to every layout: in `scroll` layout the button is rendered as the last tile of the
+     * horizontal strip, otherwise below the grid.
+     */
+    get showLoadMore(): boolean {
+        return (
+            !this.entriesService.dataSource.isLoading &&
+            this.entriesService.dataSource.hasMore() &&
+            !this.visibleItemsLimited &&
+            this.entriesService.paginationStrategy === 'infinite-scroll'
+        );
+    }
+
+    /**
+     * Whether a *further* page is being loaded, as opposed to the initial load of the list.
+     *
+     * This is the spinner that replaces the "load more" button while its page is in flight.
+     */
+    get isLoadingPage(): boolean {
+        return (
+            this.entriesService.dataSource.isLoading === 'page' &&
+            this.entriesService.paginationStrategy === 'infinite-scroll'
+        );
+    }
+
     loadData(source: 'scroll' | 'button') {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (source === 'scroll') {
+        // The footer check approximates "the page is scrolled to its end". It is meaningless for
+        // the horizontal strip, which scrolls independently of the page.
+        if (source === 'scroll' && this.layout !== 'scroll') {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {

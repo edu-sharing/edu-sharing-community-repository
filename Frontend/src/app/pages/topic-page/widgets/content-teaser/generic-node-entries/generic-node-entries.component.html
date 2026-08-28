@@ -8,7 +8,6 @@
   [class.view-mode]="!hasEditRightsAndIsEditMode"
   [columns]="layout !== GenericNodeEntriesDisplayType.ListView ? columns : tableColumns"
   [dataSource]="dataSource"
-  [disableInfiniteScroll]="true"
   [displayType]="nodeEntriesDisplayType()"
   [dragDrop]="{
     dragAllowed: false,

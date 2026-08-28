@@ -2,10 +2,11 @@
   "extends": "../tsconfig.app.json",
   "compilerOptions": {
     "rootDir": "..",
-    "types": ["node", "jquery"],
+    // "chai": required by `storybook/test` (@vitest/expect references the Chai namespace)
+    "types": ["node", "jquery", "chai"],
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "emitDecoratorMetadata": false,
+    "emitDecoratorMetadata": false
   },
   "exclude": ["../src/test.ts", "../src/**/*.spec.ts", "../projects/edu-sharing-ui/**/*.spec.ts"],
   "include": ["../src/**/*", "../projects/edu-sharing-ui/**/*", "./preview.ts"],
