@@ -1,6 +1,7 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     Input,
@@ -17,7 +18,7 @@ import { Sort } from '@angular/material/sort';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { delay, distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
@@ -51,6 +52,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     private nodesDragDropService = inject(NodesDragDropService);
     ui = inject(UIService);
     private ngZone = inject(NgZone);
+    private changeDetectorRef = inject(ChangeDetectorRef);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
@@ -127,6 +129,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.updateScrollState();
         });
+        // The strip's scrollable extent grows with its content, which is reported by neither a
+        // scroll event nor the grid's resize observer (appending cards leaves its border box
+        // untouched). Delayed by a tick so the new cards are laid out before it is measured.
+        this.nodes$
+            .pipe(delay(0), takeUntil(this.destroyed))
+            .subscribe(() => this.updateScrollState());
     }
 
     ngOnInit(): void {
@@ -392,8 +400,13 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
 
     updateScrollState() {
         if (this.layout === 'scroll') {
-            this.scroll.left = this.canScroll('left');
-            this.scroll.right = this.canScroll('right');
+            const left = this.canScroll('left');
+            const right = this.canScroll('right');
+            if (left !== this.scroll.left || right !== this.scroll.right) {
+                this.scroll = { left, right };
+                // callers include timers and listeners outside change detection
+                this.changeDetectorRef.markForCheck();
+            }
         }
     }
 
