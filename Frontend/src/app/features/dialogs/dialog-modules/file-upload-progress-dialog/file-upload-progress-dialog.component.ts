@@ -17,6 +17,7 @@ import {
 import { DialogsService } from '../../dialogs.service';
 import { ApiErrorResponse, Node, NodeService } from 'ngx-edu-sharing-api';
 import { firstValueFrom } from 'rxjs';
+import { isDuplicateNodeNameError } from '../../../../util/rest-errors';
 
 /** What to do with a file that already exists at the target location. */
 type DuplicateDecision = 'keep' | 'overwrite' | 'cancel';
@@ -128,7 +129,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
             // backend tell us about an existing file via a 409 response
             node = await this._createChild(file, this.data.duplicateBehaviour === 'unique');
         } catch (error) {
-            if (!this._isDuplicateError(error)) {
+            if (!isDuplicateNodeNameError(error)) {
                 this._failed(number, error, null);
                 return;
             }
@@ -230,10 +231,6 @@ export class FileUploadProgressDialogComponent implements OnInit {
         this.progress[number].error = this._mapError(error, node);
         this.progress[number].progress.progress = -1;
         this._upload(number + 1);
-    }
-
-    private _isDuplicateError(error: any): boolean {
-        return error?.status === RestConstants.DUPLICATE_NODE_RESPONSE;
     }
 
     /**

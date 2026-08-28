@@ -765,6 +765,7 @@
     "ERROR_INVALID_TYPE_COMBINATION": "Gli elementi di tipo diverso (file/cartelle) non possono essere modificati in blocco",
     "ERROR_ELEMENT_TYPE_UNSUPPORTED": "Gli elementi di questo tipo non possono essere modificati",
     "ERROR_FILE_EXTENSION_VERIFICATION_EXCEPTION": "L'estensione scelta non è consentita per questo tipo di file. Si prega di utilizzare un'estensione di file appropriata",
+    "ERROR_DUPLICATE_NODE_NAME": "Questo nome di file è già utilizzato in questa cartella, si prega di modificarlo.",
     "LICENSE_NO_PERMISSIONS_MATERIAL": "Non si dispone di autorizzazioni sufficienti per concedere in licenza questo materiale.",
     "LICENSE_NO_PERMISSIONS": "Le autorizzazioni per la licenza dei materiali sono insufficienti",
     "LICENSE_NO_PERMISSIONS_SAFE": "Non è possibile cambiare le licenze in un ambiente sicuro",

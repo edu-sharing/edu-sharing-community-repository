@@ -201,7 +201,8 @@ export class MdsEditorWidgetContainerComponent
             }
             this.widget.focusTrigger
                 ?.pipe(takeUntil(this.destroyed$))
-                .subscribe(() => this.injectedView?.focus());
+                // also reveals the widget (expand its section / extended widgets) and scrolls to it
+                .subscribe(() => this.scrollIntoViewAndFocus());
         }
     }
 
