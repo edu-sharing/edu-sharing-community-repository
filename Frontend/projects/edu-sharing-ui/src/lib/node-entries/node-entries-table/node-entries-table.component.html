@@ -137,30 +137,27 @@
       [class.mat-column-primary]="first"
       [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
       attr.data-test="table-cell-{{ column.name }}"
+      (click)="
+        entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
+          entriesService.onClicked({
+            event: $event,
+            element: node,
+            source: ClickSource.Metadata,
+            attribute: column,
+          })
+      "
+      (dblclick)="
+        entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
+          entriesService.dblClickItem.emit({
+            element: node,
+            source: ClickSource.Metadata,
+            attribute: column,
+          })
+      "
     >
-      <!-- single click target for the cell: display:contents normally (catches es-list-base
-           clicks via bubbling), a real box filling the cell in the sub-title case. -->
-      <div
-        class="cell-primary-content"
-        [class.has-sub-title]="first && !!column.secondaryRow"
-        (click)="
-          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
-            entriesService.onClicked({
-              event: $event,
-              element: node,
-              source: ClickSource.Metadata,
-              attribute: column,
-            })
-        "
-        (dblclick)="
-          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
-            entriesService.dblClickItem.emit({
-              element: node,
-              source: ClickSource.Metadata,
-              attribute: column,
-            })
-        "
-      >
+      <!-- layout wrapper: transparent to the cell layout normally, a stacked box when the
+           column has a sub title; the click target is the cell itself -->
+      <div class="cell-primary-content" [class.has-sub-title]="first && !!column.secondaryRow">
         @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
         <es-node-url cdkMonitorSubtreeFocus [node]="node" [mode]="first ? 'link' : 'wrapper'">
           <es-list-base
