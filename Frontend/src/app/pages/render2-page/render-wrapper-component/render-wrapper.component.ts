@@ -100,40 +100,49 @@ export class RenderWrapperComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
-            if (this.showChildobjects) {
-                this.parentNode.set(
-                    await firstValueFrom(
-                        this.nodeService.getNode(changes.nodeId.currentValue, {
-                            repository: this.repository || HOME_REPOSITORY,
-                        }),
-                    ),
-                );
-                try {
-                    this.children.set(
-                        (
-                            await firstValueFrom(
-                                this.nodeService.getChildren(changes.nodeId.currentValue, {
-                                    repository: this.repository || HOME_REPOSITORY,
-                                    filter: ['files'],
-                                    sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
-                                    sortAscending: [true],
-                                    assocName: RestConstants.CCM_ASSOC_CHILDIO,
-                                    maxItems: RestConstants.COUNT_UNLIMITED,
-                                }),
-                            )
-                        ).nodes,
-                    );
-                } catch (e) {
-                    this.children.set(null);
-                    e.preventDefault();
-                    console.warn('Could not fetch children', e);
-                }
-            } else {
-                this.children.set(null);
-            }
+            await this.loadChildobjects();
         }
         if (changes.nodeId || changes.childId) {
-            await this.refresh();
+            await this.setNodeById(this.childId || this.nodeId);
+        }
+    }
+
+    /**
+     * (re-)fetch the node and its childobjects (series children).
+     * Must also run on refresh(), since childobjects may have been added/removed
+     * in the metadata editor while the node id itself stays the same.
+     */
+    private async loadChildobjects() {
+        if (!this.showChildobjects) {
+            this.children.set(null);
+            return;
+        }
+        this.parentNode.set(
+            await firstValueFrom(
+                this.nodeService.getNode(this.nodeId, {
+                    repository: this.repository || HOME_REPOSITORY,
+                }),
+            ),
+        );
+        try {
+            this.children.set(
+                (
+                    await firstValueFrom(
+                        this.nodeService.getChildren(this.nodeId, {
+                            repository: this.repository || HOME_REPOSITORY,
+                            filter: ['files'],
+                            sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                            sortAscending: [true],
+                            assocName: RestConstants.CCM_ASSOC_CHILDIO,
+                            maxItems: RestConstants.COUNT_UNLIMITED,
+                        }),
+                    )
+                ).nodes,
+            );
+        } catch (e) {
+            this.children.set(null);
+            e.preventDefault();
+            console.warn('Could not fetch children', e);
         }
     }
 
@@ -199,7 +208,18 @@ export class RenderWrapperComponent implements OnChanges {
             },
         });
     }
+    /**
+     * full reload of the currently displayed node, including its childobjects
+     * (e.g. after the metadata editor added or removed children).
+     */
     async refresh() {
+        await this.loadChildobjects();
+        // the previously selected child may have been deleted in the meantime;
+        // fall back to the parent (the childId change re-renders via ngOnChanges)
+        if (this.childId && !this.children()?.some((child) => child.ref.id === this.childId)) {
+            this.setChild(null);
+            return;
+        }
         await this.setNodeById(this.childId || this.nodeId);
     }
 
