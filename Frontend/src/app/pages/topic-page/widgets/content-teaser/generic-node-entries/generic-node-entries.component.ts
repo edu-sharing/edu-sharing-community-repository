@@ -860,25 +860,34 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      * @param currentPagination
      */
     async fetchData(currentPagination: any): Promise<void> {
+        // Infinite scroll keeps firing while a page is in flight, and the offset it reports is
+        // only correct once the previous page has been appended.
+        if (this.dataSource.isLoading) {
+            return;
+        }
         // 'page' (not `true`) marks a follow-up page: the grid then renders its spinner and the
         // "load more" fallback inline as the trailing tile instead of below the list.
         this.dataSource.isLoading = 'page';
-        // in edit mode, all requested nodes are shown, while in view mode, some requested nodes might be omitted, which has to be taken into account
-        // TODO: an alternative solution might be replacing the offset calculation by this.allRequestedNodes.length
-        const offsetToTakeIntoAccount: number = this.hasEditRightsAndIsEditMode
-            ? currentPagination.offset
-            : currentPagination.offset +
-              this.allRequestedNodes.filter((node: Node) =>
-                  this.blacklistedNodeIds.includes(node.ref.id),
-              ).length;
-        await this.setDataSource(false, offsetToTakeIntoAccount);
-        this.dataSource.isLoading = false;
-        if (this.hasEditRightsAndIsEditMode) {
-            this.dynamicallyAddCssClasses(
-                this.allRequestedNodes,
-                this.blacklistedNodeIds,
-                this.blacklistedClassName,
-            );
+        try {
+            // in edit mode, all requested nodes are shown, while in view mode, some requested nodes might be omitted, which has to be taken into account
+            // TODO: an alternative solution might be replacing the offset calculation by this.allRequestedNodes.length
+            const offsetToTakeIntoAccount: number = this.hasEditRightsAndIsEditMode
+                ? currentPagination.offset
+                : currentPagination.offset +
+                  this.allRequestedNodes.filter((node: Node) =>
+                      this.blacklistedNodeIds.includes(node.ref.id),
+                  ).length;
+            await this.setDataSource(false, offsetToTakeIntoAccount);
+            if (this.hasEditRightsAndIsEditMode) {
+                this.dynamicallyAddCssClasses(
+                    this.allRequestedNodes,
+                    this.blacklistedNodeIds,
+                    this.blacklistedClassName,
+                );
+            }
+        } finally {
+            // a failed page must not wedge the list in a state where nothing can load any more
+            this.dataSource.isLoading = false;
         }
     }
 
