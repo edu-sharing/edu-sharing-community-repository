@@ -141,29 +141,47 @@ public class ContentServlet extends SpringHttpServlet {
 							}
 
 							String mimetype = reader.getMimetype();
+							long expectedLength = reader.getContentData().getSize();
 
 							resp.setContentType((mimetype != null) ? mimetype : "application/octet-stream");
 							// important: use the addHeader method here since the length method only accepts int which overflows for long values (> 4 GB)
-							resp.addHeader("Content-Length", Long.toString(reader.getContentData().getSize()));
+							resp.addHeader("Content-Length", Long.toString(expectedLength));
 
-							int length = 0;
 							//
 							// Stream to the requester.
 							//
-							byte[] bbuf = new byte[1024];
-							// DataInputStream in = new
-							// DataInputStream(url.openStream());
-							DataInputStream in = new DataInputStream(reader.getContentInputStream());
-							while ((in != null) && ((length = in.read(bbuf)) != -1)) {
-								op.write(bbuf, 0, length);
+							long bytesWritten = 0;
+							// try-with-resources: the previous code left the reader's InputStream open
+							// whenever read()/write() threw below, leaking it (and whatever it holds
+							// onto in the underlying content store) for the life of the request.
+							try (DataInputStream in = new DataInputStream(reader.getContentInputStream())) {
+								int length;
+								byte[] bbuf = new byte[1024];
+								while ((length = in.read(bbuf)) != -1) {
+									op.write(bbuf, 0, length);
+									bytesWritten += length;
+								}
+								op.flush();
+							} catch (IOException e) {
+								// The Content-Length header above is already committed to the client by
+								// this point, so this failure surfaces to the caller as an abrupt
+								// connection close (a "PrematureCloseException" or a content-length
+								// mismatch downstream), not as a clean error status - this log is the
+								// only place the actual cause is visible.
+								logger.error("Failed to stream content for nodeId=" + nodeId + " after writing "
+										+ bytesWritten + " of " + expectedLength + " expected bytes", e);
+								throw e;
 							}
-
-							in.close();
-							op.flush();
+							if (bytesWritten != expectedLength) {
+								logger.warn("Streamed content size mismatch for nodeId=" + nodeId + ": declared="
+										+ expectedLength + ", actual=" + bytesWritten);
+							}
 							op.close();
 						}
 					}
 				}catch (Throwable t) {
+					logger.error("Error delivering content for appId=" + appId + ", repId=" + repId
+							+ ", nodeId=" + nodeId, t);
 					throw new RuntimeException(t);
 				}
 				return null;
