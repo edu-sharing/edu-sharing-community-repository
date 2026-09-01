@@ -16,7 +16,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { NgOptimizedImage } from '@angular/common';
 import { RenderData } from '../../dto/RenderData';
 import { UrlEmbeddings } from '../../dto/FrontendModuleConfig';
 import { AccessibilityService, EduSharingUiModule } from 'ngx-edu-sharing-ui';
@@ -34,7 +33,6 @@ import { GlobalStateService } from 'ngx-rendering-service-api';
         MatButtonModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        NgOptimizedImage,
         EduSharingUiModule,
     ],
     templateUrl: './url.component.html',

@@ -27,10 +27,16 @@
     </div>
     } @if (embedding === UrlEmbeddings.YOUTUBE && externalId !== '') {
     <div class="youtube-wrapper">
-      <iframe class="youtubeFrame" [src]="sanitizedUrl" allowfullscreen allow="fullscreen"></iframe>
+      <iframe
+        [title]="node?.title ?? 'YouTube'"
+        class="youtubeFrame"
+        [src]="sanitizedUrl"
+        allowfullscreen
+        allow="fullscreen"
+      ></iframe>
     </div>
     } @if (embedding === UrlEmbeddings.VIMEO && externalId !== '') {
-    <iframe class="vimeoFrame" [src]="sanitizedUrl"></iframe>
+    <iframe [title]="node?.title ?? 'Vimeo'" class="vimeoFrame" [src]="sanitizedUrl"></iframe>
     } @if (embedding === UrlEmbeddings.AUDIO && url !== '') {
     <div class="audio-wrapper">
       <video
@@ -43,7 +49,7 @@
     } @if (embedding === UrlEmbeddings.IMAGE && url !== '') {
     <div class="image-wrapper">
       <img
-        [ngSrc]="url"
+        [src]="url"
         [alt]="node?.title ?? 'Edu-Sharing image'"
         [title]="node?.title ?? 'Edu-Sharing image'"
       />
@@ -55,24 +61,42 @@
     } @if ((embedding === UrlEmbeddings.PREZI || embedding === UrlEmbeddings.LEARNINGAPPS) && url
     !== '') {
     <iframe
+      [title]="node?.title ?? 'Prezi / LearningApps'"
       class="eduUrlFrame"
       [src]="sanitizedUrl"
       allowfullscreen=""
       allow="autoplay; fullscreen"
     ></iframe>
     } @if (embedding === UrlEmbeddings.LTI13TOOL && sanitizedUrl) {
-    <iframe class="ltiFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
+    <iframe [title]="node?.title ?? 'LTI'" class="ltiFrame" [src]="sanitizedUrl" allowfullscreen>
+    </iframe>
     } @if (embedding === UrlEmbeddings.SIMPLECONNECTOR && sanitizedUrl) {
-    <iframe class="connectorFrame" [src]="sanitizedUrl" allowfullscreen> </iframe>
+    <iframe
+      [title]="node?.title ?? 'Connector'"
+      class="connectorFrame"
+      [src]="sanitizedUrl"
+      allowfullscreen
+    >
+    </iframe>
     } @if (embedding === UrlEmbeddings.SODIX) {
     <div class="sodixFrame">
       @if (node.mediatype === 'file-audio') {
       <img [src]="previewUrl" alt="" />
       }
-      <iframe class="sodix-type-{{ node.mediatype }}" [src]="sanitizedUrl"> </iframe>
+      <iframe
+        [title]="node?.title ?? 'Sodix'"
+        class="sodix-type-{{ node.mediatype }}"
+        [src]="sanitizedUrl"
+      >
+      </iframe>
     </div>
     } @if (embedding === UrlEmbeddings.SERLO && externalId !== '') {
-    <iframe class="serloFrame" [src]="sanitizedUrl" allowfullscreen></iframe>
+    <iframe
+      [title]="node?.title ?? 'Serlo'"
+      class="serloFrame"
+      [src]="sanitizedUrl"
+      allowfullscreen
+    ></iframe>
     } @if (data?.module !== 'SODIX' && (embedding === UrlEmbeddings.LINK || embedding ===
     UrlEmbeddings.PIXABAY || embedding === UrlEmbeddings.OERSI || embedding ===
     UrlEmbeddings.BROCKHAUS)) {

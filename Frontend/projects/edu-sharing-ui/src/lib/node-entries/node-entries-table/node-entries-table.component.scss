@@ -149,8 +149,8 @@ mat-cell {
 .dropdown-dummy {
     position: fixed;
 }
-// primary cell wrapper: transparent to layout normally; with a sub title it stacks the two
-// lines and fills the cell (so a click anywhere selects, not just on the title text).
+// primary cell wrapper: transparent to the cell layout normally; with a sub title it stacks
+// the title and its sub line. The click target is the cell itself, not this wrapper.
 .cell-primary-content {
     display: contents;
     &.has-sub-title {
@@ -177,9 +177,13 @@ mat-cell {
     align-items: center;
     gap: 6px;
     max-width: 100%;
-    color: var(--textLight);
+    color: var(--textMain);
     font-size: 11px;
     line-height: 1.2;
+    // list widgets color their own text, keep the muted sub-title color
+    ::ng-deep span {
+        color: inherit;
+    }
 }
 .childobjects {
     background-color: rgba(0, 0, 0, 0.05);

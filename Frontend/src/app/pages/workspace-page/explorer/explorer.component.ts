@@ -12,7 +12,6 @@ import {
     ViewChild,
 } from '@angular/core';
 import {
-    ConfigurationService,
     NodeList,
     RestConnectorService,
     RestConstants,
@@ -44,6 +43,7 @@ import {
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
 import { canDropOnNode } from '../workspace-utils';
+import { buildWorkspaceColumns, mapWorkspaceColumnsArea } from '../workspace-columns';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
     catchError,
@@ -51,11 +51,13 @@ import {
     distinctUntilChanged,
     filter,
     first,
+    map,
     switchMap,
     takeUntil,
     tap,
 } from 'rxjs/operators';
 import {
+    ConfigService,
     DEFAULT,
     HOME_REPOSITORY,
     Node,
@@ -78,8 +80,12 @@ import { EditorialSidebarService } from '../../../features/editorial-sidebar/edi
     standalone: false,
 })
 export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterViewInit {
-    /** storage key of the user-customized column layout (versioned to discard legacy layouts) */
-    private static readonly COLUMNS_STORAGE_KEY = 'workspaceColumns_10.0';
+    /**
+     * storage key prefix of the user-customized column layout. Versioned to discard legacy
+     * layouts (which were stored globally and would override the new per-area config defaults);
+     * suffixed with the base area, mirroring {@link getSortConfigKey}.
+     */
+    private static readonly COLUMNS_STORAGE_KEY_PREFIX = 'workspaceColumns_11.0_';
 
     private connector = inject(RestConnectorService);
     private editorialSidebarService = inject(EditorialSidebarService);
@@ -87,7 +93,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     private storage = inject(SessionStorageService);
     private userService = inject(UserService);
     private temporaryStorage = inject(TemporaryStorageService);
-    private config = inject(ConfigurationService);
+    private configApi = inject(ConfigService);
     private search = inject(SearchService);
     private toast = inject(Toast);
     ui = inject(UIService);
@@ -98,93 +104,18 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
-    public static getColumns(
-        connector: RestConnectorService,
-        customColumns: ListItem[] = [],
-        configColumns: string[] = [],
-    ) {
-        let defaultColumns: ListItem[] = [];
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_NAME));
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_CREATOR));
-        defaultColumns.push(new ListItem('NODE', RestConstants.CM_MODIFIED_DATE));
-        if (connector.getCurrentLogin() ? connector.getCurrentLogin().isAdmin : false) {
-            defaultColumns.push(new ListItem('NODE', RestConstants.NODE_ID));
-
-            const repsource = new ListItem('NODE', RestConstants.CCM_PROP_REPLICATIONSOURCEID);
-            repsource.visible = false;
-            defaultColumns.push(repsource);
-        }
-        const title = new ListItem('NODE', RestConstants.LOM_PROP_TITLE);
-        title.visible = false;
-        const size = new ListItem('NODE', RestConstants.LOM_PROP_SIZE);
-        size.visible = false;
-        const created = new ListItem('NODE', RestConstants.CM_PROP_C_CREATED);
-        created.visible = false;
-        const mediatype = new ListItem('NODE', RestConstants.MEDIATYPE);
-        mediatype.visible = false;
-        const keywords = new ListItem('NODE', RestConstants.LOM_PROP_GENERAL_KEYWORD);
-        keywords.visible = false;
-        const dimensions = new ListItem('NODE', RestConstants.DIMENSIONS);
-        dimensions.visible = false;
-        const version = new ListItem('NODE', RestConstants.LOM_PROP_LIFECYCLE_VERSION);
-        version.visible = false;
-        const usage = new ListItem('NODE', RestConstants.VIRTUAL_PROP_USAGECOUNT);
-        usage.visible = false;
-        const license = new ListItem('NODE', RestConstants.CCM_PROP_LICENSE);
-        license.visible = false;
-        const wfStatus = new ListItem('NODE', RestConstants.CCM_PROP_WF_STATUS);
-        wfStatus.visible = false;
-        defaultColumns.push(title);
-        defaultColumns.push(size);
-        defaultColumns.push(created);
-        defaultColumns.push(mediatype);
-        defaultColumns.push(keywords);
-        defaultColumns.push(dimensions);
-        defaultColumns.push(version);
-        defaultColumns.push(usage);
-        defaultColumns.push(license);
-        defaultColumns.push(wfStatus);
-
-        if (Array.isArray(configColumns)) {
-            const configList: ListItem[] = [];
-            for (const col of defaultColumns) {
-                if (configColumns.indexOf(col.name) != -1) {
-                    col.visible = true;
-                    configList.push(col);
-                }
-            }
-            for (const col of defaultColumns) {
-                if (configColumns.indexOf(col.name) == -1) {
-                    col.visible = false;
-                    configList.push(col);
-                }
-            }
-            // sort as defined inside config
-            configList.sort((a, b) => {
-                let pos1 = configColumns.indexOf(a.name);
-                let pos2 = configColumns.indexOf(b.name);
-                if (pos1 === -1) pos1 = configColumns.length;
-                if (pos2 === -1) pos2 = configColumns.length;
-                return pos1 - pos2;
-            });
-            defaultColumns = configList;
-        }
-        if (Array.isArray(customColumns)) {
-            for (const column of defaultColumns) {
-                let add = true;
-                for (const column2 of customColumns) {
-                    if (column.name === column2.name) {
-                        add = false;
-                        break;
-                    }
-                }
-                if (add) {
-                    customColumns.push(column);
-                }
-            }
-            return customColumns;
-        }
-        return defaultColumns;
+    /**
+     * The standard workspace node columns, without any client config applied. Kept for reuse by
+     * column pickers outside the workspace (admin page, file chooser, statistics export).
+     * The workspace itself uses {@link buildWorkspaceColumns} so the client config is honoured.
+     */
+    public static getColumns(connector: RestConnectorService, customColumns: ListItem[] = []) {
+        return buildWorkspaceColumns({
+            connector,
+            config: null,
+            root: 'MY_FILES',
+            customColumns,
+        });
     }
 
     @ViewChild(NodeEntriesWrapperComponent) nodeEntries: NodeEntriesWrapperComponent<Node>;
@@ -217,8 +148,10 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     private lastRequestSearch: boolean;
 
     _root: NodeRoot;
+    private root$ = new BehaviorSubject<NodeRoot>(null);
     @Input() set root(root: NodeRoot) {
         this._root = root;
+        this.root$.next(root);
         this.userService
             .observeCurrentUser()
             .pipe(
@@ -377,10 +310,10 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         this.registerNodesMoved();
         combineLatest([this.node$, this.searchQuery$, this.sortReady])
             .pipe(
-                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 distinctUntilChanged((a, b) => {
-                    return Helper.objectEquals(a[0], b[0]) && a[1] === b[1];
+                    return Helper.objectEquals(a[0], b[0]) && a[1] === b[1] && a[2] === b[2];
                 }),
+                filter((v) => v[2] && (!!v[0] || !!v[1])),
                 debounceTime(10),
             )
             .subscribe(async (value) => {
@@ -490,20 +423,41 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
         return this.dataSource?.getData().filter((n) => !(n as VirtualNode).virtual).length;
     }
 
+    /**
+     * Columns depend on the client config *and* on the current base area, so this needs to react
+     * to `root` changes instead of running once on creation.
+     */
     initColumns() {
-        this.config.get('workspaceColumns').subscribe((data: string[]) => {
-            void this.storage
-                .get<ListItem[]>(WorkspaceExplorerComponent.COLUMNS_STORAGE_KEY)
-                .then((columns) => {
-                    this.columns = {
-                        Default: WorkspaceExplorerComponent.getColumns(
-                            this.connector,
-                            columns,
-                            data,
-                        ),
-                    };
-                });
-        });
+        combineLatest([
+            this.configApi.observeConfig(),
+            this.root$.pipe(
+                filter((root) => !!root),
+                map(mapWorkspaceColumnsArea),
+                distinctUntilChanged(),
+            ),
+        ])
+            .pipe(
+                takeUntil(this.destroyed),
+                // switchMap so a slow storage read of a previous area cannot overwrite the current one
+                switchMap(async ([config, area]) => {
+                    const customColumns = await this.storage.get<ListItem[]>(
+                        this.getColumnsStorageKey(area),
+                    );
+                    return buildWorkspaceColumns({
+                        connector: this.connector,
+                        config: config?.workspaceColumns,
+                        root: area,
+                        customColumns,
+                    });
+                }),
+            )
+            .subscribe((columns) => (this.columns = { Default: columns }));
+    }
+
+    private getColumnsStorageKey(root: NodeRoot = this._root) {
+        return (
+            WorkspaceExplorerComponent.COLUMNS_STORAGE_KEY_PREFIX + mapWorkspaceColumnsArea(root)
+        );
     }
 
     select(event: NodeClickEvent<NodeEntriesDataType>) {
@@ -590,7 +544,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
     }
 
     saveColumns(columns: ListItem[]) {
-        void this.storage.set(WorkspaceExplorerComponent.COLUMNS_STORAGE_KEY, columns);
+        void this.storage.set(this.getColumnsStorageKey(), columns);
     }
 
     selectionChange(selection: SelectionChange<NodeEntriesDataType>) {

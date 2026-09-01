@@ -538,7 +538,6 @@ export const DefaultColumns = {
     Default: [
         new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
         new ListItem('NODE', 'cclom:general_keyword'),
-        new ListItem('NODE', 'cclom:general_description'),
     ],
 } as ColumnType;
 

@@ -89,6 +89,22 @@
   </mat-form-field>
 
   <div class="search-filters-and-results">
+    @if (collectionFilterApplicable()) {
+    <div class="collection-filter">
+      <span class="collection-filter-label">
+        {{ i18nPrefix + 'COLLECTION_FILTER.LABEL' | translate }}
+      </span>
+      <mat-checkbox
+        class="collection-filter-chip"
+        [checked]="collectionFilterActive"
+        [matTooltip]="i18nPrefix + 'COLLECTION_FILTER.TOOLTIP' | translate"
+        (change)="onCollectionFilterChange($event)"
+      >
+        {{ i18nPrefix + 'COLLECTION_FILTER.CHIP' | translate }}
+      </mat-checkbox>
+    </div>
+    }
+
     <es-mds-editor-wrapper
       class="page-variant-search-filters"
       groupId="topic_page_variant_search"

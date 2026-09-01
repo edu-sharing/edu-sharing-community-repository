@@ -4,7 +4,7 @@
     @if (previewUrl() === '') {
     <mat-spinner [diameter]="50"></mat-spinner>
     } @if (previewUrl() !== '') {
-    <iframe class="frame" [src]="previewUrl()"></iframe>
+    <iframe [title]="node?.title ?? 'Binder'" class="frame" [src]="previewUrl()"></iframe>
     }
   </div>
   }

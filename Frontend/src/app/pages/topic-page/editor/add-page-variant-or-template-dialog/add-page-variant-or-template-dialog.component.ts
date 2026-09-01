@@ -10,6 +10,7 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { SortDirection } from '@angular/material/sort';
 import {
     CONTENT_TYPE_ALL,
@@ -44,6 +45,7 @@ import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import {
     DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+    DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP,
     DEFAULT_PAGE_VARIANT_QUERY_ID,
 } from '../../shared/types/custom-definitions';
 import { SelectOption } from '../../shared/types/select-option';
@@ -74,7 +76,8 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
 
     @Input() dialogRef: CardDialogRef;
-    @Input() pageVariantConfigNodes: Node[];
+    // the collection the topic page belongs to — its subtree is searched for existing page variants
+    collectionNodeId: InputSignal<string> = input<string>(null);
     @Input() pageConfigRef: string;
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
@@ -99,6 +102,9 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
 
     // mds-editor-wrapper
     searchFilters: Values;
+
+    // whether the search is restricted to the collection the topic page belongs to
+    collectionFilterActive: boolean = true;
 
     // search-related variables
     private searchSubject: Subject<string> = new Subject<string>();
@@ -222,17 +228,70 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     }
 
     /**
-     * Builds the search request for the global page variant templates.
+     * Whether the selected copy option can be searched for: the topic page option needs a
+     * collection to scope the search to, while the global templates are always reachable.
+     */
+    private searchScopeAvailable(): boolean {
+        return (
+            this.selectedOption === CopyOption.Template ||
+            !this.collectionFilterActive ||
+            !!this.collectionNodeId()
+        );
+    }
+
+    /**
+     * Whether the removable collection filter chip applies to the current copy option: the global
+     * templates are not scoped to a collection, so the chip is only meaningful for topic pages.
+     */
+    protected collectionFilterApplicable(): boolean {
+        return this.selectedOption === CopyOption.TopicPage && !!this.collectionNodeId();
+    }
+
+    /**
+     * Switches the search between the collection the topic page belongs to and all collections.
+     *
+     * @param event
+     */
+    protected onCollectionFilterChange(event: MatCheckboxChange): void {
+        this.collectionFilterActive = event.checked;
+        // the result list is a different one, so the referenced variant has to be looked up and
+        // sorted to the top again
+        this.initialSelectionMade = false;
+        void this.updateList();
+    }
+
+    /**
+     * Builds the criteria that restrict the search to the selected copy option: either the global
+     * page variant templates or the page variants living inside the collection subtree.
+     */
+    private createScopeCriteria(): MdsQueryCriteria | null {
+        if (this.selectedOption === CopyOption.Template) {
+            return {
+                property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
+                values: ['true'],
+            };
+        }
+        // without the collection restriction the page variants of all collections are searched
+        if (!this.collectionFilterActive) {
+            return null;
+        }
+        return {
+            property: DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP,
+            values: [this.collectionNodeId()],
+        };
+    }
+
+    /**
+     * Builds the search request for the page variants of the selected copy option.
      *
      * @param skipCount
      */
-    private createTemplateSearchRequest(skipCount: number = 0): SearchRequestParams {
-        const criteria: MdsQueryCriteria[] = [
-            {
-                property: DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
-                values: ['true'],
-            },
-        ];
+    private createSearchRequest(skipCount: number = 0): SearchRequestParams {
+        const criteria: MdsQueryCriteria[] = [];
+        const scopeCriteria: MdsQueryCriteria | null = this.createScopeCriteria();
+        if (scopeCriteria) {
+            criteria.push(scopeCriteria);
+        }
         if (this.searchValue) {
             criteria.push({
                 property: 'ngsearchword',
@@ -259,15 +318,15 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     }
 
     /**
-     * Loads the next page of global page variant templates, triggered by the fetchData output of
-     * the node entries wrapper. Without this, the list would be capped at the first request and a
-     * newly created template could be missing from it entirely.
+     * Loads the next page of page variants, triggered by the fetchData output of the node entries
+     * wrapper. Without this, the list would be capped at the first request and a newly created
+     * variant or template could be missing from it entirely.
      *
      * @param event
      */
     async loadMore(event: FetchEvent): Promise<void> {
         if (
-            this.selectedOption !== CopyOption.Template ||
+            !this.searchScopeAvailable() ||
             !this.dataSource.hasMore() ||
             this.dataSource.isLoading
         ) {
@@ -276,7 +335,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         this.dataSource.isLoading = true;
         try {
             const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search(this.createTemplateSearchRequest(event.offset)),
+                this.searchService.search(this.createSearchRequest(event.offset)),
             );
             this.dataSource.appendData(searchResult.nodes ?? []);
         } finally {
@@ -286,57 +345,25 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
 
     /**
      * Updates the list of page variants based on the selected copy option and search criteria.
+     * Both copy options are resolved by the `page_variant` search query, so searching, filtering,
+     * sorting and paging are handled by the backend instead of being emulated on a fixed list.
      */
     async updateList(): Promise<void> {
+        if (!this.searchScopeAvailable()) {
+            this.dataSource.setData([], null);
+            return;
+        }
         let nodes: Node[];
         let pagination: Pagination;
-        // distinguish between template and topic page mode
-        if (this.selectedOption === CopyOption.Template) {
-            // in template mode, search for global page variant templates only
+        this.dataSource.isLoading = true;
+        try {
             const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search(this.createTemplateSearchRequest()),
+                this.searchService.search(this.createSearchRequest()),
             );
             nodes = searchResult.nodes ?? [];
             pagination = searchResult.pagination;
-        } else {
-            // in topic page mode, display existing page variants
-            nodes = this.pageVariantConfigNodes;
-            // manual search
-            if (this.searchValue) {
-                nodes = nodes.filter((n) =>
-                    n.title.toLowerCase().includes(this.searchValue.toLowerCase()),
-                );
-            }
-            // manual properties filter
-            if (this.searchFilters && Object.keys(this.searchFilters)?.length) {
-                const propertyFilters = Object.fromEntries(
-                    Object.entries(this.searchFilters).filter(
-                        ([, value]) => value && value.length > 0,
-                    ),
-                );
-                if (Object.keys(propertyFilters).length) {
-                    nodes = nodes.filter((n) =>
-                        Object.entries(propertyFilters).every(([property, allowedValues]) => {
-                            const nodeValues: string[] = n.properties?.[property];
-                            if (!nodeValues) {
-                                return false;
-                            }
-                            return nodeValues.some((v) => (allowedValues as string[]).includes(v));
-                        }),
-                    );
-                }
-            }
-            // manual sorting
-            if (this.sortActive) {
-                nodes = nodes.sort((a: Node, b: Node) => {
-                    const valueA: string = a.properties[this.sortActive]?.[0] || '';
-                    const valueB: string = b.properties[this.sortActive]?.[0] || '';
-
-                    const comparison: number = valueA.localeCompare(valueB);
-
-                    return this.sortDirection === 'asc' ? comparison : -comparison;
-                });
-            }
+        } finally {
+            this.dataSource.isLoading = false;
         }
         // select the page variant referred to as the template (if one exists)
         let matchingVariantNode: Node;

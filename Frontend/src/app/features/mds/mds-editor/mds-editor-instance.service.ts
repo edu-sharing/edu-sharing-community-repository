@@ -1220,7 +1220,7 @@ export class MdsEditorInstanceService
         if (!groupId) {
             groupId = this.mdsEditorCommonService.getGroupId(this.nodes$.value);
         }
-        const mdsId = this.mdsEditorCommonService.getMdsId(this.nodes$.value);
+        const mdsId = await this.mdsEditorCommonService.getMdsId(this.nodes$.value);
         const wasInitialized = await this.initMds(
             groupId,
             mdsId,
@@ -1299,7 +1299,7 @@ export class MdsEditorInstanceService
             metadataSets.data.metadatas;
             groupId = this.mdsEditorCommonService.getGroupIdGraphql(metadataSets.data.metadatas);
         }
-        const mdsId = this.mdsEditorCommonService.getMdsId(metadataSets.data.metadatas);
+        const mdsId = await this.mdsEditorCommonService.getMdsId(metadataSets.data.metadatas);
         const mdsDefinition = await this.mdsService
             .getMetadataSet({ metadataSet: mdsId, repository: this.repository })
             .toPromise();

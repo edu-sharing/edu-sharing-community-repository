@@ -86,14 +86,19 @@ public class SessionListener implements HttpSessionListener{
 	}
 
     private void trackLogout(HttpSessionEvent event) {
-        boolean possibleSessionTimeout = (System.currentTimeMillis()-event.getSession().getLastAccessedTime()) >= (event.getSession().getMaxInactiveInterval()*1000);
-        String username = (String) event.getSession().getAttribute(CCConstants.AUTH_USERNAME);
-        if(username!=null){
-			ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
-			ActivityEventService activityEventService = applicationContext.getBean(ActivityEventService.class);
-			activityEventService.trackActivityOnUser(
-					username,
-					possibleSessionTimeout ? UserActivityEventType.LOGOUT_USER_TIMEOUT : UserActivityEventType.LOGOUT_USER_REGULAR);
+        try {
+            boolean possibleSessionTimeout = (System.currentTimeMillis()-event.getSession().getLastAccessedTime()) >= (event.getSession().getMaxInactiveInterval()*1000);
+            String username = (String) event.getSession().getAttribute(CCConstants.AUTH_USERNAME);
+            if(username!=null){
+                ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
+                ActivityEventService activityEventService = applicationContext.getBean(ActivityEventService.class);
+                activityEventService.trackActivityOnUser(
+                        username,
+                        possibleSessionTimeout ? UserActivityEventType.LOGOUT_USER_TIMEOUT : UserActivityEventType.LOGOUT_USER_REGULAR);
+            }
+        } catch (Exception e) {
+            // tracking must never prevent the remaining session cleanup (e.g. edit-lock release) from running
+            logger.error("failed to track logout for session " + event.getSession().getId(), e);
         }
     }
 

@@ -99,9 +99,16 @@ $horizontalScrollPadding: 1.5em;
             margin: 0 $horizontalScrollPadding;
         }
         @include materialScrollbar();
-        > .card-grid-drag-wrapper {
+        > .card-grid-drag-wrapper,
+        > .load-more-card {
             scroll-snap-align: center;
             scroll-snap-stop: always;
+        }
+        // the "load more" fallback rendered as the trailing tile of the strip
+        > .load-more-card {
+            align-items: center;
+            justify-content: center;
+            min-width: var(--cardWidth);
         }
     }
 

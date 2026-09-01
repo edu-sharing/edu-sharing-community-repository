@@ -124,7 +124,6 @@ export class ModuleInfoService {
         const checkSerlo = (): UrlModuleConfig | null => {
             const replicationSource =
                 node.properties?.[RestConstants.CCM_PROP_REPLICATIONSOURCE]?.[0] ?? '';
-            console.log('check replicationSource:', replicationSource);
             if (replicationSource === 'serlo') {
                 return {
                     embedding: UrlEmbeddings.SERLO,

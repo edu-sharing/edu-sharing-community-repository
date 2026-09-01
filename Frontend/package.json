@@ -48,6 +48,7 @@
     "test:edu-sharing-ui": "ng test edu-sharing-ui",
     "docs": "typedoc --mode file --experimentalDecorators --excludePrivate --ignoreCompilerErrors --target 'ES6' --module 'commonjs' --out docs src",
     "print-licenses": "node licenses.js",
+    "prestorybook": "npm run prestart",
     "storybook": "BROWSER=true ng run angular-edusharing:storybook",
     "build-storybook": "ng run angular-edusharing:build-storybook",
     "prepare": "cd .. && husky install Frontend/.husky && cd Frontend/src/app/core-module && git config core.hooksPath ../../../.husky || true"

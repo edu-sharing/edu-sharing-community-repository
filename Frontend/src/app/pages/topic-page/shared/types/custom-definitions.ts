@@ -18,6 +18,9 @@ export const DEFAULT_PAGE_VARIANT_CONFIG_ASPECT: string = 'ccm:page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_PROP: string = 'ccm:page_variant_config';
 export const DEFAULT_PAGE_VARIANT_GLOBAL_PROP: string = 'virtual:page_variant_global';
 export const DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP: string = 'ccm:page_variant_is_template';
+// scopes the page variant query to a node and all of its descendants (e.g. a collection and its
+// child collections, whose page variants live below their page config nodes)
+export const DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP: string = 'virtual:parent_recursive';
 export const DEFAULT_PAGE_VARIANT_PROFILING_EDUCATIONAL_CONTEXT_PROP: string =
     'ccm:educationalcontext';
 export const DEFAULT_PAGE_VARIANT_PROFILING_TARGET_GROUP_PROP: string =

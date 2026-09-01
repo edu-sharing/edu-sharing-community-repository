@@ -9,7 +9,7 @@ public class ShortcutConfigEntry {
     @XmlElement public String url;
     @XmlElement public String toolPermission;
 
-    @XmlJavaTypeAdapter(ShortCutVisibilityAdapter.class)
-    @XmlElement public ShortCutVisibility defaultVisibility;
+    @XmlJavaTypeAdapter(ConfigVisibilityAdapter.class)
+    @XmlElement public ConfigVisibility defaultVisibility;
 }
 

@@ -1,12 +1,13 @@
 import { AfterViewInit, Component, inject, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import * as rxjs from 'rxjs';
 import { delay, filter, first, map } from 'rxjs/operators';
-import { DialogButton, Node } from '../../../../core-module/core.module';
+import { DialogButton, Node, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { JumpMark } from '../../../../services/jump-marks.service';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import { MdsEditorCoreComponent } from '../../../mds/mds-editor/mds-editor-core/mds-editor-core.component';
 import { MdsEditorInstanceService } from '../../../mds/mds-editor/mds-editor-instance.service';
+import { DUPLICATE_NODE_NAME_ERROR, isDuplicateNodeNameError } from '../../../../util/rest-errors';
 import { EditorType, UserPresentableError } from '../../../mds/types/types';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { JUMP_MARK_POSTFIX } from '../../card-dialog/card-dialog-container/jump-marks-handler.directive';
@@ -174,8 +175,11 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
                     this.localEvents.nodesChanged.emit(updatedNodesOrValues as Node[]);
                 }
             } catch (e) {
-                this.handleError(e);
                 this.dialogRef.patchState({ isLoading: false });
+                if (this.handleDuplicateNodeName(e)) {
+                    return;
+                }
+                this.handleError(e);
             }
         } else {
             // No changes, behave like close.
@@ -186,6 +190,22 @@ export class MdsEditorDialogComponent implements OnInit, AfterViewInit {
             }
         }
     }
+    /**
+     * A name conflict is a user error, not an api failure: keep the dialog open, show a dedicated
+     * hint instead of the generic error and send the user back to the name field.
+     *
+     * @returns whether the error was a name conflict and has been handled
+     */
+    private handleDuplicateNodeName(error: any): boolean {
+        if (!isDuplicateNodeNameError(error)) {
+            return false;
+        }
+        error?.preventDefault?.();
+        this.toast.error(null, DUPLICATE_NODE_NAME_ERROR);
+        this.mdsEditorInstance.focusWidget(RestConstants.CM_NAME);
+        return true;
+    }
+
     private handleError(error: any): void {
         console.error(error);
         if (error instanceof UserPresentableError || error.message) {

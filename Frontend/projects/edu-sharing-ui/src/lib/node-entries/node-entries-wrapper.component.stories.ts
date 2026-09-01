@@ -37,17 +37,20 @@ import {
     mdsStorybookProviders,
 } from 'src/app/features/mds/mds-editor/storybook-utils';
 import { InteractionType, NodeEntriesDisplayType } from './entries-model';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
-const dummyDataSource = new NodeDataSource<Node>(
-    Array(16)
+/** `count` distinct copies of `DummyNode`, numbered starting at `offset`. */
+const makeNodes = (count: number, offset = 0): Node[] =>
+    Array(count)
         .fill(DummyNode)
         .map((n: Node, i) => {
             n = Helper.deepCopy(n);
-            n.ref.id = 'id_' + i;
-            n.title += ' ' + i;
+            n.ref.id = 'id_' + (offset + i);
+            n.title += ' ' + (offset + i);
             return n;
-        }),
-);
+        });
+
+const dummyDataSource = new NodeDataSource<Node>(makeNodes(16));
 const Assignments = Array(16)
     .fill(DummyAssignment)
     .map((n: Assignment, i) => {
@@ -147,6 +150,64 @@ const dummyDataSourceSubmission = new NodeDataSource<SubmissionWithAssignment>(
         } as SubmissionWithAssignment;
     }),
 );
+const LOAD_MORE_PAGE_SIZE = 8;
+const LOAD_MORE_TOTAL = 24;
+/** Simulated backend latency for loading a further page. */
+const LOAD_MORE_DELAY = 2000;
+
+/**
+ * Reports more available items (`pagination.total`) than it currently holds, so
+ * `NodeDataSource.hasMore()` is `true` and the list offers to load the next page.
+ *
+ * The instance is stable (story `args` reference it) and reset per story run.
+ */
+const paginatedDataSource = new NodeDataSource<Node>();
+
+function resetPaginatedDataSource(): void {
+    paginatedDataSource.isLoading = false;
+    paginatedDataSource.setData(makeNodes(LOAD_MORE_PAGE_SIZE), {
+        from: 0,
+        count: LOAD_MORE_PAGE_SIZE,
+        total: LOAD_MORE_TOTAL,
+    });
+}
+
+/**
+ * Appends the next page, standing in for a backend answering the `fetchData` output.
+ *
+ * Answers only after `LOAD_MORE_DELAY`, with `isLoading: 'page'` in between, so the loading
+ * state of the list (spinner, hidden "load more" button) is actually observable.
+ */
+async function appendNextPage(): Promise<void> {
+    // infinite scroll can fire again while a page is still in flight
+    if (paginatedDataSource.isLoading) {
+        return;
+    }
+    const loaded = paginatedDataSource.getData().length;
+    const count = Math.min(LOAD_MORE_PAGE_SIZE, LOAD_MORE_TOTAL - loaded);
+    if (count <= 0) {
+        return;
+    }
+    paginatedDataSource.isLoading = 'page';
+    await new Promise((resolve) => setTimeout(resolve, LOAD_MORE_DELAY));
+    paginatedDataSource.appendData(makeNodes(count, loaded));
+    // `appendData` does not maintain the pagination, so keep it in sync explicitly
+    paginatedDataSource.setPagination({
+        from: 0,
+        count: loaded + count,
+        total: LOAD_MORE_TOTAL,
+    });
+    paginatedDataSource.isLoading = false;
+}
+
+/** Holds all available items, so nothing can be loaded any more. */
+const fullyLoadedDataSource = new NodeDataSource<Node>();
+fullyLoadedDataSource.setData(makeNodes(LOAD_MORE_PAGE_SIZE), {
+    from: 0,
+    count: LOAD_MORE_PAGE_SIZE,
+    total: LOAD_MORE_PAGE_SIZE,
+});
+
 const emptyDataSource = new NodeDataSource<Node>([]);
 const loadingDataSource = new NodeDataSource<Node>([]);
 loadingDataSource.isLoading = true;
@@ -287,5 +348,65 @@ export const SubmittedTasksTable: Story = {
             ],
         } as ColumnType,
         displayType: NodeEntriesDisplayType.Table,
+    },
+};
+
+/**
+ * Renders the list with the `fetchData` output wired to a fake backend, which is what enables
+ * loading further pages.
+ */
+const loadMoreRender: Story['render'] = (args) => ({
+    props: { ...args, fetchData: () => appendNextPage() },
+    template: `
+<es-node-entries-wrapper ${argsToTemplate(args)} (fetchData)="fetchData($event)">
+</es-node-entries-wrapper>
+`,
+});
+
+const loadMoreArgs = {
+    dataSource: paginatedDataSource as any,
+    // note: deliberately no `maxRows` (unlike the stories above) -- a row limit caps the visible
+    // items and suppresses loading regardless of the layout
+    gridConfig: { layout: 'scroll' as const },
+};
+
+const queryLoadMoreButton = (canvasElement: HTMLElement) =>
+    canvasElement.querySelector<HTMLElement>('[data-test="load-more"]');
+
+const expectItemCount = async (canvas: ReturnType<typeof within>, count: number) =>
+    waitFor(() => expect(canvas.getAllByRole('listitem')).toHaveLength(count), {
+        // has to outlast the simulated backend latency
+        timeout: LOAD_MORE_DELAY + 3000,
+    });
+
+/** Scrolling the horizontal strip towards its end loads the next page automatically. */
+export const EntriesHorizontalGridScrollInfiniteScroll: Story = {
+    args: loadMoreArgs,
+    render: loadMoreRender,
+    beforeEach: () => resetPaginatedDataSource(),
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expectItemCount(canvas, LOAD_MORE_PAGE_SIZE);
+        const strip = canvasElement.querySelector<HTMLElement>('.card-grid-layout-scroll');
+        expect(strip).not.toBeNull();
+        expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth);
+        // `esInfiniteScroll` listens on the element itself, outside the Angular zone
+        strip.scrollLeft = strip.scrollWidth;
+        strip.dispatchEvent(new Event('scroll'));
+        await expectItemCount(canvas, 2 * LOAD_MORE_PAGE_SIZE);
+    },
+};
+
+/** Nothing left to load: no button, and scrolling must not request another page. */
+export const EntriesHorizontalGridScrollFullyLoaded: Story = {
+    args: {
+        dataSource: fullyLoadedDataSource as any,
+        gridConfig: { layout: 'scroll' },
+    },
+    render: loadMoreRender,
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expectItemCount(canvas, LOAD_MORE_PAGE_SIZE);
+        expect(queryLoadMoreButton(canvasElement)).toBeNull();
     },
 };

@@ -660,8 +660,8 @@
 <ng-template #addPageVariantOrTemplateDialog>
   <es-add-page-variant-or-template-dialog
     [dialogRef]="createVariantOrTemplateDialogRef"
+    [collectionNodeId]="topicCollectionId()"
     [pageConfigRef]="collectionNodePageConfigRef"
-    [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
     [pageVariantNode]="pageVariantNode()"
     [(selectedNode)]="createVariantOrTemplateSelectedNode"
     [templateMode]="createVariantOrTemplateMode() === 'template'"

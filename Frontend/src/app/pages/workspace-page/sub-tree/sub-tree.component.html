@@ -13,7 +13,7 @@
 
   @if (_nodes && _nodes.length) {
   <div [@open]="_nodes && _nodes.length">
-    @for (node of _nodes; track node; let i = $index) {
+    @for (node of _nodes; track node.ref.id; let i = $index) {
     <div (contextmenu)="contextMenu($event, node)">
       <div
         class="sub-tree-element"
@@ -54,6 +54,7 @@
       </div>
       @if (isOpen(node)) {
       <es-workspace-sub-tree
+        #childTree
         class="sub-tree"
         [node]="node.ref.id"
         [currentPath]="currentPath"

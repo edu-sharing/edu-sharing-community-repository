@@ -16,6 +16,7 @@ import { first } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { MdsEditorInstanceService } from '../mds-editor-instance.service';
+import { DUPLICATE_NODE_NAME_ERROR, isDuplicateNodeNameError } from '../../../../util/rest-errors';
 import {
     BulkBehavior,
     EditorMode,
@@ -275,6 +276,13 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
             this.done.emit(updatedNodes);
             return updatedNodes;
         } catch (error) {
+            if (isDuplicateNodeNameError(error)) {
+                // a name conflict is a user error: keep the editor open and let the user fix the name
+                error?.preventDefault?.();
+                this.toast.error(null, DUPLICATE_NODE_NAME_ERROR);
+                this.mdsEditorInstance.focusWidget(RestConstants.CM_NAME);
+                return 'validation-error';
+            }
             if (
                 error?.error?.error?.endsWith(
                     RestConstants.CONTENT_FILE_EXTENSION_VERIFICATION_EXCEPTION,

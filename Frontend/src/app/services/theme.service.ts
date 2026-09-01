@@ -9,9 +9,11 @@ import {
     DarkModeSetting,
     EDU_SHARING_UI_CONFIG,
     EduSharingUiConfiguration,
+    UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { combineLatest, fromEvent } from 'rxjs';
 import { distinctUntilChanged, first, map, startWith } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export enum Variable {
     Primary = 'primary',
@@ -44,6 +46,15 @@ export class ThemeService {
      */
     private configDarkColors: Array<ConfigThemeColor> | null = null;
 
+    /**
+     * Whether the app renders into a document it does not own: the web-component build, or an
+     * `/components/embed/*` route meant for an iframe. Nothing is scoped by a shadow root, so the
+     * theme would repaint the host page. These contexts stay light unless `?theme=` says otherwise.
+     */
+    private readonly isExternalContext =
+        environment.webComponentMode ||
+        window.location.pathname.includes('/' + UIConstants.ROUTER_PREFIX + 'embed');
+
     constructor() {
         // Paint the synchronous default first (avoids a flash before the observers resolve),
         // then start the reactive resolution. registerDarkMode must run last so its config-aware
@@ -58,7 +69,8 @@ export class ThemeService {
      *
      * A `?theme=auto|dark|light` query param always takes priority over the stored preference
      * it is presentation-only and not persisted, so removing
-     * the param reverts to the user's saved preference.
+     * the param reverts to the user's saved preference. In an {@link isExternalContext} the stored
+     * preference is ignored in favor of light.
      */
     private registerDarkMode() {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -67,15 +79,20 @@ export class ThemeService {
             startWith(mediaQuery.matches),
         );
 
-        const queryTheme$ = this.router.routerState.root.queryParamMap.pipe(
-            map((params) => this.toThemeSetting(params.get('theme'))),
+        // The router serves only as a change trigger; the value itself is read from the browser
+        // location, which is the embedding page's URL in the web-component build.
+        const urlTheme$ = this.router.routerState.root.queryParamMap.pipe(
+            map(() => this.getThemeFromUrl()),
             distinctUntilChanged(),
         );
 
-        combineLatest([this.accessibility.observe('darkMode'), browserDark$, queryTheme$])
+        combineLatest([this.accessibility.observe('darkMode'), browserDark$, urlTheme$])
             .pipe(
-                map(([storedMode, browserDark, queryTheme]) =>
-                    this.resolveIsDark(queryTheme ?? storedMode, browserDark),
+                map(([storedMode, browserDark, urlTheme]) =>
+                    this.resolveIsDark(
+                        urlTheme ?? (this.isExternalContext ? 'light' : storedMode),
+                        browserDark,
+                    ),
                 ),
             )
             .subscribe((isDark) => {
@@ -91,6 +108,10 @@ export class ThemeService {
         return value === 'auto' || value === 'light' || value === 'dark' ? value : null;
     }
 
+    private getThemeFromUrl(): DarkModeSetting | null {
+        return this.toThemeSetting(new URLSearchParams(window.location.search).get('theme'));
+    }
+
     /** Resolves an effective dark-mode setting into a boolean, following the browser when `auto`. */
     private resolveIsDark(mode: DarkModeSetting, browserDark: boolean): boolean {
         return mode === 'dark' ? true : mode === 'light' ? false : browserDark;
@@ -100,14 +121,17 @@ export class ThemeService {
         const browserDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         // honor a ?theme= override on the first synchronous paint to avoid flashing the browser
         // default before the observers in registerDarkMode resolve
-        const queryTheme = this.toThemeSetting(
-            this.router.routerState.root.snapshot.queryParamMap.get('theme'),
-        );
+        const urlTheme = this.getThemeFromUrl();
         this.accessibility
             .observe('darkMode')
             .pipe(first())
             .subscribe((storedMode) => {
-                this.applyTheme(this.resolveIsDark(queryTheme ?? storedMode, browserDark));
+                this.applyTheme(
+                    this.resolveIsDark(
+                        urlTheme ?? (this.isExternalContext ? 'light' : storedMode),
+                        browserDark,
+                    ),
+                );
             });
         this.fetchConfig();
     }

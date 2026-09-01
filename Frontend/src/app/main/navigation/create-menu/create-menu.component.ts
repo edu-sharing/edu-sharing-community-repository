@@ -366,6 +366,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                     allowCreate: true,
                     autoClose: false,
                     upload: 'default',
+                    onNodesChoosen: ({ nodes }) => {
+                        if (this.params.reurl) {
+                            this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
+                        }
+                    },
                 } as NodesSelectorConfig,
             });
             return;

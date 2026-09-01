@@ -6,7 +6,7 @@ export class AccessibilitySettings {
     contrastMode = false;
     indicatorIcons = true;
     dragAndDropOptions = false;
-    darkMode: DarkModeSetting = 'light';
+    darkMode: DarkModeSetting = 'auto';
 }
 export enum ToastDuration {
     Seconds_3 = 3,

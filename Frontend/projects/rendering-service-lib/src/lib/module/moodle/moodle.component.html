@@ -1,7 +1,7 @@
 @if (data?.items !== undefined) {
 <div class="moodle-wrapper">
   @if (!isWebComponent) {
-  <iframe class="frame" [src]="sanitizedUrl"></iframe>
+  <iframe [title]="node?.title ?? 'Moodle'" class="frame" [src]="sanitizedUrl"></iframe>
   } @if (isWebComponent) {
   <img [src]="previewUrl" alt="preview" />
   }

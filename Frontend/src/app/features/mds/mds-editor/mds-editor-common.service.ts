@@ -4,6 +4,7 @@ import { RestConstants, RestMdsService } from '../../../core-module/core.module'
 import { Values } from '../types/types';
 import {
     HOME_REPOSITORY,
+    MdsService,
     Node,
     NodeService,
     NodeSuggestionResponseDto,
@@ -34,6 +35,7 @@ export class MdsEditorCommonService {
     private nodeService = inject(NodeService);
     private mdsService = inject(RestMdsService);
     private suggestionsV1Service = inject(SuggestionsV1Service);
+    private mdsApiService = inject(MdsService);
 
     /**
      * Fetches the up-to-date and complete metadata from the server.
@@ -92,14 +94,20 @@ export class MdsEditorCommonService {
      *
      * Throws with a translatable error message if the given nodes cannot be handled by an MDS.
      */
-    getMdsId(nodes: Node[]): string {
+    async getMdsId(nodes: Node[]): Promise<string> {
         const types = nodes.map((node) => (node as Node).type);
         if (!areAllEqual(types)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_TYPE_COMBINATION');
         }
-        const requestedMdsIds = nodes.map(
-            (node) => (node as Node).metadataset,
-            RestConstants.DEFAULT,
+        const repository = nodes[0]?.ref?.repo || HOME_REPOSITORY;
+        let defaultMdsId = null;
+        if (nodes.length > 1) {
+            defaultMdsId = await this.getDefaultMdsId(repository);
+        }
+        // nodes may reference the same mds either by its id or via a "default" alias, so both have
+        // to be resolved to the actual id before comparing them
+        const requestedMdsIds = nodes.map((node) =>
+            normalizeMdsId((node as Node).metadataset, defaultMdsId),
         );
         if (!areAllEqual(requestedMdsIds)) {
             throw new UserPresentableError('MDS.ERROR_INVALID_MDS_COMBINATION');
@@ -114,6 +122,22 @@ export class MdsEditorCommonService {
         }
         return requestedMdsIds[0];
     }
+
+    /**
+     * The id of the repository's primary metadata set, i.e. the one "-default-"/"default" refers to.
+     */
+    private async getDefaultMdsId(repository: string): Promise<string | null> {
+        try {
+            const metadataSets = await firstValueFrom(
+                this.mdsApiService.getAvailableMetadataSets(repository),
+            );
+            return metadataSets?.length ? stripXmlSuffix(metadataSets[0].id) : null;
+        } catch (error) {
+            console.warn('Could not fetch available metadata sets', error);
+            return null;
+        }
+    }
+
     getGroupId(nodes: Node[]): MdsType {
         const node = nodes[0];
         let nodeGroup: MdsType = node.isDirectory ? MdsType.Map : MdsType.Io;
@@ -209,6 +233,22 @@ export class MdsEditorCommonService {
             },
         ];*/
     }
+}
+
+/**
+ * Resolves the "default" aliases of an mds id to the actual id of the repository's primary
+ * metadata set (the backend treats "-default-", "default" and the first entry of the repository's
+ * mds list as the very same metadata set).
+ */
+function normalizeMdsId(mdsId: string | undefined | null, defaultMdsId: string | null): string {
+    if (!mdsId || mdsId === RestConstants.METADATASET_DEFAULT_ID) {
+        return defaultMdsId ?? RestConstants.METADATASET_DEFAULT_ID;
+    }
+    return stripXmlSuffix(mdsId);
+}
+
+function stripXmlSuffix(mdsId: string): string {
+    return mdsId.toLowerCase().endsWith('.xml') ? mdsId.substring(0, mdsId.length - 4) : mdsId;
 }
 
 function areAllEqual<T>(elements: T[]): boolean {

@@ -3,6 +3,8 @@
 :host {
     display: block;
     width: 800px;
+    // the dialog shrinks with the viewport, the fixed width is only the preferred one
+    max-width: 100%;
 }
 
 .add-page-variant-or-template-dialog {
@@ -15,6 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 16px;
 }
 
@@ -95,6 +98,12 @@
 }
 
 .search-filters-and-results {
+    // the result table keeps its column widths, so it scrolls on its own instead of widening the dialog
+    .topic-page-entries-wrapper {
+        display: block;
+        overflow-x: auto;
+    }
+
     .empty {
         padding: 8px 16px;
         width: 100%;
@@ -107,6 +116,7 @@
 .page-variant-search-filters ::ng-deep {
     .content {
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 16px;
 
         // remove unnecessary margin-bottom from widgets
@@ -122,6 +132,32 @@
         // fix paddings of form-field
         .mat-mdc-form-field-infix {
             padding: 12px 0 !important;
+        }
+    }
+}
+
+// collection scope of the page variant search, shown above the metadata filters
+.collection-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .collection-filter-label {
+        color: topicPageVars.$secondary-text;
+    }
+
+    // the checkbox is rendered as a filter pill holding its own label
+    .collection-filter-chip {
+        --mat-checkbox-label-text-color: #{topicPageVars.$on-surface};
+        --mat-checkbox-label-text-size: #{topicPageVars.$font-size-small};
+        border-radius: 16px;
+        background-color: topicPageVars.$surface-container-highest;
+        padding-right: 12px;
+
+        ::ng-deep .mdc-form-field {
+            height: 32px;
         }
     }
 }

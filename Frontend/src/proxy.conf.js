@@ -12,6 +12,78 @@ if (!process.env.BACKEND_URL) {
 
 console.log('Starting proxy: ', process.env.BACKEND_URL, process.env.RS2_URL);
 
+const LOCAL_URL = 'http://localhost:4200';
+
+function mapCookies(proxyRes, extraReplacements = false) {
+    const cookies = proxyRes.headers['set-cookie'];
+    if (cookies) {
+        proxyRes.headers['set-cookie'] = cookies.map((cookie) => {
+            cookie = cookie
+                // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
+                .replace('; Secure', '')
+                .replace('; Partitioned', '')
+                // 'SameSite=None' is only allowed on 'Secure' cookies.
+                .replace('; SameSite=None', '');
+            if (extraReplacements) {
+                cookie = cookie.replace(/;\s*Domain=[^;]+/gi, '').replace(/;\s*Path=[^;]+/gi, '');
+            } else {
+                cookie = cookie.replace('; Path=/edu-sharing', '; Path=/');
+            }
+            return cookie;
+        });
+    }
+}
+
+/**
+ * Buffers a text/json response body, hands it to `patch` and sends the result.
+ * Returns false if the response is not patchable (binary) and was left untouched.
+ */
+function patchBody(proxyRes, res, patch) {
+    const contentType = proxyRes.headers['content-type'] || '';
+    if (!contentType.includes('application/json') && !contentType.includes('text')) {
+        return false;
+    }
+    const chunks = [];
+    proxyRes.on('data', (chunk) => {
+        chunks.push(chunk);
+    });
+    proxyRes.on('end', () => {
+        const body = patch(Buffer.concat(chunks).toString('utf8'));
+        res.setHeader('content-length', Buffer.byteLength(body));
+        res.end(body);
+    });
+    // Prevent default piping
+    proxyRes.pipe = () => {};
+    return true;
+}
+
+// absolute preview urls of the configured backend host (with any/no port)
+const PREVIEW_URL_REGEX = (() => {
+    const backend = new URL(process.env.BACKEND_URL);
+    const escapedHost = backend.hostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // the path may continue with a sub-path or a query (`/preview?nodeId=...`), or end there
+    return new RegExp(
+        `https?://${escapedHost}(?::\\d+)?/edu-sharing/preview(?=[/?"'\\s\\\\]|$)`,
+        'g',
+    );
+})();
+
+function patchPreviewUrls(body) {
+    return body.replace(PREVIEW_URL_REGEX, `${LOCAL_URL}/edu-sharing/preview`);
+}
+
+function repoConfigure(proxy) {
+    proxy.on('proxyReq', (proxyReq) => {
+        // only receive non-gzip results for patching
+        proxyReq.setHeader('Accept-Encoding', 'deflate');
+    });
+    proxy.on('proxyRes', (proxyRes, req, res) => {
+        proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
+        mapCookies(proxyRes);
+        patchBody(proxyRes, res, patchPreviewUrls);
+    });
+}
+
 const PROXY_CONFIG = [
     {
         context: [
@@ -39,42 +111,14 @@ const PROXY_CONFIG = [
                 return req.url;
             }
         },
-        onProxyRes: function (proxyRes, req, res) {
-            proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
-            const cookies = proxyRes.headers['set-cookie'];
-            if (cookies) {
-                proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
-                    cookie
-                        .replace('; Path=/edu-sharing', '; Path=/')
-                        // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
-                        .replace('; Secure', '')
-                        .replace('; Partitioned', '')
-                        // 'SameSite=None' is only allowed on 'Secure' cookies.
-                        .replace('; SameSite=None', ''),
-                );
-            }
-        },
+        configure: repoConfigure,
     },
     {
         context: ['/rest', '/eduservlet', '/preview', '/themes'],
         target: process.env.BACKEND_URL + '/edu-sharing',
         secure: false,
         changeOrigin: true,
-        onProxyRes: function (proxyRes, req, res) {
-            proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.BACKEND_URL;
-            const cookies = proxyRes.headers['set-cookie'];
-            if (cookies) {
-                proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
-                    cookie
-                        .replace('; Path=/edu-sharing', '; Path=/')
-                        // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
-                        .replace('; Secure', '')
-                        .replace('; Partitioned', '')
-                        // 'SameSite=None' is only allowed on 'Secure' cookies.
-                        .replace('; SameSite=None', ''),
-                );
-            }
-        },
+        configure: repoConfigure,
     },
     {
         context: ['/rendering2'],
@@ -90,29 +134,8 @@ const PROXY_CONFIG = [
             });
             proxy.on('proxyRes', (proxyRes, req, res) => {
                 proxyRes.headers['X-Edu-Sharing-Proxy-Target'] = process.env.RS2_URL;
-                const cookies = proxyRes.headers['set-cookie'];
-                if (cookies) {
-                    proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
-                        cookie
-                            // We serve on a non-HTTPS connection, so 'Secure' cookies won't work.
-                            .replace('; Secure', '')
-                            .replace(/;\s*Domain=[^;]+/gi, '')
-                            .replace(/;\s*Path=[^;]+/gi, '')
-                            .replace('; Partitioned', '')
-                            // 'SameSite=None' is only allowed on 'Secure' cookies.
-                            .replace('; SameSite=None', ''),
-                    );
-                }
-                const contentType = proxyRes.headers['content-type'] || '';
-                if (!contentType.includes('application/json') && !contentType.includes('text')) {
-                    return;
-                }
-                const chunks = [];
-                proxyRes.on('data', (chunk) => {
-                    chunks.push(chunk);
-                });
-                proxyRes.on('end', () => {
-                    let body = Buffer.concat(chunks).toString('utf8');
+                mapCookies(proxyRes, true);
+                patchBody(proxyRes, res, (body) => {
                     // replace all rs2 uris to local for cookie auth
                     const rs2 = new URL(process.env.RS2_URL);
                     const escapedHost = rs2.host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -126,12 +149,10 @@ const PROXY_CONFIG = [
                         `${rs2.protocol}//${escapedHost.replace(/:\\d+$/, '')}:\\d+${escapedPath}`,
                         'g',
                     );
-                    body = body.replace(regex, 'http://localhost:4200/rendering2');
-                    res.setHeader('content-length', Buffer.byteLength(body));
-                    res.end(body);
+                    body = body.replace(regex, `${LOCAL_URL}/rendering2`);
+                    // rewrite absolute repo preview urls to the local proxy path
+                    return patchPreviewUrls(body);
                 });
-                // Prevent default piping
-                proxyRes.pipe = () => {};
             });
         },
     },

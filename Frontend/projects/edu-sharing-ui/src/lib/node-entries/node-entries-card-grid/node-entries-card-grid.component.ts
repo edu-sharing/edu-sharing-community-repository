@@ -1,6 +1,7 @@
 import { CdkDragEnter, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     Input,
@@ -17,7 +18,7 @@ import { Sort } from '@angular/material/sort';
 import { Node, RestConstants } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { delay, distinctUntilChanged, map, switchMap, take, takeUntil } from 'rxjs/operators';
 import { GridLayout, NodeEntriesDisplayType } from '../entries-model';
 import { ItemsCap } from '../items-cap';
 import { NodeEntriesGlobalService } from '../node-entries-global.service';
@@ -51,6 +52,7 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
     private nodesDragDropService = inject(NodesDragDropService);
     ui = inject(UIService);
     private ngZone = inject(NgZone);
+    private changeDetectorRef = inject(ChangeDetectorRef);
 
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Target = Target;
@@ -59,6 +61,14 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
      * a value of 1 would mean to scroll the full width of the entire content
      */
     readonly ScrollingOffsetPercentage = 0.4;
+    /**
+     * Look-ahead for loading the next page, as a multiple of the viewport size: loading starts
+     * once less than `(value - 1) x viewport` of unseen content remains.
+     *
+     * The horizontal strip loads later than a vertical list, where a whole viewport of
+     * unseen content is a comfortable buffer but a strip-width worth of cards is not.
+     */
+    readonly InfiniteScrollDistance = { grid: 1.5, scroll: 1.2 };
 
     columnChooserVisible$ = new BehaviorSubject(false);
     @ViewChild('columnChooserTrigger') columnChooserTrigger: CdkOverlayOrigin;
@@ -119,6 +129,12 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.entriesService.dataSource$.pipe(takeUntil(this.destroyed)).subscribe(() => {
             this.updateScrollState();
         });
+        // The strip's scrollable extent grows with its content, which is reported by neither a
+        // scroll event nor the grid's resize observer (appending cards leaves its border box
+        // untouched). Delayed by a tick so the new cards are laid out before it is measured.
+        this.nodes$
+            .pipe(delay(0), takeUntil(this.destroyed))
+            .subscribe(() => this.updateScrollState());
     }
 
     ngOnInit(): void {
@@ -168,9 +184,38 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         this.entriesService.sortChange.emit(this.entriesService.sort);
     }
 
+    /**
+     * Whether the "load more" fallback button should be offered.
+     *
+     * Applies to every layout: in `scroll` layout the button is rendered as the last tile of the
+     * horizontal strip, otherwise below the grid.
+     */
+    get showLoadMore(): boolean {
+        return (
+            !this.entriesService.dataSource.isLoading &&
+            this.entriesService.dataSource.hasMore() &&
+            !this.visibleItemsLimited &&
+            this.entriesService.paginationStrategy === 'infinite-scroll'
+        );
+    }
+
+    /**
+     * Whether a *further* page is being loaded, as opposed to the initial load of the list.
+     *
+     * This is the spinner that replaces the "load more" button while its page is in flight.
+     */
+    get isLoadingPage(): boolean {
+        return (
+            this.entriesService.dataSource.isLoading === 'page' &&
+            this.entriesService.paginationStrategy === 'infinite-scroll'
+        );
+    }
+
     loadData(source: 'scroll' | 'button') {
         // @TODO: Maybe this is better handled in a more centraled service
-        if (source === 'scroll') {
+        // The footer check approximates "the page is scrolled to its end". It is meaningless for
+        // the horizontal strip, which scrolls independently of the page.
+        if (source === 'scroll' && this.layout !== 'scroll') {
             // check if there is a footer
             const elements = document.getElementsByTagName('footer');
             if (elements.length && elements.item(0).innerHTML.trim()) {
@@ -355,8 +400,13 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
 
     updateScrollState() {
         if (this.layout === 'scroll') {
-            this.scroll.left = this.canScroll('left');
-            this.scroll.right = this.canScroll('right');
+            const left = this.canScroll('left');
+            const right = this.canScroll('right');
+            if (left !== this.scroll.left || right !== this.scroll.right) {
+                this.scroll = { left, right };
+                // callers include timers and listeners outside change detection
+                this.changeDetectorRef.markForCheck();
+            }
         }
     }
 
