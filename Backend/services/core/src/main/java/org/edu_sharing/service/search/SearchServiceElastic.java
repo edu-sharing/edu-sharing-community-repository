@@ -127,8 +127,8 @@ public class SearchServiceElastic implements SearchService {
     public static final String AUTHORITIES_INDEX = "authorities_11.0";
     public static int MAX_RESPONSE_ENTITY_SIZE = -1;
 
-    static RestClient restClient;
-    static ElasticsearchClient client;
+    static volatile RestClient restClient;
+    static volatile ElasticsearchClient client;
     static String rootHomeId;
     static String sysSystemNodeId;
     static String sysAuthoritiesNodeId;
@@ -1605,41 +1605,59 @@ public class SearchServiceElastic implements SearchService {
     }
 
     public void checkClient() throws IOException {
-        if (client == null || !client.ping().value()) {
-            if (client != null) {
-                try {
-                    restClient.close();
-                } catch (Exception e) {
-                    log.error("ping failed, close failed:" + e.getMessage() + " creating new");
+        if (!isClientRunning()) {
+            synchronized (SearchServiceElastic.class) {
+                // another thread could have created the client while we were waiting
+                if (!isClientRunning()) {
+                    if (MAX_RESPONSE_ENTITY_SIZE == -1) {
+                        if (LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")) {
+                            MAX_RESPONSE_ENTITY_SIZE = LightbendConfigLoader.get().getInt("elasticsearch.max_response_entity_size");
+                        } else {
+                            //100 MB
+                            MAX_RESPONSE_ENTITY_SIZE = 100 * 1048576;
+                        }
+                    }
+
+                    // Create the low-level client
+                    RestClient newRestClient = RestClient
+                            .builder(getConfiguredHosts())
+                            .setDefaultHeaders(new Header[]{
+                                    // new BasicHeader("Authorization", "ApiKey " + apiKey)
+                            })
+                            .build();
+
+                    RequestOptions.Builder options = RequestOptions.DEFAULT.toBuilder();
+                    options.setHttpAsyncResponseConsumerFactory(
+                            new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE)
+                    );
+                    ElasticsearchTransport transport = new RestClientTransport(
+                            newRestClient, new JacksonJsonpMapper(), new RestClientOptions.Builder(options).build());
+
+                    // only publish the new client once it is fully built, then close the previous one
+                    RestClient previousRestClient = restClient;
+                    restClient = newRestClient;
+                    client = new ElasticsearchClient(transport);
+                    if (previousRestClient != null) {
+                        log.warn("elastic transport was not running, client recreated");
+                        try {
+                            previousRestClient.close();
+                        } catch (Exception e) {
+                            log.error("closing previous elastic rest client failed", e);
+                        }
+                    }
                 }
             }
-            if (MAX_RESPONSE_ENTITY_SIZE == -1) {
-                if (LightbendConfigLoader.get().hasPath("elasticsearch.max_response_entity_size")) {
-                    MAX_RESPONSE_ENTITY_SIZE = LightbendConfigLoader.get().getInt("elasticsearch.max_response_entity_size");
-                } else {
-                    //100 MB
-                    MAX_RESPONSE_ENTITY_SIZE = 100 * 1048576;
-                }
-            }
-
-            // Create the low-level client
-            restClient = RestClient
-                    .builder(getConfiguredHosts())
-                    .setDefaultHeaders(new Header[]{
-                            // new BasicHeader("Authorization", "ApiKey " + apiKey)
-                    })
-                    .build();
-
-            RequestOptions.Builder options = RequestOptions.DEFAULT.toBuilder();
-            options.setHttpAsyncResponseConsumerFactory(
-                    new HttpAsyncResponseConsumerFactory.HeapBufferedResponseConsumerFactory(MAX_RESPONSE_ENTITY_SIZE)
-            );
-            ElasticsearchTransport transport = new RestClientTransport(
-                    restClient, new JacksonJsonpMapper(), new RestClientOptions.Builder(options).build());
-            client = new ElasticsearchClient(transport);
+        }
+        // ping is just another request giving false only on 404. other results != 200 would throw an IOException.
+        if (!client.ping().value()) {
+            throw new IOException("elasticsearch ping failed");
         }
     }
 
+    private static boolean isClientRunning() {
+        RestClient current = restClient;
+        return client != null && current != null && current.isRunning();
+    }
 
     public SearchResultNodeRef getMetadata(List<String> nodeIds) throws IOException {
 
