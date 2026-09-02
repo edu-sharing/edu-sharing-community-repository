@@ -9,6 +9,7 @@ import org.edu_sharing.spring.security.basic.GuestCleanupFilter;
 import org.edu_sharing.spring.security.context.SecurityContextStrategySwitchFilter;
 import org.edu_sharing.spring.security.oauth2.SecurityConfigurationOAuth2;
 import org.edu_sharing.spring.security.saml2.SecurityConfigurationSaml;
+import org.edu_sharing.spring.security.server.oauth2.config.OAuth2Config;
 import org.edu_sharing.spring.security.server.oauth2.config.OAuth2ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -36,9 +38,10 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Slf4j
 @Configuration
@@ -83,7 +86,18 @@ public class OAuth2AuthorizationServerConfig {
                 .deviceVerificationEndpoint(v -> v
                         .deviceVerificationResponseHandler(new SimpleUrlAuthenticationSuccessHandler("/components/login?device_verification_success=true"))
                 )
-                .authorizationEndpoint(a ->a.consentPage("/rest/authentication/v1/oauth2consent"));
+                .authorizationEndpoint(a -> a
+                        .consentPage("/rest/authentication/v1/oauth2consent")
+                        // adds pattern matching on top of the exact redirect_uri matching spring does,
+                        // for public clients whose redirect uri cannot be registered up front. note that
+                        // this replaces the whole validator composition spring built in its own init, so
+                        // authorizationEndpointValidator() has to carry those rules along
+                        .authenticationProviders(providers -> providers.forEach(provider -> {
+                            if (provider instanceof OAuth2AuthorizationCodeRequestAuthenticationProvider codeRequestProvider) {
+                                codeRequestProvider.setAuthenticationValidator(
+                                        RedirectUriPatternValidator.authorizationEndpointValidator());
+                            }
+                        })));
         return http.build();
     }
 
@@ -108,40 +122,99 @@ public class OAuth2AuthorizationServerConfig {
     @RefreshScope
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
+        List<RegisteredClient> clients = new ArrayList<>();
         try {
-
-            List<RegisteredClient> collect = oAuth2ConfigService.getDefaultConfig().getClients().stream()
-                    .map(c -> {
-                                RegisteredClient.Builder builder = RegisteredClient.withId(c.getClientId())
-                                        .clientId(c.getClientId())
-                                        .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()));
-                                if(!c.getClientSecret().isEmpty()){
-                                    builder.clientSecret(c.getClientSecret());
-                                }
-                                builder.clientSettings(ClientSettings.builder()
-                                        .requireAuthorizationConsent(c.isRequireConsent())
-                                        .requireProofKey(c.isRequireProofKey())
-                                        .build());
-                                if(!c.getRedirectUri().isEmpty()) builder.redirectUri(c.getRedirectUri());
-                                TokenSettings.Builder tokenSettings = TokenSettings.builder();
-                                if(!c.getAccessTokenExpires().isEmpty()) {
-                                    tokenSettings.accessTokenTimeToLive(Duration.parse(c.getAccessTokenExpires()));
-                                }
-                                if(!c.getRefreshTokenExpires().isEmpty()) {
-                                    tokenSettings.refreshTokenTimeToLive(Duration.parse(c.getRefreshTokenExpires()));
-                                }
-                                builder.tokenSettings(tokenSettings.build());
-                                c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
-                                c.getScopes().forEach(builder::scope);
-                                return builder.build();
-                            }
-                    ).collect(Collectors.toList());
-
-            return new InMemoryRegisteredClientRepository(collect);
+            for (OAuth2Config.Client client : oAuth2ConfigService.getDefaultConfig().getClients()) {
+                try {
+                    clients.add(toRegisteredClient(client));
+                } catch (Throwable e) {
+                    // one bad entry used to take every other client down with it, because the whole
+                    // mapping ran inside a single try block
+                    log.error("oauth2 client {} is misconfigured and will not be available: {}",
+                            client.getClientId(), e.getMessage(), e);
+                }
+            }
         } catch (Throwable e) {
-            log.error(e.getMessage(), e);
+            log.error("could not read the oauth2 client configuration, no client will be available", e);
+        }
+        if (clients.isEmpty()) {
+            log.error("no usable oauth2 client is configured, every authorization request will be rejected");
+            return EMPTY_REGISTERED_CLIENT_REPOSITORY;
+        }
+        return new InMemoryRegisteredClientRepository(clients);
+    }
+
+    /**
+     * Stands in for the client repository when not a single client could be built.
+     * <p>
+     * Neither of the obvious alternatives works: {@code InMemoryRegisteredClientRepository} rejects an
+     * empty list, which would fail the whole application context, and returning {@code null} makes spring
+     * register a {@code NullBean} - the {@link RefreshScope} proxy then fails every single request with
+     * {@code IllegalArgumentException: object is not an instance of declaring class}, which says nothing
+     * about the actual configuration problem. Finding no client instead produces a plain
+     * {@code invalid_client} response.
+     */
+    private static final RegisteredClientRepository EMPTY_REGISTERED_CLIENT_REPOSITORY = new RegisteredClientRepository() {
+        @Override
+        public void save(RegisteredClient registeredClient) {
+            throw new UnsupportedOperationException("the oauth2 clients of this repository are read from the configuration");
+        }
+
+        @Override
+        public RegisteredClient findById(String id) {
             return null;
         }
+
+        @Override
+        public RegisteredClient findByClientId(String clientId) {
+            return null;
+        }
+    };
+
+    private RegisteredClient toRegisteredClient(OAuth2Config.Client c) {
+        RegisteredClient.Builder builder = RegisteredClient.withId(c.getClientId())
+                .clientId(c.getClientId())
+                .clientAuthenticationMethod(new ClientAuthenticationMethod(c.getClientAuthenticationMethod()));
+        if (!c.getClientSecret().isEmpty()) {
+            if (c.isPublicClient()) {
+                log.warn("client {} authenticates with \"none\" but has a clientSecret configured, ignoring "
+                        + "the secret - a public client cannot keep one", c.getClientId());
+            } else {
+                builder.clientSecret(c.getClientSecret());
+            }
+        }
+
+        if (c.isPublicClient() && !c.isRequireProofKey()) {
+            log.info("client {} is public (clientAuthenticationMethod \"none\"), enforcing pkce", c.getClientId());
+        }
+        ClientSettings.Builder clientSettings = ClientSettings.builder()
+                .requireAuthorizationConsent(c.isRequireConsent())
+                // a public client holds no secret, so the code verifier is the only thing tying the token
+                // request back to whoever started the flow - pkce is not optional there
+                .requireProofKey(c.isRequireProofKey() || c.isPublicClient());
+        if (!c.getRedirectUriPatterns().isEmpty()) {
+            clientSettings.setting(RedirectUriPatternValidator.SETTING_REDIRECT_URI_PATTERNS,
+                    List.copyOf(c.getRedirectUriPatterns()));
+        }
+        builder.clientSettings(clientSettings.build());
+
+        Set<String> redirectUris = c.getAllRedirectUris();
+        if (redirectUris.isEmpty() && !c.getRedirectUriPatterns().isEmpty()) {
+            redirectUris = Set.of(RedirectUriPatternValidator.PATTERN_ONLY_REDIRECT_URI);
+        }
+        redirectUris.forEach(builder::redirectUri);
+
+        TokenSettings.Builder tokenSettings = TokenSettings.builder();
+        if (!c.getAccessTokenExpires().isEmpty()) {
+            tokenSettings.accessTokenTimeToLive(Duration.parse(c.getAccessTokenExpires()));
+        }
+        if (!c.getRefreshTokenExpires().isEmpty()) {
+            tokenSettings.refreshTokenTimeToLive(Duration.parse(c.getRefreshTokenExpires()));
+        }
+        builder.tokenSettings(tokenSettings.build());
+        c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
+        c.getScopes().forEach(builder::scope);
+        return builder.build();
     }
 
     @Bean
