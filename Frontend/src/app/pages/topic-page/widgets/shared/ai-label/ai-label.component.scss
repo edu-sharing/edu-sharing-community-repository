@@ -20,7 +20,7 @@
 
     &.text-container {
         padding: 0 8px;
-        color: topicPageVars.$secondary;
+        color: var(--aiLabelColor);
         float: right;
     }
 
