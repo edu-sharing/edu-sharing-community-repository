@@ -79,7 +79,7 @@
             color: topicPageVars.$primary;
 
             &::placeholder {
-                color: topicPageVars.$secondary;
+                color: var(--placeholderColor);
             }
         }
 
