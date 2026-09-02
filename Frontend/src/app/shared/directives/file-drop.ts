@@ -34,12 +34,20 @@ export class FileDropDirective implements OnInit, OnDestroy {
     @Output() fileDrop: EventEmitter<FileList> = new EventEmitter<FileList>();
 
     /**
-     * Sometimes browsers fire a dragenter event before the dragleave event. When the cursor moves
-     * across different HTML elements while dragging, this results in a dragenter event followed by
-     * a dragleave. This number represents how many more dragenter events than dragleave events we
-     * received. A number > 1 means that we are currently in a drag-over state.
+     * Element the drag is currently over, or null while no drag is in progress.
+     *
+     * Browsers deliver neither a balanced nor an ordered sequence of `dragenter` and `dragleave`:
+     * the enter of the element being entered arrives before the leave of the one being left, and a
+     * leave is dropped entirely when its element gets covered mid-drag — which is what the upload
+     * overlay does to whatever sits beneath it. Counting the events therefore cannot detect the end
+     * of a drag, because a single lost leave puts the count permanently out of reach of zero.
+     *
+     * Remembering the current element instead makes both harmless: a leave for anything other than
+     * the current element belongs to one already superseded and is ignored, a lost leave is never
+     * missed because nothing waits for it, and the leave that does match marks the actual end of
+     * the drag.
      */
-    private dragEnterCount = 0;
+    private currentTarget: EventTarget = null;
     private destroyed = new Subject<void>();
     private fileOverSubject = new BehaviorSubject(false);
 
@@ -49,6 +57,7 @@ export class FileDropDirective implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.leaveDragOver();
         this.destroyed.next();
         this.destroyed.complete();
     }
@@ -83,12 +92,11 @@ export class FileDropDirective implements OnInit, OnDestroy {
     }
 
     private onDragEnter = (event: DragEvent) => {
-        ++this.dragEnterCount;
         const transfer = this.getDataTransfer(event);
         if (this.haveFiles(transfer.types)) {
             this.preventAndStop(event);
             transfer.dropEffect = 'copy';
-            this.emitFileOver(true);
+            this.enterDragOver(event.target);
         }
     };
 
@@ -99,25 +107,43 @@ export class FileDropDirective implements OnInit, OnDestroy {
             // events.
             this.preventAndStop(event);
             transfer.dropEffect = 'copy';
+            // Should a `dragenter` ever be skipped, dragover carries the more recent truth about
+            // which element the drag sits on, and the drag-over state is re-asserted along with it.
+            this.enterDragOver(event.target);
         }
     };
 
-    private onDragLeave = () => {
-        if (--this.dragEnterCount === 0) {
-            this.emitFileOver(false);
+    private onDragLeave = (event: DragEvent) => {
+        if (event.target === this.currentTarget) {
+            this.leaveDragOver();
         }
     };
 
     private onDrop = (event: DragEvent) => {
         const transfer = this.getDataTransfer(event);
-        this.dragEnterCount = 0;
-        this.emitFileOver(false);
+        this.leaveDragOver();
         const hasFiles = this.haveFiles(transfer.types) && transfer.files.length;
         if (hasFiles) {
             this.preventAndStop(event);
             this.readFile(transfer.files);
         }
     };
+
+    /**
+     * Marks `target` as the element the drag sits on and enters the drag-over state.
+     */
+    private enterDragOver(target: EventTarget): void {
+        this.currentTarget = target;
+        this.emitFileOver(true);
+    }
+
+    /**
+     * Leaves the drag-over state and forgets the current element.
+     */
+    private leaveDragOver(): void {
+        this.currentTarget = null;
+        this.emitFileOver(false);
+    }
 
     private readFile(file: FileList): void {
         const strategy = this.pickStrategy();

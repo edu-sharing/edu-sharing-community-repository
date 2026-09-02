@@ -39,6 +39,10 @@
                 width: 100%;
                 i {
                     margin-right: 10px;
+                    // the icon is sized via its font-size; as a flex item it must never be
+                    // shrunk, or `overflow: hidden` from `.mat-icon` clips the glyph once the
+                    // label next to it is long enough to overflow the row
+                    flex-shrink: 0;
                 }
                 &:hover {
                     background-color: $itemSelectedBackground;

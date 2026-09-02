@@ -173,9 +173,15 @@
         }
         .icon {
             font-size: 30px;
+            // the icon is sized via its font-size; as a flex item it must never be shrunk, or
+            // `overflow: hidden` from `.mat-icon` clips the glyph
+            flex-shrink: 0;
         }
         .text {
             flex-grow: 1;
+            // allows the text column to shrink below its content width instead of pushing the
+            // icons out of the row
+            min-width: 0;
             .title {
                 @include mixins.limitLineCount(1, 1.25);
                 word-break: break-all;
@@ -190,6 +196,7 @@
             }
         }
         .navigate {
+            flex-shrink: 0;
         }
     }
 }
