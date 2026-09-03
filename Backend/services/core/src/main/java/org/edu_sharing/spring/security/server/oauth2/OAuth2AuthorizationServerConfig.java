@@ -20,6 +20,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -28,6 +31,7 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -97,7 +101,24 @@ public class OAuth2AuthorizationServerConfig {
                                 codeRequestProvider.setAuthenticationValidator(
                                         RedirectUriPatternValidator.authorizationEndpointValidator());
                             }
-                        })));
+                        })))
+                // lets a public client that opted in via forceRefreshToken receive a refresh token. the
+                // provider holds its generator final without a setter, so it is rebuilt around a generator
+                // that wraps - not replaces - the default one, see PublicClientRefreshTokenGenerator.
+                // both shared objects are already populated at this point: OAuth2TokenEndpointConfigurer
+                // builds the default providers before it hands them to this consumer
+                .tokenEndpoint(t -> t.authenticationProviders(providers -> {
+                    OAuth2TokenGenerator<? extends OAuth2Token> defaultTokenGenerator =
+                            http.getSharedObject(OAuth2TokenGenerator.class);
+                    OAuth2AuthorizationService authorizationService =
+                            http.getSharedObject(OAuth2AuthorizationService.class);
+                    OAuth2TokenGenerator<OAuth2Token> tokenGenerator =
+                            new PublicClientRefreshTokenGenerator(defaultTokenGenerator);
+                    providers.replaceAll(provider ->
+                            (provider instanceof OAuth2AuthorizationCodeAuthenticationProvider)
+                                    ? new OAuth2AuthorizationCodeAuthenticationProvider(authorizationService, tokenGenerator)
+                                    : provider);
+                }));
         return http.build();
     }
 
@@ -184,17 +205,24 @@ public class OAuth2AuthorizationServerConfig {
             }
         }
 
-        if (c.isPublicClient() && !c.isRequireProofKey()) {
-            log.info("client {} is public (clientAuthenticationMethod \"none\"), enforcing pkce", c.getClientId());
+        // a public client holds no secret, so the code verifier is the only thing tying the token request
+        // back to whoever started the flow. the same goes for a client matching its redirect uri by
+        // pattern: pkce is what keeps a code that reached the wrong url from being worth anything
+        boolean requireProofKey = c.isRequireProofKey() || c.isPublicClient() || !c.getRedirectUriPatterns().isEmpty();
+        if (requireProofKey && !c.isRequireProofKey()) {
+            log.info("enforcing pkce for oauth2 client {} ({})", c.getClientId(),
+                    c.isPublicClient() ? "public client" : "uses redirectUriPatterns");
         }
         ClientSettings.Builder clientSettings = ClientSettings.builder()
                 .requireAuthorizationConsent(c.isRequireConsent())
-                // a public client holds no secret, so the code verifier is the only thing tying the token
-                // request back to whoever started the flow - pkce is not optional there
-                .requireProofKey(c.isRequireProofKey() || c.isPublicClient());
+                .requireProofKey(requireProofKey);
         if (!c.getRedirectUriPatterns().isEmpty()) {
             clientSettings.setting(RedirectUriPatternValidator.SETTING_REDIRECT_URI_PATTERNS,
                     List.copyOf(c.getRedirectUriPatterns()));
+        }
+        boolean forceRefreshToken = resolveForceRefreshToken(c);
+        if (forceRefreshToken) {
+            clientSettings.setting(PublicClientRefreshTokenGenerator.SETTING_FORCE_REFRESH_TOKEN, true);
         }
         builder.clientSettings(clientSettings.build());
 
@@ -205,6 +233,11 @@ public class OAuth2AuthorizationServerConfig {
         redirectUris.forEach(builder::redirectUri);
 
         TokenSettings.Builder tokenSettings = TokenSettings.builder();
+        if (forceRefreshToken) {
+            // rfc 9700 allows a refresh token for a public client only when it is rotated or sender
+            // constrained, so rotation comes with the opt-in instead of being a knob that can be left off
+            tokenSettings.reuseRefreshTokens(false);
+        }
         if (!c.getAccessTokenExpires().isEmpty()) {
             tokenSettings.accessTokenTimeToLive(Duration.parse(c.getAccessTokenExpires()));
         }
@@ -215,6 +248,28 @@ public class OAuth2AuthorizationServerConfig {
         c.getAuthorizationGrantTypes().forEach(gt -> builder.authorizationGrantType(new AuthorizationGrantType(gt)));
         c.getScopes().forEach(builder::scope);
         return builder.build();
+    }
+
+    /**
+     * Whether {@code forceRefreshToken} actually takes effect, warning about the combinations where it
+     * does nothing. Resolved once so that the opt-in and the rotation that belongs to it cannot drift
+     * apart.
+     */
+    private boolean resolveForceRefreshToken(OAuth2Config.Client c) {
+        if (!c.isForceRefreshToken()) {
+            return false;
+        }
+        if (!c.isPublicClient()) {
+            log.warn("oauth2 client {} sets forceRefreshToken but is not public, the setting has no effect "
+                    + "- a client authenticating with a secret already receives one", c.getClientId());
+            return false;
+        }
+        if (!c.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN.getValue())) {
+            log.warn("oauth2 client {} sets forceRefreshToken but does not list refresh_token in "
+                    + "authorizationGrantTypes, so no refresh token is ever requested", c.getClientId());
+            return false;
+        }
+        return true;
     }
 
     @Bean

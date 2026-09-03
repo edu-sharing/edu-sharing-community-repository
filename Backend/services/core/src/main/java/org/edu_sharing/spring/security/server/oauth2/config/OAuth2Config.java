@@ -67,10 +67,25 @@ public class OAuth2Config {
         boolean requireConsent = false;
         /**
          * whether the client must send a pkce code_challenge (rfc 7636). always on for a public client,
-         * see {@link #isPublicClient()} - the code is the only thing protecting the exchange there.
+         * see {@link #isPublicClient()} - the code is the only thing protecting the exchange there, and
+         * also on for a client using {@link #redirectUriPatterns}.
          */
         @Optional
         boolean requireProofKey = false;
+        /**
+         * hand a refresh token to this client even though it is public.
+         * <p>
+         * Spring refuses that by default, so a public client has to run the whole authorization code flow
+         * again once its access token expires. Rfc 9700 does allow it as long as the token is rotated,
+         * which is switched on together with this flag rather than being a knob of its own - a public
+         * client holding a non rotating refresh token is exactly what the rfc rules out.
+         * <p>
+         * Leave {@link #refreshTokenExpires} empty alongside it, the token then keeps spring's one hour
+         * default. Note that with rotation every refresh returns a <em>new</em> refresh token which the
+         * client has to store, otherwise it locks itself out after the first one.
+         */
+        @Optional
+        boolean forceRefreshToken = false;
 
         /**
          * a client that authenticates with {@code none}, i.e. one that holds no secret
