@@ -724,10 +724,17 @@ public class PreviewServlet extends SpringHttpServlet {
 
 
     public static PreviewDetail getPreview(NodeService nodeService, String storeProtocol, String storeIdentifier, String nodeId) {
-        return getPreview(nodeService, storeProtocol, storeIdentifier, nodeId, null);
+        return getPreview(nodeService, storeProtocol, storeIdentifier, nodeId, null, null);
     }
 
     public static PreviewDetail getPreview(NodeService nodeService, String storeProtocol, String storeIdentifier, String nodeId, Map<String, Object> nodeProps) {
+        return getPreview(nodeService, storeProtocol, storeIdentifier, nodeId, nodeProps, null);
+    }
+
+    /**
+     * @param aspects aspects of the given node, may be null (they will be fetched on demand)
+     */
+    public static PreviewDetail getPreview(NodeService nodeService, String storeProtocol, String storeIdentifier, String nodeId, Map<String, Object> nodeProps, List<String> aspects) {
         StoreRef storeRef = new StoreRef(storeProtocol, storeIdentifier);
         String nodeType = nodeService.getType(nodeId);
 
@@ -751,6 +758,29 @@ public class PreviewServlet extends SpringHttpServlet {
 
         if (!nodeType.equals(CCConstants.CCM_TYPE_IO)) {
             return null;
+        }
+
+        /*
+         * collection references carry neither the userdefined preview nor the generated thumbnail of their
+         * original, so resolve the original (as fetchNodeData does when delivering the image).
+         * Without this, a reference reports TYPE_DEFAULT/isIcon although its preview is delivered fine.
+         */
+        List<String> nodeAspects = aspects;
+        if (nodeAspects == null) {
+            String[] fetchedAspects = nodeService.getAspects(storeProtocol, storeIdentifier, nodeId);
+            nodeAspects = (fetchedAspects != null) ? Arrays.asList(fetchedAspects) : Collections.emptyList();
+        }
+        if (nodeAspects.contains(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+            String original = (nodeProps == null) ? nodeService.getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CCM_PROP_IO_ORIGINAL)
+                    : (String) nodeProps.get(CCConstants.CCM_PROP_IO_ORIGINAL);
+            if (original != null && !original.equals(nodeId)
+                    // mirror the checks fetchNodeData does before delivering the original's preview
+                    && !NodeServiceHelper.hasRestrictedAccess(new NodeRef(storeRef, nodeId), CCConstants.PERMISSION_READ_PREVIEW)) {
+                String originalFinal = original;
+                // the user may not have access to the binary content of the original (but READ_PREVIEW is validated)
+                return AuthenticationUtil.runAsSystem(() ->
+                        getPreview(nodeService, storeProtocol, storeIdentifier, originalFinal, null, null));
+            }
         }
 
         String extThumbnail = (nodeProps == null) ? nodeService.getProperty(storeProtocol, storeIdentifier, nodeId, CCConstants.CCM_PROP_IO_THUMBNAILURL)
