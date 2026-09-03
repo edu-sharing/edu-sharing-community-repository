@@ -32,7 +32,10 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
@@ -40,6 +43,9 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcherEntry;
+import org.springframework.http.HttpStatus;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -62,7 +68,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     //@Order(1)
-    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http, LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint, GuestCleanupFilter guestCleanupFilter) throws Exception {
+    public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http, LoginUrlAuthenticationEntryPoint loginUrlAuthenticationEntryPoint, GuestCleanupFilter guestCleanupFilter, RegisteredClientRepository registeredClientRepository) throws Exception {
         log.info("SecurityFilterChain server oauth2 config");
 
 
@@ -82,8 +88,17 @@ public class OAuth2AuthorizationServerConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(authorizationServerConfigurer.getEndpointsMatcher()))
+                // only the endpoints a browser is sent to may answer with a redirect to the login page.
+                // the machine endpoints - token, revoke, introspect - must answer with an oauth2 error,
+                // otherwise a client sees an html login page instead of a json error and every failure
+                // looks the same. spring registers an HttpStatusEntryPoint for them itself, but an
+                // explicitly set entry point wins unconditionally over those mappings, see
+                // ExceptionHandlingConfigurer.getAuthenticationEntryPoint
                 .exceptionHandling(e ->
-                        e.authenticationEntryPoint(loginUrlAuthenticationEntryPoint))
+                        e.authenticationEntryPoint(new DelegatingAuthenticationEntryPoint(
+                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                                List.of(new RequestMatcherEntry<AuthenticationEntryPoint>(
+                                        browserFacingEndpoints(), loginUrlAuthenticationEntryPoint)))))
                 .with(authorizationServerConfigurer, Customizer.withDefaults());
         http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
                 .deviceAuthorizationEndpoint(d -> d.verificationUri("/oauth2server/device_verification"))
@@ -107,6 +122,14 @@ public class OAuth2AuthorizationServerConfig {
                 // that wraps - not replaces - the default one, see PublicClientRefreshTokenGenerator.
                 // both shared objects are already populated at this point: OAuth2TokenEndpointConfigurer
                 // builds the default providers before it hands them to this consumer
+                // spring authenticates a public client only on a pkce token request, so a public client
+                // refreshing its token arrives unauthenticated. added converters and providers are put in
+                // front of the default ones, which is what these two need: the default
+                // PublicClientAuthenticationProvider would reject the request over the missing
+                // code_verifier before ours ever sees it
+                .clientAuthentication(c -> c
+                        .authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
+                        .authenticationProvider(new PublicClientRefreshTokenAuthenticationProvider(registeredClientRepository)))
                 .tokenEndpoint(t -> t.authenticationProviders(providers -> {
                     OAuth2TokenGenerator<? extends OAuth2Token> defaultTokenGenerator =
                             http.getSharedObject(OAuth2TokenGenerator.class);
@@ -122,6 +145,18 @@ public class OAuth2AuthorizationServerConfig {
         return http.build();
     }
 
+
+    /**
+     * the endpoints a user agent is sent to and where a redirect to the login page is the right answer,
+     * as opposed to the endpoints a client calls directly
+     */
+    private static RequestMatcher browserFacingEndpoints() {
+        return new OrRequestMatcher(
+                PathPatternRequestMatcher.withDefaults().matcher("/oauth2server/authorize"),
+                PathPatternRequestMatcher.withDefaults().matcher("/oauth2server/device_verification"),
+                PathPatternRequestMatcher.withDefaults().matcher("/rest/authentication/v1/oauth2consent"),
+                PathPatternRequestMatcher.withDefaults().matcher("/components/oauth2consent"));
+    }
 
     String getLoginPath(){
         if(Arrays.asList(env.getActiveProfiles()).contains(SecurityConfigurationSaml.PROFILE_ID)){
