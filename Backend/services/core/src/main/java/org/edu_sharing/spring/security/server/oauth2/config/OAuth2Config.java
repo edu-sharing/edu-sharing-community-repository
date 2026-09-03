@@ -4,7 +4,9 @@ import com.typesafe.config.Optional;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class OAuth2Config {
@@ -21,18 +23,88 @@ public class OAuth2Config {
 
     @Data
     public static final class Client {
+
+        /**
+         * value of {@code clientAuthenticationMethod} marking a public client, i.e. one that cannot keep a
+         * secret (browser extension, mobile app, single page app). Such a client is only safe with PKCE.
+         */
+        public static final String CLIENT_AUTHENTICATION_METHOD_NONE = "none";
+
         String clientId;
-        String clientSecret;
-        String clientAuthenticationMethod;
+        @Optional
+        String clientSecret = "";
+        @Optional
+        String clientAuthenticationMethod = "client_secret_basic";
         List<String> authorizationGrantTypes;
-        String redirectUri;
-        List<String> scopes;
-        String accessTokenExpires;
-        String refreshTokenExpires;
-        boolean requireConsent;
-        // Spring Authorization Server 7.0 enables PKCE by default; keep it opt-in here so existing
-        // confidential clients that do not send a code_challenge keep working. Set to true to require PKCE.
-        boolean requireProofKey;
+        /**
+         * single redirect uri, kept for configs written before {@link #redirectUris} existed. merged with
+         * that list, so both may be set
+         */
+        @Optional
+        String redirectUri = "";
+        /**
+         * redirect uris matched exactly, as required by rfc 6749. the only exception is a loopback host
+         * (127.0.0.0/8, ::1), where the port of the request is ignored per rfc 8252 - spring handles that
+         * on its own
+         */
+        @Optional
+        List<String> redirectUris = new ArrayList<>();
+        /**
+         * redirect uris matched by pattern, for clients whose redirect uri is not known at configuration
+         * time. see {@code security.authentication.oauth2.clients.redirectUriPatterns} in
+         * edu-sharing.reference.conf for the matching rules and why this is a deliberate relaxation of the
+         * exact matching above
+         */
+        @Optional
+        List<String> redirectUriPatterns = new ArrayList<>();
+        @Optional
+        List<String> scopes = new ArrayList<>();
+        @Optional
+        String accessTokenExpires = "";
+        @Optional
+        String refreshTokenExpires = "";
+        @Optional
+        boolean requireConsent = false;
+        /**
+         * whether the client must send a pkce code_challenge (rfc 7636). always on for a public client,
+         * see {@link #isPublicClient()} - the code is the only thing protecting the exchange there, and
+         * also on for a client using {@link #redirectUriPatterns}.
+         */
+        @Optional
+        boolean requireProofKey = false;
+        /**
+         * hand a refresh token to this client even though it is public.
+         * <p>
+         * Spring refuses that by default, so a public client has to run the whole authorization code flow
+         * again once its access token expires. Rfc 9700 does allow it as long as the token is rotated,
+         * which is switched on together with this flag rather than being a knob of its own - a public
+         * client holding a non rotating refresh token is exactly what the rfc rules out.
+         * <p>
+         * Leave {@link #refreshTokenExpires} empty alongside it, the token then keeps spring's one hour
+         * default. Note that with rotation every refresh returns a <em>new</em> refresh token which the
+         * client has to store, otherwise it locks itself out after the first one.
+         */
+        @Optional
+        boolean forceRefreshToken = false;
+
+        /**
+         * a client that authenticates with {@code none}, i.e. one that holds no secret
+         */
+        public boolean isPublicClient() {
+            return CLIENT_AUTHENTICATION_METHOD_NONE.equals(clientAuthenticationMethod);
+        }
+
+        /**
+         * @return {@link #redirectUri} and {@link #redirectUris} as one set, in configuration order
+         */
+        public Set<String> getAllRedirectUris() {
+            Set<String> all = new LinkedHashSet<>();
+            if (!redirectUri.isEmpty()) {
+                all.add(redirectUri);
+            }
+            all.addAll(redirectUris);
+            return all;
+        }
     }
 
     @Data

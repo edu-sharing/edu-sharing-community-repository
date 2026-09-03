@@ -106,7 +106,7 @@
         box-shadow: 0 4px 4px 0 #00000040;
 
         &:disabled {
-            background: topicPageVars.$secondary;
+            background: var(--buttonDisabled);
         }
     }
 }

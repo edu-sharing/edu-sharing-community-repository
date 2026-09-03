@@ -108,7 +108,7 @@
 
     // match button disabled label text color
     &.disabled-text {
-        color: var(--mat-button-text-disabled-label-text-color, topicPageVars.$secondary);
+        color: var(--mat-button-text-disabled-label-text-color, var(--buttonDisabled));
     }
 }
 
