@@ -887,9 +887,11 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
             return;
         }
         const search = this.searchQuery;
-        const folder = this.currentFolder;
-        this.currentFolder = null;
         this.searchQuery = null;
+        // `currentFolder` is deliberately kept: setting it to null and back only served to
+        // re-render, but it makes the explorer drop its node in between. A `load()` arriving while
+        // the node is null is silently discarded, which leaves the list empty (see
+        // `WorkspaceExplorerComponent.load` / `setNode`).
         const path = this.path;
         if (refreshPath) {
             this.path = [];
@@ -898,7 +900,6 @@ export class WorkspacePageComponent implements EventListener, OnInit, OnDestroy 
         setTimeout(() => {
             this.path = path;
             this.breadcrumbsService.setNodePath(this.path);
-            this.currentFolder = folder;
             this.searchQuery = search;
             this.applicationRef.tick();
             this.explorer.load({

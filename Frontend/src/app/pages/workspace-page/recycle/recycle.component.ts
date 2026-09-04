@@ -71,7 +71,7 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('list') list: NodeEntriesWrapperComponent<Node>;
     @ViewChild('confirmDeleteDialog') confirmDeleteDialog: TemplateRef<unknown>;
     @ViewChild('restoreDialog') restoreDialog: TemplateRef<unknown>;
-    dataSource = new NodeDataSource();
+    dataSource = new NodeDataSource<Node>();
 
     @Input() actionbar: ActionbarComponent;
 
@@ -200,7 +200,8 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
             this.toast.toast('RECYCLE.TOAST.RESTORE_FINISHED');
         }
-        void this.refresh();
+        // all restore stati mean the node left the archive, only the target location may differ
+        this.removeFromList(list);
     }
 
     private openRestoreDialog(restoreResults: RestoreResults): void {
@@ -235,17 +236,55 @@ export class RecycleMainComponent implements OnInit, AfterViewInit, OnDestroy {
                 archivedNodeIds: nodes.map((n) => n.ref.id),
             })
             .subscribe(
-                () => this.deleteFinished(),
+                () => this.deleteFinished(nodes),
                 (error) => this.handleErrors(error),
             );
     }
 
-    private deleteFinished() {
+    private deleteFinished(nodes: Node[]) {
         this.toast.closeProgressSpinner();
         this.toast.toast('RECYCLE.TOAST.DELETE_FINISHED');
-        this.list.getSelection().clear();
-        void this.refresh();
+        // remove locally instead of reloading: the archive search index is not yet updated at this
+        // point and would return incomplete entries
+        this.removeFromList(nodes);
     }
+    /**
+     * removes the given nodes from the list without reloading it and re-fills the list with the
+     * same amount of elements from the end, so it keeps its previous fill level
+     */
+    private removeFromList(nodes: Node[]): void {
+        const countBefore = this.dataSource.getData().length;
+        this.dataSource.removeData(nodes);
+        this.list.getSelection().clear();
+        void this.refill(
+            countBefore,
+            countBefore - this.dataSource.getData().length,
+            nodes.map((node) => node.ref.id),
+        );
+    }
+
+    private async refill(offset: number, count: number, removedIds: string[]): Promise<void> {
+        if (count <= 0 || !this.dataSource.hasMore()) {
+            return;
+        }
+        this.dataSource.isLoading = true;
+        const result = await this.loadData(
+            this.searchQuery,
+            offset,
+            count,
+            this.sort.active,
+            this.sort.direction === 'asc',
+        ).toPromise();
+        // the archive index may lag behind and still deliver already listed (or just deleted)
+        // nodes - keep the pagination corrected by `removeData` and skip duplicates
+        const known = this.dataSource
+            .getData()
+            .map((node) => node.ref.id)
+            .concat(removedIds);
+        this.dataSource.appendData(result.nodes.filter((node) => !known.includes(node.ref.id)));
+        this.dataSource.isLoading = false;
+    }
+
     private deleteNodes(list: Node[]) {
         if (this.service.get('recycleSkipDeleteConfirmation', false)) {
             this.deleteNodesWithoutConfirmation(list);
