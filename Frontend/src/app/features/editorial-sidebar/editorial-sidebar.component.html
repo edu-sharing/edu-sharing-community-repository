@@ -6,7 +6,7 @@
   }
   <div class="sidebar-header">
     @if (enabledOption() && !enabledOption().trap && !editorialSidebarService.fullscreenActive()) {
-    <button mat-icon-button (click)="enabledOption.set(null)">
+    <button mat-icon-button (click)="goBack()">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
     }
@@ -83,6 +83,8 @@
         }
       </div>
       } @if (!enabledOption()) {
+      <!-- a host may put its own intro above the option list (see `optionsHeaderTemplate`) -->
+      <ng-container *ngTemplateOutlet="optionsHeaderTemplate()"></ng-container>
       <div class="entries">
         @if (options()?.length) { @for (option of options(); track option.name) {
         <div

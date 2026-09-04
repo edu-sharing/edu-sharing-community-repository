@@ -50,6 +50,17 @@ export type CustomSidebarOption = {
      * entry whenever nothing (or something else) is selected.
      */
     elementType?: ElementType[];
+    /**
+     * Additional visibility check, for conditions no scope or element type can express — same
+     * contract as `OptionItem.customShowCallback`. Re-evaluated whenever the options are rebuilt,
+     * which a registration for the same id triggers.
+     */
+    customShowCallback?: (nodes?: NodeEntriesDataType[]) => Promise<boolean>;
+    /**
+     * Asked before the sidebar navigates back to the option list. Return `false` to stay — for an
+     * option that would otherwise silently discard what the user started.
+     */
+    canDeactivate?: () => Promise<boolean>;
 };
 
 @Injectable({

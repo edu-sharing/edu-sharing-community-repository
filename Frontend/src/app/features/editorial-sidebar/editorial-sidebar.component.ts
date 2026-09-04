@@ -153,6 +153,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
      * way in — a launcher button, a menu entry — turn it off.
      */
     showEdgeToggle = input<boolean>(true);
+    /**
+     * Rendered above the option list. Lets a host introduce its options with something of its own —
+     * an illustration, a hint — without the sidebar knowing what that is.
+     */
+    optionsHeaderTemplate = input<TemplateRef<unknown>>();
+    /**
+     * Built-in options the host does not want offered here, by their key in
+     * `EDITORIAL_SIDEBAR_OPTIONS`. For a host that contributes a set of its own and would otherwise
+     * show two options for the same job.
+     */
+    hiddenOptions = input<EditorialSidebarOption[]>([]);
 
     //@Output() closeTrigger = new EventEmitter<void>();
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
@@ -398,8 +409,13 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             if (custom.scopes) {
                 option.scopes = custom.scopes;
             }
+            if (custom.customShowCallback) {
+                option.customShowCallback = custom.customShowCallback;
+            }
             options.push(option);
         }
+        const hidden = this.hiddenOptions().map((option) => 'EDITORIAL.OPTIONS.' + option);
+        const visibleOptions = options.filter((option) => !hidden.includes(option.name));
         this.optionsHelperDataService.setData({
             scope: this.primaryMode(),
             parent: this.parent(),
@@ -408,7 +424,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             allObjects: this.editorialSidebarService.nodes(),
             customOptions: {
                 useDefaultOptions: false,
-                addOptions: options,
+                addOptions: visibleOptions,
             },
         });
         const options$ = new BehaviorSubject(
@@ -442,6 +458,20 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private enableDefaultOption(changes: SimpleChanges, options: OptionItem[]) {
         let optionId = null;
         let trap = false;
+    }
+
+    /**
+     * Leave the open option and return to the option list.
+     *
+     * A contributed option may refuse — it can have unsaved work the user should confirm losing
+     * (see `CustomSidebarOption.canDeactivate`).
+     */
+    async goBack(): Promise<void> {
+        const canDeactivate = this.customOption()?.canDeactivate;
+        if (canDeactivate && !(await canDeactivate())) {
+            return;
+        }
+        this.enabledOption.set(null);
     }
 
     close() {
