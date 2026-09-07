@@ -185,15 +185,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
         this.editorialSidebarService.getCustomOption(this.enabledOption()?.option),
     );
     /**
-     * Whether the sidebar has anything to show: either a specific option is open, or the option
-     * list is non-empty. `options() === null` means "not computed yet" (loading) and is treated as
-     * no-content so the tab doesn't flash. Used to hide the open/close tab and to avoid opening the
-     * panel to just the "no options" message.
-     */
-    readonly hasContent = computed(
-        () => !!this.enabledOption() || (this.options()?.length ?? 0) > 0,
-    );
-    /**
      * trigger to inform the editorial page to show a main component
      */
     @Output() showComponent = new EventEmitter<MainComponentType>();
@@ -219,18 +210,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
                 this.enabledOption.set(null);
             }
         });
-        // never leave the panel open on an empty "no options" state: once the options have been
-        // computed (options() !== null) and there is nothing to show, close it. Guarded on the
-        // resolved (non-null) options so a recompute doesn't momentarily close a valid sidebar.
-        effect(() => {
-            if (
-                this.editorialSidebarService.sidebarOpened() &&
-                this.options() !== null &&
-                !this.hasContent()
-            ) {
-                this.editorialSidebarService.sidebarOpened.set(false);
-            }
-        });
     }
 
     async ngOnChanges(changes: SimpleChanges) {
@@ -246,8 +225,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private async initOptions() {
-        // mark as "loading" so hasContent()/the auto-close effect don't act on a stale list while
-        // the new options are (asynchronously) computed
+        // mark as "loading" (options() === null) so the template shows neither a stale list nor
+        // the "no options" message while the new options are (asynchronously) computed
         this.options.set(null);
         const options = [];
         const shareElement = new OptionItem('EDITORIAL.OPTIONS.SHARE_QR', 'share', (nodes) =>
