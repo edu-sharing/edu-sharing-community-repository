@@ -151,6 +151,12 @@ export class EditorialSidebarService {
      * it renders a node; reset whenever an option is newly opened or closed.
      */
     readonly showFullscreenToggle = signal(false);
+    /**
+     * Lets a host name the sidebar heading itself, e.g. after the element an option is showing.
+     * While `null` the heading stays with the option (its `OptionState.title`, else its label).
+     * Owned by whoever sets it — the sidebar only reads it.
+     */
+    readonly titleOverride = signal<string>(null);
 
     toggleFullscreen() {
         this.fullscreenActive.update((v) => !v);
