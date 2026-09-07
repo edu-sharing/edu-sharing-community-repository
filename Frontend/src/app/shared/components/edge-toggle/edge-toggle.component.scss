@@ -19,7 +19,8 @@
     // (the variable is transparent in light mode)
     border: 1px solid var(--borderDarkModeOnly);
     border-radius: 50%;
-    background-color: var(--backgroundContainerHigh);
+    background-color: var(--edgeToggleBackground);
+    box-shadow: var(--edgeToggleShadow);
     color: var(--textBlack);
     cursor: pointer;
     z-index: 100;

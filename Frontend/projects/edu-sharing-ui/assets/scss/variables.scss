@@ -133,6 +133,11 @@
     // border only defined in dark-mode
     --borderDarkModeOnly: transparent;
 
+    // edge toggle tab (opens/closes a sidebar): sits on the panel edge and needs to stand out
+    // against both the page and the drawer surface
+    --edgeToggleBackground: #fff;
+    --edgeToggleShadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+
     --color-readable-overlay: rgba(255, 255, 255, 0.8);
     --color-darken: rgba(0, 0, 0, 0.2);
     --toastBackground: #333333;
@@ -233,6 +238,9 @@ body.isDarkTheme {
     --inputBorderColor: #666;
     // faint edge for surfaces that nearly match the page background in dark mode
     --borderDarkModeOnly: #444;
+    // the tab blends into the dark surfaces; its border carries the separation instead of a shadow
+    --edgeToggleBackground: var(--backgroundContainerHigh);
+    --edgeToggleShadow: none;
     --color-readable-overlay: rgba(0, 0, 0, 0.6);
     --color-darken: rgba(255, 255, 255, 0.2);
     --toastBackground: #ededed;
