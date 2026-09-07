@@ -51,9 +51,8 @@ export type CustomSidebarOption = {
      */
     elementType?: ElementType[];
     /**
-     * Additional visibility check, for conditions no scope or element type can express — same
-     * contract as `OptionItem.customShowCallback`. Re-evaluated whenever the options are rebuilt,
-     * which a registration for the same id triggers.
+     * Additional visibility check for conditions no scope or element type can express — same
+     * contract as `OptionItem.customShowCallback`.
      */
     customShowCallback?: (nodes?: NodeEntriesDataType[]) => Promise<boolean>;
     /**

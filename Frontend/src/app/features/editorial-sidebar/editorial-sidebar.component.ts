@@ -159,9 +159,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
      */
     optionsHeaderTemplate = input<TemplateRef<unknown>>();
     /**
-     * Built-in options the host does not want offered here, by their key in
-     * `EDITORIAL_SIDEBAR_OPTIONS`. For a host that contributes a set of its own and would otherwise
-     * show two options for the same job.
+     * Built-in options that are not offered here, by their key in `EDITORIAL_SIDEBAR_OPTIONS`.
+     * For a host whose own options already cover the same job.
      */
     hiddenOptions = input<EditorialSidebarOption[]>([]);
 
@@ -440,9 +439,7 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     /**
-     * Leave the open option and return to the option list.
-     *
-     * A contributed option may refuse — it can have unsaved work the user should confirm losing
+     * Leave the open option and return to the option list. A contributed option may refuse
      * (see `CustomSidebarOption.canDeactivate`).
      */
     async goBack(): Promise<void> {
