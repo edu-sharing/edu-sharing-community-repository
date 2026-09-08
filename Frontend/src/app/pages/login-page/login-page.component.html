@@ -96,6 +96,7 @@
                 required
                 name="username"
                 id="username"
+                autocomplete="username"
                 (keydown.enter)="login()"
                 (keyup)="checkConditions($event)"
                 [(ngModel)]="username"
@@ -108,6 +109,7 @@
               <es-input-password
                 #passwordInput
                 inputId="password"
+                autocomplete="current-password"
                 label="{{ 'LOGIN.PASSWORD' | translate }}"
                 floatLabel="always"
                 [required]="true"

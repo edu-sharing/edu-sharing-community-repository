@@ -1,7 +1,7 @@
 <nav aria-label="breadcrumbs" class="breadcrumbs-wrapper">
   @if (clickable) {
   <!-- Full (not short) breadcrumbs -->
-  <div class="breadcrumb breadcrumb-full" [attr.role]="nodes.length > 0 ? 'list' : null">
+  <div class="breadcrumb breadcrumb-full" role="list">
     @if (showLanding) {
     <ng-container *ngTemplateOutlet="landingBreadcrumbElement"></ng-container>
     <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
@@ -23,7 +23,7 @@
   <!-- Short breadcrumbs
     Show only the last breadcrumbs and either a back- or a home button.
     -->
-  <div class="breadcrumb breadcrumb-short" [attr.role]="nodes.length > 0 ? 'list' : null">
+  <div class="breadcrumb breadcrumb-short" role="list">
     <!-- root / home breadcrumb -->
     @if (nodes.length <= 1) {
     <ng-container *ngTemplateOutlet="homeBreadcrumbElement"></ng-container>
@@ -60,8 +60,12 @@
   Short version works only with `short="always"`.
   -->
   @if (!clickable) {
-  <div class="breadcrumb breadcrumb-readonly" [attr.role]="nodes.length > 0 ? 'list' : null">
-    <span class="breadcrumb-element" [class.breadcrumb-element-active]="nodes.length === 0">
+  <div class="breadcrumb breadcrumb-readonly" role="list">
+    <span
+      role="listitem"
+      class="breadcrumb-element"
+      [class.breadcrumb-element-active]="nodes.length === 0"
+    >
       @if (homeIcon) {
       <i class="home-icon" [esIcon]="homeIcon"></i>
       } @if (home) {
@@ -79,7 +83,7 @@
     } @for ( node of short === 'always' && nodes.length > 1 ? [nodes[nodes.length - 1]] : nodes;
     track node; let last = $last) {
     <i aria-hidden="true" esIcon="keyboard_arrow_right" class="breadcrumb-arrow"></i>
-    <span class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
+    <span role="listitem" class="breadcrumb-element" [class.breadcrumb-element-active]="last">{{
       node ? (node | nodeTitle : { type: preferredName }) : ''
     }}</span>
     }

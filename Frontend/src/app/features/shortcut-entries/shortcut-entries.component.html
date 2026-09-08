@@ -69,7 +69,12 @@
         [class.reset-padding]="renameEntryVisible && i === selectedEntryIndex"
         cdkDragHandle
       >
-        <a class="entry-title" tabindex="0">
+        <a
+          class="entry-title"
+          tabindex="0"
+          (keydown.enter)="entryKeydown(entry, i, $event)"
+          (keydown.space)="entryKeydown(entry, i, $event)"
+        >
           @if (!renameEntryVisible || i !== selectedEntryIndex) {
           {{ entry | shortcutEntryTitle : i : i18nPrefix | async }}
           } @else {

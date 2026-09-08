@@ -93,6 +93,7 @@
   "RADIO_BUTTON_SELECTED": "radio button selected",
   "RADIO_BUTTON_NOT_SELECTED": "radio button not selected",
   "DISABLED": "disabled",
+  "RESIZE_SIDEBAR": "Resize sidebar",
   "COLLECTION_CHOOSER": {
     "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
     "SEARCH_COLLECTIONS": "Find collection...",
