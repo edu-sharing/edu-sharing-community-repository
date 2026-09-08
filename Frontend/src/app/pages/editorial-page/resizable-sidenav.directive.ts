@@ -1,5 +1,16 @@
-import { Directive, ElementRef, inject, Input, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import {
+    DestroyRef,
+    Directive,
+    ElementRef,
+    inject,
+    Input,
+    OnDestroy,
+    OnInit,
+    Renderer2,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSidenavContainer } from '@angular/material/sidenav';
+import { TranslateService } from '@ngx-translate/core';
 import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -12,6 +23,8 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     private renderer = inject(Renderer2);
     private storage = inject(SessionStorageService);
     private sidenavContainer = inject(MatSidenavContainer, { optional: true });
+    private translate = inject(TranslateService);
+    private destroyRef = inject(DestroyRef);
 
     @Input() storageKey: string;
     @Input() position: 'start' | 'end' = 'start';
@@ -91,6 +104,10 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         this.renderer.setAttribute(this.resizer, 'tabindex', '0');
         this.renderer.setAttribute(this.resizer, 'role', 'separator');
         this.renderer.setAttribute(this.resizer, 'aria-orientation', 'vertical');
+        this.translate
+            .stream('RESIZE_SIDEBAR')
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((label) => this.renderer.setAttribute(this.resizer, 'aria-label', label));
         const calculatedMin = Math.round(
             Math.max(this.minWidthPx, window.innerWidth * this.minWidth),
         );

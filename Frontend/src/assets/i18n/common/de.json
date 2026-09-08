@@ -93,6 +93,7 @@
   "RADIO_BUTTON_SELECTED": "Optionsfeld ausgewählt",
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
+  "RESIZE_SIDEBAR": "Breite der Seitenleiste ändern",
   "PAGINATOR": {
     "itemsPerPageLabel": "Einträge pro Seite:",
     "firstPageLabel": "Erste Seite",
