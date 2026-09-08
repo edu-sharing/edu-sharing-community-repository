@@ -2517,7 +2517,10 @@ public class NodeDao {
                 remoteId != null ? remoteId : getRef().getId(),
                 this.version,
                 type,
-                nodeProps);
+                nodeProps,
+                // for remote objects the id and props belong to the remote node, so the local aspects must not
+                // be applied to it (and fetching them remotely would be an extra round trip): pass none
+                remoteId != null ? Collections.emptyList() : aspects);
     }
 
     private String getPreviewImage() {

@@ -13,6 +13,7 @@ import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.model.GetPreviewResult;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -36,11 +37,11 @@ public class Preview implements Serializable {
   public Preview(){
 	  
   }
-  public Preview(NodeService nodeService, String storeProtocol, String storeIdentifier, String nodeId, String version, String type, Map<String, Object> nodeProps) {
+  public Preview(NodeService nodeService, String storeProtocol, String storeIdentifier, String nodeId, String version, String type, Map<String, Object> nodeProps, List<String> aspects) {
     GetPreviewResult preview = nodeService.getPreview(storeProtocol, storeIdentifier, nodeId ,nodeProps, version);
     PreviewServlet.PreviewDetail detail = null;
     try {
-      detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId,nodeProps);
+      detail = PreviewServlet.getPreview(nodeService, storeProtocol, storeIdentifier, nodeId, nodeProps, aspects);
       if(detail != null) {
         setGenerated(!PreviewServlet.PreviewDetail.TYPE_USERDEFINED.equals(detail.getType()));
         setType(detail.getType());

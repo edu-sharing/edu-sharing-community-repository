@@ -50,6 +50,16 @@ export type CustomSidebarOption = {
      * entry whenever nothing (or something else) is selected.
      */
     elementType?: ElementType[];
+    /**
+     * Additional visibility check for conditions no scope or element type can express — same
+     * contract as `OptionItem.customShowCallback`.
+     */
+    customShowCallback?: (nodes?: NodeEntriesDataType[]) => Promise<boolean>;
+    /**
+     * Asked before the sidebar navigates back to the option list. Return `false` to stay — for an
+     * option that would otherwise silently discard what the user started.
+     */
+    canDeactivate?: () => Promise<boolean>;
 };
 
 @Injectable({
@@ -141,6 +151,12 @@ export class EditorialSidebarService {
      * it renders a node; reset whenever an option is newly opened or closed.
      */
     readonly showFullscreenToggle = signal(false);
+    /**
+     * Lets a host name the sidebar heading itself, e.g. after the element an option is showing.
+     * While `null` the heading stays with the option (its `OptionState.title`, else its label).
+     * Owned by whoever sets it — the sidebar only reads it.
+     */
+    readonly titleOverride = signal<string>(null);
 
     toggleFullscreen() {
         this.fullscreenActive.update((v) => !v);
