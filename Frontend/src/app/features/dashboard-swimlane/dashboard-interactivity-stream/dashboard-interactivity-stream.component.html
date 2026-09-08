@@ -1,4 +1,5 @@
-<div class="events-wrapper" role="list">
+<!-- the list role is only valid while it actually contains listitem children -->
+<div class="events-wrapper" [attr.role]="events()?.length ? 'list' : null">
   @for (event of events(); track event) {
   <es-node-url class="event" [node]="event" role="listitem">
     <div
