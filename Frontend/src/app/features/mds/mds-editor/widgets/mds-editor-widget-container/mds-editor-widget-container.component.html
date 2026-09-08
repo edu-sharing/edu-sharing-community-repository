@@ -3,7 +3,9 @@
 } @if ((expandedState$ | async) !== 'disabled' && isVisible()) {
 <mat-expansion-panel [expanded]="(expandedState$ | async) === 'expanded'" class="mat-elevation-z0">
   <mat-expansion-panel-header>
-    <mat-panel-title>
+    <!-- The group in #body labels itself through labelId; in the form-field variant the
+      mat-label already carries that id, so only the plain variant needs it here. -->
+    <mat-panel-title [id]="wrapInFormField ? null : labelId">
       @if (widget.definition.icon) {
       <i [esIcon]="widget.definition.icon" esIconContext="mds"></i>
       }

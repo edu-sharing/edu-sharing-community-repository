@@ -1,16 +1,14 @@
 <h1 esTitle class="cdk-visually-hidden">{{ 'SEARCH.TITLE' | translate }}</h1>
 
+<!-- While idle the bar only fades out, so it stays in the DOM. Keeping its progressbar role out
+  of the accessibility tree is preferable to exposing it without a name. -->
 <mat-progress-bar
   mode="determinate"
   [value]="progressBarIsVisible ? loadingProgress.value : 0"
   [@fadeOut]="progressBarIsVisible ? 'visible' : 'hidden'"
   (animationEnd)="onProgressBarAnimationEnd()"
-  [attr.aria-label]="
-    progressBarIsVisible
-      ? ('SEARCH.LOADING_RESULTS'
-        | translate : { progress: progressBarIsVisible ? loadingProgress.value : 0 })
-      : ''
-  "
+  [attr.aria-hidden]="progressBarIsVisible ? null : 'true'"
+  [attr.aria-label]="'SEARCH.LOADING_RESULTS' | translate : { progress: loadingProgress.value }"
 ></mat-progress-bar>
 
 <!-- Explicitly check if `tabBarIsVisible !== null`, so we don't insert the body before we know
