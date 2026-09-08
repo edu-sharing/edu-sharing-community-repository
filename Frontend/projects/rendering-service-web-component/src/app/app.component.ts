@@ -26,8 +26,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     @Input() display_mode: 'inline' | 'full' = 'inline';
     @Input() jwt: string;
     @Input() render_url: string;
-    @Input() service_worker_url: string;
-    @Input() activate_service_worker: boolean;
     @Input() assets_url: string = '';
     @Input() resource_url: string = '';
     @Input() preview_url: string = '';
@@ -40,8 +38,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     node = signal<Node>(null);
     request = signal<RenderDataRequestWithToken>(null);
 
-    serviceWorkerUrl: string;
-    activateServiceWorker: boolean;
     assetUrl: string;
     resourceUrl: string;
     previewUrl: string;
@@ -61,8 +57,6 @@ export class AppComponent implements OnChanges, AfterViewInit, OnInit {
     }
 
     ngOnInit() {
-        this.serviceWorkerUrl = this.service_worker_url;
-        this.activateServiceWorker = this.activate_service_worker;
         this.assetUrl = this.assets_url;
         this.resourceUrl = this.resource_url;
         this.previewUrl = this.preview_url;
