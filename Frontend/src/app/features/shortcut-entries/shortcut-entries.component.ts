@@ -295,13 +295,30 @@ export class ShortcutEntriesComponent implements OnInit {
     }
 
     /**
+     * Activates a given entry from the keyboard, mirroring a click on it.
+     *
+     * @param entry
+     * @param index
+     * @param event
+     */
+    entryKeydown(entry: ExtendedShortcutEntry, index: number, event: Event) {
+        // while renaming, enter and space belong to the title input inside the entry
+        if (event.target !== event.currentTarget) {
+            return;
+        }
+        // space would scroll the page instead of activating the entry
+        event.preventDefault();
+        void this.entryClicked(entry, index, event);
+    }
+
+    /**
      * Handles the click event of a given entry by opening its URL in a new tab if the click is valid.
      *
      * @param entry
      * @param index
      * @param event
      */
-    async entryClicked(entry: ExtendedShortcutEntry, index: number, event: MouseEvent) {
+    async entryClicked(entry: ExtendedShortcutEntry, index: number, event: Event) {
         // prevents unwanted backdrop click
         event.stopPropagation();
         // special case for modal to overwrite existing entries
