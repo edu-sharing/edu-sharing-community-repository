@@ -5,7 +5,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -25,17 +24,19 @@ public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
 	@JobFieldDescription(description = "if false run in protocol mode")
 	Boolean execute = true;
 	
-	protected static final int DEFAULT_DAYS_TO_KEEP = -1;
 	protected static final int DEFAULT_DELETE_BATCH_COUNT = 1000;
 	
-	Logger logger = Logger.getLogger(TrashcanCleanerJob.class);
+	Logger logger = Logger.getLogger(TrashcanCleanerSolrJob.class);
 	
 	@Override
 	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
 		
-		final int time = (DAYS_TO_KEEP != null)
-					? DAYS_TO_KEEP
-					: DEFAULT_DAYS_TO_KEEP;
+		if (DAYS_TO_KEEP == null || DAYS_TO_KEEP < 0) {
+			logger.warn("Cleaning trashcan will be skipped (DAYS_TO_KEEP is not configured: " + DAYS_TO_KEEP + ")");
+			return;
+		}
+
+		final int time = DAYS_TO_KEEP;
 		
 		final int batch = (BATCH_COUNT != null)
 					? BATCH_COUNT

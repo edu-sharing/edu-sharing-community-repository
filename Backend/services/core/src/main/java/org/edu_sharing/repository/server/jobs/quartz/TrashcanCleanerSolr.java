@@ -73,10 +73,15 @@ public class TrashcanCleanerSolr {
 		searchToken.setStoreProtocol(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getProtocol());
 		searchToken.setStoreName(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getIdentifier());
 		searchToken.setElasticQuery(QueryBuilders.bool()
-				.should(s -> s.term(t -> t.field("type").value("ccm:io")))
-				.should(s -> s.term(t -> t.field("type").value("ccm:map")))
+				.must( m -> m.bool(b -> b
+						.should(s -> s.term(t -> t.field("type").value("ccm:io")))
+						.should(s -> s.term(t -> t.field("type").value("ccm:map")))
+						.minimumShouldMatch("1"))
+				)
 				.must(m -> m.range(r -> r.term(t -> t.field("properties.sys:archivedDate.date")
-						.lte(dateFormater.format(this.to))))).build());
+					.lte(dateFormater.format(this.to))))
+				)
+				.build());
 
 		org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
 		SearchResultNodeRef search = localService.search(searchToken);
