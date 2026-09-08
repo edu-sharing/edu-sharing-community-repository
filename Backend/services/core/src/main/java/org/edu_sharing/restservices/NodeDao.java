@@ -1232,8 +1232,9 @@ public class NodeDao {
     }
 
     /**
-     * the retrying transaction helper must wrap the outermost unit of work:
-     * inside an already running transaction it will not retry but only rethrow
+     * the retrying transaction helper must wrap the outermost unit of work: it only owns
+     * (and can therefore roll back) a transaction it created itself. nested inside a foreign
+     * transaction it would repeat its callback within that already doomed transaction
      */
     private static RetryingTransactionHelper getRetryingTransactionHelper() {
         ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();

@@ -7,6 +7,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -762,6 +763,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     public void updateNodeNative(StoreRef store, String nodeId, Map<String, ?> _props) {
+        if (AlfrescoTransactionSupport.getTransactionReadState() != AlfrescoTransactionSupport.TxnReadState.TXN_NONE) {
+            // a transaction is already running: the caller owns it, so only the caller can retry
+            // (the RetryingTransactionHelper would repeat the callback inside the very transaction
+            // that is already doomed - and its retries would multiply with the outer ones)
+            updateNodeNativeImpl(store, nodeId, _props);
+            return;
+        }
+        // retry the whole read-modify-write if a concurrent writer (e.g. the async preview/rendition
+        // generation) let the optimistic node update fail
+        serviceRegistry.getRetryingTransactionHelper().doInTransaction(() -> {
+            updateNodeNativeImpl(store, nodeId, _props);
+            return null;
+        });
+    }
+
+    private void updateNodeNativeImpl(StoreRef store, String nodeId, Map<String, ?> _props) {
 
         try {
             NodeRef nodeRef = new NodeRef(store, nodeId);
