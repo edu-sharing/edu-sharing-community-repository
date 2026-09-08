@@ -7,6 +7,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.policy.BehaviourFilter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -829,6 +830,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         } catch(DuplicateChildNodeNameException e){
             throw e;
         } catch (Exception e) {
+            // concurrent writers on the same node (e.g. the async preview/rendition generation touching
+            // cm:lastThumbnailModification) let alfresco fail the optimistic node update.
+            // this must not be swallowed: the transaction is doomed anyway and only a propagated exception
+            // allows the surrounding RetryingTransactionHelper to retry the whole update
+            if (RetryingTransactionHelper.extractRetryCause(e) != null) {
+                throw e;
+            }
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
             // https://issues.alfresco.com/jira/browse/ETHREEOH-2461
