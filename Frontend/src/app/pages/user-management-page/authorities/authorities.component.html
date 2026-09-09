@@ -485,11 +485,11 @@
 >
   <ng-template #empty>
     @if (!_searchQuery) {
-    <h5 class="noElements">{{ 'PERMISSIONS.NO_ELEMENTS' | translate }}</h5>
+    <p class="noElements" role="status">{{ 'PERMISSIONS.NO_ELEMENTS' | translate }}</p>
     } @if (!!_searchQuery) {
-    <h5 class="noElements">
+    <p class="noElements" role="status">
       {{ 'PERMISSIONS.NO_ELEMENTS_SEARCH' | translate }}
-    </h5>
+    </p>
     }
   </ng-template>
 </es-node-entries-wrapper>
