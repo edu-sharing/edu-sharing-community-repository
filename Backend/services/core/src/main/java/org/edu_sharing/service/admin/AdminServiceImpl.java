@@ -599,7 +599,7 @@ public class AdminServiceImpl implements AdminService {
             throw new Exception("missing type");
         }
 
-        if (type.equals(ApplicationInfo.TYPE_RENDERSERVICE)) {
+        if (type.equals(ApplicationInfo.TYPE_RENDERSERVICE) || type.equals(ApplicationInfo.TYPE_RENDERSERVICE_2)) {
             String contentUrl = props.getProperty("contenturl");
             if (StringUtils.isBlank(contentUrl)) {
                 throw new Exception("a renderservice must have an contenturl");
@@ -623,13 +623,14 @@ public class AdminServiceImpl implements AdminService {
         }
 
 
-        if (type.equals(ApplicationInfo.TYPE_RENDERSERVICE)) {
+        if (type.equals(ApplicationInfo.TYPE_RENDERSERVICE) || type.equals(ApplicationInfo.TYPE_RENDERSERVICE_2)) {
 
             String contentUrl = props.getProperty("contenturl");
             //String previewUrl = props.getProperty("previewurl");
 
             //store that in the homeApplication.properties.xml cause every repository has it's own renderservice
             //and we don't want to config an renderservice of an remote repository
+            //(also applies to rendering service 2: when only rs2 is registered, rs1's contenturl is never set otherwise)
 
             String homeAppFileName = PropertiesHelper.Config.getPropertyFilePath(CCConstants.REPOSITORY_FILE_HOME);
             Properties homeAppProps = PropertiesHelper.getProperties(homeAppFileName, PropertiesHelper.XML);
