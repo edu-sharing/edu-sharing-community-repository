@@ -6,7 +6,7 @@
   }
   <div class="sidebar-header">
     @if (enabledOption() && !enabledOption().trap && !editorialSidebarService.fullscreenActive()) {
-    <button mat-icon-button (click)="goBack()">
+    <button #backButtonRef mat-icon-button (click)="goBack()">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
     }
@@ -90,7 +90,7 @@
           type="button"
           class="entry"
           cdkMonitorElementFocus
-          (click)="option.callback(editorialSidebarService.nodes())"
+          (click)="activateOption(option, $event)"
           [disabled]="!option.isEnabled"
           [class.disabled]="!option.isEnabled"
           [attr.aria-labelledby]="instanceId + '-option-' + $index"

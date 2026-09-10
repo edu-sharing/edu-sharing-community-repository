@@ -1,9 +1,11 @@
 import {
+    afterNextRender,
     Component,
     computed,
     effect,
     EventEmitter,
     inject,
+    Injector,
     input,
     OnChanges,
     OnDestroy,
@@ -12,6 +14,7 @@ import {
     signal,
     SimpleChanges,
     TemplateRef,
+    viewChild,
     ViewChild,
 } from '@angular/core';
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
@@ -45,6 +48,7 @@ import {
     SubmissionConfig,
 } from '../../pages/editorial-page/submission-sidebar/submission-sidebar.component';
 import { EditorMode } from '../mds/types/types';
+import { MatIconButton } from '@angular/material/button';
 
 export type PrimaryMode = 'activity' | 'share' | 'assignment' | 'suggestions';
 export type MainComponentType = 'manageAssignment' | 'assignmentSubmission' | 'submitAssignment';
@@ -180,6 +184,9 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     readonly instanceId = `editorial-sidebar-${nextInstanceId++}`;
     /** id of the title heading; names the panel's landmark via `aria-labelledby` */
     readonly titleId = `${this.instanceId}-title`;
+    private readonly injector = inject(Injector);
+    /** only rendered while an escapable sub-view is open */
+    private readonly backButton = viewChild<MatIconButton>('backButtonRef');
     readonly title = computed(
         () =>
             this.editorialSidebarService.titleOverride() ||
@@ -450,6 +457,22 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private enableDefaultOption(changes: SimpleChanges, options: OptionItem[]) {
         let optionId = null;
         let trap = false;
+    }
+
+    /**
+     * Runs an option and, if it opened a sub-view, moves the focus to that view's back control
+     * (first control in the view) — the activated row is gone,
+     * so the focus would fall back to `<body>`.
+     */
+    activateOption(option: OptionItem, event: MouseEvent): void {
+        option.callback(this.editorialSidebarService.nodes());
+        if (!this.enabledOption()) {
+            return;
+        }
+        // a click from a key press carries no coordinates; only that origin paints the focus ring
+        const origin = event.detail === 0 ? 'keyboard' : 'program';
+        // the button does not exist before the sub-view has rendered
+        afterNextRender(() => this.backButton()?.focus(origin), { injector: this.injector });
     }
 
     /**
