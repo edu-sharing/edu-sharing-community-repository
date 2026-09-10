@@ -14,7 +14,7 @@ import {
     ParentEntries,
     PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
-import { OptionGroup, OptionItem, UIConstants } from 'ngx-edu-sharing-ui';
+import { OptionGroup, OptionItem, UIConstants, Values } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -135,6 +135,14 @@ export class TopicPageHelperService {
                 .createUrlTree([UIConstants.ROUTER_PREFIX + applyFilterComponent], extras)
                 .toString();
         return window.open(link, '_blank');
+    }
+
+    /**
+     * Property filters the applyFilter target is opened with. A search without own filters
+     * has to apply them as well to match what that target shows.
+     */
+    getApplyFilterDefaultFilters(): Values {
+        return this.topicPageGlobalService.getCustomApplyFilterExtras()?.queryParams?.filters ?? {};
     }
 
     /**

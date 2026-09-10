@@ -120,6 +120,13 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 property: DEFAULT_COLLECTION_ID_PROP,
                 values: [this.contextNodeId],
             });
+            // an unconfigured teaser has to match what the filter target shows for the collection
+            criteriaArray.push(
+                ...this.searchHelperService.convertCritieria(
+                    this.topicPageHelperService.getApplyFilterDefaultFilters(),
+                    [],
+                ),
+            );
             // also push the search or input text if it exists
             const text: string = (this.searchText ?? '').trim();
             const inputVal: string = (this.searchInput() ?? '').trim();
