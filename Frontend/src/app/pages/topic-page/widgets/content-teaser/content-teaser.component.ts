@@ -282,6 +282,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             queryParams: {
                 filters: propertyFilters,
                 q: this.searchText,
+                sort: this.sort(),
             },
         };
         this.windowRef = this.topicPageHelperService.openApplyFilterLink(contentTeaserExtra);

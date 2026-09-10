@@ -1,5 +1,6 @@
 import { PlatformLocation } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -125,6 +126,7 @@ export class TopicPageHelperService {
         if (extras.queryParams.filters) {
             extras.queryParams.filters = JSON.stringify(extras.queryParams.filters);
         }
+        this.expandSortQueryParams(extras.queryParams);
         const applyFilterComponent: string =
             this.topicPageGlobalService.getCustomApplyFilterComponent() || 'search';
         const link: string =
@@ -133,6 +135,21 @@ export class TopicPageHelperService {
                 .createUrlTree([UIConstants.ROUTER_PREFIX + applyFilterComponent], extras)
                 .toString();
         return window.open(link, '_blank');
+    }
+
+    /**
+     * Writes a sort into the parameters both targets understand: the search page reads a
+     * serialized sort, the editorial desk a separate property and direction.
+     */
+    private expandSortQueryParams(queryParams: { [key: string]: any }): void {
+        const sort: Sort = queryParams.sort;
+        if (sort?.active && sort?.direction) {
+            queryParams.sort = JSON.stringify(sort);
+            queryParams.sortActive = sort.active;
+            queryParams.sortDirection = sort.direction;
+        } else {
+            delete queryParams.sort;
+        }
     }
 
     /**
