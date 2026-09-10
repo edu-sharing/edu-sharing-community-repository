@@ -109,6 +109,9 @@ export type OptionState<T extends OptionConfig> = {
      */
     trap: boolean;
 };
+/** running counter so every instance's title carries a document-unique id */
+let nextTitleId = 0;
+
 @Component({
     selector: 'es-editorial-sidebar',
     templateUrl: 'editorial-sidebar.component.html',
@@ -118,6 +121,11 @@ export type OptionState<T extends OptionConfig> = {
     animations: [trigger('overlay', UIAnimation.openOverlay())],
     host: {
         '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
+        // A named landmark, so the panel can be reached and identified directly. `region` rather
+        // than `complementary` because the hosts nest it differently — inside the search page's
+        // `<main>`, outside the editorial page's — and only `region` is valid in both places.
+        role: 'region',
+        '[attr.aria-labelledby]': 'titleId',
     },
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
@@ -168,6 +176,8 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();
+    /** id of the title heading; names the panel's landmark via `aria-labelledby` */
+    readonly titleId = `editorial-sidebar-title-${nextTitleId++}`;
     readonly title = computed(
         () =>
             this.editorialSidebarService.titleOverride() ||

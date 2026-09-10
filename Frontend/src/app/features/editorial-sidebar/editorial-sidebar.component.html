@@ -10,9 +10,9 @@
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
     }
-    <div>
+    <h2 class="sidebar-title" [id]="titleId">
       {{ title() | translate }}
-    </div>
+    </h2>
     @if (editorialSidebarService.showFullscreenToggle() && isDesktop()) {
     <button
       mat-icon-button
