@@ -31,10 +31,10 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { SearchFilter } from '../../../search-page/search-page-results.component';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
 import { ScrollHelperService } from '../../shared/services/scroll-helper.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import { ApplyFilterEvent } from '../../shared/types/apply-filter-event';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { GenericNodeEntriesDisplayType } from '../../shared/types/generic-node-entries-display-type';
@@ -403,7 +403,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             // reset the reference to be not called twice
             this.windowRef = null;
             // parse the event data
-            const resultData: ApplyFilterEvent = JSON.parse(event.data.data);
+            const resultData: SearchFilter = JSON.parse(event.data.data);
             console.info(
                 this.translate.instant('TOPIC_PAGE.WIDGET.CONTENT_TEASER.FILTER_EVENT_RECEIVED'),
                 resultData,
