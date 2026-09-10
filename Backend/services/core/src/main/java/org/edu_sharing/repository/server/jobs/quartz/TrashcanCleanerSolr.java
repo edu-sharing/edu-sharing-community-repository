@@ -85,6 +85,7 @@ public class TrashcanCleanerSolr {
 
 		org.edu_sharing.service.search.SearchService localService = SearchServiceFactory.getLocalService();
 		SearchResultNodeRef search = localService.search(searchToken);
+		logger.info("found " + search.getData().size() + " results");
 		search.getData().forEach(n -> {
 			NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
 			if(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.equals(nodeRef.getStoreRef())) {
