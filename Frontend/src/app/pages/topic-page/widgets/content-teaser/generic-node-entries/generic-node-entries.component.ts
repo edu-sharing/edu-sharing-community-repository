@@ -20,6 +20,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
     HOME_REPOSITORY,
@@ -107,6 +108,8 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @ViewChild('customType') customTypeElement!: ElementRef<HTMLElement>;
 
     private readonly CUSTOM_CARD_POSITION_INDEX: number = 6;
+    private readonly DEFAULT_SORT_PROPERTY: string = 'cm:created';
+    private readonly DEFAULT_SORT_ASCENDING: boolean = true;
     private readonly DEFAULT_WIDTH: string = '314px';
     private readonly FULL_WIDTH: string = 'max(314px, 100% - 200px)';
     // taxonomy URL
@@ -227,6 +230,8 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     @Input() queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     @HostBinding('style.--scroll-gradient-color') @Input() scrollGradientColor: string = '#fff';
     @Input() searchText: string;
+    /** Sort order of the requested nodes; unset requests the default order. */
+    @Input() sort: Sort | null = null;
     @Output() blacklistChanged: EventEmitter<string> = new EventEmitter<string>();
     @Output() displayTypeChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() includeCardChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -456,11 +461,17 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
         const resetOnFirstLoad: boolean = Object.keys(changes).length > 1;
         const resetDueToCriteriaChange: boolean =
             changes.criteria?.previousValue !== changes.criteria?.currentValue;
+        // a different order replaces the whole result set, so the collected nodes are void
+        const resetDueToSortChange: boolean =
+            JSON.stringify(changes.sort?.previousValue ?? null) !==
+            JSON.stringify(changes.sort?.currentValue ?? null);
         // update the criteria if a custom type instance exists
         if (this.customTypeInstance && changes.criteria) {
             this.customTypeInstance.criteria = changes.criteria.currentValue;
         }
-        await this.setDataSource(resetOnFirstLoad || resetDueToCriteriaChange);
+        await this.setDataSource(
+            resetOnFirstLoad || resetDueToCriteriaChange || resetDueToSortChange,
+        );
         // workaround for updating showAlways options: override customOptions variable
         this.customOptions = this.retrieveCustomOptions();
         await this.nodeEntries?.initOptionsGenerator({
@@ -508,6 +519,14 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     }
 
     /**
+     * Returns the sort order to request, or null if the default order applies.
+     * A sort without a direction means "unsorted" and is treated as unset.
+     */
+    private getActiveSort(): Sort | null {
+        return this.sort?.active && this.sort?.direction ? this.sort : null;
+    }
+
+    /**
      * Performs a search query to set the data source.
      *
      * @param resetNecessary
@@ -532,6 +551,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             this.allRequestedNodes = [];
         }
         let query: string = this.queryId;
+        const activeSort: Sort | null = this.getActiveSort();
         // create a deep copy of criteria, as we will modify (and later might reset) it
         let criteria: MdsQueryCriteria[] = Helper.deepCopy(
             await this.extendCriteria(this.criteria),
@@ -547,8 +567,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: 'ALL',
             metadataset: this.mds || this.genericWidgetGlobalService.getDefaultMds(),
-            sortProperties: ['cm:created'],
-            sortAscending: [true],
+            sortProperties: [activeSort?.active ?? this.DEFAULT_SORT_PROPERTY],
+            sortAscending: [
+                activeSort ? activeSort.direction === 'asc' : this.DEFAULT_SORT_ASCENDING,
+            ],
             body: {
                 criteria,
                 resolveCollections: false,

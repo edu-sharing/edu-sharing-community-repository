@@ -21,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Sort } from '@angular/material/sort';
 import { NavigationExtras } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MdsQueryCriteria, Node } from 'ngx-edu-sharing-api';
@@ -205,6 +206,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     private propertyFilters: WritableSignal<Values> = signal(null);
     queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     private searchMode: string = RestConstants.PRIMARY_SEARCH_CRITERIA;
+    sort: WritableSignal<Sort | null> = signal(null);
     totalSearchResultCount: number = -1;
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
@@ -357,6 +359,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             includeCustomCard: this.includeCustomCard(),
             propertyFilters: this.propertyFilters(),
             searchText: this.searchText ?? '',
+            // an unset sort is left out of the config, so the query default stays in charge
+            ...(this.sort() ? { sort: this.sort() } : {}),
         };
     }
 
@@ -383,6 +387,10 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         // an empty string is also valid (i.e., overwrite search text if it is somehow defined)
         if (config.searchText !== undefined) {
             this.searchText = config.searchText;
+        }
+        // configs written before the sort was persisted carry no sort at all
+        if (config.sort !== undefined) {
+            this.sort.set(config.sort);
         }
     }
 
@@ -411,6 +419,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             // set searchText and propertyFilters
             this.searchText = resultData.searchString;
             this.propertyFilters.set(resultData.propertyFilters);
+            // senders without sort support leave the teaser on the query default
+            this.sort.set(resultData.sort ?? null);
             // emit config changed event
             this.configChanged.emit();
         }

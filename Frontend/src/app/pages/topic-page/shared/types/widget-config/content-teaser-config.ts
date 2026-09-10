@@ -1,3 +1,4 @@
+import { Sort } from '@angular/material/sort';
 import { Values } from 'ngx-edu-sharing-ui';
 import { GenericNodeEntriesDisplayType } from '../generic-node-entries-display-type';
 import { BaseWidgetConfig } from './base-widget-config';
@@ -8,4 +9,5 @@ export interface ContentTeaserConfig extends BaseWidgetConfig {
     includeCustomCard?: boolean;
     propertyFilters?: Values;
     searchText?: string;
+    sort?: Sort;
 }
