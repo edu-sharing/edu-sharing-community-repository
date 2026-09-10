@@ -81,6 +81,13 @@
         position: absolute;
         top: 0;
         left: 0;
+
+        // the handle lies on the preview image, where the dark theme's icon color has
+        // no contrast; the translucent backdrop of the icon fallback keeps it readable
+        :host-context(body.isDarkTheme) & {
+            --mdc-icon-button-icon-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
     }
 
     .tile-header {
