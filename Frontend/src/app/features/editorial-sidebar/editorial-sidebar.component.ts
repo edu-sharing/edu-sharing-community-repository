@@ -109,8 +109,8 @@ export type OptionState<T extends OptionConfig> = {
      */
     trap: boolean;
 };
-/** running counter so every instance's title carries a document-unique id */
-let nextTitleId = 0;
+/** running counter so every instance's generated ids are document-unique */
+let nextInstanceId = 0;
 
 @Component({
     selector: 'es-editorial-sidebar',
@@ -176,8 +176,10 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     @ViewChild('content', { static: true }) dialogContent: TemplateRef<unknown>;
 
     private readonly destroyed = new Subject<void>();
+    /** prefix of every id this instance generates */
+    readonly instanceId = `editorial-sidebar-${nextInstanceId++}`;
     /** id of the title heading; names the panel's landmark via `aria-labelledby` */
-    readonly titleId = `editorial-sidebar-title-${nextTitleId++}`;
+    readonly titleId = `${this.instanceId}-title`;
     readonly title = computed(
         () =>
             this.editorialSidebarService.titleOverride() ||
