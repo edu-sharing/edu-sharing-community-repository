@@ -1,7 +1,7 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 :host {
-    > label {
+    > h2 {
         display: flex;
         font-size: $fontSizeLarge;
         font-weight: bold;
