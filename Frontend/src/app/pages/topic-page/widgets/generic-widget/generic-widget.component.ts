@@ -169,7 +169,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     descriptionMapping: PromptToTextMapping;
     descriptionAiGenerated: WritableSignal<boolean> = signal(false);
     private destroyRef: DestroyRef = inject(DestroyRef);
-    embedConfigurationOption: ConfigurationOption;
+    embedConfigurationOption: ConfigurationOption = new ConfigurationOption();
     headline: string;
     headlineMapping: PromptToTextMapping;
     headlineAiGenerated: WritableSignal<boolean> = signal(false);
@@ -185,6 +185,15 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     private widgetNode: Node;
 
     constructor() {
+        // the label is streamed rather than resolved once: it is written into an option object
+        // the widget already holds, and the translations may still be loading when it is built
+        this.translate
+            .stream('TOPIC_PAGE.WIDGET.EMBEDDING.LABEL')
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((label: string): void => {
+                this.embedConfigurationOption.text = label;
+            });
+
         this.updateSearchResultCount$
             .pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef))
             .subscribe((): void => {
@@ -667,10 +676,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      * Helper function to update the common configuration options.
      */
     private updateCommonConfigurationOptions(): void {
-        this.embedConfigurationOption = new ConfigurationOption(
-            true,
-            this.translate.instant('TOPIC_PAGE.WIDGET.EMBEDDING.LABEL'),
-        );
+        this.embedConfigurationOption.isVisible = true;
         this.embedConfigurationOption.icon = 'code';
     }
 
