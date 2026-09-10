@@ -75,6 +75,10 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     ];
     dragging: boolean = false;
     initialized: WritableSignal<boolean> = signal(false);
+    // IDs of the nodes whose preview turned out to be square
+    private readonly squarePreviewIds: WritableSignal<ReadonlySet<string>> = signal(
+        new Set<string>(),
+    );
     list: Node[] = [];
     updateInProgress: WritableSignal<boolean> = signal(false);
     showMore: WritableSignal<boolean> = signal(false);
@@ -117,6 +121,40 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         } else {
             window.open(url, this.topicPageGlobalService.getCustomUrlTarget());
         }
+    }
+
+    /**
+     * Records whether the preview of a node is square, which the tile uses to decide
+     * whether the image may be cropped to the header's proportions.
+     *
+     * @param event
+     * @param node
+     */
+    protected previewLoaded(event: Event, node: Node): void {
+        const image: HTMLImageElement = event.target as HTMLImageElement;
+        const isSquare: boolean =
+            image.naturalWidth > 0 && image.naturalWidth === image.naturalHeight;
+        this.squarePreviewIds.update((ids: ReadonlySet<string>) => {
+            if (ids.has(node.ref.id) === isSquare) {
+                return ids;
+            }
+            const updated: Set<string> = new Set(ids);
+            if (isSquare) {
+                updated.add(node.ref.id);
+            } else {
+                updated.delete(node.ref.id);
+            }
+            return updated;
+        });
+    }
+
+    /**
+     * Whether the preview of a node is square.
+     *
+     * @param node
+     */
+    protected hasSquarePreview(node: Node): boolean {
+        return this.squarePreviewIds().has(node.ref.id);
     }
 
     /**

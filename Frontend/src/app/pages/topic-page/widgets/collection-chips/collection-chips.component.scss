@@ -91,7 +91,7 @@
     }
 
     .tile-header {
-        padding: 16px 8px 0 8px;
+        padding: 8px 8px 0 8px;
         height: 92px;
         width: 100%;
 
@@ -115,10 +115,26 @@
             }
         }
 
+        // the preview covers the padded header box, so tiles share one image format
+        // regardless of the aspect ratio the collection's preview comes in
         &:not(.default-icon) {
             img {
                 height: 100%;
-                width: auto;
+                width: 100%;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+
+                // a square preview is a logo rather than a photo, so it keeps its
+                // proportions instead of being cropped to the header's letterbox
+                &.square-preview {
+                    width: auto;
+                    margin: 0 auto;
+                }
+            }
+            // for square preview as extra padding-top
+            &:has(.square-preview) {
+                padding-top: 16px;
             }
         }
     }
