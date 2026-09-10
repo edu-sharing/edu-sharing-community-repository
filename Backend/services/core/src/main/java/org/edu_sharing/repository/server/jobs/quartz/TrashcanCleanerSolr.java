@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import org.alfresco.model.ContentModel;
@@ -56,12 +57,25 @@ public class TrashcanCleanerSolr {
 		execute(0);
 		
 		logger.info("collected " + list.size() +" nodes to delete");
+		int deleted = 0;
+		int failed = 0;
 		for(NodeRef nodeRef : list) {
-			logger.info("deleteing from archive:" + nodeRef +"  " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
+			logger.info("deleteing from archive:" + nodeRef);
 			if(this.execute){
-				nodeService.deleteNode(nodeRef);
+				try {
+					nodeService.deleteNode(nodeRef);
+					deleted++;
+				} catch (Exception e) {
+					/**
+					 * i.e. the elasticsearch index is behind and still knows a node that was already
+					 * removed from the archive store. skip it instead of aborting the whole job.
+					 */
+					failed++;
+					logger.error("could not delete " + nodeRef + " from archive, continuing with next node: " + e.getMessage(), e);
+				}
 			}
 		}
+		logger.info("cleaning trashcan finished (collected: " + list.size() + ", deleted: " + deleted + ", failed: " + failed + ")");
 	}
 	
 	private void execute(int page) {
@@ -89,7 +103,13 @@ public class TrashcanCleanerSolr {
 		search.getData().forEach(n -> {
 			NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(),n.getStoreId()),n.getNodeId());
 			if(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.equals(nodeRef.getStoreRef())) {
-				logger.info("adding:" + nodeRef + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_NAME) + " " + nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
+				/**
+				 * use the properties of the search hit, the node may no longer exist in the repository
+				 */
+				Map<String,Object> properties = n.getProperties();
+				logger.info("adding:" + nodeRef
+						+ " " + ((properties != null) ? properties.get(ContentModel.PROP_NAME.toString()) : null)
+						+ " " + ((properties != null) ? properties.get(ContentModel.PROP_ARCHIVED_DATE.toString()) : null));
 				list.add(nodeRef);
 			}else {
 				logger.error("wrong store: " + nodeRef);
