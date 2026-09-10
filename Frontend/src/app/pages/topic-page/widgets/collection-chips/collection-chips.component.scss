@@ -115,15 +115,10 @@
             }
         }
 
-        // the preview covers the padded header box, so tiles share one image format
-        // regardless of the aspect ratio the collection's preview comes in
         &:not(.default-icon) {
             img {
                 height: 100%;
-                width: 100%;
-                object-fit: cover;
-                object-position: center;
-                display: block;
+                width: auto;
             }
         }
     }
