@@ -23,6 +23,8 @@
   [class.read-only]="
     widget?.definition.interactionType === 'None' || mdsEditorInstance.editorMode === 'viewer'
   "
+  [attr.role]="isFilterLandmark ? 'region' : null"
+  [attr.aria-labelledby]="isFilterLandmark ? labelId : null"
 >
   <!-- FIXME: The mat-ripple class applies 'overflow: hidden' to the container, which cuts off
     ripple effects of content elements. -->
