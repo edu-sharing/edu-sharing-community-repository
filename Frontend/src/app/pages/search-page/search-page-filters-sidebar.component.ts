@@ -23,6 +23,8 @@ import { SearchFieldInternalService } from '../../main/navigation/search-field/s
 /** Width used when `searchFilterBarWidth` is not configured. */
 const DEFAULT_FILTER_BAR_WIDTH_PX = 319;
 
+let nextInstanceId = 0;
+
 @Component({
     selector: 'es-search-page-filters-sidebar',
     templateUrl: './search-page-filters-sidebar.component.html',
@@ -41,6 +43,8 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
 
+    /** Label of the panel's `region` landmark. */
+    readonly titleId = `search-page-filters-${nextInstanceId++}-title`;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
