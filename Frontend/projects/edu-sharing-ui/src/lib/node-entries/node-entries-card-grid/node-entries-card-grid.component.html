@@ -213,8 +213,9 @@
       color="primary"
       (click)="$event.stopPropagation(); doScroll('left')"
       tabindex="-1"
+      aria-hidden="true"
     >
-      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+      <i esIcon="keyboard_arrow_left"></i>
     </button>
   </div>
   } @if (scroll.right) {
@@ -224,8 +225,9 @@
       color="primary"
       (click)="$event.stopPropagation(); doScroll('right')"
       tabindex="-1"
+      aria-hidden="true"
     >
-      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+      <i esIcon="keyboard_arrow_right"></i>
     </button>
   </div>
   } }
