@@ -176,12 +176,19 @@
       hideSingleSelectionIndicator
       [value]="collectionsDisplayType()"
       (change)="onCollectionsDisplayTypeChange($event)"
+      [attr.aria-label]="i18nPrefix + 'COLLECTIONS.DISPLAY_TYPE.LABEL' | translate"
     >
-      <mat-button-toggle [value]="NodeEntriesDisplayType.SmallGrid">
+      <mat-button-toggle
+        [value]="NodeEntriesDisplayType.SmallGrid"
+        [aria-label]="i18nPrefix + 'COLLECTIONS.DISPLAY_TYPE.GRID' | translate"
+      >
         <i esIcon="grid_view"></i>
       </mat-button-toggle>
 
-      <mat-button-toggle [value]="NodeEntriesDisplayType.Table">
+      <mat-button-toggle
+        [value]="NodeEntriesDisplayType.Table"
+        [aria-label]="i18nPrefix + 'COLLECTIONS.DISPLAY_TYPE.TABLE' | translate"
+      >
         <i esIcon="list"></i>
       </mat-button-toggle>
 
@@ -189,6 +196,7 @@
       <mat-button-toggle
         [value]="NodeEntriesDisplayType.Tree"
         [disabled]="collectionsTreeToggleDisabled()"
+        [aria-label]="i18nPrefix + 'COLLECTIONS.DISPLAY_TYPE.TREE' | translate"
       >
         <i esIcon="account_tree"></i>
       </mat-button-toggle>

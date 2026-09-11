@@ -128,7 +128,13 @@
           "PLACEHOLDER": "Search for collections",
           "RECENT_COLLECTIONS": "Recently used",
           "MY_COLLECTIONS": "My collections",
-          "EDITORIAL_COLLECTIONS": "Editorial collections"
+          "EDITORIAL_COLLECTIONS": "Editorial collections",
+          "DISPLAY_TYPE": {
+            "LABEL": "Display type",
+            "GRID": "Display as tiles",
+            "TABLE": "Display as list",
+            "TREE": "Display as tree"
+          }
         },
         "WORKSPACE": {
           "EMPTY_MESSAGE": "So far you have created neither your own nor shared contents.",

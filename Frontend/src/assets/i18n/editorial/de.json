@@ -128,7 +128,13 @@
           "PLACEHOLDER": "Suche nach Sammlungen",
           "RECENT_COLLECTIONS": "Zuletzt verwendet",
           "MY_COLLECTIONS": "Meine Sammlungen",
-          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
+          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen",
+          "DISPLAY_TYPE": {
+            "LABEL": "Anzeigeart",
+            "GRID": "Anzeige als Kacheln",
+            "TABLE": "Anzeige als Liste",
+            "TREE": "Anzeige als Baum"
+          }
         },
         "WORKSPACE": {
           "EMPTY_MESSAGE": "Du hast bisher weder eigene noch gemeinsame Inhalte angelegt.",
