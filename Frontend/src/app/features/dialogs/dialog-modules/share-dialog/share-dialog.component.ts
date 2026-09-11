@@ -242,6 +242,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     structureColumns: ColumnType;
     readonly structureTabId: string = 'structure_tab';
     structureTreeConfig: TreeConfig = {
+        label: 'WORKSPACE.TAB_STRUCTURE_INHERITANCE',
         showFileName: false,
         multipleSelection: true,
         selectParents: true,

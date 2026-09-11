@@ -235,7 +235,7 @@ export class NodesSelectorComponent implements OnInit {
      */
     tabBlacklist = input<TabType[]>([]);
     /** config of the collections tree */
-    collectionsTreeConfig = input<TreeConfig>({ showFiles: true });
+    collectionsTreeConfig = input<TreeConfig>({ label: 'COLLECTIONS.TITLE', showFiles: true });
     /** the blacklist of the input combined with the one of the option config */
     private effectiveTabBlacklist = computed<TabType[]>(() => [
         ...(this.tabBlacklist() ?? []),
@@ -491,6 +491,7 @@ export class NodesSelectorComponent implements OnInit {
     // workspace tab
     dataSourceWorkspace: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
     workspaceTreeConfig = computed<TreeConfig>(() => ({
+        label: 'WORKSPACE.TITLE',
         showFileName: true,
         showFiles: true,
         selectionMode: this.selectionMode(),

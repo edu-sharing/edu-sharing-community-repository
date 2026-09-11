@@ -16,7 +16,11 @@
   <es-node-entries-global-options [displayType]="NodeEntriesDisplayType.Tree">
   </es-node-entries-global-options>
   }
-  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+  <mat-tree
+    [dataSource]="dataSource"
+    [treeControl]="treeControl"
+    [attr.aria-label]="entriesService.treeConfig?.label ?? 'TREE_LABEL' | translate"
+  >
     <!-- child nodes -->
     <!-- matTreeNodePaddingIndent 28 = 24 (width of icon) + 4 (gap between icon and text) -->
     <mat-tree-node
@@ -114,13 +118,18 @@
             node.level > 0 ? (node.level + indentOffset()) * treeNodeIndent : 0
           "
         >
+          <!--
+            Mouse affordance only: the treeitem itself expands and collapses via
+            ArrowRight/ArrowLeft, so a second tab stop here would just duplicate the node's name.
+          -->
           <button
             mat-icon-button
             matTreeNodeToggle
             [attr.id]="'toggle-' + node.item.ref.id"
             class="toggle-button fade"
             [disabled]="node.isLoading()"
-            [attr.aria-label]="'Toggle ' + node.item.title"
+            tabindex="-1"
+            aria-hidden="true"
           >
             <i [esIcon]="treeControl.isExpanded(node) ? 'expand_less' : 'chevron_right'"></i>
           </button>
