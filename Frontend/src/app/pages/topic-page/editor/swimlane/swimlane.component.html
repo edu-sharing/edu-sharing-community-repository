@@ -9,6 +9,7 @@
   >
     @if ( gridItem.item !== '' && isSupportedWidget(gridItem.item)) {
     <es-generic-widget
+      [configOverwrite]="gridItem.configOverwrite"
       [contextNodeId]="contextNodeId"
       [editMode]="editMode"
       [gridIndex]="i"

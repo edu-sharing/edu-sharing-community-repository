@@ -95,6 +95,7 @@ import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
 import { FilterVisibleSwimlanePipe } from '../shared/pipes/filter-swimlane-hits.pipe';
 import { AiHelperService } from '../shared/services/ai-helper.service';
+import { SwimlaneRepeatService } from '../shared/services/swimlane-repeat.service';
 import { TopicPageEventsService } from '../shared/services/topic-page-events.service';
 import {
     CustomSideMenuItem,
@@ -138,6 +139,8 @@ import { PromptToTextMapping } from '../shared/types/prompt-to-text-mapping';
 import { TopicHeaderConfig } from '../shared/types/widget-config/topic-header-config';
 import { Swimlane } from '../shared/types/swimlane';
 import { SwimlaneBackgroundShape } from '../shared/types/swimlane-background-shape';
+import { ContentTeaserConfig } from '../shared/types/widget-config/content-teaser-config';
+import { WidgetConfig } from '../shared/types/widget-config/widget-config';
 import { WidgetConfigObject } from '../shared/types/widget-config-object';
 import { WidgetNodeAddedEvent } from '../shared/types/widget-node-added-event';
 import {
@@ -145,12 +148,14 @@ import {
     retrieveChatCompletionObject,
     retrieveResultString,
 } from '../shared/utils/ai-util';
+import { containsPlaceholder } from '../shared/utils/interpolate-util';
 import { checkUserAccess } from '../shared/utils/node-util';
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
     markForCopy,
     markForRender,
+    mergeConfig,
     prependWorkspacePrefix,
     retrieveAiConfigFromNode,
     retrieveNodeId,
@@ -229,6 +234,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
     private optionsHelperService = inject(OptionsHelperDataService);
@@ -261,6 +267,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
     constructor() {
+        // the mode decides what is rendered: the persisted swimlanes while editing, their
+        // resolved form otherwise. It is switched from several places, so the signal is the hook
+        effect((): void => {
+            this.editMode();
+            untracked((): void => void this.updateRenderedSwimlanes());
+        });
         // listening to changes on the page variant node
         effect((): void => {
             this.pageVariantNode();
@@ -469,6 +481,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
     swimlanes: Swimlane[] = [];
     swimlaneToEditForm: UntypedFormGroup;
+    // the swimlanes as persisted; `swimlanes` may hold a preview of them resolved for rendering
+    private persistedSwimlanes: Swimlane[] = [];
     swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
         string,
         PromptToTextMapping
@@ -1180,7 +1194,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.headerNodeId.set(pageVariant.structure.headerNodeId);
             this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
             this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
-            this.swimlanes = pageVariant.structure.swimlanes ?? [];
+            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
+            await this.updateRenderedSwimlanes();
         }
         // update the swimlane ID to prompt text mapping
         if (initialLoad || pageVariantChanged || forceReload) {
@@ -1248,6 +1263,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
             markForCopy(variantConfig);
+            // a variant holds swimlanes, never the rules a template may define them by
+            await this.swimlaneRepeatService.expandRepeats(variantConfig.structure, {
+                collectionId: this.topicCollectionId(),
+                title: this.topic(),
+            });
             // retrieve the page variant properties
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
@@ -1945,7 +1965,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 // sync with the visible nodes (reset map, as the outputs are triggered again)
                 this.topicPageGlobalService.deleteVisibleNodesMap();
                 // visually change swimlanes
-                this.swimlanes = pageVariant.structure.swimlanes;
+                this.persistedSwimlanes = pageVariant.structure.swimlanes;
+                await this.updateRenderedSwimlanes();
                 this.endEditing();
                 // fix accordions are closed on edit
                 setTimeout((): void => {
@@ -2128,6 +2149,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.editMode.set(!this.editMode());
         this.checkAccordionExpansionState();
         this.closeSideMenus();
+    }
+
+    /**
+     * Sets the swimlanes that are rendered. Editing works on the persisted ones, so that what is
+     * saved is what an editor placed; outside edit mode repeat rules are resolved, which is what
+     * makes a rule reviewable before a variant is created from it.
+     */
+    private async updateRenderedSwimlanes(): Promise<void> {
+        if (this.editMode()) {
+            this.swimlanes = this.persistedSwimlanes;
+            return;
+        }
+        this.swimlanes = await this.swimlaneRepeatService.expandForPreview(
+            { swimlanes: this.persistedSwimlanes },
+            { collectionId: this.topicCollectionId(), title: this.topic() },
+        );
     }
 
     /**
@@ -2778,6 +2815,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             isBreadcrumbNode,
                         );
                     }
+                    // expand after the index-addressed widget handling above, which would
+                    // otherwise target a swimlane the expansion has moved
+                    await this.swimlaneRepeatService.expandRepeats(variantConfig.structure, {
+                        collectionId: this.topicCollectionId(),
+                        title: this.topic(),
+                    });
                     // copy the propagated widget nodes as children of the new variant node and
                     // persist the variant config without any propagatedNodeIds (these must never
                     // be persisted; they only exist for temporary inheritance)
@@ -2819,7 +2862,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
             this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
             this.headerNodeId.set(pageVariant.structure.headerNodeId);
-            this.swimlanes = pageVariant.structure.swimlanes ?? [];
+            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
+            await this.updateRenderedSwimlanes();
             // update the ccm:page_config_ref in the collection
             await this.topicPageHelperService.setProperty(
                 retrieveNodeId(this.collectionNode),
@@ -3217,7 +3261,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
         if (options.syncLocalState) {
             this.pageVariantNode.set(updatedNode);
-            this.swimlanes = variantConfig.structure.swimlanes ?? [];
+            this.persistedSwimlanes = variantConfig.structure.swimlanes ?? [];
+            void this.updateRenderedSwimlanes();
             if (variantConfig.structure.breadcrumbNodeId) {
                 this.breadcrumbNodeId.set(variantConfig.structure.breadcrumbNodeId);
             }
@@ -3305,9 +3350,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     );
                     gridTile.nodeId = prependWorkspacePrefix(copiedNode.ref.id);
                     delete gridTile.temporaryNodeId;
-                    if (collectionId) {
-                        await this.replaceWidgetCollectionId(copiedNode, collectionId);
-                    }
+                    await this.applyWidgetConfigPatch(
+                        copiedNode,
+                        collectionId,
+                        gridTile.configPatch,
+                    );
+                    // the patch belongs to the template rule, not to the created variant
+                    delete gridTile.configPatch;
+                } else if (gridTile.configPatch && !containsPlaceholder(gridTile.configPatch)) {
+                    // a tile the template left unconfigured has no node to copy, so the patch
+                    // alone becomes the widget's config
+                    const widgetNode: Node = await this.topicPageHelperService.createChild(
+                        node.ref.id,
+                        RestConstants.CCM_TYPE_MAP,
+                        DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
+                        null,
+                        {
+                            [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(gridTile.configPatch),
+                        },
+                    );
+                    gridTile.nodeId = prependWorkspacePrefix(retrieveNodeId(widgetNode));
+                    delete gridTile.configPatch;
+                } else {
+                    // an unresolved patch belongs to a repeat rule that is gone; it addresses an
+                    // item that does not exist, so no widget is created from it
+                    delete gridTile.configPatch;
                 }
             }
         }
@@ -3466,25 +3533,40 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Replaces the default collection ID provided in the widget config property filters by a given collection ID.
+     * Binds a copied widget node to its target: the collection ID in its property filters is
+     * replaced by the given one, then the grid tile's config patch is merged on top, so a patch
+     * addressing a specific collection wins over the page's own.
      *
      * @param node
      * @param collectionId
+     * @param configPatch
      */
-    private async replaceWidgetCollectionId(node: Node, collectionId: string): Promise<void> {
+    private async applyWidgetConfigPatch(
+        node: Node,
+        collectionId?: string,
+        configPatch?: Partial<WidgetConfig>,
+    ): Promise<void> {
         const widgetConfigJson: string = node.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0];
         if (!widgetConfigJson) {
             return;
         }
-        const widgetConfig = JSON.parse(widgetConfigJson);
-        if (!widgetConfig?.propertyFilters?.[DEFAULT_COLLECTION_ID_PROP]) {
+        const widgetConfig = JSON.parse(widgetConfigJson) as WidgetConfig;
+        const hasPatch: boolean = !!configPatch && Object.keys(configPatch).length > 0;
+        const replacesCollectionId: boolean =
+            !!collectionId &&
+            !!(widgetConfig as ContentTeaserConfig)?.propertyFilters?.[DEFAULT_COLLECTION_ID_PROP];
+        if (!hasPatch && !replacesCollectionId) {
             return;
         }
-        widgetConfig.propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [collectionId];
+        if (replacesCollectionId) {
+            (widgetConfig as ContentTeaserConfig).propertyFilters[DEFAULT_COLLECTION_ID_PROP] = [
+                collectionId,
+            ];
+        }
         await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
             node.ref.id,
             DEFAULT_WIDGET_CONFIG_PROP,
-            JSON.stringify(widgetConfig),
+            JSON.stringify(hasPatch ? mergeConfig(widgetConfig, configPatch) : widgetConfig),
         );
     }
 
