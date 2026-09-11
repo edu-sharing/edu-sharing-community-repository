@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { HOME_REPOSITORY } from 'ngx-edu-sharing-api';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { Values } from '../../../../features/mds/types/types';
@@ -13,6 +13,9 @@ import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic
 })
 export class TopicPageFiltersSidebarComponent {
     genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+
+    // the values the MDS editor starts with
+    @Input() currentValues: Values = {};
 
     @Output() closeFilterbar: EventEmitter<void> = new EventEmitter<void>();
     @Output() currentValuesChange: EventEmitter<Values> = new EventEmitter<Values>();

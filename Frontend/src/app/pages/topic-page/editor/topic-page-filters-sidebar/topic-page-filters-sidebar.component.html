@@ -12,10 +12,9 @@
       [repository]="HOME_REPOSITORY"
       [setId]="genericWidgetGlobalService.getDefaultMds()"
       [embedded]="true"
-      [currentValues]="{}"
+      [currentValues]="currentValues"
       (currentValuesChange)="applySearchFilters($event)"
       mode="search"
     ></es-mds-editor-wrapper>
-    <!--    [currentValues]="searchFilterValues" -->
   </div>
 </div>
