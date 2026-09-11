@@ -10,6 +10,9 @@
       formControlName="heading"
     />
   </mat-form-field>
+  @if (advancedEnabled && form.get('repeatSource').value) {
+  <p class="field-hint">{{ i18nPrefix + 'HEADING_HINT' | translate }}</p>
+  }
   <mat-form-field appearance="outline">
     <mat-label>
       {{ 'TOPIC_PAGE.SWIMLANE.EDIT.TYPE_LABEL' | translate }}
@@ -97,6 +100,101 @@
   </div>
 
   <!-- no grid has been defined yet -->
+
+  @if (advancedEnabled) {
+  <mat-accordion class="advanced-settings">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          {{ i18nPrefix + 'HEADING' | translate }}
+          @if (advancedCount() > 0) {
+          <span class="advanced-count" [attr.aria-label]="i18nPrefix + 'COUNT_ARIA' | translate">
+            {{ advancedCount() }}
+          </span>
+          }
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <es-info-message mode="info">
+        {{ i18nPrefix + 'HINT' | translate }}
+      </es-info-message>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ i18nPrefix + 'SOURCE_LABEL' | translate }}</mat-label>
+        <mat-select formControlName="repeatSource">
+          <mat-option [value]="null">{{ i18nPrefix + 'SOURCE_NONE' | translate }}</mat-option>
+          @for (source of repeatSources; track source) {
+          <mat-option [value]="source">
+            {{ i18nPrefix + 'SOURCE.' + source | translate }}
+          </mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ i18nPrefix + 'SOURCE_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+      @if (form.get('repeatSource').value) {
+      <mat-form-field appearance="outline">
+        <mat-label>{{ i18nPrefix + 'ORDER_BY_LABEL' | translate }}</mat-label>
+        <input matInput type="text" placeholder="cm:name" formControlName="repeatOrderBy" />
+        <mat-hint>{{ i18nPrefix + 'ORDER_BY_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-checkbox formControlName="repeatOrderDescending">
+        {{ i18nPrefix + 'ORDER_DESCENDING_LABEL' | translate }}
+      </mat-checkbox>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ i18nPrefix + 'MAX_ITEMS_LABEL' | translate }}</mat-label>
+        <input matInput type="number" min="1" formControlName="repeatMaxItems" />
+        <mat-hint>{{ i18nPrefix + 'MAX_ITEMS_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+      <p class="placeholder-hint">
+        {{ i18nPrefix + 'PLACEHOLDERS' | translate }} <code>{{ placeholders }}</code>
+        <span class="placeholder-scope">{{ i18nPrefix + 'PLACEHOLDERS_SCOPE' | translate }}</span>
+      </p>
+      @for (gridItem of gridItems; track gridItem; let i = $index) { @if (gridItem.item) {
+      <ng-container *ngTemplateOutlet="configPatchField; context: { index: i }"></ng-container>
+      } } }
+    </mat-expansion-panel>
+  </mat-accordion>
+  }
+
+  <ng-template #configPatchField let-index="index">
+    <mat-form-field appearance="outline" class="config-patch-field">
+      <mat-label>
+        {{
+          i18nPrefix + 'CONFIG_PATCH_LABEL'
+            | translate
+              : {
+                  widget:
+                    'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' +
+                      widgetTypeToTextMap.get(gridItems[index].item) | translate,
+                }
+        }}
+      </mat-label>
+      <textarea
+        matInput
+        rows="4"
+        spellcheck="false"
+        [value]="patchTexts[index] ?? ''"
+        (input)="patchChanged(index, $any($event.target).value)"
+      ></textarea>
+      <mat-hint>{{ i18nPrefix + 'CONFIG_PATCH_HINT' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="patch-examples">
+      <mat-label>{{ i18nPrefix + 'EXAMPLES_LABEL' | translate }}</mat-label>
+      <mat-select
+        #exampleSelect
+        (selectionChange)="applyExample(index, $event.value, exampleSelect)"
+      >
+        @for (example of examplesFor(gridItems[index].item); track example.key) {
+        <mat-option [value]="example.json">
+          {{ i18nPrefix + 'EXAMPLE.' + example.key | translate }}
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (patchErrors()[index]?.errorKey; as errorKey) {
+    <es-info-message mode="error" class="config-patch-error">
+      {{ errorKey | translate : patchErrors()[index].errorParams }}
+    </es-info-message>
+    }
+  </ng-template>
 
   <ng-template #reconfigureGrid>
     <div class="topic-page-col-span-6 topic-page-text-center">

@@ -22,3 +22,16 @@ export interface RepeatItem {
     title?: string;
     description?: string;
 }
+
+/**
+ * Placeholders a repeated swimlane may address, used to validate what an author writes.
+ */
+export const REPEAT_PLACEHOLDERS: string[] = [
+    'item.nodeId',
+    'item.ref',
+    'item.title',
+    'item.description',
+    'index',
+    'page.collectionId',
+    'page.title',
+];

@@ -71,6 +71,7 @@ import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-conf
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import {
     DELETE_OR_CANCEL,
+    GenericDialogButton,
     USE_OR_CANCEL,
     YES_OR_NO,
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
@@ -83,6 +84,7 @@ import {
 } from '../../../main/navigation/main-nav.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { ThemeService } from '../../../services/theme.service';
+import { Toast } from '../../../services/toast';
 import {
     SearchEvent,
     SearchFieldService,
@@ -139,6 +141,7 @@ import { PromptToTextMapping } from '../shared/types/prompt-to-text-mapping';
 import { TopicHeaderConfig } from '../shared/types/widget-config/topic-header-config';
 import { Swimlane } from '../shared/types/swimlane';
 import { SwimlaneBackgroundShape } from '../shared/types/swimlane-background-shape';
+import { SwimlaneRepeat } from '../shared/types/swimlane-repeat';
 import { ContentTeaserConfig } from '../shared/types/widget-config/content-teaser-config';
 import { WidgetConfig } from '../shared/types/widget-config/widget-config';
 import { WidgetConfigObject } from '../shared/types/widget-config-object';
@@ -250,6 +253,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
     private themeService = inject(ThemeService);
+    private toast = inject(Toast);
 
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
@@ -1880,7 +1884,28 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             type: new UntypedFormControl(swimlane.type),
             heading: new UntypedFormControl(swimlane.heading),
             grid: new UntypedFormControl(JSON.stringify(swimlane.grid ?? '[]')),
+            repeatSource: new UntypedFormControl(swimlane.repeat?.source ?? null),
+            repeatOrderBy: new UntypedFormControl(swimlane.repeat?.orderBy ?? ''),
+            repeatOrderDescending: new UntypedFormControl(!!swimlane.repeat?.orderDescending),
+            repeatMaxItems: new UntypedFormControl(swimlane.repeat?.maxItems ?? null),
+            // set by the dialog while a config patch does not parse
+            advancedValid: new UntypedFormControl(true),
         });
+        const applyButton: GenericDialogButton<'APPLY'> = {
+            label: 'APPLY',
+            config: { color: 'primary' },
+            // an unsound config patch keeps the dialog open, the field states the problem
+            callback: async (): Promise<boolean> => {
+                const valid: boolean = !!this.swimlaneToEditForm.get('advancedValid').value;
+                if (!valid) {
+                    this.toast.error(
+                        null,
+                        this.i18nPrefix + 'SWIMLANE.EDIT.ADVANCED.ERROR.CANNOT_APPLY',
+                    );
+                }
+                return valid;
+            },
+        };
         const dialogRef = await this.dialogs.openGenericDialog({
             title: this.translate.instant('TOPIC_PAGE.SWIMLANE.EDIT.HEADING', {
                 heading: swimlane.heading
@@ -1891,25 +1916,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             maxWidth: '100%',
             contentTemplate: this.editSwimlaneRef,
             closable: Closable.Casual,
-            buttons: [
-                { label: 'CANCEL', config: { color: 'standard' } },
-                { label: 'APPLY', config: { color: 'primary' } },
-            ],
+            buttons: [{ label: 'CANCEL', config: { color: 'standard' } }, applyButton],
         });
         const result = await firstValueFrom(dialogRef.afterClosed());
         if (result === 'APPLY') {
-            const editedSwimlane: any = this.swimlaneToEditForm.value;
-            if (!editedSwimlane) {
+            const formValue = this.swimlaneToEditForm.value;
+            if (!formValue) {
                 return;
             }
-            // restore swimlane ID + background color
-            editedSwimlane.id = swimlane.id;
-            if (swimlane.backgroundColor) {
-                editedSwimlane.backgroundColor = swimlane.backgroundColor;
-            }
-            // parse grid string
-            if (editedSwimlane.grid) {
-                editedSwimlane.grid = JSON.parse(editedSwimlane.grid);
+            // start from the swimlane so that properties the form does not cover are kept
+            const editedSwimlane: Swimlane = {
+                ...swimlane,
+                type: formValue.type,
+                heading: formValue.heading,
+                grid: formValue.grid ? JSON.parse(formValue.grid) : swimlane.grid,
+            };
+            const repeat: SwimlaneRepeat = this.retrieveRepeatFromForm(formValue);
+            if (repeat) {
+                editedSwimlane.repeat = repeat;
+            } else {
+                delete editedSwimlane.repeat;
             }
             if (JSON.stringify(editedSwimlane) === JSON.stringify(swimlane)) {
                 return;
@@ -1980,6 +2006,29 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.topicPageHelperService.displayErrorToast();
             }
         }
+    }
+
+    /**
+     * Builds the repeat rule from the advanced form values, or `null` when no source is chosen.
+     * Empty options are left out so that a rule carries only what an author actually set.
+     *
+     * @param formValue
+     */
+    private retrieveRepeatFromForm(formValue: { [key: string]: any }): SwimlaneRepeat | null {
+        if (!formValue.repeatSource) {
+            return null;
+        }
+        const repeat: SwimlaneRepeat = { source: formValue.repeatSource };
+        if (formValue.repeatOrderBy) {
+            repeat.orderBy = formValue.repeatOrderBy;
+        }
+        if (formValue.repeatOrderDescending) {
+            repeat.orderDescending = true;
+        }
+        if (formValue.repeatMaxItems > 0) {
+            repeat.maxItems = Number(formValue.repeatMaxItems);
+        }
+        return repeat;
     }
 
     /**
@@ -2161,10 +2210,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.swimlanes = this.persistedSwimlanes;
             return;
         }
-        this.swimlanes = await this.swimlaneRepeatService.expandForPreview(
-            { swimlanes: this.persistedSwimlanes },
+        const source: Swimlane[] = this.persistedSwimlanes;
+        const expanded: Swimlane[] = await this.swimlaneRepeatService.expandForPreview(
+            { swimlanes: source },
             { collectionId: this.topicCollectionId(), title: this.topic() },
         );
+        // resolving takes a request, in which time the page may have loaded other swimlanes
+        if (source === this.persistedSwimlanes) {
+            this.swimlanes = expanded;
+        }
     }
 
     /**

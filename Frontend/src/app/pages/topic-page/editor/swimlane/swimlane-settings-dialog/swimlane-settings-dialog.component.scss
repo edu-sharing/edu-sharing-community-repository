@@ -57,3 +57,67 @@ es-info-message {
     margin-bottom: 16px;
     display: block;
 }
+
+.advanced-settings {
+    display: block;
+    margin-top: 16px;
+
+    // the panel stacks its controls, which the surrounding grid would otherwise lay out
+    ::ng-deep .mat-expansion-panel-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .advanced-count {
+        margin-left: 8px;
+        padding: 0 8px;
+        border-radius: 10px;
+        font-size: topicPageVars.$font-size-small;
+        font-weight: topicPageVars.$font-weight-bold;
+        color: topicPageVars.$on-primary;
+        background-color: topicPageVars.$primary;
+    }
+
+    .placeholder-hint {
+        margin: 0;
+        font-size: topicPageVars.$font-size-small;
+        color: topicPageVars.$secondary-text;
+
+        code {
+            word-break: break-word;
+        }
+    }
+}
+
+.config-patch-field {
+    width: 100%;
+    margin-top: 8px;
+
+    textarea {
+        font-family: monospace;
+    }
+}
+
+.config-patch-error {
+    display: block;
+    margin-bottom: 8px;
+}
+
+// a note belonging to the field above it. The mat-form-field reserves a subscript area that
+// this pulls through, so the note sits close to its own field and leaves a clear gap to the next
+.field-hint {
+    margin: -16px 0 20px 16px;
+    font-size: topicPageVars.$font-size-small;
+    color: topicPageVars.$secondary-text;
+}
+
+// a menu of ready-made patches rather than a value of its own, so it stays narrow
+.patch-examples {
+    max-width: 320px;
+}
+
+.placeholder-scope {
+    display: block;
+    margin-top: 4px;
+}

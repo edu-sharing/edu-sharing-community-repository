@@ -332,7 +332,42 @@
         "SWIMLANE_DEFAULT": "Abschnitt",
         "TYPE_LABEL": "Typ",
         "GRID_DEFINITION_LABEL": "Grid-Definition",
-        "CHANGE_GRID_HINT": "Wenn Sie den Grid-Typ ändern, können Widgets, die auf später nichtmehr vorhandenen Positionen am Ende des Grids hinzugefügt wurden, verloren gehen. Verschieben Sie daher bitte zuerst die jeweiligen Widgets, bevor Sie mit der Grid-Anpassung fortfahren."
+        "CHANGE_GRID_HINT": "Wenn Sie den Grid-Typ ändern, können Widgets, die auf später nichtmehr vorhandenen Positionen am Ende des Grids hinzugefügt wurden, verloren gehen. Verschieben Sie daher bitte zuerst die jeweiligen Widgets, bevor Sie mit der Grid-Anpassung fortfahren.",
+        "ADVANCED": {
+          "HEADING": "Für Fortgeschrittene: Dynamisch erzeugte Abschnitte",
+          "COUNT_ARIA": "Anzahl gesetzter erweiterter Optionen",
+          "HINT": "Erzeugt automatisch einen Abschnitt je Element — zum Beispiel einen Abschnitt für jede Unter-Sammlung. In einer Seiten-Vorlage entstehen daraus echte Abschnitte, sobald eine Themenseite daraus angelegt wird. In einer Seiten-Variante wird die Regel bei jedem Aufruf der Seite neu aufgelöst und bleibt damit immer aktuell.",
+          "HEADING_HINT": "Platzhalter wie ${item.title} werden je Abschnitt ersetzt.",
+          "SOURCE_LABEL": "Einen Abschnitt erzeugen für",
+          "SOURCE_NONE": "Nichts — nur dieser eine Abschnitt",
+          "SOURCE_HINT": "Ohne Auswahl bleibt es bei diesem einen Abschnitt.",
+          "SOURCE": {
+            "subCollections": "Jede Unter-Sammlung"
+          },
+          "ORDER_BY_LABEL": "Sortieren nach",
+          "ORDER_BY_HINT": "Eigenschaft, z. B. cm:name oder cm:modified. Leer lassen für die Reihenfolge des Repositoriums.",
+          "ORDER_DESCENDING_LABEL": "Absteigend sortieren",
+          "MAX_ITEMS_LABEL": "Höchstzahl der Abschnitte",
+          "MAX_ITEMS_HINT": "Obergrenze für die Zahl der erzeugten Abschnitte.",
+          "PLACEHOLDERS": "In der Überschrift und in den Feldern unten einsetzbar:",
+          "PLACEHOLDERS_SCOPE": "${item…} steht für das jeweilige Element des Abschnitts, also die einzelne Unter-Sammlung. ${page…} steht für die Sammlung, zu der diese Themenseite gehört.",
+          "CONFIG_PATCH_LABEL": "Konfiguration von \"{{widget}}\" je Element (JSON)",
+          "CONFIG_PATCH_HINT": "Wird über die Konfiguration des Widgets gelegt. Nur eintragen, was sich je Element unterscheidet.",
+          "EXAMPLES_LABEL": "Beispiel einfügen",
+          "EXAMPLE": {
+            "COLLECTION_FILTER": "Nur Inhalte dieser Sammlung",
+            "COLLECTION_FILTER_NEWEST": "Diese Sammlung, neueste zuerst",
+            "HEADLINE": "Überschrift je Abschnitt",
+            "DESCRIPTION": "Beschreibung der Sammlung",
+            "SEARCH_TEXT": "Freitextsuche je Abschnitt"
+          },
+          "ERROR": {
+            "INVALID_JSON": "Kein gültiges JSON: {{detail}}",
+            "NOT_AN_OBJECT": "Es wird ein JSON-Objekt erwartet, z. B. {\"headline\": \"...\"}.",
+            "UNKNOWN_PLACEHOLDER": "Unbekannte Platzhalter: {{placeholders}}. Erlaubt sind: {{allowed}}",
+            "CANNOT_APPLY": "Die Konfiguration je Element ist fehlerhaft und kann nicht übernommen werden."
+          }
+        }
       },
       "DELETE": {
         "LABEL": "Abschnitt löschen",

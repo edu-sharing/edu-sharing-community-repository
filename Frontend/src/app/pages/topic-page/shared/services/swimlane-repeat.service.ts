@@ -42,6 +42,13 @@ export class SwimlaneRepeatService {
     ]);
 
     /**
+     * The names a repeat rule may use as its source.
+     */
+    getSourceNames(): string[] {
+        return [...this.resolvers.keys()];
+    }
+
+    /**
      * Replaces every swimlane carrying a repeat rule by one swimlane per resolved item, in place.
      * A rule that resolves to nothing leaves no swimlane behind, and a source without a resolver
      * leaves the swimlane as it is so an unknown rule cannot empty a page.
