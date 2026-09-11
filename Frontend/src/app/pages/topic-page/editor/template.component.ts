@@ -56,7 +56,14 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, startWith, takeUntil } from 'rxjs/operators';
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    startWith,
+    take,
+    takeUntil,
+} from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
@@ -112,6 +119,8 @@ import {
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
     DEFAULT_WIDGET_NAME_PREFIX,
+    SEARCH_FILTERS_QUERY_PARAM,
+    SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
     WIDGET_TYPE,
     WIDGETS,
@@ -273,12 +282,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .pipe(debounceTime(200), distinctUntilChanged(), takeUntil(this.destroyed$))
             .subscribe((searchInput: string) => {
                 this.searchInput.set(searchInput);
+                this.persistSearchStateInParams();
                 this.previewSidebarService.handleNodeClick(null);
             });
         this.searchFiltersSubject
             .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed$))
             .subscribe((searchFilters: Values) => {
                 this.searchFilters.set(searchFilters);
+                this.persistSearchStateInParams();
                 this.previewSidebarService.handleNodeClick(null);
             });
         // subscribe to changes on the sidebar opening state
@@ -494,6 +505,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     });
     private searchInput: WritableSignal<string> = signal('');
     private searchFilters: WritableSignal<Values> = signal({});
+    // the values the filter sidebar seeds its MDS editor with
+    searchFilterValues: Signal<Values> = this.searchFilters.asReadonly();
     private searchInputSubject: Subject<string> = new Subject<string>();
     private searchFiltersSubject: Subject<Values> = new Subject<Values>();
     searchUrl: string = '';
@@ -547,6 +560,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // initialize the component
             void this.initializeComponent(this.variantId);
         }
+        // the query params hold the search state, so the page is entered with the search
+        // input and filters its URL carries
+        this.route.queryParams
+            .pipe(take(1), takeUntil(this.destroyed$))
+            .subscribe((params: Params): void => this.restoreSearchStateFromParams(params));
         // set the topic based on the query param "collectionID"
         this.route.queryParams
             .pipe(filter((params: Params) => params.collectionId))
@@ -952,6 +970,61 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     applySearchFilters(filters: Values): void {
         this.searchFiltersSubject.next(filters);
+    }
+
+    /**
+     * Takes the search input and the page filters of the given query params into the page state.
+     *
+     * @param params
+     */
+    private restoreSearchStateFromParams(params: Params): void {
+        const searchInput: string = params[SEARCH_INPUT_QUERY_PARAM] ?? '';
+        if (searchInput) {
+            this.searchInput.set(searchInput);
+            this.searchFieldService.getCurrentInstance()?.setSearchString(searchInput);
+        }
+        const filters: Values = this.parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
+        if (Object.keys(filters).length > 0) {
+            this.searchFilters.set(filters);
+            // active filters stay visible: they explain the narrowed result set
+            this.filterPanelOpen.set(true);
+        }
+    }
+
+    /**
+     * Writes the search input and the page filters into the query params. Replaces the current
+     * history entry, so that the page occupies a single entry regardless of how often the
+     * search state changes.
+     */
+    private persistSearchStateInParams(): void {
+        const filters: Values = this.searchFilters();
+        const hasFilters: boolean = Object.keys(filters ?? {}).length > 0;
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+                [SEARCH_INPUT_QUERY_PARAM]: this.searchInput() || null,
+                [SEARCH_FILTERS_QUERY_PARAM]: hasFilters ? JSON.stringify(filters) : null,
+            },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
+     * Reads a filter query param, which holds the values keyed by property as JSON.
+     *
+     * @param param
+     */
+    private parseSearchFilters(param: string): Values {
+        if (!param) {
+            return {};
+        }
+        try {
+            return JSON.parse(param) as Values;
+        } catch {
+            // the param is part of a URL and may hold anything
+            return {};
+        }
     }
 
     // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS

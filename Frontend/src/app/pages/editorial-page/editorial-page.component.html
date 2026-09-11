@@ -1,8 +1,3 @@
-<!---h1 esTitle class="cdk-visually-hidden">{{ 'EDITORIAL.TITLE' | translate }} </h1-->
-<h1 esTitle class="cdk-visually-hidden">
-  {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
-</h1>
-
 <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter drawer,
   mirroring the editorial sidebar's toggle. -->
 <es-edge-toggle
@@ -109,6 +104,9 @@
       role="main"
       [class.has-main-component]="mainComponent$ | async"
     >
+      <h1 esTitle class="cdk-visually-hidden">
+        {{ 'EDITORIAL.BREADCRUMB.' + editorialBreadcrumbService.mode()?.toUpperCase() | translate }}
+      </h1>
       <div class="top-area">
         <es-editorial-breadcrumb
           [class.display-none]="(observer.width$ | async) < 400"

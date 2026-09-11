@@ -38,6 +38,10 @@ export const DEFAULT_PAGE_VARIANT_QUERY_ID: string = 'page_variant';
 export const DEFAULT_PAGE_VARIANT_CONFIG_VALUE: string = '{"structure":{"swimlanes":[]}}';
 export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 
+// query params carrying the page-wide search state
+export const SEARCH_FILTERS_QUERY_PARAM: string = 'filters';
+export const SEARCH_INPUT_QUERY_PARAM: string = 'q';
+
 // GENERAL SETTINGS
 export const DEFAULT_BG_COLOR: string = '#F4F4F4';
 export const DEFAULT_PAGE_NAME_PREFIX: string = 'PAGE_';

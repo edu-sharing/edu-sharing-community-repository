@@ -180,6 +180,7 @@ else
     echo "bei 401: im repository-log nachsehen, die meldung unterscheidet"
     echo "  'rejected bearer token of issuer ...'   -> claim abgelehnt (aud/azp/exp/iss)"
     echo "  'could not verify bearer token ...'     -> signatur oder jwks nicht erreichbar"
+    echo "  'matches none of the ... entries'       -> iss passt, aber kein eintrag mit diesem aud/azp"
     echo "  'neither is that issuer trusted ...'    -> iss steht nicht in trustedIssuers"
     echo "  eine exception aus authenticateUser     -> token ok, nutzer fehlt im repository"
 fi

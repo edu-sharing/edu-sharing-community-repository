@@ -42,6 +42,7 @@
   <div class="topic-page-outer-wrapper">
     @if (filterPanelOpen()) {
     <es-topic-page-filters-sidebar
+      [currentValues]="searchFilterValues()"
       (closeFilterbar)="filterPanelOpen.set(false)"
       (currentValuesChange)="applySearchFilters($event)"
     ></es-topic-page-filters-sidebar>

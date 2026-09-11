@@ -1,12 +1,5 @@
 @if (request() && node()) {
-<rs-root
-  [node]="node()"
-  [request]="request()"
-  [serviceWorkerUrl]="serviceWorkerUrl"
-  [activateServiceWorker]="activateServiceWorker"
-  [assetUrl]="assetUrl"
-  [isWebComponent]="true"
->
+<rs-root [node]="node()" [request]="request()" [assetUrl]="assetUrl" [isWebComponent]="true">
 </rs-root>
 } @if (display_mode === 'inline' && node()) {
 <div class="inline-metadata">

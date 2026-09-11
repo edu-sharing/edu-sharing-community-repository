@@ -36,10 +36,12 @@ import { ConfigService, Node } from 'ngx-edu-sharing-api';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
+import { Sort } from '@angular/material/sort';
 
 export type SearchFilter = {
     propertyFilters: Values;
     searchString: string;
+    sort?: Sort;
 };
 
 @Component({
@@ -203,9 +205,13 @@ export class SearchPageResultsComponent implements OnInit, OnDestroy {
         this.primaryAction.subscribe((action) => {
             if (action === 'applyFilter') {
                 const applyFilter = new OptionItem('OPTIONS.APPLY_FILTER', 'redo', () => {
+                    const sortConfig = this.results.state.value.sortConfig;
                     const filters = {
                         propertyFilters: this.searchPage.searchFilters.getValue() as Values,
                         searchString: this.searchPage.searchString.getValue(),
+                        sort: sortConfig?.active
+                            ? { active: sortConfig.active, direction: sortConfig.direction }
+                            : undefined,
                     } as SearchFilter;
                     const data = JSON.stringify(filters);
                     console.info(data);

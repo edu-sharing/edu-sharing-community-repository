@@ -29,6 +29,12 @@
         font-size: 130%;
         margin: 0;
     }
+    .filter-bar-reset-button {
+        flex-shrink: 0;
+        // the label competes with the title for the narrow bar, so it stays compact
+        padding: 0 8px;
+        min-width: 0;
+    }
     .filter-bar-close-button {
         margin-right: -10px;
         flex-shrink: 0;

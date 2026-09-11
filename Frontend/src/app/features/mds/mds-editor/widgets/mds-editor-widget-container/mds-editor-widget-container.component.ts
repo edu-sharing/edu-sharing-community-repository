@@ -125,6 +125,10 @@ export class MdsEditorWidgetContainerComponent
 
     readonly labelId: string;
     readonly descriptionId: string;
+    /** Whether this group is a filter of its own, and thus a landmark, like a collapsible group. */
+    get isFilterLandmark(): boolean {
+        return this.mdsEditorInstance.editorMode === 'search' && this.wrapInGroup && !!this.label;
+    }
     editorBulkMode: EditorBulkMode;
     bulkMode: BehaviorSubject<BulkMode>;
     missingRequired: MdsWidget['isRequired'] | null;

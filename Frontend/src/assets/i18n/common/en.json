@@ -414,6 +414,7 @@
   "NODE_COMMENTS": {
     "TITLE": "Comments",
     "NEW_COMMENT_PLACEHOLDER": "New comment...",
+    "ADD_COMMENT": "Send comment",
     "COMMENT_EMPTY": "Please enter a comment",
     "NO_COMMENTS": "No comments yet",
     "NO_GUEST_COMMENTING": "Please login to comment elements",

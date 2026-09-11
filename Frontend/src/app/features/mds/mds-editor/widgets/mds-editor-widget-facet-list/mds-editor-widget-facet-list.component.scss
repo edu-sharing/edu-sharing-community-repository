@@ -28,11 +28,20 @@ ul {
 
 li {
     padding: 0 4px;
-    margin: -10px 0;
 }
 
 mat-checkbox {
     width: 100%;
+    // Compact rows; the 48px touch-target overlay would reach into the neighbouring rows.
+    --mat-checkbox-state-layer-size: 32px;
+    --mat-checkbox-touch-target-display: none;
+
+    // Finger-sized target; the row grows with it.
+    @media (pointer: coarse) {
+        & {
+            --mat-checkbox-state-layer-size: 48px;
+        }
+    }
 }
 
 .label {

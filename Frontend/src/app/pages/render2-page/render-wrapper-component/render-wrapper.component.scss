@@ -243,16 +243,19 @@ rs-root {
         }
     }
 
-    h2 {
+    .title {
         flex-grow: 3;
         text-align: center;
-        margin: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 5px;
-        color: var(--textMain);
-        font-size: 110%;
+
+        h1 {
+            margin: 0;
+            color: var(--textMain);
+            font-size: 110%;
+        }
     }
 }
 ::ng-deep {

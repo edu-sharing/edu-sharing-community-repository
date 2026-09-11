@@ -9,11 +9,14 @@
   [minWidth]="0"
   [minWidthPx]="269"
   [maxWidthPx]="619"
-  [hidden]="!filterBarIsVisible.getValue() || (isMobileScreen | async)"
+  [hidden]="isCollapsed()"
+  [attr.inert]="isCollapsed() ? '' : null"
+  role="region"
+  [attr.aria-labelledby]="titleId"
 >
   <div class="filter-bar-container">
     <div class="filter-bar-heading">
-      <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+      <h2 class="filter-bar-title" [id]="titleId">{{ 'SEARCH.FILTERS' | translate }}</h2>
       @if (searchFilters.getUserValue()) {
       <button mat-button (click)="searchFilters.setUserValue(null)">
         <i esIcon="undo"></i>

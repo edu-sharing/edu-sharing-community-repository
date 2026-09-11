@@ -9,16 +9,20 @@
     <div class="right">
       <form (ngSubmit)="addComment()">
         <mat-form-field>
+          <mat-label>{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}</mat-label>
           <textarea
             matInput
             name="addComment"
             [disabled]="sending"
-            placeholder="{{ 'NODE_COMMENTS.NEW_COMMENT_PLACEHOLDER' | translate }}"
             [(ngModel)]="newComment"
           ></textarea>
         </mat-form-field>
         @if (!sending) {
-        <button mat-icon-button (click)="addComment()">
+        <button
+          mat-icon-button
+          [attr.aria-label]="'NODE_COMMENTS.ADD_COMMENT' | translate"
+          (click)="addComment()"
+        >
           <i esIcon="send"></i>
         </button>
         } @if (sending) {
@@ -62,6 +66,7 @@
               mat-icon-button
               #menuTrigger="matMenuTrigger"
               class="dropdown-dummy"
+              [attr.aria-label]="'OPTIONS.SHOW_ALL_OPTIONS' | translate"
               [matMenuTriggerFor]="dropdown.menu"
               (click)="options = getOptions(comment)"
             >

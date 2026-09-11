@@ -28,7 +28,12 @@
       <!-- if isIcon is set to true, the default icon of the node type is displayed -->
       <!-- use alt="" to tell the user that the image is only decorative -->
       @if (n.preview && !n.preview.isIcon) {
-      <img [src]="n | esNodeImage | async" alt="" />
+      <img
+        [src]="n | esNodeImage | async"
+        alt=""
+        [class.square-preview]="hasSquarePreview(n)"
+        (load)="previewLoaded($event, n)"
+      />
       } @else {
       <i esIcon="layers"></i>
       }

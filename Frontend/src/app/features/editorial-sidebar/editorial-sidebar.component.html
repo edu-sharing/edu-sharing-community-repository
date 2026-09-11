@@ -6,13 +6,13 @@
   }
   <div class="sidebar-header">
     @if (enabledOption() && !enabledOption().trap && !editorialSidebarService.fullscreenActive()) {
-    <button mat-icon-button (click)="goBack()">
+    <button #backButtonRef mat-icon-button (click)="goBack()">
       <i esIcon="keyboard_arrow_left" [aria]="true"></i>
     </button>
     }
-    <div>
+    <h2 class="sidebar-title" [id]="titleId">
       {{ title() | translate }}
-    </div>
+    </h2>
     @if (editorialSidebarService.showFullscreenToggle() && isDesktop()) {
     <button
       mat-icon-button
@@ -26,7 +26,6 @@
     >
       <i
         [esIcon]="editorialSidebarService.fullscreenActive() ? 'fullscreen_exit' : 'fullscreen'"
-        [aria]="true"
       ></i>
     </button>
     }
@@ -87,18 +86,21 @@
       <ng-container *ngTemplateOutlet="optionsHeaderTemplate()"></ng-container>
       <div class="entries">
         @if (options()?.length) { @for (option of options(); track option.name) {
-        <div
+        <button
+          type="button"
           class="entry"
-          [tabindex]="option.isEnabled ? 0 : -1"
           cdkMonitorElementFocus
-          (click)="option.callback(editorialSidebarService.nodes())"
-          [attr.aria-disabled]="!option.isEnabled"
+          (click)="activateOption(option, $event)"
+          [disabled]="!option.isEnabled"
           [class.disabled]="!option.isEnabled"
+          [attr.aria-labelledby]="instanceId + '-option-' + $index"
+          [attr.aria-describedby]="instanceId + '-option-' + $index + '-description'"
         >
           <i class="icon" [esIcon]="option.icon"></i>
           <div class="text">
             <div
               class="title"
+              [id]="instanceId + '-option-' + $index"
               esCheckTextOverflow
               #text="esCheckTextOverflow"
               [matTooltip]="text.hasTextOverflow() ? (option.name | translate) : null"
@@ -107,6 +109,7 @@
             </div>
             <div
               class="description"
+              [id]="instanceId + '-option-' + $index + '-description'"
               esCheckTextOverflow
               #description="esCheckTextOverflow"
               [matTooltip]="
@@ -117,7 +120,7 @@
             </div>
           </div>
           <i class="navigate" esIcon="keyboard_arrow_right" esIconContext="sidebar-navigate"></i>
-        </div>
+        </button>
         } } @if (!options()?.length) {
         <es-info-message mode="info">
           <div class="message">

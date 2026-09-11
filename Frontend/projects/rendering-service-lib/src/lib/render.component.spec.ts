@@ -69,7 +69,6 @@ describe('RenderComponent module selection', () => {
             nodeId: node.ref.id,
             repoId: node.ref.repo,
         } as RenderDataRequestWithToken;
-        app.activateServiceWorker = false;
         fixture.detectChanges();
         return app;
     }

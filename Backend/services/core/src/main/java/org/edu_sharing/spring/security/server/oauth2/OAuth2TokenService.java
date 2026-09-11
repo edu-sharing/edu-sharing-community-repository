@@ -42,6 +42,10 @@ public class OAuth2TokenService {
      * of our own tokens is derived from the request url (no fixed issuer is configured in
      * {@link OAuth2AuthorizationServerConfig}), which is why our own tokens are the fallback rather than
      * another entry to match against.
+     * <p>
+     * An issuer may be configured several times, once per client that is allowed to call us. The decoded
+     * token is then matched against those entries by audience / authorizedParty, and the user mapping of
+     * the matching entry is applied.
      *
      * @return the user name, or null if the token could not be verified
      */
@@ -51,12 +55,17 @@ public class OAuth2TokenService {
             return null;
         }
 
-        TrustedIssuerRegistry.TrustedIssuerContext context = trustedIssuerRegistry.get(issuer);
-        if (context != null) {
+        TrustedIssuerRegistry.TrustedIssuerGroup group = trustedIssuerRegistry.get(issuer);
+        if (group != null) {
             // the claims of the parse above are unverified and must only be used for routing - from
             // here on everything is read off the validated token
-            Jwt jwt = decode(context.getDecoder(), token, issuer, "trusted issuer " + issuer);
+            Jwt jwt = decode(group.getDecoder(), token, issuer, "trusted issuer " + issuer);
             if (jwt == null) {
+                return null;
+            }
+            TrustedIssuerRegistry.TrustedIssuerContext context = group.match(jwt);
+            if (context == null) {
+                // match() logged which entries the token was held against
                 return null;
             }
             String username = context.resolveUsername(jwt);

@@ -21,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { Sort } from '@angular/material/sort';
 import { NavigationExtras } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MdsQueryCriteria, Node } from 'ngx-edu-sharing-api';
@@ -31,10 +32,10 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { SearchFilter } from '../../../search-page/search-page-results.component';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
 import { ScrollHelperService } from '../../shared/services/scroll-helper.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
-import { ApplyFilterEvent } from '../../shared/types/apply-filter-event';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { DEFAULT_COLLECTION_ID_PROP } from '../../shared/types/custom-definitions';
 import { GenericNodeEntriesDisplayType } from '../../shared/types/generic-node-entries-display-type';
@@ -119,6 +120,13 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 property: DEFAULT_COLLECTION_ID_PROP,
                 values: [this.contextNodeId],
             });
+            // an unconfigured teaser has to match what the filter target shows for the collection
+            criteriaArray.push(
+                ...this.searchHelperService.convertCritieria(
+                    this.topicPageHelperService.getApplyFilterDefaultFilters(),
+                    [],
+                ),
+            );
             // also push the search or input text if it exists
             const text: string = (this.searchText ?? '').trim();
             const inputVal: string = (this.searchInput() ?? '').trim();
@@ -205,6 +213,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     private propertyFilters: WritableSignal<Values> = signal(null);
     queryId: string = RestConstants.DEFAULT_QUERY_NAME;
     private searchMode: string = RestConstants.PRIMARY_SEARCH_CRITERIA;
+    sort: WritableSignal<Sort | null> = signal(null);
     totalSearchResultCount: number = -1;
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
@@ -280,6 +289,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             queryParams: {
                 filters: propertyFilters,
                 q: this.searchText,
+                sort: this.sort(),
             },
         };
         this.windowRef = this.topicPageHelperService.openApplyFilterLink(contentTeaserExtra);
@@ -357,6 +367,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             includeCustomCard: this.includeCustomCard(),
             propertyFilters: this.propertyFilters(),
             searchText: this.searchText ?? '',
+            // an unset sort is left out of the config, so the query default stays in charge
+            ...(this.sort() ? { sort: this.sort() } : {}),
         };
     }
 
@@ -384,6 +396,10 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         if (config.searchText !== undefined) {
             this.searchText = config.searchText;
         }
+        // configs written before the sort was persisted carry no sort at all
+        if (config.sort !== undefined) {
+            this.sort.set(config.sort);
+        }
     }
 
     // HELPERS
@@ -403,7 +419,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             // reset the reference to be not called twice
             this.windowRef = null;
             // parse the event data
-            const resultData: ApplyFilterEvent = JSON.parse(event.data.data);
+            const resultData: SearchFilter = JSON.parse(event.data.data);
             console.info(
                 this.translate.instant('TOPIC_PAGE.WIDGET.CONTENT_TEASER.FILTER_EVENT_RECEIVED'),
                 resultData,
@@ -411,6 +427,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             // set searchText and propertyFilters
             this.searchText = resultData.searchString;
             this.propertyFilters.set(resultData.propertyFilters);
+            // senders without sort support leave the teaser on the query default
+            this.sort.set(resultData.sort ?? null);
             // emit config changed event
             this.configChanged.emit();
         }

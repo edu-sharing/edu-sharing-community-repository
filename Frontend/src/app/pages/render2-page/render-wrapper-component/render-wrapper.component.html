@@ -7,8 +7,8 @@
     </button>
   </div>
   @if (data()?.node) {
-  <h2>
-    {{ data().node | nodeTitle }}
+  <div class="title">
+    <h1 esTitle>{{ data().node | nodeTitle }}</h1>
     <button
       mat-icon-button
       title="{{ 'GOTO' | translate }} {{ 'INFO' | translate }}"
@@ -17,7 +17,7 @@
     >
       <i esIcon="info"></i>
     </button>
-  </h2>
+  </div>
   }
   <es-actionbar
     [numberOfAlwaysVisibleOptions]="1"

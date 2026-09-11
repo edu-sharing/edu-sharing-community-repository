@@ -12,7 +12,8 @@
     padding-bottom: 16px;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 16px;
+    justify-content: center;
 }
 
 // due to drag-and-drop, avoid nesting in .list
@@ -80,10 +81,17 @@
         position: absolute;
         top: 0;
         left: 0;
+
+        // the handle lies on the preview image, where the dark theme's icon color has
+        // no contrast; the translucent backdrop of the icon fallback keeps it readable
+        :host-context(body.isDarkTheme) & {
+            --mdc-icon-button-icon-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(255, 255, 255, 0.5);
+        }
     }
 
     .tile-header {
-        padding: 16px 8px 0 8px;
+        padding: 8px 8px 0 8px;
         height: 92px;
         width: 100%;
 
@@ -107,10 +115,26 @@
             }
         }
 
+        // the preview covers the padded header box, so tiles share one image format
+        // regardless of the aspect ratio the collection's preview comes in
         &:not(.default-icon) {
             img {
                 height: 100%;
-                width: auto;
+                width: 100%;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+
+                // a square preview is a logo rather than a photo, so it keeps its
+                // proportions instead of being cropped to the header's letterbox
+                &.square-preview {
+                    width: auto;
+                    margin: 0 auto;
+                }
+            }
+            // for square preview as extra padding-top
+            &:has(.square-preview) {
+                padding-top: 16px;
             }
         }
     }
@@ -136,9 +160,8 @@
 
 .toggle-show-more {
     margin-top: 8px;
-    padding-right: 16px;
     width: 100%;
-    text-align: right;
+    text-align: center;
 
     button {
         color: topicPageVars.$on-surface;

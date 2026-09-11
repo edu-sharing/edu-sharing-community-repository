@@ -2,11 +2,16 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
+    Injector,
     OnDestroy,
     OnInit,
+    QueryList,
+    afterNextRender,
     ViewChild,
+    ViewChildren,
     inject,
 } from '@angular/core';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { UntypedFormArray, UntypedFormControl } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { FacetAggregation, FacetValue, SearchService } from 'ngx-edu-sharing-api';
@@ -34,8 +39,10 @@ export class MdsEditorWidgetFacetListComponent
     private search = inject(SearchService);
     private ref = inject(ChangeDetectorRef);
     private changeDetectorRef = inject(ChangeDetectorRef);
+    private injector = inject(Injector);
 
     @ViewChild(MdsEditorWidgetContainerComponent) containerRef: MdsEditorWidgetContainerComponent;
+    @ViewChildren(MatCheckbox) checkboxes: QueryList<MatCheckbox>;
     readonly MAX_FACET_COUNT = 50;
     readonly MAX_FACET_INITIAL_COUNT = 5;
     readonly valueType: ValueType = ValueType.MultiValue;
@@ -109,12 +116,33 @@ export class MdsEditorWidgetFacetListComponent
     }
 
     onLoadMore(): void {
+        const previousValues = this.facetValuesFiltered?.map(({ value }) => value) ?? [];
         this.isLoading = true;
         this.showMore = true;
         this.search
             .loadMoreFacets({ property: this.widget.definition.id }, RestConstants.COUNT_UNLIMITED)
-            .pipe(finalize(() => (this.isLoading = false)))
-            .subscribe();
+            .pipe(
+                takeUntil(this.destroyed$),
+                finalize(() => (this.isLoading = false)),
+            )
+            .subscribe(() => this.focusFirstAddedValue(previousValues));
+    }
+
+    /**
+     * Moves the focus to the first facet value that is not part of `previousValues`, so that it
+     * does not fall back to the top of the page when the "load more" button is removed from the DOM.
+     */
+    private focusFirstAddedValue(previousValues: string[]): void {
+        // The rows are rebuilt by the facet update, so focus can only be moved once they are rendered.
+        afterNextRender(
+            () => {
+                const index = this.facetValuesFiltered?.findIndex(
+                    ({ value }) => !previousValues.includes(value),
+                );
+                this.checkboxes.get(index ?? -1)?.focus();
+            },
+            { injector: this.injector },
+        );
     }
 
     private registerFacetValuesSubject(): void {

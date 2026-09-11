@@ -1,5 +1,6 @@
 import { PlatformLocation } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -13,7 +14,7 @@ import {
     ParentEntries,
     PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
-import { OptionGroup, OptionItem, UIConstants } from 'ngx-edu-sharing-ui';
+import { OptionGroup, OptionItem, UIConstants, Values } from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
@@ -125,6 +126,7 @@ export class TopicPageHelperService {
         if (extras.queryParams.filters) {
             extras.queryParams.filters = JSON.stringify(extras.queryParams.filters);
         }
+        this.expandSortQueryParams(extras.queryParams);
         const applyFilterComponent: string =
             this.topicPageGlobalService.getCustomApplyFilterComponent() || 'search';
         const link: string =
@@ -133,6 +135,29 @@ export class TopicPageHelperService {
                 .createUrlTree([UIConstants.ROUTER_PREFIX + applyFilterComponent], extras)
                 .toString();
         return window.open(link, '_blank');
+    }
+
+    /**
+     * Property filters the applyFilter target is opened with. A search without own filters
+     * has to apply them as well to match what that target shows.
+     */
+    getApplyFilterDefaultFilters(): Values {
+        return this.topicPageGlobalService.getCustomApplyFilterExtras()?.queryParams?.filters ?? {};
+    }
+
+    /**
+     * Writes a sort into the parameters both targets understand: the search page reads a
+     * serialized sort, the editorial desk a separate property and direction.
+     */
+    private expandSortQueryParams(queryParams: { [key: string]: any }): void {
+        const sort: Sort = queryParams.sort;
+        if (sort?.active && sort?.direction) {
+            queryParams.sort = JSON.stringify(sort);
+            queryParams.sortActive = sort.active;
+            queryParams.sortDirection = sort.direction;
+        } else {
+            delete queryParams.sort;
+        }
     }
 
     /**
