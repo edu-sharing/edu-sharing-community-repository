@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -1212,25 +1213,40 @@ public class NodeDao {
     public NodeDao changeProperties(Map<String, String[]> properties, boolean obeyMds)
             throws DAOException {
 
+        // Throws ConcurrencyFailureException if a concurrent writer touches the node (DESP-851)
+        getRetryingTransactionHelper().doInTransaction(() -> {
+
+            try {
+                this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
+            } catch (Throwable t) {
+                throw DAOException.mapping(t);
+            }
+            return null;
+        });
+        // don't do this in transaction since it could cause rollbacks!
         try {
-
-            this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
-
             return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
         } catch (Throwable t) {
-
             throw DAOException.mapping(t);
         }
+    }
+
+    /**
+     * the retrying transaction helper must wrap the outermost unit of work: it only owns
+     * (and can therefore roll back) a transaction it created itself. nested inside a foreign
+     * transaction it would repeat its callback within that already doomed transaction
+     */
+    private static RetryingTransactionHelper getRetryingTransactionHelper() {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        return serviceRegistry.getTransactionService().getRetryingTransactionHelper();
     }
 
     public NodeDao changePropertiesWithVersioning(
             Map<String, String[]> properties, boolean obeyMds, String comment) throws DAOException {
 
         // Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+        getRetryingTransactionHelper().doInTransaction(() -> {
 
             try {
                 mergeVersionComment(properties, comment);

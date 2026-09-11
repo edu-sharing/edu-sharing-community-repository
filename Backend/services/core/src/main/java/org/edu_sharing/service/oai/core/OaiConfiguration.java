@@ -82,7 +82,7 @@ public class OaiConfiguration {
 
             @Override
             public List<Set> getSets() {
-                return settings.getSets().stream().map(Set::new).collect(Collectors.toList());
+                return settings.getSets().stream().map((set) -> new Set(set).withName(set)).collect(Collectors.toList());
             }
 
             @Override
