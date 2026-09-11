@@ -9,7 +9,8 @@
   [minWidth]="0"
   [minWidthPx]="269"
   [maxWidthPx]="619"
-  [hidden]="!filterBarIsVisible.getValue() || (isMobileScreen | async)"
+  [hidden]="isCollapsed()"
+  [attr.inert]="isCollapsed() ? '' : null"
 >
   <div class="filter-bar-container">
     <div class="filter-bar-heading">

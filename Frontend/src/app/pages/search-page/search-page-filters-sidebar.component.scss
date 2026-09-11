@@ -14,7 +14,9 @@
     &[hidden] {
         // Override the UA stylesheet's `[hidden] { display: none }`: display:none can't be
         // transitioned, so the panel would snap instead of animate. Keep it displayed but collapse
-        // its width to 0 and clip the content so it animates open/closed.
+        // its width to 0 and clip the content so it animates open/closed. Staying displayed also
+        // keeps the panel focusable and exposed to assistive technology, so the template marks it
+        // `inert` while it is collapsed.
         display: block;
         overflow: hidden;
         width: 0 !important;

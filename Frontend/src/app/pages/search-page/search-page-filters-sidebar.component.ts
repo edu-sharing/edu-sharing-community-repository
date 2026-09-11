@@ -5,9 +5,11 @@ import {
     OnInit,
     TemplateRef,
     ViewChild,
+    computed,
     inject,
     signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -43,6 +45,18 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
     readonly isMobileScreen = this.getIsMobileScreen();
+    private readonly filterBarVisibleSig = toSignal(
+        this.searchFieldInternalService.filterBarVisible,
+        { initialValue: false },
+    );
+    private readonly isMobileSig = toSignal(this.isMobileScreen, { initialValue: false });
+    /**
+     * Whether the filter bar is collapsed — either closed by the user, or replaced by the filter
+     * dialog on a narrow screen. A collapsed bar stays rendered so that its width can animate,
+     * which is why it is additionally marked `inert` in the template to keep its controls out of
+     * the tab order and the accessibility tree.
+     */
+    readonly isCollapsed = computed(() => !this.filterBarVisibleSig() || this.isMobileSig());
     /**
      * Initial width of the resizable filter bar, configurable via `searchFilterBarWidth`.
      * `null` until the config is resolved, the filter bar is rendered only afterwards so the
