@@ -27,6 +27,10 @@ public class StreamServiceHelper {
         return authorities;
     }
     public static boolean canCurrentAuthorityAccessNode(StreamService service,String nodeId) throws Exception {
+        // no stream service configured -> no stream based access
+        if(service == null || service instanceof StreamServiceNone) {
+            return false;
+        }
         return service.canAccessNode(getCurrentAuthorities(), nodeId);
     }
 }
