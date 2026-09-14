@@ -225,8 +225,10 @@ export class IconDirective implements OnInit, OnDestroy {
 
     private updateAria() {
         if (this._aria !== undefined) {
-            if (this._aria && this._id) {
-                const key = 'ICON_LABELS.' + this._id;
+            // '' means a cssClass-only mapping; fall back to the un-mapped id for the label
+            const labelId = this._id === '' ? this.originalId$.value : this._id;
+            if (this._aria && labelId) {
+                const key = 'ICON_LABELS.' + labelId;
                 this.translate.get(key).subscribe((label) => {
                     // an icon without an `ICON_LABELS` entry resolves to the key itself; leaving
                     // the icon unnamed is better than exposing "ICON_LABELS.<id>" as its alt text
