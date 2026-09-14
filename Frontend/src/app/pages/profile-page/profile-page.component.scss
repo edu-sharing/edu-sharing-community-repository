@@ -242,7 +242,7 @@ $path: '../../../assets/images/';
             }
 
             .empty {
-                color: $textVeryLight;
+                color: var(--textRenderingLabels);
             }
 
             /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */
