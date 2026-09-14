@@ -148,13 +148,25 @@ export class RenderComponent implements OnChanges, OnInit {
                                   render.getRenderDataTokenSessionSafe(this.request!!),
                               )
                             : await firstValueFrom(render.getRenderDataToken(this.request!!));
-                        // Case 0: module deferred its links => no fetch/poll yet; the consumer
-                        // renders its action UI and calls fetchLinks() on click.
-                        if (renderResponseData.deferred) {
+                        // Case 0: the service does not render this node at all (a plain link, a
+                        // youtube embed, an LTI launch, a type no module claims) => we render it
+                        // ourselves. Checked first: such a response carries no objectLinks, no
+                        // jobId and deferred = false, so any later branch would misread it.
+                        if (renderResponseData.supportedByBackend === false) {
+                            this.renderFrontendModule(services.moduleInfo);
+                            // Case 1: module deferred its links => no fetch/poll yet; the consumer
+                            // renders its action UI and calls fetchLinks() on click.
+                        } else if (renderResponseData.deferred) {
                             this.handleDeferredResponse(renderResponseData);
-                            // Case 1: no job returned => no polling needed
+                            // Case 2: no job returned => no polling needed
                         } else if (renderResponseData.jobId === null) {
-                            this.handleRenderingResponseWithoutJob(renderResponseData);
+                            // A response without links and without a job has nothing to render;
+                            // fall back to the frontend module rather than leaving a blank area.
+                            if (!renderResponseData.objectLinks?.length) {
+                                this.renderFrontendModule(services.moduleInfo);
+                            } else {
+                                this.handleRenderingResponseWithoutJob(renderResponseData);
+                            }
                         } else {
                             // Keep the response around so reloadLinks() can re-poll this same job.
                             this.latestRenderResponse = renderResponseData;
@@ -162,7 +174,8 @@ export class RenderComponent implements OnChanges, OnInit {
                             this.startJobPolling(jobInfoService, renderResponseData);
                         }
                     } catch (error) {
-                        // 415 = backend has no module for this media type -> frontend module fallback
+                        // 415 = a rendering service predating `supportedByBackend` saying exactly
+                        // what case 0 above says. Keep while such services are still in the field.
                         if (error instanceof HttpErrorResponse && error.status === 415) {
                             this.renderFrontendModule(services.moduleInfo);
                         } else {

@@ -41,10 +41,11 @@ export class RenderControllerWrapperService extends RenderControllerService {
             this.firstRequestStarted = true;
             return this.getRenderDataToken$Response(params, context).pipe(
                 // the gate has to open on every outcome, not just on success: a failing first
-                // request (e.g. 415 for a node the backend has no module for, which the caller
-                // recovers from with a frontend module) would otherwise deadlock every other
-                // render component on the page. Unsubscribing counts too, so a component that is
-                // destroyed while its request is in flight does not block the rest either.
+                // request (a network error, a 5xx, or — against a rendering service predating
+                // RenderDataResponse.supportedByBackend — a 415 the caller recovers from with a
+                // frontend module) would otherwise deadlock every other render component on the
+                // page. Unsubscribing counts too, so a component that is destroyed while its
+                // request is in flight does not block the rest either.
                 finalize(() => this.firstRequestCompleted$.next()),
                 map((resp) => resp.body!),
                 switchMap((data) => timer(50).pipe(map(() => data))),
