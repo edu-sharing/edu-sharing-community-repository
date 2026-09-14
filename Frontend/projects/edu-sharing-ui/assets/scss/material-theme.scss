@@ -286,7 +286,7 @@ mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
         color: #fff;
     }
 }
-.mat-slide-toggle.cdk-keyboard-focused .mat-slide-toggle-thumb-container .mat-focus-indicator {
+.mat-mdc-slide-toggle.cdk-keyboard-focused .mat-focus-indicator {
     @include setGlobalKeyboardFocus();
 }
 
