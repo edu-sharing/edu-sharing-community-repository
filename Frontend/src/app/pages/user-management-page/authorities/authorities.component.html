@@ -304,7 +304,7 @@
           <input matInput name="email" [(ngModel)]="edit.profile.email" required />
         </mat-form-field>
         <div class="group">
-          <mat-form-field>
+          <mat-form-field subscriptSizing="dynamic">
             <mat-label>{{ 'USER.primaryAffiliation' | translate }}</mat-label>
             @if (primaryAffiliationList) {
             <mat-select name="primaryAffiliation" [(ngModel)]="edit.profile.primaryAffiliation">
@@ -324,7 +324,22 @@
             />
             }
           </mat-form-field>
-          <button mat-flat-button (click)="primaryAffiliationList = !primaryAffiliationList">
+          <button
+            mat-flat-button
+            (click)="primaryAffiliationList = !primaryAffiliationList"
+            [attr.aria-label]="
+              (primaryAffiliationList
+                ? 'USER.PRIMARY_AFFILIATION_SWITCH_TO_TEXT'
+                : 'USER.PRIMARY_AFFILIATION_SWITCH_TO_LIST'
+              ) | translate
+            "
+            [matTooltip]="
+              (primaryAffiliationList
+                ? 'USER.PRIMARY_AFFILIATION_SWITCH_TO_TEXT'
+                : 'USER.PRIMARY_AFFILIATION_SWITCH_TO_LIST'
+              ) | translate
+            "
+          >
             <i class="material-icons">{{ primaryAffiliationList ? 'edit' : 'list' }}</i>
           </button>
         </div>

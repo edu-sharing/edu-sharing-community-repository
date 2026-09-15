@@ -557,6 +557,8 @@
     "email": "e-mail",
     "status": "status",
     "primaryAffiliation": "primary role",
+    "PRIMARY_AFFILIATION_SWITCH_TO_LIST": "Switch to predefined list",
+    "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Switch to free text",
     "password": "password",
     "sizeQuota": "quota size in MB",
     "PRIMARY_AFFILIATION": {

@@ -731,6 +731,8 @@
     "email": "E-Mail",
     "status": "Status",
     "primaryAffiliation": "Primäre Rolle",
+    "PRIMARY_AFFILIATION_SWITCH_TO_LIST": "Zu vordefinierter Liste wechseln",
+    "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Zu Freitext wechseln",
     "password": "Passwort",
     "sizeQuota": "Speicherkontingent in MB",
     "PRIMARY_AFFILIATION": {
