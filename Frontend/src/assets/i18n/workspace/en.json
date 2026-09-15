@@ -431,7 +431,8 @@
       "LINK_INFO_FOLDER": "Everyone who has access to this link can download all contents in this folder. Sub-Folders can not be accessed.",
       "LINK_DOWNLOADS": "Number downloads: {{ count }}",
       "COPIED_CLIPBOARD": "Link copied to clipboard",
-      "COPIED_CLIPBOARD_ERROR": "Failed to copy link. Please mark and copy it manually"
+      "COPIED_CLIPBOARD_ERROR": "Failed to copy link. Please mark and copy it manually",
+      "QR_CODE_ARIA_LABEL": "QR code for this share link"
     },
     "WORKFLOW": {
       "TITLE": "workflow",

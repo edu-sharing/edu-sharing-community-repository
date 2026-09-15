@@ -469,7 +469,8 @@
       "LINK_INFO_FOLDER": "Jeder, der Zugriff auf den Link hat, darf alle Dateien des Ordners herunterladen. Auf Unterordner kann nicht zugegriffen werden.",
       "LINK_DOWNLOADS": "Bisherige Downloads: {{ count }}",
       "COPIED_CLIPBOARD": "Link wurde in die Zwischenablage kopiert",
-      "COPIED_CLIPBOARD_ERROR": "Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell"
+      "COPIED_CLIPBOARD_ERROR": "Link konnte nicht kopiert werden. Bitte markieren und kopieren Sie den Link manuell",
+      "QR_CODE_ARIA_LABEL": "QR-Code für diesen Freigabelink"
     },
     "WORKFLOW": {
       "TITLE": "Workflow",
