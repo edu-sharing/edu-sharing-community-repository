@@ -291,7 +291,10 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Dateityp",
     "TOGGLE_ALL": "Alle / Nichts auswählen",
-    "CONFIGURE_COLUMNS": "Spalten konfigurieren"
+    "CONFIGURE_COLUMNS": "Spalten konfigurieren",
+    "COLUMN_ACTIONS": "Optionen",
+    "ENTRY_COUNT": "{{total}} Einträge",
+    "ENTRY_COUNT_SELECTED": "{{selected}} von {{total}} ausgewählt"
   },
   "MAPTYPE": {
     "IMAGES": "Bilder",

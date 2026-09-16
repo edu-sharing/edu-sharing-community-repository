@@ -263,7 +263,10 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "File type",
     "TOGGLE_ALL": "Select all/none",
-    "CONFIGURE_COLUMNS": "Configure columns"
+    "CONFIGURE_COLUMNS": "Configure columns",
+    "COLUMN_ACTIONS": "Actions",
+    "ENTRY_COUNT": "{{total}} entries",
+    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected"
   },
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",

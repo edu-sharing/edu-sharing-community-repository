@@ -272,6 +272,17 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
         );
     }
 
+    /** i18n key and params for the icon column header's hidden accessible name. */
+    getEntryCountLabel(): { key: string; params: Record<string, number> } {
+        const total = this.entriesService.dataSource?.getTotal();
+        return this.entriesService.checkbox
+            ? {
+                  key: 'LIST_TABLE.ENTRY_COUNT_SELECTED',
+                  params: { selected: this.entriesService.selection.selected.length, total },
+              }
+            : { key: 'LIST_TABLE.ENTRY_COUNT', params: { total } };
+    }
+
     isSortable(column: ListItem) {
         return this.entriesService.sort?.columns?.some(
             (c) => c.type === column.type && c.name === column.name,

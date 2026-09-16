@@ -60,10 +60,18 @@
     </mat-cell>
   </ng-container>
   <div matColumnDef="icon" [sticky]="isScroll">
-    <mat-header-cell *matHeaderCellDef class="cell-icon cell-count">
-      @if (entriesService.dataSource?.getTotal() !== undefined) { ({{
-        entriesService.checkbox ? entriesService.selection.selected.length + ' / ' : ''
-      }}{{ entriesService.dataSource?.getTotal() }}) }
+    <mat-header-cell *matHeaderCellDef class="cell-icon">
+      <span class="cdk-visually-hidden">
+        {{ 'LIST_TABLE.DUMMY_ICON_LABEL' | translate }}@if (entriesService.dataSource?.getTotal()
+        !== undefined) { ,
+        {{ getEntryCountLabel().key | translate : getEntryCountLabel().params }} }
+      </span>
+      @if (entriesService.dataSource?.getTotal() !== undefined) {
+      <span aria-hidden="true"
+        >({{ entriesService.checkbox ? entriesService.selection.selected.length + ' / ' : ''
+        }}{{ entriesService.dataSource?.getTotal() }})</span
+      >
+      }
     </mat-header-cell>
     <mat-cell *matCellDef="let node" class="cell-icon">
       @if (entriesService.elementInteractionType === InteractionType.DefaultActionLink) {
@@ -88,6 +96,7 @@
   </div>
   <ng-container matColumnDef="actions" [stickyEnd]="isScroll">
     <mat-header-cell *matHeaderCellDef>
+      <span class="cdk-visually-hidden">{{ 'LIST_TABLE.COLUMN_ACTIONS' | translate }}</span>
       @if (entriesService.configureColumns) {
       <button
         mat-icon-button
