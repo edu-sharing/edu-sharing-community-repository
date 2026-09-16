@@ -12,8 +12,6 @@ import { NodeEntriesService } from '../../services/node-entries.service';
 export class NodeStatsBadgesComponent {
     entriesService = inject<NodeEntriesService<Node>>(NodeEntriesService, { optional: true });
 
-    readonly ClickSource = ClickSource;
-
     childObjectCount = 0;
 
     private _node: Node;
@@ -29,6 +27,15 @@ export class NodeStatsBadgesComponent {
     @HostBinding('attr.backgroundStyle')
     @Input()
     backgroundStyle: 'darken' | 'lighten' = 'lighten';
+
+    // Angular types `$event` as plain `Event` for filtered bindings like `(keydown.enter)`.
+    onCommentsActivated(event: Event): void {
+        this.entriesService?.onClicked({
+            event: event as MouseEvent | KeyboardEvent,
+            element: this.node,
+            source: ClickSource.Comments,
+        });
+    }
 
     private getChildObjectCount(node: Node): number {
         const value = node.properties?.['virtual:childobjectcount']?.[0];
