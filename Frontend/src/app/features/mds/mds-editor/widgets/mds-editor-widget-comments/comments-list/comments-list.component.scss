@@ -141,6 +141,9 @@ mat-form-field {
             .btn-negative,
             .btn-positive {
                 @include clickable();
+                appearance: none;
+                font: inherit;
+                padding: 0;
                 width: 40px;
                 height: 30px;
                 border-radius: $buttonBorderRadius;
