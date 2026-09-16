@@ -48,7 +48,7 @@ whether a tab bar will be shown. The body itself always lives in the same place 
       (toggled)="toggleFilters()"
     ></es-edge-toggle>
     <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>
-    <div class="main-content">
+    <div class="main-content" esSkipTarget="MAIN_CONTENT">
       @if (tabBarIsVisible) {
       <nav mat-tab-nav-bar [tabPanel]="tabPanel">
         @if (availableRepositories.getValue().length > 1) {
