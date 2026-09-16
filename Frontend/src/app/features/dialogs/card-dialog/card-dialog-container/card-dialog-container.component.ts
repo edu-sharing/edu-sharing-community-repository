@@ -243,7 +243,8 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         return this.portalOutlet.attachComponentPortal(portal);
     }
 
-    initializeWithAttachedContent() {
+    /** Sets up the container and moves focus in. Resolves once focus has actually entered. */
+    initializeWithAttachedContent(): Promise<void> {
         this.initObservables();
         this.focusTrap = this.focusTrapFactory.create(this.elementRef.nativeElement);
         this.cardDialogService.registerFocusTrap(this.focusTrap);
@@ -253,7 +254,7 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
         if (this.document) {
             this.elementFocusedBeforeDialogWasOpened = _getFocusedElementPierceShadowDom();
         }
-        void this.trapFocus();
+        return this.trapFocus();
     }
 
     @HostListener('@defaultAnimation.start', ['$event'])

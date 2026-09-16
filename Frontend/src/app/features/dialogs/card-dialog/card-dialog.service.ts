@@ -1,5 +1,5 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { Overlay, OverlayContainer, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal, ComponentType } from '@angular/cdk/portal';
 import { Injectable, Injector, inject } from '@angular/core';
 import * as rxjs from 'rxjs';
@@ -29,6 +29,7 @@ export type BeforeDialogCallback = (
 export class CardDialogService {
     private injector = inject(Injector);
     private overlay = inject(Overlay);
+    private overlayContainer = inject(OverlayContainer);
     private breakpointObserver = inject(BreakpointObserver);
 
     private readonly openDialogsBeforeClosedSubject = new BehaviorSubject<readonly CardDialogRef[]>(
@@ -37,6 +38,11 @@ export class CardDialogService {
     // FIXME: Do we need this, or could we always use `openDialogsBeforeClosedSubject`?
     private readonly openDialogsSubject = new BehaviorSubject<readonly CardDialogRef[]>([]);
     private focusTraps: ConfigurableFocusTrap[] = [];
+    /** Elements outside the overlay container that are hidden while a dialog is open. */
+    private readonly hiddenBackgroundElements = new Map<
+        Element,
+        { ariaHidden: string | null; inert: boolean }
+    >();
 
     private beforeDialogCallbacks: BeforeDialogCallback[] = [];
     get openDialogs(): readonly CardDialogRef[] {
@@ -56,6 +62,17 @@ export class CardDialogService {
 
     constructor() {
         this.registerViewMode();
+        // Restore once the last dialog starts closing, before focus is handed back.
+        // try/catch: an uncaught error would otherwise kill this subscription for good.
+        rxjs.merge(this.openDialogsBeforeClosedSubject, this.openDialogsSubject)
+            .pipe(filter((dialogs) => dialogs.length === 0))
+            .subscribe(() => {
+                try {
+                    this.restoreBackgroundForAssistiveTechnology();
+                } catch (error) {
+                    console.error('Failed to restore background from assistive technology', error);
+                }
+            });
     }
 
     open<T, D, R>(component: ComponentType<T>, config?: CardDialogConfig<D>): CardDialogRef<D, R> {
@@ -86,9 +103,11 @@ export class CardDialogService {
             new ComponentPortal(component, undefined, contentInjector),
         );
         // Notify the dialog container that the content has been attached.
-        containerRef.instance.initializeWithAttachedContent();
+        const focusTrapped = containerRef.instance.initializeWithAttachedContent();
         this.registerOpenDialog<T, D, R>(dialogRef);
         this.registerSizeAndPosition(overlayRef, dialogRef);
+        // Hiding an ancestor of the focused element is a no-op, so wait for focus first.
+        void focusTrapped.then(() => this.hideBackgroundFromAssistiveTechnology());
         return dialogRef;
     }
 
@@ -252,5 +271,51 @@ export class CardDialogService {
 
     unregisterFocusTrap(focusTrap: ConfigurableFocusTrap) {
         this.focusTraps.splice(this.focusTraps.indexOf(focusTrap), 1);
+    }
+
+    /**
+     * Hides everything outside the overlay container from assistive technology, since
+     * `aria-modal` alone is ignored by NVDA/JAWS in browse mode. Mirrors
+     * `Dialog._hideNonDialogContentFromAssistiveTechnology` (`@angular/cdk/dialog`), plus `inert`.
+     */
+    private hideBackgroundFromAssistiveTechnology(): void {
+        if (
+            this.hiddenBackgroundElements.size > 0 ||
+            this.openDialogsBeforeClosedSubject.value.length === 0
+        ) {
+            // Already hidden, or closed again before focus moved in.
+            return;
+        }
+        const overlayContainerElement = this.overlayContainer.getContainerElement();
+        for (const sibling of Array.from(overlayContainerElement.parentElement?.children ?? [])) {
+            if (
+                sibling === overlayContainerElement ||
+                sibling.nodeName === 'SCRIPT' ||
+                sibling.nodeName === 'STYLE' ||
+                sibling.hasAttribute('aria-live') ||
+                sibling.hasAttribute('popover')
+            ) {
+                continue;
+            }
+            this.hiddenBackgroundElements.set(sibling, {
+                ariaHidden: sibling.getAttribute('aria-hidden'),
+                inert: (sibling as HTMLElement).inert,
+            });
+            sibling.setAttribute('aria-hidden', 'true');
+            (sibling as HTMLElement).inert = true;
+        }
+    }
+
+    /** Reverts `hideBackgroundFromAssistiveTechnology`, restoring pre-existing attribute values. */
+    private restoreBackgroundForAssistiveTechnology(): void {
+        this.hiddenBackgroundElements.forEach((previous, element) => {
+            if (previous.ariaHidden === null) {
+                element.removeAttribute('aria-hidden');
+            } else {
+                element.setAttribute('aria-hidden', previous.ariaHidden);
+            }
+            (element as HTMLElement).inert = previous.inert;
+        });
+        this.hiddenBackgroundElements.clear();
     }
 }
