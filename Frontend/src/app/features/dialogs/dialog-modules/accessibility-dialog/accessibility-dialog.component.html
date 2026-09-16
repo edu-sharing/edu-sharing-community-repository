@@ -37,12 +37,12 @@
   }}</mat-radio-button>
 </mat-radio-group>
 <h2 id="indicatorIconsTitle">{{ 'ACCESSIBILITY.INDICATOR_ICONS_TITLE' | translate }}</h2>
-<p id="contrastModeDescription">{{ 'ACCESSIBILITY.INDICATOR_ICONS_MESSAGE' | translate }}</p>
+<p id="indicatorIconsDescription">{{ 'ACCESSIBILITY.INDICATOR_ICONS_MESSAGE' | translate }}</p>
 <mat-radio-group
   id="indicatorIcons"
   aria-labelledby="indicatorIconsTitle"
   [(ngModel)]="settings.indicatorIcons"
-  aria-describedby="contrastModeDescription"
+  aria-describedby="indicatorIconsDescription"
   [disabled]="settings.indicatorIcons === null"
   (change)="updateSettings()"
 >
