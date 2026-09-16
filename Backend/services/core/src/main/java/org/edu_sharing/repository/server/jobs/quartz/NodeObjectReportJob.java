@@ -304,13 +304,13 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
             // add total sum count
             Map<String, Integer> eventCountMapping = entry.getCounts();
             int totalSum = STATISTIC_EVENTS.stream()
-                    .map(event -> eventCountMapping.getOrDefault(event, 0))
+                    .map(event -> eventCountMapping.getOrDefault(event.toString(), 0))
                     .reduce(Integer::sum)
                     .orElse(0);
 
             // add eventCountMapping per stat field
             csvRow.addAll(STATISTIC_EVENTS.stream()
-                    .map(event -> eventCountMapping.getOrDefault(event, 0))
+                    .map(event -> eventCountMapping.getOrDefault(event.toString(), 0))
                     .map(String::valueOf)
                     .collect(Collectors.toList()));
 
@@ -322,7 +322,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
                 // group and aum up statistic events based on field type
                 List<String> counts = values.stream()
                         .map(value -> STATISTIC_EVENTS.stream()
-                                .map(eventType -> entry.getGroups().getOrDefault(eventType, Collections.emptyMap()))
+                                .map(eventType -> entry.getGroups().getOrDefault(eventType.toString(), Collections.emptyMap()))
                                 .map(eventData -> eventData.getOrDefault(fieldName, Collections.emptyMap()))
                                 .map(eventDataValues -> eventDataValues.getOrDefault(value, 0L))
                                 .reduce(Long::sum)
@@ -370,7 +370,7 @@ public class NodeObjectReportJob extends AbstractJobMapAnnotationParams {
         for (String field : additionalFields) {
             Set<String> values = dataSet.stream()
                     .map(d -> STATISTIC_EVENTS.stream()
-                            .map(event -> d.getGroups().getOrDefault(event, Collections.emptyMap()))
+                            .map(event -> d.getGroups().getOrDefault(event.toString(), Collections.emptyMap()))
                             .map(x -> x.getOrDefault(field, Collections.emptyMap()))
                             .map(Map::keySet)
                             .collect(Collectors.toSet()))
