@@ -39,7 +39,7 @@ public class AuthorityServiceHelper {
                     ? serviceRegistry.getAuthorityService().getAuthorities()
                     : serviceRegistry.getAuthorityService().getAuthoritiesForUser(username);
             return testUsetAuthorities.contains(CCConstants.AUTHORITY_GROUP_ALFRESCO_ADMINISTRATORS);
-        } catch (org.alfresco.repo.security.permissions.AccessDeniedException e) {
+        } catch (org.alfresco.repo.security.permissions.AccessDeniedException | net.sf.acegisecurity.AuthenticationCredentialsNotFoundException e) {
 
         }
         return false;
