@@ -1,9 +1,18 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 
-// NOTE: the CDK overlay pane (.es-edge-toggle-pane) is rendered in the body-level
-// .cdk-overlay-container, NOT inside this component's host — so its transition can't live here
-// (not even via ::ng-deep, which still anchors under :host). It is defined globally in
-// src/styles/main.scss instead.
+// NOTE: the CDK overlay pane (.es-edge-toggle-pane) lives in the body-level .cdk-overlay-container,
+// not inside this host, so its transition is defined globally in src/styles/globals.scss instead.
+:host(.inline) {
+    position: fixed;
+    z-index: 100;
+    transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+        right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    // mirrors `.es-edge-toggle-pane--static`
+    &.static {
+        transition: none;
+    }
+}
+
 .edge-toggle {
     display: flex;
     align-items: center;

@@ -18,6 +18,7 @@
           type="button"
           [attr.aria-label]="'SEARCH.FILTERS' | translate"
           [attr.aria-expanded]="filterBarVisible | async"
+          [attr.aria-controls]="filterPanelId | async"
           matTooltip="{{ 'TOGGLE_SEARCH_FILTERS' | translate }} {{
             totalFiltersCount > 0
               ? '(' +
@@ -26,6 +27,11 @@
               : ''
           }}"
           [matBadge]="totalFiltersCount || null"
+          [matBadgeDescription]="
+            totalFiltersCount
+              ? ('SEARCH.ACTIVE_FILTER_TOOLTIP' | translate : { count: totalFiltersCount })
+              : null
+          "
           (click)="onFiltersButtonClicked()"
         >
           <i esIcon="filter_list" [aria]="false"></i>

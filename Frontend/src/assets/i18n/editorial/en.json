@@ -32,6 +32,7 @@
       "EXIT_FULLSCREEN": "Exit fullscreen",
       "OPEN": "Open actions & options",
       "CLOSE": "Close actions & options",
+      "CLOSE_PANEL": "Close sidebar",
       "PREVIOUS": "Previous",
       "NEXT": "Next",
       "SUBMISSION": {

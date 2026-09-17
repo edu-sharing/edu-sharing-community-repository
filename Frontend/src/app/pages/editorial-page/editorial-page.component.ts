@@ -118,6 +118,9 @@ function getShare(node: unknown): InviteEvent | undefined {
     standalone: false,
 })
 export class EditorialPageComponent implements AfterViewInit, OnDestroy {
+    /** id of the left filter drawer's `region` landmark */
+    private static readonly FILTER_PANEL_ID = 'editorial-filters-panel';
+
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private breakpointObserver = inject(BreakpointObserver);
@@ -236,6 +239,11 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     // Always-visible tab ("Lasche") on the left edge that opens/closes the filter drawer,
     // mirroring the editorial sidebar's toggle (see es-edge-toggle in the template).
     readonly leftSidenav = viewChild('leftSidenavEl', { read: ElementRef });
+    /** fallback focus-restore target for the filter drawer's `esFocusOnOpen` (see template) */
+    readonly leftSidenavReturnFocus = (): HTMLElement | null =>
+        this.searchFieldInternalService.searchFieldComponent.value?.filtersButtonElement() ?? null;
+    /** instance-accessible mirror of `FILTER_PANEL_ID`, for template bindings */
+    readonly filterPanelId = EditorialPageComponent.FILTER_PANEL_ID;
     private readonly filterBarVisibleSig = toSignal(this.filterBarVisible);
     private readonly mainComponentSig = toSignal(this.mainComponent$);
     /** whether the left filter drawer is currently open (same condition as the mat-sidenav) */
@@ -329,6 +337,8 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             },
             this.destroyed$,
         );
+        // Let the main nav's filters button point `aria-controls` at this page's filter drawer.
+        this.searchFieldInternalService.filterPanelId.next(EditorialPageComponent.FILTER_PANEL_ID);
         this.searchFieldService
             .observeCurrentInstance()
             .pipe(
@@ -413,6 +423,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         console.log('destroy');
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.searchFieldInternalService.filterPanelId.next(null);
     }
 
     /**

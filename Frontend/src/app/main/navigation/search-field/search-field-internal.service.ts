@@ -56,6 +56,9 @@ export class SearchFieldInternalService implements EventListener {
     readonly filtersButtonClicked = new Subject<void>();
     /** Whether the filter bar is visible. */
     readonly filterBarVisible = new BehaviorSubject<boolean>(false);
+    /** id of the current page's filter panel, for the filters button's `aria-controls`; set by the
+     *  hosting page, `null` while none is active */
+    readonly filterPanelId = new BehaviorSubject<string | null>(null);
     /** The user triggered a search using the search field. */
     readonly searchTriggered = new Subject<SearchEvent>();
     /** The user changed the search string by typing into the search field. */

@@ -6,9 +6,16 @@
     type="button"
     (click)="toggled.emit()"
     [attr.aria-expanded]="open()"
+    [attr.aria-controls]="ariaControls()"
     [attr.aria-label]="(open() ? labelClose() : labelOpen()) | translate"
   >
     <i [esIcon]="icon()" [aria]="false" esIconContext="edge-toggle"></i>
   </button>
   }
 </ng-template>
+
+<!-- #tab must stay a top-level template so the static @ViewChild always resolves it; render it
+  right here when inline instead of portaling it elsewhere. -->
+@if (inline()) {
+<ng-container *ngTemplateOutlet="tab"></ng-container>
+}

@@ -43,8 +43,11 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     @ViewChild('filtersDialogResetButton', { static: true })
     filtersDialogResetButton: TemplateRef<HTMLElement>;
 
+    private readonly instanceId = nextInstanceId++;
     /** Label of the panel's `region` landmark. */
-    readonly titleId = `search-page-filters-${nextInstanceId++}-title`;
+    readonly titleId = `search-page-filters-${this.instanceId}-title`;
+    /** id of the panel's `region` landmark, for the nav filters button's `aria-controls` */
+    readonly panelId = `search-page-filters-${this.instanceId}-panel`;
     readonly searchFilters = this.searchPage.searchFilters;
     readonly filterBarIsVisible = this.searchPage.filterBarIsVisible;
     readonly showingAllRepositories = this.searchPage.showingAllRepositories;
@@ -71,6 +74,7 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
 
     async ngOnInit(): Promise<void> {
         this.registerFilterDialog();
+        this.searchFieldInternalService.filterPanelId.next(this.panelId);
         this.defaultWidthPx.set(
             await this.configService.get<number>(
                 'searchFilterBarWidth',
@@ -82,6 +86,7 @@ export class SearchPageFiltersSidebarComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+        this.searchFieldInternalService.filterPanelId.next(null);
     }
 
     private registerFilterDialog(): void {

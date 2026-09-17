@@ -73,6 +73,7 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly categories$ = this.internal.categoriesSubject;
     readonly suggestions$ = this.internal.suggestions$;
     readonly filterBarVisible = this.internal.filterBarVisible;
+    readonly filterPanelId = this.internal.filterPanelId;
 
     showOverlay = new BehaviorSubject(false);
     inhibitOverlay = false;
@@ -268,6 +269,11 @@ export class SearchFieldComponent implements OnInit, OnDestroy, AfterViewInit {
         ) {
             this.showOverlay.next(false);
         }
+    }
+
+    /** the "Filters" button element, for returning focus on panel close */
+    filtersButtonElement(): HTMLElement | null {
+        return this.elementRef.nativeElement.querySelector('.filters-button');
     }
 
     onFiltersButtonClicked(): void {

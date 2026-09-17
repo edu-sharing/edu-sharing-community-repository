@@ -1,5 +1,6 @@
-<!-- Always-visible tab ("Lasche") on the left edge to open/close the filter drawer,
-  mirroring the editorial sidebar's toggle. -->
+<!-- Duplicates the main nav's "Filter" button (filtersButtonClicked). Inline since this tab's
+  template position (page's first element) is free of any transformed ancestor, unlike the
+  trapped right-hand tab. -->
 <es-edge-toggle
   data-test="button-toggle-sidebar-filters-editorial"
   [side]="'start'"
@@ -11,8 +12,10 @@
     (isMobile$ | async) === false
   "
   [drawer]="leftSidenav()"
+  [inline]="true"
   [labelOpen]="'EDITORIAL.FILTER.OPEN'"
   [labelClose]="'EDITORIAL.FILTER.CLOSE'"
+  [ariaControls]="filterPanelId"
   (toggled)="filtersButtonClicked.next()"
 ></es-edge-toggle>
 <mat-sidenav-container
@@ -28,10 +31,22 @@
     storageKey="EDITORIAL_SIDENAV_LEFT_WIDTH"
     esResizableSidenav
   >
-    <div class="es-mat-sidenav-content es-mat-sidenav-content-mds">
+    <!-- role/id/tabindex sit on this inner div, not on mat-sidenav itself: Material's own tabIndex
+      host binding (null for mode="side") would silently strip one set from the outside. -->
+    <div
+      class="es-mat-sidenav-content es-mat-sidenav-content-mds"
+      role="region"
+      id="editorial-filters-panel"
+      aria-labelledby="editorial-filters-panel-title"
+      tabindex="-1"
+      [esFocusOnOpen]="filterBarOpen()"
+      [returnFocusTo]="leftSidenavReturnFocus"
+    >
       <!-- Filter header similar to es-search-page-filters-sidebar -->
       <div class="filter-bar-heading">
-        <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+        <h2 id="editorial-filters-panel-title" class="filter-bar-title">
+          {{ 'SEARCH.FILTERS' | translate }}
+        </h2>
         <!-- On mobile the panel is an overlay card without the edge tab, so it needs an explicit
           close button (mirrors the editorial sidebar's header X). -->
         @if (isMobile$ | async) {
