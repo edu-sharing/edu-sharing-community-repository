@@ -561,6 +561,10 @@ xmlstarlet ed -L \
     ${homeProp}
 }
 
+xmlstarlet ed -L \
+  -d '/properties/entry[@key="url_dynamic"]' \
+  ${homeProp}
+
 [[ -n "${my_home_url_dynamic}" ]] && {
 	xmlstarlet ed -L \
 		-s '/properties' -t elem -n "entry" -v "${my_home_url_dynamic}" \
