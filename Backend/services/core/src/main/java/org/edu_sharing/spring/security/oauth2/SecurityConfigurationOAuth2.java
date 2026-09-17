@@ -37,6 +37,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.UrlUtils;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -97,9 +98,13 @@ public class SecurityConfigurationOAuth2 {
                                 .authorizationRequestRepository(customAuthorizationRequestRepository())))
                 .sessionManagement(s -> s.sessionFixation().none())
                 //frontchannel logout triggerd by edu-sharing gui
-                //explicitly match GET /logout: the gui triggers logout via GET (window.location / ajax get).
+                //match GET and POST /logout: the gui triggers logout via GET (window.location / ajax get),
+                //while OidcBackChannelLogoutHandler POSTs to the logoutUri configured below to invalidate
+                //each session. matching GET only made the backchannel logout a silent no-op.
                 .logout((logout) -> logout
-                        .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/logout"))
+                        .logoutRequestMatcher(new OrRequestMatcher(
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/logout"),
+                                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/logout")))
                         .logoutSuccessHandler(oidcLogoutSuccessHandler(clientRegistrationRepository)))
                 //backchannel logout
                 .oidcLogout((logout) ->
