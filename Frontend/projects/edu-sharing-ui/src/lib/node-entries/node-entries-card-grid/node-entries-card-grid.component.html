@@ -42,7 +42,7 @@
   native elements at all places without any elements between `ul` and `li`. -->
 @if (entriesService.sort?.customSortingInProgress) {
 <div role="list" class="card-grid card-grid-reorder" cdkDropListGroup>
-  @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
+  @if (nodes$ | async; as nodes) { @for (node of nodes; track node.ref.id; let i = $index) {
   <div
     class="card-grid-order-wrapper"
     role="none"
@@ -103,7 +103,7 @@
     @if ( (entriesService.globalOptionsSubject | async)?.length &&
     entriesService.globalOptionsPosition === 'before' ) {
     <es-node-entries-global-options [displayType]="displayType"> </es-node-entries-global-options>
-    } @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
+    } @if (nodes$ | async; as nodes) { @for (node of nodes; track node.ref.id; let i = $index) {
     <div
       class="card-grid-drag-wrapper"
       role="none"
