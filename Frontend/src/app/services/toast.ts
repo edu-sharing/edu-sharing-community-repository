@@ -650,6 +650,8 @@ export class Toast extends ToastAbstract implements OnDestroy {
                 ? Toast.convertDuration(this.duration) * 1000
                 : null,
             panelClass: ['toast-message', `toast-message-${message.type}`],
+            // Errors interrupt the screen reader; other toasts wait their turn.
+            politeness: message.type === 'error' ? 'assertive' : 'polite',
         });
         if (message.action) {
             snackBarRef.onAction().subscribe(message.action.callback);
