@@ -800,7 +800,17 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 }
             });
     }
+    // Prevents double-submitting the create/edit request via repeated clicks.
+    private setSaveButtonDisabled(disabled: boolean) {
+        if (this.editButtons?.[1]) {
+            this.editButtons[1].disabled = disabled;
+        }
+    }
     private saveEdits() {
+        if (this.editButtons?.[1]?.disabled) {
+            return;
+        }
+        this.setSaveButtonDisabled(true);
         if (this._mode == 'GROUP' || this._mode == 'ORG') {
             if (this.editId === null) {
                 const name = this.edit.profile.displayName;
@@ -824,6 +834,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         (error) => {
                             this.toast.error(error);
                             this.toast.closeProgressSpinner();
+                            this.setSaveButtonDisabled(false);
                         },
                     );
                 } else {
@@ -844,6 +855,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                             (error: any) => {
                                 this.toast.error(error);
                                 this.toast.closeProgressSpinner();
+                                this.setSaveButtonDisabled(false);
                             },
                         );
                 }
@@ -858,7 +870,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         (await this.iam.getGroup(this.editId).toPromise()).group as Group,
                     );
                 },
-                (error: any) => this.toast.error(error),
+                (error: any) => {
+                    this.toast.error(error);
+                    this.setSaveButtonDisabled(false);
+                },
             );
         } else {
             const editStore = Helper.deepCopy(this.edit);
@@ -872,6 +887,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.passwordRef?.passwordStrength === 'weak' && password) {
                 this.toast.error(null, 'PERMISSIONS.ERROR_PASSWORD_TO_WEAK');
                 this.toast.closeProgressSpinner();
+                this.setSaveButtonDisabled(false);
                 return;
             }
             this.toast.showProgressSpinner();
@@ -904,6 +920,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                         (error: any) => {
                             this.handleError(error);
                             this.toast.closeProgressSpinner();
+                            this.setSaveButtonDisabled(false);
                         },
                     );
             } else {
@@ -920,6 +937,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     (error: any) => {
                         this.toast.error(error);
                         this.toast.closeProgressSpinner();
+                        this.setSaveButtonDisabled(false);
                     },
                 );
             }
