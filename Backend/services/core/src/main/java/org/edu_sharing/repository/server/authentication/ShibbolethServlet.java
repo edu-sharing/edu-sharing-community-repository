@@ -47,6 +47,8 @@ import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.service.authentication.EduAuthentication;
 import org.edu_sharing.service.authentication.SSOAuthorityMapper;
+import org.edu_sharing.service.authentication.SSOMappingProvider;
+import org.edu_sharing.service.authentication.sso.mapping.Mapping;
 import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionService;
 import org.edu_sharing.spring.security.google.GoogleOneTapAuthenticationToken;
@@ -83,6 +85,9 @@ public class ShibbolethServlet extends SpringHttpServlet {
     @Setter(onMethod_ = @Autowired)
     private LightbendConfigLoader configLoader;
 
+    @Setter(onMethod_ = @Autowired)
+    private SSOMappingProvider ssoMappingProvider;
+
 
     private String redirectUrl;
 
@@ -101,22 +106,21 @@ public class ShibbolethServlet extends SpringHttpServlet {
             redirectUrl = (String) session.getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
         }
 
-        Map<String, String> ssoMap = new HashMap<>() {{
-            put(CCConstants.CM_PROP_PERSON_USERNAME, req.getRemoteUser());
-        }};
+        Map<String, String> ssoMap = new HashMap<>();
         mapAttributes(ssoMap, req);
-        String headerUserName = ssoMap.get(CCConstants.CM_PROP_PERSON_USERNAME);
+        Mapping mapping = ssoMappingProvider.getMapping(ssoMap);
+        String username = mapping.isPreferRemoteUser() ? req.getRemoteUser() : mapping.getPerson().inverseBidiMap().get(CCConstants.CM_PROP_PERSON_USERNAME);
 
         // headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
 		if (validAuthInfo != null ) {
-			if(headerUserName == null){
+			if(username == null){
 				log.info("no sso username provided, but got valid ticket from session for user:"+validAuthInfo.get(CCConstants.AUTH_USERNAME));
 				redirect(resp, req);
 				return;
-			}else if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(headerUserName)) {
+			}else if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(username)) {
 
-				log.info("got valid ticket from session for user:"+headerUserName);
+				log.info("got valid ticket from session for user:"+username);
 				redirect(resp, req);
 				return;
 
@@ -142,7 +146,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
             authService.authenticateBySSO(ssoMap);
 
             String ticket = authService.getCurrentTicket();
-            authTool.storeAuthInfoInSession(headerUserName, ticket, CCConstants.AUTH_TYPE_SHIBBOLETH, session);
+            authTool.storeAuthInfoInSession(username, ticket, CCConstants.AUTH_TYPE_SHIBBOLETH, session);
 
             String shibbolethSessionId = getShibValue("Shib-Session-ID", req);
             if (StringUtils.isNotBlank(shibbolethSessionId)) {
