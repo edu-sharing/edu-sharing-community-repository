@@ -68,7 +68,7 @@
     "DELETE_USER": "Are you sure you want to exclude the selected users from this organization?",
     "DELETE_GROUP": "Are you sure you want to delete the selected groups?",
     "DELETE_GROUP_SINGLE": "Are you sure you want to delete the group {{name}}?",
-    "DELETE_ORG_SINGLE": "Are you sure you want to remove the organization {{name}}? All users remain and the organization data store will not be deleted",
+    "DELETE_ORG_SINGLE": "Are you sure you want to remove the organization {{name}}? All users and groups remain and the organization data store will not be deleted",
     "DELETE_ERROR_ADMINISTRATORS": "Administrators-Groups may not be deleted",
     "DELETED_USER": "User(s) removed successfully",
     "DELETED_GROUP": "Group(s) removed successfully",
