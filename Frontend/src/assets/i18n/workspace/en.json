@@ -477,6 +477,7 @@
       "ERROR_ORG_NAME": "Please enter the contributors organization",
       "DELETE_TITLE": "Remove contributor",
       "DELETE_MESSAGE": "Are you sure you want to remove {{ name }} as a contributor?",
+      "REMOVE": "Remove {{ name }}",
       "TYPE": {
         "PUBLISHER": "publisher",
         "AUTHOR": "author",

@@ -515,6 +515,7 @@
       "ERROR_ORG_NAME": "Bitte geben Sie den Namen der beteiligten Organisation an",
       "DELETE_TITLE": "Beteiligten entfernen",
       "DELETE_MESSAGE": "Sind Sie sicher, dass Sie den/die Beteiligten {{ name }} entfernen möchten?",
+      "REMOVE": "{{ name }} entfernen",
       "TYPE": {
         "PUBLISHER": "Herausgeber{{GENDER_SEPARATOR}}in/Anbieter{{GENDER_SEPARATOR}}in",
         "AUTHOR": "Autor{{GENDER_SEPARATOR}}in",

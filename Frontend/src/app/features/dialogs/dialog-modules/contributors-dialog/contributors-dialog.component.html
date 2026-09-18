@@ -9,10 +9,25 @@
       <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
       <mat-chip-grid>
         @for (vCard of contributorLifecycle[role]; track vCard; let i = $index) {
-        <mat-chip class="badge clickable">
-          <span (click)="editVCard('lifecycle', vCard, role, i)">{{ vCard.getDisplayName() }}</span>
-          <mat-icon matChipRemove (click)="remove(contributorLifecycle[role], i)">cancel</mat-icon>
-        </mat-chip>
+        <mat-chip-row
+          class="badge clickable"
+          [removable]="true"
+          [matTooltip]="vCard.getDisplayName() + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+          (click)="editVCard('lifecycle', vCard, role, i)"
+          (keydown.enter)="editVCard('lifecycle', vCard, role, i)"
+          (removed)="remove(contributorLifecycle[role], i)"
+        >
+          {{ vCard.getDisplayName() }}
+          <button
+            matChipRemove
+            type="button"
+            [attr.aria-label]="
+              'WORKSPACE.CONTRIBUTOR.REMOVE' | translate : { name: vCard.getDisplayName() }
+            "
+          >
+            <i esIcon="cancel"></i>
+          </button>
+        </mat-chip-row>
         }
       </mat-chip-grid>
     </div>
@@ -34,10 +49,25 @@
       <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
       <mat-chip-grid>
         @for (vCard of contributorMetadata[role]; track vCard; let i = $index) {
-        <mat-chip class="badge clickable">
-          <span (click)="editVCard('metadata', vCard, role, i)">{{ vCard.getDisplayName() }}</span>
-          <mat-icon matChipRemove (click)="remove(contributorMetadata[role], i)">cancel</mat-icon>
-        </mat-chip>
+        <mat-chip-row
+          class="badge clickable"
+          [removable]="true"
+          [matTooltip]="vCard.getDisplayName() + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+          (click)="editVCard('metadata', vCard, role, i)"
+          (keydown.enter)="editVCard('metadata', vCard, role, i)"
+          (removed)="remove(contributorMetadata[role], i)"
+        >
+          {{ vCard.getDisplayName() }}
+          <button
+            matChipRemove
+            type="button"
+            [attr.aria-label]="
+              'WORKSPACE.CONTRIBUTOR.REMOVE' | translate : { name: vCard.getDisplayName() }
+            "
+          >
+            <i esIcon="cancel"></i>
+          </button>
+        </mat-chip-row>
         }
       </mat-chip-grid>
     </div>

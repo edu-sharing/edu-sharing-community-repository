@@ -16,7 +16,7 @@
     padding-bottom: 10px;
 }
 mat-chip-grid {
-    mat-chip {
+    mat-chip-row {
         ::ng-deep .mat-mdc-chip-action {
             @include clickable();
         }
