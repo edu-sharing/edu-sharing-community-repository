@@ -3,6 +3,8 @@ package org.edu_sharing.repository.server.tools.security;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.edu_sharing.alfresco.service.guest.GuestService;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.restservices.shared.UserProfile;
@@ -42,6 +44,7 @@ public class JwtTokenUtil {
                 .claim("lastName", userProfile.getLastName())
                 .claim("userEmail", userProfile.getEmail())
                 .claim("primaryAffiliation", userProfile.getPrimaryAffiliation())
+                .claim("isGuest", AlfAppContextGate.getApplicationContext().getBean(GuestService.class).isGuestUser(username))
                 .signWith(privateKey)
                 .compact();
 

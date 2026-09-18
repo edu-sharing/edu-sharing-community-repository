@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -20,6 +19,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -28,6 +28,7 @@ import org.edu_sharing.service.tracking.ibatis.NodeData;
 import org.edu_sharing.service.tracking.ibatis.NodeResult;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
 import org.edu_sharing.service.tracking.model.StatisticEntryNode;
+import org.edu_sharing.spring.scope.refresh.annotations.RefreshScope;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@RefreshScope
 public class TrackingServiceImpl extends TrackingServiceDefault {
     private static final Map<String, FieldDescription> EXISTING_FIELDS = Stream.of(
             new FieldDescription("node_id", false, false),
@@ -134,10 +136,14 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     private final TrackingServiceCustomInterface customTrackingService;
     private final GuestService guestService;
 
-    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService) {
+    @org.springframework.beans.factory.annotation.Value("${repository.tracking.sharedWithMediacenter:false}")
+    private boolean sharedWithMediacenter;
+
+    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService, @Qualifier("nodeServiceImpl") NodeService nodeService) {
         super(transactionService, policyBehaviourFilter);
         customTrackingService = trackingServiceFactory.getTrackingServiceCustom();
         this.guestService = guestService;
+        setNodeService(nodeService);
         try {
             new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
         } catch (BindingException ignored) {
@@ -200,59 +206,66 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     public boolean trackActivityOnNode(NodeRef nodeRef, NodeTrackingDetails details, EventType type, String authorityName) {
         super.trackActivityOnNode(nodeRef, details, type, authorityName);
 
-        String version;
-        String nodeVersion = details == null ? null : details.getNodeVersion();
-        if (nodeVersion == null || nodeVersion.isEmpty() || nodeVersion.equals("-1")) {
-            version = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_PROP_VERSIONABLELABEL);
-        } else {
-            version = nodeVersion;
-        }
-        String originalNodeRef = null;
-        try {
-            if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
-                originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
-            } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
-                originalNodeRef = ((NodeRef) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
-            }
-        } catch (Throwable ignored) {
-        }
-        String finalOriginalNodeRef = originalNodeRef;
-        return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
-            statement.setLong(1, (Long) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.SYS_PROP_NODE_DBID));
-            statement.setString(2, nodeRef.getId());
-            statement.setString(3, finalOriginalNodeRef);
-            statement.setString(4, version);
-            statement.setString(5, super.getTrackedUsername(authorityName));
-            try {
-                statement.setArray(6, statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
-            } catch (Exception e) {
-                logger.info("Failed to track organizations of user", e);
-            }
-            try {
-                statement.setArray(7, statement.getConnection().createArrayOf("VARCHAR", getAuthorityMediacenters()));
-            } catch (Exception e) {
-                logger.info("Failed to track mediacenter of user", e);
-            }
-            statement.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
-            statement.setString(9, type.name());
-            JSONObject json = buildJson(nodeRef, details, type);
-            PGobject obj = new PGobject();
-            obj.setType("json");
-            if (json != null)
-                obj.setValue(json.toString());
-            statement.setObject(10, obj);
-
-            String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
-            statement.setString(11, license);
-
-            if (LightbendConfigLoader.get().getBoolean("repository.tracking.sharedWithMediacenter")) {
-                MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
-                statement.setArray(12, statement.getConnection().createArrayOf("VARCHAR", mediacenterService.getMediacenterAuthoritiesByNode(nodeRef.getId()).toArray()));
+        // building the tracking record reads node properties/aspects that the tracked authority (e.g. a
+        // guest that is only allowed to view the content via the rendering service's own authorization)
+        // may not have Alfresco ACL read permission on; run as system, same as the node reads in
+        // TrackingServiceDefault.trackActivityOnNode.
+        return AuthenticationUtil.runAsSystem(() -> {
+            String version;
+            String nodeVersion = details == null ? null : details.getNodeVersion();
+            if (nodeVersion == null || nodeVersion.isEmpty() || nodeVersion.equals("-1")) {
+                version = NodeServiceHelper.getProperty(nodeRef, CCConstants.CM_PROP_VERSIONABLELABEL);
             } else {
-                statement.setArray(12, null);
+                version = nodeVersion;
             }
+            String originalNodeRef = null;
+            try {
+                if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE)) {
+                    originalNodeRef = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_ORIGINAL);
+                } else if (NodeServiceHelper.hasAspect(nodeRef, CCConstants.CCM_ASPECT_PUBLISHED)) {
+                    originalNodeRef = ((NodeRef) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)).getId();
+                }
+            } catch (Throwable ignored) {
+            }
+            String finalOriginalNodeRef = originalNodeRef;
+            String finalVersion = version;
+            return execDatabaseQuery(TRACKING_INSERT_NODE, statement -> {
+                statement.setLong(1, (Long) NodeServiceHelper.getPropertyNative(nodeRef, CCConstants.SYS_PROP_NODE_DBID));
+                statement.setString(2, nodeRef.getId());
+                statement.setString(3, finalOriginalNodeRef);
+                statement.setString(4, finalVersion);
+                statement.setString(5, super.getTrackedUsername(authorityName));
+                try {
+                    statement.setArray(6, statement.getConnection().createArrayOf("VARCHAR", getAuthorityOrganizations()));
+                } catch (Exception e) {
+                    logger.info("Failed to track organizations of user", e);
+                }
+                try {
+                    statement.setArray(7, statement.getConnection().createArrayOf("VARCHAR", getAuthorityMediacenters()));
+                } catch (Exception e) {
+                    logger.info("Failed to track mediacenter of user", e);
+                }
+                statement.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+                statement.setString(9, type.name());
+                JSONObject json = buildJson(nodeRef, details, type);
+                PGobject obj = new PGobject();
+                obj.setType("json");
+                if (json != null)
+                    obj.setValue(json.toString());
+                statement.setObject(10, obj);
 
-            return true;
+                String license = NodeServiceHelper.getProperty(nodeRef, CCConstants.CCM_PROP_IO_COMMONLICENSE_KEY);
+                statement.setString(11, license);
+
+                if (sharedWithMediacenter) {
+                    MediacenterService mediacenterService = MediacenterServiceFactory.getLocalService();
+                    statement.setArray(12, statement.getConnection().createArrayOf("VARCHAR", mediacenterService.getMediacenterAuthoritiesByNode(nodeRef.getId()).toArray()));
+                } else {
+                    statement.setArray(12, null);
+                }
+
+                return true;
+            });
         });
     }
 

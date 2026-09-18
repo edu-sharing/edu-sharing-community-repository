@@ -137,10 +137,10 @@ public class StatisticApi {
 									       @Parameter(description = "date range from", required = true) @QueryParam("dateFrom") Long dateFrom,
                                            @Parameter(description = "date range to") @QueryParam("dateTo") Long dateTo
 	) {
+		if(!AuthorityServiceHelper.isAdmin()){
+			throw new NotAnAdminException();
+		}
 		try {
-			if(!AuthorityServiceHelper.isAdmin()){
-				throw new NotAnAdminException();
-			}
             if(dateTo == null){ dateTo = System.currentTimeMillis(); }
 			List<String> tracks=TrackingDAO.getNodesAltered(new Date(dateFrom), new Date(dateTo));
 			return Response.ok().entity(tracks).build();
