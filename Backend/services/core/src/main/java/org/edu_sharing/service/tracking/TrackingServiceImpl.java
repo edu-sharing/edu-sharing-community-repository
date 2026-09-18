@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.ConnectionDBAlfresco;
 import org.edu_sharing.alfresco.service.guest.GuestService;
@@ -20,6 +19,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.service.mediacenter.MediacenterService;
 import org.edu_sharing.service.mediacenter.MediacenterServiceFactory;
+import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.search.SearchServiceFactory;
@@ -139,10 +139,11 @@ public class TrackingServiceImpl extends TrackingServiceDefault {
     @org.springframework.beans.factory.annotation.Value("${repository.tracking.sharedWithMediacenter:false}")
     private boolean sharedWithMediacenter;
 
-    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService) {
+    public TrackingServiceImpl(TrackingServiceFactory trackingServiceFactory, TransactionService transactionService, @Qualifier("policyBehaviourFilter") BehaviourFilter policyBehaviourFilter, GuestService guestService, @Qualifier("nodeServiceImpl") NodeService nodeService) {
         super(transactionService, policyBehaviourFilter);
         customTrackingService = trackingServiceFactory.getTrackingServiceCustom();
         this.guestService = guestService;
+        setNodeService(nodeService);
         try {
             new ConnectionDBAlfresco().getSqlSessionFactoryBean().getConfiguration().addMapper(EduTrackingMapper.class);
         } catch (BindingException ignored) {
