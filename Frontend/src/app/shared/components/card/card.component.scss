@@ -104,7 +104,7 @@
             position: relative;
             .mat-mdc-card-header-text {
                 width: calc(100% - 32px);
-                mat-card-title {
+                .mat-mdc-card-title {
                     font-size: 130%;
                     &.no-subtitle {
                         margin-bottom: 5px;
@@ -143,13 +143,13 @@
                     color: var(--primary);
                 }
             }
-            mat-card-title,
+            .mat-mdc-card-title,
             mat-card-subtitle {
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            mat-card-title {
+            .mat-mdc-card-title {
                 color: $textMain !important;
             }
             mat-card-subtitle {
