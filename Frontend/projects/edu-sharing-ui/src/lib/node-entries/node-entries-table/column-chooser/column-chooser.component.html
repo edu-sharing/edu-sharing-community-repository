@@ -13,6 +13,11 @@
     cdkDropList
     class="column-chooser mat-elevation-z2"
     (cdkDropListDropped)="columnChooserDrop($event)"
+    role="dialog"
+    [attr.aria-label]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    (keydown.escape)="columnChooserVisibleChange.emit(false)"
   >
     @for (column of columns; track column; let index = $index) {
     <div class="column-chooser-item" cdkDrag>

@@ -115,6 +115,13 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
+    onColumnChooserVisibleChange(visible: boolean): void {
+        this.columnChooserVisible = visible;
+        if (!visible) {
+            this.columnChooserTrigger?.elementRef.nativeElement.focus();
+        }
+    }
+
     ngAfterViewInit(): void {
         this.isScroll = this.entriesService.tableConfig?.dataColumnLayout === 'scroll';
         void Promise.resolve().then(() => {

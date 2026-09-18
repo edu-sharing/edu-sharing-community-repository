@@ -105,6 +105,8 @@
         #columnChooserTrigger="cdkOverlayOrigin"
         [matTooltip]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
         [attr.aria-label]="'LIST_TABLE.CONFIGURE_COLUMNS' | translate"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="columnChooserVisible"
       >
         <i esIcon="settings"></i>
       </button>
@@ -273,7 +275,8 @@ entriesService.dataSource.hasMore() && entriesService.paginationStrategy === 'in
 @if (columnChooserTriggerReady) {
 <es-column-chooser
   [(columns)]="entriesService.columns"
-  [(columnChooserVisible)]="columnChooserVisible"
+  [columnChooserVisible]="columnChooserVisible"
+  (columnChooserVisibleChange)="onColumnChooserVisibleChange($event)"
   [origin]="columnChooserTrigger"
 ></es-column-chooser>
 }
