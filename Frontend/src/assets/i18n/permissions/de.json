@@ -169,6 +169,7 @@
     "DELETE": {
       "MAIN_HEADING": "Nutzer{{GENDER_SEPARATOR}}in & Daten löschen",
       "USER_LIST": "Vorgang für folgende Benutzer & deren Daten durchführen",
+      "REFRESH_USER_LIST": "Benutzerliste aktualisieren",
       "FOLDER_STRUCTURE_DISINTEGRATE": "auflösen (alle Dateien in einen Ordner überführen)",
       "FOLDER_STRUCTURE_KEEP": "beibehalten",
       "MOVE_SHARED_FILES": "Dateien in neues Verzeichnis verschieben",

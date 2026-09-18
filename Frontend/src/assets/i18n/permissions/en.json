@@ -168,6 +168,7 @@
     "DELETE": {
       "MAIN_HEADING": "Delete users & data",
       "USER_LIST": "Perform process for the following users & their data",
+      "REFRESH_USER_LIST": "Refresh user list",
       "FOLDER_STRUCTURE_DISINTEGRATE": "break down (transfer all files into one folder)",
       "FOLDER_STRUCTURE_KEEP": "keep",
       "MOVE_SHARED_FILES": "Move files to a new directory",
