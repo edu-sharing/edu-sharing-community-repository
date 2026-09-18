@@ -243,6 +243,7 @@
     "NODE_ASPECTS": "Aspekte",
     "NODE_PROPERTIES": "Properties",
     "NODE_TYPE": "Objekttyp",
+    "COPY_NODE_ID": "Node-ID kopieren",
     "JSON": "Gesamtes Objekt",
     "PERMISSIONS": "Berechtigungen",
     "PERMISSIONS_INHERITED": "Geerbte Berechtigungen",
