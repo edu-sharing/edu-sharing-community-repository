@@ -109,7 +109,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
         Map<String, String> ssoMap = new HashMap<>();
         mapAttributes(ssoMap, req);
         Mapping mapping = ssoMappingProvider.getMapping(ssoMap);
-        String username = mapping.isPreferRemoteUser() ? req.getRemoteUser() : mapping.getPerson().inverseBidiMap().get(CCConstants.CM_PROP_PERSON_USERNAME);
+        String username = mapping.isPreferRemoteUser() ? req.getRemoteUser() : ssoMap.get(mapping.getPerson().inverseBidiMap().get(CCConstants.CM_PROP_PERSON_USERNAME));
 
         // headerUserName = getShibValue(ssoMapper.getSSOUsernameProp(), req);//transform(req.getHeader(authMethodShibboleth.getShibbolethUsername()));
 
