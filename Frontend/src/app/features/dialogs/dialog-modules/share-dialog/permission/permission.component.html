@@ -30,6 +30,10 @@
           'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
             | translate : { permissions: _permission.permissions.join(', ') }
         }}"
+        [attr.aria-label]="
+          'WORKSPACE.SHARE.TIMEBASED.TOOLTIP'
+            | translate : { permissions: _permission.permissions.join(', ') }
+        "
         cdkOverlayOrigin
         #timebasedTrigger="cdkOverlayOrigin"
       >
@@ -164,7 +168,7 @@
             'WORKSPACE.SHARE.TYPE_MENU_LABEL' | translate : { user: _permission | permissionName }
           "
           aria-haspopup="true"
-          [attr.aria-expanded]="showChooseType || null"
+          [attr.aria-expanded]="showChooseType"
           [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
         >
           @if (_permission.permissions.indexOf('Owner') > -1) {
