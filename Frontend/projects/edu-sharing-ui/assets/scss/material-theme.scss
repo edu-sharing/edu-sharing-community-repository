@@ -257,6 +257,13 @@ mat-tab-group {
         }
     }
 }
+// default MDC label colour fails AA contrast on this app's #f3f3f3 form surfaces
+.mat-mdc-form-field:not(.mat-form-field-bright) {
+    --mat-form-field-outlined-label-text-color: var(--textLight);
+    --mat-form-field-filled-label-text-color: var(--textLight);
+    --mat-form-field-outlined-focus-label-text-color: var(--textLight);
+    --mat-form-field-filled-focus-label-text-color: var(--textLight);
+}
 .mat-mdc-form-field.mat-form-field-bright {
     input,
     textarea {
