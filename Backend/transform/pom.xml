@@ -19,8 +19,8 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
-        <spring.boot.version>4.0.2</spring.boot.version>
-        <spring.version>7.0.3</spring.version>
+        <spring.boot.version>4.0.7</spring.boot.version>
+        <spring.version>7.0.8</spring.version>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -58,6 +58,16 @@
     </build>
     <dependencyManagement>
         <dependencies>
+            <!-- overrides the 2.20 pin from repository/pom.xml for this module only: Jackson 3.1
+                 (tools.jackson, pulled by Spring Boot 4.0.7) requires annotations 2.21 (adds
+                 JsonSerializeAs); with 2.20 the context fails with NoClassDefFoundError while
+                 initializing tools.jackson.databind.json.JsonMapper$Builder. Only the repackaged
+                 fat jar of this module is affected, the Alfresco webapp keeps 2.20. -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.21</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
