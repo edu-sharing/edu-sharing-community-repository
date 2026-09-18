@@ -1,17 +1,19 @@
-<div
+<button
+  type="button"
   class="rootNode"
   [class.rootNodeSelected]="root === MY_FILES"
   [esNodesDropTarget]="MY_FILES"
   [canDropNodes]="canDropOnMyFiles"
   (nodeDropped)="onNodesDrop($event)"
   (click)="doSetRoot(MY_FILES)"
+  [attr.aria-expanded]="root === MY_FILES"
   data-test="workspace-tree-my-content"
 >
   <i class="material-icons typeIcon">person</i>{{ 'WORKSPACE.MY_FILES' | translate }}
   <i class="material-icons">
     {{ root === MY_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
   </i>
-</div>
+</button>
 @if (root === MY_FILES) {
 <div class="tree">
   <es-workspace-sub-tree
@@ -23,17 +25,19 @@
   ></es-workspace-sub-tree>
 </div>
 }
-<div
+<button
+  type="button"
   class="rootNode"
   [class.rootNodeSelected]="root === SHARED_FILES"
   (click)="doSetRoot(SHARED_FILES)"
+  [attr.aria-expanded]="root === SHARED_FILES"
   data-test="workspace-tree-shared-common"
 >
   <i class="material-icons typeIcon">group</i>{{ 'WORKSPACE.SHARED_FILES' | translate }}
   <i class="material-icons">
     {{ root === SHARED_FILES ? 'keyboard_arrow_down' : 'keyboard_arrow_right' }}
   </i>
-</div>
+</button>
 @if (root === SHARED_FILES) {
 <div class="tree">
   <es-workspace-sub-tree
