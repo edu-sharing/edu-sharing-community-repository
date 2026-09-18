@@ -19,6 +19,7 @@
         matTooltip="{{ option | optionTooltip | async }}"
         matTooltipPosition="right"
         matTooltipTouchGestures="off"
+        [matTooltipDisabled]="!option.keyboardShortcut"
         [attr.aria-label]="option.ariaLabel || option.name | translate"
         [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
         [class.mat-menu-item-selected]="option.isSelected"
