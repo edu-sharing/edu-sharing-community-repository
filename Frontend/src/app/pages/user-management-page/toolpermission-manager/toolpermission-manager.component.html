@@ -77,6 +77,11 @@
                 [disabled]="changing.indexOf(key) !== -1"
                 [(ngModel)]="allow[key]"
                 name="allow{{ key }}"
+                [aria-label]="
+                  ('PERMISSIONS.TOOLPERMISSIONS.ALLOW' | translate) +
+                  ': ' +
+                  getPermissionLabel(group, key)
+                "
                 (change)="deny[key] = false; change(key)"
               ></mat-checkbox>
             </div>
@@ -86,6 +91,11 @@
                 [disabled]="changing.indexOf(key) !== -1"
                 [(ngModel)]="deny[key]"
                 name="deny{{ key }}"
+                [aria-label]="
+                  ('PERMISSIONS.TOOLPERMISSIONS.DENY' | translate) +
+                  ': ' +
+                  getPermissionLabel(group, key)
+                "
                 (change)="allow[key] = false; change(key)"
               ></mat-checkbox>
             </div>
