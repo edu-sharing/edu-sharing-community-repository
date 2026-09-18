@@ -432,6 +432,11 @@ export class NodeEntriesCardGridComponent<T extends Node> implements OnInit, OnD
         );
     }
 
+    // custom template entries (e.g. from CustomTemplatesDataSource) don't have `ref.id`, so fall back to the index
+    trackNode(index: number, node: T) {
+        return (node as any)?.ref?.id ?? index;
+    }
+
     isBlocked(node: Node) {
         return (
             node.properties?.[RestConstants.CCM_PROP_IMPORT_BLOCKED]?.[0] === 'true' ||
