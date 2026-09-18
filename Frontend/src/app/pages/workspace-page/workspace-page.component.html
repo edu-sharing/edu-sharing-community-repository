@@ -86,6 +86,8 @@
         } @if (isLoggedIn) {
         <div
           class="tree"
+          role="navigation"
+          [attr.aria-label]="'NAV.WORKSPACE_TREE' | translate"
           [style.--treeOffset.px]="treeOffset"
           [class.selection-bar-visible]="selection.length"
         >

@@ -1565,7 +1565,8 @@
   "NAV": {
     "MAIN": "Hauptmenü",
     "SKIP": "Sprungmarken",
-    "COLLECTIONS": "Sammlungshierarchie"
+    "COLLECTIONS": "Sammlungshierarchie",
+    "WORKSPACE_TREE": "Arbeitsbereich-Navigation"
   },
   "SKIP_LINKS": {
     "MAIN_CONTENT": "Springe zum Hauptinhalt",
