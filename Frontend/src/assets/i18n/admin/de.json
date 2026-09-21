@@ -517,6 +517,7 @@
     },
     "FOLDERTEMPLATES": {
       "EDUGROUP": "Organisation",
+      "REMOVE_EDUGROUP": "Organisation entfernen",
       "APPLYTEMPLATE": "Ordnervorlage anwenden",
       "UPLOAD_DONE": "Ordnervorlage wurde unter {{filename}} auf dem Server abgelegt.",
       "MISSING_GROUP": "Es muss mindestens eine Organisation gewählt werden.",

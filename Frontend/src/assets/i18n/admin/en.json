@@ -686,6 +686,7 @@
     },
     "FOLDERTEMPLATES": {
       "EDUGROUP": "Organisation",
+      "REMOVE_EDUGROUP": "Remove organisation",
       "APPLYTEMPLATE": "Apply folder template",
       "UPLOAD_DONE": "Folder template was stored as {{filename}} on the server.",
       "MISSING_GROUP": "At least one organisation must be selected.",

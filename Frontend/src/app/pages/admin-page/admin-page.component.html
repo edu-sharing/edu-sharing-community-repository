@@ -1213,7 +1213,14 @@
           @for (eduGroup of eduGroupsSelected; track eduGroup) {
           <div class="badge">
             <span>{{ eduGroup.title }}</span>
-            <i class="material-icons clickable" (click)="removeEduGroup(eduGroup)">cancel</i>
+            <button
+              mat-icon-button
+              color="primary"
+              attr.aria-label="{{ 'ADMIN.FOLDERTEMPLATES.REMOVE_EDUGROUP' | translate }}"
+              (click)="removeEduGroup(eduGroup)"
+            >
+              <i esIcon="cancel" class="clickable"></i>
+            </button>
           </div>
           }
         </div>
