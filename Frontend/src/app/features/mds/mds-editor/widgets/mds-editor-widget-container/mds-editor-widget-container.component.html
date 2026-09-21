@@ -60,7 +60,7 @@
   @if (!wrapInFormField) {
   <div
     [attr.role]="wrapInGroup ? 'group' : null"
-    [attr.aria-labelledby]="wrapInGroup ? labelId : null"
+    [attr.aria-labelledby]="wrapInGroup && label ? labelId : null"
     [attr.aria-describedby]="
       widget?.definition.bottomCaption && !shouldShowError() && wrapInGroup ? descriptionId : null
     "
