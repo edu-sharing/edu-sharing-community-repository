@@ -40,9 +40,12 @@
         matRippleColor="primary"
         class="button clickable"
         [class.active]="mode === button.id"
+        role="button"
         tabindex="0"
+        [attr.aria-current]="mode === button.id ? 'true' : null"
         (click)="setMode(button.id)"
         (keyup.enter)="setMode(button.id)"
+        (keydown.space)="$event.preventDefault(); setMode(button.id)"
       >
         <i [esIcon]="button.icon"></i><span>{{ 'ADMIN.MODE.' + button.id | translate }}</span>
       </div>
