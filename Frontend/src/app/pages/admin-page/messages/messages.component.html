@@ -3,7 +3,8 @@
     {{ 'ADMIN.MESSAGES.' + (this.editId() ? 'EDIT_MESSAGE' : 'ADD_MESSAGE') | translate }}
   </h3>
   <form class="create" [formGroup]="createForm">
-    <mat-form-field>
+    <mat-form-field floatLabel="always">
+      <mat-label>{{ 'ADMIN.MESSAGES.SELECT_COMPONENT' | translate }}</mat-label>
       <mat-chip-grid #chipGridComponent>
         @for (item of selectedComponents(); track item) {
         <mat-chip-row (removed)="removeComponent($event)" [value]="item">
@@ -37,7 +38,8 @@
       <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_COMPONENT_HINT' | translate }}</mat-hint>
     </mat-form-field>
     @if (contexts()?.length) {
-    <mat-form-field>
+    <mat-form-field floatLabel="always">
+      <mat-label>{{ 'ADMIN.MESSAGES.SELECT_CONTEXT' | translate }}</mat-label>
       <mat-chip-grid #chipGrid>
         @for (item of selectedContexts(); track item) {
         <mat-chip-row (removed)="removeContext($event)" [value]="item">
@@ -70,7 +72,8 @@
       <mat-hint>{{ 'ADMIN.MESSAGES.SELECT_CONTEXT_HINT' | translate }}</mat-hint>
     </mat-form-field>
     }
-    <mat-form-field>
+    <mat-form-field floatLabel="always">
+      <mat-label>{{ 'ADMIN.MESSAGES.SELECT_TP' | translate }}</mat-label>
       <mat-chip-grid #chipGrid>
         @for (item of selectedTp(); track item) {
         <mat-chip-row

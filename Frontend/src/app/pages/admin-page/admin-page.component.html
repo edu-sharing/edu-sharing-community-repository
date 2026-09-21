@@ -651,6 +651,7 @@
             <div class="info">{{ 'ADMIN.JOBS.JOB_CLASS' | translate }}</div>
             <div class="autocomplete">
               <es-autocomplete
+                [placeholder]="'ADMIN.JOBS.JOB_CLASS'"
                 [suggestions]="jobClassesSuggested"
                 [allowAny]="true"
                 [inputMinLength]="1"
