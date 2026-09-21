@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { NativeWidgetComponent } from '../../mds-editor-view/mds-editor-view.component';
-import { InputStatus, Values } from '../../../types/types';
+import { Constraints, InputStatus, Values } from '../../../types/types';
 
 @Component({
     selector: 'es-mds-editor-widget-file-upload',
@@ -10,9 +10,11 @@ import { InputStatus, Values } from '../../../types/types';
     standalone: false,
 })
 export class MdsEditorWidgetFileUploadComponent implements NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: false,
         supportsBulk: false,
+        // drop area / file picker, nothing to show read-only
+        supportsViewer: false,
     };
     selectedFiles = new BehaviorSubject<File[]>(null);
     hasChanges = new BehaviorSubject<boolean>(false);

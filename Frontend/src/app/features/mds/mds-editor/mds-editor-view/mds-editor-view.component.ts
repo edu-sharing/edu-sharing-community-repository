@@ -410,6 +410,11 @@ export class MdsEditorViewComponent
                 return 'Not supported in bulk mode';
             }
         }
+        if (constraints.supportsViewer === false) {
+            if (this.mdsEditorInstance.editorMode === 'viewer') {
+                return 'Not supported in viewer mode';
+            }
+        }
         return null;
     }
 
