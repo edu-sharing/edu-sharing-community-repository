@@ -342,6 +342,21 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         return null;
     }
 
+    /**
+     * Entries for the flat (`array`) rendering: the displayed caption plus the raw value id.
+     *
+     * The id is required to build a search link for `isSearchable` widgets and is only
+     * available via `rawValue`, i.e. when an editor instance with nodes exists. It is left
+     * empty otherwise (pure viewer without nodes, or values coming from
+     * `getInitialDisplayValues`), in which case the entry renders as plain text.
+     */
+    arrayEntries(): { id: string; caption: string }[] {
+        const values = this.value() ?? [];
+        // only trust rawValue when it lines up with the displayed values
+        const raw = this.rawValue?.length === values.length ? this.rawValue : null;
+        return values.map((caption, i) => ({ id: raw?.[i]?.id ?? '', caption }));
+    }
+
     formatValue(): string[] {
         return this.mdsViewerService.getFormattedValue(
             this.value(),

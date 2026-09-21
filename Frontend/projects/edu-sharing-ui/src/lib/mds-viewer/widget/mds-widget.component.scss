@@ -41,6 +41,11 @@
                 display: inline;
                 align-items: flex-end;
             }
+            // searchable values render as links, matching `.tree-entry > a` below
+            > a {
+                color: var(--palette-primary-800);
+                text-decoration: none;
+            }
         }
     }
     &.widget-type-vcard {
