@@ -1,6 +1,6 @@
 <div class="currentLicense">
-  <h4 *ngIf="type !== 'MULTI' && displayMode === 'full'">
-    {{ 'WORKSPACE.LICENSE.CURRENT' | translate }}
+  <h4 *ngIf="headingKey && type !== 'MULTI' && displayMode === 'full'">
+    {{ headingKey | translate }}
   </h4>
   <img
     *ngIf="type !== 'MULTI' && displayMode === 'full'"
