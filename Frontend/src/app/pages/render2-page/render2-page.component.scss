@@ -3,3 +3,10 @@
 es-render-wrapper-component {
     min-height: 100%;
 }
+
+es-imprint-privacy {
+    display: block;
+    width: 100%;
+    // leave space for scroll to top
+    padding: 10px 0 45px 0;
+}

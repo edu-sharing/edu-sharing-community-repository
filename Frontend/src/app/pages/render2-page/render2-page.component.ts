@@ -11,12 +11,13 @@ import { AppComponent } from '../../app.component';
 import { ConfigurationService } from '../../core-module/core.module';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RouterHelper } from '../../util/router.helper';
+import { ImprintPrivacyComponent } from '../../shared/components/imprint-privacy-footer/imprint-privacy.component';
 
 @Component({
     selector: 'es-render2-page',
     templateUrl: 'render2-page.component.html',
     styleUrls: ['render2-page.component.scss'],
-    imports: [CommonModule, RenderWrapperComponent],
+    imports: [CommonModule, RenderWrapperComponent, ImprintPrivacyComponent],
     providers: [OptionsHelperDataService],
 })
 export class Render2PageComponent implements OnDestroy {
