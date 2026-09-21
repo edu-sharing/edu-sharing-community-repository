@@ -100,6 +100,7 @@
         <button
           matSuffix
           mat-icon-button
+          [disabled]="dataSourceSearch.isLoading"
           [attr.aria-label]="'SEARCH_CLEAR' | translate"
           (click)="clearSearch()"
         >
@@ -107,6 +108,29 @@
         </button>
         }
       </mat-form-field>
+      @if (tabType === TabType.SEARCH && repositorySelectionAvailable()) {
+      <mat-form-field
+        class="repository-field"
+        appearance="outline"
+        subscriptSizing="dynamic"
+        data-test="nodes-selector-repository-select"
+      >
+        <mat-label>{{ i18nPrefix + 'SEARCH.REPOSITORY' | translate }}</mat-label>
+        <mat-select
+          [value]="activeRepository()"
+          [compareWith]="compareRepositories"
+          [disabled]="dataSourceSearch.isLoading"
+          (selectionChange)="onRepositoryChange($event.value)"
+        >
+          @for (repository of availableRepositories(); track repository.id) {
+          <mat-option [value]="repository">
+            <img class="repository-icon" [src]="repository | repositoryIcon" alt="" />
+            {{ repository.title }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      }
     </div>
     } @if (isSelectStep()) { @switch (tabType) {
     <!-- SEARCH TAB -->
@@ -126,7 +150,7 @@
           dropAllowed: canDropOnSearchRef,
           dropped: dropped
         }"
-        [columns]="searchColumns"
+        [columns]="searchColumns()"
         [dataSource]="dataSourceSearch"
         [displayType]="searchDisplayType"
         (displayTypeChange)="onSearchDisplayTypeChange($event)"

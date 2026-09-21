@@ -20,16 +20,20 @@ import {
     AboutService,
     AuthenticationService,
     CollectionService as ApiCollectionService,
+    ConfigService,
     Connector,
     Copy,
     CreateSuggestionRequestDto,
     DEFAULT,
     HOME_REPOSITORY,
+    MdsDefinition,
     MdsQueryCriteria,
+    MdsService,
     NetworkService,
     Node,
     NodeService,
     PROPERTY_FILTER_ALL,
+    Repository,
     ROOT,
     SearchRequestParams,
     SearchResults,
@@ -61,7 +65,19 @@ import {
     TreeConfig,
 } from 'ngx-edu-sharing-ui';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { combineLatest, firstValueFrom, map, of, shareReplay, switchMap } from 'rxjs';
+import {
+    combineLatest,
+    concatMap,
+    distinctUntilChanged,
+    filter,
+    firstValueFrom,
+    from,
+    map,
+    Observable,
+    of,
+    shareReplay,
+    switchMap,
+} from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import {
     CollectionReference,
@@ -101,6 +117,9 @@ import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
+import { filterMetadataSets, filterRepositories } from '../../../util/repository-filter';
+import { MdsEditorInstanceService } from '../../../features/mds/mds-editor/mds-editor-instance.service';
+import { Values } from '../../../features/mds/types/types';
 
 export enum TabType {
     SEARCH = 'search',
@@ -183,6 +202,24 @@ export type NodesSelectorConfig = {
      * allow collections to be selected as sources, in addition to files.
      */
     allowCollectionSelection?: boolean;
+    /**
+     * whether the search tab offers the remote repositories of this instance in a dropdown
+     * (default: true). Set to `false` for consumers that can only work with home repository nodes.
+     */
+    allowRemoteRepositories?: boolean;
+};
+
+/** everything the search tab derives from the mds of the active repository */
+type SearchMdsContext = {
+    repositoryId: string;
+    metadataSet: string;
+    /**
+     * the values the search widgets start with, i.e. their `defaultvalue`s. The search page sends
+     * them with every request (they are part of the filter bar's mds values), so the search tab
+     * has to do the same to produce the same results.
+     */
+    defaultCriteria: MdsQueryCriteria[];
+    columns: ColumnType;
 };
 
 @Component({
@@ -195,6 +232,8 @@ export type NodesSelectorConfig = {
         MdsModule,
         MetadataTemplateManagementComponent,
     ],
+    // headless mds instance used to evaluate the search widgets' default values
+    providers: [MdsEditorInstanceService],
 })
 export class NodesSelectorComponent implements OnInit {
     private apiCollectionService = inject(ApiCollectionService);
@@ -217,6 +256,9 @@ export class NodesSelectorComponent implements OnInit {
     private ltiToolOptionsService = inject(LtiToolOptionsService);
     private dialogs = inject(DialogsService);
     private searchService = inject(SearchService);
+    private mdsEditorInstance = inject(MdsEditorInstanceService);
+    private configService = inject(ConfigService);
+    private mdsService = inject(MdsService);
     private toast = inject(Toast);
     private translate = inject(TranslateService);
 
@@ -459,7 +501,37 @@ export class NodesSelectorComponent implements OnInit {
 
     // search tab
     dataSourceSearch: NodeDataSource<Node | any> = new NodeDataSource<Node | any>();
-    searchColumns: ColumnType;
+    /**
+     * the repositories the user may search in. The backend already restricts this list to
+     * searchable repositories the user has the `TOOLPERMISSION_REPOSITORY_<appId>` for, the client
+     * config `availableRepositories` is applied on top.
+     */
+    availableRepositories: Signal<Repository[]> = toSignal(
+        combineLatest([
+            this.networkService.getRepositories(),
+            this.configService.observeConfig(),
+        ]).pipe(map(([repositories, config]) => filterRepositories(repositories, config))),
+        { initialValue: [] as Repository[] },
+    );
+    /** the repository the search tab currently queries */
+    activeRepository: WritableSignal<Repository> = signal(null);
+    /**
+     * the mds context of the active repository. `concatMap` keeps the (shared) mds editor instance
+     * from being initialized twice at the same time, consumers pick the context of the repository
+     * they are interested in via {@link getSearchMdsContext}.
+     */
+    private searchMdsContext$: Observable<SearchMdsContext> = toObservable(
+        this.activeRepository,
+    ).pipe(
+        filter((repository) => !!repository),
+        distinctUntilChanged((a, b) => a.id === b.id),
+        concatMap((repository) => from(this.createSearchMdsContext(repository))),
+        shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    private searchMdsContext: Signal<SearchMdsContext> = toSignal(this.searchMdsContext$, {
+        initialValue: null,
+    });
+    searchColumns: Signal<ColumnType> = computed(() => this.searchMdsContext()?.columns);
     searchDisplayType: NodeEntriesDisplayType = NodeEntriesDisplayType.Table;
     searchSent: WritableSignal<boolean> = signal(false);
     @ViewChild('searchWrapperRef') searchWrapper!: NodeEntriesWrapperComponent<Node>;
@@ -544,8 +616,29 @@ export class NodesSelectorComponent implements OnInit {
     searchText = model('');
     // Is this component acting as the target our source?
     selectionMode = computed(() => (this.selectedSourceNodes().length > 0 ? 'target' : 'source'));
+    /**
+     * whether the repository dropdown of the search tab is offered. Remote nodes can only be
+     * picked as a source, so the dropdown is hidden while acting as a target.
+     */
+    repositorySelectionAvailable: Signal<boolean> = computed(
+        () =>
+            this.option()?.optionConfig?.allowRemoteRepositories !== false &&
+            this.selectionMode() === 'source' &&
+            this.availableRepositories().length > 1,
+    );
 
     constructor() {
+        // keep the selected repository valid, defaulting to the first (i.e. the home) repository
+        effect(() => {
+            const repositories = this.availableRepositories();
+            if (!repositories?.length) {
+                return;
+            }
+            const active = this.activeRepository();
+            if (!active || !repositories.some((repository) => repository.id === active.id)) {
+                this.activeRepository.set(repositories[0]);
+            }
+        });
         effect(() => {
             const option = this.option();
             if (option?.optionConfig?.state) {
@@ -566,9 +659,6 @@ export class NodesSelectorComponent implements OnInit {
             this.selectedTab.set(this.supportedTabs()[0]);
             await this.refreshData(this.selectedTab());
         }
-        this.searchColumns = await this.mdsHelperService.getColumnsByMdsId('search', {
-            repository: HOME_REPOSITORY,
-        });
         this.collectionsGridColumns = {
             Default: ListItem.getCollectionDefaults(),
         };
@@ -648,12 +738,16 @@ export class NodesSelectorComponent implements OnInit {
         this.searchSent.set(true);
         this.resetNodeEntriesSelections();
         if (this.selectedTab() === TabType.SEARCH) {
+            // mark as loading before awaiting anything, otherwise the (still empty) datasource
+            // would briefly render the "no results" message instead of the spinner
             this.dataSourceSearch.isLoading = true;
+            // the request has to carry the mds default values, so wait until they are known
+            const mdsContext = await this.getSearchMdsContext();
             // reset the search datasource if it is already initialized
             if (!this.dataSourceSearch.isEmpty()) {
                 this.dataSourceSearch.reset();
             }
-            const request = this.createSearchRequest();
+            const request = this.createSearchRequest(mdsContext);
             const searchResult: SearchResults = await firstValueFrom(
                 this.searchService.search(request),
             );
@@ -675,7 +769,7 @@ export class NodesSelectorComponent implements OnInit {
             if (!this.searchText()) {
                 this.dataSourceCollectionsFlat.setData([]);
             } else {
-                const request = this.createSearchRequest(0, true);
+                const request = this.createSearchRequest(null, 0, true);
                 const searchResult: SearchResults = await firstValueFrom(
                     this.searchService.search(request),
                 );
@@ -698,6 +792,112 @@ export class NodesSelectorComponent implements OnInit {
             this.collectionsDisplayType.set(NodeEntriesDisplayType.Tree);
             this.searchCompleted.set(false);
             this.searchSent.set(false);
+        }
+    }
+
+    /** `mat-select` value comparison for the repository dropdown */
+    compareRepositories = (a: Repository, b: Repository): boolean => a?.id === b?.id;
+
+    /**
+     * Switches the repository the search tab queries and runs the search against it.
+     */
+    async onRepositoryChange(repository: Repository): Promise<void> {
+        if (!repository || repository.id === this.activeRepository()?.id) {
+            return;
+        }
+        this.activeRepository.set(repository);
+        // results of the previous repository are meaningless now
+        this.resetNodeEntriesSelections();
+        this.dataSourceSearch.reset();
+        // always query the new repository, an empty search string yields its default results
+        await this.executeSearch();
+    }
+
+    /**
+     * The mds context of the currently active repository, waiting for it to be loaded.
+     */
+    private getSearchMdsContext(): Promise<SearchMdsContext> {
+        const repositoryId = this.activeRepository()?.id;
+        return firstValueFrom(
+            this.searchMdsContext$.pipe(
+                filter((context) => !repositoryId || context.repositoryId === repositoryId),
+            ),
+        );
+    }
+
+    /**
+     * Resolves the metadata set of the given repository together with everything the search tab
+     * derives from it.
+     */
+    private async createSearchMdsContext(repository: Repository): Promise<SearchMdsContext> {
+        const repositoryId = repository.isHomeRepo ? HOME_REPOSITORY : repository.id;
+        try {
+            const metadataSet = await this.resolveMetadataSet(repository);
+            const mds: MdsDefinition = await firstValueFrom(
+                this.mdsService.getMetadataSet({ repository: repositoryId, metadataSet }),
+            );
+            return {
+                repositoryId: repository.id,
+                metadataSet,
+                defaultCriteria: await this.getMdsDefaultCriteria(repositoryId, metadataSet),
+                columns: this.mdsHelperService.getColumns(mds, 'search'),
+            };
+        } catch (e) {
+            // the stream must not fail, otherwise no further search would be possible
+            console.warn(`Could not load the search mds of repository ${repository.id}`, e);
+            return {
+                repositoryId: repository.id,
+                metadataSet: DEFAULT,
+                defaultCriteria: [],
+                columns: this.mdsHelperService.getColumns(null, 'search'),
+            };
+        }
+    }
+
+    /**
+     * The values the search widgets of the given mds start with. Evaluated by a headless mds
+     * editor instance, i.e. by the same logic the filter bar of the search page uses.
+     */
+    private async getMdsDefaultCriteria(
+        repository: string,
+        metadataSet: string,
+    ): Promise<MdsQueryCriteria[]> {
+        try {
+            await this.mdsEditorInstance.initWithoutNodes(
+                RestConstants.DEFAULT_QUERY_NAME,
+                metadataSet,
+                repository,
+                'search',
+            );
+            const values: Values =
+                (await this.mdsEditorInstance.getValues(undefined, /* validate */ false)) ?? {};
+            return Object.entries(values)
+                .filter(([, value]) => value?.length)
+                .map(([property, value]) => ({ property, values: value }));
+        } catch (e) {
+            console.warn(`Could not evaluate the search defaults of mds ${metadataSet}`, e);
+            return [];
+        }
+    }
+
+    /**
+     * The first metadata set of the given repository that is enabled via the client config.
+     */
+    private async resolveMetadataSet(repository: Repository): Promise<string> {
+        if (repository.isHomeRepo) {
+            return DEFAULT;
+        }
+        try {
+            const [metadataSets, config] = await firstValueFrom(
+                combineLatest([
+                    this.mdsService.getAvailableMetadataSets(repository.id),
+                    this.configService.observeConfig(),
+                ]),
+            );
+            return filterMetadataSets(metadataSets, config, repository)?.[0]?.id ?? DEFAULT;
+        } catch (e) {
+            console.warn(`Could not resolve the metadata sets of repository ${repository.id}`, e);
+            return DEFAULT;
         }
     }
 
@@ -875,7 +1075,8 @@ export class NodesSelectorComponent implements OnInit {
         }
 
         dataSource.isLoading = true;
-        const request = this.createSearchRequest(event.offset, searchForCollections);
+        const mdsContext = searchForCollections ? null : await this.getSearchMdsContext();
+        const request = this.createSearchRequest(mdsContext, event.offset, searchForCollections);
         const searchResult: SearchResults = await firstValueFrom(
             this.searchService.search(request),
         );
@@ -1389,30 +1590,36 @@ export class NodesSelectorComponent implements OnInit {
     /**
      * Helper function to retrieve the base search request parameters.
      *
+     * @param mdsContext the mds context of the repository to search in, `null` for collections
      * @param skipCount
      * @param searchForCollections
      */
     private createSearchRequest(
+        mdsContext: SearchMdsContext,
         skipCount: number = 0,
         searchForCollections: boolean = false,
     ): SearchRequestParams {
+        const searchText = this.searchText();
         const criteria: MdsQueryCriteria[] = [
-            {
-                property: 'ngsearchword',
-                values: [this.searchText()],
-            },
+            // the mds default values are part of every search of the search page, too
+            ...(searchForCollections ? [] : mdsContext?.defaultCriteria ?? []),
+            // an empty search word is no criterion at all (same as on the search page)
+            ...(searchText ? [{ property: 'ngsearchword', values: [searchText] }] : []),
         ];
 
+        // collections only exist in the home repository, so a remote repository selection only
+        // applies to the "regular" search
+        const repository = searchForCollections ? null : this.activeRepository();
         return {
             query: searchForCollections
                 ? RestConstants.QUERY_NAME_COLLECTIONS
                 : RestConstants.DEFAULT_QUERY_NAME,
-            repository: HOME_REPOSITORY,
+            repository: repository && !repository.isHomeRepo ? repository.id : HOME_REPOSITORY,
             maxItems: RestConnectorService.DEFAULT_NUMBER_PER_REQUEST,
             skipCount,
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: searchForCollections ? 'COLLECTIONS' : 'FILES',
-            metadataset: DEFAULT,
+            metadataset: searchForCollections ? DEFAULT : mdsContext?.metadataSet ?? DEFAULT,
             sortProperties: [RestConstants.CM_MODIFIED_DATE],
             sortAscending: [false],
             body: {

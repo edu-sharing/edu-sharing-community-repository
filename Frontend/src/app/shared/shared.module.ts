@@ -62,6 +62,7 @@ import { ToolpermissionCheckDirective } from './directives/toolpermission-check.
 import { AuthorityAffiliationPipe } from './pipes/authority-affiliation.pipe';
 import { BitwisePipe } from './pipes/bitwise.pipe';
 import { PermissionNamePipe } from './pipes/permission-name.pipe';
+import { RepositoryIconPipe } from './pipes/repository-icon.pipe';
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { SplitNewLinesPipe } from './pipes/split-new-lines.pipe';
 import { VersionLabelPipe } from './pipes/version-label.pipe';
@@ -93,6 +94,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         MultiLineLabelComponent,
         OnAttributeChangeDirective,
         PermissionNamePipe,
+        RepositoryIconPipe,
         PoweredByComponent,
         RegisterCustomPropertyDirective,
         SafeHtmlPipe,
@@ -192,6 +194,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         OnAttributeChangeDirective,
         OverlayModule,
         PermissionNamePipe,
+        RepositoryIconPipe,
         PoweredByComponent,
         ReactiveFormsModule,
         RegisterCustomPropertyDirective,

@@ -122,7 +122,8 @@
         },
         "NO_SEARCH_RESULTS": "No results could be found.",
         "SEARCH": {
-          "PLACEHOLDER": "Search for contents"
+          "PLACEHOLDER": "Search for contents",
+          "REPOSITORY": "Source"
         },
         "COLLECTIONS": {
           "EMPTY_MESSAGE": "So far you have neither created your own collection nor been given access to a collection.",
