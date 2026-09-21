@@ -40,7 +40,7 @@
   <rs-module-audio [data]="data" [node]="node"></rs-module-audio>
   } @loading {
   <ng-container *ngTemplateOutlet="loading"></ng-container>
-  } @defer (when data?.module === 'MOODLE') {
+  } @defer (when data?.module === 'MOODLE' || data?.module === 'SCORM') {
   <rs-module-moodle
     [data]="data"
     [node]="node"

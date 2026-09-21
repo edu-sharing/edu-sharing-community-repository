@@ -7,10 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { RenderData } from '../../dto/RenderData';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
+import { EduSharingUiModule } from 'ngx-edu-sharing-ui';
 
 @Component({
     selector: 'rs-module-edu-html',
-    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule],
+    imports: [RenderingModule, MatButtonModule, MatIconModule, TranslateModule, EduSharingUiModule],
     templateUrl: './eduHtml.component.html',
     styleUrl: './eduHtml.component.scss',
 })

@@ -1,12 +1,15 @@
 @if (data?.items !== undefined) {
 <div class="moodle-wrapper">
-  @if (!isWebComponent) {
+  @if (showIframe) {
   <iframe [title]="node?.title ?? 'Moodle'" class="frame" [src]="sanitizedUrl"></iframe>
-  } @if (isWebComponent) {
+  } @if (!showIframe && previewUrl) {
   <img [src]="previewUrl" alt="preview" />
+  } @if (sanitizedLinkUrl) {
+  <a mat-flat-button color="primary" [href]="sanitizedLinkUrl" target="_blank">
+    <div class="link-label">
+      {{ 'RENDERING.GO_TO_COURSE' | translate }}<i esIcon="open_in_new"></i>
+    </div>
+  </a>
   }
-  <a mat-button="filled" [href]="sanitizedLinkUrl" target="_blank">{{
-    'RENDERING.GO_TO_COURSE' | translate
-  }}</a>
 </div>
 }
