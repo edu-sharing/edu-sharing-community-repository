@@ -904,6 +904,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
     "ASSIGNMENT_FINISH": "Aufgabe abschließen",
     "ASSIGNMENT_FINISH_CONFIRM": "Möchten Sie diese Aufgabe wirklich abschließen? Dies kann nicht rückgängig gemacht werden.",
+    "ASSIGNMENT_DELETE": "Aufgabe löschen",
+    "ASSIGNMENT_DELETE_CONFIRM": "Möchten Sie diese Aufgabe wirklich endgültig löschen? Die Aufgabe und alle zugehörigen Dokumente und Abgaben werden unwiderruflich gelöscht.",
     "MANAGE_CONTENT": "Einsortieren",
     "EDIT_CONNECTOR": "Bearbeiten"
   },
@@ -1149,7 +1151,8 @@
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
     "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
-    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert."
+    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert.",
+    "ASSIGNMENT_DELETE": "Die Aufgabe wurde gelöscht."
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",

@@ -791,6 +791,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
     "ASSIGNMENT_FINISH": "Finish assignment",
     "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone.",
+    "ASSIGNMENT_DELETE": "Delete assignment",
+    "ASSIGNMENT_DELETE_CONFIRM": "Do you really want to permanently delete this assignment? The assignment and all its documents and submissions will be deleted irrevocably.",
     "EDIT_CONNECTOR": "Edit",
     "NEW_ASSIGNMENT": "New assignment",
     "ASSIGNMENT_COPY": "Copy assignment",
@@ -1024,7 +1026,8 @@
     "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable",
     "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
     "ASSIGNMENT_FINISH": "The assignment has been finished.",
-    "ASSIGNMENT_COPY": "The assignment has been copied."
+    "ASSIGNMENT_COPY": "The assignment has been copied.",
+    "ASSIGNMENT_DELETE": "The assignment has been deleted."
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",

@@ -120,5 +120,63 @@ export function createDeleteOptions({
     cancelAssignment.color = 'warn';
     cancelAssignment.priority = 10;
 
-    return [revokeNode, removeNodeRef, deleteNode, cancelAssignment];
+    const deleteAssignment = new OptionItem(
+        'OPTIONS.ASSIGNMENT_DELETE',
+        'delete_forever',
+        async (object) => {
+            const assignment = service.getObjects(object, data)[0] as Assignment;
+            const dialogRef = await service.dialogs.openGenericDialog({
+                title: 'OPTIONS.ASSIGNMENT_DELETE',
+                message: 'OPTIONS.ASSIGNMENT_DELETE_CONFIRM',
+                buttons: [
+                    { label: 'CANCEL', config: { color: 'standard' } },
+                    {
+                        label: 'OPTIONS.ASSIGNMENT_DELETE',
+                        config: { color: 'danger' },
+                    },
+                ],
+            });
+            dialogRef.afterClosed().subscribe((response) => {
+                if (response === 'OPTIONS.ASSIGNMENT_DELETE') {
+                    service.toast.showProgressSpinner();
+                    service.assignmentV1Service
+                        .deleteAssignmentPermanently({ assignmentId: assignment.ref.id })
+                        .subscribe({
+                            next: () => {
+                                service.toast.closeProgressSpinner();
+                                service.toast.show({
+                                    type: 'info',
+                                    subtype: ToastType.InfoSimple,
+                                    message: 'TOAST.ASSIGNMENT_DELETE',
+                                });
+                                service.localEvents.nodesDeleted.emit([assignment as any]);
+                            },
+                            error: (error) => {
+                                service.toast.closeProgressSpinner();
+                                service.toast.error(error);
+                            },
+                        });
+                }
+            });
+        },
+    );
+    deleteAssignment.elementType = [ElementType.Assignment];
+    deleteAssignment.constrains = [Constrain.NoBulk, Constrain.User];
+    // the assignment is deleted permanently (no recycle bin), so only its creator may do so,
+    // and only once it is finished or canceled (mirrors the backend restrictions of
+    // DELETE /assignment/v1/{assignmentId}/permanent)
+    deleteAssignment.customShowCallback = async (objects) => {
+        const assignment = objects[0] as Assignment;
+        return (
+            ['FINISHED', 'CANCELED'].includes(assignment.status) &&
+            !!assignment.creator?.authorityName &&
+            assignment.creator.authorityName === service.connector.getCurrentLogin()?.authorityName
+        );
+    };
+    deleteAssignment.showAsAction = true;
+    deleteAssignment.group = DefaultGroups.Delete;
+    deleteAssignment.color = 'warn';
+    deleteAssignment.priority = 20;
+
+    return [revokeNode, removeNodeRef, deleteNode, cancelAssignment, deleteAssignment];
 }

@@ -739,6 +739,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Volete davvero annullare questo compito? L'operazione non può essere annullata.",
     "ASSIGNMENT_FINISH": "Concludi compito",
     "ASSIGNMENT_FINISH_CONFIRM": "Volete davvero concludere questo compito? L'operazione non può essere annullata.",
+    "ASSIGNMENT_DELETE": "Elimina compito",
+    "ASSIGNMENT_DELETE_CONFIRM": "Volete davvero eliminare definitivamente questo compito? Il compito e tutti i documenti e le consegne associati verranno eliminati irreversibilmente.",
     "MANAGE_CONTENT": "Ordina"
   },
   "NO_SIZE": "-",
@@ -920,7 +922,8 @@
     "OPTION_DISABLED_OR_UNAVAILABLE": "Purtroppo l'azione richiesta non è disponibile.",
     "ASSIGNMENT_CANCEL": "Il compito è stato annullato.",
     "ASSIGNMENT_FINISH": "Il compito è stato concluso.",
-    "ASSIGNMENT_COPY": "Il compito è stato copiato."
+    "ASSIGNMENT_COPY": "Il compito è stato copiato.",
+    "ASSIGNMENT_DELETE": "Il compito è stato eliminato."
   },
   "VCARD": {
     "Givenname": "Nome",

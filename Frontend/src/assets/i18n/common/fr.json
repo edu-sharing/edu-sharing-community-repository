@@ -739,6 +739,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Voulez-vous vraiment annuler ce devoir ? Cette action est irréversible.",
     "ASSIGNMENT_FINISH": "Terminer le devoir",
     "ASSIGNMENT_FINISH_CONFIRM": "Voulez-vous vraiment terminer ce devoir ? Cette action est irréversible.",
+    "ASSIGNMENT_DELETE": "Supprimer le devoir",
+    "ASSIGNMENT_DELETE_CONFIRM": "Voulez-vous vraiment supprimer définitivement ce devoir ? Le devoir ainsi que tous les documents et rendus associés seront supprimés irréversiblement.",
     "MANAGE_CONTENT": "Classer"
   },
   "NO_SIZE": "-",
@@ -920,7 +922,8 @@
     "OPTION_DISABLED_OR_UNAVAILABLE": "L'action demandée n'est malheureusement pas disponible.",
     "ASSIGNMENT_CANCEL": "Le devoir a été annulé.",
     "ASSIGNMENT_FINISH": "Le devoir a été terminé.",
-    "ASSIGNMENT_COPY": "Le devoir a été copié."
+    "ASSIGNMENT_COPY": "Le devoir a été copié.",
+    "ASSIGNMENT_DELETE": "Le devoir a été supprimé."
   },
   "VCARD": {
     "Givenname": "Prénom",
