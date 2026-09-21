@@ -52,6 +52,7 @@ import { UserQuotaComponent } from './components/user-quota/user-quota.component
 import { ElementRefDirective } from './directives/element-ref.directive';
 import { EscapeHtmlPipe } from './directives/escape-html.pipe';
 import { FileDropDirective } from './directives/file-drop';
+import { FocusOnOpenDirective } from './directives/focus-on-open.directive';
 import { ImageConfigDirective } from './directives/image-config.directive';
 import { OnAttributeChangeDirective } from './directives/on-attribute-change.directive';
 import { RegisterCustomPropertyDirective } from './directives/register-custom-property.directive';
@@ -83,6 +84,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
+        FocusOnOpenDirective,
         GlobalProgressComponent,
         ImageConfigDirective,
         InputPasswordComponent,
@@ -148,6 +150,7 @@ import { extensionUiProviders } from '../extension/extension-ui-providers';
         ElementRefDirective,
         EscapeHtmlPipe,
         FileDropDirective,
+        FocusOnOpenDirective,
         FormsModule,
         GlobalProgressComponent,
         ImageConfigDirective,

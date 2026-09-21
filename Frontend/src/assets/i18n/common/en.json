@@ -61,6 +61,7 @@
   "CLOSE": "close",
   "DOWNLOAD": "download",
   "LOAD_MORE": "Load more",
+  "TREE_LABEL": "Content tree",
   "LOADING": "loading...",
   "INFORMATION": "information",
   "TODAY": "today",
@@ -262,7 +263,10 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "File type",
     "TOGGLE_ALL": "Select all/none",
-    "CONFIGURE_COLUMNS": "Configure columns"
+    "CONFIGURE_COLUMNS": "Configure columns",
+    "COLUMN_ACTIONS": "Actions",
+    "ENTRY_COUNT": "{{total}} entries",
+    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected"
   },
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",
@@ -556,6 +560,8 @@
     "email": "e-mail",
     "status": "status",
     "primaryAffiliation": "primary role",
+    "PRIMARY_AFFILIATION_SWITCH_TO_LIST": "Switch to predefined list",
+    "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Switch to free text",
     "password": "password",
     "sizeQuota": "quota size in MB",
     "PRIMARY_AFFILIATION": {
@@ -706,6 +712,7 @@
     "COLLECTION_PROPSE": "Submit a proposal?",
     "COLLECTION_PROPSE_INFO": "You do not have sufficient rights to the collection \"{{collection}}\". However, you can submit the material as a proposal. Would you like to continue?"
   },
+  "QR_CODE_ARIA_LABEL": "QR code for this link",
   "OPTIONS_FOR": "Actions for {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "OPTIONS": {
@@ -1355,7 +1362,8 @@
   "NAV": {
     "MAIN": "main",
     "SKIP": "skip",
-    "COLLECTIONS": "collections"
+    "COLLECTIONS": "collections",
+    "WORKSPACE_TREE": "workspace navigation"
   },
   "SKIP_LINKS": {
     "MAIN_CONTENT": "Skip to main content",
@@ -1468,6 +1476,7 @@
     "NODE_ASPECTS": "Aspects",
     "NODE_PROPERTIES": "Properties",
     "NODE_TYPE": "Objekt type",
+    "COPY_NODE_ID": "Copy node id",
     "JSON": "Entire Objekt",
     "PERMISSIONS": "Permissions",
     "PERMISSIONS_INHERITED": "Inherited permissions",

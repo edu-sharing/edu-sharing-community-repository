@@ -84,7 +84,13 @@ describe('RenderComponent module selection', () => {
 
     it('uses the backend module when renderdata succeeds', async () => {
         renderService.getRenderDataToken.and.returnValue(
-            of({ deferred: false, jobId: null, module: 'IMAGE', objectLinks: [] }),
+            of({
+                deferred: false,
+                jobId: null,
+                module: 'IMAGE',
+                objectLinks: [{ link: 'https://example.org/a.png', width: 1, height: 1 }],
+                supportedByBackend: true,
+            }),
         );
         const app = createComponent({ ref: { id: 'id', repo: 'repo' }, properties: {} } as Node);
         const data = await awaitRenderData(app);
@@ -93,6 +99,7 @@ describe('RenderComponent module selection', () => {
         expect(trackingService.trackViewedWithToken).not.toHaveBeenCalled();
     });
 
+    // The two 415 tests below cover rendering services that predate `supportedByBackend`.
     it('falls back to the default module on 415', async () => {
         renderService.getRenderDataToken.and.returnValue(
             throwError(() => new HttpErrorResponse({ status: 415 })),
@@ -117,6 +124,51 @@ describe('RenderComponent module selection', () => {
         expect(data!.module).toBe('url');
         expect(data!.frontendModuleConfig?.urlModuleConfig?.externalId).toBe('abc123');
         expect(trackingService.trackViewedWithToken).not.toHaveBeenCalled();
+    });
+
+    it('uses the default frontend module when the service reports supportedByBackend false', async () => {
+        renderService.getRenderDataToken.and.returnValue(
+            of({ deferred: false, jobId: null, supportedByBackend: false }),
+        );
+        const app = createComponent({ ref: { id: 'id', repo: 'repo' }, properties: {} } as Node);
+        const data = await awaitRenderData(app);
+        expect(data!.module).toBe('default');
+        expect(data!.frontendModuleConfig?.urlModuleConfig).toBeNull();
+        expect(moduleInfoController.getModulesInfo).not.toHaveBeenCalled();
+        expect(trackingService.trackViewedWithToken).not.toHaveBeenCalled();
+    });
+
+    it('uses a matching frontend module when the service reports supportedByBackend false', async () => {
+        renderService.getRenderDataToken.and.returnValue(
+            of({ deferred: false, jobId: null, supportedByBackend: false }),
+        );
+        const app = createComponent({
+            ref: { id: 'id', repo: 'repo' },
+            properties: { 'ccm:wwwurl': ['https://youtu.be/abc123'] },
+        } as unknown as Node);
+        const data = await awaitRenderData(app);
+        expect(data!.module).toBe('url');
+        expect(data!.frontendModuleConfig?.urlModuleConfig?.externalId).toBe('abc123');
+    });
+
+    it('prefers supportedByBackend false over a returned jobId', async () => {
+        // Guards the branch ordering: the flag is checked before deferred/jobId, so a stray jobId
+        // must not start a poll for a node the service never renders.
+        renderService.getRenderDataToken.and.returnValue(
+            of({ deferred: true, jobId: 'job-1', module: 'IMAGE', supportedByBackend: false }),
+        );
+        const app = createComponent({ ref: { id: 'id', repo: 'repo' }, properties: {} } as Node);
+        const data = await awaitRenderData(app);
+        expect(data!.module).toBe('default');
+    });
+
+    it('falls back to the frontend module when a response has neither links nor a job', async () => {
+        renderService.getRenderDataToken.and.returnValue(
+            of({ deferred: false, jobId: null, objectLinks: [], supportedByBackend: true }),
+        );
+        const app = createComponent({ ref: { id: 'id', repo: 'repo' }, properties: {} } as Node);
+        const data = await awaitRenderData(app);
+        expect(data!.module).toBe('default');
     });
 
     it('shows the error module on other errors', async () => {

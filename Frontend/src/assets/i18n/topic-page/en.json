@@ -332,7 +332,42 @@
         "SWIMLANE_DEFAULT": "Swimlane",
         "TYPE_LABEL": "Type",
         "GRID_DEFINITION_LABEL": "Grid definition",
-        "CHANGE_GRID_HINT": "If you change the grid type, widgets added to positions that no longer exist at the end of the grid may be lost. Please move the respective widgets first before proceeding with grid adjustment."
+        "CHANGE_GRID_HINT": "If you change the grid type, widgets added to positions that no longer exist at the end of the grid may be lost. Please move the respective widgets first before proceeding with grid adjustment.",
+        "ADVANCED": {
+          "HEADING": "Advanced: automatically created sections",
+          "COUNT_ARIA": "Number of advanced options that are set",
+          "HINT": "Creates one section per item automatically — for example one section for every sub collection. In a page template these become real sections as soon as a topic page is created from it. In a page variant the rule is resolved every time the page is opened and therefore stays current.",
+          "HEADING_HINT": "Placeholders such as ${item.title} are replaced per section.",
+          "SOURCE_LABEL": "Create a section for",
+          "SOURCE_NONE": "Nothing — just this one section",
+          "SOURCE_HINT": "Without a source this stays a single section.",
+          "SOURCE": {
+            "subCollections": "Every sub collection"
+          },
+          "ORDER_BY_LABEL": "Order by",
+          "ORDER_BY_HINT": "A property, e.g. cm:name or cm:modified. Leave empty for the repository's own order.",
+          "ORDER_DESCENDING_LABEL": "Order descending",
+          "MAX_ITEMS_LABEL": "Maximum number of sections",
+          "MAX_ITEMS_HINT": "Upper bound on the number of sections produced.",
+          "PLACEHOLDERS": "Usable in the heading above and in the fields below:",
+          "PLACEHOLDERS_SCOPE": "${item…} refers to the section's own item, i.e. the single sub collection. ${page…} refers to the collection this topic page belongs to.",
+          "CONFIG_PATCH_LABEL": "Per item configuration of \"{{widget}}\" (JSON)",
+          "CONFIG_PATCH_HINT": "Merged over the widget's own configuration. Only enter what differs per item.",
+          "EXAMPLES_LABEL": "Insert an example",
+          "EXAMPLE": {
+            "COLLECTION_FILTER": "Only this collection's content",
+            "COLLECTION_FILTER_NEWEST": "This collection, newest first",
+            "HEADLINE": "Headline per section",
+            "DESCRIPTION": "The collection's description",
+            "SEARCH_TEXT": "Free text search per section"
+          },
+          "ERROR": {
+            "INVALID_JSON": "Not valid JSON: {{detail}}",
+            "NOT_AN_OBJECT": "A JSON object is expected, e.g. {\"headline\": \"...\"}.",
+            "UNKNOWN_PLACEHOLDER": "Unknown placeholders: {{placeholders}}. Allowed are: {{allowed}}",
+            "CANNOT_APPLY": "The per item configuration is not valid and cannot be applied."
+          }
+        }
       },
       "DELETE": {
         "LABEL": "Delete section",

@@ -115,6 +115,13 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             .subscribe(() => this.changeDetectorRef.detectChanges());
     }
 
+    onColumnChooserVisibleChange(visible: boolean): void {
+        this.columnChooserVisible = visible;
+        if (!visible) {
+            this.columnChooserTrigger?.elementRef.nativeElement.focus();
+        }
+    }
+
     ngAfterViewInit(): void {
         this.isScroll = this.entriesService.tableConfig?.dataColumnLayout === 'scroll';
         void Promise.resolve().then(() => {
@@ -270,6 +277,17 @@ export class NodeEntriesTableComponent<T extends NodeEntriesDataType>
             }),
             shareReplay(1),
         );
+    }
+
+    /** i18n key and params for the icon column header's hidden accessible name. */
+    getEntryCountLabel(): { key: string; params: Record<string, number> } {
+        const total = this.entriesService.dataSource?.getTotal();
+        return this.entriesService.checkbox
+            ? {
+                  key: 'LIST_TABLE.ENTRY_COUNT_SELECTED',
+                  params: { selected: this.entriesService.selection.selected.length, total },
+              }
+            : { key: 'LIST_TABLE.ENTRY_COUNT', params: { total } };
     }
 
     isSortable(column: ListItem) {

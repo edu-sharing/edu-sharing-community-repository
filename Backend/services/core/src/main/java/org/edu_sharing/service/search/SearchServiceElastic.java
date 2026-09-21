@@ -1846,6 +1846,7 @@ public class SearchServiceElastic implements SearchService {
     BoolQuery.Builder getUserSharesQuery(UserShareDirection direction, Long maxAge, Instant originDate) {
         String username = AuthenticationUtil.getFullyAuthenticatedUser();
         boolean rejected = UserShareDirection.rejectedByUser.equals(direction);
+        List<String> excludedShareGroups = LightbendConfigLoader.get().getStringList("repository.search.shares.excludeGroups");
         // a node the user has rejected (hidden) carries an additional share child with status
         // REJECTED and sharedWith = the user itself (see ShareInfoServiceImpl.rejectShare)
         Query rejectedByUserQuery = Query.of(q2 -> q2.hasChild(hc -> hc
@@ -1905,6 +1906,9 @@ public class SearchServiceElastic implements SearchService {
                                         ));
                                         b.minimumShouldMatch("1");
                                         for (String group : getAllMemberships(username, false)) {
+                                            if (excludedShareGroups.contains(group)) {
+                                                continue;
+                                            }
                                             b = b.should(m -> m.term(t -> t
                                                     .field("share.sharedWith")
                                                     .value(group)
@@ -1925,6 +1929,9 @@ public class SearchServiceElastic implements SearchService {
                                                 .value(username)
                                         ));
                                         for (String group : getAllMemberships(username, false)) {
+                                            if (excludedShareGroups.contains(group)) {
+                                                continue;
+                                            }
                                             b = b.should(m -> m.term(t -> t
                                                     .field("share.sharedWith")
                                                     .value(group)
@@ -2139,6 +2146,11 @@ public class SearchServiceElastic implements SearchService {
                         childQuery
                 );
         processSpecialFilters(queryData, builder);
+        if ("shared".equals(queryId)) {
+            for (String excludedPath : LightbendConfigLoader.get().getStringList("repository.search.shares.excludePaths")) {
+                builder.mustNot(mustNot -> mustNot.match(m -> m.field("path").query(excludedPath)));
+            }
+        }
         searchToken.setElasticQuery(builder.build());
         SearchResultNodeRef queryResult = search(searchToken, true);
         org.edu_sharing.repository.server.SearchResult<T> result = new org.edu_sharing.repository.server.SearchResult<>();

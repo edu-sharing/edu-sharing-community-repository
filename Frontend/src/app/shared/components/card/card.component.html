@@ -32,7 +32,7 @@
       } @if (icon) {
       <div class="avatar" mat-card-avatar><i [esIcon]="icon"></i></div>
       }
-      <mat-card-title [class.no-subtitle]="!subtitle">{{ title }}</mat-card-title>
+      <h2 mat-card-title [class.no-subtitle]="!subtitle">{{ title }}</h2>
       <mat-card-subtitle>{{ subtitle }}</mat-card-subtitle>
       <div class="cancel">
         @if (isCancelable) {

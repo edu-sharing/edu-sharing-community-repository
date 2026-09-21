@@ -655,7 +655,10 @@
 </ng-template>
 
 <ng-template #editSwimlaneDialog>
-  <es-swimlane-settings-dialog [form]="swimlaneToEditForm"></es-swimlane-settings-dialog>
+  <es-swimlane-settings-dialog
+    [form]="swimlaneToEditForm"
+    [advancedEnabled]="isAdmin()"
+  ></es-swimlane-settings-dialog>
 </ng-template>
 
 <ng-template #addPageVariantOrTemplateDialog>

@@ -33,8 +33,9 @@ whether a tab bar will be shown. The body itself always lives in the same place 
         <es-editorial-sidebar [primaryMode]="'search'"></es-editorial-sidebar>
       </div>
     </mat-sidenav>
-    <!-- Always-visible tab ("Lasche") on the left edge to open/close the filter panel,
-      mirroring the editorial sidebar/filter toggle. -->
+    <!-- Duplicates the main nav's "Filter" button (toggleFilters -> filtersButtonClicked). Inline
+      since this tab's template position (right before its panel) is free of any transformed
+      ancestor, unlike the trapped right-hand tab. -->
     <es-edge-toggle
       data-test="button-toggle-sidebar-filters-search"
       [side]="'start'"
@@ -43,12 +44,14 @@ whether a tab bar will be shown. The body itself always lives in the same place 
       [drawer]="filtersSidebar()"
       [measure]="'edge'"
       [animatePane]="false"
+      [inline]="true"
       [labelOpen]="'SEARCH.OPEN_FILTERS'"
       [labelClose]="'SEARCH.CLOSE_FILTERS'"
+      [ariaControls]="filtersSidebarComponent()?.panelId"
       (toggled)="toggleFilters()"
     ></es-edge-toggle>
     <es-search-page-filters-sidebar #filtersSidebarEl></es-search-page-filters-sidebar>
-    <div class="main-content">
+    <div class="main-content" esSkipTarget="MAIN_CONTENT">
       @if (tabBarIsVisible) {
       <nav mat-tab-nav-bar [tabPanel]="tabPanel">
         @if (availableRepositories.getValue().length > 1) {

@@ -149,7 +149,7 @@
   "AUTHORITY_TYPE_GROUP": "Group",
   "AUTHORITY_TYPE_ORG": "Organisation",
   "CHILDOBJECT_COUNT": "{{count}} items (sequence)",
-  "OPTIONS_FOR": "Aktions for {{element}}",
+  "OPTIONS_FOR": "Options for {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "NO_SIZE": "-",
   "VERSION_COMMENT": "Version comment",

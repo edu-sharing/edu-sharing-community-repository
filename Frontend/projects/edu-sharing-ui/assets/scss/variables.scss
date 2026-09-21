@@ -32,7 +32,7 @@
     --aiColorChipText: var(--aiColor);
     --tableIconSize: 38px;
     --textLight: #585858;
-    --textMediumLight: #888;
+    --textMediumLight: #767676;
     --textMain: #383838;
     --textWhite: #fff;
     --textBlack: #000;
@@ -80,6 +80,10 @@
     --colorStatusNegative: #cd2457;
     --colorStatusWarning: #e98c1b;
     --colorStarActive: #ba7c00;
+    // OER-status license badges - do not swap the text color due to contrast
+    --licenseOerBadgeBackground: #0b0;
+    --licenseNotOerBadgeBackground: #f5a623;
+    --licenseBadgeTextColor: #000;
     --nodeVirtualColor: #42ca8d;
     --nodeVirtualColorLight: #b8fcdd;
     // main background of the large, rounded containers

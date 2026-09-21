@@ -4,6 +4,7 @@ import {
     computed,
     effect,
     ElementRef,
+    HostBinding,
     inject,
     input,
     OnDestroy,
@@ -14,22 +15,25 @@ import {
 } from '@angular/core';
 import { GlobalPositionStrategy, Overlay, OverlayModule, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
+import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 
 /**
- * Always-visible tab ("Lasche") docked to a viewport edge that opens/closes an associated
- * drawer (e.g. a `mat-sidenav`). It is rendered through a body-level CDK overlay so it stays
- * visible even while the drawer is closed (a closed `mat-sidenav` hides its own content), and
- * its offset from the edge tracks the drawer width so the tab slides together with the panel.
+ * Always-visible tab ("Lasche") docked to a viewport edge that opens/closes a drawer. By default
+ * renders through a body-level CDK overlay so it stays visible while the drawer is closed, and
+ * tracks the drawer's width so it slides with the panel.
  *
- * Provide the drawer element via {@link drawer} (its width is measured); when omitted the tab
- * falls back to the nearest `.mat-drawer` ancestor of its host.
+ * Set {@link inline} to render at the tab's own template position instead (no overlay) — only
+ * safe when that position is outside any transformed ancestor.
+ *
+ * Provide {@link drawer} to measure a specific element; otherwise falls back to the nearest
+ * `.mat-drawer` ancestor.
  */
 @Component({
     selector: 'es-edge-toggle',
     standalone: true,
-    imports: [OverlayModule, TranslateModule, EduSharingUiCommonModule],
+    imports: [CommonModule, OverlayModule, TranslateModule, EduSharingUiCommonModule],
     templateUrl: './edge-toggle.component.html',
     styleUrls: ['./edge-toggle.component.scss'],
 })
@@ -64,6 +68,17 @@ export class EdgeToggleComponent implements AfterViewInit, OnDestroy {
     /** i18n keys for the aria-label in the closed / open state */
     readonly labelOpen = input('EDITORIAL.SIDEBAR.OPEN');
     readonly labelClose = input('EDITORIAL.SIDEBAR.CLOSE');
+    /** id of the element the tab operates, exposed as `aria-controls` */
+    readonly ariaControls = input<string | null>(null);
+    /** see class doc */
+    readonly inline = input(false);
+    @HostBinding('class.inline') get isInline(): boolean {
+        return this.inline();
+    }
+    /** mirrors `animatePane` for `inline`, since there's no overlay `panelClass` here */
+    @HostBinding('class.static') get isStatic(): boolean {
+        return this.inline() && !this.animatePane();
+    }
 
     /** emitted when the tab is clicked */
     readonly toggled = output<void>();
@@ -100,15 +115,18 @@ export class EdgeToggleComponent implements AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
+        if (this.inline()) {
+            // rendered directly by the template — no overlay/portal to set up
+            this.updatePosition();
+            return;
+        }
         this.position = this.overlay
             .position()
             .global()
             .top(`calc(var(--mainnavCurrentHeight) + ${this.topOffset()})`);
         this.overlayRef = this.overlay.create({
             positionStrategy: this.position,
-            // '--static' disables the pane's CSS offset transition (used when the drawer animates
-            // its own size and a ResizeObserver already tracks the edge live, so a transition here
-            // would only lag behind).
+            // '--static' skips the offset transition when a ResizeObserver already tracks live resizing
             panelClass: this.animatePane()
                 ? 'es-edge-toggle-pane'
                 : ['es-edge-toggle-pane', 'es-edge-toggle-pane--static'],
@@ -124,6 +142,14 @@ export class EdgeToggleComponent implements AfterViewInit, OnDestroy {
         this.overlayRef?.dispose();
     }
 
+    /** The tab's button element (queried from the overlay's DOM, or a normal descendant if inline). */
+    tabElement(): HTMLElement | null {
+        if (this.inline()) {
+            return (this.elementRef.nativeElement as HTMLElement).querySelector('button');
+        }
+        return this.overlayRef?.overlayElement.querySelector('button') ?? null;
+    }
+
     private resolveDrawer(): HTMLElement | null {
         const drawer = this.drawer();
         if (drawer instanceof ElementRef) {
@@ -135,31 +161,49 @@ export class EdgeToggleComponent implements AfterViewInit, OnDestroy {
         return (this.elementRef.nativeElement as HTMLElement).closest('.mat-drawer');
     }
 
-    private updatePosition(): void {
-        if (!this.overlayRef || !this.position) {
-            return;
-        }
+    /** Offset from the drawer edge, shared by the overlay and inline position strategies. */
+    private computeOffset(): number {
         let offset = 0;
         const rect = this.resolveDrawer()?.getBoundingClientRect();
         if (this.measure() === 'edge') {
-            // Follow the drawer's actual inner-edge x-coordinate. Correct for an in-flow panel that
-            // sits at an x-offset > 0 and for a panel that animates its own width (a collapsed or
-            // hidden drawer reports a ~zero edge → offset 0). Not gated on open() so the tab keeps
-            // tracking the edge while the panel animates closed.
+            // drawer's actual inner edge — works for an in-flow panel and animating widths
             if (rect) {
                 offset = this.side() === 'end' ? window.innerWidth - rect.left : rect.right;
             }
         } else if (this.open() && rect) {
-            // 'width': the drawer keeps its full width while closed (mat-sidenav slides via
-            // transform), so gate on open() and use the width; the pane CSS transition eases it.
+            // drawer's full width; gated on open() since mat-sidenav keeps its width while closed
             offset = rect.width;
         }
-        const value = `${Math.round(Math.max(0, offset))}px`;
+        return Math.round(Math.max(0, offset));
+    }
+
+    private updatePosition(): void {
+        const value = `${this.computeOffset()}px`;
+        if (this.inline()) {
+            this.updateInlinePosition(value);
+            return;
+        }
+        if (!this.overlayRef || !this.position) {
+            return;
+        }
         if (this.side() === 'end') {
             this.position.right(value);
         } else {
             this.position.left(value);
         }
         this.overlayRef.updatePosition();
+    }
+
+    /** Positions the host via `position: fixed` (see `:host(.inline)` in the stylesheet). */
+    private updateInlinePosition(value: string): void {
+        const host = this.elementRef.nativeElement as HTMLElement;
+        host.style.top = `calc(var(--mainnavCurrentHeight) + ${this.topOffset()})`;
+        if (this.side() === 'end') {
+            host.style.right = value;
+            host.style.left = '';
+        } else {
+            host.style.left = value;
+            host.style.right = '';
+        }
     }
 }

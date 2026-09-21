@@ -280,7 +280,7 @@
             role="combobox"
             [attr.aria-label]="'WORKSPACE.SHARE.TYPE_MENU_LABEL_NEW' | translate"
             aria-haspopup="true"
-            [attr.aria-expanded]="showChooseType || null"
+            [attr.aria-expanded]="showChooseType"
             [attr.aria-controls]="showChooseType ? 'es-share-dialog-choose-type-menu' : null"
           >
             @if (currentType.length === 0) {

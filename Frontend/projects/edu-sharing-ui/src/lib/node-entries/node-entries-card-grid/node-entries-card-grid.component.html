@@ -42,7 +42,8 @@
   native elements at all places without any elements between `ul` and `li`. -->
 @if (entriesService.sort?.customSortingInProgress) {
 <div role="list" class="card-grid card-grid-reorder" cdkDropListGroup>
-  @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
+  @if (nodes$ | async; as nodes) { @for (node of nodes; track trackNode($index, node); let i =
+  $index) {
   <div
     class="card-grid-order-wrapper"
     role="none"
@@ -103,7 +104,8 @@
     @if ( (entriesService.globalOptionsSubject | async)?.length &&
     entriesService.globalOptionsPosition === 'before' ) {
     <es-node-entries-global-options [displayType]="displayType"> </es-node-entries-global-options>
-    } @if (nodes$ | async; as nodes) { @for (node of nodes; track node; let i = $index) {
+    } @if (nodes$ | async; as nodes) { @for (node of nodes; track trackNode($index, node); let i =
+    $index) {
     <div
       class="card-grid-drag-wrapper"
       role="none"
@@ -213,8 +215,9 @@
       color="primary"
       (click)="$event.stopPropagation(); doScroll('left')"
       tabindex="-1"
+      aria-hidden="true"
     >
-      <i esIcon="keyboard_arrow_left" [aria]="true"></i>
+      <i esIcon="keyboard_arrow_left"></i>
     </button>
   </div>
   } @if (scroll.right) {
@@ -224,8 +227,9 @@
       color="primary"
       (click)="$event.stopPropagation(); doScroll('right')"
       tabindex="-1"
+      aria-hidden="true"
     >
-      <i esIcon="keyboard_arrow_right" [aria]="true"></i>
+      <i esIcon="keyboard_arrow_right"></i>
     </button>
   </div>
   } }

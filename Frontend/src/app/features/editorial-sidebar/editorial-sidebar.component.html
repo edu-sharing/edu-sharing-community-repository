@@ -1,4 +1,14 @@
-<div class="sidebar-wrapper">
+<!-- `region` rather than `complementary`: hosts nest it differently (inside/outside <main>), and
+  only `region` is valid in both. tabindex="-1" makes it a focus target for esFocusOnOpen. -->
+<div
+  class="sidebar-wrapper"
+  role="region"
+  [id]="instanceId"
+  [attr.aria-labelledby]="titleId"
+  tabindex="-1"
+  [esFocusOnOpen]="editorialSidebarService.sidebarOpened()"
+  [returnFocusTo]="edgeToggleReturnFocus"
+>
   @if (editorialSidebarService.sidebarLoading()) {
   <div class="loading">
     <es-spinner></es-spinner>
@@ -29,12 +39,12 @@
       ></i>
     </button>
     }
-    <!-- explicit close button -->
+    <!-- distinct name from the edge tab's "close" label, since it's a separate control -->
     @if (!editorialSidebarService.fullscreenActive()) {
     <button
       mat-icon-button
       (click)="close()"
-      [attr.aria-label]="'EDITORIAL.SIDEBAR.CLOSE' | translate"
+      [attr.aria-label]="'EDITORIAL.SIDEBAR.CLOSE_PANEL' | translate"
     >
       <i esIcon="close" [aria]="true"></i>
     </button>
@@ -142,10 +152,12 @@
   toggle option and the header close (X) button. -->
 @if (!isModal() && showEdgeToggle()) {
 <es-edge-toggle
+  #edgeToggleRef
   data-test="button-toggle-sidebar-editorial-options"
   [side]="'end'"
   [open]="editorialSidebarService.sidebarOpened()"
   [visible]="!editorialSidebarService.fullscreenActive() && !isLoading() && isDesktop()"
+  [ariaControls]="instanceId"
   (toggled)="editorialSidebarService.sidebarOpened.set(!editorialSidebarService.sidebarOpened())"
 ></es-edge-toggle>
 }

@@ -1,6 +1,11 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 
 .noElementsInfo {
+    display: block;
+    font-size: 0.83em;
+    font-weight: bold;
+    margin-block: 1.67em;
+
     > div.clickable {
         color: var(--primary);
         text-transform: uppercase;

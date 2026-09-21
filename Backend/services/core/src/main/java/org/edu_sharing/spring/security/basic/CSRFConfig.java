@@ -89,17 +89,22 @@ public class CSRFConfig {
 
         @Override
         public void onAuthentication(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws SessionAuthenticationException {
-            boolean containsToken = this.tokenRepository.loadToken(request) != null;
-            if (containsToken) {
-                this.tokenRepository.saveToken(null, request, response);
-                DeferredCsrfToken deferredCsrfToken = this.tokenRepository.loadDeferredToken(request, response);
-                this.requestHandler.handle(request, response, deferredCsrfToken::get);
-                this.logger.debug("Replaced CSRF Token");
-            }else{
-                //initial add cookie
-                DeferredCsrfToken deferredCsrfToken = this.tokenRepository.loadDeferredToken(request, response);
-                deferredCsrfToken.get();
-            }
+            /*
+             * Do NOT use the CsrfAuthenticationStrategy approach of
+             * saveToken(null, ...) + loadDeferredToken(...): saveToken(null, ...) writes an EMPTY
+             * XSRF-TOKEN cookie (max-age 0) and the deferred token that should replace it is lazy -
+             * CsrfTokenRequestAttributeHandler#handle only stores a SupplierCsrfToken in the request
+             * attributes, and nothing else in the request reads it. The response then carries only
+             * the deletion cookie, the client ends up without an XSRF-TOKEN cookie, sends no
+             * X-XSRF-TOKEN header on the next request and gets a 403.
+             *
+             * Instead generate the (rotated) token eagerly and save it, so the response always
+             * carries exactly one cookie holding a usable token value.
+             */
+            CsrfToken token = this.tokenRepository.generateToken(request);
+            this.tokenRepository.saveToken(token, request, response);
+            this.requestHandler.handle(request, response, () -> token);
+            this.logger.debug("Replaced CSRF Token");
         }
     }
 

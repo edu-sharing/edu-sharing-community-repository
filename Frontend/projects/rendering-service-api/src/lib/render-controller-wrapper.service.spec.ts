@@ -13,7 +13,18 @@ import {
 } from './render-controller-wrapper.service';
 
 const RENDER_DATA_URL = '/public/renderdata';
-const RESPONSE: RenderDataResponse = { module: 'IMAGE', jobId: null, deferred: false };
+const RESPONSE: RenderDataResponse = {
+    module: 'IMAGE',
+    jobId: null,
+    deferred: false,
+    supportedByBackend: true,
+};
+/** A node the service does not render; the caller renders it itself (used to be a 415). */
+const CLIENT_RENDERED_RESPONSE: RenderDataResponse = {
+    jobId: null,
+    deferred: false,
+    supportedByBackend: false,
+};
 
 describe('RenderControllerWrapperService session gate', () => {
     let service: RenderControllerWrapperService;
@@ -61,6 +72,31 @@ describe('RenderControllerWrapperService session gate', () => {
         expect(second[0].request.body.nodeId).toBe('second');
         second[0].flush(RESPONSE);
         tick(50);
+    }));
+
+    it('releases later requests when the first one is not rendered by the service', fakeAsync(() => {
+        // The case the 415 test below covers, as answered by a current service: still a success,
+        // so the gate opens through the normal map() path rather than through the error path.
+        let firstResponse: unknown = null;
+        service
+            .getRenderDataTokenSessionSafe(request('first'))
+            .subscribe((response) => (firstResponse = response));
+        let secondResponse: unknown = null;
+        service
+            .getRenderDataTokenSessionSafe(request('second'))
+            .subscribe((response) => (secondResponse = response));
+
+        pending()[0].flush(CLIENT_RENDERED_RESPONSE);
+        tick(50);
+
+        expect(firstResponse).toEqual(CLIENT_RENDERED_RESPONSE);
+
+        const second = pending();
+        expect(second.length).toBe(1);
+        expect(second[0].request.body.nodeId).toBe('second');
+        second[0].flush(RESPONSE);
+        tick(50);
+        expect(secondResponse).toEqual(RESPONSE);
     }));
 
     // regression: a 415 on the first component (backend has no module for the node, e.g. a

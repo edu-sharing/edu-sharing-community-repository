@@ -349,3 +349,32 @@ export const retrieveWidgetConfigFromNode = (node: Node): WidgetConfig => {
     }
     return {};
 };
+
+/**
+ * Merges a patch into a widget config. Plain objects are merged key by key, every other value —
+ * arrays included — is taken from the patch as a whole, so a filter list replaces rather than
+ * extends the one it overrides.
+ *
+ * @param config
+ * @param patch
+ */
+export const mergeConfig = <T>(config: T, patch: Partial<T>): T => {
+    const merged = { ...config } as { [key: string]: unknown };
+    Object.entries(patch ?? {}).forEach(([key, value]) => {
+        const current = merged[key];
+        merged[key] =
+            isPlainObject(current) && isPlainObject(value)
+                ? mergeConfig(current, value)
+                : (value as unknown);
+    });
+    return merged as T;
+};
+
+/**
+ * Whether a value is a plain object, i.e. mergeable key by key.
+ *
+ * @param value
+ */
+const isPlainObject = (value: unknown): value is { [key: string]: unknown } => {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
+};

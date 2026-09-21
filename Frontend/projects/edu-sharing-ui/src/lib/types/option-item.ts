@@ -207,7 +207,7 @@ export class OptionItemToggle extends OptionItem {
             this.toggleState = !this.toggleState;
             callback?.(object, objects);
         };
-        super(toggleNames?.enabled, null, internalCallback);
+        super(toggleNames?.[toggleState ? 'enabled' : 'disabled'], null, internalCallback);
         this.group = DefaultGroups.Toggles;
         this.isToggle = true;
     }

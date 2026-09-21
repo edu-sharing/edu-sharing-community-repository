@@ -20,8 +20,14 @@
   <div class="group">
     @if (!usersDataSource.isLoading) {
     <h3 class="mat-heading-3 mat-heading-underline">
-      <span>{{ 'PERMISSIONS.DELETE.USER_LIST' | translate }}</span
-      ><button mat-icon-button (click)="refresh()"><i esIcon="refresh"></i></button>
+      <span>{{ 'PERMISSIONS.DELETE.USER_LIST' | translate }}</span>
+      <button
+        mat-icon-button
+        [attr.aria-label]="'PERMISSIONS.DELETE.REFRESH_USER_LIST' | translate"
+        (click)="refresh()"
+      >
+        <i esIcon="refresh"></i>
+      </button>
     </h3>
     } @if (usersDataSource.isLoading || !usersDataSource.isEmpty()) {
     <div class="user-list">

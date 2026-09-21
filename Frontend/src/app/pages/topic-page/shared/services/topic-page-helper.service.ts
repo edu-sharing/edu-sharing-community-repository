@@ -297,14 +297,17 @@ export class TopicPageHelperService {
     }
 
     /**
-     * Retrieves the sub-collections with counts of a collection with a given ID.
+     * Retrieves the sub-collections with counts of a collection with a given ID. Ordering and the
+     * upper bound are left to the repository, which knows the property types.
      *
      * @param collectionId
      * @param fetchCounts
+     * @param options
      */
     getSubcollections(
         collectionId: string,
         fetchCounts: boolean = false,
+        options: { orderBy?: string; ascending?: boolean; maxItems?: number } = {},
     ): Observable<CollectionEntries> {
         return this.collectionApi.getSubcollections({
             repository: HOME_REPOSITORY,
@@ -317,7 +320,13 @@ export class TopicPageHelperService {
                 | 'MY'
                 | 'RECENT',
             fetchCounts,
-            maxItems: 500,
+            maxItems: options.maxItems > 0 ? options.maxItems : 500,
+            ...(options.orderBy
+                ? {
+                      sortProperties: [options.orderBy],
+                      sortAscending: [options.ascending ?? true],
+                  }
+                : {}),
         });
     }
 
@@ -435,7 +444,12 @@ export class TopicPageHelperService {
      * Helper function to clean temporary properties from page variant config
      */
     private cleanPageVariantConfig(value: string): string {
-        const blacklistedProperties: string[] = ['hasHits', 'searchCount', 'statistics'];
+        const blacklistedProperties: string[] = [
+            'hasHits',
+            'searchCount',
+            'statistics',
+            'configOverwrite',
+        ];
         const parsedValue: PageVariantConfig = JSON.parse(value);
         // workaround to avoid keeping legacy properties
         const legacyProperties: string[] = ['template', 'variables'];

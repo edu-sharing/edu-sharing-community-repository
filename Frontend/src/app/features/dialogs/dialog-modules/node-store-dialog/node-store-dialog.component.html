@@ -4,7 +4,7 @@
 
 <!-- Manually hide the table to also hide the header when there are no elements. -->
 @if (list.isEmpty()) {
-<div class="noElementsInfo noElements">
+<div class="noElementsInfo noElements" role="status">
   {{ 'SEARCH.NODE_STORE.LIST_EMPTY' | translate }}
 </div>
 }

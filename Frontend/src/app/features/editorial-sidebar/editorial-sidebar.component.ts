@@ -38,6 +38,7 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { provideReusableOptionsHelperData } from '../../services/options-helper-data.provider';
 import { trigger } from '@angular/animations';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
@@ -125,11 +126,6 @@ let nextInstanceId = 0;
     animations: [trigger('overlay', UIAnimation.openOverlay())],
     host: {
         '[class.fullscreen]': 'editorialSidebarService.fullscreenActive()',
-        // A named landmark, so the panel can be reached and identified directly. `region` rather
-        // than `complementary` because the hosts nest it differently — inside the search page's
-        // `<main>`, outside the editorial page's — and only `region` is valid in both places.
-        role: 'region',
-        '[attr.aria-labelledby]': 'titleId',
     },
 })
 export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
@@ -187,6 +183,11 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private readonly injector = inject(Injector);
     /** only rendered while an escapable sub-view is open */
     private readonly backButton = viewChild<MatIconButton>('backButtonRef');
+    /** the tab that opens/closes this panel; see `esFocusOnOpen` on `.sidebar-wrapper` */
+    readonly edgeToggle = viewChild<EdgeToggleComponent>('edgeToggleRef');
+    /** bound once for referential stability across change-detection runs */
+    readonly edgeToggleReturnFocus = (): HTMLElement | null =>
+        this.edgeToggle()?.tabElement() ?? null;
     readonly title = computed(
         () =>
             this.editorialSidebarService.titleOverride() ||

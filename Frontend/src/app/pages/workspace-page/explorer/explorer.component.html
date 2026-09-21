@@ -26,11 +26,11 @@
 >
   <ng-template #empty>
     @if (searchQuery$.value === null || searchQuery$.value === '') {
-    <h5 class="noElementsInfo">
+    <div class="noElementsInfo" role="status">
       {{ 'WORKSPACE.NO_NODES_IN_FOLDER' | translate }}
-    </h5>
+    </div>
     } @if (!(searchQuery$.value === null || searchQuery$.value === '')) {
-    <h5 class="noElementsInfo">
+    <div class="noElementsInfo" role="status">
       @if (node$.value) {
       <div>
         {{ 'WORKSPACE.NO_MATCHING_ITEMS_FOLDER' | translate : { name: node$.value.name } }}
@@ -42,7 +42,7 @@
       } @if (!node$.value) {
       <div>{{ 'WORKSPACE.NO_MATCHING_ITEMS' | translate }}</div>
       }
-    </h5>
+    </div>
     }
   </ng-template>
 </es-node-entries-wrapper>

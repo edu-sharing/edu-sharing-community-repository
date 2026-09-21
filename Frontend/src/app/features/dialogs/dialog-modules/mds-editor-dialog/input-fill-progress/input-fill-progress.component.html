@@ -21,9 +21,14 @@
     {{ 'FILL_STATUS.MESSAGE' | translate }}
     @if ( getStatus() === RequiredMode.Mandatory || getStatus() === RequiredMode.MandatoryForPublish
     ) { -
-    <span class="clickable show-missing-button" tabindex="0" (click)="showMissing.emit()">
+    <button
+      type="button"
+      class="clickable show-missing-button"
+      [attr.aria-label]="'FILL_STATUS.SHOW' | translate"
+      (click)="showMissing.emit()"
+    >
       {{ 'FILL_STATUS.SHOW' | translate }}
-    </span>
+    </button>
     }
   </label>
 </div>

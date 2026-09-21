@@ -69,7 +69,7 @@
     "DELETE_USER": "Möchten Sie die gewählten Nutzer{{GENDER_SEPARATOR}}innen aus der Organisation ausschließen?",
     "DELETE_GROUP": "Möchten Sie die gewählten Gruppen löschen?",
     "DELETE_GROUP_SINGLE": "Möchten Sie die Gruppe {{name}} löschen?",
-    "DELETE_ORG_SINGLE": "Möchten Sie die Organisation {{name}} entfernen? Alle Nutzer{{GENDER_SEPARATOR}}innen bleiben bestehen und der Organisationsordner wird nicht gelöscht",
+    "DELETE_ORG_SINGLE": "Möchten Sie die Organisation {{name}} entfernen? Alle Nutzer{{GENDER_SEPARATOR}}innen und Gruppen bleiben bestehen und der Organisationsordner wird nicht gelöscht",
     "DELETE_ERROR_ADMINISTRATORS": "Administrations-Gruppen dürfen nicht gelöscht werden",
     "DELETED_USER": "Nutzer{{GENDER_SEPARATOR}}in erfolgreich entfernt",
     "DELETED_GROUP": "Gruppe(n) erfolgreich gelöscht",
@@ -169,6 +169,7 @@
     "DELETE": {
       "MAIN_HEADING": "Nutzer{{GENDER_SEPARATOR}}in & Daten löschen",
       "USER_LIST": "Vorgang für folgende Benutzer & deren Daten durchführen",
+      "REFRESH_USER_LIST": "Benutzerliste aktualisieren",
       "FOLDER_STRUCTURE_DISINTEGRATE": "auflösen (alle Dateien in einen Ordner überführen)",
       "FOLDER_STRUCTURE_KEEP": "beibehalten",
       "MOVE_SHARED_FILES": "Dateien in neues Verzeichnis verschieben",

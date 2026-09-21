@@ -1090,6 +1090,7 @@ export class DialogsService {
             './dialog-modules/shortcut-management-dialog/shortcut-management-dialog.component'
         );
         return this.cardDialog.open(ShortcutManagementDialogComponent, {
+            title: 'OPTIONS.ADD_SHORTCUT',
             ...(await this.cardDialogUtils.configForNode(data.node)),
             minWidth: 700,
             minHeight: 600,

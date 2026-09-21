@@ -1,6 +1,8 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 .rootNode {
+    @include mixins.removeButtonDefaultStyles;
     display: flex;
     gap: 5px;
     align-items: center;
@@ -9,6 +11,10 @@
     padding-top: 12px;
     padding-bottom: 12px;
     margin: 4px 0;
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    color: inherit;
 }
 .typeIcon {
     margin-right: 7px;

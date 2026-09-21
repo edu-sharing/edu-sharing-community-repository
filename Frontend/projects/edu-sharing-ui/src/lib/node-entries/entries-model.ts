@@ -116,6 +116,11 @@ export type TableConfig = {
 };
 export type TreeConfig = {
     /**
+     * i18n key for the accessible name of the tree, naming the content it holds
+     * (falls back to a generic label)
+     */
+    label?: string;
+    /**
      * whether multiple selection is allowed
      */
     multipleSelection?: boolean;

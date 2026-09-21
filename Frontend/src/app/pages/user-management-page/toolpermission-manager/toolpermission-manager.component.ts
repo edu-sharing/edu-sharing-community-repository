@@ -335,4 +335,18 @@ export class ToolpermissionManagerComponent {
         tp = tp.substring(RestConstants.TOOLPERMISSION_REPOSITORY_PREFIX.length);
         return tp;
     }
+    getPermissionLabel(group: any, key: string): string {
+        if (group.name === 'CONNECTORS') {
+            return this.translate.instant(
+                'TOOLPERMISSION.TOOLPERMISSION_CONNECTOR' + (this.getTpSafe(key) ? '_SAFE' : ''),
+                { connector: this.getTpConnector(key) },
+            );
+        }
+        if (group.name === 'REPOSITORIES') {
+            return this.translate.instant('TOOLPERMISSION.TOOLPERMISSION_REPOSITORY', {
+                repository: this.getTpRepository(key),
+            });
+        }
+        return this.translate.instant('TOOLPERMISSION.' + key);
+    }
 }

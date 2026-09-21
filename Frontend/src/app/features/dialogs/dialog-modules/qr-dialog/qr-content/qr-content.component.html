@@ -1,1 +1,7 @@
-<qrcode [qrdata]="url" elementType="img" [margin]="2" errorCorrectionLevel="M"></qrcode>
+<qrcode
+  [qrdata]="url"
+  elementType="img"
+  [margin]="2"
+  errorCorrectionLevel="M"
+  [ariaLabel]="'QR_CODE_ARIA_LABEL' | translate"
+></qrcode>

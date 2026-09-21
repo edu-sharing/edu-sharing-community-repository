@@ -22,6 +22,7 @@ import org.edu_sharing.service.authority.AuthorityServiceFactory;
 import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.toolpermission.ToolPermissionServiceFactory;
 import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.basic.CSRFConfig;
 import org.edu_sharing.spring.security.oauth2.SilentLoginModeRedirect;
 
 public class GuestFilter implements jakarta.servlet.Filter {
@@ -80,7 +81,7 @@ public class GuestFilter implements jakarta.servlet.Filter {
 						}
 						Map<String, String> authInfoGuest = authTool.createNewSession(currentGuestConfig.getUsername());
                         authTool.storeAuthInfoInSession(authInfoGuest.get(CCConstants.AUTH_USERNAME), authInfoGuest.get(CCConstants.AUTH_TICKET), CCConstants.AUTH_TYPE_DEFAULT, session);
-
+                        CSRFConfig.csrfInitCookie(httpRequest, httpresponse);
                         // prewarm tp session cache
                         ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
                     }

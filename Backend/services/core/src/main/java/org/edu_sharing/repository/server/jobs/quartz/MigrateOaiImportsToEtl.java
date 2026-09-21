@@ -325,15 +325,23 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 	/**
 	 * removes properties which are an empty collection now but had no value before the migration
 	 * (values which already were an empty collection before are left untouched)
+	 * Note: the whole (cleaned) map is written back instead of calling removeProperty per property:
+	 * an empty collection has no row in the property table, so the delete would affect nothing and
+	 * alfresco would neither touch the node nor drop the cached property map the revert has left behind
 	 */
 	private void removeEmptyPropertiesIntroducedByRevert(NodeRef nodeRef, Map<QName, Serializable> propsBefore) {
-		nodeService.getProperties(nodeRef).forEach((property, value) -> {
-			if (value instanceof Collection<?> && ((Collection<?>) value).isEmpty()
-					&& propsBefore.get(property) == null) {
-				logger.debug("Removing empty property " + property.getLocalName() + " of node " + nodeRef.getId());
-				nodeService.removeProperty(nodeRef, property);
+		Map<QName, Serializable> cleaned = new HashMap<>(nodeService.getProperties(nodeRef));
+		boolean removed = cleaned.entrySet().removeIf((entry) -> {
+			if (entry.getValue() instanceof Collection<?> && ((Collection<?>) entry.getValue()).isEmpty()
+					&& propsBefore.get(entry.getKey()) == null) {
+				logger.debug("Removing empty property " + entry.getKey().getLocalName() + " of node " + nodeRef.getId());
+				return true;
 			}
+			return false;
 		});
+		if (removed) {
+			nodeService.setProperties(nodeRef, cleaned);
+		}
 	}
 
 	private void throwMissingParam(String param) {

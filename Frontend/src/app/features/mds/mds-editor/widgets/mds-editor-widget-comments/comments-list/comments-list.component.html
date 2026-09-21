@@ -98,22 +98,22 @@
       </div>
       @if (comment === editComment) {
       <div class="icons">
-        <div
+        <button
+          type="button"
           class="btn-negative"
-          tabindex="0"
+          [attr.aria-label]="'CANCEL' | translate"
           (click)="editComment = null"
-          (keyup.enter)="editComment = null"
         >
           <i esIcon="close"></i>
-        </div>
-        <div
+        </button>
+        <button
+          type="button"
           class="btn-positive"
-          tabindex="0"
+          [attr.aria-label]="'SAVE' | translate"
           (click)="saveEditComment()"
-          (keyup.enter)="saveEditComment()"
         >
           <i esIcon="check"></i>
-        </div>
+        </button>
       </div>
       } @if (comment !== editComment) {
       <div class="date">{{ comment.created | formatDate }}</div>

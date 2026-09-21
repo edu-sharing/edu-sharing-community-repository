@@ -32,6 +32,7 @@
       "EXIT_FULLSCREEN": "Vollbild beenden",
       "OPEN": "Aktionen & Optionen öffnen",
       "CLOSE": "Aktionen & Optionen schließen",
+      "CLOSE_PANEL": "Seitenleiste schließen",
       "PREVIOUS": "Vorherige",
       "NEXT": "Nächste",
       "SUBMISSION": {
@@ -55,6 +56,7 @@
         "ATTACHMENT_EMPTY": "Keine Dateien abgegeben"
       },
       "ADD_COLLECTION": {
+        "TITLE": "Sammlung hinzufügen",
         "HEADING": "Wie möchten Sie fortfahren?",
         "DESCRIPTION": "Wählen Sie aus, ob Sie eine neue Sammlung erstellen oder eine bestehende kopieren möchten.",
         "CREATE": {
@@ -127,7 +129,13 @@
           "PLACEHOLDER": "Suche nach Sammlungen",
           "RECENT_COLLECTIONS": "Zuletzt verwendet",
           "MY_COLLECTIONS": "Meine Sammlungen",
-          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen"
+          "EDITORIAL_COLLECTIONS": "Redaktionelle Sammlungen",
+          "DISPLAY_TYPE": {
+            "LABEL": "Anzeigeart",
+            "GRID": "Anzeige als Kacheln",
+            "TABLE": "Anzeige als Liste",
+            "TREE": "Anzeige als Baum"
+          }
         },
         "WORKSPACE": {
           "EMPTY_MESSAGE": "Du hast bisher weder eigene noch gemeinsame Inhalte angelegt.",

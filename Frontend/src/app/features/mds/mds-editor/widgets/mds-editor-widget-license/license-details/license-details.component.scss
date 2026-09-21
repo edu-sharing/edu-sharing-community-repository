@@ -38,12 +38,12 @@ h5 {
     font-weight: bold;
     text-transform: uppercase;
     font-size: 80%;
-    color: var(--light-primary-text);
+    color: var(--licenseBadgeTextColor);
     .oer {
-        background: #0b0;
+        background: var(--licenseOerBadgeBackground);
     }
     .notOer {
-        background: #f5a623;
+        background: var(--licenseNotOerBadgeBackground);
     }
     .oer,
     .notOer {

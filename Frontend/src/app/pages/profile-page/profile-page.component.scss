@@ -36,6 +36,8 @@ $path: '../../../assets/images/';
         padding-bottom: 20px;
         background: var(--backgroundColor);
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        // Border separates the card since it shares --backgroundColor with the page; the shadow alone is invisible on dark.
+        border: 1px solid var(--borderLight);
 
         .name {
             font-size: 140%;
@@ -242,7 +244,7 @@ $path: '../../../assets/images/';
             }
 
             .empty {
-                color: $textVeryLight;
+                color: var(--textRenderingLabels);
             }
 
             /* background: url($path + 'quotes.svg') 10px 0 no-repeat; */

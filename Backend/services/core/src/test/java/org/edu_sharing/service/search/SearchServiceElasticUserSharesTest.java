@@ -2,6 +2,7 @@ package org.edu_sharing.service.search;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import com.google.gson.JsonParser;
+import com.typesafe.config.Config;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.impl.model.PermissionModel;
@@ -10,6 +11,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.AuthenticationService;
 import org.alfresco.service.cmr.security.AuthorityService;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -81,6 +83,7 @@ class SearchServiceElasticUserSharesTest {
     private MockedConstruction<MCAlfrescoAPIClient> mcAlfrescoApiClientMockedStatic;
     private MockedStatic<AuthenticationUtil> authenticationUtilMockedStatic;
     private MockedStatic<AlfAppContextGate> alfAppContextGateMockedStatic;
+    private MockedStatic<LightbendConfigLoader> lightbendConfigLoaderMockedStatic;
 
     @BeforeEach
     void beforeEach() {
@@ -100,6 +103,13 @@ class SearchServiceElasticUserSharesTest {
         when(applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY)).thenReturn(serviceRegistry);
         alfAppContextGateMockedStatic = Mockito.mockStatic(AlfAppContextGate.class);
         alfAppContextGateMockedStatic.when(AlfAppContextGate::getApplicationContext).thenReturn(applicationContext);
+
+        // no groups excluded by default - getUserSharesQuery reads this via LightbendConfigLoader.get()
+        Config lightbendConfig = Mockito.mock(Config.class);
+        when(lightbendConfig.getStringList("repository.search.shares.excludeGroups"))
+                .thenReturn(java.util.List.of());
+        lightbendConfigLoaderMockedStatic = Mockito.mockStatic(LightbendConfigLoader.class);
+        lightbendConfigLoaderMockedStatic.when(LightbendConfigLoader::get).thenReturn(lightbendConfig);
 
         underTest = new SearchServiceElastic(
                 permissionsModelDAO,
@@ -122,6 +132,7 @@ class SearchServiceElasticUserSharesTest {
         mcAlfrescoApiClientMockedStatic.close();
         authenticationUtilMockedStatic.close();
         alfAppContextGateMockedStatic.close();
+        lightbendConfigLoaderMockedStatic.close();
     }
 
     /**

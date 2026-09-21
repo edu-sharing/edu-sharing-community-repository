@@ -15,13 +15,12 @@
   @if (node.type === 'ccm:io') {
   <div
     class="node-comments"
-    (click)="
-      entriesService?.onClicked({
-        event: $event,
-        element: node,
-        source: ClickSource.Comments
-      })
-    "
+    role="button"
+    tabindex="0"
+    (click)="onCommentsActivated($event)"
+    (keydown.enter)="onCommentsActivated($event)"
+    (keydown.space)="onCommentsActivated($event); $event.preventDefault()"
+    [attr.aria-label]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
     [matTooltip]="('COMMENTS_MULTIPLE' | translate) + ': ' + node.commentCount"
   >
     <i esIcon="comment"></i>

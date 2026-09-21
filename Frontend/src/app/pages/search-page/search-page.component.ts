@@ -27,6 +27,7 @@ import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { NavigationScheduler } from './navigation-scheduler';
+import { SearchPageFiltersSidebarComponent } from './search-page-filters-sidebar.component';
 import { SearchPageService } from './search-page.service';
 import { UserModifiableValue } from './user-modifiable-values';
 import { OptionsHelperService } from '../../services/options-helper.service';
@@ -91,6 +92,10 @@ export class SearchPageComponent implements OnInit, OnDestroy {
     // Always-visible tab ("Lasche") on the left edge that opens/closes the filter panel,
     // mirroring the editorial sidebar/filter toggle (see es-edge-toggle in the template).
     readonly filtersSidebar = viewChild('filtersSidebarEl', { read: ElementRef });
+    /** same ref, read as the component instance — for its `panelId` */
+    readonly filtersSidebarComponent = viewChild('filtersSidebarEl', {
+        read: SearchPageFiltersSidebarComponent,
+    });
     private readonly filterBarVisibleSig = toSignal(
         this.searchFieldInternalService.filterBarVisible,
     );

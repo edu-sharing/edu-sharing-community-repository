@@ -62,6 +62,7 @@
   "INFORMATION": "Informationen",
   "DOWNLOAD": "Herunterladen",
   "LOAD_MORE": "Weitere laden",
+  "TREE_LABEL": "Inhaltsbaum",
   "LOADING": "Lädt...",
   "TODAY": "Heute",
   "YESTERDAY": "Gestern",
@@ -242,6 +243,7 @@
     "NODE_ASPECTS": "Aspekte",
     "NODE_PROPERTIES": "Properties",
     "NODE_TYPE": "Objekttyp",
+    "COPY_NODE_ID": "Node-ID kopieren",
     "JSON": "Gesamtes Objekt",
     "PERMISSIONS": "Berechtigungen",
     "PERMISSIONS_INHERITED": "Geerbte Berechtigungen",
@@ -290,7 +292,10 @@
   "LIST_TABLE": {
     "DUMMY_ICON_LABEL": "Dateityp",
     "TOGGLE_ALL": "Alle / Nichts auswählen",
-    "CONFIGURE_COLUMNS": "Spalten konfigurieren"
+    "CONFIGURE_COLUMNS": "Spalten konfigurieren",
+    "COLUMN_ACTIONS": "Optionen",
+    "ENTRY_COUNT": "{{total}} Einträge",
+    "ENTRY_COUNT_SELECTED": "{{selected}} von {{total}} ausgewählt"
   },
   "MAPTYPE": {
     "IMAGES": "Bilder",
@@ -730,6 +735,8 @@
     "email": "E-Mail",
     "status": "Status",
     "primaryAffiliation": "Primäre Rolle",
+    "PRIMARY_AFFILIATION_SWITCH_TO_LIST": "Zu vordefinierter Liste wechseln",
+    "PRIMARY_AFFILIATION_SWITCH_TO_TEXT": "Zu Freitext wechseln",
     "password": "Passwort",
     "sizeQuota": "Speicherkontingent in MB",
     "PRIMARY_AFFILIATION": {
@@ -816,6 +823,7 @@
     "COLLECTION_PROPSE": "Vorschlag einreichen?",
     "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
   },
+  "QR_CODE_ARIA_LABEL": "QR-Code für diesen Link",
   "OPTIONS_FOR": "Aktionen für {{element}}",
   "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar.",
   "OPTIONS": {
@@ -1558,7 +1566,8 @@
   "NAV": {
     "MAIN": "Hauptmenü",
     "SKIP": "Sprungmarken",
-    "COLLECTIONS": "Sammlungshierarchie"
+    "COLLECTIONS": "Sammlungshierarchie",
+    "WORKSPACE_TREE": "Arbeitsbereich-Navigation"
   },
   "SKIP_LINKS": {
     "MAIN_CONTENT": "Springe zum Hauptinhalt",

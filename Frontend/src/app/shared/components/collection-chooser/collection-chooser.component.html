@@ -40,13 +40,13 @@
     >
       <ng-template #empty>
         @if (searchQuery === '') {
-        <h5 class="noElements">
+        <div class="noElements" role="status">
           {{ 'COLLECTION_CHOOSER.NO_RECENT_COLLECTIONS' | translate }}
-        </h5>
+        </div>
         } @if (searchQuery !== '') {
-        <h5 class="noElements">
+        <div class="noElements" role="status">
           {{ 'NO_MATCHES' | translate }}
-        </h5>
+        </div>
         }
       </ng-template>
       <ng-template #overlay let-element="element">
@@ -91,13 +91,13 @@
         </ng-template>
         <ng-template #empty>
           @if (!currentRoot) {
-          <h5 class="noElements">
+          <div class="noElements" role="status">
             {{ 'COLLECTION_CHOOSER.NO_PERSONAL_COLLECTIONS' | translate }}
-          </h5>
+          </div>
           } @if (currentRoot) {
-          <h5 class="noElements">
+          <div class="noElements" role="status">
             {{ 'COLLECTION_CHOOSER.NO_SUB_COLLECTIONS' | translate }}
-          </h5>
+          </div>
           }
         </ng-template>
       </es-node-entries-wrapper>

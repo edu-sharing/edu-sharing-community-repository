@@ -18,7 +18,12 @@
   @for (node of _nodes; track node) {
   <span class="node-id">
     <a class="clickable" (click)="openNodeWorkspace(node)">{{ node.ref?.id }}</a>
-    <button mat-icon-button color="primary" (click)="copyNodeIdToClipboard(node)">
+    <button
+      mat-icon-button
+      color="primary"
+      [attr.aria-label]="'NODE_INFO.COPY_NODE_ID' | translate"
+      (click)="copyNodeIdToClipboard(node)"
+    >
       <i esIcon="content_copy" color="primary"></i>
     </button>
   </span>
@@ -72,7 +77,8 @@
   <span>{{ 'WORKSPACE.EDITOR.PREVIEW' | translate }}</span
   ><span
     ><a [href]="_nodes[0].preview.url" target="_blank">{{ _nodes[0].preview.url }}</a></span
-  ><span>isIcon: {{ _nodes[0].preview.isIcon }}</span> <img [src]="_nodes[0].preview.url" />
+  ><span>isIcon: {{ _nodes[0].preview.isIcon }}</span>
+  <img [src]="_nodes[0].preview.url" [attr.alt]="'WORKSPACE.EDITOR.PREVIEW' | translate" />
 </div>
 }
 <div>

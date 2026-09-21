@@ -7,3 +7,8 @@
 mat-slide-toggle {
     margin-right: 10px;
 }
+
+// The primary tone is too light for label text on the page background.
+button.mat-mdc-button {
+    --mat-button-text-label-text-color: var(--primaryForeground800);
+}

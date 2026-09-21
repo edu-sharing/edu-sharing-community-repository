@@ -31,6 +31,8 @@
     "SAVE_SEARCH_ACTION": "Save",
     "FILTER": "Filter",
     "FILTERS": "Filters",
+    "OPEN_FILTERS": "Open filters",
+    "CLOSE_FILTERS": "Close filters",
     "FILTER_BY": "Filter by: {{property}}",
     "NUMBER_RESULTS": "{{ results }} result(s)",
     "CLICK_TO_REMOVE": "Click to remove",
