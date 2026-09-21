@@ -824,6 +824,8 @@
     "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
   },
   "QR_CODE_ARIA_LABEL": "QR-Code für diesen Link",
+  "QR_CODE_SHORTLINK_LABEL": "Kurzlink",
+  "QR_CODE_SHORTLINK_COPY": "Link kopieren",
   "OPTIONS_FOR": "Aktionen für {{element}}",
   "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar.",
   "OPTIONS": {
