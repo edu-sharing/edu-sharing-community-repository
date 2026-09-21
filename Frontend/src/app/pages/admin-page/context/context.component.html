@@ -49,9 +49,13 @@
   <div>
     <div
       class="open-close clickable context"
+      role="button"
       tabindex="0"
       [class.opened]="openCloseContext[c.id]"
+      [attr.aria-expanded]="!!openCloseContext[c.id]"
       (click)="openCloseContext[c.id] = !openCloseContext[c.id]"
+      (keyup.enter)="openCloseContext[c.id] = !openCloseContext[c.id]"
+      (keydown.space)="$event.preventDefault(); openCloseContext[c.id] = !openCloseContext[c.id]"
     >
       <i esIcon="public"></i>
       <span>{{ c.domain.join(', ') }}</span>
@@ -126,9 +130,18 @@
   <div [formGroup]="form">
     <div
       class="open-close clickable"
+      role="button"
       [class.opened]="openCloseEditors[context?.id + variant]"
       tabindex="0"
+      [attr.aria-expanded]="!!openCloseEditors[context?.id + variant]"
       (click)="openCloseEditors[context?.id + variant] = !openCloseEditors[context?.id + variant]"
+      (keyup.enter)="
+        openCloseEditors[context?.id + variant] = !openCloseEditors[context?.id + variant]
+      "
+      (keydown.space)="
+        $event.preventDefault();
+        openCloseEditors[context?.id + variant] = !openCloseEditors[context?.id + variant]
+      "
     >
       <span>{{ 'ADMIN.CONTEXT.CONTEXT_CONFIG_' + variant.toUpperCase() | translate }}</span>
       <i
