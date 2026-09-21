@@ -47,6 +47,12 @@ $rowHeight: vars.$nodeEntriesTableRowHeight;
                 @include setGlobalKeyboardFocus('border');
             }
         }
+        // primary cell of a row without a routerLink (elementInteractionType !== DefaultActionLink):
+        // made keyboard-focusable so the row can be opened without the per-row options menu
+        mat-cell[tabindex='0']:focus-visible {
+            @include setGlobalKeyboardFocus('border');
+        }
+
         es-list-base {
             white-space: nowrap;
             text-overflow: ellipsis;
