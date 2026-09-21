@@ -52,6 +52,7 @@ import {
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
 import { MdsEditorGlobalService } from '../mds-editor-global.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -134,6 +135,7 @@ export class MdsEditorViewComponent
         private ngZone: NgZone,
         private viewInstance: ViewInstanceService,
         private uiService: UIService,
+        private translate: TranslateService,
         public injector: Injector,
         @Optional() private jumpMarks: JumpMarksService,
     ) {
@@ -218,10 +220,26 @@ export class MdsEditorViewComponent
         // user probably meant to define the respective widget) as these would mess up the HTML
         // structure if left unclosed.
         const html = closeTags(
-            this.view.html,
+            this.replaceI18nTags(this.view.html),
             (tagName) => this.knownWidgetTags.includes(tagName) || tagName.includes(':'),
         );
         return this.sanitizer.bypassSecurityTrustHtml(html);
+    }
+
+    /**
+     * Replaces `<i18n SOME.KEY>` tags in the template html with their translation.
+     *
+     * Mirrors `replaceI18nStrings` of the backend `MetadataTemplateRenderer`, but resolves
+     * against the frontend (ngx-translate) bundles, since the angular editor has no access to
+     * the backend mds i18n properties. Unresolved keys are rendered as the key itself, which
+     * matches the fallback of the backend implementation.
+     *
+     * Runs before `closeTags` so that resolved tags never reach the html parser.
+     */
+    private replaceI18nTags(html: string): string {
+        return html.replace(/<i18n ([^>]+)>/g, (_match, key: string) =>
+            this.translate.instant(key.trim()),
+        );
     }
 
     private injectWidgets(): void {
