@@ -33,7 +33,7 @@
           <td mat-cell *matCellDef="let element">
             <div class="copy">
               <button mat-icon-button color="primary" (click)="copyUrl(element)">
-                <i esIcon="content_copy"></i>
+                <i esIcon="content_copy" [aria]="true"></i>
               </button>
             </div>
           </td>
@@ -43,7 +43,7 @@
           <td mat-cell *matCellDef="let element">
             <div class="delete">
               <button mat-icon-button color="primary" (click)="remove(element)">
-                <i esIcon="delete"></i>
+                <i esIcon="delete" [aria]="true"></i>
               </button>
             </div>
           </td>

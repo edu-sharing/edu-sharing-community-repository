@@ -1253,7 +1253,10 @@
     "delete": "Löschen",
     "edit": "Bearbeiten",
     "add": "Neu",
-    "redo": "Übernehmen"
+    "redo": "Übernehmen",
+    "settings": "Einstellungen",
+    "cloud_download": "Herunterladen",
+    "content_copy": "Kopieren"
   },
   "FILL_STATUS": {
     "MESSAGE": "Feldern ausgefüllt",

@@ -401,10 +401,10 @@
             <i esIcon="edit"></i>
           </button>-->
         <button mat-icon-button color="primary" (click)="editMessage(msg)">
-          <i esIcon="edit"></i>
+          <i esIcon="edit" [aria]="true"></i>
         </button>
         <button mat-icon-button color="warn" (click)="deleteMessage(msg)">
-          <i esIcon="delete"></i>
+          <i esIcon="delete" [aria]="true"></i>
         </button>
       </div>
     </div>

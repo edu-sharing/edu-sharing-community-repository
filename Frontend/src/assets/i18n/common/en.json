@@ -1062,7 +1062,10 @@
     "delete": "delete",
     "add": "New",
     "redo": "Apply",
-    "edit": "Edit"
+    "edit": "Edit",
+    "settings": "settings",
+    "cloud_download": "download",
+    "content_copy": "copy"
   },
   "FILL_STATUS": {
     "REQUIRED": "mandatory fields",

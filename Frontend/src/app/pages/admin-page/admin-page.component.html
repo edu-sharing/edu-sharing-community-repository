@@ -343,23 +343,23 @@
               <div class="config">
                 @if (app.configUrl) {
                 <button mat-icon-button color="primary" (click)="configApp(app)">
-                  <i esIcon="settings" class="clickable"></i>
+                  <i esIcon="settings" class="clickable" [aria]="true"></i>
                 </button>
                 }
               </div>
               <div class="edit">
                 <button mat-icon-button color="primary" (click)="editApp(app)">
-                  <i esIcon="edit" class="clickable"></i>
+                  <i esIcon="edit" class="clickable" [aria]="true"></i>
                 </button>
               </div>
               <div class="download">
                 <button mat-icon-button color="primary" (click)="downloadApp(app)">
-                  <i esIcon="cloud_download" class="clickable"></i>
+                  <i esIcon="cloud_download" class="clickable" [aria]="true"></i>
                 </button>
               </div>
               <div class="delete">
                 <button mat-icon-button color="primary" (click)="removeApp(app)">
-                  <i esIcon="delete" class="clickable"></i>
+                  <i esIcon="delete" class="clickable" [aria]="true"></i>
                 </button>
               </div>
             </div>
