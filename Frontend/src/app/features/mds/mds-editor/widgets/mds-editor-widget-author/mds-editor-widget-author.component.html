@@ -3,7 +3,12 @@
   [widget]="$any(requiredWidget)"
 >
   @if (author) {
-  <mat-tab-group mat-stretch-tabs [(selectedIndex)]="authorTab" class="author-tabs">
+  <mat-tab-group
+    mat-stretch-tabs
+    [(selectedIndex)]="authorTab"
+    class="author-tabs"
+    [aria-label]="'MDS.AUTHOR_LABEL' | translate"
+  >
     <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
       <mat-form-field class="authorFreetext">
         <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>

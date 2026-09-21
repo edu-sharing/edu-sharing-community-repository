@@ -567,6 +567,7 @@
       "RELEASE_MULTI": "{{count}} Objekte mit dieser Lizenz veröffentlichen",
       "CONTACT": "Andere Nutzende dürfen mich für weitere Lizenzverhandlungen kontaktieren",
       "MORE": "Mehr Informationen",
+      "MORE_ARIA": "Mehr Informationen zu {{ license }}",
       "CHECKBOX_AUTHOR": "Ich bin Autor{{GENDER_SEPARATOR}}in des Materials",
       "MIXED_AUTHORS": "Unterschiedliche Autoren-Angaben",
       "MIXED_AUTHORS_INFO": "Die gewählten Elemente enthalten unterschiedliche Autoren-Angaben. Wenn diese im Bulk bearbeitet werden sollen, müssen alle Werte überschrieben werden.\nWählen Sie \"Ändern\", wenn Sie dies tun möchten.",
