@@ -112,10 +112,10 @@
         </th>
         <td mat-cell *matCellDef="let contributor" class="actions">
           <button mat-icon-button (click)="startEdit(contributor)">
-            <i esIcon="edit"></i>
+            <i esIcon="edit" [aria]="true"></i>
           </button>
           <button mat-icon-button (click)="remove(contributor)">
-            <i esIcon="delete"></i>
+            <i esIcon="delete" [aria]="true"></i>
           </button>
         </td>
       </ng-container>
