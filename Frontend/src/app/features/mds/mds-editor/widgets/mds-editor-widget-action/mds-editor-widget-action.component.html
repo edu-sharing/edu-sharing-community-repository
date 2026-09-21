@@ -1,0 +1,10 @@
+@if (action$ | async; as action) {
+<es-mds-editor-widget-container [label]="false">
+  <button mat-flat-button color="primary" class="action" (click)="action.option.callback(action.node)">
+    @if (icon(action.option); as iconName) {
+    <i [esIcon]="iconName"></i>
+    }
+    <span>{{ caption ?? (action.option.name | translate) }}</span>
+  </button>
+</es-mds-editor-widget-container>
+}

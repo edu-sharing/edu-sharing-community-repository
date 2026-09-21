@@ -1,11 +1,19 @@
 import { applicationConfig, type Meta, moduleMetadata, type StoryObj } from '@storybook/angular';
 import { MdsEditorWrapperComponent } from './mds-editor-wrapper.component';
-import { Data, DummyNode, mdsStorybookProviders, registerMockNode } from '../storybook-utils';
+import {
+    Data,
+    DefaultMds,
+    DummyNode,
+    mdsStorybookProviders,
+    registerMockNode,
+} from '../storybook-utils';
 import { SharedModule } from '../../../../shared/shared.module';
-import { DEFAULT, Node } from 'ngx-edu-sharing-api';
+import { DEFAULT, MdsDefinition, MdsIdentifier, MdsService, Node } from 'ngx-edu-sharing-api';
 import { CommonModule } from '@angular/common';
 import { MdsModule } from '../../mds.module';
-import { Helper } from 'ngx-edu-sharing-ui';
+import { Helper, OptionItem, OptionsHelperDataService, Target } from 'ngx-edu-sharing-ui';
+import { Observable, of } from 'rxjs';
+import { Injectable } from '@angular/core';
 
 const meta: Meta<MdsEditorWrapperComponent> = {
     title: 'Mds/Editor',
@@ -81,5 +89,77 @@ export const MdsIOBulkTemplate: Story = {
             registerMockNode(n);
             return n;
         }),
+    },
+};
+
+const FEEDBACK_OPTION = 'OPTIONS.MATERIAL_FEEDBACK';
+const TEMPLATE_GROUP = 'storybook_template_features';
+
+/**
+ * View exercising the two template features that are resolved by `MdsEditorViewComponent`
+ * itself: `<i18n …>` tags and the generic `<action>` widget.
+ */
+const TEMPLATE_FEATURES_HTML = `
+    <h3><i18n MDS.LICENSE></h3>
+    <p>Unbekannter Key bleibt stehen: <i18n MDS.NO_SUCH_KEY></p>
+    <cclom:title>
+    <action option="${FEEDBACK_OPTION}">
+    <action option="${FEEDBACK_OPTION}" caption="Rückmeldung geben" icon="feedback">
+    <action option="OPTIONS.NOT_AVAILABLE_FOR_THIS_NODE">
+`;
+
+const TemplateFeaturesMds: MdsDefinition = {
+    ...DefaultMds,
+    views: [
+        ...DefaultMds.views,
+        {
+            id: TEMPLATE_GROUP,
+            caption: 'Template-Features',
+            icon: 'description',
+            html: TEMPLATE_FEATURES_HTML,
+            rel: null,
+            hideIfEmpty: false,
+            isExtended: false,
+        },
+    ],
+    groups: [
+        ...DefaultMds.groups,
+        { id: TEMPLATE_GROUP, views: [TEMPLATE_GROUP], rendering: 'angular' },
+    ],
+};
+
+@Injectable()
+class TemplateFeaturesMdsService {
+    getMetadataSet(_identifier: Partial<MdsIdentifier>): Observable<MdsDefinition> {
+        return of(TemplateFeaturesMds);
+    }
+}
+
+/** only `OPTIONS.MATERIAL_FEEDBACK` is available, so the third `<action>` must stay invisible */
+@Injectable()
+class OptionsHelperDataServiceMock {
+    async getAvailableOptions(_target: Target): Promise<OptionItem[]> {
+        return [
+            new OptionItem(FEEDBACK_OPTION, 'chat_bubble', () => alert('Test: option triggered')),
+        ];
+    }
+}
+
+/**
+ * `<i18n KEY>` is replaced with the frontend translation before the template html is parsed,
+ * and `<action option="…">` renders the matching option of the options helper.
+ */
+export const TemplateFeatures: Story = {
+    decorators: [
+        applicationConfig({
+            providers: [
+                { provide: MdsService, useClass: TemplateFeaturesMdsService },
+                { provide: OptionsHelperDataService, useClass: OptionsHelperDataServiceMock },
+            ],
+        }),
+    ],
+    args: {
+        groupId: TEMPLATE_GROUP,
+        editorMode: 'viewer',
     },
 };

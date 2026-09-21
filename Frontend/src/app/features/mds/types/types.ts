@@ -71,6 +71,7 @@ export enum NativeWidgetType {
     FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
+    Action = 'action',
     Contributor = 'contributor',
     Collections = 'collections',
     Comments = 'comments',
