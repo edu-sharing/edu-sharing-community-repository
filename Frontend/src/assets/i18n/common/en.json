@@ -838,6 +838,7 @@
     "FILTER_TREE": "Filter...",
     "OPEN_CLOSE_EXTENDED": "Open/close view",
     "FILTER_FACET": "Filter...",
+    "FACET_COUNT": "{{ count }} hit(s)",
     "SHOW_EXTENDED_TRUE": "Display additional information",
     "NO_ARBITRARY_VALUES_NOTICE": "You cannot freely select values ​​for this field. Please select values ​​from the list.",
     "DELETE_KEY_NOTICE": "Delete with Delete key",

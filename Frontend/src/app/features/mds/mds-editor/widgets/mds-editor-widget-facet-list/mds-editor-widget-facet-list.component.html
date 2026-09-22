@@ -27,7 +27,10 @@
             [matTooltip]="text.hasTextOverflow() ? getFacet(i).label : null"
             [innerHTML]="getFacet(i).label | escapeHtml | highlight : filter.value"
           ></span>
-          <span class="count">{{ getFacet(i).count }}</span>
+          <span class="count" aria-hidden="true">{{ getFacet(i).count }}</span>
+          <span class="cdk-visually-hidden">{{
+            'MDS.FACET_COUNT' | translate : { count: getFacet(i).count }
+          }}</span>
         </span>
       </mat-checkbox>
     </li>
