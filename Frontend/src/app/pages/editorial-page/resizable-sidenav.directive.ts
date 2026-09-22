@@ -1,18 +1,21 @@
 import {
+    computed,
     DestroyRef,
     Directive,
+    effect,
     ElementRef,
     inject,
     Input,
     OnDestroy,
     OnInit,
     Renderer2,
+    signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatSidenavContainer } from '@angular/material/sidenav';
 import { TranslateService } from '@ngx-translate/core';
 import { SessionStorageService, Store } from 'ngx-edu-sharing-api';
-import { BehaviorSubject } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 @Directive({
@@ -43,12 +46,37 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
     @Input() maxWidthPx = 800;
     private resizer!: HTMLElement;
     private dragging = false;
-    private width$ = new BehaviorSubject<number>(0);
+
+    private announcedWidth = signal(0);
+    // `initialValue: ''` covers the moment before this key's translation has resolved.
+    private valueTextTemplate = toSignal(this.translate.stream('RESIZE_SIDEBAR_VALUE'), {
+        initialValue: '',
+    });
+    private valueText = computed(() => {
+        const template = this.valueTextTemplate();
+        return template ? template.replace('{{width}}', String(this.announcedWidth())) : '';
+    });
+
+    // Must stay silent until a real resize, or the debounced subscriber below persists a seed value.
+    private width$ = new Subject<number>();
 
     constructor() {
         this.width$.pipe(debounceTime(10)).subscribe((width) => {
             if (this.storageKey) {
                 void this.storage.set(this.storageKey, width, Store.LocalStorage);
+            }
+        });
+
+        // Combines the current width and its translation; re-applies whenever either changes.
+        effect(() => {
+            const width = this.announcedWidth();
+            const text = this.valueText();
+            if (!this.resizer) {
+                return;
+            }
+            this.renderer.setAttribute(this.resizer, 'aria-valuenow', String(width));
+            if (text) {
+                this.renderer.setAttribute(this.resizer, 'aria-valuetext', text);
             }
         });
     }
@@ -76,21 +104,39 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             const lastValue = this.applyWidthConstrains(storageValue);
 
             this.renderer.setStyle(this.el.nativeElement, 'width', `${lastValue}px`);
-            this.renderer.setAttribute(
-                this.resizer,
-                'aria-valuenow',
-                String(Math.round(lastValue)),
-            );
+            this.setResizerValueAttrs(lastValue);
             this.sidenavContainer?.updateContentMargins();
         } else {
             this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
-            this.renderer.setAttribute(
-                this.resizer,
-                'aria-valuenow',
-                String(Math.round(defaultWidth)),
-            );
+            this.setResizerValueAttrs(defaultWidth);
             this.sidenavContainer?.updateContentMargins();
         }
+    }
+
+    // Writing the signal is enough — the constructor's effect applies `aria-valuenow`/`valuetext`.
+    private setResizerValueAttrs(width: number) {
+        this.announcedWidth.set(Math.round(width));
+    }
+
+    /** Recomputes `aria-valuemin`/`aria-valuemax` from the current viewport width. */
+    private updateResizerRange() {
+        const calculatedMin = Math.round(
+            Math.max(this.minWidthPx, window.innerWidth * this.minWidth),
+        );
+        this.renderer.setAttribute(this.resizer, 'aria-valuemin', String(calculatedMin));
+        const calculatedMax = Math.round(
+            Math.min(this.maxWidthPx, window.innerWidth * this.maxWidth),
+        );
+        this.renderer.setAttribute(this.resizer, 'aria-valuemax', String(calculatedMax));
+    }
+
+    // Re-clamps the panel and its announced range to the viewport's current bounds.
+    private onWindowResize() {
+        this.updateResizerRange();
+        const clampedWidth = this.applyWidthConstrains(this.el.nativeElement.offsetWidth);
+        this.renderer.setStyle(this.el.nativeElement, 'width', `${clampedWidth}px`);
+        this.setResizerValueAttrs(clampedWidth);
+        this.sidenavContainer?.updateContentMargins();
     }
 
     ngOnDestroy(): void {
@@ -108,14 +154,10 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
             .stream('RESIZE_SIDEBAR')
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((label) => this.renderer.setAttribute(this.resizer, 'aria-label', label));
-        const calculatedMin = Math.round(
-            Math.max(this.minWidthPx, window.innerWidth * this.minWidth),
-        );
-        this.renderer.setAttribute(this.resizer, 'aria-valuemin', String(calculatedMin));
-        const calculatedMax = Math.round(
-            Math.min(this.maxWidthPx, window.innerWidth * this.maxWidth),
-        );
-        this.renderer.setAttribute(this.resizer, 'aria-valuemax', String(calculatedMax));
+        this.updateResizerRange();
+        fromEvent(window, 'resize')
+            .pipe(debounceTime(150), takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.onWindowResize());
         // prevent the browser from treating a touch-drag on the handle as a scroll/zoom gesture,
         // so pointermove events keep firing during a touch resize
         this.renderer.setStyle(this.resizer, 'touch-action', 'none');
@@ -160,6 +202,7 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         newWidth = this.applyWidthConstrains(newWidth);
         this.width$.next(newWidth);
         this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
+        this.setResizerValueAttrs(newWidth);
     };
 
     private applyWidthConstrains(newWidth: number) {
@@ -204,13 +247,14 @@ export class ResizableSidenavDirective implements OnInit, OnDestroy {
         this.width$.next(newWidth);
         this.renderer.setStyle(this.el.nativeElement, 'width', `${newWidth}px`);
         this.sidenavContainer?.updateContentMargins();
-        this.renderer.setAttribute(this.resizer, 'aria-valuenow', String(Math.round(newWidth)));
+        this.setResizerValueAttrs(newWidth);
     };
 
     private resetToDefault = async () => {
         void this.storage.delete(this.storageKey, Store.LocalStorage);
         const defaultWidth = this.getDefaultWidth();
         this.renderer.setStyle(this.el.nativeElement, 'width', `${defaultWidth}px`);
+        this.setResizerValueAttrs(defaultWidth);
         this.sidenavContainer?.updateContentMargins();
     };
 }
