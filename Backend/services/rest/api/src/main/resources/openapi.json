@@ -7143,6 +7143,9 @@
         "properties": {
           "childobjects": {
             "$ref": "#/components/schemas/ChildobjectsConfig"
+          },
+          "webComponents": {
+            "$ref": "#/components/schemas/WebComponentsConfig"
           }
         },
         "type": "object"
@@ -10157,6 +10160,14 @@
         "properties": {
           "datetime": {
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WebComponentsConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           }
         },
         "type": "object"
