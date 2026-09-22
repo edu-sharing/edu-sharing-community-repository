@@ -378,6 +378,13 @@
     &.table-not-executed {
         background-color: color-mix(in srgb, var(--colorStatusWarning) 20%, var(--backgroundColor));
     }
+    // darkened to meet contrast against the tinted row background
+    .test button {
+        --mat-button-text-label-text-color: color-mix(in srgb, var(--primary), black 10%);
+        :host-context(body.isDarkTheme) & {
+            --mat-button-text-label-text-color: var(--primary);
+        }
+    }
 }
 .header {
     color: $textLight;
