@@ -2,6 +2,7 @@ package org.edu_sharing.service.nodeservice;
 
 import lombok.NonNull;
 import org.alfresco.service.cmr.repository.*;
+import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.client.rpc.User;
@@ -123,6 +124,16 @@ public interface NodeService {
     void revertVersion(String nodeId, String verLbl) throws Exception;
 
     default void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
+        revertVersionNoRollback(nodeId, verLbl, Collections.emptyList());
+    }
+
+    /**
+     * @param propertiesToKeep properties which are not restored from the given version, i.e. the
+     *                         current value of the live node survives the revert.
+     *                         Useful e.g. for cm:name, which can not be reverted if a sibling
+     *                         meanwhile owns that name ("Duplicate child name not allowed")
+     */
+    default void revertVersionNoRollback(String nodeId, String verLbl, Collection<QName> propertiesToKeep) throws Exception {
         throw new NotImplementedException();
     }
 

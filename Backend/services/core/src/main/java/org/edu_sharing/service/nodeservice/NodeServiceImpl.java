@@ -11,6 +11,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.repo.transaction.AlfrescoTransactionSupport;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
+import org.alfresco.repo.version.EduVersion2ServiceImpl;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.*;
@@ -1889,12 +1890,17 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
      * same as regular revert version, but no custom transaction and no rollback
      */
     @Override
-    public void revertVersionNoRollback(String nodeId, String verLbl) throws Exception {
+    public void revertVersionNoRollback(String nodeId, String verLbl, Collection<QName> propertiesToKeep) throws Exception {
         VersionHistory versionHistory = versionService.getVersionHistory(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId));
         if (versionHistory != null && versionHistory.getAllVersions() != null && !versionHistory.getAllVersions().isEmpty()) {
             NodeRef ioNodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
             Version version = versionHistory.getVersion(verLbl);
-            versionService.revert(ioNodeRef, version, true);
+            // the public VersionService bean is a jdk proxy on the VersionService interface, so the
+            // properties to keep can not be passed as a parameter and are handed over thread bound
+            EduVersion2ServiceImpl.keepProperties(propertiesToKeep, () -> {
+                versionService.revert(ioNodeRef, version, true);
+                return null;
+            });
         } else {
             throw new IllegalArgumentException("The node " + nodeId + "as no version history");
         }
