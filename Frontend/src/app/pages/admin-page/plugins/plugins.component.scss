@@ -22,7 +22,7 @@
                 color: color-mix(in srgb, var(--colorStatusNegative), var(--textBlack) 20%);
                 padding-bottom: 2px;
                 &.state-enabled {
-                    color: color-mix(in srgb, var(--colorStatusPositive), var(--textBlack) 20%);
+                    color: color-mix(in srgb, var(--colorStatusPositive), var(--textBlack) 35%);
                 }
             }
             .name-wrapper {
