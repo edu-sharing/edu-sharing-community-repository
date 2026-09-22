@@ -1307,21 +1307,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     @Override
     public void removeNodeForce(String storeProtocol, String storeId, String nodeId, boolean recycle) {
         NodeRef nodeRef = new NodeRef(new StoreRef(storeProtocol, storeId), nodeId);
-        if (!recycle) {
-            nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
-        }
-        //serviceRegistry.getRetryingTransactionHelper().doInTransaction(()->{
-        Method method = null;
-        try {
-            method = nodeServiceAlfresco.getClass().getDeclaredMethod("deleteNode", NodeRef.class, boolean.class);
-            method.setAccessible(true);
-
-            Object r = method.invoke(nodeServiceAlfresco, nodeRef, false);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            log.error(e.getMessage(), e);
-        }
-		/*	return null;
-		});*/
+        // force a fresh writable transaction: a plain doInTransaction(...) joins the ambient transaction,
+        // which is a no-op fix when that transaction is already read-only (see MBeanSupport.doTxReadOnlyWork)
+        boolean requiresNew = AlfrescoTransactionSupport.getTransactionReadState() == AlfrescoTransactionSupport.TxnReadState.TXN_READ_ONLY;
+        retryingTransactionHelper.doInTransaction(() -> {
+            if (!recycle) {
+                nodeServiceAlfresco.addAspect(nodeRef, ContentModel.ASPECT_TEMPORARY, null);
+            }
+            try {
+                Method method = nodeServiceAlfresco.getClass().getDeclaredMethod("deleteNode", NodeRef.class, boolean.class);
+                method.setAccessible(true);
+                method.invoke(nodeServiceAlfresco, nodeRef, false);
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                log.error(e.getMessage(), e);
+            }
+            return null;
+        }, false, requiresNew);
     }
 
     @Override
