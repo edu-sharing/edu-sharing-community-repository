@@ -18,6 +18,7 @@ import {
     ClientConfig,
     ConfigService,
     DashboardShortcutEntry,
+    DEFAULT,
     HOME_REPOSITORY,
     IamV1Service,
     LoginInfo,
@@ -25,9 +26,11 @@ import {
     MdsIdentifier,
     MdsService,
     MdsWidget,
+    MetadataSetInfo,
     Node,
     NodeService,
     NodeSuggestionResponseDto,
+    Repository,
     RestConstants,
     SessionStorageService,
     Store,
@@ -38,13 +41,14 @@ import {
     UserSimple,
     Variables,
 } from 'ngx-edu-sharing-api';
-import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, from, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { RestMdsService } from '../../../core-module/rest/services/rest-mds.service';
 import { InputStatus, MdsWidgetValue } from '../types/types';
 import { MdsEditorInstanceService } from './mds-editor-instance.service';
 import {
     ColumnType,
+    DefaultGroups,
     Helper,
     I18N_CONFIG,
     I18nConfig,
@@ -52,8 +56,11 @@ import {
     ListItem,
     MdsValueList,
     MdsViewerService,
+    NodeEntriesDisplayType,
     OptionData,
     OptionItem,
+    OptionItemToggle,
+    OptionsHelperComponents,
     OptionsHelperService,
     Target,
     Toast,
@@ -74,44 +81,61 @@ import {
 import { CARD_DIALOG_DATA } from '../../dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../dialogs/card-dialog/card-dialog-ref';
 
+/**
+ * The merged german translations, loaded once per storybook session. `.storybook/preview.ts` awaits
+ * this before a story renders, so `TranslateService.instant()` — which can only answer from the
+ * cache — returns captions instead of raw keys.
+ */
+let storybookTranslations: Promise<any> | null = null;
+/** the resolved translations, readable synchronously (as `instant()` needs them) */
+let storybookTranslationsValue: any = null;
+export function loadStorybookTranslations(): Promise<any> {
+    if (!storybookTranslations) {
+        const load = (file: string) =>
+            fetch(`/assets/i18n/${file}`)
+                .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+                .catch(() =>
+                    fetch(`/edu-sharing/storybook/assets/i18n/${file}`)
+                        .then((response) => (response.ok ? response.json() : {}))
+                        .catch(() => ({})),
+                );
+        storybookTranslations = Promise.all(
+            TRANSLATION_LIST.map((source) => load(`${source}/de.json`)),
+        ).then((results) => {
+            storybookTranslationsValue = results.reduce((acc, cur) => ({ ...acc, ...cur }), {});
+            return storybookTranslationsValue;
+        });
+    }
+    return storybookTranslations;
+}
+
 @Injectable()
 export class translateProvider {
     private translation$: Observable<any> | null = null;
     cache$ = new BehaviorSubject(null);
-    private httpClient = inject(HttpClient);
 
-    constructor() {}
+    constructor() {
+        // `instant()` can only answer from the cache, so fill it as early as possible
+        void loadStorybookTranslations().then((translations) => this.cache$.next(translations));
+    }
 
     instant(v: string, args: any = {}) {
-        let str = Helper.getDotPathFromNestedObject(this.cache$?.value, v)?.replace(
-            /{{GENDER_SEPARATOR}}/g,
-            '*',
-        );
+        let str = Helper.getDotPathFromNestedObject(
+            this.cache$?.value ?? storybookTranslationsValue,
+            v,
+        )?.replace(/{{GENDER_SEPARATOR}}/g, '*');
         for (const k of Object.keys(args)) {
             str = (str || v).replace(new RegExp('{{\\s*' + k + '\\s*}}', 'g'), args[k]);
         }
 
-        return str;
+        // same contract as ngx-translate: an unknown (or not yet loaded) key resolves to itself,
+        // otherwise callers that render the result show nothing at all
+        return str ?? v;
     }
 
     get(v: string, args: any = {}): Observable<any> {
         if (!this.translation$) {
-            const sources = TRANSLATION_LIST.map((s) => s + '/de.json');
-
-            const requests = sources.map((file) =>
-                this.httpClient
-                    .get(`/assets/i18n/${file}`)
-                    .pipe(
-                        catchError(() =>
-                            this.httpClient
-                                .get(`/edu-sharing/storybook/assets/i18n/${file}`)
-                                .pipe(catchError(() => of({}))),
-                        ),
-                    ),
-            );
-
-            this.translation$ = forkJoin(requests).pipe(
-                map((results) => results.reduce((acc, cur) => ({ ...acc, ...cur }), {})),
+            this.translation$ = from(loadStorybookTranslations()).pipe(
                 tap((merged) => this.cache$.next(merged)),
                 shareReplay(1),
             );
@@ -207,6 +231,30 @@ export class AuthenticationServiceMock {
 export class MdsServiceMock extends MdsService {
     getMetadataSet({ repository, metadataSet }: Partial<MdsIdentifier>): Observable<MdsDefinition> {
         return of(DefaultMds);
+    }
+    getAvailableMetadataSets(repository?: string): Observable<MetadataSetInfo[]> {
+        return of([{ id: DEFAULT, name: 'Default' }] as MetadataSetInfo[]);
+    }
+}
+
+/**
+ * The repositories of the instance. Defaults to a single home repository, pass a list to simulate
+ * remote repositories (e.g. for the repository switch of a search).
+ */
+export function createNetworkServiceMock(repositories: Repository[] = [DummyRepository]) {
+    return {
+        getRepositories: (): Observable<Repository[]> => of(repositories),
+        getHomeRepository: (): Observable<Repository> =>
+            of(repositories.find((repository) => repository.isHomeRepo) ?? DummyRepository),
+        isFromHomeRepository: (node: Node): Observable<boolean> =>
+            of(!node?.ref?.repo || node.ref.repo === DummyRepository.id),
+    };
+}
+
+@Injectable()
+export class DialogsServiceMock {
+    getCustomTemplateSlot(): null {
+        return null;
     }
 }
 
@@ -344,6 +392,12 @@ export class NodeServiceMock {
     getNode(id: string, { repository = HOME_REPOSITORY } = {}): Observable<Node> {
         return of(MockNodes[id] || (DummyNode as Node));
     }
+    getChildren(parent: string, params?: unknown): Observable<unknown> {
+        const child = Helper.deepCopy(DummyNode) as Node;
+        // the callers re-assign the parent to sort the children into their (fake) group nodes
+        child.parent = { ...(child.parent ?? ({} as Node['parent'])), id: parent };
+        return of({ nodes: [child], pagination: { from: 0, count: 1, total: 1 } });
+    }
     editNodeMetadata(
         id: string,
         properties: { [key: string]: string[] },
@@ -358,6 +412,9 @@ export class NodeServiceMock {
 }
 @Injectable()
 export class AboutServiceMock {
+    async hasPlugin(plugin: string): Promise<boolean> {
+        return ['b-api', 'mongo-plugin'].includes(plugin);
+    }
     getAbout(): Observable<About> {
         return of({
             services: [],
@@ -480,6 +537,10 @@ export class SuggestionsV1ServiceMock {
 
 @Injectable()
 export class IamServiceMock extends IamV1Service {
+    // read e.g. by the node lists via `UserService.observePreferences()`
+    getPreferences(params?: unknown, context?: HttpContext): Observable<any> {
+        return of({ preferences: '{}' });
+    }
     getDashboardShortcuts(
         params: any,
         context?: HttpContext,
@@ -521,6 +582,61 @@ export class ActivatedRouteMock {}
 
 @Injectable()
 export class OptionsHelperServiceMock {
+    // called by `OptionsHelperDataService.setData()` / `refreshComponents()` of every node list
+    wrapOptionCallbacks(data: OptionData): OptionData {
+        return data;
+    }
+    getObjects(): Node[] {
+        return [];
+    }
+    /**
+     * Only the display type toggle — the option every node list offers by itself. The remaining
+     * options of the real service depend on half of the application and are not simulated.
+     */
+    async getAvailableOptions(
+        target: Target,
+        objects: Node[],
+        components?: OptionsHelperComponents,
+        data?: OptionData,
+    ): Promise<OptionItem[]> {
+        const list = components?.list;
+        if (target !== Target.Actionbar || !list) {
+            return [];
+        }
+        const toggleViewType = new OptionItemToggle(
+            { enabled: 'OPTIONS.SWITCH_TO_CARDS_VIEW', disabled: 'OPTIONS.SWITCH_TO_LIST_VIEW' },
+            { enabled: 'view_module', disabled: 'list' },
+            list.getDisplayType() === NodeEntriesDisplayType.Table,
+            () =>
+                list.setDisplayType(
+                    list.getDisplayType() === NodeEntriesDisplayType.Table
+                        ? NodeEntriesDisplayType.Grid
+                        : NodeEntriesDisplayType.Table,
+                ),
+        );
+        toggleViewType.group = DefaultGroups.Toggles;
+        toggleViewType.elementType = [];
+        toggleViewType.constrains = [];
+        toggleViewType.togglePosition = 'before';
+        const supported = data?.customOptions?.supportedOptions;
+        return this.filterOptions(
+            supported?.length
+                ? [toggleViewType].filter((option) => supported.includes(option.name))
+                : [toggleViewType],
+            target,
+        );
+    }
+    async refreshComponents(components: OptionsHelperComponents, data: OptionData): Promise<void> {
+        const options = await this.getAvailableOptions(Target.Actionbar, [], components, data);
+        const actionbars = (
+            Array.isArray(components?.actionbar) ? components.actionbar : [components?.actionbar]
+        ).filter(Boolean);
+        for (const actionbar of actionbars) {
+            actionbar.options = options;
+            actionbar.invalidate();
+        }
+    }
+    pasteNode(): void {}
     async filterOptions(
         options: OptionItem[],
         target: Target,
@@ -551,6 +667,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: AboutService, useClass: AboutServiceMock },
     { provide: OptionsHelperService, useClass: OptionsHelperServiceMock },
     { provide: NodeService, useClass: NodeServiceMock },
+    { provide: IamV1Service, useClass: IamServiceMock },
     { provide: EduSharingLlmService, useClass: EduSharingLlmServiceMock },
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useClass: MdsServiceMock },
@@ -730,6 +847,15 @@ export const DummyAssignment: Partial<Assignment> = {
     allowAdditionalDocumentSubmissions: true,
     status: 'DRAFT',
 };
+/** the home repository of the instance */
+export const DummyRepository: Repository = {
+    id: '-home-',
+    title: 'Storybook Repository',
+    isHomeRepo: true,
+    repositoryType: 'ALFRESCO',
+    renderingSupported: true,
+};
+
 export const DummyNode: Partial<Node> = {
     ref: {
         id: 'nodeid',

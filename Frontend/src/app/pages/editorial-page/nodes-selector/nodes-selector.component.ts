@@ -311,8 +311,29 @@ export class NodesSelectorComponent implements OnInit {
             return Object.values(value).some((data: MdsExtendedValueData) => data.enabled);
         });
     });
+    /** the toolpermission a tab requires, if any */
+    private static readonly TAB_TOOLPERMISSIONS: { [tab: string]: string } = {
+        [TabType.METHODOLOGY]: RestConstants.TOOLPERMISSION_METADATA_METHODOLOGY,
+        [TabType.WORKSPACE]: RestConstants.TOOLPERMISSION_WORKSPACE,
+    };
+    /**
+     * the tabs the user has the required toolpermission for. Part of `supportedTabs` (instead of a
+     * template condition), so the rendered tabs and `selectedTabId` can not disagree.
+     */
+    private allowedByToolPermission: Signal<{ [tab: string]: boolean }> = toSignal(
+        combineLatest(
+            Object.entries(NodesSelectorComponent.TAB_TOOLPERMISSIONS).map(
+                ([tab, toolPermission]) =>
+                    from(this.authenticationService.hasToolpermission(toolPermission)).pipe(
+                        map((allowed) => [tab, allowed] as [string, boolean]),
+                    ),
+            ),
+        ).pipe(map((entries) => Object.fromEntries(entries))),
+        { initialValue: {} as { [tab: string]: boolean } },
+    );
     supportedTabs: Signal<TabType[]> = computed(() => {
         const blacklist = this.effectiveTabBlacklist();
+        const allowedByToolPermission = this.allowedByToolPermission();
         let tabs: TabType[];
         if (this.selectionMode() === 'source') {
             if (!this.parent() || this.nodeHelperService.isNodeCollection(this.parent())) {
@@ -325,7 +346,10 @@ export class NodesSelectorComponent implements OnInit {
         } else {
             tabs = [TabType.COLLECTIONS];
         }
-        return tabs.filter((tab) => !blacklist.includes(tab));
+        return tabs.filter((tab) => {
+            const toolPermission = NodesSelectorComponent.TAB_TOOLPERMISSIONS[tab];
+            return !blacklist.includes(tab) && (!toolPermission || allowedByToolPermission[tab]);
+        });
     });
     highestSelectedNode: Signal<Partial<Node> | null> = computed((): Partial<Node> | null => {
         const selectedNodes: Partial<Node>[] = this.selectedNodes();

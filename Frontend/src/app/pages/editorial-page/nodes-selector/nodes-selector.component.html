@@ -9,7 +9,9 @@
   <mat-tab [id]="idPrefix + TabType.SEARCH">
     <ng-template mat-tab-label>
       <i esIcon="search" class="tab-icon"></i>
-      <span class="tab-label">{{ 'SIDEBAR.SEARCH_SHORT' | translate }}</span>
+      <span class="tab-label" [attr.data-test]="idPrefix + '-label-' + TabType.SEARCH">{{
+        'SIDEBAR.SEARCH_SHORT' | translate
+      }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.SEARCH }"
@@ -18,12 +20,13 @@
   }
 
   <!-- METHODOLOGY TAB -->
-  @if ( supportedTabs().includes(TabType.METHODOLOGY) && ('TOOLPERMISSION_METADATA_METHODOLOGY' |
-  esToolpermission | async) ) {
+  @if (supportedTabs().includes(TabType.METHODOLOGY)) {
   <mat-tab [id]="idPrefix + TabType.METHODOLOGY">
     <ng-template mat-tab-label>
       <i esIcon="sell" class="tab-icon"></i>
-      <span class="tab-label">{{ i18nPrefix + 'METHODOLOGY.TITLE' | translate }}</span>
+      <span class="tab-label" [attr.data-test]="idPrefix + '-label-' + TabType.METHODOLOGY">{{
+        i18nPrefix + 'METHODOLOGY.TITLE' | translate
+      }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.METHODOLOGY }"
@@ -36,7 +39,9 @@
   <mat-tab [id]="idPrefix + TabType.COLLECTIONS">
     <ng-template mat-tab-label>
       <i esIcon="layers" class="tab-icon"></i>
-      <span class="tab-label">{{ 'COLLECTIONS.TITLE' | translate }}</span>
+      <span class="tab-label" [attr.data-test]="idPrefix + '-label-' + TabType.COLLECTIONS">{{
+        'COLLECTIONS.TITLE' | translate
+      }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.COLLECTIONS }"
@@ -45,12 +50,13 @@
   }
 
   <!-- WORKSPACE TAB -->
-  @if ( supportedTabs().includes(TabType.WORKSPACE) && ('TOOLPERMISSION_WORKSPACE' |
-  esToolpermission | async) ) {
+  @if (supportedTabs().includes(TabType.WORKSPACE)) {
   <mat-tab [id]="idPrefix + TabType.WORKSPACE">
     <ng-template mat-tab-label>
       <i esIcon="cloud" class="tab-icon"></i>
-      <span class="tab-label">{{ 'WORKSPACE.TITLE' | translate }}</span>
+      <span class="tab-label" [attr.data-test]="idPrefix + '-label-' + TabType.WORKSPACE">{{
+        'WORKSPACE.TITLE' | translate
+      }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.WORKSPACE }"
@@ -63,7 +69,9 @@
   <mat-tab [id]="idPrefix + TabType.UPLOAD">
     <ng-template mat-tab-label>
       <i esIcon="add_circle_outline" class="tab-icon"></i>
-      <span class="tab-label">{{ i18nPrefix + 'UPLOAD.TITLE' | translate }}</span>
+      <span class="tab-label" [attr.data-test]="idPrefix + '-label-' + TabType.UPLOAD">{{
+        i18nPrefix + 'UPLOAD.TITLE' | translate
+      }}</span>
     </ng-template>
     <ng-container
       *ngTemplateOutlet="tabContent; context: { tabType: TabType.UPLOAD }"
@@ -123,7 +131,10 @@
           (selectionChange)="onRepositoryChange($event.value)"
         >
           @for (repository of availableRepositories(); track repository.id) {
-          <mat-option [value]="repository">
+          <mat-option
+            [value]="repository"
+            [attr.data-test]="'nodes-selector-repository-option-' + repository.id"
+          >
             <img class="repository-icon" [src]="repository | repositoryIcon" alt="" />
             {{ repository.title }}
           </mat-option>
@@ -390,7 +401,7 @@
 
     <ng-template #noSearchResults let-dataSource="dataSource">
       @if (dataSource.isEmpty() && !dataSource.isLoading && searchSent()) {
-      <es-info-message mode="info" class="info-message">
+      <es-info-message mode="info" class="info-message" data-test="nodes-selector-no-results">
         {{ i18nPrefix + 'NO_SEARCH_RESULTS' | translate }}
       </es-info-message>
       }
