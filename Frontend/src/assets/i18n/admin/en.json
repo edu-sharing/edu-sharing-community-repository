@@ -695,6 +695,7 @@
       "UPLOAD_DONE": "Folder template was stored as {{filename}} on the server.",
       "MISSING_GROUP": "At least one organisation must be selected.",
       "MISSING_TEMPLATE": "A folder template must be selected.",
+      "TEMPLATE": "Folder template",
       "TEMPLATE_APPLIED": "Template {{templatename}} was applied for {{groupname}}.",
       "TEMPLATE_NOTAPPLIED": "Folder template {{{templatename}} could not be applied to {{{groupname}}. Check the folder template for correctness.",
       "UPLOAD_HINT": "You can upload additional folder templates and then select them.",

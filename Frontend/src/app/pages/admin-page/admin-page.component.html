@@ -1239,6 +1239,7 @@
         </div>
         <div class="inputGroupGrow">
           <mat-form-field>
+            <mat-label>{{ 'ADMIN.FOLDERTEMPLATES.TEMPLATE' | translate }}</mat-label>
             <mat-select [(ngModel)]="selectedTemplate" name="template">
               @for (option of templates; track option) {
               <mat-option [value]="option">{{ option }}</mat-option>

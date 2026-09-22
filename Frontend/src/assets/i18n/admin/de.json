@@ -526,6 +526,7 @@
       "UPLOAD_DONE": "Ordnervorlage wurde unter {{filename}} auf dem Server abgelegt.",
       "MISSING_GROUP": "Es muss mindestens eine Organisation gewählt werden.",
       "MISSING_TEMPLATE": "Es muss eine Ordnervorlage gewählt werden.",
+      "TEMPLATE": "Ordnervorlage",
       "TEMPLATE_APPLIED": "Vorlage {{templatename}} wurde für {{groupname}} angewandt.",
       "TEMPLATE_NOTAPPLIED": "Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfen Sie die Ordnervorlage auf Richtigkeit.",
       "UPLOAD_HINT": "Sie können weitere Ordnervorlagen hochladen und anschließend auswählen.",
