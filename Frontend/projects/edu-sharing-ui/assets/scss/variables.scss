@@ -77,6 +77,8 @@
     --chipsSeperatorLineColor: #e2e2e2;
     --colorStatusNeutral: #ddd;
     --colorStatusPositive: #40bf8e;
+    // darker variant of --colorStatusPositive for use as text on light backgrounds
+    --colorStatusPositiveText: #297a5b;
     --colorStatusNegative: #cd2457;
     --colorStatusWarning: #e98c1b;
     --colorStarActive: #ba7c00;
@@ -195,6 +197,7 @@ body.isDarkTheme {
     --tableSeperatorLineColor: #444;
     --chipsSeperatorLineColor: #3a3a3a;
     --focusColor: color-mix(in srgb, var(--primary), black 44%);
+    --colorStatusPositiveText: var(--colorStatusPositive);
 
     // light primary tint reads wrong on dark; use a translucent primary instead
     //--listItemSelectedBackground: rgba(var(--palette-primary-500-no-rgb), 0.22);

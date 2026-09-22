@@ -87,7 +87,7 @@ $headingHeight: 60px;
     .technicalName {
         font-size: 70%;
         word-break: break-all;
-        color: $textVeryLight;
+        color: $textLight;
         font-style: italic;
     }
 }
@@ -141,10 +141,10 @@ $headingHeight: 60px;
     }
 }
 .allowed {
-    color: $colorStatusPositive;
+    color: var(--colorStatusPositiveText);
 }
 .denied {
-    color: $colorStatusNegative;
+    color: var(--colorStatusNegative);
 }
 ::ng-deep {
     .toolpermission-tooltip .mdc-tooltip__surface {
