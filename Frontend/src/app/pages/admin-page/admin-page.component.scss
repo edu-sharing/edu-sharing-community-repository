@@ -695,7 +695,7 @@
             font-weight: bold;
         }
         .class {
-            color: $textVeryLight;
+            color: var(--textLight);
         }
         .job-row {
             display: flex;
