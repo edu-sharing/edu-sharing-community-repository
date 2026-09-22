@@ -974,6 +974,9 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "DEFAULT_MODULE_INFO_TEXT": "This material cannot be displayed in the browser.",
+    "DEFAULT_MODULE_DOWNLOAD": "Download material",
+    "DOWNLOAD": "Download",
     "GO_TO_COURSE": "Go to course",
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",

@@ -1,9 +1,32 @@
 .rs-default-wrapper {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+
     img {
         width: 100%;
-        max-height: var(--containerHeight);
+        // leave room for the info text below the preview
+        max-height: calc(var(--containerHeight) - 60px);
         object-fit: contain;
         position: relative;
+    }
+
+    &.has-download img {
+        // ... and for the download hint plus its button
+        max-height: calc(var(--containerHeight) - 140px);
+    }
+
+    p {
+        margin: 0;
+        text-align: center;
+    }
+
+    .link-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
     }
 }
