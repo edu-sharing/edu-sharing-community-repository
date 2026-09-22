@@ -208,6 +208,9 @@
         "RENDER": "Rendering-Service"
       },
       "COPY": "Kopieren",
+      "CONFIG": "Konfiguration",
+      "EDIT": "Bearbeiten",
+      "DELETE": "Löschen",
       "COPIED_CLIPBOARD": "In Zwischenablage kopiert",
       "ADD_URL": "anbinden",
       "APP_REGISTERED": "App wurde erfolgreich registriert",

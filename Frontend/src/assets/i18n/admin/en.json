@@ -377,6 +377,9 @@
         "RENDER": "Rendering-Service"
       },
       "COPY": "copy",
+      "CONFIG": "Configuration",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
       "COPIED_CLIPBOARD": "Copied to clipboard",
       "ADD_URL": "connect",
       "APP_REGISTERED": "App was successfully registered",

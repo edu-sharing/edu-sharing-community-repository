@@ -328,10 +328,22 @@
               <div class="file">{{ 'ADMIN.APPLICATIONS.FILE' | translate }}</div>
               <div class="repoType">{{ 'ADMIN.APPLICATIONS.REPOTYPE' | translate }}</div>
               <div class="subtype">{{ 'ADMIN.APPLICATIONS.SUBTYPE' | translate }}</div>
-              <div class="config">&nbsp;</div>
-              <div class="edit">&nbsp;</div>
-              <div class="download">&nbsp;</div>
-              <div class="delete">&nbsp;</div>
+              <div class="config">
+                <span class="cdk-visually-hidden">{{
+                  'ADMIN.APPLICATIONS.CONFIG' | translate
+                }}</span>
+              </div>
+              <div class="edit">
+                <span class="cdk-visually-hidden">{{ 'ADMIN.APPLICATIONS.EDIT' | translate }}</span>
+              </div>
+              <div class="download">
+                <span class="cdk-visually-hidden">{{ 'DOWNLOAD' | translate }}</span>
+              </div>
+              <div class="delete">
+                <span class="cdk-visually-hidden">{{
+                  'ADMIN.APPLICATIONS.DELETE' | translate
+                }}</span>
+              </div>
             </div>
             @for (app of getApplications(type); track app) {
             <div>

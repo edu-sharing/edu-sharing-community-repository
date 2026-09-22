@@ -29,7 +29,9 @@
           </td>
         </ng-container>
         <ng-container matColumnDef="copy">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="cdk-visually-hidden">{{ 'ADMIN.APPLICATIONS.COPY' | translate }}</span>
+          </th>
           <td mat-cell *matCellDef="let element">
             <div class="copy">
               <button mat-icon-button color="primary" (click)="copyUrl(element)">
@@ -39,7 +41,9 @@
           </td>
         </ng-container>
         <ng-container matColumnDef="delete">
-          <th mat-header-cell *matHeaderCellDef></th>
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="cdk-visually-hidden">{{ 'ADMIN.APPLICATIONS.DELETE' | translate }}</span>
+          </th>
           <td mat-cell *matCellDef="let element">
             <div class="delete">
               <button mat-icon-button color="primary" (click)="remove(element)">
