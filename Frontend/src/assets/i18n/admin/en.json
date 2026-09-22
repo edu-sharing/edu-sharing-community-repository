@@ -170,6 +170,7 @@
   "Konto": "Account",
   "ADMIN": {
     "TITLE": "Admin-Tools",
+    "NAV": "Admin sections",
     "UNDERSTAND": "Understood, proceed",
     "WARNING_TITLE": "Administration area",
     "WARNING_INFO": "This area is intended for repository administration only. Improper settings can lead to errors or even data loss.\nDo not carry out any actions that you are unsure about!",

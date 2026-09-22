@@ -32,7 +32,7 @@
 }
 <div class="main">
   @if (buttons?.length > 1) {
-  <div class="main-nav">
+  <div class="main-nav" role="navigation" [attr.aria-label]="'ADMIN.NAV' | translate">
     <div>
       @for (button of buttons; track button) {
       <div

@@ -1,6 +1,7 @@
 {
   "ADMIN": {
     "TITLE": "Admin-Tools",
+    "NAV": "Admin-Bereiche",
     "UNDERSTAND": "Verstanden, Fortfahren",
     "WARNING_TITLE": "Administrationsbereich",
     "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht. Falsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\nFühren Sie keine Aktionen durch, bei denen Sie unsicher sind!",
