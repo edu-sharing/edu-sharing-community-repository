@@ -26,12 +26,17 @@
       >
       @for (cfg of [editorConfig()]; track cfg.skin) {
       <editor
+        #summaryEditor
         [init]="cfg"
         formControlName="summary"
         [class.editor-invalid]="
           mainDataFormGroup.get('summary').invalid && mainDataFormGroup.get('summary').touched
         "
       ></editor>
+      } @if (mainDataFormGroup.get('summary').invalid && mainDataFormGroup.get('summary').touched) {
+      <div id="summary-error" class="field-error" role="alert">
+        {{ 'EDITORIAL.ASSIGNMENT.ERROR.FIELD_SUMMARY' | translate }}
+      </div>
       }
       <div class="files">
         @if (submissionsWithContent()?.length > 0) {

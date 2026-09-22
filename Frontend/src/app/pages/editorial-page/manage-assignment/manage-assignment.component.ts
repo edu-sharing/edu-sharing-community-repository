@@ -92,6 +92,7 @@ export class ManageAssignmentComponent {
     dateTime = new Date().getTime() + 1000 * 3600 * 24 * 5;
     @ViewChild(MatStepper) matStepper: MatStepper;
     @ViewChild('dateChooser') dateChooserRef: ShareDialogChooseDateComponent;
+    @ViewChild('summaryEditor') summaryEditorRef: EditorComponent;
     readonly EmptyAssignment = {
         type: 'SUBMISSION',
         status: 'DRAFT',
@@ -119,6 +120,9 @@ export class ManageAssignmentComponent {
                         null,
                         'EDITORIAL.ASSIGNMENT.ERROR.FIELD_' + entry[0].toUpperCase(),
                     );
+                    if (entry[0] === 'summary') {
+                        this.markSummaryEditorInvalid();
+                    }
                     break;
                 }
             }
@@ -137,12 +141,29 @@ export class ManageAssignmentComponent {
         }
     }
 
+    // attributes on the <editor> host don't reach TinyMCE's inner iframe, so set them directly
+    private markSummaryEditorInvalid() {
+        const iframe = this.summaryEditorRef?.editor?.iframeElement;
+        if (iframe) {
+            iframe.setAttribute('aria-invalid', 'true');
+            iframe.setAttribute('aria-describedby', 'summary-error');
+        }
+        this.summaryEditorRef?.editor?.focus();
+    }
+
     constructor() {
         this.mainDataFormGroup = this.formBuilder.group({
             title: ['', [Validators.required]],
             summary: ['', [Validators.required]],
             useEndTime: [false, []],
             allowAdditionalDocumentSubmissions: [true, []],
+        });
+        this.mainDataFormGroup.get('summary').valueChanges.subscribe(() => {
+            if (this.mainDataFormGroup.get('summary').valid) {
+                const iframe = this.summaryEditorRef?.editor?.iframeElement;
+                iframe?.removeAttribute('aria-invalid');
+                iframe?.removeAttribute('aria-describedby');
+            }
         });
         this.route.queryParams
             .pipe(

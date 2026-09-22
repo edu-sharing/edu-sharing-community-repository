@@ -1,4 +1,3 @@
-@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
@@ -47,7 +46,12 @@ mat-stepper {
     }
 }
 ::ng-deep editor.editor-invalid .tox-tinymce {
-    border-color: vars.$warning;
+    border-color: var(--warn);
+}
+.field-error {
+    color: var(--warn);
+    font-size: 0.75rem;
+    margin-top: -6px;
 }
 .files {
     display: flex;
