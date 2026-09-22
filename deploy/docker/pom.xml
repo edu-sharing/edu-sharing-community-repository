@@ -122,6 +122,14 @@
       dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:21.0.12
     </docker.from.openjdk.21.liberica.debian>
 
+    <docker.from.node>
+      dockerio.mirror.docker.edu-sharing.com/library/node:24.18.0-bookworm
+    </docker.from.node>
+
+    <docker.from.node.slim>
+      dockerio.mirror.docker.edu-sharing.com/library/node:24.18.0-bookworm-slim
+    </docker.from.node.slim>
+
     <docker.from.edu_sharing.community.common.alfresco.repository>
       ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:26.1.0-2
     </docker.from.edu_sharing.community.common.alfresco.repository>

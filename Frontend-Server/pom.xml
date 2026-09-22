@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.edu_sharing</groupId>
+        <artifactId>edu_sharing-community-repository</artifactId>
+        <version>git</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>edu_sharing-community-repository-frontend-server</artifactId>
+    <packaging>jar</packaging>
+
+    <name>edu_sharing-community-repository-frontend-server</name>
+
+    <description>
+        Node/Fastify server delivering the Angular frontend and proxying backend requests to Tomcat.
+        Replaces NgServlet step by step - see Frontend-Server/docs.
+    </description>
+
+    <build>
+
+        <plugins>
+
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <configuration>
+                    <!-- deliberately not ${node.version}: the Angular build stays on its
+                         pinned toolchain, this server targets the Node 24 LTS runtime -->
+                    <nodeVersion>v${node.server.version}</nodeVersion>
+                    <npmVersion>${npm.server.version}</npmVersion>
+                    <nodeDownloadRoot>${node.server.downloadRoot}</nodeDownloadRoot>
+                </configuration>
+                <executions>
+
+                    <execution>
+                        <id>frontend-server-bootstrap</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+
+                    <execution>
+                        <id>frontend-server-install</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <arguments>${npm.server.args.install}</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>frontend-server-build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>frontend-server-test</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <arguments>test</arguments>
+                            <skip>${skipTests}</skip>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>build</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <!-- the jar carries the compiled server plus its manifest, so the docker
+                 module and downstream projects can consume it as a maven artifact -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <classesDirectory>${project.basedir}</classesDirectory>
+                    <includes>
+                        <include>build/**</include>
+                        <include>package.json</include>
+                        <include>package-lock.json</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+</project>

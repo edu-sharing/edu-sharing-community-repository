@@ -2,6 +2,14 @@ version: '3.7'
 
 services:
 
+  repository-frontend-server:
+    environment:
+      DEV: "true"
+      LOG_LEVEL: "${REPOSITORY_FRONTEND_SERVER_LOG_LEVEL:-debug}"
+    volumes:
+      - "${GIT_ROOT}/repository/Frontend/dist:/app/dist:ro"
+      - "${GIT_ROOT}/repository/Frontend-Server/build:/app/build:ro"
+
   repository-service:
     environment:
       CACHE_HOST: ""

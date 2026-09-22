@@ -1,0 +1,29 @@
+{
+  "name": "@edu-sharing/frontend-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node/Fastify server delivering the edu-sharing Angular frontend and proxying backend requests to Tomcat",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node build/index.js",
+    "dev": "DEV=true node --watch --experimental-strip-types src/index.ts",
+    "check:types": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@fastify/reply-from": "^12.6.5",
+    "@fastify/static": "^10.1.4",
+    "fastify": "^5.12.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "pino-pretty": "^13.0.0",
+    "typescript": "^5.7.3"
+  }
+}
