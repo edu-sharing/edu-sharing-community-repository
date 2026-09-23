@@ -44,7 +44,12 @@
         {{ 'NO_PERMISSIONS_FOR_SCOPE' | translate }}
       </div>
       } @if (!isBlocked) {
-      <div class="workspace-container" [class.hide]="globalProgress">
+      <div
+        class="workspace-container"
+        role="main"
+        esSkipTarget="MAIN_CONTENT"
+        [class.hide]="globalProgress"
+      >
         @if (showSelectRoot) {
         <div class="dialog" (click)="showSelectRoot = false"></div>
         } @if (showSelectRoot) {
@@ -120,8 +125,6 @@
         <es-workspace-explorer
           class="explorer"
           #explorer
-          role="main"
-          esSkipTarget="MAIN_CONTENT"
           appCreateContextMenu
           [current]="currentFolder"
           [root]="root"
