@@ -53,6 +53,7 @@
     <mongodb.version>5.5.1</mongodb.version>
     <spring.version>6.2.11</spring.version>
     <spring-security.version>6.5.9</spring-security.version>
+    <redisson.version>3.50.0</redisson.version>
 
 
   </properties>
@@ -854,6 +855,18 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql.jdbc.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-tomcat-10</artifactId>
+        <version>${redisson.version}</version>
       </dependency>
 
       <dependency>
