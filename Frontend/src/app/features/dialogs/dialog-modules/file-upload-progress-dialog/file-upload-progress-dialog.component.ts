@@ -17,8 +17,8 @@ import {
 } from './file-upload-progress-dialog-data';
 import { map, switchMap } from 'rxjs/operators';
 import { DialogsService } from '../../dialogs.service';
-import { from, of } from 'rxjs';
-import { Node, NodeService } from 'ngx-edu-sharing-api';
+import { from, of, Subscription } from 'rxjs';
+import { Node } from 'ngx-edu-sharing-api';
 
 /**
  * A dialog that handles uploading a given list of files and shows a progress bar per file to the
@@ -39,6 +39,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private resultList: Node[] = [];
     private error = false;
     private existingNodes: Node[];
+    private currentUploadSubscription: Subscription;
     processed = 0;
     keep = true;
     @ViewChild('existingFiles') existingFilesRef: TemplateRef<undefined>;
@@ -50,7 +51,6 @@ export class FileUploadProgressDialogComponent implements OnInit {
             FileUploadProgressDialogResult
         >,
         private nodeService: RestNodeService,
-        private nodeApi: NodeService,
         private dialogs: DialogsService,
         private translate: TranslateService,
     ) {}
@@ -120,6 +120,10 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private _done(status: 'CANCELED' | 'FINISHED') {
         // first check whether the dialog has already been closed
         if (this.dialogRef.getLifecycleState() !== 'open') return;
+        if (status === 'CANCELED') {
+            // stops the in-flight request (and, for a chunked upload, aborts the session server-side)
+            this.currentUploadSubscription?.unsubscribe();
+        }
         if (this.resultList.length > 0) {
             // Close with nodes uploaded until now. Could also delete these nodes.
             this.dialogRef.close({
@@ -204,13 +208,16 @@ export class FileUploadProgressDialogComponent implements OnInit {
         // if the user also chose to overwrite the old one only create a new version
         const existingNode = this.existingNodes.find((node) => node.name == file.name);
         if (existingNode && !this.keep) {
-            this.nodeApi
-                .changeContent(
-                    existingNode.ref.repo,
+            this.currentUploadSubscription = this.nodeService
+                .uploadNodeContent(
                     existingNode.ref.id,
-                    'auto',
+                    file,
                     RestConstants.COMMENT_CONTENT_UPDATE,
-                    { file },
+                    'auto',
+                    (progress) => {
+                        progress.progress = Math.round(progress.progress * 100);
+                        this.progress[number].progress = progress;
+                    },
                 )
                 .subscribe(nextUpload(existingNode), nextError(existingNode));
         } else {
@@ -223,7 +230,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
                     this.keep,
                 )
                 .subscribe((data: NodeWrapper) => {
-                    this.nodeService
+                    this.currentUploadSubscription = this.nodeService
                         .uploadNodeContent(
                             data.node.ref.id,
                             file,
