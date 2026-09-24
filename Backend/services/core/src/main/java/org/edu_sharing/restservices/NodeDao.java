@@ -2386,48 +2386,52 @@ public class NodeDao {
     }
 
     public String getJWT() throws GeneralSecurityException {
-        String user;
-        if(ContextManagementFilter.accessTool.get() != null && ContextManagementFilter.accessTool.get().getUserId() != null) {
-            user = ContextManagementFilter.accessTool.get().getUserId();
-        } else{
-            user = AuthenticationUtil.getFullyAuthenticatedUser();
-        }
-        UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
-        Node node = asNode();
-
-        java.util.Collection<String> permissions;
-        if (node instanceof CollectionReference) {
-            CollectionReference collectionReference = (CollectionReference) node;
-            // is it a licensed node? check the original for access (new since 5.1)
-            if (collectionReference.isOriginalRestrictedAccess()) {
-                permissions = collectionReference.getAccessOriginal();
-            }
-            //Has the user alf permissions on the node? -> check if he also has read_all permissions
-            // LEGACY! Remove this Behaviour in future releases, only included for back compat
-            else if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
-                permissions = node.getAccessEffective();
+        try {
+            String user;
+            if (ContextManagementFilter.accessTool.get() != null && ContextManagementFilter.accessTool.get().getUserId() != null) {
+                user = ContextManagementFilter.accessTool.get().getUserId();
             } else {
-                permissions = node.getAccess();
+                user = AuthenticationUtil.getFullyAuthenticatedUser();
             }
-        } else {
-            // access effective might also provided for regular nodes since they have enhanced access via collection shares
-            if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
-                permissions = node.getAccessEffective();
+            UserProfile userProfile = PersonDao.getPerson(RepositoryDao.getHomeRepository(), user).asPerson().getProfile();
+            Node node = asNode();
+
+            java.util.Collection<String> permissions;
+            if (node instanceof CollectionReference) {
+                CollectionReference collectionReference = (CollectionReference) node;
+                // is it a licensed node? check the original for access (new since 5.1)
+                if (collectionReference.isOriginalRestrictedAccess()) {
+                    permissions = collectionReference.getAccessOriginal();
+                }
+                //Has the user alf permissions on the node? -> check if he also has read_all permissions
+                // LEGACY! Remove this Behaviour in future releases, only included for back compat
+                else if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
+                    permissions = node.getAccessEffective();
+                } else {
+                    permissions = node.getAccess();
+                }
             } else {
-                permissions = node.getAccess();
+                // access effective might also provided for regular nodes since they have enhanced access via collection shares
+                if (node.getAccessEffective() != null && !node.getAccessEffective().isEmpty()) {
+                    permissions = node.getAccessEffective();
+                } else {
+                    permissions = node.getAccess();
+                }
             }
+
+            String replicationSource = Arrays.stream(getProperties()
+                            .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
+                    .findFirst()
+                    .orElse(null);
+
+            String resourceType = Arrays.stream(getProperties().getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[0]))
+                    .findFirst()
+                    .orElse(null);
+
+            return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType, userProfile);
+        } catch (RuntimeException t) {
+            throw DAOException.mapping(t, nodeId);
         }
-
-        String replicationSource = Arrays.stream(getProperties()
-                        .getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_IO_REPLICATIONSOURCE), new String[0]))
-                .findFirst()
-                .orElse(null);
-
-        String resourceType = Arrays.stream(getProperties().getOrDefault(CCConstants.getValidLocalName(CCConstants.CCM_PROP_CCRESSOURCETYPE), new String[0]))
-                .findFirst()
-                .orElse(null);
-
-        return JwtTokenUtil.generateToken(user, nodeId, permissions, getMimetype(), getMediatype(), replicationSource, resourceType, userProfile);
     }
 
     private String getMimetype() {

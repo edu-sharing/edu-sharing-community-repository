@@ -115,6 +115,14 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
+
+        // map throwables that were propagated straight from a service call without
+        // going through DAOException.mapping() to their corresponding DAOException subtype,
+        // so they get a proper status code below instead of falling through to 500
+        if (!(t instanceof DAOException)) {
+            t = DAOException.mapping(t);
+        }
+
         if (t instanceof DAOMissingException) {
             return Response.status(Response.Status.NOT_FOUND)
                     .type(MediaType.APPLICATION_JSON_TYPE)
