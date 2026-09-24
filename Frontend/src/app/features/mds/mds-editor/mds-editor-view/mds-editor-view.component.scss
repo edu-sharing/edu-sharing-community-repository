@@ -51,3 +51,12 @@
     flex-direction: column;
     padding: var(--mds-content-padding, 0);
 }
+
+// In bulk mode the header row of each widget carries the "edit" toggle, which is taller than a
+// plain label. Together with the 10px the ripple container pulls every widget up by (see
+// mds-editor-widget-container) the toggle of the first widget slides underneath the sticky
+// view heading, so reserve the space here. Only applies to bulk mode - the spacing of all other
+// modes stays untouched.
+:host.bulk-mode .content {
+    padding-top: calc(var(--mds-content-padding, 0px) + 20px);
+}

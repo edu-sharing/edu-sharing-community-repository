@@ -109,6 +109,10 @@ export class MdsEditorViewComponent
     get isHidden() {
         return this._isHidden() || this._isEmpty();
     }
+    @HostBinding('class.bulk-mode')
+    get isBulkMode() {
+        return !!this.mdsEditorInstance.editorBulkMode?.isBulk;
+    }
     _isHidden = signal(false);
     _isEmpty = signal(false);
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
