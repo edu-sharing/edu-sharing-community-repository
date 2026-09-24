@@ -52,7 +52,10 @@ export class MdsEditorWidgetTreeComponent
             treeNode.isIndeterminate = false;
         }
         const values: DisplayValue[] = this.chipsControl.value;
-        this.chipsControl.setValue([...values, value]);
+        if (!values.some((v) => v.key === value.key)) {
+            this.chipsControl.setValue([...values, value]);
+        }
+        this.removeFromIndeterminateValues(value.key);
         this.preventOverlayOpen = true;
         setTimeout(() => {
             this.preventOverlayOpen = false;
@@ -245,6 +248,10 @@ export class MdsEditorWidgetTreeComponent
             }
         });
 
+        // values offered by an es-mds-editor-widget-suggestion-chips widget for this property
+        this.widget.addValue.subscribe((value: MdsWidgetValue) => {
+            this.add(this.toDisplayValue(value));
+        });
         this.registerValueChanges(this.chipsControl);
     }
 
