@@ -97,18 +97,6 @@ public class ErrorResponse {
         while (t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
             t = t.getCause();
         }
-        if (t instanceof DAOValidationException) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(new ErrorResponse(t))
-                    .build();
-        }
-        if (t instanceof DAOSecurityException) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(new ErrorResponse(t))
-                    .build();
-        }
         if (t instanceof UsageException && Usage2Service.NO_CCPUBLISH_PERMISSION.equals(t.getMessage())) {
             return Response.status(Response.Status.FORBIDDEN)
                     .type(MediaType.APPLICATION_JSON_TYPE)
@@ -123,6 +111,18 @@ public class ErrorResponse {
             t = DAOException.mapping(t);
         }
 
+        if (t instanceof DAOValidationException) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+        if (t instanceof DAOSecurityException) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
         if (t instanceof DAOMissingException) {
             return Response.status(Response.Status.NOT_FOUND)
                     .type(MediaType.APPLICATION_JSON_TYPE)
