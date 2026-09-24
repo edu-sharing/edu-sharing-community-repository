@@ -40,15 +40,18 @@ export class VideoComponent implements RenderModule, AfterViewInit {
     @Input() node: Node | undefined;
     @ViewChild('video') videoRef: ElementRef<HTMLVideoElement> | undefined;
     activeObject = signal<AssetStateItem | undefined>(undefined);
-    hasMultipleResolutions: Boolean = true;
     private hasBeenPlayed: Boolean = false;
+
+    // getter, since further resolutions may be added by job polling after the view has been initialized
+    get hasMultipleResolutions(): boolean {
+        return (this.data?.items?.length ?? 1) > 1;
+    }
 
     get filteredItems(): AssetStateItem[] {
         return this.data?.items?.filter((item) => item.status !== 'FAILED') || [];
     }
 
     ngAfterViewInit(): void {
-        this.hasMultipleResolutions = (this.data?.items?.length ?? 1) > 1;
         const downlink: number = (navigator as any).connection?.downlink;
         let optimalResolution = 720;
         if (downlink < 2) {
