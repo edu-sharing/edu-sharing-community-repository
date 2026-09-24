@@ -33,7 +33,7 @@ export class IndexHtml {
             stat = fs.statSync(file);
         } catch (cause) {
             throw new Error(
-                `Angular build output not found: ${file}. Run "npm run build" in Frontend/ or set DIST_DIR.`,
+                `Angular build output not found: ${file}. Run "npm run build:frontend" (builds ../Frontend into ../Frontend/dist) and set DIST_DIR=../Frontend/dist in .env, or point DIST_DIR at another build.`,
                 { cause },
             );
         }
@@ -60,12 +60,22 @@ export class IndexHtml {
         }
     }
 
-    render(): string {
+    /**
+     * @param nonce of this response - the CSP header must carry the same one, see `newNonce`
+     * @param customHead `angular.customHtmlHeaders`, added before the nonce is substituted
+     *   (as in NgServlet), so a `{{ngCspNonce}}` inside it is replaced as well
+     */
+    render(nonce: string, customHead = ''): string {
         if (this.#watchForChanges) {
             this.#reloadIfChanged();
         }
-        const nonce = randomBytes(16).toString('base64');
-        return this.#template.replaceAll(NONCE_PLACEHOLDER, nonce);
+        const template = customHead === '' ? this.#template : insertBeforeHeadEnd(this.#template, customHead);
+        return template.replaceAll(NONCE_PLACEHOLDER, nonce);
+    }
+
+    /** `SecurityHeadersFilter.generateNonceHash`: 16 random bytes, base64 */
+    static newNonce(): string {
+        return randomBytes(16).toString('base64');
     }
 
     #reloadIfChanged(): void {
@@ -75,4 +85,10 @@ export class IndexHtml {
             this.#mtimeMs = stat.mtimeMs;
         }
     }
+}
+
+/** `NgServlet.addToHead`: right before the first `</head>`. */
+function insertBeforeHeadEnd(html: string, fragment: string): string {
+    const position = html.indexOf('</head>');
+    return position === -1 ? html : html.slice(0, position) + fragment + html.slice(position);
 }

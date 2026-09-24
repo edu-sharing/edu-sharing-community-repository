@@ -101,6 +101,8 @@
                   <excludes>
                     <exclude>**/node_modules/**</exclude>
                     <exclude>**/build/**</exclude>
+                    <!-- generated, the image build regenerates it from the copied inputs -->
+                    <exclude>src/shared/**</exclude>
                     <exclude>**/target/**</exclude>
                     <exclude>**/dist/**</exclude>
                     <exclude>node/**</exclude>

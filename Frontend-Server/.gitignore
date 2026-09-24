@@ -5,3 +5,4 @@ dist/
 node/
 *.log
 .env
+src/shared/

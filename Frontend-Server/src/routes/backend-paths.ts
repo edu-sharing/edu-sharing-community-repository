@@ -15,7 +15,9 @@
 export const BACKEND_PATHS: readonly string[] = [
     '/.well-known',
     '/appactivation',
-    // must stay ahead of the static /assets/* delivery - the backend serves i18n
+    // must stay ahead of the static /assets/* delivery. Tomcat serves these files out of
+    // the frontend.war overlay; production builds do not fetch them anyway, they load the
+    // bundle from /rest/config/v1/language/defaults - see docs/06-migration-phases.md phase 6
     '/assets/i18n',
     '/classic.html',
     '/content',

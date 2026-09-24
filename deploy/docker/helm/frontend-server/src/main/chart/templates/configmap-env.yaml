@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}-env
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+data:
+  PORT: {{ .Values.service.port.api | quote }}
+  MANAGEMENT_PORT: {{ .Values.service.port.management | quote }}
+  CONTEXT_PATH: {{ .Values.config.contextPath | quote }}
+  # everything proxied and the node metadata go to the external port - never the internal
+  # one, tomcat skips 2FA there (ApplicationInfoList.isInternalPortRequest)
+  BACKEND_URL: {{ include "edusharing_repository_frontend_server.backend.url" (dict "root" . "port" .Values.config.backend.port.external) | quote }}
+  # config fetches only - the internal port hands out ValuesBackendInternal
+  BACKEND_INTERNAL_URL: {{ include "edusharing_repository_frontend_server.backend.url" (dict "root" . "port" .Values.config.backend.port.internal) | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  PROXY_UNMATCHED: {{ .Values.config.proxyUnmatched | quote }}
+  ENRICH_TIMEOUT_MS: {{ .Values.config.enrichTimeoutMs | quote }}
+  CONFIG_POLL_INTERVAL_MS: {{ .Values.config.configCache.pollIntervalMs | quote }}
+  CONFIG_MAX_AGE_MS: {{ .Values.config.configCache.maxAgeMs | quote }}
+  # behind the ingress: X-Forwarded-Host / -Proto name the public url
+  TRUST_PROXY: "true"
+  {{- range $key, $value := .Values.config.extraEnv }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

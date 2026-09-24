@@ -1,0 +1,238 @@
+########################################################################################################################
+# GLOBAL
+########################################################################################################################
+
+## @section Global parameters
+global:
+
+  ## @param global.annotations Define global annotations
+  annotations: {}
+
+  cluster:
+
+    cert:
+      ## @param global.cluster.cert.annotations Set custom global cert annotations
+      annotations: {}
+
+    ## @param global.cluster.domain Set global domain for the cluster
+    domain: cluster.local
+
+    ingress:
+      ## @param global.cluster.ingress.ingressClassName Set global ingress class name
+      ingressClassName: "nginx"
+
+    istio:
+      ## @param global.cluster.istio.enabled Enable Istio Service mesh - not supported by this chart yet, see the README
+      enabled: false
+
+    pdb:
+      ## @param global.cluster.pdb.enabled Enable PDB
+      enabled: false
+
+  image:
+    ## @param global.image.pullPolicy Set global image pullPolicy
+    pullPolicy: Always
+    ## @param global.image.pullSecrets Set global image pullSecrets
+    pullSecrets: []
+    ## @param global.image.registry Set global image container registry
+    registry: ${docker.registry}
+    ## @param global.image.repository Set global image container repository
+    repository: ${docker.repository}
+
+  metrics:
+    scrape:
+      ## @param global.metrics.scrape.interval Set prometheus scrape interval
+      interval: 60s
+      ## @param global.metrics.scrape.timeout Set prometheus scrape timeout
+      timeout: 60s
+    servicemonitor:
+      ## @param global.metrics.servicemonitor.enabled Enable metrics service monitor
+      enabled: false
+
+  ## @param global.security Set global custom security parameters
+  security: {}
+
+########################################################################################################################
+# LOCAL
+########################################################################################################################
+
+## @section Local parameters
+
+## @param nameOverride Override name
+nameOverride: edusharing-repository-frontend-server
+
+image:
+  ## @param image.name Set image name
+  name: ${docker.prefix}-deploy-docker-build-frontend-server
+  ## @param image.tag Set image tag
+  tag: ${docker.tag}
+
+########################################################################################################################
+
+## @param replicaCount Define amount of parallel replicas to run
+replicaCount: 2
+
+autoscaling:
+  ## @param autoscaling.enabled Enable autoscaling
+  enabled: false
+  ## @param autoscaling.minReplicas Define minimum number of replicas to have running
+  minReplicas: 2
+  ## @param autoscaling.maxReplicas Define maximum number of replicas to have running
+  maxReplicas: 5
+  ## @param autoscaling.targetCPU Set CPU limit when to scale
+  targetCPU: 80
+
+pdb:
+  ## @param pdb.maxUnavailable Pods that may be unavailable during a voluntary disruption (with global.cluster.pdb.enabled)
+  maxUnavailable: 1
+
+########################################################################################################################
+
+service:
+  port:
+    ## @param service.port.api Set port for the frontend server (app, proxy to the repository)
+    api: 8080
+    ## @param service.port.management Set port for the management server (/metrics, /health/liveness, /health/readiness)
+    management: 9090
+
+########################################################################################################################
+
+ingress:
+  ## @param ingress.enabled Enable ingress
+  enabled: true
+  annotations:
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-body-size Set proxy-body-size on nginx ingress
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-connect-timeout Set proxy-connect-timeout on nginx ingress
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-read-timeout Set proxy-read-timeout on nginx ingress
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-send-timeout Set proxy-send-timeout on nginx ingress
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+  ## @param ingress.hosts Set ingress hosts - the same hosts as the repository service chart
+  hosts:
+  - repository.127.0.0.1.nip.io
+  ## @param ingress.tls Set TLS for ingress
+  #  - secretName: edusharing-repository-tls
+  #    hosts:
+  #    - repository.127.0.0.1.nip.io
+  tls: []
+  ## @param ingress.paths Set paths for ingress - the catch-all; the backend prefixes are routed by the repository service chart
+  paths:
+  - /edu-sharing
+  exact:
+    ## @param ingress.exact.enabled Route the bare host root to the frontend server, which redirects it to the context path
+    enabled: true
+
+########################################################################################################################
+
+config:
+
+  ## @param config.contextPath Context path of the app - must match the angular base href
+  contextPath: /edu-sharing
+
+  backend:
+    ## @param config.backend.host Service name of the repository service
+    host: edusharing-repository-service
+    port:
+      ## @param config.backend.port.external Repository service port for everything proxied (service.port.api.external of the service chart - the proxy sidecar or the external connector, 2FA applies)
+      external: 8081
+      ## @param config.backend.port.internal Repository service port for the config fetches only (service.port.api.internal of the service chart)
+      internal: 8080
+
+  ## @param config.logLevel Log level (trace, debug, info, warn, error)
+  logLevel: info
+
+  ## @param config.proxyUnmatched Proxy paths that are neither app nor known backend paths to the repository (transitional)
+  proxyUnmatched: true
+
+  ## @param config.enrichTimeoutMs Budget in ms for the backend calls enriching a shell page
+  enrichTimeoutMs: 2000
+
+  configCache:
+    ## @param config.configCache.pollIntervalMs How often the backend config refresh signal is polled, in ms
+    pollIntervalMs: 30000
+    ## @param config.configCache.maxAgeMs Upper bound for a cached backend config, in ms
+    maxAgeMs: 600000
+
+  metrics:
+    ## @param config.metrics.enabled Enable prometheus metrics scraping
+    enabled: true
+
+  ## @param config.extraEnv Additional environment variables for the frontend server
+  extraEnv: {}
+
+########################################################################################################################
+
+## @param nodeAffinity Set node affinity
+nodeAffinity: {}
+## @param podAntiAffinity Set pod antiaffinity, can be "soft" or "hard"
+podAntiAffinity: "soft"
+## @param tolerations Set tolerations
+tolerations: []
+
+########################################################################################################################
+
+## @param podAnnotations Set custom pod annotations
+podAnnotations: {}
+
+## @param podSecurityContext.fsGroup Set fs group for access
+## @param podSecurityContext.fsGroupChangePolicy Set fs group change policy
+podSecurityContext:
+  fsGroup: 1000
+  fsGroupChangePolicy: OnRootMismatch
+
+## @param securityContext.allowPrivilegeEscalation Allow privilege escalation
+## @param securityContext.capabilities.drop Set drop capabilities
+## @param securityContext.readOnlyRootFilesystem Mount the root filesystem read only
+## @param securityContext.runAsNonRoot Run as non root
+## @param securityContext.runAsUser Set user to run the container as (the node user of the image)
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+########################################################################################################################
+
+## @param terminationGracePeriod Set termination grace period
+terminationGracePeriod: 30
+
+## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 3
+
+## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+## @param readinessProbe.successThreshold Set threshold for success on readiness probe
+## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 3
+
+########################################################################################################################
+
+## @param resources.limits.cpu Set CPU limit on resources
+## @param resources.limits.memory Set memory limit on resources
+## @param resources.requests.cpu Set CPU for requests on resources
+## @param resources.requests.memory Set memory for requests on resources
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi

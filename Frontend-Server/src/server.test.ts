@@ -6,6 +6,7 @@ import path from 'node:path';
 import { after, before, test } from 'node:test';
 import type { AddressInfo } from 'node:net';
 import type { FastifyInstance } from 'fastify';
+import { buildManagementServer } from './lib/management-server.ts';
 import { buildServer } from './server.ts';
 import type { Config } from './config.ts';
 
@@ -31,6 +32,8 @@ before(async () => {
     fs.writeFileSync(path.join(distDir, 'main-A1B2C3D4.js'), 'console.log(1);');
     fs.mkdirSync(path.join(distDir, 'assets'));
     fs.writeFileSync(path.join(distDir, 'assets', 'logo.svg'), '<svg/>');
+    fs.mkdirSync(path.join(distDir, 'web-components', 'app'), { recursive: true });
+    fs.writeFileSync(path.join(distDir, 'web-components', 'app', 'main.js'), 'console.log(2);');
 
     backend = http.createServer((request, response) => {
         hits.push({ url: request.url ?? '', method: request.method ?? '', headers: request.headers });
@@ -45,6 +48,7 @@ before(async () => {
         port: 0,
         contextPath: '/edu-sharing',
         backendUrl: `http://127.0.0.1:${backendPort}`,
+        backendInternalUrl: `http://127.0.0.1:${backendPort}`,
         distDir,
         proxyUnmatched: true,
         proxyTimeoutMs: 5000,
@@ -52,6 +56,10 @@ before(async () => {
         logLevel: 'silent',
         dev: false,
         trustProxy: true,
+        enrichTimeoutMs: 2000,
+        // no background polling - tests count backend hits
+        configPollIntervalMs: 0,
+        configMaxAgeMs: 60_000,
     };
     app = await buildServer(config);
     await app.ready();
@@ -70,6 +78,14 @@ test('serves the SPA shell on the angular routes and substitutes the nonce', asy
         assert.match(response.headers['content-type'] as string, /text\/html/);
         assert.equal(response.body.includes('{{ngCspNonce}}'), false, `nonce not substituted for ${url}`);
         assert.match(response.headers['cache-control'] as string, /no-store/);
+    }
+});
+
+test('redirects the bare root and the context path to the app', async () => {
+    for (const url of ['/', '/edu-sharing']) {
+        const response = await app.inject({ method: 'GET', url });
+        assert.equal(response.statusCode, 302, url);
+        assert.equal(response.headers.location, '/edu-sharing/', url);
     }
 });
 
@@ -97,6 +113,15 @@ test('proxies the backend prefixes', async () => {
         assert.equal(response.statusCode, 200, url);
         assert.equal(response.body, `backend:${url}`);
     }
+});
+
+test('web components carry Access-Control-Allow-Origin: *, as WebComponentsFilter sets it', async () => {
+    const component = await app.inject({ method: 'GET', url: '/edu-sharing/web-components/app/main.js' });
+    assert.equal(component.statusCode, 200);
+    assert.equal(component.headers['access-control-allow-origin'], '*');
+
+    const other = await app.inject({ method: 'GET', url: '/edu-sharing/assets/logo.svg' });
+    assert.equal(other.headers['access-control-allow-origin'], undefined);
 });
 
 test('/assets/i18n wins over the static /assets delivery', async () => {
@@ -145,11 +170,15 @@ test('forwards the proxy headers tomcat needs for absolute urls', async () => {
     assert.ok(hit.headers['x-request-id']);
 });
 
-test('answers health without touching the backend', async () => {
+test('liveness and readiness never touch the backend', async () => {
     hits.length = 0;
-    const response = await app.inject({ method: 'GET', url: '/edu-sharing/_health' });
-    assert.equal(response.statusCode, 200);
-    assert.equal(response.json().status, 'ok');
+    const management = buildManagementServer(app, { backendUrl: 'x' });
+    const liveness = await management.inject({ method: 'GET', url: '/health/liveness' });
+    assert.equal(liveness.statusCode, 200);
+    assert.equal(liveness.json().status, 'ok');
+    // polling is off in this test, so ready right away
+    const readiness = await management.inject({ method: 'GET', url: '/health/readiness' });
+    assert.equal(readiness.statusCode, 200);
     assert.equal(hits.length, 0);
 });
 
@@ -157,4 +186,18 @@ test('proxies non-GET methods', async () => {
     const response = await app.inject({ method: 'POST', url: '/edu-sharing/rest/node/v1/nodes', payload: 'x' });
     assert.equal(response.statusCode, 200);
     assert.equal(hits.at(-1)?.method, 'POST');
+});
+
+test('metrics are served on the management server only', async () => {
+    await app.inject({ method: 'GET', url: '/edu-sharing/rest/ping' });
+    const metrics = await buildManagementServer(app, { backendUrl: 'x' }).inject({ method: 'GET', url: '/metrics' });
+    assert.equal(metrics.statusCode, 200);
+    assert.match(metrics.headers['content-type'] as string, /text\/plain/);
+    assert.match(metrics.body, /http_request_duration_seconds_count\{[^}]*route="\/edu-sharing\/rest\/\*"/);
+    assert.match(metrics.body, /frontend_server_proxy_duration_seconds_count\{reason="backend-path",status_code="200"\}/);
+    assert.match(metrics.body, /nodejs_eventloop_lag_seconds/);
+
+    // never on the public port
+    const onApp = await app.inject({ method: 'GET', url: '/metrics' });
+    assert.doesNotMatch(onApp.body, /http_request_duration_seconds/);
 });

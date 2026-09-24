@@ -111,7 +111,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
     public static final String KEY_IS_HOME_NODE = "is_home_node";
 
-    public static final String KEY_CUSTOM_HTML_HEADERS = "custom_html_headers";
 
     public static final String KEY_METADATASETS_V2 = "metadatasetsV2";
 
@@ -360,8 +359,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
     @Getter
     private final String previewUrl;
     @Getter
-    private final String customHtmlHeaders;
-    @Getter
     private String logoutUrl;
     private final String websitepreviewrenderservice;
     private String searchable;
@@ -588,7 +585,6 @@ public class ApplicationInfo implements Comparable<ApplicationInfo>, Serializabl
 
         previewUrl = properties.getProperty(KEY_PREVIEWURL);
 
-        customHtmlHeaders = properties.getProperty(KEY_CUSTOM_HTML_HEADERS);
 
         logoutUrl = properties.getProperty(KEY_LOGOUT_URL);
         if (logoutUrl == null) {

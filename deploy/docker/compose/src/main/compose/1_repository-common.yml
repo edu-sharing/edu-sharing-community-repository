@@ -24,7 +24,10 @@ services:
       VIRTUAL_PORT: 8080
       VIRTUAL_DEST: /edu-sharing/
       VIRTUAL_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}/"
-      BACKEND_URL: "http://repository-service:8080"
+      # external connector for everything proxied (2FA applies), the internal one
+      # only for the config fetches (ValuesBackendInternal)
+      BACKEND_URL: "http://repository-service:8081"
+      BACKEND_INTERNAL_URL: "http://repository-service:8080"
       CONTEXT_PATH: "${REPOSITORY_SERVICE_PATH:-/edu-sharing}"
       LOG_LEVEL: "${REPOSITORY_FRONTEND_SERVER_LOG_LEVEL:-info}"
       PROXY_UNMATCHED: "${REPOSITORY_FRONTEND_SERVER_PROXY_UNMATCHED:-true}"

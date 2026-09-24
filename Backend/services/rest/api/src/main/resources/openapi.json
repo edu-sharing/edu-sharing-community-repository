@@ -250,6 +250,22 @@
         },
         "type": "object"
       },
+      "AngularConfig": {
+        "properties": {
+          "customHtmlHeaders": {
+            "description": "angular.customHtmlHeaders: html added to the head of every shell page, {{ngCspNonce}} is replaced per page",
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "angular.headers: security headers of the shell pages; Content-Security-Policy is a map directive -> value, {{ngCspNonce}} is replaced per page",
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
       "Application": {
         "properties": {
           "allowedOrigins": {
@@ -1332,7 +1348,15 @@
             "$ref": "#/components/schemas/Values"
           },
           "currentBackend": {
-            "$ref": "#/components/schemas/ValuesBackend"
+            "description": "Relevant config infos mapped from the Lightbend from the backend. ValuesBackendInternal (a superset) on the internal port only, i.e. for the Frontend-Server; ValuesBackend otherwise",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ValuesBackend"
+              },
+              {
+                "$ref": "#/components/schemas/ValuesBackendInternal"
+              }
+            ]
           },
           "global": {
             "$ref": "#/components/schemas/Values"
@@ -2631,6 +2655,14 @@
           "rows": {
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ExporterConfig": {
+        "properties": {
+          "lrmi": {
+            "$ref": "#/components/schemas/LrmiConfig"
           }
         },
         "type": "object"
@@ -3948,6 +3980,25 @@
           "url": {
             "description": "URL to navigate to on logout",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LrmiConfig": {
+        "properties": {
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "lrmi field -> property expression, short names: \"a,b\" first filled wins, \"a+b\" values combined",
+            "type": "object"
+          },
+          "vcard": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "lrmi field -> vcard property (short name), rendered as schema.org Person / Organization",
+            "type": "object"
           }
         },
         "type": "object"
@@ -11235,6 +11286,24 @@
       },
       "ValuesBackend": {
         "properties": {
+          "repository": {
+            "$ref": "#/components/schemas/RepositoryConfigBackend"
+          },
+          "security": {
+            "$ref": "#/components/schemas/SecurityConfig"
+          }
+        },
+        "type": "object"
+      },
+      "ValuesBackendInternal": {
+        "description": "ValuesBackend plus the config the Frontend-Server needs to deliver the angular shell. Only returned on the internal port",
+        "properties": {
+          "angular": {
+            "$ref": "#/components/schemas/AngularConfig"
+          },
+          "exporter": {
+            "$ref": "#/components/schemas/ExporterConfig"
+          },
           "repository": {
             "$ref": "#/components/schemas/RepositoryConfigBackend"
           },
@@ -37760,6 +37829,7 @@
     },
     "/node/v1/nodes/{repository}/{node}/lrmi": {
       "get": {
+        "deprecated": true,
         "description": "Get lrmi data of node.",
         "operationId": "getLrmiData",
         "parameters": [

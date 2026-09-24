@@ -154,6 +154,8 @@ ingress:
   annotations:
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/affinity Set affinity on nginx ingress
     nginx.ingress.kubernetes.io/affinity: cookie
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/session-cookie-path Set affinity cookie path - one cookie for all ingress.paths
+    nginx.ingress.kubernetes.io/session-cookie-path: /edu-sharing
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-body-size Set proxy-body-size on nginx ingress
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-connect-timeout Set proxy-connect-timeout on nginx ingress
@@ -177,9 +179,13 @@ ingress:
   #    - repository.127.0.0.1.nip.io
   tls: []
 
-  ## @param ingress.paths Set paths for ingress
+  ## @param ingress.paths Set paths for ingress - backend prefixes only, the app is routed by the frontend-server chart
   paths:
-  - /edu-sharing
+  - /edu-sharing/rest
+  - /edu-sharing/eduservlet
+  - /edu-sharing/login
+  - /edu-sharing/logout
+  - /edu-sharing/preview
 
   admin:
     ## @param ingress.admin.enabled Enable admin ingress
@@ -201,8 +207,8 @@ ingress:
     tls: []
 
   exact:
-    ## @param ingress.exact.enabled Enable exact ingress
-    enabled: true
+    ## @param ingress.exact.enabled Enable exact ingress - off, the host root belongs to the frontend-server chart
+    enabled: false
 
     annotations:
       ## @param ingress.exact.annotations.nginx.ingress.kubernetes.io/app-root Set app-root on nginx exact ingress
@@ -351,7 +357,7 @@ config:
     cookieAttributes: ""
     ## @param config.home.urlDynamic Set url_dynamic attribute
     urlDynamic: false
-    ## @param config.home.customHtmlHeaders Set home custom_html_headers attributes
+    ## @param config.home.customHtmlHeaders Html added to the head of every page (lightbend angular.customHtmlHeaders)
     customHtmlHeaders: ""
 
   jvm:

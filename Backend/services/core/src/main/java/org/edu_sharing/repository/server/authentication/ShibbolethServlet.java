@@ -42,7 +42,6 @@ import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.NgServlet;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions;
 import org.edu_sharing.repository.server.tools.security.ShibbolethSessions.SessionInfo;
 import org.edu_sharing.service.authentication.EduAuthentication;
@@ -71,6 +70,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.edu_sharing.repository.tools.URLHelper;
 
 @Slf4j
 public class ShibbolethServlet extends SpringHttpServlet {
@@ -89,8 +89,6 @@ public class ShibbolethServlet extends SpringHttpServlet {
     private SSOMappingProvider ssoMappingProvider;
 
 
-    private String redirectUrl;
-
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -99,12 +97,10 @@ public class ShibbolethServlet extends SpringHttpServlet {
         HttpSession session = req.getSession(true);
         Map<String, String> validAuthInfo = authTool.validateAuthentication(session);
 
-        redirectUrl = (String) session.getAttribute(NgServlet.PREVIOUS_ANGULAR_URL);
-        // prefer the login url since it will intercept the regular angular url
-        if (session.getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL) != null) {
-            log.debug("Previous frontend url found: {}", session.getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL));
-            redirectUrl = (String) session.getAttribute(AuthenticationFilter.LOGIN_SUCCESS_REDIRECT_URL);
-        }
+        // resolved up front - a user switch below invalidates the session.
+        // a local, not a field: the servlet instance is shared by concurrent logins
+        String redirectUrl = LoginRedirect.resolve(req);
+        log.debug("login redirect target: {}", redirectUrl);
 
         Map<String, String> ssoMap = new HashMap<>();
         mapAttributes(ssoMap, req);
@@ -116,12 +112,12 @@ public class ShibbolethServlet extends SpringHttpServlet {
 		if (validAuthInfo != null ) {
 			if(username == null){
 				log.info("no sso username provided, but got valid ticket from session for user:"+validAuthInfo.get(CCConstants.AUTH_USERNAME));
-				redirect(resp, req);
+				redirect(resp, req, redirectUrl);
 				return;
 			}else if (validAuthInfo.get(CCConstants.AUTH_USERNAME).equals(username)) {
 
 				log.info("got valid ticket from session for user:"+username);
-				redirect(resp, req);
+				redirect(resp, req, redirectUrl);
 				return;
 
                 // do not trigger as guest
@@ -159,7 +155,7 @@ public class ShibbolethServlet extends SpringHttpServlet {
                 session.setAttribute(SSOAuthorityMapper.SSO_REFERER, referer);
             }
 
-            redirect(resp, req);
+            redirect(resp, req, redirectUrl);
 
         } catch (org.alfresco.repo.security.authentication.AuthenticationException e) {
             processError(resp, e);
@@ -173,11 +169,11 @@ public class ShibbolethServlet extends SpringHttpServlet {
             message = "SSO_UNKNOWN_ERROR";
         }
         message = URLEncoder.encode(message.trim());
-        resp.sendRedirect("/edu-sharing/components/error/" + message + "/" + message
+        resp.sendRedirect("/edu-sharing/" + URLHelper.NG_COMPONENTS_ERROR + "/" + message + "/" + message
         );
     }
 
-    private void redirect(HttpServletResponse resp, HttpServletRequest req) throws IOException {
+    private void redirect(HttpServletResponse resp, HttpServletRequest req, String redirectUrl) throws IOException {
 
         if (redirectUrl != null) {
             redirectUrl = resp.encodeURL(redirectUrl);
@@ -186,6 +182,10 @@ public class ShibbolethServlet extends SpringHttpServlet {
             Enumeration<String> paramNames = req.getParameterNames();
             while (paramNames.hasMoreElements()) {
                 String paramName = paramNames.nextElement();
+                if (LoginRedirect.PARAM.equals(paramName)) {
+                    // only ever reaches here invalid, see LoginRedirect.validate
+                    continue;
+                }
                 String paramVal = req.getParameter(paramName);
                 redirectUrl = UrlTool.setParam(redirectUrl, paramName, paramVal);
             }

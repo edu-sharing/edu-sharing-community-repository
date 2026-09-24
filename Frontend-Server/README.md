@@ -21,11 +21,16 @@ root pom's `node.version`; these are deliberately separate toolchains.
 ```bash
 nvm use                 # node 24
 npm ci
-cp .env.example .env    # point BACKEND_URL at a running edu-sharing
-(cd ../Frontend && npm run build)   # produces ../Frontend/dist
+cp .env.example .env    # BACKEND_URL / BACKEND_INTERNAL_URL of a running edu-sharing
+npm run build:frontend  # builds ../Frontend into ../Frontend/dist (only once, or after frontend changes)
 
 npm run dev             # http://localhost:4200/edu-sharing/
 ```
+
+`.env` is read from the package root by the server itself, so starting
+`src/index.ts` directly - e.g. a Node.js run/debug configuration in IDEA - works
+the same as `npm run dev`. Node 24 runs the TypeScript sources natively (type
+stripping, no type check - that is `npm run check:types`).
 
 `DEV=true` enables pretty logs and re-reads `index.html` whenever the Angular
 build writes a new one, so a `npm run build` in `Frontend/` is picked up without
@@ -37,6 +42,7 @@ a restart.
 |---------|---------|
 | `npm run dev` | run from TypeScript sources with `--watch` |
 | `npm run build` | compile to `build/` |
+| `npm run build:frontend` | production build of the Angular app into `../Frontend/dist` |
 | `npm start` | run the compiled server |
 | `npm test` | unit + routing tests (fake backend, no network) |
 | `npm run check:types` | type check only |
@@ -51,7 +57,8 @@ ones:
 |----------|---------|---|
 | `PORT` | `8080` | |
 | `CONTEXT_PATH` | `/edu-sharing` | must match the Angular `baseHref` |
-| `BACKEND_URL` | `http://repository-service:8080` | Tomcat, **without** context path |
+| `BACKEND_URL` | `http://repository-service:8081` | Tomcat external connector, **without** context path |
+| `BACKEND_INTERNAL_URL` | `http://repository-service:8080` | Tomcat internal connector, config fetches only |
 | `DIST_DIR` | `./dist` | Angular build output |
 
 ## How routing works

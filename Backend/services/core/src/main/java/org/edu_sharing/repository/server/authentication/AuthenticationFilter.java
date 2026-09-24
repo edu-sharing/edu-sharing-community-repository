@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.alfresco.service.guest.GuestConfig;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
@@ -13,7 +14,6 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.UrlTool;
 import org.edu_sharing.repository.server.AuthenticationTool;
 import org.edu_sharing.repository.server.AuthenticationToolAPI;
-import org.edu_sharing.repository.server.NgServlet;
 import org.edu_sharing.repository.server.RepoFactory;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.LocaleValidator;
@@ -203,7 +203,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 			loginSuccessRedirectUrl = UrlTool.removeParam(loginSuccessRedirectUrl, CCConstants.REQUEST_PARAM_DISABLE_GUESTFILTER);
 		}
 		URL url = new URL(req.getRequestURL().toString()+(StringUtils.isBlank(req.getQueryString()) ? "" : "?"+req.getQueryString()));
-		if(!url.getPath().contains(NgServlet.COMPONENTS_ERROR)) {
+		if(!url.getPath().contains(URLHelper.NG_COMPONENTS_ERROR)) {
 			log.info(LOGIN_SUCCESS_REDIRECT_URL + ":" + loginSuccessRedirectUrl);
 			req.getSession().setAttribute(LOGIN_SUCCESS_REDIRECT_URL, loginSuccessRedirectUrl);
 		}
@@ -239,7 +239,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
         // detect if the error component was requested -> then go ahead
         // otherwise, go to the angular login page
         URL requestUrl = new URL(req.getRequestURL().toString());
-        if(requestUrl.getPath().contains(NgServlet.COMPONENTS_ERROR)){
+        if(requestUrl.getPath().contains(URLHelper.NG_COMPONENTS_ERROR)){
             addErrorCode(resp, url);
             // go to the error component
             chain.doFilter(req, resp);
@@ -283,7 +283,7 @@ public class AuthenticationFilter implements jakarta.servlet.Filter {
 	}
 
 	private void addErrorCode(HttpServletResponse resp, URL url) {
-		String error=url.getPath().substring(url.getPath().indexOf(NgServlet.COMPONENTS_ERROR) + NgServlet.COMPONENTS_ERROR.length() + 1);
+		String error=url.getPath().substring(url.getPath().indexOf(URLHelper.NG_COMPONENTS_ERROR) + URLHelper.NG_COMPONENTS_ERROR.length() + 1);
 		try {
 			resp.setStatus(Integer.parseInt(error));
 		}catch(Throwable t){

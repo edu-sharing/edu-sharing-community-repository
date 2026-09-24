@@ -18,6 +18,7 @@ import org.edu_sharing.spring.security.oauth2.config.OAuth2ClientProperties;
 import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
+import org.edu_sharing.repository.tools.URLHelper;
 
 import java.util.regex.Pattern;
 
@@ -86,7 +87,7 @@ public class SilentLoginModeRedirect {
                 + (request.getQueryString() != null ? ("?" + request.getQueryString()) : "");
         request.getSession().setAttribute(SESS_ATT_SILENT_LOGIN_TARGET, targetPath);
 
-        if(targetPath.contains("components/error")){
+        if(targetPath.contains(URLHelper.NG_COMPONENTS_ERROR)){
             log.debug("target path "+targetPath);
             return false;
         }

@@ -89,6 +89,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
             config = (Config) jaxbUnmarshaller.unmarshal(is);
         }
         config.valuesBackend = getLightbendMapped();
+        config.valuesBackendInternal = getLightbendMappedInternal();
         is.close();
         configCache.put(CACHE_KEY, config);
         return config;
@@ -96,6 +97,14 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
 
     private ValuesBackend getLightbendMapped() {
         return ConfigBeanFactory.create(LightbendConfigLoader.get(), ValuesBackend.class);
+    }
+
+    private ValuesBackendInternal getLightbendMappedInternal() {
+        ValuesBackendInternal internal = ConfigBeanFactory.create(LightbendConfigLoader.get(), ValuesBackendInternal.class);
+        if (internal.getAngular() == null) {
+            internal.setAngular(new ValuesBackendInternal.AngularConfig());
+        }
+        return internal;
     }
 
     private InputStream getConfigInputStream() throws IOException {

@@ -25,12 +25,6 @@ import java.util.stream.Collectors;
 public class LRMITool {
 
     private static final List<String> IGNORED_PROPERTIES = Arrays.asList(CCConstants.SYS_PROP_NODE_UID);
-    private static final Map<String,String> VCARD_MAPPING=new HashMap<>();
-    static{
-        VCARD_MAPPING.put("contributor",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_MITWIRKENDE);
-        VCARD_MAPPING.put("creator",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_AUTHOR);
-        VCARD_MAPPING.put("publisher",CCConstants.CCM_PROP_IO_REPL_LIFECYCLECONTRIBUTER_PUBLISHER);
-    }
     private static Logger logger=Logger.getLogger(LRMITool.class);
 
     private static final String OR_SEPERATOR = ",";
@@ -43,7 +37,7 @@ public class LRMITool {
         Config lrmiProps = getMappingFile();
         lrmi.put("@context","http://schema.org/");
         lrmi.put("@type",new String[]{"CreativeWork","MediaObject"});
-        for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
+        for(Map.Entry<String,String> vcard : getVCardMapping().entrySet()){
             Object data = getFromVCard(vcard.getValue(), props);
             if(data != null) {
                 lrmi.put(vcard.getKey(), data);
@@ -82,6 +76,23 @@ public class LRMITool {
 
     private static Config getMappingFile() throws Exception {
         return LightbendConfigLoader.get().getConfig("exporter.lrmi.properties");
+    }
+
+    /**
+     * lrmi field -> vcard property (global name), from exporter.lrmi.vcard
+     */
+    private static Map<String, String> getVCardMapping() {
+        Map<String, String> mapping = new HashMap<>();
+        Config config = LightbendConfigLoader.get();
+        if (!config.hasPath("exporter.lrmi.vcard")) {
+            // a custom config replacing exporter.lrmi as a whole predates this key
+            logger.warn("exporter.lrmi.vcard is not configured, LRMI will not contain creator/publisher/contributor");
+            return mapping;
+        }
+        for (Map.Entry<String, ConfigValue> entry : config.getConfig("exporter.lrmi.vcard").entrySet()) {
+            mapping.put(entry.getKey(), CCConstants.getValidGlobalName(entry.getValue().unwrapped().toString()));
+        }
+        return mapping;
     }
 
     private static String getDate(Object property) {
@@ -171,7 +182,7 @@ public class LRMITool {
     public static Map<String, String[]> fromLRMIJsonToProperties(JSONObject jsonObject) throws Exception {
         Map<String,String[]> props=new HashMap<>();
         Config lrmiProps = getMappingFile();
-        for(Map.Entry<String,String> vcard : VCARD_MAPPING.entrySet()){
+        for(Map.Entry<String,String> vcard : getVCardMapping().entrySet()){
             try {
                 props.put(vcard.getValue(), new String[]{asVCard(jsonObject.getJSONObject(vcard.getKey()))});
             }catch(Exception e){

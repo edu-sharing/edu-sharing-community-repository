@@ -79,7 +79,7 @@ public class DownloadServlet extends SpringHttpServlet {
         try {
             downloadNodeInternal(nodeId, repositoryId, req, resp, fileName, mode);
         } catch (InsufficientPermissionException e) {
-            resp.sendRedirect(URLHelper.getBaseUrl(true) + "/" + NgServlet.COMPONENTS_ERROR + "/" + HttpServletResponse.SC_FORBIDDEN);
+            resp.sendRedirect(URLHelper.getBaseUrl(true) + "/" + URLHelper.NG_COMPONENTS_ERROR + "/" + HttpServletResponse.SC_FORBIDDEN);
         }
 
     }

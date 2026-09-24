@@ -62,6 +62,7 @@ import {
 } from '../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { CardDialogRef } from '../../features/dialogs/card-dialog/card-dialog-ref';
 import { CordovaService } from '../../services/cordova.service';
+import { withLoginRedirect } from '../../util/login-redirect';
 
 type WafyEntry = {
     name: string;
@@ -370,8 +371,13 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             this.toast.error(null, 'No configuration for loginProviderTargetUrl found.');
             return;
         }
-        const target =
-            this.connector.getAbsoluteServerUrl() + this.configService.instant('loginUrl');
+        const serverUrl = this.connector.getAbsoluteServerUrl();
+        // the provider (wayf) returns to target - which then carries the login target on
+        const target = withLoginRedirect(
+            serverUrl + this.configService.instant('loginUrl'),
+            this.next,
+            serverUrl,
+        );
         url = url
             .replace(':target', encodeURIComponent(target))
             // remove invalid parameters for multiple universities using the same idp
@@ -474,7 +480,19 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openLoginUrl() {
-        window.location.href = this.loginUrl;
+        window.location.href = withLoginRedirect(
+            this.loginUrl,
+            this.next,
+            this.connector.getAbsoluteServerUrl(),
+        );
+    }
+
+    /** SSO start of an oauth provider, returning to `next` after the login */
+    oauthProviderUrl(registrationId: string): string {
+        return withLoginRedirect(
+            '/edu-sharing/sso?id=' + encodeURIComponent(registrationId),
+            this.next,
+        );
     }
 
     register() {
@@ -631,8 +649,6 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             );
         }
     }
-
-    protected readonly encodeURIComponent = encodeURIComponent;
 
     appBack() {
         this.cordova.restartCordova();

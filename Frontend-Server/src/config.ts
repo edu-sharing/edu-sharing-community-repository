@@ -1,7 +1,21 @@
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+/**
+ * Loads `<package root>/.env` for local development - independent of the working
+ * directory, so a plain `node src/index.ts` from the IDE picks it up as well as
+ * `npm run dev`. Variables already set in the environment win. The image ships no
+ * `.env`, there this is a no-op.
+ */
+export function loadDotEnv(): void {
+    const file = path.join(packageRoot, '.env');
+    if (fs.existsSync(file)) {
+        process.loadEnvFile(file);
+    }
+}
 
 function str(name: string, fallback: string): string {
     const value = process.env[name];
@@ -44,7 +58,10 @@ export interface Config {
     readonly host: string;
     readonly port: number;
     readonly contextPath: string;
+    /** external tomcat connector - every proxied and on-behalf-of-user request, 2FA applies */
     readonly backendUrl: string;
+    /** internal tomcat connector - config fetches only, see ValuesBackendInternal */
+    readonly backendInternalUrl: string;
     readonly distDir: string;
     readonly proxyUnmatched: boolean;
     readonly proxyTimeoutMs: number;
@@ -52,6 +69,14 @@ export interface Config {
     readonly logLevel: string;
     readonly dev: boolean;
     readonly trustProxy: boolean;
+    /** budget for the backend calls enriching a shell request - on expiry the plain shell is sent */
+    readonly enrichTimeoutMs: number;
+    /** how often `_about.lastCacheUpdate` is polled to detect a backend config refresh; 0 disables */
+    readonly configPollIntervalMs: number;
+    /** upper bound for a cached config entry, in case a refresh is missed */
+    readonly configMaxAgeMs: number;
+    /** port of the management server (`/metrics`, `/health`); 0 disables it */
+    readonly managementPort: number;
 }
 
 export function loadConfig(): Config {
@@ -59,8 +84,11 @@ export function loadConfig(): Config {
         host: str('HOST', '0.0.0.0'),
         port: int('PORT', 8080),
         contextPath: normalizeContextPath(str('CONTEXT_PATH', '/edu-sharing')),
-        // without context path - the incoming request already carries it
-        backendUrl: str('BACKEND_URL', 'http://repository-service:8080').replace(/\/+$/, ''),
+        // without context path - the incoming request already carries it.
+        // 8081 is the external connector: tomcat treats 8080 (the home repository port) as
+        // internal and skips 2FA there (ApplicationInfoList.isInternalPortRequest)
+        backendUrl: str('BACKEND_URL', 'http://repository-service:8081').replace(/\/+$/, ''),
+        backendInternalUrl: str('BACKEND_INTERNAL_URL', 'http://repository-service:8080').replace(/\/+$/, ''),
         distDir: path.resolve(packageRoot, str('DIST_DIR', path.join(packageRoot, 'dist'))),
         // transitional: see docs/02-routing.md - the target state is an exhaustive
         // BACKEND_PATHS list and a 404 for anything else
@@ -72,5 +100,10 @@ export function loadConfig(): Config {
         logLevel: str('LOG_LEVEL', 'info'),
         dev: bool('DEV', false),
         trustProxy: bool('TRUST_PROXY', true),
+        enrichTimeoutMs: int('ENRICH_TIMEOUT_MS', 2_000),
+        configPollIntervalMs: int('CONFIG_POLL_INTERVAL_MS', 60_000),
+        configMaxAgeMs: int('CONFIG_MAX_AGE_MS', 600_000),
+        // same port as the repository's jmx exporter - never the public app port
+        managementPort: int('MANAGEMENT_PORT', 9090),
     };
 }

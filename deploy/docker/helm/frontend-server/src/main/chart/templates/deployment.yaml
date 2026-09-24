@@ -1,0 +1,109 @@
+{{- if .Values.global.cluster.istio.enabled }}
+{{- fail "edusharing frontend server: istio is not supported yet - the path split between frontend server and repository service needs one VirtualService, see the chart README" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "edusharing_common_lib.names.name" . }}
+  labels: {{ include "edusharing_common_lib.labels.app" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      name: {{ include "edusharing_common_lib.names.name" . }}
+      labels: {{ include "edusharing_common_lib.labels.app" . | nindent 8 }}
+      annotations:
+        checksum/configmap-env: {{ include (print .Template.BasePath "/configmap-env.yaml") . | sha256sum | trunc 63 }}
+        {{- if not .Values.global.metrics.servicemonitor.enabled }}
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: {{ .Values.service.port.management | quote }}
+        prometheus.io/scrape: {{ .Values.config.metrics.enabled | quote }}
+        {{- end }}
+        {{- with merge .Values.podAnnotations .Values.global.annotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+      - name: {{ include "edusharing_common_lib.names.name" . }}
+        image: {{ include "edusharing_common_lib.images.image" . }}{{ .Values.image.name }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "edusharing_common_lib.names.name" . }}-env
+        ports:
+        - name: api
+          containerPort: {{ .Values.service.port.api }}
+        - name: management
+          containerPort: {{ .Values.service.port.management }}
+        {{- with .Values.livenessProbe }}
+        livenessProbe:
+          # the process answers - never asks the backend
+          httpGet:
+            path: /health/liveness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.readinessProbe }}
+        readinessProbe:
+          # the backend was reached once, so pages carry the security headers
+          httpGet:
+            path: /health/readiness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.securityContext }}
+        securityContext: {{ toYaml . | nindent 10 }}
+        {{- end }}
+      {{- with .Values.global.image.pullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with merge .Values.podSecurityContext .Values.global.security }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.terminationGracePeriod }}
+      terminationGracePeriodSeconds: {{ . }}
+      {{- end }}
+      {{- if or .Values.nodeAffinity .Values.podAntiAffinity }}
+      affinity:
+        {{- with .Values.nodeAffinity }}
+        nodeAffinity: {{ toYaml . | nindent 10 }}
+        {{- end }}
+        {{- if .Values.podAntiAffinity }}
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 16 }}
+          {{- else if eq .Values.podAntiAffinity "soft" }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels: {{ include "edusharing_common_lib.labels.app" . | nindent 18 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}

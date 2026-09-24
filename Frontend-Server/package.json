@@ -1,6 +1,6 @@
 {
   "name": "@edu-sharing/frontend-server",
-  "version": "0.1.0",
+  "version": "0.0.0-dev",
   "private": true,
   "description": "Node/Fastify server delivering the edu-sharing Angular frontend and proxying backend requests to Tomcat",
   "license": "GPL-3.0-or-later",
@@ -10,19 +10,27 @@
   },
   "main": "build/index.js",
   "scripts": {
+    "sync-shared": "node scripts/sync-shared.mjs && node scripts/generate-api-types.mjs",
+    "prebuild": "npm run sync-shared",
     "build": "tsc -p tsconfig.json",
     "start": "node build/index.js",
-    "dev": "DEV=true node --watch --experimental-strip-types src/index.ts",
+    "predev": "npm run sync-shared",
+    "dev": "DEV=true node --watch src/index.ts",
+    "build:frontend": "npm --prefix ../Frontend run build",
+    "precheck:types": "npm run sync-shared",
     "check:types": "tsc -p tsconfig.json --noEmit",
-    "test": "node --experimental-strip-types --test \"src/**/*.test.ts\""
+    "pretest": "npm run sync-shared",
+    "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@fastify/reply-from": "^12.6.5",
     "@fastify/static": "^10.1.4",
-    "fastify": "^5.12.5"
+    "fastify": "^5.12.5",
+    "fastify-metrics": "^14.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "openapi-typescript": "^7.13.0",
     "pino-pretty": "^13.0.0",
     "typescript": "^5.7.3"
   }

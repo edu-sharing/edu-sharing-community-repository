@@ -122,7 +122,9 @@ public class ErrorFilter implements Filter {
             resp.setStatus(statusCode);
             if (accept != null && accept.toLowerCase().contains("text/html")) {
                 resp.setContentType("text/html");
-                resp.getWriter().print("<head><script nonce=\"" + SecurityHeadersFilter.ngCspNonce.get() + "\">window.location.href=\"" + URLTool.getNgErrorUrl(
+                // SecurityHeadersFilter does not run on every path that ends up here (i.e. /error.html) - no nonce then, instead of nonce="null"
+                String nonce = SecurityHeadersFilter.ngCspNonce.get();
+                resp.getWriter().print("<head><script" + (nonce == null ? "" : " nonce=\"" + nonce + "\"") + ">window.location.href=\"" + URLTool.getNgErrorUrl(
                         (t instanceof ErrorFilterException) ? ((ErrorFilterException) t).getAngularServletMessage() :
                                 statusCode + ""
                 ) + "\";</script></head>");

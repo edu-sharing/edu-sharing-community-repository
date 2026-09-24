@@ -124,7 +124,13 @@ public class NodeApi {
 
     }
 
+    /**
+     * deprecated: the Frontend-Server renders the LRMI JSON-LD of the render page itself, from
+     * the node metadata plus the lrmi mapping (exporter.lrmi) it gets with the internal config
+     * ({@code ValuesBackendInternal}).
+     */
     @GET
+    @Deprecated
     @Path("/nodes/{repository}/{node}/lrmi")
     @Operation(summary = "Get lrmi data.", description = "Get lrmi data of node.")
     @ApiResponses(
