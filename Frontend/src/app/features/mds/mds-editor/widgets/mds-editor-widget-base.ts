@@ -26,6 +26,36 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     focus(): void {
         // default implementation will do nothing
     }
+
+    /**
+     * Values that are only set on some of the edited nodes (bulk mode). They are kept apart from
+     * the regular values so they can be left untouched on save, see
+     * `MdsEditorInstanceService.getNewPropertyValue`.
+     */
+    readonly indeterminateValues$ = new BehaviorSubject<string[]>(undefined);
+
+    /**
+     * Initializes the indeterminate (mixed) values and keeps the widget in sync with them.
+     *
+     * @param individualValues values present in some but not all of the edited nodes
+     */
+    protected initIndeterminateValues(individualValues: string[]): void {
+        this.indeterminateValues$.next(individualValues);
+        this.indeterminateValues$.subscribe((indeterminateValues) =>
+            this.widget.setIndeterminateValues(indeterminateValues),
+        );
+    }
+
+    /**
+     * Confirms an indeterminate (mixed) value: it is no longer treated as individual and will be
+     * written to all edited nodes on save.
+     */
+    protected removeFromIndeterminateValues(key: string): void {
+        const indeterminateValues = this.indeterminateValues$.value;
+        if (key && indeterminateValues?.includes(key)) {
+            this.indeterminateValues$.next(indeterminateValues.filter((value) => value !== key));
+        }
+    }
     constructor(
         protected toast: Toast,
         public mdsEditorInstance: MdsEditorInstanceService,
