@@ -967,7 +967,8 @@
       "GENERIC_BAD_REQUEST": "Ungültige Anfrage",
       "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
+      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden",
+      "GENERIC_ACCESS_DENIED": "Keine ausreichenden Rechte"
     },
     "GDPR": {
       "EXTERNAL_SITE": "Externe Seite",
