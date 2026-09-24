@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.extensions.surf.util.URLEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.*;
@@ -117,7 +118,12 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
-	public void removeNode(String nodeID, String fromID) {	
+	public void writeContent(StoreRef store, String nodeID, File content, String mimetype, String _encoding,
+			String property) throws Exception {
+	}
+
+	@Override
+	public void removeNode(String nodeID, String fromID) {
 	}
 
 	@Override

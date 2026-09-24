@@ -16,8 +16,9 @@ import {
 } from './file-upload-progress-dialog-data';
 import { DialogsService } from '../../dialogs.service';
 import { ApiErrorResponse, Node, NodeService } from 'ngx-edu-sharing-api';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { isDuplicateNodeNameError } from '../../../../util/rest-errors';
+import { RestChunkedUploadService } from '../../../../core-module/rest/services/rest-chunked-upload.service';
 
 /** What to do with a file that already exists at the target location. */
 type DuplicateDecision = 'keep' | 'overwrite' | 'cancel';
@@ -44,6 +45,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
         );
     private nodeService = inject(RestNodeService);
     private nodeApi = inject(NodeService);
+    private chunkedUpload = inject(RestChunkedUploadService);
     private dialogs = inject(DialogsService);
     private translate = inject(TranslateService);
     private formatSizePipe = inject(FormatSizePipe);
@@ -59,6 +61,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private duplicateDecision: DuplicateDecision = null;
     /** Lazily fetched children of the target folder, only required to overwrite an existing file. */
     private childNodes: Node[] = null;
+    private currentUploadSubscription: Subscription;
     processed = 0;
     /** Bound to the radio group of the "file exists" dialog: `true` = keep both files. */
     keep = true;
@@ -80,6 +83,10 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private _done(status: 'CANCELED' | 'FINISHED') {
         // first check whether the dialog has already been closed
         if (this.dialogRef.getLifecycleState() !== 'open') return;
+        if (status === 'CANCELED') {
+            // stops the in-flight request (and, for a chunked upload, aborts the session server-side)
+            this.currentUploadSubscription?.unsubscribe();
+        }
         if (this.resultList.length > 0) {
             // Close with nodes uploaded until now. Could also delete these nodes.
             this.dialogRef.close({
@@ -196,26 +203,51 @@ export class FileUploadProgressDialogComponent implements OnInit {
         versionComment: string,
     ): Promise<Node> {
         const start = new Date().getTime();
-        return this.nodeApi
-            .changeContent(
-                node.ref.repo,
-                node.ref.id,
-                'auto',
-                versionComment,
-                { file },
-                ({ loaded, total }) => {
-                    const elapsed = (new Date().getTime() - start) / 1000;
-                    this.progress[number].progress = {
-                        start,
-                        loaded,
-                        total,
-                        elapsed,
-                        progress: total ? Math.round((loaded / total) * 100) : 0,
-                        remaining: loaded ? ((total - loaded) * elapsed) / loaded : 0,
-                    };
-                },
-            )
-            .toPromise();
+        // large files go through the chunked upload endpoints instead of a single long-lived
+        // request, so no individual request risks hitting a reverse-proxy timeout
+        if (RestChunkedUploadService.shouldUseChunkedUpload(file)) {
+            return new Promise<Node>((resolve, reject) => {
+                this.currentUploadSubscription = this.chunkedUpload
+                    .upload(
+                        node.ref.id,
+                        file,
+                        versionComment,
+                        (progress) => {
+                            this.progress[number].progress = {
+                                ...progress,
+                                progress: Math.round(progress.progress * 100),
+                            };
+                        },
+                        node.ref.repo,
+                    )
+                    .subscribe({
+                        next: (result) => resolve(result.node),
+                        error: reject,
+                    });
+            });
+        }
+        return new Promise<Node>((resolve, reject) => {
+            this.currentUploadSubscription = this.nodeApi
+                .changeContent(
+                    node.ref.repo,
+                    node.ref.id,
+                    'auto',
+                    versionComment,
+                    { file },
+                    ({ loaded, total }) => {
+                        const elapsed = (new Date().getTime() - start) / 1000;
+                        this.progress[number].progress = {
+                            start,
+                            loaded,
+                            total,
+                            elapsed,
+                            progress: total ? Math.round((loaded / total) * 100) : 0,
+                            remaining: loaded ? ((total - loaded) * elapsed) / loaded : 0,
+                        };
+                    },
+                )
+                .subscribe({ next: resolve, error: reject });
+        });
     }
 
     private _succeeded(number: number, node: Node): void {

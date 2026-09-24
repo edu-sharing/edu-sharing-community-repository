@@ -21,6 +21,8 @@ public class RestConstants {
 	public static final ApiResponse[] RETURN_TYPES = null;
 	
 	public static final String HTTP_200="OK.";
+	public static final String HTTP_201="Created.";
+	public static final String HTTP_202="Accepted, processing in progress.";
 	public static final String HTTP_400="Preconditions are not present.";
 	public static final String HTTP_401="Authorization failed.";
 	public static final String HTTP_403="Session user has insufficient rights to perform this operation.";

@@ -84,6 +84,14 @@ public interface NodeService {
 
     void deleteVersionHistory(String nodeId) throws Exception;
 
+    /**
+     * same as the {@link InputStream} based overload, but avoids spooling the content to a
+     * temporary file a second time for mimetype detection when the caller already has it on disk
+     * (e.g. an assembled chunked upload).
+     */
+    void writeContent(final StoreRef store, final String nodeID, final java.io.File content, final String mimetype, String _encoding,
+                      final String property) throws Exception;
+
     void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                       final String property) throws Exception;
 

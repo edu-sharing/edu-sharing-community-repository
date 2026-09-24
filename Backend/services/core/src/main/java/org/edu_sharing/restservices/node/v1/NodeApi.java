@@ -41,6 +41,7 @@ import org.edu_sharing.service.clientutils.WebsiteInformation;
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.editlock.LockedException;
 import org.edu_sharing.service.github.GitHubService;
+import org.edu_sharing.service.upload.UploadSession;
 import org.edu_sharing.service.nodeservice.AssocInfo;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.notification.NotificationService;
@@ -1800,6 +1801,172 @@ public class NodeApi {
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/content/uploads")
+
+    @Operation(summary = "Start a chunked upload session for the content of a node.",
+            description = "Alternative to the single-request content upload above for large files: send the content via " +
+                    "several small PUT .../uploads/{id}?offset= requests instead of one long-lived request, so no request " +
+                    "individually risks hitting a reverse-proxy timeout. Finish with POST .../uploads/{id}/complete.")
+
+    @ApiResponses(
+    	value = {
+        @ApiResponse(responseCode="201", description=RestConstants.HTTP_201, content = @Content(schema = @Schema(implementation = UploadSession.class))),
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response initUpload(
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+		@Parameter(description = "size of the file to upload, in bytes", required = true) UploadInitRequest data) {
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	UploadSession session = nodeDao.initUpload(data.getSize(), data.getVersionComment());
+
+	    	return Response.status(Response.Status.CREATED).entity(session).build();
+
+    	} catch (Throwable t) {
+			return ErrorResponse.createResponse(DAOException.mapping(t));
+		}
+    }
+
+    @PUT
+    @Path("/nodes/{repository}/{node}/content/uploads/{id}")
+    @Consumes({ "application/octet-stream" })
+
+    @Operation(summary = "Append a chunk to a chunked upload session.",
+            description = "The request body is the raw chunk content (no multipart envelope). offset must match the number " +
+                    "of bytes already stored for this session (as returned by the previous call), otherwise the current " +
+                    "offset is returned with a 409 so the client can resync.")
+
+    @ApiResponses(
+    	value = {
+        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UploadSession.class))),
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="409", description=RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response appendUploadChunk(
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "id of the upload session", required = true) @PathParam("id") String id,
+	    @Parameter(description = "number of bytes already stored for this session", required = true) @QueryParam("offset") long offset,
+		@Parameter(description = "chunk content", schema = @Schema(type = "string", format = "binary")) InputStream chunk) {
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	UploadSession session = nodeDao.appendUploadChunk(id, offset, chunk);
+
+	    	return Response.status(Response.Status.OK).entity(session).build();
+
+    	} catch (Throwable t) {
+			return ErrorResponse.createResponse(DAOException.mapping(t));
+		}
+    }
+
+    @GET
+    @Path("/nodes/{repository}/{node}/content/uploads/{id}")
+
+    @Operation(summary = "Get the status of a chunked upload session.", description = "Used to poll for completion after POST .../complete.")
+
+    @ApiResponses(
+    	value = {
+        @ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = UploadSession.class))),
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response getUploadSession(
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "id of the upload session", required = true) @PathParam("id") String id) {
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	UploadSession session = nodeDao.getUploadSession(id);
+
+	    	return Response.status(Response.Status.OK).entity(session).build();
+
+    	} catch (Throwable t) {
+			return ErrorResponse.createResponse(DAOException.mapping(t));
+		}
+    }
+
+    @POST
+    @Path("/nodes/{repository}/{node}/content/uploads/{id}/complete")
+
+    @Operation(summary = "Finish a chunked upload session.",
+            description = "Requires all bytes to have been received. Returns immediately with state PROCESSING; poll " +
+                    "GET .../uploads/{id} for the outcome (state DONE or FAILED), since finishing the upload (virus scan, " +
+                    "mimetype/metadata extraction, versioning) can itself take longer than a reverse-proxy timeout allows.")
+
+    @ApiResponses(
+    	value = {
+        @ApiResponse(responseCode="202", description=RestConstants.HTTP_202, content = @Content(schema = @Schema(implementation = UploadSession.class))),
+        @ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response completeUpload(
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "id of the upload session", required = true) @PathParam("id") String id) {
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	UploadSession session = nodeDao.completeUpload(id);
+
+	    	return Response.status(Response.Status.ACCEPTED).entity(session).build();
+
+    	} catch (Throwable t) {
+			return ErrorResponse.createResponse(DAOException.mapping(t));
+		}
+    }
+
+    @DELETE
+    @Path("/nodes/{repository}/{node}/content/uploads/{id}")
+
+    @Operation(summary = "Abort a chunked upload session.", description = "Discards any chunks received so far. The node's existing content is left untouched.")
+
+    @ApiResponses(
+    	value = {
+        @ApiResponse(responseCode="204", description=RestConstants.HTTP_200),
+        @ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public Response abortUpload(
+    	@Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue="-home-" )) @PathParam("repository") String repository,
+	    @Parameter(description = RestConstants.MESSAGE_NODE_ID,required=true ) @PathParam("node") String node,
+	    @Parameter(description = "id of the upload session", required = true) @PathParam("id") String id) {
+    	try {
+	    	RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+	    	NodeDao nodeDao = NodeDao.getNode(repoDao, node);
+
+	    	nodeDao.abortUpload(id);
+
+	    	return Response.status(Response.Status.NO_CONTENT).build();
+
+    	} catch (Throwable t) {
+			return ErrorResponse.createResponse(DAOException.mapping(t));
+		}
     }
 
     @POST

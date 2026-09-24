@@ -158,6 +158,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-connect-timeout Set proxy-connect-timeout on nginx ingress
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    # proxy-read-timeout/proxy-send-timeout bound every single request, including a large file
+    # upload sent as one request. The frontend avoids this by uploading large files in chunks well
+    # under this timeout (see NodeApi's .../content/uploads endpoints) instead of relying on these
+    # values being raised - raise them only as a stopgap, they don't scale to arbitrarily large files.
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-read-timeout Set proxy-read-timeout on nginx ingress
     nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
     ## @param ingress.annotations.nginx.ingress.kubernetes.io/proxy-send-timeout Set proxy-send-timeout on nginx ingress

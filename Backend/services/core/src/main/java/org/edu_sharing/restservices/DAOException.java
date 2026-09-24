@@ -24,6 +24,8 @@ import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
 import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
+import org.edu_sharing.service.upload.UploadChunkOffsetMismatchException;
+import org.edu_sharing.service.upload.UploadSessionNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.io.FileNotFoundException;
@@ -186,9 +188,13 @@ public class DAOException extends RuntimeException {
                 || t instanceof InvalidStoreRefException
                 || t instanceof FileNotFoundException
                 || t instanceof NoSuchFileException
-                || t instanceof InvalidNodeRefException) {
+                || t instanceof InvalidNodeRefException
+                || t instanceof UploadSessionNotFoundException) {
 
             return new DAOMissingException(t, nodeId);
+        }
+        if (t instanceof UploadChunkOffsetMismatchException) {
+            return new DAOUploadOffsetMismatchException((UploadChunkOffsetMismatchException) t, nodeId);
         }
 
         if(t instanceof IllegalArgumentException) {

@@ -1573,9 +1573,19 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     }
 
     public void writeContent(final StoreRef store, final String nodeID, final File content, final String mimetype, String _encoding, final String property)
-            throws FileNotFoundException {
-        FileInputStream fis = new FileInputStream(content);
-        this.writeContent(store, nodeID, fis, mimetype, _encoding, property);
+            throws Exception {
+        writeContent(store, nodeID, content, mimetype, _encoding, property, null);
+    }
+
+    /**
+     * same as the {@link InputStream}-based overload, but the caller already has the content on
+     * disk (e.g. an assembled chunked upload), so it is used directly for mimetype detection
+     * instead of being spooled to a temp file a second time. The caller keeps ownership of
+     * {@code content} - it is not deleted here.
+     */
+    public void writeContent(final StoreRef store, final String nodeID, final File content, final String mimetype, String _encoding,
+                             final String property, final Runnable onComplete) throws Exception {
+        writeContentInternal(store, nodeID, null, content.toPath(), mimetype, _encoding, property, onComplete);
     }
 
     /**
@@ -1595,7 +1605,21 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
     }
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
-                             final String property, final Runnable onComplete) {
+                             final String property, final Runnable onComplete) throws Exception {
+        writeContentInternal(store, nodeID, content, null, mimetype, _encoding, property, onComplete);
+    }
+
+    /**
+     * Shared implementation for the {@link InputStream}- and {@link File}-based
+     * {@code writeContent} overloads.
+     *
+     * @param content      the stream to write, used when {@code providedFile} is {@code null}
+     * @param providedFile when set, the content is read from this already-on-disk file instead of
+     *                     {@code content} (which is then ignored), and it is also used directly
+     *                     for mimetype detection instead of spooling a temp copy
+     */
+    private void writeContentInternal(final StoreRef store, final String nodeID, final InputStream content, final Path providedFile,
+                                       final String mimetype, String _encoding, final String property, final Runnable onComplete) throws Exception {
 
         final String encoding = (_encoding == null) ? "UTF-8" : _encoding;
         log.debug("called nodeID:{} store:{} mimetype:{} property:{}", nodeID, store, mimetype, property);
@@ -1604,17 +1628,20 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
         // Spool once, outside of the retrying transaction: the incoming stream (e.g. a Jersey multipart
         // stream) is not repeatable. If the transaction below got retried after already having consumed
-        // it, the write would silently end up with empty/truncated content.
+        // it, the write would silently end up with empty/truncated content. Skipped when the caller
+        // already provides a repeatable file (e.g. an assembled chunked upload).
         File tempFile = null;
-        if (StringUtils.isBlank(mimetype)) {
+        Path detectionSource = providedFile;
+        if (detectionSource == null && StringUtils.isBlank(mimetype)) {
             tempFile = TempFileProvider.createTempFile("edu_mimedetect_", ".bin");
             try (InputStream in = content) {
                 Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new AlfrescoRuntimeException("Failed to spool content for mimetype detection", e);
             }
+            detectionSource = tempFile.toPath();
         }
-        final Path detectionSource = tempFile == null ? null : tempFile.toPath();
+        final Path finalDetectionSource = detectionSource;
 
         try {
             RetryingTransactionCallback<NodeRef> callback = () -> {
@@ -1628,13 +1655,13 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
                 String finalMimeType = mimetype;
                 contentWriter.setEncoding(encoding);
                 InputStream finalContent;
-                if (detectionSource != null) {
+                if (finalDetectionSource != null) {
                     String filename = (String) nodeService.getProperty(nodeRef, ContentModel.PROP_NAME);
                     // file based detection: Tika only reads the zip central directory for office formats
                     // instead of spooling the whole file to /tmp again (see NodeCustomizationPolicies)
-                    MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, detectionSource);
+                    MediaType mediaType = NodeCustomizationPolicies.getMediaType(filename, finalDetectionSource);
                     finalMimeType = mediaType.toString();
-                    finalContent = Files.newInputStream(detectionSource);
+                    finalContent = Files.newInputStream(finalDetectionSource);
                 } else {
                     finalContent = content;
                 }

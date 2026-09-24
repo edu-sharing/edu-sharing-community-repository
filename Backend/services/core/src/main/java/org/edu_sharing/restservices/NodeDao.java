@@ -78,6 +78,8 @@ import org.edu_sharing.service.tracking.ActivityEventService;
 import org.edu_sharing.service.tracking.ActivityOnNodeEventType;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
 import org.edu_sharing.service.tracking.model.StatisticEntry;
+import org.edu_sharing.service.upload.ChunkedUploadService;
+import org.edu_sharing.service.upload.UploadSession;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -1345,17 +1347,7 @@ public class NodeDao {
                                  String versionComment) throws DAOException {
 
         try {
-            Map<String, String[]> props = new HashMap<>();
-
-            boolean version = versionComment != null && !versionComment.isEmpty();
-            // 1. update
-            if (version) {
-                props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{versionComment});
-                //mergeVersionComment(props, versionComment);
-            }
-            props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{Boolean.toString(version)});
-            nodeService.updateNode(nodeId, props, true);
-
+            markVersion(versionComment);
 
             // 2. change content (automatic versioning)
             nodeService.writeContent(storeRef, nodeId, is, mimetype, null,
@@ -1367,6 +1359,104 @@ public class NodeDao {
 
             throw DAOException.mapping(t);
         }
+    }
+
+    /**
+     * same as {@link #changeContent(InputStream, String, String)}, but for content that is
+     * already assembled on disk (e.g. a completed chunked upload). Mimetype is always detected
+     * from the file, matching the behaviour of the REST content upload endpoint.
+     */
+    public NodeDao changeContent(java.io.File file, String versionComment) throws DAOException {
+        try {
+            markVersion(versionComment);
+
+            nodeService.writeContent(storeRef, nodeId, file, null, null,
+                    CCConstants.CM_PROP_CONTENT);
+
+            return new NodeDao(repoDao, nodeId);
+
+        } catch (Throwable t) {
+
+            throw DAOException.mapping(t);
+        }
+    }
+
+    private void markVersion(String versionComment) throws Throwable {
+        Map<String, String[]> props = new HashMap<>();
+
+        boolean version = versionComment != null && !versionComment.isEmpty();
+        if (version) {
+            props.put(CCConstants.CCM_PROP_IO_VERSION_COMMENT, new String[]{versionComment});
+        }
+        props.put(CCConstants.CCM_PROP_IO_CREATE_VERSION, new String[]{Boolean.toString(version)});
+        nodeService.updateNode(nodeId, props, true);
+    }
+
+    /**
+     * Starts a new chunked upload session for this node's content. See {@code ChunkedUploadService}
+     * for the session lifecycle. Requires write permission, checked explicitly here since NodeDao
+     * instances are plain objects and are not proxied by the {@code @NodePermission} AOP aspect.
+     */
+    public UploadSession initUpload(long size, String versionComment) throws DAOException {
+        try {
+            checkWritePermission();
+            return getChunkedUploadService().initUpload(nodeId, size, versionComment);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    public UploadSession appendUploadChunk(String uploadId, long offset, InputStream data) throws DAOException {
+        try {
+            checkWritePermission();
+            return getChunkedUploadService().appendChunk(uploadId, nodeId, offset, data);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    public UploadSession getUploadSession(String uploadId) throws DAOException {
+        try {
+            checkWritePermission();
+            return getChunkedUploadService().getSession(uploadId, nodeId);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    /**
+     * Marks the session as PROCESSING and asynchronously finishes the upload by calling
+     * {@link #changeContent(File, String)} with the assembled file. Returns immediately - poll
+     * {@link #getUploadSession(String)} for the outcome.
+     */
+    public UploadSession completeUpload(String uploadId) throws DAOException {
+        try {
+            checkWritePermission();
+            return getChunkedUploadService().completeUpload(uploadId, nodeId,
+                    (file, versionComment) -> changeContent(file, versionComment));
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    public void abortUpload(String uploadId) throws DAOException {
+        try {
+            checkWritePermission();
+            getChunkedUploadService().abortUpload(uploadId, nodeId);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
+    private void checkWritePermission() {
+        org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext()
+                .getBean(org.edu_sharing.service.permission.PermissionChecking.class)
+                .checkNodePermissions(nodeId, new String[]{CCConstants.PERMISSION_WRITE});
+    }
+
+    private static ChunkedUploadService getChunkedUploadService() {
+        return org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext()
+                .getBean(ChunkedUploadService.class);
     }
 
     private void mergeVersionComment(Map<String, String[]> properties,

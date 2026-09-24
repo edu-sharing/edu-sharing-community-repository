@@ -152,6 +152,12 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
+        if (t instanceof DAOUploadOffsetMismatchException) {
+            return Response.status(Response.Status.CONFLICT)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
 
         if(t instanceof EduSharingLockException){
             return Response.status(ExtendedStatus.LOCKED)
