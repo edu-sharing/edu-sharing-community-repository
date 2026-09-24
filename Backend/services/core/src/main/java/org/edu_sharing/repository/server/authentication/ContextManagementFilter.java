@@ -146,9 +146,9 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 				logger.debug(e.getMessage());
 			}
 
-			handleAppSignature((HttpServletRequest)req, (HttpServletResponse)res);
-
-			chain.doFilter(req,res);
+			if (handleAppSignature((HttpServletRequest)req, (HttpServletResponse)res)) {
+				chain.doFilter(req,res);
+			}
 
 		} finally {
 
@@ -194,8 +194,10 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 
 	/**
 	 * Checks if app headers and signature are present and sets the header accordingly
+	 *
+	 * @return false if a response was already written and the filter chain must stop, true to continue
 	 */
-	private void handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
+	private boolean handleAppSignature(HttpServletRequest httpReq, HttpServletResponse httpRes) throws IOException {
 		accessTool.set(null);
 
 		String appId = SignatureVerifier.getHeaderOrParam("X-Edu-App-Id",httpReq);
@@ -231,10 +233,14 @@ public class ContextManagementFilter implements jakarta.servlet.Filter {
 						}
 
 					} catch (Usage2Exception e) {
+						// the referenced usage (and typically its underlying node) no longer exists
+						httpRes.sendError(HttpServletResponse.SC_NOT_FOUND, "usage not found");
+						return false;
 					}
 				}
 			}
 		}
+		return true;
 	}
 
 }
