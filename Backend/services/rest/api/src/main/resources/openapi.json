@@ -258,6 +258,7 @@
           },
           "headers": {
             "additionalProperties": {
+              "description": "angular.headers: security headers of the shell pages; Content-Security-Policy is a map directive -> value, {{ngCspNonce}} is replaced per page",
               "type": "object"
             },
             "description": "angular.headers: security headers of the shell pages; Content-Security-Policy is a map directive -> value, {{ngCspNonce}} is replaced per page",
@@ -1348,15 +1349,7 @@
             "$ref": "#/components/schemas/Values"
           },
           "currentBackend": {
-            "description": "Relevant config infos mapped from the Lightbend from the backend. ValuesBackendInternal (a superset) on the internal port only, i.e. for the Frontend-Server; ValuesBackend otherwise",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ValuesBackend"
-              },
-              {
-                "$ref": "#/components/schemas/ValuesBackendInternal"
-              }
-            ]
+            "$ref": "#/components/schemas/ValuesBackend"
           },
           "global": {
             "$ref": "#/components/schemas/Values"
@@ -3985,6 +3978,7 @@
         "type": "object"
       },
       "LrmiConfig": {
+        "description": "exporter.lrmi: the mapping LRMITool uses",
         "properties": {
           "properties": {
             "additionalProperties": {
@@ -11285,6 +11279,15 @@
         "type": "object"
       },
       "ValuesBackend": {
+        "description": "Relevant config infos mapped from the Lightbend from the backend. ValuesBackendInternal (a superset) for internal requests; ValuesBackend otherwise",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ValuesBackend"
+          },
+          {
+            "$ref": "#/components/schemas/ValuesBackendInternal"
+          }
+        ],
         "properties": {
           "repository": {
             "$ref": "#/components/schemas/RepositoryConfigBackend"
