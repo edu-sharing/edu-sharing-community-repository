@@ -94,6 +94,19 @@ public class ErrorResponse {
         while (t instanceof RuntimeException && !(t instanceof DAOException) && t.getCause() != null) {
             t = t.getCause();
         }
+        if (t instanceof UsageException && Usage2Service.NO_CCPUBLISH_PERMISSION.equals(t.getMessage())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+
+        // map throwables that were propagated straight from a service call without
+        // going through DAOException.mapping() to their corresponding DAOException subtype,
+        // so they get a proper status code below instead of falling through to 500
+        if (!(t instanceof DAOException)) {
+            t = DAOException.mapping(t);
+        }
 
         if (t instanceof DAOValidationException) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -102,12 +115,6 @@ public class ErrorResponse {
                     .build();
         }
         if (t instanceof DAOSecurityException || t instanceof DAOToolPermissionException) {
-            return Response.status(Response.Status.FORBIDDEN)
-                    .type(MediaType.APPLICATION_JSON_TYPE)
-                    .entity(new ErrorResponse(t))
-                    .build();
-        }
-        if (t instanceof UsageException && Usage2Service.NO_CCPUBLISH_PERMISSION.equals(t.getMessage())) {
             return Response.status(Response.Status.FORBIDDEN)
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))
