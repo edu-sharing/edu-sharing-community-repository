@@ -4,16 +4,19 @@
     class="toggle-button"
     mat-icon-button
     color="primary"
+    [attr.aria-expanded]="!!(open | async)"
+    [attr.aria-controls]="'swimlane-content-' + swimlane().id"
     [attr.aria-label]="
       ((open | async) ? 'DASHBOARD_SWIMLANE.COLLAPSE' : 'DASHBOARD_SWIMLANE.EXPAND')
         | translate : { element: ('DASHBOARD_SWIMLANE.' + swimlane().id + '.TITLE' | translate) }
     "
   >
-    <i [esIcon]="'keyboard_arrow_' + ((open | async) ? 'up' : 'down')"></i>
+    <i [esIcon]="'keyboard_arrow_' + ((open | async) ? 'up' : 'down')" aria-hidden="true"></i>
   </button>
 </div>
 @if (open | async) {
 <div
+  [id]="'swimlane-content-' + swimlane().id"
   class="swimlane"
   [class.swimlane-stream]="
     ['interactivity-stream-shares', 'interactivity-stream-activities'].includes(type())

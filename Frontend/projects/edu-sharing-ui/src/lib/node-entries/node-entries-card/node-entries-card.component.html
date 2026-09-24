@@ -81,6 +81,7 @@
   <button
     class="card-body"
     matRipple
+    [attr.aria-label]="node | nodeTitle"
     (click)="
       entriesService.onClicked({
         event: $event,
