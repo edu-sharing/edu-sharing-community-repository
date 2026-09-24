@@ -1,5 +1,6 @@
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../../../../../../projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+@use '../../../mds/mds-editor/mds-mixins' as mds;
 
 :host {
     // default fallback; will be set via scale observer in ts!
@@ -9,8 +10,9 @@
     flex: 1;
     min-height: 0;
     ::ng-deep {
-        es-mds-editor-wrapper es-mds-editor-core {
-            display: grid;
+        es-mds-editor-wrapper {
+            // side by side in the fullscreen dialog, single column in the narrow sidebar
+            @include mds.mdsEditorColumns;
         }
     }
     @media screen and (max-width: ($mobileTabSwitchWidth)) {

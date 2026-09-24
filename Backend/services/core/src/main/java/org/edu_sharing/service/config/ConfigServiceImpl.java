@@ -166,7 +166,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
                     }
 
                     for (String dom : context.domain) {
-                        contextCacheByDomain.put(dom, context);
+                        contextCacheByDomain.put(dom.toLowerCase(), context);
                     }
                 }
             }
@@ -180,7 +180,7 @@ public class ConfigServiceImpl implements ConfigService, ApplicationListener<Ref
                         .map(x -> x.get(CCConstants.CCM_PROP_CONTEXT_CONFIG).toString())
                         .map(CheckedFunction.wrap(x -> objectMapper.readValue(x, Context.class), null))
                         .filter(Objects::nonNull)
-                        .forEach(x -> Arrays.stream(x.domain).filter(Objects::nonNull).forEach(y -> contextCacheByDomain.put(y, x)));
+                        .forEach(x -> Arrays.stream(x.domain).filter(Objects::nonNull).forEach(y -> contextCacheByDomain.put(y.toLowerCase(), x)));
 
                 return null;
             });

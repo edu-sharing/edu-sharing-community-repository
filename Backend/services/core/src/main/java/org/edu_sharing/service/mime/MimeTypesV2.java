@@ -452,6 +452,7 @@ public class MimeTypesV2 {
 
 		if(extensionMimeMap == null){
 			extensionMimeMap = new HashMap<>();
+			extensionMimeMap.put("ipynb", "application/x-ipynb+json");
 			extensionMimeMap.put("jpg", "image/jpeg");
 			extensionMimeMap.put("jpeg", "image/jpeg");
 			extensionMimeMap.put("png", "image/png");

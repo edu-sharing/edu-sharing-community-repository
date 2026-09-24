@@ -276,7 +276,11 @@ mat-tab-group {
     .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label {
         color: mat-css-vars.mat-css-color-primary(50);
     }
-    --mat-form-field-outlined-input-text-color: rgba(255, 255, 255);
+    --mdc-outlined-text-field-input-text-color: rgba(255, 255, 255);
+    // keep disabled fields readable on the (dark) colored background
+    --mdc-outlined-text-field-disabled-input-text-color: rgba(255, 255, 255, 0.8);
+    --mdc-outlined-text-field-disabled-label-text-color: rgba(255, 255, 255, 0.8);
+    --mdc-outlined-text-field-disabled-outline-color: rgba(255, 255, 255, 0.5);
 }
 mat-slide-toggle.mat-mdc-slide-toggle.mat-primary-bright {
     --mat-slide-toggle-unselected-handle-color: #fff;

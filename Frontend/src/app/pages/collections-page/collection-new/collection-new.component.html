@@ -191,7 +191,7 @@
             @if (!authorFreetext) {
             <i esIcon="person"></i>
             <span>{{ user | authorityName }}</span>
-            @if (authorFreetextAllowed) {
+            @if (authorFreetextAllowed || authorFreetextFixedAllowed) {
             <button
               mat-icon-button
               [attr.aria-label]="

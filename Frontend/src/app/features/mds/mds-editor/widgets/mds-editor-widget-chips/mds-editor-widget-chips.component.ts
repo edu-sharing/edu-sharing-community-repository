@@ -65,7 +65,6 @@ export class MdsEditorWidgetChipsComponent
     inputControl = new UntypedFormControl();
     autocompleteValues: Observable<DisplayValue[]>;
     shouldShowNoMatchingValuesNotice: Observable<boolean>;
-    indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
     hasFocus = true;
     private autocompleteIsInhibited = new BehaviorSubject(false);
@@ -110,9 +109,7 @@ export class MdsEditorWidgetChipsComponent
                 this.chipsControl.setValue(await this.getInitialValues());
             });
 
-        this.indeterminateValues$ = new BehaviorSubject(
-            (await this.widget.getInitalValuesAsync()).individualValues,
-        );
+        this.initIndeterminateValues((await this.widget.getInitalValuesAsync()).individualValues);
         super.initSuggestions();
         if (
             this.widget.definition.type === MdsWidgetType.MultiValueBadges ||
@@ -156,9 +153,6 @@ export class MdsEditorWidgetChipsComponent
             this.widget.definition.type === MdsWidgetType.MultiValueFixedBadges &&
             !!this.widget.definition.values;
 
-        this.indeterminateValues$.subscribe((indeterminateValues) =>
-            this.widget.setIndeterminateValues(indeterminateValues),
-        );
         this.widget.addValue.subscribe((value: MdsWidgetValue) => {
             this.add(this.toDisplayValue(value));
         });
@@ -334,14 +328,6 @@ export class MdsEditorWidgetChipsComponent
                         break;
                 }
             });
-    }
-
-    private removeFromIndeterminateValues(key: string): void {
-        const indeterminateValues = this.indeterminateValues$.value;
-        if (key && indeterminateValues?.includes(key)) {
-            indeterminateValues.splice(indeterminateValues.indexOf(key), 1);
-            this.indeterminateValues$.next(indeterminateValues);
-        }
     }
 
     private subscribeForSuggestionUpdates(): Observable<DisplayValue[]> {

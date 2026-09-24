@@ -800,6 +800,22 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     }
 
     public void updateNodeNative(StoreRef store, String nodeId, Map<String, ?> _props) {
+        if (AlfrescoTransactionSupport.getTransactionReadState() != AlfrescoTransactionSupport.TxnReadState.TXN_NONE) {
+            // a transaction is already running: the caller owns it, so only the caller can retry
+            // (the RetryingTransactionHelper would repeat the callback inside the very transaction
+            // that is already doomed - and its retries would multiply with the outer ones)
+            updateNodeNativeImpl(store, nodeId, _props);
+            return;
+        }
+        // retry the whole read-modify-write if a concurrent writer (e.g. the async preview/rendition
+        // generation) let the optimistic node update fail
+        retryingTransactionHelper.doInTransaction(() -> {
+            updateNodeNativeImpl(store, nodeId, _props);
+            return null;
+        });
+    }
+
+    private void updateNodeNativeImpl(StoreRef store, String nodeId, Map<String, ?> _props) {
 
         try {
             NodeRef nodeRef = new NodeRef(store, nodeId);
@@ -868,6 +884,13 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         } catch (DuplicateChildNodeNameException e) {
             throw e;
         } catch (Exception e) {
+            // concurrent writers on the same node (e.g. the async preview/rendition generation touching
+            // cm:lastThumbnailModification) let alfresco fail the optimistic node update.
+            // this must not be swallowed: the transaction is doomed anyway and only a propagated exception
+            // allows the surrounding RetryingTransactionHelper to retry the whole update
+            if (RetryingTransactionHelper.extractRetryCause(e) != null) {
+                throw e;
+            }
             // this occurs sometimes in workspace
             // it seems it is an alfresco bug:
             // https://issues.alfresco.com/jira/browse/ETHREEOH-2461
@@ -1857,6 +1880,7 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
     @Override
     public void removeProperty(String storeProtocol, String storeId, String nodeId, String property) {
         // when interceptors are active, use set instead to trigger interceptors
+        // some sync remove of properties for others
         if (!PropertiesInterceptorFactory.getPropertiesSetInterceptors().isEmpty()) {
             setProperty(storeProtocol, storeId, nodeId, property, null, true);
         } else {
@@ -2024,11 +2048,8 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
         }
         if (properties != null) {
             updateNodeNative(nodeRef.getStoreRef(), nodeRef.getId(), properties);
-            nodeService.setProperties(nodeRef, properties.entrySet().stream().collect(
-                    HashMap::new,
-                    (m, entry) -> m.put(QName.createQName(entry.getKey()), (Serializable) entry.getValue()),
-                    HashMap::putAll
-            ));
+            // @TODO check if second properties update still necessary
+            nodeService.setProperties(nodeRef, convertToFinalProperties(nodeRef,properties));
         } else {
             nodeService.setProperty(nodeRef, prop, value);
         }

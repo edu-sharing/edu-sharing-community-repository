@@ -147,6 +147,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Searching and inviting users outside the organization in shared folders",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Searching and inviting users outside the organization in shared folders in the safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Pinning collections and managing pinned collections",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Adding materials to public collections",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creating curriculum collections (currently not used)",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Give feedback on other materials",
     "TOOLPERMISSION_CONFIDENTAL": "Access to the secure area (safe)",
@@ -812,7 +813,7 @@
     "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON": "Author & Contributors",
     "AUTHOR_UNSET": "<not set>",
-    "LICENSE": "license",
+    "LICENSE": "License",
     "WORKFLOW": "workflow state",
     "BULK_EDIT": "Edit",
     "LICENSE_LINK": "manage license",
@@ -974,6 +975,9 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "DEFAULT_MODULE_INFO_TEXT": "This material cannot be displayed in the browser.",
+    "DEFAULT_MODULE_DOWNLOAD": "Download material",
+    "DOWNLOAD": "Download",
     "GO_TO_COURSE": "Go to course",
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
@@ -997,8 +1001,8 @@
       "GENERIC_BAD_REQUEST": "Bad request",
       "GENERIC_MODULE_NOT_AVAILABLE": "The rendering module needed to display the object is not available.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "This object is not supported by the rendering service.",
-      "GENERIC_ACCESS_DENIED": "There are no permissions available for the requested element.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
+      "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error",
+      "GENERIC_ACCESS_DENIED": "Insufficient rights"
     },
     "GDPR": {
       "EXTERNAL_SITE": "External site",
@@ -1053,7 +1057,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Wikidata entry",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Research Organization Registry)"
+    "X-ROR": "ROR (Research Organization Registry)",
+    "LINK_PERSISTENT_ID": "Open profile"
   },
   "ICON_LABELS": {
     "more_vert": "Options",

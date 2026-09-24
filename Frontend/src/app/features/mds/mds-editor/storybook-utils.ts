@@ -41,6 +41,7 @@ import {
     UserSimple,
     Variables,
 } from 'ngx-edu-sharing-api';
+import { FacetAggregation, SearchService } from 'ngx-edu-sharing-api';
 import { BehaviorSubject, from, forkJoin, Observable, of, Subject } from 'rxjs';
 import { CordovaService } from '../../../services/cordova.service';
 import { RestMdsService } from '../../../core-module/rest/services/rest-mds.service';
@@ -657,6 +658,20 @@ export const DefaultColumns = {
     ],
 } as ColumnType;
 
+@Injectable()
+export class SearchServiceMock {
+    /** facet values offered by `es-mds-editor-widget-suggestion-chips` */
+    observeFacet(property: string): Observable<FacetAggregation> {
+        return of({
+            hasMore: false,
+            values: [
+                { value: 'physik', label: 'Physik', count: 12 },
+                { value: 'chemie', label: 'Chemie', count: 5 },
+            ],
+        });
+    }
+}
+
 export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
     { provide: MdsEditorInstanceService, useClass: MdsEditorInstanceServiceMock },
@@ -672,6 +687,7 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     { provide: SuggestionsV1Service, useClass: SuggestionsV1ServiceMock },
     { provide: MdsService, useClass: MdsServiceMock },
     { provide: RestMdsService, useClass: RestMdsServiceMock },
+    { provide: SearchService, useClass: SearchServiceMock },
     ViewInstanceService,
     CordovaService,
     { provide: Toast, useClass: ToastMock },

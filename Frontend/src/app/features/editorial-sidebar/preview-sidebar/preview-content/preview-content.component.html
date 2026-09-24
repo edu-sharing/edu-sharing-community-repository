@@ -87,6 +87,7 @@
       [queryParams]="allDetailsParams"
       class="all-details-link"
       color="primary"
+      (click)="allDetailsClick.emit()"
     >
       <span>{{ 'ALL_DETAILS' | translate }}</span>
     </a>

@@ -59,6 +59,17 @@ public class ExceptionHandler
     }
     
 
+    /**
+     * edu-sharing fix: status to answer a rejected upload with, honouring the User-Agent dependent
+     * mapping WebDAVMethod already maintains.
+     */
+    private int rejectedStatus()
+    {
+        int status = WebDAVMethod.getStatusForAccessDeniedException(request);
+        // no or unrecognized User-Agent: a 401 would look like an authentication problem
+        return (status == HttpServletResponse.SC_UNAUTHORIZED) ? HttpServletResponse.SC_FORBIDDEN : status;
+    }
+
     public void handle() throws IOException
     {
         if (!(e instanceof WebDAVServerException) && e.getCause() != null)
@@ -68,13 +79,29 @@ public class ExceptionHandler
                 e = e.getCause();
             }
         }
+        //edu-sharing fix: a content rejection reaches us as a plain 500 whenever it was raised at
+        //transaction commit rather than inside executeImpl - the antivirus behaviour binds itself with
+        //NotificationFrequency.TRANSACTION_COMMIT, so WebDAVMethod.execute only ever sees an exception
+        //it does not recognize and wraps it. Mapping it here covers both timings and every method, so
+        //the client is told the actual reason instead of "an unexpected error".
+        if (!(e instanceof Edu_SharingWebDAVServerException))
+        {
+            Edu_SharingWebDAVServerException rejection =
+                    Edu_SharingWebDAVServerException.classify(e, rejectedStatus());
+            if (rejection != null)
+            {
+                e = rejection;
+            }
+        }
         // Work out how to handle the error
         if (e instanceof WebDAVServerException)
         {
             WebDAVServerException error = (WebDAVServerException) e;
             if (error.getCause() != null)
             {
-                logger.error("Exception thrown.", e);
+                if (logger.isDebugEnabled()) {
+                    logger.error("Exception thrown.", e);
+                }
             }
 
             if (logger.isDebugEnabled())
@@ -90,12 +117,21 @@ public class ExceptionHandler
             }
             else
             {
+                //edu-sharing fix: MS-WDV extended error handling, so a client that understands it can
+                //display the actual reason instead of its own generic message. Set before sendError(),
+                //which keeps headers that are already on the response.
+                if (error instanceof Edu_SharingWebDAVServerException)
+                {
+                    ((Edu_SharingWebDAVServerException) error).applyExtendedErrorHeader(response);
+                }
                 response.sendError(error.getHttpStatusCode());
             }
         }
         else
         {
-            logger.error("Exception thrown.", e);
+            if (logger.isDebugEnabled()) {
+                logger.error("Exception thrown.", e);
+            }
 
             if (response.isCommitted())
             {

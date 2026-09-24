@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.oidc.session.OidcSessionInformation;
 import org.springframework.security.oauth2.client.oidc.session.OidcSessionRegistry;
 import org.springframework.security.oauth2.client.oidc.authentication.logout.OidcLogoutToken;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,7 +27,6 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
     }
 
     @Override
-    @Transactional
     public OidcSessionInformation removeSessionInformation(String clientSessionId) {
         OidcUserSessionRecord record = mapper.findBySessionId(clientSessionId);
         if (record != null) {
@@ -47,24 +44,26 @@ public class MyBatisOidcSessionRegistry implements OidcSessionRegistry {
 
     @Override
     public Iterable<OidcSessionInformation> removeSessionInformation(OidcLogoutToken token) {
-        log.debug("cleanup idp session: {},subject: {}", token.getSessionId(),token.getSubject());
-        List<OidcUserSessionRecord> all = mapper.findAll();
-        Predicate<OidcSessionInformationDto> matcher = (token.getSessionId() != null)
-                ? dto -> token.getSessionId().equals(dto.getClaims().get("sid"))
-                : dto -> token.getSubject().equals(dto.getSubject());
+        log.debug("cleanup idp session: {},subject: {}", token.getSessionId(), token.getSubject());
+
+        /*
+         * only the matching rows are read. reading the whole table and filtering in java does not scale:
+         * every logout would materialize the complete registry in the heap, once per request thread.
+         */
+        List<OidcUserSessionRecord> matches = (token.getSessionId() != null)
+                ? mapper.findBySid(token.getSessionId())
+                : mapper.findBySubject(token.getSubject());
 
         List<OidcSessionInformation> removed = new ArrayList<>();
-        for (OidcUserSessionRecord record : all) {
-            if (matcher.test(record.getSessionInformation())) {
-                log.debug("Removing session information: {} , idp sid: {}, issuedAt: {}. expiresAt: {}",
-                        record.getSessionId(),
-                        record.getSessionInformation().getClaims().get("sid"),
-                        record.getSessionInformation().getIssuedAt(),
-                        record.getSessionInformation().getExpiresAt());
-                mapper.deleteBySessionId(record.getSessionId());
-                removed.add(record.getSessionInformation()
-                        .toDomain(Collections.emptySet())); // you can enrich authorities if needed
-            }
+        for (OidcUserSessionRecord record : matches) {
+            log.debug("Removing session information: {} , idp sid: {}, issuedAt: {}. expiresAt: {}",
+                    record.getSessionId(),
+                    record.getSessionInformation().getClaims().get("sid"),
+                    record.getSessionInformation().getIssuedAt(),
+                    record.getSessionInformation().getExpiresAt());
+            mapper.deleteBySessionId(record.getSessionId());
+            removed.add(record.getSessionInformation()
+                    .toDomain(Collections.emptySet())); // you can enrich authorities if needed
         }
         return removed;
     }

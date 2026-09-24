@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import lombok.extern.slf4j.Slf4j;
@@ -50,12 +51,25 @@ public class TrashcanCleanerSolr {
         execute(0);
 
         log.info("collected {} nodes to delete", list.size());
+        int deleted = 0;
+        int failed = 0;
         for (NodeRef nodeRef : list) {
-            log.info("deleteing from archive:{}  {} {}", nodeRef, nodeService.getProperty(nodeRef, ContentModel.PROP_NAME), nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
+            log.info("deleteing from archive:{}", nodeRef);
             if (this.execute) {
-                nodeService.deleteNode(nodeRef);
+                try {
+                    nodeService.deleteNode(nodeRef);
+                    deleted++;
+                } catch (Exception e) {
+                    /*
+                     * i.e. the elasticsearch index is behind and still knows a node that was already
+                     * removed from the archive store. skip it instead of aborting the whole job.
+                     */
+                    failed++;
+                    log.error("could not delete {} from archive, continuing with next node: {}", nodeRef, e.getMessage(), e);
+                }
             }
         }
+        log.info("cleaning trashcan finished (collected: {}, deleted: {}, failed: {})", list.size(), deleted, failed);
     }
 
     private void execute(int page) {
@@ -67,21 +81,34 @@ public class TrashcanCleanerSolr {
         searchToken.setStoreProtocol(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getProtocol());
         searchToken.setStoreName(StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.getIdentifier());
         searchToken.setElasticQuery(QueryBuilders.bool()
-                .should(s -> s.term(t -> t.field("type").value("ccm:io")))
-                .should(s -> s.term(t -> t.field("type").value("ccm:map")))
+                .must(m -> m.bool(b -> b
+                        .should(s -> s.term(t -> t.field("type").value("ccm:io")))
+                        .should(s -> s.term(t -> t.field("type").value("ccm:map")))
+                        .minimumShouldMatch("1"))
+                )
                 .must(m -> m.range(r -> r.term(t -> t.field("properties.sys:archivedDate.date")
-                        .lte(dateFormater.format(this.to))))).build());
+                        .lte(dateFormater.format(this.to))))
+                )
+                .build());
 
         SearchResultNodeRef search = searchService.search(searchToken);
+        log.info("found {} results", search.getData().size());
         search.getData().forEach(n -> {
             NodeRef nodeRef = new NodeRef(new StoreRef(n.getStoreProtocol(), n.getStoreId()), n.getNodeId());
             if (StoreRef.STORE_REF_ARCHIVE_SPACESSTORE.equals(nodeRef.getStoreRef())) {
-                log.info("adding:{} {} {}", nodeRef, nodeService.getProperty(nodeRef, ContentModel.PROP_NAME), nodeService.getProperty(nodeRef, ContentModel.PROP_ARCHIVED_DATE));
+                /*
+                 * use the properties of the search hit, the node may no longer exist in the repository
+                 */
+                Map<String, Object> properties = n.getProperties();
+                log.info("adding:{} {} {}", nodeRef,
+                        (properties != null) ? properties.get(ContentModel.PROP_NAME.toString()) : null,
+                        (properties != null) ? properties.get(ContentModel.PROP_ARCHIVED_DATE.toString()) : null);
                 list.add(nodeRef);
             } else {
                 log.error("wrong store: {}", nodeRef);
             }
         });
     }
+
 
 }

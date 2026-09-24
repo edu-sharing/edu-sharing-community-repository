@@ -7,6 +7,7 @@ import lombok.Getter;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.*;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -92,8 +93,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -101,6 +100,7 @@ import java.util.stream.Stream;
 public class NodeDao {
     private static final Logger logger = Logger.getLogger(NodeDao.class);
     private static final StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+
     /**
      * also check @PermissionServiceHelper.PERMISSIONS
      */
@@ -1014,10 +1014,16 @@ public class NodeDao {
         final String user = AuthenticationUtil.getFullyAuthenticatedUser();
         final Context context = Context.getCurrentInstance();
         final String scope = NodeServiceInterceptor.getEduSharingScope();
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         List<Node> nodes;
         java.util.Collection<Callable<Node>> tasks = list.stream().map(
                 (nodeRef) -> (Callable<Node>) () -> AuthenticationUtil.runAs(() -> {
+                    // NodeConvertExecutorProvider's executor is shared across requests, and under
+                    // CallerRunsPolicy a task may even run on the calling request thread itself - so
+                    // the previous thread state is saved and restored here instead of being
+                    // unconditionally cleared, to avoid leaking (or wiping) another request's
+                    // context/scope on that thread.
+                    Context prevContext = Context.getCurrentInstance();
+                    String prevScope = NodeServiceInterceptor.getEduSharingScope();
                     try {
                         // apply thread variables to keep state of thread
                         Context.setInstance(context);
@@ -1040,12 +1046,17 @@ public class NodeDao {
                         logger.info("Toolpermission exception for node " + nodeRef.getId() + " tried to fetch, skipping fetch", daoException);
                         return null;
                     } finally {
-                        Context.release();
+                        if (prevContext != null) {
+                            Context.setInstance(prevContext);
+                        } else {
+                            Context.release();
+                        }
+                        NodeServiceInterceptor.setEduSharingScope(prevScope);
                     }
                 }, user)
         ).collect(Collectors.toList());
         try {
-            nodes = executor.invokeAll(tasks).stream()
+            nodes = NodeConvertExecutorProvider.get().getExecutor().invokeAll(tasks).stream()
                     .filter(Objects::nonNull)
                     .map((f) -> {
                         try {
@@ -1054,7 +1065,6 @@ public class NodeDao {
                             throw new RuntimeException(e);
                         }
                     }).filter(Objects::nonNull).collect(Collectors.toList());
-            executor.shutdown();
             return nodes;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -1240,25 +1250,40 @@ public class NodeDao {
     public NodeDao changeProperties(Map<String, String[]> properties, boolean obeyMds)
             throws DAOException {
 
+        // Throws ConcurrencyFailureException if a concurrent writer touches the node (DESP-851)
+        getRetryingTransactionHelper().doInTransaction(() -> {
+
+            try {
+                this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
+            } catch (Throwable t) {
+                throw DAOException.mapping(t);
+            }
+            return null;
+        });
+        // don't do this in transaction since it could cause rollbacks!
         try {
-
-            this.nodeService.updateNode(nodeId, transformProperties(properties), obeyMds);
-
             return new NodeDao(repoDao, nodeId, Filter.createShowAllFilter());
-
         } catch (Throwable t) {
-
             throw DAOException.mapping(t);
         }
+    }
+
+    /**
+     * the retrying transaction helper must wrap the outermost unit of work: it only owns
+     * (and can therefore roll back) a transaction it created itself. nested inside a foreign
+     * transaction it would repeat its callback within that already doomed transaction
+     */
+    private static RetryingTransactionHelper getRetryingTransactionHelper() {
+        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
+        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
+        return serviceRegistry.getTransactionService().getRetryingTransactionHelper();
     }
 
     public NodeDao changePropertiesWithVersioning(
             Map<String, String[]> properties, boolean obeyMds, String comment) throws DAOException {
 
         // Throws ConcurrencyFailureException if the previous call changes the preview (DESP-851)
-        ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
-        ServiceRegistry serviceRegistry = (ServiceRegistry) applicationContext.getBean(ServiceRegistry.SERVICE_REGISTRY);
-        serviceRegistry.getTransactionService().getRetryingTransactionHelper().doInTransaction(() -> {
+        getRetryingTransactionHelper().doInTransaction(() -> {
 
             try {
                 mergeVersionComment(properties, comment);

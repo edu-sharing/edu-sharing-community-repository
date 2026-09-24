@@ -52,6 +52,7 @@
     <mongodb.version>5.5.1</mongodb.version>
     <spring.version>7.0.2</spring.version>
     <spring-security.version>7.0.0</spring-security.version>
+    <redisson.version>3.50.0</redisson.version>
 
 
   </properties>
@@ -390,7 +391,7 @@
         <version>${project.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-angular</artifactId>
         <version>${project.version}</version>
@@ -402,7 +403,7 @@
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-typescript-ng</artifactId>
         <version>${project.version}</version>
         <classifier>sources</classifier>
-      </dependency>
+      </dependency>-->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -410,12 +411,12 @@
         <version>${project.version}</version>
       </dependency>
 
-      <dependency>
+      <!--<dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>edu_sharing-community-repository-backend-services-rest-client-php</artifactId>
         <version>${project.version}</version>
         <type>zip</type>
-      </dependency>
+      </dependency>-->
 
       <dependency>
         <groupId>${project.groupId}</groupId>
@@ -871,6 +872,18 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql.jdbc.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-all</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-tomcat-10</artifactId>
+        <version>${redisson.version}</version>
       </dependency>
 
       <dependency>

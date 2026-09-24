@@ -337,7 +337,8 @@ public class RenderingProxy extends SpringHttpServlet {
 
             String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
             ApplicationInfo appInfoRs1 = ApplicationInfoList.getRenderService();
-            String alg = StringUtils.isNullOrEmpty( appInfoRs1.getSignatureAlgorithm())  ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
+            // appInfoRs1 is null when no classic rendering service (rs1) is registered, e.g. when only rendering service 2 is deployed
+            String alg = (appInfoRs1 == null || StringUtils.isNullOrEmpty(appInfoRs1.getSignatureAlgorithm())) ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
 
 			contentUrl = UrlTool.setParam(contentUrl, "sig",
 					RenderingTool.getSignatureSigned(rep_id, nodeId, timestamp,alg));

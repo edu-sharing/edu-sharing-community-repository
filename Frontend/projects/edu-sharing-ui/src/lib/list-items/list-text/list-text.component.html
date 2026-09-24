@@ -57,15 +57,17 @@
 <span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
   @if (provideLabel) {
   <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  } @if (!$any(getNode()).isDirectory) {
+  <span>{{ $any(getNode()).size | formatSize }}</span>
   }
-  {{ $any(getNode()).size | formatSize }}
 </span>
 } @case ('cclom:size') {
 <span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">
   @if (provideLabel) {
   <span class="cdk-visually-hidden">{{ getI18n(item) | translate }}:</span>
+  } @if (!$any(getNode()).isDirectory) {
+  <span>{{ $any(getNode()).size | formatSize }}</span>
   }
-  {{ $any(getNode()).size | formatSize }}
 </span>
 } @case ('dimensions') {
 <span [matTooltip]="provideLabel ? (getI18n(item) | translate) : null">

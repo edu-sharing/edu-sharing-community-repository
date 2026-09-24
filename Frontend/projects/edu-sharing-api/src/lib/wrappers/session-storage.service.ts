@@ -44,6 +44,12 @@ export class SessionStorageService {
 
     private readonly localStorage = new BrowserStorage(localStorage, this.authentication, false);
     private readonly sessionStorage = new BrowserStorage(localStorage, this.authentication, true);
+    // Backed by the real browser sessionStorage: cleared on reload by the browser and on logout by us.
+    private readonly browserSessionStorage = new BrowserStorage(
+        sessionStorage,
+        this.authentication,
+        true,
+    );
 
     /** User preferences from the backend were changed locally and pushed to the backend. */
     private readonly userPreferencesChanged = new Subject<{ [key: string]: any }>();
@@ -123,6 +129,8 @@ export class SessionStorageService {
                     return this.localStorage.observe(key, fallback);
                 case Store.Session:
                     return this.sessionStorage.observe(key, fallback);
+                case Store.BrowserSessionStorage:
+                    return this.browserSessionStorage.observe(key, fallback);
             }
         })().pipe(
             // Return a deep copy to prevent manipulation of our internal state from outside and
@@ -137,10 +145,18 @@ export class SessionStorageService {
     /**
      * Updates a storage value, immediately reflecting the changes within this service and on the
      * storage.
+     *
+     * @param sessionTimeout optional lifetime in seconds for this entry, overriding the default
+     * session timeout. Only applies to `Store.Session`; ignored for `Store.UserProfile`.
      */
     // Use a promise for `set` since an observable needs to be subscribed to to have an effect,
     // which users are likely to forget.
-    async set(key: string, value: any, store = Store.UserProfile): Promise<void> {
+    async set(
+        key: string,
+        value: any,
+        store = Store.UserProfile,
+        sessionTimeout?: number,
+    ): Promise<void> {
         const obj: any = {};
         switch (store) {
             case Store.UserProfile:
@@ -150,7 +166,9 @@ export class SessionStorageService {
                 obj[key] = value;
                 return this.storeInLocalStorage(obj);
             case Store.Session:
-                return this.sessionStorage.set(key, value);
+                return this.sessionStorage.set(key, value, sessionTimeout);
+            case Store.BrowserSessionStorage:
+                return this.browserSessionStorage.set(key, value, sessionTimeout);
         }
     }
 
@@ -177,6 +195,8 @@ export class SessionStorageService {
                 return this.localStorage.delete(key);
             case Store.Session:
                 return this.sessionStorage.delete(key);
+            case Store.BrowserSessionStorage:
+                return this.browserSessionStorage.delete(key);
         }
     }
 
@@ -255,10 +275,12 @@ export class SessionStorageService {
 export enum Store {
     /** The user profile, if available, otherwise localStorage. */
     UserProfile,
-    /** Only the current running session (via sessionStorage). */
+    /** Only the current running (backend) session (via localStorage). */
     Session,
     /** Only browser local storage */
     LocalStorage,
+    /** Only the current session storage of browser (cleared on logout, cleared on reload by browser). More volatile than the regular Session cache! */
+    BrowserSessionStorage,
 }
 export type StorageWithTime<T> = {
     expiry: number;
@@ -286,6 +308,10 @@ class BrowserStorage {
                 .subscribe((login) => {
                     this.sessionTimeout = login?.sessionTimeout;
                 });
+            // The session store lives in localStorage (so it survives an F5 reload), but must not
+            // leak between users. Clear all our entries whenever the logged-in user actually changes
+            // (login or logout). `observeUserChanges` does not fire on the initial fetch/reload.
+            this.authentication.observeUserChanges().subscribe(() => this.clearAll());
         }
     }
 
@@ -310,12 +336,12 @@ class BrowserStorage {
         );
     }
 
-    set<T>(key: string, value: T): void {
+    set<T>(key: string, value: T, sessionTimeout: number = this.sessionTimeout): void {
         if (this.keepOnlyForSession) {
             this.storage.setItem(
                 this.getKey(key),
                 JSON.stringify({
-                    expiry: Date.now() + this.sessionTimeout * 1000,
+                    expiry: Date.now() + sessionTimeout * 1000,
                     value,
                 } as StorageWithTime<T>),
             );
@@ -328,6 +354,21 @@ class BrowserStorage {
     delete(key: string): void {
         this.storage.removeItem(this.getKey(key));
         this.entryChanged.next({ key, value: null });
+    }
+
+    /** Removes every entry owned by this storage (i.e. carrying our `SessionPrefix`). */
+    clearAll(): void {
+        // Iterate backwards since `removeItem` reindexes the storage.
+        for (let i = this.storage.length - 1; i >= 0; i--) {
+            const rawKey = this.storage.key(i);
+            if (rawKey?.startsWith(this.SessionPrefix)) {
+                this.storage.removeItem(rawKey);
+                this.entryChanged.next({
+                    key: rawKey.substring(this.SessionPrefix.length),
+                    value: null,
+                });
+            }
+        }
     }
 
     private getKey(key: string) {

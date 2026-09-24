@@ -22,12 +22,9 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import org.apache.log4j.Logger;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.detect.Detector;
-import org.apache.tika.io.TikaInputStream;
-import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypeException;
+import org.edu_sharing.alfresco.policy.NodeCustomizationPolicies;
 import org.edu_sharing.alfresco.policy.NodeMimetypeValidationException;
 
 import static org.apache.batik.transcoder.SVGAbstractTranscoder.*;
@@ -161,11 +158,7 @@ public class ImageTool {
 	 */
 	public static VerifyResult verifyAndPreprocessImage(InputStream is, int maxSize) throws MimeTypeException, IOException {
 		byte[] data=IOUtils.toByteArray(is);
-		TikaConfig config = TikaConfig.getDefaultConfig();
-		Detector detector = config.getDetector();
-		TikaInputStream stream = TikaInputStream.get(data);
-		Metadata metadata = new Metadata();
-		MediaType mediaType = detector.detect(stream, metadata);
+		MediaType mediaType = NodeCustomizationPolicies.getMediaType(null, data);
 		if(!mediaType.getType().equals("image") && !mediaType.getType().equals("text")) {
 			throw new NodeMimetypeValidationException("Invalid mime type for image: " + mediaType.getType() + "/" + mediaType.getSubtype());
 		}

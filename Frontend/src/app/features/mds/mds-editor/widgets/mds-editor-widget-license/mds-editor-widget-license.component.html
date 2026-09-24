@@ -2,7 +2,12 @@
 mdsEditorInstance.editorMode === 'viewer' ) {
 <es-mds-editor-widget-container [widget]="widget" [label]="false">
   @if (!isSafe) {
-  <es-license-details [nodes]="nodes"></es-license-details>
+  <es-license-details
+    [nodes]="nodes"
+    [headingKey]="
+      mdsEditorInstance.editorMode === 'viewer' ? 'MDS.LICENSE' : 'WORKSPACE.LICENSE.CURRENT'
+    "
+  ></es-license-details>
   @if (mdsEditorInstance.editorMode !== 'viewer') {
   <div class="link">
     <div>

@@ -485,6 +485,7 @@
         "INITIATOR": "initiator",
         "TERMINATOR": "terminator",
         "VALIDATOR": "validator",
+        "REDAKTION": "editorial office",
         "EDITOR": "editor",
         "GRAPHICAL_DESIGNER": "graphical Designer",
         "TECHNICAL_IMPLEMENTER": "technical implementer",

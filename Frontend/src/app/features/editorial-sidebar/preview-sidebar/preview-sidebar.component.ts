@@ -146,4 +146,8 @@ export class PreviewSidebarComponent implements OnDestroy {
     async openModal() {
         await this.openAsDialog();
     }
+
+    closeModal() {
+        this.modalDialogRef?.close();
+    }
 }

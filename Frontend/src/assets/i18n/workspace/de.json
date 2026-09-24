@@ -523,6 +523,7 @@
         "INITIATOR": "Auftraggeber{{GENDER_SEPARATOR}}in",
         "TERMINATOR": "Person, welche die Verfügbarkeit eines Mediums beendet",
         "VALIDATOR": "Evaluation",
+        "REDAKTION": "Redaktion",
         "EDITOR": "Redaktion",
         "GRAPHICAL_DESIGNER": "Grafiker{{GENDER_SEPARATOR}}in",
         "TECHNICAL_IMPLEMENTER": "Technische Umsetzer",

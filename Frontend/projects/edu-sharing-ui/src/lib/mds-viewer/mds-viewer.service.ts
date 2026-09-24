@@ -107,6 +107,9 @@ export class MdsViewerService {
                 return 'duration';
             case 'range':
                 return 'range';
+            case 'checkbox':
+            case 'toggle':
+                return 'checkbox';
         }
         return 'unknown';
     }

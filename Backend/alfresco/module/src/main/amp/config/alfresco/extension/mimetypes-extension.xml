@@ -7,6 +7,10 @@
             <extension default="true">json</extension>
          </mimetype>
 
+         <mimetype mimetype="application/x-ipynb+json" display="Jupyter Notebook">
+            <extension default="true">ipynb</extension>
+         </mimetype>
+
          <mimetype mimetype="application/eps" display="EPS Type PostScript">
             <extension default="true">eps</extension>
          </mimetype>
