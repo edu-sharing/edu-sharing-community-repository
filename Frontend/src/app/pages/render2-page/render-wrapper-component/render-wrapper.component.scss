@@ -1,7 +1,26 @@
+@use 'sass:math';
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
+// mds views may only be rendered 1, 2 or 4 side by side - 3 columns are skipped because they
+// look unbalanced with the typical number of views.
+// breakpoints: n * $mdsColumnMinWidth + (n - 1) * $mdsColumnGap, plus the horizontal padding
+// (2 * $rsPaddingHorizontal = 4vw, i.e. the available width is 96vw)
+$mdsColumnMinWidth: 330px;
+$mdsColumnGap: 10px;
+$mdsTwoColumns: math.div(2 * $mdsColumnMinWidth + $mdsColumnGap, 0.96);
+$mdsFourColumns: math.div(4 * $mdsColumnMinWidth + 3 * $mdsColumnGap, 0.96);
+@mixin mdsColumns {
+    grid-template-columns: 1fr;
+    @media screen and (min-width: $mdsTwoColumns) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    @media screen and (min-width: $mdsFourColumns) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 $horizontalScrollPadding: 1.5em;
 $maxHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 100px);
 $minHeight: calc(100vh - var(--mainnavHeight) - $rsPaddingVertical - 200px);
@@ -270,11 +289,11 @@ rs-root {
         width: 100%;
         padding: 0 $rsPaddingHorizontal;
         grid-gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
+        @include mdsColumns;
         .mds-views {
             display: grid;
             grid-gap: 10px;
-            grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
+            @include mdsColumns;
         }
         es-mds-editor-view {
             padding: 0;
