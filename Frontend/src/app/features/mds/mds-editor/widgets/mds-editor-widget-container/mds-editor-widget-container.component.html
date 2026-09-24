@@ -84,7 +84,7 @@
   <mat-form-field
     esRegisterFormField
     *ngIf="wrapInFormField"
-    [floatLabel]="widget.definition.placeholder ? 'always' : 'auto'"
+    [floatLabel]="widget.definition.placeholder || alwaysFloatLabel ? 'always' : 'auto'"
     class="widget-form-field-{{ widget.definition.id.replace(':', '-') }}"
     [class.warn]="missingRequired === 'mandatoryForPublish'"
     [hideRequiredMarker]="true"

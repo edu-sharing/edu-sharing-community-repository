@@ -112,14 +112,6 @@ export class MdsEditorWidgetTextComponent extends MdsEditorWidgetBase implements
         return validators;
     }
 
-    showBulkMixedValues() {
-        return (
-            this.widget.getInitialValues()?.individualValues &&
-            this.mdsEditorInstance.editorBulkMode?.isBulk &&
-            this.widget.getBulkMode() === 'no-change'
-        );
-    }
-
     submit() {
         if (this.mdsEditorInstance.editorMode === 'search') {
             this.setValue([this.formControl.value]);

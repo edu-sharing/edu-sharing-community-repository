@@ -47,6 +47,19 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     }
 
     /**
+     * Whether the widget currently represents mixed values, i.e. in bulk mode the edited nodes
+     * carry different values for this property and the user has not decided to overwrite them
+     * yet. Widgets show a "(different values)" hint in that case.
+     */
+    showBulkMixedValues(): boolean {
+        return !!(
+            this.widget.getInitialValues()?.individualValues &&
+            this.mdsEditorInstance.editorBulkMode?.isBulk &&
+            this.widget.getBulkMode() === 'no-change'
+        );
+    }
+
+    /**
      * Confirms an indeterminate (mixed) value: it is no longer treated as individual and will be
      * written to all edited nodes on save.
      */

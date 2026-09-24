@@ -89,6 +89,11 @@ export class MdsEditorWidgetContainerComponent
      *
      * Defaults to `true` if `control` is set, otherwise `false`.
      */
+    /**
+     * Forces the label of the form field to float, so a placeholder - e.g. the
+     * "(different values)" hint of a bulk edit - is visible without focusing the field.
+     */
+    @Input() alwaysFloatLabel = false;
     @Input() wrapInFormField: boolean;
     /**
      * Whether the content should be semantically grouped and labelled using ARIA.
