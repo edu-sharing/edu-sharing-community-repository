@@ -124,6 +124,14 @@ public class URLHelper {
         return getNgComponentsUrl(getBaseUrl(dynamic));
     }
 
+    /**
+     * the angular routes relative to the host of the request ({@code <contextPath>/components/}) -
+     * for redirects that keep the browser on the domain it came from
+     */
+    public static String getNgComponentsUrlRelative(HttpServletRequest req) {
+        return getNgComponentsUrl(req.getContextPath());
+    }
+
     public static String getNgCollectionUrl(String nodeId, boolean dynamic) {
        return getNgComponentsUrl(dynamic) + "collections/?id=" + nodeId;
     }

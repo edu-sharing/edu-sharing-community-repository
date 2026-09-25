@@ -20,7 +20,8 @@ export function buildManagementServer(app: FastifyInstance, options: { backendUr
     // alive = the process answers; never asks the backend - a failing tomcat must not
     // make kubernetes restart every frontend server
     management.get('/health/liveness', async () => ({ status: 'ok' }));
-    // we will later serve a custom error handler when we can't reach the backend
+    // stays up when the backend goes away later: the pods answer with the
+    // "service unavailable" page then (docs/04-deployment.md, backend unreachable)
     management.get('/health/readiness', async () => ({ status: 'ok' }));
 
     return management;

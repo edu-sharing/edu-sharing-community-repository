@@ -3,6 +3,7 @@ package org.edu_sharing.repository.server;
 import com.google.gson.Gson;
 import lombok.Getter;
 import org.apache.axis.utils.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.rendering.RenderingException;
@@ -121,13 +122,14 @@ public class ErrorFilter implements Filter {
             }
             resp.setStatus(statusCode);
             if (accept != null && accept.toLowerCase().contains("text/html")) {
-                resp.setContentType("text/html");
-                // SecurityHeadersFilter does not run on every path that ends up here (i.e. /error.html) - no nonce then, instead of nonce="null"
-                String nonce = SecurityHeadersFilter.ngCspNonce.get();
-                resp.getWriter().print("<head><script" + (nonce == null ? "" : " nonce=\"" + nonce + "\"") + ">window.location.href=\"" + URLTool.getNgErrorUrl(
+                resp.setContentType("text/html;charset=UTF-8");
+                // a meta refresh needs no CSP nonce (SecurityHeadersFilter does not run on every path that ends up
+                // here) - the same markup the frontend server answers its own errors with (Frontend-Server/src/lib/error-response.ts)
+                String target = URLTool.getErrorPageUrl(req,
                         (t instanceof ErrorFilterException) ? ((ErrorFilterException) t).getAngularServletMessage() :
                                 statusCode + ""
-                ) + "\";</script></head>");
+                );
+                resp.getWriter().print("<head><meta http-equiv=\"refresh\" content=\"0;url=" + StringEscapeUtils.escapeHtml4(target) + "\"></head>");
             } else if (accept != null && accept.toLowerCase().contains("application/json")) {
                 resp.setHeader("Content-Type", "application/json");
                 resp.getWriter().print(new Gson().toJson(response));

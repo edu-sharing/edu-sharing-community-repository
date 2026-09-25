@@ -5,9 +5,9 @@ import Fastify, { LogController, type FastifyInstance, type FastifyReply, type F
 import fastifyStatic from '@fastify/static';
 import replyFrom from '@fastify/reply-from';
 import type { Config } from './config.ts';
-import { anonymousFor, BackendClient, onBehalfOf } from './lib/backend-client.ts';
+import { anonymousFor, BackendClient, isConnectionError, onBehalfOf } from './lib/backend-client.ts';
 import { ConfigCache } from './lib/config-cache.ts';
-import { acceptsHtml, sendError, shellErrorStatus } from './lib/error-response.ts';
+import { isServiceUnavailablePage, RETRY_AFTER_SECONDS, sendError, sendUnavailable, shellErrorStatus } from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { loadNode, parseShellTarget } from './lib/node-metadata.ts';
@@ -123,19 +123,22 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
     }
     const backend = new BackendClient(config.backendUrl, config.enrichTimeoutMs);
     // config only - the internal port hands out ValuesBackendInternal
-    const internalBackend = new BackendClient(config.backendInternalUrl, config.enrichTimeoutMs);
+    const internalBackend = new BackendClient(config.backendInternalUrl, config.configTimeoutMs);
     const configCache = new ConfigCache(internalBackend, {
+        // the _about poll decides about "backend unreachable" - its own, longer timeout
+        probe: new BackendClient(config.backendInternalUrl, config.backendProbeTimeoutMs),
         contextPath: ctx,
         pollIntervalMs: config.configPollIntervalMs,
         maxAgeMs: config.configMaxAgeMs,
         log: app.log,
     });
-    configCache.start();
     app.addHook('onClose', async () => configCache.stop());
     app.decorate('backendReady', () => configCache.isReady());
 
     // before any route, so fastify-metrics sees every route pattern
     const metrics = await registerMetrics(app, configCache);
+    // after the metrics subscribed to it - an early outage is counted as well
+    configCache.start();
     app.addHook('onResponse', async (request, reply) => {
         const info = proxied.get(request);
         if (info) {
@@ -150,25 +153,21 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
      */
     function toBackend(request: FastifyRequest, reply: FastifyReply, reason: ProxyReason = 'backend-path'): FastifyReply {
         proxied.set(request, { reason, upstream: `${config.backendUrl}${request.url}`, startedAt: Date.now() });
+        // tomcat's errors (ErrorFilter / ErrorPageServlet) redirect relative to the request,
+        // so they pass through unchanged - the browser stays on its domain
         return reply.from(request.url, {
-            // TRANSITIONAL, with the unmatched fallback: a path tomcat does not know either
-            // is answered with this server's own error page - tomcat's (ErrorFilter) points
-            // at the configured repository domain instead of the requested one
-            ...(reason === 'unmatched'
-                ? {
-                      // the reply handed in is this very reply, only typed more generally
-                      onResponse: (_request, _reply, response) => {
-                          if (response.statusCode === 404 && acceptsHtml(request)) {
-                              response.stream.resume();
-                              for (const header of ['content-length', 'content-type', 'content-encoding']) {
-                                  reply.removeHeader(header);
-                              }
-                              return sendError(request, reply, ctx, 404);
-                          }
-                          return reply.send(response.stream);
-                      },
-                  }
-                : {}),
+            // the default answers every browser with fastify's error json. A connection
+            // that never reached tomcat marks the backend unreachable: browsers go to the
+            // "service unavailable" page, which returns here once the backend is back
+            onError: (_reply, { error }) => {
+                if (isConnectionError(error)) {
+                    configCache.markUnreachable('proxy', error.message);
+                    metrics.unavailable('proxy');
+                    return sendUnavailable(request, reply, ctx);
+                }
+                const statusCode = (error as { statusCode?: unknown }).statusCode;
+                return sendError(request, reply, ctx, typeof statusCode === 'number' ? statusCode : 502);
+            },
             rewriteRequestHeaders: (originalRequest, headers) => {
                 const forwardedFor = headers['x-forwarded-for'];
                 const clientIp = originalRequest.socket.remoteAddress ?? '';
@@ -197,17 +196,31 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
      * that status.
      */
     async function sendIndex(request: FastifyRequest, reply: FastifyReply): Promise<FastifyReply> {
+        const reachable = configCache.isBackendReachable();
+        const unavailablePage = isServiceUnavailablePage(request.url, ctx);
+        // the app would hang on its config and translations - the "service unavailable"
+        // page needs neither and returns to this url once the backend is back
+        if (!reachable && !unavailablePage) {
+            metrics.unavailable('page');
+            return sendUnavailable(request, reply, ctx);
+        }
         const url = request.url.slice(ctx.length);
         const errorStatus = shellErrorStatus(url);
         if (errorStatus !== undefined) {
             reply.code(errorStatus);
         }
-        const target = parseShellTarget(url);
+        if (unavailablePage) {
+            reply.header('Retry-After', String(RETRY_AFTER_SECONDS));
+        }
+        const target = reachable ? parseShellTarget(url) : undefined;
         // the config is needed on every shell page (headers, custom html) and is cached;
-        // node metadata only for the render and collection views
+        // node metadata only for the render and collection views. Without a backend the
+        // cached config is used as is - asking would only wait for the timeout
         const enrichmentStart = Date.now();
         const [configResult, nodeResult] = await Promise.allSettled([
-            configCache.get(request.hostname, anonymousFor(request)),
+            reachable
+                ? configCache.get(request.hostname, anonymousFor(request))
+                : Promise.resolve(configCache.peek(request.hostname)),
             target === undefined ? Promise.resolve(undefined) : loadNode(backend, ctx, target, onBehalfOf(request)),
         ]);
         if (target !== undefined) {

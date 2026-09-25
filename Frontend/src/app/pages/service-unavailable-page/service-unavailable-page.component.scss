@@ -1,0 +1,15 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+@include mixins.messagePage(vars.$mobileHeightLandscape);
+
+// same layout as the error page, but rendered as a simple page without the main nav -
+// it has to fill the viewport itself
+:host {
+    display: block;
+    min-height: 100vh;
+    background: var(--messagePageBackground);
+}
+.message-bg {
+    min-height: 100vh;
+}

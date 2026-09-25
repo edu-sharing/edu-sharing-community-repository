@@ -2,11 +2,12 @@ import { STATUS_CODES } from 'node:http';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
- * Mirrors `ErrorFilter.handleError` (reached via `NgErrorServlet` / `error.html`),
+ * Mirrors `ErrorFilter.handleError` (also behind `ErrorPageServlet`, tomcat's error page),
  * so errors this server answers itself look exactly like the ones Tomcat produces:
  *
  * * `text/html`        -> status kept, browser sent to the angular error page
- *                         `components/error/<status>` (`URLTool.getNgErrorUrl`)
+ *                         `components/error/<status>` by a relative meta refresh
+ *                         (`URLTool.getErrorPageUrl`)
  * * `application/json` -> `ErrorResponse` shape, `{"error":"<status>","message":...}`
  * * anything else      -> plain text
  */
@@ -19,7 +20,7 @@ export function sendError(request: FastifyRequest, reply: FastifyReply, contextP
     const message = STATUS_CODES[statusCode] ?? String(statusCode);
     reply.code(statusCode);
     if (acceptsHtml(request)) {
-        // the backend uses an inline script with the CSP nonce - a meta refresh needs none
+        // a meta refresh needs no CSP nonce - the same markup as ErrorFilter.handleError
         const target = `${contextPath}/components/error/${statusCode}`;
         return reply
             .type('text/html; charset=utf-8')
@@ -42,4 +43,38 @@ export function shellErrorStatus(url: string): number | undefined {
     }
     const code = Number(segments.at(-1));
     return Number.isInteger(code) && code >= 400 && code <= 599 ? code : 500;
+}
+
+/** the angular page shown while the backend is unreachable, relative to CONTEXT_PATH - it needs no backend itself */
+export const SERVICE_UNAVAILABLE_PATH = '/components/error/503';
+
+/** the url to return to once the backend is back, read by the angular page */
+export const SERVICE_UNAVAILABLE_NEXT_PARAM = 'next';
+
+/** how often clients may retry, the `Retry-After` of every "unavailable" answer */
+export const RETRY_AFTER_SECONDS = 10;
+
+export function isServiceUnavailablePage(url: string, contextPath: string): boolean {
+    return new URL(url, 'http://localhost').pathname.replace(/\/+$/, '') === `${contextPath}${SERVICE_UNAVAILABLE_PATH}`;
+}
+
+/**
+ * The backend is unreachable: 503 with `Retry-After`. Browsers are sent to the angular
+ * "service unavailable" page, which returns to `request.url` by itself once the backend
+ * answers again. Everything else gets the `ErrorResponse` shape / plain text, like `sendError`.
+ */
+export function sendUnavailable(request: FastifyRequest, reply: FastifyReply, contextPath: string): FastifyReply {
+    reply.code(503).header('Retry-After', String(RETRY_AFTER_SECONDS));
+    if (acceptsHtml(request)) {
+        const target = `${contextPath}${SERVICE_UNAVAILABLE_PATH}?${SERVICE_UNAVAILABLE_NEXT_PARAM}=${encodeURIComponent(request.url)}`;
+        return reply
+            .type('text/html; charset=utf-8')
+            .header('Cache-Control', 'no-store')
+            .send(`<head><meta http-equiv="refresh" content="0;url=${escapeAttribute(target)}"></head>`);
+    }
+    return sendError(request, reply, contextPath, 503);
+}
+
+function escapeAttribute(value: string): string {
+    return value.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }

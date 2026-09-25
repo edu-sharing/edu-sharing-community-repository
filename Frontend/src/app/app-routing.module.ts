@@ -5,6 +5,7 @@ import { extensionRoutes } from './extension/extension-routes';
 import { DialogsNavigationGuard } from './features/dialogs/dialogs-navigation.guard';
 import { StartupComponent } from './main/startup.component';
 import { getTopicPageQueryParams } from './features/topic-page/shared/utils/collection-topic-page-util';
+import { SERVICE_UNAVAILABLE_ROUTE } from './util/service-unavailable';
 
 const routes: Routes = [
     // Overrides and additional routes
@@ -204,6 +205,14 @@ const routes: Routes = [
         loadComponent: () =>
             import('./pages/loading-page/loading-page.component').then(
                 (m) => m.LoadingPageComponent,
+            ),
+    },
+    // backend unreachable - must work without the backend, see AppComponent
+    {
+        path: SERVICE_UNAVAILABLE_ROUTE,
+        loadComponent: () =>
+            import('./pages/service-unavailable-page/service-unavailable-page.component').then(
+                (m) => m.ServiceUnavailablePageComponent,
             ),
     },
     // Error page / 404

@@ -69,10 +69,23 @@ export interface Config {
     readonly logLevel: string;
     readonly dev: boolean;
     readonly trustProxy: boolean;
-    /** budget for the backend calls enriching a shell request - on expiry the plain shell is sent */
+    /**
+     * timeout of the node metadata fetch of render / collection views (LRMI, oEmbed) -
+     * the page waits for it, on expiry the plain shell is sent
+     */
     readonly enrichTimeoutMs: number;
+    /**
+     * timeout of the config fetch - rare (cached per domain, refreshed in the background),
+     * only a domain's first page waits for it
+     */
+    readonly configTimeoutMs: number;
     /** how often `_about.lastCacheUpdate` is polled to detect a backend config refresh; 0 disables */
     readonly configPollIntervalMs: number;
+    /**
+     * timeout of that `_about` poll - also the reachability probe, so longer than the
+     * enrichment budget: a busy tomcat must not count as gone
+     */
+    readonly backendProbeTimeoutMs: number;
     /** upper bound for a cached config entry, in case a refresh is missed */
     readonly configMaxAgeMs: number;
     /** port of the management server (`/metrics`, `/health`); 0 disables it */
@@ -101,7 +114,9 @@ export function loadConfig(): Config {
         dev: bool('DEV', false),
         trustProxy: bool('TRUST_PROXY', true),
         enrichTimeoutMs: int('ENRICH_TIMEOUT_MS', 2_000),
+        configTimeoutMs: int('CONFIG_TIMEOUT_MS', 10_000),
         configPollIntervalMs: int('CONFIG_POLL_INTERVAL_MS', 60_000),
+        backendProbeTimeoutMs: int('BACKEND_PROBE_TIMEOUT_MS', 5_000),
         configMaxAgeMs: int('CONFIG_MAX_AGE_MS', 600_000),
         // same port as the repository's jmx exporter - never the public app port
         managementPort: int('MANAGEMENT_PORT', 9090),

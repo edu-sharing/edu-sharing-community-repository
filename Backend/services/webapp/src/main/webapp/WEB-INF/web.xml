@@ -785,12 +785,14 @@
   </listener>
 
 
+  <!-- answers every sendError / uncaught exception of tomcat (ErrorFilter behaviour), browsers are
+       sent on to components/error/<code> of the frontend server - only reached by the error dispatch -->
   <servlet>
-    <servlet-name>ng-error</servlet-name>
-    <servlet-class>org.edu_sharing.repository.server.NgErrorServlet</servlet-class>
+    <servlet-name>error-page</servlet-name>
+    <servlet-class>org.edu_sharing.repository.server.ErrorPageServlet</servlet-class>
   </servlet>
   <servlet-mapping>
-    <servlet-name>ng-error</servlet-name>
+    <servlet-name>error-page</servlet-name>
     <url-pattern>/error.html</url-pattern>
   </servlet-mapping>
   <error-page>

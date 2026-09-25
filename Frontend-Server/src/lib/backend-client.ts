@@ -86,3 +86,17 @@ export function anonymousFor(request: FastifyRequest): OutgoingHttpHeaders {
         'x-forwarded-proto': request.protocol,
     };
 }
+
+/** codes of a connection that never reached tomcat - as opposed to a slow or failing request */
+const UNREACHABLE_CODES = new Set(['ECONNREFUSED', 'ENOTFOUND', 'EAI_AGAIN', 'EHOSTUNREACH', 'ENETUNREACH', 'UND_ERR_CONNECT_TIMEOUT']);
+
+/**
+ * The backend could not be connected to at all. Takes the errors of this client as well
+ * as those @fastify/reply-from hands to `onError` (the original error is their `cause`).
+ */
+export function isConnectionError(error: unknown): boolean {
+    const codes = [error, (error as { cause?: unknown } | undefined)?.cause].map(
+        (candidate) => (candidate as { code?: unknown } | undefined)?.code,
+    );
+    return codes.some((code) => typeof code === 'string' && UNREACHABLE_CODES.has(code));
+}

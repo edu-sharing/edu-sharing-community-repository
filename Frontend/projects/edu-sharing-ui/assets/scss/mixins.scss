@@ -369,3 +369,73 @@
         @content;
     }
 }
+
+/// Full page message layout (error page, "service unavailable" page): dark background,
+/// illustration next to the text, stacked on mobile. Styles `.message-bg` >
+/// `.message-container` with an `img`, `h1`, `h2`/`p` and a `.link` row (`a` or `button`).
+/// Fixed colors (`--messagePage*`) - these pages may render without the theme of the backend.
+@mixin messagePage($mobileBreakpoint) {
+    .message-bg {
+        min-height: 100%;
+        background: var(--messagePageBackground);
+        color: var(--messagePageText);
+        display: flex;
+        justify-content: center;
+    }
+    .message-container {
+        padding: 5% 20px;
+        display: flex;
+        align-items: center;
+        img {
+            width: 45%;
+            margin-right: 40px;
+            max-width: 400px;
+        }
+        h1 {
+            font-weight: normal;
+            font-size: 28px;
+            margin: 0;
+        }
+        h2,
+        p {
+            font-size: 16px;
+            font-weight: normal;
+            line-height: 150%;
+        }
+        .link {
+            padding-top: 20px;
+            min-height: 1.5em;
+        }
+        a,
+        button {
+            // should be always a light primary - the fallback when no theme is loaded
+            color: var(--palette-primary-100, var(--messagePageLink));
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font: inherit;
+            font-weight: bold;
+            &:focus-visible {
+                outline: 2px solid var(--messagePageText);
+                outline-offset: 2px;
+            }
+        }
+    }
+
+    @media screen and (max-width: $mobileBreakpoint) {
+        .message-container {
+            display: block;
+            text-align: center;
+            img {
+                width: 60%;
+                margin: 20%;
+            }
+        }
+    }
+}

@@ -146,7 +146,7 @@ config:
   ## @param config.proxyUnmatched Proxy paths that are neither app nor known backend paths to the repository (transitional)
   proxyUnmatched: true
 
-  ## @param config.enrichTimeoutMs Budget in ms for the backend calls enriching a shell page
+  ## @param config.enrichTimeoutMs Timeout in ms of the node metadata fetch of render / collection views (LRMI, oEmbed) - the page waits for it
   enrichTimeoutMs: 2000
 
   configCache:
@@ -154,6 +154,10 @@ config:
     pollIntervalMs: 30000
     ## @param config.configCache.maxAgeMs Upper bound for a cached backend config, in ms
     maxAgeMs: 600000
+    ## @param config.configCache.timeoutMs Timeout of the config fetch in ms - refreshed in the background, only the first page of a domain waits for it
+    timeoutMs: 10000
+    ## @param config.configCache.probeTimeoutMs Timeout of that poll in ms - it also decides "backend unreachable" (3 timeouts in a row), so keep it above enrichTimeoutMs
+    probeTimeoutMs: 5000
 
   metrics:
     ## @param config.metrics.enabled Enable prometheus metrics scraping

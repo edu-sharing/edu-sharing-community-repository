@@ -22,7 +22,6 @@ export const BACKEND_PATHS: readonly string[] = [
     '/classic.html',
     '/content',
     '/eduservlet',
-    '/error.html',
     '/graphql',
     '/index.jsp',
     '/jsp',

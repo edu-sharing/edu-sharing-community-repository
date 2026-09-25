@@ -1,3 +1,7 @@
+@if (simplePage) {
+<!-- simple page (e.g. backend unreachable): nothing global, see AppComponent.simplePage -->
+<router-outlet></router-outlet>
+} @else {
 <!-- custom component to override or inject global templates or html -->
 <es-custom-global-extensions></es-custom-global-extensions>
 <es-main-nav></es-main-nav>
@@ -13,4 +17,4 @@
 ></es-scroll-to-top-button>
 @if (isLoading | async) {
 <es-loading-screen></es-loading-screen>
-}
+} }

@@ -67,9 +67,11 @@ before(async () => {
         dev: false,
         trustProxy: true,
         enrichTimeoutMs: 2000,
+        configTimeoutMs: 10_000,
         // no background polling - tests count backend hits
         configPollIntervalMs: 0,
         configMaxAgeMs: 60_000,
+        backendProbeTimeoutMs: 5000,
     };
     app = await buildServer(config);
     await app.ready();

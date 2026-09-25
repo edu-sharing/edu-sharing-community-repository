@@ -1,7 +1,7 @@
 import type { OutgoingHttpHeaders } from 'node:http';
 import type { FastifyBaseLogger } from 'fastify';
 import type { components } from '../shared/api-types.ts';
-import type { JsonGetter } from './backend-client.ts';
+import { isConnectionError, type JsonGetter } from './backend-client.ts';
 
 /** REST models, generated from openapi.json by scripts/generate-api-types.mjs */
 type ConfigResponse = components['schemas']['Config'];
@@ -32,15 +32,35 @@ export interface RepositoryConfig {
 interface Entry {
     readonly config: RepositoryConfig;
     readonly fetchedAt: number;
+    /** the backend reloaded its config since - still handed out until the refetch is done */
+    readonly invalidated?: boolean;
 }
 
 export interface ConfigCacheOptions {
     readonly contextPath: string;
     readonly pollIntervalMs: number;
     readonly maxAgeMs: number;
+    /** while the backend is unreachable (or a poll failed), `_about` is polled this often instead of every pollIntervalMs */
+    readonly unreachableRetryMs?: number;
+    /**
+     * client for the `_about` poll, with its own (longer) timeout than the config fetches -
+     * defaults to the config client
+     */
+    readonly probe?: JsonGetter;
+    /**
+     * failed polls in a row without a clear verdict (timeout, garbage) until the backend
+     * counts as unreachable - a refused connection or a 5xx counts at once
+     */
+    readonly failedPollsUntilUnreachable?: number;
     readonly log: FastifyBaseLogger;
     readonly now?: () => number;
 }
+
+const DEFAULT_UNREACHABLE_RETRY_MS = 5000;
+const DEFAULT_FAILED_POLLS_UNTIL_UNREACHABLE = 3;
+
+/** what found the backend unreachable */
+export type UnreachableSource = 'poll' | 'config' | 'proxy';
 
 /**
  * Backend config, cached per domain - the backend resolves the config context from
@@ -51,11 +71,13 @@ export interface ConfigCacheOptions {
  * (`RepoFactory.getLastRefreshed()`), which moves whenever the backend reloads its
  * configuration. In a cluster every pod has its own value and a load balancer hands
  * them out in turn, so only an *increase* over the highest value seen counts -
- * anything else would flush the cache on every poll. `maxAgeMs` bounds an entry
+ * anything else would invalidate the cache on every poll. `maxAgeMs` bounds an entry
  * should a refresh be missed.
  *
- * Never blocks and never throws: a failing backend yields the stale entry, or null
- * when there is none yet, and callers render without the config dependent parts.
+ * Stale-while-revalidate: an outdated or invalidated entry is handed out at once and
+ * refetched in the background - a page only waits for the config when its domain has
+ * none yet. Never throws: a failing backend keeps the old entry, or yields null when
+ * there is none, and callers render without the config dependent parts.
  */
 export class ConfigCache {
     readonly #client: JsonGetter;
@@ -65,6 +87,10 @@ export class ConfigCache {
     readonly #pending = new Map<string, Promise<RepositoryConfig | null>>();
     #lastCacheUpdate = Number.NEGATIVE_INFINITY;
     #timer: NodeJS.Timeout | undefined;
+    #retryTimer: NodeJS.Timeout | undefined;
+    #reachable = true;
+    #failedPolls = 0;
+    readonly #unreachableListeners: ((source: UnreachableSource) => void)[] = [];
 
     constructor(client: JsonGetter, options: ConfigCacheOptions) {
         this.#client = client;
@@ -98,25 +124,99 @@ export class ConfigCache {
 
     stop(): void {
         clearInterval(this.#timer);
+        clearTimeout(this.#retryTimer);
         this.#timer = undefined;
+        this.#retryTimer = undefined;
     }
 
-    /** One `_about` round trip; flushes every entry when `lastCacheUpdate` increased. */
-    async poll(): Promise<void> {
-        try {
-            const response = await this.#client.getJson(`${this.#options.contextPath}/rest/_about`);
-            const lastCacheUpdate = (response.body as { lastCacheUpdate?: unknown } | undefined)?.lastCacheUpdate;
-            if (typeof lastCacheUpdate !== 'number' || lastCacheUpdate <= this.#lastCacheUpdate) {
-                return;
+    /**
+     * False from a failed `_about` poll (no answer, or 5xx - e.g. a starting Tomcat) or a
+     * failed connection of a proxied request until the next successful poll. Unlike
+     * readiness this flips both ways: the app pages send the browser to the
+     * "service unavailable" page meanwhile.
+     */
+    isBackendReachable(): boolean {
+        return this.#reachable;
+    }
+
+    /** called whenever the backend turns unreachable (not again while it stays so) - for the metrics */
+    onUnreachable(listener: (source: UnreachableSource) => void): void {
+        this.#unreachableListeners.push(listener);
+    }
+
+    /** The backend could not be reached - also reported by the proxy. Polls faster until it answers again. */
+    markUnreachable(source: UnreachableSource, reason: string): void {
+        if (this.#reachable) {
+            this.#options.log.warn({ source, reason }, 'backend unreachable');
+            this.#reachable = false;
+            for (const listener of this.#unreachableListeners) {
+                listener(source);
             }
-            if (this.#lastCacheUpdate !== Number.NEGATIVE_INFINITY) {
-                this.#options.log.info({ lastCacheUpdate }, 'backend config refreshed, flushing config cache');
-            }
-            this.#lastCacheUpdate = lastCacheUpdate;
-            this.#entries.clear();
-        } catch (error) {
-            this.#options.log.debug({ err: error }, 'polling backend _about failed');
         }
+        this.#scheduleRetry();
+    }
+
+    /** a quicker next poll - only as part of the background polling, a manual poll() schedules nothing */
+    #scheduleRetry(): void {
+        if (this.#timer === undefined || this.#retryTimer !== undefined) {
+            return;
+        }
+        this.#retryTimer = setTimeout(() => {
+            this.#retryTimer = undefined;
+            void this.poll();
+        }, this.#options.unreachableRetryMs ?? DEFAULT_UNREACHABLE_RETRY_MS);
+        this.#retryTimer.unref();
+    }
+
+    /**
+     * One `_about` round trip; invalidates every entry when `lastCacheUpdate` increased.
+     *
+     * A refused connection (or DNS, connect timeout) and a 5xx mark the backend unreachable
+     * at once. Anything else failing - mostly a timeout of a busy tomcat - only after
+     * `failedPollsUntilUnreachable` polls in a row, so a single slow answer does not send
+     * every browser to the "service unavailable" page.
+     */
+    async poll(): Promise<void> {
+        let response;
+        try {
+            response = await (this.#options.probe ?? this.#client).getJson(`${this.#options.contextPath}/rest/_about`);
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            this.#options.log.debug({ err: error }, 'polling backend _about failed');
+            this.#failedPolls++;
+            if (isConnectionError(error) || this.#failedPolls >= (this.#options.failedPollsUntilUnreachable ?? DEFAULT_FAILED_POLLS_UNTIL_UNREACHABLE)) {
+                this.markUnreachable('poll', reason);
+            } else {
+                this.#scheduleRetry();
+            }
+            return;
+        }
+        if (response.status >= 500) {
+            this.#failedPolls++;
+            this.markUnreachable('poll', `_about answered ${response.status}`);
+            return;
+        }
+        this.#failedPolls = 0;
+        if (!this.#reachable) {
+            this.#options.log.info('backend reachable again');
+            this.#reachable = true;
+        }
+        const lastCacheUpdate = (response.body as { lastCacheUpdate?: unknown } | undefined)?.lastCacheUpdate;
+        if (typeof lastCacheUpdate !== 'number' || lastCacheUpdate <= this.#lastCacheUpdate) {
+            return;
+        }
+        if (this.#lastCacheUpdate !== Number.NEGATIVE_INFINITY) {
+            this.#options.log.info({ lastCacheUpdate }, 'backend config refreshed, refetching the cached configs');
+        }
+        this.#lastCacheUpdate = lastCacheUpdate;
+        for (const [domain, entry] of this.#entries) {
+            this.#entries.set(domain, { ...entry, invalidated: true });
+        }
+    }
+
+    /** the cached config of a domain, however old, without asking the backend */
+    peek(domain: string): RepositoryConfig | null {
+        return this.#entries.get(domain)?.config ?? null;
     }
 
     /**
@@ -125,16 +225,22 @@ export class ConfigCache {
      */
     get(domain: string, headers: OutgoingHttpHeaders): Promise<RepositoryConfig | null> {
         const entry = this.#entries.get(domain);
-        if (entry !== undefined && this.#now() - entry.fetchedAt < this.#options.maxAgeMs) {
+        if (entry !== undefined && !entry.invalidated && this.#now() - entry.fetchedAt < this.#options.maxAgeMs) {
             return Promise.resolve(entry.config);
         }
-        const pending = this.#pending.get(domain);
-        if (pending !== undefined) {
-            return pending;
+        // one fetch per domain at a time, however many requests ask
+        let load = this.#pending.get(domain);
+        if (load === undefined) {
+            load = this.#load(domain, headers, entry).finally(() => this.#pending.delete(domain));
+            this.#pending.set(domain, load);
         }
-        const load = this.#load(domain, headers, entry).finally(() => this.#pending.delete(domain));
-        this.#pending.set(domain, load);
-        return load;
+        // an old entry right away, the fetch goes on in the background
+        return entry !== undefined ? Promise.resolve(entry.config) : load;
+    }
+
+    /** settles once no config fetch is running any more - for tests */
+    async idle(): Promise<void> {
+        await Promise.all(this.#pending.values());
     }
 
     async #load(domain: string, headers: OutgoingHttpHeaders, stale: Entry | undefined): Promise<RepositoryConfig | null> {
@@ -153,6 +259,9 @@ export class ConfigCache {
             this.#entries.set(domain, { config, fetchedAt: this.#now() });
             return config;
         } catch (error) {
+            if (isConnectionError(error)) {
+                this.markUnreachable('config', error instanceof Error ? error.message : String(error));
+            }
             this.#options.log.warn({ err: error, domain }, 'loading backend config failed, using the stale config if any');
             return stale?.config ?? null;
         }

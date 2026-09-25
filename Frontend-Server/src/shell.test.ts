@@ -111,10 +111,10 @@ before(async () => {
             return json(response, 200, { node: entry.node }, setCookie);
         }
         if (url === '/edu-sharing/unknown-to-tomcat') {
-            // what ErrorFilter renders: an absolute redirect to the configured domain
+            // what ErrorFilter / ErrorPageServlet render: a relative redirect
             if (String(request.headers.accept).includes('text/html')) {
-                response.writeHead(404, { 'content-type': 'text/html' });
-                response.end('<head><script nonce="null">window.location.href="http://configured.example.org/edu-sharing/components/error/404";</script></head>');
+                response.writeHead(404, { 'content-type': 'text/html;charset=UTF-8' });
+                response.end('<head><meta http-equiv="refresh" content="0;url=/edu-sharing/components/error/404"></head>');
                 return;
             }
             return json(response, 404, { error: '404', message: 'The requested resource is not available' });
@@ -139,8 +139,10 @@ before(async () => {
         dev: false,
         trustProxy: true,
         enrichTimeoutMs: 2000,
+        configTimeoutMs: 10_000,
         configPollIntervalMs: 0,
         configMaxAgeMs: 60_000,
+        backendProbeTimeoutMs: 5000,
     };
     app = await buildServer(config);
     await app.ready();
@@ -256,13 +258,11 @@ test('proxied requests keep the browser Host - the backend resolves the config c
     assert.equal(hit?.headers.host, 'tenant.example.org');
 });
 
-test("an unmatched path tomcat does not know either gets this server's error page for browsers", async () => {
+test("an unmatched path tomcat does not know either keeps tomcat's error answer", async () => {
     const html = await shell('/edu-sharing/unknown-to-tomcat', { accept: 'text/html' });
     assert.equal(html.statusCode, 404);
     assert.match(html.body, /<meta http-equiv="refresh" content="0;url=\/edu-sharing\/components\/error\/404">/);
-    assert.doesNotMatch(html.body, /configured\.example\.org/);
 
-    // everything else keeps tomcat's answer
     const api = await shell('/edu-sharing/unknown-to-tomcat', { accept: 'application/json' });
     assert.equal(api.statusCode, 404);
     assert.equal(api.json().error, '404');

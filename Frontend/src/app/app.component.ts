@@ -35,6 +35,7 @@ import { LicenseAgreementService } from './services/license-agreement.service';
 import { ScrollPositionRestorationService } from './services/scroll-position-restoration.service';
 import { ThemeService } from './services/theme.service';
 import { PlatformLocation } from '@angular/common';
+import { isSimplePageRoute } from './util/simple-page';
 
 @Component({
     selector: 'es-app',
@@ -44,24 +45,55 @@ import { PlatformLocation } from '@angular/common';
     standalone: false,
 })
 export class AppComponent implements OnInit, DoCheck, AfterViewInit {
-    private appContainer = inject(AppContainerService);
     private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
-    private mainNavService = inject(MainNavService);
-    private dialogs = inject(ManagementDialogsService);
     private ngZone = inject(NgZone);
-    private bridge = inject(BridgeService);
     private injector = inject(Injector);
-    private accessibilityService = inject(AccessibilityService);
-    private ui = inject(UIService);
-    private translations = inject(TranslationsService);
-    private loadingScreen = inject(LoadingScreenService);
-    private licenseAgreement = inject(LicenseAgreementService);
-    private themeService = inject(ThemeService);
-    private authentication = inject(AuthenticationService);
-    private configuration = inject(ConfigurationService);
-    private scrollPositionRestoration = inject(ScrollPositionRestorationService);
-    private legacyRestService = inject(RestNetworkService);
-    private apiState = inject(ApiStateService);
+
+    // Everything else is resolved on first use: several of these services fetch the config
+    // or the login state as soon as they are created - on a simple page (no backend) they
+    // must not be created at all.
+    private get appContainer() {
+        return this.injector.get(AppContainerService);
+    }
+    private get mainNavService() {
+        return this.injector.get(MainNavService);
+    }
+    private get dialogs() {
+        return this.injector.get(ManagementDialogsService);
+    }
+    private get bridge() {
+        return this.injector.get(BridgeService);
+    }
+    private get accessibilityService() {
+        return this.injector.get(AccessibilityService);
+    }
+    private get ui() {
+        return this.injector.get(UIService);
+    }
+    private get translations() {
+        return this.injector.get(TranslationsService);
+    }
+    private get loadingScreen() {
+        return this.injector.get(LoadingScreenService);
+    }
+    private get licenseAgreement() {
+        return this.injector.get(LicenseAgreementService);
+    }
+    private get authentication() {
+        return this.injector.get(AuthenticationService);
+    }
+    private get configuration() {
+        return this.injector.get(ConfigurationService);
+    }
+    private get scrollPositionRestoration() {
+        return this.injector.get(ScrollPositionRestorationService);
+    }
+    private get legacyRestService() {
+        return this.injector.get(RestNetworkService);
+    }
+    private get apiState() {
+        return this.injector.get(ApiStateService);
+    }
 
     private static readonly CHECKS_PER_SECOND_WARNING_THRESHOLD = 0;
     private static readonly CONSECUTIVE_TRANSGRESSION_THRESHOLD = 10;
@@ -81,7 +113,16 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     @ViewChild('management') management: WorkspaceManagementDialogsComponent;
     @ViewChild('cookie') cookie: CookieInfoComponent;
 
-    isLoading = this.loadingScreen.isLoading;
+    get isLoading() {
+        return this.loadingScreen.isLoading;
+    }
+
+    /**
+     * A simple page (see `SIMPLE_PAGE_ROUTES`, e.g. the "service unavailable" page): only
+     * the router outlet is rendered and nothing global is initialized - translations,
+     * navigation, login checks etc. all need the backend.
+     */
+    readonly simplePage = isSimplePageRoute(this.getCurrentRoute());
 
     private numberOfChecks = 0;
     private consecutiveTransgression = 0;
@@ -134,6 +175,11 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
 
     ngOnInit(): void {
         this.elementRef.nativeElement.removeAttribute('ng-version');
+        if (this.simplePage) {
+            return;
+        }
+        // resolves theme and dark mode from the config as soon as it exists
+        this.injector.get(ThemeService);
         this.translations
             .initialize()
             .pipe(
@@ -161,6 +207,9 @@ export class AppComponent implements OnInit, DoCheck, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
+        if (this.simplePage) {
+            return;
+        }
         this.dialogs.registerDialogsComponent(this.management);
         this.mainNavService.registerCookieInfo(this.cookie);
         this.mainNavService.registerAccessibility();

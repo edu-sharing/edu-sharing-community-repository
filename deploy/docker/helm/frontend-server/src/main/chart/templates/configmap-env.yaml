@@ -15,8 +15,10 @@ data:
   LOG_LEVEL: {{ .Values.config.logLevel | quote }}
   PROXY_UNMATCHED: {{ .Values.config.proxyUnmatched | quote }}
   ENRICH_TIMEOUT_MS: {{ .Values.config.enrichTimeoutMs | quote }}
+  CONFIG_TIMEOUT_MS: {{ .Values.config.configCache.timeoutMs | quote }}
   CONFIG_POLL_INTERVAL_MS: {{ .Values.config.configCache.pollIntervalMs | quote }}
   CONFIG_MAX_AGE_MS: {{ .Values.config.configCache.maxAgeMs | quote }}
+  BACKEND_PROBE_TIMEOUT_MS: {{ .Values.config.configCache.probeTimeoutMs | quote }}
   # behind the ingress: X-Forwarded-Host / -Proto name the public url
   TRUST_PROXY: "true"
   {{- range $key, $value := .Values.config.extraEnv }}

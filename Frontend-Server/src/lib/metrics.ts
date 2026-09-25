@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import fastifyMetricsModule from 'fastify-metrics';
-import type { ConfigCache } from './config-cache.ts';
+import type { ConfigCache, UnreachableSource } from './config-cache.ts';
 
 /**
  * Prometheus metrics.
@@ -27,6 +27,8 @@ export interface AppMetrics {
     enrichment(result: 'ok' | 'missing' | 'failed', seconds: number): void;
     /** a shell page sent without CSP - no config loadable, or one without angular.headers */
     shellWithoutCsp(cause: 'no-config' | 'no-csp'): void;
+    /** a request answered with 503 because the backend is unreachable - an app page or a proxied request */
+    unavailable(kind: 'page' | 'proxy'): void;
 }
 
 /** Registers the measuring side on the app server; `/metrics` itself is served by the management server. */
@@ -71,9 +73,30 @@ export async function registerMetrics(app: FastifyInstance, configCache: ConfigC
         },
     });
 
+    new client.Gauge({
+        name: `${PREFIX}backend_reachable`,
+        help: '1 while the backend answers, 0 while it is unreachable (browsers get the "service unavailable" page)',
+        collect() {
+            this.set(configCache.isBackendReachable() ? 1 : 0);
+        },
+    });
+    // the gauge only shows the state at scrape time - these make short outages visible too
+    const unreachable = new client.Counter({
+        name: `${PREFIX}backend_unreachable_total`,
+        help: 'Times the backend turned unreachable, by what found out (poll, config, proxy)',
+        labelNames: ['source'] as const,
+    });
+    configCache.onUnreachable((source: UnreachableSource) => unreachable.inc({ source }));
+    const unavailableResponses = new client.Counter({
+        name: `${PREFIX}unavailable_responses_total`,
+        help: 'Requests answered with 503 because the backend is unreachable, by kind (page, proxy)',
+        labelNames: ['kind'] as const,
+    });
+
     return {
         proxied: (reason, statusCode, seconds) => proxyDuration.observe({ reason, status_code: String(statusCode) }, seconds),
         enrichment: (result, seconds) => enrichmentDuration.observe({ result }, seconds),
         shellWithoutCsp: (cause) => withoutCsp.inc({ cause }),
+        unavailable: (kind) => unavailableResponses.inc({ kind }),
     };
 }
