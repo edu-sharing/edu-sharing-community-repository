@@ -84,7 +84,7 @@ after(async () => {
 });
 
 test('serves the SPA shell on the angular routes and substitutes the nonce', async () => {
-    for (const url of ['/edu-sharing/', '/edu-sharing/index.html', '/edu-sharing/components/workspace', '/edu-sharing/v/abc']) {
+    for (const url of ['/edu-sharing/index.html', '/edu-sharing/components/workspace', '/edu-sharing/v/abc']) {
         const response = await app.inject({ method: 'GET', url });
         assert.equal(response.statusCode, 200, url);
         assert.match(response.headers['content-type'] as string, /text\/html/);
@@ -103,8 +103,8 @@ test('redirects the bare root and the context path to the app', async () => {
 
 test('gives each shell request its own nonce', async () => {
     const nonceOf = (body: string) => /ngcspnonce="([^"]+)"/i.exec(body)?.[1];
-    const first = nonceOf((await app.inject({ method: 'GET', url: '/edu-sharing/' })).body);
-    const second = nonceOf((await app.inject({ method: 'GET', url: '/edu-sharing/' })).body);
+    const first = nonceOf((await app.inject({ method: 'GET', url: '/edu-sharing/components/workspace' })).body);
+    const second = nonceOf((await app.inject({ method: 'GET', url: '/edu-sharing/components/workspace' })).body);
     assert.ok(first);
     assert.notEqual(first, second);
 });
@@ -230,3 +230,10 @@ test('metrics are served on the management server only', async () => {
     const onApp = await app.inject({ method: 'GET', url: '/metrics' });
     assert.doesNotMatch(onApp.body, /http_request_duration_seconds/);
 });
+
+test('the bare entry point goes to the login without a backend config', async () => {
+    const response = await app.inject({ method: 'GET', url: '/edu-sharing/' });
+    assert.equal(response.statusCode, 302);
+    assert.equal(response.headers.location, '/edu-sharing/components/login');
+});
+

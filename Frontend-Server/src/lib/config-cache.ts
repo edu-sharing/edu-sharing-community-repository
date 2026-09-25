@@ -19,6 +19,8 @@ export type LrmiMapping = Readonly<Required<components['schemas']['LrmiConfig']>
 export interface RepositoryConfig {
     /** `current.branding` - appends " – edu-sharing" to page titles */
     readonly branding: NonNullable<components['schemas']['Values']['branding']>;
+    /** `current.defaultLocation` - where the bare entry point goes, see default-location.ts */
+    readonly defaultLocation: string | undefined;
     readonly lrmi: LrmiMapping;
     /**
      * `angular.headers` - security headers of the shell pages, see security-headers.ts.
@@ -278,6 +280,7 @@ export function parseRepositoryConfig(body: unknown): RepositoryConfig {
     const backend = response.currentBackend as ValuesBackendInternal | undefined;
     return {
         branding: response.current?.branding === true,
+        defaultLocation: response.current?.defaultLocation,
         lrmi: {
             properties: backend?.exporter?.lrmi?.properties ?? {},
             vcard: backend?.exporter?.lrmi?.vcard ?? {},

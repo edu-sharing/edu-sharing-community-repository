@@ -148,5 +148,5 @@ test('a proxied browser request to a gone backend is sent to the unavailable pag
     assert.equal(response.statusCode, 503);
     assert.match(response.body, /components\/error\/503\?next=%2Fedu-sharing%2Feduservlet%2Frender%3Fnode_id%3Dx/);
     await startBackend();
-    await eventually(async () => (await app.inject({ method: 'GET', url: '/edu-sharing/', headers: browser })).statusCode === 200);
+    await eventually(async () => (await app.inject({ method: 'GET', url: '/edu-sharing/components/workspace', headers: browser })).statusCode === 200);
 });

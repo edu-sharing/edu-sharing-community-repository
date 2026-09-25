@@ -57,7 +57,7 @@ test('parses branding and the lrmi mapping from the config values', () => {
 });
 
 test('an older backend without the mapping yields an empty one, not an error', () => {
-    const empty = { branding: false, lrmi: { properties: {}, vcard: {} }, angularHeaders: {}, customHtmlHeaders: '' };
+    const empty = { branding: false, defaultLocation: undefined, lrmi: { properties: {}, vcard: {} }, angularHeaders: {}, customHtmlHeaders: '' };
     assert.deepEqual(parseRepositoryConfig({ current: {} }), empty);
     assert.deepEqual(parseRepositoryConfig('garbage'), empty);
 });

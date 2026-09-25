@@ -73,7 +73,10 @@ before(async () => {
         }
         if (url === '/edu-sharing/rest/config/v1/values') {
             return json(response, 200, {
-                current: { branding: true },
+                current: {
+                    branding: true,
+                    defaultLocation: request.headers.host === 'portal.example.org' ? 'https://portal.example.org/start' : 'workspace',
+                },
                 currentBackend: {
                     angular: {
                         headers: {
@@ -267,3 +270,18 @@ test("an unmatched path tomcat does not know either keeps tomcat's error answer"
     assert.equal(api.statusCode, 404);
     assert.equal(api.json().error, '404');
 });
+
+test('the bare entry point goes to the configured default location, like AuthenticationFilter did', async () => {
+    const root = await shell('/edu-sharing/');
+    assert.equal(root.statusCode, 302);
+    assert.equal(root.headers.location, '/edu-sharing/components/workspace');
+    assert.equal(root.headers['cache-control'], 'no-store');
+
+    // after the login the app returns to the entry point it came from
+    const fromLogin = await shell('/edu-sharing/?fromLogin=true');
+    assert.equal(fromLogin.headers.location, '/edu-sharing/components/workspace');
+
+    const absolute = await shell('/edu-sharing/', { host: 'portal.example.org' });
+    assert.equal(absolute.headers.location, 'https://portal.example.org/start');
+});
+

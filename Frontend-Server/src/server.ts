@@ -7,6 +7,7 @@ import replyFrom from '@fastify/reply-from';
 import type { Config } from './config.ts';
 import { anonymousFor, BackendClient, isConnectionError, onBehalfOf } from './lib/backend-client.ts';
 import { ConfigCache } from './lib/config-cache.ts';
+import { defaultLocationUrl } from './lib/default-location.ts';
 import { isServiceUnavailablePage, RETRY_AFTER_SECONDS, sendError, sendUnavailable, shellErrorStatus } from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
@@ -287,7 +288,17 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
         // the server owns the whole host, so the bare root lands on the app
         app.get('/', (_request, reply) => reply.redirect(`${ctx}/`, 302));
     }
-    app.get(`${ctx}/`, sendIndex);
+    // the bare entry point never renders the shell - AuthenticationFilter.redirectToDefaultLocation
+    app.get(`${ctx}/`, async (request, reply) => {
+        if (!configCache.isBackendReachable()) {
+            metrics.unavailable('page');
+            return sendUnavailable(request, reply, ctx);
+        }
+        const repositoryConfig = await configCache.get(request.hostname, anonymousFor(request));
+        return reply
+            .header('Cache-Control', 'no-store')
+            .redirect(defaultLocationUrl(ctx, repositoryConfig?.defaultLocation), 302);
+    });
     app.get(`${ctx}/index.html`, sendIndex);
     for (const prefix of ANGULAR_ROUTE_PREFIXES) {
         app.get(`${ctx}${prefix}`, sendIndex);
