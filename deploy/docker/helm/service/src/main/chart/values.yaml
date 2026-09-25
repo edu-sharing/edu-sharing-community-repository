@@ -186,6 +186,7 @@ ingress:
   - /edu-sharing/login
   - /edu-sharing/logout
   - /edu-sharing/preview
+  - /edu-sharing/webdav
 
   admin:
     ## @param ingress.admin.enabled Enable admin ingress

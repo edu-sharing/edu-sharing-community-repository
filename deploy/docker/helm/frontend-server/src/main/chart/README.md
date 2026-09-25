@@ -13,9 +13,9 @@ longest matching path:
 |------|-------|--------------|
 | `/` (exact) | this chart - the frontend server redirects to the context path | `service.port.api` |
 | `/edu-sharing` (prefix, catch-all) | this chart | `service.port.api` |
-| `/edu-sharing/rest`, `/eduservlet`, `/login`, `/logout`, `/preview` | repository service chart (`ingress.paths`) | its `service.port.api.external` |
+| `/edu-sharing/rest`, `/eduservlet`, `/login`, `/logout`, `/preview`, `/webdav` | repository service chart (`ingress.paths`) | its `service.port.api.external` |
 
-Every other backend path (`/shibboleth`, `/saml2`, `/oauth2`, `/sso`, `/webdav`, ...)
+Every other backend path (`/shibboleth`, `/saml2`, `/oauth2`, `/sso`, ...)
 reaches Tomcat through the frontend server, which proxies it
 (`Frontend-Server/src/routes/backend-paths.ts`). Sessions are shared via redis, so it
 does not matter which repository pod such a request lands on.
