@@ -1601,7 +1601,11 @@ public class MCAlfrescoAPIClient extends MCAlfrescoBaseClient {
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
                              final String property) {
-        writeContent(store, nodeID, content, mimetype, _encoding, property, null);
+        try {
+            writeContent(store, nodeID, content, mimetype, _encoding, property, null);
+        } catch (Exception e) {
+            throw new AlfrescoRuntimeException("Failed to write content", e);
+        }
     }
 
     public void writeContent(final StoreRef store, final String nodeID, final InputStream content, final String mimetype, String _encoding,
