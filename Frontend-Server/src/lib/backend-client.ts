@@ -76,13 +76,22 @@ export function onBehalfOf(request: FastifyRequest): OutgoingHttpHeaders {
 }
 
 /** Domain and trace of a browser request, but no identity - for public data like the config. */
+/**
+ * The config cache key of a host: lower case (host names are case insensitive, browsers
+ * always send them so), without a trailing dot.
+ */
+export function normalizeDomain(host: string): string {
+    return host.trim().toLowerCase().replace(/\.$/, '');
+}
+
 export function anonymousFor(request: FastifyRequest): OutgoingHttpHeaders {
     return {
         ...collectTraceHeaders(request.headers),
         [REQUEST_ID_HEADER]: request.id,
-        // same set toBackend sends for proxied requests
-        ...(request.headers.host === undefined ? {} : { host: request.headers.host }),
-        'x-forwarded-host': request.hostname,
+        // same set toBackend sends for proxied requests - but in the case a browser sends:
+        // the backend matches context domains case sensitively, the cache key is lower case
+        ...(request.headers.host === undefined ? {} : { host: request.headers.host.toLowerCase() }),
+        'x-forwarded-host': normalizeDomain(request.hostname),
         'x-forwarded-proto': request.protocol,
     };
 }

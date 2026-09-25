@@ -1,7 +1,8 @@
 import type { OutgoingHttpHeaders } from 'node:http';
 import type { FastifyBaseLogger } from 'fastify';
 import type { components } from '../shared/api-types.ts';
-import { isConnectionError, type JsonGetter } from './backend-client.ts';
+import { LRUCache } from 'lru-cache';
+import { isConnectionError, normalizeDomain, type JsonGetter } from './backend-client.ts';
 
 /** REST models, generated from openapi.json by scripts/generate-api-types.mjs */
 type ConfigResponse = components['schemas']['Config'];
@@ -42,6 +43,8 @@ export interface ConfigCacheOptions {
     readonly contextPath: string;
     readonly pollIntervalMs: number;
     readonly maxAgeMs: number;
+    /** most domains kept at once (least recently used first out) - any Host header makes a key; default 100 */
+    readonly maxDomains?: number;
     /** while the backend is unreachable (or a poll failed), `_about` is polled this often instead of every pollIntervalMs */
     readonly unreachableRetryMs?: number;
     /**
@@ -85,7 +88,7 @@ export class ConfigCache {
     readonly #client: JsonGetter;
     readonly #options: ConfigCacheOptions;
     readonly #now: () => number;
-    readonly #entries = new Map<string, Entry>();
+    readonly #entries: LRUCache<string, Entry>;
     readonly #pending = new Map<string, Promise<RepositoryConfig | null>>();
     #lastCacheUpdate = Number.NEGATIVE_INFINITY;
     #timer: NodeJS.Timeout | undefined;
@@ -98,6 +101,7 @@ export class ConfigCache {
         this.#client = client;
         this.#options = options;
         this.#now = options.now ?? Date.now;
+        this.#entries = new LRUCache<string, Entry>({ max: options.maxDomains ?? 100 });
     }
 
     start(): void {
@@ -121,7 +125,7 @@ export class ConfigCache {
 
     /** per cached domain: when its config was fetched - for the metrics */
     entries(): { domain: string; fetchedAt: number }[] {
-        return [...this.#entries].map(([domain, entry]) => ({ domain, fetchedAt: entry.fetchedAt }));
+        return [...this.#entries.entries()].map(([domain, entry]) => ({ domain, fetchedAt: entry.fetchedAt }));
     }
 
     stop(): void {
@@ -211,21 +215,23 @@ export class ConfigCache {
             this.#options.log.info({ lastCacheUpdate }, 'backend config refreshed, refetching the cached configs');
         }
         this.#lastCacheUpdate = lastCacheUpdate;
-        for (const [domain, entry] of this.#entries) {
+        for (const [domain, entry] of [...this.#entries.entries()]) {
             this.#entries.set(domain, { ...entry, invalidated: true });
         }
     }
 
     /** the cached config of a domain, however old, without asking the backend */
     peek(domain: string): RepositoryConfig | null {
-        return this.#entries.get(domain)?.config ?? null;
+        return this.#entries.get(normalizeDomain(domain))?.config ?? null;
     }
 
     /**
      * @param domain the browser facing host, the cache key
      * @param headers identity-free headers carrying that domain, see `anonymousFor`
      */
-    get(domain: string, headers: OutgoingHttpHeaders): Promise<RepositoryConfig | null> {
+    get(requestedDomain: string, headers: OutgoingHttpHeaders): Promise<RepositoryConfig | null> {
+        // host names are case insensitive - one entry for Repo.Example.org and repo.example.org
+        const domain = normalizeDomain(requestedDomain);
         const entry = this.#entries.get(domain);
         if (entry !== undefined && !entry.invalidated && this.#now() - entry.fetchedAt < this.#options.maxAgeMs) {
             return Promise.resolve(entry.config);

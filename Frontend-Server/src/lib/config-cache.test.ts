@@ -399,3 +399,24 @@ test('without any entry the first request waits for the fetch', async () => {
     release?.();
     assert.equal((await first)?.branding, true);
 });
+
+test('host names are case insensitive - one entry and one backend call for every spelling', async () => {
+    const { client, valueCalls } = fakeBackend();
+    const subject = cache(client);
+    await subject.get('Repo.Example.ORG', {});
+    await subject.get('repo.example.org', {});
+    await subject.get('repo.example.org.', {});
+    assert.equal(valueCalls(), 1);
+    assert.deepEqual(subject.entries().map((entry) => entry.domain), ['repo.example.org']);
+    assert.equal(subject.peek('REPO.example.org')?.branding, true);
+});
+
+test('keeps at most maxDomains entries, least recently used first out', async () => {
+    const { client } = fakeBackend();
+    const subject = new ConfigCache(client, { contextPath: '/edu-sharing', pollIntervalMs: 0, maxAgeMs: 60_000, maxDomains: 2, log: Fastify().log });
+    await subject.get('a.example.org', {});
+    await subject.get('b.example.org', {});
+    await subject.get('a.example.org', {});
+    await subject.get('c.example.org', {});
+    assert.deepEqual(subject.entries().map((entry) => entry.domain).sort(), ['a.example.org', 'c.example.org']);
+});

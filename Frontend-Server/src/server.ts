@@ -40,6 +40,7 @@ function hasPinoPretty(): boolean {
 interface ProxyInfo {
     reason: ProxyReason;
     upstream: string;
+    /** performance.now() - monotonic */
     startedAt: number;
 }
 
@@ -95,7 +96,7 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
             if (info) {
                 reply.header('X-Proxy-Reason', info.reason);
                 reply.header('X-Proxy-Upstream', info.upstream);
-                reply.header('X-Proxy-Time', `${Date.now() - info.startedAt}ms`);
+                reply.header('X-Proxy-Time', `${Math.round(performance.now() - info.startedAt)}ms`);
             }
             return payload;
         });
@@ -155,7 +156,7 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
     app.addHook('onResponse', async (request, reply) => {
         const info = proxied.get(request);
         if (info) {
-            metrics.proxied(info.reason, reply.statusCode, (Date.now() - info.startedAt) / 1000);
+            metrics.proxied(info.reason, reply.statusCode, (performance.now() - info.startedAt) / 1000);
         }
     });
 
@@ -165,7 +166,7 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
      * (URLTool) keeps building correct absolute URLs.
      */
     function toBackend(request: FastifyRequest, reply: FastifyReply, reason: ProxyReason = 'backend-path'): FastifyReply {
-        proxied.set(request, { reason, upstream: `${config.backendUrl}${request.url}`, startedAt: Date.now() });
+        proxied.set(request, { reason, upstream: `${config.backendUrl}${request.url}`, startedAt: performance.now() });
         // tomcat's errors (ErrorFilter / ErrorPageServlet) redirect relative to the request,
         // so they pass through unchanged - the browser stays on its domain
         return reply.from(request.url, {
@@ -229,7 +230,8 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
         // the config is needed on every shell page (headers, custom html) and is cached;
         // node metadata only for the render and collection views. Without a backend the
         // cached config is used as is - asking would only wait for the timeout
-        const enrichmentStart = Date.now();
+        // monotonic - a wall clock step (NTP) must not distort the duration
+        const enrichmentStart = performance.now();
         const [configResult, nodeResult] = await Promise.allSettled([
             reachable
                 ? configCache.get(request.hostname, anonymousFor(request))
@@ -238,7 +240,7 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
         ]);
         if (target !== undefined) {
             const result = nodeResult.status === 'rejected' ? 'failed' : nodeResult.value === undefined ? 'missing' : 'ok';
-            metrics.enrichment(result, (Date.now() - enrichmentStart) / 1000);
+            metrics.enrichment(result, (performance.now() - enrichmentStart) / 1000);
         }
         if (nodeResult.status === 'rejected') {
             request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId }, 'loading node metadata for the shell failed');
