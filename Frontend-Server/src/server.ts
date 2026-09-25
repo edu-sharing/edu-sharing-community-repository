@@ -311,7 +311,7 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
             reply.header(
                 'Cache-Control',
                 HASHED_ASSET.test(path.basename(filePath))
-                    ? 'public, max-age=31536000, immutable'
+                    ? 'public, max-age=3600, immutable'
                     : 'public, max-age=300',
             );
             // WebComponentsFilter: the web components are embedded on foreign origins
