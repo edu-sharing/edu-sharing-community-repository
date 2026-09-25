@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@fastify/reply-from": "^12.6.5",
+    "@fastify/send": "^4.1.1",
     "@fastify/static": "^10.1.4",
     "fastify": "^5.12.5",
-    "fastify-metrics": "^14.1.0"
+    "fastify-metrics": "^14.1.0",
+    "lru-cache": "^11.5.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

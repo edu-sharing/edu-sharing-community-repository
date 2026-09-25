@@ -19,6 +19,8 @@ data:
   CONFIG_POLL_INTERVAL_MS: {{ .Values.config.configCache.pollIntervalMs | quote }}
   CONFIG_MAX_AGE_MS: {{ .Values.config.configCache.maxAgeMs | quote }}
   BACKEND_PROBE_TIMEOUT_MS: {{ .Values.config.configCache.probeTimeoutMs | quote }}
+  STATIC_CACHE_MAX_MB: {{ .Values.config.staticCache.maxMb | quote }}
+  STATIC_CACHE_MAX_FILE_MB: {{ .Values.config.staticCache.maxFileMb | quote }}
   # behind the ingress: X-Forwarded-Host / -Proto name the public url
   TRUST_PROXY: "true"
   {{- range $key, $value := .Values.config.extraEnv }}

@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -32,6 +33,31 @@ function int(name: string, fallback: number): number {
         throw new Error(`Environment variable ${name} must be an integer, got "${value}"`);
     }
     return parsed;
+}
+
+const MB = 1024 * 1024;
+
+/**
+ * Default budget of the static file cache: 20 % of the memory the process may use - the
+ * cgroup limit in a container (`process.constrainedMemory()`), else the host memory -
+ * within 16 MB and 256 MB. The cached buffers live outside the V8 heap (external memory),
+ * so they count against the container limit, not against --max-old-space-size. Together
+ * with the heap (40 %, image default) this leaves ~40 % to code, sockets and streams.
+ *
+ * @param constrained `process.constrainedMemory()` - 0, or a huge value, without a limit
+ */
+export function autoStaticCacheBytes(constrained: number, total: number): number {
+    const available = constrained > 0 && constrained < total ? constrained : total;
+    return Math.min(256 * MB, Math.max(16 * MB, Math.floor(available * 0.2)));
+}
+
+/** `auto` (default) or a size in MB, see autoStaticCacheBytes */
+function staticCacheBytes(name: string): number {
+    const value = process.env[name];
+    if (value === undefined || value === '' || value === 'auto') {
+        return autoStaticCacheBytes(process.constrainedMemory(), os.totalmem());
+    }
+    return int(name, 0) * MB;
 }
 
 function bool(name: string, fallback: boolean): boolean {
@@ -90,6 +116,10 @@ export interface Config {
     readonly configMaxAgeMs: number;
     /** port of the management server (`/metrics`, `/health`); 0 disables it */
     readonly managementPort: number;
+    /** memory budget of the static file cache (lib/static-cache.ts), in bytes; 0 disables it - `auto` by default, see autoStaticCacheBytes */
+    readonly staticCacheMaxBytes: number;
+    /** larger files bypass the static file cache and are streamed from disk, in bytes */
+    readonly staticCacheMaxFileBytes: number;
 }
 
 export function loadConfig(): Config {
@@ -120,5 +150,9 @@ export function loadConfig(): Config {
         configMaxAgeMs: int('CONFIG_MAX_AGE_MS', 600_000),
         // same port as the repository's jmx exporter - never the public app port
         managementPort: int('MANAGEMENT_PORT', 9090),
+        // the first page's files take ~10 MB with all variants; 51 MB in a 256Mi pod
+        staticCacheMaxBytes: staticCacheBytes('STATIC_CACHE_MAX_MB'),
+        // 8 MB: the largest bundles (monaco ts worker, pdf vendor) are 6-7 MB
+        staticCacheMaxFileBytes: int('STATIC_CACHE_MAX_FILE_MB', 8) * MB,
     };
 }

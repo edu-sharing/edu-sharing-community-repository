@@ -13,6 +13,7 @@ import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
 import { loadNode, parseShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
+import { type CachedFile, negotiateEncoding, StaticCache } from './lib/static-cache.ts';
 import { enrichShell } from './lib/shell-head.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
 import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
@@ -137,7 +138,18 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
     app.decorate('backendReady', () => configCache.isReady());
 
     // before any route, so fastify-metrics sees every route pattern
-    const metrics = await registerMetrics(app, configCache);
+    const staticCache = new StaticCache({
+        root: config.distDir,
+        maxBytes: config.staticCacheMaxBytes,
+        maxFileBytes: config.staticCacheMaxFileBytes,
+        revalidateMs: 60_000,
+        isHashed: (fileName) => HASHED_ASSET.test(fileName),
+    });
+    app.log.info(
+        { maxMb: Math.round(config.staticCacheMaxBytes / 1048576), maxFileMb: Math.round(config.staticCacheMaxFileBytes / 1048576) },
+        'static file cache',
+    );
+    const metrics = await registerMetrics(app, configCache, staticCache);
     // after the metrics subscribed to it - an early outage is counted as well
     configCache.start();
     app.addHook('onResponse', async (request, reply) => {
@@ -311,25 +323,58 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
     }
 
     // --- static -----------------------------------------------------------------
+    /** the headers of every static file, from the cache or from disk alike */
+    function staticHeaders(filePath: string): Record<string, string> {
+        return {
+            'Cache-Control': HASHED_ASSET.test(path.basename(filePath)) ? 'public, max-age=3600, immutable' : 'public, max-age=300',
+            // WebComponentsFilter: the web components are embedded on foreign origins
+            ...(isWebComponentFile(filePath) ? { 'Access-Control-Allow-Origin': '*' } : {}),
+        };
+    }
+
+    // serves nothing itself any more - only reply.sendFile, the fallback of the cache below
     await app.register(fastifyStatic, {
         root: config.distDir,
-        prefix: `${ctx}/`,
+        serve: false,
         index: false,
         redirect: false,
         // fully managed below - @fastify/static's own value would win otherwise
         cacheControl: false,
         setHeaders: (reply, filePath) => {
-            reply.header(
-                'Cache-Control',
-                HASHED_ASSET.test(path.basename(filePath))
-                    ? 'public, max-age=3600, immutable'
-                    : 'public, max-age=300',
-            );
-            // WebComponentsFilter: the web components are embedded on foreign origins
-            if (isWebComponentFile(filePath)) {
-                reply.header('Access-Control-Allow-Origin', '*');
-            }
+            reply.headers(staticHeaders(filePath));
         },
+    });
+
+    function sendCached(request: FastifyRequest, reply: FastifyReply, relative: string, file: CachedFile): FastifyReply {
+        reply
+            .headers(staticHeaders(path.join(config.distDir, relative)))
+            .header('ETag', file.etag)
+            .header('Last-Modified', file.lastModified)
+            .header('Vary', 'Accept-Encoding');
+        const ifNoneMatch = request.headers['if-none-match'];
+        if (ifNoneMatch !== undefined && ifNoneMatch.split(',').some((tag) => tag.trim() === file.etag)) {
+            return reply.code(304).send();
+        }
+        const encoding = negotiateEncoding(request.headers['accept-encoding'], file);
+        if (encoding !== 'identity') {
+            reply.header('Content-Encoding', encoding);
+        }
+        return reply.type(file.contentType).send(file[encoding] ?? file.identity);
+    }
+
+    // after the more specific app, shell and backend routes above; ranges stay with sendFile
+    app.get(`${ctx}/*`, async (request, reply) => {
+        const relative = (request.params as { '*': string })['*'];
+        if (request.headers.range === undefined) {
+            const { result, file } = await staticCache.get(relative);
+            metrics.staticLookup(result);
+            if (file !== undefined) {
+                return sendCached(request, reply, relative, file);
+            }
+        } else {
+            metrics.staticLookup('bypass');
+        }
+        return reply.sendFile(relative);
     });
 
     // --- fallback ---------------------------------------------------------------

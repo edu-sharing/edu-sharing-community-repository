@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import fastifyMetricsModule from 'fastify-metrics';
 import type { ConfigCache, UnreachableSource } from './config-cache.ts';
+import type { LookupResult, StaticCache } from './static-cache.ts';
 
 /**
  * Prometheus metrics.
@@ -29,10 +30,12 @@ export interface AppMetrics {
     shellWithoutCsp(cause: 'no-config' | 'no-csp'): void;
     /** a request answered with 503 because the backend is unreachable - an app page or a proxied request */
     unavailable(kind: 'page' | 'proxy'): void;
+    /** a static file request, by how the static file cache answered it */
+    staticLookup(result: LookupResult): void;
 }
 
 /** Registers the measuring side on the app server; `/metrics` itself is served by the management server. */
-export async function registerMetrics(app: FastifyInstance, configCache: ConfigCache): Promise<AppMetrics> {
+export async function registerMetrics(app: FastifyInstance, configCache: ConfigCache, staticCache: StaticCache): Promise<AppMetrics> {
     await app.register(fastifyMetrics, {
         // no route on the app server, see management-server.ts
         endpoint: null,
@@ -93,10 +96,31 @@ export async function registerMetrics(app: FastifyInstance, configCache: ConfigC
         labelNames: ['kind'] as const,
     });
 
+    const staticLookups = new client.Counter({
+        name: `${PREFIX}static_cache_requests_total`,
+        help: 'Static file requests by how the in-memory cache answered them (hit, miss = read and compressed now, bypass = streamed from disk)',
+        labelNames: ['result'] as const,
+    });
+    new client.Gauge({
+        name: `${PREFIX}static_cache_bytes`,
+        help: 'Bytes held by the static file cache, all encodings together (limit: STATIC_CACHE_MAX_MB)',
+        collect() {
+            this.set(staticCache.size().bytes);
+        },
+    });
+    new client.Gauge({
+        name: `${PREFIX}static_cache_entries`,
+        help: 'Files held by the static file cache',
+        collect() {
+            this.set(staticCache.size().entries);
+        },
+    });
+
     return {
         proxied: (reason, statusCode, seconds) => proxyDuration.observe({ reason, status_code: String(statusCode) }, seconds),
         enrichment: (result, seconds) => enrichmentDuration.observe({ result }, seconds),
         shellWithoutCsp: (cause) => withoutCsp.inc({ cause }),
         unavailable: (kind) => unavailableResponses.inc({ kind }),
+        staticLookup: (result) => staticLookups.inc({ result }),
     };
 }

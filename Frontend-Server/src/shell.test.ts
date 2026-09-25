@@ -146,6 +146,8 @@ before(async () => {
         configPollIntervalMs: 0,
         configMaxAgeMs: 60_000,
         backendProbeTimeoutMs: 5000,
+        staticCacheMaxBytes: 16 * 1024 * 1024,
+        staticCacheMaxFileBytes: 4 * 1024 * 1024,
     };
     app = await buildServer(config);
     await app.ready();

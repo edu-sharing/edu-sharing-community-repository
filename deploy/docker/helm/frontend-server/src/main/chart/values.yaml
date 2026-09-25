@@ -159,6 +159,12 @@ config:
     ## @param config.configCache.probeTimeoutMs Timeout of that poll in ms - it also decides "backend unreachable" (3 timeouts in a row), so keep it above enrichTimeoutMs
     probeTimeoutMs: 5000
 
+  staticCache:
+    ## @param config.staticCache.maxMb Memory budget of the static file cache in MB (every type, gzip/brotli variants included); auto = 20 % of resources.limits.memory (16-256 MB), 0 disables it
+    maxMb: auto
+    ## @param config.staticCache.maxFileMb Larger files are streamed from disk instead of cached, in MB
+    maxFileMb: 8
+
   metrics:
     ## @param config.metrics.enabled Enable prometheus metrics scraping
     enabled: true

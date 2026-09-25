@@ -3,6 +3,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { after, before, test } from 'node:test';
 import type { AddressInfo } from 'node:net';
 import type { FastifyInstance } from 'fastify';
@@ -72,6 +73,8 @@ before(async () => {
         configPollIntervalMs: 0,
         configMaxAgeMs: 60_000,
         backendProbeTimeoutMs: 5000,
+        staticCacheMaxBytes: 16 * 1024 * 1024,
+        staticCacheMaxFileBytes: 4 * 1024 * 1024,
     };
     app = await buildServer(config);
     await app.ready();
@@ -235,5 +238,45 @@ test('the bare entry point goes to the login without a backend config', async ()
     const response = await app.inject({ method: 'GET', url: '/edu-sharing/' });
     assert.equal(response.statusCode, 302);
     assert.equal(response.headers.location, '/edu-sharing/components/login');
+});
+
+test('static files come from the memory cache, compressed as the client accepts', async () => {
+    const plain = await app.inject({ method: 'GET', url: '/edu-sharing/main-A1B2C3D4.js' });
+    assert.equal(plain.statusCode, 200);
+    assert.equal(plain.body, 'console.log(1);');
+    assert.equal(plain.headers['cache-control'], 'public, max-age=3600, immutable');
+    assert.equal(plain.headers.vary, 'Accept-Encoding');
+    assert.equal(plain.headers['content-type'], 'application/javascript; charset=utf-8');
+
+    const big = 'console.log("x");\n'.repeat(500);
+    fs.writeFileSync(path.join(distDir, 'chunk-ZZZZZZZZ.js'), big);
+    const gzipped = await app.inject({ method: 'GET', url: '/edu-sharing/chunk-ZZZZZZZZ.js', headers: { 'accept-encoding': 'gzip' } });
+    assert.equal(gzipped.headers['content-encoding'], 'gzip');
+    assert.equal(zlib.gunzipSync(gzipped.rawPayload).toString(), big);
+    const brotli = await app.inject({ method: 'GET', url: '/edu-sharing/chunk-ZZZZZZZZ.js', headers: { 'accept-encoding': 'gzip, deflate, br' } });
+    assert.equal(brotli.headers['content-encoding'], 'br');
+    assert.equal(zlib.brotliDecompressSync(brotli.rawPayload).toString(), big);
+
+    const revalidated = await app.inject({ method: 'GET', url: '/edu-sharing/chunk-ZZZZZZZZ.js', headers: { 'if-none-match': String(brotli.headers.etag) } });
+    assert.equal(revalidated.statusCode, 304);
+    assert.equal(revalidated.body, '');
+
+    const head = await app.inject({ method: 'HEAD', url: '/edu-sharing/chunk-ZZZZZZZZ.js', headers: { 'accept-encoding': 'br' } });
+    assert.equal(head.statusCode, 200);
+    assert.equal(head.body, '');
+});
+
+test('ranges are streamed from disk, other files keep their cache headers', async () => {
+    const range = await app.inject({ method: 'GET', url: '/edu-sharing/main-A1B2C3D4.js', headers: { range: 'bytes=0-6' } });
+    assert.equal(range.statusCode, 206);
+    assert.equal(range.body, 'console');
+    const svg = await app.inject({ method: 'GET', url: '/edu-sharing/assets/logo.svg' });
+    assert.equal(svg.statusCode, 200);
+    assert.equal(svg.headers['cache-control'], 'public, max-age=300');
+});
+
+test('a missing static file still falls through to the backend', async () => {
+    const response = await app.inject({ method: 'GET', url: '/edu-sharing/missing-00000000.js' });
+    assert.equal(response.body, 'backend:/edu-sharing/missing-00000000.js');
 });
 
