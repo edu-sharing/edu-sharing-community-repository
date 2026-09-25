@@ -8,6 +8,9 @@ global:
   ## @param global.annotations Define global annotations
   annotations: {}
 
+  ## @param global.debug Enable global debugging
+  debug: false
+
   cluster:
 
     cert:
@@ -57,6 +60,9 @@ global:
 ########################################################################################################################
 
 ## @section Local parameters
+
+## @param debug Enable debugging (default global.debug): DEV mode (dev response headers, request logging) and the node inspector on the pod's 127.0.0.1:9229 - reach it with kubectl port-forward
+debug: false
 
 ## @param nameOverride Override name
 nameOverride: edusharing-repository-frontend-server

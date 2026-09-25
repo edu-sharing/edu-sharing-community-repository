@@ -36,6 +36,11 @@ spec:
       - name: {{ include "edusharing_common_lib.names.name" . }}
         image: {{ include "edusharing_common_lib.images.image" . }}{{ .Values.image.name }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+        {{- if default .Values.global.debug .Values.debug }}
+        # node inspector on the pod's loopback only (it runs arbitrary code) - kubectl
+        # port-forward reaches it there, other pods do not. The image's NODE_OPTIONS stay.
+        command: ["node", "--inspect=127.0.0.1:9229", "build/index.js"]
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ include "edusharing_common_lib.names.name" . }}-env
@@ -44,6 +49,10 @@ spec:
           containerPort: {{ .Values.service.port.api }}
         - name: management
           containerPort: {{ .Values.service.port.management }}
+        {{- if default .Values.global.debug .Values.debug }}
+        - name: inspect
+          containerPort: 9229
+        {{- end }}
         {{- with .Values.startupProbe }}
         startupProbe:
           # the process answers - liveness and readiness only start after it succeeded

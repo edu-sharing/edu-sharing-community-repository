@@ -7,6 +7,10 @@ data:
   PORT: {{ .Values.service.port.api | quote }}
   MANAGEMENT_PORT: {{ .Values.service.port.management | quote }}
   CONTEXT_PATH: {{ .Values.config.contextPath | quote }}
+  {{- if default .Values.global.debug .Values.debug }}
+  # dev response headers (Server, X-Proxy-*) and request logging - see Frontend-Server/src/config.ts
+  DEV: "true"
+  {{- end }}
   # everything proxied and the node metadata go to the external port - never the internal
   # one, tomcat skips 2FA there (ApplicationInfoList.isInternalPortRequest)
   BACKEND_URL: {{ include "edusharing_repository_frontend_server.backend.url" (dict "root" . "port" .Values.config.backend.port.external) | quote }}
