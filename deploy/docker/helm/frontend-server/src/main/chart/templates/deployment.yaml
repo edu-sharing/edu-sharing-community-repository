@@ -44,6 +44,18 @@ spec:
           containerPort: {{ .Values.service.port.api }}
         - name: management
           containerPort: {{ .Values.service.port.management }}
+        {{- with .Values.startupProbe }}
+        startupProbe:
+          # the process answers - liveness and readiness only start after it succeeded
+          httpGet:
+            path: /health/liveness
+            port: management
+          failureThreshold: {{ .failureThreshold }}
+          initialDelaySeconds: {{ .initialDelaySeconds }}
+          periodSeconds: {{ .periodSeconds }}
+          successThreshold: {{ .successThreshold }}
+          timeoutSeconds: {{ .timeoutSeconds }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           # the process answers - never asks the backend

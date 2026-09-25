@@ -205,6 +205,18 @@ securityContext:
 ## @param terminationGracePeriod Set termination grace period
 terminationGracePeriod: 30
 
+## @param startupProbe.failureThreshold Failure threshold for startupProbe - up to 20 tries, 5 s apart (~105 s incl. the initial delay)
+## @param startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
+## @param startupProbe.periodSeconds Period seconds for startupProbe
+## @param startupProbe.successThreshold Success threshold for startupProbe
+## @param startupProbe.timeoutSeconds Timeout seconds for startupProbe
+startupProbe:
+  failureThreshold: 20
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  successThreshold: 1
+  timeoutSeconds: 3
+
 ## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
 ## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
 ## @param livenessProbe.periodSeconds Period seconds for livenessProbe
@@ -229,7 +241,8 @@ readinessProbe:
 
 ########################################################################################################################
 
-## @param resources.limits.cpu Set CPU limit on resources
+# Node serves requests on ONE thread - a limit above 1 CPU buys (almost) nothing
+## @param resources.limits.cpu Set CPU limit on resources - 1 CPU is the sensible maximum (one request thread), scale out via replicas
 ## @param resources.limits.memory Set memory limit on resources
 ## @param resources.requests.cpu Set CPU for requests on resources
 ## @param resources.requests.memory Set memory for requests on resources

@@ -59,7 +59,12 @@ RUN set -eux \
     && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 
+# the V8 heap follows the container memory limit (cgroup): without it node takes about half of
+# the limit but at least ~259 MB - more than a 256Mi container. 40 % leaves the rest to code,
+# socket buffers and streams (~150-180 MB under load); the app itself uses well below 100 MB
+# heap. Override with NODE_OPTIONS (helm: config.extraEnv).
 ENV NODE_ENV=production \
+    NODE_OPTIONS=--max-old-space-size-percentage=40 \
     HOST=0.0.0.0 \
     PORT=8080 \
     CONTEXT_PATH=/edu-sharing \
