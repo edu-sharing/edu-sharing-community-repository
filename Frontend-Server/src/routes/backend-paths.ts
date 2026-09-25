@@ -52,6 +52,13 @@ export const BACKEND_PATHS: readonly string[] = [
 ];
 
 /**
+ * Methods beyond the standard ones, used by WebDAV clients on `/webdav` (see
+ * `NgErrorServlet.service`, which answers them itself on errors). Registered with
+ * fastify so the backend routes accept them.
+ */
+export const WEBDAV_METHODS: readonly string[] = ['PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK'];
+
+/**
  * Paths the Angular router owns. Mirrors the `ng-index` servlet mappings in
  * web.xml (/index.html, /components/*, /v/*); these are the only paths that get
  * the SPA shell. Everything else that is not a file falls through to the backend,

@@ -14,7 +14,7 @@ import { loadNode, parseShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
 import { enrichShell } from './lib/shell-head.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
-import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS } from './routes/backend-paths.ts';
+import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
 
 /** Angular emits `main-A1B2C3D4.js`; those are content hashed and immutable. */
 const HASHED_ASSET = /-[A-Z0-9]{8,}\.(js|css)$/;
@@ -67,6 +67,12 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
 
     // Never parse a body - everything with one is proxied, so it is streamed through.
     app.addContentTypeParser('*', (_request, payload, done) => done(null, payload));
+
+    // the WebDAV verbs of /webdav (Tomcat's WebDAV servlet) - fastify only routes the
+    // methods it knows, `all` would skip these and they would end up in the not-found handler
+    for (const method of WEBDAV_METHODS) {
+        app.addHttpMethod(method, { hasBody: true });
+    }
 
     // echo the request id back so responses this server answers itself stay correlatable
     app.addHook('onRequest', async (request, reply) => {

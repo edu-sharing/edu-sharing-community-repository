@@ -15,6 +15,7 @@ interface BackendHit {
     url: string;
     method: string;
     headers: http.IncomingHttpHeaders;
+    body: string;
 }
 
 const hits: BackendHit[] = [];
@@ -36,9 +37,18 @@ before(async () => {
     fs.writeFileSync(path.join(distDir, 'web-components', 'app', 'main.js'), 'console.log(2);');
 
     backend = http.createServer((request, response) => {
-        hits.push({ url: request.url ?? '', method: request.method ?? '', headers: request.headers });
-        response.writeHead(200, { 'content-type': 'text/plain' });
-        response.end(`backend:${request.url}`);
+        const chunks: Buffer[] = [];
+        request.on('data', (chunk: Buffer) => chunks.push(chunk));
+        request.on('end', () => {
+            hits.push({
+                url: request.url ?? '',
+                method: request.method ?? '',
+                headers: request.headers,
+                body: Buffer.concat(chunks).toString(),
+            });
+            response.writeHead(200, { 'content-type': 'text/plain' });
+            response.end(`backend:${request.url}`);
+        });
     });
     await new Promise<void>((resolve) => backend.listen(0, '127.0.0.1', resolve));
     const backendPort = (backend.address() as AddressInfo).port;
@@ -186,6 +196,23 @@ test('proxies non-GET methods', async () => {
     const response = await app.inject({ method: 'POST', url: '/edu-sharing/rest/node/v1/nodes', payload: 'x' });
     assert.equal(response.statusCode, 200);
     assert.equal(hits.at(-1)?.method, 'POST');
+});
+
+test('proxies the WebDAV methods on /webdav with their body', async () => {
+    for (const method of ['PROPFIND', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK']) {
+        const response = await app.inject({
+            method: method as 'GET',
+            url: '/edu-sharing/webdav/folder/file.txt',
+            headers: { 'content-type': 'application/xml', depth: '1' },
+            payload: '<propfind xmlns="DAV:"/>',
+        });
+        assert.equal(response.statusCode, 200, method);
+        assert.equal(response.body, 'backend:/edu-sharing/webdav/folder/file.txt', method);
+        const hit = hits.at(-1);
+        assert.equal(hit?.method, method);
+        assert.equal(hit?.body, '<propfind xmlns="DAV:"/>', method);
+        assert.equal(hit?.headers.depth, '1', method);
+    }
 });
 
 test('metrics are served on the management server only', async () => {
