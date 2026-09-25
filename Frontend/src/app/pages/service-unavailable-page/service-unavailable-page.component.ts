@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { exhaustMap, interval } from 'rxjs';
+import { SpinnerSmallComponent } from 'ngx-edu-sharing-ui';
 import { returnUrl, SERVICE_UNAVAILABLE_NEXT_PARAM } from '../../util/service-unavailable';
 
 interface Texts {
@@ -43,6 +44,8 @@ const TEXTS: Readonly<Record<'de' | 'en', Texts>> = {
     templateUrl: 'service-unavailable-page.component.html',
     styleUrls: ['service-unavailable-page.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    // no module of the app - SpinnerSmallComponent is standalone and needs nothing but material
+    imports: [SpinnerSmallComponent],
     standalone: true,
 })
 export class ServiceUnavailablePageComponent {

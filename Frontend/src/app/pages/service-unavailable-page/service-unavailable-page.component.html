@@ -6,7 +6,9 @@
       <p>{{ texts.detail }}</p>
       <div class="link" aria-live="polite">
         @if (checking()) {
-        <span>{{ texts.checking }}</span>
+        <span class="checking"
+          ><es-spinner-small [diameter]="18"></es-spinner-small>{{ texts.checking }}</span
+        >
         } @else {
         <button type="button" (click)="retry()">{{ texts.retry }}</button>
         }

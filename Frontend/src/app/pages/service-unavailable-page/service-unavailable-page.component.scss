@@ -13,3 +13,14 @@
 .message-bg {
     min-height: 100vh;
 }
+
+.checking {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    es-spinner-small {
+        // no theme without the backend - the page's own link color
+        --mat-progress-spinner-active-indicator-color: var(--messagePageLink);
+        --mdc-circular-progress-active-indicator-color: var(--messagePageLink);
+    }
+}
