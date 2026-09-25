@@ -1349,7 +1349,16 @@
             "$ref": "#/components/schemas/Values"
           },
           "currentBackend": {
-            "$ref": "#/components/schemas/ValuesBackend"
+            "description": "Relevant config infos mapped from the Lightbend from the backend. ValuesBackendInternal (a superset) for internal requests; ValuesBackend otherwise",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ValuesBackend"
+              },
+              {
+                "$ref": "#/components/schemas/ValuesBackendInternal"
+              }
+            ],
+            "type": "object"
           },
           "global": {
             "$ref": "#/components/schemas/Values"
@@ -11279,15 +11288,6 @@
         "type": "object"
       },
       "ValuesBackend": {
-        "description": "Relevant config infos mapped from the Lightbend from the backend. ValuesBackendInternal (a superset) for internal requests; ValuesBackend otherwise",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/ValuesBackend"
-          },
-          {
-            "$ref": "#/components/schemas/ValuesBackendInternal"
-          }
-        ],
         "properties": {
           "repository": {
             "$ref": "#/components/schemas/RepositoryConfigBackend"
