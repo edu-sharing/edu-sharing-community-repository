@@ -12,21 +12,32 @@
     <fileSet>
       <directory></directory>
       <outputDirectory></outputDirectory>
-      <!-- which files shall be bundled into the jar (add all relevant for frontend build to be reused in the customer project -->
+      <!-- the inputs a customer project needs to build the frontend itself - sources and
+           configuration, nothing the project rebuilds anyway:
+           - no node_modules: the project installs them from package-lock.json (npm ci / npm i)
+           - no .angular or node_modules/.cache: build caches of this build, useless elsewhere
+           - no dist: app and web components come from the community frontend war, a project
+             with overrides rebuilds them, the libraries are rebuilt by `npm run prebuild`
+           The generated api clients (projects/*/src/lib/api) stay: prebuild only regenerates
+           them when missing or outdated. -->
       <includes>
         <include>projects/**</include>
         <include>src/**</include>
         <include>tests/**</include>
         <include>playwright/**</include>
-        <include>.angular/**</include>
         <include>.storybook/**</include>
-        <include>node_modules/**</include>
-        <include>dist/**</include>
         <include>.browserslistrc</include>
         <include>*.ts</include>
         <include>*.js</include>
         <include>*.json</include>
       </includes>
+      <excludes>
+        <!-- local leftovers of the sub projects (gitignored) -->
+        <exclude>**/node_modules/**</exclude>
+        <exclude>**/.angular/**</exclude>
+        <exclude>projects/*/dist/**</exclude>
+        <exclude>playwright/out/**</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
 </assembly>
