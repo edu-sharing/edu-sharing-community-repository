@@ -8,7 +8,12 @@
   "
 >
   <ng-container *ngIf="!isSafe">
-    <es-license-details [nodes]="nodes"></es-license-details>
+    <es-license-details
+      [nodes]="nodes"
+      [headingKey]="
+        mdsEditorValues.editorMode === 'viewer' ? 'MDS.LICENSE' : 'WORKSPACE.LICENSE.CURRENT'
+      "
+    ></es-license-details>
     <div class="link" *ngIf="mdsEditorValues.editorMode !== 'viewer'">
       <div>
         <button

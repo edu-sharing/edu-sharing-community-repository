@@ -28,6 +28,11 @@ export interface Constraints {
     requiresNode?: boolean;
     supportsBulk?: boolean;
     /**
+     * does the widget provide a read-only representation for `editorMode: 'viewer'`?
+     * defaults to true; set to false for widgets that only offer an editing ui
+     */
+    supportsViewer?: boolean;
+    /**
      * shall the widget show an error or only be hidden
      */
     onConstraintFailed?: 'showError' | 'hide';
@@ -66,6 +71,7 @@ export enum NativeWidgetType {
     FileUpload = 'fileupload',
     Workflow = 'workflow',
     Author = 'author',
+    Action = 'action',
     Contributor = 'contributor',
     Collections = 'collections',
     Comments = 'comments',

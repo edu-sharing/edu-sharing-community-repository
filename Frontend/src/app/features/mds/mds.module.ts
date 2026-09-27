@@ -19,6 +19,7 @@ import {
     MdsEditorWidgetChipsComponent,
     MdsEditorWidgetChipsRangedValueComponent,
 } from './mds-editor/widgets/mds-editor-widget-chips/mds-editor-widget-chips.component';
+import { MdsEditorWidgetActionComponent } from './mds-editor/widgets/mds-editor-widget-action/mds-editor-widget-action.component';
 import { MdsEditorWidgetContainerComponent } from './mds-editor/widgets/mds-editor-widget-container/mds-editor-widget-container.component';
 import { RegisterFormFieldDirective } from './mds-editor/widgets/mds-editor-widget-container/register-form-field.directive';
 import { MdsEditorWidgetDurationComponent } from './mds-editor/widgets/mds-editor-widget-duration/mds-editor-widget-duration.component';
@@ -78,6 +79,7 @@ import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-edi
         MdsEditorWidgetChildobjectsComponent,
         MdsEditorWidgetChipsComponent,
         MdsEditorWidgetChipsRangedValueComponent,
+        MdsEditorWidgetActionComponent,
         MdsEditorWidgetContainerComponent,
         MdsEditorWidgetDurationComponent,
         MdsEditorWidgetErrorComponent,

@@ -19,6 +19,8 @@ import org.edu_sharing.restservices.ltiplatform.v13.model.LoginInitiationSession
 import org.edu_sharing.service.editlock.EditLockServiceFactory;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
+import org.edu_sharing.spring.ApplicationContextFactory;
+import org.edu_sharing.spring.security.openid.persistence.OidcUserSessionMapper;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Map;
@@ -42,6 +44,7 @@ public class SessionListener implements HttpSessionListener{
 	
 	@Override
 	public void sessionDestroyed(HttpSessionEvent event) {
+		removeOidcSessionRegistryEntry(event.getSession().getId());
 		trackLogout(event);
 		EditLockServiceFactory.getEditLockService().unlockBySession(event.getSession().getId());
 				
@@ -86,6 +89,27 @@ public class SessionListener implements HttpSessionListener{
 		logger.debug("AllSessions:"+AllSessions.size() + " ShibbolethSessions.size():"+ShibbolethSessions.size() + " ShibbolethSessionsCache.size():"+ShibbolethSessionsCache.size());
 
 	}
+
+    /**
+     * The oidc session registry (see MyBatisOidcSessionRegistry) holds one row per logged in session so that a
+     * back channel logout of the idp can be mapped to it. Spring only removes that row on an explicit logout,
+     * so the rows of all sessions that ran into the tomcat session timeout have to be cleaned up here - otherwise
+     * the table grows with every login and is never reduced.
+     *
+     * Deleting is safe for every kind of session: for a session without an entry (basic auth, lti, guest, or an
+     * entry that the logout already removed) the statement simply affects no row.
+     */
+    private void removeOidcSessionRegistryEntry(String sessionId) {
+        try {
+            ApplicationContext applicationContext = ApplicationContextFactory.getApplicationContext();
+            if (applicationContext == null) {
+                return;
+            }
+            applicationContext.getBean(OidcUserSessionMapper.class).deleteBySessionId(sessionId);
+        } catch (Throwable t) {
+            logger.warn("could not remove the oidc session registry entry of session " + sessionId, t);
+        }
+    }
 
     private void trackLogout(HttpSessionEvent event) {
         boolean possibleSessionTimeout = (System.currentTimeMillis()-event.getSession().getLastAccessedTime()) >= (event.getSession().getMaxInactiveInterval()*1000);

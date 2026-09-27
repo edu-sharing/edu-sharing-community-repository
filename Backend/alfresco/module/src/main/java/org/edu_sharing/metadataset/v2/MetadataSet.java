@@ -256,7 +256,6 @@ public class MetadataSet implements Serializable {
         if (result.size() > 1) {
 			logger.warn("Widget " + widgetId + " has multiple candidates (" + result.size() + ") when rendered with template " + template + ", will use the first one that matches. Check the metadataset definitions for that widget to ensure only one candidate always matches.");
 		}
-		result.get(0).setHideIfEmpty(true);
 		return result.get(0);
 	 }
 

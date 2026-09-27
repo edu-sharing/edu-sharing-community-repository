@@ -942,6 +942,9 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "RENDERING": {
+    "DEFAULT_MODULE_INFO_TEXT": "Das Anzeigen dieses Materials im Browser ist nicht möglich.",
+    "DEFAULT_MODULE_DOWNLOAD": "Laden Sie das Material herunter, um es zu benutzen.",
+    "DOWNLOAD": "Herunterladen",
     "GO_TO_COURSE": "Zum Kurs springen",
     "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
@@ -964,7 +967,8 @@
       "GENERIC_BAD_REQUEST": "Ungültige Anfrage",
       "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
+      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden",
+      "GENERIC_ACCESS_DENIED": "Keine ausreichenden Rechte"
     },
     "GDPR": {
       "EXTERNAL_SITE": "Externe Seite",

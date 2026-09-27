@@ -300,6 +300,19 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- tomcat session store, only read to check whether a session is still alive -->
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-all</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.redisson</groupId>
+      <artifactId>redisson-tomcat-10</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>edu.uoc.elc.lti</groupId>
       <artifactId>spring-boot-lti-advantage</artifactId>

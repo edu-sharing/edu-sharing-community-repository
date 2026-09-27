@@ -24,6 +24,8 @@ export class MdsEditorWidgetLinkComponent
         supportsInlineEditing: true,
         requiresNode: true,
         supportsBulk: false,
+        // renders a button that opens an editing dialog, useless in a read-only view
+        supportsViewer: false,
     };
     readonly valueType: ValueType = ValueType.String;
     @Input() widgetName: NativeWidgetType.Maptemplate | NativeWidgetType.Contributor;

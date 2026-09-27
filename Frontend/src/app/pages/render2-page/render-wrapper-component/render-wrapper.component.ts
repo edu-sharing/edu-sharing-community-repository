@@ -94,40 +94,47 @@ export class RenderWrapperComponent implements OnChanges {
 
     async ngOnChanges(changes: SimpleChanges) {
         if (changes.nodeId) {
-            if (this.showChildobjects) {
-                this.parentNode.set(
-                    await firstValueFrom(
-                        this.nodeService.getNode(changes.nodeId.currentValue, {
-                            repository: this.repository || HOME_REPOSITORY,
-                        }),
-                    ),
-                );
-                try {
-                    this.children.set(
-                        (
-                            await firstValueFrom(
-                                this.nodeService.getChildren(changes.nodeId.currentValue, {
-                                    repository: this.repository || HOME_REPOSITORY,
-                                    filter: ['files'],
-                                    sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
-                                    sortAscending: [true],
-                                    assocName: RestConstants.CCM_ASSOC_CHILDIO,
-                                    maxItems: RestConstants.COUNT_UNLIMITED,
-                                }),
-                            )
-                        ).nodes,
-                    );
-                } catch (e) {
-                    this.children.set(null);
-                    e.preventDefault();
-                    console.warn('Could not fetch children', e);
-                }
-            } else {
-                this.children.set(null);
-            }
+            await this.loadChildObjects();
         }
         if (changes.nodeId || changes.childId) {
             await this.refresh();
+        }
+    }
+
+    /**
+     * (Re-)loads the node and its child objects, i.e. the list shown on top for series.
+     */
+    private async loadChildObjects() {
+        if (!this.showChildobjects) {
+            this.children.set(null);
+            return;
+        }
+        this.parentNode.set(
+            await firstValueFrom(
+                this.nodeService.getNode(this.nodeId, {
+                    repository: this.repository || HOME_REPOSITORY,
+                }),
+            ),
+        );
+        try {
+            this.children.set(
+                (
+                    await firstValueFrom(
+                        this.nodeService.getChildren(this.nodeId, {
+                            repository: this.repository || HOME_REPOSITORY,
+                            filter: ['files'],
+                            sortProperties: [RestConstants.CCM_PROP_CHILDOBJECT_ORDER],
+                            sortAscending: [true],
+                            assocName: RestConstants.CCM_ASSOC_CHILDIO,
+                            maxItems: RestConstants.COUNT_UNLIMITED,
+                        }),
+                    )
+                ).nodes,
+            );
+        } catch (e) {
+            this.children.set(null);
+            e.preventDefault();
+            console.warn('Could not fetch children', e);
         }
     }
 
@@ -169,12 +176,20 @@ export class RenderWrapperComponent implements OnChanges {
         });
     }
     async refresh() {
+        // the child objects may have changed as well, e.g. when the metadata of one of them was
+        // edited or a child was added/removed
+        await this.loadChildObjects();
         await this.setNodeById(this.childId || this.nodeId);
     }
     private async setNodeById(nodeId: string) {
         this.loading.set(true);
-        delete this.data()?.request;
-        this.data.set(this.data());
+        /*
+         drop the current data before fetching: `rs-root` and `es-mds-editor-wrapper` only read
+         their inputs when they are created (see the note on stable inputs in
+         `MdsEditorWrapperComponent`), so without destroying them first a refresh - e.g. after
+         the metadata dialog was closed - would keep displaying the outdated node.
+         */
+        this.data.set(null);
         const data = await this.renderHelperService.getRenderData(
             nodeId,
             this.version,

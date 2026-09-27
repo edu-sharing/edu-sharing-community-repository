@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../../../features/mds/mds-editor/mds-mixins' as mds;
 $rsPaddingHorizontal: 2vw;
 
 $rsPaddingVertical: 20px;
@@ -144,6 +145,18 @@ rs-root {
                 height: auto;
                 aspect-ratio: 16 / 9;
             }
+            // Moodle/SCORM can be configured to show the course as a preview image plus a link
+            // instead of an embedded iframe (module credential showPreviewIframe). Without the
+            // frame there is nothing to fill a 16/9 box, so it sizes like module-url and lets the
+            // preview image drive the height.
+            &.module-MOODLE:not(:has(iframe)),
+            &.module-SCORM:not(:has(iframe)) {
+                width: 60%;
+                @media screen and (max-width: ($mobileWidth)) {
+                    width: 90%;
+                }
+                aspect-ratio: auto;
+            }
             &.module-url {
                 width: 60%;
                 @media screen and (max-width: ($mobileWidth)) {
@@ -252,18 +265,15 @@ rs-root {
         font-size: 110%;
     }
 }
-::ng-deep {
-    es-mds-editor-wrapper es-mds-editor-core {
-        display: grid;
-        width: 100%;
+// `:host` is required: a `::ng-deep` block at the top level of the file is not scoped at all and
+// would leak these styles to every mds editor of the application - e.g. the one nested in
+// `es-preview-content`.
+:host ::ng-deep {
+    es-mds-editor-wrapper {
+        // the padding sits on the container, so its content box - and with it the width the
+        // column layout is measured against - matches the space the views actually get
         padding: 0 $rsPaddingHorizontal;
-        grid-gap: 10px;
-        grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
-        .mds-views {
-            display: grid;
-            grid-gap: 10px;
-            grid-template-columns: repeat(auto-fit, minmax(min(500px, 100%), 1fr));
-        }
+        @include mds.mdsEditorColumns;
         es-mds-editor-view {
             padding: 0;
             //border: 1px solid var(--palette-primary-100);
@@ -271,7 +281,7 @@ rs-root {
             overflow: hidden;
             .view-wrapper {
                 .content {
-                    padding: 0 10px;
+                    padding: 10px 10px;
                 }
                 .heading-container {
                     > h3 {

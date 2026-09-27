@@ -66,7 +66,17 @@
     <img alt="" [src]="license.icon" /> {{ license.name }}
   </div>
   <div *ngIf="basicType() === 'array'">
-    <div class="array-entry" *ngFor="let v of value()">{{ v }}</div>
+    @for (entry of arrayEntries(); track $index) {
+    <div class="array-entry">
+      @if (widget.definition.isSearchable && entry.id) {
+      <a [routerLink]="'/' + ROUTER_PREFIX + 'search'" [queryParams]="getSearchParams(entry)">{{
+        entry.caption
+      }}</a>
+      } @else {
+      <span>{{ entry.caption }}</span>
+      }
+    </div>
+    }
   </div>
   <div *ngIf="basicType() === 'tree'">
     <div class="tree-entry" *ngFor="let v of rawValue">

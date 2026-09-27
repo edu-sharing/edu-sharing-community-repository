@@ -65,6 +65,7 @@
       [routerLink]="allDetailsLink"
       [queryParams]="allDetailsParams"
       class="all-details-link"
+      (click)="allDetailsClick.emit()"
     >
       <span>{{ 'ALL_DETAILS' | translate }}</span>
       <i esIcon="arrow_forward"></i>

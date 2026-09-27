@@ -1,5 +1,6 @@
 @use 'variables-scss' as *;
 @use 'mixins' as *;
+@use '../mds/mds-editor/mds-mixins' as mds;
 
 $previewHeight: 500px;
 
@@ -13,8 +14,9 @@ $previewHeight: 500px;
         background: rgba(0, 0, 0, 0.26);
     }
     ::ng-deep {
-        es-mds-editor-wrapper es-mds-editor-core {
-            display: grid;
+        es-mds-editor-wrapper {
+            // side by side in the fullscreen dialog, single column in the narrow sidebar
+            @include mds.mdsEditorColumns;
         }
     }
 }

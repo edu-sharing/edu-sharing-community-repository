@@ -13,7 +13,7 @@ import { Attributes } from '../../util/parse-attributes';
 import { authorIsEmpty } from '../../util/native-widget-completion';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
-import { InputStatus, Values } from '../../../types/types';
+import { Constraints, InputStatus, Values } from '../../../types/types';
 import { MdsWidget } from 'ngx-edu-sharing-api';
 
 export interface AuthorData {
@@ -31,9 +31,11 @@ enum DefaultTab {
     standalone: false,
 })
 export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetComponent {
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: false,
         supportsBulk: false,
+        // the widget only provides tabs with input fields, there is no read-only representation
+        supportsViewer: false,
     };
     attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
