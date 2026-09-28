@@ -139,6 +139,7 @@ export class MdsEditorViewComponent
 
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
+    private hideEmptyObserver: MutationObserver;
     private allWidgetsHidden = false;
     private expandContentDone = new Subject<void>();
 
@@ -195,11 +196,12 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             this.injectWidgets();
             this.checkHideState();
-            MdsViewerService.hideEmpty(this.container);
+            this.hideEmptyObserver = MdsViewerService.hideEmpty(this.container);
         });
     }
 
     ngOnDestroy(): void {
+        this.hideEmptyObserver?.disconnect();
         this.destroyed.next();
         this.destroyed.complete();
     }

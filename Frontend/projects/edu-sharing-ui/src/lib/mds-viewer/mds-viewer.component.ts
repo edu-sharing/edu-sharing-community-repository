@@ -6,6 +6,7 @@ import {
     Injector,
     Input,
     OnChanges,
+    OnDestroy,
     QueryList,
     signal,
     SimpleChanges,
@@ -40,7 +41,7 @@ import { BehaviorSubject } from 'rxjs';
     providers: [MdsViewerService, ViewInstanceService],
     standalone: false,
 })
-export class MdsViewerComponent implements OnChanges {
+export class MdsViewerComponent implements OnChanges, OnDestroy {
     private mdsService = inject(MdsService);
     private mdsViewerService = inject(MdsViewerService);
     private factoryResolver = inject(ComponentFactoryResolver);
@@ -48,6 +49,7 @@ export class MdsViewerComponent implements OnChanges {
     private containerRef = inject(ViewContainerRef);
     private sanitizer = inject(DomSanitizer);
     private viewInstance = inject(ViewInstanceService);
+    private hideEmptyObservers: MutationObserver[] = [];
 
     @ViewChildren('container') container: QueryList<ElementRef>;
 
@@ -161,10 +163,22 @@ export class MdsViewerComponent implements OnChanges {
                             this.injector,
                         );
                     }
-                    setTimeout(() => MdsViewerService.hideEmpty(c), 1);
                 });
             }
+            this.disconnectHideEmptyObservers();
+            this.hideEmptyObservers = this.container
+                .toArray()
+                .map((c) => MdsViewerService.hideEmpty(c));
         });
+    }
+
+    ngOnDestroy(): void {
+        this.disconnectHideEmptyObservers();
+    }
+
+    private disconnectHideEmptyObservers() {
+        this.hideEmptyObservers.forEach((o) => o.disconnect());
+        this.hideEmptyObservers = [];
     }
 
     /**

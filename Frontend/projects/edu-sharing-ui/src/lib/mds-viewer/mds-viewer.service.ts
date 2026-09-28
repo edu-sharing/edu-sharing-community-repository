@@ -115,13 +115,23 @@ export class MdsViewerService {
     }
 
     /**
-     * hide empty widgets inside a closed container
+     * hide <hideIfEmpty> groups inside the container as long as their <hideIfEmpty-content> is empty
+     *
+     * Widgets load their values asynchronously, so the state is re-evaluated on every dom change
+     * inside the container. Call disconnect() on the returned observer when the container is destroyed.
      */
-    static hideEmpty(c: ElementRef) {
-        for (let emptyGroup of c.nativeElement.getElementsByTagName('hideifempty')) {
-            if (!emptyGroup.getElementsByTagName('hideifempty-content')?.[0]?.innerText?.trim()) {
-                emptyGroup.parentElement.removeChild(emptyGroup);
+    static hideEmpty(c: ElementRef): MutationObserver {
+        const update = () => {
+            for (const group of Array.from(
+                c.nativeElement.getElementsByTagName('hideifempty'),
+            ) as HTMLElement[]) {
+                const content = group.getElementsByTagName('hideifempty-content')?.[0];
+                group.style.display = content?.textContent?.trim() ? '' : 'none';
             }
-        }
+        };
+        update();
+        const observer = new MutationObserver(update);
+        observer.observe(c.nativeElement, { childList: true, subtree: true, characterData: true });
+        return observer;
     }
 }
