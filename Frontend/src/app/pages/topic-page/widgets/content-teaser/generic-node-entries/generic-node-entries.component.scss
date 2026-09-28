@@ -38,9 +38,11 @@ es-node-entries-wrapper {
     }
 }
 
-// the placeholder for empty content spans the whole widget
+// the placeholder for empty content spans the whole widget, in the card layouts (row) as well as
+// in the list layout (column)
 :host ::ng-deep es-node-entries-wrapper .empty-container {
     flex: 1;
+    align-self: stretch;
 }
 
 // increase gap between elements
