@@ -15,4 +15,9 @@ es-spinner {
     padding: 0 16px 16px 16px;
     border: 1px solid var(--mat-form-field-outlined-outline-color, var(--mat-sys-outline));
     border-radius: 8px;
+
+    // no frame around a widget that renders nothing
+    &:has(> :empty) {
+        display: none;
+    }
 }
