@@ -15,7 +15,6 @@ function loaded(properties: LoadedNode['properties'], licenseUrl?: string): Load
     return {
         node: { ref: { id: 'n1' }, properties, ...(licenseUrl === undefined ? {} : { license: { url: licenseUrl } }) },
         properties,
-        setCookie: undefined,
     };
 }
 

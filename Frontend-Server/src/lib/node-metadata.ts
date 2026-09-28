@@ -1,4 +1,4 @@
-import type { IncomingHttpHeaders, OutgoingHttpHeaders } from 'node:http';
+import type { OutgoingHttpHeaders } from 'node:http';
 import type { components } from '../shared/api-types.ts';
 import type { JsonGetter } from './backend-client.ts';
 
@@ -46,8 +46,6 @@ export interface LoadedNode {
     readonly node: RestNode;
     /** of the requested version - the node's own when no version was requested */
     readonly properties: NodeProperties;
-    /** from the metadata response, to be handed on to the browser */
-    readonly setCookie: IncomingHttpHeaders['set-cookie'];
 }
 
 /**
@@ -56,7 +54,8 @@ export interface LoadedNode {
  * preview, license and render url come from the node itself - as in LRMITool, which
  * also takes the preview of the current node.
  *
- * Runs with the browser's identity: a node the caller may not read yields undefined.
+ * Runs anonymously (see backend-client.ts): a node the public may not read yields
+ * undefined, and the shell then goes out without enrichment.
  */
 export async function loadNode(
     client: JsonGetter,
@@ -88,7 +87,7 @@ export async function loadNode(
         }
         properties = versionProperties;
     }
-    return { node, properties, setCookie: current.headers['set-cookie'] };
+    return { node, properties };
 }
 
 function parseVersion(version: string | undefined): { major: number; minor: number } | undefined {

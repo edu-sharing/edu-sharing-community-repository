@@ -13,7 +13,8 @@ import { buildServer } from './server.ts';
  * Shell delivery end to end, against a fake Tomcat with both connectors: the internal
  * one answers _about and the internal config (ValuesBackendInternal), the external
  * one node metadata and everything proxied. "private" is only readable with the
- * session cookie of its owner.
+ * session cookie of its owner - which this server never sends, so it serves to show
+ * that the backend calls really do go out anonymously.
  */
 
 const OWNER_SESSION = 'JSESSIONID=owner';
@@ -184,11 +185,14 @@ test('render view of a public node carries title, description, license, LRMI and
     assert.deepEqual(lrmi.creator, { '@type': 'Person', givenName: 'Mike', familyName: 'Miller' });
 });
 
-test('tunnels the browser session to the metadata call - the owner sees a private node', async () => {
+test('the metadata call carries no browser identity - even the owner gets no enrichment', async () => {
     const response = await shell('/edu-sharing/components/render/private', { cookie: OWNER_SESSION });
-    assert.match(response.body, /<title>Secret draft – edu-sharing<\/title>/);
     const metadataHit = hits.find((hit) => hit.url.includes('/private/metadata'));
-    assert.equal(metadataHit?.headers.cookie, OWNER_SESSION);
+    assert.equal(metadataHit?.headers.cookie, undefined);
+    assert.equal(metadataHit?.headers.authorization, undefined);
+    // the price of anonymous forwarding: a node only its owner may read stays unenriched
+    assert.doesNotMatch(response.body, /Secret draft/);
+    assert.match(response.body, /<title>edu-sharing<\/title>/);
 });
 
 test('without the session a private node stays hidden - plain shell plus oEmbed', async () => {
@@ -208,9 +212,13 @@ test('the config is fetched without the browser identity', async () => {
     assert.equal(configHit.headers.host, 'other.example.org');
 });
 
-test('hands the session a guest metadata call opened on to the browser', async () => {
+test('a session the metadata call opened is not handed to the browser', async () => {
     const response = await shell('/edu-sharing/components/render/public');
-    assert.match(String(response.headers['set-cookie']), /JSESSIONID=guest/);
+    // the fake backend answers the anonymous call with a guest cookie; handing it on
+    // would pin the browser to a session that, without an ingress, is not sticky
+    assert.equal(response.headers['set-cookie'], undefined);
+    // enrichment itself still works, the node is public
+    assert.match(response.body, /<title>Photosynthesis – edu-sharing<\/title>/);
 });
 
 test('collection view gets title and description only', async () => {

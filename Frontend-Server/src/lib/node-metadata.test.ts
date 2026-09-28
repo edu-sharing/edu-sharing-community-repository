@@ -43,14 +43,13 @@ function fakeBackend(routes: Record<string, BackendResponse>) {
 const NODE_PATH = '/edu-sharing/rest/node/v1/nodes/-home-/n1/metadata?propertyFilter=-all-';
 const NODE = { ref: { id: 'n1' }, properties: { 'cclom:title': ['current'] }, preview: { url: 'p' } };
 
-test('loads the node with the given identity and hands on its Set-Cookie', async () => {
+test('loads the node with the given headers', async () => {
     const { client, calls } = fakeBackend({
-        [NODE_PATH]: { status: 200, headers: { 'set-cookie': ['JSESSIONID=1'] }, body: { node: NODE } },
+        [NODE_PATH]: { status: 200, headers: {}, body: { node: NODE } },
     });
-    const loaded = await loadNode(client, '/edu-sharing', { kind: 'render', nodeId: 'n1', version: undefined }, { cookie: 'c' });
+    const loaded = await loadNode(client, '/edu-sharing', { kind: 'render', nodeId: 'n1', version: undefined }, { host: 'repo.example.org' });
     assert.equal(loaded?.properties['cclom:title']?.[0], 'current');
-    assert.deepEqual(loaded?.setCookie, ['JSESSIONID=1']);
-    assert.equal(calls[0]?.headers['cookie'], 'c');
+    assert.equal(calls[0]?.headers['host'], 'repo.example.org');
 });
 
 test('versioned render url: properties from the version, the rest from the node', async () => {

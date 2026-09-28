@@ -61,19 +61,17 @@ export class BackendClient {
 /** What callers need - lets tests hand in a fake. */
 export type JsonGetter = Pick<BackendClient, 'getJson'>;
 
-/**
- * Headers for a backend call made on behalf of a browser request: the same
- * identity (session cookie / authorization), the same domain and the same trace.
- * Permission checks therefore behave exactly as for the browser itself.
+/*
+ * There is deliberately no `onBehalfOf` counterpart any more: this server never
+ * forwards the browser's identity (session cookie, Authorization) to its own
+ * backend calls. This does NOT concern the proxy in server.ts - that one forwards
+ * everything, and has to. Without an ingress in front there is no session affinity, so such
+ * a call can land on a pod that does not know the session - the result would be
+ * unreliable rather than authenticated. Every call goes out anonymously.
+ *
+ * Temporary. What it costs and what has to be in place to bring it back:
+ * docs/02-routing.md, "No identity is forwarded".
  */
-export function onBehalfOf(request: FastifyRequest): OutgoingHttpHeaders {
-    return {
-        ...anonymousFor(request),
-        ...(request.headers.cookie === undefined ? {} : { cookie: request.headers.cookie }),
-        ...(request.headers.authorization === undefined ? {} : { authorization: request.headers.authorization }),
-        ...(request.headers['accept-language'] === undefined ? {} : { 'accept-language': request.headers['accept-language'] }),
-    };
-}
 
 /** Domain and trace of a browser request, but no identity - for public data like the config. */
 /**

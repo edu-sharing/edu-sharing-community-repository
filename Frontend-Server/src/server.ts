@@ -5,7 +5,7 @@ import Fastify, { LogController, type FastifyInstance, type FastifyReply, type F
 import fastifyStatic from '@fastify/static';
 import replyFrom from '@fastify/reply-from';
 import type { Config } from './config.ts';
-import { anonymousFor, BackendClient, isConnectionError, onBehalfOf } from './lib/backend-client.ts';
+import { anonymousFor, BackendClient, isConnectionError } from './lib/backend-client.ts';
 import { ConfigCache } from './lib/config-cache.ts';
 import { defaultLocationUrl } from './lib/default-location.ts';
 import { isServiceUnavailablePage, RETRY_AFTER_SECONDS, sendError, sendUnavailable, shellErrorStatus } from './lib/error-response.ts';
@@ -229,14 +229,15 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
         const target = reachable ? parseShellTarget(url) : undefined;
         // the config is needed on every shell page (headers, custom html) and is cached;
         // node metadata only for the render and collection views. Without a backend the
-        // cached config is used as is - asking would only wait for the timeout
+        // cached config is used as is - asking would only wait for the timeout.
+        // Both go out anonymously, so a node the public may not read stays unenriched
         // monotonic - a wall clock step (NTP) must not distort the duration
         const enrichmentStart = performance.now();
         const [configResult, nodeResult] = await Promise.allSettled([
             reachable
                 ? configCache.get(request.hostname, anonymousFor(request))
                 : Promise.resolve(configCache.peek(request.hostname)),
-            target === undefined ? Promise.resolve(undefined) : loadNode(backend, ctx, target, onBehalfOf(request)),
+            target === undefined ? Promise.resolve(undefined) : loadNode(backend, ctx, target, anonymousFor(request)),
         ]);
         if (target !== undefined) {
             const result = nodeResult.status === 'rejected' ? 'failed' : nodeResult.value === undefined ? 'missing' : 'ok';
@@ -259,12 +260,6 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
                 pageUrl: `${origin}${request.url}`,
                 appUrl: `${origin}${ctx}/`,
             });
-        }
-        // the metadata call may have opened the (guest) session - NgServlet did the same
-        // for the shell request, so the browser keeps it instead of Tomcat collecting
-        // one orphaned session per page view
-        if (node?.setCookie !== undefined) {
-            reply.header('set-cookie', node.setCookie);
         }
         if (repositoryConfig === null) {
             metrics.shellWithoutCsp('no-config');

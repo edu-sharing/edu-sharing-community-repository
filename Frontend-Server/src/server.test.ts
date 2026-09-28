@@ -47,7 +47,12 @@ before(async () => {
                 headers: request.headers,
                 body: Buffer.concat(chunks).toString(),
             });
-            response.writeHead(200, { 'content-type': 'text/plain' });
+            const url = request.url ?? '';
+            response.writeHead(200, {
+                'content-type': 'text/plain',
+                // as tomcat answers a login: the proxy has to hand this to the browser
+                ...(url.includes('/rest/authentication') ? { 'set-cookie': 'JSESSIONID=abc; Path=/edu-sharing; HttpOnly' } : {}),
+            });
             response.end(`backend:${request.url}`);
         });
     });
@@ -195,6 +200,34 @@ test('liveness and readiness never touch the backend', async () => {
     const readiness = await management.inject({ method: 'GET', url: '/health/readiness' });
     assert.equal(readiness.statusCode, 200);
     assert.equal(hits.length, 0);
+});
+
+test('the proxy forwards the browser identity in full - unlike this server\'s own calls', async () => {
+    hits.length = 0;
+    await app.inject({
+        method: 'GET',
+        url: '/edu-sharing/rest/node/v1/nodes',
+        headers: {
+            cookie: 'JSESSIONID=abc; XSRF-TOKEN=t',
+            authorization: 'Basic dXNlcjpwYXNz',
+            'x-xsrf-token': 't',
+            'accept-language': 'de-DE',
+        },
+    });
+    const hit = hits.at(-1);
+    assert.ok(hit);
+    // stripping any of these would break login, CSRF and the UI language. Only the
+    // server's OWN backend calls go out anonymously - see lib/backend-client.ts
+    assert.equal(hit.headers.cookie, 'JSESSIONID=abc; XSRF-TOKEN=t');
+    assert.equal(hit.headers.authorization, 'Basic dXNlcjpwYXNz');
+    assert.equal(hit.headers['x-xsrf-token'], 't');
+    assert.equal(hit.headers['accept-language'], 'de-DE');
+});
+
+test('the proxy hands Set-Cookie back to the browser untouched', async () => {
+    const response = await app.inject({ method: 'POST', url: '/edu-sharing/rest/authentication/v1/validateSession' });
+    // same path prefix as tomcat, so the cookie needs no rewriting
+    assert.equal(String(response.headers['set-cookie']), 'JSESSIONID=abc; Path=/edu-sharing; HttpOnly');
 });
 
 test('proxies non-GET methods', async () => {
