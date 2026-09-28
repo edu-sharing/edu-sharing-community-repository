@@ -28,7 +28,10 @@ es-render-wrapper-component {
 es-imprint-privacy {
     display: block;
     width: 100%;
+    // push to the bottom of the card's scroll area when the content is shorter than the card
+    margin-top: auto;
+    flex-shrink: 0;
     // leave space for scroll to top
-    padding: 10px 0 45px 0;
+    padding: 15px 0;
     border-top: 1px solid #eaeaea;
 }
