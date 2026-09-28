@@ -90,6 +90,16 @@ public class DownloadServlet extends HttpServlet {
 			// allow signature based auth from connector to bypass the download/content access
 			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
 			logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
+			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
+			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
+			// metadata export only requires read permission (enforced via NodeDao), not download permission
+			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
+				String metadata = getMetadataRenderer(nodeRef).render("io_text");
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				out.write(metadata.getBytes());
+				outputData(resp,name + ".txt", out, "text/plain");
+				return;
+			}
 			if (repositoryId == null &&
 					!NodeServiceHelper.downloadAllowed(nodeId) &&
 					!(
@@ -106,18 +116,9 @@ public class DownloadServlet extends HttpServlet {
 				logger.info("Download forbidden for node " + nodeId);
 				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
 			}
-			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
 			String version=req.getParameter("version");
 			if(version!=null && version.isEmpty()) {
 				version=null;
-			}
-			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
-			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
-				String metadata = getMetadataRenderer(nodeRef).render("io_text");
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				out.write(metadata.getBytes());
-				outputData(resp,name + ".txt", out, "text/plain");
-				return;
 			}
 			String originalNodeId;
 			if(repositoryId == null) {

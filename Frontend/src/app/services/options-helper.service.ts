@@ -1068,7 +1068,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             if (!nodes) {
                 return false;
             }
-            return nodes[0].downloadUrl != null;
+            return true;
         };
         const simpleEditNode = new OptionItem(
             'OPTIONS.EDIT_SIMPLE',
