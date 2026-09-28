@@ -73,6 +73,11 @@ es-info-message {
         gap: 8px;
     }
 
+    // separates each field's hint from the next control so the hint reads as part of its own field
+    mat-form-field {
+        margin-bottom: 8px;
+    }
+
     .advanced-count {
         margin-left: 8px;
         padding: 0 8px;
