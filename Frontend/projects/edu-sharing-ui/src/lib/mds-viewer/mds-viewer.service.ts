@@ -1,6 +1,7 @@
-import { ElementRef, Injectable, QueryList, ViewChildren, inject } from '@angular/core';
+import { ElementRef, Injectable, NgZone, QueryList, ViewChildren, inject } from '@angular/core';
 import { MdsDefinition, MdsWidget } from 'ngx-edu-sharing-api';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { debounceTime, startWith } from 'rxjs/operators';
 import { Values } from '../services/search-helper.service';
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
@@ -118,20 +119,30 @@ export class MdsViewerService {
      * hide <hideIfEmpty> groups inside the container as long as their <hideIfEmpty-content> is empty
      *
      * Widgets load their values asynchronously, so the state is re-evaluated on every dom change
-     * inside the container. Call disconnect() on the returned observer when the container is destroyed.
+     * inside the container. Unsubscribe the returned subscription when the container is destroyed.
+     *
+     * Runs outside of angular: inside the zone, each check would trigger a change detection that
+     * mutates the dom again and ends up in an endless loop.
      */
-    static hideEmpty(c: ElementRef): MutationObserver {
-        const update = () => {
-            for (const group of Array.from(
-                c.nativeElement.getElementsByTagName('hideifempty'),
-            ) as HTMLElement[]) {
-                const content = group.getElementsByTagName('hideifempty-content')?.[0];
-                group.style.display = content?.textContent?.trim() ? '' : 'none';
-            }
-        };
-        update();
-        const observer = new MutationObserver(update);
-        observer.observe(c.nativeElement, { childList: true, subtree: true, characterData: true });
-        return observer;
+    static hideEmpty(c: ElementRef, ngZone: NgZone): Subscription {
+        const domChanges$ = new Observable<void>((subscriber) => {
+            const observer = new MutationObserver(() => subscriber.next());
+            observer.observe(c.nativeElement, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+            });
+            return () => observer.disconnect();
+        });
+        return ngZone.runOutsideAngular(() =>
+            domChanges$.pipe(startWith(undefined), debounceTime(50)).subscribe(() => {
+                for (const group of Array.from(
+                    c.nativeElement.getElementsByTagName('hideifempty'),
+                ) as HTMLElement[]) {
+                    const content = group.getElementsByTagName('hideifempty-content')?.[0];
+                    group.style.display = content?.textContent?.trim() ? '' : 'none';
+                }
+            }),
+        );
     }
 }

@@ -5,6 +5,7 @@ import {
     inject,
     Injector,
     Input,
+    NgZone,
     OnChanges,
     OnDestroy,
     QueryList,
@@ -32,7 +33,7 @@ import { replaceElementWithDiv } from './replace-element-with-div';
 import { UIService } from '../services/ui.service';
 import { MdsViewerService } from './mds-viewer.service';
 import { ViewInstanceService } from './view-instance.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -49,7 +50,8 @@ export class MdsViewerComponent implements OnChanges, OnDestroy {
     private containerRef = inject(ViewContainerRef);
     private sanitizer = inject(DomSanitizer);
     private viewInstance = inject(ViewInstanceService);
-    private hideEmptyObservers: MutationObserver[] = [];
+    private ngZone = inject(NgZone);
+    private hideEmptySubscriptions: Subscription[] = [];
 
     @ViewChildren('container') container: QueryList<ElementRef>;
 
@@ -165,20 +167,20 @@ export class MdsViewerComponent implements OnChanges, OnDestroy {
                     }
                 });
             }
-            this.disconnectHideEmptyObservers();
-            this.hideEmptyObservers = this.container
+            this.unsubscribeHideEmpty();
+            this.hideEmptySubscriptions = this.container
                 .toArray()
-                .map((c) => MdsViewerService.hideEmpty(c));
+                .map((c) => MdsViewerService.hideEmpty(c, this.ngZone));
         });
     }
 
     ngOnDestroy(): void {
-        this.disconnectHideEmptyObservers();
+        this.unsubscribeHideEmpty();
     }
 
-    private disconnectHideEmptyObservers() {
-        this.hideEmptyObservers.forEach((o) => o.disconnect());
-        this.hideEmptyObservers = [];
+    private unsubscribeHideEmpty() {
+        this.hideEmptySubscriptions.forEach((s) => s.unsubscribe());
+        this.hideEmptySubscriptions = [];
     }
 
     /**
