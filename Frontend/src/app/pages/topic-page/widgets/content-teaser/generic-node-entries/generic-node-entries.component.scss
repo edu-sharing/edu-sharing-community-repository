@@ -38,6 +38,11 @@ es-node-entries-wrapper {
     }
 }
 
+// the placeholder for empty content spans the whole widget
+:host ::ng-deep es-node-entries-wrapper .empty-container {
+    flex: 1;
+}
+
 // increase gap between elements
 // TODO: make it configurable via CSS variable
 :host ::ng-deep es-node-entries-wrapper ::ng-deep es-node-entries-card-grid {
