@@ -1,13 +1,11 @@
-import type { OutgoingHttpHeaders } from 'node:http';
 import type { components } from '../shared/api-types.ts';
-import type { JsonGetter } from './backend-client.ts';
 
-/** REST models, generated from openapi.json by scripts/generate-api-types.mjs */
-export type RestNode = components['schemas']['Node'];
-type NodeEntry = components['schemas']['NodeEntry'];
-type NodeVersionEntry = components['schemas']['NodeVersionEntry'];
-
-export type NodeProperties = NonNullable<RestNode['properties']>;
+/**
+ * The property map shape, still taken from the REST model so it stays the one
+ * definition of "a node's properties" - the values now come from the search index
+ * and are normalized into this shape by `normalizeProperties` in elastic-node.ts.
+ */
+export type NodeProperties = NonNullable<components['schemas']['Node']['properties']>;
 
 /**
  * What `NgServlet.getNodeFromURL` extracts from a shell url:
@@ -42,55 +40,16 @@ export function parseShellTarget(url: string): ShellTarget | undefined {
     return undefined;
 }
 
-export interface LoadedNode {
-    readonly node: RestNode;
-    /** of the requested version - the node's own when no version was requested */
-    readonly properties: NodeProperties;
-}
-
 /**
- * `GET /node/v1/nodes/-home-/<id>/metadata`, plus `/versions/<major>/<minor>/metadata`
- * for a versioned render url: the version endpoint only carries the properties, while
- * preview, license and render url come from the node itself - as in LRMITool, which
- * also takes the preview of the current node.
- *
- * Runs anonymously (see backend-client.ts): a node the public may not read yields
- * undefined, and the shell then goes out without enrichment.
+ * What the shell enrichment needs about a node. Deliberately not the REST `Node`
+ * model any more: the data comes from the search index, and only these four things
+ * are read (license link, LRMI thumbnailUrl / encodingFormat, title, description).
+ * A nodeshaped stand-in would claim fields nobody fills.
  */
-export async function loadNode(
-    client: JsonGetter,
-    contextPath: string,
-    target: ShellTarget,
-    headers: OutgoingHttpHeaders,
-): Promise<LoadedNode | undefined> {
-    const base = `${contextPath}/rest/node/v1/nodes/-home-/${encodeURIComponent(target.nodeId)}`;
-    const version = target.kind === 'render' ? parseVersion(target.version) : undefined;
-    if (target.kind === 'render' && target.version !== undefined && version === undefined) {
-        // an unparsable version fails in NgServlet as well - no enrichment
-        return undefined;
-    }
-    const [current, versioned] = await Promise.all([
-        client.getJson(`${base}/metadata?propertyFilter=-all-`, headers),
-        version === undefined
-            ? undefined
-            : client.getJson(`${base}/versions/${version.major}/${version.minor}/metadata?propertyFilter=-all-`, headers),
-    ]);
-    const node = (current.body as Partial<NodeEntry> | undefined)?.node;
-    if (node === undefined) {
-        return undefined;
-    }
-    let properties: NodeProperties = node.properties ?? {};
-    if (versioned !== undefined) {
-        const versionProperties = (versioned.body as Partial<NodeVersionEntry> | undefined)?.version?.properties;
-        if (versionProperties === undefined) {
-            return undefined;
-        }
-        properties = versionProperties;
-    }
-    return { node, properties };
-}
-
-function parseVersion(version: string | undefined): { major: number; minor: number } | undefined {
-    const match = version === undefined ? null : /^(\d+)\.(\d+)$/.exec(version);
-    return match === null ? undefined : { major: Number(match[1]), minor: Number(match[2]) };
+export interface LoadedNode {
+    readonly properties: NodeProperties;
+    /** `AlfrescoMimeType` of the LRMI mapping, from `cclom:format` */
+    readonly mimetype: string | undefined;
+    readonly previewUrl: string | undefined;
+    readonly licenseUrl: string | undefined;
 }

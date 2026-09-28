@@ -88,6 +88,14 @@ export interface Config {
     readonly backendUrl: string;
     /** internal tomcat connector - config fetches only, see ValuesBackendInternal */
     readonly backendInternalUrl: string;
+    /** the search cluster, same one the backend reaches through `elasticsearch.servers` */
+    readonly elasticUrl: string;
+    /**
+     * `SearchServiceElastic.WORKSPACE_INDEX`. Carries the release in its name, so an
+     * edu-sharing upgrade renames it - a stale value here means the index is gone and
+     * enrichment silently stops. buildServer therefore probes it at startup.
+     */
+    readonly elasticIndex: string;
     readonly distDir: string;
     readonly proxyUnmatched: boolean;
     readonly proxyTimeoutMs: number;
@@ -132,6 +140,8 @@ export function loadConfig(): Config {
         // internal and skips 2FA there (ApplicationInfoList.isInternalPortRequest)
         backendUrl: str('BACKEND_URL', 'http://repository-service:8081').replace(/\/+$/, ''),
         backendInternalUrl: str('BACKEND_INTERNAL_URL', 'http://repository-service:8080').replace(/\/+$/, ''),
+        elasticUrl: str('ELASTIC_URL', 'http://repository-search-elastic-index:9200').replace(/\/+$/, ''),
+        elasticIndex: str('ELASTIC_INDEX', 'workspace_11.0'),
         distDir: path.resolve(packageRoot, str('DIST_DIR', path.join(packageRoot, 'dist'))),
         // transitional: see docs/02-routing.md - the target state is an exhaustive
         // BACKEND_PATHS list and a 404 for anything else
@@ -143,7 +153,7 @@ export function loadConfig(): Config {
         logLevel: str('LOG_LEVEL', 'info'),
         dev: bool('DEV', false),
         trustProxy: bool('TRUST_PROXY', true),
-        enrichTimeoutMs: int('ENRICH_TIMEOUT_MS', 2_000),
+        enrichTimeoutMs: int('ENRICH_TIMEOUT_MS', 500),
         configTimeoutMs: int('CONFIG_TIMEOUT_MS', 10_000),
         configPollIntervalMs: int('CONFIG_POLL_INTERVAL_MS', 60_000),
         backendProbeTimeoutMs: int('BACKEND_PROBE_TIMEOUT_MS', 5_000),

@@ -10,33 +10,58 @@ import type { Config } from './config.ts';
 import { buildServer } from './server.ts';
 
 /**
- * Shell delivery end to end, against a fake Tomcat with both connectors: the internal
- * one answers _about and the internal config (ValuesBackendInternal), the external
- * one node metadata and everything proxied. "private" is only readable with the
- * session cookie of its owner - which this server never sends, so it serves to show
- * that the backend calls really do go out anonymously.
+ * Shell delivery end to end, against a fake Tomcat with both connectors (internal:
+ * _about and the internal config; external: everything proxied) and a fake search
+ * index for the node metadata.
+ *
+ * The index double answers the way the real one does: raw property values, mixed
+ * scalars and arrays, and only for a document the public-read filter matches - so
+ * "private" is simply not found, whatever the browser sends.
  */
 
 const OWNER_SESSION = 'JSESSIONID=owner';
 
-const NODES: Record<string, { owner: boolean; node: unknown }> = {
+/**
+ * `_source` documents as the index holds them: property values are raw - `cclom:title`
+ * a scalar, `ccm:commonlicense_key` an array - and there is no ready made preview url,
+ * mimetype or license url; the server derives those.
+ */
+const DOCUMENTS: Record<string, { public: boolean; source: Record<string, unknown> }> = {
     public: {
-        owner: false,
-        node: {
-            ref: { id: 'public' },
-            mimetype: 'application/pdf',
+        public: true,
+        source: {
             properties: {
-                'cclom:title': ['Photosynthesis'],
-                'cclom:general_description': ['How plants eat light'],
+                'cclom:title': 'Photosynthesis',
+                'cclom:general_description': 'How plants eat light',
+                'cclom:format': 'application/pdf',
                 'ccm:lifecyclecontributer_author': ['BEGIN:VCARD\nVERSION:3.0\nN:Miller;Mike\nEND:VCARD'],
+                'ccm:commonlicense_key': ['CC_BY'],
+                'ccm:commonlicense_cc_version': '4.0',
             },
-            license: { url: 'https://creativecommons.org/licenses/by/4.0/' },
-            preview: { url: 'http://repo.example.org/edu-sharing/preview?nodeId=public' },
         },
     },
     private: {
-        owner: true,
-        node: { ref: { id: 'private' }, properties: { 'cclom:title': ['Secret draft'] } },
+        public: false,
+        source: { properties: { 'cclom:title': 'Secret draft' } },
+    },
+};
+
+/** Records the queries, and answers only for a document the public filter matches. */
+const elasticQueries: { index: string; nodeId: string }[] = [];
+const fakeElastic = {
+    firstSource: async (request: { index?: unknown; query?: any }) => {
+        const filters = request.query?.bool?.filter ?? [];
+        const nodeId = String(filters[0]?.ids?.values?.[0] ?? '');
+        elasticQueries.push({ index: String(request.index), nodeId });
+        // the real index applies these as part of the query - mirror that here, so a
+        // server that dropped a filter would fail this suite
+        const everyone = filters.some((f: any) => f?.term?.['permissions.read'] === 'GROUP_EVERYONE');
+        const workspace = filters.some((f: any) => f?.term?.['nodeRef.storeRef.protocol'] === 'workspace');
+        const entry = DOCUMENTS[nodeId];
+        if (entry === undefined || !everyone || !workspace || !entry.public) {
+            return undefined;
+        }
+        return entry.source;
     },
 };
 
@@ -101,19 +126,6 @@ before(async () => {
     external = http.createServer((request, response) => {
         const url = request.url ?? '';
         hits.push({ port: 'external', url, headers: request.headers });
-        const match = /^\/edu-sharing\/rest\/node\/v1\/nodes\/-home-\/([^/]+)\/metadata\?propertyFilter=-all-$/.exec(url);
-        if (match?.[1] !== undefined) {
-            const entry = NODES[match[1]];
-            if (entry === undefined) {
-                return json(response, 404, { error: '404' });
-            }
-            if (entry.owner && request.headers.cookie !== OWNER_SESSION) {
-                return json(response, 403, { error: '403' });
-            }
-            // a guest without session gets one, as Tomcat's guest filter does
-            const setCookie = request.headers.cookie === undefined ? { 'set-cookie': 'JSESSIONID=guest; Path=/edu-sharing' } : {};
-            return json(response, 200, { node: entry.node }, setCookie);
-        }
         if (url === '/edu-sharing/unknown-to-tomcat') {
             // what ErrorFilter / ErrorPageServlet render: a relative redirect
             if (String(request.headers.accept).includes('text/html')) {
@@ -135,6 +147,9 @@ before(async () => {
         contextPath: '/edu-sharing',
         backendUrl: `http://127.0.0.1:${(external.address() as AddressInfo).port}`,
         backendInternalUrl: `http://127.0.0.1:${(internal.address() as AddressInfo).port}`,
+        // the index is faked through buildServer's seam, the url stays unused
+        elasticUrl: 'http://127.0.0.1:9200',
+        elasticIndex: 'workspace_test',
         distDir,
         proxyUnmatched: true,
         proxyTimeoutMs: 5000,
@@ -150,7 +165,7 @@ before(async () => {
         staticCacheMaxBytes: 16 * 1024 * 1024,
         staticCacheMaxFileBytes: 4 * 1024 * 1024,
     };
-    app = await buildServer(config);
+    app = await buildServer(config, { elastic: fakeElastic });
     await app.ready();
 });
 
@@ -163,6 +178,7 @@ after(async () => {
 
 beforeEach(() => {
     hits.length = 0;
+    elasticQueries.length = 0;
 });
 
 function shell(url: string, headers: Record<string, string> = {}) {
@@ -175,7 +191,8 @@ test('render view of a public node carries title, description, license, LRMI and
     const html = response.body;
     assert.match(html, /<title>Photosynthesis – edu-sharing<\/title>/);
     assert.match(html, /<meta name="description" content="How plants eat light">/);
-    assert.match(html, /<link rel="license" href="https:\/\/creativecommons.org\/licenses\/by\/4.0\/">/);
+    // derived from ccm:commonlicense_key + _cc_version, language from Accept-Language
+    assert.match(html, /<link rel="license" href="https:\/\/creativecommons.org\/licenses\/by\/4.0\/deed.en">/);
     assert.match(html, /eduservlet\/oembed\?format=json&amp;url=http%3A%2F%2Frepo.example.org%2Fedu-sharing%2Fcomponents%2Frender%2Fpublic/);
 
     const lrmi = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? 'null');
@@ -183,16 +200,20 @@ test('render view of a public node carries title, description, license, LRMI and
     assert.equal(lrmi.encodingFormat, 'application/pdf');
     assert.equal(lrmi.url, 'http://repo.example.org/edu-sharing/components/render/public');
     assert.deepEqual(lrmi.creator, { '@type': 'Person', givenName: 'Mike', familyName: 'Miller' });
+    // built from the requested origin, no dontcache buster
+    assert.equal(
+        lrmi.thumbnailUrl,
+        'http://repo.example.org/edu-sharing/preview?nodeId=public&storeProtocol=workspace&storeId=SpacesStore',
+    );
 });
 
-test('the metadata call carries no browser identity - even the owner gets no enrichment', async () => {
+test('a node that is not public stays unenriched, whatever the browser sends', async () => {
     const response = await shell('/edu-sharing/components/render/private', { cookie: OWNER_SESSION });
-    const metadataHit = hits.find((hit) => hit.url.includes('/private/metadata'));
-    assert.equal(metadataHit?.headers.cookie, undefined);
-    assert.equal(metadataHit?.headers.authorization, undefined);
-    // the price of anonymous forwarding: a node only its owner may read stays unenriched
+    // the browser identity plays no part: the query filters on permissions.read, so
+    // even the owner's session buys nothing here
     assert.doesNotMatch(response.body, /Secret draft/);
     assert.match(response.body, /<title>edu-sharing<\/title>/);
+    assert.equal(hits.some((hit) => hit.url.includes('/metadata')), false);
 });
 
 test('without the session a private node stays hidden - plain shell plus oEmbed', async () => {
@@ -212,12 +233,11 @@ test('the config is fetched without the browser identity', async () => {
     assert.equal(configHit.headers.host, 'other.example.org');
 });
 
-test('a session the metadata call opened is not handed to the browser', async () => {
+test('the shell request opens no session at all', async () => {
     const response = await shell('/edu-sharing/components/render/public');
-    // the fake backend answers the anonymous call with a guest cookie; handing it on
-    // would pin the browser to a session that, without an ingress, is not sticky
+    // metadata comes from the index, so tomcat never sees the shell request and cannot
+    // hand out a (guest) session the browser would then be pinned to
     assert.equal(response.headers['set-cookie'], undefined);
-    // enrichment itself still works, the node is public
     assert.match(response.body, /<title>Photosynthesis – edu-sharing<\/title>/);
 });
 
@@ -227,13 +247,26 @@ test('collection view gets title and description only', async () => {
     assert.doesNotMatch(response.body, /oembed|ld\+json/);
 });
 
-test('other shell urls load no node metadata', async () => {
+test('other shell urls query the index not at all', async () => {
     const response = await shell('/edu-sharing/components/workspace');
     assert.equal(response.statusCode, 200);
-    assert.equal(
-        hits.some((hit) => hit.url.includes('/metadata')),
-        false,
-    );
+    assert.deepEqual(elasticQueries, []);
+});
+
+test('a versioned render url is not enriched and spares the query', async () => {
+    const response = await shell('/edu-sharing/components/render/public/1.0');
+    assert.equal(response.statusCode, 200);
+    // the index holds no version documents - current metadata under a versioned url
+    // would be wrong, so nothing is sent
+    assert.doesNotMatch(response.body, /Photosynthesis/);
+    assert.deepEqual(elasticQueries, []);
+    // the oEmbed links do not depend on the node and stay
+    assert.match(response.body, /json\+oembed/);
+});
+
+test('the query goes to the configured index', async () => {
+    await shell('/edu-sharing/components/render/public');
+    assert.deepEqual(elasticQueries, [{ index: 'workspace_test', nodeId: 'public' }]);
 });
 
 test('every shell page carries the security headers and custom html headers, sharing one nonce', async () => {
@@ -250,13 +283,15 @@ test('each shell response gets a fresh nonce', async () => {
     assert.notEqual(await nonceOf(), await nonceOf());
 });
 
-test('config and _about go to the internal port, metadata and proxying to the external one', async () => {
+test('config goes to the internal port, proxying to the external one, metadata to neither', async () => {
     await shell('/edu-sharing/components/render/public', { host: 'ports.example.org' });
     await shell('/edu-sharing/rest/ping', { host: 'ports.example.org' });
     const portOf = (fragment: string) => hits.find((hit) => hit.url.includes(fragment))?.port;
     assert.equal(portOf('/config/v1/values'), 'internal');
-    assert.equal(portOf('/metadata'), 'external');
     assert.equal(portOf('/rest/ping'), 'external');
+    // node metadata no longer touches tomcat at all - it comes from the index
+    assert.equal(portOf('/metadata'), undefined);
+    assert.equal(elasticQueries.length, 1);
 });
 
 test('components/error/<code> answers with that status', async () => {

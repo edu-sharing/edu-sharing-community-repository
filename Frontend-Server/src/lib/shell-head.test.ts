@@ -12,10 +12,7 @@ const CONFIG: RepositoryConfig = {
 };
 
 function loaded(properties: LoadedNode['properties'], licenseUrl?: string): LoadedNode {
-    return {
-        node: { ref: { id: 'n1' }, properties, ...(licenseUrl === undefined ? {} : { license: { url: licenseUrl } }) },
-        properties,
-    };
+    return { properties, mimetype: undefined, previewUrl: undefined, licenseUrl };
 }
 
 function renderContext(overrides: Partial<ShellContext> = {}): ShellContext {

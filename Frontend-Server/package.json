@@ -23,6 +23,7 @@
     "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.19.2",
     "@fastify/reply-from": "^12.6.5",
     "@fastify/send": "^4.1.1",
     "@fastify/static": "^10.1.4",

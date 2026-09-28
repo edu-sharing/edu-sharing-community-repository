@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** [source relative to the package root, target relative to the package root] */
-const SHARED_FILES = [['../Frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts', 'src/shared/VCard.ts']];
+const SHARED_FILES = [
+    ['../Frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts', 'src/shared/VCard.ts'],
+    ['../Frontend/projects/edu-sharing-ui/src/lib/util/license-url.ts', 'src/shared/license-url.ts'],
+];
 
 for (const [from, to] of SHARED_FILES) {
     const source = path.resolve(root, from);

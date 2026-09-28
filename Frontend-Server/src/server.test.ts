@@ -65,6 +65,9 @@ before(async () => {
         contextPath: '/edu-sharing',
         backendUrl: `http://127.0.0.1:${backendPort}`,
         backendInternalUrl: `http://127.0.0.1:${backendPort}`,
+        // these tests do not exercise the shell enrichment; buildServer gets a fake
+        elasticUrl: 'http://127.0.0.1:9200',
+        elasticIndex: 'workspace_test',
         distDir,
         proxyUnmatched: true,
         proxyTimeoutMs: 5000,
@@ -81,7 +84,7 @@ before(async () => {
         staticCacheMaxBytes: 16 * 1024 * 1024,
         staticCacheMaxFileBytes: 4 * 1024 * 1024,
     };
-    app = await buildServer(config);
+    app = await buildServer(config, { elastic: { firstSource: async () => undefined } });
     await app.ready();
 });
 

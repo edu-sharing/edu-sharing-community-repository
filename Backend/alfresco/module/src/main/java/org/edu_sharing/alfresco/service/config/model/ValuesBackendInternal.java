@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * {@link ValuesBackend} plus the lightbend config the Frontend-Server needs to deliver
- * the angular shell (security headers, custom html headers, LRMI mapping).
+ * the angular shell
  * <p>
  * Only handed out on the internal port ({@code ApplicationInfoList.isInternalPortRequest}),
  * where the Frontend-Server fetches the config - documented in the openapi spec, but not

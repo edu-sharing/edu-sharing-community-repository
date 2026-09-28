@@ -11,7 +11,9 @@ import { defaultLocationUrl } from './lib/default-location.ts';
 import { isServiceUnavailablePage, RETRY_AFTER_SECONDS, sendError, sendUnavailable, shellErrorStatus } from './lib/error-response.ts';
 import { IndexHtml } from './lib/index-html.ts';
 import { registerMetrics, type ProxyReason } from './lib/metrics.ts';
-import { loadNode, parseShellTarget } from './lib/node-metadata.ts';
+import { ElasticClient, type ElasticSearcher, isMissingIndex } from './lib/elastic-client.ts';
+import { loadNode, primaryLanguage } from './lib/elastic-node.ts';
+import { parseShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
 import { type CachedFile, negotiateEncoding, StaticCache } from './lib/static-cache.ts';
 import { enrichShell } from './lib/shell-head.ts';
@@ -51,7 +53,12 @@ declare module 'fastify' {
     }
 }
 
-export async function buildServer(config: Config): Promise<FastifyInstance> {
+/** Test seam: hand in a fake instead of talking to a real cluster. */
+export interface ServerOverrides {
+    readonly elastic?: ElasticSearcher;
+}
+
+export async function buildServer(config: Config, overrides: ServerOverrides = {}): Promise<FastifyInstance> {
     const app = Fastify({
         logger: {
             level: config.logLevel,
@@ -124,7 +131,16 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
             'BACKEND_URL and BACKEND_INTERNAL_URL point to the same host and port - BACKEND_URL must be the external connector (else 2FA is bypassed for every proxied request), BACKEND_INTERNAL_URL the internal one',
         );
     }
-    const backend = new BackendClient(config.backendUrl, config.enrichTimeoutMs);
+    // node metadata for the shell comes from the search index, not from tomcat: this
+    // server forwards no identity, so it could only ever see public nodes anyway
+    const elastic: ElasticSearcher =
+        overrides.elastic ??
+        (() => {
+            const client = new ElasticClient(config.elasticUrl, config.enrichTimeoutMs);
+            // release the connection pool with the app, or closing it leaves sockets open
+            app.addHook('onClose', () => client.close());
+            return client;
+        })();
     // config only - the internal port hands out ValuesBackendInternal
     const internalBackend = new BackendClient(config.backendInternalUrl, config.configTimeoutMs);
     const configCache = new ConfigCache(internalBackend, {
@@ -237,14 +253,23 @@ export async function buildServer(config: Config): Promise<FastifyInstance> {
             reachable
                 ? configCache.get(request.hostname, anonymousFor(request))
                 : Promise.resolve(configCache.peek(request.hostname)),
-            target === undefined ? Promise.resolve(undefined) : loadNode(backend, ctx, target, anonymousFor(request)),
+            target === undefined
+                ? Promise.resolve(undefined)
+                : loadNode(elastic, target, {
+                      index: config.elasticIndex,
+                      appBaseUrl: `${request.protocol}://${request.host}${ctx}`,
+                      language: primaryLanguage(request.headers['accept-language']),
+                  }),
         ]);
         if (target !== undefined) {
             const result = nodeResult.status === 'rejected' ? 'failed' : nodeResult.value === undefined ? 'missing' : 'ok';
             metrics.enrichment(result, (performance.now() - enrichmentStart) / 1000);
         }
         if (nodeResult.status === 'rejected') {
-            request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId }, 'loading node metadata for the shell failed');
+            const reason = isMissingIndex(nodeResult.reason)
+                ? 'elastic index not found - check ELASTIC_INDEX'
+                : 'loading node metadata for the shell failed';
+            request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId, index: config.elasticIndex }, reason);
         }
         const repositoryConfig = configResult.status === 'fulfilled' ? configResult.value : null;
         const node = nodeResult.status === 'fulfilled' ? nodeResult.value : undefined;

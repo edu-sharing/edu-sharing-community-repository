@@ -32,12 +32,12 @@ export function enrichShell(html: string, context: ShellContext): string {
     const { target, loaded, config } = context;
     const head: string[] = [];
     if (target.kind === 'render') {
-        const licenseUrl = loaded?.node.license?.url;
+        const licenseUrl = loaded?.licenseUrl;
         if (licenseUrl) {
             head.push(`<link rel="license" href="${escapeHtml(licenseUrl)}">`);
         }
         if (loaded !== undefined && config !== null) {
-            const lrmi = buildLrmi(loaded.node, loaded.properties, config.lrmi, renderUrl(context.appUrl, target.nodeId, target.version));
+            const lrmi = buildLrmi(loaded, config.lrmi, renderUrl(context.appUrl, target.nodeId, target.version));
             head.push(`<script type="application/ld+json">${jsonForScript(lrmi)}</script>`);
         }
         const oembed = `${context.appUrl}eduservlet/oembed`;

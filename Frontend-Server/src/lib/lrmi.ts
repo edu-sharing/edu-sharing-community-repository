@@ -1,23 +1,22 @@
 import { VCard } from '../shared/VCard.ts';
 import type { LrmiMapping } from './config-cache.ts';
-import type { NodeProperties, RestNode } from './node-metadata.ts';
+import type { LoadedNode, NodeProperties } from './node-metadata.ts';
 
 /**
- * Port of `LRMITool.getLRMIJson` (Backend/services/core/.../tools/LRMITool.java),
- * working on the REST node instead of the raw Alfresco properties. The mapping is
- * the same lightbend config (`exporter.lrmi`) LRMITool reads, delivered through
- * `currentBackend.exporter.lrmi`.
+ * Port of `LRMITool.getLRMIJson` (Backend/services/core/.../tools/LRMITool.java).
+ * The mapping is the same lightbend config (`exporter.lrmi`) LRMITool reads,
+ * delivered through `currentBackend.exporter.lrmi`.
  */
 
 const OR_SEPARATOR = ',';
 const AND_SEPARATOR = '+';
 
 /**
- * LRMITool reads `AlfrescoMimeType` from the raw properties; the REST node carries
- * it as a top level field instead.
+ * LRMITool reads `AlfrescoMimeType` from the raw properties; the index has it as
+ * `cclom:format`, which `loadNode` lifts to a field of its own.
  */
-const NODE_FIELD_FALLBACKS: Readonly<Record<string, (node: RestNode) => string | null | undefined>> = {
-    AlfrescoMimeType: (node) => node.mimetype,
+const NODE_FIELD_FALLBACKS: Readonly<Record<string, (loaded: LoadedNode) => string | null | undefined>> = {
+    AlfrescoMimeType: (loaded) => loaded.mimetype,
 };
 
 export type LrmiJson = Record<string, unknown>;
@@ -26,7 +25,8 @@ export type LrmiJson = Record<string, unknown>;
  * @param renderUrl `URLHelper.getNgRenderNodeUrl(id, version)`
  * @param properties the properties of the requested version (the node's own for the latest)
  */
-export function buildLrmi(node: RestNode, properties: NodeProperties, mapping: LrmiMapping, renderUrl: string): LrmiJson {
+export function buildLrmi(loaded: LoadedNode, mapping: LrmiMapping, renderUrl: string): LrmiJson {
+    const { properties } = loaded;
     const lrmi: LrmiJson = {
         '@context': 'http://schema.org/',
         '@type': ['CreativeWork', 'MediaObject'],
@@ -35,15 +35,15 @@ export function buildLrmi(node: RestNode, properties: NodeProperties, mapping: L
         put(lrmi, field, fromVCards(properties[property]));
     }
     put(lrmi, 'url', renderUrl);
-    put(lrmi, 'thumbnailUrl', node.preview?.url);
+    put(lrmi, 'thumbnailUrl', loaded.previewUrl);
     put(lrmi, 'dateCreated', isoDate(first(properties['cm:created_LONG'])));
     put(lrmi, 'dateModified', isoDate(first(properties['cm:modified_LONG'])));
     put(lrmi, 'datePublished', isoDate(first(properties['ccm:published_date_LONG'])));
-    put(lrmi, 'license', node.license?.url);
+    put(lrmi, 'license', loaded.licenseUrl);
     for (const [field, expression] of Object.entries(mapping.properties)) {
         // split by "," (or) first, then by "+" (and)
         const alternatives = expression.split(OR_SEPARATOR).map((alternative) => alternative.split(AND_SEPARATOR));
-        put(lrmi, field, combined(node, properties, alternatives));
+        put(lrmi, field, combined(loaded, alternatives));
     }
     return lrmi;
 }
@@ -62,11 +62,11 @@ function put(target: LrmiJson, key: string, value: unknown): void {
  * wins; within an alternative all values are concatenated. One value -> scalar,
  * several -> array.
  */
-function combined(node: RestNode, properties: NodeProperties, alternatives: string[][]): unknown {
+function combined(loaded: LoadedNode, alternatives: string[][]): unknown {
     for (const keys of alternatives) {
         const result: string[] = [];
         for (const key of keys) {
-            const values = valuesOf(node, properties, key);
+            const values = valuesOf(loaded, key);
             if (values.length === 0 || (values.length === 1 && values[0] === '')) {
                 continue;
             }
@@ -82,12 +82,12 @@ function combined(node: RestNode, properties: NodeProperties, alternatives: stri
     return null;
 }
 
-function valuesOf(node: RestNode, properties: NodeProperties, key: string): string[] {
-    const values = properties[key];
+function valuesOf(loaded: LoadedNode, key: string): string[] {
+    const values = loaded.properties[key];
     if (values !== undefined && values !== null) {
         return values;
     }
-    const fallback = NODE_FIELD_FALLBACKS[key]?.(node);
+    const fallback = NODE_FIELD_FALLBACKS[key]?.(loaded);
     return fallback === undefined || fallback === null ? [] : [fallback];
 }
 
