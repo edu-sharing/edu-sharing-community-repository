@@ -66,6 +66,10 @@ export class PreviewSidebarService {
 
     handleNodeClick(node: Node) {
         if (!this.instance$.value) {
+            // a null node only closes the preview, which is a no-op without a registered sidebar
+            if (!node) {
+                return;
+            }
             UIHelper.openUrl(
                 this.nodeHelper.getNodeUrl(node),
                 this.bridgeService,
