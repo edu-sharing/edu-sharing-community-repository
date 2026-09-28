@@ -94,7 +94,11 @@ public class RenderingServiceImpl implements RenderingService{
 	public RenderingVersionInfo getVersion() throws GeneralSecurityException {
 		String url = new RenderingTool().getRenderServiceUrl(ApplicationInfoList.getHomeRepository(), null);
 		url = url.replace("index.php", "version.php");
-		return new Gson().fromJson(new HttpQueryTool().query(url), RenderingVersionInfo.class);
+		HttpQueryTool queryTool = new HttpQueryTool();
+		// avoid the default -1 (= no client-side timeout), which lets an unreachable rendering service
+		// stall the caller for minutes until the OS TCP stack gives up
+		queryTool.setTimeout(5000);
+		return new Gson().fromJson(queryTool.query(url), RenderingVersionInfo.class);
 	}
 
 	@Override
