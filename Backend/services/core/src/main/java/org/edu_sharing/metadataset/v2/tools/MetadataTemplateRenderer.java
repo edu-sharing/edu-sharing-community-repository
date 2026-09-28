@@ -333,7 +333,10 @@ public class MetadataTemplateRenderer {
 							widgetHtml.append("<a href=\"").append(value).append("\" target=\"").append(widget.getLink()).append("\">");
 							isLink = true;
 						} else if (vcardData != null) {
-							value = cleanupText(MetadataWidget.TextEscapingPolicy.all, VCardConverter.getNameForVCard("", vcardData));
+							String vcardName = VCardConverter.getNameForVCard("", vcardData);
+							value = renderingMode.equals(RenderingMode.HTML)
+									? cleanupText(MetadataWidget.TextEscapingPolicy.all, vcardName)
+									: vcardName;
 						}
 						if (renderingMode.equals(RenderingMode.HTML)) {
 							widgetHtml
