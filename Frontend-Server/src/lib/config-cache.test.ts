@@ -423,7 +423,7 @@ test('host names are case insensitive - one entry and one backend call for every
     await subject.get('repo.example.org', {});
     await subject.get('repo.example.org.', {});
     assert.equal(valueCalls(), 1);
-    assert.deepEqual(subject.entries().map((entry) => entry.domain), ['repo.example.org']);
+    assert.deepEqual(subject.domains(), ['repo.example.org']);
     assert.equal(subject.peek('REPO.example.org')?.branding, true);
 });
 
@@ -434,5 +434,5 @@ test('keeps at most maxDomains entries, least recently used first out', async ()
     await subject.get('b.example.org', {});
     await subject.get('a.example.org', {});
     await subject.get('c.example.org', {});
-    assert.deepEqual(subject.entries().map((entry) => entry.domain).sort(), ['a.example.org', 'c.example.org']);
+    assert.deepEqual(subject.domains().sort(), ['a.example.org', 'c.example.org']);
 });

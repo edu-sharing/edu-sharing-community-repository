@@ -139,9 +139,9 @@ export class ConfigCache {
         return this.#options.pollIntervalMs <= 0 || this.#lastCacheUpdate !== Number.NEGATIVE_INFINITY || this.#entries.size > 0;
     }
 
-    /** per cached domain: when its config was fetched - for the metrics */
-    entries(): { domain: string; fetchedAt: number }[] {
-        return [...this.#entries.entries()].map(([domain, entry]) => ({ domain, fetchedAt: entry.fetchedAt }));
+    /** the domains a config is cached for */
+    domains(): string[] {
+        return [...this.#entries.keys()];
     }
 
     stop(): void {

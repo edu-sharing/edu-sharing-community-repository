@@ -64,19 +64,6 @@ export async function registerMetrics(app: FastifyInstance, configCache: ConfigC
         labelNames: ['cause'] as const,
     });
     new client.Gauge({
-        name: `${PREFIX}config_age_seconds`,
-        help: 'Age of the cached backend config per domain - no series means no config loaded yet',
-        labelNames: ['domain'] as const,
-        collect() {
-            this.reset();
-            const now = Date.now();
-            for (const { domain, fetchedAt } of configCache.entries()) {
-                this.set({ domain }, (now - fetchedAt) / 1000);
-            }
-        },
-    });
-
-    new client.Gauge({
         name: `${PREFIX}backend_reachable`,
         help: '1 while the backend answers, 0 while it is unreachable (browsers get the "service unavailable" page)',
         collect() {
