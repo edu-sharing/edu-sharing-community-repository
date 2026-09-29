@@ -16,6 +16,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
@@ -112,7 +113,10 @@ public class ContentServlet extends HttpServlet{
 							isCollectionRef = true;
 						}
 
-						boolean isPublishedMaterial = serviceRegistry.getNodeService().getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)) != null;
+						// when original node is deleted public nodeService would deliver null for CCM_PROP_IO_PUBLISHED_ORIGINAL.
+						// so we use alfrescoDefaultDbNodeService to do the isPublishedMaterial check
+						NodeService nodeServiceAlfresco = (NodeService) appContext.getBean("alfrescoDefaultDbNodeService");
+						boolean isPublishedMaterial = nodeServiceAlfresco.getProperty(nodeRef, QName.createQName(CCConstants.CCM_PROP_IO_PUBLISHED_ORIGINAL)) != null;
 						// we only fetch a specific version if it's not a ref
 						// and it's not a remote node
 						if (!isCollectionRef && !isPublishedMaterial && version != null && !version.trim().equals("") && homeAppInfo.getAppId().equals(repId)) {
