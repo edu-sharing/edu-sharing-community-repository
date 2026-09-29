@@ -64,7 +64,7 @@ public class NodeContentGet extends StreamContent
     /**
      * format definied by RFC 822, see http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3
      */
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z", Locale.US);
+    private static final String DATE_FORMAT_PATTERN = "EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z";
 
     private NodeDAO nodeDAO;
     private NodeService nodeService;
@@ -142,7 +142,8 @@ public class NodeContentGet extends StreamContent
         {
             try
             {
-                modifiedSince = dateFormat.parse(modifiedSinceStr).getTime();
+                // SimpleDateFormat is not thread-safe, so create one per request
+                modifiedSince = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.US).parse(modifiedSinceStr).getTime();
             }
             catch (Throwable e)
             {

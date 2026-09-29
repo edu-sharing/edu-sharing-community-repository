@@ -74,7 +74,7 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 	Map<String, String> replIdTimestampMap = null;
 	Map<String, NodeRef> replIdMap = null;
 
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss");
+	private static final String TIMESTAMP_PATTERN = "yyyy-MM-dd'T'HH:mm:sss";
 
 
 	static ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
@@ -492,15 +492,16 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 
 	public Map<String, String> getReplicationIdTimestampMap() {
 		if(!hasTimestampMap) {
-			replIdMap = new HashMap<>();
-			replIdTimestampMap=new HashMap<>();
+			replIdMap = Collections.synchronizedMap(new HashMap<>());
+			replIdTimestampMap = Collections.synchronizedMap(new HashMap<>());
 		}
 		if (replIdTimestampMap == null) {
 			try {
 				String user=AuthenticationUtil.getFullyAuthenticatedUser();
 				List<NodeRef> allNodes = getAllNodesInImportfolder();
-				replIdMap = new HashMap<>();
-				replIdTimestampMap = new HashMap<>();
+				// filled from a parallel stream below
+				replIdMap = Collections.synchronizedMap(new HashMap<>());
+				replIdTimestampMap = Collections.synchronizedMap(new HashMap<>());
 				// fetch data parallel for faster build up
 				getLogger().info("Starting build of timestamp map...");
 				allNodes.parallelStream().forEach((entry)->{
@@ -568,6 +569,8 @@ public class PersistentHandlerEdusharing implements PersistentHandlerInterface {
 			return true;
 		}
 
+		// SimpleDateFormat is not thread-safe, so do not share an instance
+		SimpleDateFormat sdf = new SimpleDateFormat(TIMESTAMP_PATTERN);
 		Date newDate = null;
 		try {
 			newDate = sdf.parse(newTimeStamp);

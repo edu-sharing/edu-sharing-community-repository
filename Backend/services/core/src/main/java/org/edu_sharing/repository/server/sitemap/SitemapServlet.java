@@ -38,6 +38,7 @@ import org.edu_sharing.spring.servlet.SpringHttpServlet;
 @Slf4j
 public class SitemapServlet extends SpringHttpServlet {
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
+    @Deprecated // not thread-safe, do not use concurrently
     public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final int NODES_PER_MAP = 500;
     @Override
@@ -122,7 +123,7 @@ public class SitemapServlet extends SpringHttpServlet {
             Date property = (ref.getProperties() != null)
                     ? new Date((long)ref.getProperties().get(CCConstants.CM_PROP_C_MODIFIED))
                     : (Date) nodeService.getPropertyNative(ref.getStoreProtocol(), ref.getStoreId(), ref.getNodeId(), CCConstants.CM_PROP_C_MODIFIED);
-            url.lastmod = DATE_FORMAT.format(property);
+            url.lastmod = new SimpleDateFormat("yyyy-MM-dd").format(property); // SimpleDateFormat is not thread-safe
             if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)){
                 url.loc=URLTool.getNgCollectionUrl(ref.getNodeId());
             }

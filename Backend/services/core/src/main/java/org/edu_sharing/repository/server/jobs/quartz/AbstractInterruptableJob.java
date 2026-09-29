@@ -36,7 +36,10 @@ public abstract class AbstractInterruptableJob extends AbstractJobMapAnnotationP
             onInterruptedRunnable.run();
         }
         if(forceStop) {
-            thread.stop();
+            // Thread.stop() is not supported since JDK 20 (always throws UnsupportedOperationException),
+            // so a forced stop can only rely on the interrupt above. The flag is still used by the JobHandler
+            // to not veto a new job run while this one is in interrupted state.
+            logger.warn("Force stop requested, but threads cannot be stopped forcibly on this JVM. Job thread was interrupted only");
         }
     }
 

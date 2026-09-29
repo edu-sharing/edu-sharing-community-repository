@@ -106,7 +106,7 @@ public class ImportCleanerIdentifiersList {
 			throw new IllegalArgumentException("Set folder "+set+" was not found. Please check your "+OAIPMHLOMImporter.FOLDER_NAME_IMPORTED_OBJECTS+" folder");
 		}
 		List<NodeRef> allNodes = NodeServiceFactory.getInstance().getLocalService().getChildrenRecursive(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, setFolderRef.getId(), Collections.singletonList(CCConstants.CCM_TYPE_IO), RecurseMode.Folders);
-		allNodesInSet=new HashMap<>();
+		allNodesInSet = Collections.synchronizedMap(new HashMap<>()); // filled from a parallel stream below
 		allNodes.parallelStream().forEach((entry)-> {
 			AuthenticationUtil.runAsSystem(()->allNodesInSet.put(entry.getId(), NodeServiceHelper.getProperty(entry, CCConstants.CCM_PROP_IO_REPLICATIONSOURCEID)));
 		});
