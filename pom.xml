@@ -774,14 +774,6 @@
         <type>pom</type>
       </dependency>
 
-      <!-- deprecated empty artifact (last release 5.2.0, not part of mockito-bom 5.18); kept for modules that still declare it -->
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-inline</artifactId>
-        <version>5.2.0</version>
-        <scope>test</scope>
-      </dependency>
-
 
       <dependency>
         <groupId>com.nimbusds</groupId>
