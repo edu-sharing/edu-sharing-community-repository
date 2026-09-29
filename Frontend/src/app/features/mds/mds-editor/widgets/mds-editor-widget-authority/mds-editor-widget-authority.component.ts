@@ -40,7 +40,6 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
     inputControl = new UntypedFormControl();
     chipsControl: UntypedFormControl;
     autocompleteValues: Observable<DisplayValue[]>;
-    indeterminateValues$: BehaviorSubject<string[]>;
     showDropdownArrow: boolean;
 
     private autocompleteIsInhibited = new BehaviorSubject(false);
@@ -75,9 +74,7 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
                 ),
             this.getStandardValidators(),
         );
-        this.indeterminateValues$ = new BehaviorSubject(
-            this.widget.getInitialValues().individualValues,
-        );
+        this.initIndeterminateValues(this.widget.getInitialValues().individualValues);
         this.conntector
             .hasToolPermission(RestConstants.TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH)
             .subscribe((tp) => (this.globalSearchAllowed = tp));
@@ -85,9 +82,6 @@ export class MdsEditorWidgetAuthorityComponent extends MdsEditorWidgetBase imple
             .pipe(distinctUntilChanged())
             .subscribe((values: DisplayValue[]) => this.setValue(values.map((value) => value.key)));
 
-        this.indeterminateValues$.subscribe((indeterminateValues) =>
-            this.widget.setIndeterminateValues(indeterminateValues),
-        );
         this.widget.addValue.subscribe((value: MdsWidgetValue) =>
             this.chipsControl.setValue([...this.chipsControl.value, value]),
         );

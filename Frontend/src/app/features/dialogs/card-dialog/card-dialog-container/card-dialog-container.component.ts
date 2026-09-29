@@ -136,7 +136,9 @@ export class CardDialogContainerComponent implements OnInit, OnDestroy {
     @HostBinding('attr.tabindex') readonly tabIndex = '-1';
     @HostBinding('attr.aria-labelledby') readonly ariaLabelledby = `card-dialog-title-${this.id}`;
     @HostBinding('attr.aria-describedby')
-    readonly ariaDescribedby = `card-dialog-subtitle-${this.id}`;
+    get ariaDescribedby(): string | null {
+        return this.config.subtitle ? `card-dialog-subtitle-${this.id}` : null;
+    }
     @HostBinding('@defaultAnimation') defaultAnimation: CardState | null = null;
     @HostBinding('@mobileAnimation') mobileAnimation: CardState | null = null;
 

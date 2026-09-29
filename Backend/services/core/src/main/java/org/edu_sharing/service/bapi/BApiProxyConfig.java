@@ -18,4 +18,9 @@ public class BApiProxyConfig {
    private String callTimeout = "PT1m";
    @Optional
    private List<String> features = List.of();
+   /**
+    * If true, api keys not set in a context are inherited from the global repository.bapi config
+    */
+   @Optional
+   private boolean fallback = true;
 }

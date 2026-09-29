@@ -1,16 +1,12 @@
-@if (initialized()) {
-<div>
-  <!-- color + configuration buttons -->
-  @if (editMode()) {
-  <es-widget-configuration-buttons
-    [optionOne]="embedConfigurationOption"
-    [pageVariantNode]="pageVariantNode"
-    [swimlaneIndex]="swimlaneIndex"
-    [updateInProgress]="updateInProgress()"
-    (optionOneClicked)="embedWidget()"
-  ></es-widget-configuration-buttons>
-  }
-</div>
-} @else {
+@if (!initialized()) {
 <es-spinner></es-spinner>
+} @else if (editMode() && embedConfigurationOption?.isVisible) {
+<!-- configuration buttons -->
+<es-widget-configuration-buttons
+  [optionOne]="embedConfigurationOption"
+  [pageVariantNode]="pageVariantNode"
+  [swimlaneIndex]="swimlaneIndex"
+  [updateInProgress]="updateInProgress()"
+  (optionOneClicked)="embedWidget()"
+></es-widget-configuration-buttons>
 }

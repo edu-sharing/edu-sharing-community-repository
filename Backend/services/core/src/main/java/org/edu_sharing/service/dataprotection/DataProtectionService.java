@@ -261,9 +261,7 @@ public class DataProtectionService {
                 .map(g -> (String)authorityService.getAuthorityProperty(g,CCConstants.CM_PROP_AUTHORITY_AUTHORITYDISPLAYNAME))
                 .collect(Collectors.toList());
 
-        /**
-         * @TODO use profile data or something dynamic determine locale and timezone
-         */
+        // @TODO use profile data or something dynamic determine locale and timezone
         ZoneId zone = ZoneId.of("Europe/Berlin");
         Locale locale = Locale.GERMANY;
 

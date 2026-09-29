@@ -3,7 +3,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 import { ErrorComponent } from './error.component';
 
-describe('DefaultComponent', () => {
+describe('ErrorComponent', () => {
     let component: ErrorComponent;
     let fixture: ComponentFixture<ErrorComponent>;
 

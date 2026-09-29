@@ -133,6 +133,21 @@
 .tab-search-container {
     display: flex;
     align-items: center;
+    gap: 8px;
+
+    .repository-field {
+        // the search field takes the remaining space, the repository dropdown stays compact
+        flex: 0 0 auto;
+        max-width: 40%;
+    }
+}
+
+.repository-icon {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 6px;
 }
 
 .collection-display-type {

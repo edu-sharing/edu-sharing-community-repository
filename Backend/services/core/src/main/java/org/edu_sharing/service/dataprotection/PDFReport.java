@@ -1,10 +1,11 @@
 package org.edu_sharing.service.dataprotection;
 
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.edu_sharing.service.transform.TransformServiceStatic;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -12,25 +13,24 @@ import org.thymeleaf.context.Context;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class PDFReport {
 
-
-    @Autowired
-    TemplateEngine templateEngine;
-
-    @Autowired
-    TransformServiceStatic transformService;
+    private final TemplateEngine templateEngine;
+    private final TransformServiceStatic transformService;
 
     @Value("${repository.dataprotection.templatePath:html/dataprotection/report.html}")
-    String templatePath;
+    private String templatePath;
 
     //@Value("${repository.dataprotection.links:http://edu-sharing.com}")
     @Value("#{'${repository.dataprotection.links:http://edu-sharing.com}'.split(',')}")
-    List<String> links;
+    private List<String> links;
 
     public File report(Data reportData, File dir){
 
@@ -45,7 +45,7 @@ public class PDFReport {
         String content = templateEngine.process("html/baseLayout.html", ctx);
 
         byte[] result = transformService.callTransformer(
-                IOUtils.toInputStream(content),
+                IOUtils.toInputStream(content, StandardCharsets.UTF_8),
                 content.length(),
                 "text/html",
                 "application/pdf",
@@ -56,7 +56,7 @@ public class PDFReport {
             fos.write(result);
             return file;
         }catch (Exception e){
-            e.printStackTrace();
+            log.error("Error while creating PDF file: {}", e.getMessage(), e);
             return null;
         }
     }

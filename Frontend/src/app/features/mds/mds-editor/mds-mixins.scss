@@ -9,3 +9,53 @@
     color: var(--aiColor) !important;
     text-shadow: $shadow;
 }
+
+/// A view of an mds editor needs at least this width to be readable.
+$mdsColumnMinWidth: 345px;
+$mdsColumnGap: 10px;
+/// widths the editor needs for 2 resp. 4 columns
+$mdsTwoColumnsWidth: 2 * $mdsColumnMinWidth + $mdsColumnGap;
+$mdsFourColumnsWidth: 4 * $mdsColumnMinWidth + 3 * $mdsColumnGap;
+
+/// Declares the element as the query container the mds column layout is measured against.
+/// Apply to the element that gives the editor its width, usually `es-mds-editor-wrapper`.
+/// The element must not be inline, set a `display` if it has none.
+@mixin mdsColumnsContainer {
+    container: mdsEditor / inline-size;
+}
+
+/// Lays the mds views out in 1, 2 or 4 columns - 3 is skipped because it looks unbalanced with
+/// the usual number of views. The width is queried from the container declared with
+/// `mdsColumnsContainer`, so the editor adapts to the space it actually gets (preview sidebar,
+/// fullscreen dialog, rendering page) instead of to the viewport.
+///
+/// `:has` additionally caps the columns at the number of views, so two views use the full width
+/// instead of leaving two empty tracks on the right.
+/// Apply to the element holding the `es-mds-editor-view` elements.
+@mixin mdsColumns {
+    display: grid;
+    gap: $mdsColumnGap;
+    grid-template-columns: 1fr;
+    @container mdsEditor (min-width: #{$mdsTwoColumnsWidth}) {
+        &:has(> :nth-child(2)) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @container mdsEditor (min-width: #{$mdsFourColumnsWidth}) {
+        &:has(> :nth-child(4)) {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+}
+
+/// `mdsColumnsContainer` plus the column layout for the editor nested inside.
+/// Apply to `es-mds-editor-wrapper` (inside a `::ng-deep` context).
+@mixin mdsEditorColumns {
+    display: block;
+    @include mdsColumnsContainer;
+    es-mds-editor-core {
+        .mds-views {
+            @include mdsColumns;
+        }
+    }
+}

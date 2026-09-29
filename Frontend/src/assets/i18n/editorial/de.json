@@ -122,7 +122,8 @@
         },
         "NO_SEARCH_RESULTS": "Es konnten keine Ergebnisse gefunden werden.",
         "SEARCH": {
-          "PLACEHOLDER": "Suche nach Inhalten"
+          "PLACEHOLDER": "Suche nach Inhalten",
+          "REPOSITORY": "Quelle"
         },
         "COLLECTIONS": {
           "EMPTY_MESSAGE": "Du hast bisher weder eine eigene Sammlung angelegt oder Zugriff auf eine Sammlung erhalten.",

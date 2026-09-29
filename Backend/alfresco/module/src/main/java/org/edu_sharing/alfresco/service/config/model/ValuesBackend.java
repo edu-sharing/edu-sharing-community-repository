@@ -16,6 +16,11 @@ public class ValuesBackend {
     @Data
     public static class RepositoryConfigBackend {
         private ChildobjectsConfig childobjects;
+        private WebComponentsConfig webComponents;
+    }
+    @Data
+    public static class WebComponentsConfig {
+        private boolean enabled;
     }
     @Data
     public static class ChildobjectsConfig {

@@ -20,7 +20,15 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import {
+    BehaviorSubject,
+    combineLatest,
+    Observable,
+    of,
+    ReplaySubject,
+    Subject,
+    Subscription,
+} from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
@@ -52,6 +60,7 @@ import {
     ViewInstanceService,
 } from 'ngx-edu-sharing-ui';
 import { MdsEditorGlobalService } from '../mds-editor-global.service';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface NativeWidgetComponent {
     hasChanges: BehaviorSubject<boolean>;
@@ -104,6 +113,7 @@ export class MdsEditorViewComponent
     private ngZone = inject(NgZone);
     private viewInstance = inject(ViewInstanceService);
     private uiService = inject(UIService);
+    private translate = inject(TranslateService);
     injector = inject(Injector);
     private jumpMarks = inject(JumpMarksService, { optional: true });
 
@@ -120,6 +130,10 @@ export class MdsEditorViewComponent
     get isHidden() {
         return this._isHidden() || this._isEmpty();
     }
+    @HostBinding('class.bulk-mode')
+    get isBulkMode() {
+        return !!this.mdsEditorInstance.editorBulkMode?.isBulk;
+    }
     _isHidden = signal(false);
     _isEmpty = signal(false);
     @ViewChild('container') container: ElementRef<HTMLDivElement>;
@@ -133,6 +147,7 @@ export class MdsEditorViewComponent
 
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
+    private hideEmptySubscription: Subscription;
     private allWidgetsHidden = false;
     private expandContentDone = new Subject<void>();
 
@@ -189,11 +204,12 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             this.injectWidgets();
             this.checkHideState();
-            MdsViewerService.hideEmpty(this.container);
+            this.hideEmptySubscription = MdsViewerService.hideEmpty(this.container, this.ngZone);
         });
     }
 
     ngOnDestroy(): void {
+        this.hideEmptySubscription?.unsubscribe();
         this.destroyed.next();
         this.destroyed.complete();
     }
@@ -219,12 +235,28 @@ export class MdsEditorViewComponent
         // user probably meant to define the respective widget) as these would mess up the HTML
         // structure if left unclosed.
         const html = closeTags(
-            this.view.html,
+            this.replaceI18nTags(this.view.html),
             (tagName) =>
                 !!this.knownWidgetTags.find((k) => k.toLowerCase() === tagName.toLowerCase()) ||
                 tagName.includes(':'),
         );
         return this.sanitizer.bypassSecurityTrustHtml(html);
+    }
+
+    /**
+     * Replaces `<i18n SOME.KEY>` tags in the template html with their translation.
+     *
+     * Mirrors `replaceI18nStrings` of the backend `MetadataTemplateRenderer`, but resolves
+     * against the frontend (ngx-translate) bundles, since the angular editor has no access to
+     * the backend mds i18n properties. Unresolved keys are rendered as the key itself, which
+     * matches the fallback of the backend implementation.
+     *
+     * Runs before `closeTags` so that resolved tags never reach the html parser.
+     */
+    private replaceI18nTags(html: string): string {
+        return html.replace(/<i18n ([^>]+)>/g, (_match, key: string) =>
+            this.translate.instant(key.trim()),
+        );
     }
 
     private injectWidgets(): void {
@@ -421,6 +453,11 @@ export class MdsEditorViewComponent
         if (constraints.supportsBulk === false) {
             if (this.mdsEditorInstance.editorBulkMode.isBulk) {
                 return 'Not supported in bulk mode';
+            }
+        }
+        if (constraints.supportsViewer === false) {
+            if (this.mdsEditorInstance.editorMode === 'viewer') {
+                return 'Not supported in viewer mode';
             }
         }
         return null;

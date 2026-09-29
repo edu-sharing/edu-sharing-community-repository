@@ -20,6 +20,7 @@
       "EMAIL": "Please enter e-mail"
     },
     "IMG_CHANGE": "change",
+    "IMG_CHANGE_LABEL": "Change profile picture",
     "REQUEST_GDPR_BUTTON": "Request Data Disclosure / Export",
     "GDPR": {
       "TITLE": "Request Disclosure / Export",

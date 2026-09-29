@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MdsModule } from '../../features/mds/mds.module';
 import { SharedModule } from '../../shared/shared.module';
-import { RepositoryIconPipe } from './repository-icon.pipe';
 import { SearchPageFiltersSidebarComponent } from './search-page-filters-sidebar.component';
 import { SearchPageResultsAllComponent } from './search-page-results-all.component';
 import { SearchPageResultsComponent } from './search-page-results.component';
@@ -21,7 +20,6 @@ import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-to
         SearchPageToolbarComponent,
         SearchPageFilterBarComponent,
         SearchPageFiltersSidebarComponent,
-        RepositoryIconPipe,
         SearchPageToolbarComponent,
         SearchPageResultsComponent,
         SearchPageResultsAllComponent,

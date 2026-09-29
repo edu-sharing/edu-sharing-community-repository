@@ -1,7 +1,7 @@
 <div class="currentLicense">
-  @if (type !== 'MULTI' && displayMode === 'full') {
+  @if (headingKey && type !== 'MULTI' && displayMode === 'full') {
   <h4>
-    {{ 'WORKSPACE.LICENSE.CURRENT' | translate }}
+    {{ headingKey | translate }}
   </h4>
   } @if (type !== 'MULTI' && displayMode === 'full') {
   <img class="currentLicenseIcon" src="{{ getLicenseIcon() }}" alt="" />

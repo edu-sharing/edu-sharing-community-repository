@@ -399,13 +399,18 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
 
     isAllowedToAddContent(): boolean {
         if (!this.isAllowedToEditCollection()) return false;
-        // In public collections, adding content requires INVITE_ALLAUTHORITIES tool permission.
+        // In public collections, adding content requires the ADD_TO_PUBLIC_COLLECTION tool
+        // permission or the broader INVITE_ALLAUTHORITIES tool permission.
         // Sub-collection creation is handled separately via createAllowed() and is not affected.
         if (this.collection.isPublic) {
             return (
                 this.login?.toolPermissions?.includes(
+                    RestConstants.TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION,
+                ) ||
+                this.login?.toolPermissions?.includes(
                     RestConstants.TOOLPERMISSION_INVITE_ALLAUTHORITIES,
-                ) ?? false
+                ) ||
+                false
             );
         }
         return true;
@@ -845,7 +850,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                                     await this.sessionStorageService.get<VirtualNode[]>(
                                         SessionStorageService.KEY_ROOT_COLLECTIONS,
                                         [],
-                                        Store.Session,
+                                        Store.BrowserSessionStorage,
                                     )
                                 ).map((n) => {
                                     n.override = false;

@@ -95,6 +95,7 @@
   "RADIO_BUTTON_NOT_SELECTED": "Optionsfeld nicht ausgewählt",
   "DISABLED": "deaktiviert",
   "RESIZE_SIDEBAR": "Breite der Seitenleiste ändern",
+  "RESIZE_SIDEBAR_VALUE": "{{width}} Pixel",
   "PAGINATOR": {
     "itemsPerPageLabel": "Einträge pro Seite:",
     "firstPageLabel": "Erste Seite",
@@ -155,6 +156,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_FUZZY": "Suchen und Finden von Nutzenden außerhalb der Organisation ohne Eingabe der gesamten Nutzenden-ID.",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Suchen und Einladen Nutzender außerhalb der Organisation in gemeinsamen Ordnern im Safe.",
     "TOOLPERMISSION_COLLECTION_PINNING": "Sammlungen anpinnen und gepinnte Sammlungen verwalten.",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Hinzufügen von Materialien zu öffentlichen Sammlungen.",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Lehrplansammlungen erstellen (aktuell nicht verwendet).",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Feedback an Materialien abgeben.",
     "TOOLPERMISSION_CONFIDENTAL": "Zugriff auf gesicherten Bereich (Safe).",
@@ -824,6 +826,8 @@
     "COLLECTION_PROPSE_INFO": "Sie haben auf die Sammlung \"{{collection}}\" keine ausreichenden Rechte. Sie können das Material jedoch als Vorschlag einreichen. Möchten Sie fortfahren?"
   },
   "QR_CODE_ARIA_LABEL": "QR-Code für diesen Link",
+  "QR_CODE_SHORTLINK_LABEL": "Kurzlink",
+  "QR_CODE_SHORTLINK_COPY": "Link kopieren",
   "OPTIONS_FOR": "Aktionen für {{element}}",
   "NO_AVAILABLE_OPTIONS": "Es sind keine Aktionen für die ausgewählten Elemente verfügbar.",
   "OPTIONS": {
@@ -902,6 +906,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Möchten Sie diese Aufgabe wirklich abbrechen? Dies kann nicht rückgängig gemacht werden.",
     "ASSIGNMENT_FINISH": "Aufgabe abschließen",
     "ASSIGNMENT_FINISH_CONFIRM": "Möchten Sie diese Aufgabe wirklich abschließen? Dies kann nicht rückgängig gemacht werden.",
+    "ASSIGNMENT_DELETE": "Aufgabe löschen",
+    "ASSIGNMENT_DELETE_CONFIRM": "Möchten Sie diese Aufgabe wirklich endgültig löschen? Die Aufgabe und alle zugehörigen Dokumente und Abgaben werden unwiderruflich gelöscht.",
     "MANAGE_CONTENT": "Einsortieren",
     "EDIT_CONNECTOR": "Bearbeiten"
   },
@@ -953,6 +959,7 @@
     "FILTER_FOR": "Nach \"{{value}}\" filtern ({{count}} passende(s) Element(e)).",
     "FILTER_TREE": "Filtern...",
     "FILTER_FACET": "Filtern...",
+    "FACET_COUNT": "{{ count }} Treffer",
     "SUGGEST_VALUE_LABEL": "Neuen Wert vorschlagen",
     "SUGGEST_VALUE_SEND": "Vorschlagen",
     "SUGGEST_VALUE_SENT": "Der Vorschlag wurde eingereicht und wird durch die Redaktion geprüft. Der Vorschlag taucht erst auf, wenn er durch die Redaktion aktiviert wurde. Vielen Dank!",
@@ -1093,9 +1100,13 @@
     "SAVED": "Änderungen wurden gespeichert."
   },
   "RENDERING": {
+    "DEFAULT_MODULE_INFO_TEXT": "Das Anzeigen dieses Materials im Browser ist nicht möglich.",
+    "DEFAULT_MODULE_DOWNLOAD": "Laden Sie das Material herunter, um es zu benutzen.",
+    "DOWNLOAD": "Herunterladen",
     "GO_TO_COURSE": "Zum Kurs springen",
     "AUTHORED_BY": "von",
     "CONVERTING": "Konvertierung",
+    "PREPARING": "Wird vorbereitet",
     "QUEUED": "Warteschlange",
     "QUEUE_POSITION": "Position in der Warteschlange",
     "OPEN_IN_NEW_TAB": "In neuem Tab öffnen",
@@ -1116,8 +1127,8 @@
       "GENERIC_BAD_REQUEST": "Ungültige Anfrage",
       "GENERIC_MODULE_NOT_AVAILABLE": "Das zur Anzeige des Objekts nötige Rendering-Modul ist nicht verfügbar.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "Das Objekt wird vom Rendering-Service nicht unterstützt.",
-      "GENERIC_ACCESS_DENIED": "Für das angeforderte Element sind keine Berechtigungen vorhanden.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden"
+      "GENERIC_INTERNAL_SERVER_ERROR": "Die Anfrage konnte vom Server nicht bearbeitet werden",
+      "GENERIC_ACCESS_DENIED": "Keine ausreichenden Rechte"
     },
     "GDPR": {
       "EXTERNAL_SITE": "Externe Seite",
@@ -1147,7 +1158,8 @@
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
     "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
-    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert."
+    "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert.",
+    "ASSIGNMENT_DELETE": "Die Aufgabe wurde gelöscht."
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",
@@ -1231,7 +1243,8 @@
     "X-ORCID": "ORCID",
     "X-GND-URI": "GND-URI",
     "X-ROR": "ROR (Research Organization Registry)",
-    "X-Wikidata": "Wikidata-Eintrag"
+    "X-Wikidata": "Wikidata-Eintrag",
+    "LINK_PERSISTENT_ID": "Profil öffnen"
   },
   "VCARD_HINT": {
     "X-ORCID": "Verweis auf einen persistenten ORCID-Identifier. <a target='blank' href='https://orcid.org/'>Registrierung & Infos</a>",
@@ -1253,7 +1266,10 @@
     "delete": "Löschen",
     "edit": "Bearbeiten",
     "add": "Neu",
-    "redo": "Übernehmen"
+    "redo": "Übernehmen",
+    "settings": "Einstellungen",
+    "cloud_download": "Herunterladen",
+    "content_copy": "Kopieren"
   },
   "FILL_STATUS": {
     "MESSAGE": "Feldern ausgefüllt",

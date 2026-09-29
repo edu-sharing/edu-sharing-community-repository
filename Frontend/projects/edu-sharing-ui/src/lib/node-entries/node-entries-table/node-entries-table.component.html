@@ -148,10 +148,25 @@
       [class.mat-column-primary]="first"
       [style.min-width]="first ? (containerWidth$ | async) / 3 + 'px' : null"
       attr.data-test="table-cell-{{ column.name }}"
+      [attr.tabindex]="
+        first && entriesService.elementInteractionType !== InteractionType.DefaultActionLink
+          ? 0
+          : null
+      "
       (click)="
         entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
           entriesService.onClicked({
             event: $event,
+            element: node,
+            source: ClickSource.Metadata,
+            attribute: column,
+          })
+      "
+      (keydown.enter)="
+        first &&
+          entriesService.elementInteractionType !== InteractionType.DefaultActionLink &&
+          entriesService.onClicked({
+            event: $any($event),
             element: node,
             source: ClickSource.Metadata,
             attribute: column,

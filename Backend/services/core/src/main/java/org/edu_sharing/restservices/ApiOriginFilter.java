@@ -4,6 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 
@@ -18,10 +19,18 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 	 Note: Only OPTIONS + GET methods are allowed
 	 */
 	List<String> CORS_ALLOWED_ENDPOINTS = Arrays.asList(
+			"/_about",
 			"/config/v1/values",
 			"/config/v1/language",
 			"/mds/v1/metadatasets",
 			"/assets/i18n" // assets/i18n etc. from Angular
+	);
+	/**
+	 Endpoints that are allowed when web components (widget components) are enabled
+	 Note: Any method is allowed here
+	 */
+	List<String> WEB_COMPONENTS_ALLOWED_ENDPOINTS = Arrays.asList(
+			"/search/v1/queries"
 	);
 	public void doFilter(ServletRequest request, ServletResponse response,
 						 FilterChain chain) throws IOException, ServletException {
@@ -50,6 +59,23 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 			// this is usually okay. When the client requests to the same domain, it will omit origin
 			//logger.info("No origin was sent by client and "+ApplicationInfo.KEY_ALLOW_ORIGIN+" is set in home app, will not allow CORS request");
 		}
+
+		if(!allow) {
+			boolean webComponentsActivated = LightbendConfigLoader.get().getBoolean("repository.webComponents.enabled");
+			if (webComponentsActivated) {
+				String pathInfo = req.getPathInfo() == null ? req.getServletPath() : req.getPathInfo();
+				if (
+					// allow all get requests
+						"GET".equalsIgnoreCase(req.getMethod()) ||
+								"OPTIONS".equalsIgnoreCase(req.getMethod()) && "GET".equalsIgnoreCase(req.getHeader("access-control-request-method")) ||
+								// and explicitly enabled paths
+								WEB_COMPONENTS_ALLOWED_ENDPOINTS.stream().anyMatch(c -> pathInfo != null && pathInfo.startsWith(c))
+				) {
+					res.addHeader("Access-Control-Allow-Origin", origin);
+					allow = true;
+				}
+			}
+		}
 		if(allow) {
 			res.addHeader(
 					"Access-Control-Allow-Methods",
@@ -64,7 +90,6 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 					"true");
 		} else {
 			String pathInfo = req.getPathInfo() == null ? req.getServletPath() : req.getPathInfo();
-
 			// allow cors access for GET requests on uncritical endpoints
 			// required for (external) web component usage
 			if(Arrays.asList("OPTIONS", "GET").contains(req.getMethod()) &&

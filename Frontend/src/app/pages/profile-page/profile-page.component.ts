@@ -1,6 +1,15 @@
 import { firstValueFrom, forkJoin as observableForkJoin, of, Subject, timer } from 'rxjs';
 
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import {
+    Component,
+    computed,
+    ElementRef,
+    inject,
+    OnDestroy,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
 import {
     ActionbarComponent,
     DefaultGroups,
@@ -31,6 +40,8 @@ import { LoadingScreenService } from '../../main/loading-screen/loading-screen.s
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { catchError, first, take, takeUntil } from 'rxjs/operators';
 import {
+    About,
+    AboutService,
     ConfigService,
     HOME_REPOSITORY,
     IamV1Service,
@@ -71,6 +82,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private iamService = inject(IamV1Service);
     private userService = inject(UserService);
     private nodePersonNamePipe = inject(NodePersonNamePipe);
+    private aboutService = inject(AboutService);
 
     private destroyed = new Subject<void>();
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
@@ -78,6 +90,10 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     avatarCache = '';
     gdprExport: NodeEntry;
     params: any;
+    private about = signal<About>(null);
+    hasDataprotection = computed(
+        () => this.about()?.features?.filter((f) => f.id === 'dataprotection').length > 0,
+    );
     constructor() {
         const route = this.route;
 
@@ -93,6 +109,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.editAction.group = DefaultGroups.Edit;
         this.editAction.elementType = [ElementType.NoneOrUnknown];
         this.editAction.showAsAction = true;
+        this.aboutService.getAbout().subscribe((about) => this.about.set(about));
     }
     private static PASSWORD_MIN_LENGTH = 5;
     public user: User;
@@ -129,7 +146,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         this.destroyed.next();
         this.destroyed.complete();
     }
-
     public loadUser(authority: string) {
         this.toast.showProgressSpinner();
         this.connector.isLoggedIn().subscribe((login) => {

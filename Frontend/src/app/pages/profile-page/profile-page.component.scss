@@ -126,6 +126,12 @@ $path: '../../../assets/images/';
                     width: 116px;
                     cursor: pointer;
                     overflow: hidden;
+                    // reset native <button> chrome to match the plain overlay look
+                    padding: 0;
+                    border: none;
+                    background: transparent;
+                    font: inherit;
+                    color: inherit;
 
                     span {
                         background: rgba(0, 0, 0, 0.7);

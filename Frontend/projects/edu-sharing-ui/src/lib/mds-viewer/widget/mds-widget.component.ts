@@ -32,6 +32,18 @@ import {
 } from '../mds-editor-instance-service.abstract';
 import { animate, group, state, style, transition, trigger } from '@angular/animations';
 import { UIAnimation } from '../../util/ui-animation';
+import { VCard } from '../../util/VCard';
+import { VCardNamePipe } from '../../pipes/vcard-name.pipe';
+
+export interface VCardEntry {
+    name: string;
+    /** icon name (esIcon) representing the vcard type: person or organization */
+    icon: string;
+    /** main link (url or mailto:), depending on the widget's link definition */
+    link: string | null;
+    /** persistent identifier link (ORCID/GND/ROR/Wikidata) */
+    persistentId: string | null;
+}
 
 export enum MdsType {
     Io = 'io',
@@ -202,6 +214,36 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     });
     license$ = new BehaviorSubject<{ name: string; icon: string }>(null);
 
+    /**
+     * Structured vcard values with resolved links, mirroring the backend
+     * MetadataTemplateRenderer: a main link (url/email) plus a persistent-id
+     * link (ORCID/GND/ROR/Wikidata).
+     */
+    vcardEntries = computed<VCardEntry[]>(() => {
+        if (this.basicType() !== 'vcard') {
+            return [];
+        }
+        const linkType = this.getDefinition().link;
+        return (this.value() ?? []).filter(Boolean).map((v) => {
+            const vcard = new VCard(v);
+            let link: string | null = null;
+            if (linkType === 'email') {
+                link = vcard.email ? 'mailto:' + vcard.email : null;
+            } else if (!linkType) {
+                link = vcard.url || null;
+                if (link && !link.includes('://')) {
+                    link = 'http://' + link;
+                }
+            }
+            return {
+                name: new VCardNamePipe().transform(v),
+                icon: vcard.getType() === VCard.TYPE_ORG ? 'domain' : 'person',
+                link,
+                persistentId: vcard.orcid || vcard.gnduri || vcard.ror || vcard.wikidata || null,
+            };
+        });
+    });
+
     get headingLevel() {
         return this.viewInstance.headingLevel;
     }
@@ -312,26 +354,51 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
         return data;
     }
 
-    click() {
-        if (this.getDefinition().link) {
-            if (this.getDefinition().link === '_BLANK') {
-                window.open(
-                    this.mdsViewerService.getFormattedValue(
-                        this.value(),
-                        this.getDefinition(),
-                        'text',
-                    )[0],
-                );
-            } else if (this.getDefinition().link === '_SELF') {
-                window.location.href = this.mdsViewerService.getFormattedValue(
-                    this.value(),
-                    this.definition,
-                    'text',
-                )[0];
-            } else {
-                console.warn('Unsupported link type ' + this.getDefinition().link);
-            }
+    /**
+     * Resolves the widget's link definition to a real anchor href/target so the
+     * value can be rendered as an `<a>`. Rendering a native anchor (instead of a
+     * div with a JS click handler) keeps the text selectable with the mouse and
+     * supports middle-click / "open in new tab" / copy-link.
+     */
+    linkHref(): { href: string; target: string | null } | null {
+        const link = this.getDefinition().link;
+        // vcard values render their own per-entry anchors (see template) — do not
+        // wrap the whole block in an anchor, that would nest <a> elements.
+        if (!link || this.basicType() === 'vcard') {
+            return null;
         }
+        const value = this.mdsViewerService.getFormattedValue(
+            this.value(),
+            this.getDefinition(),
+            'text',
+        )[0];
+        if (!value) {
+            return null;
+        }
+        if (link === '_BLANK') {
+            return { href: value, target: '_blank' };
+        } else if (link === '_SELF') {
+            return { href: value, target: null };
+        } else if (link === 'email') {
+            return { href: 'mailto:' + value, target: null };
+        }
+        console.warn('Unsupported link type ' + link);
+        return null;
+    }
+
+    /**
+     * Entries for the flat (`array`) rendering: the displayed caption plus the raw value id.
+     *
+     * The id is required to build a search link for `isSearchable` widgets and is only
+     * available via `rawValue`, i.e. when an editor instance with nodes exists. It is left
+     * empty otherwise (pure viewer without nodes, or values coming from
+     * `getInitialDisplayValues`), in which case the entry renders as plain text.
+     */
+    arrayEntries(): { id: string; caption: string }[] {
+        const values = this.value() ?? [];
+        // only trust rawValue when it lines up with the displayed values
+        const raw = this.rawValue?.length === values.length ? this.rawValue : null;
+        return values.map((caption, i) => ({ id: raw?.[i]?.id ?? '', caption }));
     }
 
     formatValue(): string[] {

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
@@ -146,12 +147,13 @@ public class EduSharingItemRepository implements ItemRepository {
                 new OAILOMExporterHSOER().write(os, nodeRef.getNodeId());
             }
 
-            if (os.size() == 0) {
+            String metadata = os.toString();
+            if (StringUtils.isBlank(metadata)) {
                 throw new IdDoesNotExistException("No metadata produced for node " + nodeRef.getNodeId()
                         + " in format " + format.getPrefix());
             }
 
-            return new EduItem(getIdentifier(nodeRef), os.toString());
+            return new EduItem(getIdentifier(nodeRef), metadata);
         } catch (InvalidNodeRefException e) {
             log.error(e.getMessage(), e);
             throw new IdDoesNotExistException(e);

@@ -1,6 +1,7 @@
 package org.edu_sharing.restservices;
 
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import net.sf.acegisecurity.AuthenticationCredentialsNotFoundException;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.domain.node.NodeExistsException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
@@ -122,7 +123,8 @@ public class DAOException extends RuntimeException {
         if (t instanceof AccessDeniedException
                 || t instanceof AuthenticationException || t instanceof PermissionException
                 || t instanceof GuestCagePolicy.GuestPermissionDeniedException
-                || t instanceof InsufficientPermissionException || t instanceof NotAnAdminException) {
+                || t instanceof InsufficientPermissionException || t instanceof NotAnAdminException
+                || t instanceof AuthenticationCredentialsNotFoundException) {
 
             return new DAOSecurityException(t, nodeId);
         }

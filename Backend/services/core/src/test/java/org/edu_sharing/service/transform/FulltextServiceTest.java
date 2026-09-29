@@ -13,6 +13,7 @@ import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.bapi.BApiConfigProvider;
 import org.edu_sharing.service.bapi.BApiProxyConfig;
 import org.edu_sharing.service.bapi.BApiProxyService;
 import org.junit.jupiter.api.AfterEach;
@@ -61,6 +62,8 @@ class FulltextServiceTest {
         nodeService = Mockito.mock(NodeService.class);
         transformService = Mockito.mock(TransformService.class);
         bApiProxyConfig = Mockito.mock(BApiProxyConfig.class);
+        BApiConfigProvider bApiConfigProvider = Mockito.mock(BApiConfigProvider.class);
+        when(bApiConfigProvider.getCurrentConfig()).thenReturn(bApiProxyConfig);
         bApiProxyService = Mockito.mock(BApiProxyService.class);
         transformerCache = Mockito.mock(SimpleCache.class);
         retryingTransactionHelper = Mockito.mock(RetryingTransactionHelper.class);
@@ -82,7 +85,7 @@ class FulltextServiceTest {
                 ((RetryingTransactionHelper.RetryingTransactionCallback<?>) invocation.getArgument(0)).execute()
         );
 
-        underTest = new FulltextService(contentService, nodeService, transformService, bApiProxyConfig, bApiProxyService, transformerCache, retryingTransactionHelper, behaviourFilter, repositoryCache);
+        underTest = new FulltextService(contentService, nodeService, transformService, bApiConfigProvider, bApiProxyService, transformerCache, retryingTransactionHelper, behaviourFilter, repositoryCache);
     }
 
     @AfterEach

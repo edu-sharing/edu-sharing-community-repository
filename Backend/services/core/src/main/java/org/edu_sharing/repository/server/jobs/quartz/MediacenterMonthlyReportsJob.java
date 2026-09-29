@@ -54,7 +54,34 @@ import static org.edu_sharing.alfresco.service.AuthorityService.ORG_GROUP_PREFIX
 public class MediacenterMonthlyReportsJob extends AbstractJobMapAnnotationParams {
 
     public enum ReportMode {
-        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored")
+        // Report is built from the mediacenter tracking data (TrackingService.getListNodeDataByMediacenter).
+        //
+        // Special behaviour to be aware of:
+        //
+        // - Single-mediacenter tracking only: the tracking query counts events only for users assigned to exactly
+        //   one mediacenter (ARRAY_LENGTH(authority_mediacenter,1)=1); accesses by users that belong to more than one
+        //   mediacenter are ignored (unlike AlfrescoPermissionData).
+        //
+        // - Licensed nodes plus still-tracked nodes: the media report lists the currently licensed nodes returned by
+        //   MediacenterService.getAllLicensedNodes (scoped by the mediacenter proxy-group read permission), filtered to
+        //   restricted_mz, with the tracking counts merged onto them (a licensed node is listed even with zero activity).
+        //   In addition, nodes that had tracking activity last month but are no longer in the licensed ES snapshot (e.g.
+        //   license revoked since) are kept so their historical data is not lost: they carry no ES properties, so their
+        //   editorial state is verified with a single live read run as system (see isRestrictedMediacenterMedia). Such
+        //   nodes are reported with their counts but empty CSV columns (no ES properties in memory).
+        //
+        // - restricted_mz filter: getAllLicensedNodes does NOT filter on the editorial state, so the licensed nodes are
+        //   additionally filtered here to ccm:io_editorial_state == "restricted_mz" to drop non-mediacenter media.
+        //
+        // - Properties are read ES-first, with a single bounded live fallback: the restricted_mz filter and the exported
+        //   CSV column values use the properties Elasticsearch already delivered in memory (NodeRef.getProperties()), so
+        //   we do NOT re-fetch the full property map of every licensed node through the Alfresco node service (that would
+        //   flood the Alfresco L2 cache and blow up the heap). The only live Alfresco access is the single-property
+        //   fallback in readProperty, hit for the tracked nodes that are no longer in the licensed ES snapshot, to decide
+        //   their editorial state (see isRestrictedMediacenterMedia).
+        //   not re-checked live, to keep that path cheap).
+        @JobFieldDescription(description = "Use the tracked mediacenter user data. Elements accessed from users assigned to more than one mediacenter are ignored. " +
+                "The report lists the currently licensed nodes (filtered to editorial state 'restricted_mz') merged with the tracking counts")
         TrackingMediacenterData,
         @JobFieldDescription(description = "Use the current licensed node data. Elements not licensed anymore will not be visible. Elements accessed from users assigned to more than one MZ are counted as well (legacy)")
         AlfrescoPermissionData

@@ -5,7 +5,9 @@ import {
     inject,
     Injector,
     Input,
+    NgZone,
     OnChanges,
+    OnDestroy,
     QueryList,
     signal,
     SimpleChanges,
@@ -31,7 +33,7 @@ import { replaceElementWithDiv } from './replace-element-with-div';
 import { UIService } from '../services/ui.service';
 import { MdsViewerService } from './mds-viewer.service';
 import { ViewInstanceService } from './view-instance.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Component({
     selector: 'es-mds-viewer',
@@ -40,7 +42,7 @@ import { BehaviorSubject } from 'rxjs';
     providers: [MdsViewerService, ViewInstanceService],
     standalone: false,
 })
-export class MdsViewerComponent implements OnChanges {
+export class MdsViewerComponent implements OnChanges, OnDestroy {
     private mdsService = inject(MdsService);
     private mdsViewerService = inject(MdsViewerService);
     private factoryResolver = inject(ComponentFactoryResolver);
@@ -48,6 +50,8 @@ export class MdsViewerComponent implements OnChanges {
     private containerRef = inject(ViewContainerRef);
     private sanitizer = inject(DomSanitizer);
     private viewInstance = inject(ViewInstanceService);
+    private ngZone = inject(NgZone);
+    private hideEmptySubscriptions: Subscription[] = [];
 
     @ViewChildren('container') container: QueryList<ElementRef>;
 
@@ -161,10 +165,22 @@ export class MdsViewerComponent implements OnChanges {
                             this.injector,
                         );
                     }
-                    setTimeout(() => MdsViewerService.hideEmpty(c), 1);
                 });
             }
+            this.unsubscribeHideEmpty();
+            this.hideEmptySubscriptions = this.container
+                .toArray()
+                .map((c) => MdsViewerService.hideEmpty(c, this.ngZone));
         });
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscribeHideEmpty();
+    }
+
+    private unsubscribeHideEmpty() {
+        this.hideEmptySubscriptions.forEach((s) => s.unsubscribe());
+        this.hideEmptySubscriptions = [];
     }
 
     /**

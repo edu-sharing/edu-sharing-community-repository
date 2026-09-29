@@ -5,7 +5,12 @@
   'WORKSPACE.LICENSE.ONLY_OER' | translate
 }}</mat-slide-toggle>
 } @if (oerMode) {
-<mat-radio-group class="oerLicenses" [(ngModel)]="type" name="oerLicenses mat-group-gap">
+<mat-radio-group
+  class="oerLicenses"
+  [(ngModel)]="type"
+  name="oerLicenses mat-group-gap"
+  [attr.aria-label]="'WORKSPACE.LICENSE.TYPE' | translate"
+>
   <fieldset>
     <legend>{{ 'LICENSE.GROUPS.CC_0' | translate }}</legend>
     <div class="oerCC0">
@@ -22,9 +27,15 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a [href]="getLicenseUrlVersion('CC_0') | async" target="_blank">{{
-            'WORKSPACE.LICENSE.MORE' | translate
-          }}</a>
+          <a
+            [href]="getLicenseUrlVersion('CC_0') | async"
+            target="_blank"
+            [attr.aria-label]="
+              'WORKSPACE.LICENSE.MORE_ARIA'
+                | translate : { license: ('WORKSPACE.LICENSE.CC0.CC0' | translate) }
+            "
+            >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
+          >
         </div>
       </div>
       } @if (isAllowedLicense('PDM')) {
@@ -40,9 +51,16 @@
           </es-multi-line-label>
         </mat-radio-button>
         <div class="more-information-link">
-          <a class="focus-underline" [href]="getLicenseUrlVersion('PDM') | async" target="_blank">{{
-            'WORKSPACE.LICENSE.MORE' | translate
-          }}</a>
+          <a
+            class="focus-underline"
+            [href]="getLicenseUrlVersion('PDM') | async"
+            target="_blank"
+            [attr.aria-label]="
+              'WORKSPACE.LICENSE.MORE_ARIA'
+                | translate : { license: ('WORKSPACE.LICENSE.CC0.PDM' | translate) }
+            "
+            >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
+          >
         </div>
       </div>
       }
@@ -68,6 +86,10 @@
             class="focus-underline"
             [href]="getLicenseUrlVersion('CC_BY') | async"
             target="_blank"
+            [attr.aria-label]="
+              'WORKSPACE.LICENSE.MORE_ARIA'
+                | translate : { license: ('WORKSPACE.LICENSE.CC.CC_BY_RADIO' | translate) }
+            "
             >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
           >
         </div>
@@ -89,6 +111,10 @@
             class="focus-underline"
             [href]="getLicenseUrlVersion('CC_BY_SA') | async"
             target="_blank"
+            [attr.aria-label]="
+              'WORKSPACE.LICENSE.MORE_ARIA'
+                | translate : { license: ('WORKSPACE.LICENSE.CC.CC_BY_SA_RADIO' | translate) }
+            "
             >{{ 'WORKSPACE.LICENSE.MORE' | translate }}</a
           >
         </div>
@@ -353,7 +379,7 @@
 </div>
 <div class="currentLicense">
   @if (type !== 'MULTI') {
-  <h4>{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h4>
+  <h3>{{ 'WORKSPACE.LICENSE.CURRENT' | translate }}</h3>
   } @if (type !== 'MULTI') {
   <img class="currentLicenseIcon" src="{{ getLicenseIcon() }}" alt="" />
   } @if (type.startsWith('CC_BY')) {
@@ -384,7 +410,7 @@
   </div>
   }
   <div class="licenseName">
-    <h4>{{ getLicenseName() }}</h4>
+    <h3>{{ getLicenseName() }}</h3>
     @if (getLicenseProperty() !== 'MULTI') {
     <div class="oerStatus">
       @if (isOerLicense()) {

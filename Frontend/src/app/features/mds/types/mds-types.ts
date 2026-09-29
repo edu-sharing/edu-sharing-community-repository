@@ -1,5 +1,6 @@
 import { MdsEditorWidgetComponent, NativeWidgetClass, NativeWidgetType } from './types';
 import { MdsEditorWidgetPreviewComponent } from '../mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
+import { MdsEditorWidgetActionComponent } from '../mds-editor/widgets/mds-editor-widget-action/mds-editor-widget-action.component';
 import { MdsEditorWidgetAuthorComponent } from '../mds-editor/widgets/mds-editor-widget-author/mds-editor-widget-author.component';
 import { MdsEditorWidgetVersionComponent } from '../mds-editor/widgets/mds-editor-widget-version/mds-editor-widget-version.component';
 import { MdsEditorWidgetChildobjectsComponent } from '../mds-editor/widgets/mds-editor-widget-childobjects/mds-editor-widget-childobjects.component';
@@ -62,6 +63,8 @@ export const NativeWidgets: {
     license: MdsEditorWidgetLicenseComponent,
     fileupload: MdsEditorWidgetFileUploadComponent,
     workflow: null as null,
+    // generic: renders an option of the options helper as a button
+    action: MdsEditorWidgetActionComponent,
     // rendering specific
     collections: MdsEditorWidgetCollectionsComponent,
     comments: MdsEditorWidgetCommentsComponent,

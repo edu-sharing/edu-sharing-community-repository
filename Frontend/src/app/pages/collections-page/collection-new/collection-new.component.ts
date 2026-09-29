@@ -160,6 +160,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
     buttons: DialogButton[];
     authorFreetext = false;
     authorFreetextAllowed = false;
+    authorFreetextFixedAllowed = false;
     mdsSet: string;
     editorialGroupsSelected: Group[] = [];
     editorialCollectionsConfig: CollectionsTypeConfig;
@@ -193,9 +194,16 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
                 // cleanup irrelevant data
                 this.currentCollection.rating = null;
                 this.authorFreetext = this.currentCollection.collection.authorFreetext != null;
+                this.authorFreetextFixedAllowed = this.authorFreetext;
                 this.originalPermissions = perm.localPermissions;
                 this.properties = collection.properties;
                 this.newCollectionType = this.getTypeForCollection(this.currentCollection);
+                if (
+                    this.currentCollection.collection.type ===
+                    RestConstants.COLLECTIONTYPE_MEDIA_CENTER
+                ) {
+                    this.authorFreetextFixedAllowed = true;
+                }
                 this.hasCustomScope = false;
                 this.newCollectionStep = this.STEP_GENERAL;
                 if (
@@ -583,6 +591,7 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
             this.currentCollection.collection.scope = RestConstants.COLLECTIONSCOPE_CUSTOM;
         }
         if (type === RestConstants.COLLECTIONTYPE_MEDIA_CENTER) {
+            this.authorFreetextFixedAllowed = true;
             this.switchToAuthorFreetext();
         }
         this.updateAvailableSteps();
@@ -880,13 +889,15 @@ export class CollectionNewComponent implements OnInit, OnDestroy {
             const collections = await this.sessionStorageService.get(
                 SessionStorageService.KEY_ROOT_COLLECTIONS,
                 [],
-                Store.Session,
+                Store.BrowserSessionStorage,
             );
             collections.push(collection);
+            // temporary store for 60s to hold it when elastic index fails
             await this.sessionStorageService.set(
                 SessionStorageService.KEY_ROOT_COLLECTIONS,
                 collections,
-                Store.Session,
+                Store.BrowserSessionStorage,
+                60,
             );
         }
         // check if there are any nodes that should be added to this collection

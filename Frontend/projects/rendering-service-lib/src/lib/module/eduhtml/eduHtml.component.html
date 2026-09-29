@@ -1,8 +1,10 @@
 @if (data?.items !== undefined) {
 <div class="eduHtml-wrapper">
   <iframe [title]="node?.title ?? 'eduhtml'" class="frame" [src]="sanitizedUrl"></iframe>
-  <a mat-flat-button color="primary" [href]="url" target="_blank">{{
-    'RENDERING.OPEN_IN_NEW_TAB' | translate
-  }}</a>
+  <a mat-flat-button color="primary" [href]="url" target="_blank">
+    <div class="link-label">
+      {{ 'RENDERING.OPEN_IN_NEW_TAB' | translate }}<i esIcon="open_in_new"></i>
+    </div>
+  </a>
 </div>
 }

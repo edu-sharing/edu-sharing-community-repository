@@ -210,9 +210,11 @@ public class CollectionServiceElastic implements CollectionService {
 
         }
 
-        if (collectionIsPublic && !toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES)
+        if (collectionIsPublic
+                && !toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION)
+                && !toolPermissionService.hasToolPermission(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES)
                 && !client.isOwner(collectionId, AuthenticationUtil.getFullyAuthenticatedUser())) {
-            throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_INVITE_ALLAUTHORITIES);
+            throw new ToolPermissionException(CCConstants.CCM_VALUE_TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION);
         }
 
         String originalNodeType = client.getNodeType(originalNodeId);

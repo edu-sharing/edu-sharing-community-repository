@@ -25,10 +25,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
-import { MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
+import { ConfigService, MdsWidget, Node, SearchService } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse, NodeConfig } from 'ngx-edu-sharing-b-api';
 import { UIService, Values } from 'ngx-edu-sharing-ui';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
@@ -110,6 +110,7 @@ export interface WidgetComponentInterface {
 export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestroy {
     private aiHelperService = inject(AiHelperService);
     private clipboard = inject(Clipboard);
+    private configService = inject(ConfigService);
     private dialogs = inject(DialogsService);
     private injector = inject(Injector);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
@@ -176,6 +177,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     initialized: WritableSignal<boolean> = signal(false);
     private readonly persistConfigTrigger$: Subject<void> = new Subject<void>();
     rendering2Supported: WritableSignal<boolean> = signal(false);
+    // whether embedding widgets as web components is enabled in the repository backend config
+    private webComponentsEnabled: boolean = false;
     private searchResults: Map<string, number> = new Map<string, number>();
     updateInProgress: WritableSignal<boolean> = signal(false);
     private updateSearchResultCount$: Subject<void> = new Subject<void>();
@@ -235,6 +238,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
         this.aiSupported.set(await this.aiHelperService.hasAISupport());
         this.rendering2Supported.set(await this.aiHelperService.hasRendering2Support());
+        this.webComponentsEnabled = await this.hasWebComponentsSupport();
 
         // define a common embed configuration option to be used in every widget
         this.updateCommonConfigurationOptions();
@@ -676,8 +680,23 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
      * Helper function to update the common configuration options.
      */
     private updateCommonConfigurationOptions(): void {
-        this.embedConfigurationOption.isVisible = true;
+        // the embedding option produces a web component tag, so it is only offered
+        // when web components are enabled in the repository config
+        this.embedConfigurationOption.isVisible = this.webComponentsEnabled;
         this.embedConfigurationOption.icon = 'code';
+    }
+
+    /**
+     * Helper function to check whether web components are enabled in the repository backend config.
+     */
+    private async hasWebComponentsSupport(): Promise<boolean> {
+        try {
+            const config = await firstValueFrom(this.configService.observeBackendConfig());
+            return config?.repository?.webComponents?.enabled ?? false;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
     }
 
     /**

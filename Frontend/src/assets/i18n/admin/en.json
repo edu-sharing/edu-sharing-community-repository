@@ -170,6 +170,7 @@
   "Konto": "Account",
   "ADMIN": {
     "TITLE": "Admin-Tools",
+    "NAV": "Admin sections",
     "UNDERSTAND": "Understood, proceed",
     "WARNING_TITLE": "Administration area",
     "WARNING_INFO": "This area is intended for repository administration only. Improper settings can lead to errors or even data loss.\nDo not carry out any actions that you are unsure about!",
@@ -245,6 +246,22 @@
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
           "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "The Elasticsearch module transforms objects, including statistics and metadata, into a specialized Elasticsearch index structure, enabling efficient and highly detailed search queries."
+        },
+        "edu_sharing-community-repository-plugin-kafka-backend-alfresco-module": {
+          "TITLE": "edu-sharing Kafka Plugin",
+          "DESCRIPTION": "The plugin provides a Kafka message broker to deliver and bundle notifications, e.g. for shares, via a single endpoint."
+        },
+        "edu_sharing-community-repository-plugin-remote-backend-alfresco-module": {
+          "TITLE": "edu-sharing Remote Plugin",
+          "DESCRIPTION": "The plugin enables the federated integration of other edu-sharing instances into the search."
+        },
+        "edu_sharing-community-repository-plugin-mongo-backend-alfresco-module": {
+          "TITLE": "edu-sharing Mongo Plugin",
+          "DESCRIPTION": "The plugin provides a MongoDB for additional metadata such as suggestions, relations or ratings."
+        },
+        "edu_sharing-community-repository-plugin-cluster-backend-alfresco-module": {
+          "TITLE": "edu-sharing Cluster Plugin",
+          "DESCRIPTION": "The plugin allows the edu-sharing backend to be distributed across multiple instances (load balancing) with a distributed cache."
         },
         "alfresco-trashcan-cleaner project": {
           "TITLE": "Trashcan Cleaner",
@@ -376,6 +393,9 @@
         "RENDER": "Rendering-Service"
       },
       "COPY": "copy",
+      "CONFIG": "Configuration",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
       "COPIED_CLIPBOARD": "Copied to clipboard",
       "ADD_URL": "connect",
       "APP_REGISTERED": "App was successfully registered",
@@ -686,10 +706,12 @@
     },
     "FOLDERTEMPLATES": {
       "EDUGROUP": "Organisation",
+      "REMOVE_EDUGROUP": "Remove organisation",
       "APPLYTEMPLATE": "Apply folder template",
       "UPLOAD_DONE": "Folder template was stored as {{filename}} on the server.",
       "MISSING_GROUP": "At least one organisation must be selected.",
       "MISSING_TEMPLATE": "A folder template must be selected.",
+      "TEMPLATE": "Folder template",
       "TEMPLATE_APPLIED": "Template {{templatename}} was applied for {{groupname}}.",
       "TEMPLATE_NOTAPPLIED": "Folder template {{{templatename}} could not be applied to {{{groupname}}. Check the folder template for correctness.",
       "UPLOAD_HINT": "You can upload additional folder templates and then select them.",

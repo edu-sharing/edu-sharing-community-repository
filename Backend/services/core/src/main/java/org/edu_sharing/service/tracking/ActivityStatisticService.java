@@ -127,7 +127,6 @@ public class ActivityStatisticService {
             " GROUP BY type,date :grouping" +
             " ORDER BY date";
 
-
     private final ActivityStatisticsConfig config;
     private final PermissionService permissionService;
     private final NodeTrackingMapper nodeTrackingMapper;

@@ -1,10 +1,8 @@
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-    ClientConfig,
     CollectionService,
     ConfigService,
-    HOME_REPOSITORY,
     MdsService,
     MetadataSetInfo,
     NetworkService,
@@ -36,6 +34,7 @@ import { SearchPageResults } from './search-page-results.service';
 import { UserModifiableValue, UserModifiableValuesService } from './user-modifiable-values';
 import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { Sort } from '@angular/material/sort';
+import { filterMetadataSets, filterRepositories } from '../../util/repository-filter';
 
 export class SearchRequestParams {
     constructor(
@@ -376,41 +375,5 @@ export class SearchPageService implements OnDestroy {
         this.activeMetadataSet.setUserValue(savedSearch.metadataSet);
         this.searchString.setUserValue(savedSearch.searchString);
         this.searchFilters.setUserValue(savedSearch.filters);
-    }
-}
-
-function filterRepositories(repositories: Repository[], config: ClientConfig): Repository[] {
-    const enabledRepositories = config.availableRepositories;
-    if (enabledRepositories) {
-        return repositories.filter(
-            (repo) =>
-                (repo.isHomeRepo && config.availableRepositories.includes(HOME_REPOSITORY)) ||
-                config.availableRepositories.includes(repo.id),
-        );
-    } else {
-        return repositories;
-    }
-}
-
-function filterMetadataSets(
-    metadataSets: MetadataSetInfo[],
-    config: ClientConfig,
-    repository: Repository,
-): MetadataSetInfo[] {
-    const enabledMetadataSets = config.availableMds?.find(
-        (mdsConfig) =>
-            mdsConfig.repository === repository.id ||
-            (mdsConfig.repository === HOME_REPOSITORY && repository.isHomeRepo),
-    )?.mds;
-    if (enabledMetadataSets) {
-        const mds = metadataSets.filter((mds) => enabledMetadataSets.includes(mds.id));
-        if (mds.length === 0) {
-            console.warn(
-                `The filtered mds ${enabledMetadataSets} did not exists for the current app ${repository.id}. Check your Application XML config value "metadatasetsV2"`,
-            );
-        }
-        return mds;
-    } else {
-        return metadataSets;
     }
 }

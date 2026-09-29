@@ -1,1 +1,13 @@
 <es-qr-content [url]="url"></es-qr-content>
+@if (shortUrl) {
+<div class="shortlink">
+  <mat-form-field class="shortlink-field" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>{{ 'QR_CODE_SHORTLINK_LABEL' | translate }}</mat-label>
+    <input #shortlinkInput matInput readonly [value]="shortUrl" (focus)="shortlinkInput.select()" />
+  </mat-form-field>
+  <button mat-stroked-button color="primary" (click)="copyShortlink()">
+    <i esIcon="content_copy" color="primary"></i>
+    {{ 'QR_CODE_SHORTLINK_COPY' | translate }}
+  </button>
+</div>
+}

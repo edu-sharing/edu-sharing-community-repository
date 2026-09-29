@@ -32,59 +32,20 @@
       >
         @if (isEmpty()) {
         <div class="widget-data widget-no-data widget-type-{{ basicType() }}">-</div>
-        } @if (!isEmpty()) {
-        <div
-          class="widget-data widget-type-{{ basicType() }} {{
-            widget.definition.link ? 'widget-link' : ''
-          }}"
-          (click)="click()"
+        } @if (!isEmpty()) { @if (linkHref(); as link) {
+        <a
+          class="widget-data widget-link widget-type-{{ basicType() }}"
+          [href]="link.href"
+          [attr.target]="link.target"
+          [attr.rel]="link.target === '_blank' ? 'noopener noreferrer' : null"
         >
-          @if (['text', 'number', 'date'].includes(basicType())) {
-          <div>{{ formatValue() }}</div>
-          } @if (basicType() === 'license' && (license$ | async); as license) {
-          <div><img alt="" [src]="license.icon" /> {{ license.name }}</div>
-          } @if (basicType() === 'array') {
-          <div>
-            @for (v of value(); track v) {
-            <div class="array-entry">{{ v }}</div>
-            }
-          </div>
-          } @if (basicType() === 'tree') {
-          <div>
-            @for (v of rawValue; track v) {
-            <div class="tree-entry">
-              <ng-container *ngTemplateOutlet="treeEntry; context: { path: v.path }"></ng-container>
-            </div>
-            }
-          </div>
-          } @if (basicType() === 'vcard') {
-          <div>
-            @for (v of value(); track v) {
-            <div class="array-entry">{{ v | vcardName }}</div>
-            }
-          </div>
-          } @if (basicType() === 'slider') {
-          <div>
-            <span class="slider-value">{{ value() }}</span
-            ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
-          </div>
-          } @if (basicType() === 'duration') {
-          <div>
-            <span class="duration-value">{{ value()[0] | appMdsDuration }}</span>
-          </div>
-          } @if (basicType() === 'range') {
-          <div>
-            <span class="slider-value">{{ value()[0] }}</span
-            >-<span class="slider-value">{{ value()[1] }}</span>
-          </div>
-          } @if (basicType() === 'unknown') {
-          <div>
-            The widget type {{ widget.definition.type }} is currently not supported via angular
-            rendering
-          </div>
-          }
+          <ng-container *ngTemplateOutlet="widgetContent"></ng-container>
+        </a>
+        } @else {
+        <div class="widget-data widget-type-{{ basicType() }}">
+          <ng-container *ngTemplateOutlet="widgetContent"></ng-container>
         </div>
-        }
+        } }
       </div>
     </div>
     }
@@ -97,6 +58,74 @@
   </div>
 </es-mds-editor-widget-container>
 }
+<ng-template #widgetContent>
+  @if (['text', 'number', 'date'].includes(basicType())) {
+  <div>{{ formatValue() }}</div>
+  } @if (basicType() === 'license' && (license$ | async); as license) {
+  <div><img alt="" [src]="license.icon" /> {{ license.name }}</div>
+  } @if (basicType() === 'array') {
+  <div>
+    @for (entry of arrayEntries(); track $index) {
+    <div class="array-entry">
+      @if (widget.definition.isSearchable && entry.id) {
+      <a [routerLink]="'/' + ROUTER_PREFIX + 'search'" [queryParams]="getSearchParams(entry)">{{
+        entry.caption
+      }}</a>
+      } @else {
+      <span>{{ entry.caption }}</span>
+      }
+    </div>
+    }
+  </div>
+  } @if (basicType() === 'tree') {
+  <div>
+    @for (v of rawValue; track v) {
+    <div class="tree-entry">
+      <ng-container *ngTemplateOutlet="treeEntry; context: { path: v.path }"></ng-container>
+    </div>
+    }
+  </div>
+  } @if (basicType() === 'vcard') {
+  <div class="vcard-list">
+    @for (entry of vcardEntries(); track $index) {
+    <div class="vcard-entry">
+      <i class="vcard-icon" [esIcon]="entry.icon" [aria]="false"></i>
+      <div class="vcard-body">
+        @if (entry.link) {
+        <a class="vcard-name" [href]="entry.link" target="_blank">{{ entry.name }}</a>
+        } @else {
+        <span class="vcard-name">{{ entry.name }}</span>
+        } @if (entry.persistentId) {
+        <a class="vcard-persistent-id" [href]="entry.persistentId" target="_blank">{{
+          'VCARD.LINK_PERSISTENT_ID' | translate
+        }}</a>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  } @if (basicType() === 'slider') {
+  <div>
+    <span class="slider-value">{{ value() }}</span
+    ><span> / </span><span class="slider-max">{{ widget.definition.max }}</span>
+  </div>
+  } @if (basicType() === 'duration') {
+  <div>
+    <span class="duration-value">{{ value()[0] | appMdsDuration }}</span>
+  </div>
+  } @if (basicType() === 'range') {
+  <div>
+    <span class="slider-value">{{ value()[0] }}</span
+    >-<span class="slider-value">{{ value()[1] }}</span>
+  </div>
+  } @if (basicType() === 'checkbox') {
+  <div>{{ (value()?.[0] === 'true' ? 'YES' : 'NO') | translate }}</div>
+  } @if (basicType() === 'unknown') {
+  <div>
+    The widget type {{ widget.definition.type }} is currently not supported via angular rendering
+  </div>
+  }
+</ng-template>
 <div class="edit-wrapper">
   <div #editWrapper><div #edit></div></div>
   <!--<button *ngIf="!!editWrapper.innerText.trim()" mat-icon-button><i esIcon="save"></i></button>-->

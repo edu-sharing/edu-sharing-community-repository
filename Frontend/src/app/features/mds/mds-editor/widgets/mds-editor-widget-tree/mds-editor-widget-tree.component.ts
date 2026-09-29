@@ -89,8 +89,10 @@ export class MdsEditorWidgetTreeComponent
             treeNode.isIndeterminate = false;
         }
         const values: DisplayValue[] = this.chipsControl.value;
-        this.chipsControl.setValue([...values, value]);
-        console.log('set value', value);
+        if (!values.some((v) => v.key === value.key)) {
+            this.chipsControl.setValue([...values, value]);
+        }
+        this.removeFromIndeterminateValues(value.key);
         this.preventOverlayOpen = true;
         setTimeout(() => {
             this.preventOverlayOpen = false;
@@ -133,7 +135,6 @@ export class MdsEditorWidgetTreeComponent
     userProposalGroups$: Observable<UserProposalGroup[]>;
     valueType: ValueType;
     tree: Tree;
-    indeterminateValues$: BehaviorSubject<string[]>;
     overlayIsVisible = false;
     /**
      * Briefly set to `true` in situations where the input field might get focus as result of a
@@ -226,17 +227,12 @@ export class MdsEditorWidgetTreeComponent
             ].map((value) => this.tree.toDisplayValue(value)),
             this.getStandardValidators(),
         );
-        this.indeterminateValues$ = new BehaviorSubject(
-            (await this.widget.getInitalValuesAsync()).individualValues,
-        );
+        this.initIndeterminateValues((await this.widget.getInitalValuesAsync()).individualValues);
         this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) => {
             // temporary hack if you want to apply all
             // this.setValue(values.map((value) => value.key).concat(MdsService.unfoldTreeChilds(values.map((value) => value.key), this.widget.definition)));
             this.setValue(values.map((value) => value.key));
         });
-        this.indeterminateValues$.subscribe((indeterminateValues) =>
-            this.widget.setIndeterminateValues(indeterminateValues),
-        );
         this.userProposalGroups$ = this.widget.getSuggestions().pipe(
             map((suggestions) => {
                 if (!suggestions) return [];
@@ -361,6 +357,10 @@ export class MdsEditorWidgetTreeComponent
                 }
             });
 
+        // values offered by an es-mds-editor-widget-suggestion-chips widget for this property
+        this.widget.addValue.subscribe((value: MdsWidgetValue) => {
+            this.add(this.toDisplayValue(value));
+        });
         this.registerValueChanges(this.chipsControl);
     }
 
@@ -384,10 +384,41 @@ export class MdsEditorWidgetTreeComponent
         this.destroyed$.complete();
     }
 
+    /**
+     * In bulk mode a chip can be indeterminate, i.e. the value is set on some but not all of the
+     * edited nodes. Clicking such a chip confirms the value for all nodes - the same as checking
+     * its indeterminate checkbox inside the tree. Any other chip reveals its node in the tree.
+     */
+    onChipClick(value: DisplayValue): void {
+        if (this.indeterminateValues$.value?.includes(value.key)) {
+            this.confirmIndeterminateValue(value);
+        } else {
+            this.revealInTree(value);
+        }
+    }
+
+    private confirmIndeterminateValue(value: DisplayValue): void {
+        const treeNode = this.tree.findById(value.key);
+        // old values may not be part of the tree (valuespace changed), so check for null
+        if (treeNode) {
+            treeNode.isChecked = true;
+            treeNode.isIndeterminate = false;
+        }
+        this.removeFromIndeterminateValues(value.key);
+        // the value is already listed as a chip, re-emit it so the widget picks it up as a
+        // regular (no longer indeterminate) value
+        this.chipsControl.setValue([...this.chipsControl.value]);
+    }
+
     revealInTree(value: DisplayValue): void {
+        const treeNode = this.tree.findById(value.key);
+        if (!treeNode) {
+            // the value is not part of the valuespace (e.g. a legacy value), nothing to reveal
+            return;
+        }
         this.openOverlay();
         setTimeout(() => {
-            this.treeCoreComponent.revealInTree(this.tree.findById(value.key));
+            this.treeCoreComponent.revealInTree(treeNode);
         });
     }
     focus() {
@@ -473,11 +504,7 @@ export class MdsEditorWidgetTreeComponent
         if (values.includes(toBeRemoved)) {
             this.chipsControl.setValue(values.filter((value) => value !== toBeRemoved));
         }
-        if (this.indeterminateValues$.value?.includes(toBeRemoved.key)) {
-            this.indeterminateValues$.next(
-                this.indeterminateValues$.value.filter((value) => value !== toBeRemoved.key),
-            );
-        }
+        this.removeFromIndeterminateValues(toBeRemoved.key);
         if (removeSuggestion) {
             const suggestion = await firstValueFrom(this.isSuggestion(toBeRemoved));
             if (suggestion) {

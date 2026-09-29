@@ -95,6 +95,7 @@
   "RADIO_BUTTON_NOT_SELECTED": "radio button not selected",
   "DISABLED": "disabled",
   "RESIZE_SIDEBAR": "Resize sidebar",
+  "RESIZE_SIDEBAR_VALUE": "{{width}} pixels",
   "COLLECTION_CHOOSER": {
     "ADD_TO_RECENT_COLLECTION": "Add to recently used collections",
     "SEARCH_COLLECTIONS": "Find collection...",
@@ -146,6 +147,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Searching and inviting users outside the organization in shared folders",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Searching and inviting users outside the organization in shared folders in the safe",
     "TOOLPERMISSION_COLLECTION_PINNING": "Pinning collections and managing pinned collections",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Adding materials to public collections",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creating curriculum collections (currently not used)",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Give feedback on other materials",
     "TOOLPERMISSION_CONFIDENTAL": "Access to the secure area (safe)",
@@ -713,6 +715,8 @@
     "COLLECTION_PROPSE_INFO": "You do not have sufficient rights to the collection \"{{collection}}\". However, you can submit the material as a proposal. Would you like to continue?"
   },
   "QR_CODE_ARIA_LABEL": "QR code for this link",
+  "QR_CODE_SHORTLINK_LABEL": "Short link",
+  "QR_CODE_SHORTLINK_COPY": "Copy link",
   "OPTIONS_FOR": "Actions for {{element}}",
   "NO_AVAILABLE_OPTIONS": "No actions are available for the selected items",
   "OPTIONS": {
@@ -789,6 +793,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Do you really want to cancel this assignment? This cannot be undone.",
     "ASSIGNMENT_FINISH": "Finish assignment",
     "ASSIGNMENT_FINISH_CONFIRM": "Do you really want to finish this assignment? This cannot be undone.",
+    "ASSIGNMENT_DELETE": "Delete assignment",
+    "ASSIGNMENT_DELETE_CONFIRM": "Do you really want to permanently delete this assignment? The assignment and all its documents and submissions will be deleted irrevocably.",
     "EDIT_CONNECTOR": "Edit",
     "NEW_ASSIGNMENT": "New assignment",
     "ASSIGNMENT_COPY": "Copy assignment",
@@ -807,7 +813,7 @@
     "AUTHOR_FREETEXT_PLACEHOLDER": "Who are the authors of this work? How should they be attributed?",
     "AUTHOR_PERSON": "Author & Contributors",
     "AUTHOR_UNSET": "<not set>",
-    "LICENSE": "license",
+    "LICENSE": "License",
     "WORKFLOW": "workflow state",
     "BULK_EDIT": "Edit",
     "LICENSE_LINK": "manage license",
@@ -834,6 +840,7 @@
     "FILTER_TREE": "Filter...",
     "OPEN_CLOSE_EXTENDED": "Open/close view",
     "FILTER_FACET": "Filter...",
+    "FACET_COUNT": "{{ count }} hit(s)",
     "SHOW_EXTENDED_TRUE": "Display additional information",
     "NO_ARBITRARY_VALUES_NOTICE": "You cannot freely select values ​​for this field. Please select values ​​from the list.",
     "DELETE_KEY_NOTICE": "Delete with Delete key",
@@ -968,9 +975,13 @@
     "SAVED": "Saved changes"
   },
   "RENDERING": {
+    "DEFAULT_MODULE_INFO_TEXT": "This material cannot be displayed in the browser.",
+    "DEFAULT_MODULE_DOWNLOAD": "Download material",
+    "DOWNLOAD": "Download",
     "GO_TO_COURSE": "Go to course",
     "AUTHORED_BY": "by",
     "CONVERTING": "Converting",
+    "PREPARING": "Preparing",
     "QUEUED": "Queued",
     "QUEUE_POSITION": "Queue position",
     "OPEN_IN_NEW_TAB": "Open in new tab",
@@ -991,8 +1002,8 @@
       "GENERIC_BAD_REQUEST": "Bad request",
       "GENERIC_MODULE_NOT_AVAILABLE": "The rendering module needed to display the object is not available.",
       "GENERIC_OBJECT_NOT_SUPPORTED": "This object is not supported by the rendering service.",
-      "GENERIC_ACCESS_DENIED": "There are no permissions available for the requested element.",
-      "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error"
+      "GENERIC_INTERNAL_SERVER_ERROR": "Internal server error",
+      "GENERIC_ACCESS_DENIED": "Insufficient rights"
     },
     "GDPR": {
       "EXTERNAL_SITE": "External site",
@@ -1022,7 +1033,8 @@
     "OPTION_DISABLED_OR_UNAVAILABLE": "The selected action is currently unavailable",
     "ASSIGNMENT_CANCEL": "The assignment has been canceled.",
     "ASSIGNMENT_FINISH": "The assignment has been finished.",
-    "ASSIGNMENT_COPY": "The assignment has been copied."
+    "ASSIGNMENT_COPY": "The assignment has been copied.",
+    "ASSIGNMENT_DELETE": "The assignment has been deleted."
   },
   "NODE_SEARCH_SELECTOR": {
     "MORE_FILTERS": "Extended search filters",
@@ -1046,7 +1058,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Wikidata entry",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Research Organization Registry)"
+    "X-ROR": "ROR (Research Organization Registry)",
+    "LINK_PERSISTENT_ID": "Open profile"
   },
   "ICON_LABELS": {
     "more_vert": "Options",
@@ -1062,7 +1075,10 @@
     "delete": "delete",
     "add": "New",
     "redo": "Apply",
-    "edit": "Edit"
+    "edit": "Edit",
+    "settings": "settings",
+    "cloud_download": "download",
+    "content_copy": "copy"
   },
   "FILL_STATUS": {
     "REQUIRED": "mandatory fields",

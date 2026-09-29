@@ -2,7 +2,12 @@ import { inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject } from 'rxjs';
 import { AuthenticationService, MdsWidget, UserEvent } from 'ngx-edu-sharing-api';
-import { NodeEntriesDataType, NodeEntriesDisplayType, Values } from 'ngx-edu-sharing-ui';
+import {
+    LocalEventsService,
+    NodeEntriesDataType,
+    NodeEntriesDisplayType,
+    Values,
+} from 'ngx-edu-sharing-ui';
 import { PrimaryMode } from '../../features/editorial-sidebar/editorial-sidebar.component';
 
 export const RECENT_ACTIVITY_EVENT_TYPES: Record<string, NonNullable<UserEvent['eventType']>[]> = {
@@ -50,6 +55,24 @@ export class EditorialPageService {
             .observeUserChanges()
             .pipe(takeUntilDestroyed())
             .subscribe(() => this.virtualNodes$.next({}));
+        // A deleted node must not be re-injected into the list by `injectVirtualNodes` on the next
+        // search (e.g. an assignment that was created and permanently deleted in the same session).
+        inject(LocalEventsService)
+            .nodesDeleted.pipe(takeUntilDestroyed())
+            .subscribe((nodes) => this.removeVirtualNodes(nodes?.map((n) => n.ref?.id)));
+    }
+
+    private removeVirtualNodes(nodeIds: string[]) {
+        if (!nodeIds?.length) {
+            return;
+        }
+        const virtualNodes = Object.fromEntries(
+            Object.entries(this.virtualNodes$.value).map(([key, nodes]) => [
+                key,
+                nodes.filter((n) => !nodeIds.includes((n as { ref?: { id: string } }).ref?.id)),
+            ]),
+        );
+        this.virtualNodes$.next(virtualNodes);
     }
 
     buildSearchCriteria(tab: number) {

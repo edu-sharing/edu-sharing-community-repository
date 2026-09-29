@@ -58,9 +58,14 @@
             accept="image/*"
             class="hide"
           />
-          <div class="new-avatar-button" (click)="avatar.click()">
+          <button
+            type="button"
+            class="new-avatar-button"
+            [attr.aria-label]="'PROFILES.IMG_CHANGE_LABEL' | translate"
+            (click)="avatar.click()"
+          >
             <span>{{ 'PROFILES.IMG_CHANGE' | translate }}</span>
-          </div>
+          </button>
           @if (hasAvatar()) {
           <button mat-button (click)="clearAvatar()">
             <i esIcon="delete"></i>
@@ -297,7 +302,7 @@
         </div>
         }
       </div>
-      } @if (isMe) {
+      } @if (isMe && hasDataprotection()) {
       <div class="gdpr-export">
         @if (gdprExport) {
         <div class="export-result">

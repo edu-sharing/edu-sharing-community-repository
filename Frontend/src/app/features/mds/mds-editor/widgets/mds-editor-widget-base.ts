@@ -30,6 +30,49 @@ export abstract class MdsEditorWidgetBase extends MdsEditorWidgetCore {
     constructor() {
         super();
     }
+
+    /**
+     * Values that are only set on some of the edited nodes (bulk mode). They are kept apart from
+     * the regular values so they can be left untouched on save, see
+     * `MdsEditorInstanceService.getNewPropertyValue`.
+     */
+    readonly indeterminateValues$ = new BehaviorSubject<string[]>(undefined);
+
+    /**
+     * Initializes the indeterminate (mixed) values and keeps the widget in sync with them.
+     *
+     * @param individualValues values present in some but not all of the edited nodes
+     */
+    protected initIndeterminateValues(individualValues: string[]): void {
+        this.indeterminateValues$.next(individualValues);
+        this.indeterminateValues$.subscribe((indeterminateValues) =>
+            this.widget.setIndeterminateValues(indeterminateValues),
+        );
+    }
+
+    /**
+     * Whether the widget currently represents mixed values, i.e. in bulk mode the edited nodes
+     * carry different values for this property and the user has not decided to overwrite them
+     * yet. Widgets show a "(different values)" hint in that case.
+     */
+    showBulkMixedValues(): boolean {
+        return !!(
+            this.widget.getInitialValues()?.individualValues &&
+            this.mdsEditorInstance.editorBulkMode?.isBulk &&
+            this.widget.getBulkMode() === 'no-change'
+        );
+    }
+
+    /**
+     * Confirms an indeterminate (mixed) value: it is no longer treated as individual and will be
+     * written to all edited nodes on save.
+     */
+    protected removeFromIndeterminateValues(key: string): void {
+        const indeterminateValues = this.indeterminateValues$.value;
+        if (key && indeterminateValues?.includes(key)) {
+            this.indeterminateValues$.next(indeterminateValues.filter((value) => value !== key));
+        }
+    }
     protected setValue(value: string[], dirty?: boolean): void {
         this.widget.setValue(value, dirty);
     }

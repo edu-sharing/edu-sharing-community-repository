@@ -1,3 +1,12 @@
-<div class="rs-default-wrapper">
+<div class="rs-default-wrapper" [class.has-download]="downloadUrl">
   <img [src]="previewUrl" />
+  <p class="info-text">{{ 'RENDERING.DEFAULT_MODULE_INFO_TEXT' | translate }}</p>
+  @if (downloadUrl) {
+  <p class="download-text">{{ 'RENDERING.DEFAULT_MODULE_DOWNLOAD' | translate }}</p>
+  <a mat-flat-button color="primary" [href]="downloadUrl">
+    <div class="link-label">
+      {{ 'RENDERING.DOWNLOAD' | translate }}<i esIcon="cloud_download"></i>
+    </div>
+  </a>
+  }
 </div>

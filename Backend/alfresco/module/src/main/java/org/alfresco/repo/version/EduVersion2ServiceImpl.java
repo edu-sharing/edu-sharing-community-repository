@@ -5,6 +5,7 @@ package org.alfresco.repo.version;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,36 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
     );
     private final ActionService actionService;
     private final RepositoryCache repositoryCache;
+
+    /**
+     * edu-sharing: properties which a revert running on the current thread must not touch, i.e.
+     * the value of the live node is kept instead of the one from the frozen version.
+     * Reverting e.g. cm:name can fail with a "Duplicate child name not allowed" if a sibling
+     * meanwhile owns that name (e.g. bulk migration jobs that move nodes around).
+     */
+    private static final ThreadLocal<Set<QName>> PROPERTIES_TO_KEEP = ThreadLocal.withInitial(Collections::emptySet);
+
+    /**
+     * runs the given callback while any {@link #revert(NodeRef, Version, boolean)} happening inside it
+     * keeps the current values of the given properties instead of reverting them.
+     * Nested calls are merged.
+     */
+    public static <T> T keepProperties(Collection<QName> properties, Callable<T> callable) throws Exception {
+        Set<QName> previous = PROPERTIES_TO_KEEP.get();
+        Set<QName> merged = new HashSet<>(previous);
+        merged.addAll(properties);
+        PROPERTIES_TO_KEEP.set(merged);
+        try {
+            return callable.call();
+        } finally {
+            // don't leave an entry behind on pooled threads (jobs run threaded)
+            if (previous.isEmpty()) {
+                PROPERTIES_TO_KEEP.remove();
+            } else {
+                PROPERTIES_TO_KEEP.set(previous);
+            }
+        }
+    }
 
 
     /**
@@ -167,6 +198,9 @@ public class EduVersion2ServiceImpl extends org.alfresco.repo.version.Version2Se
             propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_PH_USERS));
             propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_VIEWS));
             propsToLeaveAlone.add(QName.createQName(CCConstants.CCM_PROP_TRACKING_DOWNLOADS));
+
+            // edu-sharing: properties the current thread asked to keep (see keepProperties)
+            propsToLeaveAlone.addAll(PROPERTIES_TO_KEEP.get());
 
 
             for (QName prop : propsToLeaveAlone) {

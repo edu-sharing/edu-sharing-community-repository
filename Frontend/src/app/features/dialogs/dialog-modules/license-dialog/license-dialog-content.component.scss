@@ -45,6 +45,7 @@ es-mds-editor-widget-author {
     }
 }
 
+h3,
 h4 {
     font-weight: bold;
     font-size: 100%;
@@ -66,7 +67,7 @@ h5 {
     background-color: $backgroundColor;
     padding: 10px 30px;
     margin: 0 -20px;
-    h4 {
+    h3 {
         margin: 10px 0 20px 0;
     }
 }
@@ -75,7 +76,7 @@ h5 {
     display: table;
     margin: auto;
     padding: 10px 0;
-    h4,
+    h3,
     div {
         display: table-cell;
     }

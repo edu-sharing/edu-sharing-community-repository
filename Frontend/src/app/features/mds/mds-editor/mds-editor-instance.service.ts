@@ -2055,8 +2055,11 @@ export class MdsEditorInstanceService
                 const condition = widget.condition;
                 const pattern = condition.pattern ? new RegExp(`^(?:${condition.pattern})$`) : null;
                 return nodes
-                    ? nodes.some((n) => pattern.test(n.properties[condition.value]?.join(', '))) !==
-                          condition.negate
+                    ? nodes.some((n) =>
+                          // An unset property must be tested as an empty string: `test(undefined)`
+                          // would check the literal "undefined" and never match a real pattern.
+                          pattern.test(n.properties[condition.value]?.join(', ') ?? ''),
+                      ) !== condition.negate
                     : values
                     ? widget.condition.negate === !values[widget.condition.value]
                     : true;

@@ -35,9 +35,6 @@ export class MdsEditorWidgetSelectComponent extends MdsEditorWidgetBase implemen
         this.matSelect.open();
     }
 
-    showBulkMixedValues() {
-        return this.widget.getInitialValues() && this.mdsEditorInstance.editorBulkMode?.isBulk;
-    }
     async ngOnInit() {
         this.formControl = new UntypedFormControl(null, this.getStandardValidators());
         const initialValue = (await this.widget.getInitalValuesAsync()).jointValues[0];

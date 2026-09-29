@@ -3,11 +3,13 @@ import {
     Component,
     effect,
     ElementRef,
+    EventEmitter,
     inject,
     Input,
     input,
     OnChanges,
     OnDestroy,
+    Output,
     signal,
     SimpleChanges,
     ViewChild,
@@ -90,6 +92,11 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     @Input() editorMode: EditorMode = 'viewer';
     /** Group id for the embedded mds-editor-wrapper. */
     @Input() groupId: string = 'preview_sidebar';
+    /**
+     * the user navigates away via the "all details" link, so a surrounding dialog (fullscreen or
+     * the mobile variant of the sidebar) should close instead of staying open behind the page
+     */
+    @Output() allDetailsClick = new EventEmitter<void>();
     @ViewChild(ActionbarComponent) actionbar: ActionbarComponent;
     @ViewChild(MdsEditorWrapperComponent) mdsRef: MdsEditorWrapperComponent;
 

@@ -28,10 +28,10 @@ import {
     exhaustMap,
     firstValueFrom,
     from,
-    interval,
     map,
     Subject,
     takeUntil,
+    timer,
 } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ImageComponent } from './module/image/image.component';
@@ -170,7 +170,14 @@ export class RenderComponent implements OnChanges, OnInit {
                         } else {
                             // Keep the response around so reloadLinks() can re-poll this same job.
                             this.latestRenderResponse = renderResponseData;
-                            this.progress$.next({ module: renderResponseData.module ?? '' });
+                            // Some assets are already available (e.g. one video resolution) while
+                            // others are still being rendered => show the available ones right away
+                            // instead of flashing the progress bar
+                            if (renderResponseData.objectLinks?.some((item) => !!item.link)) {
+                                this.handleRenderingResponseWithJob(renderResponseData);
+                            } else {
+                                this.progress$.next({ module: renderResponseData.module ?? '' });
+                            }
                             this.startJobPolling(jobInfoService, renderResponseData);
                         }
                     } catch (error) {
@@ -353,7 +360,7 @@ export class RenderComponent implements OnChanges, OnInit {
         jobInfoService: JobInfoControllerService,
         renderResponseData: RenderDataResponse,
     ) {
-        interval(renderResponseData.module === 'VIDEO' ? 2000 : 500)
+        timer(0, renderResponseData.module === 'VIDEO' ? 2000 : 500)
             .pipe(
                 takeUntil(this.finished),
                 takeUntilDestroyed(this.destroyRef),
@@ -432,6 +439,27 @@ export class RenderComponent implements OnChanges, OnInit {
         };
         renderDataResponse.objectLinks !== undefined && this.renderData$.next(data);
         this.finished.next();
+    }
+
+    handleRenderingResponseWithJob(renderDataResponse: RenderDataResponse) {
+        const items = renderDataResponse.objectLinks
+            ?.filter((item) => !!item.link)
+            .map((item) => {
+                const assetItem: AssetStateItem = {
+                    link: item.link,
+                    progress: 100,
+                    height: item.height,
+                    width: item.width,
+                    additionalData: undefined,
+                    status: 'FINISHED',
+                };
+                return assetItem;
+            });
+        const data: RenderData = {
+            module: renderDataResponse.module ?? '',
+            items: items,
+        };
+        this.renderData$.next(data);
     }
 
     handleJobInfoWithSubJobsInProgress(

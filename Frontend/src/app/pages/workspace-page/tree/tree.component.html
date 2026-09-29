@@ -49,7 +49,8 @@
   ></es-workspace-sub-tree>
 </div>
 }
-<div
+<button
+  type="button"
   class="rootNode"
   [esNodesDropTarget]="SHARED_FILES_LINK"
   [canDropNodes]="canDropOnMySharedFiles"
@@ -58,15 +59,17 @@
   data-test="workspace-tree-shared-files-link"
 >
   <i class="material-icons typeIcon">send</i>{{ 'WORKSPACE.SHARED_FILES_LINK' | translate }}
-</div>
-<div
+</button>
+<button
+  type="button"
   class="rootNode"
   [class.rootNodeSelected]="root === WORKFLOW_RECEIVE"
   (click)="doSetRoot(WORKFLOW_RECEIVE)"
+  [attr.aria-expanded]="root === WORKFLOW_RECEIVE"
   data-test="workspace-tree-workflow"
 >
   <i class="material-icons typeIcon">inbox</i>{{ 'WORKSPACE.WORKFLOW_RECEIVE' | translate }}
-</div>
+</button>
 @if (root === WORKFLOW_RECEIVE) {
 <div class="tree">
   <es-workspace-sub-tree
@@ -78,14 +81,16 @@
   ></es-workspace-sub-tree>
 </div>
 }
-<div
+<button
+  type="button"
   class="rootNode"
   [class.rootNodeSelected]="root === RECYCLE"
   (click)="doSetRoot(RECYCLE)"
   [esNodesDropTarget]="RECYCLE"
   [canDropNodes]="canDropOnRecycle"
   (nodeDropped)="onNodesDrop($event)"
+  [attr.aria-expanded]="root === RECYCLE"
   data-test="workspace-tree-recycle"
 >
   <i class="material-icons typeIcon">delete</i>{{ 'WORKSPACE.RECYCLE' | translate }}
-</div>
+</button>

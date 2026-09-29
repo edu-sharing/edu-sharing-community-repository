@@ -438,6 +438,7 @@
         "INITIATOR": "iniziatore",
         "TERMINATOR": "terminatore",
         "VALIDATOR": "validatore",
+        "REDAKTION": "redazione",
         "EDITOR": "editore",
         "GRAPHICAL_DESIGNER": "Designer grafico",
         "TECHNICAL_IMPLEMENTER": "implementatore tecnico",

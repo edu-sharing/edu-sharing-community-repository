@@ -137,6 +137,7 @@
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE": "Ricerca e invito di utenti esterni all'organizzazione in cartelle condivise",
     "TOOLPERMISSION_GLOBAL_AUTHORITY_SEARCH_SHARE_SAFE": "Cercare e invitare utenti esterni all'organizzazione in cartelle condivise in sicurezza",
     "TOOLPERMISSION_COLLECTION_PINNING": "Appuntare le collezioni e gestire le collezioni appuntate",
+    "TOOLPERMISSION_ADD_TO_PUBLIC_COLLECTION": "Aggiungere materiali alle collezioni pubbliche",
     "TOOLPERMISSION_COLLECTION_CURRICULUM": "Creazione di raccolte di curriculum (attualmente non utilizzate)",
     "TOOLPERMISSION_MATERIAL_FEEDBACK": "Dare un feedback su altre materiali",
     "TOOLPERMISSION_CONFIDENTAL": "Accesso all'area protetta (cassaforte)",
@@ -739,6 +740,8 @@
     "ASSIGNMENT_CANCEL_CONFIRM": "Volete davvero annullare questo compito? L'operazione non può essere annullata.",
     "ASSIGNMENT_FINISH": "Concludi compito",
     "ASSIGNMENT_FINISH_CONFIRM": "Volete davvero concludere questo compito? L'operazione non può essere annullata.",
+    "ASSIGNMENT_DELETE": "Elimina compito",
+    "ASSIGNMENT_DELETE_CONFIRM": "Volete davvero eliminare definitivamente questo compito? Il compito e tutti i documenti e le consegne associati verranno eliminati irreversibilmente.",
     "MANAGE_CONTENT": "Ordina"
   },
   "NO_SIZE": "-",
@@ -920,7 +923,8 @@
     "OPTION_DISABLED_OR_UNAVAILABLE": "Purtroppo l'azione richiesta non è disponibile.",
     "ASSIGNMENT_CANCEL": "Il compito è stato annullato.",
     "ASSIGNMENT_FINISH": "Il compito è stato concluso.",
-    "ASSIGNMENT_COPY": "Il compito è stato copiato."
+    "ASSIGNMENT_COPY": "Il compito è stato copiato.",
+    "ASSIGNMENT_DELETE": "Il compito è stato eliminato."
   },
   "VCARD": {
     "Givenname": "Nome",
@@ -938,7 +942,8 @@
     "X-GND-URI": "GND-URI",
     "X-Wikidata": "Voce di Wikidata",
     "X-ORCID": "ORCID",
-    "X-ROR": "ROR (Registro delle organizzazioni di ricerca)"
+    "X-ROR": "ROR (Registro delle organizzazioni di ricerca)",
+    "LINK_PERSISTENT_ID": "Apri profilo"
   },
   "ICON_LABELS": {
     "more_vert": "Opzioni",
@@ -1533,6 +1538,7 @@
     "GO_TO_COURSE": "Vai al corso",
     "AUTHORED_BY": "di",
     "CONVERTING": "Conversione",
+    "PREPARING": "In preparazione",
     "QUEUED": "In coda",
     "QUEUE_POSITION": "Posizione in coda",
     "OPEN_IN_NEW_TAB": "Apri in una nuova scheda",

@@ -1,6 +1,7 @@
 {
   "ADMIN": {
     "TITLE": "Admin-Tools",
+    "NAV": "Admin-Bereiche",
     "UNDERSTAND": "Verstanden, Fortfahren",
     "WARNING_TITLE": "Administrationsbereich",
     "WARNING_INFO": "Dieser Bereich ist nur zur Administration des Repositorys gedacht. Falsche Änderungen können zu Fehlern bis hin zu Datenverlust führen.\nFühren Sie keine Aktionen durch, bei denen Sie unsicher sind!",
@@ -76,6 +77,22 @@
         "edu_sharing-community-repository-plugin-elastic-backend-alfresco-module": {
           "TITLE": "edu-sharing Elasticsearch Plugin",
           "DESCRIPTION": "Das Elasticsearch-Modul transformiert die Objekte inkl. Statistiken und Metadaten in eine spezielle Elasticsearch-Indexstruktur und erlaubt effiziente und sehr detaillierte Suchqueries"
+        },
+        "edu_sharing-community-repository-plugin-kafka-backend-alfresco-module": {
+          "TITLE": "edu-sharing Kafka Plugin",
+          "DESCRIPTION": "Das Plugin stellt einen Kafka-Message-Broker bereit um Benachrichtigungen, z.B. für Freigaben, über einen Endpunkt bereitzustellen und zu bündeln"
+        },
+        "edu_sharing-community-repository-plugin-remote-backend-alfresco-module": {
+          "TITLE": "edu-sharing Remote Plugin",
+          "DESCRIPTION": "Das Plugin ermöglicht die förderierte Anbindung anderer edu-sharing Instanzen in der Suche"
+        },
+        "edu_sharing-community-repository-plugin-mongo-backend-alfresco-module": {
+          "TITLE": "edu-sharing Mongo Plugin",
+          "DESCRIPTION": "Das Plugin stellt eine MongoDB für additionale Metadaten wie Vorschläge, Relationen oder Bewertungen bereit"
+        },
+        "edu_sharing-community-repository-plugin-cluster-backend-alfresco-module": {
+          "TITLE": "edu-sharing Cluster Plugin",
+          "DESCRIPTION": "Das Plugin ermöglicht die Verteilung des edu-sharing Backends auf mehrere Instanzen (Load Balancing) mit verteiltem Cache"
         },
         "alfresco-trashcan-cleaner project": {
           "TITLE": "Trashcan Cleaner",
@@ -207,6 +224,9 @@
         "RENDER": "Rendering-Service"
       },
       "COPY": "Kopieren",
+      "CONFIG": "Konfiguration",
+      "EDIT": "Bearbeiten",
+      "DELETE": "Löschen",
       "COPIED_CLIPBOARD": "In Zwischenablage kopiert",
       "ADD_URL": "anbinden",
       "APP_REGISTERED": "App wurde erfolgreich registriert",
@@ -517,10 +537,12 @@
     },
     "FOLDERTEMPLATES": {
       "EDUGROUP": "Organisation",
+      "REMOVE_EDUGROUP": "Organisation entfernen",
       "APPLYTEMPLATE": "Ordnervorlage anwenden",
       "UPLOAD_DONE": "Ordnervorlage wurde unter {{filename}} auf dem Server abgelegt.",
       "MISSING_GROUP": "Es muss mindestens eine Organisation gewählt werden.",
       "MISSING_TEMPLATE": "Es muss eine Ordnervorlage gewählt werden.",
+      "TEMPLATE": "Ordnervorlage",
       "TEMPLATE_APPLIED": "Vorlage {{templatename}} wurde für {{groupname}} angewandt.",
       "TEMPLATE_NOTAPPLIED": "Ordnervorlage {{templatename}} konnte nicht für {{groupname}} angewandt werden. Prüfen Sie die Ordnervorlage auf Richtigkeit.",
       "UPLOAD_HINT": "Sie können weitere Ordnervorlagen hochladen und anschließend auswählen.",

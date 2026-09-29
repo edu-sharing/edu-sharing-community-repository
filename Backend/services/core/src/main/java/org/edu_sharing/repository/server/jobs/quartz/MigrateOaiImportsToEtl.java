@@ -61,6 +61,13 @@ import java.util.concurrent.Semaphore;
 @JobDescription(description = "Migrate nodes previously imported via OAI (IMP_OBJ) to nodes which will should be processed by the etl-framework. " +
 		"Note: cclom:version is increased by 3 minor versions since the version history is rebuilt; cm:modified/cm:modifier are preserved")
 public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
+	/**
+	 * properties the version reverts of this job must not restore from the frozen version:
+	 * the node is moved into the grouped target folder before the revert, where a sibling may already
+	 * own the frozen cm:name -> "Duplicate child name not allowed"
+	 */
+	private static final Collection<QName> PROPERTIES_KEPT_ON_REVERT = Collections.singletonList(ContentModel.PROP_NAME);
+
 	protected Logger logger = Logger.getLogger(MigrateOaiImportsToEtl.class);
 	ApplicationContext applicationContext = AlfAppContextGate.getApplicationContext();
 
@@ -281,6 +288,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 		}
 		NodeServiceFactory.getInstance().getLocalService().moveNode(groupedTarget, CCConstants.CM_ASSOC_FOLDER_CONTAINS, nodeRef.getId());
 		try {
+			logger.info("Bulk transform started for " + nodeRef.getId() + " ");
 			// hold the latest state of the object, i.e. user modificationns
 			nodeService.setProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
@@ -290,7 +298,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 			service.createVersion(nodeRef.getId());
 			VersionHistory history = serviceRegistry.getVersionService().getVersionHistory(nodeRef);
 			// revert to the initial version of the import
-			service.revertVersionNoRollback(nodeRef.getId(), history.getRootVersion().getVersionLabel());
+			service.revertVersionNoRollback(nodeRef.getId(), history.getRootVersion().getVersionLabel(), PROPERTIES_KEPT_ON_REVERT);
 			// tag it as it was the bulk_create event so the crawler can detect modifications
 			nodeService.setProperty(nodeRef,
 					QName.createQName(CCConstants.CCM_PROP_IO_VERSION_COMMENT),
@@ -298,7 +306,7 @@ public class MigrateOaiImportsToEtl extends AbstractInterruptableJob{
 			);
 			String oldVersion = service.createVersion(nodeRef.getId());
 			// finally, rollback the version with all changes and at it on top
-			service.revertVersionNoRollback(nodeRef.getId(), history.getHeadVersion().getVersionLabel());
+			service.revertVersionNoRollback(nodeRef.getId(), history.getHeadVersion().getVersionLabel(), PROPERTIES_KEPT_ON_REVERT);
 			// drop empty collections the revert introduced for properties that were unset before,
 			// so the final version freezes the cleaned up state
 			removeEmptyPropertiesIntroducedByRevert(nodeRef, propsBefore);

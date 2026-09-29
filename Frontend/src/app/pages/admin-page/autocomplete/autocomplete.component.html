@@ -3,7 +3,8 @@
 }
 <div class="form-group edusharing-autocomplete-wrapper">
   <form (ngSubmit)="addValue()">
-    <mat-form-field>
+    <mat-form-field floatLabel="always">
+      <mat-label>{{ placeholder | translate }}</mat-label>
       <input
         matInput
         name="valueInput"
@@ -13,7 +14,6 @@
         (keyup.enter)="addValue()"
         [disabled]="disabled"
         placeholder="{{ placeholder | translate }}"
-        title="{{ placeholder | translate }}"
         autocomplete="off"
       />
       @if (hintBottom) {

@@ -32,12 +32,12 @@ export class GlobalCollectionsPageService {
         const collections = await this.sessionStorageService.get<Node[]>(
             SessionStorageService.KEY_ROOT_COLLECTIONS,
             [],
-            Store.Session,
+            Store.BrowserSessionStorage,
         );
         await this.sessionStorageService.set(
             SessionStorageService.KEY_ROOT_COLLECTIONS,
             collections.filter((c) => !nodes.find((n) => c.ref.id === n.ref.id)),
-            Store.Session,
+            Store.BrowserSessionStorage,
         );
     }
 }

@@ -28,6 +28,14 @@ export class LicenseDetailsComponent implements OnChanges {
      * minimalUrl: like minimal but with license url
      */
     @Input() displayMode: 'full' | 'minimal' | 'minimalUrl' = 'full';
+    /**
+     * translation key of the heading shown above the license (`displayMode: 'full'` only).
+     *
+     * defaults to "currently selected license", which only makes sense while the license can
+     * actually be changed. read-only callers should pass a neutral key, or `null` to drop the
+     * heading altogether.
+     */
+    @Input() headingKey: string | null = 'WORKSPACE.LICENSE.CURRENT';
     @Input() nodes: Node[];
     @Input() properties: Values;
     type: string;

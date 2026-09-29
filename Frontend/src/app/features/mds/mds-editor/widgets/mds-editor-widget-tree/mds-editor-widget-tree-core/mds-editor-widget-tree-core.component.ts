@@ -29,6 +29,7 @@ import { Helper } from '../../../../../../core-module/rest/helper';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
 import { MdsV1Service, SuggestionResponseDto } from 'ngx-edu-sharing-api';
 import { MdsEditorWidgetTreeComponent } from '../mds-editor-widget-tree.component';
+import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 
 let nextUniqueId = 0;
 
@@ -91,9 +92,9 @@ export class MdsEditorWidgetTreeCoreComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.clearFilter();
         // deep copy for modifications
-        this.isTree =
-            this.widget.definition.type === 'multivalueTree' ||
-            this.widget.definition.type === 'singleValueTree';
+        this.isTree = [MdsWidgetType.MultiValueTree, MdsWidgetType.SingleValueTree].includes(
+            this.widget.definition.type as MdsWidgetType,
+        );
         this.filterDataSource();
         if (
             this.widget.definition.allowValuespaceSuggestions &&

@@ -15,6 +15,7 @@ import { AppComponent } from '../../app.component';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { RouterHelper } from '../../util/router.helper';
 import { ConfigurationService } from '../../core-module/rest/services/configuration.service';
+import { ImprintPrivacyComponent } from '../../shared/components/imprint-privacy-footer/imprint-privacy.component';
 
 @Component({
     selector: 'es-render2-page',
@@ -27,6 +28,7 @@ import { ConfigurationService } from '../../core-module/rest/services/configurat
         ResizableSidenavDirective,
         MatSidenavContent,
         EditorialSidebarModule,
+        ImprintPrivacyComponent,
     ],
     // NOTE: do NOT provide OptionsHelperDataService here. Both es-render-wrapper-component and
     // es-editorial-sidebar use provideReusableOptionsHelperData(), which reuses an ancestor

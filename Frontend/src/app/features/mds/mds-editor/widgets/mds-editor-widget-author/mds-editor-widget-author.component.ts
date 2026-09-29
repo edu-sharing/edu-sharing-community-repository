@@ -13,7 +13,7 @@ import { Attributes } from '../../util/parse-attributes';
 import { authorIsEmpty } from '../../util/native-widget-completion';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
-import { InputStatus, Values } from '../../../types/types';
+import { Constraints, InputStatus, Values } from '../../../types/types';
 
 export interface AuthorData {
     freetext: string;
@@ -36,9 +36,11 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     ui = inject(UIService);
     private dialogs = inject(DialogsService);
 
-    static readonly constraints = {
+    static readonly constraints: Constraints = {
         requiresNode: false,
         supportsBulk: false,
+        // the widget only provides tabs with input fields, there is no read-only representation
+        supportsViewer: false,
     };
     attributes: Attributes;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
@@ -190,9 +192,12 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] =
                 this.author.author.toVCardString();
         } else if (values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null;
+            // backend treats `null` as "property not provided" and would keep the old value.
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [];
         } else {
-            delete values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0];
+            // the author was cleared: drop the first entry (the author vcard) and keep any
+            // remaining contributors
+            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].splice(0, 1);
         }
         return values;
     }

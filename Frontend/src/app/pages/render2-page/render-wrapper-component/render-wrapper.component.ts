@@ -213,6 +213,8 @@ export class RenderWrapperComponent implements OnChanges {
      * (e.g. after the metadata editor added or removed children).
      */
     async refresh() {
+        // the child objects may have changed as well, e.g. when the metadata of one of them was
+        // edited or a child was added/removed
         await this.loadChildobjects();
         // the previously selected child may have been deleted in the meantime;
         // fall back to the parent (the childId change re-renders via ngOnChanges)
@@ -244,9 +246,13 @@ export class RenderWrapperComponent implements OnChanges {
 
     private async setNodeById(nodeId: string) {
         this.loading.set(true);
-        delete this.data()?.request;
-        this.data.set(this.data());
-        this.optionsHelper;
+        /*
+         drop the current data before fetching: `rs-root` and `es-mds-editor-wrapper` only read
+         their inputs when they are created (see the note on stable inputs in
+         `MdsEditorWrapperComponent`), so without destroying them first a refresh - e.g. after
+         the metadata dialog was closed - would keep displaying the outdated node.
+         */
+        this.data.set(null);
         const data = await this.renderHelperService.getRenderData(
             nodeId,
             this.version,

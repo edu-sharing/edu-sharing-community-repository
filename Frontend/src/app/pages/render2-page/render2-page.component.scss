@@ -24,3 +24,14 @@ es-render-wrapper-component {
         @include mixins.materialScrollbarLight();
     }
 }
+
+es-imprint-privacy {
+    display: block;
+    width: 100%;
+    // push to the bottom of the card's scroll area when the content is shorter than the card
+    margin-top: auto;
+    flex-shrink: 0;
+    // leave space for scroll to top
+    padding: 15px 0;
+    border-top: 1px solid #eaeaea;
+}

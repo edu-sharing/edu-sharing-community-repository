@@ -1,5 +1,4 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
-@use 'sass:color';
 
 .wrapper {
     display: flex;
@@ -47,10 +46,10 @@
         font-size: $fontSizeSmall;
         text-align: center;
         &.status-mandatory {
-            color: color.adjust($colorStatusNegative, $lightness: -20%);
+            color: color-mix(in srgb, var(--colorStatusNegative), var(--textBlack) 40%);
         }
         &.status-mandatoryForPublish {
-            color: color.adjust($warningMedium, $lightness: -20%);
+            color: color-mix(in srgb, var(--colorStatusWarning), var(--textBlack) 35%);
         }
         .show-missing-button {
             font-weight: bold;
