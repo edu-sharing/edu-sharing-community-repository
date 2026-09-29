@@ -116,6 +116,7 @@
     "SHARE": {
       "TITLE": "Manage Sharing",
       "LOCAL_SHARING_TITLE": "Local sharing",
+      "EXTERNAL_PERMISSIONS_INFO": "This element is external and may have its own permissions within the tool. The permission changes made here only affect the visibility and the editing of the metadata",
       "NO_PERMISSIONS": "No explicit permissions have been stipulated for this object yet.",
       "GROUP_OWNER": "Owner",
       "GROUP_USERS": "Persons",

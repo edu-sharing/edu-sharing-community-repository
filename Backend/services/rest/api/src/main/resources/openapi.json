@@ -1558,6 +1558,9 @@
       },
       "Connector": {
         "properties": {
+          "externalPermissions": {
+            "type": "boolean"
+          },
           "filetypes": {
             "items": {
               "$ref": "#/components/schemas/ConnectorFileType"
