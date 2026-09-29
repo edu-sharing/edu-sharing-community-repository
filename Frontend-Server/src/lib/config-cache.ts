@@ -8,28 +8,44 @@ import { isConnectionError, normalizeDomain, type JsonGetter } from './backend-c
 type ConfigResponse = components['schemas']['Config'];
 type ValuesBackendInternal = components['schemas']['ValuesBackendInternal'];
 type AngularConfig = components['schemas']['AngularConfig'];
+type Values = components['schemas']['Values'];
+type GuestConfig = components['schemas']['GuestConfig'];
 
 /** `exporter.lrmi` - the mapping `LRMITool` works with, both maps always present */
 export type LrmiMapping = Readonly<Required<components['schemas']['LrmiConfig']>>;
 
+/** the fields `K` of `T` with the default applied - always present, although the spec has them optional */
+type Defaulted<T, K extends keyof T> = Readonly<Required<Pick<T, K>>>;
+
 /**
  * The slice of `GET /rest/config/v1/values` this server works with, normalized.
- * Everything but `branding` is part of `ValuesBackendInternal`, which the backend
+ * Everything but `current` is part of `ValuesBackendInternal`, which the backend
  * only returns on its internal port - the cache must be fed by a client on that port.
+ *
+ * Picked from the generated schemas, keeping their names and nesting, with the
+ * defaults already applied - so no caller has to walk optional chains or repeat a
+ * default, and a spec change shows up here as a compile error.
+ *
+ * From `current`: `branding` appends " – edu-sharing" to page titles,
+ * `defaultLocation` is where the bare entry point goes (default-location.ts).
  */
-export interface RepositoryConfig {
-    /** `current.branding` - appends " – edu-sharing" to page titles */
-    readonly branding: NonNullable<components['schemas']['Values']['branding']>;
-    /** `current.defaultLocation` - where the bare entry point goes, see default-location.ts */
-    readonly defaultLocation: string | undefined;
+export interface RepositoryConfig
+    extends Defaulted<Values, 'branding'>,
+        Readonly<Pick<Values, 'defaultLocation'>> {
+    /** `exporter.lrmi` */
     readonly lrmi: LrmiMapping;
     /**
-     * `angular.headers` - security headers of the shell pages, see security-headers.ts.
-     * The spec types the values as objects (Content-Security-Policy is one), the other
-     * entries are strings - hence unknown here.
+     * `angular` - `headers` are the security headers of the shell pages (security-headers.ts).
+     * The spec types their values as objects (Content-Security-Policy is one), the other
+     * entries are strings.
      */
-    readonly angularHeaders: Readonly<Record<string, unknown>>;
-    readonly customHtmlHeaders: NonNullable<AngularConfig['customHtmlHeaders']>;
+    readonly angular: Defaulted<AngularConfig, 'headers' | 'customHtmlHeaders'>;
+    /**
+     * `repository.guest`, `enabled` defaults to false as in the lightbend reference config.
+     * With guest access off the repository hands an anonymous caller nothing at all, so
+     * the shell must not be enriched either - see the enrichment in server.ts.
+     */
+    readonly guest: Defaulted<GuestConfig, 'enabled'>;
 }
 
 interface Entry {
@@ -286,13 +302,20 @@ export function parseRepositoryConfig(body: unknown): RepositoryConfig {
     const backend = response.currentBackend as ValuesBackendInternal | undefined;
     return {
         branding: response.current?.branding === true,
-        defaultLocation: response.current?.defaultLocation,
+        ...(response.current?.defaultLocation !== undefined && { defaultLocation: response.current.defaultLocation }),
         lrmi: {
             properties: backend?.exporter?.lrmi?.properties ?? {},
             vcard: backend?.exporter?.lrmi?.vcard ?? {},
         },
-        angularHeaders: backend?.angular?.headers ?? {},
-        customHtmlHeaders: backend?.angular?.customHtmlHeaders ?? '',
+        angular: {
+            headers: backend?.angular?.headers ?? {},
+            customHtmlHeaders: backend?.angular?.customHtmlHeaders ?? '',
+        },
+        guest: {
+            // absent means off: the reference config defaults repository.guest.enabled to
+            // false, and an older backend that does not report it must not make us enrich
+            enabled: response.currentBackend?.repository?.guest?.enabled === true,
+        },
     };
 }
 

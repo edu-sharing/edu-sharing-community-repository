@@ -3158,6 +3158,15 @@
         },
         "type": "object"
       },
+      "GuestConfig": {
+        "properties": {
+          "enabled": {
+            "description": "repository.guest.enabled: whether anonymous visitors get a guest session. When false, the Frontend-Server renders the shell without any node metadata",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "HandleParam": {
         "properties": {
           "doiService": {
@@ -7699,6 +7708,9 @@
         "properties": {
           "childobjects": {
             "$ref": "#/components/schemas/ChildobjectsConfig"
+          },
+          "guest": {
+            "$ref": "#/components/schemas/GuestConfig"
           },
           "webComponents": {
             "$ref": "#/components/schemas/WebComponentsConfig"

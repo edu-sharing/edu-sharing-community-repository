@@ -73,6 +73,9 @@ interface Hit {
 
 const CUSTOM_HTML = '<script nonce="{{ngCspNonce}}">window.tracking = true;</script>';
 
+/** repository.guest.enabled of the fake backend - flipped by the guest gate test */
+let guestEnabled = true;
+
 const hits: Hit[] = [];
 let external: http.Server;
 let internal: http.Server;
@@ -104,6 +107,7 @@ before(async () => {
                     defaultLocation: request.headers.host === 'portal.example.org' ? 'https://portal.example.org/start' : 'workspace',
                 },
                 currentBackend: {
+                    repository: { guest: { enabled: guestEnabled } },
                     angular: {
                         headers: {
                             'X-Frame-Options': 'sameorigin',
@@ -239,6 +243,40 @@ test('the shell request opens no session at all', async () => {
     // hand out a (guest) session the browser would then be pinned to
     assert.equal(response.headers['set-cookie'], undefined);
     assert.match(response.body, /<title>Photosynthesis – edu-sharing<\/title>/);
+});
+
+test('with guest access off the shell carries no node metadata at all', async () => {
+    guestEnabled = false;
+    try {
+        // a fresh domain, so the cache does not serve the guest-enabled entry
+        const response = await shell('/edu-sharing/components/render/public', { host: 'noguest.example.org' });
+        assert.equal(response.statusCode, 200);
+        // the repository hands an anonymous caller nothing, so neither do we - even
+        // though the index would happily answer, and did
+        assert.doesNotMatch(response.body, /Photosynthesis/);
+        assert.doesNotMatch(response.body, /ld\+json/);
+        assert.doesNotMatch(response.body, /rel="license"/);
+        // the parts that do not depend on the node stay
+        assert.match(response.body, /json\+oembed/);
+        assert.match(response.body, /<title>edu-sharing<\/title>/);
+    } finally {
+        guestEnabled = true;
+    }
+});
+
+test('with guest access off in the cached config the index is not even asked', async () => {
+    guestEnabled = false;
+    try {
+        // the first request finds no config yet and queries in parallel to its fetch
+        await shell('/edu-sharing/components/render/public', { host: 'noguest-cached.example.org' });
+        elasticQueries.length = 0;
+        const response = await shell('/edu-sharing/components/render/public', { host: 'noguest-cached.example.org' });
+        assert.equal(response.statusCode, 200);
+        assert.doesNotMatch(response.body, /Photosynthesis/);
+        assert.deepEqual(elasticQueries, []);
+    } finally {
+        guestEnabled = true;
+    }
 });
 
 test('collection view gets title and description only', async () => {

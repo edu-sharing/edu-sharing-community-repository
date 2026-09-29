@@ -57,9 +57,25 @@ test('parses branding and the lrmi mapping from the config values', () => {
 });
 
 test('an older backend without the mapping yields an empty one, not an error', () => {
-    const empty = { branding: false, defaultLocation: undefined, lrmi: { properties: {}, vcard: {} }, angularHeaders: {}, customHtmlHeaders: '' };
+    // guest.enabled false without a value: the reference config defaults
+    // repository.guest.enabled to false, so an older backend must not unlock it
+    const empty = {
+        branding: false,
+        lrmi: { properties: {}, vcard: {} },
+        angular: { headers: {}, customHtmlHeaders: '' },
+        guest: { enabled: false },
+    };
     assert.deepEqual(parseRepositoryConfig({ current: {} }), empty);
     assert.deepEqual(parseRepositoryConfig('garbage'), empty);
+});
+
+test('guest access is read from repository.guest.enabled, and only true unlocks it', () => {
+    const guestOf = (currentBackend: unknown) => parseRepositoryConfig({ currentBackend }).guest.enabled;
+    assert.equal(guestOf({ repository: { guest: { enabled: true } } }), true);
+    assert.equal(guestOf({ repository: { guest: { enabled: false } } }), false);
+    assert.equal(guestOf({ repository: { guest: {} } }), false);
+    assert.equal(guestOf({ repository: {} }), false);
+    assert.equal(guestOf({}), false);
 });
 
 test('parses the internal angular block: security headers and custom html headers', () => {
@@ -71,8 +87,8 @@ test('parses the internal angular block: security headers and custom html header
             },
         },
     });
-    assert.deepEqual(config.angularHeaders, { 'X-Frame-Options': 'sameorigin', 'Content-Security-Policy': { 'default-src': "'self'" } });
-    assert.equal(config.customHtmlHeaders, '<meta name="x">');
+    assert.deepEqual(config.angular.headers, { 'X-Frame-Options': 'sameorigin', 'Content-Security-Policy': { 'default-src': "'self'" } });
+    assert.equal(config.angular.customHtmlHeaders, '<meta name="x">');
 });
 
 test('tells the internal config from the public one', () => {

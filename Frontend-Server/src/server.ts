@@ -247,13 +247,17 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         // node metadata only for the render and collection views. Without a backend the
         // cached config is used as is - asking would only wait for the timeout.
         // Both go out anonymously, so a node the public may not read stays unenriched
+        // guest access off in the cached config: the metadata could not be shown anyway (see
+        // the guest gate below), so the query is not even sent. Only a domain without a
+        // cached config yet queries in parallel to its config fetch.
+        const skipNode = target !== undefined && configCache.peek(request.hostname)?.guest.enabled === false;
         // monotonic - a wall clock step (NTP) must not distort the duration
         const enrichmentStart = performance.now();
         const [configResult, nodeResult] = await Promise.allSettled([
             reachable
                 ? configCache.get(request.hostname, anonymousFor(request))
                 : Promise.resolve(configCache.peek(request.hostname)),
-            target === undefined
+            target === undefined || skipNode
                 ? Promise.resolve(undefined)
                 : loadNode(elastic, target, {
                       index: config.elasticIndex,
@@ -261,7 +265,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
                       language: primaryLanguage(request.headers['accept-language']),
                   }),
         ]);
-        if (target !== undefined) {
+        if (target !== undefined && !skipNode) {
             const result = nodeResult.status === 'rejected' ? 'failed' : nodeResult.value === undefined ? 'missing' : 'ok';
             metrics.enrichment(result, (performance.now() - enrichmentStart) / 1000);
         }
@@ -272,10 +276,28 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
             request.log.warn({ err: nodeResult.reason, nodeId: target?.nodeId, index: config.elasticIndex }, reason);
         }
         const repositoryConfig = configResult.status === 'fulfilled' ? configResult.value : null;
-        const node = nodeResult.status === 'fulfilled' ? nodeResult.value : undefined;
+        const loadedNode = nodeResult.status === 'fulfilled' ? nodeResult.value : undefined;
+        /*
+         * The guest gate. With `repository.guest.enabled` off, the repository serves an
+         * anonymous caller nothing at all - so neither may we, even though the index
+         * would happily answer. Without a config we do not know and stay closed.
+         *
+         * Gating the OUTPUT as well as the query: the query is skipped when the cached
+         * config already says no (skipNode above), but a domain without a cached config
+         * queries in parallel to the fetch - serializing them would add a backend round
+         * trip - and the answer may have changed since. The metadata never reaches the html.
+         */
+        const guestEnabled = repositoryConfig?.guest.enabled === true;
+        if (loadedNode !== undefined && !guestEnabled) {
+            request.log.debug(
+                { nodeId: target?.nodeId, hasConfig: repositoryConfig !== null },
+                'guest access is off - shell sent without node metadata',
+            );
+        }
+        const node = guestEnabled ? loadedNode : undefined;
 
         const nonce = IndexHtml.newNonce();
-        let html = index.render(nonce, repositoryConfig?.customHtmlHeaders ?? '');
+        let html = index.render(nonce, repositoryConfig?.angular.customHtmlHeaders ?? '');
         if (target !== undefined) {
             const origin = `${request.protocol}://${request.host}`;
             html = enrichShell(html, {
@@ -293,7 +315,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
                 'backend config not available - shell sent without security headers and custom html headers',
             );
         } else {
-            const headers = securityHeaders(repositoryConfig.angularHeaders, nonce);
+            const headers = securityHeaders(repositoryConfig.angular.headers, nonce);
             if (headers['Content-Security-Policy'] === undefined) {
                 metrics.shellWithoutCsp('no-csp');
                 request.log.warn('backend config has no angular.headers Content-Security-Policy - shell sent without CSP');

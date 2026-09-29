@@ -9,6 +9,8 @@ const SHELL = '<html><head><base href="/edu-sharing/"><title>edu-sharing</title>
 const CONFIG: RepositoryConfig = {
     branding: true,
     lrmi: { properties: { name: 'cclom:title,cm:name' }, vcard: {} },
+    angular: { headers: {}, customHtmlHeaders: '' },
+    guest: { enabled: true },
 };
 
 function loaded(properties: LoadedNode['properties'], licenseUrl?: string): LoadedNode {
