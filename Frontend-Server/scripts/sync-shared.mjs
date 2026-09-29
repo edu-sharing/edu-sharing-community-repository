@@ -11,7 +11,11 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-/** [source relative to the package root, target relative to the package root] */
+/**
+ * [source relative to the package root, target relative to the package root] -
+ * every source must also be copied into the image, see the server-build stage of
+ * deploy/docker/build/frontend-server/src/main/build/Dockerfile
+ */
 const SHARED_FILES = [
     ['../Frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts', 'src/shared/VCard.ts'],
     ['../Frontend/projects/edu-sharing-ui/src/lib/util/license-url.ts', 'src/shared/license-url.ts'],

@@ -36,7 +36,10 @@ COPY frontend-server/ ./
 
 # inputs of the generated src/shared/ (scripts/sync-shared.mjs, scripts/generate-api-types.mjs),
 # placed at the same location relative to the server as in the repository
-COPY frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts /Frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts
+# (keep in sync with SHARED_FILES there)
+COPY frontend/projects/edu-sharing-ui/src/lib/util/VCard.ts \
+     frontend/projects/edu-sharing-ui/src/lib/util/license-url.ts \
+     /Frontend/projects/edu-sharing-ui/src/lib/util/
 COPY rest-api/openapi.json /Backend/services/rest/api/src/main/resources/openapi.json
 
 RUN set -eux \
