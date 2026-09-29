@@ -24,6 +24,10 @@
     text-align: center;
 }
 
+.reconfigure-grid {
+    width: 100%;
+}
+
 .drag-handle {
     position: absolute;
     top: 8px;
@@ -67,6 +71,11 @@ es-info-message {
         display: flex;
         flex-direction: column;
         gap: 8px;
+    }
+
+    // separates each field's hint from the next control so the hint reads as part of its own field
+    mat-form-field {
+        margin-bottom: 8px;
     }
 
     .advanced-count {
