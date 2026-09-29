@@ -16,6 +16,7 @@ import org.alfresco.service.namespace.QName;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.tools.cache.RepositoryCache;
+import org.edu_sharing.service.bapi.BApiConfigProvider;
 import org.edu_sharing.service.bapi.BApiProxyConfig;
 import org.edu_sharing.service.bapi.BApiProxyService;
 import org.edu_sharing.service.nodeservice.annotation.NodeManipulation;
@@ -41,7 +42,7 @@ public class FulltextService {
     private final ContentService contentService;
     private final NodeService nodeService;
     private final TransformService transformService;
-    private final BApiProxyConfig bApiProxyConfig;
+    private final BApiConfigProvider bApiConfigProvider;
     private final BApiProxyService bApiProxyService;
     private final SimpleCache<String, String> eduSharingTransformerCache;
     private final RetryingTransactionHelper retryingTransactionHelper;
@@ -157,6 +158,7 @@ public class FulltextService {
     }
 
     private boolean bapiFulltextEnabled() {
+        BApiProxyConfig bApiProxyConfig = bApiConfigProvider.getCurrentConfig();
         return StringUtils.isNotBlank(bApiProxyConfig.getUri())
                 && bApiProxyConfig.getFeatures().contains("url-fulltext");
     }

@@ -73,6 +73,33 @@ class BApiConfigProviderTest {
     }
 
     @Test
+    void contextOverridesFeatures() {
+        BApiProxyConfig config = provider("""
+                repository.bapi { uri: "https://bapi", features: ["url-fulltext"] }
+                repository.context.ctx.repository.bapi { features: ["other"] }
+                """).getConfig("ctx");
+        assertEquals(java.util.List.of("other"), config.getFeatures());
+    }
+
+    @Test
+    void featuresInheritedWithFallback() {
+        BApiProxyConfig config = provider("""
+                repository.bapi { uri: "https://bapi", features: ["url-fulltext"] }
+                repository.context.ctx.repository.bapi { authUserApiKey: "A2" }
+                """).getConfig("ctx");
+        assertEquals(java.util.List.of("url-fulltext"), config.getFeatures());
+    }
+
+    @Test
+    void featuresNotInheritedWithoutFallback() {
+        BApiProxyConfig config = provider("""
+                repository.bapi { uri: "https://bapi", features: ["url-fulltext"], fallback: false }
+                repository.context.ctx.repository.bapi { authUserApiKey: "A2" }
+                """).getConfig("ctx");
+        assertTrue(config.getFeatures().isEmpty());
+    }
+
+    @Test
     void contextIdWithDot() {
         BApiProxyConfig config = provider(GLOBAL + """
                 repository.context."my.ctx".repository.bapi { authUserApiKey: "A3" }

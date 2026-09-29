@@ -13,10 +13,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Provides the {@link BApiProxyConfig} for the current edu-sharing context.
- * A context may override the api keys of {@code repository.bapi} via {@code repository.context.<id>.repository.bapi};
- * all other values (uri, timeout, features) are always taken from the global config.
+ * A context may override the {@code repository.bapi} via {@code repository.context.<id>.repository.bapi};
+ * api keys and features;
+ * all other values (uri, timeout) are always taken from the global config.
  */
 @Component
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class BApiConfigProvider {
 
     public static final String REPOSITORY_BAPI_CONFIG_PATH = "repository.bapi";
     public static final String REPOSITORY_CONTEXT_CONFIG_PATH = "repository.context";
+    private static final String FEATURES = "features";
     private static final String AUTH_USER_API_KEY = "authUserApiKey";
     private static final String GUEST_USER_API_KEY = "guestUserApiKey";
 
@@ -61,15 +65,22 @@ public class BApiConfigProvider {
         // the fallback switch is global only
         boolean fallback = defaultConfig.isFallback();
 
-        // uri, timeout and features are instance wide, only the api keys can be set per context
+        // uri and timeout are instance wide, only api keys and features can be set per context
         BApiProxyConfig result = new BApiProxyConfig();
         result.setUri(defaultConfig.getUri());
         result.setCallTimeout(defaultConfig.getCallTimeout());
-        result.setFeatures(defaultConfig.getFeatures());
         result.setFallback(fallback);
+        result.setFeatures(resolveFeatures(contextConfig, defaultConfig.getFeatures(), fallback));
         result.setAuthUserApiKey(resolveKey(contextConfig, AUTH_USER_API_KEY, defaultConfig.getAuthUserApiKey(), fallback));
         result.setGuestUserApiKey(resolveKey(contextConfig, GUEST_USER_API_KEY, defaultConfig.getGuestUserApiKey(), fallback));
         return result;
+    }
+
+    private static List<String> resolveFeatures(Config contextConfig, List<String> defaultValue, boolean fallback) {
+        if (contextConfig != null && contextConfig.hasPath(FEATURES)) {
+            return contextConfig.getStringList(FEATURES);
+        }
+        return fallback ? defaultValue : List.of();
     }
 
     private static String resolveKey(Config contextConfig, String key, String defaultValue, boolean fallback) {
