@@ -270,6 +270,24 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Retrieves a node referenced by a stored config, resolving to null without the global error
+     * message if it was deleted or is no longer readable. Other errors are rethrown.
+     */
+    async getNodeIfAvailable(nodeId: string): Promise<Node | null> {
+        try {
+            return await this.getNode(nodeId);
+        } catch (error) {
+            if (
+                [RestConstants.HTTP_NOT_FOUND, RestConstants.HTTP_FORBIDDEN].includes(error?.status)
+            ) {
+                error.preventDefault?.();
+                return null;
+            }
+            throw error;
+        }
+    }
+
+    /**
      * Retrieves the parents of a node with a given ID.
      */
     async getNodeParents(nodeId: string): Promise<ParentEntries> {
@@ -411,11 +429,45 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Copies a node referenced by a stored config as a child of a given parent node, resolving to
+     * null without the global error message if the source was deleted. Other errors are rethrown.
+     */
+    async copyNodeAsChildIfExists(
+        sourceNodeId: string,
+        parentNodeId: string,
+    ): Promise<Node | null> {
+        try {
+            return await this.copyNodeAsChild(sourceNodeId, parentNodeId);
+        } catch (error) {
+            if (error?.status !== RestConstants.HTTP_NOT_FOUND) {
+                throw error;
+            }
+            error.preventDefault?.();
+            return null;
+        }
+    }
+
+    /**
      * Deletes a node with a given ID.
      */
     async deleteNode(nodeId: string): Promise<void> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         return firstValueFrom(this.nodeApi.deleteNode(nodeId));
+    }
+
+    /**
+     * Deletes a node referenced by a stored config, treating an already deleted node as success
+     * without the global error message. Other errors are rethrown.
+     */
+    async deleteNodeIfExists(nodeId: string): Promise<void> {
+        try {
+            await this.deleteNode(nodeId);
+        } catch (error) {
+            if (error?.status !== RestConstants.HTTP_NOT_FOUND) {
+                throw error;
+            }
+            error.preventDefault?.();
+        }
     }
 
     // COMBINED NODE FUNCTIONS

@@ -128,6 +128,8 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     );
     selectedNode: Node;
     selectedNodeTitle: WritableSignal<string> = signal('');
+    // ID of a configured node that was deleted or is no longer readable, kept until it is replaced
+    unavailableNodeId: WritableSignal<string | null> = signal(null);
     sidebarOpen: WritableSignal<boolean> = signal(false);
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
@@ -198,6 +200,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             this.selectedNode = null;
             setTimeout((): void => {
                 this.selectedNode = node;
+                this.unavailableNodeId.set(null);
                 this.computeSelectedNodeTitle();
                 this.configChanged.emit();
                 this.emitVisibleNode();
@@ -259,8 +262,9 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         let widgetConfig: MediaRenderingConfig = {
             mediaRenderingLayout: this.layout(),
         };
-        if (this.selectedNode?.ref.id) {
-            widgetConfig.selectedNodeId = this.selectedNode.ref.id;
+        const selectedNodeId: string | null = this.selectedNode?.ref.id ?? this.unavailableNodeId();
+        if (selectedNodeId) {
+            widgetConfig.selectedNodeId = selectedNodeId;
         }
         return widgetConfig;
     }
@@ -276,7 +280,10 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             this.layout.set(config.mediaRenderingLayout);
         }
         if (config.selectedNodeId) {
-            this.selectedNode = await this.topicPageHelperService.getNode(config.selectedNodeId);
+            this.selectedNode = await this.topicPageHelperService.getNodeIfAvailable(
+                config.selectedNodeId,
+            );
+            this.unavailableNodeId.set(this.selectedNode ? null : config.selectedNodeId);
             this.computeSelectedNodeTitle();
         }
     }

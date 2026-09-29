@@ -39,6 +39,10 @@
     </div>
     }
   </div>
+  } @else if (unavailableNodeId() && editMode()) {
+  <es-info-message mode="warning" class="info-message">
+    {{ i18nPrefix + 'SELECTED_ELEMENT_UNAVAILABLE' | translate }}
+  </es-info-message>
   } @else {
   <es-info-message mode="info" class="info-message">
     {{ i18nPrefix + 'NO_ELEMENT_SELECTED' | translate }}

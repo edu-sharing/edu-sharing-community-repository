@@ -113,6 +113,7 @@
       },
       "MEDIA_RENDERING": {
         "NO_ELEMENT_SELECTED": "Non è ancora stato selezionato alcun elemento da visualizzare.",
+        "SELECTED_ELEMENT_UNAVAILABLE": "Il contenuto selezionato non è più disponibile. Seleziona un altro contenuto.",
         "TO_ORIGINAL_PAGE": "Alla pagina originale",
         "SHOW_DETAILS": "Mostra dettagli",
         "HIDE_DETAILS": "Nascondi dettagli",

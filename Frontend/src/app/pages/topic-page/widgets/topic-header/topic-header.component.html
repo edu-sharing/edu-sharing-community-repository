@@ -88,10 +88,10 @@
       [fallbackNode]="collectionNode"
       [editMode]="editMode"
       [supportAiGeneration]="aiSupported()"
-      [uploadParentNodeId]="nodeId"
+      [uploadParentNodeId]="availableNodeId"
       [(userUploadedNodeId)]="userUploadedNodeId"
       [widgetNodeId]="widgetNodeId"
-      (persistConfig)="persistConfig()"
+      (persistConfig)="persistConfig($event)"
     ></es-image-wrapper>
   </div>
   } @else {
