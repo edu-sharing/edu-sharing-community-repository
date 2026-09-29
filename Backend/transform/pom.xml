@@ -19,11 +19,9 @@
     <name>edu_sharing-community-repository-backend-transform</name>
 
     <properties>
+        <maven.compiler.release>21</maven.compiler.release>
         <spring.boot.version>4.0.7</spring.boot.version>
         <spring.version>7.0.8</spring.version>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
         <alfresco.transform-core.version>5.4.0</alfresco.transform-core.version>
     </properties>
 
@@ -43,14 +41,6 @@
                         <phase>package</phase>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
             </plugin>
 
         </plugins>

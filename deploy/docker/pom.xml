@@ -118,9 +118,9 @@
       0.35.0
     </docker.edu_sharing.community.common.varnish.exporter.tag>
 
-    <docker.from.openjdk.17.liberica.debian>
-      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:17.0.20
-    </docker.from.openjdk.17.liberica.debian>
+    <docker.from.openjdk.21.liberica.debian>
+      dockerio.mirror.docker.edu-sharing.com/bellsoft/liberica-openjdk-debian:21.0.12
+    </docker.from.openjdk.21.liberica.debian>
 
     <docker.from.edu_sharing.community.common.alfresco.repository>
       ${docker.registry}/${docker.common}/edu_sharing-community-common-docker-alfresco-repository:26.1.0-1

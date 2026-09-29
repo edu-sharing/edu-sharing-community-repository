@@ -1,4 +1,4 @@
-FROM ${docker.from.openjdk.17.liberica.debian}
+FROM ${docker.from.openjdk.21.liberica.debian}
 
 ########################################################################################################################
 

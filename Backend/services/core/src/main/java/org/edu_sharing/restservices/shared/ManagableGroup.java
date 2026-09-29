@@ -1,7 +1,7 @@
 package org.edu_sharing.restservices.shared;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;;
+import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

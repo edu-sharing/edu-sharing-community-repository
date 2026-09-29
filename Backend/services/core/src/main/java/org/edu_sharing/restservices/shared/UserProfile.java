@@ -9,7 +9,6 @@ import org.edu_sharing.restservices.PersonDao;
 
 import java.io.Serializable;
 
-;
 
 @Data
 public class UserProfile implements Serializable {

@@ -1,6 +1,6 @@
 package org.edu_sharing.service.handleservice;
 
-import org.edu_sharing.restservices.about.v1.model.FeatureInfo;;
+import org.edu_sharing.restservices.about.v1.model.FeatureInfo;
 import org.edu_sharing.spring.conditions.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

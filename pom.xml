@@ -38,7 +38,7 @@
     <!-- release-1 -->
     <bom.repository-repackaged.version>${project.version}</bom.repository-repackaged.version>
 
-    <java.version.range>[11,)</java.version.range>
+    <java.version.range>[21,)</java.version.range>
 
     <node.version>22.17.0</node.version>
     <npm.version>11.4.2</npm.version>

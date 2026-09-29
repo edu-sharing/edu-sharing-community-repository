@@ -19,23 +19,10 @@
   <name>edu_sharing-community-repository-backend</name>
 
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
-    <java.version>17</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
   </properties>
 
 
-  <profiles>
-    <profile>
-      <id>jdk9+</id>
-      <activation>
-        <jdk>!1.8</jdk>
-      </activation>
-      <properties>
-        <maven.compiler.release>17</maven.compiler.release>
-      </properties>
-    </profile>
-  </profiles>
 
   <licenses>
     <license>

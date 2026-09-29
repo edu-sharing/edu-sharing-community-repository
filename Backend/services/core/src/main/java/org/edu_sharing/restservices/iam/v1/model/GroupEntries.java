@@ -8,7 +8,6 @@ import org.edu_sharing.restservices.shared.Pagination;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-;
 
 @Data
 public class GroupEntries  {

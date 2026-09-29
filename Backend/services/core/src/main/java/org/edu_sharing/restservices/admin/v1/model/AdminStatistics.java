@@ -1,6 +1,5 @@
 package org.edu_sharing.restservices.admin.v1.model;
 
-;
 
 import java.util.List;
 
