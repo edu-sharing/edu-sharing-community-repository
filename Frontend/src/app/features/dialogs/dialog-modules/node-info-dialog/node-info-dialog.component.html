@@ -6,6 +6,87 @@
   <span>{{ 'NODE_INFO.ALL_ACTIONS' | translate }}</span>
   <es-actionbar [numberOfAlwaysVisibleOptions]="4" #allActionbar></es-actionbar>
 </div>
+<div class="option-debug">
+  <span>{{ 'NODE_INFO.OPTION_DEBUG' | translate }}</span>
+  <div class="option-debug-settings">
+    <mat-form-field class="mat-form-field-no-padding">
+      <mat-label>{{ 'NODE_INFO.OPTION_DEBUG_SCOPE' | translate }}</mat-label>
+      <mat-select [(ngModel)]="optionDebugScope" (selectionChange)="refreshOptionDebug()">
+        @for (scope of optionDebugScopes; track scope) {
+        <mat-option [value]="scope">{{ scope }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="mat-form-field-no-padding">
+      <mat-label>{{ 'NODE_INFO.OPTION_DEBUG_TARGET' | translate }}</mat-label>
+      <mat-select [(ngModel)]="optionDebugTarget" (selectionChange)="refreshOptionDebug()">
+        @for (target of optionDebugTargets; track target) {
+        <mat-option [value]="target">{{ Target[target] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (!optionDebugEntries) {
+      <es-spinner-small></es-spinner-small>
+    } @else {
+      <mat-form-field class="mat-form-field-no-padding option-debug-option">
+        <mat-label>{{ 'NODE_INFO.OPTION_DEBUG_OPTION' | translate }}</mat-label>
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="optionDebugFilter"
+          [matAutocomplete]="optionDebugAutocomplete"
+        />
+        <mat-autocomplete
+          #optionDebugAutocomplete="matAutocomplete"
+          (optionSelected)="selectOptionDebug($event.option.value)"
+        >
+          @for (entry of getOptionDebugFiltered(); track $index) {
+            <mat-option [value]="entry">
+              <i [esIcon]="entry.explanation.option.icon"></i> {{ entry.label }}
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    }
+  </div>
+  @if (optionDebugEntries) {
+    @if (optionDebugSelected; as entry) {
+      <div class="option-debug-result">
+        <div class="option-debug-title">
+          <i [esIcon]="entry.explanation.option.icon"></i>
+          <span>{{ entry.label }}</span>
+          <span
+            class="option-debug-visibility"
+            [class]="'visibility-' + entry.explanation.visibility"
+            >{{ 'NODE_INFO.OPTION_DEBUG_VISIBILITY_' + entry.explanation.visibility | translate }}</span
+          >
+        </div>
+        @if (!entry.checks.length) {
+          <div>{{ 'NODE_INFO.OPTION_DEBUG_NO_CHECKS' | translate }}</div>
+        } @else {
+          <table>
+            <tr>
+              <th></th>
+              <th>{{ 'NODE_INFO.OPTION_DEBUG_CHECK' | translate }}</th>
+              <th>{{ 'NODE_INFO.OPTION_DEBUG_EXPECTED' | translate }}</th>
+              <th>{{ 'NODE_INFO.OPTION_DEBUG_ACTUAL' | translate }}</th>
+              <th>{{ 'NODE_INFO.OPTION_DEBUG_EFFECT' | translate }}</th>
+            </tr>
+            @for (check of entry.checks; track $index) {
+              <tr [class.failed]="!check.passed">
+                <td><i [esIcon]="check.passed ? 'check' : 'close'"></i></td>
+                <td>{{ check.check }}</td>
+                <td>{{ check.expected }}</td>
+                <td>{{ check.actual }}</td>
+                <td>{{ check.effect }}</td>
+              </tr>
+            }
+          </table>
+        }
+      </div>
+    }
+  }
+</div>
 
 <div>
   <span>{{ 'NODE.cm:name' | translate }}</span

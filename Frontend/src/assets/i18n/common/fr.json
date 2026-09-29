@@ -1316,7 +1316,19 @@
     "CUSTOM_PROPERTY_NAME": "Saisir le nom de la propriété personnalisée",
     "CUSTOM_PROPERTY_VALUE": "Saisir la valeur de la propriété personnalisée",
     "CONTEXT_ACTIONS": "Actions pour ce type d'élément.",
-    "ALL_ACTIONS": "Toutes les actions (peuvent ne pas être compatibles avec ce type !)"
+    "ALL_ACTIONS": "Toutes les actions (peuvent ne pas être compatibles avec ce type !)",
+    "OPTION_DEBUG": "Débogueur d'actions (pourquoi une action n'est-elle pas affichée ?)",
+    "OPTION_DEBUG_SCOPE": "Scope",
+    "OPTION_DEBUG_TARGET": "Cible",
+    "OPTION_DEBUG_OPTION": "Sélectionner une action",
+    "OPTION_DEBUG_CHECK": "Vérification",
+    "OPTION_DEBUG_EXPECTED": "Attendu",
+    "OPTION_DEBUG_ACTUAL": "Réel",
+    "OPTION_DEBUG_EFFECT": "Effet",
+    "OPTION_DEBUG_VISIBILITY_shown": "Affichée",
+    "OPTION_DEBUG_VISIBILITY_disabled": "Désactivée",
+    "OPTION_DEBUG_VISIBILITY_hidden": "Masquée",
+    "OPTION_DEBUG_NO_CHECKS": "Aucune restriction n'est définie pour cette action."
   },
   "NOTIFICATION": {
     "MENU": "Notifications",

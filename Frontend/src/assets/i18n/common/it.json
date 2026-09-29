@@ -1315,7 +1315,19 @@
     "CUSTOM_PROPERTY_NAME": "Inserire il nome della proprietà personalizzata",
     "CUSTOM_PROPERTY_VALUE": "Inserire il valore della proprietà personalizzata",
     "CONTEXT_ACTIONS": "Azioni per questo tipo di elemento.",
-    "ALL_ACTIONS": "Tutte le azioni (potrebbero non essere compatibili con questo tipo!)"
+    "ALL_ACTIONS": "Tutte le azioni (potrebbero non essere compatibili con questo tipo!)",
+    "OPTION_DEBUG": "Debugger delle azioni (perché un'azione non viene mostrata?)",
+    "OPTION_DEBUG_SCOPE": "Scope",
+    "OPTION_DEBUG_TARGET": "Destinazione",
+    "OPTION_DEBUG_OPTION": "Seleziona azione",
+    "OPTION_DEBUG_CHECK": "Verifica",
+    "OPTION_DEBUG_EXPECTED": "Previsto",
+    "OPTION_DEBUG_ACTUAL": "Effettivo",
+    "OPTION_DEBUG_EFFECT": "Effetto",
+    "OPTION_DEBUG_VISIBILITY_shown": "Visibile",
+    "OPTION_DEBUG_VISIBILITY_disabled": "Disattivata",
+    "OPTION_DEBUG_VISIBILITY_hidden": "Nascosta",
+    "OPTION_DEBUG_NO_CHECKS": "Nessuna restrizione definita per questa azione."
   },
   "NOTIFICATION": {
     "MENU": "Notifiche",

@@ -281,12 +281,14 @@ export class PdfService {
                 );
                 content.push([
                     widget.definition.caption,
-                    this.mdsViewerService.getFormattedValue(
-                        displayValues.values?.map((v) => v.displayString || v.key) ||
-                            initialValues.jointValues,
-                        widget.definition,
-                        MdsViewerService.getBasicType(widget.definition, true),
-                    )[0],
+                    this.mdsViewerService
+                        .getFormattedValue(
+                            displayValues.values?.map((v) => v.displayString || v.key) ||
+                                initialValues.jointValues,
+                            widget.definition,
+                            MdsViewerService.getBasicType(widget.definition, true),
+                        )
+                        .join('; '),
                 ]);
             }
         }

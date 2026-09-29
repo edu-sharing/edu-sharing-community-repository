@@ -464,7 +464,7 @@ public class PersonDao {
 
 	private BoolQuery.Builder getUserStatsBaseQuery() {
 		BoolQuery.Builder bool = QueryBuilders.bool();
-		bool.must(m -> m.term(t -> t.field("properties.cm:creator").value(getAuthorityName())));
+		bool.must(m -> m.term(t -> t.field("properties.cm:creator.keyword").value(getAuthorityName())));
 		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:collection_io_reference")));
 		bool.mustNot(mn -> mn.term(t -> t.field("aspects").value("ccm:io_childobject")));
 		return bool;

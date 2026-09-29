@@ -32,7 +32,9 @@
             font-weight: bold;
         }
     }
-    &.widget-type-array {
+    // `text` covers searchable single-choice widgets, see `isSearchableOption()`
+    &.widget-type-array,
+    &.widget-type-text {
         .array-entry {
             display: inline;
             &:not(:last-child):after {

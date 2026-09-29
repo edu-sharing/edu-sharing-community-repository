@@ -20,7 +20,9 @@ import {
     LocalEventsService,
     NodeEntriesDisplayType,
     NodesRightMode,
+    OptionCheckResult,
     OptionData,
+    OptionExplanation,
     OptionItem,
     OptionsHelperComponents,
     OptionsHelperService as OptionsHelperServiceAbstract,
@@ -89,6 +91,29 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         ElementType.NodePublishedCopy,
     ];
     static ElementTypesAddToCollection = [ElementType.Node, ElementType.NodePublishedCopy];
+    /**
+     * human readable description of each constrain, used for debugging (explainOptions)
+     */
+    static ConstrainDescriptions: { [key in Constrain]: string } = {
+        [Constrain.CollectionReference]: 'all objects are collection references',
+        [Constrain.NoCollectionReference]: 'no object is a collection reference',
+        [Constrain.Directory]: 'all objects are directories (ccm:map), no collections',
+        [Constrain.Collections]: 'all objects are collections',
+        [Constrain.Files]: 'all objects are files (ccm:io)',
+        [Constrain.FilesAndDirectories]: 'all objects are ccm:io or ccm:map, no collections',
+        [Constrain.Admin]: 'user is admin',
+        [Constrain.AdminOrDebug]: 'user is admin or window.esDebug is set',
+        [Constrain.NoBulk]: 'at most one object',
+        [Constrain.NoSelection]: 'no object selected',
+        [Constrain.ClipboardContent]: 'clipboard has content',
+        [Constrain.AddObjects]: 'objects can be added to the current list',
+        [Constrain.HomeRepository]: 'all objects are from the home repository',
+        [Constrain.GuestOrNotLoggedIn]: 'user is guest or not logged in',
+        [Constrain.User]: 'user is logged in',
+        [Constrain.NoScope]: 'no (safe) scope is active',
+        [Constrain.ReurlMode]: 'reurl is present (LMS picking mode)',
+        [Constrain.LTIMode]: 'LTI session is present',
+    };
 
     readonly virtualNodesAdded = new EventEmitter<Node[]>();
     readonly displayTypeChanged = new EventEmitter<NodeEntriesDisplayType>();
@@ -419,6 +444,184 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
         return true;
     }
 
+    /**
+     * Debug helper which mirrors the logic of getAvailableOptions, isOptionAvailable and
+     * isOptionEnabled, but evaluates every single check instead of stopping at the first failing one
+     */
+    async explainOptions(target: Target, data: OptionData): Promise<OptionExplanation[]> {
+        const objects: Node[] | any[] =
+            target === Target.Actionbar
+                ? data.selectedObjects || data.activeObjects
+                : data.activeObjects;
+        const management = this.mainNavService.getDialogs();
+        const baseOptions = this.prepareOptions(management, objects, null, {
+            ...data,
+            customOptions: null,
+            postPrepareOptions: null,
+        });
+        let options = this.prepareOptions(management, objects, null, data);
+        options = this.applyExternalOptions(options, data.customOptions);
+        const custom = this.configService.instant<ConfigOptionItem[]>('customOptions');
+        await this.nodeHelper.applyCustomNodeOptions(custom, data.allObjects, objects, options);
+
+        const result: OptionExplanation[] = [];
+        for (const option of options) {
+            result.push(await this.explainOption(option, target, data, objects));
+        }
+        for (const option of baseOptions) {
+            if (!options.some((o) => o.name === option.name)) {
+                result.push({
+                    option,
+                    visibility: 'hidden',
+                    checks: [
+                        {
+                            check: 'customOptions',
+                            expected: 'present',
+                            actual: 'removed by customOptions / postPrepareOptions / config',
+                            passed: false,
+                            effect: 'hide',
+                        },
+                    ],
+                });
+            }
+        }
+        return result;
+    }
+
+    private async explainOption(
+        option: OptionItem,
+        target: Target,
+        data: OptionData,
+        objects: Node[] | any[],
+    ): Promise<OptionExplanation> {
+        const checks: OptionCheckResult[] = [];
+        const add = (
+            check: string,
+            expected: string,
+            actual: string,
+            passed: boolean,
+            effect: OptionCheckResult['effect'] = 'hide',
+        ) => checks.push({ check, expected, actual, passed, effect });
+        const evaluate = async (callback: () => Promise<boolean> | boolean) => {
+            try {
+                return { value: await callback(), actual: null as string };
+            } catch (e) {
+                return { value: false, actual: 'error: ' + (e?.message ?? e) };
+            }
+        };
+
+        if (option.elementType?.length > 0) {
+            const types = this.getType(objects as Node[]);
+            add(
+                'elementType',
+                option.elementType.map((t) => ElementType[t]).join(', '),
+                types.map((t) => ElementType[t]).join(', '),
+                types.every((t) => option.elementType.includes(t)),
+            );
+        }
+        if (option.scopes) {
+            add(
+                'scopes',
+                option.scopes.join(', '),
+                data.scope ?? 'null',
+                data.scope != null && option.scopes.includes(data.scope),
+            );
+        }
+        if (option.customShowCallback) {
+            const r = await evaluate(() => option.customShowCallback(objects));
+            add('customShowCallback', 'true', r.actual ?? String(r.value), r.value !== false);
+        }
+        const missingToolpermissions = option.toolpermissions
+            ? this.getMissingToolpermissions(option)
+            : [];
+        for (const p of option.toolpermissions ?? []) {
+            const has = !missingToolpermissions.includes(p);
+            add(
+                'toolpermission (' + HideMode[option.toolpermissionsMode] + ')',
+                p,
+                has ? 'granted' : 'missing',
+                has,
+                // toolpermissions are always checked for enabled, and additionally for show in Hide mode
+                option.toolpermissionsMode === HideMode.Hide ? 'hide' : 'disable',
+            );
+        }
+        let missingPermissions: string[] = [];
+        let permissionsError: string = null;
+        try {
+            missingPermissions = option.permissions
+                ? this.getMissingPermissions(option, objects)
+                : [];
+        } catch (e) {
+            permissionsError = 'error: ' + (e?.message ?? e);
+        }
+        for (const p of option.permissions ?? []) {
+            const r = {
+                value: !permissionsError && !missingPermissions.includes(p),
+                actual: permissionsError,
+            };
+            add(
+                'permission (' +
+                    HideMode[option.permissionsMode] +
+                    ', ' +
+                    NodesRightMode[option.permissionsRightMode] +
+                    ')',
+                p,
+                r.actual ?? (r.value ? 'granted' : 'missing'),
+                r.value,
+                option.permissionsMode === HideMode.Hide ? 'hide' : 'disable',
+            );
+        }
+        for (const c of option.constrains ?? []) {
+            const r = await evaluate(
+                () => this.objectsMatchesConstrains([c], data, objects) == null,
+            );
+            add(
+                'constrain: ' + Constrain[c],
+                OptionsHelperService.ConstrainDescriptions[c] ?? '',
+                r.actual ?? (r.value ? 'matched' : 'not matched'),
+                r.value,
+            );
+        }
+        if (target !== Target.Actionbar) {
+            if (option.isToggle) {
+                add('target: toggle', 'Actionbar', Target[target], false);
+            }
+            if (option.constrains?.includes(Constrain.NoSelection)) {
+                add('target: NoSelection', 'Actionbar', Target[target], false);
+            }
+        }
+        if (option.onlyMobile || option.onlyDesktop || option.mediaQueryType) {
+            add(
+                'device / media query',
+                [
+                    option.onlyMobile ? 'onlyMobile' : null,
+                    option.onlyDesktop ? 'onlyDesktop' : null,
+                    option.mediaQueryType
+                        ? option.mediaQueryType + ' ' + option.mediaQueryValue
+                        : null,
+                ]
+                    .filter((v) => v)
+                    .join(', '),
+                this.uiService.isMobile() ? 'mobile' : 'desktop',
+                this.uiService.filterValidOptions([option]).length === 1,
+            );
+        }
+        if (option.customEnabledCallback) {
+            const r = await evaluate(() => option.customEnabledCallback(objects));
+            add('customEnabledCallback', 'true', r.actual ?? String(r.value), !!r.value, 'disable');
+        }
+        const failed = checks.filter((c) => !c.passed);
+        return {
+            option,
+            visibility: failed.some((c) => c.effect === 'hide')
+                ? 'hidden'
+                : failed.length
+                ? 'disabled'
+                : 'shown',
+            checks,
+        };
+    }
+
     private hasSelection(data: OptionData) {
         return data.selectedObjects && data.selectedObjects.length;
     }
@@ -467,19 +670,20 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
 
     private validateToolpermissions(option: OptionItem) {
-        return (
-            option.toolpermissions.filter((p) => !this.connector.hasToolPermissionInstant(p))
-                .length === 0
-        );
+        return this.getMissingToolpermissions(option).length === 0;
+    }
+
+    private getMissingToolpermissions(option: OptionItem) {
+        return option.toolpermissions.filter((p) => !this.connector.hasToolPermissionInstant(p));
     }
 
     private validatePermissions(option: OptionItem, objects: Node[] | any[]) {
-        return (
-            option.permissions.filter(
-                (p) =>
-                    this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) ===
-                    false,
-            ).length === 0
+        return this.getMissingPermissions(option, objects).length === 0;
+    }
+
+    private getMissingPermissions(option: OptionItem, objects: Node[] | any[]) {
+        return option.permissions.filter(
+            (p) => this.nodeHelper.getNodesRight(objects, p, option.permissionsRightMode) === false,
         );
     }
 
@@ -556,7 +760,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
                     console.warn(e);
                 }
             }
-            void this.dialogs.openNodeInfoDialog({ nodes });
+            void this.dialogs.openNodeInfoDialog({ nodes, optionData: data });
         });
         debugNode.elementType = [
             ElementType.Node,
@@ -1068,7 +1272,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
             if (!nodes) {
                 return false;
             }
-            return nodes[0].downloadUrl != null;
+            return true;
         };
         const simpleEditNode = new OptionItem(
             'OPTIONS.EDIT_SIMPLE',

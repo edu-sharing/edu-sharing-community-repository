@@ -271,3 +271,24 @@ export enum Target {
     Actionbar,
     CreateMenu,
 }
+
+/**
+ * Debug information about a single check which decides about the visibility/enabled state of an option
+ */
+export interface OptionCheckResult {
+    /** the check that was evaluated, e.g. "scopes" or "constrain: Files" */
+    check: string;
+    expected: string;
+    actual: string;
+    passed: boolean;
+    /** what happens with the option if the check fails */
+    effect: 'hide' | 'disable';
+}
+/**
+ * Debug explanation why an option is shown, disabled or hidden in the given context
+ */
+export interface OptionExplanation {
+    option: OptionItem;
+    visibility: 'shown' | 'disabled' | 'hidden';
+    checks: OptionCheckResult[];
+}

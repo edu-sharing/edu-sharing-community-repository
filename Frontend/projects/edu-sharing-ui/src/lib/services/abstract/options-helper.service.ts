@@ -1,5 +1,5 @@
 import { OptionData, OptionsHelperComponents } from '../options-helper-data.service';
-import { OptionItem, Target } from '../../types/option-item';
+import { OptionExplanation, OptionItem, Target } from '../../types/option-item';
 import { Node } from 'ngx-edu-sharing-api';
 
 export abstract class OptionsHelperService {
@@ -30,4 +30,13 @@ export abstract class OptionsHelperService {
         data: OptionData,
         objects: Node[] | any,
     ): Promise<OptionItem[]>;
+
+    /**
+     * Debug helper: evaluates every check of all options for the given target + data
+     * and returns the result of each check (without short-circuiting)
+     * Returns null if the implementation does not support it
+     */
+    explainOptions(target: Target, data: OptionData): Promise<OptionExplanation[]> {
+        return Promise.resolve(null);
+    }
 }

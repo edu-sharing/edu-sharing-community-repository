@@ -199,8 +199,13 @@ export class NodeHelperService extends NodeHelperServiceBase {
         version = RestConstants.NODE_VERSION_CURRENT,
         metadata = false,
     ) {
+        const baseUrl = node.downloadUrl
+            ? await this.repoUrlService.getRepoUrl(node.downloadUrl, node)
+            : this.connector.getAbsoluteEndpointUrl() +
+              '../eduservlet/download?nodeId=' +
+              encodeURIComponent(node.ref.id);
         this.downloadUrl(
-            (await this.repoUrlService.getRepoUrl(node.downloadUrl, node)) +
+            baseUrl +
                 (version && version != RestConstants.NODE_VERSION_CURRENT
                     ? '&version=' + version
                     : '') +
