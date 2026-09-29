@@ -75,7 +75,7 @@ behavioural deltas: [`docs/02-routing.md`](docs/02-routing.md).
 
 ## Tracing
 
-`X-B3-*`, `X-OT-*`, `X-Request-Id` and `X-Client-Trace-Id` are forwarded
-unchanged and asserted by a test — the backend reads them into its Log4j
+`X-B3-*` and `X-OT-*` are forwarded unchanged and asserted by a test; `X-Request-Id` is kept if it is a UUID and generated otherwise, as in the
+backend — the backend reads them into its Log4j
 `ThreadContext` and would lose the trace at this hop otherwise. See
 [`docs/05-tracing.md`](docs/05-tracing.md).

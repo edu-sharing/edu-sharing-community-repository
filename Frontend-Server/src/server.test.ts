@@ -157,6 +157,8 @@ test('proxies unmatched paths instead of answering with the shell', async () => 
     assert.equal(response.body, 'backend:/edu-sharing/some-unknown-servlet');
 });
 
+const REQUEST_ID = '3f2b8c1e-5d4a-4e6f-9a7b-1c2d3e4f5a6b';
+
 test('tunnels every trace header to the backend untouched', async () => {
     hits.length = 0;
     await app.inject({
@@ -168,8 +170,7 @@ test('tunnels every trace header to the backend untouched', async () => {
             'x-b3-parentspanid': 'parent-1',
             'x-b3-sampled': '1',
             'x-ot-span-context': 'ot-1',
-            'x-client-trace-id': 'client-1',
-            'x-request-id': 'req-1',
+            'x-request-id': REQUEST_ID,
         },
     });
     const hit = hits.at(-1);
@@ -179,8 +180,7 @@ test('tunnels every trace header to the backend untouched', async () => {
     assert.equal(hit.headers['x-b3-parentspanid'], 'parent-1');
     assert.equal(hit.headers['x-b3-sampled'], '1');
     assert.equal(hit.headers['x-ot-span-context'], 'ot-1');
-    assert.equal(hit.headers['x-client-trace-id'], 'client-1');
-    assert.equal(hit.headers['x-request-id'], 'req-1');
+    assert.equal(hit.headers['x-request-id'], REQUEST_ID);
 });
 
 test('forwards the proxy headers tomcat needs for absolute urls', async () => {

@@ -86,6 +86,16 @@ export class Toast extends ToastAbstract implements OnDestroy {
         return duration.valueOf();
     }
 
+    /**
+     * The id the server logged the failed request under (`X-Request-Id` of the response,
+     * set by the repository and the Frontend-Server) - so support can find it in the logs.
+     */
+    private static getRequestId(errorObject: unknown): string | null {
+        return errorObject instanceof HttpErrorResponse
+            ? errorObject.headers?.get('X-Request-Id') ?? null
+            : null;
+    }
+
     constructor() {
         super();
         this.messageQueue
@@ -619,17 +629,12 @@ export class Toast extends ToastAbstract implements OnDestroy {
             message = 'TOAST.NO_CONNECTION';
             dialogTitle = null;
         }
-        if (dialogTitle && errorObject?.traceId) {
+        const requestId = Toast.getRequestId(errorObject);
+        if (dialogTitle && requestId) {
             dialogTitle =
-                this.translate.instant(dialogTitle, translationParameters) +
-                ' (' +
-                errorObject.traceId +
-                ')';
+                this.translate.instant(dialogTitle, translationParameters) + ' (' + requestId + ')';
             message =
-                this.translate.instant(message, translationParameters) +
-                '\n(' +
-                errorObject.traceId +
-                ')';
+                this.translate.instant(message, translationParameters) + '\n(' + requestId + ')';
         }
         return {
             message,

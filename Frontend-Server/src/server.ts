@@ -72,7 +72,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         // binds traceId/spanId/requestId to every log line, so Node and Tomcat
         // logs can be queried with the same ids
         childLoggerFactory: (logger, bindings, options, rawRequest) =>
-            logger.child({ ...bindings, ...traceLogBindings(rawRequest.headers, ensureRequestId(rawRequest.headers)) }, options),
+            logger.child({ ...bindings, ...traceLogBindings(rawRequest.headers, String(bindings.reqId)) }, options),
     });
 
     // Never parse a body - everything with one is proxied, so it is streamed through.

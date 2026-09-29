@@ -15,9 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Slf4j
 public class Context {
@@ -31,6 +32,8 @@ public class Context {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
+
+    public static final String REQUEST_ID_HEADER = "X-Request-Id";
 
     private B3 b3 = new B3() { };
 
@@ -63,10 +66,18 @@ public class Context {
                     return null;
                 }
             };
+            // the worker belongs to the request that started it - without this, init()
+            // would roll a new id and its log lines would no longer join the request's
+            String requestId = context.getB3().getRequestId();
             HttpServletRequestAdapter adapter = new HttpServletRequestAdapter(){
                 @Override
                 public HttpSession getSession(boolean create) {
                     return session;
+                }
+
+                @Override
+                public String getHeader(String name) {
+                    return REQUEST_ID_HEADER.equalsIgnoreCase(name) ? requestId : super.getHeader(name);
                 }
 
                 @Override
@@ -104,16 +115,18 @@ public class Context {
     }
 
     private void init() {
+        // decided once: generated when absent, so every accessor and every outgoing call sees the same id
+        String requestId = resolveRequestId(request.getHeader(REQUEST_ID_HEADER));
         b3 = new B3() {
+
+            @Override
+            public String getRequestId() {
+                return requestId;
+            }
 
             @Override
             public String getTraceId() {
                 return request.getHeader("X-B3-TraceId");
-            }
-
-            @Override
-            public String getClientTraceId() {
-                return request.getHeader("X-Client-Trace-Id");
             }
 
             @Override
@@ -137,34 +150,59 @@ public class Context {
             private boolean isX3Header(String header) {
                 return header.toUpperCase().startsWith("X-B3-") ||
                         header.toUpperCase().startsWith("X-OT-") ||
-                        header.equalsIgnoreCase("X-Request-Id") ||
-                        header.equalsIgnoreCase("X-Client-Trace-Id");
+                        header.equalsIgnoreCase(REQUEST_ID_HEADER);
             }
 
             @Override
             public Map<String, String> getX3Headers() {
+                Map<String, String> headers = new HashMap<>();
                 try {
-                    return Collections.list(request.getHeaderNames()).stream()
+                    Collections.list(request.getHeaderNames()).stream()
                             .filter(this::isX3Header)
-                            .collect(Collectors.toMap(
-                                    k -> k,
-                                    request::getHeader
-                            ));
+                            .filter(header -> !header.equalsIgnoreCase(REQUEST_ID_HEADER))
+                            .forEach(header -> headers.put(header, request.getHeader(header)));
                 } catch (Throwable t) {
                     Logger.getLogger(Context.class).warn("Unexpected error while fetching x3 headers", t);
-                    return Collections.emptyMap();
                 }
+                // always the resolved one - generated, or the incoming one if it is a valid uuid
+                headers.put(REQUEST_ID_HEADER, requestId);
+                return headers;
             }
         };
+
+        ThreadContext.put("RequestId", requestId);
 
         if(b3.getTraceId() != null) {
             ThreadContext.put("TraceId", b3.getTraceId());
         }
-        if(b3.getClientTraceId() != null) {
-            ThreadContext.put("ClientTraceId", b3.getClientTraceId());
-        }
         if(b3.getSpanId() != null) {
             ThreadContext.put("SpanId", b3.getSpanId());
+        }
+    }
+
+    /**
+     * The incoming id if it is a UUID, a new one otherwise - this server joins a trace,
+     * it does not start one, but responses it produces itself must stay correlatable.
+     * The id ends up in every log line, so a caller must not put arbitrary text or length there.
+     */
+    @NotNull
+    static String resolveRequestId(@Nullable String incoming) {
+        return isCanonicalUuid(incoming) ? incoming : UUID.randomUUID().toString();
+    }
+
+    /**
+     * Only the canonical 8-4-4-4-12 hex form (any version, either case). {@link UUID#fromString}
+     * alone is lenient ("1-2-3-4-5", a leading "+"), the round trip is not - so this matches
+     * {@code isValidRequestId} in Frontend-Server/src/lib/tracing.ts exactly. Keep both in sync.
+     */
+    private static boolean isCanonicalUuid(@Nullable String value) {
+        if (value == null) {
+            return false;
+        }
+        try {
+            return UUID.fromString(value).toString().equalsIgnoreCase(value);
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
@@ -275,13 +313,14 @@ public class Context {
 
     public interface B3 {
 
+        /** X-Request-Id of the current request, generated if absent or not a UUID */
         @Nullable
-        default String getTraceId() {
+        default String getRequestId() {
             return null;
         }
 
         @Nullable
-        default String getClientTraceId() {
+        default String getTraceId() {
             return null;
         }
 

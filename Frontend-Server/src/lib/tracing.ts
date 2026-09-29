@@ -5,12 +5,12 @@ import type { IncomingHttpHeaders } from 'node:http';
  * Trace headers the backend consumes. Mirrors `Context.B3.isX3Header` in
  * Backend/alfresco/module/.../authentication/Context.java - keep both in sync.
  *
- * The backend reads X-B3-TraceId / X-B3-SpanId / X-B3-Sampled / X-Client-Trace-Id
- * into the Log4j ThreadContext and re-attaches the full set to its own outgoing
+ * The backend reads X-B3-TraceId / X-B3-SpanId / X-Request-Id into the Log4j
+ * ThreadContext and re-attaches the full set to its own outgoing
  * calls. If this proxy drops them, traces break at the Node hop.
  */
 export const TRACE_HEADER_PREFIXES = ['x-b3-', 'x-ot-'] as const;
-export const TRACE_HEADER_NAMES = ['x-request-id', 'x-client-trace-id'] as const;
+export const TRACE_HEADER_NAMES = ['x-request-id'] as const;
 
 export const REQUEST_ID_HEADER = 'x-request-id';
 export const TRACE_ID_HEADER = 'x-b3-traceid';
@@ -37,19 +37,25 @@ export function collectTraceHeaders(headers: IncomingHttpHeaders): Record<string
 }
 
 /**
- * Never overwrite an incoming id - this server joins a trace, it does not start
- * one. Only X-Request-Id is generated when absent, so that responses this server
- * produces itself stay correlatable.
+ * An incoming id is only accepted as a UUID (any version, either case) - it ends up
+ * in every log line here and in tomcat, so a caller must not put arbitrary text or
+ * length there. Same rule as `Context.resolveRequestId` (repository) and
+ * `RequestIdFilter` (rendering2) - keep them in sync.
+ */
+const REQUEST_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isValidRequestId(value: string | undefined): value is string {
+    return value !== undefined && REQUEST_ID_PATTERN.test(value);
+}
+
+/**
+ * Never overwrite a valid incoming id - this server joins a trace, it does not start
+ * one. Only X-Request-Id is generated when absent (or not a UUID), so that responses
+ * this server produces itself stay correlatable.
  */
 export function ensureRequestId(headers: IncomingHttpHeaders): string {
-    const existing = headers[REQUEST_ID_HEADER];
-    if (typeof existing === 'string' && existing !== '') {
-        return existing;
-    }
-    if (Array.isArray(existing) && existing[0] !== undefined && existing[0] !== '') {
-        return existing[0];
-    }
-    return randomUUID();
+    const existing = single(headers[REQUEST_ID_HEADER]);
+    return isValidRequestId(existing) ? existing : randomUUID();
 }
 
 function single(value: string | string[] | undefined): string | undefined {
