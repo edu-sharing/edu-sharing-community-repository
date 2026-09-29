@@ -2,3 +2,8 @@
 {{- define "edusharing_repository_frontend_server.backend.url" -}}
 http://{{ .root.Values.config.backend.host }}:{{ .port }}
 {{- end -}}
+
+{{/* base url of the elasticsearch index the shell metadata is read from */}}
+{{- define "edusharing_repository_frontend_server.elastic.url" -}}
+http://{{ .Values.config.elastic.host }}:{{ .Values.config.elastic.port }}
+{{- end -}}

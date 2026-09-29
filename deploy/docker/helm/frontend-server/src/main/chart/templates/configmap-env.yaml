@@ -16,6 +16,9 @@ data:
   BACKEND_URL: {{ include "edusharing_repository_frontend_server.backend.url" (dict "root" . "port" .Values.config.backend.port.external) | quote }}
   # config fetches only - the internal port hands out ValuesBackendInternal
   BACKEND_INTERNAL_URL: {{ include "edusharing_repository_frontend_server.backend.url" (dict "root" . "port" .Values.config.backend.port.internal) | quote }}
+  # node metadata of the render / collection shell - read from the search index, not
+  # from tomcat. ELASTIC_INDEX stays at the application default, see values.yaml
+  ELASTIC_URL: {{ include "edusharing_repository_frontend_server.elastic.url" . | quote }}
   LOG_LEVEL: {{ .Values.config.logLevel | quote }}
   PROXY_UNMATCHED: {{ .Values.config.proxyUnmatched | quote }}
   ENRICH_TIMEOUT_MS: {{ .Values.config.enrichTimeoutMs | quote }}
