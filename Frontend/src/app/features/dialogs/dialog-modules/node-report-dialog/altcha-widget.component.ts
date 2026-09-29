@@ -45,12 +45,12 @@ function loadWidget(baseHref: string): Promise<void> {
     selector: 'es-altcha-widget',
     template: `
         @if (loaded()) {
-            <altcha-widget
-                #widgetRef
-                [attr.challenge]="challengeUrl()"
-                [attr.language]="language"
-                (statechange)="onStateChange($event)"
-            ></altcha-widget>
+        <altcha-widget
+            #widgetRef
+            [attr.challenge]="challengeUrl()"
+            [attr.language]="language"
+            (statechange)="onStateChange($event)"
+        ></altcha-widget>
         }
     `,
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -84,6 +84,6 @@ export class AltchaWidgetComponent {
 
     onStateChange(event: Event) {
         const detail = (event as CustomEvent<{ state: string; payload?: string }>).detail;
-        this.payloadChange.emit(detail.state === 'verified' ? (detail.payload ?? null) : null);
+        this.payloadChange.emit(detail.state === 'verified' ? detail.payload ?? null : null);
     }
 }
