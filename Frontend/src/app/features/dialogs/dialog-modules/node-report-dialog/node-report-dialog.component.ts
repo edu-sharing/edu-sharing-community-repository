@@ -7,6 +7,8 @@ import {
     OnInit,
     ViewChild,
     inject,
+    signal,
+    viewChild,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,6 +18,7 @@ import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import {
+    AltchaV1Service,
     AuthenticationService,
     HOME_REPOSITORY,
     NodeServiceUnwrapped,
@@ -24,6 +27,7 @@ import {
 import { UIAnimation } from 'ngx-edu-sharing-ui';
 import { forkJoin } from 'rxjs';
 import { NodeReportDialogData } from 'ngx-rendering-service-lib';
+import { AltchaWidgetComponent } from './altcha-widget.component';
 
 @Component({
     selector: 'es-node-report-dialog',
@@ -45,9 +49,16 @@ export class NodeReportDialogComponent implements OnInit {
     private toast = inject(Toast);
     private nodeApi = inject(NodeServiceUnwrapped);
     private cdr = inject(ChangeDetectorRef);
+    private altchaApi = inject(AltchaV1Service);
 
     readonly reasons = ['UNAVAILABLE', 'INAPPROPRIATE_CONTENT', 'INVALID_METADATA', 'OTHER'];
     @ViewChild('formElement') formRef: ElementRef<HTMLFormElement>;
+    private readonly altchaWidget = viewChild(AltchaWidgetComponent);
+
+    /** challenge url of the ALTCHA widget, only set for guests if ALTCHA is enabled */
+    readonly altchaChallengeUrl = signal<string | null>(null);
+    readonly altchaMissing = signal(false);
+    private altchaPayload: string | null = null;
 
     readonly form = new UntypedFormGroup({
         reason: new UntypedFormControl(''),
@@ -83,6 +94,9 @@ export class NodeReportDialogComponent implements OnInit {
                 this.form.get('email').disable();
                 this.form.patchValue({ email: user.person.profile.email });
             }
+            if (login.isGuest || !login.isValidLogin) {
+                this.initAltcha();
+            }
         });
         // Disable close by backdrop click as soon as the user enters any value .
         this.form.valueChanges
@@ -97,6 +111,27 @@ export class NodeReportDialogComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    /**
+     * Show the ALTCHA widget if the backend has it enabled (the challenge endpoint returns no content otherwise)
+     */
+    private initAltcha() {
+        this.altchaApi.getChallenge().subscribe({
+            next: (challenge) => {
+                if (challenge) {
+                    this.altchaChallengeUrl.set(this.altchaApi.rootUrl + '/altcha/v1/challenge');
+                }
+            },
+            error: (error) => console.warn('ALTCHA challenge could not be loaded', error),
+        });
+    }
+
+    onAltchaPayloadChange(payload: string | null) {
+        this.altchaPayload = payload;
+        if (payload) {
+            this.altchaMissing.set(false);
+        }
+    }
+
     shouldShowError(field: string) {
         const fieldControl = this.form.get(field);
         return !fieldControl.disabled && fieldControl.touched && !fieldControl.valid;
@@ -104,6 +139,10 @@ export class NodeReportDialogComponent implements OnInit {
 
     report() {
         if (this.form.valid) {
+            if (this.altchaChallengeUrl() && !this.altchaPayload) {
+                this.altchaMissing.set(true);
+                return;
+            }
             // Include value for possibly disabled email field.
             const value = this.form.getRawValue();
             this.setLoading(true);
@@ -115,6 +154,7 @@ export class NodeReportDialogComponent implements OnInit {
                     reason: this.getReasonAsString(value.reason),
                     userEmail: value.email,
                     userComment: value.comment,
+                    'X-Altcha': this.altchaPayload ?? undefined,
                 })
                 .subscribe(
                     () => {
@@ -124,6 +164,8 @@ export class NodeReportDialogComponent implements OnInit {
                     (error: any) => {
                         this.setLoading(false);
                         this.toast.error(error);
+                        // the payload is consumed by the backend, a new challenge is required for a retry
+                        this.altchaWidget()?.reset();
                     },
                 );
         } else {

@@ -74,6 +74,7 @@
     "@github/markdown-toolbar-element": "^2.2.3",
     "@ngx-translate/core": "^15.0.0",
     "@tinymce/tinymce-angular": "^9.1.1",
+    "altcha": "3.2.3",
     "angular-material-css-vars": "^10.0.0",
     "angular-resizable-element": "^7.0.2",
     "angularx-qrcode": "^21.0.0",

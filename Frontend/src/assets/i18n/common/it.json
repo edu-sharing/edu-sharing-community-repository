@@ -359,6 +359,7 @@
     "EMAIL_REQUIRED": "Si prega di fornire un indirizzo e-mail valido.",
     "REASON_REQUIRED": "Selezionare il tipo di problema riscontrato.",
     "DONE": "Grazie per il suo messaggio.",
+    "ALTCHA_REQUIRED": "Si prega di confermare di non essere un robot.",
     "REASON": "Quale problema esiste?",
     "REASONS": {
       "UNAVAILABLE": "oggetto non disponibile",
