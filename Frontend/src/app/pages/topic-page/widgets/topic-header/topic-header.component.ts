@@ -101,6 +101,8 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     searchInput: InputSignal<string> = input<string>(null);
     @Input() topic: string;
 
+    // own config node, empty if none exists or it was deleted, so saving creates a new one
+    availableNodeId: string = '';
     aiGeneratedDescription: WritableSignal<boolean> = signal(false);
     aiGeneratedImage: boolean;
     aiGeneratedText: WritableSignal<boolean> = signal(false);
@@ -185,13 +187,15 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         // when only a propagated node exists, take over only its color attribute
         let colorOnly: boolean = false;
         const configNodeId: string = this.nodeId || this.propagatedNodeId;
+        let node: Node | null = null;
         if (configNodeId) {
-            const node: Node = await this.topicPageHelperService.getNode(configNodeId);
-            if (node.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0]) {
+            node = await this.topicPageHelperService.getNodeIfAvailable(configNodeId);
+            if (node?.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0]) {
                 configJson = node.properties[DEFAULT_WIDGET_CONFIG_PROP][0];
             }
             colorOnly = !this.nodeId && !!this.propagatedNodeId;
         }
+        this.availableNodeId = this.nodeId && node ? this.nodeId : '';
         // read config from this JSON string and generates an AI text if no description is found
         const aiNodeId: string = getNodeOrDefaultNodeId(
             this.defaultTextNodeId,
@@ -250,9 +254,11 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Persists the currently defined config.
+     *
+     * @param force user-triggered changes (e.g. an image upload) are stored even while locked
      */
-    async persistConfig(): Promise<void> {
-        if (this.configLocked) {
+    async persistConfig(force: boolean = false): Promise<void> {
+        if (this.configLocked && !force) {
             return;
         }
         // retrieve a widget config from the currently set variables
@@ -264,7 +270,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         }, 500);
         // persist the config by creating a new or updating an existing node
         await this.topicPageHelperService.persistConfig(
-            this.nodeId,
+            this.availableNodeId,
             -1,
             -1,
             this.pageVariantNode,

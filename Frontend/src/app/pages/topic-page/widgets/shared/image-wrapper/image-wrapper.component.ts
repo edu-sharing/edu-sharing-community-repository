@@ -166,7 +166,8 @@ export class ImageWrapperComponent implements OnInit {
         if (userUploadedNodeId) {
             // remember the loaded id so the reactive effect does not fetch it again
             this.lastLoadedUploadId = userUploadedNodeId;
-            const uploadedNode: Node = await this.topicPageHelperService.getNode(
+            // an unavailable upload falls back to the fallback node below
+            const uploadedNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
                 userUploadedNodeId,
             );
             if (uploadedNode?.preview?.url) {
@@ -337,7 +338,7 @@ export class ImageWrapperComponent implements OnInit {
      */
     async deletePotentialUploadAndEmitValue(): Promise<void> {
         if (this.userUploadedNodeId()) {
-            await this.topicPageHelperService.deleteNode(this.userUploadedNodeId());
+            await this.topicPageHelperService.deleteNodeIfExists(this.userUploadedNodeId());
             this.userUploadedNodeIdChange.emit(null);
         }
     }
