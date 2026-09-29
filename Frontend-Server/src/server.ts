@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import Fastify, { LogController, type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
 import fastifyStatic from '@fastify/static';
@@ -17,6 +16,7 @@ import { parseShellTarget } from './lib/node-metadata.ts';
 import { securityHeaders } from './lib/security-headers.ts';
 import { type CachedFile, negotiateEncoding, StaticCache } from './lib/static-cache.ts';
 import { enrichShell } from './lib/shell-head.ts';
+import { createLogStream } from './lib/log-format.ts';
 import { ensureRequestId, REQUEST_ID_HEADER, traceLogBindings } from './lib/tracing.ts';
 import { ANGULAR_ROUTE_PREFIXES, BACKEND_PATHS, WEBDAV_METHODS } from './routes/backend-paths.ts';
 
@@ -27,16 +27,6 @@ const HASHED_ASSET = /-[A-Z0-9]{8,}\.(js|css)$/;
 function serverVersion(): string {
     const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version?: string };
     return `edu-sharing-frontend-server/${pkg.version ?? 'unknown'} node/${process.versions.node}`;
-}
-
-/** pino-pretty is a devDependency - the image runs `npm ci --omit=dev`, DEV=true must not crash there. */
-function hasPinoPretty(): boolean {
-    try {
-        createRequire(import.meta.url).resolve('pino-pretty');
-        return true;
-    } catch {
-        return false;
-    }
 }
 
 interface ProxyInfo {
@@ -62,7 +52,8 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
     const app = Fastify({
         logger: {
             level: config.logLevel,
-            ...(config.dev && hasPinoPretty() ? { transport: { target: 'pino-pretty' } } : {}),
+            // the repository's log4j layout, so both land in the log aggregation in one shape - see log-format.ts
+            stream: createLogStream(),
         },
         trustProxy: config.trustProxy,
         bodyLimit: config.bodyLimitBytes,
@@ -121,7 +112,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
 
     const ctx = config.contextPath;
     const index = IndexHtml.load(config.distDir, { watchForChanges: config.dev });
-    index.verifyBaseHref(ctx, app.log);
+    index.verifyBaseHref(ctx, app.log.child({ name: 'index-html' }));
 
     // browser traffic goes to the external connector only: tomcat skips 2FA for
     // requests on its internal port (ApplicationInfoList.isInternalPortRequest)
@@ -149,7 +140,7 @@ export async function buildServer(config: Config, overrides: ServerOverrides = {
         contextPath: ctx,
         pollIntervalMs: config.configPollIntervalMs,
         maxAgeMs: config.configMaxAgeMs,
-        log: app.log,
+        log: app.log.child({ name: 'config-cache' }),
     });
     app.addHook('onClose', async () => configCache.stop());
     app.decorate('backendReady', () => configCache.isReady());

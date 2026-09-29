@@ -32,7 +32,7 @@ npm run dev             # http://localhost:4200/edu-sharing/
 the same as `npm run dev`. Node 24 runs the TypeScript sources natively (type
 stripping, no type check - that is `npm run check:types`).
 
-`DEV=true` enables pretty logs and re-reads `index.html` whenever the Angular
+`DEV=true` enables request logging and re-reads `index.html` whenever the Angular
 build writes a new one, so a `npm run build` in `Frontend/` is picked up without
 a restart.
 
@@ -72,6 +72,15 @@ The authoritative list lives in
 [`src/routes/backend-paths.ts`](src/routes/backend-paths.ts) and is derived from
 `Backend/services/webapp/src/main/webapp/WEB-INF/web.xml`. Details and the known
 behavioural deltas: [`docs/02-routing.md`](docs/02-routing.md).
+
+## Logging
+
+Log lines use the repository's Log4j layout (`src/lib/log-format.ts`), so Node and
+Tomcat logs have one shape in the log aggregation:
+
+```
+2026-09-29T10:15:30,123 {RequestId=3f2b8c1e-… TraceId=80f1…} WARN  [config-cache] [main] backend unreachable source=poll
+```
 
 ## Tracing
 
