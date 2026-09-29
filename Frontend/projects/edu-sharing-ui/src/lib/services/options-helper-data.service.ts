@@ -177,6 +177,13 @@ export class OptionsHelperDataService implements OnDestroy {
             }
         }
     }
+    /**
+     * Debug helper: explains why options are shown, disabled or hidden for the given data
+     */
+    explainOptions(target: Target, data: OptionData = this.getData()) {
+        return this.optionsHelperService?.explainOptions(target, data);
+    }
+
     filterOptions(options: OptionItem[], target: Target, objects: Node[] | any = null) {
         return (
             this.optionsHelperService?.filterOptions(options, target, this.getData(), objects) ||

@@ -78,3 +78,56 @@ div {
     white-space: pre;
     font-family: 'Lucida Console', monospace;
 }
+
+.option-debug {
+    .option-debug-settings {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin: 5px 0 10px 0;
+        .option-debug-option {
+            flex: 1;
+            min-width: 250px;
+        }
+    }
+    .option-debug-result {
+        margin: 5px 0 10px 0;
+        .option-debug-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .option-debug-visibility {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 90%;
+            color: #fff;
+            &.visibility-shown {
+                background-color: $colorStatusPositive;
+            }
+            &.visibility-disabled {
+                background-color: $colorStatusWarning;
+            }
+            &.visibility-hidden {
+                background-color: $colorStatusNegative;
+            }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            th,
+            td {
+                text-align: left;
+                padding: 2px 6px;
+                border-bottom: 1px solid $inputBorderColor;
+                word-break: break-word;
+            }
+            tr.failed td {
+                color: $colorStatusNegative;
+            }
+        }
+    }
+}

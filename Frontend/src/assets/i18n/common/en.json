@@ -1409,7 +1409,19 @@
     "CUSTOM_PROPERTY_NAME": "Enter name for custom property",
     "CUSTOM_PROPERTY_VALUE": "Enter value for custom property",
     "CONTEXT_ACTIONS": "Actions for this element-type",
-    "ALL_ACTIONS": "All actions (might be not compatible with this type!)"
+    "ALL_ACTIONS": "All actions (might be not compatible with this type!)",
+    "OPTION_DEBUG": "Action debugger (why is an action not shown?)",
+    "OPTION_DEBUG_SCOPE": "Scope",
+    "OPTION_DEBUG_TARGET": "Target",
+    "OPTION_DEBUG_OPTION": "Select action",
+    "OPTION_DEBUG_CHECK": "Check",
+    "OPTION_DEBUG_EXPECTED": "Expected",
+    "OPTION_DEBUG_ACTUAL": "Actual",
+    "OPTION_DEBUG_EFFECT": "Effect",
+    "OPTION_DEBUG_VISIBILITY_shown": "Shown",
+    "OPTION_DEBUG_VISIBILITY_disabled": "Disabled",
+    "OPTION_DEBUG_VISIBILITY_hidden": "Hidden",
+    "OPTION_DEBUG_NO_CHECKS": "No restrictions are defined for this action."
   },
   "NOTIFICATION": {
     "MENU": "Notifications",

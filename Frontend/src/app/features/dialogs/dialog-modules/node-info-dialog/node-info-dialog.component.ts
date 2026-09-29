@@ -4,8 +4,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { ConfigService, Node, NodeService, NodeServiceUnwrapped } from 'ngx-edu-sharing-api';
 import {
     ActionbarComponent,
+    OptionCheckResult,
+    OptionData,
+    OptionExplanation,
     OptionsHelperDataService,
     Scope,
+    Target,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
 import { forkJoin } from 'rxjs';
@@ -24,7 +28,17 @@ import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.serv
 
 export interface NodeInfoDialogData {
     nodes: Node[];
+    /**
+     * the option data of the context the dialog was opened from (used by the option debugger)
+     */
+    optionData?: OptionData;
 }
+type OptionDebugEntry = {
+    explanation: OptionExplanation;
+    label: string;
+    /** checks sorted by failed first */
+    checks: OptionCheckResult[];
+};
 type RawPermissions = {
     inherited: boolean;
     aces: {
@@ -60,6 +74,16 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     customProperty: string[] = [];
     editMode: boolean;
 
+    readonly optionDebugScopes = Object.values(Scope).filter((s) => s !== Scope.DebugShowAll);
+    readonly optionDebugTargets = [Target.Actionbar, Target.ListDropdown, Target.List];
+    readonly Target = Target;
+    optionDebugScope: Scope;
+    optionDebugTarget = Target.Actionbar;
+    optionDebugFilter = '';
+    optionDebugEntries: OptionDebugEntry[];
+    optionDebugSelected: OptionDebugEntry;
+    private optionDebugRequest = 0;
+
     constructor(
         @Inject(CARD_DIALOG_DATA) public data: NodeInfoDialogData,
         private dialogRef: CardDialogRef,
@@ -80,6 +104,9 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
+        const originScope = this.data.optionData?.scope;
+        this.optionDebugScope =
+            originScope && originScope !== Scope.DebugShowAll ? originScope : Scope.WorkspaceList;
         this.setNodes(this.data.nodes);
     }
 
@@ -148,6 +175,7 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
             }
         }
         void this.updateOptions();
+        void this.refreshOptionDebug();
     }
 
     openNodes(nodes: Node[]) {
@@ -254,5 +282,48 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         });
         await this.optionsHelperDataService.initComponents(this.allActionbarComponent);
         void this.optionsHelperDataService.refreshComponents();
+    }
+
+    async refreshOptionDebug() {
+        const request = ++this.optionDebugRequest;
+        // the origin context (parent, custom options...) is only valid for the initial nodes
+        const origin = this._nodes === this.data.nodes ? this.data.optionData : null;
+        const explanations = await this.optionsHelperDataService.explainOptions(
+            this.optionDebugTarget,
+            {
+                ...origin,
+                scope: this.optionDebugScope,
+                activeObjects: this._nodes,
+                selectedObjects: this._nodes,
+            },
+        );
+        if (request !== this.optionDebugRequest) {
+            return;
+        }
+        this.optionDebugEntries = (explanations ?? []).map((explanation) => ({
+            explanation,
+            label: explanation.option.name
+                ? this.translate.instant(explanation.option.name) +
+                  ' (' +
+                  explanation.option.name +
+                  ')'
+                : '(' + explanation.option.icon + ')',
+            checks: [...explanation.checks].sort((a, b) => Number(a.passed) - Number(b.passed)),
+        }));
+        const selected = this.optionDebugSelected?.explanation.option.name;
+        this.optionDebugSelected =
+            selected != null
+                ? this.optionDebugEntries.find((e) => e.explanation.option.name === selected)
+                : null;
+    }
+
+    getOptionDebugFiltered() {
+        const filter = this.optionDebugFilter?.toLowerCase() ?? '';
+        return this.optionDebugEntries?.filter((e) => e.label.toLowerCase().includes(filter));
+    }
+
+    selectOptionDebug(entry: OptionDebugEntry) {
+        this.optionDebugSelected = entry;
+        this.optionDebugFilter = entry.label;
     }
 }
