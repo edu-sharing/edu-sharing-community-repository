@@ -61,11 +61,13 @@
   </div>
 </es-mds-editor-widget-container>
 <ng-template #widgetContent>
-  <div *ngIf="['text', 'number', 'date'].includes(basicType())">{{ formatValue() }}</div>
+  <div *ngIf="['text', 'number', 'date'].includes(basicType()) && !isSearchableOption()">
+    {{ formatValue() }}
+  </div>
   <div *ngIf="basicType() === 'license' && (license$ | async) as license">
     <img alt="" [src]="license.icon" /> {{ license.name }}
   </div>
-  <div *ngIf="basicType() === 'array'">
+  <div *ngIf="basicType() === 'array' || isSearchableOption()">
     @for (entry of arrayEntries(); track $index) {
     <div class="array-entry">
       @if (widget.definition.isSearchable && entry.id) {

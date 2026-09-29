@@ -343,6 +343,22 @@ export class MdsWidgetComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     /**
+     * Single-choice widgets (e.g. `singleoption`) are rendered as plain text by default. If they
+     * are `isSearchable`, they are rendered like the flat `array` entries instead, so that the
+     * value links to a search for it.
+     */
+    isSearchableOption(): boolean {
+        return (
+            !!this.widget?.definition.isSearchable &&
+            [
+                MdsWidgetType.Singleoption,
+                MdsWidgetType.RadioVertical,
+                MdsWidgetType.RadioHorizontal,
+            ].includes(this.widget.definition.type as MdsWidgetType)
+        );
+    }
+
+    /**
      * Entries for the flat (`array`) rendering: the displayed caption plus the raw value id.
      *
      * The id is required to build a search link for `isSearchable` widgets and is only
