@@ -1,5 +1,6 @@
 import { PlatformLocation } from '@angular/common';
-import { Injectable, inject } from '@angular/core';
+import { computed, Injectable, inject, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
 import { NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -14,11 +15,23 @@ import {
     ParentEntries,
     PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
-import { OptionGroup, OptionItem, UIConstants, Values } from 'ngx-edu-sharing-ui';
+import {
+    ClickSource,
+    CustomOptions,
+    NodeEntriesWrapperComponent,
+    OptionGroup,
+    OptionItem,
+    Scope,
+    UIConstants,
+    Values,
+} from 'ngx-edu-sharing-ui';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
+import type { PreviewConfig } from '../../../../features/editorial-sidebar/editorial-sidebar.component';
+import { EditorialSidebarService } from '../../../../features/editorial-sidebar/editorial-sidebar.service';
+import { PreviewSidebarService } from '../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 import { Toast, ToastType } from '../../../../services/toast';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 import {
@@ -51,9 +64,11 @@ import { TopicPageGlobalService } from './topic-page-global.service';
 export class TopicPageHelperService {
     private collectionApi = inject(CollectionService);
     private dialogs = inject(DialogsService);
+    private editorialSidebarService = inject(EditorialSidebarService);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     private nodeApi = inject(NodeService);
     private nodeApiUnwrapped = inject(NodeServiceUnwrapped);
+    private previewSidebarService = inject(PreviewSidebarService);
     private platformLocation = inject(PlatformLocation);
     private router = inject(Router);
     private toast = inject(Toast);
@@ -62,9 +77,70 @@ export class TopicPageHelperService {
     private translate = inject(TranslateService);
 
     blobToUpload: Blob;
+    /** Custom options for the actionbar of the preview in the editorial sidebar. */
+    previewCustomOptions: CustomOptions = null;
+    private readonly standalonePreviewNode = toSignal(this.previewSidebarService.getCurrentNode(), {
+        initialValue: null,
+    });
+    /**
+     * The previewed node, `null` while there is none. Without an editorial sidebar (e.g. as web
+     * component) this is the node of a standalone preview sidebar.
+     */
+    readonly previewedNode: Signal<Node | null> = computed(() => {
+        if (!this.editorialSidebarService.sidebarAvailable()) {
+            return this.standalonePreviewNode();
+        }
+        return this.editorialSidebarService.sidebarOpened()
+            ? (this.editorialSidebarService.nodes()?.[0] as Node) ?? null
+            : null;
+    });
     private selectedVariablesSubject: BehaviorSubject<{ [key: string]: string[] }> =
         new BehaviorSubject<{ [key: string]: string[] }>({});
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
+
+    /**
+     * Show the node in the editorial sidebar's preview, or close the preview if it shows the node.
+     * With a node list, the list's selection drives the sidebar, as on the search page.
+     */
+    togglePreview(node: Node, list?: NodeEntriesWrapperComponent<Node>): void {
+        // no editorial sidebar: an embedded `edu-sharing-preview-sidebar` shows it, else a new tab
+        if (!this.editorialSidebarService.sidebarAvailable()) {
+            this.previewSidebarService.handleNodeClick(node);
+            return;
+        }
+        const previewConfig = { customOptions: this.previewCustomOptions } as PreviewConfig;
+        if (list) {
+            this.editorialSidebarService.handleSelect(
+                list,
+                { element: node, source: ClickSource.Preview },
+                Scope.TopicPage,
+                previewConfig,
+            );
+            return;
+        }
+        if (this.previewedNode()?.ref.id === node.ref.id) {
+            this.editorialSidebarService.close();
+            return;
+        }
+        this.editorialSidebarService.scope.set(Scope.TopicPage);
+        this.editorialSidebarService.nodes.set([node]);
+        this.editorialSidebarService.showOption({
+            option: 'PREVIEW',
+            trap: false,
+            optionConfig: previewConfig,
+        });
+    }
+
+    /** Close the preview, leaving any other option of the editorial sidebar open. */
+    closePreview(): void {
+        if (!this.editorialSidebarService.sidebarAvailable()) {
+            this.previewSidebarService.handleNodeClick(null);
+            return;
+        }
+        if (this.editorialSidebarService.editorialSidebar?.enabledOption()?.option === 'PREVIEW') {
+            this.editorialSidebarService.close();
+        }
+    }
 
     /**
      * Retrieves the base href of the application.

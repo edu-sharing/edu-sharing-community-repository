@@ -194,7 +194,6 @@ import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-di
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
-import { PreviewSidebarService } from '../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 @Component({
     imports: [
@@ -244,7 +243,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private mdsService = inject(MdsService);
     private optionsHelperService = inject(OptionsHelperDataService);
     private platformLocation = inject(PlatformLocation);
-    protected previewSidebarService = inject(PreviewSidebarService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private scrollHelperService = inject(ScrollHelperService);
@@ -307,21 +305,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .subscribe((searchInput: string) => {
                 this.searchInput.set(searchInput);
                 this.persistSearchStateInParams();
-                this.previewSidebarService.handleNodeClick(null);
+                this.topicPageHelperService.closePreview();
             });
         this.searchFiltersSubject
             .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroyed$))
             .subscribe((searchFilters: Values) => {
                 this.searchFilters.set(searchFilters);
                 this.persistSearchStateInParams();
-                this.previewSidebarService.handleNodeClick(null);
-            });
-        // subscribe to changes on the sidebar opening state
-        this.previewSidebarService
-            .getOpenState()
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((isOpen: boolean): void => {
-                this.sidebarOpen.set(isOpen);
+                this.topicPageHelperService.closePreview();
             });
         if (!this.topicPageGlobalService.getCustomUrlFunction()) {
             this.topicPageGlobalService.setCustomUrlFunction((node: Node): string => {
@@ -399,7 +390,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     canAddToGlobalTemplates: WritableSignal<boolean> = signal(false);
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
-    sidebarOpen: WritableSignal<boolean> = signal(false);
+    readonly sidebarOpen: Signal<boolean> = computed(
+        () => !!this.topicPageHelperService.previewedNode(),
+    );
     customSidebarOptions: CustomOptions = {
         useDefaultOptions: true,
         supportedOptions: ['OPTIONS.DEBUG', 'OPTIONS.DOWNLOAD'],
@@ -574,6 +567,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DefaultGroups.FileOperations,
             ),
         ];
+        this.topicPageHelperService.previewCustomOptions = this.customSidebarOptions;
         // retrieve the search URL
         this.searchUrl = this.retrieveSearchUrl();
         // retrieve the AI support state

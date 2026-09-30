@@ -42,6 +42,8 @@ import { CardDialogRef } from '../../../dialogs/card-dialog/card-dialog-ref';
     selector: 'es-preview-content',
     templateUrl: './preview-content.component.html',
     styleUrls: ['./preview-content.component.scss'],
+    // For nested components such as the render wrapper, which reuses an ancestor's instance; the
+    // preview's own actionbar keeps a separate one (`optionsHelper`).
     providers: [OptionsHelperDataService],
     standalone: false,
 })
@@ -49,7 +51,11 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
     private nodeHelper = inject(NodeHelperService);
     private dialogs = inject(DialogsService);
-    optionsHelper = inject(OptionsHelperDataService);
+    /**
+     * Options channel of the preview's actionbar, kept out of DI so nested components cannot
+     * reuse it.
+     */
+    optionsHelper = new OptionsHelperDataService();
     moduleInfoService = inject(ModuleInfoService);
     previewSidebarTemplateService = inject(PreviewSidebarTemplateService);
     editorialSidebarService = inject(EditorialSidebarService);
@@ -162,6 +168,7 @@ export class PreviewContentComponent implements AfterViewInit, OnDestroy, OnChan
     }
 
     ngOnDestroy(): void {
+        this.optionsHelper.ngOnDestroy();
         this.editorialSidebarService.showFullscreenToggle.set(false);
         this.destroyed.next();
         this.destroyed.complete();
