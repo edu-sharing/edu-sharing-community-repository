@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class Context {
@@ -34,6 +36,12 @@ public class Context {
     private final HttpServletResponse response;
 
     public static final String REQUEST_ID_HEADER = "X-Request-Id";
+    /**
+     * The single header B3 form. Spring Boot sends this one for
+     * {@code management.tracing.propagation.type=b3} (rendering2 does), while {@code b3_multi}
+     * and Istio/Envoy send the {@code X-B3-*} headers - both have to be understood here.
+     */
+    public static final String B3_SINGLE_HEADER = "b3";
 
     private B3 b3 = new B3() { };
 
@@ -117,6 +125,8 @@ public class Context {
     private void init() {
         // decided once: generated when absent, so every accessor and every outgoing call sees the same id
         String requestId = resolveRequestId(request.getHeader(REQUEST_ID_HEADER));
+        // callers may send either B3 form; the multi header one wins when both are present
+        SingleB3 single = SingleB3.parse(request.getHeader(B3_SINGLE_HEADER));
         b3 = new B3() {
 
             @Override
@@ -126,17 +136,22 @@ public class Context {
 
             @Override
             public String getTraceId() {
-                return request.getHeader("X-B3-TraceId");
+                String multi = request.getHeader("X-B3-TraceId");
+                return multi != null ? multi : single.traceId();
             }
 
             @Override
             public String getSpanId() {
-                return request.getHeader("X-B3-SpanId");
+                String multi = request.getHeader("X-B3-SpanId");
+                return multi != null ? multi : single.spanId();
             }
 
             @Override
             public boolean isSampled() {
-                return "1".equals(request.getHeader("X-B3-Sampled"));
+                String multi = request.getHeader("X-B3-Sampled");
+                // "d" is debug, which implies sampled
+                String sampled = multi != null ? multi : single.sampled();
+                return "1".equals(sampled) || "d".equals(sampled);
             }
 
             @Override
@@ -150,6 +165,7 @@ public class Context {
             private boolean isX3Header(String header) {
                 return header.toUpperCase().startsWith("X-B3-") ||
                         header.toUpperCase().startsWith("X-OT-") ||
+                        header.equalsIgnoreCase(B3_SINGLE_HEADER) ||
                         header.equalsIgnoreCase(REQUEST_ID_HEADER);
             }
 
@@ -177,6 +193,39 @@ public class Context {
         }
         if(b3.getSpanId() != null) {
             ThreadContext.put("SpanId", b3.getSpanId());
+        }
+    }
+
+    /**
+     * The `b3` single header: {@code {traceId}-{spanId}[-{samplingState}[-{parentSpanId}]]},
+     * or just {@code 0} to deny sampling (no ids). Ids are 16 or 32 hex characters (trace) and
+     * 16 (span); the sampling state is {@code 0}, {@code 1} or {@code d} (debug).
+     * <p>
+     * Anything that does not match is ignored rather than rejected - a malformed trace header
+     * must not fail the request, it only costs the correlation.
+     *
+     * @see <a href="https://github.com/openzipkin/b3-propagation#single-header">b3 single header</a>
+     */
+    record SingleB3(@Nullable String traceId, @Nullable String spanId, @Nullable String sampled) {
+
+        private static final SingleB3 NONE = new SingleB3(null, null, null);
+        private static final Pattern PATTERN = Pattern.compile(
+                "^([0-9a-fA-F]{16}|[0-9a-fA-F]{32})-([0-9a-fA-F]{16})(?:-([01d])(?:-[0-9a-fA-F]{16})?)?$");
+
+        @NotNull
+        static SingleB3 parse(@Nullable String header) {
+            if (header == null || header.isBlank()) {
+                return NONE;
+            }
+            String value = header.trim();
+            // "b3: 0" is the sampling decision alone, without any ids
+            if ("0".equals(value) || "1".equals(value) || "d".equals(value)) {
+                return new SingleB3(null, null, value);
+            }
+            Matcher matcher = PATTERN.matcher(value);
+            return matcher.matches()
+                    ? new SingleB3(matcher.group(1), matcher.group(2), matcher.group(3))
+                    : NONE;
         }
     }
 
