@@ -7,9 +7,6 @@
     --anchor-menu-height: 108px;
     --border-radius: 24px;
     --content-max-width: 1440px;
-    --breadcrumb-height: 76px;
-    --sidebar-offset: 16px;
-    --sidebar-width: 450px;
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
     // overwrite border radius for template page
@@ -868,52 +865,6 @@ es-editable-text {
 
         .create-button > button {
             min-height: 100%;
-        }
-    }
-}
-
-// The resizable preview column lives in es-preview-sidebar-wrapper. Here we pass the gap on its
-// right edge (the offcanvas menu; the card's scroll region ends at its own edge) so its drag-resize
-// math stays correct.
-es-preview-sidebar-wrapper {
-    --preview-panel-edge-inset: calc(var(--offcanvas-menu-width) + var(--offcanvas-offset));
-
-    // sticky within .template-scroll rather than the window, so offset and height are relative to it
-    ::ng-deep .preview-resizable {
-        top: calc(var(--sidebar-offset) / 2);
-        max-height: calc(
-            100vh - var(--mainnavCurrentHeight) - 2 * var(--roundedContainerMargin) -
-                var(--breadcrumb-height) - var(--sidebar-offset)
-        );
-    }
-}
-
-// Adjust style of es-preview-sidebar for topic page
-:host es-preview-sidebar ::ng-deep .preview-sidebar {
-    .preview-sidebar-body .mds-views {
-        width: calc(var(--sidebar-width) - 2 * 15px);
-    }
-
-    es-render-wrapper-component {
-        // reduce min-height
-        min-height: 250px;
-
-        rs-root {
-            // reduce min-height
-            min-height: 250px;
-
-            // adjust img width + avoid having visual empty space at the bottom
-            img {
-                max-width: 100%;
-                display: block;
-            }
-
-            // remove link to original content from link-wrapper
-            .link-wrapper {
-                > a {
-                    display: none;
-                }
-            }
         }
     }
 }

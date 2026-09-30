@@ -7,6 +7,17 @@
       [variantId]="topicVariantId()"
     ></es-template-page>
     }
+    <!-- Preview column beside the page card, carrying the topic page's own preview options. It owns
+      the resizable column, header/close chrome and the mobile modal. -->
+    <es-preview-sidebar-wrapper
+      #previewColumnRef
+      [customOptions]="templatePage()?.customSidebarOptions"
+      storageKey="TOPIC_PAGE_PREVIEW_SIDEBAR_WIDTH"
+      [defaultWidthPx]="484"
+      [minWidth]="0"
+      [minWidthPx]="400"
+      [maxWidthPx]="734"
+    ></es-preview-sidebar-wrapper>
     <!-- Extension column beside the page: a panel another module contributes (the editorial
       sidebar hosting the chat assistant). Sticky, so it stays in view while the page scrolls on the
       window, and kept mounted while it is closed — the panel registers itself on creation, and only
