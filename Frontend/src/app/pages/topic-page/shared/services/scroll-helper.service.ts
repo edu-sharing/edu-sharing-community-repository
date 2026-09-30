@@ -22,17 +22,29 @@ export class ScrollHelperService implements OnDestroy {
     private layoutTimeout: ReturnType<typeof setTimeout>;
     private relativeScrollYPosition: number = -1;
     private renderer: Renderer2;
+    // element the page scrolls in; the window while none is registered
+    private scrollContainer: HTMLElement | null = null;
     // https://medium.com/claritydesignsystem/four-ways-of-listening-to-dom-events-in-angular-part-3-renderer2-listen-14c6fe052b59
     private unlistener: () => void;
 
     constructor() {
         // get an instance of Renderer2 inside the service (https://stackoverflow.com/a/47924814)
         this.renderer = this.rendererFactory.createRenderer(null, null);
+        this.setScrollContainer(null);
+    }
 
-        // start listening and store the "unlistener" function
-        this.unlistener = this.renderer.listen('window', 'scroll', (): void => {
+    /**
+     * Tracks the scroll position of the given element, or of the window when null is passed.
+     */
+    setScrollContainer(element: HTMLElement | null): void {
+        this.unlistener?.();
+        this.scrollContainer = element;
+        this.relativeScrollYPosition = -1;
+        this.unlistener = this.renderer.listen(element ?? 'window', 'scroll', (): void => {
             if (!this.changeLayoutPending) {
-                this.relativeScrollYPosition = Math.round(getBodyHeight() - window.scrollY);
+                this.relativeScrollYPosition = Math.round(
+                    this.getScrollHeight() - this.getScrollTop(),
+                );
             }
         });
     }
@@ -48,14 +60,14 @@ export class ScrollHelperService implements OnDestroy {
      * Restores the scroll position to the latest stored relative position.
      */
     restoreScrollPosition(): void {
-        const updatedBodyHeight: number = getBodyHeight();
+        const updatedScrollHeight: number = this.getScrollHeight();
         // check for valid data being provided
         if (
             this.relativeScrollYPosition > -1 &&
-            updatedBodyHeight - this.relativeScrollYPosition > 0
+            updatedScrollHeight - this.relativeScrollYPosition > 0
         ) {
-            window.scrollTo({
-                top: updatedBodyHeight - this.relativeScrollYPosition,
+            (this.scrollContainer ?? window).scrollTo({
+                top: updatedScrollHeight - this.relativeScrollYPosition,
                 left: 0,
                 behavior: 'smooth',
             });
@@ -63,5 +75,13 @@ export class ScrollHelperService implements OnDestroy {
             clearTimeout(this.layoutTimeout);
             this.changeLayoutPending = false;
         }
+    }
+
+    private getScrollHeight(): number {
+        return this.scrollContainer?.scrollHeight ?? getBodyHeight();
+    }
+
+    private getScrollTop(): number {
+        return this.scrollContainer?.scrollTop ?? window.scrollY;
     }
 }

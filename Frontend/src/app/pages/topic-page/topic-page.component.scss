@@ -5,7 +5,7 @@
 }
 
 // Page shell: a flex column filling the viewport below the main nav, light gray background in the margin.
-// Uses min-height so the body keeps scrolling on the window (the sticky breadcrumb and sidebar need that).
+// Uses min-height so the footer below the fixed-height page card stays reachable by the body scroll.
 .topic-page {
     display: flex;
     flex-direction: column;
