@@ -20,6 +20,7 @@ import {
 import { Node, RestConstants, ROOT } from 'ngx-edu-sharing-api';
 import {
     Constrain,
+    CustomOptions,
     DefaultGroups,
     ElementType,
     HideMode,
@@ -93,6 +94,8 @@ export type PreviewConfig = {
     editorMode?: EditorMode;
     /** override the groupId of the embedded mds-editor-wrapper. Default: 'preview_sidebar'. */
     groupId?: string;
+    /** custom options for the actionbar of the embedded preview. */
+    customOptions?: CustomOptions;
 };
 export type OptionConfig =
     | NodesSelectorConfig

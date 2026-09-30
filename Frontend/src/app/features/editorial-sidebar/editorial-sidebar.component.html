@@ -87,6 +87,7 @@
           [node]="$any(editorialSidebarService.nodes())?.[0]"
           [editorMode]="$any(enabledOption()?.optionConfig)?.editorMode || 'viewer'"
           [groupId]="$any(enabledOption()?.optionConfig)?.groupId || 'preview_sidebar'"
+          [customOptions]="$any(enabledOption()?.optionConfig)?.customOptions"
           [showStickyBar]="!editorialSidebarService.fullscreenActive()"
         ></es-preview-sidebar>
         }
