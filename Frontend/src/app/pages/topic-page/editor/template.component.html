@@ -47,7 +47,9 @@
       (currentValuesChange)="applySearchFilters($event)"
     ></es-topic-page-filters-sidebar>
     }
-    <div class="topic-page-wrapper">
+    <!-- The card's scroll region: the breadcrumb and hints above and the filters beside it stay in
+      place while the header and page content scroll. -->
+    <div class="topic-page-wrapper template-scroll" #scrollContainerRef>
       @if (initialLoadSuccessfully()) {
       <!-- TOPIC HERO HEADER -->
       <!-- wait until the initial load is successfully to retrieve the correct nodeID for the header -->
@@ -601,7 +603,7 @@
   </div>
   } @else {
   <!-- failed to load page config -> currently, no further action possible -->
-  <div class="missing-page-config">
+  <div class="missing-page-config template-scroll" #scrollContainerRef>
     <h1 class="mat-heading-1 topic-header-title">
       <span [innerHTML]="topic()"></span>
       @if (backToCollectionButtonVisible()) {

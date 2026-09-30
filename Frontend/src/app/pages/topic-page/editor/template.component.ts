@@ -22,6 +22,7 @@ import {
     SimpleChanges,
     TemplateRef,
     untracked,
+    viewChild,
     ViewChild,
     ViewChildren,
     WritableSignal,
@@ -97,6 +98,7 @@ import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
 import { FilterVisibleSwimlanePipe } from '../shared/pipes/filter-swimlane-hits.pipe';
 import { AiHelperService } from '../shared/services/ai-helper.service';
+import { ScrollHelperService } from '../shared/services/scroll-helper.service';
 import { SwimlaneRepeatService } from '../shared/services/swimlane-repeat.service';
 import { TopicPageEventsService } from '../shared/services/topic-page-events.service';
 import {
@@ -245,6 +247,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     protected previewSidebarService = inject(PreviewSidebarService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private scrollHelperService = inject(ScrollHelperService);
     private searchFieldService = inject(SearchFieldService);
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
@@ -271,6 +274,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
     constructor() {
+        effect((): void => {
+            this.scrollHelperService.setScrollContainer(
+                this.scrollContainerRef()?.nativeElement ?? null,
+            );
+        });
         // the mode decides what is rendered: the persisted swimlanes while editing, their
         // resolved form otherwise. It is switched from several places, so the signal is the hook
         effect((): void => {
@@ -379,6 +387,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     @ViewChild('editSwimlaneDialog') editSwimlaneRef: TemplateRef<undefined>;
     @ViewChild('showQrCodeDialog') showQrCodeDialogRef: TemplateRef<undefined>;
     @ViewChildren('accordionItem') accordions: QueryList<CdkAccordionItem>;
+    private scrollContainerRef = viewChild<ElementRef<HTMLElement>>('scrollContainerRef');
 
     initialLoadSuccessfully: WritableSignal<boolean> = signal(false);
     requestInProgress: WritableSignal<boolean> = signal(false);
@@ -717,6 +726,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.destroyed$.next();
         this.destroyed$.complete();
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
+        this.scrollHelperService.setScrollContainer(null);
     }
 
     /**
@@ -955,14 +965,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return false;
         }
         const element: HTMLElement = document.getElementById(this.latestUrlFragment);
-        if (element) {
-            const topBarElement = document.querySelector('.topBar') as HTMLElement;
-            const navbarHeight = topBarElement ? topBarElement.offsetHeight : 100;
-            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - navbarHeight;
-
-            window.scrollTo({
-                top: offsetPosition,
+        const scrollContainer: HTMLElement = this.scrollContainerRef()?.nativeElement;
+        if (element && scrollContainer) {
+            // scroll only the card's scroll region (not the window), keeping the scroll-margin gap
+            const scrollMargin = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+            const offsetInContainer =
+                element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top;
+            scrollContainer.scrollTo({
+                top: scrollContainer.scrollTop + offsetInContainer - scrollMargin,
                 behavior: 'smooth',
             });
 
