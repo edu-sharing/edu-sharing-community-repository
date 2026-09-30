@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthenticationService, ConfigService } from 'ngx-edu-sharing-api';
+import { AuthenticationService, ConfigService, DashboardSwimlaneEntry } from 'ngx-edu-sharing-api';
 import {
     DefaultGroups,
     ElementType,
@@ -18,16 +18,6 @@ import {
     SearchFieldService,
 } from '../../main/navigation/search-field/search-field.service';
 
-export type SwimlaneTypes =
-    | 'featured-media'
-    | 'collections'
-    | 'recent-activities'
-    | 'shares'
-    | 'assignments';
-export type SwimlaneEntry = {
-    id: SwimlaneTypes;
-    defaultExpanded: boolean;
-};
 @Component({
     selector: 'es-landing-page',
     templateUrl: 'landing-page.component.html',
@@ -51,7 +41,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
      * displayed swimlanes (in order)
      * are be retrieved from the backend client.config
      */
-    swimlanes = signal<SwimlaneEntry[]>([]);
+    swimlanes = signal<DashboardSwimlaneEntry[]>([]);
 
     constructor() {
         const createAssignment = new OptionItem('EDITORIAL.OPTIONS.CREATE_ASSIGNMENT', 'task', () =>
@@ -135,28 +125,31 @@ export class LandingPageComponent implements OnInit, OnDestroy {
             return;
         }
         this.swimlanes.set(
-            await this.configService.get<SwimlaneEntry[]>('frontpage.dashboard.swimlanes', [
-                {
-                    id: 'collections',
-                    defaultExpanded: true,
-                },
-                {
-                    id: 'recent-activities',
-                    defaultExpanded: true,
-                },
-                {
-                    id: 'assignments',
-                    defaultExpanded: true,
-                },
-                {
-                    id: 'featured-media',
-                    defaultExpanded: true,
-                },
-                {
-                    id: 'shares',
-                    defaultExpanded: true,
-                },
-            ]),
+            await this.configService.get<DashboardSwimlaneEntry[]>(
+                'frontpage.dashboard.swimlanes',
+                [
+                    {
+                        id: 'collections',
+                        defaultExpanded: true,
+                    },
+                    {
+                        id: 'recent-activities',
+                        defaultExpanded: true,
+                    },
+                    {
+                        id: 'assignments',
+                        defaultExpanded: true,
+                    },
+                    {
+                        id: 'featured-media',
+                        defaultExpanded: true,
+                    },
+                    {
+                        id: 'shares',
+                        defaultExpanded: true,
+                    },
+                ],
+            ),
         );
     }
 

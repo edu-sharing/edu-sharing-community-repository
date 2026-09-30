@@ -1315,6 +1315,16 @@
         "properties": {
           "shortcuts": {
             "$ref": "#/components/schemas/ShortcutConfig"
+          },
+          "swimlanes": {
+            "description": "Swimlanes shown on the dashboard (in order). If not set, the frontend default (all swimlanes, expanded) is used",
+            "items": {
+              "$ref": "#/components/schemas/DashboardSwimlaneEntry"
+            },
+            "type": "array",
+            "xml": {
+              "name": "swimlane"
+            }
           }
         },
         "type": "object"
@@ -2222,6 +2232,27 @@
         "required": [
           "type"
         ],
+        "type": "object"
+      },
+      "DashboardSwimlaneEntry": {
+        "description": "Swimlanes shown on the dashboard (in order). If not set, the frontend default (all swimlanes, expanded) is used",
+        "properties": {
+          "defaultExpanded": {
+            "description": "Whether the swimlane is expanded initially (the user's own toggle state takes precedence)",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Swimlane type",
+            "enum": [
+              "featured-media",
+              "collections",
+              "recent-activities",
+              "shares",
+              "assignments"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "DataProtectionExport": {
