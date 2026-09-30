@@ -12,7 +12,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
-import { TopicPageGlobalService } from './shared/services/topic-page-global.service';
 import { TemplateComponent } from './editor/template.component';
 
 @Component({
@@ -25,12 +24,7 @@ export class TopicPageComponent {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private translate = inject(TranslateService);
-    private topicPageGlobalService = inject(TopicPageGlobalService);
     protected editorialSidebarService = inject(EditorialSidebarService);
-
-    /** Component of the extension column beside the page, `null` while none is registered. */
-    protected readonly customSidebarExtension =
-        this.topicPageGlobalService.getCustomSidebarExtension();
 
     // defaults to the main collection of physics
     topicCollectionId: WritableSignal<string> = signal(null);
@@ -38,11 +32,7 @@ export class TopicPageComponent {
     topicPageLoaded: WritableSignal<boolean> = signal(false);
 
     @ViewChild('templateComponent') templateComponent: TemplateComponent;
-    protected readonly templatePage = viewChild<TemplateComponent>('templateComponent');
     private readonly sidebarColumn = viewChild<ElementRef<HTMLElement>>('sidebarColumnRef');
-    private readonly previewColumn = viewChild('previewColumnRef', {
-        read: ElementRef<HTMLElement>,
-    });
     private readonly host = inject(ElementRef<HTMLElement>);
 
     constructor() {
@@ -107,26 +97,23 @@ export class TopicPageComponent {
     }
 
     /**
-     * Publish the combined width of the columns beside the page (extension, preview) as
-     * `--sideMenuRightInset`, so the offcanvas side menu fixed to the viewport's right edge stays
-     * clear of them. Watched rather than read once: the columns open, close and resize by drag.
+     * Publish the width of the sidebar column as `--sideMenuRightInset`, so the offcanvas side menu
+     * fixed to the viewport's right edge stays clear of it. Watched rather than read once: the
+     * column is resizable by drag.
      */
     private trackSidebarColumnWidth(): void {
         effect((onCleanup) => {
-            const columns: HTMLElement[] = [
-                this.sidebarColumn()?.nativeElement,
-                (this.previewColumn()?.nativeElement as HTMLElement)?.querySelector<HTMLElement>(
-                    '.preview-resizable',
-                ),
-            ].filter(Boolean);
-            // closed columns are `display: none` and count with a width of 0
-            const update = () =>
-                this.setSideMenuRightInset(
-                    columns.reduce((sum, column) => sum + column.offsetWidth, 0),
-                );
-            const observer = new ResizeObserver(update);
-            columns.forEach((column) => observer.observe(column));
-            update();
+            const column = this.sidebarColumn()?.nativeElement;
+            const opened = this.editorialSidebarService.sidebarOpened();
+            if (!column || !opened) {
+                this.setSideMenuRightInset(0);
+                return;
+            }
+            const observer = new ResizeObserver(() =>
+                this.setSideMenuRightInset(column.offsetWidth),
+            );
+            observer.observe(column);
+            this.setSideMenuRightInset(column.offsetWidth);
             onCleanup(() => observer.disconnect());
         });
     }

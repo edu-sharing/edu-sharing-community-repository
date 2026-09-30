@@ -13,7 +13,7 @@
     background: var(--backgroundColor);
 }
 
-// Page body: the topic page and the extension column side by side, above the footer.
+// Page body: the topic page and the sidebar column side by side, above the footer.
 .topic-page-body {
     display: flex;
     flex-direction: row;
@@ -25,30 +25,68 @@ es-template-page {
     min-width: 0;
 }
 
-// Preview column beside the page card, like the extension column: sticky and viewport-high, with its
-// card aligned to the page card's top and bottom. The page card's right margin is the gap between
-// the two, so the side menu keeps sitting at the page card's edge.
-es-preview-sidebar-wrapper {
-    ::ng-deep .preview-resizable {
-        top: var(--mainnavCurrentHeight);
-        height: calc(100vh - var(--mainnavCurrentHeight));
-        max-height: none;
-        margin-right: 0;
-        padding-right: 0;
+// Sidebar column at the page's outer edge. Sticky and viewport-high, since the page itself
+// scrolls on the window. `display: none` while closed keeps the sidebar mounted (and registered)
+// instead of tearing it down.
+.sidebar-column {
+    display: none;
+    flex-shrink: 0;
+    align-self: flex-start;
+    box-sizing: border-box;
+    // pre-init fallback width; esResizableSidenav overrides it with the saved width and min/max
+    width: 600px;
+    // same gap to the viewport edge as the page card beside it; the top gap comes from `top`
+    padding-right: var(--roundedContainerMargin);
+    position: sticky;
+    top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
+    // runs down to the bottom of the viewport
+    height: calc(100vh - var(--mainnavCurrentHeight) - var(--roundedContainerMargin));
 
-        .preview-panel {
-            margin: var(--roundedContainerMargin) var(--roundedContainerMargin)
-                var(--roundedContainerMargin) 0;
-        }
-        // the 7px handle, centered in the gap left of the column
-        .es-sidenav-resizer.end {
-            left: calc((var(--roundedContainerMargin) + 7px) / -2);
+    &.open {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height
+    es-editorial-sidebar {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+
+    // The handle is created by the directive without this component's encapsulation attribute,
+    // hence ::ng-deep. Centered in the gap left of the column (the page card's right margin), with
+    // a hover tint so it reads as grabbable against the page background.
+    ::ng-deep .es-sidenav-resizer.end {
+        left: calc((var(--roundedContainerMargin) + 8px) / -2);
+        width: 8px;
+        border-radius: 4px;
+        &:hover {
+            background-color: var(--backgroundTinted);
         }
     }
 }
 
+// Below the tab-switch breakpoint the page is too narrow to stand beside a panel, so the column
+// covers it instead of squeezing it. The bottom inset clears the fixed mobile navigation.
+@media screen and (max-width: vars.$mobileTabSwitchWidth) {
+    .sidebar-column.open {
+        position: fixed;
+        top: var(--mainnavCurrentHeight);
+        right: 0;
+        bottom: vars.$mobileTabNavHeight;
+        left: 0;
+        // beats the inline width the resize directive restores from storage
+        width: auto !important;
+        height: auto;
+        padding: 0;
+        z-index: 98;
+    }
+}
+
 // Topic-page adjustments of the preview content
-es-preview-sidebar-wrapper ::ng-deep es-preview-sidebar .preview-sidebar {
+.sidebar-column ::ng-deep es-preview-sidebar .preview-sidebar {
     es-render-wrapper-component {
         // reduce min-height
         min-height: 250px;
@@ -70,56 +108,5 @@ es-preview-sidebar-wrapper ::ng-deep es-preview-sidebar .preview-sidebar {
                 }
             }
         }
-    }
-}
-
-// Extension column at the page's outer edge. Sticky and viewport-high, since the page itself
-// scrolls on the window. `display: none` while closed keeps the panel mounted (and its sidebar
-// registered) instead of tearing it down.
-.custom-sidebar-extension {
-    display: none;
-    flex-shrink: 0;
-    align-self: flex-start;
-    box-sizing: border-box;
-    // pre-init fallback width; esResizableSidenav overrides it with the saved width and min/max
-    width: 600px;
-    // same gap to the viewport edge as the page card beside it; the top gap comes from `top`
-    padding-right: var(--roundedContainerMargin);
-    position: sticky;
-    top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
-    // runs down to the bottom of the viewport
-    height: calc(100vh - var(--mainnavCurrentHeight) - var(--roundedContainerMargin));
-
-    &.open {
-        display: flex;
-        flex-direction: column;
-    }
-
-    // The handle is created by the directive without this component's encapsulation attribute,
-    // hence ::ng-deep. A hover tint so it reads as grabbable against the page background.
-    ::ng-deep .es-sidenav-resizer.end {
-        left: 0;
-        width: 8px;
-        border-radius: 4px;
-        &:hover {
-            background-color: var(--backgroundTinted);
-        }
-    }
-}
-
-// Below the tab-switch breakpoint the page is too narrow to stand beside a panel, so the column
-// covers it instead of squeezing it. The bottom inset clears the fixed mobile navigation.
-@media screen and (max-width: vars.$mobileTabSwitchWidth) {
-    .custom-sidebar-extension.open {
-        position: fixed;
-        top: var(--mainnavCurrentHeight);
-        right: 0;
-        bottom: vars.$mobileTabNavHeight;
-        left: 0;
-        // beats the inline width the resize directive restores from storage
-        width: auto !important;
-        height: auto;
-        padding: 0;
-        z-index: 98;
     }
 }
