@@ -1643,6 +1643,7 @@ public class NodeDao {
             } catch (AccessDeniedException e) {
                 logger.info("Access to content for hash generation was denied for " + nodeId);
             }
+        }
         return content;
     }
 
