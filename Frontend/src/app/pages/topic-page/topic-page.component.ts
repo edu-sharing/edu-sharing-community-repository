@@ -38,7 +38,11 @@ export class TopicPageComponent {
     topicPageLoaded: WritableSignal<boolean> = signal(false);
 
     @ViewChild('templateComponent') templateComponent: TemplateComponent;
+    protected readonly templatePage = viewChild<TemplateComponent>('templateComponent');
     private readonly sidebarColumn = viewChild<ElementRef<HTMLElement>>('sidebarColumnRef');
+    private readonly previewColumn = viewChild('previewColumnRef', {
+        read: ElementRef<HTMLElement>,
+    });
     private readonly host = inject(ElementRef<HTMLElement>);
 
     constructor() {
@@ -103,25 +107,26 @@ export class TopicPageComponent {
     }
 
     /**
-     * Publish the width of the extension column as `--sideMenuRightInset`.
-     *
-     * The topic page's offcanvas side menu ("Themenbaum", "Statistik") is fixed to the right edge of
-     * the viewport, so without this it would stand on top of an open column. The width is watched
-     * rather than read once: the column is resizable by drag.
+     * Publish the combined width of the columns beside the page (extension, preview) as
+     * `--sideMenuRightInset`, so the offcanvas side menu fixed to the viewport's right edge stays
+     * clear of them. Watched rather than read once: the columns open, close and resize by drag.
      */
     private trackSidebarColumnWidth(): void {
         effect((onCleanup) => {
-            const column = this.sidebarColumn()?.nativeElement;
-            const opened = this.editorialSidebarService.sidebarOpened();
-            if (!column || !opened) {
-                this.setSideMenuRightInset(0);
-                return;
-            }
-            const observer = new ResizeObserver(() =>
-                this.setSideMenuRightInset(column.offsetWidth),
-            );
-            observer.observe(column);
-            this.setSideMenuRightInset(column.offsetWidth);
+            const columns: HTMLElement[] = [
+                this.sidebarColumn()?.nativeElement,
+                (this.previewColumn()?.nativeElement as HTMLElement)?.querySelector<HTMLElement>(
+                    '.preview-resizable',
+                ),
+            ].filter(Boolean);
+            // closed columns are `display: none` and count with a width of 0
+            const update = () =>
+                this.setSideMenuRightInset(
+                    columns.reduce((sum, column) => sum + column.offsetWidth, 0),
+                );
+            const observer = new ResizeObserver(update);
+            columns.forEach((column) => observer.observe(column));
+            update();
             onCleanup(() => observer.disconnect());
         });
     }

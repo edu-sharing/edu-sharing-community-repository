@@ -25,6 +25,54 @@ es-template-page {
     min-width: 0;
 }
 
+// Preview column beside the page card, like the extension column: sticky and viewport-high, with its
+// card aligned to the page card's top and bottom. The page card's right margin is the gap between
+// the two, so the side menu keeps sitting at the page card's edge.
+es-preview-sidebar-wrapper {
+    ::ng-deep .preview-resizable {
+        top: var(--mainnavCurrentHeight);
+        height: calc(100vh - var(--mainnavCurrentHeight));
+        max-height: none;
+        margin-right: 0;
+        padding-right: 0;
+
+        .preview-panel {
+            margin: var(--roundedContainerMargin) var(--roundedContainerMargin)
+                var(--roundedContainerMargin) 0;
+        }
+        // the 7px handle, centered in the gap left of the column
+        .es-sidenav-resizer.end {
+            left: calc((var(--roundedContainerMargin) + 7px) / -2);
+        }
+    }
+}
+
+// Topic-page adjustments of the preview content
+es-preview-sidebar-wrapper ::ng-deep es-preview-sidebar .preview-sidebar {
+    es-render-wrapper-component {
+        // reduce min-height
+        min-height: 250px;
+
+        rs-root {
+            // reduce min-height
+            min-height: 250px;
+
+            // adjust img width + avoid having visual empty space at the bottom
+            img {
+                max-width: 100%;
+                display: block;
+            }
+
+            // remove link to original content from link-wrapper
+            .link-wrapper {
+                > a {
+                    display: none;
+                }
+            }
+        }
+    }
+}
+
 // Extension column at the page's outer edge. Sticky and viewport-high, since the page itself
 // scrolls on the window. `display: none` while closed keeps the panel mounted (and its sidebar
 // registered) instead of tearing it down.
