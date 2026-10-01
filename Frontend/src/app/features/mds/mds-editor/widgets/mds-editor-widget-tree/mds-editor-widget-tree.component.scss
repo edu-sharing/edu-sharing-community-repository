@@ -50,6 +50,10 @@ mat-chip-grid {
     display: flex;
     flex-grow: 1;
 }
+// ARIA-only wrapper, keeps the flex layout untouched
+.input-cell {
+    display: contents;
+}
 // Standalone autocomplete field used in the `valueSelection` layout (free-text / suggestion
 // badges), rendered below the selected-value cards. Uses the default Material outline appearance.
 .value-selection-input {

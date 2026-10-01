@@ -19,6 +19,7 @@
   esBorderBoxObserver
   #box
   #triggerBorderBox="borderBoxObserver"
+  (focusout)="onFocusOut($event)"
 >
   @if (editorMode !== valueSelection) {
   <es-mds-editor-widget-container
@@ -118,34 +119,36 @@
         ></i>
       </div>
       } }
-      <div class="input-wrapper">
-        <input
-          autocomplete="off"
-          [readonly]="isTree"
-          [formControl]="inputControl"
-          #inputElement
-          [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
-          [matChipInputFor]="chipList"
-          (keyup)="$event.key === 'Enter' && addSelectedTreeNode()"
-          (focus)="openOverlay($event)"
-          (blur)="onBlurInput($event)"
-        />
+      <!-- The grid only has role="grid" while it contains chips. -->
+      <div class="input-wrapper" [attr.role]="chipsControl?.value?.length ? 'row' : null">
+        <span class="input-cell" [attr.role]="chipsControl?.value?.length ? 'gridcell' : null">
+          <input
+            autocomplete="off"
+            [readonly]="isTree"
+            [formControl]="inputControl"
+            #inputElement
+            [placeholder]="chipsControl?.value?.length ? null : widget.definition.placeholder"
+            [matChipInputFor]="chipList"
+            (keyup)="$event.key === 'Enter' && addSelectedTreeNode()"
+            (focus)="openOverlay($event)"
+            (blur)="onBlurInput($event)"
+          />
+        </span>
         @if (showDropdownArrow) {
-        <button
-          matSuffix
-          mat-icon-button
-          class="mat-button-select-arrow"
-          cdkMonitorElementFocus
-          #openButton
-          (click)="openOverlay()"
-          [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-          [disabled]="chipsControl.disabled"
-        >
-          <!-- @TODO removed with angular 15
-              (keydown.tab)="chipList._allowFocusEscape()"
-              -->
-          <i esIcon="keyboard_arrow_down" class="mat-select-arrow"></i>
-        </button>
+        <span class="input-cell" [attr.role]="chipsControl?.value?.length ? 'gridcell' : null">
+          <button
+            matSuffix
+            mat-icon-button
+            class="mat-button-select-arrow"
+            cdkMonitorElementFocus
+            #openButton
+            (click)="openOverlay()"
+            [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+            [disabled]="chipsControl.disabled"
+          >
+            <i esIcon="keyboard_arrow_down" class="mat-select-arrow"></i>
+          </button>
+        </span>
         }
       </div>
     </mat-chip-grid>
@@ -196,7 +199,13 @@
 >
   <!--     *ngIf="overlayIsVisible" -->
   @if (overlayIsVisible) {
-  <div class="suggestion-card" role="dialog" #overlay [attr.aria-labelledby]="container?.labelId">
+  <div
+    class="suggestion-card"
+    role="dialog"
+    #overlay
+    [attr.aria-labelledby]="container?.labelId"
+    (focusout)="onFocusOut($event)"
+  >
     <es-mds-editor-widget-tree-core
       cdkTrapFocus
       [cdkTrapFocusAutoCapture]="false"

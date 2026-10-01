@@ -73,34 +73,36 @@
         </mat-chip>
       </mat-chip-set>-->
     }
-    <div class="input-wrapper">
-      <input
-        #input
-        #trigger="matAutocompleteTrigger"
-        autocomplete="off"
-        [formControl]="inputControl"
-        [matAutocomplete]="auto"
-        [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
-        [matChipInputFor]="chipList"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        [matChipInputAddOnBlur]="false"
-        (matChipInputTokenEnd)="onInputTokenEnd($event)"
-        (blur)="onBlurInput($event)"
-      />
+    <!-- The grid only has role="grid" while it contains chips. -->
+    <div class="input-wrapper" [attr.role]="chipsControl.value?.length ? 'row' : null">
+      <span class="input-cell" [attr.role]="chipsControl.value?.length ? 'gridcell' : null">
+        <input
+          #input
+          #trigger="matAutocompleteTrigger"
+          autocomplete="off"
+          [formControl]="inputControl"
+          [matAutocomplete]="auto"
+          [placeholder]="chipsControl.value?.length ? null : widget.definition.placeholder"
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="false"
+          (matChipInputTokenEnd)="onInputTokenEnd($event)"
+          (blur)="onBlurInput($event)"
+        />
+      </span>
       @if (showDropdownArrow) {
-      <button
-        mat-icon-button
-        color="primary"
-        class="mat-button-select-arrow"
-        (click)="toggleAutoCompletePanel()"
-        [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
-        [disabled]="chipsControl.disabled"
-      >
-        <!-- @TODO removed with angular 15
-          (keydown.tab)="chipList._allowFocusEscape()"
-          -->
-        <i esIcon="keyboard_arrow_down" class="mat-select-arrow"></i>
-      </button>
+      <span class="input-cell" [attr.role]="chipsControl.value?.length ? 'gridcell' : null">
+        <button
+          mat-icon-button
+          color="primary"
+          class="mat-button-select-arrow"
+          (click)="toggleAutoCompletePanel()"
+          [attr.aria-label]="'MDS.SHOW_OPTIONS_BUTTON' | translate"
+          [disabled]="chipsControl.disabled"
+        >
+          <i esIcon="keyboard_arrow_down" class="mat-select-arrow"></i>
+        </button>
+      </span>
       }
     </div>
   </mat-chip-grid>
