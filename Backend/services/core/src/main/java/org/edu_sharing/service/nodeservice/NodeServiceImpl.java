@@ -1365,8 +1365,11 @@ public class NodeServiceImpl implements org.edu_sharing.service.nodeservice.Node
             if(details.isRemoveContent()) {
                 removeContent(ref, CCConstants.CM_PROP_CONTENT);
                 removeContent(ref, CCConstants.CCM_PROP_IO_USERDEFINED_PREVIEW);
-                // remove childs like childobjects or preview images
+                // remove childs like childobjects or preview images, but keep usages
                 for (ChildAssociationRef child : getChildAssocs(new NodeRef(new StoreRef(storeProtocol, storeId), finalNodeId))) {
+                    if (QName.createQName(CCConstants.CCM_TYPE_USAGE).equals(nodeServiceAlfresco.getType(child.getChildRef()))) {
+                        continue;
+                    }
                     removeNode(child.getChildRef().getId(), finalNodeId, false);
                 }
             }
