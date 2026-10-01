@@ -3,6 +3,7 @@ package org.edu_sharing.alfresco.action;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -12,14 +13,20 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
+import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -31,10 +38,27 @@ class RessourceInfoExecuterTest {
 
     private final NodeService mockedNodeService = Mockito.mock(NodeService.class);
     private final LightbendConfigLoader mockedLightbendConfigLoader = Mockito.mock(LightbendConfigLoader.class);
+    private MockedStatic<AlfAppContextGate> mockedAlfAppContextGate;
+    private MockedStatic<ApplicationInfoList> mockedApplicationInfoList;
+
     @BeforeEach
     void setUp() {
+        // ApplicationInfoList fetches its cache from the spring context in its static initializer
+        ApplicationContext mockedApplicationContext = Mockito.mock(ApplicationContext.class);
+        Mockito.doReturn(Mockito.mock(SimpleCache.class)).when(mockedApplicationContext).getBean("eduSharingApplicationInfoCache");
+        mockedAlfAppContextGate = Mockito.mockStatic(AlfAppContextGate.class);
+        mockedAlfAppContextGate.when(AlfAppContextGate::getApplicationContext).thenReturn(mockedApplicationContext);
+        mockedApplicationInfoList = Mockito.mockStatic(ApplicationInfoList.class);
+        mockedApplicationInfoList.when(ApplicationInfoList::getAppInfosLtiTool).thenReturn(Collections.emptyList());
+
         underTest = new RessourceInfoExecuter(mockedLightbendConfigLoader);
         underTest.setNodeService(mockedNodeService);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockedApplicationInfoList.close();
+        mockedAlfAppContextGate.close();
     }
 
     @Test
