@@ -21,6 +21,7 @@ public class ApplicationInfoList {
 
     private static ApplicationInfo appInfoHome;
     private static ApplicationInfo appInfoRenderingService2;
+    private static List<ApplicationInfo> appInfosLtiTool = new ArrayList<>();
 
     public static ApplicationInfo getRepositoryInfo(String file) {
         return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
@@ -136,6 +137,7 @@ public class ApplicationInfoList {
         synchronized (lock) {
             appInfoHome = null;
             appInfoRenderingService2 = null;
+            appInfosLtiTool.clear();
         }
 
         try {
@@ -174,6 +176,9 @@ public class ApplicationInfoList {
                     }
                     if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(repInfo.getType())) {
                         appInfoRenderingService2 = repInfo;
+                    }
+                    if(repInfo.isLtiTool()){
+                        appInfosLtiTool.add(repInfo);
                     }
                 }
             } catch (Exception e) {
@@ -233,6 +238,10 @@ public class ApplicationInfoList {
         }
         if (appInfoRenderingService2 == null) logger.warn("no rendering service 2 found. check your application files");
         return appInfoRenderingService2;
+    }
+
+    public static List<ApplicationInfo> getAppInfosLtiTool(){
+        return appInfosLtiTool;
     }
 
     public static ApplicationInfo getHomeRepositoryObeyConfig(String[] allowedRepos) {
