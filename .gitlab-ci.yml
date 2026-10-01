@@ -45,6 +45,7 @@ deploy:
     - apt-get update -y
     - apt-get install -y git
   script:
+    - if [ "$SKIP_TESTS" = "true" ]; then MAVEN_CLI="$MAVEN_CLI -DskipTests"; fi
     - mvn $MAVEN_CLI -s .mvn/settings.xml deploy
 
 .frontend_job: &frontend_job
