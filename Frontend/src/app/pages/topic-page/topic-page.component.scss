@@ -47,6 +47,12 @@ es-template-page {
         flex-direction: column;
     }
 
+    // being sticky, the column is a stacking context of its own, so the fullscreen sidebar's
+    // z-index only counts once the column itself is raised above the page
+    &.fullscreen {
+        z-index: vars.$dialogZIndex - 10;
+    }
+
     // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height
     es-editorial-sidebar {
         display: flex;
