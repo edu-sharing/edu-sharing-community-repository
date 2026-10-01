@@ -20,6 +20,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Sort } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -58,7 +59,6 @@ import { OptionsHelperService } from '../../../shared/services/options-helper.se
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { GenericNodeEntriesDisplayType } from '../../../shared/types/generic-node-entries-display-type';
 import { GenericWidgetGlobalService } from '../../generic-widget/generic-widget-global.service';
-import { PreviewSidebarService } from '../../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 export interface DisplayTypeComponentInterface {
     // inputs
@@ -98,7 +98,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
     genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     private mdsHelperService = inject(MdsHelperService);
     private mdsService = inject(MdsService);
-    private previewSidebarService = inject(PreviewSidebarService);
     private searchService = inject(SearchService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private uiService = inject(UIService);
@@ -285,8 +284,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     constructor() {
         // subscribe to changes on the selected node
-        this.previewSidebarService
-            .getCurrentNode()
+        toObservable(this.topicPageHelperService.previewedNode)
             .pipe(takeUntil(this.destroy$))
             .subscribe((node: Node | null): void => {
                 const selectedNode: Node = node;
@@ -920,7 +918,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      */
     onItemClicked(node: Node): void {
         this.itemClicked.emit(node);
-        this.previewSidebarService.handleNodeClick(node);
+        this.topicPageHelperService.togglePreview(node, this.nodeEntries);
     }
 
     /**

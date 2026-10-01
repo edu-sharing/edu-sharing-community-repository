@@ -5,11 +5,66 @@
   backdropClass="mat-dropdown-menu"
   [xPosition]="position === 'right' ? 'after' : 'before'"
 >
+  <ng-template #itemContent let-option>
+    @if (option.icon) {
+    <i [esIcon]="option.icon" esIconContext="option"></i>
+    }
+    {{ option.name | translate }}
+  </ng-template>
   <!-- MatMenu has role="menu", so the only meaningful role of descendants is "menuitem" -->
   <ul role="none">
     @for (option of options$ | async; track option; let i = $index) { @if (option.isEnabled ||
     showDisabled) {
     <li role="none">
+      @if (option.isEnabled && option.link?.routerLink) {
+      <a
+        mat-menu-item
+        class="mat-menu-item collection-item-{{
+          option.name | replaceChars : { search: '.', replace: '-' }
+        }}"
+        [class.warn]="option.color === 'warn'"
+        matTooltip="{{ option | optionTooltip | async }}"
+        matTooltipPosition="right"
+        matTooltipTouchGestures="off"
+        [matTooltipDisabled]="!option.keyboardShortcut"
+        [attr.aria-label]="option.ariaLabel || option.name | translate"
+        [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+        [class.mat-menu-item-selected]="option.isSelected"
+        [routerLink]="option.link.routerLink"
+        [queryParams]="option.link.queryParams"
+        (click)="clickLink(option, $event)"
+        attr.data-test="menu-item-{{ option.name }}"
+      >
+        <ng-container
+          *ngTemplateOutlet="itemContent; context: { $implicit: option }"
+        ></ng-container>
+      </a>
+      } @else if (option.isEnabled && option.link?.href) {
+      <a
+        mat-menu-item
+        class="mat-menu-item collection-item-{{
+          option.name | replaceChars : { search: '.', replace: '-' }
+        }}"
+        [class.warn]="option.color === 'warn'"
+        matTooltip="{{ option | optionTooltip | async }}"
+        matTooltipPosition="right"
+        matTooltipTouchGestures="off"
+        [matTooltipDisabled]="!option.keyboardShortcut"
+        [attr.aria-label]="option.ariaLabel || option.name | translate"
+        [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+        [class.mat-menu-item-selected]="option.isSelected"
+        [attr.href]="option.link.href"
+        [attr.target]="option.link.openInNew ? '_blank' : null"
+        [attr.rel]="option.link.openInNew ? 'noopener noreferrer' : null"
+        (click)="clickLink(option, $event)"
+        attr.data-test="menu-item-{{ option.name }}"
+      >
+        <ng-container
+          *ngTemplateOutlet="itemContent; context: { $implicit: option }"
+        ></ng-container>
+      </a>
+      } @else {
+      <!-- Options without a link target and disabled options are plain actions, so they stay buttons. -->
       <button
         mat-menu-item
         class="mat-menu-item collection-item-{{
@@ -27,11 +82,11 @@
         (click)="click(option)"
         attr.data-test="menu-item-{{ option.name }}"
       >
-        @if (option.icon) {
-        <i [esIcon]="option.icon" esIconContext="option"></i>
-        }
-        {{ option.name | translate }}
+        <ng-container
+          *ngTemplateOutlet="itemContent; context: { $implicit: option }"
+        ></ng-container>
       </button>
+      }
     </li>
     } }
   </ul>

@@ -115,6 +115,7 @@
       },
       "MEDIA_RENDERING": {
         "NO_ELEMENT_SELECTED": "No element has been selected for display yet.",
+        "SELECTED_ELEMENT_UNAVAILABLE": "The selected content is no longer available. Please select a different content.",
         "TO_ORIGINAL_PAGE": "To original page",
         "SHOW_DETAILS": "Show details",
         "HIDE_DETAILS": "Hide details",

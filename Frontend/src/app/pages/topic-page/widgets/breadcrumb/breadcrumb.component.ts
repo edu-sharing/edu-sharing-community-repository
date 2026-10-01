@@ -101,6 +101,8 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     });
     rootLink: WritableSignal<string> = signal('');
     widgetConfig: BreadcrumbConfig;
+    // own config node, empty if none exists or it was deleted, so saving creates a new one
+    private availableNodeId: string = '';
 
     // CUSTOM EXTENSION RELATED VARIABLES
     @ViewChild('customExtension', { read: ViewContainerRef, static: false })
@@ -192,9 +194,11 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
      */
     private async loadWidgetConfig(): Promise<void> {
         const configNodeId: string = this.nodeId || this.propagatedNodeId;
-        this.widgetConfig = configNodeId
-            ? retrieveWidgetConfigFromNode(await this.topicPageHelperService.getNode(configNodeId))
-            : undefined;
+        const configNode: Node | null = configNodeId
+            ? await this.topicPageHelperService.getNodeIfAvailable(configNodeId)
+            : null;
+        this.widgetConfig = configNode ? retrieveWidgetConfigFromNode(configNode) : undefined;
+        this.availableNodeId = this.nodeId && configNode ? this.nodeId : '';
         this.editorialMemberNodeIds = this.widgetConfig?.editorialMemberNodeIds || [];
         // refresh the selected editorial members in the custom extension if it is already mounted
         if (this.customExtensionComponentRef) {
@@ -226,7 +230,7 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
         this.widgetConfig = this.retrieveWidgetConfig();
         // persist config by creating a new or updating an existing node
         await this.topicPageHelperService.persistConfig(
-            this.nodeId,
+            this.availableNodeId,
             -1,
             -1,
             this.pageVariantNode,

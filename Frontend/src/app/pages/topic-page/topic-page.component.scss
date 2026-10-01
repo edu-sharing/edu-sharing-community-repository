@@ -5,7 +5,7 @@
 }
 
 // Page shell: a flex column filling the viewport below the main nav, light gray background in the margin.
-// Uses min-height so the body keeps scrolling on the window (the sticky breadcrumb and sidebar need that).
+// Uses min-height so the footer below the fixed-height page card stays reachable by the body scroll.
 .topic-page {
     display: flex;
     flex-direction: column;
@@ -13,7 +13,7 @@
     background: var(--backgroundColor);
 }
 
-// Page body: the topic page and the extension column side by side, above the footer.
+// Page body: the topic page and the sidebar column side by side, above the footer.
 .topic-page-body {
     display: flex;
     flex-direction: row;
@@ -25,10 +25,10 @@ es-template-page {
     min-width: 0;
 }
 
-// Extension column at the page's outer edge. Sticky and viewport-high, since the page itself
-// scrolls on the window. `display: none` while closed keeps the panel mounted (and its sidebar
-// registered) instead of tearing it down.
-.custom-sidebar-extension {
+// Sidebar column at the page's outer edge. Sticky and viewport-high, since the page itself
+// scrolls on the window. `display: none` while closed keeps the sidebar mounted (and registered)
+// instead of tearing it down.
+.sidebar-column {
     display: none;
     flex-shrink: 0;
     align-self: flex-start;
@@ -47,10 +47,26 @@ es-template-page {
         flex-direction: column;
     }
 
+    // being sticky, the column is a stacking context of its own, so the fullscreen sidebar's
+    // z-index only counts once the column itself is raised: above the page's side menu (same
+    // z-index, earlier in the DOM), below the main nav
+    &.fullscreen {
+        z-index: vars.$topBarZIndex - 1;
+    }
+
+    // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height
+    es-editorial-sidebar {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+    }
+
     // The handle is created by the directive without this component's encapsulation attribute,
-    // hence ::ng-deep. A hover tint so it reads as grabbable against the page background.
+    // hence ::ng-deep. Centered in the gap left of the column (the page card's right margin), with
+    // a hover tint so it reads as grabbable against the page background.
     ::ng-deep .es-sidenav-resizer.end {
-        left: 0;
+        left: calc((var(--roundedContainerMargin) + 8px) / -2);
         width: 8px;
         border-radius: 4px;
         &:hover {
@@ -62,7 +78,7 @@ es-template-page {
 // Below the tab-switch breakpoint the page is too narrow to stand beside a panel, so the column
 // covers it instead of squeezing it. The bottom inset clears the fixed mobile navigation.
 @media screen and (max-width: vars.$mobileTabSwitchWidth) {
-    .custom-sidebar-extension.open {
+    .sidebar-column.open {
         position: fixed;
         top: var(--mainnavCurrentHeight);
         right: 0;
@@ -73,5 +89,31 @@ es-template-page {
         height: auto;
         padding: 0;
         z-index: 98;
+    }
+}
+
+// Topic-page adjustments of the preview content
+.sidebar-column ::ng-deep es-preview-sidebar .preview-sidebar {
+    es-render-wrapper-component {
+        // reduce min-height
+        min-height: 250px;
+
+        rs-root {
+            // reduce min-height
+            min-height: 250px;
+
+            // adjust img width + avoid having visual empty space at the bottom
+            img {
+                max-width: 100%;
+                display: block;
+            }
+
+            // remove link to original content from link-wrapper
+            .link-wrapper {
+                > a {
+                    display: none;
+                }
+            }
+        }
     }
 }

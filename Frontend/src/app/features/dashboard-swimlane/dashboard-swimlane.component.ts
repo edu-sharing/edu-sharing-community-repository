@@ -31,12 +31,12 @@ import {
     UIConstants,
     UIService,
 } from 'ngx-edu-sharing-ui';
-import { SwimlaneEntry } from '../../pages/landing-page/landing-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import {
     AssignmentV1Service,
     AuthenticationService,
+    DashboardSwimlaneEntry,
     DEFAULT,
     HOME_REPOSITORY,
     Node,
@@ -92,11 +92,11 @@ export class DashboardSwimlaneComponent {
     private mdsHelperService = inject(MdsHelperService);
 
     /**
-     * @param {SwimlaneEntry} swimlane - The required SwimlaneEntry.
+     * @param {DashboardSwimlaneEntry} swimlane - The required DashboardSwimlaneEntry.
      * @description
      * Represents a swimlane on the start page
      */
-    readonly swimlane = input.required<SwimlaneEntry>();
+    readonly swimlane = input.required<DashboardSwimlaneEntry>();
     readonly type = computed(() => {
         return 'recent-activities' === this.swimlane().id
             ? 'interactivity-stream-activities'

@@ -7,33 +7,49 @@
     --anchor-menu-height: 108px;
     --border-radius: 24px;
     --content-max-width: 1440px;
-    --navbar-height: var(--mainnavHeight, 89px);
-    --breadcrumb-height: 76px;
-    --sidebar-offset: 16px;
-    --sidebar-width: 450px;
     --offcanvas-menu-width: 48px;
     --offcanvas-offset: 8px;
     // overwrite border radius for template page
     --mat-fab-small-container-shape: 4px;
-    display: flex;
-    flex-direction: column;
 
-    // Rounded card frame. `overflow: clip` rounds the corners without making a scroll box, so the
-    // page still scrolls on the window (the sticky breadcrumb and preview sidebar rely on that).
+    // Rounded card of fixed height: the breadcrumb and hints stay on top while .template-scroll
+    // scrolls the page content internally.
     margin: var(--roundedContainerMargin);
     border-radius: var(--borderRadiusCards);
-    overflow: clip;
     background: topicPageVars.$surface-container-lowest;
     @include topicPageVars.materialShadow();
+    @include topicPageVars.roundedContainerStaticScroll(
+        topicPageVars.$mobileTabSwitchWidth,
+        topicPageVars.$mobileTabNavHeight
+    );
 }
 
-// On mobile, drop the frame so the page uses the full width (like the other pages).
+// On mobile, drop the frame so the page uses the full width (like the other pages), leaving room
+// for the fixed mobile bottom nav.
 @media screen and (max-width: topicPageVars.$mobileTabSwitchWidth) {
     :host {
-        margin: 0;
+        margin: 0 0 topicPageVars.$mobileTabNavHeight;
         border-radius: 0;
         box-shadow: none;
     }
+}
+
+main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.template-mode {
+    flex-shrink: 0;
+}
+
+.template-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    @include topicPageVars.materialScrollbarLight();
 }
 
 .reloading-indicator-bg {
@@ -107,10 +123,10 @@ es-side-menu-wrapper {
 }
 
 .template-breadcrumb {
+    flex-shrink: 0;
     box-sizing: border-box;
     width: 100%;
-    position: sticky;
-    top: 70px;
+    position: relative;
     // overflow contents such as the image of the navbar or the AI labels
     z-index: 12;
 
@@ -184,6 +200,8 @@ es-side-menu-wrapper {
 }
 
 .topic-page-outer-wrapper {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: row;
 }
@@ -327,9 +345,8 @@ es-side-menu-wrapper {
             width: 100%;
             position: relative;
 
-            // fix position of es-swimlane-wrapper, when being scrolled into position
-            // this is caused by the navbar
-            scroll-margin-top: 100px;
+            // gap to the top of the scroll region when the swimlane is scrolled into view
+            scroll-margin-top: 16px;
 
             .topic-page-swimlane {
                 margin: 0 auto;
@@ -848,44 +865,6 @@ es-editable-text {
 
         .create-button > button {
             min-height: 100%;
-        }
-    }
-}
-
-// The resizable preview column lives in es-preview-sidebar-wrapper. Here we only pass the gap on
-// its right edge (rounded margin + offcanvas menu) so its drag-resize math stays correct.
-es-preview-sidebar-wrapper {
-    --preview-panel-edge-inset: calc(
-        var(--roundedContainerMargin) + var(--offcanvas-menu-width) + var(--offcanvas-offset)
-    );
-}
-
-// Adjust style of es-preview-sidebar for topic page
-:host es-preview-sidebar ::ng-deep .preview-sidebar {
-    .preview-sidebar-body .mds-views {
-        width: calc(var(--sidebar-width) - 2 * 15px);
-    }
-
-    es-render-wrapper-component {
-        // reduce min-height
-        min-height: 250px;
-
-        rs-root {
-            // reduce min-height
-            min-height: 250px;
-
-            // adjust img width + avoid having visual empty space at the bottom
-            img {
-                max-width: 100%;
-                display: block;
-            }
-
-            // remove link to original content from link-wrapper
-            .link-wrapper {
-                > a {
-                    display: none;
-                }
-            }
         }
     }
 }

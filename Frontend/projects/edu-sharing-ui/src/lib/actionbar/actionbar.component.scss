@@ -57,10 +57,10 @@ button {
 }
 .actionbar-background-primary {
     .mdc-button {
-        color: rgb(var(--palette-foreground-text-dark));
+        color: var(--light-primary-text);
     }
     .mat-mdc-outlined-button {
-        border-color: rgb(var(--palette-foreground-text-dark));
+        border-color: var(--light-primary-text);
     }
 
     .mat-mdc-unelevated-button {

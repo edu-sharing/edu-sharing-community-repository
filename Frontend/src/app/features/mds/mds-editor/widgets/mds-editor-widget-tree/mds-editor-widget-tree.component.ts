@@ -416,9 +416,11 @@ export class MdsEditorWidgetTreeComponent
             // the value is not part of the valuespace (e.g. a legacy value), nothing to reveal
             return;
         }
-        this.openOverlay();
+        if (!this.overlayIsVisible) {
+            this.openOverlay();
+        }
         setTimeout(() => {
-            this.treeCoreComponent.revealInTree(treeNode);
+            this.treeCoreComponent?.revealInTree(treeNode);
         });
     }
     focus() {
@@ -467,7 +469,11 @@ export class MdsEditorWidgetTreeComponent
         this.positionY.set(null);
         if (!this.isTree) {
             //this.inputControl.setValue('');
-            if (this.editorMode !== this.valueSelection) {
+            // the flag is only consumed by a focus event, which an already focused input never fires
+            if (
+                this.editorMode !== this.valueSelection &&
+                document.activeElement !== this.inputElement?.nativeElement
+            ) {
                 this.ignoreNextFocusEvent = true;
             }
             this.inputControl.setValue('');
@@ -475,6 +481,27 @@ export class MdsEditorWidgetTreeComponent
         } else {
             this.openButtonRef.focus();
         }
+        this.onBlur.emit();
+    }
+
+    /** Closes the overlay when the focus leaves widget and overlay, without moving it back. */
+    onFocusOut(event: FocusEvent): void {
+        const next = event.relatedTarget as HTMLElement | null;
+        if (!this.overlayIsVisible || !next) {
+            return;
+        }
+        if (
+            UIHelper.isParentElementOfElement(next, this.boxRef.nativeElement) ||
+            next.closest('.suggestion-card')
+        ) {
+            return;
+        }
+        this.overlayIsVisible = false;
+        this.positionY.set(null);
+        if (!this.isTree) {
+            this.inputControl.setValue('');
+        }
+        this.changeDetectorRef.detectChanges();
         this.onBlur.emit();
     }
 

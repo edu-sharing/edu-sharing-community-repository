@@ -186,6 +186,8 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     private widgetComponentRef: ComponentRef<any> | null = null;
     widgetInstance: WidgetComponentInterface | null = null;
     private widgetNode: Node;
+    // the own config node was deleted, so saving creates a new one
+    private configNodeUnavailable: boolean = false;
 
     constructor() {
         // the label is streamed rather than resolved once: it is written into an option object
@@ -328,7 +330,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         );
         // persist config by creating new or updating existing node
         this.widgetNode = await this.topicPageHelperService.persistConfig(
-            this.nodeId,
+            this.configNodeUnavailable ? '' : this.nodeId,
             this.gridIndex,
             this.swimlaneIndex,
             this.pageVariantNode,
@@ -782,12 +784,16 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
         let aiConfig: BapiConfigObject = {};
 
         if (this.nodeId || this.propagatedNodeId) {
-            this.widgetNode = await this.topicPageHelperService.getNode(
+            // an unavailable config node leaves the widget unconfigured
+            this.widgetNode = await this.topicPageHelperService.getNodeIfAvailable(
                 this.nodeId || this.propagatedNodeId,
             );
-            widgetConfig = retrieveWidgetConfigFromNode(this.widgetNode);
-            aiConfig = retrieveAiConfigFromNode(this.widgetNode);
+            if (this.widgetNode) {
+                widgetConfig = retrieveWidgetConfigFromNode(this.widgetNode);
+                aiConfig = retrieveAiConfigFromNode(this.widgetNode);
+            }
         }
+        this.configNodeUnavailable = !!this.nodeId && !this.widgetNode;
 
         // check if configOverwrite should override the retrieved config
         if (this.configOverwrite) {

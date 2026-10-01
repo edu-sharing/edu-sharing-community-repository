@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tika.Tika;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -37,6 +38,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
@@ -210,6 +212,7 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						CCM_RESSOURCETYPE_SERLO);
 				nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESOURCESUBTYPE), result.variant);
 				nodeService.setProperty(nodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION), result.version);
+				processLtiToolProperties(nodeRef,"Serlo Editor");
 				return true;
 			}
 		}
@@ -409,12 +412,26 @@ public class RessourceInfoExecuter extends ActionExecuterAbstractBase {
 						CCM_RESSOURCETYPE_GEOGEBRA);
 				nodeService.setProperty(actionedUponNodeRef, QName.createQName(CCM_PROP_IO_RESSOURCEVERSION),
 						schemaVers);
-                return true;
+
+				processLtiToolProperties(actionedUponNodeRef,"Geogebra");
+				return true;
 			}
 		} catch(Throwable e) {
 			logger.info("Could not identify if file is a geogebra element: " + e.getMessage());
 		}
         return false;
+	}
+
+	private void processLtiToolProperties(NodeRef actionedUponNodeRef,String toolCaption) {
+		ApplicationInfoList.getAppInfosLtiTool().stream()
+				.filter(a -> a.isLtiTool() && toolCaption.equals(a.getAppCaption()))
+				.findFirst()
+				.ifPresent(a -> {
+					HashMap<QName,Serializable> props = new HashMap<>();
+					props.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_TOOLURL),a.getLtitoolUrl());
+					props.put(QName.createQName(CCConstants.CCM_PROP_LTITOOL_NODE_RESOURCELINK),a.getLtitoolUrl());
+					nodeService.addAspect(actionedUponNodeRef,QName.createQName(CCConstants.CCM_ASPECT_LTITOOL_NODE),props);
+				});
 	}
 
 	private void processMoodle(InputStream is, ContentReader contentreader, NodeRef actionedUponNodeRef) {

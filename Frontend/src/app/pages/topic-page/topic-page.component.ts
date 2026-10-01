@@ -12,7 +12,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
-import { TopicPageGlobalService } from './shared/services/topic-page-global.service';
 import { TemplateComponent } from './editor/template.component';
 
 @Component({
@@ -25,12 +24,7 @@ export class TopicPageComponent {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private translate = inject(TranslateService);
-    private topicPageGlobalService = inject(TopicPageGlobalService);
     protected editorialSidebarService = inject(EditorialSidebarService);
-
-    /** Component of the extension column beside the page, `null` while none is registered. */
-    protected readonly customSidebarExtension =
-        this.topicPageGlobalService.getCustomSidebarExtension();
 
     // defaults to the main collection of physics
     topicCollectionId: WritableSignal<string> = signal(null);
@@ -103,11 +97,9 @@ export class TopicPageComponent {
     }
 
     /**
-     * Publish the width of the extension column as `--sideMenuRightInset`.
-     *
-     * The topic page's offcanvas side menu ("Themenbaum", "Statistik") is fixed to the right edge of
-     * the viewport, so without this it would stand on top of an open column. The width is watched
-     * rather than read once: the column is resizable by drag.
+     * Publish the width of the sidebar column as `--sideMenuRightInset`, so the offcanvas side menu
+     * fixed to the viewport's right edge stays clear of it. Watched rather than read once: the
+     * column is resizable by drag.
      */
     private trackSidebarColumnWidth(): void {
         effect((onCleanup) => {

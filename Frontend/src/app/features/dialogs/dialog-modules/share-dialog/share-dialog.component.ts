@@ -30,7 +30,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
 import { buffer, firstValueFrom, forkJoin as observableForkJoin, of, Subject } from 'rxjs';
-import { catchError, debounceTime, filter, map } from 'rxjs/operators';
+import { catchError, debounceTime, filter, map, take } from 'rxjs/operators';
 import {
     CollectionUsage,
     ConfigurationService,
@@ -65,6 +65,7 @@ import {
     AuthenticationService,
     Authority,
     ConfigService,
+    ConnectorService,
     HOME_REPOSITORY,
     IamV1Service,
     Node,
@@ -108,6 +109,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     private config = inject(ConfigurationService);
     private configService = inject(ConfigService);
     private connector = inject(RestConnectorService);
+    private connectorService = inject(ConnectorService);
     private localEvents = inject(LocalEventsService);
     private dialogs = inject(DialogsService);
     private aboutService = inject(AboutService);
@@ -237,6 +239,8 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
     showChooseType = false;
     private showChooseTypeList: Permission;
 
+    /** whether any of the nodes belongs to a connector whose tool may manage its own permissions */
+    hasExternalPermissions: WritableSignal<boolean> = signal(false);
     isCollectionOrDirectory: WritableSignal<boolean> = signal(false);
     atLeastOneTreeChild: WritableSignal<boolean> = signal(false);
     structureColumns: ColumnType;
@@ -386,6 +390,14 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         if (isDirectory.values().next().value) {
             this.currentType = [RestConstants.ACCESS_CONSUMER];
         }
+        this.connectorService
+            .observeConnectorsOfNodes(this._nodes)
+            .pipe(take(1))
+            .subscribe((connectors) =>
+                this.hasExternalPermissions.set(
+                    connectors.some((connector) => connector.externalPermissions),
+                ),
+            );
         if (this.data.currentPermissions) {
             this.originalPermissions = Helper.deepCopy(this.data.currentPermissions);
             this.setPermissions(this.data.currentPermissions.permissions);

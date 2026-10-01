@@ -127,6 +127,7 @@ export { RefDashboardShortcutEntry } from './api/models/ref-dashboard-shortcut-e
 export { RefDashboardShortcut } from './api/models/ref-dashboard-shortcut';
 export { ShortcutConfig } from './api/models/shortcut-config';
 export { ShortcutConfigEntry } from './api/models/shortcut-config-entry';
+export { DashboardSwimlaneEntry } from './api/models/dashboard-swimlane-entry';
 export { Statistics } from './api/models/statistics';
 export { StatisticsGroup } from './api/models/statistics-group';
 export { StreamEntry } from './api/models/stream-entry';

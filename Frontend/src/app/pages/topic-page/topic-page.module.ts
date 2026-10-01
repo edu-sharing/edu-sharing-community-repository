@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { SharedModule } from '../../shared/shared.module';
 import { TemplateComponent } from './editor/template.component';
@@ -9,6 +10,7 @@ import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.d
 @NgModule({
     declarations: [TopicPageComponent],
     imports: [
+        EditorialSidebarModule,
         SharedModule,
         TemplateComponent,
         TopicPageRoutingModule,

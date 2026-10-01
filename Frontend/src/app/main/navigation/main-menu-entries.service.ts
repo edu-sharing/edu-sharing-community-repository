@@ -254,14 +254,16 @@ export class MainMenuEntriesService {
     }
 
     private generateEntry(entryDefinition: EntryDefinition): ConfigEntry {
-        const entry = {
+        const entry: ConfigEntry = {
             name: entryDefinition.name,
             icon: entryDefinition.icon,
             scope: entryDefinition.scope,
             isDisabled: false,
             isSeparate: false,
             isCustom: false,
+            ...this.getLinkProperties(entryDefinition.target),
             open: () => this.openEntry(entry, entryDefinition.target),
+            notifyViewSwitched: () => this.broadcastViewSwitched(entry),
         };
         return entry;
     }
@@ -274,16 +276,18 @@ export class MainMenuEntriesService {
                   url: customEntryDefinition.url,
                   openInNew: customEntryDefinition.openInNew ?? true,
               };
-        const entry = {
+        const entry: ConfigEntry = {
             name: customEntryDefinition.name,
             icon: customEntryDefinition.icon,
             scope: customEntryDefinition.scope,
             isDisabled: !!customEntryDefinition.isDisabled,
             isSeparate: !!customEntryDefinition.isSeperate,
             isCustom: true,
+            ...this.getLinkProperties(target),
             open: () => {
                 void this.openEntry(entry, target);
             },
+            notifyViewSwitched: () => this.broadcastViewSwitched(entry),
         };
         return entry;
     }
@@ -308,8 +312,41 @@ export class MainMenuEntriesService {
         );
     }
 
-    private async openEntry(entry: ConfigEntry, target: Target): Promise<void> {
+    private broadcastViewSwitched(entry: ConfigEntry): void {
         this.frameEvents.broadcastEvent(FrameEventsService.EVENT_VIEW_SWITCHED, entry.scope);
+    }
+
+    /**
+     * Splits a target path like `search?foo=bar` into router commands and the query params
+     * contained in the path itself.
+     */
+    private parsePath(targetPath: string): { routerLink: string[]; queryParams: Params } {
+        const queryParams: Params = {};
+        const sourceParams = targetPath.split('?');
+        const path = sourceParams.splice(0, 1);
+        sourceParams
+            .join('?')
+            .split('&')
+            .forEach((p) => {
+                const split = p.split('=');
+                queryParams[split[0]] = split[1];
+            });
+        return { routerLink: [UIConstants.ROUTER_PREFIX + path], queryParams };
+    }
+
+    private getLinkProperties(
+        target: Target,
+    ): Pick<ConfigEntry, 'routerLink' | 'queryParams' | 'url' | 'openInNew'> {
+        switch (target.type) {
+            case 'path':
+                return this.parsePath(target.path);
+            case 'url':
+                return { url: target.url, openInNew: target.openInNew };
+        }
+    }
+
+    private async openEntry(entry: ConfigEntry, target: Target): Promise<void> {
+        this.broadcastViewSwitched(entry);
         switch (target.type) {
             case 'path':
                 const currentParams = await this.route.queryParams.pipe(first()).toPromise();
@@ -319,17 +356,9 @@ export class MainMenuEntriesService {
                         params[key] = currentParams[key];
                     }
                 }
-                const sourceParams = target.path.split('?');
-                const path = sourceParams.splice(0, 1);
-                sourceParams
-                    ?.join('?')
-                    .split('&')
-                    .forEach((p) => {
-                        const split = p.split('=');
-                        params[split[0]] = split[1];
-                    });
-                void this.router.navigate([UIConstants.ROUTER_PREFIX + path], {
-                    queryParams: params,
+                const { routerLink, queryParams } = this.parsePath(target.path);
+                void this.router.navigate(routerLink, {
+                    queryParams: { ...params, ...queryParams },
                 });
                 break;
             case 'url':

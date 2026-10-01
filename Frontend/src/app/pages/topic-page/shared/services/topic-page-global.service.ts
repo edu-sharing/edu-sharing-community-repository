@@ -1,4 +1,4 @@
-import { Injectable, signal, Signal, TemplateRef, Type } from '@angular/core';
+import { Injectable, TemplateRef, Type } from '@angular/core';
 import { NavigationExtras } from '@angular/router';
 import { NgxColorsColor } from 'ngx-colors';
 import { Node } from 'ngx-edu-sharing-api';
@@ -8,15 +8,6 @@ import { BreadcrumbExtensionInterface } from '../../widgets/breadcrumb/breadcrum
 export type CustomBreadcrumbExtension = {
     id: string;
     component: () => Promise<Type<BreadcrumbExtensionInterface>>;
-};
-/**
- * A component another module contributes to the topic page's right-hand extension column — a panel
- * the page does not bring itself, such as the editorial sidebar hosting the chat assistant. Loaded
- * lazily, the same way a custom breadcrumb extension is.
- */
-export type CustomSidebarExtension = {
-    id: string;
-    component: () => Promise<Type<unknown>>;
 };
 export type CustomSideMenuItem = {
     id: string;
@@ -36,11 +27,6 @@ export type NodeSelectionValidator = (node: Node) => boolean | Promise<boolean>;
 export class TopicPageGlobalService {
     private backToCollectionButtonVisible: boolean = true;
     private customBreadcrumbExtension: CustomBreadcrumbExtension = null;
-    /**
-     * The loaded component of the registered sidebar extension. A signal because the registration
-     * resolves asynchronously and the page renders the column from it.
-     */
-    private readonly customSidebarExtension = signal<Type<unknown> | null>(null);
     private customBreadcrumbRootLink: string = '';
     private customReurlComponent: string = '';
     private customReurlExtras: NavigationExtras;
@@ -73,16 +59,6 @@ export class TopicPageGlobalService {
      */
     registerCustomBreadcrumbExtension(customBreadcrumbExtension: CustomBreadcrumbExtension) {
         this.customBreadcrumbExtension = customBreadcrumbExtension;
-    }
-
-    /**
-     * Registers a component for the right-hand extension column of the topic page. Registering a
-     * second one replaces the first — the column holds a single panel.
-     *
-     * @param extension
-     */
-    registerCustomSidebarExtension(extension: CustomSidebarExtension) {
-        void extension.component().then((component) => this.customSidebarExtension.set(component));
     }
 
     /**
@@ -311,14 +287,6 @@ export class TopicPageGlobalService {
             return this.customBreadcrumbExtension.component();
         }
         return null;
-    }
-
-    /**
-     * The component of the registered sidebar extension, `null` while none is registered or its
-     * lazy chunk is still loading.
-     */
-    getCustomSidebarExtension(): Signal<Type<unknown> | null> {
-        return this.customSidebarExtension.asReadonly();
     }
 
     /**

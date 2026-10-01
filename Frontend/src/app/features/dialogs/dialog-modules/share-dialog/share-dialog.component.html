@@ -14,6 +14,11 @@
       {{ 'WORKSPACE.TAB_SHARING' | translate }}
     </ng-template>
     <div class="share-group">
+      @if (hasExternalPermissions()) {
+      <es-info-message mode="info">
+        {{ 'WORKSPACE.SHARE.EXTERNAL_PERMISSIONS_INFO' | translate }}
+      </es-info-message>
+      }
       <!-- notification settings -->
       <div class="group groupMessage">
         @if (!hasNotificationService) {

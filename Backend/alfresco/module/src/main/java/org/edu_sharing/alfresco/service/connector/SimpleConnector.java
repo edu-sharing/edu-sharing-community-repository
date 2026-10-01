@@ -80,6 +80,12 @@ public class SimpleConnector implements Serializable {
 
 	@Optional private String mdsGroup;
 
+	/**
+	 * the element is managed by an external tool which may have its own permissions,
+	 * i.e. permissions set in edu-sharing only affect visibility and metadata
+	 */
+	@Optional private boolean externalPermissions=false;
+
 	private List<ConnectorFileType> filetypes;
 	@Data
 	public static class SimpleConnectorApi {

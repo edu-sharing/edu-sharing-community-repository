@@ -7,26 +7,30 @@
       [variantId]="topicVariantId()"
     ></es-template-page>
     }
-    <!-- Extension column beside the page: a panel another module contributes (the editorial
-      sidebar hosting the chat assistant). Sticky, so it stays in view while the page scrolls on the
-      window, and kept mounted while it is closed — the panel registers itself on creation, and only
-      a registered sidebar offers its options. -->
-    @if (customSidebarExtension(); as sidebarExtension) {
+    <!-- Editorial sidebar beside the page: previews the page's elements and hosts the options other
+      modules register. Sticky, so it stays in view while the page scrolls on the window, and kept
+      mounted while closed — only a registered sidebar offers its options. -->
     <div
       #sidebarColumnRef
-      class="custom-sidebar-extension"
+      class="sidebar-column"
       [class.open]="editorialSidebarService.sidebarOpened()"
+      [class.fullscreen]="editorialSidebarService.fullscreenActive()"
       esResizableSidenav
       position="end"
-      storageKey="TOPIC_PAGE_CUSTOM_SIDEBAR_WIDTH"
+      storageKey="TOPIC_PAGE_SIDEBAR_WIDTH"
       [defaultWidthPx]="600"
       [minWidth]="0"
       [minWidthPx]="400"
       [maxWidthPx]="800"
     >
-      <ng-container *ngComponentOutlet="sidebarExtension"></ng-container>
+      <!-- `primaryMode` becomes the options scope: 'activity' leaves out the options scoped to other
+        pages (workspace, search, collections, …). -->
+      <es-editorial-sidebar
+        [primaryMode]="'activity'"
+        [showEdgeToggle]="false"
+        (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
+      ></es-editorial-sidebar>
     </div>
-    }
   </div>
   <es-footer></es-footer>
 </div>

@@ -76,9 +76,9 @@
 
 @mixin menu-styles {
     // static fix for now to override 1em defined in material theme CSS
-    // exclude back to top button
+    // exclude back to top button; the page's sidebar column sizes its icons itself
     .topic-page-menu,
-    es-custom-topic-page {
+    es-custom-topic-page es-template-page {
         i.mat-icon:not([esicon='arrow_upward']):not([esicon='comment']) {
             font-size: 24px;
             width: 24px;

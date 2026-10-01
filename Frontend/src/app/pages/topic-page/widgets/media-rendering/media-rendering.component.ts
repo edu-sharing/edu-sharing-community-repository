@@ -17,6 +17,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -40,7 +41,6 @@ import { MediaRenderingDisplayType } from '../../shared/types/media-rendering-di
 import { MediaRenderingConfig } from '../../shared/types/widget-config/media-rendering-config';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
-import { PreviewSidebarService } from '../../../../features/editorial-sidebar/preview-sidebar/preview-sidebar.service';
 
 @Component({
     selector: 'es-media-rendering',
@@ -65,7 +65,6 @@ import { PreviewSidebarService } from '../../../../features/editorial-sidebar/pr
 export class MediaRenderingComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     private highlightSearch = inject(HighlightSearchPipe);
     private nodeTitlePipe = inject(NodeTitlePipe);
-    private previewSidebarService = inject(PreviewSidebarService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
 
@@ -128,14 +127,15 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     );
     selectedNode: Node;
     selectedNodeTitle: WritableSignal<string> = signal('');
+    // ID of a configured node that was deleted or is no longer readable, kept until it is replaced
+    unavailableNodeId: WritableSignal<string | null> = signal(null);
     sidebarOpen: WritableSignal<boolean> = signal(false);
     updateInProgress: WritableSignal<boolean> = signal(false);
     private windowRef: Window | null = null;
 
     constructor() {
         // subscribe to changes on the selected node
-        this.previewSidebarService
-            .getCurrentNode()
+        toObservable(this.topicPageHelperService.previewedNode)
             .pipe(takeUntil(this.destroy$))
             .subscribe((node: Node | null): void => {
                 const selectedNode: Node = node;
@@ -198,6 +198,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             this.selectedNode = null;
             setTimeout((): void => {
                 this.selectedNode = node;
+                this.unavailableNodeId.set(null);
                 this.computeSelectedNodeTitle();
                 this.configChanged.emit();
                 this.emitVisibleNode();
@@ -240,7 +241,7 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      */
     itemClicked(): void {
         this.itemClickedEvent.emit(this.selectedNode);
-        this.previewSidebarService.handleNodeClick(this.selectedNode);
+        this.topicPageHelperService.togglePreview(this.selectedNode);
     }
 
     // noinspection JSUnusedGlobalSymbols
@@ -259,8 +260,9 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
         let widgetConfig: MediaRenderingConfig = {
             mediaRenderingLayout: this.layout(),
         };
-        if (this.selectedNode?.ref.id) {
-            widgetConfig.selectedNodeId = this.selectedNode.ref.id;
+        const selectedNodeId: string | null = this.selectedNode?.ref.id ?? this.unavailableNodeId();
+        if (selectedNodeId) {
+            widgetConfig.selectedNodeId = selectedNodeId;
         }
         return widgetConfig;
     }
@@ -276,7 +278,10 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
             this.layout.set(config.mediaRenderingLayout);
         }
         if (config.selectedNodeId) {
-            this.selectedNode = await this.topicPageHelperService.getNode(config.selectedNodeId);
+            this.selectedNode = await this.topicPageHelperService.getNodeIfAvailable(
+                config.selectedNodeId,
+            );
+            this.unavailableNodeId.set(this.selectedNode ? null : config.selectedNodeId);
             this.computeSelectedNodeTitle();
         }
     }
