@@ -1,18 +1,56 @@
-@for (entry of entries$ | async; track entry) {
-<button
-  mat-button
-  color="primary"
-  class="entry mat-button-no-uppercase"
-  [class.selected]="currentScope === entry.scope"
-  (click)="entry.open(); entryClicked.emit()"
-  [class.collection-item-separate]="entry.isSeparate"
-  [class.clickable]="!entry.isDisabled"
-  [class.disabled]="entry.isDisabled"
-  title="{{ 'GOTO' | translate }} {{ entry.name | translate }}"
->
+<ng-template #content let-entry>
   @if (entry.icon) {
   <i class="align-icon" [esIcon]="entry.icon"></i>
   }
   <span>{{ entry.name | translate }}</span>
+</ng-template>
+@for (button of buttons$ | async; track button.entry) { @if (isLink(button.entry) &&
+button.entry.routerLink) {
+<a
+  mat-button
+  color="primary"
+  class="entry mat-button-no-uppercase"
+  [class.selected]="currentScope === button.entry.scope"
+  [class.collection-item-separate]="button.entry.isSeparate"
+  [class.clickable]="true"
+  [routerLink]="button.entry.routerLink"
+  [queryParams]="button.queryParams"
+  (click)="onClick($event, button.entry)"
+  title="{{ 'GOTO' | translate }} {{ button.entry.name | translate }}"
+>
+  <ng-container *ngTemplateOutlet="content; context: { $implicit: button.entry }"></ng-container>
+</a>
+} @else if (isLink(button.entry)) {
+<!-- Kept apart from the router link anchor: RouterLink would overwrite href and target. -->
+<a
+  mat-button
+  color="primary"
+  class="entry mat-button-no-uppercase"
+  [class.selected]="currentScope === button.entry.scope"
+  [class.collection-item-separate]="button.entry.isSeparate"
+  [class.clickable]="true"
+  [attr.href]="button.entry.url"
+  [attr.target]="button.entry.openInNew ? '_blank' : null"
+  [attr.rel]="button.entry.openInNew ? 'noopener noreferrer' : null"
+  (click)="onClick($event, button.entry)"
+  title="{{ 'GOTO' | translate }} {{ button.entry.name | translate }}"
+>
+  <ng-container *ngTemplateOutlet="content; context: { $implicit: button.entry }"></ng-container>
+</a>
+} @else {
+<!-- Disabled entries and entries without a target are not links, so they stay buttons. -->
+<button
+  mat-button
+  color="primary"
+  class="entry mat-button-no-uppercase"
+  [class.selected]="currentScope === button.entry.scope"
+  (click)="onClick($event, button.entry)"
+  [class.collection-item-separate]="button.entry.isSeparate"
+  [class.clickable]="!button.entry.isDisabled"
+  [class.disabled]="button.entry.isDisabled"
+  [disabled]="button.entry.isDisabled"
+  title="{{ 'GOTO' | translate }} {{ button.entry.name | translate }}"
+>
+  <ng-container *ngTemplateOutlet="content; context: { $implicit: button.entry }"></ng-container>
 </button>
-}
+} }

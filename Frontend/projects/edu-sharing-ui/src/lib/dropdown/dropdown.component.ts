@@ -66,6 +66,17 @@ export class DropdownComponent implements OnChanges {
         setTimeout(() => option.callback(null, this.callbackObjects));
     }
 
+    /** Click on a link option; modified clicks are left to the browser. */
+    clickLink(option: OptionItem, event: MouseEvent) {
+        if (!option.isEnabled || Helper.isModifiedClick(event)) {
+            return;
+        }
+        if (!option.link.routerLink) {
+            event.preventDefault();
+        }
+        setTimeout(() => option.callback(null, this.callbackObjects));
+    }
+
     isNewGroup(i: number) {
         if (i > 0) {
             return this.options$.value[i].group !== this.options$.value[i - 1].group;

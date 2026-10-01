@@ -2,7 +2,8 @@
 ul {
     @include dropdown.list();
     > li {
-        > button {
+        > button,
+        > a {
             width: 100%;
             min-height: 50px;
             height: fit-content;
