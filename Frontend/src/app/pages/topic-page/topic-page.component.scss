@@ -48,9 +48,10 @@ es-template-page {
     }
 
     // being sticky, the column is a stacking context of its own, so the fullscreen sidebar's
-    // z-index only counts once the column itself is raised above the page
+    // z-index only counts once the column itself is raised: above the page's side menu (same
+    // z-index, earlier in the DOM), below the main nav
     &.fullscreen {
-        z-index: vars.$dialogZIndex - 10;
+        z-index: vars.$topBarZIndex - 1;
     }
 
     // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height
