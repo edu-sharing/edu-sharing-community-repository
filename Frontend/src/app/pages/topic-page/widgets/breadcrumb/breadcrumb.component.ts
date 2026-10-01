@@ -21,6 +21,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatMenuModule } from '@angular/material/menu';
@@ -31,11 +32,15 @@ import { EduSharingUiCommonModule, UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RestConnectorService } from '../../../../core-module/rest/services/rest-connector.service';
+import { TopicPageEventsService } from '../../shared/services/topic-page-events.service';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { DEFAULT_PAGE_VARIANT_NAME_PREFIX } from '../../shared/types/custom-definitions';
 import { BreadcrumbConfig } from '../../shared/types/widget-config/breadcrumb-config';
-import { retrieveWidgetConfigFromNode } from '../../shared/utils/template-util';
+import {
+    convertNodeRefIntoNodeId,
+    retrieveWidgetConfigFromNode,
+} from '../../shared/utils/template-util';
 
 export interface BreadcrumbExtensionInterface {
     // inputs
@@ -62,6 +67,7 @@ export interface BreadcrumbExtensionInterface {
 })
 export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
     private connector = inject(RestConnectorService);
+    private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private uiService = inject(UIService);
@@ -133,6 +139,13 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
         }
         this.hasBreadcrumbExtension.set(this.topicPageGlobalService.hasCustomBreadcrumbExtension());
         this.customUrlTarget = this.topicPageGlobalService.getCustomUrlTarget();
+        this.topicPageEventsService.widgetNodeRestored
+            .pipe(takeUntilDestroyed())
+            .subscribe((nodeId: string): void => {
+                if (this.nodeId && convertNodeRefIntoNodeId(this.nodeId) === nodeId) {
+                    void this.loadWidgetConfig();
+                }
+            });
     }
 
     /**

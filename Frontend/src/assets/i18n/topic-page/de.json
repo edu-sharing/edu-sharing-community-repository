@@ -377,6 +377,39 @@
       "INVALID_OR_UNKNOWN_WIDGET": "Das Widget ist nicht definiert oder unbekannt."
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
+    "HISTORY": {
+      "UNDO": "Rückgängig",
+      "REDO": "Wiederholen",
+      "BAR": {
+        "LABEL": "Seitenverlauf",
+        "TITLE": "Bearbeitungsmodus",
+        "LAST_CHANGE": "Letzte Änderung: {{step}}",
+        "NOTHING_TO_UNDO": "Nichts rückgängig zu machen",
+        "UNDO_TOOLTIP": "Rückgängig: {{step}} (Strg+Z)",
+        "REDO_TOOLTIP": "Wiederholen: {{step}} (Strg+Umschalt+Z)"
+      },
+      "CHANGED_ELSEWHERE": "Die Seite wurde zwischenzeitlich an anderer Stelle geändert, daher wurde der Änderungsverlauf zurückgesetzt.",
+      "STEP": {
+        "ADD_SWIMLANE": "Abschnitt hinzugefügt",
+        "MOVE_SWIMLANE": "Abschnitt verschoben",
+        "DELETE_SWIMLANE": "Abschnitt gelöscht",
+        "EDIT_SWIMLANE": "Abschnittseinstellungen geändert",
+        "SWIMLANE_HEADING": "Abschnittsüberschrift geändert",
+        "SWIMLANE_SHAPE": "Abschnittsform geändert",
+        "SWIMLANE_COLOR": "Abschnittsfarbe geändert",
+        "GRID": "Abschnittslayout geändert",
+        "ADD_WIDGET": "{{widget}} hinzugefügt",
+        "WIDGET_CONFIG": "{{widget}} geändert",
+        "WIDGET_TYPE": "Widget-Typ geändert: {{from}} → {{to}}",
+        "REARRANGE_WIDGETS": "Widgets neu angeordnet",
+        "HEADER": "Seitenkopf geändert",
+        "COLLECTION_DESCRIPTION": "Sammlungsbeschreibung geändert",
+        "BREADCRUMB": "Redaktionsmitglieder geändert",
+        "WIDGET": "Widget",
+        "TOPIC_COLOR": "Themenfarbe geändert",
+        "ANCHOR_COLOR": "Farbe des Ankermenüs geändert"
+      }
+    },
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "Für diese Sammlung wurde noch keine Themenseite erstellt.",
       "VIEW_MESSAGE": "Bitte wenden Sie sich an Ihren Systemadministrator.",
@@ -452,8 +485,8 @@
       "PENDING_MESSAGE": "Die Seiten-Vorlage wird samt aller Anpassungen gelöscht."
     },
     "TEMPLATE_MODE_ACTIVE": {
-      "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",
-      "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage.",
+      "VIEW": "Anzeigemodus der Vorlage",
+      "EDIT": "Bearbeitungsmodus der Vorlage",
       "END": "Vorlagen-Modus beenden"
     }
   }

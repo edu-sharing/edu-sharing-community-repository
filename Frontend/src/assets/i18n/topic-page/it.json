@@ -364,6 +364,39 @@
       "INVALID_OR_UNKNOWN_WIDGET": "Il widget non è definito o è sconosciuto."
     },
     "NO_SWIMLANES": "Non è ancora stata creata alcuna sezione con contenuti.",
+    "HISTORY": {
+      "UNDO": "Annulla",
+      "REDO": "Ripeti",
+      "BAR": {
+        "LABEL": "Cronologia della pagina",
+        "TITLE": "Modalità modifica",
+        "LAST_CHANGE": "Ultima modifica: {{step}}",
+        "NOTHING_TO_UNDO": "Niente da annullare",
+        "UNDO_TOOLTIP": "Annulla: {{step}} (Ctrl+Z)",
+        "REDO_TOOLTIP": "Ripeti: {{step}} (Ctrl+Maiusc+Z)"
+      },
+      "CHANGED_ELSEWHERE": "Nel frattempo la pagina è stata modificata altrove, quindi la cronologia delle modifiche è stata azzerata.",
+      "STEP": {
+        "ADD_SWIMLANE": "Sezione aggiunta",
+        "MOVE_SWIMLANE": "Sezione spostata",
+        "DELETE_SWIMLANE": "Sezione eliminata",
+        "EDIT_SWIMLANE": "Impostazioni della sezione modificate",
+        "SWIMLANE_HEADING": "Titolo della sezione modificato",
+        "SWIMLANE_SHAPE": "Forma della sezione modificata",
+        "SWIMLANE_COLOR": "Colore della sezione modificato",
+        "GRID": "Layout della sezione modificato",
+        "ADD_WIDGET": "Widget aggiunto: {{widget}}",
+        "WIDGET_CONFIG": "Widget modificato: {{widget}}",
+        "WIDGET_TYPE": "Tipo di widget modificato: {{from}} → {{to}}",
+        "REARRANGE_WIDGETS": "Widget riorganizzati",
+        "HEADER": "Intestazione della pagina modificata",
+        "COLLECTION_DESCRIPTION": "Descrizione della collezione modificata",
+        "BREADCRUMB": "Membri della redazione modificati",
+        "WIDGET": "Widget",
+        "TOPIC_COLOR": "Colore del tema modificato",
+        "ANCHOR_COLOR": "Colore del menu di ancoraggio modificato"
+      }
+    },
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "Non è stato possibile trovare alcuna configurazione di pagina per questa pagina.",
       "VIEW_MESSAGE": "Contattate il vostro amministratore di sistema.",
@@ -428,8 +461,8 @@
       "PENDING_MESSAGE": "Il modello di pagina viene eliminato insieme a tutte le sue personalizzazioni."
     },
     "TEMPLATE_MODE_ACTIVE": {
-      "VIEW": "Vi trovate attualmente nella modalità di visualizzazione del modello.",
-      "EDIT": "Vi trovate attualmente nella modalità di modifica del modello.",
+      "VIEW": "Modalità di visualizzazione del modello",
+      "EDIT": "Modalità di modifica del modello",
       "END": "Esci dalla modalità modello"
     }
   }

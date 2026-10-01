@@ -30,6 +30,7 @@ import { DialogsService } from '../../../../../features/dialogs/dialogs.service'
 import { TooltipAriaLabelDirective } from '../../../shared/directives/tooltip-aria-label.directive';
 import { AiHelperService } from '../../../shared/services/ai-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
+import { TopicPageHistoryService } from '../../../shared/services/topic-page-history.service';
 import { AiLabelComponent } from '../ai-label/ai-label.component';
 
 @Component({
@@ -51,6 +52,7 @@ export class ImageWrapperComponent implements OnInit {
     private dialogsService = inject(DialogsService);
     private sanitizer = inject(DomSanitizer);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageHistoryService = inject(TopicPageHistoryService, { optional: true });
 
     // CONSTANTS
     private readonly BASE_64_PREFIX: string = 'data:image/jpg;base64,';
@@ -338,7 +340,14 @@ export class ImageWrapperComponent implements OnInit {
      */
     async deletePotentialUploadAndEmitValue(): Promise<void> {
         if (this.userUploadedNodeId()) {
-            await this.topicPageHelperService.deleteNodeIfExists(this.userUploadedNodeId());
+            // undo may link the replaced image again, so the editor history decides when it goes
+            const deletionTakenOver: boolean = !!this.topicPageHistoryService?.markOrphaned(
+                this.userUploadedNodeId(),
+                this.uploadParentNodeId(),
+            );
+            if (!deletionTakenOver) {
+                await this.topicPageHelperService.deleteNode(this.userUploadedNodeId());
+            }
             this.userUploadedNodeIdChange.emit(null);
         }
     }

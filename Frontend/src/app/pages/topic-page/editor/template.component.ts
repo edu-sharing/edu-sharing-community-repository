@@ -27,6 +27,7 @@ import {
     ViewChildren,
     WritableSignal,
     inject,
+    NgZone,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
@@ -56,7 +57,7 @@ import {
     UIConstants,
     Values,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { firstValueFrom, fromEvent, Observable, Subject } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -78,6 +79,7 @@ import {
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { CardComponent } from '../../../shared/components/card/card.component';
 import {
     MainNavCreateConfig,
     MainNavService,
@@ -106,6 +108,13 @@ import {
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
+import { HistoryAction, historyActionForKey } from '../shared/utils/history-shortcut-util';
+import {
+    HistoryTransaction,
+    StepOptions,
+    TopicPageHistoryHost,
+    TopicPageHistoryService,
+} from '../shared/services/topic-page-history.service';
 import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_COLLECTION_ID_PROP,
@@ -128,11 +137,13 @@ import {
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
     WIDGET_TYPE,
+    WIDGET_TYPE_OPTIONS,
     WIDGETS,
 } from '../shared/types/custom-definitions';
 import { BapiConfigObject } from '../shared/types/bapi-config-object';
 import { ColorChangeEvent } from '../shared/types/color-change-event';
 import { GridTile } from '../shared/types/grid-tile';
+import { HistoryStep } from '../shared/types/history-step';
 import { GridTileToHitsMapping } from '../shared/types/grid-tile-to-hits-mapping';
 import { GridTileToSearchCountMapping } from '../shared/types/grid-tile-to-search-count-mapping';
 import { GridTileToSearchResultsMapping } from '../shared/types/grid-tile-to-search-results-mapping';
@@ -147,6 +158,7 @@ import { SwimlaneRepeat } from '../shared/types/swimlane-repeat';
 import { ContentTeaserConfig } from '../shared/types/widget-config/content-teaser-config';
 import { WidgetConfig } from '../shared/types/widget-config/widget-config';
 import { WidgetConfigObject } from '../shared/types/widget-config-object';
+import { WidgetConfigUpdatedEvent } from '../shared/types/widget-config-updated-event';
 import { WidgetNodeAddedEvent } from '../shared/types/widget-node-added-event';
 import {
     containsAiTags,
@@ -195,6 +207,11 @@ import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
 
+// keystrokes in editable content keep their native meaning (e.g. undoing typed text)
+const isEditableTarget = (target: EventTarget | null): boolean =>
+    target instanceof HTMLElement &&
+    (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
+
 @Component({
     imports: [
         AddPageVariantOrTemplateDialogComponent,
@@ -225,7 +242,12 @@ import { EditorialSidebarModule } from '../../../features/editorial-sidebar/edit
         TranslateModule,
         VarDirective,
     ],
-    providers: [OptionsHelperDataService, TopicPageHelperService, TopicPageEventsService],
+    providers: [
+        OptionsHelperDataService,
+        TopicPageHelperService,
+        TopicPageEventsService,
+        TopicPageHistoryService,
+    ],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
     styleUrls: ['./template.component.scss'],
@@ -238,6 +260,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    protected history = inject(TopicPageHistoryService);
+    private ngZone = inject(NgZone);
     private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -266,6 +290,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         (o) => o.viewValue === 'CONTAINER_ELEMENT',
     )?.value;
     readonly i18nPrefix: string = 'TOPIC_PAGE.';
+    private readonly historyStepPrefix: string = this.i18nPrefix + 'HISTORY.STEP.';
     readonly createPageVariantTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_VARIANT';
     readonly createPageTemplateTitle: string = this.i18nPrefix + 'NAVIGATION.NEW_PAGE_TEMPLATE';
     readonly SWIMLANE_ID_PREFIX: string = 'swimlane-';
@@ -283,6 +308,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.editMode();
             untracked((): void => void this.updateRenderedSwimlanes());
         });
+        // a history spans one edit session on one variant
+        effect((): void => {
+            this.editMode();
+            this.pageVariantNodeId();
+            untracked((): void => void this.history.reset());
+        });
+        this.history.attach(this.historyHost);
         // listening to changes on the page variant node
         effect((): void => {
             this.pageVariantNode();
@@ -432,6 +464,19 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageVariantConfigs: NodeEntries;
     private pageVariantDefaultPosition: number = -1;
     pageVariantNode: WritableSignal<Node | null> = signal(null);
+    private pageVariantNodeId: Signal<string | null> = computed(
+        (): string | null => retrieveNodeId(this.pageVariantNode()) ?? null,
+    );
+    private readonly historyHost: TopicPageHistoryHost = {
+        variantNodeId: (): string | null => this.pageVariantNodeId(),
+        canRecord: (): boolean =>
+            this.editMode() && !!this.collectionNodePageConfigRef && !!this.pageVariantNode(),
+        readStructure: (): PageStructure | null => this.readPersistedStructure(),
+        writeStructure: (structure: PageStructure): Promise<void> =>
+            this.writePersistedStructure(structure),
+        nodePropertyRestored: (nodeId: string): Promise<void> => this.refreshRestoredNode(nodeId),
+        setBusy: (busy: boolean): void => this.requestInProgress.set(busy),
+    };
     pageVariantNodeIndex: number = 0;
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
@@ -568,6 +613,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             ),
         ];
         this.topicPageHelperService.previewCustomOptions = this.customSidebarOptions;
+        this.registerHistoryShortcuts();
         // retrieve the search URL
         this.searchUrl = this.retrieveSearchUrl();
         // retrieve the AI support state
@@ -717,6 +763,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * On destruction, complete the subjects.
      */
     ngOnDestroy(): void {
+        void this.history.reset();
         this.destroyed$.next();
         this.destroyed$.complete();
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
@@ -786,20 +833,30 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     let changesNecessary: boolean =
                         this.swimlanes[swimlaneIndex]?.backgroundColor !== color;
                     if (changesNecessary) {
-                        try {
-                            // if necessary, create a new page config node
-                            await this.checkForCustomPageNodeExistence();
-                            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                            this.swimlanes[swimlaneIndex].backgroundColor = color;
-                            if (!color) {
-                                delete this.swimlanes[swimlaneIndex].backgroundColor;
-                            }
-                            pageVariant.structure.swimlanes = this.swimlanes;
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        } catch (err) {
-                            console.error(err);
-                            this.topicPageHelperService.displayErrorToast();
-                        }
+                        await this.history.record(
+                            this.historyStepPrefix + 'SWIMLANE_COLOR',
+                            async (tx: HistoryTransaction): Promise<void> => {
+                                try {
+                                    // if necessary, create a new page config node
+                                    await this.checkForCustomPageNodeExistence();
+                                    const pageVariant: PageVariantConfig =
+                                        this.retrievePageVariant();
+                                    this.swimlanes[swimlaneIndex].backgroundColor = color;
+                                    if (!color) {
+                                        delete this.swimlanes[swimlaneIndex].backgroundColor;
+                                    }
+                                    pageVariant.structure.swimlanes = this.swimlanes;
+                                    this.pageVariantNode.set(
+                                        await this.savePageVariantConfig(pageVariant),
+                                    );
+                                    await this.updatePageVariantConfigs();
+                                } catch (err) {
+                                    tx.fail();
+                                    console.error(err);
+                                    this.topicPageHelperService.displayErrorToast();
+                                }
+                            },
+                        );
                     }
                 }
             });
@@ -831,70 +888,111 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     validWidgetOrAiConfig &&
                     (validInputs || isBreadcrumbNode || isHeaderNode)
                 ) {
-                    // if no page configuration exists yet, a config has to be created and a reload of the page is necessary
-                    // this also creates the widget node, as it has to be added as children of the page variant node
-                    const addedSuccessfully = await this.checkForCustomPageNodeExistence(
-                        pageVariantNode,
-                        swimlaneIndex,
-                        gridIndex,
-                        widget,
-                        isHeaderNode,
-                        isBreadcrumbNode,
+                    // the node is created on the first edit of a widget the user added before
+                    const step: { key: string } & StepOptions = isHeaderNode
+                        ? { key: 'HEADER' }
+                        : isBreadcrumbNode
+                        ? { key: 'BREADCRUMB' }
+                        : this.widgetStep(
+                              'WIDGET_CONFIG',
+                              this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex]?.item,
+                          );
+                    await this.history.record(
+                        this.historyStepPrefix + step.key,
+                        async (): Promise<void> => {
+                            // if no page configuration exists yet, a config has to be created and a reload of the page is necessary
+                            // this also creates the widget node, as it has to be added as children of the page variant node
+                            const addedSuccessfully = await this.checkForCustomPageNodeExistence(
+                                pageVariantNode,
+                                swimlaneIndex,
+                                gridIndex,
+                                widget,
+                                isHeaderNode,
+                                isBreadcrumbNode,
+                            );
+                            // if no page node was created, the adding is not yet successfully, so updating is necessary
+                            if (!addedSuccessfully) {
+                                const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                                // create the widget node
+                                const properties: { [key: string]: string } = {
+                                    [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(
+                                        widget.widgetConfig,
+                                    ),
+                                };
+                                if (widget.aiConfig && Object.keys(widget.aiConfig)?.length) {
+                                    properties[DEFAULT_AI_CONFIG_PROP] = JSON.stringify(
+                                        widget.aiConfig,
+                                    );
+                                }
+                                let widgetNode: Node =
+                                    await this.topicPageHelperService.createChild(
+                                        retrieveNodeId(this.pageVariantNode()),
+                                        RestConstants.CCM_TYPE_MAP,
+                                        DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
+                                        null,
+                                        properties,
+                                    );
+                                const convertedWidgetNodeId: string = prependWorkspacePrefix(
+                                    retrieveNodeId(widgetNode),
+                                );
+                                // modify breadcrumb nodeId
+                                if (isBreadcrumbNode) {
+                                    pageVariant.structure.breadcrumbNodeId = convertedWidgetNodeId;
+                                    this.breadcrumbNodeId.set(
+                                        pageVariant.structure.breadcrumbNodeId,
+                                    );
+                                    this.pageVariantNode.set(
+                                        await this.savePageVariantConfig(pageVariant),
+                                    );
+                                }
+                                // modify header nodeId
+                                else if (isHeaderNode) {
+                                    pageVariant.structure.headerNodeId = convertedWidgetNodeId;
+                                    this.headerNodeId.set(pageVariant.structure.headerNodeId);
+                                    this.pageVariantNode.set(
+                                        await this.savePageVariantConfig(pageVariant),
+                                    );
+                                }
+                                // modify nodeId of swimlane grid tile
+                                else if (
+                                    this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex] &&
+                                    pageVariant
+                                ) {
+                                    this.swimlanes[swimlaneIndex].grid[gridIndex].nodeId =
+                                        convertedWidgetNodeId;
+                                    pageVariant.structure.swimlanes = this.swimlanes;
+                                    this.pageVariantNode.set(
+                                        await this.savePageVariantConfig(pageVariant),
+                                    );
+                                }
+                            }
+                            await this.updatePageVariantConfigs();
+                        },
+                        step,
                     );
-                    // if no page node was created, the adding is not yet successfully, so updating is necessary
-                    if (!addedSuccessfully) {
-                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                        // create the widget node
-                        const properties: { [key: string]: string } = {
-                            [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(widget.widgetConfig),
-                        };
-                        if (widget.aiConfig && Object.keys(widget.aiConfig)?.length) {
-                            properties[DEFAULT_AI_CONFIG_PROP] = JSON.stringify(widget.aiConfig);
-                        }
-                        let widgetNode: Node = await this.topicPageHelperService.createChild(
-                            retrieveNodeId(this.pageVariantNode()),
-                            RestConstants.CCM_TYPE_MAP,
-                            DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
-                            null,
-                            properties,
-                        );
-                        const convertedWidgetNodeId: string = prependWorkspacePrefix(
-                            retrieveNodeId(widgetNode),
-                        );
-                        // modify breadcrumb nodeId
-                        if (isBreadcrumbNode) {
-                            pageVariant.structure.breadcrumbNodeId = convertedWidgetNodeId;
-                            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                        // modify header nodeId
-                        else if (isHeaderNode) {
-                            pageVariant.structure.headerNodeId = convertedWidgetNodeId;
-                            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                        // modify nodeId of swimlane grid tile
-                        else if (
-                            this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex] &&
-                            pageVariant
-                        ) {
-                            this.swimlanes[swimlaneIndex].grid[gridIndex].nodeId =
-                                convertedWidgetNodeId;
-                            pageVariant.structure.swimlanes = this.swimlanes;
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                    }
                 }
             });
 
         // listen to widgetConfigUpdated event — widget settings edited in-place (configNodeExists path)
         this.topicPageEventsService.widgetConfigUpdated
             .pipe(takeUntil(this.destroyed$))
-            .subscribe(async (pageVariantNode: Node): Promise<void> => {
+            .subscribe(async (event: WidgetConfigUpdatedEvent): Promise<void> => {
                 if (
-                    pageVariantNode &&
-                    retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode())
+                    event?.pageVariantNode &&
+                    retrieveNodeId(event.pageVariantNode) === retrieveNodeId(this.pageVariantNode())
                 ) {
+                    const step: { key: string } & StepOptions = this.widgetConfigStep(
+                        event.widgetNodeId,
+                    );
+                    void this.history.recordApplied(
+                        this.historyStepPrefix + step.key,
+                        event.changes.map((change) => ({
+                            kind: 'nodeProperty' as const,
+                            nodeId: event.widgetNodeId,
+                            ...change,
+                        })),
+                        { ...step, coalesceKey: 'widget:' + event.widgetNodeId },
+                    );
                     await this.bumpTemplateVersionIfNeeded();
                 }
             });
@@ -1200,17 +1298,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
                 markForRender(pageVariant);
             }
-            // set the anchorItemColor, topicColor, breadcrumbNodeId, headerNodeId and swimlanes
-            if (pageVariant.structure.anchorItemColor) {
-                this.anchorItemColor = pageVariant.structure.anchorItemColor;
-            }
-            this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
-            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-            this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
-            this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
-            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
-            await this.updateRenderedSwimlanes();
+            await this.applyStructureToLocalState(pageVariant.structure);
         }
         // update the swimlane ID to prompt text mapping
         if (initialLoad || pageVariantChanged || forceReload) {
@@ -1557,30 +1645,36 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         color: string,
         isTopicColor: boolean = false,
     ): Promise<void> {
-        if (isTopicColor) {
-            this.topicColor = color;
-        } else {
-            this.anchorItemColor = color;
-        }
-        this.startEditing();
-        try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
-                this.endEditing();
-                return;
-            }
-            const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
-            pageVariant.structure[propertyName] = color;
-            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-            this.pageVariantReloadNecessary = false;
-            this.endEditing();
-        } catch (err) {
-            console.error(err);
-            this.endEditing();
-            this.topicPageHelperService.displayErrorToast();
-        }
+        await this.history.record(
+            this.historyStepPrefix + (isTopicColor ? 'TOPIC_COLOR' : 'ANCHOR_COLOR'),
+            async (tx: HistoryTransaction): Promise<void> => {
+                if (isTopicColor) {
+                    this.topicColor = color;
+                } else {
+                    this.anchorItemColor = color;
+                }
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        this.endEditing();
+                        return;
+                    }
+                    const propertyName = isTopicColor ? 'topicColor' : 'anchorItemColor';
+                    pageVariant.structure[propertyName] = color;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+        );
     }
 
     /**
@@ -1648,28 +1742,34 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Adds a new swimlane to the page and persists it in the config.
      */
     async addSwimlane(newSwimlane: Swimlane, positionToAdd: number): Promise<void> {
-        this.startEditing();
-        try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
-                this.endEditing();
-                return;
-            }
-            const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
-            swimlanesCopy.splice(positionToAdd, 0, newSwimlane);
-            pageVariant.structure.swimlanes = swimlanesCopy;
-            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-            this.pageVariantReloadNecessary = false;
-            // add swimlane visually as soon as the requests are done
-            this.swimlanes.splice(positionToAdd, 0, newSwimlane);
-            this.endEditing();
-        } catch (err) {
-            console.error(err);
-            this.endEditing();
-            this.topicPageHelperService.displayErrorToast();
-        }
+        await this.history.record(
+            this.historyStepPrefix + 'ADD_SWIMLANE',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        this.endEditing();
+                        return;
+                    }
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    swimlanesCopy.splice(positionToAdd, 0, newSwimlane);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    // add swimlane visually as soon as the requests are done
+                    this.swimlanes.splice(positionToAdd, 0, newSwimlane);
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+        );
     }
 
     /**
@@ -1677,28 +1777,34 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     async moveSwimlanePosition(oldIndex: number, newIndex: number): Promise<void> {
         if (newIndex >= 0 && newIndex <= this.swimlanes.length - 1) {
-            this.startEditing();
-            try {
-                await this.checkForCustomPageNodeExistence();
-                const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                if (!pageVariant) {
-                    this.endEditing();
-                    return;
-                }
-                const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
-                moveItemInArray(swimlanesCopy, oldIndex, newIndex);
-                pageVariant.structure.swimlanes = swimlanesCopy;
-                this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
-                // move swimlane position visually as soon as the requests are done
-                moveItemInArray(this.swimlanes, oldIndex, newIndex);
-                this.endEditing();
-            } catch (err) {
-                console.error(err);
-                this.endEditing();
-                this.topicPageHelperService.displayErrorToast();
-            }
+            await this.history.record(
+                this.historyStepPrefix + 'MOVE_SWIMLANE',
+                async (tx: HistoryTransaction): Promise<void> => {
+                    this.startEditing();
+                    try {
+                        await this.checkForCustomPageNodeExistence();
+                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                        if (!pageVariant) {
+                            this.endEditing();
+                            return;
+                        }
+                        const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                        moveItemInArray(swimlanesCopy, oldIndex, newIndex);
+                        pageVariant.structure.swimlanes = swimlanesCopy;
+                        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                        // move swimlane position visually as soon as the requests are done
+                        moveItemInArray(this.swimlanes, oldIndex, newIndex);
+                        this.endEditing();
+                    } catch (err) {
+                        tx.fail();
+                        console.error(err);
+                        this.endEditing();
+                        this.topicPageHelperService.displayErrorToast();
+                    }
+                },
+            );
         }
     }
 
@@ -1714,35 +1820,41 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         mirror: boolean = false,
         index: number,
     ): Promise<void> {
-        this.startEditing();
-        try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
-                return;
-            }
-            const applySwimlaneChanges = (swimlane: Swimlane) => {
-                if (swimlaneShape != null) {
-                    swimlane.backgroundShape = swimlaneShape;
-                }
-                if (mirror) {
-                    swimlane.backgroundShapeMirrored = !swimlane.backgroundShapeMirrored;
-                }
-            };
+        await this.history.record(
+            this.historyStepPrefix + 'SWIMLANE_SHAPE',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        return;
+                    }
+                    const applySwimlaneChanges = (swimlane: Swimlane) => {
+                        if (swimlaneShape != null) {
+                            swimlane.backgroundShape = swimlaneShape;
+                        }
+                        if (mirror) {
+                            swimlane.backgroundShapeMirrored = !swimlane.backgroundShapeMirrored;
+                        }
+                    };
 
-            const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
-            applySwimlaneChanges(swimlanesCopy[index]);
-            pageVariant.structure.swimlanes = swimlanesCopy;
-            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-            this.pageVariantReloadNecessary = false;
-            applySwimlaneChanges(this.swimlanes[index]);
-        } catch (err) {
-            console.error(err);
-            this.topicPageHelperService.displayErrorToast();
-        } finally {
-            this.endEditing();
-        }
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    applySwimlaneChanges(swimlanesCopy[index]);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    applySwimlaneChanges(this.swimlanes[index]);
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    this.endEditing();
+                }
+            },
+        );
     }
 
     /**
@@ -1833,55 +1945,72 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param index
      */
     async swimlaneTitleChanged(title: string, index: number): Promise<void> {
-        this.startEditing();
-        try {
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant || !this.pageVariantNode()) {
-                this.endEditing();
-                return;
-            }
-            // update swimlane heading
-            this.swimlanes[index].heading = title;
-            pageVariant.structure.swimlanes = this.swimlanes;
-            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-            // retrieve existing AI config
-            const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(this.pageVariantNode());
-            let aiUpdateNecessary: boolean = false;
-            if (containsAiTags(title)) {
-                aiConfig[this.swimlanes[index].id] = retrieveChatCompletionObject(title);
-                aiUpdateNecessary = true;
-            } else if (aiConfig.hasOwnProperty(this.swimlanes[index].id)) {
-                delete aiConfig[this.swimlanes[index].id];
-                aiUpdateNecessary = true;
-            }
-            // update AI config, if necessary (either AI tags are present or were deleted)
-            if (aiUpdateNecessary) {
-                this.pageVariantNode.set(
-                    await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                        retrieveNodeId(this.pageVariantNode()),
-                        DEFAULT_AI_CONFIG_PROP,
-                        JSON.stringify(aiConfig),
-                    ),
-                );
-                // reload the page variant configs and set the updated pageVariantNode
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
-                this.retrievePageVariant();
-                // use this pageVariantNode to update the mapping
-                await this.updateSwimlaneIdToPromptTextMapping();
-            }
-            // update the page variant config in any case
-            else {
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
-            }
-            this.endEditing();
-        } catch (err) {
-            console.error(err);
-            this.endEditing();
-            this.topicPageHelperService.displayErrorToast();
-        }
+        await this.history.record(
+            this.historyStepPrefix + 'SWIMLANE_HEADING',
+            async (tx: HistoryTransaction): Promise<void> => {
+                this.startEditing();
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant || !this.pageVariantNode()) {
+                        this.endEditing();
+                        return;
+                    }
+                    // update swimlane heading
+                    this.swimlanes[index].heading = title;
+                    pageVariant.structure.swimlanes = this.swimlanes;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    // retrieve existing AI config
+                    const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(
+                        this.pageVariantNode(),
+                    );
+                    let aiUpdateNecessary: boolean = false;
+                    if (containsAiTags(title)) {
+                        aiConfig[this.swimlanes[index].id] = retrieveChatCompletionObject(title);
+                        aiUpdateNecessary = true;
+                    } else if (aiConfig.hasOwnProperty(this.swimlanes[index].id)) {
+                        delete aiConfig[this.swimlanes[index].id];
+                        aiUpdateNecessary = true;
+                    }
+                    // update AI config, if necessary (either AI tags are present or were deleted)
+                    if (aiUpdateNecessary) {
+                        const previousAiConfig: string[] | null =
+                            this.pageVariantNode().properties?.[DEFAULT_AI_CONFIG_PROP] ?? null;
+                        this.pageVariantNode.set(
+                            await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                                retrieveNodeId(this.pageVariantNode()),
+                                DEFAULT_AI_CONFIG_PROP,
+                                JSON.stringify(aiConfig),
+                            ),
+                        );
+                        tx.trackNodeProperty(
+                            retrieveNodeId(this.pageVariantNode()),
+                            DEFAULT_AI_CONFIG_PROP,
+                            previousAiConfig,
+                            this.pageVariantNode().properties?.[DEFAULT_AI_CONFIG_PROP] ?? null,
+                        );
+                        // reload the page variant configs and set the updated pageVariantNode
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                        this.retrievePageVariant();
+                        // use this pageVariantNode to update the mapping
+                        await this.updateSwimlaneIdToPromptTextMapping();
+                    }
+                    // update the page variant config in any case
+                    else {
+                        await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                        this.pageVariantReloadNecessary = false;
+                    }
+                    this.endEditing();
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.endEditing();
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+            { coalesceKey: 'heading:' + this.swimlanes[index]?.id },
+        );
     }
 
     /**
@@ -1955,67 +2084,64 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const structuralChange: boolean =
                 editedSwimlane.type !== swimlane.type ||
                 JSON.stringify(editedSwimlane.grid) !== JSON.stringify(swimlane.grid);
-            this.startEditing();
-            try {
-                await this.checkForCustomPageNodeExistence();
-                const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                if (!pageVariant) {
-                    this.endEditing();
-                    return;
-                }
-                // create a copy of the swimlanes
-                const stringifiedSwimlanes: string = JSON.stringify(this.swimlanes ?? []);
-                const swimlanesCopy = JSON.parse(stringifiedSwimlanes);
-                // retrieve deleted widget node IDs (previously existing node IDs must still exist)
-                const deletedWidgetNodeIds: string[] = [];
-                const stringifiedEditedSwimlane: string = JSON.stringify(editedSwimlane);
-                // iterate swimlane and detect potentially deleted node IDs
-                swimlane?.grid?.forEach((gridItem: GridTile): void => {
-                    // nodeId exists but is no longer included in the edited swimlane
-                    if (
-                        !!gridItem.nodeId &&
-                        gridItem.nodeId !== '' &&
-                        !stringifiedEditedSwimlane.includes(gridItem.nodeId)
-                    ) {
-                        deletedWidgetNodeIds.push(gridItem.nodeId);
+            // a dialog that only changed the grid is named like the same change made in place
+            const onlyGridChanged: boolean =
+                JSON.stringify({ ...editedSwimlane, grid: null }) ===
+                JSON.stringify({ ...swimlane, grid: null });
+            const step: { key: string } & StepOptions = onlyGridChanged
+                ? this.gridChangeStep(swimlane.grid ?? [], editedSwimlane.grid ?? [])
+                : { key: 'EDIT_SWIMLANE' };
+            await this.history.record(
+                this.historyStepPrefix + step.key,
+                async (tx: HistoryTransaction): Promise<void> => {
+                    this.startEditing();
+                    try {
+                        await this.checkForCustomPageNodeExistence();
+                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                        if (!pageVariant) {
+                            this.endEditing();
+                            return;
+                        }
+                        // create a copy of the swimlanes
+                        const swimlanesCopy = JSON.parse(JSON.stringify(this.swimlanes ?? []));
+                        // store updated swimlane in config
+                        swimlanesCopy[index] = editedSwimlane;
+                        // overwrite swimlanes
+                        pageVariant.structure.swimlanes = swimlanesCopy;
+                        let reloadNecessary: boolean = false;
+                        if (structuralChange) {
+                            reloadNecessary = this.pageVariantReloadNecessary;
+                        }
+                        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                        if (structuralChange) {
+                            await this.updatePageVariantConfigs(reloadNecessary);
+                            this.pageVariantReloadNecessary = false;
+                        } else {
+                            await this.updatePageVariantConfigs();
+                        }
+                        // the history deletes the widget nodes of removed tiles once no step can
+                        // restore them
+                        // sync with the visible nodes (reset map, as the outputs are triggered again)
+                        this.topicPageGlobalService.deleteVisibleNodesMap();
+                        // visually change swimlanes
+                        this.persistedSwimlanes = pageVariant.structure.swimlanes;
+                        await this.updateRenderedSwimlanes();
+                        this.endEditing();
+                        // fix accordions are closed on edit
+                        setTimeout((): void => {
+                            this.accordions?.forEach((accordion: CdkAccordionItem): void => {
+                                accordion.open();
+                            });
+                        });
+                    } catch (err) {
+                        tx.fail();
+                        console.error(err);
+                        this.endEditing();
+                        this.topicPageHelperService.displayErrorToast();
                     }
-                });
-                // store updated swimlane in config
-                swimlanesCopy[index] = editedSwimlane;
-                // overwrite swimlanes
-                pageVariant.structure.swimlanes = swimlanesCopy;
-                let reloadNecessary: boolean = false;
-                if (structuralChange) {
-                    reloadNecessary = this.pageVariantReloadNecessary;
-                }
-                this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                if (structuralChange) {
-                    await this.updatePageVariantConfigs(reloadNecessary);
-                    this.pageVariantReloadNecessary = false;
-                }
-                // afterward, delete config nodes of removed widgets
-                for (const nodeId of deletedWidgetNodeIds) {
-                    // retrieve correct nodeId
-                    const widgetNodeId: string = convertNodeRefIntoNodeId(nodeId);
-                    await this.topicPageHelperService.deleteNodeIfExists(widgetNodeId);
-                }
-                // sync with the visible nodes (reset map, as the outputs are triggered again)
-                this.topicPageGlobalService.deleteVisibleNodesMap();
-                // visually change swimlanes
-                this.persistedSwimlanes = pageVariant.structure.swimlanes;
-                await this.updateRenderedSwimlanes();
-                this.endEditing();
-                // fix accordions are closed on edit
-                setTimeout((): void => {
-                    this.accordions?.forEach((accordion: CdkAccordionItem): void => {
-                        accordion.open();
-                    });
-                });
-            } catch (err) {
-                console.error(err);
-                this.endEditing();
-                this.topicPageHelperService.displayErrorToast();
-            }
+                },
+                step,
+            );
         }
     }
 
@@ -2057,41 +2183,40 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             buttons: YES_OR_NO,
             closable: Closable.Casual,
         });
-        dialogRef.afterClosed().subscribe(async (response) => {
-            if (response === 'YES') {
+        const response = await firstValueFrom(dialogRef.afterClosed());
+        if (response !== 'YES') {
+            return;
+        }
+        await this.history.record(
+            this.historyStepPrefix + 'DELETE_SWIMLANE',
+            async (tx: HistoryTransaction): Promise<void> => {
                 this.startEditing();
-                await this.checkForCustomPageNodeExistence();
-                const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                if (!pageVariant) {
-                    this.endEditing();
-                    return;
-                }
-                // hold deleted widget node IDs to delete them afterwards
-                const deletedWidgetNodeIds: string[] = [];
-                this.swimlanes[index].grid?.forEach((gridItem: GridTile): void => {
-                    if (gridItem?.nodeId) {
-                        deletedWidgetNodeIds.push(gridItem.nodeId);
+                try {
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        return;
                     }
-                });
-                const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
-                swimlanesCopy.splice(index, 1);
-                pageVariant.structure.swimlanes = swimlanesCopy;
-                // update page variant first to ensure that no inconsistency occurs
-                this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-                this.pageVariantReloadNecessary = false;
-                // delete config nodes of removed widgets
-                for (const nodeId of deletedWidgetNodeIds) {
-                    const widgetNodeId: string = convertNodeRefIntoNodeId(nodeId);
-                    await this.topicPageHelperService.deleteNodeIfExists(widgetNodeId);
+                    const swimlanesCopy = Helper.deepCopy(this.swimlanes ?? []);
+                    swimlanesCopy.splice(index, 1);
+                    pageVariant.structure.swimlanes = swimlanesCopy;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                    // the history deletes the swimlane's widget nodes once no step can restore them
+                    // sync with the visible nodes (reset swimlane nodes)
+                    this.topicPageGlobalService.deleteVisibleNodesBySwimlane(index);
+                    // delete swimlane visually as soon as the requests are done
+                    this.swimlanes.splice(index, 1);
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    this.endEditing();
                 }
-                // sync with the visible nodes (reset swimlane nodes)
-                this.topicPageGlobalService.deleteVisibleNodesBySwimlane(index);
-                // delete swimlane visually as soon as the requests are done
-                this.swimlanes.splice(index, 1);
-                this.endEditing();
-            }
-        });
+            },
+        );
     }
 
     // REACT TO FURTHER OUTPUT EVENTS
@@ -2103,25 +2228,37 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async handleGridUpdate(grid: GridTile[], swimlaneIndex: number): Promise<void> {
-        try {
-            // overwrite swimlane grid
-            this.swimlanes[swimlaneIndex].grid = grid;
+        const step: { key: string } & StepOptions = this.gridChangeStep(
+            this.readPersistedStructure()?.swimlanes?.[swimlaneIndex]?.grid ?? [],
+            grid,
+        );
+        await this.history.record(
+            this.historyStepPrefix + step.key,
+            async (tx: HistoryTransaction): Promise<void> => {
+                try {
+                    // overwrite swimlane grid
+                    this.swimlanes[swimlaneIndex].grid = grid;
 
-            // persist the state afterward
-            await this.checkForCustomPageNodeExistence();
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (!pageVariant) {
-                // TODO: rollback necessary
-            }
-            pageVariant.structure.swimlanes = this.swimlanes;
-            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-            await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
-            this.pageVariantReloadNecessary = false;
-            // TODO: rollback necessary, if the request is not successful
-        } catch (err) {
-            console.error(err);
-            this.topicPageHelperService.displayErrorToast();
-        }
+                    // persist the state afterward
+                    await this.checkForCustomPageNodeExistence();
+                    const pageVariant: PageVariantConfig = this.retrievePageVariant();
+                    if (!pageVariant) {
+                        // restores the grid the swimlane had before
+                        tx.fail();
+                        return;
+                    }
+                    pageVariant.structure.swimlanes = this.swimlanes;
+                    this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+                    await this.updatePageVariantConfigs(this.pageVariantReloadNecessary);
+                    this.pageVariantReloadNecessary = false;
+                } catch (err) {
+                    tx.fail();
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                }
+            },
+            step,
+        );
     }
 
     /**
@@ -2230,6 +2367,174 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (source === this.persistedSwimlanes) {
             this.swimlanes = expanded;
         }
+    }
+
+    /**
+     * Renders a page structure and rebuilds the state derived from it. The structure is taken
+     * over by reference and edited in place afterwards, so it has to be a copy of its own.
+     */
+    private async applyStructureToLocalState(structure: PageStructure): Promise<void> {
+        this.anchorItemColor = structure.anchorItemColor;
+        this.topicColor = retrieveTopicColor({ structure }, this.collectionNode, this.topic());
+        this.breadcrumbNodeId.set(structure.breadcrumbNodeId);
+        this.headerNodeId.set(structure.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(structure.propagatedBreadcrumbNodeId ?? null);
+        this.propagatedHeaderNodeId.set(structure.propagatedHeaderNodeId ?? null);
+        this.persistedSwimlanes = structure.swimlanes ?? [];
+        await this.updateRenderedSwimlanes();
+        this.updateSwimlaneIdToHitMatching();
+        this.anchorTrigger++;
+        setTimeout((): void => this.checkAccordionExpansionState());
+    }
+
+    /**
+     * Reads the structure as persisted on the page variant node, freshly parsed on every call.
+     */
+    private readPersistedStructure(): PageStructure | null {
+        const pageVariantNode: Node = this.pageVariantNode();
+        return pageVariantNode
+            ? retrievePageVariantConfig(pageVariantNode)?.structure ?? null
+            : null;
+    }
+
+    /**
+     * Persists a structure the history restores and renders it.
+     */
+    private async writePersistedStructure(structure: PageStructure): Promise<void> {
+        this.pageVariantNode.set(await this.savePageVariantConfig({ structure }));
+        await this.bumpTemplateVersionIfNeeded();
+        await this.updatePageVariantConfigs();
+        // the visible nodes are keyed by swimlane and grid index
+        this.topicPageGlobalService.deleteVisibleNodesMap();
+        await this.applyStructureToLocalState(this.readPersistedStructure());
+    }
+
+    /**
+     * Updates what displays a node after the history restored one of its properties.
+     */
+    private async refreshRestoredNode(nodeId: string): Promise<void> {
+        if (nodeId === retrieveNodeId(this.collectionNode)) {
+            // the header shows the collection description from the collection node it is given
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(nodeId);
+            return;
+        }
+        if (nodeId === this.pageVariantNodeId()) {
+            // the variant node carries the AI config of the swimlane headings
+            this.pageVariantNode.set(await this.topicPageHelperService.getNodeUncached(nodeId));
+            await this.updatePageVariantConfigs();
+            await this.updateSwimlaneIdToPromptTextMapping();
+            return;
+        }
+        await this.bumpTemplateVersionIfNeeded();
+        this.topicPageEventsService.widgetNodeRestored.emit(nodeId);
+    }
+
+    /**
+     * Registers undo (Ctrl/Cmd+Z) and redo (Ctrl/Cmd+Shift+Z, Ctrl/Cmd+Y) for the edit mode.
+     */
+    private registerHistoryShortcuts(): void {
+        // TODO: register with KeyboardShortcutsService (keyCode KeyZ/KeyY) and drop history-shortcut-util
+        //  once matchesShortcutCondition follows the keyboard layout; it compares key positions,
+        //  which swaps Z and Y on QWERTZ keyboards
+        // key presses are only brought into the zone when they trigger a history action
+        this.ngZone.runOutsideAngular(() =>
+            fromEvent<KeyboardEvent>(document, 'keydown')
+                .pipe(takeUntil(this.destroyed$))
+                .subscribe((event: KeyboardEvent): void => {
+                    const action: HistoryAction | null = historyActionForKey(event);
+                    if (!action || this.ignoreHistoryShortcut(event)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    this.ngZone.run((): void => {
+                        void (action === 'undo' ? this.history.undo() : this.history.redo());
+                    });
+                }),
+        );
+    }
+
+    // an open dialog or card owns the keyboard, as for the app-wide shortcuts
+    private ignoreHistoryShortcut(event: KeyboardEvent): boolean {
+        return (
+            !this.editMode() ||
+            this.requestInProgress() ||
+            isEditableTarget(event.target) ||
+            this.dialogs.openDialogs.length > 0 ||
+            CardComponent.getNumberOfOpenCards() > 0
+        );
+    }
+
+    /**
+     * The translated label of a history step, with the names it refers to filled in.
+     */
+    historyStepLabel(step: HistoryStep): string {
+        const params: { [param: string]: string } = {};
+        Object.entries(step.labelParams ?? {}).forEach(([param, key]: [string, string]): void => {
+            params[param] = this.translate.instant(key);
+        });
+        return this.translate.instant(step.labelKey, params);
+    }
+
+    /**
+     * Names a change of a swimlane grid the way the user made it: picking a widget for an empty
+     * tile, changing a widget's type, rearranging the widgets, or changing the layout itself.
+     */
+    private gridChangeStep(before: GridTile[], after: GridTile[]): { key: string } & StepOptions {
+        const sameLayout: boolean =
+            before.length === after.length &&
+            before.every((tile, i) => tile.cols === after[i].cols && tile.rows === after[i].rows);
+        const changedTiles: { from: string; to: string }[] = sameLayout
+            ? after
+                  .map((tile, i) => ({ from: before[i].item || '', to: tile.item || '' }))
+                  .filter(({ from, to }) => from !== to)
+            : [];
+        const tileKey = (tile: GridTile): string => (tile.item || '') + '|' + (tile.nodeId || '');
+        const sameWidgets: boolean =
+            JSON.stringify(before.map(tileKey).sort()) ===
+            JSON.stringify(after.map(tileKey).sort());
+        if (changedTiles.length > 1 && sameWidgets) {
+            return { key: 'REARRANGE_WIDGETS' };
+        }
+        if (changedTiles.length === 1 && changedTiles[0].to) {
+            const { from, to } = changedTiles[0];
+            if (!from) {
+                return this.widgetStep('ADD_WIDGET', to);
+            }
+            return {
+                key: 'WIDGET_TYPE',
+                labelParams: { from: this.widgetNameKey(from), to: this.widgetNameKey(to) },
+            };
+        }
+        return { key: 'GRID' };
+    }
+
+    /**
+     * Names an edit of a widget node by what the node belongs to on the page.
+     */
+    private widgetConfigStep(widgetNodeId: string): { key: string } & StepOptions {
+        const nodeId: string = convertNodeRefIntoNodeId(widgetNodeId);
+        if (nodeId === convertNodeRefIntoNodeId(this.headerNodeId())) {
+            return { key: 'HEADER' };
+        }
+        if (nodeId === convertNodeRefIntoNodeId(this.breadcrumbNodeId())) {
+            return { key: 'BREADCRUMB' };
+        }
+        const tile: GridTile = this.persistedSwimlanes
+            .flatMap((swimlane: Swimlane) => swimlane.grid ?? [])
+            .find((t: GridTile) => !!t.nodeId && convertNodeRefIntoNodeId(t.nodeId) === nodeId);
+        return this.widgetStep('WIDGET_CONFIG', tile?.item);
+    }
+
+    private widgetStep(key: string, widgetType: string): { key: string } & StepOptions {
+        return { key, labelParams: { widget: this.widgetNameKey(widgetType) } };
+    }
+
+    // the name the widget selection shows for a widget type
+    private widgetNameKey(widgetType: string): string {
+        const option = WIDGET_TYPE_OPTIONS.find((o) => o.value === widgetType);
+        return option
+            ? 'TOPIC_PAGE.SWIMLANE.SELECT_WIDGET.' + option.viewValue
+            : this.historyStepPrefix + 'WIDGET';
     }
 
     /**
@@ -2482,12 +2787,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(this.pageVariantNode());
+        // a section without a stored prompt shows its plain heading, so no entry may outlive it
+        this.swimlaneIdToPromptTextMapping = new Map<string, PromptToTextMapping>();
         if (!aiConfig || !Object.keys(aiConfig)?.length) {
             return;
         }
         try {
-            // reset map to delete existing entries
-            this.swimlaneIdToPromptTextMapping = new Map<string, PromptToTextMapping>();
             for (const swimlane of this.swimlanes) {
                 if (aiConfig.hasOwnProperty(swimlane.id)) {
                     const prompt: string = retrievePromptFromAiConfig(aiConfig, swimlane.id);
@@ -2988,14 +3293,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             await this.updatePageVariantConfigs(true);
             // parse the page config ref again
             const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (pageVariant.structure.anchorItemColor) {
-                this.anchorItemColor = pageVariant.structure.anchorItemColor;
-            }
-            this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
-            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
-            await this.updateRenderedSwimlanes();
+            await this.applyStructureToLocalState(pageVariant.structure);
             // update the ccm:page_config_ref in the collection
             await this.topicPageHelperService.setProperty(
                 retrieveNodeId(this.collectionNode),
@@ -3183,70 +3481,72 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             buttons: YES_OR_NO,
             closable: Closable.Casual,
         });
-        dialogRef.afterClosed().subscribe(async (response) => {
-            if (response === 'YES') {
-                this.startEditing();
-                try {
-                    // collect old widget nodeIds before overwriting so they can be
-                    // deleted only after the new config is successfully persisted
-                    const oldVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
-                    const oldNodeIds: string[] = [];
-                    oldVariantConfig?.structure?.swimlanes?.forEach((s) =>
-                        s.grid?.forEach((tile) => {
-                            if (tile.nodeId) oldNodeIds.push(tile.nodeId);
-                        }),
-                    );
-                    if (oldVariantConfig?.structure?.breadcrumbNodeId) {
-                        oldNodeIds.push(oldVariantConfig.structure.breadcrumbNodeId);
-                    }
-                    if (oldVariantConfig?.structure?.headerNodeId) {
-                        oldNodeIds.push(oldVariantConfig.structure.headerNodeId);
-                    }
-                    const variantConfig = retrievePageVariantConfig(templateNode);
-                    markForCopy(variantConfig);
-                    // create new widget nodes + persist config
-                    await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
-                        syncLocalState: true,
-                        collectionId: this.topicCollectionId(),
-                    });
-                    // store the template version that was used so we know it's up to date;
-                    // in template mode the node is a non-root template, so append the default
-                    // own_counter to form the compound "{parent_sync}:{own_counter}" version
-                    const templateVersion = retrievePageVariantTemplateVersion(templateNode);
-                    const syncedVersion = this.templateMode()
-                        ? templateVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
-                        : templateVersion;
-                    this.pageVariantNode.set(
-                        await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                            retrieveNodeId(this.pageVariantNode()),
-                            DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
-                            syncedVersion,
-                        ),
-                    );
-                    await this.updatePageVariantConfigs(true);
-                    // refresh pageVariantNode from the fully-loaded configs; the node returned by
-                    // setPropertyAndRetrieveUpdatedNode above only carries the written property, so
-                    // the effect re-running loadTemplateVariantNode would compare versions against a
-                    // stale/incomplete node and incorrectly re-enable the regenerate button
-                    const refreshedNode = this.pageVariantConfigs.nodes?.find(
-                        (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
-                    );
-                    if (refreshedNode) {
-                        this.pageVariantNode.set(refreshedNode);
-                    }
-                    // if the config was saved, delete the now-orphaned old widget nodes
-                    for (const nodeId of oldNodeIds) {
-                        await this.topicPageHelperService.deleteNodeIfExists(
-                            convertNodeRefIntoNodeId(nodeId),
-                        );
-                    }
-                } catch (err) {
-                    console.error('Failed to regenerate page variant', err);
-                } finally {
-                    this.endEditing();
-                }
+        const response = await firstValueFrom(dialogRef.afterClosed());
+        if (response !== 'YES') {
+            return;
+        }
+        // the page is replaced wholesale, which no step can undo
+        await this.history.reset();
+        this.startEditing();
+        try {
+            // collect old widget nodeIds before overwriting so they can be
+            // deleted only after the new config is successfully persisted
+            const oldVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
+            const oldNodeIds: string[] = [];
+            oldVariantConfig?.structure?.swimlanes?.forEach((s) =>
+                s.grid?.forEach((tile) => {
+                    if (tile.nodeId) oldNodeIds.push(tile.nodeId);
+                }),
+            );
+            if (oldVariantConfig?.structure?.breadcrumbNodeId) {
+                oldNodeIds.push(oldVariantConfig.structure.breadcrumbNodeId);
             }
-        });
+            if (oldVariantConfig?.structure?.headerNodeId) {
+                oldNodeIds.push(oldVariantConfig.structure.headerNodeId);
+            }
+            const variantConfig = retrievePageVariantConfig(templateNode);
+            markForCopy(variantConfig);
+            // create new widget nodes + persist config
+            await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
+                syncLocalState: true,
+                collectionId: this.topicCollectionId(),
+            });
+            // store the template version that was used so we know it's up to date;
+            // in template mode the node is a non-root template, so append the default
+            // own_counter to form the compound "{parent_sync}:{own_counter}" version
+            const templateVersion = retrievePageVariantTemplateVersion(templateNode);
+            const syncedVersion = this.templateMode()
+                ? templateVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION
+                : templateVersion;
+            this.pageVariantNode.set(
+                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
+                    retrieveNodeId(this.pageVariantNode()),
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
+                    syncedVersion,
+                ),
+            );
+            await this.updatePageVariantConfigs(true);
+            // refresh pageVariantNode from the fully-loaded configs; the node returned by
+            // setPropertyAndRetrieveUpdatedNode above only carries the written property, so
+            // the effect re-running loadTemplateVariantNode would compare versions against a
+            // stale/incomplete node and incorrectly re-enable the regenerate button
+            const refreshedNode = this.pageVariantConfigs.nodes?.find(
+                (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+            );
+            if (refreshedNode) {
+                this.pageVariantNode.set(refreshedNode);
+            }
+            // if the config was saved, delete the now-orphaned old widget nodes
+            for (const nodeId of oldNodeIds) {
+                await this.topicPageHelperService.deleteNodeIfExists(
+                    convertNodeRefIntoNodeId(nodeId),
+                );
+            }
+        } catch (err) {
+            console.error('Failed to regenerate page variant', err);
+        } finally {
+            this.endEditing();
+        }
     }
 
     /**
@@ -3394,19 +3694,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
         if (options.syncLocalState) {
             this.pageVariantNode.set(updatedNode);
-            this.persistedSwimlanes = variantConfig.structure.swimlanes ?? [];
-            void this.updateRenderedSwimlanes();
-            if (variantConfig.structure.breadcrumbNodeId) {
-                this.breadcrumbNodeId.set(variantConfig.structure.breadcrumbNodeId);
-            }
-            if (variantConfig.structure.headerNodeId) {
-                this.headerNodeId.set(variantConfig.structure.headerNodeId);
-            }
-            // markers were materialized above, so clear the render (propagated) signals
-            this.propagatedBreadcrumbNodeId.set(
-                variantConfig.structure.propagatedBreadcrumbNodeId ?? null,
-            );
-            this.propagatedHeaderNodeId.set(variantConfig.structure.propagatedHeaderNodeId ?? null);
+            await this.applyStructureToLocalState(variantConfig.structure);
             await this.updatePageVariantConfigs(true);
         }
         return updatedNode;

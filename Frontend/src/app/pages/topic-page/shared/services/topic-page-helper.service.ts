@@ -346,12 +346,27 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Retrieves a node with a given ID from the server, bypassing the short-lived node cache that
+     * would still answer with the state from before a recent write.
+     */
+    async getNodeUncached(nodeId: string): Promise<Node> {
+        const response = await firstValueFrom(
+            this.nodeApiUnwrapped.getMetadata({
+                repository: HOME_REPOSITORY,
+                node: convertNodeRefIntoNodeId(nodeId),
+                propertyFilter: [PROPERTY_FILTER_ALL],
+            }),
+        );
+        return response.node;
+    }
+
+    /**
      * Retrieves a node referenced by a stored config, resolving to null without the global error
      * message if it was deleted or is no longer readable. Other errors are rethrown.
      */
-    async getNodeIfAvailable(nodeId: string): Promise<Node | null> {
+    async getNodeIfAvailable(nodeId: string, uncached: boolean = false): Promise<Node | null> {
         try {
-            return await this.getNode(nodeId);
+            return uncached ? await this.getNodeUncached(nodeId) : await this.getNode(nodeId);
         } catch (error) {
             if (
                 [RestConstants.HTTP_NOT_FOUND, RestConstants.HTTP_FORBIDDEN].includes(error?.status)
@@ -564,7 +579,7 @@ export class TopicPageHelperService {
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);
-        return this.getNode(nodeId);
+        return this.getNodeUncached(nodeId);
     }
 
     // INTERNAL HELPER FUNCTIONS
@@ -689,6 +704,7 @@ export class TopicPageHelperService {
                 this.topicPageEventsService.widgetNodeAdded.emit(event);
                 return null;
             } else {
+                const previousNode: Node = await this.getNodeUncached(nodeId);
                 // update the config(s) and return the updated node
                 await this.setProperty(
                     nodeId,
@@ -705,8 +721,19 @@ export class TopicPageHelperService {
                 } else {
                     await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
                 }
-                // return the updated node
-                return await this.getNode(nodeId);
+                const updatedNode: Node = await this.getNodeUncached(nodeId);
+                this.topicPageEventsService.widgetConfigUpdated.emit({
+                    pageVariantNode,
+                    widgetNodeId: retrieveNodeId(updatedNode),
+                    changes: [DEFAULT_WIDGET_CONFIG_PROP, DEFAULT_AI_CONFIG_PROP].map(
+                        (property: string) => ({
+                            property,
+                            before: previousNode.properties?.[property] ?? null,
+                            after: updatedNode.properties?.[property] ?? null,
+                        }),
+                    ),
+                });
+                return updatedNode;
             }
         } catch (err) {
             this.displayErrorToast(err);

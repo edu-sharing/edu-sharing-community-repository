@@ -28,10 +28,8 @@ export class ColorPickerComponent implements OnInit {
     }
     set selectedColor(value: string) {
         this._selectedColor = value;
-        // save the initial value for further changes
-        if (this._initialColor === null) {
-            this._initialColor = value;
-        }
+        // the input carries the color the page holds, so only a pick in the palette is a change
+        this._initialColor = value;
     }
     @Input() disabled: boolean = false;
     @Input() acceptLabel: string = 'APPLY';

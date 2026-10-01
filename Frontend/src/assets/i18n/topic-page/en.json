@@ -377,6 +377,39 @@
       "INVALID_OR_UNKNOWN_WIDGET": "The widget is not defined or unknown."
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
+    "HISTORY": {
+      "UNDO": "Undo",
+      "REDO": "Redo",
+      "BAR": {
+        "LABEL": "Page history",
+        "TITLE": "Edit mode",
+        "LAST_CHANGE": "Last change: {{step}}",
+        "NOTHING_TO_UNDO": "Nothing to undo",
+        "UNDO_TOOLTIP": "Undo: {{step}} (Ctrl+Z)",
+        "REDO_TOOLTIP": "Redo: {{step}} (Ctrl+Shift+Z)"
+      },
+      "CHANGED_ELSEWHERE": "The page was changed elsewhere in the meantime, so the change history was reset.",
+      "STEP": {
+        "ADD_SWIMLANE": "Section added",
+        "MOVE_SWIMLANE": "Section moved",
+        "DELETE_SWIMLANE": "Section deleted",
+        "EDIT_SWIMLANE": "Section settings changed",
+        "SWIMLANE_HEADING": "Section heading changed",
+        "SWIMLANE_SHAPE": "Section shape changed",
+        "SWIMLANE_COLOR": "Section color changed",
+        "GRID": "Section layout changed",
+        "ADD_WIDGET": "{{widget}} added",
+        "WIDGET_CONFIG": "{{widget}} changed",
+        "WIDGET_TYPE": "Widget type changed: {{from}} → {{to}}",
+        "REARRANGE_WIDGETS": "Widgets rearranged",
+        "HEADER": "Page header changed",
+        "COLLECTION_DESCRIPTION": "Collection description changed",
+        "BREADCRUMB": "Editorial members changed",
+        "WIDGET": "Widget",
+        "TOPIC_COLOR": "Topic color changed",
+        "ANCHOR_COLOR": "Anchor menu color changed"
+      }
+    },
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "No topic page has been created for this collection yet.",
       "VIEW_MESSAGE": "Please contact your system administrator.",
@@ -452,8 +485,8 @@
       "PENDING_MESSAGE": "The page template including all customizations is being deleted."
     },
     "TEMPLATE_MODE_ACTIVE": {
-      "VIEW": "You are currently in the template viewing mode.",
-      "EDIT": "You are currently in the template editing mode.",
+      "VIEW": "Template viewing mode",
+      "EDIT": "Template editing mode",
       "END": "Leave template mode"
     }
   }

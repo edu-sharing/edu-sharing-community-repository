@@ -12,6 +12,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule } from '@ngx-translate/core';
 import { Node, ParentEntries } from 'ngx-edu-sharing-api';
 import { CreateChatCompletionResponse } from 'ngx-edu-sharing-b-api';
@@ -29,13 +30,15 @@ import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageEventsService } from '../../shared/services/topic-page-events.service';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
+import { TopicPageHistoryService } from '../../shared/services/topic-page-history.service';
 import { DEFAULT_WIDGET_CONFIG_PROP } from '../../shared/types/custom-definitions';
 import { TopicHeaderConfig } from '../../shared/types/widget-config/topic-header-config';
 import { retrieveResultString } from '../../shared/utils/ai-util';
 import { getNodeOrDefaultNodeId } from '../../shared/utils/node-util';
-import { retrieveNodeId } from '../../shared/utils/template-util';
+import { convertNodeRefIntoNodeId, retrieveNodeId } from '../../shared/utils/template-util';
 import { ColorPickerComponent } from '../shared/color-picker/color-picker.component';
 import { EditableTextComponent } from '../shared/editable-text/editable-text.component';
 import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.component';
@@ -61,8 +64,10 @@ import { ImageWrapperComponent } from '../shared/image-wrapper/image-wrapper.com
 export class TopicHeaderComponent implements OnChanges, OnInit {
     private aiHelperService = inject(AiHelperService);
     private globalWidgetConfigService = inject(GlobalWidgetConfigService);
+    private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageHistoryService = inject(TopicPageHistoryService, { optional: true });
     private themeService = inject(ThemeService);
 
     // CONSTANTS
@@ -74,6 +79,8 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     @Input() set collectionNode(value: Node) {
         this._collectionNode = value;
         this.collectionDescription = value?.properties?.[RestConstants.CM_DESCRIPTION]?.[0];
+        // a stored description was written by an editor, only a missing one is generated
+        this.aiGeneratedDescription.set(false);
         if (!this.collectionDescription) {
             void this.generateCollectionDescription(retrieveNodeId(value));
         }
@@ -121,6 +128,14 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         this.backToCollectionButtonVisible.set(
             this.topicPageGlobalService.getBackToCollectionButtonVisible(),
         );
+        this.topicPageEventsService.widgetNodeRestored
+            .pipe(takeUntilDestroyed())
+            .subscribe(async (nodeId: string): Promise<void> => {
+                if (this.nodeId && convertNodeRefIntoNodeId(this.nodeId) === nodeId) {
+                    this.resetConfigValues();
+                    await this.initTopicHeader();
+                }
+            });
     }
 
     /**
@@ -162,12 +177,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
                 (!changes.propagatedNodeId?.firstChange && propagatedNodeIdChanged) ||
                 topicChanged
             ) {
-                this.aiGeneratedImage = this.aiSupported();
-                this.aiGeneratedText.set(false);
-                this.initialized.set(false);
-                this.description = this.DEFAULT_DESCRIPTION;
-                this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;
-                this.userUploadedNodeId = null;
+                this.resetConfigValues();
             }
             // initialize the topic header component
             await this.initTopicHeader();
@@ -176,6 +186,18 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             // regenerate texts of the topic header component
             await this.regenerateTexts();
         }
+    }
+
+    /**
+     * Resets the values read from the config, which only overrides the values it carries.
+     */
+    private resetConfigValues(): void {
+        this.aiGeneratedImage = this.aiSupported();
+        this.aiGeneratedText.set(false);
+        this.initialized.set(false);
+        this.description = this.DEFAULT_DESCRIPTION;
+        this.textBackgroundColor = this.DEFAULT_HEADER_TEXT_BG_COLOR;
+        this.userUploadedNodeId = null;
     }
 
     /**
@@ -299,10 +321,29 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         }
         try {
             this.topicPageHelperService.openSaveConfigToast();
+            const collectionNodeId: string = this.collectionNode.ref.id;
+            const before: Node = await this.topicPageHelperService.getNodeUncached(
+                collectionNodeId,
+            );
             await this.topicPageHelperService.setProperty(
-                this.collectionNode.ref.id,
+                collectionNodeId,
                 RestConstants.CM_DESCRIPTION,
                 description,
+            );
+            const after: Node = await this.topicPageHelperService.getNodeUncached(collectionNodeId);
+            // the description belongs to the collection, not to a widget node, so it is recorded here
+            void this.topicPageHistoryService?.recordApplied(
+                'TOPIC_PAGE.HISTORY.STEP.COLLECTION_DESCRIPTION',
+                [
+                    {
+                        kind: 'nodeProperty',
+                        nodeId: collectionNodeId,
+                        property: RestConstants.CM_DESCRIPTION,
+                        before: before.properties?.[RestConstants.CM_DESCRIPTION] ?? null,
+                        after: after.properties?.[RestConstants.CM_DESCRIPTION] ?? null,
+                    },
+                ],
+                { coalesceKey: 'collection-description' },
             );
         } catch (err) {
             this.topicPageHelperService.displayErrorToast(err);

@@ -41,10 +41,6 @@ main {
     flex-direction: column;
 }
 
-.template-mode {
-    flex-shrink: 0;
-}
-
 .template-scroll {
     flex: 1;
     min-height: 0;
@@ -106,29 +102,17 @@ es-side-menu-wrapper {
 }
 
 // BREADCRUMB NAVIGATION
-// alert placed on top of the breadcrumb navigation
-.template-mode ::ng-deep {
-    .block {
-        border-radius: 0 !important;
-        border: none !important;
-    }
-    .message-container {
-        text-align: center;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-    }
+.template-fixed-top {
+    flex-shrink: 0;
+    position: relative;
+    // overflow contents such as the image of the navbar or the AI labels
+    z-index: 12;
 }
 
 .template-breadcrumb {
     flex-shrink: 0;
     box-sizing: border-box;
     width: 100%;
-    position: relative;
-    // overflow contents such as the image of the navbar or the AI labels
-    z-index: 12;
 
     .template-breadcrumb-wrapper {
         margin: 0 auto;
@@ -883,6 +867,48 @@ button.topic-page-edit-toggle-btn {
 
     .mdc-button__label {
         gap: 8px;
+    }
+}
+
+// page mode bar, shown while editing or in template mode
+.topic-page-edit-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 0 16px;
+    background-color: var(--primaryBackground50);
+    color: var(--textMain);
+
+    .topic-page-edit-bar-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+
+        &.template-mode {
+            color: var(--primary);
+        }
+    }
+
+    .topic-page-edit-bar-status {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topic-page-template-mode-end {
+        margin-left: auto;
+    }
+
+    button {
+        --mat-button-text-label-text-color: var(--textMain);
+
+        i {
+            margin-right: 6px;
+        }
     }
 }
 

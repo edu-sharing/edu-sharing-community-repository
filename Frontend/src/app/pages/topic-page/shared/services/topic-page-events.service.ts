@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { Node } from 'ngx-edu-sharing-api';
 import { ColorChangeEvent } from '../types/color-change-event';
+import { WidgetConfigUpdatedEvent } from '../types/widget-config-updated-event';
 import { WidgetNodeAddedEvent } from '../types/widget-node-added-event';
 
 /**
@@ -27,10 +27,14 @@ export class TopicPageEventsService {
         new EventEmitter<WidgetNodeAddedEvent>();
 
     /**
-     * An existing widget node's config has been updated (not added).
-     *
-     * Emits the page variant node that owns the widget, so listeners can
-     * bump the template version when the edit occurs in template mode.
+     * An existing widget node's config has been updated (not added), with the values it replaced.
      */
-    readonly widgetConfigUpdated: EventEmitter<Node> = new EventEmitter<Node>();
+    readonly widgetConfigUpdated: EventEmitter<WidgetConfigUpdatedEvent> =
+        new EventEmitter<WidgetConfigUpdatedEvent>();
+
+    /**
+     * Properties of the node with the emitted ID were restored by undo or redo, so whatever
+     * displays the node has to read it again.
+     */
+    readonly widgetNodeRestored: EventEmitter<string> = new EventEmitter<string>();
 }

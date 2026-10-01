@@ -112,7 +112,10 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
 
     // VARIABLES
     blacklistedNodeIds: string[] = [];
+    // bumped whenever a config is applied, as the search text it sets is no signal of its own
+    private readonly appliedConfigs: WritableSignal<number> = signal(0);
     criteria: Signal<MdsQueryCriteria[]> = computed((): MdsQueryCriteria[] => {
+        this.appliedConfigs();
         const criteriaArray: MdsQueryCriteria[] = [];
         // if no propertyFilters were defined yet, set collectionIdKey to [COLLECTION_ID] to search for the collection
         if (!this.propertyFilters()) {
@@ -379,9 +382,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
      * @param config
      */
     setWidgetValues(config: ContentTeaserConfig): void {
-        if (config.blacklistedNodeIds) {
-            this.blacklistedNodeIds = config.blacklistedNodeIds;
-        }
+        this.blacklistedNodeIds = config.blacklistedNodeIds ?? [];
         // 0 is a valid enum value, so check for undefined
         if (config.contentTeaserLayout !== undefined) {
             this.layout = config.contentTeaserLayout;
@@ -389,9 +390,8 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         if (config.includeCustomCard !== undefined) {
             this.includeCustomCard.set(config.includeCustomCard);
         }
-        if (config.propertyFilters) {
-            this.propertyFilters.set(config.propertyFilters);
-        }
+        // a config without filters belongs to an unconfigured teaser, which searches the collection
+        this.propertyFilters.set(config.propertyFilters ?? null);
         // an empty string is also valid (i.e., overwrite search text if it is somehow defined)
         if (config.searchText !== undefined) {
             this.searchText = config.searchText;
@@ -400,6 +400,7 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
         if (config.sort !== undefined) {
             this.sort.set(config.sort);
         }
+        this.appliedConfigs.update((count: number): number => count + 1);
     }
 
     // HELPERS

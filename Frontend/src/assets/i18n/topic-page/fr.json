@@ -364,6 +364,39 @@
       "INVALID_OR_UNKNOWN_WIDGET": "Le widget n'est pas défini ou est inconnu."
     },
     "NO_SWIMLANES": "Aucune section avec du contenu n'a encore été créée.",
+    "HISTORY": {
+      "UNDO": "Annuler",
+      "REDO": "Rétablir",
+      "BAR": {
+        "LABEL": "Historique de la page",
+        "TITLE": "Mode édition",
+        "LAST_CHANGE": "Dernière modification : {{step}}",
+        "NOTHING_TO_UNDO": "Rien à annuler",
+        "UNDO_TOOLTIP": "Annuler : {{step}} (Ctrl+Z)",
+        "REDO_TOOLTIP": "Rétablir : {{step}} (Ctrl+Maj+Z)"
+      },
+      "CHANGED_ELSEWHERE": "La page a été modifiée ailleurs entre-temps, l'historique des modifications a donc été réinitialisé.",
+      "STEP": {
+        "ADD_SWIMLANE": "Section ajoutée",
+        "MOVE_SWIMLANE": "Section déplacée",
+        "DELETE_SWIMLANE": "Section supprimée",
+        "EDIT_SWIMLANE": "Paramètres de la section modifiés",
+        "SWIMLANE_HEADING": "Titre de la section modifié",
+        "SWIMLANE_SHAPE": "Forme de la section modifiée",
+        "SWIMLANE_COLOR": "Couleur de la section modifiée",
+        "GRID": "Mise en page de la section modifiée",
+        "ADD_WIDGET": "Widget ajouté : {{widget}}",
+        "WIDGET_CONFIG": "Widget modifié : {{widget}}",
+        "WIDGET_TYPE": "Type de widget modifié : {{from}} → {{to}}",
+        "REARRANGE_WIDGETS": "Widgets réorganisés",
+        "HEADER": "En-tête de page modifié",
+        "COLLECTION_DESCRIPTION": "Description de la collection modifiée",
+        "BREADCRUMB": "Membres de la rédaction modifiés",
+        "WIDGET": "Widget",
+        "TOPIC_COLOR": "Couleur du thème modifiée",
+        "ANCHOR_COLOR": "Couleur du menu d'ancrage modifiée"
+      }
+    },
     "NO_PAGE_CONFIG": {
       "DEFAULT_MESSAGE": "Aucune configuration de page n'a pu être trouvée pour cette page.",
       "VIEW_MESSAGE": "Veuillez contacter votre administrateur système.",
@@ -428,8 +461,8 @@
       "PENDING_MESSAGE": "Le modèle de page est supprimé avec toutes ses adaptations."
     },
     "TEMPLATE_MODE_ACTIVE": {
-      "VIEW": "Vous vous trouvez actuellement en mode affichage du modèle.",
-      "EDIT": "Vous vous trouvez actuellement en mode édition du modèle.",
+      "VIEW": "Mode affichage du modèle",
+      "EDIT": "Mode édition du modèle",
       "END": "Quitter le mode modèle"
     }
   }

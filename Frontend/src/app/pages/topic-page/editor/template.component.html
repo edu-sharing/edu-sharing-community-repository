@@ -5,40 +5,104 @@
   <es-spinner></es-spinner>
   }
 </div>
-} @if (templateMode()) {
-<es-info-message mode="info" class="template-mode">
-  {{
-    i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
-      | translate
-  }}
-  <button mat-flat-button color="primary" (click)="leaveTemplateMode()">
-    {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
-  </button>
-</es-info-message>
 }
 <main>
-  @if (initialLoadSuccessfully() && showBreadcrumb()) {
-  <!-- BREADCRUMBS -->
-  @if (parentEntries()) {
-  <div class="template-breadcrumb">
-    <div class="template-breadcrumb-wrapper">
-      <es-topic-page-breadcrumb
-        [contextNodeId]="topicCollectionId()"
-        [editMode]="editMode()"
-        [isProcessing]="requestInProgress()"
-        [nodeId]="convertedBreadcrumbNodeId()"
-        [propagatedNodeId]="convertedPropagatedBreadcrumbNodeId()"
-        [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
-        [pageVariantNode]="pageVariantNode()"
-        [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
-        [parentEntries]="parentEntries()"
-        [templateMode]="templateMode()"
-        (navigateToTemplate)="switchIntoTemplateMode()"
-        (variantSelected)="navigateToVariant($event)"
-      ></es-topic-page-breadcrumb>
+  <!-- undo/redo bar and breadcrumbs stay below the navigation while scrolling -->
+  <div class="template-fixed-top">
+    @if (templateMode() || editMode()) {
+    <div
+      class="topic-page-edit-bar"
+      role="toolbar"
+      [attr.aria-label]="i18nPrefix + 'HISTORY.BAR.LABEL' | translate"
+    >
+      <span class="topic-page-edit-bar-title" [class.template-mode]="templateMode()">
+        <i [esIcon]="templateMode() && !editMode() ? 'visibility' : 'edit'" [aria]="false"></i>
+
+        @if (templateMode()) {
+        {{
+          i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
+            | translate
+        }}
+        } @else {
+        {{ i18nPrefix + 'HISTORY.BAR.TITLE' | translate }}
+        }
+      </span>
+
+      @if (editMode()) {
+      <span class="topic-page-edit-bar-status" aria-live="polite">
+        @if (history.nextUndoStep(); as step) {
+        {{ i18nPrefix + 'HISTORY.BAR.LAST_CHANGE' | translate : { step: historyStepLabel(step) } }}
+        } @else {
+        {{ i18nPrefix + 'HISTORY.BAR.NOTHING_TO_UNDO' | translate }}
+        }
+      </span>
+
+      <button
+        mat-button
+        class="mat-button-no-uppercase"
+        [disabled]="!history.canUndo() || requestInProgress()"
+        [matTooltip]="
+          history.nextUndoStep()
+            ? (i18nPrefix + 'HISTORY.BAR.UNDO_TOOLTIP'
+              | translate : { step: historyStepLabel(history.nextUndoStep()) })
+            : ''
+        "
+        (click)="history.undo()"
+      >
+        <i esIcon="undo" [aria]="false"></i>
+        <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.UNDO' | translate }}</span>
+      </button>
+
+      <button
+        mat-button
+        class="mat-button-no-uppercase"
+        [disabled]="!history.canRedo() || requestInProgress()"
+        [matTooltip]="
+          history.nextRedoStep()
+            ? (i18nPrefix + 'HISTORY.BAR.REDO_TOOLTIP'
+              | translate : { step: historyStepLabel(history.nextRedoStep()) })
+            : ''
+        "
+        (click)="history.redo()"
+      >
+        <i esIcon="redo" [aria]="false"></i>
+        <span class="topic-page-btn-label">{{ i18nPrefix + 'HISTORY.REDO' | translate }}</span>
+      </button>
+      } @if (templateMode()) {
+      <button
+        class="topic-page-template-mode-end"
+        mat-flat-button
+        color="primary"
+        (click)="leaveTemplateMode()"
+      >
+        {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
+      </button>
+      }
     </div>
+    } @if (initialLoadSuccessfully() && showBreadcrumb()) {
+    <!-- BREADCRUMBS -->
+    @if (parentEntries()) {
+    <div class="template-breadcrumb">
+      <div class="template-breadcrumb-wrapper">
+        <es-topic-page-breadcrumb
+          [contextNodeId]="topicCollectionId()"
+          [editMode]="editMode()"
+          [isProcessing]="requestInProgress()"
+          [nodeId]="convertedBreadcrumbNodeId()"
+          [propagatedNodeId]="convertedPropagatedBreadcrumbNodeId()"
+          [pageTemplateExists]="!!collectionNodePagePropagateConfigRef"
+          [pageVariantNode]="pageVariantNode()"
+          [pageVariantConfigNodes]="pageVariantConfigs?.nodes || []"
+          [parentEntries]="parentEntries()"
+          [templateMode]="templateMode()"
+          (navigateToTemplate)="switchIntoTemplateMode()"
+          (variantSelected)="navigateToVariant($event)"
+        ></es-topic-page-breadcrumb>
+      </div>
+    </div>
+    } }
   </div>
-  } } @if (!pageConfigCheckFailed()) {
+  @if (!pageConfigCheckFailed()) {
   <div class="topic-page-outer-wrapper">
     @if (filterPanelOpen()) {
     <es-topic-page-filters-sidebar

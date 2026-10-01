@@ -37,6 +37,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { Toast, ToastType } from '../../../../services/toast';
 import { AiHelperService } from '../../shared/services/ai-helper.service';
 import { GlobalWidgetConfigService } from '../../shared/services/global-widget-config.service';
+import { TopicPageEventsService } from '../../shared/services/topic-page-events.service';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { BapiConfigObject } from '../../shared/types/bapi-config-object';
@@ -117,6 +118,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     private globalWidgetConfigService = inject(GlobalWidgetConfigService);
     private platformLocation = inject(PlatformLocation);
     private toast = inject(Toast);
+    private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private translate = inject(TranslateService);
@@ -221,6 +223,18 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
                 // only update if an AI config does exist
                 if (aiConfig && Object.keys(aiConfig).length) {
                     void this.updateCommonProperties(widgetConfig, aiConfig);
+                }
+            });
+        // undo/redo rewrote the config of this widget's node, which leaves the nodeId unchanged
+        this.topicPageEventsService.widgetNodeRestored
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((nodeId: string): void => {
+                if (
+                    this.viewInitialized &&
+                    this.nodeId &&
+                    convertNodeRefIntoNodeId(this.nodeId) === nodeId
+                ) {
+                    void this.readWidgetConfig(true);
                 }
             });
         // listen to changes in the persist config trigger
@@ -436,12 +450,13 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             this.updateInProgress.set(false);
             this.widgetInstance.updateInProgress.set(false);
         }
-        // when the headline or description are not synced with the prompt, set them to the config value
-        if (!headlineSyncedWithPrompt && widgetConfig.headline !== undefined) {
-            this.headline = widgetConfig.headline;
+        // when the headline or description are not synced with the prompt, set them to the config
+        // value; the config holds the whole state, so a text missing from it is empty
+        if (!headlineSyncedWithPrompt) {
+            this.headline = widgetConfig.headline ?? '';
         }
-        if (!descriptionSyncedWithPrompt && widgetConfig.description !== undefined) {
-            this.description = widgetConfig.description;
+        if (!descriptionSyncedWithPrompt) {
+            this.description = widgetConfig.description ?? '';
         }
         // when the headline or description were not AI-generated, reset the flag
         if (!headlineAiGeneratedUpdated) {
@@ -778,8 +793,10 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Helper function to read the widget configuration from the node inputs.
+     *
+     * @param uncached bypasses the short-lived node cache, for a node that was just rewritten
      */
-    private async readWidgetConfig(): Promise<void> {
+    private async readWidgetConfig(uncached: boolean = false): Promise<void> {
         let widgetConfig: WidgetConfig = {};
         let aiConfig: BapiConfigObject = {};
 
@@ -787,6 +804,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
             // an unavailable config node leaves the widget unconfigured
             this.widgetNode = await this.topicPageHelperService.getNodeIfAvailable(
                 this.nodeId || this.propagatedNodeId,
+                uncached,
             );
             if (this.widgetNode) {
                 widgetConfig = retrieveWidgetConfigFromNode(this.widgetNode);

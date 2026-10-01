@@ -295,7 +295,8 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
         // create an output object
         const outputObject: TextVariant = {};
         this.selectDimensions.forEach((val, key) => {
-            if (this.latestSelectedDimensionValues[key].length) {
+            // only dimensions used in the prompt and picked in the form carry a value
+            if (this.latestSelectedDimensionValues[key]?.length) {
                 outputObject[key] = this.latestSelectedDimensionValues[key];
             }
         });
