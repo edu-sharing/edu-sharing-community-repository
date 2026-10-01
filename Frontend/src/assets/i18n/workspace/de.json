@@ -110,6 +110,7 @@
       "TITLE": "Veröffentlichung zurückziehen",
       "REASON": "Begründung angeben",
       "REVOKE": "Objekt zurückziehen",
+      "CLEANUP_COLLECTIONS": "Objekt aus allen Sammlungen entfernen",
       "DETAILS": "Hierdurch wird die Veröffentlichung dieses Elements aufgehoben. Es verbleibt lediglich eine Hinweis-Seite mit den Metadaten. Sollte das Element Serien-Elemente besitzen, werden diese ebenfalls entfernt. Bitte beachten Sie, dass dieser Vorgang nicht rückgängig gemacht werden kann."
     },
     "SHARE": {

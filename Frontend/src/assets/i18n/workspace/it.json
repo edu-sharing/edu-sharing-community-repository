@@ -558,6 +558,7 @@
       "TITLE": "Ritirare la pubblicazione",
       "REASON": "Fornisci una ragione",
       "REVOKE": "Ritirare l'oggetto",
+      "CLEANUP_COLLECTIONS": "Rimuovi l'oggetto da tutte le raccolte",
       "DETAILS": "Questa operazione rimuoverà la pubblicazione di questo elemento. Rimarrà solo una pagina di notifica con i metadati. Se l'elemento contiene elementi di serie, anche questi verranno rimossi. Si prega di notare che questa azione non può essere annullata."
     },
     "SAFE_CONFIRM_DOWNLOAD_TITLE": "Avviso",

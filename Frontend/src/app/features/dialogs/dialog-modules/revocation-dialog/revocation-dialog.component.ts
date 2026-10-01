@@ -18,6 +18,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class RevocationDialogComponent {
     reasonControl = new FormControl('', Validators.required);
+    cleanupCollectionsControl = new FormControl(false);
     edit: boolean;
 
     constructor(
@@ -69,6 +70,7 @@ export class RevocationDialogComponent {
                 body: {
                     reason: this.reasonControl.value,
                     removeContent: true,
+                    cleanupCollections: !this.edit && this.cleanupCollectionsControl.value,
                 },
             }),
         );

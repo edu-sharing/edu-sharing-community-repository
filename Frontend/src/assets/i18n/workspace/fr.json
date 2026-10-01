@@ -565,6 +565,7 @@
       "TITLE": "Retirer la publication",
       "REASON": "Veuillez fournir une raison.",
       "REVOKE": "Retirer l'objet",
+      "CLEANUP_COLLECTIONS": "Retirer l'objet de toutes les collections",
       "DETAILS": "Cette action supprimera la publication de cet élément. Seule une page de notification contenant les métadonnées sera conservée. Si l'élément contient des éléments de série, ceux-ci seront également supprimés. Veuillez noter que cette action est irréversible."
     },
     "SAFE_CONFIRM_DOWNLOAD_TITLE": "Avis",
