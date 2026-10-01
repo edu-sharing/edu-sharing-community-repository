@@ -4,7 +4,7 @@ import { take } from 'rxjs/operators';
 import { KeyEvents } from '../util/key-events';
 import { DialogsService } from '../features/dialogs/dialogs.service';
 import { CardComponent } from '../shared/components/card/card.component';
-import { KeyboardShortcut, KeyboardShortcutCondition, Modifier } from 'ngx-edu-sharing-ui';
+import { KeyboardShortcut, matchesShortcutCondition } from 'ngx-edu-sharing-ui';
 
 interface ShortcutsRecord {
     shortcuts: KeyboardShortcut[];
@@ -72,23 +72,4 @@ export class KeyboardShortcutsService implements KeyboardShortcutsService {
             }
         }
     }
-}
-
-export function matchesShortcutCondition(
-    event: KeyboardEvent,
-    condition: KeyboardShortcutCondition,
-): boolean {
-    return (
-        event.code === condition.keyCode &&
-        matchesModifiers(event, condition.modifiers) &&
-        !condition.ignoreWhen?.(event)
-    );
-}
-
-function matchesModifiers(event: KeyboardEvent, modifiers: Modifier[] = []): boolean {
-    return (
-        modifiers.includes('Alt') === event.altKey &&
-        modifiers.includes('Shift') === event.shiftKey &&
-        modifiers.includes('Ctrl/Cmd') === (event.ctrlKey || event.metaKey)
-    );
 }

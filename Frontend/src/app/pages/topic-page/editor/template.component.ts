@@ -27,7 +27,6 @@ import {
     ViewChildren,
     WritableSignal,
     inject,
-    NgZone,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
@@ -49,6 +48,8 @@ import {
     DefaultGroups,
     ElementType,
     Helper,
+    KeyboardShortcut,
+    Modifier,
     OptionItem,
     OptionsHelperDataService,
     PreferredColor,
@@ -57,7 +58,7 @@ import {
     UIConstants,
     Values,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom, fromEvent, Observable, Subject } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 import {
     debounceTime,
     distinctUntilChanged,
@@ -79,7 +80,7 @@ import {
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
+import { KeyboardShortcutsService } from '../../../services/keyboard-shortcuts.service';
 import {
     MainNavCreateConfig,
     MainNavService,
@@ -108,7 +109,6 @@ import {
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
-import { HistoryAction, historyActionForKey } from '../shared/utils/history-shortcut-util';
 import {
     HistoryTransaction,
     StepOptions,
@@ -207,7 +207,7 @@ import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
 
-// keystrokes in editable content keep their native meaning (e.g. undoing typed text)
+// the app-wide shortcuts only skip text inputs; textareas and rich text keep their own undo too
 const isEditableTarget = (target: EventTarget | null): boolean =>
     target instanceof HTMLElement &&
     (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName));
@@ -261,7 +261,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
     protected history = inject(TopicPageHistoryService);
-    private ngZone = inject(NgZone);
+    private keyboardShortcuts = inject(KeyboardShortcutsService);
     private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -2433,34 +2433,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Registers undo (Ctrl/Cmd+Z) and redo (Ctrl/Cmd+Shift+Z, Ctrl/Cmd+Y) for the edit mode.
      */
     private registerHistoryShortcuts(): void {
-        // TODO: register with KeyboardShortcutsService (keyCode KeyZ/KeyY) and drop history-shortcut-util
-        //  once matchesShortcutCondition follows the keyboard layout; it compares key positions,
-        //  which swaps Z and Y on QWERTZ keyboards
-        // key presses are only brought into the zone when they trigger a history action
-        this.ngZone.runOutsideAngular(() =>
-            fromEvent<KeyboardEvent>(document, 'keydown')
-                .pipe(takeUntil(this.destroyed$))
-                .subscribe((event: KeyboardEvent): void => {
-                    const action: HistoryAction | null = historyActionForKey(event);
-                    if (!action || this.ignoreHistoryShortcut(event)) {
-                        return;
-                    }
-                    event.preventDefault();
-                    this.ngZone.run((): void => {
-                        void (action === 'undo' ? this.history.undo() : this.history.redo());
-                    });
-                }),
-        );
-    }
-
-    // an open dialog or card owns the keyboard, as for the app-wide shortcuts
-    private ignoreHistoryShortcut(event: KeyboardEvent): boolean {
-        return (
-            !this.editMode() ||
-            this.requestInProgress() ||
-            isEditableTarget(event.target) ||
-            this.dialogs.openDialogs.length > 0 ||
-            CardComponent.getNumberOfOpenCards() > 0
+        // matched by the character typed, so the shortcuts follow the keyboard layout
+        const shortcut = (
+            key: string,
+            modifiers: Modifier[],
+            action: () => Promise<void>,
+        ): KeyboardShortcut => ({
+            keyCode: 'Key' + key.toUpperCase(),
+            key,
+            modifiers,
+            ignoreWhen: (event: KeyboardEvent): boolean =>
+                !this.editMode() || this.requestInProgress() || isEditableTarget(event.target),
+            callback: (): void => void action(),
+        });
+        this.keyboardShortcuts.register(
+            [
+                shortcut('z', ['Ctrl/Cmd'], () => this.history.undo()),
+                shortcut('z', ['Ctrl/Cmd', 'Shift'], () => this.history.redo()),
+                shortcut('y', ['Ctrl/Cmd'], () => this.history.redo()),
+            ],
+            { until: this.destroyed$ },
         );
     }
 
