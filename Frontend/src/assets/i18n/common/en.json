@@ -406,6 +406,7 @@
     "EMAIL_REQUIRED": "Please provide a valind e-mail address.",
     "REASON_REQUIRED": "Please select what kind of problem you are experiencing.",
     "DONE": "Thanks for your message.",
+    "ALTCHA_REQUIRED": "Please confirm that you are not a robot.",
     "REASON": "Which problem exists?",
     "REASONS": {
       "UNAVAILABLE": "object not available",

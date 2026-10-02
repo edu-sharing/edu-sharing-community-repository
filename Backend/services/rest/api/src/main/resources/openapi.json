@@ -16123,6 +16123,42 @@
         ]
       }
     },
+    "/altcha/v1/challenge": {
+      "get": {
+        "description": "Proof-of-work challenge which guests have to solve before reporting a node. Returns 204 if ALTCHA is disabled.",
+        "operationId": "getChallenge",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "204": {
+            "description": "ALTCHA is disabled."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "security": [],
+        "summary": "Get a new ALTCHA challenge.",
+        "tags": [
+          "ALTCHA v1"
+        ]
+      }
+    },
     "/archive/v1/purge/{repository}": {
       "delete": {
         "description": "Searches for archive nodes.",
@@ -38179,6 +38215,14 @@
         "operationId": "reportNode",
         "parameters": [
           {
+            "description": "solved ALTCHA payload, required for guests if ALTCHA is enabled (see /altcha/v1/challenge)",
+            "in": "header",
+            "name": "X-Altcha",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "ID of repository (or \"-home-\" for home repository)",
             "in": "path",
             "name": "repository",
@@ -38282,6 +38326,9 @@
               }
             },
             "description": "Ressources are not found."
+          },
+          "409": {
+            "description": "ALTCHA payload was already used."
           },
           "500": {
             "content": {
