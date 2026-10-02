@@ -1169,6 +1169,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.loadAuthorities();
     }
 
+    // The authority index may lag behind deletions, so deleted entries are removed locally.
+    private removeFromList(authority: GenericAuthority) {
+        this.dataSource.removeWhere((a) => a.authorityName === authority.authorityName);
+    }
+
     private closeDialog() {
         this.toast.closeProgressSpinner();
     }
@@ -1177,7 +1182,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.closeDialog();
         if (position == data.length) {
             this.toast.closeProgressSpinner();
-            this.refresh();
+            // no full refresh since the deleted entries might still be returned by the search
+            this.nodeEntries.getSelection().clear();
+            if (this.optionsHelperService.getData()) {
+                void this.optionsHelperService.refreshComponents();
+            }
             if (!error) this.toast.toast('PERMISSIONS.DELETED_' + this._mode);
             return;
         }
@@ -1186,7 +1195,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             console.error('delete for user does not exists');
         } else {
             this.iam.deleteGroup(data[position].authorityName).subscribe(
-                () => this.startDelete(data, position + 1, error),
+                () => {
+                    this.removeFromList(data[position]);
+                    this.startDelete(data, position + 1, error);
+                },
                 (error: any) => {
                     this.toast.error(error);
                     this.startDelete(data, position + 1, true);
@@ -1445,7 +1457,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 this.toast.toast('PERMISSIONS.ORG_REMOVED');
                 this.toast.closeProgressSpinner();
                 this.closeDialog();
-                this.refresh();
+                // no full refresh since the deleted organization might still be returned by the search
+                this.removeFromList(org);
+                this.nodeEntries.getSelection().clear();
+                if (this.optionsHelperService.getData()) {
+                    void this.optionsHelperService.refreshComponents();
+                }
             },
             (error: any) => {
                 this.toast.error(error);
