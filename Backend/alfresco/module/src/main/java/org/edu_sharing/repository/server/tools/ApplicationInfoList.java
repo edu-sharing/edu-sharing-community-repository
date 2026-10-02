@@ -4,10 +4,8 @@
 package org.edu_sharing.repository.server.tools;
 
 import jakarta.servlet.ServletRequest;
-import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 
 import java.util.*;
 
@@ -16,12 +14,10 @@ public class ApplicationInfoList {
 
     private static final Log logger = LogFactory.getLog(ApplicationInfoList.class);
 
-    private static final Object lock = new Object();
-    private static final SimpleCache<String, ApplicationInfo> appInfos = (SimpleCache<String, ApplicationInfo>) AlfAppContextGate.getApplicationContext().getBean("eduSharingApplicationInfoCache");
-
-    private static ApplicationInfo appInfoHome;
-    private static ApplicationInfo appInfoRenderingService2;
-    private static List<ApplicationInfo> appInfosLtiTool = new ArrayList<>();
+    /**
+     * always replaced as a whole, so readers get a consistent state without locking. null until the first successful init
+     */
+    private static volatile ApplicationInfoListSnapshot snapshot;
 
     public static ApplicationInfo getRepositoryInfo(String file) {
         return getApplicationInfoByProperty(file, ApplicationInfoProperty.APPFILE);
@@ -40,11 +36,7 @@ public class ApplicationInfoList {
     ;
 
     private static ApplicationInfo getApplicationInfoByProperty(String value, ApplicationInfoProperty prop) {
-        if (appInfos.getKeys().isEmpty()) {
-            getApplicationInfos();
-        }
-        for (String key : appInfos.getKeys()) {
-            ApplicationInfo appInfo = appInfos.get(key);
+        for (ApplicationInfo appInfo : getSnapshot().appInfos().values()) {
             if (prop.equals(ApplicationInfoProperty.TYPE)) {
                 if (value.equals(appInfo.getType())) {
                     return appInfo;
@@ -99,8 +91,7 @@ public class ApplicationInfoList {
      * @return Map with AppId, ApplicationInfo
      */
     public static Collection<String> getAppInfoIds() {
-        initAppInfoCache();
-        return Collections.unmodifiableCollection(appInfos.getKeys());
+        return getSnapshot().appInfos().keySet();
     }
 
     /**
@@ -108,91 +99,34 @@ public class ApplicationInfoList {
      * @return Map with AppId, ApplicationInfo
      */
     public static Map<String, ApplicationInfo> getApplicationInfos() {
-        initAppInfoCache();
         /**
          * @TODO refactor calls to this methode so that hashmap building is not needed
          */
-        Map<String, ApplicationInfo> result = new HashMap<>();
-        appInfos.getKeys().forEach(appId -> result.put(appId, appInfos.get(appId)));
-        return Collections.synchronizedMap(result);
-    }
-
-    private static void initAppInfoCache() {
-        if (appInfos.getKeys().isEmpty()) {
-            logger.debug("appInfos size is 0");
-            synchronized (appInfos) {
-                initAppInfos();
-            }
-        } else {
-            logger.debug("appInfos size not 0");
-        }
+        return Collections.synchronizedMap(new HashMap<>(getSnapshot().appInfos()));
     }
 
     /**
-     * synchronized to prevent errors when multithreads call this static method
+     * lock free in the normal case, only the first access synchronizes
+     *
+     * @return the current snapshot, an empty one if the application infos could not be loaded yet
      */
-    private static synchronized void initAppInfos() {
-        String[] appFileArray;
-
-        synchronized (lock) {
-            appInfoHome = null;
-            appInfoRenderingService2 = null;
-            appInfosLtiTool.clear();
+    private static ApplicationInfoListSnapshot getSnapshot() {
+        ApplicationInfoListSnapshot current = snapshot;
+        if (current != null) {
+            return current;
         }
+        return initAppInfos();
+    }
 
-        try {
-            ApplicationInfo registry = new ApplicationInfo("ccapp-registry.properties.xml");
-            String repStr = registry.getString("applicationfiles", null, false);
-            if (repStr == null || repStr.trim().isEmpty()) {
-                logger.error("Repository Registry config is undefined or empty");
-                return;
-            }
-            appFileArray = repStr.split(",");
-            if (appFileArray.length == 0) {
-                logger.error("Repository Registry config is empty");
-                return;
-            }
-        } catch (Exception e) {
-            logger.error("Could not find Repository Registry", e);
-            return;
+    /**
+     * synchronized to prevent errors when multithreads call this static method.
+     * If loading fails, the snapshot stays null and the next call tries again.
+     */
+    private static synchronized ApplicationInfoListSnapshot initAppInfos() {
+        if (snapshot == null) {
+            snapshot = ApplicationInfoListSnapshot.build();
         }
-
-        List<ApplicationInfo> tmpAppInfos = new ArrayList<>();
-        for (String appFile : appFileArray) {
-            logger.debug("appFile:" + appFile);
-            appFile = appFile.trim();
-            if (appFile.isEmpty()) {
-                logger.error("found empty value in Repository Registry");
-                continue;
-            }
-
-            try {
-                ApplicationInfo repInfo = new ApplicationInfo(appFile);
-                logger.debug("put:" + appFile + " " + repInfo);
-                synchronized (lock) {
-                    tmpAppInfos.add(repInfo);
-                    if (repInfo.ishomeNode()) {
-                        appInfoHome = repInfo;
-                    }
-                    if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(repInfo.getType())) {
-                        appInfoRenderingService2 = repInfo;
-                    }
-                    if(repInfo.isLtiTool()){
-                        appInfosLtiTool.add(repInfo);
-                    }
-                }
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-
-        }
-
-        for (ApplicationInfo appInfo : tmpAppInfos) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("put:" + appInfo.getAppFile() + " " + appInfo + " size:" + appInfos.getKeys().size());
-            }
-            appInfos.put(appInfo.getAppId(), appInfo);
-        }
+        return snapshot != null ? snapshot : ApplicationInfoListSnapshot.EMPTY;
     }
 
     /**
@@ -201,19 +135,13 @@ public class ApplicationInfoList {
      */
     public static ArrayList<ApplicationInfo> getRepositoryInfosOrdered() {
         //set home reporsitory as the first one
-        ArrayList<ApplicationInfo> appInfoList = new ArrayList<>();
-        for (String key : ApplicationInfoList.getApplicationInfos().keySet()) {
-            ApplicationInfo repInfo = ApplicationInfoList.getApplicationInfos().get(key);
-            appInfoList.add(repInfo);
-        }
+        ArrayList<ApplicationInfo> appInfoList = new ArrayList<>(getSnapshot().appInfos().values());
         Collections.sort(appInfoList);
         return appInfoList;
     }
 
     public static ApplicationInfo getHomeRepository() {
-        if (appInfos.getKeys().isEmpty()) {
-            initAppInfos();
-        }
+        ApplicationInfo appInfoHome = getSnapshot().appInfoHome();
         if (appInfoHome == null) logger.error("no home repository found. check your application files");
         return appInfoHome;
     }
@@ -233,15 +161,13 @@ public class ApplicationInfoList {
     }
 
     public static ApplicationInfo getRenderingService2() {
-        if (appInfos.getKeys().isEmpty()) {
-            initAppInfos();
-        }
+        ApplicationInfo appInfoRenderingService2 = getSnapshot().appInfoRenderingService2();
         if (appInfoRenderingService2 == null) logger.warn("no rendering service 2 found. check your application files");
         return appInfoRenderingService2;
     }
 
     public static List<ApplicationInfo> getAppInfosLtiTool(){
-        return appInfosLtiTool;
+        return getSnapshot().appInfosLtiTool();
     }
 
     public static ApplicationInfo getHomeRepositoryObeyConfig(String[] allowedRepos) {
@@ -265,10 +191,18 @@ public class ApplicationInfoList {
         return getHomeRepository();
     }
 
+    /**
+     * builds a new snapshot and replaces the current one, readers keep using the previous snapshot until then.
+     * If loading fails, the previous snapshot is kept.
+     */
 	public static synchronized void refresh(){
         logger.debug("calling");
-        appInfos.clear();
-        getApplicationInfos();
+        ApplicationInfoListSnapshot newSnapshot = ApplicationInfoListSnapshot.build();
+        if (newSnapshot == null) {
+            logger.error("refresh of application infos failed, keeping the previous state");
+        } else {
+            snapshot = newSnapshot;
+        }
         logger.debug("returning");
     }
 }
