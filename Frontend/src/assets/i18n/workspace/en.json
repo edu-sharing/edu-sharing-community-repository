@@ -111,6 +111,7 @@
       "TITLE": "Revoke object",
       "REASON": "Reason for revocation",
       "REVOKE": "Revoke",
+      "CLEANUP_COLLECTIONS": "Remove object from all collections",
       "DETAILS": "This will unpublish the given element. Only a notice page with metadata will remain. In case this element is a series object, all children will be removed as well. Please note that this action can not be undone."
     },
     "SHARE": {

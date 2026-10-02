@@ -7,3 +7,6 @@
   <mat-label>{{ 'WORKSPACE.REVOCATION.REASON' | translate }}</mat-label>
   <textarea [formControl]="reasonControl" matInput></textarea>
 </mat-form-field>
+<mat-checkbox *ngIf="!edit" [formControl]="cleanupCollectionsControl">
+  {{ 'WORKSPACE.REVOCATION.CLEANUP_COLLECTIONS' | translate }}
+</mat-checkbox>

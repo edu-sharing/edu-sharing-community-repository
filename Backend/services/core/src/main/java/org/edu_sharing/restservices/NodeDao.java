@@ -1638,7 +1638,11 @@ public class NodeDao {
                             ((CollectionReference) data).getOriginalId(), this.version, org.alfresco.model.ContentModel.PROP_CONTENT.toString())
             ));
         } else {
-            content.setHash(nodeService.getContentHash(storeProtocol, storeId, nodeId, this.version, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+            try {
+                content.setHash(nodeService.getContentHash(storeProtocol, storeId, nodeId, this.version, org.alfresco.model.ContentModel.PROP_CONTENT.toString()));
+            } catch (AccessDeniedException e) {
+                logger.info("Access to content for hash generation was denied for " + nodeId);
+            }
         }
         return content;
     }
