@@ -530,8 +530,7 @@ export class WorkspaceExplorerComponent implements OnDestroy, OnChanges, AfterVi
                     n.parent?.id === currentId,
             );
             if (filtered.length) {
-                console.log('filtered', filtered.length);
-                this.nodeEntries?.addVirtualNodes(filtered, { select: false });
+                this.nodeEntries?.addVirtualNodes(filtered, { select: true });
             }
         });
     }
