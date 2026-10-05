@@ -956,6 +956,14 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.dataSource.isLoading = false;
     }
 
+    /** Appends only entries not yet listed; an existing virtual entry is kept as it is. */
+    private appendNewAuthorities(entries: GenericAuthority[]) {
+        const key = (a: GenericAuthority) =>
+            (a as { ref?: { id?: string } }).ref?.id ?? a.authorityName;
+        const loaded = new Set(this.dataSource.getData().map(key));
+        this.dataSource.appendData(entries.filter((a) => !loaded.has(key(a))));
+    }
+
     private onLoadAuthoritiesError(error: any) {
         this.dataSource.isLoading = false;
         this.toast.error(error);
@@ -991,7 +999,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         const request = {
             sortBy: [sort],
             sortAscending: this.sortConfig.direction === 'asc',
-            offset: this.dataSource.getData().length,
+            // virtual entries are not server results and must not shift the offset
+            offset: this.dataSource.getData().filter((d) => !(d as { virtual?: boolean }).virtual)
+                .length,
         };
         const query = this._searchQuery ? this._searchQuery : '';
         this.organization
@@ -1006,8 +1016,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 .getOrganizations(query, !this.isAdmin, request)
                 .pipe(takeUntil(this.cancelLoadAuthorities$))
                 .subscribe({
-                    next: async (orgs: OrganizationOrganizations) => {
-                        await this.dataSource.appendData(
+                    next: (orgs: OrganizationOrganizations) => {
+                        this.appendNewAuthorities(
                             orgs.organizations.filter((o) => o.administrationAccess),
                         );
                         this.dataSource.isLoading = false;
@@ -1035,9 +1045,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .getGroupMembers(this.org.authorityName, query, this._mode, request)
                     .pipe(takeUntil(this.cancelLoadAuthorities$))
                     .subscribe({
-                        next: async (data: IamAuthorities) => {
+                        next: (data: IamAuthorities) => {
                             this.dataSource.setPagination(data.pagination);
-                            await this.dataSource.appendData(data.authorities as Organization[]);
+                            this.appendNewAuthorities(data.authorities as Organization[]);
                             this.dataSource.isLoading = false;
                         },
                         error: (error) => this.onLoadAuthoritiesError(error),
@@ -1047,9 +1057,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .searchGroups(query, true, '', '', request)
                     .pipe(takeUntil(this.cancelLoadAuthorities$))
                     .subscribe({
-                        next: async (data: IamGroups) => {
+                        next: (data: IamGroups) => {
                             this.dataSource.setPagination(data.pagination);
-                            await this.dataSource.appendData(data.groups as Group[]);
+                            this.appendNewAuthorities(data.groups as Group[]);
                             this.dataSource.isLoading = false;
                         },
                         error: (error) => this.onLoadAuthoritiesError(error),
@@ -1059,9 +1069,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                     .searchUsers(query, true, '', request, RestConstants.HOME_REPOSITORY, false)
                     .pipe(takeUntil(this.cancelLoadAuthorities$))
                     .subscribe({
-                        next: async (data: IamUsers) => {
+                        next: (data: IamUsers) => {
                             this.dataSource.setPagination(data.pagination);
-                            await this.dataSource.appendData(data.users as unknown as User[]);
+                            this.appendNewAuthorities(data.users as unknown as User[]);
                             this.dataSource.isLoading = false;
                         },
                         error: (error) => this.onLoadAuthoritiesError(error),
