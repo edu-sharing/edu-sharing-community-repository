@@ -158,6 +158,20 @@
     }
 }
 
+// outside of edit mode tile and chip are links, which render with the font and text
+// styles the browser gives their buttons in edit mode
+a.collection-tile {
+    font: -moz-button;
+    font: -webkit-small-control;
+    color: buttontext;
+    text-align: center;
+    text-decoration: none;
+}
+
+a.collection-chip {
+    text-align: center;
+}
+
 .toggle-show-more {
     margin-top: 8px;
     width: 100%;

@@ -56,7 +56,7 @@ import {
     retrievePageVariantTemplateVersion,
 } from '../utils/template-util';
 import { TopicPageEventsService } from './topic-page-events.service';
-import { TopicPageGlobalService } from './topic-page-global.service';
+import { TopicNavigation, TopicPageGlobalService } from './topic-page-global.service';
 
 @Injectable({
     providedIn: 'root',
@@ -97,12 +97,18 @@ export class TopicPageHelperService {
     private selectedVariablesSubject: BehaviorSubject<{ [key: string]: string[] }> =
         new BehaviorSubject<{ [key: string]: string[] }>({});
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
+    private inPlaceNavigationHandler: TopicNavigation | null = null;
 
     /**
      * Show the node in the editorial sidebar's preview, or close the preview if it shows the node.
      * With a node list, the list's selection drives the sidebar, as on the search page.
      */
     togglePreview(node: Node, list?: NodeEntriesWrapperComponent<Node>): void {
+        // the preview is rendered outside of the topic page; its topic links load in this one
+        this.topicPageGlobalService.setPreviewTopicNavigation(
+            node.ref.id,
+            this.inPlaceNavigationHandler,
+        );
         // no editorial sidebar: an embedded `edu-sharing-preview-sidebar` shows it, else a new tab
         if (!this.editorialSidebarService.sidebarAvailable()) {
             this.previewSidebarService.handleNodeClick(node);
@@ -140,6 +146,28 @@ export class TopicPageHelperService {
         if (this.editorialSidebarService.editorialSidebar?.enabledOption()?.option === 'PREVIEW') {
             this.editorialSidebarService.close();
         }
+    }
+
+    /**
+     * Registers the handler of the topic page that loads linked topics inside itself.
+     * The handler returns whether it took over the navigation.
+     */
+    setInPlaceNavigationHandler(handler: TopicNavigation | null): void {
+        if (this.inPlaceNavigationHandler) {
+            this.topicPageGlobalService.clearPreviewTopicNavigation(this.inPlaceNavigationHandler);
+        }
+        this.inPlaceNavigationHandler = handler;
+    }
+
+    /**
+     * Lets the surrounding topic page load the linked topic inside itself.
+     * Returns false if the caller has to navigate to the link itself.
+     *
+     * @param collectionId
+     * @param url the link of the topic, as given by the custom URL function
+     */
+    navigateInPlace(collectionId: string, url: string | null): boolean {
+        return this.inPlaceNavigationHandler?.(collectionId, url) ?? false;
     }
 
     /**

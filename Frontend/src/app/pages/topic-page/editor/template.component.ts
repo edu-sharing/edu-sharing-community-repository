@@ -4,6 +4,7 @@ import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { PlatformLocation } from '@angular/common';
 import {
     AfterViewInit,
+    booleanAttribute,
     Component,
     computed,
     CUSTOM_ELEMENTS_SCHEMA,
@@ -16,6 +17,7 @@ import {
     OnChanges,
     OnDestroy,
     OnInit,
+    output,
     QueryList,
     Signal,
     signal,
@@ -144,6 +146,7 @@ import { TopicHeaderConfig } from '../shared/types/widget-config/topic-header-co
 import { Swimlane } from '../shared/types/swimlane';
 import { SwimlaneBackgroundShape } from '../shared/types/swimlane-background-shape';
 import { SwimlaneRepeat } from '../shared/types/swimlane-repeat';
+import { TopicChangedEvent } from '../shared/types/topic-changed-event';
 import { ContentTeaserConfig } from '../shared/types/widget-config/content-teaser-config';
 import { WidgetConfig } from '../shared/types/widget-config/widget-config';
 import { WidgetConfigObject } from '../shared/types/widget-config-object';
@@ -272,6 +275,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
     constructor() {
+        this.topicPageHelperService.setInPlaceNavigationHandler(
+            (collectionId: string, url: string | null): boolean =>
+                this.openTopicInPlace(collectionId, url),
+        );
         effect((): void => {
             this.scrollHelperService.setScrollContainer(
                 this.scrollContainerRef()?.nativeElement ?? null,
@@ -370,6 +377,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     showBreadcrumb: InputSignal<boolean> = input(true);
     showSidebar: InputSignal<boolean> = input(true);
     @Input() variantId: string;
+    /**
+     * Loads topics linked inside the page (topic tree, collection chips, breadcrumb) in this
+     * component. The links keep the URLs of the custom URL function, e.g. for new tabs.
+     */
+    readonly navigateInPlace = input(false, { transform: booleanAttribute });
+    /** Emitted after the page switched to another topic via navigateInPlace. */
+    readonly topicChanged = output<TopicChangedEvent>();
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
     @ViewChild('addPageVariantOrTemplateDialog')
@@ -383,6 +397,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     initialLoadSuccessfully: WritableSignal<boolean> = signal(false);
     requestInProgress: WritableSignal<boolean> = signal(false);
     private initializedWithParams: boolean = false;
+    private customEventListenersInitialized: boolean = false;
+    private fragmentListenerInitialized: boolean = false;
+    private switchedTopic: { collectionId: string; variantId?: string } | null = null;
     private readonly destroyed$ = new Subject<void>();
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
@@ -619,14 +636,72 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             changes.collectionId && !changes.collectionId.firstChange;
         const variantIdChanged: boolean = changes.variantId && !changes.variantId.firstChange;
         if (collectionIdChanged || variantIdChanged) {
-            // reset several values to ensure that the component is properly initialized
-            this.selectedVariantPosition = -1;
-            this.pageConfigNode = null;
-            // set the collection ID
-            this.topicCollectionId.set(changes.collectionId?.currentValue || this.collectionId);
-            // initialize the component
-            await this.initializeComponent(changes.variantId?.currentValue || this.variantId);
+            const collectionId: string = changes.collectionId?.currentValue || this.collectionId;
+            const variantId: string | undefined =
+                changes.variantId?.currentValue || this.variantId || undefined;
+            // an in-place navigation reflects the topic it has loaded into the inputs
+            if (
+                collectionId === this.switchedTopic?.collectionId &&
+                variantId === this.switchedTopic?.variantId
+            ) {
+                return;
+            }
+            await this.switchTopic(collectionId, variantId);
         }
+    }
+
+    /**
+     * Loads another topic into this component.
+     *
+     * @param collectionId
+     * @param variantId
+     */
+    private async switchTopic(collectionId: string, variantId?: string): Promise<void> {
+        this.switchedTopic = { collectionId, variantId };
+        // reset several values to ensure that the component is properly initialized
+        this.selectedVariantPosition = -1;
+        this.pageConfigNode = null;
+        this.topicCollectionId.set(collectionId);
+        await this.initializeComponent(variantId);
+    }
+
+    /**
+     * Loads the linked topic in this component instead of navigating to its link.
+     * Returns false if navigateInPlace is not set.
+     *
+     * @param collectionId
+     * @param url the link of the topic, passed on to the host with topicChanged
+     */
+    private openTopicInPlace(collectionId: string, url: string | null): boolean {
+        if (!this.navigateInPlace()) {
+            return false;
+        }
+        if (collectionId !== this.topicCollectionId()) {
+            void this.loadTopicInPlace({ collectionId, url });
+        }
+        return true;
+    }
+
+    /**
+     * Switches to the given topic and scrolls the page back to its top.
+     *
+     * @param topic
+     */
+    private async loadTopicInPlace(topic: TopicChangedEvent): Promise<void> {
+        // as web component, the attributes feed the inputs, so the host can set a previous
+        // topic again (e.g. on back) and read the current one
+        this.collectionId = topic.collectionId;
+        this.variantId = undefined;
+        const host: HTMLElement = this.elementRef.nativeElement;
+        host.setAttribute('collection-id', topic.collectionId);
+        host.removeAttribute('variant-id');
+        this.topicPageHelperService.closePreview();
+        this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
+        if (host.getBoundingClientRect().top < 0) {
+            host.scrollIntoView({ block: 'start' });
+        }
+        await this.switchTopic(topic.collectionId);
+        this.topicChanged.emit(topic);
     }
 
     /**
@@ -719,6 +794,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     ngOnDestroy(): void {
         this.destroyed$.next();
         this.destroyed$.complete();
+        this.topicPageHelperService.setInPlaceNavigationHandler(null);
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
         this.scrollHelperService.setScrollContainer(null);
     }
@@ -770,6 +846,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Initializes custom event listeners to react to events sent by the widgets (color change, widget node added).
      */
     private initializeCustomEventListeners(): void {
+        // the listeners outlive a switch of the topic
+        if (this.customEventListenersInitialized) {
+            return;
+        }
+        this.customEventListenersInitialized = true;
         // listen to swimlaneColorChanged event
         this.topicPageEventsService.swimlaneColorChanged
             .pipe(takeUntil(this.destroyed$))
@@ -905,25 +986,32 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * If the fragment part changes, the corresponding element is scrolled into view.
      */
     private initializeFragmentListener(): void {
-        this.route.fragment.subscribe((urlFragment: string): void => {
-            this.latestUrlFragment = urlFragment;
-            // avoid attempting to scroll when no fragment is specified
-            if (!this.latestUrlFragment) {
-                this.initialFragmentScrollPerformed = true;
-                return;
-            }
-            // directly scroll into view if the page is already loaded
-            if (this.initialFragmentScrollPerformed) {
-                this.scrollElementIntoView();
-            }
-            // otherwise, wait 3 seconds before trying to scroll into view
-            // TODO: this should be replaced by waiting for all widgets being loaded
-            else {
-                setTimeout((): void => {
-                    this.performScrollAttempts();
-                }, 3000);
-            }
-        });
+        // the listener outlives a switch of the topic
+        if (this.fragmentListenerInitialized) {
+            return;
+        }
+        this.fragmentListenerInitialized = true;
+        this.route.fragment
+            .pipe(takeUntil(this.destroyed$))
+            .subscribe((urlFragment: string): void => {
+                this.latestUrlFragment = urlFragment;
+                // avoid attempting to scroll when no fragment is specified
+                if (!this.latestUrlFragment) {
+                    this.initialFragmentScrollPerformed = true;
+                    return;
+                }
+                // directly scroll into view if the page is already loaded
+                if (this.initialFragmentScrollPerformed) {
+                    this.scrollElementIntoView();
+                }
+                // otherwise, wait 3 seconds before trying to scroll into view
+                // TODO: this should be replaced by waiting for all widgets being loaded
+                else {
+                    setTimeout((): void => {
+                        this.performScrollAttempts();
+                    }, 3000);
+                }
+            });
     }
 
     /**

@@ -8,7 +8,7 @@
         {{ rootName ?? (i18nPrefix + 'DEFAULT_ROOT_NAME' | translate) }}
       </a>
       } @else { @if (customUrl && customUrl(node)) {
-      <a [href]="customUrl(node)" [target]="customUrlTarget">
+      <a [href]="customUrl(node)" [target]="customUrlTarget" [esTopicLink]="node">
         <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
       </a>
       } @else {
