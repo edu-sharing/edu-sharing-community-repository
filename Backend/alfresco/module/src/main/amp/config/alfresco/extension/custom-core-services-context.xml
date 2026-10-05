@@ -605,4 +605,48 @@
     <constructor-arg name="configLoader" ref="lightbendConfigLoader"/>
   </bean>
 
+  <!--  User usage tracking (requires a query across all users on startup) -->
+  <bean id="userUsageTrackingComponent" class="org.edu_sharing.alfresco.quota.EduSharingUsageTrackingComponent" init-method="init">
+    <property name="policyComponent">
+      <ref bean="policyComponent"/>
+    </property>
+    <property name="transactionService">
+      <ref bean="transactionService"/>
+    </property>
+    <property name="contentUsageImpl">
+      <ref bean="contentUsageImpl"/>
+    </property>
+    <!-- The store in which people are persisted-->
+    <property name="personStoreUrl">
+      <value>${spaces.store}</value>
+    </property>
+    <property name="nodeService">
+      <ref bean="nodeService"/>
+    </property>
+    <property name="usageDAO">
+      <ref bean="usageDAO"/>
+    </property>
+    <property name="usageService">
+      <ref bean="usageService"/>
+    </property>
+    <property name="tenantAdminService">
+      <ref bean="tenantAdminService" />
+    </property>
+    <property name="tenantService">
+      <ref bean="tenantService" />
+    </property>
+    <property name="jobLockService">
+      <ref bean="jobLockService" />
+    </property>
+    <property name="clearBatchSize">
+      <value>${system.usages.clearBatchSize}</value>
+    </property>
+    <property name="updateBatchSize">
+      <value>${system.usages.updateBatchSize}</value>
+    </property>
+    <property name="enabled">
+      <value>${system.usages.enabled}</value>
+    </property>
+  </bean>
+
 </beans>
