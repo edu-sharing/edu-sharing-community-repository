@@ -605,4 +605,11 @@
     <constructor-arg name="configLoader" ref="lightbendConfigLoader"/>
   </bean>
 
+  <!-- ensures qnames of the edu-sharing models exist in alf_qname, otherwise the solr tracking api fails on an empty repository -->
+  <bean id="eduSharingModelQNameBootstrap" class="org.edu_sharing.alfresco.fixes.ModelQNameBootstrap">
+    <property name="qnameDAO" ref="qnameDAO"/>
+    <property name="dictionaryService" ref="dictionaryService"/>
+    <property name="transactionService" ref="transactionService"/>
+  </bean>
+
 </beans>
