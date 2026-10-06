@@ -24,11 +24,12 @@
     );
 }
 
-// Embedded as web component, the page fills its container without the app's card frame, and its
-// fixed parts (side menu, loading overlay) are positioned within it instead of the foreign viewport.
+// Embedded as web component, the page fills its container without the app's card frame and main
+// nav, and its fixed parts (side menu, loading overlay) are positioned within it.
 :host(.embedded) {
     contain: layout;
     --roundedContainerMargin: 0px;
+    --mainnavCurrentHeight: 0px;
 }
 
 // On mobile, drop the frame so the page uses the full width (like the other pages), leaving room
