@@ -68,6 +68,7 @@ import {
     takeUntil,
 } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
+import { environment } from '../../../../environments/environment';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
@@ -386,6 +387,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     readonly topicChanged = output<TopicChangedEvent>();
     initialTopicColor: string;
     @HostBinding('style.--topic-color') topicColor: string;
+    /** As web component, the page is a box within a foreign page instead of the app's main view. */
+    @HostBinding('class.embedded') readonly embedded: boolean = environment.webComponentMode;
     @ViewChild('addPageVariantOrTemplateDialog')
     addPageVariantOrTemplateRef: TemplateRef<undefined>;
     @ViewChild('editModeToggle') editModeToggle: TemplateRef<any>;
