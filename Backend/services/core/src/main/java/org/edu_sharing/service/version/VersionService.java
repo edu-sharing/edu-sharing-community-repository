@@ -1,6 +1,7 @@
 package org.edu_sharing.service.version;
 
 import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import org.alfresco.repo.cache.SimpleCache;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -9,6 +10,7 @@ import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.restservices.about.v1.model.Licenses;
 import org.edu_sharing.restservices.about.v1.model.Services;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.rendering.RenderingService;
 import org.edu_sharing.service.rendering.RenderingServiceFactory;
 import org.edu_sharing.service.rendering.RenderingVersionInfo;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
@@ -29,11 +31,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class VersionService implements ApplicationListener<RefreshScopeRefreshedEvent> {
     static Logger logger = Logger.getLogger(VersionService.class);
 
 	public SimpleCache<Type, String> versionCache = (SimpleCache<Type, String>) AlfAppContextGate.getApplicationContext().getBean("eduSharingVersionCache", SimpleCache.class);
 
+    private final RenderingService renderingService;
 
 	@Override
 	public void onApplicationEvent(RefreshScopeRefreshedEvent event) {
@@ -63,10 +67,10 @@ public class VersionService implements ApplicationListener<RefreshScopeRefreshed
                 logger.error(t.getMessage(), t);
             }
             try {
-                licenses.getServices().put(
-                        Services.Rendering,
-                        RenderingServiceFactory.getLocalService().getVersion().licenses
-                );
+                RenderingVersionInfo rsVersion = renderingService.getVersion();
+                if (rsVersion != null) {
+                    licenses.getServices().put(Services.Rendering, rsVersion.licenses);
+                }
             } catch (Throwable t) {
                 logger.error(t.getMessage(), t);
             }
