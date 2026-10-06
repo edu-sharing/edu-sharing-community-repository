@@ -45,6 +45,9 @@
               <includes>openapi.json</includes>
               <excludes>META-INF/**</excludes>
               <outputDirectory>${project.build.directory}/build/rest-api</outputDirectory>
+              <!-- the rest-api SNAPSHOT keeps its version across rebuilds, so the
+                   unpack marker would otherwise pin a stale openapi.json -->
+              <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
           </execution>
 
