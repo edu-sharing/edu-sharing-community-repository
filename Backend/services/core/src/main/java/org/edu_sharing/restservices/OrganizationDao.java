@@ -6,6 +6,7 @@ import org.alfresco.repo.security.permissions.AccessDeniedException;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.NoSuchPersonException;
 import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.alfresco.authentication.HttpContext;
 import org.edu_sharing.alfresco.service.OrganisationService;
@@ -268,8 +269,9 @@ public class OrganizationDao {
 			}
 		}
 		AuthenticationUtil.runAsSystem((RunAsWork<Void>) () -> {
-			// will throw if member is invalid user
-			repoDao.getBaseClient().getUserInfo(member).get(CCConstants.CM_PROP_PERSON_USERNAME);
+			if (repoDao.getBaseClient().getUserInfo(member) == null) {
+				throw new NoSuchPersonException(member);
+			}
 
 			if(deprovisioning != null) {
 				if(deprovisioning.getMode() == OrganizationUserDeprovisioning.Mode.assign) {
