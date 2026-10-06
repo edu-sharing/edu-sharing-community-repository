@@ -130,4 +130,19 @@ class ErrorPageServletTest {
         assertEquals("<head><meta http-equiv=\"refresh\" content=\"0;url=/edu-sharing/components/error/OTHER/a%20%22b%22%20%3Cc%3E\"></head>",
                 body.toString());
     }
+
+    /**
+     * the angular routes are not served by the backend - redirecting to components/error/<code> would loop
+     */
+    @Test
+    void angularRoutesReachingTheBackendGetAStaticPageInsteadOfARefreshLoop() {
+        errorDispatch(404, "not here", "text/html");
+        when(request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI)).thenReturn("/edu-sharing/components/error/404");
+
+        new ErrorPageServlet().service(request, response);
+
+        verify(response).setStatus(404);
+        assertFalse(body.toString().contains("http-equiv=\"refresh\""), body.toString());
+        assertTrue(body.toString().contains("<h1>404</h1>"), body.toString());
+    }
 }
