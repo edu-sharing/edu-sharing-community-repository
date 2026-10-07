@@ -623,6 +623,14 @@
   </div>
   }
 </main>
+<!-- beside the page card: preview of the elements clicked on the page; only takes space while one
+  is previewed -->
+@if (previewPanel()) {
+<es-preview-sidebar-wrapper
+  [customOptions]="customSidebarOptions"
+  storageKey="TOPIC_PAGE_PREVIEW_WIDTH"
+></es-preview-sidebar-wrapper>
+}
 
 <ng-template #swimlaneTemplate let-swimlane="swimlane" let-index="index">
   <es-swimlane

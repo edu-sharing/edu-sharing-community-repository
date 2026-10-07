@@ -81,6 +81,8 @@ import {
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
 import { DialogsService } from '../../../features/dialogs/dialogs.service';
+import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
+import { PreviewSidebarWrapperComponent } from '../../../features/editorial-sidebar/preview-sidebar/preview-sidebar-wrapper/preview-sidebar-wrapper.component';
 import {
     MainNavCreateConfig,
     MainNavService,
@@ -197,7 +199,6 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
-import { EditorialSidebarModule } from '../../../features/editorial-sidebar/editorial-sidebar.module';
 
 @Component({
     imports: [
@@ -280,6 +281,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             (collectionId: string, url: string | null): boolean =>
                 this.openTopicInPlace(collectionId, url),
         );
+        // the side menu on the page's right edge stays clear of the resizable preview column
+        effect((onCleanup): void => {
+            const column: HTMLElement | null =
+                this.previewPanelRef()?.nativeElement.querySelector('.preview-resizable') ?? null;
+            if (!column) {
+                return;
+            }
+            const host: HTMLElement = this.elementRef.nativeElement;
+            const updateInset = (): void =>
+                host.style.setProperty('--sideMenuRightInset', `${column.offsetWidth}px`);
+            const observer = new ResizeObserver(updateInset);
+            observer.observe(column);
+            updateInset();
+            onCleanup((): void => {
+                observer.disconnect();
+                host.style.removeProperty('--sideMenuRightInset');
+            });
+        });
         effect((): void => {
             this.scrollHelperService.setScrollContainer(
                 this.scrollContainerRef()?.nativeElement ?? null,
@@ -383,6 +402,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * component. The links keep the URLs of the custom URL function, e.g. for new tabs.
      */
     readonly navigateInPlace = input(false, { transform: booleanAttribute });
+    /**
+     * Shows the preview of clicked elements in a column of the page itself, e.g. as web component
+     * without an `edu-sharing-preview-sidebar` of its own.
+     */
+    readonly previewPanel = input(false, { transform: booleanAttribute });
+    @HostBinding('class.with-preview-panel') get withPreviewPanel(): boolean {
+        return this.previewPanel();
+    }
+    private readonly previewPanelRef = viewChild(PreviewSidebarWrapperComponent, {
+        read: ElementRef,
+    });
     /** Emitted after the page switched to another topic via navigateInPlace. */
     readonly topicChanged = output<TopicChangedEvent>();
     initialTopicColor: string;

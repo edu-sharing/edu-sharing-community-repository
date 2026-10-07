@@ -32,6 +32,37 @@
     --mainnavCurrentHeight: 0px;
 }
 
+// With `preview-panel`, the preview stands beside the page card as on the app's topic page: the host
+// lays out card and preview in a row, and `main` becomes the card.
+:host(.embedded.with-preview-panel) {
+    flex-direction: row;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+
+    > main {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        border-radius: var(--borderRadiusCards);
+        background: topicPageVars.$surface-container-lowest;
+        @include topicPageVars.materialShadow();
+    }
+
+    // the preview column runs the full height of the page, like the app's sidebar column; the
+    // embedding page provides the outer spacing, only the gap holding the resize handle stays
+    ::ng-deep es-preview-sidebar-wrapper {
+        .preview-resizable {
+            align-self: stretch;
+        }
+        .preview-panel {
+            margin-top: 0;
+            margin-right: 0;
+            margin-bottom: 0;
+        }
+    }
+}
+
 // On mobile, drop the frame so the page uses the full width (like the other pages), leaving room
 // for the fixed mobile bottom nav.
 @media screen and (max-width: topicPageVars.$mobileTabSwitchWidth) {
