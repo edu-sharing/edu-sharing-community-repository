@@ -1090,7 +1090,9 @@ public class CollectionServiceElastic implements CollectionService {
                             .bool(b -> b
                                     .must(m -> readPermissionsQuery != null ? m.bool(readPermissionsQuery) : m.bool(searchServiceElastic::getReadPermissionsQuery))
                                     .must(m -> m.match(match -> match.field("nodeRef.storeRef.protocol").query("workspace")))
-                                    .must(m -> m.wildcard(w -> w.field("fullpath").wildcard("*/" + nodeRef.getId() + "*")))
+                                    // "path" holds the same elements as "fullpath" (both built from the primary apath in the tracker),
+                                    // a term lookup avoids scanning the whole term dictionary like the leading wildcard did
+                                    .must(m -> m.term(t -> t.field("path").value(nodeRef.getId())))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_PAGE))))
                                     .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_PAGE_VARIANT))))
