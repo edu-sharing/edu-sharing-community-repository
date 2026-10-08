@@ -8,8 +8,10 @@ import {
     EventEmitter,
     HostBinding,
     Input,
+    OnChanges,
     OnInit,
     Output,
+    SimpleChanges,
     TemplateRef,
     ViewChild,
     inject,
@@ -44,7 +46,7 @@ import { AiPreviewImagesOverlayComponent } from './ai-preview-images-overlay/ai-
     styleUrls: ['./mds-editor-widget-preview.component.scss'],
     standalone: false,
 })
-export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, OnInit {
+export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, OnInit, OnChanges {
     private changeDetectorRef = inject(ChangeDetectorRef);
     private destroyRef = inject(DestroyRef);
     private events = inject(FrameEventsService);
@@ -76,11 +78,24 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
     /** in standalone mode: optional fallback shown when there is no user-defined preview image */
     @ContentChild('previewPlaceholder') placeholderTemplate: TemplateRef<unknown>;
     /**
+     * in standalone mode: a picked image or delete request is only emitted; the host persists it
+     * and shows the result via {@link showStandaloneNode}
+     */
+    @Input() hostControlled = false;
+    /** in standalone mode: show the preview without any controls */
+    @Input() readonly = false;
+    /** in standalone mode: whether the host allows removing the current preview */
+    @Input() deletable = true;
+    /** in standalone mode: host-specific actions listed in the change-preview menu */
+    @Input() additionalOptions: OptionItem[] = [];
+    /**
      * render the delete action as an entry in the change-preview menu (with a divider) instead of
      * a separate button. Useful where there is no room for a second button (e.g. the collection
      * create/edit dialog). The change-preview button then shows a "more options" icon.
      */
     @Input() deleteAsOption = false;
+    /** load the shown node's preview as a 400x300 crop instead of the uncropped preview */
+    @Input() cropPreview = true;
 
     /** standalone layout: the widget fills the host's box (full-width image + blurred backdrop) */
     @HostBinding('class.standalone') get standaloneClass(): boolean {
@@ -115,9 +130,12 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
     /** popup window for selecting an image from search */
     private imageWindow: Window;
 
-    /** whether the preview can be changed (all edit modes and standalone; not the viewer) */
+    /** whether the preview can be changed (not in the viewer or a readonly standalone widget) */
     get editable(): boolean {
-        return this.standalone || this.mdsEditorInstance?.editorMode !== 'viewer';
+        if (this.standalone) {
+            return !this.readonly;
+        }
+        return this.mdsEditorInstance?.editorMode !== 'viewer';
     }
     /** the compact inline layout (label + explicit save button) — never in standalone mode */
     get inline(): boolean {
@@ -140,6 +158,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
     get canDeletePreview(): boolean {
         return (
             !this.delete &&
+            (!this.standalone || this.deletable) &&
             (!!this.file ||
                 this.getType() === 'TYPE_USERDEFINED' ||
                 // an existing (non auto-generated) image, e.g. a collection icon
@@ -153,7 +172,8 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
             this.standalone || !this.mdsEditorInstance ? of(false) : this.mdsEditorInstance.hasAi;
         // 1) Wire up the input sources for setting a new preview (edit modes only):
         //    clipboard-availability polling, global image paste, and the image-search popup.
-        if (this.editable) {
+        //    In standalone mode `readonly` may change later, so the handlers check `editable`.
+        if (this.editable || this.standalone) {
             void this.checkClipboardForImage();
             fromEvent(window, 'focus')
                 .pipe(takeUntilDestroyed(this.destroyRef))
@@ -209,18 +229,39 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
             });
     }
 
+    /**
+     * In standalone mode: show `node` as the current preview and discard any pending file or
+     * delete request, e.g. once the host has persisted or rejected the pending change.
+     */
+    showStandaloneNode(node: Node): void {
+        this.node = node;
+        this.nodeSrc = node?.preview && !node.preview.isIcon ? this.buildNodeSrc(node) : null;
+        this.file = null;
+        this.delete = false;
+        void this.updateSrc();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.readonly || changes.deletable || changes.additionalOptions) {
+            this.rebuildPreviewOptions();
+        }
+    }
+
     /** Build the (cache-busting) preview source URL/data-URI for a node. */
     private buildNodeSrc(node: Node): string {
-        return node.preview.url
-            ? node.preview.url + '&crop=true&width=400&height=300&dontcache=:cache'
-            : 'data:' + node.preview.mimetype + ';base64,' + node.preview.data;
+        if (!node.preview.url) {
+            return 'data:' + node.preview.mimetype + ';base64,' + node.preview.data;
+        }
+        const crop = this.cropPreview ? '&crop=true&width=400&height=300' : '';
+        return `${node.preview.url}${crop}&dontcache=:cache`;
     }
 
     /** Handle the hidden file input's change event: use the chosen file as the new preview. */
     async setPreview(event: Event) {
-        this.file = (event.target as HTMLInputElement).files[0];
-        this.delete = false;
-        void this.updateSrc();
+        const input = event.target as HTMLInputElement;
+        this.applyImageFile(input.files[0]);
+        // allows choosing the same file again
+        input.value = '';
     }
 
     /**
@@ -236,7 +277,8 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
             );
         } else if (this.nodeSrc) {
             const src = this.nodeSrc.replace(':cache', new Date().getTime().toString());
-            if (this.node) {
+            // inline data URIs are not served by a repository
+            if (this.node && this.node.preview?.url) {
                 this.src$.next(await this.repoUrlService.getRepoUrl(src, this.node));
             } else {
                 this.src$.next(src);
@@ -259,6 +301,10 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
 
     /** Remove the current preview: discard a pending file, otherwise flag the saved one for deletion. */
     deletePreview() {
+        if (this.standalone && this.hostControlled) {
+            this.previewChange.emit({ file: null, delete: true });
+            return;
+        }
         if (this.file) {
             this.file = null;
         } else {
@@ -291,8 +337,12 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
         }
     }
 
-    /** apply an image (clipboard paste or search pick) as the new, unsaved preview */
+    /** apply a picked image (file, clipboard or search) as the new, unsaved preview */
     private applyImageFile(file: File) {
+        if (this.standalone && this.hostControlled) {
+            this.previewChange.emit({ file, delete: false });
+            return;
+        }
         this.file = file;
         this.delete = false;
         void this.updateSrc();
@@ -341,6 +391,9 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
      * paste targets an editable field that also carries text (then keep native behavior).
      */
     private onPaste(event: ClipboardEvent) {
+        if (!this.editable) {
+            return;
+        }
         const image = Array.from(event.clipboardData?.files ?? []).find((file) =>
             file.type.startsWith('image/'),
         );
@@ -440,6 +493,9 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
             options.push(
                 new OptionItem('MDS.AI.DRAWING_STYLES.HEADING', 'brush', () => this.showOverlay()),
             );
+        }
+        if (editable && this.standalone) {
+            options.push(...this.additionalOptions);
         }
         if (editable && this.deleteAsOption && this.canDeletePreview) {
             const deleteOption = new OptionItem('WORKSPACE.EDITOR.PREVIEW_DELETE', 'delete', () =>

@@ -13,47 +13,41 @@ import {
     Signal,
     signal,
     untracked,
+    viewChild,
     WritableSignal,
     inject,
 } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { TranslateModule } from '@ngx-translate/core';
-import { Node } from 'ngx-edu-sharing-api';
+import { HOME_REPOSITORY, Node } from 'ngx-edu-sharing-api';
 import { ImagesResponse } from 'ngx-edu-sharing-b-api';
-import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule, OptionItem } from 'ngx-edu-sharing-ui';
 import { v4 as uuidv4 } from 'uuid';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
 import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
-import { TooltipAriaLabelDirective } from '../../../shared/directives/tooltip-aria-label.directive';
+import { MdsEditorWidgetPreviewComponent } from '../../../../../features/mds/mds-editor/widgets/mds-editor-widget-preview/mds-editor-widget-preview.component';
+import { MdsModule } from '../../../../../features/mds/mds.module';
 import { AiHelperService } from '../../../shared/services/ai-helper.service';
 import { TopicPageHelperService } from '../../../shared/services/topic-page-helper.service';
 import { AiLabelComponent } from '../ai-label/ai-label.component';
 
+/**
+ * Topic page image that is either AI generated, uploaded by the user or taken from a fallback
+ * node. The standalone preview widget displays it and offers the edit and delete controls; this
+ * component adds AI generation to its menu and persists the result as a child of the widget node.
+ */
 @Component({
     selector: 'es-image-wrapper',
-    imports: [
-        AiLabelComponent,
-        CommonModule,
-        EduSharingUiCommonModule,
-        MatIconButton,
-        MatTooltip,
-        TooltipAriaLabelDirective,
-        TranslateModule,
-    ],
+    imports: [AiLabelComponent, CommonModule, EduSharingUiCommonModule, MdsModule],
     templateUrl: './image-wrapper.component.html',
     styleUrls: ['./image-wrapper.component.scss'],
 })
 export class ImageWrapperComponent implements OnInit {
     private aiHelperService = inject(AiHelperService);
     private dialogsService = inject(DialogsService);
-    private sanitizer = inject(DomSanitizer);
     private topicPageHelperService = inject(TopicPageHelperService);
 
     // CONSTANTS
-    private readonly BASE_64_PREFIX: string = 'data:image/jpg;base64,';
+    private readonly AI_IMAGE_MIMETYPE: string = 'image/jpeg';
     protected readonly i18nPrefix: string = 'TOPIC_PAGE.WIDGET.IMAGE_WRAPPER.';
     private readonly UPLOAD_PREFIX: string = 'UPLOAD_';
 
@@ -93,9 +87,25 @@ export class ImageWrapperComponent implements OnInit {
     deleteImageDisabled: Signal<boolean> = computed((): boolean => {
         return !this.aiGeneratedImage() && !this.userUploadedNodeId();
     });
-    private fileInput: HTMLInputElement;
-    imagePath: SafeResourceUrl;
-    imageNode: Node;
+    // (re)generating the AI image is offered in the preview widget's change menu
+    aiOptions: Signal<OptionItem[]> = computed((): OptionItem[] => {
+        if (!this.aiGenerationSupportedAndValid()) {
+            return [];
+        }
+        const regenerate: boolean = this.aiGeneratedImage() && !this.userUploadedNodeId();
+        const option = new OptionItem(
+            this.i18nPrefix + (regenerate ? 'REGENERATE' : 'GENERATE'),
+            'magic_button',
+            () => void this.generateImage(),
+        );
+        option.isEnabled = !this.imageProcessing();
+        return [option];
+    });
+    private previewWidget: Signal<MdsEditorWidgetPreviewComponent> = viewChild(
+        MdsEditorWidgetPreviewComponent,
+    );
+    // the node whose preview is shown; AI images are wrapped into a node carrying inline data
+    imageNode: WritableSignal<Node> = signal(null);
     // last uploaded node id that was loaded, to avoid fetching the same image twice
     private lastLoadedUploadId: string | null = null;
     imageProcessing: WritableSignal<boolean> = signal(false);
@@ -158,10 +168,6 @@ export class ImageWrapperComponent implements OnInit {
         userUploadedNodeId: string,
         regenerateNecessary: boolean = false,
     ): Promise<void> {
-        const resetSources = () => {
-            this.imagePath = null;
-            this.imageNode = null;
-        };
         // user has uploaded a custom image
         if (userUploadedNodeId) {
             // remember the loaded id so the reactive effect does not fetch it again
@@ -171,9 +177,12 @@ export class ImageWrapperComponent implements OnInit {
                 userUploadedNodeId,
             );
             if (uploadedNode?.preview?.url) {
-                // reset both sources before loading the new one
-                resetSources();
-                this.imageNode = uploadedNode;
+                // the thumbnail of a fresh upload may still be pending (icon preview), but its
+                // preview url serves the uploaded image either way
+                this.showImageNode({
+                    ...uploadedNode,
+                    preview: { ...uploadedNode.preview, isIcon: false },
+                });
                 return;
             }
         } else if (aiGeneratedImage) {
@@ -188,11 +197,7 @@ export class ImageWrapperComponent implements OnInit {
                           this.widgetNodeId(),
                           this.contextNodeId(),
                       );
-                // reset both sources before loading the new one
-                resetSources();
-                this.imagePath = this.sanitizer.bypassSecurityTrustResourceUrl(
-                    this.BASE_64_PREFIX + imageData.data[0].b64_json,
-                );
+                this.showImageNode(this.toInlineImageNode(imageData.data[0].b64_json));
                 return;
             } catch (error) {
                 console.error(error);
@@ -201,17 +206,47 @@ export class ImageWrapperComponent implements OnInit {
         // no own image available: fall back to the preview of the fallback node,
         // unless that preview is only the generic type icon
         if (this.fallbackNode?.preview && !this.fallbackNode.preview.isIcon) {
-            // reset both sources before loading the new one
-            resetSources();
-            this.imageNode = this.fallbackNode;
+            this.showImageNode(this.fallbackNode);
             return;
         }
-        // reset both sources, if no condition matches
-        resetSources();
+        this.showImageNode(null);
     }
 
     /**
-     * Triggers the process of generating an AI image when the related button is clicked.
+     * Shows the given node and drops any change still pending in the preview widget.
+     */
+    private showImageNode(node: Node | null): void {
+        this.imageNode.set(node);
+        this.previewWidget()?.showStandaloneNode(node);
+    }
+
+    /**
+     * Wraps a base64 encoded image into a node, so it can be shown like any node preview.
+     */
+    private toInlineImageNode(base64: string): Node {
+        return {
+            ref: { id: this.widgetNodeId(), repo: HOME_REPOSITORY },
+            preview: { data: base64, mimetype: this.AI_IMAGE_MIMETYPE, isIcon: false },
+        } as unknown as Node;
+    }
+
+    /**
+     * Handles a change requested in the preview widget (picked image or delete request).
+     */
+    onPreviewChange(change: { file: File | null; delete: boolean }): void {
+        if (this.imageProcessing()) {
+            return;
+        }
+        // the widget offers picking an image even if only AI generation is supported
+        if (change.file && this.userUploadSupportedAndValid()) {
+            void this.imageChanged(change.file);
+        } else if (change.delete) {
+            void this.deleteImage();
+        }
+    }
+
+    /**
+     * Triggers the process of generating an AI image.
      */
     async generateImage(): Promise<void> {
         // set the image processing to true
@@ -256,25 +291,11 @@ export class ImageWrapperComponent implements OnInit {
     }
 
     /**
-     * Triggers the file selection by simulating a click event on a given file input element.
-     *
-     * @param fileInput
-     */
-    uploadImageClicked(fileInput: HTMLInputElement): void {
-        fileInput.click();
-        // temporary save the file input element to be able to reset it later
-        this.fileInput = fileInput;
-    }
-
-    /**
      * Handles the upload of an image if the user confirms that he/she has the necessary rights.
      *
-     * @param event
+     * @param file
      */
-    async imageChanged(event: any): Promise<void> {
-        if (!event.target.files || !event.target.files[0]) {
-            return;
-        }
+    async imageChanged(file: File): Promise<void> {
         const dialogRef = await this.dialogsService.openGenericDialog({
             title: this.i18nPrefix + 'UPLOAD',
             message: this.i18nPrefix + 'IMAGE_UPLOAD_CONFIRMATION_TEXT',
@@ -282,22 +303,21 @@ export class ImageWrapperComponent implements OnInit {
             closable: Closable.Casual,
         });
         dialogRef.afterClosed().subscribe(async (response) => {
-            if (response === 'YES') {
-                // set the image processing to true
-                this.imageProcessing.set(true);
-                // delete a potentially existing user uploaded image
-                await this.deletePotentialUploadAndEmitValue();
-                // upload the new image
-                const uploadImage = event.target.files[0];
-                const blob: Blob = new Blob([uploadImage], { type: uploadImage.type });
-                this.topicPageHelperService.setBlobToUpload(blob);
-                if (!this.uploadParentNodeId()) {
-                    // persist the config before handling the actual upload to ensure
-                    // that the image is created as a child of the widget node
-                    this.persistConfig.emit(true);
-                } else {
-                    await this.handleUploadBlob();
-                }
+            if (response !== 'YES') {
+                return;
+            }
+            // set the image processing to true
+            this.imageProcessing.set(true);
+            // delete a potentially existing user uploaded image
+            await this.deletePotentialUploadAndEmitValue();
+            // upload the new image
+            this.topicPageHelperService.setBlobToUpload(new Blob([file], { type: file.type }));
+            if (!this.uploadParentNodeId()) {
+                // persist the config before handling the actual upload to ensure
+                // that the image is created as a child of the widget node
+                this.persistConfig.emit(true);
+            } else {
+                await this.handleUploadBlob();
             }
         });
     }
@@ -325,10 +345,6 @@ export class ImageWrapperComponent implements OnInit {
         this.persistConfig.emit(true);
         // load the image depending on the currently selected mode
         await this.loadImage(this.aiGeneratedImage(), imageNode.ref.id);
-        // reset the file input
-        if (this.fileInput) {
-            this.fileInput.value = null;
-        }
         // reset the image processing
         this.imageProcessing.set(false);
     }
