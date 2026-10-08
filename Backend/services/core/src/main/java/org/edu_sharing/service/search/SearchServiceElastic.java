@@ -460,7 +460,9 @@ public class SearchServiceElastic implements SearchService {
             if (a.getValue().isFilter()) {
                 FilterAggregate pf = a.getValue().filter();
                 for (Map.Entry<String, Aggregate> aggregation : pf.aggregations().entrySet()) {
-                    if (aggregation.getValue().isSterms()) {
+                    if (isCombinedSuggestionFacet(aggregation.getValue())) {
+                        facetsResult.add(getCombinedSuggestionFacet(mds, queryData, aggregation.getKey(), aggregation.getValue().filter()));
+                    } else if (aggregation.getValue().isSterms()) {
                         Aggregation definition = aggregations.get(a.getKey());
                         StringTermsAggregate sterms = aggregation.getValue().sterms();
                         facetsResult.add(getFacet(mds, queryData, aggregation.getKey(), sterms, definition));
@@ -492,6 +494,61 @@ public class SearchServiceElastic implements SearchService {
         return facetsResult;
     }
 
+    private static boolean isCombinedSuggestionFacet(Aggregate aggregate) {
+        if (!aggregate.isFilter() || aggregate.filter().meta() == null) {
+            return false;
+        }
+        JsonData kind = aggregate.filter().meta().get(MetadataElasticSearchHelper.COMBINED_SUGGESTION_META_KIND);
+        // compare the raw json value to not depend on the mapper the response was deserialized with
+        return kind != null && ("\"" + MetadataElasticSearchHelper.COMBINED_SUGGESTION_META_KIND_VALUE + "\"").equals(kind.toJson().toString());
+    }
+
+    /**
+     * Facet built by {@link MetadataElasticSearchHelper#buildCombinedSuggestionFacetAggregation}: merges the plain
+     * (doc_values) branch and the suggestion (script) branch into one facet
+     */
+    private NodeSearch.Facet getCombinedSuggestionFacet(MetadataSet mds, MetadataQuery queryData, String name, FilterAggregate container) {
+        List<Map<String, Long>> branchBuckets = new ArrayList<>();
+        List<Long> branchSumOther = new ArrayList<>();
+        for (String branch : List.of(MetadataElasticSearchHelper.COMBINED_SUGGESTION_BRANCH_PLAIN,
+                MetadataElasticSearchHelper.COMBINED_SUGGESTION_BRANCH_WITH_SUGGESTIONS)) {
+            Aggregate branchAggregate = container.aggregations().get(branch);
+            if (branchAggregate == null || !branchAggregate.isFilter()) {
+                continue;
+            }
+            Aggregate values = branchAggregate.filter().aggregations().get(MetadataElasticSearchHelper.COMBINED_SUGGESTION_BRANCH_VALUES);
+            if (values == null || !values.isSterms()) {
+                continue;
+            }
+            StringTermsAggregate sterms = values.sterms();
+            Map<String, Long> buckets = new HashMap<>();
+            for (StringTermsBucket b : sterms.buckets().array()) {
+                buckets.merge(b.key().stringValue(), b.docCount(), Long::sum);
+            }
+            branchBuckets.add(buckets);
+            branchSumOther.add(sterms.sumOtherDocCount());
+        }
+        Map<String, JsonData> meta = container.meta();
+        int size = Integer.parseInt(meta.get(MetadataElasticSearchHelper.COMBINED_SUGGESTION_META_SIZE).toJson().toString());
+        long minDocCount = Long.parseLong(meta.get(MetadataElasticSearchHelper.COMBINED_SUGGESTION_META_MIN_DOC_COUNT).toJson().toString());
+        MetadataElasticSearchHelper.MergedFacetBuckets merged =
+                MetadataElasticSearchHelper.mergeCombinedSuggestionBuckets(branchBuckets, branchSumOther, size, minDocCount);
+
+        NodeSearch.Facet facet = new NodeSearch.Facet();
+        facet.setProperty(name);
+        List<NodeSearch.Facet.Value> values = new ArrayList<>();
+        for (Map.Entry<String, Long> bucket : merged.buckets()) {
+            NodeSearch.Facet.Value value = new NodeSearch.Facet.Value();
+            value.setValue(bucket.getKey());
+            value.setCount(bucket.getValue());
+            values.add(value);
+        }
+        facet.setValues(values);
+        setSumOtherDocCount(queryData, name, merged.sumOtherDocCount(), facet);
+        sortFacetValues(mds, queryData, name, values);
+        return facet;
+    }
+
     private NodeSearch.Facet getMultitermFacet(MetadataSet mds, MetadataQuery queryData, String name, MultiTermsAggregate mta, Aggregation definition) {
         NodeSearch.Facet facet = new NodeSearch.Facet();
         facet.setProperty(name);
@@ -518,8 +575,12 @@ public class SearchServiceElastic implements SearchService {
     }
 
     private void setSumOtherDocCount(MetadataQuery queryData, String name, TermsAggregateBase<?> buckets, NodeSearch.Facet facet) {
+        setSumOtherDocCount(queryData, name, buckets.sumOtherDocCount(), facet);
+    }
+
+    private void setSumOtherDocCount(MetadataQuery queryData, String name, Long sumOtherDocCount, NodeSearch.Facet facet) {
         if (queryData == null) return;
-        facet.setSumOtherDocCount(buckets.sumOtherDocCount());
+        facet.setSumOtherDocCount(sumOtherDocCount);
         MetadataQueryParameter metadataQueryParameter = queryData.findParameterByName(name);
         if (metadataQueryParameter == null) {
             return;
