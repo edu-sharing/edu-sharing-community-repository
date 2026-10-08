@@ -573,6 +573,7 @@
     "REASON": "Art des Problems",
     "REASON_REQUIRED": "Bitte wählen Sie aus, welches Problem besteht",
     "DONE": "Vielen Dank für Ihre Meldung.",
+    "ALTCHA_REQUIRED": "Bitte bestätigen Sie, dass Sie kein Roboter sind.",
     "REASONS": {
       "UNAVAILABLE": "Medium nicht verfügbar",
       "INAPPROPRIATE_CONTENT": "Problematischer Inhalt",

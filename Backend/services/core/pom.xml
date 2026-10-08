@@ -286,6 +286,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.altcha</groupId>
+      <artifactId>altcha</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>provided</scope>

@@ -28,7 +28,8 @@
     "COMMENT": "Nenne zusätzliche Hinweise zum aufgetretenen Problem.",
     "EMAIL_REQUIRED": "Bitte gib eine gültige E-Mail-Adresse an",
     "REASON_REQUIRED": "Bitte wähle aus, welches Problem besteht",
-    "DONE": "Vielen Dank für Deine Meldung."
+    "DONE": "Vielen Dank für Deine Meldung.",
+    "ALTCHA_REQUIRED": "Bitte bestätige, dass Du kein Roboter bist."
   },
   "NODE_COMMENTS": {
     "DELETE_COMMENT_MESSAGE": "Bist Du sicher, dass Du den gewählten Kommentar löschen möchtest?"
