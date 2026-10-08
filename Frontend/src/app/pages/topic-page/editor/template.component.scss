@@ -521,9 +521,10 @@ es-side-menu-wrapper {
                 margin-bottom: 40px;
             }
 
-            // overrides for empty swimlanes
+            // overrides for empty swimlanes; the horizontal padding stays aligned with the header
             &.is-empty {
-                padding: 24px 44px;
+                padding-top: 24px;
+                padding-bottom: 24px;
 
                 &.edit-mode {
                     margin-top: 24px;
