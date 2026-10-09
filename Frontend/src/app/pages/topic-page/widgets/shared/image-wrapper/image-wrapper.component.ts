@@ -93,13 +93,13 @@ export class ImageWrapperComponent implements OnInit {
             return [];
         }
         const regenerate: boolean = this.aiGeneratedImage() && !this.userUploadedNodeId();
-        const option = new OptionItem(
-            this.i18nPrefix + (regenerate ? 'REGENERATE' : 'GENERATE'),
-            'magic_button',
-            () => void this.generateImage(),
-        );
-        option.isEnabled = !this.imageProcessing();
-        return [option];
+        return [
+            new OptionItem(
+                this.i18nPrefix + (regenerate ? 'REGENERATE' : 'GENERATE'),
+                'magic_button',
+                () => void this.generateImage(),
+            ),
+        ];
     });
     private previewWidget: Signal<MdsEditorWidgetPreviewComponent> = viewChild(
         MdsEditorWidgetPreviewComponent,

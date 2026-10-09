@@ -4,6 +4,7 @@
   [standaloneNode]="imageNode()"
   [hostControlled]="true"
   [readonly]="!editMode || !atLeastOneEditOptionSupported()"
+  [disabled]="imageProcessing()"
   [deletable]="!deleteImageDisabled()"
   [additionalOptions]="aiOptions()"
   [cropPreview]="false"

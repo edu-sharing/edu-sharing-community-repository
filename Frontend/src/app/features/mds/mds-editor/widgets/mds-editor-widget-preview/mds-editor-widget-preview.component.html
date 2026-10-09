@@ -42,6 +42,7 @@
         mat-fab
         [color]="$any('white')"
         [matMenuTriggerFor]="previewDropdown.menu"
+        [disabled]="disabled"
         (menuOpened)="onPreviewMenuOpened()"
         [matTooltip]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
         [attr.aria-label]="'WORKSPACE.EDITOR.PREVIEW_CHANGE' | translate"
@@ -49,7 +50,7 @@
         <i [esIcon]="deleteAsOption ? 'more_vert' : 'edit'"></i>
       </button>
       } @if (editable && !deleteAsOption && canDeletePreview) {
-      <button mat-fab [color]="$any('white')" (click)="deletePreview()">
+      <button mat-fab [color]="$any('white')" [disabled]="disabled" (click)="deletePreview()">
         <i esIcon="delete"></i>
       </button>
       }

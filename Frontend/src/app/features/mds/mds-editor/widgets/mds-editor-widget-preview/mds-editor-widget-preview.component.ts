@@ -84,6 +84,8 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
     @Input() hostControlled = false;
     /** in standalone mode: show the preview without any controls */
     @Input() readonly = false;
+    /** in standalone mode: keep the controls visible but inactive, e.g. while the host saves */
+    @Input() disabled = false;
     /** in standalone mode: whether the host allows removing the current preview */
     @Input() deletable = true;
     /** in standalone mode: host-specific actions listed in the change-preview menu */
@@ -391,7 +393,7 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
      * paste targets an editable field that also carries text (then keep native behavior).
      */
     private onPaste(event: ClipboardEvent) {
-        if (!this.editable) {
+        if (!this.editable || this.disabled) {
             return;
         }
         const image = Array.from(event.clipboardData?.files ?? []).find((file) =>
