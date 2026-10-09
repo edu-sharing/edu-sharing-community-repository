@@ -8,6 +8,11 @@
     width: 319px;
 }
 
+// the filters are shown in a dialog instead
+:host(.as-dialog) {
+    display: none;
+}
+
 .filter-bar-container {
     flex: 1;
     min-width: 0;
@@ -66,15 +71,5 @@
 .filter-bar-editor-wrapper ::ng-deep {
     .view-wrapper {
         padding-top: 8px;
-    }
-}
-
-// On mobile the page card is full-bleed, so the filters drop their frame as well
-@media screen and (max-width: vars.$mobileTabSwitchWidth) {
-    .filter-bar-container {
-        margin: 0;
-        border-radius: 0;
-        box-shadow: none;
-        border-right: 1px solid var(--mat-sidenav-container-divider-color);
     }
 }
