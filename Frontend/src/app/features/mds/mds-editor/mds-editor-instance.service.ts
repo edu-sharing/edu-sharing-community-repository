@@ -7,6 +7,7 @@ import {
     Injector,
     NgZone,
     OnDestroy,
+    signal,
     Type,
     ViewContainerRef,
 } from '@angular/core';
@@ -436,6 +437,8 @@ export class MdsEditorInstanceService
                 case 'singlevalueTree':
                 case 'multivalueTree':
                     return flat ? 'array' : 'tree';
+                case 'collectionTree':
+                    return 'array';
                 case 'slider':
                     return 'slider';
                 case 'duration':
@@ -860,6 +863,8 @@ export class MdsEditorInstanceService
     private nativeWidgetsValidValue = true;
     /** Input to `MdsEditorWrapper`. */
     externalFilters: Values;
+    /** Collection the `collectionTree` widgets start at. Input to `MdsEditorWrapper`. */
+    readonly collectionRootId = signal<string | null>(null);
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);

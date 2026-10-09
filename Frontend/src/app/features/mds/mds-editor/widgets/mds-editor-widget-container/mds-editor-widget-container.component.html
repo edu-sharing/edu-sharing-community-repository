@@ -17,7 +17,7 @@
   </mat-expansion-panel-header>
   <ng-container *ngTemplateOutlet="body"></ng-container>
 </mat-expansion-panel>
-} @if (!widget || (expandedState$ | async) === 'disabled') {
+} @if ((!widget || (expandedState$ | async) === 'disabled') && isVisible()) {
 <div
   class="widget-container"
   [class.read-only]="

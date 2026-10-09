@@ -38,6 +38,7 @@ export class SearchPageFilterBarComponent implements OnInit, OnDestroy {
     readonly activeMdsForm = new UntypedFormControl(this.activeMetadataSet.getValue());
     readonly searchFilters = this.searchPage.searchFilters;
     readonly reUrl = this.searchPage.reUrl;
+    readonly collectionRoot = this.searchPage.collectionRoot;
     readonly customTemplates = this.globalSearchPageInternal.customTemplates;
     /** Deep copy of `searchFilters.userValue` for immutability. */
     searchFilterValues: Values;

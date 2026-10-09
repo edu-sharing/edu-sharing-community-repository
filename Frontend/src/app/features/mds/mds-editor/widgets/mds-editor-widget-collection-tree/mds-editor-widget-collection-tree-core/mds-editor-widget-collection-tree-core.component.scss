@@ -1,0 +1,121 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+
+:host {
+    display: block;
+}
+.collection-tree {
+    background-color: var(--cardLightBackground);
+    min-width: 100%;
+}
+.tree-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    mat-form-field {
+        flex-grow: 1;
+    }
+    .search-icon {
+        padding: 0 12px;
+    }
+    button {
+        margin-left: 20px;
+        height: 50px;
+    }
+}
+.within-root {
+    display: block;
+    padding: 0 10px 8px;
+    // an option of the list, so it does not take the color of the collections listed below
+    ::ng-deep .mat-internal-form-field {
+        --mat-checkbox-label-text-color: var(--textMain);
+    }
+}
+.notice {
+    padding: 4px 20px;
+    font-size: 12px;
+    color: var(--textLight);
+}
+.rows {
+    background-color: var(--mat-tree-container-background-color);
+}
+// `--level` is the depth of the row inside the tree
+.row {
+    display: flex;
+    align-items: center;
+    min-height: var(--mat-tree-node-min-height);
+    padding-inline-start: calc(var(--level, 0) * 30px);
+    padding-inline-end: 12px;
+    &.active {
+        background-color: var(--primaryBackground50);
+        @include setGlobalKeyboardFocus();
+        outline-offset: calc(var(--focusWidth) * -1);
+    }
+}
+.node-row {
+    position: relative;
+    // only rows without sub-collections are separated, as in the tree of fixed values
+    &.leaf:not(:last-child):after {
+        content: '';
+        position: absolute;
+        height: 1px;
+        left: calc(var(--level, 0) * 30px + 20px);
+        right: 20px;
+        bottom: 0;
+        background-color: var(--chipsSeperatorLineColor);
+    }
+    .expander-spacer {
+        display: inline-block;
+        width: 40px;
+        flex-shrink: 0;
+    }
+    .rtl-mirror:dir(rtl) {
+        transform: scaleX(-1);
+    }
+    .node-checkbox {
+        flex-grow: 1;
+        min-width: 0;
+        ::ng-deep label {
+            overflow-wrap: anywhere;
+            padding: 4px 0;
+        }
+    }
+    .write-marker {
+        flex-shrink: 0;
+        font-size: 18px;
+        color: var(--textLight);
+    }
+}
+// a group of collections, styled apart from the selectable collections below it
+.category-row {
+    cursor: pointer;
+    color: var(--textMain);
+    .category-expander {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        flex-shrink: 0;
+    }
+    .category-icon {
+        margin-inline-end: 8px;
+        color: var(--textLight);
+    }
+    .category-label {
+        font-weight: 600;
+    }
+    .rtl-mirror:dir(rtl) {
+        transform: scaleX(-1);
+    }
+}
+// aligned with the checkboxes of the level, behind the 40px expander
+.status-row {
+    padding-inline-start: calc(var(--level, 0) * 30px + 40px);
+    &.empty {
+        color: var(--textLight);
+        padding-inline-start: 20px;
+    }
+    &.error {
+        gap: 8px;
+        color: var(--colorStatusNegative);
+    }
+}
