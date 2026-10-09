@@ -307,6 +307,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
                     );
                 }
                 this.dynamicallyAddCssClasses(nodes, this.selectedNodeIds, this.selectedClassName);
+                this.scrollToNode(nodes, selectedNode);
                 if (!this.nodeEntries) {
                     return;
                 }
@@ -848,6 +849,25 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
             } else if (element.classList?.contains(className)) {
                 element.classList.remove(className);
             }
+        });
+    }
+
+    /**
+     * Scrolls the card or row of the given node into view, e.g. when the preview steps to a node
+     * outside of the visible part of the list. Only the list the preview was opened from scrolls.
+     */
+    private scrollToNode(nodes: Node[], node: Node | null): void {
+        if (!this.topicPageHelperService.isPreviewSource(this.nodeEntries)) {
+            return;
+        }
+        const index: number = node ? nodes.findIndex((n: Node) => n.ref.id === node.ref.id) : -1;
+        if (index < 0) {
+            return;
+        }
+        this.queryElement(index)?.scrollIntoView({
+            block: 'nearest',
+            inline: 'nearest',
+            behavior: 'smooth',
         });
     }
 

@@ -98,6 +98,8 @@ export class TopicPageHelperService {
         new BehaviorSubject<{ [key: string]: string[] }>({});
     private readonly shareOptionsI18nPrefix: string = 'TOPIC_PAGE.WIDGET.SHARE_OPTIONS.';
     private inPlaceNavigationHandler: TopicNavigation | null = null;
+    /** The node list the current preview was opened from, `null` for a single node. */
+    private previewSourceList: NodeEntriesWrapperComponent<Node> | null = null;
 
     /**
      * Show the node in the editorial sidebar's preview, or close the preview if it shows the node.
@@ -117,7 +119,8 @@ export class TopicPageHelperService {
         }
         const previewConfig = { customOptions: this.previewCustomOptions } as PreviewConfig;
         // the preview steps through the list it was opened from; a single node has no neighbours
-        this.editorialSidebarService.setPreviewList(list ?? null);
+        this.previewSourceList = list ?? null;
+        this.editorialSidebarService.setPreviewList(this.previewSourceList);
         if (list) {
             this.editorialSidebarService.handleSelect(
                 list,
@@ -138,6 +141,11 @@ export class TopicPageHelperService {
             trap: false,
             optionConfig: previewConfig,
         });
+    }
+
+    /** Whether the current preview was opened from the given node list. */
+    isPreviewSource(list: NodeEntriesWrapperComponent<Node>): boolean {
+        return !!list && this.previewSourceList === list;
     }
 
     /** Close the preview, leaving any other option of the editorial sidebar open. */
