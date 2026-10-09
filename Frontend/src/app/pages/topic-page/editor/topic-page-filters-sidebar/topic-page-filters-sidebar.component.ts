@@ -69,6 +69,11 @@ export class TopicPageFiltersSidebarComponent implements OnInit {
     protected async resetFilters(): Promise<void> {
         // the editor reads its values on initialization only
         this.currentValues = {};
+        // the input binding passes the values on with the next change detection, after the re-init
+        const editor = this.mdsEditor();
+        if (editor) {
+            editor.currentValues = this.currentValues;
+        }
         await this.mdsEditor()?.reInit();
         this.applySearchFilters({});
     }
