@@ -1,15 +1,26 @@
 <!-- On a narrow screen the same filters open as a dialog instead of this card -->
 @if (!isMobileScreen()) {
-<div class="filter-bar-container">
-  <div class="filter-bar-heading">
-    <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
-    <ng-container [ngTemplateOutlet]="resetButtonTemplate"></ng-container>
-    <button class="filter-bar-close-button" mat-icon-button (click)="closeFilterBar()">
-      <i esIcon="close" [aria]="true"></i>
-    </button>
-  </div>
-  <div class="filter-bar-body">
-    <ng-container [ngTemplateOutlet]="filtersTemplate"></ng-container>
+<div
+  class="filter-bar-resizable"
+  esResizableSidenav
+  position="start"
+  storageKey="TOPIC_PAGE_SIDENAV_LEFT_WIDTH"
+  [defaultWidthPx]="319"
+  [minWidth]="0"
+  [minWidthPx]="275"
+  [maxWidthPx]="619"
+>
+  <div class="filter-bar-container">
+    <div class="filter-bar-heading">
+      <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+      <ng-container [ngTemplateOutlet]="resetButtonTemplate"></ng-container>
+      <button class="filter-bar-close-button" mat-icon-button (click)="closeFilterBar()">
+        <i esIcon="close" [aria]="true"></i>
+      </button>
+    </div>
+    <div class="filter-bar-body">
+      <ng-container [ngTemplateOutlet]="filtersTemplate"></ng-container>
+    </div>
   </div>
 </div>
 }

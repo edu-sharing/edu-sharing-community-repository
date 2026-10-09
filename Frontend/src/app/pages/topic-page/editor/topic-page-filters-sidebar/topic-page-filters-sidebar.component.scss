@@ -5,7 +5,19 @@
 :host {
     display: flex;
     flex-shrink: 0;
+}
+
+// width-controlled wrapper that esResizableSidenav resizes and in which it inserts the drag handle
+.filter-bar-resizable {
+    display: flex;
+    position: relative;
+    // pre-init fallback, before the directive sets the stored or default width
     width: 319px;
+}
+
+// Center the drag handle in the gap between the filter card and the page card
+:host ::ng-deep .es-sidenav-resizer.start {
+    right: -9px;
 }
 
 // the filters are shown in a dialog instead

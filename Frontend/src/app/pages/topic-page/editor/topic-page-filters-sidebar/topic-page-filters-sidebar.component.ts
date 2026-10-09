@@ -22,6 +22,7 @@ import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import { MdsEditorWrapperComponent } from '../../../../features/mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { Values } from '../../../../features/mds/types/types';
+import { ResizableSidenavDirective } from '../../../editorial-page/resizable-sidenav.directive';
 import { SharedModule } from '../../../../shared/shared.module';
 import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic-widget-global.service';
 
@@ -36,7 +37,7 @@ function containsValues(values: Values): boolean {
 
 @Component({
     selector: 'es-topic-page-filters-sidebar',
-    imports: [SharedModule, MdsModule],
+    imports: [SharedModule, MdsModule, ResizableSidenavDirective],
     templateUrl: './topic-page-filters-sidebar.component.html',
     styleUrls: ['./topic-page-filters-sidebar.component.scss'],
     host: { '[class.as-dialog]': 'isMobileScreen()' },
