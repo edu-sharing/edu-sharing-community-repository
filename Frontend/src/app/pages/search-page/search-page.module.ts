@@ -13,6 +13,7 @@ import { SearchPageFilterBarComponent } from './search-page-filter-bar.component
 import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
 import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-toggle.component';
+import { ScopeBaseQueryBannerComponent } from './scope-base-query-banner/scope-base-query-banner.component';
 
 @NgModule({
     declarations: [
@@ -33,6 +34,7 @@ import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-to
         FooterComponent,
         ResizableSidenavDirective,
         EdgeToggleComponent,
+        ScopeBaseQueryBannerComponent,
     ],
     // This module is lazy-loaded and should not export anything.
     exports: [],

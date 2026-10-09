@@ -48,7 +48,9 @@
         "
       ></ng-container>
     </div>
-    } @if (!previewSidebarTemplateService.metadata) { @if (node()?.properties && mdsVisible()) {
+    }
+    <es-scope-badges [node]="node()"></es-scope-badges>
+    @if (!previewSidebarTemplateService.metadata) { @if (node()?.properties && mdsVisible()) {
     <es-mds-editor-wrapper
       #mds
       [embedded]="true"

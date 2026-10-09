@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslationsService, UIService } from 'ngx-edu-sharing-ui';
+import { HOME_REPOSITORY, OrganizationV1Service, ScopesService } from 'ngx-edu-sharing-api';
 import {
     ConfigurationService,
     LoginResult,
@@ -17,6 +18,8 @@ import { Subject } from 'rxjs';
 import { SearchFieldService } from '../../main/navigation/search-field/search-field.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { PlatformLocation } from '@angular/common';
+
+type UserManagementTab = 'ORG' | 'SCOPES' | 'GROUP' | 'USER' | 'DELETE';
 
 @Component({
     selector: 'es-user-management-page',
@@ -38,6 +41,8 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     private connector = inject(RestConnectorService);
     private searchField = inject(SearchFieldService);
     private ui = inject(UIService);
+    private organizationApi = inject(OrganizationV1Service);
+    readonly scopesService = inject(ScopesService);
 
     public tab: number = 0;
     public searchQuery: string;
@@ -45,7 +50,23 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     public isAdmin = false;
     public disabled = false;
     public isLoading = true;
-    TABS = ['ORG', 'GROUP', 'USER', 'DELETE'];
+    /**
+     * ids of the currently rendered tabs, in template order. Tabs are shown conditionally, so the
+     * index of a tab depends on the state — always resolve it via the id
+     */
+    get visibleTabs(): UserManagementTab[] {
+        const showScopes = !this.selected && this.isAdmin && this.scopesService.enabled();
+        const showMembers = !!this.selected || this.isAdmin;
+        return [
+            'ORG',
+            ...(showScopes ? (['SCOPES'] as const) : []),
+            ...(showMembers ? (['GROUP', 'USER'] as const) : []),
+            ...(!this.selected && this.isAdmin ? (['DELETE'] as const) : []),
+        ];
+    }
+    get currentTab(): UserManagementTab {
+        return this.visibleTabs[this.tab] ?? 'ORG';
+    }
     private destroyed = new Subject<void>();
 
     constructor() {
@@ -107,10 +128,13 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
     }
 
     private updateSearchField(): void {
-        if (this.tab !== 3) {
+        if (this.currentTab !== 'DELETE') {
             const searchFieldInstance = this.searchField.enable(
                 {
-                    placeholder: 'PERMISSIONS.SEARCH_' + this.TABS[this.tab],
+                    placeholder:
+                        this.currentTab === 'SCOPES'
+                            ? 'SCOPES.ADMIN.SEARCH'
+                            : 'PERMISSIONS.SEARCH_' + this.currentTab,
                 },
                 this.destroyed,
             );
@@ -141,6 +165,25 @@ export class UserManagementPageComponent implements OnInit, OnDestroy {
             this.tab = tab;
         }
         this.updateSearchField();
+    }
+
+    /**
+     * a scope group is an organization: select it and switch to its members, so members and org
+     * admins are managed with the regular organization tabs
+     */
+    manageScopeMembers(scopeId: string) {
+        this.organizationApi
+            .getOrganization({ repository: HOME_REPOSITORY, organization: scopeId })
+            .subscribe({
+                next: (org) => {
+                    // the core-module dto is structurally compatible with the api model
+                    this.selected = org as unknown as Organization;
+                    this.searchQuery = null;
+                    this.tab = this.visibleTabs.indexOf('USER');
+                    this.updateSearchField();
+                },
+                error: (e) => this.toast.error(e),
+            });
     }
 
     private goToLogin() {

@@ -1,0 +1,180 @@
+<div class="scope-management">
+  @if (draft(); as d) {
+  <div class="editor" data-test="scope-management-editor">
+    <h2>
+      {{ (d.scopeId ? 'SCOPES.ADMIN.EDIT_TITLE' : 'SCOPES.ADMIN.CREATE_TITLE') | translate }}
+      @if (d.scopeId) {
+      <span class="scope-id">{{ d.scopeId }}</span>
+      }
+    </h2>
+    @if (!d.scopeId) {
+    <div class="row">
+      <mat-form-field>
+        <mat-label>{{ 'SCOPES.ADMIN.NAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="d.name" required data-test="scope-management-name" />
+        <mat-hint>{{ 'SCOPES.ADMIN.NAME_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'SCOPES.ADMIN.DISPLAY_NAME' | translate }}</mat-label>
+        <input matInput [(ngModel)]="d.displayName" />
+      </mat-form-field>
+    </div>
+    }
+    <div class="row">
+      <mat-form-field>
+        <mat-label>{{ 'SCOPES.ADMIN.MDS' | translate }}</mat-label>
+        @if (metadataSets()?.length) {
+        <mat-select [ngModel]="d.mds" (ngModelChange)="setMds($event)">
+          @for (mds of metadataSets(); track mds.id) {
+          <mat-option [value]="mds.id">{{ mds.name || mds.id }} ({{ mds.id }})</mat-option>
+          }
+        </mat-select>
+        } @else {
+        <input matInput [ngModel]="d.mds" (ngModelChange)="setMds($event)" />
+        }
+        <mat-hint>{{ 'SCOPES.ADMIN.MDS_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <h3>{{ 'SCOPES.ADMIN.FIELDS' | translate }}</h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.FIELDS_HINT' | translate }}</p>
+    <div class="fields-editor">
+      <div class="property-picker">
+        <mat-form-field class="property-filter" subscriptSizing="dynamic">
+          <mat-label>{{ 'SCOPES.ADMIN.FIELD.FILTER' | translate }}</mat-label>
+          <input
+            matInput
+            [ngModel]="propertyFilter()"
+            (ngModelChange)="propertyFilter.set($event)"
+          />
+        </mat-form-field>
+        <div class="properties-list" data-test="scope-management-properties">
+          @for (property of availableProperties(); track property.name) {
+          <mat-checkbox
+            [checked]="isSelected(property)"
+            (change)="toggleField(property, $event.checked)"
+          >
+            <span class="property-label">
+              <span class="caption">{{ property | esListItemLabel | async }}</span>
+              <span class="property-id">{{ property.name }}</span>
+            </span>
+          </mat-checkbox>
+          }
+        </div>
+      </div>
+      <div
+        class="selected-fields"
+        cdkDropList
+        [cdkDropListData]="d.fields"
+        (cdkDropListDropped)="dropField($event)"
+      >
+        @for (field of d.fields; track field.id; let i = $index) {
+        <div class="field-row" cdkDrag [attr.data-test]="'scope-management-field-' + i">
+          <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
+          <div class="field-label">
+            <span class="caption">{{ getLabel(field.id) }}</span>
+            <span class="property-id">{{ field.id }}</span>
+          </div>
+          <mat-form-field class="visibility" subscriptSizing="dynamic">
+            <mat-label>{{ 'SCOPES.ADMIN.FIELD.VISIBILITY' | translate }}</mat-label>
+            <mat-select [(ngModel)]="field.visibility">
+              @for (v of visibilities; track v) {
+              <mat-option [value]="v">{{
+                'SCOPES.ADMIN.VISIBILITY.' + v.toUpperCase() | translate
+              }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-checkbox
+            [(ngModel)]="field.replaces"
+            [matTooltip]="'SCOPES.ADMIN.FIELD.REPLACES_HINT' | translate"
+            >{{ 'SCOPES.ADMIN.FIELD.REPLACES' | translate }}</mat-checkbox
+          >
+          <div class="field-actions">
+            <button
+              mat-icon-button
+              (click)="removeField(i)"
+              color="warn"
+              [attr.aria-label]="'SCOPES.ADMIN.FIELD.REMOVE' | translate"
+            >
+              <i esIcon="delete"></i>
+            </button>
+          </div>
+        </div>
+        } @empty {
+        <p class="empty">{{ 'SCOPES.ADMIN.FIELDS_EMPTY' | translate }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button mat-button (click)="cancel()">{{ 'CANCEL' | translate }}</button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        [disabled]="!canSave()"
+        data-test="scope-management-save"
+      >
+        {{ 'SAVE' | translate }}
+      </button>
+    </div>
+  </div>
+  } @else {
+  <div class="toolbar">
+    <es-info-message mode="info" class="info">
+      <div>{{ 'SCOPES.ADMIN.INFO' | translate }}</div>
+    </es-info-message>
+    <button mat-flat-button color="primary" (click)="create()" data-test="scope-management-create">
+      <i esIcon="add"></i> {{ 'SCOPES.ADMIN.CREATE' | translate }}
+    </button>
+  </div>
+  @if (scopes() === null) {
+  <es-spinner></es-spinner>
+  } @else {
+  <div class="list" role="table" [attr.aria-label]="'SCOPES.ADMIN.TITLE' | translate">
+    <div class="list-row header" role="row">
+      <span role="columnheader">{{ 'SCOPES.ADMIN.DISPLAY_NAME' | translate }}</span>
+      <span role="columnheader">{{ 'SCOPES.ADMIN.SCOPE_ID' | translate }}</span>
+      <span role="columnheader">{{ 'SCOPES.ADMIN.MDS' | translate }}</span>
+      <span role="columnheader">{{ 'SCOPES.ADMIN.FIELDS' | translate }}</span>
+      <span role="columnheader">{{ 'SCOPES.ADMIN.BASE_QUERY_VERSION' | translate }}</span>
+      <span role="columnheader" class="cdk-visually-hidden">{{
+        'SCOPES.ADMIN.ACTIONS' | translate
+      }}</span>
+    </div>
+    @for (scope of filteredScopes(); track scope.scopeId) {
+    <div class="list-row" role="row" [attr.data-test]="'scope-management-row-' + scope.scopeId">
+      <span role="cell" class="name">{{ scope.displayName || scope.scopeId }}</span>
+      <span role="cell" class="scope-id">{{ scope.scopeId }}</span>
+      <span role="cell">{{ scope.mds || '-' }}</span>
+      <span role="cell">{{ scope.fields?.length ?? 0 }}</span>
+      <span role="cell">{{ scope.baseQuery?.version ?? '-' }}</span>
+      <span role="cell" class="actions">
+        <button
+          mat-icon-button
+          (click)="manageMembers.emit(scope.scopeId)"
+          [matTooltip]="'SCOPES.ADMIN.MANAGE_MEMBERS' | translate"
+          [attr.aria-label]="'SCOPES.ADMIN.MANAGE_MEMBERS' | translate"
+        >
+          <i esIcon="group"></i>
+        </button>
+        <button
+          mat-icon-button
+          (click)="edit(scope)"
+          [matTooltip]="'SCOPES.ADMIN.EDIT' | translate"
+          [attr.aria-label]="'SCOPES.ADMIN.EDIT' | translate"
+        >
+          <i esIcon="edit"></i>
+        </button>
+      </span>
+    </div>
+    } @empty {
+    <div class="empty">{{ 'SCOPES.ADMIN.EMPTY' | translate }}</div>
+    }
+  </div>
+  <es-info-message mode="warning" class="delete-info">
+    <div>{{ 'SCOPES.ADMIN.DELETE_INFO' | translate }}</div>
+  </es-info-message>
+  } }
+</div>

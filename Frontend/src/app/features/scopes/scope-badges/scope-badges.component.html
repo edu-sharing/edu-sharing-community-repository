@@ -1,0 +1,26 @@
+@if (own(); as own) {
+<div class="own" [attr.aria-label]="'SCOPES.BADGES.OWN' | translate">
+  @if (!own.entry) {
+  <span class="status muted">{{ 'SCOPES.BADGES.NO_ENTRY' | translate }}</span>
+  } @else {
+  <span class="status" [class.published]="own.entry.published">
+    <i [esIcon]="own.entry.published ? 'visibility' : 'visibility_off'"></i>
+    {{
+      (own.entry.published ? 'SCOPES.BADGES.PUBLISHED' : 'SCOPES.BADGES.NOT_PUBLISHED') | translate
+    }}
+  </span>
+  @for (s of own.status; track s.label) {
+  <span class="status" [matTooltip]="s.label">{{ s.value }}</span>
+  } }
+</div>
+} @if (foreign().length) {
+<ul class="foreign" [attr.aria-label]="'SCOPES.BADGES.FOREIGN' | translate">
+  @for (badge of foreign(); track $index) {
+  <li class="badge" [matTooltip]="badge.label">
+    <i esIcon="verified"></i>
+    <span class="scope">{{ badge.scope }}:</span>
+    <span class="value">{{ badge.value }}</span>
+  </li>
+  }
+</ul>
+}

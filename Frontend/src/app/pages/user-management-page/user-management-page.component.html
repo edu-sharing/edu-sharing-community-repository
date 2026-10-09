@@ -22,7 +22,20 @@
         ></es-permissions-authorities>
       </ng-template>
     </mat-tab>
-    @if (selected || isAdmin) {
+    @if (!selected && isAdmin && scopesService.enabled()) {
+    <mat-tab
+      label="{{ 'SCOPES.ADMIN.TAB' | translate }}"
+      labelClass="data-test-permissions-tab-scopes"
+      bodyClass="data-test-permissions-body-scopes"
+    >
+      <ng-template matTabContent>
+        <es-scope-management
+          [searchQuery]="searchQuery"
+          (manageMembers)="manageScopeMembers($event)"
+        ></es-scope-management>
+      </ng-template>
+    </mat-tab>
+    } @if (selected || isAdmin) {
     <mat-tab
       label="{{ 'PERMISSIONS.TAB.GROUP' | translate }}{{
         selected ? ' (' + selected.profile?.displayName + ')' : ''

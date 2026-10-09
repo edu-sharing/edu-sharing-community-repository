@@ -1,0 +1,29 @@
+.banner {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 8px 16px;
+    padding: 12px 16px;
+    border-radius: var(--borderRadiusCards);
+    background: var(--primaryBackground50);
+    color: var(--textMain);
+    .icon {
+        color: var(--primary);
+    }
+    .text {
+        flex: 1;
+        min-width: 200px;
+    }
+    .title {
+        font-weight: bold;
+    }
+    .hint {
+        color: var(--textLight);
+        font-size: 90%;
+    }
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+}

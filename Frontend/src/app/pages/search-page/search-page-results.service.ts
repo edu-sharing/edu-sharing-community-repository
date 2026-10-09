@@ -47,6 +47,7 @@ import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserModifiableValuesService } from './user-modifiable-values';
+import { SCOPE_BASE_QUERY_PARAMS } from '../editorial-page/scope-settings/scope-base-query-navigation';
 import { Sort } from '@angular/material/sort';
 
 export abstract class SearchPageResults {
@@ -398,6 +399,12 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                     metadataset: params.metadataSet,
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     propertyFilter: [RestConstants.ALL],
+                    // editing the base query of a scope: search the pool, not the active scope
+                    ignoreScope: this._route.snapshot.queryParamMap.has(
+                        SCOPE_BASE_QUERY_PARAMS.scopeId,
+                    )
+                        ? true
+                        : undefined,
                 })
                 .pipe(
                     tap((r) => {

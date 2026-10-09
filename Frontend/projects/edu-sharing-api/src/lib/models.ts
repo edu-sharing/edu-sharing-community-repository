@@ -160,3 +160,16 @@ export { OAuthEntry } from './api/models/o-auth-entry';
 export { RepositoryConfig } from './api/models/repository-config';
 export { RepositoryMessage } from './api/models/repository-message';
 export { Usage } from './api/models/usage';
+
+// Scopes
+export { ActiveScope } from './api/models/active-scope';
+export { ScopeAssignment } from './api/models/scope-assignment';
+export { ScopeBaseQuery } from './api/models/scope-base-query';
+export { ScopeBulkRequest } from './api/models/scope-bulk-request';
+export { ScopeBulkStatus } from './api/models/scope-bulk-status';
+export { ScopeDefinition } from './api/models/scope-definition';
+export { ScopeField } from './api/models/scope-field';
+export { ScopeHistoryEntry } from './api/models/scope-history-entry';
+export { ScopeInfo } from './api/models/scope-info';
+export { ScopeQuery } from './api/models/scope-query';
+export * from './model-overrides/scopes';

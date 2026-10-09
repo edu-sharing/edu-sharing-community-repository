@@ -195,6 +195,7 @@
     "TOOLPERMISSION_METADATA_METHODOLOGY": "Methodikreiter beim Einordnen von Elementen anzeigen.",
     "TOOLPERMISSION_MANAGE_QA": "Qualitätssicherung von Materialien verwalten.",
     "TOOLPERMISSION_MANAGE_CONTRIBUTORS": "Beteiligte (Autorinnen/Autoren, Organisationen) mit persistenten IDs verwalten, hinzufügen und löschen.",
+    "TOOLPERMISSION_SCOPE_WRITE": "Scope-Einträge an Elementen anlegen, ändern und entfernen (einzeln und als Massenänderung).",
     "TOOLPERMISSION_BAPI": "Zugriff auf die Bildungs-API (BAPI) des Repositories."
   },
   "NO_WRITE_PERMISSIONS": "Keine Rechte für diesen Vorgang.",
@@ -284,7 +285,8 @@
     "SECURE_SHORT": "Safe",
     "PERMISSIONS_SHORT": "Konten",
     "LOGIN_SHORT": "Login",
-    "ADMIN_SHORT": "Admin"
+    "ADMIN_SHORT": "Admin",
+    "EDITORIAL_SCOPE": "Redaktion"
   },
   "WORKFLOW": {
     "100_unchecked": "Kein Status",
@@ -1167,7 +1169,14 @@
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
     "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
     "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert.",
-    "ASSIGNMENT_DELETE": "Die Aufgabe wurde gelöscht."
+    "ASSIGNMENT_DELETE": "Die Aufgabe wurde gelöscht.",
+    "SCOPE": {
+      "SAVED": "Gespeichert. Die Suche ist in spätestens einer Minute aktualisiert.",
+      "DELETED": "Eintrag entfernt. Die Suche ist in spätestens einer Minute aktualisiert.",
+      "NOTHING_CHANGED": "Es wurde nichts geändert.",
+      "BULK_FINISHED": "{{done}} von {{total}} Inhalten geändert. Die Suche wird in Kürze aktualisiert.",
+      "BULK_FINISHED_WITH_ERRORS": "{{done}} von {{total}} Inhalten geändert, einige mit Fehlern. Details im Redaktions-Panel."
+    }
   },
   "ADD_TO_STREAM": {
     "TITLE": "Zum Stream hinzufügen",
@@ -1783,5 +1792,111 @@
     "SELECTIVE_MATERIALS": "ausgewählte_Materialien",
     "MATERIALS": "Materialien",
     "TO": "bis"
+  },
+  "SCOPES": {
+    "SWITCHER": {
+      "TOOLTIP": "Redaktion (Scope) wechseln",
+      "GLOBAL": "Global (keine Redaktion)",
+      "READ_ONLY": "nur lesend",
+      "HEADING": "Arbeitsbereich",
+      "LOADING": "Wird geladen…",
+      "NONE": "Sie sind keiner Redaktion zugeordnet"
+    },
+    "ADMIN": {
+      "TAB": "Redaktionen",
+      "TITLE": "Redaktionen",
+      "SEARCH": "Redaktionen durchsuchen…",
+      "INFO": "Redaktionen sind Organisationen mit eigener Feldliste. Mitglieder und Org-Admins werden über die Organisation verwaltet.",
+      "CREATE": "Redaktion anlegen",
+      "CREATE_TITLE": "Neue Redaktion",
+      "EDIT_TITLE": "Redaktion bearbeiten",
+      "EDIT": "Bearbeiten",
+      "MANAGE_MEMBERS": "Mitglieder verwalten",
+      "NAME": "Name",
+      "NAME_HINT": "Technischer Name, die Gruppe heißt GROUP_ORG_<Name>",
+      "DISPLAY_NAME": "Anzeigename",
+      "SCOPE_ID": "Gruppe",
+      "MDS": "Metadatenset",
+      "MDS_HINT": "Liefert Widgets, Wertelisten und Übersetzungen der Redaktions-Properties",
+      "FIELDS": "Feldliste",
+      "FIELDS_HINT": "Properties aus dem Metadatenset auswählen, die die Redaktion pflegen darf",
+      "FIELDS_EMPTY": "Noch keine Felder",
+      "BASE_QUERY_VERSION": "Basisabfrage (Version)",
+      "ACTIONS": "Aktionen",
+      "EMPTY": "Keine Redaktionen vorhanden",
+      "DELETE_INFO": "Eine Redaktion wird über ihre Organisation gelöscht. Dabei werden alle Einträge und die Historie sofort und endgültig entfernt.",
+      "CREATED": "Redaktion angelegt",
+      "UPDATED": "Redaktion gespeichert",
+      "VISIBILITY": {
+        "INTERNAL": "Intern",
+        "PUBLIC": "Öffentlich"
+      },
+      "FIELD": {
+        "VISIBILITY": "Sichtbarkeit",
+        "REPLACES": "Ersetzt Original",
+        "REPLACES_HINT": "Der Wert ersetzt im aktiven Scope den Originalwert",
+        "REMOVE": "Entfernen",
+        "FILTER": "Properties filtern"
+      }
+    },
+    "EDITORIAL": {
+      "NO_SCOPE": "Keine Redaktion aktiv.",
+      "TAB_EDIT": "Bearbeiten",
+      "TAB_HISTORY": "Historie",
+      "STATE": {
+        "NO_ENTRY": "Noch kein Eintrag in dieser Redaktion",
+        "PUBLISHED": "Veröffentlicht",
+        "NOT_PUBLISHED": "Nicht veröffentlicht",
+        "EXCLUDED": "Abgelehnt"
+      },
+      "PUBLISH": "Zulassen",
+      "EXCLUDE": "Ablehnen",
+      "SECTION_STATUS": "Redaktioneller Status",
+      "SECTION_REPLACING": "Angepasste Metadaten",
+      "SECTION_REPLACING_DESCRIPTION": "Diese Werte ersetzen das Original nur in dieser Redaktion.",
+      "VISIBILITY_PUBLIC": "Öffentlich sichtbar, sobald veröffentlicht",
+      "FREE_VALUE_PLACEHOLDER": "Wert eingeben und Enter drücken",
+      "REMOVE_VALUE": "Wert entfernen",
+      "ORIGINAL": "Original:",
+      "RESET_TO_ORIGINAL": "Auf Original zurücksetzen",
+      "REASON": "Anlass (optional)",
+      "HINT_NOT_PUBLIC": "Der Inhalt ist nicht öffentlich. Mit der Zulassung wird er für alle Nutzer und Gäste dieser Redaktion sichtbar.",
+      "HINT_EXCLUDED_AND_PUBLISHED": "Der Inhalt ist abgelehnt und gleichzeitig zugelassen. Er bleibt für Gäste sichtbar.",
+      "DELETE": {
+        "ACTION": "Eintrag entfernen",
+        "TITLE": "Eintrag entfernen?",
+        "MESSAGE": "Alle Angaben dieser Redaktion zu diesem Inhalt werden entfernt. Die Historie bleibt erhalten."
+      },
+      "BULK": {
+        "TARGET": "{{count}} Inhalte",
+        "HINT": "Nur geänderte Felder werden auf alle Inhalte übertragen.",
+        "APPLY": "Auf alle anwenden",
+        "DELETE": "Einträge entfernen",
+        "CONFIRM_TITLE": "Änderung übernehmen?",
+        "CONFIRM_MESSAGE": "Die Änderung wird auf {{count}} Inhalte angewendet.",
+        "CONFIRM_DELETE_TITLE": "Einträge entfernen?",
+        "CONFIRM_DELETE_MESSAGE": "Die Einträge von {{count}} Inhalten werden aus dieser Redaktion entfernt.",
+        "STATE_QUEUED": "Wartet…",
+        "STATE_RUNNING": "{{done}} von {{total}} bearbeitet",
+        "STATE_FINISHED": "Fertig: {{done}} von {{total}}",
+        "STATE_FAILED": "Abgebrochen nach {{done}} von {{total}}",
+        "FAILURES": "{{count}} Inhalte konnten nicht geändert werden"
+      },
+      "HISTORY": {
+        "EMPTY": "Noch keine Änderungen",
+        "ERROR": "Die Historie konnte nicht geladen werden.",
+        "DELETED": "Eintrag entfernt",
+        "ACTOR_BULK": "Massenänderung",
+        "ACTOR_SKILL": "Skill",
+        "VERSION": "Version {{version}}"
+      }
+    },
+    "BADGES": {
+      "OWN": "Status in der aktiven Redaktion",
+      "FOREIGN": "Angaben anderer Redaktionen",
+      "NO_ENTRY": "Nicht in der Redaktion",
+      "PUBLISHED": "Veröffentlicht",
+      "NOT_PUBLISHED": "Nicht veröffentlicht"
+    }
   }
 }

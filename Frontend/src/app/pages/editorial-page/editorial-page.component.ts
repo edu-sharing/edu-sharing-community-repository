@@ -8,6 +8,8 @@ import {
     inject,
     OnDestroy,
     signal,
+    TemplateRef,
+    untracked,
     ViewChild,
     viewChild,
     ChangeDetectionStrategy,
@@ -31,6 +33,7 @@ import {
     NodeShare,
     NodeSuggestion,
     SearchResults,
+    ScopesService,
     SearchService,
     SearchServiceUnwrapped,
 } from 'ngx-edu-sharing-api';
@@ -60,6 +63,7 @@ import {
     NodeDataSource,
     NodeEntriesDataType,
     NodeEntriesDisplayType,
+    NodeEntriesGlobalService,
     NodeEntriesWrapperComponent,
     NodeHelperService,
     OptionItem,
@@ -98,6 +102,8 @@ import { RestConnectorService } from '../../core-module/rest/services/rest-conne
 import { UIService } from '../../core-module/rest/services/ui.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
+import { ScopeEditorialService } from '../../features/scopes/scope-editorial.service';
+import { ScopeMdsService } from '../../features/scopes/scope-mds.service';
 
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -147,6 +153,10 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     private nodeHelperService = inject(NodeHelperService);
     private toolpermissionPipe = inject(ToolpermissionPipe);
     private loadingScreenService = inject(LoadingScreenService);
+    private nodeEntriesGlobalService = inject(NodeEntriesGlobalService);
+    readonly scopesService = inject(ScopesService);
+    private scopeEditorialService = inject(ScopeEditorialService);
+    private scopeMdsService = inject(ScopeMdsService);
     /** hide the filter toggle tab while the global loading screen covers the app */
     readonly isLoading = toSignal(this.loadingScreenService.observeIsLoading(), {
         initialValue: true,
@@ -162,6 +172,17 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     readonly TabWidgetShares = 'virtual:shareDirection';
     readonly TabWidgetAssignment = 'virtual:assignmentType';
     readonly TabWidgetSuggestions = 'virtual:suggestionType';
+    readonly TabWidgetScope = 'virtual:scope_view';
+    /** prefix of the list columns that show a property of the entry in the active scope */
+    static readonly SCOPE_COLUMN_PREFIX = 'scope:';
+    /** properties of the active scope shown as list columns (if part of its field list) */
+    static readonly SCOPE_COLUMNS = [
+        'ccm:editorial_inventory',
+        'ccm:editorial_release',
+        'ccm:editorial_recommendation',
+        'ccm:editorial_review_formal',
+        'ccm:editorial_review_subject',
+    ];
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -171,6 +192,12 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     readonly nodeEntriesRef = viewChild<NodeEntriesWrapperComponent<NodeEntriesDataType>>(
         NodeEntriesWrapperComponent,
     );
+    /** cell template of the scope status columns (registered as custom field rendering) */
+    readonly scopeStatusTemplate = viewChild<TemplateRef<unknown>>('scopeStatusTemplateRef');
+    private scopeColumnsRegistered = false;
+    /** criteria (raw values) of the last search in scope mode, for "edit all hits" */
+    private lastScopeCriteria: { [key: string]: string[] } = {};
+    readonly scopeHitCount = signal(0);
     /** Whether the selected-nodes overlay above the selection bar is open. */
     selectionOverlayOpen = false;
     /** Open the selection overlay upward (its bottom edge aligned to the bar's top edge). */
@@ -196,6 +223,12 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     mdsGroup = signal<string>(null);
 
     params$ = new BehaviorSubject<RouteConfig>(null);
+    private readonly primaryMode = toSignal(this.params$.pipe(map((p) => p?.primaryMode)));
+    /** scope mode is usable: feature enabled and the user is an editor of the active scope */
+    readonly scopeAvailable = computed(
+        () => this.scopesService.enabled() && this.scopesService.isEditor(),
+    );
+    readonly isScopeMode = computed(() => this.primaryMode() === 'scope');
     loginInfo$ = new BehaviorSubject<LoginInfo>(null);
     queryParams$ = new BehaviorSubject<Params>(null);
     tabSelection$ = new BehaviorSubject<number>(0);
@@ -280,7 +313,16 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             }
         });
         effect(() => {
-            if (this.selection()?.selected.length !== 1) {
+            if (
+                this.selection()?.selected.length !== 1 &&
+                // the scope editorial option also works on multiple nodes or all hits (bulk)
+                untracked(
+                    () =>
+                        this.editorialSidebarService.editorialSidebar?.enabledOption()?.option !==
+                            ScopeEditorialService.SIDEBAR_OPTION &&
+                        !this.scopeEditorialService.searchTarget(),
+                )
+            ) {
                 this.editorialSidebarService.sidebarOpened.set(false);
             }
             // Inject pending virtual nodes as soon as the node-entries wrapper exists. When returning
@@ -288,6 +330,37 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             // absent at the moment the search result arrives — the signal query re-fires this then.
             if (this.nodeEntriesRef()) {
                 this.injectVirtualNodes();
+            }
+        });
+        // scope status columns: the cell template lives in this page's template
+        effect(() => {
+            const template = this.scopeStatusTemplate();
+            if (template && !this.scopeColumnsRegistered) {
+                this.scopeColumnsRegistered = true;
+                for (const property of EditorialPageComponent.SCOPE_COLUMNS) {
+                    this.nodeEntriesGlobalService.registerCustomFieldRendering({
+                        type: 'NODE',
+                        name: EditorialPageComponent.SCOPE_COLUMN_PREFIX + property,
+                        templateRef: template,
+                    });
+                }
+            }
+        });
+        // reload the scope list after entries were changed (sidebar option, bulk job) or the
+        // active scope was switched
+        effect(() => {
+            this.scopeEditorialService.changed();
+            if (untracked(() => this.isScopeMode() && this.init$.value)) {
+                untracked(() => this.reloadScopeMode());
+            }
+        });
+        effect(() => {
+            this.scopesService.activeScope();
+            if (untracked(() => this.isScopeMode())) {
+                // columns and field list depend on the scope; re-registering the tabs re-runs the search
+                untracked(() => {
+                    void this.registerScopeMode();
+                });
             }
         });
         // Editorial page requires a valid, non-guest login; redirect to login otherwise.
@@ -410,13 +483,32 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 nodes.every((n) => getShare(n)?.shareStatus === 'REJECTED')
             );
         };
+        const scopeEditorial = new OptionItem(
+            'EDITORIAL.SCOPE.OPTION.EDIT',
+            'rule',
+            (node: Node, nodes?: Node[]) => {
+                const elements = this.optionsHelperService.getObjects(
+                    nodes ?? node,
+                    this.nodeEntriesRef()!.optionsHelper.getData(),
+                );
+                this.openScopeEditorial(elements as Node[]);
+            },
+        );
+        scopeEditorial.elementType = [ElementType.Node];
+        scopeEditorial.group = DefaultGroups.Primary;
+        scopeEditorial.priority = 5;
+        scopeEditorial.showAsAction = true;
+        scopeEditorial.showAlways = true;
+        scopeEditorial.toolpermissions = [RestConstants.TOOLPERMISSION_SCOPE_WRITE];
+        scopeEditorial.customShowCallback = async () =>
+            this.params$.value?.primaryMode === 'scope' && this.scopeAvailable();
         // Split actionbar (mirrors search/workspace): the toolbar actionbar shows toggle options
         // only; node actions move to the bottom selection bar.
         void this.nodeEntriesRef()?.initOptionsGenerator({
             actionbar: [this.actionbarRef, this.selectionActionbar?.()].filter(Boolean),
             customOptions: {
                 useDefaultOptions: true,
-                addOptions: [reject, unreject],
+                addOptions: [reject, unreject, scopeEditorial],
             },
         });
     }
@@ -540,6 +632,8 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 } else {
                     this.editorialPageService.registerTabsFromWidget(widget);
                 }
+            } else if (p.primaryMode === 'scope') {
+                await this.registerScopeMode();
             } else if (p.primaryMode === 'assignment') {
                 this.mainNav.patchMainNavConfig({
                     currentScope: 'editorial_assignment',
@@ -835,6 +929,45 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                     this.dataSource.isLoading = false;
                     this.setNewData(event);
                 });
+        } else if (routeConfig.primaryMode === 'scope') {
+            if (!this.scopeAvailable()) {
+                this.dataSource.isLoading = false;
+                this.scopeHitCount.set(0);
+                this.dataSource.setData([]);
+                return;
+            }
+            this.lastScopeCriteria = {
+                ...criteria,
+                ...this.editorialPageService.buildSearchCriteria(this.tabSelection$.value),
+                ...(ngsearchword
+                    ? { [RestConstants.PRIMARY_SEARCH_CRITERIA]: [ngsearchword] }
+                    : {}),
+            };
+            this.searchService
+                .search<SearchResults>({
+                    repository: HOME_REPOSITORY,
+                    metadataset: DEFAULT,
+                    query: RestConstants.DEFAULT_QUERY_NAME,
+                    contentType: 'FILES',
+                    ...pagination,
+                    body: {
+                        facetLimit: 5,
+                        facetMinCount: 1,
+                        criteria: searchCriteria,
+                        resolveCollections: false,
+                        resolveUsernames: true,
+                    },
+                })
+                .subscribe({
+                    next: (event) => {
+                        this.dataSource.isLoading = false;
+                        this.scopeHitCount.set(event.pagination?.total ?? 0);
+                        this.setNewData(event);
+                    },
+                    error: () => {
+                        this.dataSource.isLoading = false;
+                    },
+                });
         } else if (routeConfig.primaryMode === 'assignment') {
             this.searchService
                 .search({
@@ -876,6 +1009,89 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 });
         }
     }
+    private async registerScopeMode() {
+        const scope = this.scopesService.activeScope();
+        this.mainNav.patchMainNavConfig({
+            currentScope: 'editorial_scope',
+            title: 'EDITORIAL.TITLE_SCOPE',
+        });
+        this.mdsDefinition$.next(
+            await firstValueFrom(this.mdsService.getMetadataSet({ repository: HOME_REPOSITORY })),
+        );
+        const scopeWidgets = await firstValueFrom(
+            this.scopeMdsService.observeWidgets(scope?.definition?.mds),
+        );
+        const fields = this.scopesService.fields().map((f) => f.id);
+        this.columns.set({
+            Default: [
+                new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
+                ...EditorialPageComponent.SCOPE_COLUMNS.filter(
+                    (property) => !fields.length || fields.includes(property),
+                ).map((property) => {
+                    const column = new ListItem(
+                        'NODE',
+                        EditorialPageComponent.SCOPE_COLUMN_PREFIX + property,
+                    );
+                    column.label = ScopeMdsService.getLabel(scopeWidgets, property);
+                    return column;
+                }),
+            ],
+        });
+        const widget = MdsHelperService.getWidget(
+            this.TabWidgetScope,
+            null,
+            this.mdsDefinition$.value.widgets,
+        );
+        this.mdsGroup.set('editorial_scope');
+        if (widget == null) {
+            console.warn(
+                'Can not register tabs since widget definition was not found',
+                this.TabWidgetScope,
+            );
+        } else {
+            this.editorialPageService.registerTabsFromWidget(widget);
+        }
+    }
+
+    /** property of a scope status column, see `SCOPE_COLUMN_PREFIX` */
+    getScopeColumnProperty(item: ListItem): string {
+        return item.name.substring(EditorialPageComponent.SCOPE_COLUMN_PREFIX.length);
+    }
+
+    private reloadScopeMode() {
+        if (this.queryParams$.value && this.params$.value) {
+            void this.processCurrentValues(this.queryParams$.value, this.params$.value);
+        }
+    }
+
+    /** opens the scope editorial sidebar option for the given nodes */
+    openScopeEditorial(nodes: Node[]) {
+        this.scopeEditorialService.searchTarget.set(null);
+        this.editorialSidebarService.nodes.set(nodes);
+        this.editorialSidebarService.showOption({
+            option: ScopeEditorialService.SIDEBAR_OPTION,
+            trap: false,
+        });
+    }
+
+    /** opens the scope editorial sidebar option for all hits of the current search (bulk) */
+    editAllScopeHits() {
+        this.clearSelection();
+        this.scopeEditorialService.openForSearch({
+            search: {
+                mds: DEFAULT,
+                query: RestConstants.DEFAULT_QUERY_NAME,
+                criteria: this.lastScopeCriteria,
+            },
+            count: this.scopeHitCount(),
+        });
+        this.editorialSidebarService.nodes.set([]);
+        this.editorialSidebarService.showOption({
+            option: ScopeEditorialService.SIDEBAR_OPTION,
+            trap: false,
+        });
+    }
+
     click(event: NodeClickEvent<NodeEntriesDataType>) {
         if (this.nodeHelperService.directActionOnSingleClick(event.element as Node)) {
             this.nodeHelperService.navigateToNode(event);

@@ -1,5 +1,7 @@
 package org.edu_sharing.restservices.search.v1;
 
+import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.scope.ScopeContextResolver;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -76,6 +78,7 @@ public class SearchApi {
 			@Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
 			@Parameter(description = "search parameters", required = true) SearchParameters parameters,
 			@Parameter(description = "property filter for result nodes (or \"-all-\" for all properties)", array = @ArraySchema(schema = @Schema(defaultValue = "-all-"))) @QueryParam("propertyFilter") List<String> propertyFilter,
+			@Parameter(description = "scopes: search all public content instead of the active scope, to edit the base query of the scope. Org admins of the active scope group only") @QueryParam("ignoreScope") Boolean ignoreScope,
 			@Context HttpServletRequest req) {
 
 		try {
@@ -91,6 +94,11 @@ public class SearchApi {
 			MdsDao mdsDao = MdsDao.getMds(repoDao, mdsId);
 
 			SearchToken token = getSearchToken(contentType, maxItems, skipCount, sortProperties, sortAscending, parameters);
+			if (Boolean.TRUE.equals(ignoreScope)) {
+				// the base query is evaluated on public content only (GROUP_EVERYONE), the scope filter does not apply then
+				ScopeContextResolver.requireOrgAdminOfActiveScope();
+				token.setAuthorityScope(Collections.singletonList(CCConstants.AUTHORITY_GROUP_EVERYONE));
+			}
 			NodeSearch search = NodeDao.search(repoDao, mdsDao, query, parameters.getCriteria(), token, filter, parametersToDaoTransformer(parameters));
 
 			List<Node> data = null;//new ArrayList<>();

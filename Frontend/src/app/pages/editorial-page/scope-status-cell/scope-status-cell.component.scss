@@ -1,0 +1,16 @@
+:host {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.value {
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: var(--primaryBackground100);
+    color: var(--textMain);
+    font-size: 90%;
+    white-space: nowrap;
+}
+.empty {
+    color: var(--textLight);
+}

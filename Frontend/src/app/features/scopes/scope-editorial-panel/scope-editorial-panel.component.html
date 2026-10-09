@@ -1,0 +1,242 @@
+@if (!scope()) {
+<es-info-message mode="info" [message]="'SCOPES.EDITORIAL.NO_SCOPE' | translate"></es-info-message>
+} @else {
+<div class="scope-heading">
+  <i esIcon="fact_check"></i>
+  <span class="scope-name">{{ scope().definition?.displayName || scope().scopeId }}</span>
+  @if (isBulk()) {
+  <span class="target">{{
+    'SCOPES.EDITORIAL.BULK.TARGET' | translate : { count: bulkCount() }
+  }}</span>
+  } @else if (node()) {
+  <span class="target" [title]="node().title || node().name">{{
+    node().title || node().name
+  }}</span>
+  }
+</div>
+
+@if (isBulk()) {
+<ng-container *ngTemplateOutlet="editor"></ng-container>
+} @else {
+<mat-tab-group class="tabs" mat-stretch-tabs="false">
+  <mat-tab [label]="'SCOPES.EDITORIAL.TAB_EDIT' | translate">
+    <ng-container *ngTemplateOutlet="editor"></ng-container>
+  </mat-tab>
+  <mat-tab [label]="'SCOPES.EDITORIAL.TAB_HISTORY' | translate">
+    <ng-template matTabContent>
+      @if (nodeId()) {
+      <es-scope-history
+        [scopeId]="scope().scopeId"
+        [nodeId]="nodeId()"
+        [widgets]="widgets()"
+        [reload]="historyReload()"
+      ></es-scope-history>
+      }
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
+} }
+
+<ng-template #editor>
+  <div class="editor">
+    @if (loading()) {
+    <es-spinner></es-spinner>
+    } @else {
+    <div class="entry-state">
+      @if (isBulk()) {
+      <span class="state">{{ 'SCOPES.EDITORIAL.BULK.HINT' | translate }}</span>
+      } @else if (!assignment()) {
+      <span class="state">{{ 'SCOPES.EDITORIAL.STATE.NO_ENTRY' | translate }}</span>
+      } @else {
+      <span class="state" [class.published]="assignment().published">
+        <i [esIcon]="assignment().published ? 'visibility' : 'visibility_off'"></i>
+        {{
+          (assignment().published
+            ? 'SCOPES.EDITORIAL.STATE.PUBLISHED'
+            : 'SCOPES.EDITORIAL.STATE.NOT_PUBLISHED'
+          ) | translate
+        }}
+      </span>
+      @if (assignment().excluded) {
+      <span class="state excluded">
+        <i esIcon="block"></i>{{ 'SCOPES.EDITORIAL.STATE.EXCLUDED' | translate }}
+      </span>
+      } }
+    </div>
+
+    @if (publishFields().length || excludeFields().length) {
+    <div class="primary-actions">
+      @for (f of publishFields(); track f.field.id) {
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="applyMarking(f, 'published')"
+        [matTooltip]="f.label"
+      >
+        <i esIcon="check_circle"></i>
+        {{ 'SCOPES.EDITORIAL.PUBLISH' | translate }}
+      </button>
+      } @for (f of excludeFields(); track f.field.id) {
+      <button mat-stroked-button (click)="applyMarking(f, 'excluded')" [matTooltip]="f.label">
+        <i esIcon="block"></i>
+        {{ 'SCOPES.EDITORIAL.EXCLUDE' | translate }}
+      </button>
+      }
+    </div>
+    }
+
+    <section class="fields">
+      <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_STATUS' | translate }}</h3>
+      @for (f of statusFields(); track f.field.id) {
+      <div class="field" [class.touched]="isTouched(f.field.id)">
+        <div class="field-label">
+          {{ f.label }}
+          @if (f.field.visibility === 'public') {
+          <i
+            esIcon="public"
+            class="visibility"
+            [matTooltip]="'SCOPES.EDITORIAL.VISIBILITY_PUBLIC' | translate"
+          ></i>
+          }
+        </div>
+        @if (f.values.length) {
+        <mat-chip-listbox
+          [multiple]="f.multiple"
+          [value]="f.multiple ? getValues(f.field.id) : getValues(f.field.id)[0]"
+          (change)="onListboxChange(f, $event)"
+          [attr.aria-label]="f.label"
+        >
+          @for (value of f.values; track value.id) {
+          <mat-chip-option [value]="value.id">{{ value.caption }}</mat-chip-option>
+          }
+        </mat-chip-listbox>
+        } @else {
+        <mat-form-field class="free-values" subscriptSizing="dynamic">
+          <mat-chip-grid #grid [attr.aria-label]="f.label">
+            @for (value of getValues(f.field.id); track value) {
+            <mat-chip-row (removed)="removeFreeValue(f, value)">
+              {{ value }}
+              <button matChipRemove [attr.aria-label]="'SCOPES.EDITORIAL.REMOVE_VALUE' | translate">
+                <i esIcon="cancel"></i>
+              </button>
+            </mat-chip-row>
+            }
+            <input
+              [placeholder]="'SCOPES.EDITORIAL.FREE_VALUE_PLACEHOLDER' | translate"
+              [matChipInputFor]="grid"
+              (matChipInputTokenEnd)="addFreeValue(f, $event)"
+            />
+          </mat-chip-grid>
+        </mat-form-field>
+        }
+      </div>
+      }
+    </section>
+
+    @if (!isBulk() && replacingFields().length) {
+    <section class="fields replacing">
+      <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_REPLACING' | translate }}</h3>
+      <p class="section-description">
+        {{ 'SCOPES.EDITORIAL.SECTION_REPLACING_DESCRIPTION' | translate }}
+      </p>
+      @for (f of replacingFields(); track f.field.id) {
+      <div class="field" [class.touched]="isTouched(f.field.id)">
+        <mat-form-field subscriptSizing="dynamic" class="replacing-input">
+          <mat-label>{{ f.label }}</mat-label>
+          <textarea
+            matInput
+            cdkTextareaAutosize
+            [value]="getValues(f.field.id).join(', ')"
+            (input)="setReplacingValue(f.field.id, $any($event.target).value)"
+          ></textarea>
+        </mat-form-field>
+        <div class="original">
+          <span class="original-label">{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}</span>
+          <span class="original-value">{{ getOriginal(f.field.id).join(', ') || '–' }}</span>
+          @if (getValues(f.field.id).length) {
+          <button mat-button (click)="resetToOriginal(f.field.id)">
+            <i esIcon="undo"></i>
+            {{ 'SCOPES.EDITORIAL.RESET_TO_ORIGINAL' | translate }}
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </section>
+    }
+
+    <mat-form-field class="reason" subscriptSizing="dynamic">
+      <mat-label>{{ 'SCOPES.EDITORIAL.REASON' | translate }}</mat-label>
+      <input
+        matInput
+        [value]="reason()"
+        (input)="reason.set($any($event.target).value)"
+        maxlength="1000"
+      />
+    </mat-form-field>
+
+    @if (hintNotPublic()) {
+    <es-info-message
+      mode="warning"
+      [message]="'SCOPES.EDITORIAL.HINT_NOT_PUBLIC' | translate"
+    ></es-info-message>
+    } @if (hintConflict()) {
+    <es-info-message
+      mode="warning"
+      [message]="'SCOPES.EDITORIAL.HINT_EXCLUDED_AND_PUBLISHED' | translate"
+    ></es-info-message>
+    } @if (bulkStatus(); as status) {
+    <div class="bulk-status">
+      <div class="bulk-status-text">
+        {{
+          'SCOPES.EDITORIAL.BULK.STATE_' + status.state
+            | translate : { done: status.done ?? 0, total: status.total ?? 0 }
+        }}
+      </div>
+      <mat-progress-bar
+        [mode]="status.state === 'QUEUED' ? 'indeterminate' : 'determinate'"
+        [value]="bulkProgress(status)"
+      ></mat-progress-bar>
+      @if (status.failed?.length) {
+      <details class="bulk-failures">
+        <summary>
+          {{ 'SCOPES.EDITORIAL.BULK.FAILURES' | translate : { count: status.failed.length } }}
+        </summary>
+        <ul>
+          @for (failure of status.failed; track failure.nodeId) {
+          <li>
+            <code>{{ failure.nodeId }}</code
+            >: {{ failure.message }}
+          </li>
+          }
+        </ul>
+      </details>
+      }
+    </div>
+    }
+
+    <div class="actions">
+      @if (isBulk() || assignment()) {
+      <button mat-button color="warn" (click)="deleteEntries()" [disabled]="saving()">
+        <i esIcon="delete"></i>
+        {{
+          (isBulk() ? 'SCOPES.EDITORIAL.BULK.DELETE' : 'SCOPES.EDITORIAL.DELETE.ACTION') | translate
+        }}
+      </button>
+      }
+      <span class="spacer"></span>
+      <button mat-button (click)="discard()" [disabled]="saving() || !hasChanges()">
+        {{ 'DISCARD' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="save()"
+        [disabled]="saving() || !hasChanges()"
+      >
+        {{ (isBulk() ? 'SCOPES.EDITORIAL.BULK.APPLY' : 'SAVE') | translate }}
+      </button>
+    </div>
+    }
+  </div>
+</ng-template>

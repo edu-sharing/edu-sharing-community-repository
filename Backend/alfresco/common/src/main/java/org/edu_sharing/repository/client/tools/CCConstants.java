@@ -144,6 +144,11 @@ public class CCConstants {
     public final static String SESSION_2FA_PENDING_USERNAME = "SESSION_2FA_PENDING_USERNAME";
 
     /**
+     * scope selected via the scope switcher (authority name of the scope group)
+     */
+    public final static String SESSION_SCOPE_ACTIVE = "SESSION_SCOPE_ACTIVE";
+
+    /**
      * access on nodes that was validated by lms
      */
     public final static String AUTH_SINGLE_USE_NODEIDS = "AUTH_SINGLE_USE_NODEIDS";
@@ -558,6 +563,37 @@ public class CCConstants {
     public final static String CCM_PROP_COLLECTION_PROPOSAL_TARGET = "{http://www.campuscontent.de/model/1.0}collection_proposal_target";
     public final static String CCM_PROP_COLLECTION_PROPOSAL_STATUS = "{http://www.campuscontent.de/model/1.0}collection_proposal_status";
     public final static String CCM_PROP_COLLECTION_PROPOSAL_COMMENT = "{http://www.campuscontent.de/model/1.0}collection_proposal_comment";
+
+    /**
+     * scopes: definition stored at the scope group (groupType = GROUP_TYPE_SCOPE)
+     */
+    public final static String CCM_ASPECT_SCOPE_GROUP = "{http://www.campuscontent.de/model/1.0}scopeGroup";
+    // json list of allowed scope properties ({id, visibility, replaces})
+    public final static String CCM_PROP_SCOPE_FIELDS = "{http://www.campuscontent.de/model/1.0}scope_fields";
+    // mds providing widgets, valuespaces and i18n for the scope properties
+    public final static String CCM_PROP_SCOPE_MDS = "{http://www.campuscontent.de/model/1.0}scope_mds";
+    // candidate (base) queries, maintained by the org admins. multi value: one json query {mds, query, criteria} per
+    // value, the values are OR-combined
+    public final static String CCM_PROP_SCOPE_BASE_QUERY = "{http://www.campuscontent.de/model/1.0}scope_base_query";
+    // version of the base queries, increased on every change (referenced by the history)
+    public final static String CCM_PROP_SCOPE_BASE_QUERY_VERSION = "{http://www.campuscontent.de/model/1.0}scope_base_query_version";
+    // shared folder of the scope group (upload target)
+    public final static String CCM_PROP_SCOPE_FOLDER = "{http://www.campuscontent.de/model/1.0}scope_folder";
+
+    /**
+     * scopes: editorial properties, only stored inside scope assignments (mongo), never on alfresco nodes
+     */
+    public final static String CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES = "{http://www.campuscontent.de/model/1.0}editorialScopeProperties";
+    public final static String CCM_PROP_EDITORIAL_INVENTORY = "{http://www.campuscontent.de/model/1.0}editorial_inventory";
+    public final static String CCM_PROP_EDITORIAL_RELEASE = "{http://www.campuscontent.de/model/1.0}editorial_release";
+    public final static String CCM_PROP_EDITORIAL_RECOMMENDATION = "{http://www.campuscontent.de/model/1.0}editorial_recommendation";
+    public final static String CCM_PROP_EDITORIAL_REVIEW_FORMAL = "{http://www.campuscontent.de/model/1.0}editorial_review_formal";
+    public final static String CCM_PROP_EDITORIAL_REVIEW_SUBJECT = "{http://www.campuscontent.de/model/1.0}editorial_review_subject";
+    public final static String CCM_PROP_EDITORIAL_INTERNAL = "{http://www.campuscontent.de/model/1.0}editorial_internal";
+
+    // scope group a collection is assigned to (single value, not inherited by its content)
+    // not named "collection_scope" to avoid confusion with the existing ccm:collectionscope
+    public final static String CCM_PROP_COLLECTION_SCOPE_GROUP = "{http://www.campuscontent.de/model/1.0}collection_scope_group";
 
     public final static String CCM_PROP_MEDIACENTER_ID = "{http://www.campuscontent.de/model/1.0}mediacenterId";
     public final static String CCM_PROP_MEDIACENTER_DISTRICT_ABBREVIATION = "{http://www.campuscontent.de/model/1.0}mediacenterDistrictAbbreviation";
@@ -1030,6 +1066,9 @@ public class CCConstants {
     public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_QA = "TOOLPERMISSION_MANAGE_QA";
 
     public final static String CCM_VALUE_TOOLPERMISSION_MANAGE_CONTRIBUTORS = "TOOLPERMISSION_MANAGE_CONTRIBUTORS";
+
+    // scopes: set/delete scope assignments (single and bulk)
+    public final static String CCM_VALUE_TOOLPERMISSION_SCOPE_WRITE = "TOOLPERMISSION_SCOPE_WRITE";
 
     public final static String CCM_VALUE_TOOLPERMISSION_VIDEO_AUDIO_CUT = "TOOLPERMISSION_VIDEO_AUDIO_CUT";
 
@@ -2434,6 +2473,10 @@ public class CCConstants {
 	public static final String GROUP_TYPE_SCHOOL_NONE = "SCHOOL_NONE";
 
     public static final String EDITORIAL_GROUP_TYPE = "EDITORIAL";
+    /**
+     * group type of a scope group (owns exactly one scope, see ccm:scopeGroup)
+     */
+    public static final String GROUP_TYPE_SCOPE = "SCOPE";
     public static final String COLLECTIONTYPE_DEFAULT = "default";
     public static final String COLLECTIONTYPE_EDITORIAL = "EDITORIAL";
     public static final String COLLECTIONTYPE_MEDIA_CENTER = "MEDIA_CENTER";

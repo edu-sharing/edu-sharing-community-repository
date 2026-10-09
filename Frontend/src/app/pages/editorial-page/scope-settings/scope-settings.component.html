@@ -1,0 +1,41 @@
+<div class="scope-settings">
+  <h2>
+    {{
+      'EDITORIAL.SCOPE.BASE_QUERY.TITLE' | translate : { scope: scope()?.definition?.displayName }
+    }}
+  </h2>
+  <es-info-message mode="info">
+    <div class="message">{{ 'EDITORIAL.SCOPE.BASE_QUERY.INFO' | translate }}</div>
+  </es-info-message>
+  <div class="version">
+    {{ 'EDITORIAL.SCOPE.BASE_QUERY.VERSION' | translate : { version: version() } }}
+  </div>
+  <ul class="queries">
+    @for (query of queries(); track $index) {
+    <li class="query">
+      <i esIcon="search"></i>
+      <div class="criteria">
+        @for (line of describe(query); track line) {
+        <span>{{ line }}</span>
+        } @empty {
+        <span class="empty">{{ 'EDITORIAL.SCOPE.BASE_QUERY.NO_CRITERIA' | translate }}</span>
+        }
+      </div>
+      <button mat-button color="primary" [disabled]="saving()" (click)="edit($index)">
+        <i esIcon="edit"></i>
+        {{ 'EDITORIAL.SCOPE.BASE_QUERY.EDIT' | translate }}
+      </button>
+      <button mat-button [disabled]="saving()" (click)="remove($index)">
+        <i esIcon="delete"></i>
+        {{ 'EDITORIAL.SCOPE.BASE_QUERY.REMOVE' | translate }}
+      </button>
+    </li>
+    } @empty {
+    <li class="empty">{{ 'EDITORIAL.SCOPE.BASE_QUERY.EMPTY' | translate }}</li>
+    }
+  </ul>
+  <button mat-flat-button color="primary" [disabled]="saving()" (click)="edit('new')">
+    <i esIcon="add"></i>
+    {{ 'EDITORIAL.SCOPE.BASE_QUERY.ADD' | translate }}
+  </button>
+</div>

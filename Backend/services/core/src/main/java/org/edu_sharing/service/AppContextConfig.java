@@ -29,6 +29,7 @@ import org.edu_sharing.service.relations.NodeRelationTraceService;
 import org.edu_sharing.service.relations.RelationService;
 import org.edu_sharing.service.relations.RelationServiceAdapter;
 import org.edu_sharing.service.rendering.RenderingService;
+import org.edu_sharing.service.scope.ScopeService;
 import org.edu_sharing.service.search.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,7 @@ public class AppContextConfig {
                 .defineBean(RenderingService.class, RenderingService.class)
                 .defineBean(CollectionService.class, CollectionService.class)
                 .defineBean(ContributorService.class, ContributorServiceAdapter.class)
+                .defineBean(ScopeService.class, "scopeServiceAdapter")
                 .defineBean(AuthenticationTool.class, AuthenticationToolAPI.class)
                 .done()
 
@@ -70,6 +72,7 @@ public class AppContextConfig {
                 .defineBean(OrganizationService.class, OrganizationService.class)
                 .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
                 .defineBean(ContributorService.class, "contributorServiceImpl")
+                .defineBean(ScopeService.class, "scopeService")
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.ElasticSearchProvider")
@@ -88,6 +91,7 @@ public class AppContextConfig {
                 .defineBean(OrganizationService.class, OrganizationService.class)
                 .defineBean(ArchiveService.class, ArchiveServiceImpl.class)
                 .defineBean(ContributorService.class, "contributorServiceImpl")
+                .defineBean(ScopeService.class, "scopeService")
                 .done()
 
                 .addAppContext("org.edu_sharing.service.provider.BrockhausProvider")

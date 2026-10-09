@@ -1,0 +1,5 @@
+@for (value of values(); track value) {
+<span class="value" [attr.title]="caption() + ': ' + value">{{ value }}</span>
+} @empty {
+<span class="empty" aria-hidden="true">–</span>
+}

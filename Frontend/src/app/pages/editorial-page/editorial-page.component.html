@@ -151,13 +151,19 @@
       <es-assignment-submission></es-assignment-submission>
       } @case ('submitAssignment') {
       <es-submit-assignment></es-submit-assignment>
+      } @case ('scopeSettings') {
+      <es-scope-settings></es-scope-settings>
       } @default {
       <span> Component "{{ component }}" not implemented </span>
       } } } @if ((mainComponent$ | async) === null) {
       <!-- Scroll region below the header: the tab bar sticks to its top while the option row
         (filter button) and the list scroll beneath it. -->
       <div class="content-scroll">
-        @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
+        @if (isScopeMode() && !scopeAvailable()) {
+        <es-info-message mode="info" class="scope-unavailable">
+          <div class="message">{{ 'EDITORIAL.SCOPE.NO_ACTIVE_SCOPE' | translate }}</div>
+        </es-info-message>
+        } @else { @if ((editorialPageService.observeTabs() | async)?.length) { @if ((params$ |
         async).primaryMode !== 'suggestions') {
         <mat-tab-group
           [selectedIndex]="tabSelection$ | async"
@@ -172,8 +178,35 @@
           </mat-tab>
           }
         </mat-tab-group>
-        } } @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode ===
-        'share' || mode === 'assignment' || mode === 'suggestions' ) {
+        } } @if ((params$ | async)?.primaryMode; as mode) { @if (mode === 'scope') {
+        <div class="scope-toolbar">
+          <span class="scope-name">
+            <i esIcon="rule"></i>
+            {{ scopesService.activeScope()?.definition?.displayName }}
+          </span>
+          <button
+            mat-button
+            color="primary"
+            data-test="button-scope-edit-all"
+            [disabled]="!scopeHitCount()"
+            (click)="editAllScopeHits()"
+          >
+            <i esIcon="checklist"></i>
+            {{ 'EDITORIAL.SCOPE.EDIT_ALL' | translate : { count: scopeHitCount() } }}
+          </button>
+          @if (scopesService.isOrgAdmin()) {
+          <button
+            mat-button
+            data-test="button-scope-settings"
+            (click)="goToComponent('scopeSettings')"
+          >
+            <i esIcon="manage_search"></i>
+            {{ 'EDITORIAL.SCOPE.BASE_QUERY.OPEN' | translate }}
+          </button>
+          }
+        </div>
+        } @if ( mode === 'activity' || mode === 'share' || mode === 'assignment' || mode ===
+        'suggestions' || mode === 'scope' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"
           [dataSource]="dataSource"
@@ -196,10 +229,11 @@
             </div>
           </ng-template>
         </es-node-entries-wrapper>
-        } }
+        } } }
       </div>
       @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode === 'share'
-      || mode === 'assignment' || mode === 'suggestions' ) {
+      || mode === 'assignment' || mode === 'suggestions' || (mode === 'scope' && scopeAvailable()) )
+      {
       <!-- Full-width selection bar pinned at the bottom of the card (outside the scroll region);
         mirrors the search-page selection layout. Node actions render in #selectionActionbarRef. -->
       <div
@@ -253,6 +287,13 @@
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+<!-- cell of the scope status columns (registered as custom field rendering, see SCOPE_COLUMNS) -->
+<ng-template #scopeStatusTemplateRef let-node="node" let-item="item">
+  <es-scope-status-cell
+    [node]="node"
+    [property]="getScopeColumnProperty(item)"
+  ></es-scope-status-cell>
+</ng-template>
 @if ((isMobile$ | async) === true && editorialSidebarService.sidebarOpened()) {
 <es-editorial-sidebar
   [primaryMode]="$safeNavigationMigration((params$ | async)?.primaryMode)"

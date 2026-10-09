@@ -1,0 +1,121 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.scope-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    .scope-name {
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    .target {
+        color: var(--textLight);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 12px;
+}
+.entry-state {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    .state {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: var(--textLight);
+        &.published {
+            color: var(--colorStatusPositiveText);
+        }
+        &.excluded {
+            color: var(--colorStatusNegative);
+        }
+    }
+}
+.primary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.section-title {
+    margin: 0;
+    font-size: var(--fontSizeSmall);
+    text-transform: uppercase;
+    color: var(--textLight);
+}
+.section-description {
+    margin: 0;
+    color: var(--textLight);
+    font-size: var(--fontSizeXSmall);
+}
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 8px;
+    border-left: 3px solid transparent;
+    &.touched {
+        border-left-color: var(--primary);
+    }
+    .field-label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: bold;
+        .visibility {
+            font-size: 16px;
+            color: var(--textLight);
+        }
+    }
+}
+.free-values,
+.replacing-input,
+.reason {
+    width: 100%;
+}
+.original {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
+    .original-label {
+        font-weight: bold;
+    }
+}
+.bulk-status {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    .bulk-failures ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+}
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    .spacer {
+        flex: 1;
+    }
+}

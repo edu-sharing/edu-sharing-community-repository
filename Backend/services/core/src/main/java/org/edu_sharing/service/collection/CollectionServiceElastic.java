@@ -40,6 +40,8 @@ import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.repository.server.appcontext.AppContextScope;
 import org.edu_sharing.repository.server.appcontext.ApplicationInfoContextHolder;
 import org.edu_sharing.repository.server.appcontext.UseLocalAppContext;
+import org.edu_sharing.service.scope.ScopeContextResolver;
+import org.edu_sharing.service.scope.ScopeRole;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.I18nServer;
@@ -108,6 +110,7 @@ public class CollectionServiceElastic implements CollectionService {
     private final org.alfresco.service.cmr.security.AuthorityService authorityService;
     private final AuthenticationService authenticationService;
     private final AuthorityService localAuthorityService;
+    private final ScopeContextResolver scopeContextResolver;
     private MCAlfrescoAPIClient client;
 
     public CollectionServiceElastic(SearchServiceElastic searchServiceElastic,
@@ -129,7 +132,8 @@ public class CollectionServiceElastic implements CollectionService {
                                     org.alfresco.service.cmr.security.AuthorityService authorityService,
                                     AuthenticationService authenticationService,
                                     @UseLocalAppContext
-                                    AuthorityService localAuthorityService) {
+                                    AuthorityService localAuthorityService,
+                                    ScopeContextResolver scopeContextResolver) {
         this.searchServiceElastic = searchServiceElastic;
 
         this.repositoryCache = repositoryCache;
@@ -149,6 +153,7 @@ public class CollectionServiceElastic implements CollectionService {
         this.authorityService = authorityService;
         this.authenticationService = authenticationService;
         this.localAuthorityService = localAuthorityService;
+        this.scopeContextResolver = scopeContextResolver;
 
         try {
             this.client = new MCAlfrescoAPIClient();
@@ -456,6 +461,10 @@ public class CollectionServiceElastic implements CollectionService {
             }
 
             Map<String, Object> props = asProps(collection);
+            // collections created by an editor inside the active scope belong to that scope (not inherited by the content)
+            scopeContextResolver.resolve()
+                    .filter(scope -> scope.getRole() == ScopeRole.EDITOR)
+                    .ifPresent(scope -> props.put(CCConstants.CCM_PROP_COLLECTION_SCOPE_GROUP, scope.getScopeId()));
             return AuthenticationUtil.runAsSystem(() -> {
                 try {
                     new DuplicateFinder().transformToSafeName(client.getChildren(parentIdLocal), props);

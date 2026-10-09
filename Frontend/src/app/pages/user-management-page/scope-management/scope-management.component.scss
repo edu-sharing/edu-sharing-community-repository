@@ -1,0 +1,160 @@
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
+
+:host {
+    display: block;
+}
+.scope-management {
+    padding: 16px;
+}
+.toolbar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+    .info {
+        flex: 1;
+    }
+}
+.list {
+    display: flex;
+    flex-direction: column;
+}
+.list-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 80px 120px 100px;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--borderLight);
+    &.header {
+        font-weight: bold;
+        min-height: 40px;
+    }
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+.scope-id {
+    font-family: monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.empty {
+    padding: 16px 8px;
+    color: var(--textLight);
+}
+.delete-info {
+    display: block;
+    margin-top: 16px;
+}
+.editor {
+    h2 .scope-id {
+        font-size: 70%;
+        margin-left: 8px;
+        font-weight: normal;
+    }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        mat-form-field {
+            min-width: 260px;
+        }
+    }
+    .hint {
+        color: var(--textLight);
+    }
+}
+.fields-editor {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 2fr;
+    gap: 24px;
+    align-items: start;
+}
+.property-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .property-filter {
+        width: 100%;
+    }
+}
+.properties-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+.property-label {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+.property-id {
+    font-size: 75%;
+    color: var(--textLight);
+    opacity: 0.8;
+}
+@mixin fieldRow() {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--borderLight);
+    .handle {
+        cursor: move;
+        opacity: 0.3;
+        display: flex;
+        align-items: center;
+    }
+    .field-label {
+        flex: 1;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+    }
+    .visibility {
+        width: 140px;
+    }
+    .field-actions {
+        display: flex;
+        margin-left: auto;
+    }
+}
+.field-row {
+    @include fieldRow();
+}
+.cdk-drag-preview {
+    @include fieldRow();
+    @include mixins.materialShadowSmall();
+    background: var(--cardLightBackground);
+    padding: 8px;
+}
+.cdk-drag-placeholder {
+    opacity: 0.3;
+}
+.selected-fields.cdk-drop-list-dragging .field-row:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+@media screen and (max-width: 900px) {
+    .fields-editor {
+        grid-template-columns: 1fr;
+    }
+    .list-row {
+        grid-template-columns: 1fr 1fr 60px;
+        > :nth-child(3),
+        > :nth-child(4),
+        > :nth-child(5) {
+            display: none;
+        }
+    }
+}

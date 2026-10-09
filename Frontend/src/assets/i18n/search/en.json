@@ -92,6 +92,15 @@
     },
     "ACTION": {
       "APPLYFILTER_DESCRIPTION": "Use the filters to get your result. You can then apply the given filter configuration."
+    },
+    "SCOPE_BASE_QUERY": {
+      "REGION": "Edit base query",
+      "TITLE": "Edit query of the base query of {{scope}}",
+      "TITLE_NEW": "New query for the base query of {{scope}}",
+      "HINT": "The current search criteria will be used. All hits are shown here for now; the editorial office only shows public content.",
+      "SAVE": "Save as base query",
+      "SAVED": "Base query saved",
+      "SCOPE_NOT_ACTIVE": "The base query can only be edited in the active editorial office."
     }
   }
 }
