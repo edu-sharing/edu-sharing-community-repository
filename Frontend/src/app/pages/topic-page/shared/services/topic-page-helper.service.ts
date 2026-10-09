@@ -101,7 +101,8 @@ export class TopicPageHelperService {
 
     /**
      * Show the node in the editorial sidebar's preview, or close the preview if it shows the node.
-     * With a node list, the list's selection drives the sidebar, as on the search page.
+     * With a node list, the list's selection drives the sidebar, as on the search page, and the
+     * preview steps through that list.
      */
     togglePreview(node: Node, list?: NodeEntriesWrapperComponent<Node>): void {
         // the preview is rendered outside of the topic page; its topic links load in this one
@@ -115,6 +116,8 @@ export class TopicPageHelperService {
             return;
         }
         const previewConfig = { customOptions: this.previewCustomOptions } as PreviewConfig;
+        // the preview steps through the list it was opened from; a single node has no neighbours
+        this.editorialSidebarService.setPreviewList(list ?? null);
         if (list) {
             this.editorialSidebarService.handleSelect(
                 list,
