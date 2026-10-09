@@ -1,33 +1,43 @@
-@use '../../topic-page-variables' as topicPageVars;
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
+// Same card as the search page's filters, standing beside the page card
 :host {
     display: flex;
-    border-right: 1px solid var(--mat-sidenav-container-divider-color);
+    flex-shrink: 0;
+    width: 319px;
 }
 
 .filter-bar-container {
-    width: 300px;
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    margin: 10px;
-    border-radius: 10px;
-    &[hidden] {
-        display: none;
-    }
+    margin: var(--roundedContainerMargin);
+    margin-right: 4px;
+    background-color: var(--roundedContainerBackground);
+    border-radius: var(--borderRadiusCards);
+    @include mixins.materialShadow();
 }
 
 .filter-bar-heading {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     padding: 0 20px;
-    height: 60px;
-    border-bottom: 1px solid var(--mat-divider-color);
+    height: vars.$secondaryBarHeight;
+    background-color: var(--roundedContainerBackground);
+    @include mixins.materialShadowBottom();
+    // paint the shadow above the scrolled filter body
+    position: relative;
+    z-index: 1;
 
     .filter-bar-title {
         flex-grow: 1;
-        font-size: 130%;
+        font-size: 140%;
         margin: 0;
+        font-weight: 400;
     }
     .filter-bar-reset-button {
         flex-shrink: 0;
@@ -38,25 +48,33 @@
     .filter-bar-close-button {
         margin-right: -10px;
         flex-shrink: 0;
-        height: 40px;
-        width: 40px;
+        // Resize via the MDC token so the icon stays centered
+        --mdc-icon-button-state-layer-size: 40px;
     }
 }
 
 .filter-bar-body {
     flex-grow: 1;
+    min-height: 0;
     overflow: auto;
     --container-padding: 20px;
     padding: var(--container-padding);
-}
-
-.filters-dialog-content {
-    flex-grow: 1;
+    @include mixins.materialScrollbarLight();
 }
 
 // fix form-field of first filter is cut off
 .filter-bar-editor-wrapper ::ng-deep {
     .view-wrapper {
         padding-top: 8px;
+    }
+}
+
+// On mobile the page card is full-bleed, so the filters drop their frame as well
+@media screen and (max-width: vars.$mobileTabSwitchWidth) {
+    .filter-bar-container {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border-right: 1px solid var(--mat-sidenav-container-divider-color);
     }
 }

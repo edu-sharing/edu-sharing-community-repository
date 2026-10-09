@@ -5,19 +5,27 @@
   <es-spinner></es-spinner>
   }
 </div>
-} @if (templateMode()) {
-<es-info-message mode="info" class="template-mode">
-  {{
-    i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
-      | translate
-  }}
-  <button mat-flat-button color="primary" (click)="leaveTemplateMode()">
-    {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
-  </button>
-</es-info-message>
+}
+<!-- beside the page card, like the search page's filters -->
+@if (filterPanelOpen() && !pageConfigCheckFailed()) {
+<es-topic-page-filters-sidebar
+  [currentValues]="searchFilterValues()"
+  (closeFilterbar)="filterPanelOpen.set(false)"
+  (currentValuesChange)="applySearchFilters($event)"
+></es-topic-page-filters-sidebar>
 }
 <main>
-  @if (initialLoadSuccessfully() && showBreadcrumb()) {
+  @if (templateMode()) {
+  <es-info-message mode="info" class="template-mode">
+    {{
+      i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
+        | translate
+    }}
+    <button mat-flat-button color="primary" (click)="leaveTemplateMode()">
+      {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
+    </button>
+  </es-info-message>
+  } @if (initialLoadSuccessfully() && showBreadcrumb()) {
   <!-- BREADCRUMBS -->
   @if (parentEntries()) {
   <div class="template-breadcrumb">
@@ -40,15 +48,8 @@
   </div>
   } } @if (!pageConfigCheckFailed()) {
   <div class="topic-page-outer-wrapper">
-    @if (filterPanelOpen()) {
-    <es-topic-page-filters-sidebar
-      [currentValues]="searchFilterValues()"
-      (closeFilterbar)="filterPanelOpen.set(false)"
-      (currentValuesChange)="applySearchFilters($event)"
-    ></es-topic-page-filters-sidebar>
-    }
-    <!-- The card's scroll region: the breadcrumb and hints above and the filters beside it stay in
-      place while the header and page content scroll. -->
+    <!-- The card's scroll region: the breadcrumb and hints above stay in place while the header and
+      page content scroll. -->
     <div class="topic-page-wrapper template-scroll" #scrollContainerRef>
       @if (initialLoadSuccessfully()) {
       <!-- TOPIC HERO HEADER -->

@@ -12,16 +12,11 @@
     // overwrite border radius for template page
     --mat-fab-small-container-shape: 4px;
 
-    // Rounded card of fixed height: the breadcrumb and hints stay on top while .template-scroll
-    // scrolls the page content internally.
-    margin: var(--roundedContainerMargin);
-    border-radius: var(--borderRadiusCards);
-    background: topicPageVars.$surface-container-lowest;
-    @include topicPageVars.materialShadow();
-    @include topicPageVars.roundedContainerStaticScroll(
-        topicPageVars.$mobileTabSwitchWidth,
-        topicPageVars.$mobileTabNavHeight
-    );
+    // A row of the page card (`main`) and the panels standing beside it: the filters on the left,
+    // the element preview on the right. Fills the viewport below the main nav.
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - var(--mainnavCurrentHeight));
 }
 
 // Embedded as web component, the page fills its container without the app's card frame and main
@@ -32,52 +27,46 @@
     --mainnavCurrentHeight: 0px;
 }
 
-// With `preview-panel`, the preview stands beside the page card as on the app's topic page: the host
-// lays out card and preview in a row, and `main` becomes the card.
-:host(.embedded.with-preview-panel) {
-    flex-direction: row;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-
-    > main {
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        border-radius: var(--borderRadiusCards);
-        background: topicPageVars.$surface-container-lowest;
-        @include topicPageVars.materialShadow();
+// The embedding page provides the outer spacing of the preview column, which therefore runs the
+// full height of the page; only the gap holding the resize handle stays.
+:host(.embedded.with-preview-panel) ::ng-deep es-preview-sidebar-wrapper {
+    .preview-resizable {
+        align-self: stretch;
     }
-
-    // the preview column runs the full height of the page, like the app's sidebar column; the
-    // embedding page provides the outer spacing, only the gap holding the resize handle stays
-    ::ng-deep es-preview-sidebar-wrapper {
-        .preview-resizable {
-            align-self: stretch;
-        }
-        .preview-panel {
-            margin-top: 0;
-            margin-right: 0;
-            margin-bottom: 0;
-        }
+    .preview-panel {
+        margin-top: 0;
+        margin-right: 0;
+        margin-bottom: 0;
     }
+}
+
+// Rounded card of fixed height: the breadcrumb and hints stay on top while .template-scroll
+// scrolls the page content internally.
+main {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: var(--roundedContainerMargin);
+    border-radius: var(--borderRadiusCards);
+    background: topicPageVars.$surface-container-lowest;
+    @include topicPageVars.materialShadow();
 }
 
 // On mobile, drop the frame so the page uses the full width (like the other pages), leaving room
 // for the fixed mobile bottom nav.
 @media screen and (max-width: topicPageVars.$mobileTabSwitchWidth) {
     :host {
-        margin: 0 0 topicPageVars.$mobileTabNavHeight;
+        height: calc(100vh - var(--mainnavCurrentHeight) - #{topicPageVars.$mobileTabNavHeight});
+        margin-bottom: topicPageVars.$mobileTabNavHeight;
+    }
+    main {
+        margin: 0;
         border-radius: 0;
         box-shadow: none;
     }
-}
-
-main {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
 }
 
 .template-mode {
