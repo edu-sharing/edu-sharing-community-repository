@@ -966,6 +966,20 @@
     "NO_MATCHING_VALUES": "Keine passenden Werte.",
     "NO_ARBITRARY_VALUES_NOTICE": "Für dieses Feld können Werte nicht frei gewählt werden. Bitte wählen Sie Werte aus der Liste.",
     "DELETE_KEY_NOTICE": "Löschen mit Entf-Taste.",
+    "COLLECTION_TREE": {
+      "WITHIN_ROOT": "Nur in „{{ root }}“",
+      "NO_WRITE_PERMISSION": "Keine Schreibrechte für diese Sammlung",
+      "WRITE_REQUIRED": "Nur Sammlungen mit Schreibrechten können ausgewählt werden.",
+      "INCLUDED_BY_PARENT": "Bereits über eine übergeordnete Sammlung enthalten.",
+      "LOAD_MORE": "Weitere laden ({{ loaded }} von {{ total }})",
+      "EMPTY": "Keine Sammlungen vorhanden.",
+      "NO_RESULTS": "Keine passenden Sammlungen gefunden.",
+      "ERROR": "Sammlungen konnten nicht geladen werden.",
+      "RETRY": "Erneut versuchen",
+      "NOT_ACCESSIBLE": "Sammlung nicht verfügbar oder keine Leserechte",
+      "ROOT_FALLBACK": "Die Start-Sammlung ist nicht verfügbar, daher werden andere Sammlungen angezeigt.",
+      "RESULTS_COUNT": "{{ count }} Sammlungen gefunden"
+    },
     "SHOW_EXTENDED": "Erweitere Infos anzeigen",
     "AI": {
       "GENERATE_ALL_TITLE": "Metadaten generieren",

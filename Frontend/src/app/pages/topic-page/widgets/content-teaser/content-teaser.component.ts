@@ -32,6 +32,7 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-collection-tree/collection-tree-config';
 import { SearchFilter } from '../../../search-page/search-page-results.component';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
 import { ScrollHelperService } from '../../shared/services/scroll-helper.service';
@@ -284,12 +285,13 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
                 [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
             };
         }
-        // set both filters and query string
+        // set both filters and query string; the collection filter starts at the page's collection
         const contentTeaserExtra: NavigationExtras = {
             queryParams: {
                 filters: propertyFilters,
                 q: this.searchText,
                 sort: this.sort(),
+                [COLLECTION_TREE_ROOT_QUERY_PARAM]: this.contextNodeId,
             },
         };
         this.windowRef = this.topicPageHelperService.openApplyFilterLink(contentTeaserExtra);
