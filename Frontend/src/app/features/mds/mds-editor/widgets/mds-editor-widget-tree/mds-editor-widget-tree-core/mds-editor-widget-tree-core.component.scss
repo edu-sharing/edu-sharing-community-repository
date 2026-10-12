@@ -135,6 +135,11 @@
             padding-inline-start: 30px;
         }
     }
+    // rows with children grow with captions that span several lines
+    .mat-nested-tree-node > .item:not(.item-tree) {
+        height: auto;
+        min-height: var(--mat-tree-node-min-height);
+    }
 }
 
 [hidden] {
