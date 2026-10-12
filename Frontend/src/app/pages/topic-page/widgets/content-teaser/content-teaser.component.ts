@@ -32,7 +32,7 @@ import {
     Values,
 } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-collection-tree/collection-tree-config';
+import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { SearchFilter } from '../../../search-page/search-page-results.component';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
 import { ScrollHelperService } from '../../shared/services/scroll-helper.service';

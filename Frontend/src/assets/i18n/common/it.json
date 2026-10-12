@@ -789,17 +789,7 @@
     "DELETE_KEY_NOTICE": "Cancellare con il tasto Canc",
     "COLLECTION_TREE": {
       "WITHIN_ROOT": "Solo in «{{ root }}»",
-      "NO_WRITE_PERMISSION": "Nessun permesso di scrittura per questa raccolta",
-      "WRITE_REQUIRED": "Si possono selezionare solo raccolte con permesso di scrittura.",
-      "INCLUDED_BY_PARENT": "Già inclusa tramite una raccolta superiore.",
-      "LOAD_MORE": "Carica altre ({{ loaded }} di {{ total }})",
-      "EMPTY": "Nessuna raccolta disponibile.",
-      "NO_RESULTS": "Nessuna raccolta corrispondente trovata.",
-      "ERROR": "Impossibile caricare le raccolte.",
-      "RETRY": "Riprova",
-      "NOT_ACCESSIBLE": "Raccolta non disponibile o non leggibile",
-      "ROOT_FALLBACK": "La raccolta iniziale non è disponibile, vengono mostrate altre raccolte.",
-      "RESULTS_COUNT": "{{ count }} raccolte trovate"
+      "NOT_ACCESSIBLE": "Raccolta non disponibile o non leggibile"
     },
     "SHOW_EXTENDED_FALSE": "nascondere le informazioni aggiuntive",
     "SUGGEST_VALUE_SEND": "suggerire",

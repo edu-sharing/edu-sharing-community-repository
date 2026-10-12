@@ -13,7 +13,10 @@ export class TreeNode {
     isChecked?: boolean;
     isIndeterminate?: boolean;
     isHidden?: boolean;
-    type?: null | 'suggestionInput';
+    /** Whether the node has children that are loaded once it is expanded. */
+    hasChildren?: boolean;
+    /** `group` is a heading that cannot be selected, `more` loads further siblings. */
+    type?: null | 'suggestionInput' | 'group' | 'more';
 }
 
 export type MdsWidgetTree = MdsWidget & {
@@ -79,6 +82,36 @@ export class Tree {
         return this.nodesMap[id];
     }
 
+    /**
+     * Adds a node below `parent`, or as a root node. An id may be added more than once, e.g. for
+     * a value listed in several groups; `findById` returns the node added first.
+     */
+    addNode(
+        node: Pick<TreeNode, 'id' | 'caption'> &
+            Partial<Pick<TreeNode, 'hasChildren' | 'isChecked' | 'type'>>,
+        parent?: TreeNode,
+    ): TreeNode {
+        const treeNode: TreeNode = {
+            alternativeIds: null,
+            uid: `app-tree-node-${nextUniqueId++}`,
+            isHidden: false,
+            ...node,
+        };
+        this.pushNode(treeNode, parent);
+        return treeNode;
+    }
+
+    removeNode(node: TreeNode): void {
+        const siblings = node.parent?.children ?? this.rootNodes;
+        const index = siblings.indexOf(node);
+        if (index >= 0) {
+            siblings.splice(index, 1);
+        }
+        if (this.nodesMap[node.id] === node) {
+            delete this.nodesMap[node.id];
+        }
+    }
+
     find(
         predicate: (node: TreeNode) => boolean,
         rootNodes: TreeNode[] = this.rootNodes,
@@ -135,7 +168,9 @@ export class Tree {
     }
 
     private pushNode(node: TreeNode, parent?: TreeNode): void {
-        this.nodesMap[node.id] = node;
+        if (!this.nodesMap[node.id]) {
+            this.nodesMap[node.id] = node;
+        }
         if (node.alternativeIds?.length > 0) {
             // FIXME: we're currently only supporting one alternative id but not multiple
             this.nodesMapAlternativeIds[node.alternativeIds[0]] = node;
@@ -156,7 +191,9 @@ export class Tree {
         let result = node.caption;
         let parent = node.parent;
         while (parent) {
-            result = `${parent.caption} / ${result}`;
+            if (parent.type !== 'group') {
+                result = `${parent.caption} / ${result}`;
+            }
             parent = parent.parent;
         }
         return result;

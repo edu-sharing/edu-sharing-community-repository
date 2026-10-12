@@ -35,7 +35,6 @@ import { UserModifiableValue, UserModifiableValuesService } from './user-modifia
 import { Widget } from '../../features/mds/mds-editor/mds-editor-instance.service';
 import { Sort } from '@angular/material/sort';
 import { filterMetadataSets, filterRepositories } from '../../util/repository-filter';
-import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../features/mds/mds-editor/widgets/mds-editor-widget-collection-tree/collection-tree-config';
 
 export class SearchRequestParams {
     constructor(
@@ -82,8 +81,6 @@ export class SearchPageService implements OnDestroy {
     readonly loadingProgress = new BehaviorSubject<number>(null);
     readonly reUrl = new BehaviorSubject<string | false>(null);
     readonly applyCollections = new BehaviorSubject<boolean>(false);
-    /** Collection the collection filter of the search starts at. */
-    readonly collectionRoot = new BehaviorSubject<string | null>(null);
     readonly addToCollectionMode = new BehaviorSubject<AddToCollectionMode>(null);
     readonly primaryAction = new BehaviorSubject<PrimaryAction>(null);
     readonly filtersMdsWidgets: BehaviorSubject<Widget[]> = new BehaviorSubject(null);
@@ -185,12 +182,6 @@ export class SearchPageService implements OnDestroy {
         this.route.queryParams
             .pipe(map((params) => params.applyCollections === 'true'))
             .subscribe(this.applyCollections);
-        this.route.queryParams
-            .pipe(
-                map((params) => params[COLLECTION_TREE_ROOT_QUERY_PARAM] || null),
-                distinctUntilChanged(),
-            )
-            .subscribe(this.collectionRoot);
     }
 
     private registerRepositories(): void {

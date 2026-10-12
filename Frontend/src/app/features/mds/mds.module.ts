@@ -59,8 +59,6 @@ import { CommentsListComponent } from './mds-editor/widgets/mds-editor-widget-co
 import { MdsNodeRelationsWidgetComponent } from './mds-editor/widgets/mds-editor-widget-relations/node-relations/node-relations-widget.component';
 import { MdsEditorWidgetRelationsComponent } from './mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 import { MdsEditorWidgetNodefilterComponent } from './mds-editor/widgets/mds-editor-widget-nodefilter/mds-editor-widget-nodefilter.component';
-import { MdsEditorWidgetCollectionTreeComponent } from './mds-editor/widgets/mds-editor-widget-collection-tree/mds-editor-widget-collection-tree.component';
-import { MdsEditorWidgetCollectionTreeCoreComponent } from './mds-editor/widgets/mds-editor-widget-collection-tree/mds-editor-widget-collection-tree-core/mds-editor-widget-collection-tree-core.component';
 import { MdsEditorWidgetMultivalueButtonsComponent } from './mds-editor/widgets/mds-editor-widget-multivalue-buttons/mds-editor-widget-multivalue-buttons.component';
 
 @NgModule({
@@ -76,8 +74,6 @@ import { MdsEditorWidgetMultivalueButtonsComponent } from './mds-editor/widgets/
         MdsEditorViewComponent,
         MdsEditorWidgetAuthorComponent,
         MdsEditorWidgetNodefilterComponent,
-        MdsEditorWidgetCollectionTreeComponent,
-        MdsEditorWidgetCollectionTreeCoreComponent,
         MdsEditorWidgetCollectionsComponent,
         MdsEditorWidgetRelationsComponent,
         MdsEditorWidgetCommentsComponent,

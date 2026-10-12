@@ -1,10 +1,12 @@
 /**
- * Query parameter through which pages hosting a search editor pass the collection the
- * `collectionTree` widget starts at, e.g. the collection of the topic page a teaser belongs to.
+ * Query parameter of the page URL naming the collection the `collectionTree` widget starts at,
+ * e.g. the collection of the topic page a teaser links from.
  */
 export const COLLECTION_TREE_ROOT_QUERY_PARAM = 'collectionRoot';
 
 export const DEFAULT_COLLECTION_TREE_PAGE_SIZE = 50;
+/** Search hits listed at most; a more specific search narrows them down. */
+export const COLLECTION_TREE_MAX_SEARCH_HITS = 100;
 
 export type CollectionTreeScope =
     | 'MY'
@@ -25,24 +27,13 @@ export const DEFAULT_COLLECTION_TREE_SCOPES: readonly CollectionTreeScope[] = [
 /** Categories only signed-in users have collections in. */
 export const PERSONAL_COLLECTION_TREE_SCOPES: readonly CollectionTreeScope[] = ['MY', 'EDU_GROUPS'];
 
-/** Icon of each category, the same as on the tabs of the collections page. */
-export const COLLECTION_TREE_SCOPE_ICONS: Record<CollectionTreeScope, string> = {
-    MY: 'person',
-    EDU_GROUPS: 'group',
-    TYPE_EDITORIAL: 'star',
-    TYPE_MEDIA_CENTER: 'domain',
-    EDU_ALL: 'language',
-};
-
 /** Options of the `collectionTree` widget, given as JSON in the widget's `configuration`. */
 export interface CollectionTreeConfig {
     /** Collection to start at when the hosting page passes none. */
     rootCollectionId?: string;
     /** Categories of the top level that is listed when no start collection is known. */
     scopes?: CollectionTreeScope[];
-    /** Restricts the selection to collections the user may write to. */
-    requireWrite?: boolean;
-    /** Number of collections loaded per tree level and per search page. */
+    /** Number of collections loaded per tree level at once. */
     pageSize?: number;
 }
 
