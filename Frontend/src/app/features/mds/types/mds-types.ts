@@ -29,7 +29,6 @@ import { MdsWidgetType } from 'ngx-edu-sharing-ui';
 import { MdsEditorWidgetCommentsComponent } from '../mds-editor/widgets/mds-editor-widget-comments/mds-editor-widget-comments.component';
 import { MdsEditorWidgetRelationsComponent } from '../mds-editor/widgets/mds-editor-widget-relations/mds-editor-widget-relations.component';
 import { MdsEditorWidgetNodefilterComponent } from '../mds-editor/widgets/mds-editor-widget-nodefilter/mds-editor-widget-nodefilter.component';
-import { MdsEditorWidgetCollectionTreeComponent } from '../mds-editor/widgets/mds-editor-widget-collection-tree/mds-editor-widget-collection-tree.component';
 
 /**
  * - `nodes`:
@@ -96,7 +95,7 @@ export const WidgetComponents: {
     [MdsWidgetType.MultiValueAuthorityBadges]: MdsEditorWidgetAuthorityComponent,
     [MdsWidgetType.MultiValueButtons]: MdsEditorWidgetMultivalueButtonsComponent,
     [MdsWidgetType.Nodefilter]: MdsEditorWidgetNodefilterComponent,
-    [MdsWidgetType.CollectionTree]: MdsEditorWidgetCollectionTreeComponent,
+    [MdsWidgetType.CollectionTree]: MdsEditorWidgetTreeComponent,
     [MdsWidgetType.Singleoption]: MdsEditorWidgetSelectComponent,
     [MdsWidgetType.Slider]: MdsEditorWidgetSliderComponent,
     [MdsWidgetType.Range]: MdsEditorWidgetSliderRangeComponent,

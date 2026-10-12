@@ -846,17 +846,7 @@
     "DELETE_KEY_NOTICE": "Delete with Delete key",
     "COLLECTION_TREE": {
       "WITHIN_ROOT": "Only in “{{ root }}”",
-      "NO_WRITE_PERMISSION": "No write permission for this collection",
-      "WRITE_REQUIRED": "Only collections you can write to can be selected.",
-      "INCLUDED_BY_PARENT": "Already included through a parent collection.",
-      "LOAD_MORE": "Load more ({{ loaded }} of {{ total }})",
-      "EMPTY": "No collections available.",
-      "NO_RESULTS": "No matching collections found.",
-      "ERROR": "Collections could not be loaded.",
-      "RETRY": "Retry",
-      "NOT_ACCESSIBLE": "Collection unavailable or not readable",
-      "ROOT_FALLBACK": "The start collection is unavailable, other collections are shown instead.",
-      "RESULTS_COUNT": "{{ count }} collections found"
+      "NOT_ACCESSIBLE": "Collection unavailable or not readable"
     },
     "SHOW_EXTENDED_FALSE": "hide additional information",
     "SUGGEST_VALUE_SEND": "suggest",

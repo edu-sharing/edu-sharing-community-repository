@@ -97,13 +97,6 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     @Input() set externalFilters(values: Values) {
         this.mdsEditorInstance.externalFilters = values;
     }
-    /**
-     * Collection the `collectionTree` widgets start at, listing its sub-collections. Without it,
-     * they start at the collection of their configuration or at the top level.
-     */
-    @Input() set collectionRootId(id: string | null | undefined) {
-        this.mdsEditorInstance.collectionRootId.set(id || null);
-    }
 
     @Output() extendedChange = new EventEmitter();
     @Output() cancelMds = new EventEmitter();
