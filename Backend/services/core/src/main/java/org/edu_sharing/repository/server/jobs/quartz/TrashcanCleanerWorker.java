@@ -8,26 +8,26 @@ import java.util.List;
 import java.util.Map;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import com.hazelcast.internal.serialization.SerializableByConvention;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.checkerframework.checker.units.qual.C;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.SearchResultNodeRef;
 import org.edu_sharing.service.search.SearchService;
 import org.edu_sharing.service.search.model.SearchToken;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-public class TrashcanCleanerSolr {
+public class TrashcanCleanerWorker {
 
 
-    @Autowired
     private NodeService nodeService;
-    @Autowired
     private SearchService searchService;
 
 
@@ -40,7 +40,9 @@ public class TrashcanCleanerSolr {
 
     Boolean execute;
 
-    public TrashcanCleanerSolr(long timeToKeep, int batchCount, Boolean execute) {
+    public TrashcanCleanerWorker(NodeService nodeService, SearchService searchService, long timeToKeep, int batchCount, Boolean execute) {
+        this.nodeService = nodeService;
+        this.searchService = searchService;
         this.to = new Date(System.currentTimeMillis() - timeToKeep);
         this.batchCount = batchCount;
         this.execute = execute;
