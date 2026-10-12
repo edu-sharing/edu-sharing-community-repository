@@ -71,6 +71,8 @@ mat-chip-grid {
     border-bottom-right-radius: 4px;
 }
 mat-chip-row {
+    // a long caption is cut at the field's edge; 100% does not include the chip's 8px start margin
+    max-width: calc(100% - 8px);
     &.indeterminate {
         background: repeating-linear-gradient(
             -45deg,
