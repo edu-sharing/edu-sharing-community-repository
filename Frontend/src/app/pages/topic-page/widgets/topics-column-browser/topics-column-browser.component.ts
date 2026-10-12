@@ -20,6 +20,7 @@ import { map } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { SharedModule } from '../../../../shared/shared.module';
 import { TooltipAriaLabelDirective } from '../../shared/directives/tooltip-aria-label.directive';
+import { TopicLinkDirective } from '../../shared/directives/topic-link.directive';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { ConfigurationOption } from '../../shared/types/configuration-option';
@@ -43,6 +44,7 @@ const CHILD_ITEM_SELECTOR = ':scope > .child-list-item';
         MatListModule,
         SharedModule,
         TooltipAriaLabelDirective,
+        TopicLinkDirective,
         WidgetConfigurationButtonsComponent,
         WrapObservablePipe,
     ],

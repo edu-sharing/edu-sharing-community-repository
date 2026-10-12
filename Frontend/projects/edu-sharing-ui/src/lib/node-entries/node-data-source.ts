@@ -89,10 +89,14 @@ export class NodeDataSource<T extends NodeEntriesDataType> extends DataSource<T>
      * Removes elements from the visible data.
      */
     removeData(toRemove: T[]): void {
-        const newData = this.getData().filter(
-            (value) =>
-                !toRemove.some((d) => Helper.objectEquals((d as Node).ref, (value as Node).ref)),
+        this.removeWhere((value) =>
+            toRemove.some((d) => Helper.objectEquals((d as Node).ref, (value as Node).ref)),
         );
+    }
+
+    /** Removes all visible elements matching the predicate and adjusts the pagination counts. */
+    removeWhere(predicate: (value: T) => boolean): void {
+        const newData = this.getData().filter((value) => !predicate(value));
         const removedData = this.getData().filter((value) => !newData.includes(value));
         this.dataStream.next(newData);
         if (this.pagination$.value) {

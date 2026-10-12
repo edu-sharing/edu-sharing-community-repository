@@ -31,6 +31,7 @@ import { EduSharingUiCommonModule, UIService } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RestConnectorService } from '../../../../core-module/rest/services/rest-connector.service';
+import { TopicLinkDirective } from '../../shared/directives/topic-link.directive';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { DEFAULT_PAGE_VARIANT_NAME_PREFIX } from '../../shared/types/custom-definitions';
@@ -55,6 +56,7 @@ export interface BreadcrumbExtensionInterface {
         MatFormFieldModule,
         MatMenuModule,
         MatSelectModule,
+        TopicLinkDirective,
         TranslateModule,
     ],
     templateUrl: './breadcrumb.component.html',

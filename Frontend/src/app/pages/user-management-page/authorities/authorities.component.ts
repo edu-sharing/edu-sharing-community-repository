@@ -51,8 +51,8 @@ import {
     Scope,
     UIAnimation,
 } from 'ngx-edu-sharing-ui';
-import { firstValueFrom, forkJoin } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { firstValueFrom, forkJoin, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { SuggestItem } from '../../../pages/admin-page/autocomplete/autocomplete.component';
 import {
     DialogButton,
@@ -174,6 +174,8 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
     public addMemberColumns: ColumnType;
     public editGroupColumns: ColumnType;
     public _searchQuery: string;
+    /** Emits when the page request in flight belongs to a list that has been discarded. */
+    private readonly cancelLoadAuthorities$ = new Subject<void>();
     manageMemberSearch: string;
     public options: CustomOptions = {
         useDefaultOptions: true,
@@ -434,8 +436,7 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             this.sortConfig.active = event.active;
         }
         this.sortConfig.direction = event.direction;
-        this.dataSource.reset();
-        this.loadAuthorities();
+        this.resetAndLoadAuthorities();
     }
     private getList<T>(data: T): T[] {
         return NodeHelperService.getActionbarNodes(
@@ -943,7 +944,35 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             }
         }
     }
+    /** Starts over with the first page; a request still in flight is cancelled. */
+    private resetAndLoadAuthorities() {
+        this.discardLoadedAuthorities();
+        this.loadAuthorities();
+    }
+
+    private discardLoadedAuthorities() {
+        this.cancelLoadAuthorities$.next();
+        this.dataSource.reset();
+        this.dataSource.isLoading = false;
+    }
+
+    /** Appends only entries not yet listed; an existing virtual entry is kept as it is. */
+    private appendNewAuthorities(entries: GenericAuthority[]) {
+        const key = (a: GenericAuthority) =>
+            (a as { ref?: { id?: string } }).ref?.id ?? a.authorityName;
+        const loaded = new Set(this.dataSource.getData().map(key));
+        this.dataSource.appendData(entries.filter((a) => !loaded.has(key(a))));
+    }
+
+    private onLoadAuthoritiesError(error: any) {
+        this.dataSource.isLoading = false;
+        this.toast.error(error);
+    }
+
     public loadAuthorities(event: FetchEvent = null) {
+        if (this.dataSource.isLoading === true) {
+            return;
+        }
         this.dataSource.isLoading = true;
         let sort = RestConstants.AUTHORITY_NAME;
         if (this._mode == 'ORG') {
@@ -970,7 +999,9 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         const request = {
             sortBy: [sort],
             sortAscending: this.sortConfig.direction === 'asc',
-            offset: this.dataSource.getData().length,
+            // virtual entries are not server results and must not shift the offset
+            offset: this.dataSource.getData().filter((d) => !(d as { virtual?: boolean }).virtual)
+                .length,
         };
         const query = this._searchQuery ? this._searchQuery : '';
         this.organization
@@ -983,12 +1014,16 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             // as non-admin, search only own orgs since these are the once with access
             this.organization
                 .getOrganizations(query, !this.isAdmin, request)
-                .subscribe(async (orgs: OrganizationOrganizations) => {
-                    await this.dataSource.appendData(
-                        orgs.organizations.filter((o) => o.administrationAccess),
-                    );
-                    this.dataSource.isLoading = false;
-                    void this.updateOptions();
+                .pipe(takeUntil(this.cancelLoadAuthorities$))
+                .subscribe({
+                    next: (orgs: OrganizationOrganizations) => {
+                        this.appendNewAuthorities(
+                            orgs.organizations.filter((o) => o.administrationAccess),
+                        );
+                        this.dataSource.isLoading = false;
+                        void this.updateOptions();
+                    },
+                    error: (error) => this.onLoadAuthoritiesError(error),
                 });
         } /*
     else if(this._mode=='USER'){
@@ -1008,26 +1043,38 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             if (this.org) {
                 this.iam
                     .getGroupMembers(this.org.authorityName, query, this._mode, request)
-                    .subscribe(async (data: IamAuthorities) => {
-                        this.dataSource.setPagination(data.pagination);
-                        await this.dataSource.appendData(data.authorities as Organization[]);
-                        this.dataSource.isLoading = false;
+                    .pipe(takeUntil(this.cancelLoadAuthorities$))
+                    .subscribe({
+                        next: (data: IamAuthorities) => {
+                            this.dataSource.setPagination(data.pagination);
+                            this.appendNewAuthorities(data.authorities as Organization[]);
+                            this.dataSource.isLoading = false;
+                        },
+                        error: (error) => this.onLoadAuthoritiesError(error),
                     });
             } else if (this._mode == 'GROUP') {
                 this.iam
                     .searchGroups(query, true, '', '', request)
-                    .subscribe(async (data: IamGroups) => {
-                        this.dataSource.setPagination(data.pagination);
-                        await this.dataSource.appendData(data.groups as Group[]);
-                        this.dataSource.isLoading = false;
+                    .pipe(takeUntil(this.cancelLoadAuthorities$))
+                    .subscribe({
+                        next: (data: IamGroups) => {
+                            this.dataSource.setPagination(data.pagination);
+                            this.appendNewAuthorities(data.groups as Group[]);
+                            this.dataSource.isLoading = false;
+                        },
+                        error: (error) => this.onLoadAuthoritiesError(error),
                     });
             } else if (this._mode == 'USER') {
                 this.iam
                     .searchUsers(query, true, '', request, RestConstants.HOME_REPOSITORY, false)
-                    .subscribe(async (data: IamUsers) => {
-                        this.dataSource.setPagination(data.pagination);
-                        await this.dataSource.appendData(data.users as unknown as User[]);
-                        this.dataSource.isLoading = false;
+                    .pipe(takeUntil(this.cancelLoadAuthorities$))
+                    .subscribe({
+                        next: (data: IamUsers) => {
+                            this.dataSource.setPagination(data.pagination);
+                            this.appendNewAuthorities(data.users as unknown as User[]);
+                            this.dataSource.isLoading = false;
+                        },
+                        error: (error) => this.onLoadAuthoritiesError(error),
                     });
             }
         }
@@ -1161,12 +1208,17 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         });
     }
     private refresh() {
-        this.dataSource.reset();
+        this.discardLoadedAuthorities();
         this.nodeEntries.getSelection().clear();
         if (this.optionsHelperService.getData()) {
             void this.optionsHelperService.refreshComponents();
         }
         this.loadAuthorities();
+    }
+
+    // The authority index may lag behind deletions, so deleted entries are removed locally.
+    private removeFromList(authority: GenericAuthority) {
+        this.dataSource.removeWhere((a) => a.authorityName === authority.authorityName);
     }
 
     private closeDialog() {
@@ -1177,7 +1229,11 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
         this.closeDialog();
         if (position == data.length) {
             this.toast.closeProgressSpinner();
-            this.refresh();
+            // no full refresh since the deleted entries might still be returned by the search
+            this.nodeEntries.getSelection().clear();
+            if (this.optionsHelperService.getData()) {
+                void this.optionsHelperService.refreshComponents();
+            }
             if (!error) this.toast.toast('PERMISSIONS.DELETED_' + this._mode);
             return;
         }
@@ -1186,7 +1242,10 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
             console.error('delete for user does not exists');
         } else {
             this.iam.deleteGroup(data[position].authorityName).subscribe(
-                () => this.startDelete(data, position + 1, error),
+                () => {
+                    this.removeFromList(data[position]);
+                    this.startDelete(data, position + 1, error);
+                },
                 (error: any) => {
                     this.toast.error(error);
                     this.startDelete(data, position + 1, true);
@@ -1445,7 +1504,12 @@ export class PermissionsAuthoritiesComponent implements OnChanges, AfterViewInit
                 this.toast.toast('PERMISSIONS.ORG_REMOVED');
                 this.toast.closeProgressSpinner();
                 this.closeDialog();
-                this.refresh();
+                // no full refresh since the deleted organization might still be returned by the search
+                this.removeFromList(org);
+                this.nodeEntries.getSelection().clear();
+                if (this.optionsHelperService.getData()) {
+                    void this.optionsHelperService.refreshComponents();
+                }
             },
             (error: any) => {
                 this.toast.error(error);

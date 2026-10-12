@@ -1102,7 +1102,7 @@ public class NodeDao {
             int i = 2;
             while (true) {
                 try {
-                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc, obeyMds, aspects.toArray(new String[0]));
+                    childId = this.nodeService.createNode(nodeId, type, props, childAssoc, obeyMds, aspects != null ? aspects.toArray(new String[0]) : null);
                     break;
                 } catch (DuplicateChildNodeNameException e) {
                     if (renameIfExists) {

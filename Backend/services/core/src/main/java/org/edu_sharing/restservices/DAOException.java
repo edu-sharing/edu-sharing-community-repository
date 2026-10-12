@@ -6,6 +6,7 @@ import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.repo.domain.node.NodeExistsException;
 import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.alfresco.repo.security.permissions.AccessDeniedException;
+import org.alfresco.repo.security.authority.UnknownAuthorityException;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.DuplicateChildNodeNameException;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
@@ -183,6 +184,7 @@ public class DAOException extends RuntimeException {
         }
 
         if (t instanceof NoSuchPersonException
+                || t instanceof UnknownAuthorityException
                 || t instanceof InvalidStoreRefException
                 || t instanceof FileNotFoundException
                 || t instanceof NoSuchFileException

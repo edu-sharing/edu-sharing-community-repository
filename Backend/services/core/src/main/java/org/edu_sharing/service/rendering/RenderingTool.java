@@ -70,9 +70,12 @@ public class RenderingTool {
 	 */
 	public String getRenderServiceUrl(ApplicationInfo repInfo,String nodeId,Map<String,String> parameters) throws GeneralSecurityException{
 
-		ApplicationInfo homeRepo = ApplicationInfoList.getHomeRepository();
-
-		String renderingService = homeRepo.getContentUrl();
+		ApplicationInfo appInfoRs1 = ApplicationInfoList.getRenderService();
+		// appInfoRs1 is null when no classic rendering service (rs1) is registered, e.g. when only rendering service 2 is deployed
+		if (appInfoRs1 == null) {
+			throw new IllegalStateException("no rendering service (rs1) registered");
+		}
+		String renderingService = appInfoRs1.getContentUrl();
 
 		//renderServiceUrl = UrlTool.setParam(renderServiceUrl, "proxyRepId", ApplicationInfoList.getHomeRepository().getAppId());
 
@@ -95,9 +98,7 @@ public class RenderingTool {
 		}catch(Throwable t){}
 
         String defaultAlg = LightbendConfigLoader.get().getString("security.sso.authByApp.alg.defaultSign");
-        ApplicationInfo appInfoRs1 = ApplicationInfoList.getRenderService();
-        // appInfoRs1 is null when no classic rendering service (rs1) is registered, e.g. when only rendering service 2 is deployed
-        String alg = (appInfoRs1 == null || StringUtils.isNullOrEmpty(appInfoRs1.getSignatureAlgorithm())) ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
+        String alg = StringUtils.isNullOrEmpty(appInfoRs1.getSignatureAlgorithm()) ? defaultAlg : appInfoRs1.getSignatureAlgorithm();
 
 		renderingService = UrlTool.setParam(renderingService, "sig", getSignatureSigned(appId,nodeId,timestamp,alg));
         renderingService = UrlTool.setParam(renderingService, "signedAlg", alg);

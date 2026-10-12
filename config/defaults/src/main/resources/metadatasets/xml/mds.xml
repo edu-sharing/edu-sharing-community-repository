@@ -810,7 +810,7 @@
       <id>virtual:collection_id_tree</id>
       <caption>virtual_prop_collection_id_tree</caption>
       <hideIfEmpty>true</hideIfEmpty>
-      <type>nodefilter</type>
+      <type>collectionTree</type>
     </widget>
     <widget>
       <id>ccm:page_variant_profiling_target_group</id>
@@ -2256,6 +2256,14 @@
           ]
           }}
         </statement>
+      </property>
+      <property name="virtual:parent_recursive">
+        <statement>{"match":{"path":"${valueRaw}"}}</statement>
+      </property>
+      <property name="virtual:node_id">
+        <statement>{"term":{"nodeRef.id":"${valueRaw}"}}</statement>
+        <multiple>true</multiple>
+        <multiplejoin>OR</multiplejoin>
       </property>
     </query>
     <query join="AND" id="ngsearch">

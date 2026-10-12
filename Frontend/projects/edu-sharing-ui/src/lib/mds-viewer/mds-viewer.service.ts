@@ -102,6 +102,8 @@ export class MdsViewerService {
             case 'singlevalueTree':
             case 'multivalueTree':
                 return flat ? 'array' : 'tree';
+            case 'collectionTree':
+                return 'array';
             case 'slider':
                 return 'slider';
             case 'duration':

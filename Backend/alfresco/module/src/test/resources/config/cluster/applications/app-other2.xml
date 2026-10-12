@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="appid">other2</entry>
+    <entry key="type">REPOSITORY</entry>
+    <entry key="host">other2.example.org</entry>
+</properties>

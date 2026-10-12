@@ -17,6 +17,8 @@ export type CustomSideMenuItem = {
     templateRef: TemplateRef<unknown>;
 };
 export type NodeSelectionValidator = (node: Node) => boolean | Promise<boolean>;
+/** Loads the linked topic in place; returns whether it took over the navigation. */
+export type TopicNavigation = (collectionId: string, url: string | null) => boolean;
 
 /**
  * This service is intended to add custom behavior to components of the topic page.
@@ -41,6 +43,7 @@ export class TopicPageGlobalService {
     private customUrlFunction: (node: Node) => string;
     private customUrlTarget: '_self' | '_blank' = '_self';
     private nodeSelectionValidator: NodeSelectionValidator | null = null;
+    private previewTopicNavigation: { nodeId: string; navigate: TopicNavigation } | null = null;
     private sidebarMobileHidden: boolean = false;
     private visibleNodesMap: Map<string, Node[]> = new Map<string, Node[]>();
     private visibleNodesUpdated = new Subject<void>();
@@ -183,6 +186,45 @@ export class TopicPageGlobalService {
      */
     setCustomUrlTarget(target: '_self' | '_blank'): void {
         this.customUrlTarget = target;
+    }
+
+    /**
+     * Remembers how the topic page that opened the preview of a node loads linked topics.
+     * The preview is rendered outside of that topic page, so its links cannot reach it otherwise.
+     *
+     * @param nodeId
+     * @param navigate null if that topic page does not load topics in place
+     */
+    setPreviewTopicNavigation(nodeId: string, navigate: TopicNavigation | null): void {
+        this.previewTopicNavigation = navigate ? { nodeId, navigate } : null;
+    }
+
+    /**
+     * Forgets the given navigation, e.g. when its topic page is destroyed.
+     *
+     * @param navigate
+     */
+    clearPreviewTopicNavigation(navigate: TopicNavigation): void {
+        if (this.previewTopicNavigation?.navigate === navigate) {
+            this.previewTopicNavigation = null;
+        }
+    }
+
+    /**
+     * Lets the topic page that opened the preview of the given node load the linked topic in place.
+     * Returns false for previews opened elsewhere.
+     *
+     * @param previewNodeId
+     * @param collectionId
+     * @param url
+     */
+    navigateInPlaceFromPreview(
+        previewNodeId: string,
+        collectionId: string,
+        url: string | null,
+    ): boolean {
+        const origin = this.previewTopicNavigation;
+        return origin?.nodeId === previewNodeId ? origin.navigate(collectionId, url) : false;
     }
 
     /**

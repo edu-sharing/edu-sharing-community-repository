@@ -29,6 +29,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-collection-tree/collection-tree-config';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
@@ -210,12 +211,13 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
      * Opens a new window with the Re-URL parameter set.
      */
     openReurlLink(): void {
-        // set filter to collection ID
+        // set filter to collection ID, which is also where the collection filter starts
         const mediaRenderingExtra: NavigationExtras = {
             queryParams: {
                 filters: {
                     [DEFAULT_COLLECTION_ID_PROP]: [this.contextNodeId],
                 },
+                [COLLECTION_TREE_ROOT_QUERY_PARAM]: this.contextNodeId,
             },
         };
         this.windowRef = this.topicPageHelperService.openReurlLink(mediaRenderingExtra);

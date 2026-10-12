@@ -30,7 +30,8 @@ public class ApiOriginFilter implements jakarta.servlet.Filter {
 	 Note: Any method is allowed here
 	 */
 	List<String> WEB_COMPONENTS_ALLOWED_ENDPOINTS = Arrays.asList(
-			"/search/v1/queries"
+			"/search/v1/queries",
+			"/bapi/api/v1/edu-sharing/chat/completion"
 	);
 	public void doFilter(ServletRequest request, ServletResponse response,
 						 FilterChain chain) throws IOException, ServletException {

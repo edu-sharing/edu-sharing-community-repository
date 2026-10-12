@@ -15,9 +15,11 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
-import { EduSharingUiCommonModule, NodeHelperService } from 'ngx-edu-sharing-ui';
+import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
+import { NodeHelperService } from '../../../../services/node-helper.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import { TopicLinkDirective } from '../../shared/directives/topic-link.directive';
 import { TopicPageGlobalService } from '../../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import { CollectionListDisplayType } from '../../shared/types/collection-list-display-type';
@@ -30,7 +32,12 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
 @Component({
     selector: 'es-collection-chips',
     encapsulation: ViewEncapsulation.Emulated,
-    imports: [EduSharingUiCommonModule, SharedModule, WidgetConfigurationButtonsComponent],
+    imports: [
+        EduSharingUiCommonModule,
+        SharedModule,
+        TopicLinkDirective,
+        WidgetConfigurationButtonsComponent,
+    ],
     templateUrl: './collection-chips.component.html',
     styleUrls: ['./collection-chips.component.scss'],
 })
@@ -98,7 +105,7 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     }
 
     /**
-     * Opens the link to a collection.
+     * Opens the link to a collection in edit mode.
      * Note: The click event is necessary, as drag-and-drop does not work with href.
      *
      * @param node
@@ -107,20 +114,68 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         if (this.dragging) {
             return;
         }
-        let url: string = this.customUrl && this.customUrl(node) ? this.customUrl(node) : null;
+        const url: string = this.customUrl && this.customUrl(node) ? this.customUrl(node) : null;
         if (!url) {
-            const queryParamsArray = Object.entries(
-                this.nodeHelper.getNodeLink('queryParams', node),
-            )
-                .filter((k) => !!k[1] && k[0] !== 'scope')
-                .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
-            url =
-                (this.nodeHelper.getNodeLink('routerLink', node) as string) +
-                (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '');
-            await this.router.navigateByUrl(url);
+            await this.router.navigateByUrl(this.collectionRouterUrl(node));
         } else {
             window.open(url, this.topicPageGlobalService.getCustomUrlTarget());
         }
+    }
+
+    /** The target of the collection links, read on every use as the host may set it later. */
+    protected get customUrlTarget(): '_self' | '_blank' {
+        return this.topicPageGlobalService.getCustomUrlTarget();
+    }
+
+    /**
+     * The link of a collection outside of edit mode: its custom URL, or the collection's page.
+     *
+     * @param node
+     */
+    protected collectionUrl(node: Node): string {
+        if (this.customUrl && this.customUrl(node)) {
+            return this.customUrl(node);
+        }
+        // the scope is left out, like on navigating via the router
+        return this.nodeHelper.getNodeUrl(node, { scope: null });
+    }
+
+    /**
+     * Opens the collection's page via the router, so the app is not reloaded.
+     * Custom URLs and modified clicks (e.g. into a new tab) are left to the browser.
+     *
+     * @param event
+     * @param node
+     */
+    protected collectionLinkClicked(event: MouseEvent, node: Node): void {
+        if (
+            event.defaultPrevented ||
+            (this.customUrl && this.customUrl(node)) ||
+            event.button !== 0 ||
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey
+        ) {
+            return;
+        }
+        event.preventDefault();
+        void this.router.navigateByUrl(this.collectionRouterUrl(node));
+    }
+
+    /**
+     * The router URL of the collection's page, without the scope parameter.
+     *
+     * @param node
+     */
+    private collectionRouterUrl(node: Node): string {
+        const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
+            .filter((k) => !!k[1] && k[0] !== 'scope')
+            .map((k) => k[0] + '=' + encodeURIComponent(k[1]));
+        return (
+            (this.nodeHelper.getNodeLink('routerLink', node) as string) +
+            (queryParamsArray.length > 0 ? '?' + queryParamsArray.join('&') : '')
+        );
     }
 
     /**

@@ -765,19 +765,22 @@ export class NodesSelectorComponent implements OnInit {
             // mark as loading before awaiting anything, otherwise the (still empty) datasource
             // would briefly render the "no results" message instead of the spinner
             this.dataSourceSearch.isLoading = true;
-            // the request has to carry the mds default values, so wait until they are known
-            const mdsContext = await this.getSearchMdsContext();
-            // reset the search datasource if it is already initialized
-            if (!this.dataSourceSearch.isEmpty()) {
-                this.dataSourceSearch.reset();
+            try {
+                // the request has to carry the mds default values, so wait until they are known
+                const mdsContext = await this.getSearchMdsContext();
+                // reset the search datasource if it is already initialized
+                if (!this.dataSourceSearch.isEmpty()) {
+                    this.dataSourceSearch.reset();
+                }
+                const searchResult = await this.requestSearch(this.createSearchRequest(mdsContext));
+                this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
+            } catch (e) {
+                this.dataSourceSearch.setData([]);
+                this.toast.error(e);
+            } finally {
+                this.searchCompleted.set(true);
+                this.dataSourceSearch.isLoading = false;
             }
-            const request = this.createSearchRequest(mdsContext);
-            const searchResult: SearchResults = await firstValueFrom(
-                this.searchService.search(request),
-            );
-            this.dataSourceSearch.setData(searchResult.nodes, searchResult.pagination);
-            this.searchCompleted.set(true);
-            this.dataSourceSearch.isLoading = false;
         } else if (this.selectedTab() === TabType.COLLECTIONS) {
             this.dataSourceCollectionsFlat.isLoading = true;
             // reset the flat datasource if it is already initialized
@@ -790,17 +793,25 @@ export class NodesSelectorComponent implements OnInit {
             if (this.collectionsDisplayType() === NodeEntriesDisplayType.Tree) {
                 this.collectionsDisplayType.set(NodeEntriesDisplayType.Table);
             }
-            if (!this.searchText()) {
+            try {
+                if (!this.searchText()) {
+                    this.dataSourceCollectionsFlat.setData([]);
+                } else {
+                    const searchResult = await this.requestSearch(
+                        this.createSearchRequest(null, 0, true),
+                    );
+                    this.dataSourceCollectionsFlat.setData(
+                        searchResult.nodes,
+                        searchResult.pagination,
+                    );
+                }
+            } catch (e) {
                 this.dataSourceCollectionsFlat.setData([]);
-            } else {
-                const request = this.createSearchRequest(null, 0, true);
-                const searchResult: SearchResults = await firstValueFrom(
-                    this.searchService.search(request),
-                );
-                this.dataSourceCollectionsFlat.setData(searchResult.nodes, searchResult.pagination);
+                this.toast.error(e);
+            } finally {
+                this.searchCompleted.set(true);
+                this.dataSourceCollectionsFlat.isLoading = false;
             }
-            this.searchCompleted.set(true);
-            this.dataSourceCollectionsFlat.isLoading = false;
         }
     }
 
@@ -1099,14 +1110,25 @@ export class NodesSelectorComponent implements OnInit {
         }
 
         dataSource.isLoading = true;
-        const mdsContext = searchForCollections ? null : await this.getSearchMdsContext();
-        const request = this.createSearchRequest(mdsContext, event.offset, searchForCollections);
-        const searchResult: SearchResults = await firstValueFrom(
-            this.searchService.search(request),
-        );
+        try {
+            const mdsContext = searchForCollections ? null : await this.getSearchMdsContext();
+            const searchResult = await this.requestSearch(
+                this.createSearchRequest(mdsContext, event.offset, searchForCollections),
+            );
+            dataSource.appendData(searchResult.nodes);
+        } catch (e) {
+            this.toast.error(e);
+        } finally {
+            dataSource.isLoading = false;
+        }
+    }
 
-        dataSource.appendData(searchResult.nodes);
-        dataSource.isLoading = false;
+    /**
+     * Sends the given search without touching the global state of the root `SearchService`,
+     * whose facets and last request belong to the host page (e.g. its filter bar).
+     */
+    private requestSearch(request: SearchRequestParams): Promise<SearchResults> {
+        return firstValueFrom(this.searchService.requestSearch(request)) as Promise<SearchResults>;
     }
 
     /**

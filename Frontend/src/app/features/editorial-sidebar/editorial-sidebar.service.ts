@@ -19,7 +19,7 @@ import {
     NodeEntriesWrapperComponent,
     Scope,
 } from 'ngx-edu-sharing-ui';
-import { SelectionChange } from '@angular/cdk/collections';
+import { SelectionChange, SelectionModel } from '@angular/cdk/collections';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
@@ -157,6 +157,11 @@ export class EditorialSidebarService {
      * Owned by whoever sets it — the sidebar only reads it.
      */
     readonly titleOverride = signal<string>(null);
+    /**
+     * The list the preview steps through: `undefined` stands for the page's primary list, `null`
+     * for none. Reset on close, so it only applies to the preview that set it.
+     */
+    private previewList: NodeEntriesWrapperComponent<NodeEntriesDataType> | null | undefined;
 
     toggleFullscreen() {
         this.fullscreenActive.update((v) => !v);
@@ -238,6 +243,33 @@ export class EditorialSidebarService {
         // The service is providedIn:'root' and shared across pages, so the selected nodes must be
         // reset too — otherwise the stale selection survives a scope change (e.g. search → collections).
         this.nodes.set(null);
+        this.previewList = undefined;
+    }
+
+    /**
+     * Sets the list the preview steps through, for previews opened from a list that is not the
+     * page's primary one; `null` disables stepping.
+     */
+    setPreviewList(list: NodeEntriesWrapperComponent<NodeEntriesDataType> | null): void {
+        this.previewList = list;
+    }
+
+    private resolvePreviewList(): {
+        data: NodeEntriesDataType[];
+        selection: Pick<SelectionModel<NodeEntriesDataType>, 'setSelection'>;
+    } | null {
+        if (this.previewList !== undefined) {
+            return this.previewList
+                ? {
+                      data: this.previewList.dataSource?.getData() ?? [],
+                      selection: this.previewList.getSelection(),
+                  }
+                : null;
+        }
+        const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
+        return instance
+            ? { data: instance.dataSource?.getData() ?? [], selection: instance.selection }
+            : null;
     }
 
     /**
@@ -325,13 +357,11 @@ export class EditorialSidebarService {
     }
 
     /**
-     * Resolve the index of the currently previewed node within the page's primary
-     * node-entries list (the "selection" the preview was opened from).
-     * Returns -1 when there is no primary list or the node is not part of it.
+     * Resolve the index of the currently previewed node within the list the preview steps
+     * through. Returns -1 when there is no such list or the node is not part of it.
      */
     private getPreviewIndex(): { data: NodeEntriesDataType[]; index: number } {
-        const data =
-            this.nodeEntriesGlobalService.getPrimaryInstance()?.dataSource?.getData() ?? [];
+        const data = this.resolvePreviewList()?.data ?? [];
         const current = this.nodes()?.[0] as Node;
         const index = current
             ? data.findIndex((n) => (n as Node)?.ref?.id === current.ref?.id)
@@ -341,7 +371,7 @@ export class EditorialSidebarService {
 
     /**
      * Whether a preview step by `offset` (e.g. -1 / +1) lands on an existing node
-     * of the primary list. Used to enable/disable the preview navigation buttons.
+     * of the preview's list. Used to enable/disable the preview navigation buttons.
      */
     canStepPreview(offset: number): boolean {
         const { data, index } = this.getPreviewIndex();
@@ -349,21 +379,21 @@ export class EditorialSidebarService {
     }
 
     /**
-     * Move the preview to the previous/next node of the primary list and keep the
+     * Move the preview to the previous/next node of the preview's list and keep the
      * list selection in sync. `handleSelection` keeps the PREVIEW option open for a
      * single-node selection, so the enabled option is left untouched here — its
      * reference stays stable and the fullscreen view is preserved while stepping.
      */
     stepPreview(offset: number): void {
-        const instance = this.nodeEntriesGlobalService.getPrimaryInstance();
+        const list = this.resolvePreviewList();
         const { data, index } = this.getPreviewIndex();
         const target = index >= 0 ? data[index + offset] : undefined;
-        if (!instance || !target) {
+        if (!list || !target) {
             return;
         }
         // Use setSelection (single change emission) rather than clear()+select(): clear() would
         // momentarily emit an empty selection, and `handleSelection` closes the sidebar on length 0.
-        instance.selection.setSelection(target);
+        list.selection.setSelection(target);
         this.nodes.set([target]);
     }
 }

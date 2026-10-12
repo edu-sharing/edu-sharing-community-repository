@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="appid">home</entry>
+    <entry key="is_home_node">true</entry>
+    <entry key="type">REPOSITORY</entry>
+    <entry key="host">localhost</entry>
+    <entry key="port">8080</entry>
+</properties>

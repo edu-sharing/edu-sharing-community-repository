@@ -350,7 +350,7 @@ export class MdsEditorWidgetContainerComponent
     isVisible() {
         if (
             this.mdsEditorInstance.editorMode === 'search' &&
-            this.widget.definition.hideIfEmpty &&
+            this.widget?.definition.hideIfEmpty &&
             this.hasValues
         ) {
             return this.hasValues();

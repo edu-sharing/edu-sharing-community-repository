@@ -144,6 +144,9 @@
                 [attr.aria-label]="'NAV.COLLECTIONS' | translate"
                 class="breadcrumb-space"
               >
+                @if (customTemplates.value.breadcrumbs) {
+                <ng-container *ngTemplateOutlet="customTemplates.value.breadcrumbs"></ng-container>
+                } @else {
                 <es-breadcrumbs
                   class="collections-breadcrumb"
                   [home]="'COLLECTIONS.TAB.' + tabSelected"
@@ -160,6 +163,7 @@
                     collectionContentComponent.dropOnCollection($event.target, $event.source)
                   "
                 ></es-breadcrumbs>
+                }
               </div>
               }
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->

@@ -3,7 +3,6 @@ package org.edu_sharing.repository.server.connector;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.apache.commons.collections.IteratorUtils;
@@ -26,8 +25,6 @@ import org.edu_sharing.repository.server.tools.ApplicationInfoList;
 import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.edu_sharing.repository.server.tools.security.Encryption;
 import org.edu_sharing.service.InsufficientPermissionException;
-import org.edu_sharing.service.authentication.oauth2.TokenService;
-import org.edu_sharing.service.authentication.oauth2.TokenService.Token;
 import org.edu_sharing.service.connector.ConnectorServiceFactory;
 import org.edu_sharing.service.connector.SimpleConnectorAttributes;
 import org.edu_sharing.service.editlock.EditLockService;
@@ -44,7 +41,6 @@ import org.edu_sharing.spring.servlet.SpringHttpServlet;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.ApplicationContext;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -236,15 +232,6 @@ public class ConnectorServlet extends SpringHttpServlet {
 			jsonObject.put("ticket", req.getSession().getAttribute(CCConstants.AUTH_TICKET));
 			jsonObject.put("api_url",homeRepo.getClientBaseUrl() + "/rest");
 			jsonObject.put("appid",homeRepo.getAppId());
-
-			if(req.getSession().getAttribute(CCConstants.AUTH_SCOPE)==null){
-				ApplicationContext eduApplicationContext = org.edu_sharing.spring.ApplicationContextFactory.getApplicationContext();
-				TokenService tokenService = (TokenService) eduApplicationContext.getBean("oauthTokenService");
-				Token token=tokenService.createToken(AuthenticationUtil.getFullyAuthenticatedUser(),(String)req.getSession().getAttribute(CCConstants.AUTH_TICKET));
-				jsonObject.put("accessToken", token.getAccessToken());
-				jsonObject.put("refreshToken", token.getRefreshToken());
-				jsonObject.put("expiresIn", tokenService.getExpiresIn());
-			}
 
 			logger.debug("jsonObject:" + jsonObject);
 
