@@ -43,7 +43,7 @@
 </div> -->
   @if (!isTree || true || treeOpen) { @if (isTree) {
   <div class="tree-header">
-    <mat-form-field floatLabel="always">
+    <mat-form-field floatLabel="always" subscriptSizing="dynamic">
       <mat-label>{{ 'MDS.FILTER_TREE' | translate }}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input
