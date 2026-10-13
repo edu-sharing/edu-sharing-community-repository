@@ -6,6 +6,7 @@ import {
     Injectable,
     NgModule,
 } from '@angular/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -114,6 +115,8 @@ export function loadStorybookTranslations(): Promise<any> {
 export class translateProvider {
     private translation$: Observable<any> | null = null;
     cache$ = new BehaviorSubject(null);
+    // the storybook translations are german, see `loadStorybookTranslations`
+    currentLang = 'de';
 
     constructor() {
         // `instant()` can only answer from the cache, so fill it as early as possible
@@ -408,7 +411,13 @@ export class NodeServiceMock {
             obeyMds = true,
         }: { versionComment?: string; repository?: string; obeyMds?: boolean } = {},
     ): Observable<Node> {
-        return of({ properties } as Node);
+        // like the backend, answer with the complete updated node (including `ref`), since
+        // callers like `MdsEditorInstanceService.updateNodes` match the result by its ref
+        const node = Helper.deepCopy(MockNodes[id] || (DummyNode as Node)) as Node;
+        node.ref = { ...node.ref, id };
+        node.properties = { ...node.properties, ...properties };
+        registerMockNode(node);
+        return of(node);
     }
 }
 @Injectable()
@@ -705,6 +714,8 @@ export const mdsStorybookProviders: ApplicationConfig['providers'] = [
     MatSnackBar,
     provideAnimations(),
     importProvidersFrom(MatSnackBarModule),
+    // dialogs are created via the root injector and don't see the `SharedModule` providers
+    provideNativeDateAdapter(),
 ];
 
 export class WidgetDummy extends MdsEditorInstanceService.Widget {
@@ -17527,11 +17538,20 @@ export const DefaultMds: MdsDefinition = {
             isExtended: false,
         },
         {
+            id: 'node_author_only',
+            caption: null,
+            icon: 'person',
+            html: '\n              <author>\n\t\t\t\t',
+            rel: null,
+            hideIfEmpty: false,
+            isExtended: false,
+        },
+        {
             id: 'node_general_bulk',
             caption: null,
             icon: 'description',
             html:
-                '\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>' +
+                '\n              <cclom:title>\n              <ccm:educationallearningresourcetype>\n              <cclom:general_keyword>\n              <cclom:general_description>\n              <author>' +
                 '<ccm:taxonid> <ccm:educationaltypicallearningtime> <ccm:educationaltypicalagerange> <ccm:tool_category> ',
             rel: null,
             hideIfEmpty: false,
@@ -17844,6 +17864,11 @@ export const DefaultMds: MdsDefinition = {
         {
             id: 'io_bulk',
             views: ['node_general_bulk'],
+            rendering: 'angular',
+        },
+        {
+            id: 'io_author_only',
+            views: ['node_author_only'],
             rendering: 'angular',
         },
         {

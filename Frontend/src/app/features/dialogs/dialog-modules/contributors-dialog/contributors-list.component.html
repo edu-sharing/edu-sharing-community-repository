@@ -1,0 +1,54 @@
+<div class="contributor-bucket" [class.bucket-metadata]="bucket() === 'metadata'">
+  <h4 class="mat-heading-4 bucketHeading" [id]="headingId()">{{ heading() | translate }}</h4>
+  @for (group of groups(); track group.role) {
+  <div class="group">
+    <div class="role" [id]="roleId(group.role)">{{ roleLabel(group.role) | translate }}</div>
+    <mat-chip-grid [attr.aria-labelledby]="headingId() + ' ' + roleId(group.role)">
+      @for (entry of group.entries; track entry.key) { @let name =
+      entry.vCard.getDisplayName().trim(); @let state = !isBulk() ? '' : entry.state === 'some' ?
+      ('WORKSPACE.CONTRIBUTOR.BULK.ON_SOME' | translate: { count: entry.nodeIds.length, total:
+      nodeCount() }) : ('WORKSPACE.CONTRIBUTOR.BULK.ON_ALL' | translate: {total: nodeCount()}); @let
+      conflict = isBulk() && entry.hasConflicts ? ('WORKSPACE.CONTRIBUTOR.BULK.CONFLICT' |
+      translate) : ''; @let details = state && conflict ? state + ', ' + conflict : state ||
+      conflict;
+      <!-- Built like the chips of the mds multivalue tree: label plus remove, with the hatched
+            `indeterminate` look for a contributor that only some of the nodes carry. MatChip strips a
+            host [attr.aria-label] (it binds that to null itself) and forwards its own `aria-label`
+            input to the focusable action, so the state is bound as an input, not as an attribute. The
+            conflict marker is decorative, its meaning is part of the label. -->
+      <mat-chip-row
+        class="badge clickable"
+        [class.indeterminate]="entry.state === 'some'"
+        [removable]="true"
+        [matTooltip]="
+          (details ? name + ' (' + details + ')' : name) +
+          ' (' +
+          ('MDS.DELETE_KEY_NOTICE' | translate) +
+          ')'
+        "
+        matTooltipPosition="above"
+        [aria-label]="details ? name + ', ' + details : name"
+        (click)="edit.emit(entry)"
+        (keydown.enter)="edit.emit(entry)"
+        (removed)="remove.emit(entry)"
+      >
+        {{ entry.vCard.getDisplayName() }}
+        @if (isBulk() && entry.hasConflicts) {
+        <i esIcon="info" class="conflict-marker" [aria]="false"></i>
+        }
+        <button
+          matChipRemove
+          type="button"
+          [attr.aria-label]="'WORKSPACE.CONTRIBUTOR.REMOVE' | translate : { name: name }"
+        >
+          <i esIcon="cancel" [aria]="false"></i>
+        </button>
+      </mat-chip-row>
+      }
+    </mat-chip-grid>
+  </div>
+  }
+  <button mat-raised-button class="btnAdd" (click)="add.emit()">
+    <i esIcon="add"></i> {{ 'ADD' | translate }}
+  </button>
+</div>

@@ -537,6 +537,14 @@
         "DARSTELLER": "Darsteller{{GENDER_SEPARATOR}}in",
         "CREATOR": "Ersteller{{GENDER_SEPARATOR}}in",
         "PROVIDER": "Anbieter{{GENDER_SEPARATOR}}in"
+      },
+      "BULK": {
+        "HINT": "Sie bearbeiten {{ total }} Objekte. Schraffierte Beteiligte liegen nur auf einem Teil der Objekte und bleiben unverändert – öffnen Sie sie, um sie auf alle Objekte anzuwenden, oder entfernen Sie sie, um sie überall zu löschen.",
+        "ON_SOME": "auf {{ count }} von {{ total }} Objekten",
+        "ON_ALL": "auf allen {{ total }} Objekten",
+        "CONFLICT": "Die Angaben zu diesem Beteiligten unterscheiden sich zwischen den Objekten. Beim Bearbeiten werden sie vereinheitlicht.",
+        "DELETE_MESSAGE": "Sind Sie sicher, dass Sie den/die Beteiligten {{ name }} von allen {{ total }} Objekten entfernen möchten?",
+        "PARTIAL_ERROR": "{{ count }} von {{ total }} Objekten wurden aktualisiert. Die übrigen konnten nicht gespeichert werden."
       }
     },
     "COPY_SEARCH": "Suche",
@@ -668,7 +676,8 @@
       "LTI_FIELDS_REQUIRED": "Alle nötigen Felder müssen korrekt ausgefüllt sein, um eine LTI-Ressource anzulegen",
       "LTI_FIELDS_REQUIRED_LINK": "Als normalen Link anlegen",
       "TO_ME_SHARED_PERSONAL": "An mich freigegebene Inhalte werden angezeigt",
-      "TO_ME_SHARED_ALL": "An meine Gruppen freigegebene Inhalte werden angezeigt"
+      "TO_ME_SHARED_ALL": "An meine Gruppen freigegebene Inhalte werden angezeigt",
+      "CONTRIBUTOR_UPDATED_MULTIPLE": "Informationen zu Beteiligten wurden für {{ count }} Objekte aktualisiert"
     }
   }
 }

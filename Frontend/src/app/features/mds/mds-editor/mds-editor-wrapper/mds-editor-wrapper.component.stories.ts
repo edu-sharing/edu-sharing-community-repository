@@ -19,6 +19,7 @@ import {
 } from 'ngx-edu-sharing-api';
 import { CommonModule } from '@angular/common';
 import { MdsModule } from '../../mds.module';
+import { DialogsModule } from '../../../dialogs/dialogs.module';
 import {
     Helper,
     MdsExtendedValue,
@@ -105,7 +106,7 @@ const meta: Meta<MdsEditorWrapperComponent> = {
     decorators: [
         moduleMetadata({
             declarations: [],
-            imports: [MdsModule, SharedModule],
+            imports: [MdsModule, SharedModule, DialogsModule],
         }),
         applicationConfig({
             providers: mdsStorybookProviders,

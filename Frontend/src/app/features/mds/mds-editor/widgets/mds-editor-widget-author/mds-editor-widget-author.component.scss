@@ -37,6 +37,15 @@ mat-tab-group {
         padding: 0 10px;
     }
 
+    // long placeholder in narrow fields
+    .authorPerson input {
+        text-overflow: ellipsis;
+
+        &::placeholder {
+            text-overflow: ellipsis;
+        }
+    }
+
     .authorFreetext {
         display: flex;
         flex-grow: 1;

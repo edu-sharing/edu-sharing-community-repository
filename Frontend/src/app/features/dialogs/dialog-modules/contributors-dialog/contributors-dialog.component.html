@@ -1,80 +1,22 @@
-<div class="contributor-lifecycle">
-  <h4 class="mat-heading-4 lifecycleHeading">
-    {{ 'WORKSPACE.CONTRIBUTOR.LIFECYCLECONTRIBUTOR' | translate }}
-  </h4>
-  @for (role of rolesLifecycle; track role) {
-  <div>
-    @if (contributorLifecycle[role] && contributorLifecycle[role].length) {
-    <div class="group">
-      <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
-      <mat-chip-grid>
-        @for (vCard of contributorLifecycle[role]; track vCard; let i = $index) {
-        <mat-chip-row
-          class="badge clickable"
-          [removable]="true"
-          [matTooltip]="vCard.getDisplayName() + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
-          (click)="editVCard('lifecycle', vCard, role, i)"
-          (keydown.enter)="editVCard('lifecycle', vCard, role, i)"
-          (removed)="remove(contributorLifecycle[role], i)"
-        >
-          {{ vCard.getDisplayName() }}
-          <button
-            matChipRemove
-            type="button"
-            [attr.aria-label]="
-              'WORKSPACE.CONTRIBUTOR.REMOVE' | translate : { name: vCard.getDisplayName() }
-            "
-          >
-            <i esIcon="cancel"></i>
-          </button>
-        </mat-chip-row>
-        }
-      </mat-chip-grid>
-    </div>
-    }
-  </div>
-  }
-  <button mat-raised-button class="btnAdd" (click)="addVCard('lifecycle')">
-    <i esIcon="add"></i> {{ 'ADD' | translate }}
-  </button>
-</div>
-<div class="contributor-metadata">
-  <h4 class="mat-heading-4 metadataHeading">
-    {{ 'WORKSPACE.CONTRIBUTOR.METADATACONTRIBUTOR' | translate }}
-  </h4>
-  @for (role of rolesMetadata; track role) {
-  <div>
-    @if (contributorMetadata[role] && contributorMetadata[role].length) {
-    <div class="group">
-      <div class="role">{{ 'WORKSPACE.CONTRIBUTOR.TYPE.' + role.toUpperCase() | translate }}</div>
-      <mat-chip-grid>
-        @for (vCard of contributorMetadata[role]; track vCard; let i = $index) {
-        <mat-chip-row
-          class="badge clickable"
-          [removable]="true"
-          [matTooltip]="vCard.getDisplayName() + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
-          (click)="editVCard('metadata', vCard, role, i)"
-          (keydown.enter)="editVCard('metadata', vCard, role, i)"
-          (removed)="remove(contributorMetadata[role], i)"
-        >
-          {{ vCard.getDisplayName() }}
-          <button
-            matChipRemove
-            type="button"
-            [attr.aria-label]="
-              'WORKSPACE.CONTRIBUTOR.REMOVE' | translate : { name: vCard.getDisplayName() }
-            "
-          >
-            <i esIcon="cancel"></i>
-          </button>
-        </mat-chip-row>
-        }
-      </mat-chip-grid>
-    </div>
-    }
-  </div>
-  }
-  <button mat-raised-button class="btnAdd" (click)="addVCard('metadata')">
-    <i esIcon="add"></i> {{ 'ADD' | translate }}
-  </button>
-</div>
+@if (isBulk()) {
+<!-- content projection instead of [message], since the hint needs the `total` interpolation -->
+<es-info-message mode="info" class="bulk-hint">
+  {{ 'WORKSPACE.CONTRIBUTOR.BULK.HINT' | translate : { total: nodeCount() } }}
+</es-info-message>
+}
+<es-contributors-list
+  bucket="lifecycle"
+  [entries]="entries()"
+  [nodeCount]="nodeCount()"
+  (remove)="onRemove($event)"
+  (edit)="onEdit($event)"
+  (add)="onAdd('lifecycle')"
+></es-contributors-list>
+<es-contributors-list
+  bucket="metadata"
+  [entries]="entries()"
+  [nodeCount]="nodeCount()"
+  (remove)="onRemove($event)"
+  (edit)="onEdit($event)"
+  (add)="onAdd('metadata')"
+></es-contributors-list>

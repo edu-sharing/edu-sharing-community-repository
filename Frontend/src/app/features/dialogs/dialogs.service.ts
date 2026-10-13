@@ -484,7 +484,7 @@ export class DialogsService {
         );
         return this.cardDialog.open(ContributorsDialogComponent, {
             title: 'WORKSPACE.CONTRIBUTOR.TITLE',
-            width: 500,
+            width: 600,
             height: 700,
             data,
         });

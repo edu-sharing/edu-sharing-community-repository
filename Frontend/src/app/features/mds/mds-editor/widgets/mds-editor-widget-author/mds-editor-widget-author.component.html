@@ -1,6 +1,6 @@
 <es-mds-editor-widget-container
   [label]="'MDS.AUTHOR_LABEL' | translate"
-  [widget]="$any(requiredWidget)"
+  [widget]="$any(containerWidget)"
 >
   @if (author) {
   <mat-tab-group
@@ -9,64 +9,84 @@
     class="author-tabs"
     [aria-label]="'MDS.AUTHOR_LABEL' | translate"
   >
-    <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}">
-      <mat-form-field class="authorFreetext">
+    <mat-tab label="{{ 'MDS.AUTHOR_FREETEXT' | translate }}" [disabled]="fieldsDisabled()">
+      <mat-form-field
+        class="authorFreetext"
+        [floatLabel]="showMixed('freetext') ? 'always' : 'auto'"
+      >
         <mat-label>{{ 'MDS.AUTHOR_FREETEXT_PLACEHOLDER' | translate }}</mat-label>
         <textarea
           matInput
           cdkTextareaAutosize
           id="authorFreetext"
           [(ngModel)]="author.freetext"
-          (ngModelChange)="onChange()"
+          (ngModelChange)="onFreetextChange()"
           (blur)="onBlur()"
+          [disabled]="fieldsDisabled()"
+          [placeholder]="showMixed('freetext') ? ('MDS.DIFFERENT_VALUES' | translate) : ''"
           cdkAutosizeMinRows="2"
           cdkAutosizeMaxRows="5"
         ></textarea>
       </mat-form-field>
       <ng-container *ngTemplateOutlet="requiredHint"></ng-container>
     </mat-tab>
-    <mat-tab label="{{ 'MDS.AUTHOR_PERSON' | translate }}">
+    <mat-tab label="{{ 'MDS.AUTHOR_PERSON' | translate }}" [disabled]="fieldsDisabled()">
       <div class="author-checkbox">
-        <mat-checkbox [(ngModel)]="userAuthor" (ngModelChange)="setVCardAuthor($event)">{{
-          'WORKSPACE.LICENSE.CHECKBOX_AUTHOR' | translate
-        }}</mat-checkbox>
+        <mat-checkbox
+          [(ngModel)]="userAuthor"
+          (ngModelChange)="setVCardAuthor($event)"
+          [disabled]="fieldsDisabled()"
+          >{{ 'WORKSPACE.LICENSE.CHECKBOX_AUTHOR' | translate }}</mat-checkbox
+        >
       </div>
       <div class="vcard authorPerson">
         <div class="title">
           <!-- <i esIcon="person"></i> -->
-          <mat-form-field class="mat-form-field-no-padding">
+          <mat-form-field
+            class="mat-form-field-no-padding"
+            [floatLabel]="showMixed('author') ? 'always' : 'auto'"
+          >
             <mat-label>{{ 'VCARD.Title' | translate }}</mat-label>
             <input
               matInput
               [(ngModel)]="author.author.title"
-              (ngModelChange)="onChange()"
+              (ngModelChange)="onAuthorChange()"
               (blur)="onBlur()"
-              [disabled]="userAuthor"
+              [disabled]="userAuthor || fieldsDisabled()"
+              [placeholder]="showMixed('author') ? ('MDS.DIFFERENT_VALUES' | translate) : ''"
             />
           </mat-form-field>
         </div>
         <div class="givenname">
           <!-- <i esIcon="person"></i> -->
-          <mat-form-field class="mat-form-field-no-padding">
+          <mat-form-field
+            class="mat-form-field-no-padding"
+            [floatLabel]="showMixed('author') ? 'always' : 'auto'"
+          >
             <mat-label>{{ 'VCARD.Givenname' | translate }}</mat-label>
             <input
               matInput
               [(ngModel)]="author.author.givenname"
-              (ngModelChange)="onChange()"
+              (ngModelChange)="onAuthorChange()"
               (blur)="onBlur()"
-              [disabled]="userAuthor"
+              [disabled]="userAuthor || fieldsDisabled()"
+              [placeholder]="showMixed('author') ? ('MDS.DIFFERENT_VALUES' | translate) : ''"
             />
           </mat-form-field>
         </div>
         <div class="surname">
-          <mat-form-field class="mat-form-field-no-padding">
+          <mat-form-field
+            class="mat-form-field-no-padding"
+            [floatLabel]="showMixed('author') ? 'always' : 'auto'"
+          >
             <mat-label>{{ 'VCARD.Surname' | translate }}</mat-label>
             <input
               matInput
               [(ngModel)]="author.author.surname"
-              (ngModelChange)="onChange()"
+              (ngModelChange)="onAuthorChange()"
               (blur)="onBlur()"
-              [disabled]="userAuthor"
+              [disabled]="userAuthor || fieldsDisabled()"
+              [placeholder]="showMixed('author') ? ('MDS.DIFFERENT_VALUES' | translate) : ''"
             />
           </mat-form-field>
         </div>
@@ -74,8 +94,13 @@
       <ng-container *ngTemplateOutlet="requiredHint"></ng-container>
       @if (showContributorDialog && mdsEditorValues.nodes$.value) {
       <div class="contributors">
-        @if (_nodes?.length === 1 && !ui.isMobile()) {
-        <button mat-button color="primary" (click)="openContributorDialog()">
+        @if (!ui.isMobile()) {
+        <button
+          mat-button
+          color="primary"
+          [disabled]="fieldsDisabled()"
+          (click)="openContributorDialog()"
+        >
           {{ 'MDS.CONTRIBUTOR_LINK' | translate }} <i esIcon="arrow_forward"></i>
         </button>
         }

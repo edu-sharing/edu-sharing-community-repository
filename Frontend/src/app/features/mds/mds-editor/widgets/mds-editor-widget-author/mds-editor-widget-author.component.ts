@@ -1,7 +1,18 @@
-import { Component, inject, Input, OnInit, ViewChild } from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    computed,
+    DestroyRef,
+    inject,
+    Input,
+    OnInit,
+    signal,
+    ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTabGroup } from '@angular/material/tabs';
 import { BehaviorSubject } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { MdsWidget, Node } from 'ngx-edu-sharing-api';
 import { RestConstants } from '../../../../../core-module/rest/rest-constants';
 import { RestIamService } from '../../../../../core-module/rest/services/rest-iam.service';
@@ -13,7 +24,8 @@ import { Attributes } from '../../util/parse-attributes';
 import { authorIsEmpty } from '../../util/native-widget-completion';
 import { MainNavService } from '../../../../../main/navigation/main-nav.service';
 import { DialogsService } from '../../../../dialogs/dialogs.service';
-import { Constraints, InputStatus, Values } from '../../../types/types';
+import { BulkMode, Constraints, InputStatus, Values } from '../../../types/types';
+import { applyAuthorValues } from '../../util/author-bulk-values';
 
 export interface AuthorData {
     freetext: string;
@@ -35,14 +47,18 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     private mainNavService = inject(MainNavService);
     ui = inject(UIService);
     private dialogs = inject(DialogsService);
+    private destroyRef = inject(DestroyRef);
+    private changeDetectorRef = inject(ChangeDetectorRef);
 
     static readonly constraints: Constraints = {
         requiresNode: false,
-        supportsBulk: false,
+        supportsBulk: true,
         // the widget only provides tabs with input fields, there is no read-only representation
         supportsViewer: false,
     };
     attributes: Attributes;
+    /** carries the bulk mode; not set when embedded, e.g. in the license dialog */
+    @Input() widget: Widget;
     @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
     @Input() showContributorDialog = true;
     _nodes: Node[];
@@ -71,8 +87,28 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      */
     userAuthor: boolean;
     private initialAuthor: AuthorData;
+    /** whether the nodes differ in the field */
+    mixedFreetext = false;
+    mixedAuthor = false;
+    /** an emptied field with differing values looks unchanged, so edits are tracked separately */
+    private freetextTouched = false;
+    private authorTouched = false;
+    private readonly bulkMode = signal<BulkMode>(null);
+    /** locked while the bulk switch is off */
+    readonly fieldsDisabled = computed(
+        () => this.isBulk && !!this.widget && this.bulkMode() === 'no-change',
+    );
 
     ngOnInit(): void {
+        this.widget
+            ?.observeBulkMode()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((mode) => {
+                this.bulkMode.set(mode);
+                if (this.initialAuthor) {
+                    this.onChange();
+                }
+            });
         this.mdsEditorValues.nodes$.pipe(filter((n) => n != null)).subscribe((nodes) => {
             void this.updateValues(nodes);
         });
@@ -80,11 +116,45 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
             void this.updateValues([{ properties: values }] as Node[]);
         });
     }
+    get isBulk(): boolean {
+        return !!this.mdsEditorValues.editorBulkMode?.isBulk;
+    }
+
+    /** whether the input is applied when saving; always true without a bulk switch */
+    private get isEditingActive(): boolean {
+        return !this.isBulk || !this.widget || this.bulkMode() !== 'no-change';
+    }
+
+    private get freetextChanged(): boolean {
+        return this.mixedFreetext
+            ? this.freetextTouched
+            : this.initialAuthor.freetext !== this.author.freetext;
+    }
+
+    private get authorChanged(): boolean {
+        return this.mixedAuthor
+            ? this.authorTouched
+            : this.initialAuthor.author.getDisplayName() !== this.author.author.getDisplayName();
+    }
+
+    showMixed(field: 'freetext' | 'author'): boolean {
+        return field === 'freetext'
+            ? this.mixedFreetext && !this.freetextTouched
+            : this.mixedAuthor && !this.authorTouched;
+    }
+
+    onFreetextChange(): void {
+        this.freetextTouched = true;
+        this.onChange();
+    }
+
+    onAuthorChange(): void {
+        this.authorTouched = true;
+        this.onChange();
+    }
+
     onChange(): void {
-        this.hasChanges.next(
-            this.initialAuthor.freetext !== this.author.freetext ||
-                this.initialAuthor.author.getDisplayName() !== this.author.author.getDisplayName(),
-        );
+        this.hasChanges.next(this.isEditingActive && (this.freetextChanged || this.authorChanged));
         this.updateStatus();
     }
 
@@ -94,7 +164,11 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
      * `nativeWidgetEmptyCheckers`) so there is a single source of truth.
      */
     private get isEmptyValue(): boolean {
-        return authorIsEmpty(this.author?.freetext, this.author?.author);
+        return (
+            !this.showMixed('freetext') &&
+            !this.showMixed('author') &&
+            authorIsEmpty(this.author?.freetext, this.author?.author)
+        );
     }
 
     /**
@@ -104,7 +178,8 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     private updateStatus(): void {
         const empty = this.isEmptyValue;
         this.isEmpty.next(empty);
-        const status: InputStatus = this.isRequired === 'mandatory' && empty ? 'INVALID' : 'VALID';
+        const status: InputStatus =
+            this.isRequired === 'mandatory' && empty && this.isEditingActive ? 'INVALID' : 'VALID';
         this.status.next(status);
     }
 
@@ -127,6 +202,11 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         return !!this.isRequired && this.isEmptyValue;
     }
 
+    /** the real widget in bulk mode, so the container shows the switch */
+    get containerWidget(): Partial<Widget> | null {
+        return this.isBulk && this.widget ? this.widget : this.requiredWidget;
+    }
+
     /**
      * "fake" widget passed to the container so it shows the required marker via the existing
      * `widget.definition.isRequired` logic. Returns a stable, cached instance.
@@ -147,22 +227,23 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
     static async openContributorDialog(
         mdsEditorInstanceService: MdsEditorInstanceService,
         dialogs: DialogsService,
-    ): Promise<Node | null> {
+    ): Promise<Node[] | null> {
         // update props before switching to contributor to keep local changes
         const nodes = mdsEditorInstanceService.nodes$.value;
-        const values = await mdsEditorInstanceService.getValues(nodes[0], false);
-        const node = nodes[0];
-        Object.keys(values).forEach((key) => (node.properties[key] = values[key]));
-        // this._nodes[0].properties = await this.getValues(this._nodes[0].properties, this._nodes[0]);
-        const dialogRef = await dialogs.openContributorsDialog({ node });
+        for (const node of nodes) {
+            const values = await mdsEditorInstanceService.getValues(node, false);
+            Object.keys(values).forEach((key) => (node.properties[key] = values[key]));
+        }
+        const dialogRef = await dialogs.openContributorsDialog({ nodes });
         return dialogRef
             .afterClosed()
             .pipe(
                 tap((result) => {
-                    if (result) {
-                        mdsEditorInstanceService.updateNodes([result]);
+                    if (result?.length) {
+                        mdsEditorInstanceService.updateNodes(result);
                     }
                 }),
+                map((result) => result ?? null),
             )
             .toPromise();
     }
@@ -173,33 +254,21 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
         } else {
             this.author.author = new VCard();
         }
-        this.onChange();
+        this.onAuthorChange();
     }
 
+    /** in bulk mode only the edited parts are written */
     async getValues(values: Values, node: Node): Promise<Values> {
         if (!this.author) {
-            return {};
+            return values;
         }
-        values[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = [this.author.freetext];
-        // copy current value from node, replace only first entry (if it has multiple authors)
-        values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = (node as Node)?.properties?.[
-            RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR
-        ];
-        if (!values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR]) {
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [''];
+        if (!this.isEditingActive) {
+            return values;
         }
-        if (this.author.author.isValid()) {
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR][0] =
-                this.author.author.toVCardString();
-        } else if (values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].length === 1) {
-            // backend treats `null` as "property not provided" and would keep the old value.
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = [];
-        } else {
-            // the author was cleared: drop the first entry (the author vcard) and keep any
-            // remaining contributors
-            values[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR].splice(0, 1);
-        }
-        return values;
+        return applyAuthorValues(values, node, {
+            freetext: !this.isBulk || this.freetextChanged ? this.author.freetext : undefined,
+            author: !this.isBulk || this.authorChanged ? this.author.author : undefined,
+        });
     }
     private async updateValues(nodes: Node[]) {
         if (this.hasChanges.value) {
@@ -226,6 +295,10 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                     ),
                 ),
             );
+            this.mixedFreetext = freetext.length !== 1;
+            this.mixedAuthor = author.length !== 1;
+            this.freetextTouched = false;
+            this.authorTouched = false;
             if (freetext.length !== 1) {
                 freetext = null;
             }
@@ -272,17 +345,20 @@ export class MdsEditorWidgetAuthorComponent implements OnInit, NativeWidgetCompo
                 freetext: this.author.freetext,
                 author: new VCard(this.author.author.toVCardString()),
             };
+            // the refresh may be triggered from outside the zone (e.g. when the contributor dialog
+            // closes), so the new values would otherwise only show up on the next user interaction
+            this.changeDetectorRef.markForCheck();
             setTimeout(() => this.tabGroup.realignInkBar());
         }
     }
 
     async openContributorDialog() {
-        const updatedNode = await MdsEditorWidgetAuthorComponent.openContributorDialog(
+        const updatedNodes = await MdsEditorWidgetAuthorComponent.openContributorDialog(
             this.mdsEditorValues,
             this.dialogs,
         );
-        if (updatedNode) {
-            await this.updateValues([updatedNode]);
+        if (updatedNodes?.length) {
+            await this.updateValues(this.mdsEditorValues.nodes$.value);
         }
     }
 }

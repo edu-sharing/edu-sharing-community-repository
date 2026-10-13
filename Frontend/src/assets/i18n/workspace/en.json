@@ -283,7 +283,6 @@
     "INHERIT_COLLECTION_EMPTY": "There are currently no permissions on the parent collection.\nAs soon as the parent collection receives permissions, they will be applied to this object.",
     "PERMISSION_AUTHORITY_EXISTS": "The chosen user/group already has access. Check the current permissions at \"Local sharing\"",
     "PERMISSIONS_UPDATED": "Permissions updated",
-
     "NOTIFY_TITLE": "Send e-mail notification",
     "NOTIFY_INFO": "The new users or groups will get an invitation notification",
     "STRUCTURE": {
@@ -499,6 +498,14 @@
         "DARSTELLER": "actor",
         "CREATOR": "creator",
         "PROVIDER": "provider"
+      },
+      "BULK": {
+        "HINT": "You are editing {{ total }} objects. Hatched contributors exist on only some of them and stay unchanged – open one to apply it to all objects, or remove it to delete it everywhere.",
+        "ON_SOME": "on {{ count }} of {{ total }} objects",
+        "ON_ALL": "on all {{ total }} objects",
+        "CONFLICT": "The details of this contributor differ between the objects. Editing will unify them.",
+        "DELETE_MESSAGE": "Are you sure you want to remove {{ name }} as a contributor from all {{ total }} objects?",
+        "PARTIAL_ERROR": "{{ count }} of {{ total }} objects have been updated. The remaining ones could not be saved."
       }
     },
     "COPY_SEARCH": "Search",
@@ -630,7 +637,8 @@
       "LTI_FIELDS_REQUIRED": "All required fields must be filled out in order to create a lti-resource",
       "LTI_FIELDS_REQUIRED_LINK": "Create regular link",
       "TO_ME_SHARED_PERSONAL": "Content shared with me is displayed",
-      "TO_ME_SHARED_ALL": "Content shared with my groups is displayed"
+      "TO_ME_SHARED_ALL": "Content shared with my groups is displayed",
+      "CONTRIBUTOR_UPDATED_MULTIPLE": "Information of contributors have been updated for {{ count }} objects"
     }
   }
 }

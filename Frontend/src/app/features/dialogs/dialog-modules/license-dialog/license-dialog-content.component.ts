@@ -434,10 +434,17 @@ export class LicenseDialogContentComponent implements OnInit {
         prop = await this.getProperties(prop);
         this.isLoading.emit(true);
         const updatedNodes: Node[] = [];
+        // with several nodes the author is written per node
+        const authorPerNode = !!this.author && this.type !== 'MULTI' && this.getNodes().length > 1;
         for (const node of this.getNodes()) {
-            node.properties = prop;
+            const nodeProps = authorPerNode ? await this.author.getValues({ ...prop }, node) : prop;
+            node.properties = nodeProps;
             this.nodeApi
-                .editNodeMetadataNewVersion(node.ref.id, RestConstants.COMMENT_LICENSE_UPDATE, prop)
+                .editNodeMetadataNewVersion(
+                    node.ref.id,
+                    RestConstants.COMMENT_LICENSE_UPDATE,
+                    nodeProps,
+                )
                 .subscribe(
                     (result) => {
                         updatedNodes.push(result.node);
@@ -777,12 +784,12 @@ export class LicenseDialogContentComponent implements OnInit {
                 prop[RestConstants.CCM_PROP_LICENSE_CC_LOCALE] = [this.ccCountry];
             }
         }
-        prop = this.author
-            ? await this.author.getValues(
-                  prop,
-                  this.getNodes()?.length === 1 ? this.getNodes()[0] : null,
-              )
-            : prop;
+        // with several nodes the author is added per node in saveLicense
+        const nodes = this.getNodes();
+        prop =
+            this.author && !(nodes?.length > 1)
+                ? await this.author.getValues(prop, nodes?.length === 1 ? nodes[0] : null)
+                : prop;
 
         if (this.type == 'CUSTOM') {
             prop[RestConstants.LOM_PROP_RIGHTS_DESCRIPTION] = [this.rightsDescription];
@@ -828,43 +835,6 @@ export class LicenseDialogContentComponent implements OnInit {
         if (a.toLowerCase() < b.toLowerCase()) return -1;
         if (a.toLowerCase() > b.toLowerCase()) return 1;
         return 0;
-    }
-
-    hasMixedAuthorValues() {
-        return (
-            this.getNodes() != null &&
-            (this.nodeHelper.hasMixedPropertyValues(
-                this.getNodes(),
-                RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,
-            ) ||
-                this.nodeHelper.hasMixedPropertyValues(
-                    this.getNodes(),
-                    RestConstants.CCM_PROP_AUTHOR_FREETEXT,
-                ))
-        );
-    }
-
-    resetMixedAuthorValues() {
-        if (
-            this.nodeHelper.hasMixedPropertyValues(
-                this.getNodes(),
-                RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR,
-            )
-        ) {
-            this.getNodes().forEach(
-                (n) => (n.properties[RestConstants.CCM_PROP_LIFECYCLECONTRIBUTER_AUTHOR] = null),
-            );
-        }
-        if (
-            this.nodeHelper.hasMixedPropertyValues(
-                this.getNodes(),
-                RestConstants.CCM_PROP_AUTHOR_FREETEXT,
-            )
-        ) {
-            this.getNodes().forEach(
-                (n) => (n.properties[RestConstants.CCM_PROP_AUTHOR_FREETEXT] = null),
-            );
-        }
     }
 
     private setDefaultModeState() {
