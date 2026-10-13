@@ -1,21 +1,36 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { DialogButton, RestConstants, RestNodeService } from '../../../../core-module/core.module';
-import { Node } from 'ngx-edu-sharing-api';
-import { LocalEventsService, VCard } from 'ngx-edu-sharing-ui';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Node, NodeService } from 'ngx-edu-sharing-api';
+import { LocalEventsService } from 'ngx-edu-sharing-ui';
+import { firstValueFrom } from 'rxjs';
+import { DialogButton, RestConstants } from '../../../../core-module/core.module';
 import { Toast } from '../../../../services/toast';
 import { CARD_DIALOG_DATA, CardDialogConfig, Closable } from '../../card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
+import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 import { DialogsService } from '../../dialogs.service';
 import {
     ContributorEditDialogData,
     ContributorEditDialogResult,
-    EditMode,
 } from '../contributor-edit-dialog/contributor-edit-dialog-data';
 import { YES_OR_NO } from '../generic-dialog/generic-dialog-data';
+import {
+    applyEdit,
+    buildEntries,
+    buildNodeDiff,
+    ContributorBucket,
+    ContributorEntry,
+    removeEntry,
+    upsertEntry,
+} from './contributor-bulk-model';
 import { ContributorsDialogData, ContributorsDialogResult } from './contributors-dialog-data';
-import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 
+/**
+ * Edits the contributors of one or many nodes.
+ *
+ * The dialog always works on the bulk model, even for a single node - with one node there simply
+ * are no partial (`some`) states, so there is one code path instead of two. Saving writes only the
+ * properties that actually changed, which keeps untouched nodes free of empty new versions.
+ */
 @Component({
     selector: 'es-contributors-dialog',
     templateUrl: './contributors-dialog.component.html',
@@ -29,15 +44,13 @@ export class ContributorsDialogComponent implements OnInit {
     private cardDialogUtils = inject(CardDialogUtilsService);
     private dialogs = inject(DialogsService);
     private localEvents = inject(LocalEventsService);
-    private nodeService = inject(RestNodeService);
+    private nodeService = inject(NodeService);
     private toast = inject(Toast);
 
-    readonly rolesLifecycle = RestConstants.CONTRIBUTOR_ROLES_LIFECYCLE;
-    readonly rolesMetadata = RestConstants.CONTRIBUTOR_ROLES_METADATA;
-    contributorLifecycle: { [role: string]: VCard[] } = {};
-    contributorMetadata: { [role: string]: VCard[] } = {};
-
-    node: Node;
+    readonly entries = signal<ContributorEntry[]>([]);
+    readonly nodes = signal<Node[]>([]);
+    readonly nodeCount = computed(() => this.nodes().length);
+    readonly isBulk = computed(() => this.nodeCount() > 1);
 
     ngOnInit(): void {
         this.initButtons();
@@ -48,144 +61,135 @@ export class ContributorsDialogComponent implements OnInit {
         this.dialogRef.patchConfig({
             buttons: [
                 new DialogButton('CANCEL', { color: 'standard' }, () => this.dialogRef.close(null)),
-                new DialogButton('APPLY', { color: 'primary' }, () => this.saveContributor()),
+                new DialogButton('APPLY', { color: 'primary' }, () => void this.save()),
             ],
         });
     }
 
     private async initData() {
-        if (typeof this.data.node === 'string') {
-            this.dialogRef.patchState({ isLoading: true });
-            this.node = await this.nodeService
-                .getNodeMetadata(this.data.node, [RestConstants.ALL])
-                .pipe(map(({ node }) => node))
-                .toPromise();
-        } else {
-            this.node = this.data.node;
-        }
+        this.dialogRef.patchState({ isLoading: true });
+        const nodes = await Promise.all(
+            this.data.nodes.map((node) =>
+                typeof node === 'string' || !this.hasContributorProperties(node)
+                    ? firstValueFrom(
+                          this.nodeService.getNode(typeof node === 'string' ? node : node.ref.id),
+                      )
+                    : Promise.resolve(node),
+            ),
+        );
+        this.nodes.set(nodes);
+        this.entries.set(buildEntries(nodes));
         this.dialogRef.patchConfig(
-            (await this.cardDialogUtils.configForNode(this.node)) as Partial<
+            (await this.cardDialogUtils.configForNodes(nodes)) as Partial<
                 CardDialogConfig<ContributorsDialogData>
             >,
         );
-        for (let role of this.rolesLifecycle) {
-            this.contributorLifecycle[role] = [];
-            let list = this.node.properties[RestConstants.CONTRIBUTOR_LIFECYCLE_PREFIX + role];
-            if (!list) {
-                continue;
-            }
-            for (let vCard of list) {
-                if (vCard && new VCard(vCard).isValid()) {
-                    this.contributorLifecycle[role].push(new VCard(vCard));
-                }
-            }
-        }
-        for (let role of this.rolesMetadata) {
-            this.contributorMetadata[role] = [];
-            let list = this.node.properties[RestConstants.CONTRIBUTOR_METADATA_PREFIX + role];
-            if (!list) {
-                continue;
-            }
-            for (let vCard of list) {
-                if (vCard && new VCard(vCard).isValid()) {
-                    this.contributorMetadata[role].push(new VCard(vCard));
-                }
-            }
-        }
         this.dialogRef.patchState({ isLoading: false });
     }
 
-    async remove(data: any[], pos: number) {
+    /**
+     * Nodes coming from a list may be loaded with a reduced property filter. Only a node that
+     * already carries contributor properties can be used without reloading it.
+     */
+    private hasContributorProperties(node: Node): boolean {
+        return RestConstants.getAllVCardFields().some(
+            (property) => node.properties?.[property] !== undefined,
+        );
+    }
+
+    async onRemove(entry: ContributorEntry) {
         const confirmDialogRef = await this.dialogs.openGenericDialog({
             title: 'WORKSPACE.CONTRIBUTOR.DELETE_TITLE',
-            message: 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
-            messageParameters: { name: data[pos].getDisplayName() },
+            message: this.isBulk()
+                ? 'WORKSPACE.CONTRIBUTOR.BULK.DELETE_MESSAGE'
+                : 'WORKSPACE.CONTRIBUTOR.DELETE_MESSAGE',
+            messageParameters: {
+                name: entry.vCard.getDisplayName(),
+                total: String(this.nodeCount()),
+            },
             buttons: YES_OR_NO,
         });
         confirmDialogRef.afterClosed().subscribe((response) => {
             if (response === 'YES') {
-                data.splice(pos, 1);
-                this.dialogRef.patchConfig({ closable: Closable.Confirm });
+                removeEntry(this.entries(), entry);
+                this.markChanged();
             }
         });
     }
 
-    addVCard(mode: EditMode) {
-        void this.openEditDialog({ editMode: mode });
+    onAdd(bucket: ContributorBucket) {
+        void this.openEditDialog({ editMode: bucket }, null);
     }
 
-    async editVCard(mode: EditMode, vcard: VCard, role: string, position: number) {
-        void this.openEditDialog({
-            vCard: vcard.copy(),
-            editMode: mode,
-            position,
-            role,
-        });
+    onEdit(entry: ContributorEntry) {
+        void this.openEditDialog(
+            { vCard: entry.vCard.copy(), editMode: entry.bucket, role: entry.role },
+            entry,
+        );
     }
 
-    private async openEditDialog(data: ContributorEditDialogData) {
+    private async openEditDialog(data: ContributorEditDialogData, entry: ContributorEntry | null) {
         const dialogRef = await this.dialogs.openContributorEditDialog(data);
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                this.saveEdits(data, result);
+        dialogRef.afterClosed().subscribe((result: ContributorEditDialogResult) => {
+            if (!result) {
+                return;
             }
+            const entries = this.entries();
+            if (entry) {
+                applyEdit(entries, entry, result.vCard, result.role);
+            } else {
+                upsertEntry(entries, result.vCard, data.editMode, result.role);
+            }
+            this.markChanged();
         });
     }
 
-    private saveEdits(
-        originalData: ContributorEditDialogData,
-        result: ContributorEditDialogResult,
-    ) {
+    private markChanged() {
         this.dialogRef.patchConfig({ closable: Closable.Confirm });
-        let array =
-            originalData.editMode == 'lifecycle'
-                ? this.contributorLifecycle
-                : this.contributorMetadata;
-        if (originalData.role) {
-            array[originalData.role].splice(originalData.position, 1);
-            if (originalData.role === result.role) {
-                array[originalData.role].splice(originalData.position, 0, result.vCard);
-            } else {
-                array[result.role].push(result.vCard);
-            }
-        } else {
-            array[result.role].push(result.vCard);
-        }
+        // the entries are mutated in place by the model helpers; re-emit so the view updates
+        this.entries.set([...this.entries()]);
     }
 
-    private saveContributor() {
+    private async save() {
+        const changes = buildNodeDiff(this.nodes(), this.entries());
+        if (!changes.length) {
+            this.dialogRef.close([]);
+            return;
+        }
         this.dialogRef.patchState({ isLoading: true });
-        let properties: any = {};
-        for (let role of this.rolesLifecycle) {
-            let prop = [];
-            for (let vcard of this.contributorLifecycle[role]) {
-                prop.push(vcard.toVCardString());
+        const updatedNodes: Node[] = [];
+        const failed: { node: Node; error: any }[] = [];
+        for (const { node, values } of changes) {
+            try {
+                updatedNodes.push(
+                    await firstValueFrom(
+                        this.nodeService.editNodeMetadata(node.ref.id, values, {
+                            versionComment: RestConstants.COMMENT_CONTRIBUTOR_UPDATE,
+                        }),
+                    ),
+                );
+            } catch (error) {
+                failed.push({ node, error });
             }
-            properties['ccm:lifecyclecontributer_' + role] = prop;
         }
-        for (let role of this.rolesMetadata) {
-            let prop = [];
-            for (let vcard of this.contributorMetadata[role]) {
-                prop.push(vcard.toVCardString());
-            }
-            properties['ccm:metadatacontributer_' + role] = prop;
+        if (updatedNodes.length) {
+            this.localEvents.nodesChanged.emit(updatedNodes);
         }
-        this.nodeService
-            .editNodeMetadataNewVersion(
-                this.node.ref.id,
-                RestConstants.COMMENT_CONTRIBUTOR_UPDATE,
-                properties,
-            )
-            .subscribe(
-                ({ node }) => {
-                    this.dialogRef.close(node);
-                    this.toast.toast('WORKSPACE.TOAST.CONTRIBUTOR_UPDATED');
-                    this.localEvents.nodesChanged.emit([node]);
-                },
-                (error: any) => {
-                    this.toast.error(error);
-                    this.dialogRef.patchState({ isLoading: false });
-                },
-            );
+        if (failed.length) {
+            // Keep the dialog open so the user does not lose the state of the other entries.
+            this.dialogRef.patchState({ isLoading: false });
+            this.toast.error(failed[0].error, 'WORKSPACE.CONTRIBUTOR.BULK.PARTIAL_ERROR', {
+                count: updatedNodes.length,
+                total: changes.length,
+            });
+            return;
+        }
+        this.dialogRef.close(updatedNodes);
+        this.toast.toast(
+            this.isBulk()
+                ? 'WORKSPACE.TOAST.CONTRIBUTOR_UPDATED_MULTIPLE'
+                : 'WORKSPACE.TOAST.CONTRIBUTOR_UPDATED',
+            { count: updatedNodes.length },
+        );
     }
 }

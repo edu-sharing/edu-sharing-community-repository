@@ -452,6 +452,14 @@
         "DARSTELLER": "attore",
         "CREATOR": "creatore",
         "PROVIDER": "fornitore"
+      },
+      "BULK": {
+        "HINT": "Stai modificando {{ total }} oggetti. I collaboratori tratteggiati sono presenti solo su una parte degli oggetti e restano invariati – aprine uno per applicarlo a tutti gli oggetti, oppure rimuovilo per eliminarlo ovunque.",
+        "ON_SOME": "su {{ count }} di {{ total }} oggetti",
+        "ON_ALL": "su tutti i {{ total }} oggetti",
+        "CONFLICT": "I dati di questo collaboratore differiscono tra gli oggetti. Modificandoli verranno uniformati.",
+        "DELETE_MESSAGE": "Sei sicuro di voler rimuovere {{ name }} come collaboratore da tutti i {{ total }} oggetti?",
+        "PARTIAL_ERROR": "{{ count }} di {{ total }} oggetti sono stati aggiornati. Gli altri non sono stati salvati."
       }
     },
     "COPY_SEARCH": "Ricerca",
@@ -568,7 +576,8 @@
       "LTI_FIELDS_REQUIRED": "Tutti i campi obbligatori devono essere compilati per poter creare una risorsa lti",
       "LTI_FIELDS_REQUIRED_LINK": "Creare un collegamento regolare",
       "TO_ME_SHARED_PERSONAL": "I contenuti condivisi con me vengono visualizzati",
-      "TO_ME_SHARED_ALL": "I contenuti condivisi con me o con i miei gruppi vengono visualizzati"
+      "TO_ME_SHARED_ALL": "I contenuti condivisi con me o con i miei gruppi vengono visualizzati",
+      "CONTRIBUTOR_UPDATED_MULTIPLE": "Le informazioni sui collaboratori sono state aggiornate per {{ count }} oggetti"
     },
     "LTI_TOOLS": {
       "TITLE": "Strumenti LTI",

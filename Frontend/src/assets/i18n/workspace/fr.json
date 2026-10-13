@@ -456,6 +456,14 @@
         "DARSTELLER": "acteur",
         "CREATOR": "créateur",
         "PROVIDER": "fournisseur"
+      },
+      "BULK": {
+        "HINT": "Vous modifiez {{ total }} objets. Les contributeurs hachurés ne concernent qu’une partie des objets et restent inchangés – ouvrez-en un pour l’appliquer à tous les objets, ou supprimez-le pour l’effacer partout.",
+        "ON_SOME": "sur {{ count }} des {{ total }} objets",
+        "ON_ALL": "sur les {{ total }} objets",
+        "CONFLICT": "Les informations de ce contributeur diffèrent selon les objets. La modification les uniformisera.",
+        "DELETE_MESSAGE": "Êtes-vous sûr de vouloir supprimer {{ name }} en tant que contributeur des {{ total }} objets ?",
+        "PARTIAL_ERROR": "{{ count }} objets sur {{ total }} ont été mis à jour. Les autres n’ont pas pu être enregistrés."
       }
     },
     "COPY_SEARCH": "Recherche",
@@ -579,7 +587,8 @@
       "LTI_FIELDS_REQUIRED": "Tous les champs obligatoires doivent être remplis pour créer une ressource lti.",
       "LTI_FIELDS_REQUIRED_LINK": "Créer un lien régulier",
       "TO_ME_SHARED_PERSONAL": "Le contenu partagé avec moi est affiché",
-      "TO_ME_SHARED_ALL": "Le contenu partagé avec moi ou mes groupes est affiché"
+      "TO_ME_SHARED_ALL": "Le contenu partagé avec moi ou mes groupes est affiché",
+      "CONTRIBUTOR_UPDATED_MULTIPLE": "Les informations sur les contributeurs ont été mises à jour pour {{ count }} objets"
     },
     "LTI_TOOLS": {
       "TITLE": "Outils LTI",

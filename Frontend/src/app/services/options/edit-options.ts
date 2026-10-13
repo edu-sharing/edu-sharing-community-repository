@@ -97,16 +97,15 @@ export function createEditOptions({
     licenseNode.group = DefaultGroups.Edit;
     licenseNode.priority = 30;
 
-    const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', (object) => {
-        void service.dialogs.openContributorsDialog({
-            node: service.getObjects(object, data)[0],
-        });
+    const contributorNode = new OptionItem('OPTIONS.CONTRIBUTOR', 'group', async (object) => {
+        // resolve the full nodes: list entries may not carry the contributor properties
+        const nodes = await service.getObjectsAsync(object, data, true);
+        void service.dialogs.openContributorsDialog({ nodes });
     });
     contributorNode.constrains = [
         Constrain.Files,
         Constrain.NoCollectionReference,
         Constrain.HomeRepository,
-        Constrain.NoBulk,
         Constrain.User,
     ];
     contributorNode.permissions = [RestConstants.ACCESS_WRITE];
