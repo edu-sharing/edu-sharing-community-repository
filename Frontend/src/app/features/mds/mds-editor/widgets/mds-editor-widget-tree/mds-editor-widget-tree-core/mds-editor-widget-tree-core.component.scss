@@ -72,6 +72,17 @@
             height: 50px;
         }
     }
+    .tree-header-toggle {
+        padding: 0 20px 10px;
+        // an option of the tree, so it does not take the color of the entries listed below
+        ::ng-deep .mat-internal-form-field {
+            --mat-checkbox-label-text-color: var(--textMain);
+        }
+    }
+    .group-label {
+        color: var(--textMain);
+        font-weight: 600;
+    }
     li,
     .mat-nested-tree-node,
     .mat-tree-node {
@@ -123,6 +134,11 @@
         .children-group {
             padding-inline-start: 30px;
         }
+    }
+    // rows with children grow with captions that span several lines
+    .mat-nested-tree-node > .item:not(.item-tree) {
+        height: auto;
+        min-height: var(--mat-tree-node-min-height);
     }
 }
 

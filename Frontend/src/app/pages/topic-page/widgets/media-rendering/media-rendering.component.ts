@@ -29,7 +29,7 @@ import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule, NodeTitlePipe } from 'ngx-edu-sharing-ui';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-collection-tree/collection-tree-config';
+import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { SharedModule } from '../../../../shared/shared.module';
 import { RenderWrapperComponent } from '../../../render2-page/render-wrapper-component/render-wrapper.component';
 import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';

@@ -7,7 +7,6 @@ import {
     Injector,
     NgZone,
     OnDestroy,
-    signal,
     Type,
     ViewContainerRef,
 } from '@angular/core';
@@ -863,8 +862,6 @@ export class MdsEditorInstanceService
     private nativeWidgetsValidValue = true;
     /** Input to `MdsEditorWrapper`. */
     externalFilters: Values;
-    /** Collection the `collectionTree` widgets start at. Input to `MdsEditorWrapper`. */
-    readonly collectionRootId = signal<string | null>(null);
 
     // Mutable state
     private readonly completionStatus$ = new BehaviorSubject<CompletionStatus>(null);

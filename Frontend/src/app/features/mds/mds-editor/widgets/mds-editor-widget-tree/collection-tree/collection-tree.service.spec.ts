@@ -10,15 +10,16 @@ import {
 } from 'ngx-edu-sharing-api';
 import { NodeHelperService } from 'ngx-edu-sharing-ui';
 import { Observable, of, throwError } from 'rxjs';
-import { CollectionPage, CollectionTreeService } from './collection-tree.service';
+import { CollectionTreeService } from './collection-tree.service';
 
-function collection(id: string): Node {
+function collection(id: string, parentId: string | null = null): Node {
     return {
         ref: { id },
         title: id,
         name: id,
-        access: ['Read'],
         aspects: ['ccm:collection'],
+        collection: { level0: !parentId },
+        properties: parentId ? { 'virtual:primaryparent_nodeid': [parentId] } : {},
     } as unknown as Node;
 }
 
@@ -80,24 +81,23 @@ describe('CollectionTreeService', () => {
         searchService.requestSearch.and.returnValue(
             of({ nodes: [collection('a')], pagination: { total: 1 } } as never),
         );
-        const page = result(
+        const hits = result(
             service.searchCollections('phys', {
                 rootId: 'root',
-                mdsId: 'mds_oeh',
-                skipCount: 0,
+                mdsId: DEFAULT,
                 maxItems: 25,
             }),
         );
         void expect(searchService.search).not.toHaveBeenCalled();
         const params = searchService.requestSearch.calls.mostRecent().args[0];
-        void expect(params.metadataset).toBe('mds_oeh');
+        void expect(params.metadataset).toBe(DEFAULT);
         void expect(params.query).toBe('collections');
         void expect(params.body.criteria).toEqual([
             { property: 'ngsearchword', values: ['phys'] },
             { property: 'virtual:parent_recursive', values: ['root'] },
         ]);
         void expect(params.propertyFilter).toContain('virtual:primaryparent_nodeid');
-        void expect(page).toEqual({ nodes: [collection('a')], total: 1 });
+        void expect(hits).toEqual([collection('a')]);
     });
 
     it('searches all collections when no root is given', () => {
@@ -107,8 +107,7 @@ describe('CollectionTreeService', () => {
         result(
             service.searchCollections('phys', {
                 rootId: null,
-                mdsId: 'mds_oeh',
-                skipCount: 0,
+                mdsId: DEFAULT,
                 maxItems: 25,
             }),
         );
@@ -122,11 +121,10 @@ describe('CollectionTreeService', () => {
             throwError(() => new Error('unknown parameter')),
             of({ nodes: [], pagination: { total: 0 } } as never),
         );
-        const page: CollectionPage = result(
+        const hits = result(
             service.searchCollections('phys', {
                 rootId: 'root',
-                mdsId: 'mds_oeh',
-                skipCount: 0,
+                mdsId: DEFAULT,
                 maxItems: 25,
             }),
         );
@@ -134,10 +132,10 @@ describe('CollectionTreeService', () => {
         void expect(searchService.requestSearch).toHaveBeenCalledTimes(2);
         void expect(retry.metadataset).toBe(DEFAULT);
         void expect(retry.body.criteria).toEqual([{ property: 'ngsearchword', values: ['phys'] }]);
-        void expect(page).toEqual({ nodes: [], total: 0 });
+        void expect(hits).toEqual([]);
     });
 
-    it('keeps the application from reporting errors the widget shows itself', () => {
+    it('keeps the application from reporting a failed search it recovers from', () => {
         spyOn(console, 'warn');
         const error = { status: 400, preventDefault: jasmine.createSpy('preventDefault') };
         searchService.requestSearch.and.returnValues(
@@ -147,8 +145,7 @@ describe('CollectionTreeService', () => {
         result(
             service.searchCollections('phys', {
                 rootId: 'root',
-                mdsId: 'mds_oeh',
-                skipCount: 0,
+                mdsId: DEFAULT,
                 maxItems: 25,
             }),
         );
@@ -185,9 +182,9 @@ describe('CollectionTreeService', () => {
 
     it('looks up several collections by id in one search', () => {
         searchService.requestSearch.and.returnValue(of({ nodes: [collection('a')] } as never));
-        const found = result(service.getCollections(['a', 'b'], 'mds_oeh'));
+        const found = result(service.getCollections(['a', 'b'], DEFAULT));
         const params = searchService.requestSearch.calls.mostRecent().args[0];
-        void expect(params.metadataset).toBe('mds_oeh');
+        void expect(params.metadataset).toBe(DEFAULT);
         void expect(params.query).toBe('collections');
         void expect(params.maxItems).toBe(2);
         void expect(params.body.criteria).toEqual([
@@ -203,17 +200,32 @@ describe('CollectionTreeService', () => {
         nodeService.getParents.and.returnValue(
             of({ nodes: [collection('a'), collection('top'), folder] } as never),
         );
-        const found = result(service.getCollections(['a'], 'mds_oeh'));
+        const found = result(service.getCollections(['a'], DEFAULT));
         void expect(found.map((node) => node.ref.id)).toEqual(['top', 'a']);
-        // only the requested collection is read with the user's rights
-        void expect(found.map((node) => node.access)).toEqual([undefined, ['Read']]);
-        result(service.getCollections(['b'], 'mds_oeh'));
+        result(service.getCollections(['b'], DEFAULT));
         void expect(searchService.requestSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it('looks up the collections above search hits one level per request', () => {
+        searchService.requestSearch.and.returnValues(
+            of({ nodes: [collection('b', 'a')] } as never),
+            of({ nodes: [collection('a')] } as never),
+        );
+        const placed = result(
+            service.getWithAncestors([collection('c', 'b'), collection('d', 'b')], DEFAULT),
+        );
+        const lookups = searchService.requestSearch.calls
+            .allArgs()
+            .map(([params]) => params.body.criteria[0].values);
+        void expect(lookups).toEqual([['b'], ['a']]);
+        void expect([...placed.keys()].sort()).toEqual(['a', 'b', 'c', 'd']);
+        void expect(placed.get('c').parentId).toBe('b');
+        void expect(placed.get('a').parentId).toBeNull();
     });
 
     it('searches unrestricted right away once the subtree search was rejected', () => {
         spyOn(console, 'warn');
-        const options = { rootId: 'root', mdsId: 'mds_oeh', skipCount: 0, maxItems: 25 };
+        const options = { rootId: 'root', mdsId: DEFAULT, maxItems: 25 };
         searchService.requestSearch.and.returnValues(
             throwError(() => ({ status: 400 })),
             of({ nodes: [], pagination: { total: 0 } } as never),

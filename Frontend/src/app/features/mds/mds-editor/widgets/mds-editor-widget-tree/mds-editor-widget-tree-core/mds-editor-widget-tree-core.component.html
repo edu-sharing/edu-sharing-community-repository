@@ -43,7 +43,7 @@
 </div> -->
   @if (!isTree || true || treeOpen) { @if (isTree) {
   <div class="tree-header">
-    <mat-form-field floatLabel="always">
+    <mat-form-field floatLabel="always" subscriptSizing="dynamic">
       <mat-label>{{ 'MDS.FILTER_TREE' | translate }}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input
@@ -60,7 +60,13 @@
       <i esIcon="close"></i>
     </button>
   </div>
-  }
+  @if (source?.headerToggle(); as toggle) {
+  <div class="tree-header-toggle">
+    <mat-checkbox [checked]="toggle.checked" (change)="setHeaderToggle($event.checked)">{{
+      toggle.label
+    }}</mat-checkbox>
+  </div>
+  } }
   <mat-tree id="{{ uid }}-mat-tree" [dataSource]="dataSource" [treeControl]="treeControl">
     <!-- Leaf nodes -->
     <mat-tree-node
@@ -79,11 +85,23 @@
         <!-- use a disabled button to provide padding for tree leaf -->
         @if (isTree) {
         <button mat-icon-button disabled aria-hidden="true"></button>
-        }
+        } @if (node.type === 'more') {
+        <!-- while loading, the expand button of the parent shows a spinner -->
+        <button
+          mat-button
+          color="primary"
+          [id]="getCheckboxId(node)"
+          [disabled]="isLoading(node.parent)"
+          (click)="loadMore(node)"
+        >
+          {{ 'LOAD_MORE' | translate }}
+        </button>
+        } @else {
         <ng-container
           [ngTemplateOutlet]="isTree ? (isMultiValue ? checkBox : radioButton) : button"
           [ngTemplateOutletContext]="{ node: node }"
         ></ng-container>
+        }
       </div>
     </mat-tree-node>
     <!-- Nodes with children -->
@@ -94,7 +112,7 @@
       [attr.aria-expanded]="treeControl.isExpanded(node)"
       [attr.aria-selected]="selectedNode === node"
       attr.aria-label="{{ node.caption }}
-          {{ (getIsChecked(node) ? 'CHECKBOX_CHECKED' : 'CHECKBOX_NOT_CHECKED') | translate }}
+          {{ getCheckedStateKey(node) | translate }}
           {{ getIsDisabled(node) ? ('DISABLED' | translate) : '' }}
         "
     >
@@ -108,14 +126,22 @@
               | translate : { element: node.caption }
           "
         >
+          @if (isLoading(node)) {
+          <es-spinner-small></es-spinner-small>
+          } @else {
           <mat-icon class="mat-icon-rtl-mirror">
             {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
           </mat-icon>
+          }
         </button>
+        @if (node.type === 'group') {
+        <span class="group-label" [id]="getCheckboxId(node)">{{ node.caption }}</span>
+        } @else {
         <ng-container
           [ngTemplateOutlet]="isMultiValue ? checkBox : radioButton"
           [ngTemplateOutletContext]="{ node: node }"
         ></ng-container>
+        }
       </div>
       <div class="children-group" role="group">
         @if (treeControl.isExpanded(node)) {

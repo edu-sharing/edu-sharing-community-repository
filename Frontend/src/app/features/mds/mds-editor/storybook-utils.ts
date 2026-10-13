@@ -73,7 +73,7 @@ import {
 } from 'ngx-edu-sharing-ui';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { catchError, first, map, shareReplay, take, tap } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import {
     EduSharingLlmService,
     SuggestionResponseDto as SuggestionLlm,
@@ -579,7 +579,9 @@ export class IamServiceMock extends IamV1Service {
     }
 }
 @Injectable()
-export class ActivatedRouteMock {}
+export class ActivatedRouteMock {
+    readonly queryParamMap = of(convertToParamMap({}));
+}
 
 @Injectable()
 export class OptionsHelperServiceMock {
@@ -791,6 +793,11 @@ export class WidgetDummy extends MdsEditorInstanceService.Widget {
             individualValues: [],
             jointValues: [],
         };
+    }
+
+    /** The dummy belongs to no editor, which would decide whether AI suggestions are shown. */
+    getShowAiSuggestions(): Observable<[boolean, SuggestionResponseDto[]]> {
+        return of([false, []]);
     }
 
     observeIsDisabled(): Observable<boolean> {

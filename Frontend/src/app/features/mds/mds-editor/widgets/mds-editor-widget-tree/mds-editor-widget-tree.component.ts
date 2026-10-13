@@ -10,6 +10,7 @@ import {
     Directive,
     ElementRef,
     inject,
+    Injector,
     OnDestroy,
     OnInit,
     QueryList,
@@ -29,6 +30,8 @@ import { DisplayValue } from '../DisplayValues';
 import { MdsEditorWidgetBase, MdsEditorWidgetChipsSuggestionBase } from '../mds-editor-widget-base';
 import { MdsEditorWidgetTreeCoreComponent } from './mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { Tree, TreeNode } from './tree';
+import { TreeSource } from './tree-source';
+import { CollectionTreeSource } from './collection-tree/collection-tree-source';
 import { MatChipOption, MatChipRow } from '@angular/material/chips';
 import { UIService } from '../../../../../core-module/rest/services/ui.service';
 import { MatButton } from '@angular/material/button';
@@ -61,6 +64,8 @@ export class EsProposalChipDirective implements FocusableOption {
     templateUrl: './mds-editor-widget-tree.component.html',
     styleUrls: ['./mds-editor-widget-tree.component.scss'],
     standalone: false,
+    // instantiated on first request, which only `collectionTree` widgets make
+    providers: [CollectionTreeSource],
 })
 export class MdsEditorWidgetTreeComponent
     extends MdsEditorWidgetChipsSuggestionBase
@@ -99,6 +104,13 @@ export class MdsEditorWidgetTreeComponent
         });
     }
     getChipsValue(value: DisplayValue) {
+        if (this.treeSource) {
+            // a value picked in the tree comes with its label, others are being loaded
+            const label =
+                this.treeSource.getValue(value.key)?.label ??
+                (value.label === value.key ? '…' : value.label);
+            return { key: value.key, label };
+        }
         if (value.key === value.label || !value.label) {
             const ds = this.widget
                 .getInitialDisplayValues()
@@ -162,11 +174,25 @@ export class MdsEditorWidgetTreeComponent
     positionY: WritableSignal<string> = signal(null);
     private destroyed$: ReplaySubject<boolean> = new ReplaySubject(1);
 
+    /** Supplies the nodes of a tree loaded from a server, `null` for one from the valuespace. */
+    treeSource: TreeSource | null = null;
+    /** Whether the widget holds values, for views that hide empty widgets (`hideIfEmpty`). */
+    hasValues?: () => boolean;
+    private readonly hadValues = signal(false);
+    private readonly injector = inject(Injector);
+
     constructor() {
         super();
     }
 
     async ngOnInit() {
+        if (this.widget.definition.type === MdsWidgetType.CollectionTree) {
+            this.treeSource = this.injector
+                .get(CollectionTreeSource)
+                .configure(this.widget.definition.configuration, this.mdsEditorInstance.mdsId);
+            // with `hideIfEmpty`, the widget stays listed once it had a value, so it can be replaced
+            this.hasValues = () => this.hadValues() || this.treeSource.showWithoutValues();
+        }
         if (this.mdsEditorInstance.editorMode === 'inline') {
             this.onBlur.subscribe(() => (this.hasFocus = false));
             // an host listener is not triggering
@@ -189,15 +215,18 @@ export class MdsEditorWidgetTreeComponent
                 MdsWidgetType.MultiValueTree,
                 MdsWidgetType.MultiValueFixedBadges,
                 MdsWidgetType.MultiValueSuggestBadges,
+                MdsWidgetType.CollectionTree,
             ].includes(this.widget.definition.type as MdsWidgetType)
         ) {
             this.valueType = ValueType.MultiValue;
         } else {
             throw new Error('Unexpected widget type: ' + this.widget.definition.type);
         }
-        this.isTree = [MdsWidgetType.MultiValueTree, MdsWidgetType.SingleValueTree].includes(
-            this.widget.definition.type as MdsWidgetType,
-        );
+        this.isTree = [
+            MdsWidgetType.MultiValueTree,
+            MdsWidgetType.SingleValueTree,
+            MdsWidgetType.CollectionTree,
+        ].includes(this.widget.definition.type as MdsWidgetType);
         this.isFreeBadges = [
             MdsWidgetType.MultiValueSuggestBadges,
             MdsWidgetType.MultiValueBadges,
@@ -361,7 +390,20 @@ export class MdsEditorWidgetTreeComponent
         this.widget.addValue.subscribe((value: MdsWidgetValue) => {
             this.add(this.toDisplayValue(value));
         });
+        if (this.treeSource) {
+            this.loadSourceValues(this.chipsControl.value);
+            this.chipsControl.valueChanges.subscribe((values: DisplayValue[]) =>
+                this.loadSourceValues(values),
+            );
+        }
         this.registerValueChanges(this.chipsControl);
+    }
+
+    private loadSourceValues(values: DisplayValue[]): void {
+        if (values?.length) {
+            this.hadValues.set(true);
+        }
+        this.treeSource.loadValues((values ?? []).map((value) => value.key));
     }
 
     ngAfterViewInit(): void {
@@ -411,6 +453,13 @@ export class MdsEditorWidgetTreeComponent
     }
 
     revealInTree(value: DisplayValue): void {
+        if (this.treeSource) {
+            if (!this.overlayIsVisible) {
+                this.openOverlay();
+            }
+            void this.revealAlongAncestors(value.key);
+            return;
+        }
         const treeNode = this.tree.findById(value.key);
         if (!treeNode) {
             // the value is not part of the valuespace (e.g. a legacy value), nothing to reveal
@@ -423,6 +472,28 @@ export class MdsEditorWidgetTreeComponent
             this.treeCoreComponent?.revealInTree(treeNode);
         });
     }
+
+    /** Expands a tree source's tree along the ancestors of a value, as far as it is listed. */
+    private async revealAlongAncestors(id: string): Promise<void> {
+        const tree = await firstValueFrom(this.treeSource.getTree(null));
+        const path = [...(this.treeSource.getValue(id)?.ancestorIds ?? []), id];
+        const start = path.findIndex((pathId) => tree.findById(pathId));
+        const core = this.treeCoreComponent;
+        if (start < 0 || !core) {
+            return;
+        }
+        let node = tree.findById(path[start]);
+        for (const nextId of path.slice(start + 1)) {
+            await core.expandNode(node);
+            const child = node.children?.find((candidate) => candidate.id === nextId);
+            if (!child) {
+                break;
+            }
+            node = child;
+        }
+        core.revealInTree(node);
+    }
+
     focus() {
         this.openOverlay();
     }
@@ -506,9 +577,16 @@ export class MdsEditorWidgetTreeComponent
     }
 
     onOverlayKeydown(event: KeyboardEvent) {
+        const target = event.target as HTMLElement;
         if (event.key === 'Escape') {
             event.stopPropagation();
             this.closeOverlay();
+        } else if (
+            target?.closest?.('.tree-header, .tree-header-toggle') &&
+            target !== this.treeRef?.input?.nativeElement
+        ) {
+            // the controls above the tree handle their own keys
+            return;
         } else {
             const wasHandledByTree = this.treeCoreComponent.handleKeydown(event.code);
             if (wasHandledByTree) {
@@ -545,8 +623,26 @@ export class MdsEditorWidgetTreeComponent
     }
 
     onValuesChange(values: DisplayValue[]): void {
+        if (this.treeSource && this.editorMode === 'search') {
+            values = this.withoutValuesBelowAdded(values);
+        }
         this.chipsControl.setValue([...values]);
         this.changeDetectorRef.detectChanges();
+    }
+
+    /**
+     * In a search, a selected node includes the ones below it. A tree source knows the ancestors
+     * of values that are not loaded in the tree, so these are dropped here.
+     */
+    private withoutValuesBelowAdded(values: DisplayValue[]): DisplayValue[] {
+        const previous = new Set(this.widget.getValue() as string[]);
+        const added = values.filter((value) => !previous.has(value.key));
+        return values.filter(
+            (value) =>
+                !added.some((addedValue) =>
+                    this.treeSource.getValue(value.key)?.ancestorIds.includes(addedValue.key),
+                ),
+        );
     }
 
     onBlurInput(event: FocusEvent) {

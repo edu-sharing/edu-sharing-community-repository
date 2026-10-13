@@ -29,6 +29,7 @@
     [injectedView]="this"
     [valueType]="valueType"
     [control]="chipsControl"
+    [hasValues]="hasValues"
   >
     <!-- We use `chipsControl` as `formControl` of the chips list. This serves different purposes:
       - The `formControl` of the chips list controls which chips are *selected*. Thus, by using
@@ -59,7 +60,9 @@
         #chip
         [value]="value"
         [removable]="true"
-        [matTooltip]="value.label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'"
+        [matTooltip]="
+          getChipsValue(value).label + ' (' + ('MDS.DELETE_KEY_NOTICE' | translate) + ')'
+        "
         matTooltipPosition="above"
         [class.indeterminate]="(indeterminateValues$ | async)?.includes(value.key)"
         [class.mat-chip-selected]="false"
@@ -214,6 +217,7 @@
       [component]="this"
       [filter]="isTree ? null : inputControl.value"
       [tree]="tree"
+      [source]="treeSource"
       [isMultiValue]="valueType === ValueType.MultiValue"
       [values]="chipsControl?.value"
       [indeterminateValues]="indeterminateValues$ | async"
