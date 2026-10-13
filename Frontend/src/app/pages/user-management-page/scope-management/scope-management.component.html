@@ -9,19 +9,19 @@
     </h2>
     @if (!d.scopeId) {
     <div class="row">
-      <mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
         <mat-label>{{ 'SCOPES.ADMIN.NAME' | translate }}</mat-label>
         <input matInput [(ngModel)]="d.name" required data-test="scope-management-name" />
         <mat-hint>{{ 'SCOPES.ADMIN.NAME_HINT' | translate }}</mat-hint>
       </mat-form-field>
-      <mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
         <mat-label>{{ 'SCOPES.ADMIN.DISPLAY_NAME' | translate }}</mat-label>
         <input matInput [(ngModel)]="d.displayName" />
       </mat-form-field>
     </div>
     }
     <div class="row">
-      <mat-form-field>
+      <mat-form-field subscriptSizing="dynamic">
         <mat-label>{{ 'SCOPES.ADMIN.MDS' | translate }}</mat-label>
         @if (metadataSets()?.length) {
         <mat-select [ngModel]="d.mds" (ngModelChange)="setMds($event)">
@@ -132,47 +132,21 @@
   @if (scopes() === null) {
   <es-spinner></es-spinner>
   } @else {
-  <div class="list" role="table" [attr.aria-label]="'SCOPES.ADMIN.TITLE' | translate">
-    <div class="list-row header" role="row">
-      <span role="columnheader">{{ 'SCOPES.ADMIN.DISPLAY_NAME' | translate }}</span>
-      <span role="columnheader">{{ 'SCOPES.ADMIN.SCOPE_ID' | translate }}</span>
-      <span role="columnheader">{{ 'SCOPES.ADMIN.MDS' | translate }}</span>
-      <span role="columnheader">{{ 'SCOPES.ADMIN.FIELDS' | translate }}</span>
-      <span role="columnheader">{{ 'SCOPES.ADMIN.BASE_QUERY_VERSION' | translate }}</span>
-      <span role="columnheader" class="cdk-visually-hidden">{{
-        'SCOPES.ADMIN.ACTIONS' | translate
-      }}</span>
-    </div>
-    @for (scope of filteredScopes(); track scope.scopeId) {
-    <div class="list-row" role="row" [attr.data-test]="'scope-management-row-' + scope.scopeId">
-      <span role="cell" class="name">{{ scope.displayName || scope.scopeId }}</span>
-      <span role="cell" class="scope-id">{{ scope.scopeId }}</span>
-      <span role="cell">{{ scope.mds || '-' }}</span>
-      <span role="cell">{{ scope.fields?.length ?? 0 }}</span>
-      <span role="cell">{{ scope.baseQuery?.version ?? '-' }}</span>
-      <span role="cell" class="actions">
-        <button
-          mat-icon-button
-          (click)="manageMembers.emit(scope.scopeId)"
-          [matTooltip]="'SCOPES.ADMIN.MANAGE_MEMBERS' | translate"
-          [attr.aria-label]="'SCOPES.ADMIN.MANAGE_MEMBERS' | translate"
-        >
-          <i esIcon="group"></i>
-        </button>
-        <button
-          mat-icon-button
-          (click)="edit(scope)"
-          [matTooltip]="'SCOPES.ADMIN.EDIT' | translate"
-          [attr.aria-label]="'SCOPES.ADMIN.EDIT' | translate"
-        >
-          <i esIcon="edit"></i>
-        </button>
-      </span>
-    </div>
-    } @empty {
-    <div class="empty">{{ 'SCOPES.ADMIN.EMPTY' | translate }}</div>
-    }
-  </div>
+  <es-node-entries-wrapper
+    #scopeList
+    class="list"
+    data-test="scope-management-list"
+    [scope]="Scope.UserManagement"
+    [displayType]="DisplayType.Table"
+    [elementInteractionType]="InteractionType.Emitter"
+    [columns]="columns"
+    [dataSource]="dataSource"
+    [checkbox]="false"
+  >
+    <ng-template #empty>
+      <p class="empty" role="status">{{ 'SCOPES.ADMIN.EMPTY' | translate }}</p>
+    </ng-template>
+  </es-node-entries-wrapper>
   <es-info-message mode="warning" class="delete-info">
     <div>{{ 'SCOPES.ADMIN.DELETE_INFO' | translate }}</div>
   </es-info-message>

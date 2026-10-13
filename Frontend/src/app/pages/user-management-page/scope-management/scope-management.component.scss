@@ -16,24 +16,7 @@
     }
 }
 .list {
-    display: flex;
-    flex-direction: column;
-}
-.list-row {
-    display: grid;
-    grid-template-columns: 2fr 2fr 1fr 80px 120px 100px;
-    gap: 8px;
-    align-items: center;
-    padding: 4px 8px;
-    border-bottom: 1px solid var(--borderLight);
-    &.header {
-        font-weight: bold;
-        min-height: 40px;
-    }
-    .actions {
-        display: flex;
-        justify-content: flex-end;
-    }
+    display: block;
 }
 .scope-id {
     font-family: monospace;
@@ -56,9 +39,12 @@
     }
     .row {
         display: flex;
+        align-items: flex-start;
         flex-wrap: wrap;
         gap: 16px;
+        margin-bottom: 16px;
         mat-form-field {
+            flex: 0 1 360px;
             min-width: 260px;
         }
     }
@@ -148,13 +134,5 @@
 @media screen and (max-width: 900px) {
     .fields-editor {
         grid-template-columns: 1fr;
-    }
-    .list-row {
-        grid-template-columns: 1fr 1fr 60px;
-        > :nth-child(3),
-        > :nth-child(4),
-        > :nth-child(5) {
-            display: none;
-        }
     }
 }

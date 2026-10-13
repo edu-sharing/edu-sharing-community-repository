@@ -3,6 +3,7 @@ package org.edu_sharing.service.scope;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.cache.SimpleCache;
 import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -15,19 +16,27 @@ import org.springframework.context.ApplicationContext;
 public final class ScopePublishedCache {
 
     private static volatile SimpleCache<String, Boolean> cache;
+    /** the cache bean is missing or not configured (e.g. no cluster.type): work without caching */
+    private static volatile boolean unavailable;
 
     private ScopePublishedCache() {
     }
 
     @SuppressWarnings("unchecked")
     private static SimpleCache<String, Boolean> getCache() {
-        if (cache == null) {
+        if (cache == null && !unavailable) {
             ApplicationContext context = AlfAppContextGate.getApplicationContext();
             if (context == null) {
                 // no alfresco context (e.g. unit tests): no caching
                 return null;
             }
-            cache = context.getBean("eduSharingScopePublishedCache", SimpleCache.class);
+            try {
+                cache = context.getBean("eduSharingScopePublishedCache", SimpleCache.class);
+            } catch (BeansException e) {
+                // permission checks and writes must not fail because of the cache
+                unavailable = true;
+                log.warn("cache eduSharingScopePublishedCache is not available, scope permission checks run without cache: {}", e.getMessage());
+            }
         }
         return cache;
     }

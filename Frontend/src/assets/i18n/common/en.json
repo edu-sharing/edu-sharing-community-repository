@@ -337,7 +337,11 @@
     "ccm:taxonid": "Area of ​​Expertise",
     "ccm:educationalintendedenduserrole": "Target group",
     "ccm:eaf_sequence_title": "Title of sequence",
-    "ccm:collection_ordered_position": "Manual sorting"
+    "ccm:collection_ordered_position": "Manual sorting",
+    "scope:id": "Group",
+    "scope:mds": "Metadata set",
+    "scope:fields": "Fields",
+    "scope:baseQueryVersion": "Base query (version)"
   },
   "SHARE": {
     "sharedBy": "Shared by",

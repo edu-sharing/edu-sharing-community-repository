@@ -1159,6 +1159,13 @@
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
+          },
           "size": {
             "description": "Size of the node in bytes",
             "type": "string"
@@ -5202,6 +5209,13 @@
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
           },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
+          },
           "size": {
             "description": "Size of the node in bytes",
             "type": "string"
@@ -5380,6 +5394,13 @@
           "repositoryType": {
             "description": "Repository type of the repository this node is originated from",
             "type": "string"
+          },
+          "scopes": {
+            "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+            "items": {
+              "$ref": "#/components/schemas/NodeScope"
+            },
+            "type": "array"
           },
           "size": {
             "description": "Size of the node in bytes",
@@ -5718,6 +5739,42 @@
           "node",
           "remote"
         ],
+        "type": "object"
+      },
+      "NodeScope": {
+        "description": "Scope entries of the node visible for the current user. Inside the active scope, properties contains the replaced (effective) values",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "excluded": {
+            "type": "boolean"
+          },
+          "originals": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "properties": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "scopeId": {
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "NodeShare": {

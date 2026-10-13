@@ -359,7 +359,11 @@
       "DOWNLOAD_MATERIAL": "Downloads",
       "VIEW_MATERIAL_PLAY_MEDIA": "Wiedergaben",
       "VIEW_MATERIAL_GDPR_CONFIRMED": "DSGVO-Bestätigungen"
-    }
+    },
+    "scope:id": "Gruppe",
+    "scope:mds": "Metadatenset",
+    "scope:fields": "Felder",
+    "scope:baseQueryVersion": "Basisabfrage (Version)"
   },
   "SHARE": {
     "sharedBy": "Geteilt von",
