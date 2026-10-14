@@ -2549,7 +2549,7 @@
         <aspect name="ccm:scopeGroup">
             <title>scopes: definition of the scope owned by a group with ccm:groupType = SCOPE</title>
             <properties>
-                <!-- json list of allowed scope properties: [{"id": "ccm:editorial_release", "visibility": "internal|public", "replaces": false, "publishedValues": [], "excludedValues": []}] -->
+                <!-- json list of allowed scope properties: [{"id": "ccm:editorial_inventory", "visibility": "internal|public", "replaces": false, "publishedValues": [], "excludedValues": []}] -->
                 <property name="ccm:scope_fields">
                     <type>d:text</type>
                     <multiple>false</multiple>
@@ -2580,32 +2580,13 @@
         </aspect>
         <aspect name="ccm:editorialScopeProperties">
             <title>scopes: editorial properties. only stored in scope assignments (mongo), never applied to nodes.
-                exists for the dictionary (validation, mds widgets) only
+                exists for the dictionary (validation, mds widgets) only.
+                custom models add their editorial properties via an own aspect with parent ccm:editorialScopeProperties
             </title>
             <properties>
                 <property name="ccm:editorial_inventory">
                     <type>d:text</type>
                     <multiple>false</multiple>
-                </property>
-                <property name="ccm:editorial_release">
-                    <type>d:text</type>
-                    <multiple>false</multiple>
-                </property>
-                <property name="ccm:editorial_recommendation">
-                    <type>d:text</type>
-                    <multiple>false</multiple>
-                </property>
-                <property name="ccm:editorial_review_formal">
-                    <type>d:text</type>
-                    <multiple>false</multiple>
-                </property>
-                <property name="ccm:editorial_review_subject">
-                    <type>d:text</type>
-                    <multiple>false</multiple>
-                </property>
-                <property name="ccm:editorial_internal">
-                    <type>d:text</type>
-                    <multiple>true</multiple>
                 </property>
             </properties>
         </aspect>

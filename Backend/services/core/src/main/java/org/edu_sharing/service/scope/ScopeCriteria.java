@@ -2,7 +2,6 @@ package org.edu_sharing.service.scope;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.RequiredArgsConstructor;
-import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.namespace.QName;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -10,9 +9,11 @@ import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Decides how a search criterion is applied with respect to scopes (F2/F3, concept §5.4/§6.3), see
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 public class ScopeCriteria {
 
     /** editorial work sets: only meaningful for editors, they would reveal internal states to others */
-    static final Set<String> EDITOR_ONLY_CRITERIA = Set.of("virtual:scope_view", "virtual:scope_excluded");
+    static final Set<String> EDITOR_ONLY_CRITERIA = Set.of("virtual:scope_view");
 
     private final ScopesSettings scopesSettings;
     private final ScopeContextResolver scopeContextResolver;
@@ -36,7 +37,7 @@ public class ScopeCriteria {
     }
 
     /**
-     * @param criterion name of the mds query parameter, e.g. "ccm:editorial_release"
+     * @param criterion name of the mds query parameter, e.g. "ccm:editorial_inventory"
      * @param query     the query built from the mds statement
      */
     public static Query apply(String criterion, Query query) {
@@ -92,12 +93,17 @@ public class ScopeCriteria {
     }
 
     /**
-     * properties that only exist in scope entries (aspect ccm:editorialScopeProperties)
+     * properties that only exist in scope entries: aspect ccm:editorialScopeProperties and all its sub aspects, so custom
+     * models add their own editorial properties via an aspect with parent ccm:editorialScopeProperties
      */
     Set<String> getScopeOnlyProperties() {
         if (scopeOnlyProperties == null) {
-            AspectDefinition aspect = dictionaryService.getAspect(QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES));
-            scopeOnlyProperties = aspect == null ? Set.of() : aspect.getProperties().keySet().stream()
+            QName root = QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES);
+            scopeOnlyProperties = Stream.concat(Stream.of(root), dictionaryService.getSubAspects(root, true).stream())
+                    .distinct()
+                    .map(dictionaryService::getAspect)
+                    .filter(Objects::nonNull)
+                    .flatMap(aspect -> aspect.getProperties().keySet().stream())
                     .map(q -> CCConstants.getValidLocalName(q.toString()))
                     .collect(Collectors.toUnmodifiableSet());
         }

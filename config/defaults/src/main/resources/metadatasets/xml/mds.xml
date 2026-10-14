@@ -907,7 +907,8 @@
       <type>checkbox</type>
     </widget>
     <!-- scopes: editorial properties. only stored in scope entries (mongo), edited via the scope api.
-         a scope group selects the ones it uses via ccm:scope_fields; its own mds may override these widgets -->
+         a scope group selects the ones it uses via ccm:scope_fields; its own mds may override these widgets.
+         further editorial properties are not part of the core, they come with the mds of the scope -->
     <widget>
       <id>ccm:editorial_inventory</id>
       <caption>ccm_editorial_inventory</caption>
@@ -917,64 +918,8 @@
         <value>proposed</value>
         <value>accepted</value>
         <value>rejected</value>
-      </values>
-    </widget>
-    <widget>
-      <id>ccm:editorial_release</id>
-      <caption>ccm_editorial_release</caption>
-      <type>singleoption</type>
-      <valuespace_i18n_prefix>ccm_editorial_release_</valuespace_i18n_prefix>
-      <values>
-        <value>not_released</value>
-        <value>released</value>
-        <value>withdrawn</value>
-      </values>
-    </widget>
-    <widget>
-      <id>ccm:editorial_recommendation</id>
-      <caption>ccm_editorial_recommendation</caption>
-      <type>singleoption</type>
-      <valuespace_i18n_prefix>ccm_editorial_recommendation_</valuespace_i18n_prefix>
-      <values>
-        <value>none</value>
         <value>recommended</value>
-        <value>highly_recommended</value>
-        <value>withdrawn</value>
       </values>
-    </widget>
-    <widget>
-      <id>ccm:editorial_review_formal</id>
-      <caption>ccm_editorial_review_formal</caption>
-      <type>singleoption</type>
-      <valuespace_i18n_prefix>ccm_editorial_review_</valuespace_i18n_prefix>
-      <values>
-        <value>requested</value>
-        <value>in_progress</value>
-        <value>clarification_needed</value>
-        <value>completed_positive</value>
-        <value>completed_negative</value>
-        <value>not_required</value>
-      </values>
-    </widget>
-    <widget>
-      <id>ccm:editorial_review_subject</id>
-      <caption>ccm_editorial_review_subject</caption>
-      <type>singleoption</type>
-      <valuespace_i18n_prefix>ccm_editorial_review_</valuespace_i18n_prefix>
-      <values>
-        <value>requested</value>
-        <value>in_progress</value>
-        <value>clarification_needed</value>
-        <value>completed_positive</value>
-        <value>completed_negative</value>
-        <value>not_required</value>
-      </values>
-    </widget>
-    <widget>
-      <id>ccm:editorial_internal</id>
-      <caption>ccm_editorial_internal</caption>
-      <placeholder>ccm_editorial_internal_placeholder</placeholder>
-      <type>multivalueSuggestBadges</type>
     </widget>
     <!-- scopes: tabs (work sets) of the editorial page inside the active scope, see query ngsearch -->
     <widget>
@@ -984,31 +929,10 @@
       <values>
         <entry icon="inbox">inbox</entry>
         <entry icon="lightbulb">proposed</entry>
-        <entry icon="fact_check">open_reviews</entry>
         <entry icon="public">published</entry>
         <entry icon="thumb_up">recommended</entry>
         <entry icon="block">rejected</entry>
         <entry icon="list">all</entry>
-      </values>
-    </widget>
-    <widget>
-      <id>virtual:scope_published</id>
-      <caption>cp_virtual_scope_published</caption>
-      <type>radioVertical</type>
-      <valuespace_i18n_prefix>scope_published_</valuespace_i18n_prefix>
-      <values>
-        <entry>true</entry>
-        <entry>false</entry>
-      </values>
-    </widget>
-    <widget>
-      <id>virtual:scope_excluded</id>
-      <caption>cp_virtual_scope_excluded</caption>
-      <type>radioVertical</type>
-      <valuespace_i18n_prefix>scope_excluded_</valuespace_i18n_prefix>
-      <values>
-        <entry>true</entry>
-        <entry>false</entry>
       </values>
     </widget>
   </widgets>
@@ -1374,13 +1298,6 @@
       <id>editorial_scope</id>
       <html><![CDATA[
               <ccm:editorial_inventory expandable="expanded">
-              <ccm:editorial_release expandable="expanded">
-              <ccm:editorial_recommendation expandable="expanded">
-              <ccm:editorial_review_formal expandable="expanded">
-              <ccm:editorial_review_subject expandable="expanded">
-              <ccm:editorial_internal expandable="expanded">
-              <virtual:scope_published expandable="expanded">
-              <virtual:scope_excluded expandable="expanded">
 				]]></html>
     </template>
     <template>
@@ -1451,11 +1368,6 @@
       <caption>scope_editorial</caption>
       <html><![CDATA[
 					<ccm:editorial_inventory>
-					<ccm:editorial_release>
-					<ccm:editorial_recommendation>
-					<ccm:editorial_review_formal>
-					<ccm:editorial_review_subject>
-					<ccm:editorial_internal>
 				]]></html>
     </template>
   </templates>
@@ -2579,23 +2491,12 @@
         <facets type="geo_grid"/>
       </property>
       <!-- scopes: work sets inside the active scope (${scope}), see scopes concept §6.2 -->
-      <property name="virtual:scope_published">
-        <statement value="true">{"term":{"scope_ids_published":"${scope}"}}</statement>
-        <statement value="false">{"bool":{"must_not":{"term":{"scope_ids_published":"${scope}"}}}}</statement>
-        <statement>{"match_all": {}}</statement>
-      </property>
-      <property name="virtual:scope_excluded">
-        <statement value="true">{"term":{"scope_ids_excluded":"${scope}"}}</statement>
-        <statement value="false">{"bool":{"must_not":{"term":{"scope_ids_excluded":"${scope}"}}}}</statement>
-        <statement>{"match_all": {}}</statement>
-      </property>
       <!-- scopes: tabs of the editorial page (virtual:scope_view) inside the active scope -->
       <property name="virtual:scope_view">
         <statement value="inbox">{"bool":{"must_not":[{"term":{"scope_ids_published":"${scope}"}},{"term":{"scope_ids_excluded":"${scope}"}}]}}</statement>
         <statement value="proposed">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"terms":{"scopes.properties.ccm:editorial_inventory.keyword":["proposed"]}}]}}}}</statement>
-        <statement value="open_reviews">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"bool":{"should":[{"terms":{"scopes.properties.ccm:editorial_review_formal.keyword":["requested","in_progress","clarification_needed"]}},{"terms":{"scopes.properties.ccm:editorial_review_subject.keyword":["requested","in_progress","clarification_needed"]}}],"minimum_should_match":1}}]}}}}</statement>
         <statement value="published">{"term":{"scope_ids_published":"${scope}"}}</statement>
-        <statement value="recommended">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"terms":{"scopes.properties.ccm:editorial_recommendation.keyword":["recommended","highly_recommended"]}}]}}}}</statement>
+        <statement value="recommended">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"terms":{"scopes.properties.ccm:editorial_inventory.keyword":["recommended"]}}]}}}}</statement>
         <statement value="rejected">{"term":{"scope_ids_excluded":"${scope}"}}</statement>
         <statement value="all">{"match_all": {}}</statement>
         <statement>{"match_all": {}}</statement>
@@ -2607,31 +2508,6 @@
         <multiple>true</multiple>
         <multiplejoin>OR</multiplejoin>
         <statement>{"term":{"properties.ccm:editorial_inventory.keyword":"${value}"}}</statement>
-      </property>
-      <property name="ccm:editorial_release">
-        <multiple>true</multiple>
-        <multiplejoin>OR</multiplejoin>
-        <statement>{"term":{"properties.ccm:editorial_release.keyword":"${value}"}}</statement>
-      </property>
-      <property name="ccm:editorial_recommendation">
-        <multiple>true</multiple>
-        <multiplejoin>OR</multiplejoin>
-        <statement>{"term":{"properties.ccm:editorial_recommendation.keyword":"${value}"}}</statement>
-      </property>
-      <property name="ccm:editorial_review_formal">
-        <multiple>true</multiple>
-        <multiplejoin>OR</multiplejoin>
-        <statement>{"term":{"properties.ccm:editorial_review_formal.keyword":"${value}"}}</statement>
-      </property>
-      <property name="ccm:editorial_review_subject">
-        <multiple>true</multiple>
-        <multiplejoin>OR</multiplejoin>
-        <statement>{"term":{"properties.ccm:editorial_review_subject.keyword":"${value}"}}</statement>
-      </property>
-      <property name="ccm:editorial_internal">
-        <multiple>true</multiple>
-        <multiplejoin>OR</multiplejoin>
-        <statement>{"term":{"properties.ccm:editorial_internal.keyword":"${value}"}}</statement>
       </property>
     </query>
     <query join="AND" id="mediacenter_filter">

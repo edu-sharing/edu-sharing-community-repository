@@ -66,8 +66,11 @@ const DEFAULT_FIELD_VALUES: Record<
     string,
     Pick<ScopeField, 'publishedValues' | 'excludedValues' | 'uploadValues'>
 > = {
-    'ccm:editorial_release': { publishedValues: ['released'] },
-    'ccm:editorial_inventory': { excludedValues: ['rejected'], uploadValues: ['accepted'] },
+    'ccm:editorial_inventory': {
+        publishedValues: ['accepted', 'recommended'],
+        excludedValues: ['rejected'],
+        uploadValues: ['accepted'],
+    },
 };
 
 /**

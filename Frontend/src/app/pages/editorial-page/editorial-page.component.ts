@@ -176,13 +176,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     /** prefix of the list columns that show a property of the entry in the active scope */
     static readonly SCOPE_COLUMN_PREFIX = 'scope:';
     /** properties of the active scope shown as list columns (if part of its field list) */
-    static readonly SCOPE_COLUMNS = [
-        'ccm:editorial_inventory',
-        'ccm:editorial_release',
-        'ccm:editorial_recommendation',
-        'ccm:editorial_review_formal',
-        'ccm:editorial_review_subject',
-    ];
+    static readonly SCOPE_COLUMNS = ['ccm:editorial_inventory'];
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;

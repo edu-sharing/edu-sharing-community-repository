@@ -3,7 +3,11 @@ package org.edu_sharing.service.scope;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.namespace.QName;
+import org.edu_sharing.repository.client.tools.CCConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -11,11 +15,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ScopeCriteriaTest {
 
@@ -32,6 +38,27 @@ class ScopeCriteriaTest {
             return Set.of("ccm:editorial_release", "ccm:editorial_recommendation", "ccm:editorial_inventory");
         }
     };
+
+    @Test
+    void scopeOnlyPropertiesIncludeSubAspects() {
+        DictionaryService dictionary = mock(DictionaryService.class);
+        QName root = QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES);
+        QName custom = QName.createQName(CCConstants.NAMESPACE_CCM, "customEditorialScopeProperties");
+        when(dictionary.getSubAspects(root, true)).thenReturn(List.of(custom));
+        AspectDefinition rootAspect = aspect("editorial_inventory");
+        AspectDefinition customAspect = aspect("editorial_release");
+        when(dictionary.getAspect(root)).thenReturn(rootAspect);
+        when(dictionary.getAspect(custom)).thenReturn(customAspect);
+        ScopeCriteria criteria = new ScopeCriteria(new ScopesSettings(), mock(ScopeContextResolver.class), dictionary);
+        assertEquals(Set.of("ccm:editorial_inventory", "ccm:editorial_release"), criteria.getScopeOnlyProperties());
+    }
+
+    private static AspectDefinition aspect(String property) {
+        AspectDefinition aspect = mock(AspectDefinition.class);
+        PropertyDefinition definition = mock(PropertyDefinition.class);
+        when(aspect.getProperties()).thenReturn(Map.of(QName.createQName(CCConstants.NAMESPACE_CCM, property), definition));
+        return aspect;
+    }
 
     private static Optional<ActiveScope> scope(String role) {
         return role.equals("-") ? Optional.empty()
@@ -58,8 +85,7 @@ class ScopeCriteriaTest {
             // editorial work sets
             "EDITOR,           virtual:scope_view,           ORIGINAL",
             "GUEST,            virtual:scope_view,           IGNORE",
-            "-,                virtual:scope_excluded,       IGNORE",
-            "GUEST,            virtual:scope_published,      ORIGINAL",
+            "-,                virtual:scope_view,           IGNORE",
     })
     void mode(String role, String criterion, ScopeCriteriaRewriter.Mode expected) {
         assertEquals(expected, underTest.getMode(scope(role), criterion));
