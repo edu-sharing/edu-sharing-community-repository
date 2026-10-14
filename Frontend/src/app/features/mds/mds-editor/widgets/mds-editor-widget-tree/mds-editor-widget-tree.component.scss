@@ -49,6 +49,13 @@ mat-chip-grid {
 .input-wrapper {
     display: flex;
     flex-grow: 1;
+
+    // a tree's readonly input only opens the dropdown and needs no typing width,
+    // so the arrow stays on the chips' line while it has room there
+    input[readonly] {
+        flex-basis: 0;
+        width: 0;
+    }
 }
 // ARIA-only wrapper, keeps the flex layout untouched
 .input-cell {
