@@ -1540,7 +1540,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // ref yet, so the next variant resolution would fall back to the inherited page config and
         // display the values from before these changes
         if (pageConfigCreated) {
-            this.collectionNode = await this.topicPageHelperService.getNode(
+            this.collectionNode = await this.topicPageHelperService.getUpdatedNode(
                 retrieveNodeId(this.collectionNode),
             );
         }
@@ -1563,7 +1563,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             (n: Node) => retrieveNodeId(n) === nodeId,
         );
         this.pageVariantNode.set(
-            reloadedNode ?? (await this.topicPageHelperService.getNode(nodeId)),
+            reloadedNode ?? (await this.topicPageHelperService.getUpdatedNode(nodeId)),
         );
         const reloadedIndex: number = this.pageVariantConfigs?.nodes?.findIndex(
             (n: Node) => retrieveNodeId(n) === nodeId,
@@ -2371,7 +2371,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
         this.templateMode.set(true);
         if (reloadNecessary) {
-            this.collectionNode = await this.topicPageHelperService.getNode(
+            this.collectionNode = await this.topicPageHelperService.getUpdatedNode(
                 retrieveNodeId(this.collectionNode),
             );
         }
@@ -2911,7 +2911,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         for (const [key, value] of parameterChanges) {
             await this.topicPageHelperService.setProperty(targetNodeId, key, value);
         }
-        return await this.topicPageHelperService.getNode(targetNodeId);
+        return await this.topicPageHelperService.getUpdatedNode(targetNodeId);
     }
 
     /**
@@ -2933,7 +2933,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
         }
         if (modified) {
-            return await this.topicPageHelperService.getNode(targetNodeId);
+            return await this.topicPageHelperService.getUpdatedNode(targetNodeId);
         }
         return null;
     }

@@ -385,6 +385,22 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Retrieves a node from the repository past the short-lived node cache of `getNode`, for reads
+     * that have to reflect a write made to the node just before.
+     */
+    async getUpdatedNode(nodeId: string): Promise<Node> {
+        nodeId = convertNodeRefIntoNodeId(nodeId);
+        const nodeEntry = await firstValueFrom(
+            this.nodeApiUnwrapped.getMetadata({
+                repository: HOME_REPOSITORY,
+                node: nodeId,
+                propertyFilter: [PROPERTY_FILTER_ALL],
+            }),
+        );
+        return nodeEntry.node;
+    }
+
+    /**
      * Retrieves a node referenced by a stored config, resolving to null without the global error
      * message if it was deleted or is no longer readable. Other errors are rethrown.
      */
@@ -603,7 +619,7 @@ export class TopicPageHelperService {
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);
-        return this.getNode(nodeId);
+        return this.getUpdatedNode(nodeId);
     }
 
     // INTERNAL HELPER FUNCTIONS
@@ -745,7 +761,7 @@ export class TopicPageHelperService {
                     await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
                 }
                 // return the updated node
-                return await this.getNode(nodeId);
+                return await this.getUpdatedNode(nodeId);
             }
         } catch (err) {
             this.displayErrorToast(err);
