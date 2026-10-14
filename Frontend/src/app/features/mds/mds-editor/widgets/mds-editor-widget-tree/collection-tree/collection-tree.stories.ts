@@ -163,7 +163,7 @@ class CollectionTreeWidgetDummy extends WidgetDummy {
 type StoryArgs = MdsWidget & { initialIds?: string[] };
 
 const meta: Meta<StoryArgs> = {
-    title: 'Mds/Widget/CollectionTree',
+    title: 'Mds/Widget/Tree',
     component: MdsEditorWidgetTreeComponent,
     decorators: [
         moduleMetadata({
