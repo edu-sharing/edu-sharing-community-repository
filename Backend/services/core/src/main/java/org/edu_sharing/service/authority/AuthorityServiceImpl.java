@@ -44,6 +44,7 @@ import org.edu_sharing.service.authentication.totp.OneTimeTokenService;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -604,7 +605,11 @@ public class AuthorityServiceImpl implements AuthorityService {
                                     userCache.refresh(userName);
 
                                 } catch (Throwable e) {
-                                    log.error(e.getMessage(), e);
+                                    if(e instanceof org.alfresco.service.cmr.model.FileExistsException){
+                                        log.warn(e.getMessage());
+                                    }else{
+                                        log.error(e.getMessage(), e);
+                                    }
                                     return e;
                                 }
 
@@ -613,6 +618,10 @@ public class AuthorityServiceImpl implements AuthorityService {
                             ApplicationInfoList.getHomeRepository().getUsername());
 
                     if (runAs != null) {
+                        if (runAs instanceof org.alfresco.service.cmr.model.FileExistsException) {
+                            // concurrent creation of a shared home folder parent (e.g. "lo") -> let RetryingTransactionHelper retry
+                            throw new ConcurrencyFailureException(runAs.getMessage(), runAs);
+                        }
                         throw runAs;
                     }
 
