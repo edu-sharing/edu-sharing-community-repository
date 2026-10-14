@@ -134,6 +134,7 @@
           [collection]="collection"
           [getInfobar]="getInfobar"
           [scope]="getScope()"
+          (scopeChange)="selectTab($event)"
           [isRootLevel]="isRootLevelCollection()"
           [createAllowed]="createAllowed"
           [class.collections-master-div-notabs]="!showTabs()"
