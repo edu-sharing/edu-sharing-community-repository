@@ -95,6 +95,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardCopyOption;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -451,12 +452,35 @@ public class AdminServiceImpl implements AdminService {
         String pathAppRegistry = PropertiesHelper.Config.getAbsolutePathForConfigFile(appRegistryfileName);
 
         //backup
-        propsAppRegistry.storeToXML(new FileOutputStream(pathAppRegistry + System.currentTimeMillis() + ".bak"), " backup of registry");
+        storePropertiesFile(propsAppRegistry, new File(pathAppRegistry + System.currentTimeMillis() + ".bak"), " backup of registry");
 
         propsAppRegistry.setProperty("applicationfiles", newValue);
         //overwrite
-        propsAppRegistry.storeToXML(new FileOutputStream(pathAppRegistry), comment);
+        storePropertiesFileAtomically(propsAppRegistry, new File(pathAppRegistry), comment);
 
+    }
+
+    private static void storePropertiesFile(Properties props, File file, String comment) throws IOException {
+        try (FileOutputStream os = new FileOutputStream(file)) {
+            props.storeToXML(os, comment);
+        }
+    }
+
+    /**
+     * writes the file next to the target and moves it in place, so concurrent readers (e.g. the ApplicationInfoList
+     * refresh of another cluster member) never see a missing or partially written file
+     */
+    private static void storePropertiesFileAtomically(Properties props, File file, String comment) throws IOException {
+        File tmpFile = new File(file.getAbsolutePath() + "." + System.nanoTime() + ".tmp");
+        try {
+            try (FileOutputStream os = new FileOutputStream(tmpFile)) {
+                props.storeToXML(os, comment);
+                os.getFD().sync();
+            }
+            java.nio.file.Files.move(tmpFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        } finally {
+            java.nio.file.Files.deleteIfExists(tmpFile.toPath());
+        }
     }
 
     @Override
@@ -613,9 +637,8 @@ public class AdminServiceImpl implements AdminService {
         if (appFile.exists()) {
             // store as backup
             Files.copy(appFile, new File(appFile.getAbsolutePath() + System.currentTimeMillis() + ".bak"));
-            appFile.delete();
         }
-        props.storeToXML(new FileOutputStream(appFile), "");
+        storePropertiesFileAtomically(props, appFile, "");
 
         if (!alreadyRegistered) {
             Set<String> entries = new LinkedHashSet<>(Arrays.asList(existingFileList.split(",")));
@@ -641,13 +664,13 @@ public class AdminServiceImpl implements AdminService {
             String homeAppPath = PropertiesHelper.Config.getAbsolutePathForConfigFile(homeAppFileName);
 
             //backup
-            homeAppProps.storeToXML(new FileOutputStream(homeAppPath + System.currentTimeMillis() + ".bak"), " backup of homeApplication.properties.xml");
+            storePropertiesFile(homeAppProps, new File(homeAppPath + System.currentTimeMillis() + ".bak"), " backup of homeApplication.properties.xml");
 
             homeAppProps.setProperty(ApplicationInfo.KEY_CONTENTURL, contentUrl);
             //homeAppProps.setProperty(ApplicationInfo.KEY_PREVIEWURL, previewUrl);
 
             //overwrite
-            homeAppProps.storeToXML(new FileOutputStream(homeAppPath), " added contenturl and preview url");
+            storePropertiesFileAtomically(homeAppProps, new File(homeAppPath), " added contenturl and preview url");
         }
 
         ContextRefreshUtils.refreshContext();
