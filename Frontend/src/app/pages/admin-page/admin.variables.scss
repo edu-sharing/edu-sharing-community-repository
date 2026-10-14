@@ -16,6 +16,20 @@ $sidenavWidthMobile: 66px;
     > input {
         margin-bottom: 0;
     }
+    mat-radio-group {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    // mobile: stack label and control, otherwise the form overflows horizontally
+    @media all and (max-width: $mobileWidth+$mobileStage*1) {
+        flex-wrap: wrap;
+        row-gap: 10px;
+        > * {
+            width: 100%;
+            flex-basis: 100%;
+            min-width: 0;
+        }
+    }
 }
 @mixin heading() {
     color: $textLight;
