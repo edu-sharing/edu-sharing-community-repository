@@ -445,7 +445,6 @@ public class ElasticAdminService {
      * Writes a zip containing
      * - mapping.json / settings.json / aliases.json of the exported index(es)
      * - data-00001.ndjson ...: documents in the _bulk format (action + _source line)
-     * - README.txt with restore instructions
      */
     private long exportDump(String index, ObjectNode body, OutputStream out) throws IOException {
         ZipOutputStream zip = new ZipOutputStream(out, StandardCharsets.UTF_8);
@@ -481,10 +480,6 @@ public class ElasticAdminService {
         if (count > 0) {
             zip.closeEntry();
         }
-        zip.putNextEntry(new ZipEntry("README.txt"));
-        writer.write(getDumpReadme(index, count, includeIndex));
-        writer.flush();
-        zip.closeEntry();
         zip.finish();
         zip.flush();
         return count;
@@ -494,20 +489,6 @@ public class ElasticAdminService {
         zip.putNextEntry(new ZipEntry(name));
         zip.write(mapper.writer().with(SerializationFeature.INDENT_OUTPUT).writeValueAsBytes(content));
         zip.closeEntry();
-    }
-
-    private static String getDumpReadme(String index, long count, boolean includeIndex) {
-        return "edu-sharing elasticsearch dump\n" +
-                "index: " + index + "\n" +
-                "created: " + new Date() + "\n" +
-                "documents: " + count + "\n\n" +
-                "mapping.json, settings.json and aliases.json contain the index definition at the time of the dump.\n" +
-                "data-*.ndjson contain the documents in the elasticsearch _bulk format.\n\n" +
-                "Restore (example):\n" +
-                "  1. create the target index using the \"settings\" (without uuid/creation_date/provided_name/version) and \"mappings\" of the json files\n" +
-                "  2. for f in data-*.ndjson; do curl -s -H 'Content-Type: application/x-ndjson' -XPOST " +
-                (includeIndex ? "'http://localhost:9200/_bulk'" : "'http://localhost:9200/<target-index>/_bulk'") +
-                " --data-binary \"@$f\"; done\n";
     }
 
     static String getNodeId(JsonNode hit) {
