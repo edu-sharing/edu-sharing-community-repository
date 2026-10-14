@@ -72,3 +72,8 @@ export {
 } from './lib/api/services';
 export * from './lib/api/models/contributor-data';
 export * from './lib/api/models/contributor-search-result';
+export * from './lib/api/models/elastic-index-info';
+export * from './lib/api/models/elastic-export-request';
+export * from './lib/api/models/elastic-doc-inspection';
+export * from './lib/api/models/elastic-document';
+export * from './lib/api/models/elastic-property-diff';

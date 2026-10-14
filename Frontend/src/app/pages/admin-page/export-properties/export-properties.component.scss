@@ -1,0 +1,17 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.export-properties-mode {
+    align-self: flex-start;
+    margin-bottom: 20px;
+}
+.export-properties-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}

@@ -1,2 +1,37 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 $sidenavWidth: 250px;
 $sidenavWidthMobile: 66px;
+
+// shared layout of the admin forms (used by the admin page and its sub components)
+@mixin inputGroupGrow() {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    > * {
+        width: 0;
+        flex-grow: 1;
+        display: flex;
+        margin: 0 10px;
+    }
+    > input {
+        margin-bottom: 0;
+    }
+}
+@mixin heading() {
+    color: $textLight;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 110%;
+    width: 100%;
+    border-bottom: 1px solid $cardSeparatorLineColor;
+    margin: 20px 0;
+    padding: 0 10px;
+    i {
+        font-size: 13pt;
+    }
+    span {
+        position: relative;
+        top: -3px;
+        margin-left: 10px;
+    }
+}

@@ -2357,6 +2357,161 @@
         },
         "type": "object"
       },
+      "ElasticDocInspection": {
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/ElasticDocument"
+            },
+            "type": "array"
+          },
+          "existsInRepository": {
+            "type": "boolean"
+          },
+          "index": {
+            "type": "string"
+          },
+          "nodeId": {
+            "type": "string"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/ElasticPropertyDiff"
+            },
+            "type": "array"
+          },
+          "repositoryAspects": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "repositoryType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ElasticDocument": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "index": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ElasticExportRequest": {
+        "properties": {
+          "async": {
+            "description": "run in background and store the result in the inbox of the current user",
+            "type": "boolean"
+          },
+          "format": {
+            "enum": [
+              "csv",
+              "json",
+              "dump"
+            ],
+            "type": "string"
+          },
+          "index": {
+            "description": "index name, alias or pattern or one of the constants -workspace- / -authorities-. Defaults to the workspace index",
+            "type": "string"
+          },
+          "properties": {
+            "description": "properties to export (csv/json only). Short names like ccm:title are read from the properties of the document, other values are treated as path in the _source (e.g. nodeRef.id). Use parent::<property> to include parent property values",
+            "items": {
+              "description": "properties to export (csv/json only). Short names like ccm:title are read from the properties of the document, other values are treated as path in the _source (e.g. nodeRef.id). Use parent::<property> to include parent property values",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "propertySource": {
+            "description": "where property values are read from (csv/json only)",
+            "enum": [
+              "elastic",
+              "alfresco"
+            ],
+            "type": "string"
+          },
+          "query": {
+            "description": "elastic query (json). Either a full search body containing \"query\" or the query object itself. Empty = match_all",
+            "type": "string"
+          }
+        },
+        "required": [
+          "format"
+        ],
+        "type": "object"
+      },
+      "ElasticIndexInfo": {
+        "properties": {
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "authorities": {
+            "type": "boolean"
+          },
+          "docsCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "health": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "storeSize": {
+            "type": "string"
+          },
+          "workspace": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ElasticPropertyDiff": {
+        "properties": {
+          "indexValue": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "property": {
+            "type": "string"
+          },
+          "repositoryValue": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "equal",
+              "different",
+              "onlyRepository",
+              "onlyIndex"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Element": {
         "properties": {
           "id": {
@@ -12560,6 +12715,297 @@
         ]
       }
     },
+    "/admin/v1/elastic/export": {
+      "post": {
+        "description": "Formats: csv / json (selected properties) or dump (zip with mapping, settings and all raw documents in the elastic _bulk format). Uses scrolling, so there is no limit on the number of results. If async is set, the export runs as background job and the file is stored in the inbox of the current user.",
+        "operationId": "exportByElastic",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElasticExportRequest"
+              }
+            }
+          },
+          "description": "export request",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "202": {
+            "description": "export scheduled (async)"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Duplicate Entity/Node conflict (Node with same name exists)"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Export all documents matching an elastic query",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/elastic/indices": {
+      "get": {
+        "operationId": "getElasticIndices",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ElasticIndexInfo"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "List the available elastic indices (incl. aliases and document counts)",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/elastic/inspect/{nodeId}": {
+      "get": {
+        "operationId": "inspectElasticDocument",
+        "parameters": [
+          {
+            "description": "node id",
+            "in": "path",
+            "name": "nodeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "index (default: workspace index), also accepts -workspace- / -authorities-",
+            "in": "query",
+            "name": "index",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElasticDocInspection"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Compare the indexed elastic document(s) of a node with the repository state",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
     "/admin/v1/export/lom": {
       "get": {
         "description": "Export Nodes with LOM Metadata Format.",
@@ -14592,151 +15038,6 @@
           }
         },
         "summary": "Search for custom lucene query",
-        "tags": [
-          "ADMIN v1"
-        ]
-      }
-    },
-    "/admin/v1/lucene/export": {
-      "get": {
-        "description": "e.g. @cm\\:name:\"*\"",
-        "operationId": "exportByLucene",
-        "parameters": [
-          {
-            "description": "query",
-            "in": "query",
-            "name": "query",
-            "schema": {
-              "default": "@cm\\:name:\"*\"",
-              "type": "string"
-            }
-          },
-          {
-            "description": "sort properties",
-            "in": "query",
-            "name": "sortProperties",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
-            "in": "query",
-            "name": "sortAscending",
-            "schema": {
-              "items": {
-                "type": "boolean"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "description": "properties to fetch, use parent::<property> to include parent property values",
-            "in": "query",
-            "name": "properties",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "description": "store, workspace or archive",
-            "in": "query",
-            "name": "store",
-            "schema": {
-              "enum": [
-                "Workspace",
-                "Archive"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "authority scope to search for",
-            "in": "query",
-            "name": "authorityScope",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "additionalProperties": {
-                      "type": "object"
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                }
-              }
-            },
-            "description": "OK."
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Preconditions are not present."
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Authorization failed."
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Session user has insufficient rights to perform this operation."
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Ressources are not found."
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Fatal error occured."
-          }
-        },
-        "summary": "Search for custom lucene query and choose specific properties to load",
         "tags": [
           "ADMIN v1"
         ]

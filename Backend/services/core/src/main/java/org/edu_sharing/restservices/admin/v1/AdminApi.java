@@ -1,8 +1,7 @@
 package org.edu_sharing.restservices.admin.v1;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +19,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import lombok.Setter;
 import org.alfresco.rest.framework.core.exceptions.InvalidArgumentException;
 import org.alfresco.service.ServiceRegistry;
@@ -53,6 +53,10 @@ import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
 import org.edu_sharing.service.admin.AdminServiceFactory;
+import org.edu_sharing.service.admin.elastic.ElasticAdminService;
+import org.edu_sharing.service.admin.elastic.ElasticDocInspection;
+import org.edu_sharing.service.admin.elastic.ElasticExportRequest;
+import org.edu_sharing.service.admin.elastic.ElasticIndexInfo;
 import org.edu_sharing.service.admin.model.GlobalGroup;
 import org.edu_sharing.service.admin.model.RepositoryConfig;
 import org.edu_sharing.service.admin.model.ServerUpdateInfo;
@@ -61,8 +65,6 @@ import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.lifecycle.PersonDeleteOptions;
 import org.edu_sharing.service.lifecycle.PersonLifecycleService;
 import org.edu_sharing.service.lifecycle.PersonReport;
-import org.edu_sharing.service.nodeservice.NodeServiceFactory;
-import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchResultNodeRefElastic;
 import org.edu_sharing.service.search.SearchService.ContentType;
 import org.edu_sharing.service.search.SearchServiceElastic;
@@ -75,10 +77,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.io.Writer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -1194,6 +1194,80 @@ public class AdminApi {
         }
     }
 
+    @Autowired
+    @Setter
+    private ElasticAdminService elasticAdminService;
+
+    @GET
+    @Path("/elastic/indices")
+    @Operation(summary = "List the available elastic indices (incl. aliases and document counts)")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = ElasticIndexInfo.class)))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response getElasticIndices(@Context HttpServletRequest req) {
+        try {
+            return Response.ok().entity(elasticAdminService.getIndices()).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @POST
+    @Path("/elastic/export")
+    @Consumes({"application/json"})
+    @Produces({"application/octet-stream", "application/json"})
+    @Operation(summary = "Export all documents matching an elastic query",
+            description = "Formats: csv / json (selected properties) or dump (zip with mapping, settings and all raw documents in the elastic _bulk format). " +
+                    "Uses scrolling, so there is no limit on the number of results. " +
+                    "If async is set, the export runs as background job and the file is stored in the inbox of the current user.")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(mediaType = "application/octet-stream", schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(responseCode = "202", description = "export scheduled (async)"),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = RestConstants.HTTP_409, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response exportByElastic(@Parameter(description = "export request", required = true) ElasticExportRequest request,
+                                    @Context HttpServletRequest req) {
+        try {
+            // validate (incl. admin check) before the streaming response is committed
+            String index = elasticAdminService.validateExport(request);
+            if (request.isAsync()) {
+                elasticAdminService.scheduleExport(index, request.getQuery(), request.getFormat(), request.getProperties(), request.getPropertySource());
+                return Response.status(Response.Status.ACCEPTED).build();
+            }
+            StreamingOutput output = out -> elasticAdminService.export(request, out);
+            return Response.ok(output, request.getFormat().getMimetype())
+                    .header("Content-Disposition", "attachment; filename=\"" + ElasticAdminService.getExportFilename(index, request.getFormat()) + "\"")
+                    .build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    @GET
+    @Path("/elastic/inspect/{nodeId}")
+    @Operation(summary = "Compare the indexed elastic document(s) of a node with the repository state")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ElasticDocInspection.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+    public Response inspectElasticDocument(@Parameter(description = "node id", required = true) @PathParam("nodeId") String nodeId,
+                                           @Parameter(description = "index (default: workspace index), also accepts -workspace- / -authorities-") @QueryParam("index") String index,
+                                           @Context HttpServletRequest req) {
+        try {
+            return Response.ok().entity(elasticAdminService.inspect(nodeId, index)).build();
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
     @GET
     @Path("/lucene")
     @Consumes({"application/json"})
@@ -1264,96 +1338,6 @@ public class AdminApi {
         }
     }
 
-    @GET
-    @Path("/lucene/export")
-    @Consumes({"application/json"})
-
-    @Operation(summary = "Search for custom lucene query and choose specific properties to load", description = "e.g. @cm\\:name:\"*\"")
-
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(type = "object", additionalPropertiesSchema = Objects.class)))),
-            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
-
-    public Response exportByLucene(
-            @Parameter(description = "query", schema = @Schema(defaultValue = "@cm\\:name:\"*\"")) @QueryParam("query") String query,
-            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
-            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
-            @Parameter(description = "properties to fetch, use parent::<property> to include parent property values") @QueryParam("properties") List<String> properties,
-            @Parameter(description = "store, workspace or archive") @QueryParam("store") LuceneStore store,
-            @Parameter(description = "authority scope to search for") @QueryParam("authorityScope") List<String> authorityScope,
-            @Context HttpServletRequest req) {
-
-        try {
-
-            //check that there is an admin
-            AdminServiceFactory.getInstance();
-            RepositoryDao repoDao = RepositoryDao.getHomeRepository();
-
-
-            List<Map<String, Serializable>> data = new ArrayList<>();
-            //
-            boolean haseMore = true;
-            int pageSize = 1000;
-            int page = 0;
-            do {
-
-                SearchToken token = new SearchToken();
-                token.setSortDefinition(new SortDefinition(sortProperties, sortAscending));
-                token.setFrom(page);
-                token.setMaxResult(pageSize);
-                token.setContentType(ContentType.ALL);
-                setQuery(query, token);
-                token.disableSearchCriterias();
-                token.setAuthorityScope(authorityScope);
-                StoreRef storeRef = LuceneStore.Archive.equals(store) ? StoreRef.STORE_REF_ARCHIVE_SPACESSTORE : StoreRef.STORE_REF_WORKSPACE_SPACESSTORE;
-                if (LuceneStore.Archive.equals(store)) {
-                    token.setStoreName(storeRef.getIdentifier());
-                    token.setStoreProtocol(storeRef.getProtocol());
-                }
-                NodeSearch search = NodeDao.search(repoDao, token, false);
-                logger.info("page: " + page + " count:" + search.getCount() + " t:" + Thread.currentThread().getId());
-                page = page + pageSize;
-                if ((search.getCount() - 1) <= page) {
-                    haseMore = false;
-                }
-                for (org.edu_sharing.restservices.shared.NodeRef ref : search.getResult()) {
-                    NodeRef alfRef = new NodeRef(storeRef, ref.getId());
-                    Map<String, Serializable> props = new HashMap<>();
-                    for (String prop : properties) {
-                        if (prop.startsWith("parent::")) {
-                            String parentId = NodeServiceFactory.getInstance().getLocalService().getPrimaryParent(ref.getId());
-                            String realProp = prop.substring("parent::".length());
-                            props.put(prop, NodeServiceHelper.getPropertyNative(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, parentId), CCConstants.getValidGlobalName(realProp)));
-                        } else {
-                            props.put(prop, NodeServiceHelper.getPropertyNative(alfRef, CCConstants.getValidGlobalName(prop)));
-                        }
-                    }
-                    data.add(props);
-                }
-
-            } while (haseMore);
-
-            logger.info("result:" + data.size());
-            String tempDir = System.getProperty("java.io.tmpdir");
-            String protocolFile = tempDir + "/" + "edu_export_lucene.txt";
-            try (Writer writer = new FileWriter(protocolFile)) {
-                Gson gson = new GsonBuilder().create();
-                gson.toJson(data, writer);
-            }
-            //
-            return Response.status(Response.Status.OK).entity(data).build();
-
-        } catch (DAOException e) {
-            return ErrorResponse.createResponse(e);
-        } catch (Throwable t) {
-            return ErrorResponse.createResponse(t);
-        }
-    }
-
     /**
      * checks if its an json string. if true its using json else solr.
      *
@@ -1362,22 +1346,24 @@ public class AdminApi {
      */
     private static void setQuery(String query, SearchToken token) {
         logger.info("query:" + query);
-        //check if its json
-        boolean elasticQuery;
+        //check if its a json object
+        JsonObject jsonObject = null;
         try {
-            JsonParser.parseString(query);
-            elasticQuery = true;
-        } catch (Exception e) {
-            elasticQuery = false;
+            JsonElement parsed = JsonParser.parseString(query);
+            if (parsed.isJsonObject()) {
+                jsonObject = parsed.getAsJsonObject();
+            }
+        } catch (Exception ignored) {
         }
-        if (elasticQuery) {
+        if (jsonObject != null) {
             logger.info("using elasticsearch");
-            query = query.replaceAll("\\s", "");
-            if (query.replaceAll("\\s", "").startsWith("{\"query\"")) {
-                JsonObject jsonObject = JsonParser.parseString(query).getAsJsonObject();
-                JsonObject queryObject = jsonObject.getAsJsonObject("query");
-                logger.info("removed surrounding \"query\": " + queryObject.toString());
-                query = queryObject.toString();
+            // same structure as the raw elastic mode / export: {"query": {...}}
+            if (jsonObject.has("query")) {
+                query = jsonObject.getAsJsonObject("query").toString();
+            } else if (jsonObject.isEmpty()) {
+                query = "{\"match_all\":{}}";
+            } else {
+                throw new IllegalArgumentException("elastic query must be wrapped in {\"query\": {...}}");
             }
             token.setElasticQuery(QueryBuilders.wrapper().query(new String(Base64.getEncoder().encode(query.getBytes()))).build());
         } else {

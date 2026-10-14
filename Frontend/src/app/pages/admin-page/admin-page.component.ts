@@ -20,18 +20,9 @@ import {
     Store,
 } from 'ngx-edu-sharing-api';
 import {
-    ActionbarComponent,
-    ColumnType,
-    DateHelper,
-    InteractionType,
-    ListItem,
     NodeClickEvent,
-    NodeDataSource,
     NodeEntriesDataType,
-    NodeEntriesDisplayType,
-    NodeEntriesWrapperComponent,
     NodeHelperService,
-    Scope,
     TranslationsService,
     UIAnimation,
     UIConstants,
@@ -46,7 +37,6 @@ import {
     DialogButton,
     JobDescription,
     LoginResult,
-    NodeListElastic,
     RestAdminService,
     RestConnectorService,
     RestConstants,
@@ -57,7 +47,6 @@ import {
     RestSearchService,
     ServerUpdate,
 } from '../../core-module/core.module';
-import { CsvHelper } from '../../core-module/csv.helper';
 import { Helper } from '../../core-module/rest/helper';
 import { Toast } from '../../services/toast';
 import { UIHelper } from '../../core-ui-module/ui-helper';
@@ -70,24 +59,9 @@ import { XmlAppPropertiesDialogData } from '../../features/dialogs/dialog-module
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
 import { AuthoritySearchMode } from '../../shared/components/authority-search-input/authority-search-input.component';
-import { WorkspaceExplorerComponent } from '../workspace-page/explorer/explorer.component';
 import { AdminSystemChecksService } from './admin-system-checks.service';
 import { delay, repeat, takeUntil, tap } from 'rxjs/operators';
 
-type LuceneData = {
-    mode: 'NODEREF' | 'SOLR' | 'ELASTIC';
-    store: 'Workspace' | 'Archive';
-    offset: number;
-    count: number;
-    noderef?: string;
-    query?: string;
-    properties?: string;
-    authorities?: Authority[];
-    outputMode?: 'view' | 'export';
-    exportFormat?: 'json' | 'csv';
-    index?: string;
-    elasticRaw: boolean;
-};
 type JobConfig = {
     params?: string;
     name?: string;
@@ -147,13 +121,7 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     private nodeHelperService = inject(NodeHelperService);
 
     readonly AuthoritySearchMode = AuthoritySearchMode;
-    readonly SCOPES = Scope;
-    readonly InteractionType = InteractionType;
-    readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
-    @ViewChild('searchResults') nodeEntriesSearchResult: NodeEntriesWrapperComponent<Node>;
-    @ViewChild('actionbarComponent') actionbarComponent: ActionbarComponent;
     @ViewChild('keyValueTable') keyValueTable: TemplateRef<undefined>;
-    elasticResponse: NodeListElastic;
     cancelJobInfo: Job;
     private readonly destroyed$ = new Subject<void>();
     private queryParams: Params;
@@ -219,29 +187,8 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         autoIndent: true,
         automaticLayout: true,
     };
-    public dslCodeOptions = {
-        minimap: { enabled: false },
-        language: 'json',
-        autoIndent: true,
-        automaticLayout: true,
-    };
-    public elasticResponseCodeOptions = {
-        minimap: { enabled: false },
-        language: 'json',
-        autoIndent: true,
-        automaticLayout: true,
-        readOnly: true,
-    };
     public jobClasses: SuggestItem[] = [];
     public jobClassesSuggested: SuggestItem[] = [];
-    public lucene: LuceneData = {
-        mode: 'NODEREF',
-        store: 'Workspace',
-        offset: 0,
-        count: 100,
-        outputMode: 'view',
-        elasticRaw: false,
-    };
     public oaiSave = true;
     public repositoryVersion: string;
     public updates: ServerUpdate[] = [];
@@ -271,14 +218,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     uploadOaiFile: File;
     public xmlAppKeys: string[];
     public editableXmls = [{ name: 'HOMEAPP', file: RestConstants.HOME_APPLICATION_XML }];
-    searchResponse = new NodeDataSource<Node>();
-    searchColumns = {
-        Default: [
-            new ListItem('NODE', RestConstants.CM_NAME),
-            new ListItem('NODE', RestConstants.NODE_ID),
-            new ListItem('NODE', RestConstants.CM_MODIFIED_DATE),
-        ],
-    } as ColumnType;
     public selectedTemplate = '';
     public templates: string[];
     public eduGroupSuggestions: SuggestItem[];
@@ -348,78 +287,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
     }
     public getModeButton(mode = this.mode): any {
         return this.buttons[Helper.indexOfObjectArray(this.buttons, 'id', mode)];
-    }
-    public searchNoderef() {
-        void this.storage.set('admin_lucene', this.lucene);
-        this.globalProgress = true;
-        this.node.getNodeMetadata(this.lucene.noderef, [RestConstants.ALL]).subscribe(
-            (node) => {
-                this.globalProgress = false;
-                this.searchResponse.setData([node.node], {
-                    from: 0,
-                    count: 1,
-                    total: 1,
-                });
-            },
-            (error) => {
-                this.globalProgress = false;
-                this.toast.error(error);
-            },
-        );
-    }
-    public async searchNodes() {
-        void this.storage.set('admin_lucene', this.lucene);
-        const authorities = [];
-        if (this.lucene.authorities) {
-            for (const auth of this.lucene.authorities) {
-                authorities.push(auth.authorityName);
-            }
-        }
-        await this.nodeEntriesSearchResult.initOptionsGenerator({
-            actionbar: this.actionbarComponent,
-        });
-        const request = {
-            offset: this.lucene.offset ? this.lucene.offset : 0,
-            count: this.lucene.count,
-            propertyFilter: [RestConstants.ALL],
-        };
-        this.globalProgress = true;
-        if (
-            this.lucene.mode === 'SOLR' ||
-            (this.lucene.mode === 'ELASTIC' && !this.lucene.elasticRaw)
-        ) {
-            this.admin
-                .searchLucene(this.lucene.query, this.lucene.store, authorities, request)
-                .subscribe(
-                    (data) => {
-                        this.globalProgress = false;
-                        this.searchResponse.setData(data.nodes, data.pagination);
-                    },
-                    (error: any) => {
-                        this.globalProgress = false;
-                        this.toast.error(error);
-                    },
-                );
-        } else if (this.lucene.mode === 'ELASTIC' && this.lucene.elasticRaw) {
-            this.admin.searchElastic(this.lucene.query, this.lucene.index).subscribe(
-                (data) => {
-                    this.globalProgress = false;
-                    this.elasticResponse = data;
-                    this.searchResponse.setData(data.nodes, data.pagination);
-                },
-                (error: any) => {
-                    this.globalProgress = false;
-                    this.toast.error(error);
-                },
-            );
-        }
-    }
-    public addLuceneAuthority(authority: Authority) {
-        if (!this.lucene.authorities) this.lucene.authorities = [];
-        this.lucene.authorities.push(authority);
-    }
-    public removeLuceneAuthority(authority: Authority) {
-        this.lucene.authorities.splice(this.lucene.authorities.indexOf(authority), 1);
     }
     public downloadApp(app: Application) {
         Helper.downloadContent(app.file, app.xml);
@@ -1121,57 +988,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         });
     }
 
-    exportLucene() {
-        if (!this.lucene.properties) {
-            this.toast.error(null, 'ADMIN.BROWSER.LUCENE_PROPERTIES_REQUIRED');
-            return;
-        }
-        void this.storage.set('admin_lucene', this.lucene);
-        this.globalProgress = true;
-        const props = this.lucene.properties.split('\n');
-        this.admin
-            .exportLucene(
-                this.lucene.query,
-                this.lucene.store,
-                props,
-                this.lucene.authorities?.map((a) => a.authorityName),
-            )
-            .subscribe((data) => {
-                const filename =
-                    'Export-' +
-                    DateHelper.formatDate(this.translate, new Date().getTime(), {
-                        useRelativeLabels: false,
-                    });
-                this.globalProgress = false;
-
-                // transform store refs to ids
-                data.forEach((d: any) => {
-                    Object.keys(d).forEach((k) => {
-                        if (d[k]?.id) {
-                            d[k] = d[k].id;
-                        }
-                    });
-                });
-                if (this.lucene.exportFormat === 'json') {
-                    // reformat data, move all parent:: props to a seperate child
-                    data.forEach((d: any) => {
-                        Object.keys(d)
-                            .filter((k) => k.startsWith('parent::'))
-                            .forEach((key) => {
-                                if (!d.parent) {
-                                    d.parent = {};
-                                }
-                                d.parent[key.substring('parent::'.length)] = d[key];
-                                delete d[key];
-                            });
-                    });
-                    Helper.downloadContent(filename + '.json', JSON.stringify(data, null, 2));
-                } else {
-                    CsvHelper.download(filename, props, data);
-                }
-            });
-    }
-
     private initButtons() {
         if (this.loginResult.isAdmin) {
             this.buttons = [
@@ -1287,13 +1103,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
         }
         this.globalProgress = false;
 
-        this.searchColumns.Default = WorkspaceExplorerComponent.getColumns(this.connector);
-        this.searchColumns.Default.filter((s) =>
-            [RestConstants.CM_NAME, RestConstants.NODE_ID, RestConstants.CM_CREATOR].includes(
-                s.name,
-            ),
-        ).forEach((s) => (s.visible = true));
-
         this.route.queryParams.subscribe((data: Params) => {
             this.queryParams = data;
             this.statisticsNodeIds.set(
@@ -1325,9 +1134,6 @@ export class AdminPageComponent implements OnInit, OnDestroy {
             this.refreshAppList();
             void this.storage.get<JobConfig>('admin_job', this.job).then((data) => {
                 this.job = data;
-            });
-            void this.storage.get<LuceneData>('admin_lucene', this.lucene).then((data) => {
-                this.lucene = data;
             });
             this.reloadJobStatus([]);
             this.systemChecks.runToolpermissionChecks();

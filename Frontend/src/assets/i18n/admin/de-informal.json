@@ -61,11 +61,12 @@
     "BROWSER": {
       "LUCENE_PROPERTIES_REQUIRED": "Bitte leg die gewünschte properties fest.",
       "LUCENE_TEMPLATE_MEMORY": {
-        "HINT": "Speicher und lade den Inhalt der Felder \"Lucene-Query\" und \"Im Export einzubindende Properties\" in benannten Vorlagen.",
+        "HINT": "Speicher und lade den Inhalt der Felder \"Elastic-Index\", \"DSL-Query\" und \"Im Export einzubindende Properties\" in benannten Vorlagen.",
         "CONFIRM_UPDATE_MESSAGE": "Möchtest Du die Vorlage mit den aktuellen Werten überschreiben?",
         "CONFIRM_DELETE_MESSAGE": "Möchtest Du die Vorlage löschen?",
         "CHOOSE_NAME_TEXT": "Wähle einen Namen für die neue Vorlage."
-      }
+      },
+      "EXPORT_SCHEDULED": "Der Export wurde eingeplant. Die Datei wird nach Abschluss in Deinem Inbox-Ordner abgelegt."
     },
     "JOBS": {
       "JOB_STARTED": "Die Aufgabe wurde gestartet. Überprüfe die Aufgabenliste, um den Status einzusehen.",

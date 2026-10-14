@@ -310,44 +310,12 @@
           <es-info-message mode="info">
             {{ 'ADMIN.STATISTICS.EXPORT_INFO' | translate }}
           </es-info-message>
-          @if ((null | esGlobalAdmin | async)) {
-          <div>
-            <mat-button-toggle-group
-              class="export-properties-mode"
-              [(ngModel)]="exportPropertiesMode"
-            >
-              <mat-button-toggle value="input">
-                {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_INPUT' | translate }}
-              </mat-button-toggle>
-              <mat-button-toggle value="list">
-                {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_LIST' | translate }}
-              </mat-button-toggle>
-            </mat-button-toggle-group>
-          </div>
-          } @if ((null | esGlobalAdmin | async) && exportPropertiesMode === 'input') {
-          <mat-form-field>
-            <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
-            <textarea
-              matInput
-              cdkTextareaAutosize
-              cdkAutosizeMinRows="4"
-              cdkAutosizeMaxRows="6"
-              [(ngModel)]="exportProperties"
-            ></textarea>
-            <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-          </mat-form-field>
-          } @else {
-          <div class="export-properties-list">
-            @for (column of availableExportColumns; track column.name) {
-            <mat-checkbox
-              [checked]="isExportColumnSelected(column)"
-              (change)="toggleExportColumn(column, $event.checked)"
-            >
-              {{ column | esListItemLabel | async }}
-            </mat-checkbox>
-            }
-          </div>
-          }
+          <es-admin-export-properties
+            [properties]="exportProperties"
+            (propertiesChange)="setExportProperties($event)"
+            [columns]="availableExportColumns"
+            [allowInput]="!!(null | esGlobalAdmin | async)"
+          ></es-admin-export-properties>
           <div class="actions">
             <button mat-raised-button color="primary" (click)="startExport()">
               {{ 'ADMIN.STATISTICS.EXPORT_REQUEST' | translate }}
@@ -406,17 +374,11 @@
       </h4>
       @if (showExport) {
       <div [@overlay]="showExport">
-        <mat-form-field>
-          <mat-label>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES' | translate }}</mat-label>
-          <textarea
-            matInput
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="4"
-            cdkAutosizeMaxRows="6"
-            [(ngModel)]="exportProperties"
-          ></textarea>
-          <mat-hint>{{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_HINT' | translate }}</mat-hint>
-        </mat-form-field>
+        <es-admin-export-properties
+          [properties]="exportProperties"
+          (propertiesChange)="setExportProperties($event)"
+          [columns]="availableExportColumns"
+        ></es-admin-export-properties>
         <div>
           <button mat-raised-button color="primary" (click)="export()">
             {{ 'ADMIN.STATISTICS.EXPORT' | translate }}

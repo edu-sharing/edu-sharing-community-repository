@@ -1394,6 +1394,7 @@
     "COPIED_TO_CLIPBOARD_NOTICE": "Le code d'intégration a été copié dans le presse-papiers."
   },
   "NODE_INFO": {
+    "OPEN_INDEX_INSPECTOR": "Ouvrir dans l'inspecteur d'index",
     "TITLE": "Nœud \"{{name}}\"",
     "LOCATION": "Chemin d'accès à l'article",
     "NODE_ASPECTS": "Aspects",

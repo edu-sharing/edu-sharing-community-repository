@@ -234,10 +234,57 @@ public class SearchServiceElastic implements SearchService {
         return builder.build();
     }
 
-    public SearchResultNodeRefElastic searchDSL(String dsl, String index) throws Throwable {
+    /**
+     * index names, aliases or patterns which are safe to be used as path segment of a raw request
+     */
+    private static final java.util.regex.Pattern VALID_INDEX_EXPRESSION = java.util.regex.Pattern.compile("^[A-Za-z0-9*][A-Za-z0-9._,*\\-]*$");
+    /**
+     * symbolic index names, independent of the current index version
+     */
+    public static final String INDEX_CONSTANT_WORKSPACE = "-workspace-";
+    public static final String INDEX_CONSTANT_AUTHORITIES = "-authorities-";
+
+    /**
+     * resolves symbolic index names and validates the given index expression
+     *
+     * @return the index expression, the workspace index if empty
+     */
+    public static String validateIndexExpression(String index) {
         if (index == null || index.trim().isEmpty()) {
-            index = WORKSPACE_INDEX;
+            return WORKSPACE_INDEX;
         }
+        index = index.trim();
+        if (INDEX_CONSTANT_WORKSPACE.equals(index)) {
+            return WORKSPACE_INDEX;
+        }
+        if (INDEX_CONSTANT_AUTHORITIES.equals(index)) {
+            return AUTHORITIES_INDEX;
+        }
+        if (!VALID_INDEX_EXPRESSION.matcher(index).matches()) {
+            throw new IllegalArgumentException("Invalid index name: " + index);
+        }
+        return index;
+    }
+
+    /**
+     * Run a raw request against the elastic cluster via the low level client.
+     * Only intended for admin tooling (no permission handling is applied to the result)
+     *
+     * @param endpoint path incl. query string, e.g. "workspace_11.0/_search?scroll=5m"
+     * @param jsonBody optional json body
+     * @return the response body
+     */
+    public String performRawRequest(String method, String endpoint, String jsonBody) throws IOException {
+        checkClient();
+        Request request = new Request(method, endpoint);
+        if (jsonBody != null) {
+            request.setJsonEntity(jsonBody);
+        }
+        return EntityUtils.toString(restClient.performRequest(request).getEntity(), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public SearchResultNodeRefElastic searchDSL(String dsl, String index) throws Throwable {
+        index = validateIndexExpression(index);
         checkClient();
         Request request = new Request("GET", index + "/_search");
         request.setJsonEntity(dsl);
@@ -255,7 +302,12 @@ public class SearchServiceElastic implements SearchService {
         boolean isAdmin = AuthorityServiceHelper.isAdmin();
         String user = authenticationService.getCurrentUserName();
         for (int i = 0; i < hitsList.length(); i++) {
-            Map<?, ?> hit = new ObjectMapper().readValue(hitsList.getJSONObject(i).getJSONObject("_source").toString(), Map.class);
+            JSONObject source = hitsList.getJSONObject(i).optJSONObject("_source");
+            // non-node indices (e.g. app_info, tracker_failures) are only available via the raw response
+            if (source == null || !source.has("nodeRef")) {
+                continue;
+            }
+            Map<?, ?> hit = new ObjectMapper().readValue(source.toString(), Map.class);
             data.add(transformSearchHit(isAdmin, authorities, user, hit, false));
         }
         return sr;
