@@ -37,6 +37,12 @@ public class OAuth2SchemaInitializer {
             executeSqlFromClasspath(
                     "org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql");
         }
+
+        // not part of the spring schema: an authorization that waits for the consent of the user carries no
+        // token yet and therefore no expires_at, this is the only way OAuth2AuthorizationCleanupJob can tell
+        // its age. spring names its columns explicitly on insert and update, so the extra column stays
+        // untouched by it. rows that exist before the column is added get the time of the migration.
+        executeSql("ALTER TABLE oauth2_authorization ADD COLUMN IF NOT EXISTS created_at timestamptz DEFAULT CURRENT_TIMESTAMP");
     }
 
     private boolean tableExists(String tableName) {
@@ -60,18 +66,26 @@ public class OAuth2SchemaInitializer {
 
             sql = sql.replace("blob", "text");
 
-            String finalSql = sql;
+            executeSql(sql);
+        }
+    }
 
-            ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
-            Connection con = dbAlf.getConnection();
-            for (String statement : finalSql.split(";")) {
+    private void executeSql(String sql) throws Exception {
+        ConnectionDBAlfresco dbAlf = new ConnectionDBAlfresco();
+        Connection con = dbAlf.getConnection();
+        try {
+            for (String statement : sql.split(";")) {
                 if (!statement.isBlank()) {
-                    try(PreparedStatement ps = con.prepareStatement(finalSql)){
+                    try (PreparedStatement ps = con.prepareStatement(statement)) {
                         ps.executeUpdate();
                     }
                 }
             }
             con.commit();
+        } catch (Exception e) {
+            con.rollback();
+            throw e;
+        } finally {
             dbAlf.cleanUp(con);
         }
     }
