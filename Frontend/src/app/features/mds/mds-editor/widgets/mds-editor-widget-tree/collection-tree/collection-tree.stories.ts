@@ -153,6 +153,8 @@ class CollectionTreeServiceMock implements Partial<CollectionTreeService> {
 class CollectionTreeWidgetDummy extends WidgetDummy {
     constructor(definition: MdsWidget, private readonly initialIds: string[]) {
         super(definition);
+        // collection trees filter searches, which list no proposals
+        this.setSuggestions([]);
     }
 
     getInitalValuesAsync(): Promise<InitialValues> {
