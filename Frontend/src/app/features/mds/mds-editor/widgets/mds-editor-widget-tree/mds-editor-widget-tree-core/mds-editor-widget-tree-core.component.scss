@@ -63,6 +63,9 @@
         align-items: center;
         mat-form-field {
             flex-grow: 1;
+            // fills the width beside the close button rather than Material's minimum width,
+            // so the header never widens the tree beyond the card
+            width: 0;
             .mat-form-field-wrapper {
                 margin-bottom: 0;
             }
