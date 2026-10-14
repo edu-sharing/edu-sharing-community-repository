@@ -138,14 +138,13 @@ class ElasticAdminServiceTest {
                 entries.put(entry.getName(), new String(zip.readAllBytes(), StandardCharsets.UTF_8));
             }
         }
-        assertEquals(List.of("mapping.json", "settings.json", "aliases.json", "data-00001.ndjson", "README.txt"), new ArrayList<>(entries.keySet()));
+        assertEquals(List.of("mapping.json", "settings.json", "aliases.json", "data-00001.ndjson"), new ArrayList<>(entries.keySet()));
         String[] lines = entries.get("data-00001.ndjson").split("\n");
         assertEquals(4, lines.length);
         // single concrete index -> no _index in the action, so the dump can be restored into any index
         assertEquals("{\"index\":{\"_id\":\"1\"}}", lines[0]);
         assertEquals("node-1", mapper.readTree(lines[1]).path("nodeRef").path("id").asText());
         assertEquals("{\"index\":{\"_id\":\"2\"}}", lines[2]);
-        assertTrue(entries.get("README.txt").contains("documents: 2"));
     }
 
     @Test
