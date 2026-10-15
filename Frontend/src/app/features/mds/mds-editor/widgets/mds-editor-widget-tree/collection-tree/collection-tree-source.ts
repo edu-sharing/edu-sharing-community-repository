@@ -171,10 +171,11 @@ export class CollectionTreeSource implements TreeSource {
         const root = this.withinRoot() ? await this.loadRoot() : null;
         if (root) {
             const rootNode = this.addCollection(tree, root);
-            // the start collection is listed with its first page of collections
-            rootNode.hasChildren = true;
+            // the start collection is listed with its first page of collections, and can be
+            // expanded only when that page holds any
             await this.appendPage(rootNode);
             rootNode.children ??= [];
+            rootNode.hasChildren = rootNode.children.length > 0;
         } else {
             for (const scope of await this.getFilledCategories()) {
                 const category = tree.addNode({
