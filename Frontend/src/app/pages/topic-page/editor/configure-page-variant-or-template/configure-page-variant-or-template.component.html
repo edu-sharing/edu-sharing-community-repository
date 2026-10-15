@@ -29,7 +29,7 @@
   >
   </es-mds-editor-wrapper>
   <div class="configuration-buttons">
-    @if (deleteVariantEnabled()) {
+    @if (deleteEnabled()) {
     <button
       mat-stroked-button
       class="btn-outline-primary"
@@ -39,7 +39,7 @@
       <i esIcon="delete"></i>
       {{ dynamicI18nPrefix() + 'DELETE_VARIANT' | translate }}
     </button>
-    }
+    } @if (!globalTemplateMode()) {
     <div [matTooltip]="regenerateTooltip()">
       <button
         mat-stroked-button
@@ -51,7 +51,17 @@
         {{ i18nPrefix + 'REGENERATE_VARIANT' | translate }}
       </button>
     </div>
-    @if (addToGlobalTemplatesEnabled()) {
+    } @if (editGlobalTemplateEnabled() && !globalTemplateMode()) {
+    <button
+      mat-stroked-button
+      class="btn-outline-primary"
+      color="primary"
+      (click)="editGlobalTemplate()"
+    >
+      <i esIcon="edit"></i>
+      {{ dynamicI18nPrefix() + 'EDIT_GLOBAL_TEMPLATE' | translate }}
+    </button>
+    } @if (addToGlobalTemplatesEnabled() && !globalTemplateMode()) {
     <div [matTooltip]="invalidParametersTooltip()">
       <button
         mat-stroked-button

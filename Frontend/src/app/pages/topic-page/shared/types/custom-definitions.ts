@@ -36,6 +36,9 @@ export const DEFAULT_PAGE_VARIANT_QUERY_ID: string = 'page_variant';
 // Fallback config for page variant nodes that do not carry a `ccm:page_variant_config`
 // (e.g. the default node auto-created when requesting the global page templates).
 export const DEFAULT_PAGE_VARIANT_CONFIG_VALUE: string = '{"structure":{"swimlanes":[]}}';
+// `ccm:maptype` of the default global template, which the repository maintains itself
+export const DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE: string =
+    'EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE';
 export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 
 // query params carrying the page-wide search state

@@ -164,6 +164,7 @@ import { checkUserAccess } from '../shared/utils/node-util';
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
+    isDefaultGlobalTemplate,
     markForCopy,
     markForRender,
     mergeConfig,
@@ -438,6 +439,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
     canAddToGlobalTemplates: WritableSignal<boolean> = signal(false);
+    // set while a global template is edited in place of the collection's page; the collection
+    // only provides the topic and sub-collections the preview is resolved for
+    globalTemplateNode: WritableSignal<Node | null> = signal(null);
+    private globalTemplatesFolderId: WritableSignal<string | null> = signal(null);
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
     readonly sidebarOpen: Signal<boolean> = computed(
@@ -508,6 +513,35 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // Leaf page variants store their foundation's version verbatim, so compare the
         // full version against the foundation's current version.
         return currentTemplateVersion !== variantTemplateVersion;
+    });
+    // the global template the page was created from; the collection's own template is edited in
+    // template mode and the repository-maintained default template not at all
+    linkedGlobalTemplate: Signal<Node | null> = computed(() => {
+        const templateNode: Node = this.templateVariantNode();
+        const folderId: string = this.globalTemplatesFolderId();
+        const isGlobal: boolean = !!folderId && templateNode?.parent?.id === folderId;
+        return isGlobal && !isDefaultGlobalTemplate(templateNode) ? templateNode : null;
+    });
+    canEditLinkedGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.linkedGlobalTemplate();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_WRITE)
+        );
+    });
+    canDeleteGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.globalTemplateNode();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_DELETE)
+        );
+    });
+    // the i18n section of the settings menu matching the edited node
+    settingsI18nSection: Signal<string> = computed(() => {
+        if (this.globalTemplateNode()) {
+            return 'CONFIG_GLOBAL_TEMPLATE';
+        }
+        return this.templateMode() ? 'CONFIG_PAGE_TEMPLATE' : 'CONFIG_PAGE_VARIANT';
     });
     createVariantOrTemplateDialogRef: CardDialogRef;
     createVariantOrTemplateMode: WritableSignal<'template' | 'variant'> = signal('variant');
@@ -1181,6 +1215,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         variantId: string = '',
         forceReload: boolean = false,
     ): Promise<void> {
+        if (this.globalTemplateNode()) {
+            await this.loadGlobalTemplate();
+            return;
+        }
         // check whether the collection node has a page propagate config
         // hint: this must be done before parsing the page config, as it might not exist and cancel the execution
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
@@ -1321,23 +1359,62 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
                 markForRender(pageVariant);
             }
-            // set the anchorItemColor, topicColor, breadcrumbNodeId, headerNodeId and swimlanes
-            if (pageVariant.structure.anchorItemColor) {
-                this.anchorItemColor = pageVariant.structure.anchorItemColor;
-            }
-            this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
-            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-            this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
-            this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
-            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
-            await this.updateRenderedSwimlanes();
+            await this.applyPageVariantStructure(pageVariant);
         }
         // update the swimlane ID to prompt text mapping
         if (initialLoad || pageVariantChanged || forceReload) {
             await this.updateSwimlaneIdToPromptTextMapping();
         }
         // wait for the page variant to be loaded before checking whether all accordions are opened in edit mode
+        setTimeout((): void => {
+            this.checkAccordionExpansionState();
+        });
+    }
+
+    /**
+     * Takes the colors, the breadcrumb and header node IDs and the swimlanes of a page variant
+     * into the rendered page.
+     */
+    private async applyPageVariantStructure(pageVariant: PageVariantConfig): Promise<void> {
+        if (pageVariant.structure.anchorItemColor) {
+            this.anchorItemColor = pageVariant.structure.anchorItemColor;
+        }
+        this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
+        this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
+        this.headerNodeId.set(pageVariant.structure.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
+        this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
+        this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
+        await this.updateRenderedSwimlanes();
+    }
+
+    /**
+     * Loads the global template being edited as the only variant of the page. It belongs to no
+     * page config, so the one of the collection is neither read nor written.
+     */
+    private async loadGlobalTemplate(): Promise<void> {
+        const templateNode: Node = await this.topicPageHelperService.getUpdatedNode(
+            retrieveNodeId(this.globalTemplateNode()),
+        );
+        this.globalTemplateNode.set(templateNode);
+        this.pageVariantConfigs = { nodes: [templateNode], pagination: null };
+        this.pageVariantNode.set(templateNode);
+        this.pageVariantNodeIndex = 0;
+        this.selectedVariantPosition = 0;
+        this.pageVariantSettingsValid.set(true);
+        this.pageConfigCheckFailed.set(false);
+        const pageVariant: PageVariantConfig = retrievePageVariantConfig(templateNode);
+        if (!pageVariant?.structure) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.VARIANT_OR_STRUCTURE_MISSING'),
+                pageVariant,
+            );
+            return;
+        }
+        // a global template carries no anchor color; the one of the collection's page must not stay
+        this.anchorItemColor = null;
+        await this.applyPageVariantStructure(pageVariant);
+        await this.updateSwimlaneIdToPromptTextMapping();
         setTimeout((): void => {
             this.checkAccordionExpansionState();
         });
@@ -1556,7 +1633,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param nodeId
      */
     private async syncPageVariantNode(nodeId: string): Promise<void> {
-        if (retrieveNodeId(this.pageConfigNode)) {
+        if (retrieveNodeId(this.pageConfigNode) || this.globalTemplateNode()) {
             await this.updatePageVariantConfigs(true);
         }
         const reloadedNode: Node = this.pageVariantConfigs?.nodes?.find(
@@ -1578,7 +1655,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * deletes the page config and its link as well if it is the last item.
      */
     async deletePageVariant(): Promise<void> {
-        if (!this.collectionNodePageConfigRef || !this.userHasEditRights()) {
+        if (
+            !this.collectionNodePageConfigRef ||
+            !this.userHasEditRights() ||
+            this.globalTemplateNode()
+        ) {
             return;
         }
         const deleteString: string = this.templateMode()
@@ -2387,6 +2468,91 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         await this.retrievePageConfigAndSelectVariant();
     }
 
+    /**
+     * Opens a global template in the editor in place of the collection's page. The rights on the
+     * template decide about editing; the collection's page itself stays untouched.
+     */
+    async switchIntoGlobalTemplateMode(templateNode: Node): Promise<void> {
+        if (!templateNode) {
+            return;
+        }
+        // the page may still offer a template that was deleted in the meantime
+        const availableTemplateNode: Node | null =
+            await this.topicPageHelperService.getNodeIfAvailable(retrieveNodeId(templateNode));
+        if (!availableTemplateNode) {
+            this.toast.error(null, this.i18nPrefix + 'GLOBAL_TEMPLATE_UNAVAILABLE');
+            await this.loadTemplateVariantNode();
+            return;
+        }
+        this.requestInProgress.set(true);
+        try {
+            this.globalTemplateNode.set(availableTemplateNode);
+            this.templateMode.set(false);
+            // no write may reach the collection's page config while the template is edited
+            this.pageConfigNode = null;
+            this.closeSideMenus();
+            // neither a page variant nor a page template can be created from within the template
+            await this.removeCustomMainNavOptions(
+                this.createPageVariantTitle,
+                this.createPageTemplateTitle,
+            );
+            await this.retrievePageConfigAndSelectVariant();
+            this.userHasEditRights.set(
+                this.nodeHelperService.getNodesRight(
+                    [this.globalTemplateNode()],
+                    ApiRestConstants.ACCESS_WRITE,
+                ),
+            );
+            if (this.userHasEditRights()) {
+                this.initializeCustomEventListeners();
+            }
+            this.editMode.set(this.userHasEditRights());
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
+        }
+    }
+
+    /**
+     * Opens a global template picked in the dialog for creating a page variant or template.
+     *
+     * @param templateNode
+     */
+    async openGlobalTemplateFromDialog(templateNode: Node): Promise<void> {
+        this.createVariantOrTemplateDialogRef?.close();
+        await this.switchIntoGlobalTemplateMode(templateNode);
+    }
+
+    /**
+     * Re-resolves the template of the current page after a global template was deleted, as it may
+     * have been that one.
+     */
+    async onGlobalTemplateDeleted(): Promise<void> {
+        await this.loadTemplateVariantNode();
+    }
+
+    /**
+     * Leaves the global template by reloading the collection's page.
+     */
+    leaveGlobalTemplateMode(): void {
+        window.location.reload();
+    }
+
+    /**
+     * Deletes the global template being edited and returns to the collection's page.
+     */
+    async deleteGlobalTemplate(): Promise<void> {
+        const templateNode: Node = this.globalTemplateNode();
+        if (
+            templateNode &&
+            (await this.topicPageHelperService.deleteGlobalTemplate(templateNode))
+        ) {
+            this.leaveGlobalTemplateMode();
+        }
+    }
+
     // HELPER FUNCTIONS
     /**
      * Removes custom create options from the main nav config by their (i18n) name.
@@ -2988,6 +3154,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         isHeaderNode?: boolean,
         isBreadcrumbNode?: boolean,
     ): Promise<boolean> {
+        // a global template is edited in place and must never give the collection a page config
+        if (this.globalTemplateNode()) {
+            await this.bumpTemplateVersionIfNeeded();
+            return false;
+        }
         if (!this.collectionNodePageConfigRef) {
             // before creating another page config node, check which variant is currently selected
             const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
@@ -3139,6 +3310,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Helper function to retrieve the page variant of an existing page config node.
      */
     private retrievePageVariant(): PageVariantConfig {
+        // a global template is the only variant of the page and belongs to no page config
+        if (this.globalTemplateNode()) {
+            return retrievePageVariantConfig(this.pageVariantNode());
+        }
         // parse the page config from the properties
         const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
         if (!pageConfig.variants) {
@@ -3192,6 +3367,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param reloadNecessary
      */
     private async updatePageVariantConfigs(reloadNecessary: boolean = false): Promise<void> {
+        if (reloadNecessary && this.globalTemplateNode()) {
+            const templateNode: Node = await this.topicPageHelperService.getUpdatedNode(
+                retrieveNodeId(this.globalTemplateNode()),
+            );
+            this.globalTemplateNode.set(templateNode);
+            this.pageVariantConfigs = { nodes: [templateNode], pagination: null };
+            return;
+        }
         if (reloadNecessary) {
             this.pageVariantConfigs = await this.topicPageHelperService.getNodeChildren(
                 retrieveNodeId(this.pageConfigNode),
@@ -3229,13 +3412,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Bumps the patch segment of `ccm:page_variant_template_version` on the
-     * current page variant node when in template mode (e.g. 1.0.0 → 1.0.1).
-     * Called by `checkForCustomPageNodeExistence` on every real modification
-     * and by the `widgetConfigUpdated` listener for widget settings edits.
+     * Bumps the patch segment of `ccm:page_variant_template_version` on the current node while a
+     * template is edited (template mode or a global template), e.g. 1.0.0 → 1.0.1. Called on
+     * every real modification and on widget settings edits.
      */
     private async bumpTemplateVersionIfNeeded(): Promise<void> {
-        if (!this.templateMode() || !this.pageVariantNode()) return;
+        if ((!this.templateMode() && !this.globalTemplateNode()) || !this.pageVariantNode()) return;
         const currentVersion =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ??
             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
@@ -3655,7 +3837,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async addCurrentVariantToGlobalTemplates(
         changesMap?: Map<string, string | string[]>,
     ): Promise<void> {
-        if (!this.pageVariantNode() || !this.canAddToGlobalTemplates()) {
+        if (
+            !this.pageVariantNode() ||
+            !this.canAddToGlobalTemplates() ||
+            this.globalTemplateNode()
+        ) {
             return;
         }
         this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
@@ -3778,13 +3964,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Updates whether the current user is allowed to add nodes to the global templates folder.
+     * Updates whether the current user is allowed to add nodes to the global templates folder and
+     * keeps its ID to recognize the global templates among the templates of a page.
      */
     private async updateGlobalTemplatesPermission(): Promise<void> {
         try {
             const folderNode: Node = await this.topicPageHelperService.getNode(
                 ApiRestConstants.TOPIC_PAGE_TEMPLATES,
             );
+            this.globalTemplatesFolderId.set(retrieveNodeId(folderNode));
             this.canAddToGlobalTemplates.set(
                 this.nodeHelperService.getNodesRight(
                     [folderNode],
@@ -3793,6 +3981,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
         } catch {
             // folder missing or no access
+            this.globalTemplatesFolderId.set(null);
             this.canAddToGlobalTemplates.set(false);
         }
     }

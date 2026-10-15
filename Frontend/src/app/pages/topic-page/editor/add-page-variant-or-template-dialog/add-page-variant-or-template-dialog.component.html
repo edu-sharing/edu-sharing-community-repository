@@ -125,6 +125,7 @@
       [displayType]="DisplayType.Table"
       [elementInteractionType]="InteractionType.Emitter"
       [scope]="Scope.TopicPage"
+      [showActions]="templateActionsAvailable()"
       [sort]="{
       allowed: true,
       active: sortActive,
@@ -133,6 +134,7 @@
     }"
       (clickItem)="onNodeClick($event)"
       (fetchData)="loadMore($event)"
+      (selectionChange)="onSelectionChange()"
       (sortChange)="onSort($event)"
     >
       <!-- placeholder template for empty content -->

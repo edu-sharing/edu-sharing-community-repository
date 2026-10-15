@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     Component,
     EventEmitter,
     input,
@@ -7,7 +8,9 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    signal,
     ViewChild,
+    WritableSignal,
     inject,
 } from '@angular/core';
 import { MatCheckboxChange } from '@angular/material/checkbox';
@@ -33,6 +36,10 @@ import {
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesWrapperComponent,
+    NodeHelperService,
+    OptionItem,
+    OptionsHelperDataService,
+    OptionsHelperService as OptionsHelperServiceAbstract,
     Scope,
     SearchHelperService,
     Values,
@@ -43,6 +50,8 @@ import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
+import { OptionsHelperService } from '../../shared/services/options-helper.service';
+import { TopicPageHelperService } from '../../shared/services/topic-page-helper.service';
 import {
     DEFAULT_PAGE_VARIANT_GLOBAL_PROP,
     DEFAULT_PAGE_VARIANT_PARENT_RECURSIVE_PROP,
@@ -51,6 +60,7 @@ import {
 import { SelectOption } from '../../shared/types/select-option';
 import {
     convertNodeRefIntoNodeId,
+    isDefaultGlobalTemplate,
     retrieveNodeId,
     retrievePageVariantTemplateRef,
 } from '../../shared/utils/template-util';
@@ -64,13 +74,20 @@ export enum CopyOption {
 @Component({
     selector: 'es-add-page-variant-or-template-dialog',
     imports: [SharedModule, MdsModule],
+    // own instances, so the row actions do not replace the options of the hosting topic page
+    providers: [
+        OptionsHelperDataService,
+        { provide: OptionsHelperServiceAbstract, useClass: OptionsHelperService },
+    ],
     templateUrl: 'add-page-variant-or-template-dialog.component.html',
     styleUrls: ['add-page-variant-or-template-dialog.component.scss'],
 })
-export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnInit {
+export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, OnDestroy, OnInit {
     public genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private nodeHelperService = inject(NodeHelperService);
     private searchHelperService = inject(SearchHelperService);
     private searchService = inject(SearchService);
+    private topicPageHelperService = inject(TopicPageHelperService);
 
     readonly i18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.';
@@ -83,6 +100,9 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     @Input() selectedNode: Node;
     templateMode: InputSignal<boolean> = input(false);
     @Output() copyOptionChanged: EventEmitter<CopyOption> = new EventEmitter<CopyOption>();
+    // a global template is to be opened in the editor
+    @Output() editGlobalTemplate: EventEmitter<Node> = new EventEmitter<Node>();
+    @Output() globalTemplateDeleted: EventEmitter<Node> = new EventEmitter<Node>();
     @Output() selectedNodeChange: EventEmitter<Node> = new EventEmitter<Node>();
 
     // copy options toggle
@@ -127,6 +147,8 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     ];
     sortDirection: SortDirection = 'desc';
     private readonly MAX_ITEMS_PER_REQUEST: number = 50;
+    // whether a listed global template can be edited or deleted by the user
+    templateActionsAvailable: WritableSignal<boolean> = signal(false);
 
     // whether the initial node was attempted to be selected
     private initialSelectionMade: boolean = false;
@@ -154,9 +176,100 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         this.initialized = true;
     }
 
+    async ngAfterViewInit(): Promise<void> {
+        await this.nodeEntries.initOptionsGenerator({
+            customOptions: {
+                useDefaultOptions: false,
+                addOptions: this.createTemplateOptions(),
+            },
+        });
+    }
+
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    /**
+     * Creates the row actions of the global templates: opening one in the editor and deleting it.
+     */
+    private createTemplateOptions(): OptionItem[] {
+        const edit: OptionItem = new OptionItem(
+            this.i18nPrefix + 'TEMPLATE_ACTIONS.EDIT',
+            'edit',
+            (node: Node, nodes: Node[]): void => {
+                this.editGlobalTemplate.emit(node ?? nodes?.[0]);
+            },
+        );
+        edit.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.canEditTemplate(nodes?.[0]);
+        const remove: OptionItem = new OptionItem(
+            this.i18nPrefix + 'TEMPLATE_ACTIONS.DELETE',
+            'delete',
+            (node: Node, nodes: Node[]): void => {
+                void this.deleteGlobalTemplate(node ?? nodes?.[0]);
+            },
+        );
+        remove.customShowCallback = async (nodes: Node[]): Promise<boolean> =>
+            this.canDeleteTemplate(nodes?.[0]);
+        return [edit, remove];
+    }
+
+    /**
+     * Whether the user may open a listed global template in the editor.
+     */
+    private canEditTemplate(node: Node): boolean {
+        return (
+            this.isManageableTemplate(node) &&
+            this.nodeHelperService.getNodesRight([node], RestConstants.ACCESS_WRITE)
+        );
+    }
+
+    /**
+     * Whether the user may delete a listed global template.
+     */
+    private canDeleteTemplate(node: Node): boolean {
+        return (
+            this.isManageableTemplate(node) &&
+            this.nodeHelperService.getNodesRight([node], RestConstants.ACCESS_DELETE)
+        );
+    }
+
+    /**
+     * Whether a listed node is a global template that can be managed at all: the topic page
+     * option lists page variants instead, and the default template is left to the repository.
+     */
+    private isManageableTemplate(node: Node): boolean {
+        const listsGlobalTemplates: boolean = this.selectedOption === CopyOption.Template;
+        return listsGlobalTemplates && !!node && !isDefaultGlobalTemplate(node);
+    }
+
+    /**
+     * Deletes a global template after confirmation and drops it from the list. The search index
+     * follows the deletion with a delay, so a new search would still return the template.
+     */
+    private async deleteGlobalTemplate(node: Node): Promise<void> {
+        if (!node || !(await this.topicPageHelperService.deleteGlobalTemplate(node))) {
+            return;
+        }
+        this.dataSource.removeData([node]);
+        this.nodeEntries.getSelection().deselect(node);
+        this.updateTemplateActionsAvailable(this.dataSource.getData());
+        await this.updateSelectedNode();
+        this.globalTemplateDeleted.emit(node);
+    }
+
+    /**
+     * Updates whether the action column is shown: only when a listed global template offers one.
+     *
+     * @param nodes
+     */
+    private updateTemplateActionsAvailable(nodes: Node[]): void {
+        this.templateActionsAvailable.set(
+            nodes.some(
+                (node: Node): boolean => this.canEditTemplate(node) || this.canDeleteTemplate(node),
+            ),
+        );
     }
 
     /**
@@ -224,6 +337,14 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         if (!alreadySelected) {
             this.nodeEntries.getSelection().select(event.element);
         }
+        void this.updateSelectedNode();
+    }
+
+    /**
+     * Keeps the use button in line with the selection, which opening the actions of a row changes
+     * as well.
+     */
+    onSelectionChange(): void {
         void this.updateSelectedNode();
     }
 
@@ -338,6 +459,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
                 this.searchService.search(this.createSearchRequest(event.offset)),
             );
             this.dataSource.appendData(searchResult.nodes ?? []);
+            this.updateTemplateActionsAvailable(this.dataSource.getData());
         } finally {
             this.dataSource.isLoading = false;
         }
@@ -351,6 +473,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
     async updateList(): Promise<void> {
         if (!this.searchScopeAvailable()) {
             this.dataSource.setData([], null);
+            this.templateActionsAvailable.set(false);
             return;
         }
         let nodes: Node[];
@@ -393,6 +516,7 @@ export class AddPageVariantOrTemplateDialogComponent implements OnDestroy, OnIni
         }
         // update the data source
         this.dataSource.setData(nodes, pagination ?? null);
+        this.updateTemplateActionsAvailable(nodes);
         // give the node entries wrapper time to render the list
         setTimeout(async () => {
             this.nodeEntries.getSelection().clear();

@@ -216,6 +216,7 @@
         "REGENERATE_VARIANT": "Neu generieren",
         "DELETE_VARIANT": "Variante löschen",
         "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
+        "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten",
         "DEFINE_PARAMETERS": "Definiere Parameter",
         "DUPLICATE_PARAMETERS": "Duplikat in existierender Variante erkannt"
       },
@@ -224,7 +225,14 @@
         "TITLE": "Titel der Vorlage",
         "TITLE_PLACEHOLDER": "Themenseiten-Vorlage für xyz",
         "DELETE_VARIANT": "Vorlage löschen",
-        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen"
+        "ADD_TO_GLOBAL_TEMPLATES": "Zu globalen Vorlagen hinzufügen",
+        "EDIT_GLOBAL_TEMPLATE": "Globale Vorlage bearbeiten"
+      },
+      "CONFIG_GLOBAL_TEMPLATE": {
+        "HEADING": "Einstellungen der globalen Vorlage",
+        "TITLE": "Titel der globalen Vorlage",
+        "TITLE_PLACEHOLDER": "Globale Themenseiten-Vorlage für xyz",
+        "DELETE_VARIANT": "Globale Vorlage löschen"
       }
     },
     "ADD_PAGE_TEMPLATE": {
@@ -430,6 +438,10 @@
         "TOPIC_PAGE": "Themenseite",
         "TEMPLATE": "Vorlage"
       },
+      "TEMPLATE_ACTIONS": {
+        "EDIT": "Bearbeiten",
+        "DELETE": "Löschen"
+      },
       "COLLECTION_FILTER": {
         "LABEL": "Gefiltert:",
         "CHIP": "Aktuelle Sammlung",
@@ -455,6 +467,17 @@
       "VIEW": "Sie befinden sich aktuell im Anzeigemodus der Vorlage.",
       "EDIT": "Sie befinden sich aktuell im Bearbeitungsmodus der Vorlage.",
       "END": "Vorlagen-Modus beenden"
+    },
+    "GLOBAL_TEMPLATE_UNAVAILABLE": "Die globale Vorlage existiert nicht mehr.",
+    "GLOBAL_TEMPLATE_MODE_ACTIVE": {
+      "VIEW": "Du siehst die globale Vorlage „{{title}}“.",
+      "EDIT": "Du bearbeitest die globale Vorlage „{{title}}“. Themenseiten, die aus ihr erstellt wurden, können die Änderungen per „Neu generieren“ übernehmen.",
+      "END": "Globale Vorlage verlassen"
+    },
+    "DELETE_GLOBAL_TEMPLATE": {
+      "HEADING": "Globale Vorlage löschen",
+      "MESSAGE": "Möchtest du die globale Vorlage „{{title}}“ wirklich löschen? Themenseiten, die aus ihr erstellt wurden, behalten ihren Inhalt, können aber nicht mehr aus ihr neu generiert werden.",
+      "SUCCESS_MESSAGE": "Die globale Vorlage wurde gelöscht."
     }
   }
 }

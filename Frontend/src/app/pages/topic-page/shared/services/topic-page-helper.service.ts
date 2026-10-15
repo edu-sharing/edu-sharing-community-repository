@@ -28,6 +28,8 @@ import {
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { DELETE_OR_CANCEL } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import type { PreviewConfig } from '../../../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../../features/editorial-sidebar/editorial-sidebar.service';
@@ -599,6 +601,32 @@ export class TopicPageHelperService {
             }
             error.preventDefault?.();
         }
+    }
+
+    /**
+     * Deletes a global topic-page template once the user confirmed it and tells whether it was
+     * deleted. Pages created from it keep their content but can no longer be regenerated from it.
+     */
+    async deleteGlobalTemplate(templateNode: Node): Promise<boolean> {
+        const i18nPrefix: string = 'TOPIC_PAGE.DELETE_GLOBAL_TEMPLATE.';
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: i18nPrefix + 'HEADING',
+            message: i18nPrefix + 'MESSAGE',
+            messageParameters: { title: templateNode.title || templateNode.name },
+            buttons: DELETE_OR_CANCEL,
+            closable: Closable.Casual,
+        });
+        if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
+            return false;
+        }
+        try {
+            await this.deleteNode(retrieveNodeId(templateNode));
+        } catch (error) {
+            this.displayErrorToast(error);
+            return false;
+        }
+        this.toast.toast(i18nPrefix + 'SUCCESS_MESSAGE');
+        return true;
     }
 
     // COMBINED NODE FUNCTIONS
