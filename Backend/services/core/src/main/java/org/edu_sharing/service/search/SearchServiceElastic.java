@@ -1707,6 +1707,118 @@ public class SearchServiceElastic implements SearchService {
         return client.withTransportOptions(this::getRequestOptions).search(searchRequest, Map.class);
     }
 
+    private static final int SITEMAP_WALK_SIZE = 10000;
+
+    private SearchRequest getSitemapRequest(ContentType contentType, Long afterDbid, int size, List<String> sourceIncludes) {
+        BoolQuery.Builder conditions = getGlobalConditions(null, null, null, null, true);
+        conditions.must(getContentTypeQuery(contentType));
+        if (afterDbid != null) {
+            conditions.must(m -> m.range(r -> r.number(n -> n.field("dbid").gt(afterDbid.doubleValue()))));
+        }
+        // "from" is limited to 10.000 hits by the index, so the sitemap pages by a cursor on the unique dbid
+        return SearchRequest.of(req -> req
+                .index(WORKSPACE_INDEX)
+                .size(size)
+                .query(conditions.build()._toQuery())
+                .sort(s -> s.field(f -> f.field("dbid").order(SortOrder.Asc)))
+                .source(src -> src.filter(f -> f.includes(sourceIncludes)))
+                .trackTotalHits(t -> t.enabled(false)));
+    }
+
+    /**
+     * Splits all nodes of the given type (visible to the current user) into sitemap pages.
+     * Reads only the sort cursor and cm:modified, no repository lookups.
+     */
+    public List<SitemapPage> getSitemapPages(ContentType contentType, int pageSize) throws IOException {
+        List<SitemapPage> pages = new ArrayList<>();
+        long count = 0;
+        Long lastDbid = null;
+        Long pageAfter = null;
+        Long pageModified = null;
+        while (true) {
+            List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, lastDbid, SITEMAP_WALK_SIZE,
+                    List.of("properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED)))).hits().hits();
+            for (Hit<Map> hit : hits) {
+                if (count > 0 && count % pageSize == 0) {
+                    pages.add(new SitemapPage(pageAfter, pageModified));
+                    pageAfter = lastDbid;
+                    pageModified = null;
+                }
+                Long modified = getSitemapModified(hit.source());
+                if (modified != null && (pageModified == null || modified > pageModified)) {
+                    pageModified = modified;
+                }
+                lastDbid = hit.sort().get(0).longValue();
+                count++;
+            }
+            if (hits.size() < SITEMAP_WALK_SIZE) {
+                break;
+            }
+        }
+        if (count > 0) {
+            pages.add(new SitemapPage(pageAfter, pageModified));
+        }
+        return pages;
+    }
+
+    /**
+     * One page of sitemap entries, ordered by dbid, starting after the given cursor (null for the first page).
+     */
+    public List<SitemapEntry> getSitemapEntries(ContentType contentType, Long afterDbid, int size) throws IOException {
+        String modifiedKey = CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED);
+        String nameKey = CCConstants.getValidLocalName(CCConstants.CM_NAME);
+        List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, afterDbid, size,
+                List.of("nodeRef.id", "aspects", "content.mimetype", "properties." + modifiedKey, "properties." + nameKey))).hits().hits();
+        List<SitemapEntry> entries = new ArrayList<>(hits.size());
+        for (Hit<Map> hit : hits) {
+            Map source = hit.source();
+            Object nodeRef = source.get("nodeRef");
+            Object content = source.get("content");
+            Object aspects = source.get("aspects");
+            Object name = getSitemapProperty(source, nameKey);
+            entries.add(new SitemapEntry(
+                    (String) ((Map) nodeRef).get("id"),
+                    hit.sort().get(0).longValue(),
+                    getSitemapModified(source),
+                    aspects instanceof Collection && ((Collection<?>) aspects).contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION)),
+                    content instanceof Map ? (String) ((Map) content).get("mimetype") : null,
+                    name != null ? name.toString() : null
+            ));
+        }
+        return entries;
+    }
+
+    private static Object getSitemapProperty(Map source, String key) {
+        Object properties = source == null ? null : source.get("properties");
+        if (!(properties instanceof Map)) {
+            return null;
+        }
+        Object value = ((Map) properties).get(key);
+        if (value instanceof Collection) {
+            return ((Collection<?>) value).stream().findFirst().orElse(null);
+        }
+        return value;
+    }
+
+    private static Long getSitemapModified(Map source) {
+        Object value = getSitemapProperty(source, CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED));
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        if (value instanceof String) {
+            try {
+                return java.time.Instant.parse((String) value).toEpochMilli();
+            } catch (java.time.format.DateTimeParseException e) {
+                try {
+                    return Long.parseLong((String) value);
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
     public UpdateResponse<Map> updateNative(UpdateRequest updateRequest) throws IOException {
         checkClient();
         return client.withTransportOptions(this::getRequestOptions).update(updateRequest, Map.class);
