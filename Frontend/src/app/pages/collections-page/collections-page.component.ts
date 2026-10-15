@@ -197,7 +197,7 @@ export class CollectionsPageComponent implements OnDestroy {
                         });
                         this.collectionScopesService.getScopes().subscribe((scopes) => {
                             this.scopes.set(scopes);
-                            this.selectListedTab();
+                            this.dropUnlistedScope();
                         });
                         this.initialize();
                     } else {
@@ -240,7 +240,7 @@ export class CollectionsPageComponent implements OnDestroy {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }
 
-    navigate(id = '', addToOther = '', feedback = false, replaceUrl = false) {
+    navigate(id = '', addToOther = '', feedback = false) {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
             if (id && id !== '-root-') {
@@ -254,7 +254,6 @@ export class CollectionsPageComponent implements OnDestroy {
             }
             void this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
                 queryParams: params,
-                replaceUrl,
             });
         });
     }
@@ -409,14 +408,24 @@ export class CollectionsPageComponent implements OnDestroy {
     }
 
     /**
-     * Moves to the first tab when the scope from the URL has no tab, e.g. an editorial scope
-     * without editorial collections, replacing the URL so going back does not return to it.
+     * Drops a scope from the URL that is not listed for the user, e.g. an editorial scope without
+     * editorial collections, so the default category shows; going back does not return to it.
      */
-    private selectListedTab(): void {
+    private dropUnlistedScope(): void {
+        const scope = this.params?.scope;
         const scopes = this.scopes();
-        if (this.showTabs() && !scopes.some((scope) => scope === this.tabSelected)) {
-            this.tabSelected = scopes[0];
-            this.navigate('', '', false, true);
+        if (
+            scope &&
+            this.isRootLevelCollection() &&
+            scopes.length &&
+            !scopes.some((listed) => listed === scope)
+        ) {
+            void this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: { scope: null },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
         }
     }
 
@@ -485,7 +494,7 @@ export class CollectionsPageComponent implements OnDestroy {
                             });
                     }
                     await this.displayCollectionById(id);
-                    this.selectListedTab();
+                    this.dropUnlistedScope();
 
                     /*if (params.nodeId) {
                         let node = params.nodeId.split('/');
