@@ -10,13 +10,6 @@ $collectionIconSize: 40px;
 
 .grid-card {
     grid-template-rows: $topBarHeight auto auto;
-    .card-meta {
-        .card-meta-row {
-            > es-list-base {
-                @include limitLineCount(2, $cardLineHeight);
-            }
-        }
-    }
 }
 :host ::ng-deep {
     .grid-card {

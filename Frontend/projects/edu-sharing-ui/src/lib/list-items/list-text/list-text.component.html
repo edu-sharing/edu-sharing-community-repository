@@ -150,6 +150,7 @@
 <span
   esCheckTextOverflow
   #text="esCheckTextOverflow"
+  [class.has-text-overflow]="text.hasTextOverflow()"
   [matTooltip]="
     provideLabel ? (getI18n(item) | translate) : text.hasTextOverflow() ? content.innerText : null
   "
