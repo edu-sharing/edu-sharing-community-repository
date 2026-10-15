@@ -16,6 +16,18 @@ export interface Options {
     readAs?: string;
 }
 
+/**
+ * A folder dropped via drag & drop, including all its (nested) files and sub folders.
+ *
+ * The root folder of a drop is virtual (its `name` is empty) and contains the dropped top-level
+ * files and folders.
+ */
+export interface DroppedFolder {
+    name: string;
+    files: File[];
+    folders: DroppedFolder[];
+}
+
 @Directive({
     selector: '[esFileDrop]',
     standalone: false,
@@ -29,9 +41,15 @@ export class FileDropDirective implements OnInit, OnDestroy {
      * catch drag/drop of whole window
      */
     @Input() window = false;
+    /**
+     * Allow dropping folders. If a drop contains at least one folder, `folderDrop` is emitted
+     * (instead of `fileDrop`) with the complete tree of the dropped files and folders.
+     */
+    @Input() allowFolders = false;
 
     @Output() fileOver: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() fileDrop: EventEmitter<FileList> = new EventEmitter<FileList>();
+    @Output() folderDrop: EventEmitter<DroppedFolder> = new EventEmitter<DroppedFolder>();
 
     /**
      * Element the drag is currently over, or null while no drag is in progress.
@@ -125,9 +143,33 @@ export class FileDropDirective implements OnInit, OnDestroy {
         const hasFiles = this.haveFiles(transfer.types) && transfer.files.length;
         if (hasFiles) {
             this.preventAndStop(event);
-            this.readFile(transfer.files);
+            // entries are only accessible synchronously during the drop event
+            const entries = this.allowFolders ? this.getEntries(transfer) : [];
+            if (entries.some((entry) => entry.isDirectory)) {
+                void this.readFolder(entries);
+            } else {
+                this.readFile(transfer.files);
+            }
         }
     };
+
+    private getEntries(transfer: DataTransfer): FileSystemEntry[] {
+        return Array.from(transfer.items ?? [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.webkitGetAsEntry?.())
+            .filter((entry) => !!entry);
+    }
+
+    private async readFolder(entries: FileSystemEntry[]): Promise<void> {
+        try {
+            const folder = await readEntries('', entries);
+            this.ngZone.run(() => {
+                this.folderDrop.emit(folder);
+            });
+        } catch (e) {
+            console.error('Could not read dropped folder', e);
+        }
+    }
 
     /**
      * Marks `target` as the element the drag sits on and enters the drag-over state.
@@ -224,4 +266,36 @@ function addEventListenerUntil<T extends Event>(
 ) {
     target.addEventListener(eventName, callback);
     until.subscribe(() => target.removeEventListener(eventName, callback));
+}
+
+async function readEntries(name: string, entries: FileSystemEntry[]): Promise<DroppedFolder> {
+    const folder: DroppedFolder = { name, files: [], folders: [] };
+    for (const entry of entries) {
+        if (entry.isFile) {
+            folder.files.push(
+                await new Promise<File>((resolve, reject) =>
+                    (entry as FileSystemFileEntry).file(resolve, reject),
+                ),
+            );
+        } else if (entry.isDirectory) {
+            const children = await readDirectory(entry as FileSystemDirectoryEntry);
+            folder.folders.push(await readEntries(entry.name, children));
+        }
+    }
+    return folder;
+}
+
+async function readDirectory(directory: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
+    const reader = directory.createReader();
+    const result: FileSystemEntry[] = [];
+    // readEntries returns the children in batches, an empty batch marks the end
+    while (true) {
+        const batch = await new Promise<FileSystemEntry[]>((resolve, reject) =>
+            reader.readEntries(resolve, reject),
+        );
+        if (!batch.length) {
+            return result;
+        }
+        result.push(...batch);
+    }
 }

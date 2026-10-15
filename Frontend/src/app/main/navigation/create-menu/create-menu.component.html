@@ -12,8 +12,10 @@
 <div
   esFileDrop
   [window]="true"
+  [allowFolders]="true"
   (fileOver)="fileIsOver = $event"
   (fileDrop)="onFileDrop($event)"
+  (folderDrop)="onFolderDrop($event)"
 ></div>
 } @if (fileIsOver && dropEnabled()) {
 <div class="dialog darken drop-zone">

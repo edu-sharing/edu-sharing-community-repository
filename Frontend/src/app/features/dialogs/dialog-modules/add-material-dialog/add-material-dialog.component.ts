@@ -1,12 +1,15 @@
 import { trigger } from '@angular/animations';
 import {
     Component,
+    computed,
     ElementRef,
     EventEmitter,
     Input,
+    OnChanges,
     OnInit,
     Output,
     signal,
+    SimpleChanges,
     ViewChild,
     inject,
 } from '@angular/core';
@@ -31,6 +34,25 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { DialogsService, DialogTemplate } from '../../dialogs.service';
 import { AddMaterialDialogData, AddMaterialDialogResult } from './add-material-dialog-data';
 import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
+import { DroppedFolder } from '../../../../shared/directives/file-drop';
+
+/** A single row of the (flattened) tree of the selected files and folders */
+interface SelectionRow {
+    kind: 'file' | 'folder';
+    name: string;
+    depth: number;
+    /** file size, or the total size of all contained files for a folder */
+    size: number;
+    /** the file or folder this row represents */
+    item: File | DroppedFolder;
+}
+
+function folderSize(folder: DroppedFolder): number {
+    return (
+        folder.files.reduce((sum, file) => sum + file.size, 0) +
+        folder.folders.reduce((sum, child) => sum + folderSize(child), 0)
+    );
+}
 
 @Component({
     selector: 'es-add-material-dialog',
@@ -43,7 +65,7 @@ import { TemplateSlot } from '../../../../main/navigation/main-nav.service';
     ],
     standalone: false,
 })
-export class AddMaterialDialogComponent implements OnInit {
+export class AddMaterialDialogComponent implements OnInit, OnChanges {
     data = inject<AddMaterialDialogData | null>(CARD_DIALOG_DATA, { optional: true });
     private dialogRef = inject<CardDialogRef<
         AddMaterialDialogData,
@@ -80,6 +102,28 @@ export class AddMaterialDialogComponent implements OnInit {
     ];
     protected parent$ = new BehaviorSubject<Node>(null);
     selectedFiles = signal<File[]>([]);
+    selectedFolders = signal<DroppedFolder[]>([]);
+    hasSelection = computed(() => this.selectedFiles().length + this.selectedFolders().length > 0);
+    /** the selected files and folders, flattened for display as a tree */
+    selectionRows = computed<SelectionRow[]>(() => {
+        const rows: SelectionRow[] = [];
+        const addFolder = (folder: DroppedFolder, depth: number) => {
+            rows.push({
+                kind: 'folder',
+                name: folder.name,
+                depth,
+                size: folderSize(folder),
+                item: folder,
+            });
+            folder.folders.forEach((child) => addFolder(child, depth + 1));
+            folder.files.forEach((file) => addFile(file, depth + 1));
+        };
+        const addFile = (file: File, depth: number) =>
+            rows.push({ kind: 'file', name: file.name, depth, size: file.size, item: file });
+        this.selectedFolders().forEach((folder) => addFolder(folder, 0));
+        this.selectedFiles().forEach((file) => addFile(file, 0));
+        return rows;
+    });
 
     get currentData(): AddMaterialDialogData {
         return this.data || this.dialogData;
@@ -99,6 +143,36 @@ export class AddMaterialDialogComponent implements OnInit {
         this.parent$.next(this.currentData.parent);
         this.setState('');
         this.registerLink();
+        this.applyPreselection(this.currentData.preselection);
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        // the embedded component stays alive, so a new preselection (e.g. another drop) has to be
+        // picked up here
+        const change = changes.dialogData;
+        if (
+            change &&
+            !change.firstChange &&
+            change.currentValue?.preselection !== change.previousValue?.preselection
+        ) {
+            this.applyPreselection(change.currentValue?.preselection);
+        }
+    }
+
+    /**
+     * whether folders may be dropped, i.e. their structure gets recreated on upload
+     */
+    get allowFolders(): boolean {
+        return this.currentData.multiple && !this.currentData.childobject;
+    }
+
+    private applyPreselection(preselection: DroppedFolder): void {
+        if (!preselection) {
+            return;
+        }
+        this.selectedFiles.set(preselection.files);
+        this.selectedFolders.set(this.allowFolders ? preselection.folders : []);
+        this.setState('');
     }
 
     private registerLink(): void {
@@ -154,14 +228,33 @@ export class AddMaterialDialogComponent implements OnInit {
      */
     closeWithFiles(fileList: FileList) {
         this.selectedFiles.set(Array.from(fileList));
+        this.selectedFolders.set([]);
+        this.closeWithSelection();
+    }
+
+    /**
+     * Closes the dialog and returns the dropped files and folders to the caller.
+     */
+    closeWithFolder(folder: DroppedFolder) {
+        this.selectedFiles.set(folder.files);
+        this.selectedFolders.set(folder.folders);
+        this.closeWithSelection();
+    }
+
+    private closeWithSelection() {
         if (this.currentData.showFiles === true) {
             this.setState('');
             this.updateHideFileUpload();
             return;
         }
+        this.emitFileResult();
+    }
+
+    private emitFileResult() {
         const dialogResult: AddMaterialDialogResult = {
             kind: 'file',
             files: this.selectedFiles(),
+            folders: this.selectedFolders(),
             parent: this.parent$.value,
         };
         this.dialogRef ? this.dialogRef.close(dialogResult) : this.dialogResult.emit(dialogResult);
@@ -170,15 +263,8 @@ export class AddMaterialDialogComponent implements OnInit {
     setLink() {
         if (this.disabled) {
             // To nothing
-        } else if (this.selectedFiles().length) {
-            const dialogResult: AddMaterialDialogResult = {
-                kind: 'file',
-                files: this.selectedFiles(),
-                parent: this.parent$.value,
-            };
-            this.dialogRef
-                ? this.dialogRef.close(dialogResult)
-                : this.dialogResult.emit(dialogResult);
+        } else if (this.hasSelection()) {
+            this.emitFileResult();
         } else if (this.ltiActivated && (!this.ltiConsumerKey || !this.ltiSharedSecret)) {
             const params = {
                 link: {
@@ -212,7 +298,7 @@ export class AddMaterialDialogComponent implements OnInit {
 
     setState(link: string) {
         link = link.trim();
-        this.disabled = !link && !this.selectedFiles().length;
+        this.disabled = !link && !this.hasSelection();
         this.updateButtons();
         this.dialogRef?.patchConfig({ closable: Closable.Standard });
     }
@@ -244,11 +330,33 @@ export class AddMaterialDialogComponent implements OnInit {
     }
 
     /**
+     * Removes the file or folder (including its contents) of the given row from the selection,
+     * regardless of its depth in the tree
+     */
+    removeRow(row: SelectionRow) {
+        // rebuild instead of mutating, the tree may be shared with the caller (preselection)
+        const without = (folder: DroppedFolder): DroppedFolder => ({
+            ...folder,
+            files: folder.files.filter((file) => file !== row.item),
+            folders: folder.folders.filter((child) => child !== row.item).map(without),
+        });
+        const root = without({
+            name: '',
+            files: this.selectedFiles(),
+            folders: this.selectedFolders(),
+        });
+        this.selectedFiles.set(root.files);
+        this.selectedFolders.set(root.folders);
+        this.setState('');
+    }
+
+    /**
      * Clears the entered link and the picked files. Needed when the component is embedded
      * (i.e. not used as a dialog that gets destroyed) and stays open for the next upload.
      */
     reset(): void {
         this.selectedFiles.set([]);
+        this.selectedFolders.set([]);
         // silent: the valueChanges pipeline would re-fetch the website information for ''
         this.linkControl.setValue('', { emitEvent: false });
         this.websiteInformation = null;

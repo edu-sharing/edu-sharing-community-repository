@@ -132,7 +132,13 @@ public class ErrorResponse {
                     .entity(new ErrorResponse(t))
                     .build();
         }
-        if (t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException) {
+        if (t instanceof DAONodeFileSizeExceededException) {
+            return Response.status(Response.Status.REQUEST_ENTITY_TOO_LARGE)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity(new ErrorResponse(t))
+                    .build();
+        }
+        if (t instanceof DAOVirusDetectedException || t instanceof DAOVirusScanFailedException || t instanceof DAONodeCountLimitExceededException) {
             return Response.status(HttpStatus.UNPROCESSABLE_ENTITY.value())
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .entity(new ErrorResponse(t))

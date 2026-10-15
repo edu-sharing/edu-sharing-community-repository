@@ -508,6 +508,15 @@ export class Toast extends ToastAbstract implements OnDestroy {
                 } else if (json.error.indexOf('SystemFolderDeleteDeniedException') !== -1) {
                     message = 'SYSTEM_FOLDER_DELETE_ERROR';
                     dialogTitle = '';
+                } else if (
+                    json.error.indexOf(RestConstants.NODE_COUNT_LIMIT_EXCEEDED_EXCEPTION) !== -1
+                ) {
+                    message = 'TOAST.NODE_COUNT_LIMIT_EXCEEDED';
+                    translationParameters = {
+                        ...translationParameters,
+                        maxNodes: json.details?.maxNodes,
+                    };
+                    dialogTitle = '';
                 } else {
                     dialogMessage = '';
                     dialogTitle = 'COMMON_API_ERROR_TITLE';

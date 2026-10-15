@@ -1,5 +1,6 @@
 package org.edu_sharing.service.collection;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
@@ -20,6 +21,7 @@ import org.alfresco.service.cmr.security.OwnableService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.alfresco.repository.server.authentication.Context;
 import org.edu_sharing.alfresco.service.guest.GuestService;
 import org.edu_sharing.alfresco.service.search.CMISSearchHelper;
@@ -50,6 +52,7 @@ import org.edu_sharing.restservices.shared.Authority;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.config.ConfigServiceFactory;
 import org.edu_sharing.service.model.NodeRefImpl;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
@@ -1212,6 +1215,7 @@ public class CollectionServiceElastic implements CollectionService {
         if(copyRoot == false && copyChildCollections == false && copyRefs == true){
             throw new IllegalArgumentException("refs only can not be copied");
         }
+        throwIfNodeCountExceedsLimit(src, LightbendConfigLoader.get().getInt("repository.collections.copy.maxNodes"));
         CopyResult copyResult = new CopyResult();
         if(dst == null){
             copyResult.root = copyInternal(copyResult,null,src, dst, copyRoot, copyRefs, copyPermissions,copyChildCollections);
@@ -1307,14 +1311,150 @@ public class CollectionServiceElastic implements CollectionService {
         }
 
         if(result != null && copyPermissions){
-            try {
-                ACL acl = eduPermissionService.getPermissions(src.getId());
-                eduPermissionService.setPermissions(result, Arrays.asList(acl.getAces()));
-            }catch (AccessDeniedException e){
-                copyResult.entries.add(new CopyResult.Entry(result,CopyResult.ErrorCode.NO_RIGHTS_ON_PERMISSIONS));
-            }
+            copyPermissions(copyResult, src, result);
         }
         return result;
+    }
+
+    private void copyPermissions(CopyResult copyResult, NodeRef src, String targetId) throws Throwable {
+        try {
+            ACL acl = eduPermissionService.getPermissions(src.getId());
+            eduPermissionService.setPermissions(targetId, Arrays.asList(acl.getAces()));
+        }catch (AccessDeniedException e){
+            copyResult.entries.add(new CopyResult.Entry(targetId,CopyResult.ErrorCode.NO_RIGHTS_ON_PERMISSIONS));
+        }
+    }
+
+    @Override
+    public CopyResult createFromFolder(NodeRef folder, NodeRef dst, boolean convertRoot, boolean inheritPermissions, boolean copyPermissions) throws Throwable {
+        if(folder == null) throw new IllegalArgumentException("folder is null");
+        if(!isFolder(folder)){
+            throw new IllegalArgumentException("source must be a folder which is not a collection");
+        }
+        if(!convertRoot && dst == null){
+            throw new IllegalArgumentException("targetCollection is required if the folder itself is not converted");
+        }
+        if(dst != null){
+            throwIfNotACollection(dst.getStoreRef().getProtocol(), dst.getStoreRef().getIdentifier(), dst.getId());
+        }
+        ToolPermissionHelper.throwIfToolpermissionMissing(CCConstants.CCM_VALUE_TOOLPERMISSION_CREATE_ELEMENTS_COLLECTIONS);
+        throwIfNodeCountExceedsLimit(folder, LightbendConfigLoader.get().getInt("repository.collections.fromFolder.maxNodes"));
+
+        CopyResult copyResult = new CopyResult();
+        // all created collections share the color of the target (or the default one for level0)
+        String color = dst == null ? null : NodeServiceHelper.getProperty(dst, CCConstants.CCM_PROP_MAP_COLLECTIONCOLOR);
+        if (color == null || color.isBlank()) {
+            color = getDefaultCollectionColor();
+        }
+        NodeRef root = convertFolderInternal(copyResult, folder, dst, convertRoot, color, inheritPermissions, copyPermissions);
+        copyResult.root = convertRoot ? root : dst;
+        return copyResult;
+    }
+
+    /**
+     * Rejects folders / collections which (recursively) contain more than maxNodes objects
+     * (ccm:io, i.e. files or references) and folders / collections (ccm:map)
+     */
+    private void throwIfNodeCountExceedsLimit(NodeRef parent, int maxNodes) throws IOException {
+        SearchRequest searchRequest = SearchRequest.of(req -> req
+                .index(SearchServiceElastic.WORKSPACE_INDEX)
+                .size(0)
+                // counting beyond the limit is not required
+                .trackTotalHits(t -> t.count(maxNodes + 1))
+                .query(q -> q
+                        .bool(b -> b
+                                .must(m -> m.match(match -> match.field("nodeRef.storeRef.protocol").query("workspace")))
+                                // "path" contains the ids of all ancestors, so this matches all descendants
+                                .must(m -> m.term(term -> term.field("path").value(parent.getId())))
+                                .must(m -> m.terms(terms -> terms.field("type").terms(values -> values.value(List.of(
+                                        FieldValue.of(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_IO)),
+                                        FieldValue.of(CCConstants.getValidLocalName(CCConstants.CCM_TYPE_MAP)))))))
+                                // childobjects are not referenced
+                                .mustNot(m -> m.match(match -> match.field("aspects").query(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_IO_CHILDOBJECT))))
+                        )));
+        long count = searchServiceElastic.searchNative(searchRequest).hits().total().value();
+        if (count > maxNodes) {
+            throw new NodeCountLimitExceededException(parent.getId(), maxNodes);
+        }
+    }
+
+    /**
+     * Creates a collection for the given folder (if convertSrc is set) below dst and recursively converts its children:
+     * sub folders become child collections, ccm:io become collection references
+     * @return the collection holding the converted children of src
+     */
+    private NodeRef convertFolderInternal(CopyResult copyResult, NodeRef src, NodeRef dst, boolean convertSrc, String color, boolean inheritPermissions, boolean copyPermissions) throws Throwable {
+        String collectionId;
+        if(convertSrc) {
+            collectionId = create(dst == null ? null : dst.getId(), collectionFromFolder(src, color)).nodeId;
+            if (inheritPermissions) {
+                eduPermissionService.setPermissionInherit(collectionId, true);
+            }
+            if (copyPermissions) {
+                copyPermissions(copyResult, src, collectionId);
+            }
+            // neither create nor setPermissionInherit / setPermissions(id, aces) detect the scope,
+            // so derive it from the effective (incl. inherited) permissions
+            updateScope(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId),
+                    Arrays.asList(eduPermissionService.getPermissions(collectionId).getAces()));
+        } else {
+            collectionId = dst.getId();
+        }
+        NodeRef collectionRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, collectionId);
+        for (ChildAssociationRef childAssociationRef : eduNodeService.getChildrenChildAssociationRef(src.getId())) {
+            NodeRef child = childAssociationRef.getChildRef();
+            if (isFolder(child)) {
+                convertFolderInternal(copyResult, child, collectionRef, true, color, inheritPermissions, copyPermissions);
+            } else if (QName.createQName(CCConstants.CCM_TYPE_IO).equals(nodeService.getType(child))
+                    && !nodeService.hasAspect(child, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION_IO_REFERENCE))) {
+                try {
+                    addToCollection(collectionId, child.getId(), true);
+                } catch (Exception e) {
+                    if ("collection_no_publish_permission".equals(e.getMessage())) {
+                        copyResult.entries.add(new CopyResult.Entry(child.getId(), CopyResult.ErrorCode.NO_PUBLISH_PERMISSION));
+                    } else {
+                        copyResult.entries.add(new CopyResult.Entry(child.getId(), CopyResult.ErrorCode.UNKNOWN_ERROR));
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+        }
+        return collectionRef;
+    }
+
+    /**
+     * @return true if the node is a regular folder (ccm:map), i.e. not a collection
+     */
+    private boolean isFolder(NodeRef nodeRef) {
+        return QName.createQName(CCConstants.CCM_TYPE_MAP).equals(nodeService.getType(nodeRef))
+                && !nodeService.hasAspect(nodeRef, QName.createQName(CCConstants.CCM_ASPECT_COLLECTION));
+    }
+
+    /**
+     * @return the first color configured in the client.config.xml (collections.colors), else the system default
+     */
+    private String getDefaultCollectionColor() {
+        try {
+            org.edu_sharing.alfresco.service.config.model.Collections config = ConfigServiceFactory.getCurrentConfig().values.collections;
+            if (config != null && config.colors != null && config.colors.length > 0 && config.colors[0] != null && !config.colors[0].isBlank()) {
+                return config.colors[0];
+            }
+        } catch (Exception e) {
+            log.warn("Could not read collections.colors from the client config, using the default color", e);
+        }
+        return CCConstants.COLLECTION_COLOR_DEFAULT;
+    }
+
+    private Collection collectionFromFolder(NodeRef folder, String color) {
+        Collection collection = new Collection();
+        collection.setColor(color);
+        String title = NodeServiceHelper.getProperty(folder, CCConstants.CM_PROP_TITLE);
+        if (title == null || title.isBlank()) {
+            title = NodeServiceHelper.getProperty(folder, CCConstants.CM_NAME);
+        }
+        collection.setTitle(title);
+        collection.setDescription(NodeServiceHelper.getProperty(folder, CCConstants.CM_PROP_DESCRIPTION));
+        return collection;
     }
 }
 

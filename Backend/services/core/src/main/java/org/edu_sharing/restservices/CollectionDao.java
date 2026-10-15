@@ -392,6 +392,15 @@ public class CollectionDao {
         }
     }
 
+    public static CopyResult createCollectionFromFolder(RepositoryDao repoDao, String folderId, String dstId, boolean convertRoot, boolean inheritPermissions, boolean copyPermissions) throws DAOException {
+        try {
+            NodeRef dstNodeRef = dstId == null ? null : new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, dstId);
+            return CollectionServiceFactory.getInstance().getLocalService().createFromFolder(new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, folderId), dstNodeRef, convertRoot, inheritPermissions, copyPermissions);
+        } catch (Throwable t) {
+            throw DAOException.mapping(t);
+        }
+    }
+
 	public void removeFromCollection(String nodeId) throws DAOException {
 
         try {

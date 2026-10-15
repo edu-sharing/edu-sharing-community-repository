@@ -9,6 +9,7 @@ import { ShareDialogComponent } from './share-dialog.component';
 import { ShareDialogUsageComponent } from './usage/usage.component';
 import { ShareDialogRestrictedAccessComponent } from './restricted-access/restricted-access.component';
 import { ShareDialogChooseDateComponent } from './permission/choose-date/choose-date.component';
+import { ShareDialogInheritComponent } from './inherit/share-dialog-inherit.component';
 
 export { ShareDialogComponent };
 
@@ -22,8 +23,9 @@ export { ShareDialogComponent };
         ShareDialogPublishComponent,
         ShareDialogUsageComponent,
         ShareDialogRestrictedAccessComponent,
+        ShareDialogInheritComponent,
     ],
     imports: [SharedModule, ShareDialogChooseDateComponent],
-    exports: [ShareDialogComponent, ShareDialogChooseDateComponent],
+    exports: [ShareDialogComponent, ShareDialogChooseDateComponent, ShareDialogInheritComponent],
 })
 export class ShareDialogModule {}

@@ -169,10 +169,6 @@
     }
 }
 
-.crossed {
-    text-decoration: line-through;
-}
-
 .groupEntry,
 .usageEntry {
     width: 100%;
@@ -199,15 +195,6 @@
     background: rgba($warning, 0.2);
 }
 
-.inherit {
-    color: $textLight;
-    min-height: 50px;
-}
-.inherit .groupEntry {
-    border: 1px solid $workspaceInheritColor;
-    cursor: default;
-}
-
 .normal {
     cursor: default;
 }
@@ -232,33 +219,11 @@
     }
 }
 
-.groupHeading {
-    display: flex;
-    align-items: baseline;
-    padding-bottom: 10px;
-}
-
 .groupName {
     color: $textLight;
     font-size: 90%;
     padding-top: 15px;
     padding-bottom: 5px;
-    float: left;
-}
-
-.inheritDisabled,
-.inheritEmpty {
-    font-size: 90%;
-    color: $textLight;
-    padding: 0 10px 20px 10px;
-    font-style: italic;
-    width: 100%;
-    text-align: center;
-    white-space: pre-wrap;
-}
-
-.inheritCheck {
-    margin-top: 16px;
     float: left;
 }
 
@@ -276,8 +241,7 @@
     top: -60px;
 }
 
-.notify-info,
-.inherit-info {
+.notify-info {
     color: $textLight;
 }
 
@@ -364,14 +328,6 @@
     }
 }
 @media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
-    .groupHeading {
-        flex-direction: column;
-        padding-bottom: 5px;
-    }
-    .inheritCheck {
-        padding-left: 5px;
-    }
-
     .state {
         .show-state > span {
             display: none;

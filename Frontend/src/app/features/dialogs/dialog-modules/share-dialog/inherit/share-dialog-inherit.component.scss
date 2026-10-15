@@ -1,0 +1,60 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+
+:host {
+    display: block;
+}
+
+.groupHeading {
+    display: flex;
+    align-items: baseline;
+    padding-bottom: 10px;
+}
+
+.inheritCheck {
+    margin-top: 16px;
+    float: left;
+}
+
+.inherit-info {
+    color: $textLight;
+}
+
+.inherit {
+    color: $textLight;
+    min-height: 50px;
+    .groupEntry {
+        width: 100%;
+        display: flex;
+        min-height: 35px;
+        align-items: center;
+        margin-bottom: 6px;
+        border-radius: 8px;
+        background: var(--actionDialogBackground);
+        border: 1px solid $workspaceInheritColor;
+        cursor: default;
+        es-share-dialog-permission {
+            width: 100%;
+        }
+    }
+}
+
+.inheritDisabled,
+.inheritEmpty {
+    font-size: 90%;
+    color: $textLight;
+    padding: 0 10px 20px 10px;
+    font-style: italic;
+    width: 100%;
+    text-align: center;
+    white-space: pre-wrap;
+}
+
+@media screen and (max-width: ($mobileWidth - $mobileStage*2)) {
+    .groupHeading {
+        flex-direction: column;
+        padding-bottom: 5px;
+    }
+    .inheritCheck {
+        padding-left: 5px;
+    }
+}

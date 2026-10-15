@@ -170,6 +170,12 @@
             "MULTIPLE": "{{count}} Inhalte inkludieren"
           },
           "NO_CONFIG_OPTIONS": "Für diesen Inhalt existieren keine weiteren Kopieroptionen."
+        },
+        "FOLDER_CONVERSION": {
+          "INFO_HEADING": "Ordner als Sammlungen übernehmen:",
+          "INFO_MESSAGE": "Für jeden Ordner wird eine Untersammlung mit derselben Struktur erstellt. Die enthaltenen Inhalte werden nicht kopiert, sondern verlinkt. Die Ordner selbst bleiben unverändert.",
+          "CONFIG_HEADING": "Übernahme konfigurieren",
+          "APPLY": "Als Sammlung übernehmen"
         }
       },
       "ADD_COLLECTION": "Sammlung hinzufügen",

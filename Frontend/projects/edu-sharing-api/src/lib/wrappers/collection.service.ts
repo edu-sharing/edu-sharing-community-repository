@@ -110,6 +110,46 @@ export class CollectionService {
     }): Observable<Copy> {
         return this.collectionV1.copyCollection(params);
     }
+
+    /**
+     * Create a collection structure from a folder: (sub) folders become (child) collections, all
+     * contained objects become collection references. The folder itself stays untouched.
+     */
+    createCollectionFromFolder(params: {
+        /**
+         * ID of repository (or "-home-" for home repository)
+         */
+        repository: string;
+
+        /**
+         * ID of the source folder
+         */
+        sourceFolder: string;
+
+        /**
+         * ID of the parent collection. if not set, a new level0 collection will be created
+         * (requires convertRoot)
+         */
+        targetCollection?: string;
+
+        /**
+         * if true the folder itself becomes a collection, else only its children are added to
+         * targetCollection
+         */
+        convertRoot?: boolean;
+
+        /**
+         * if true the created collections inherit the permissions of their parent collection
+         */
+        inheritPermissions?: boolean;
+
+        /**
+         * if true the permissions of each folder will be copied to its collection
+         */
+        copyPermissions?: boolean;
+    }): Observable<Copy> {
+        return this.collectionV1.createCollectionFromFolder(params);
+    }
 }
 
 function getCacheKey(id: string, { repository = HOME_REPOSITORY }): string {

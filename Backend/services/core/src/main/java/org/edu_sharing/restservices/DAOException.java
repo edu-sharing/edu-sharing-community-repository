@@ -22,6 +22,7 @@ import org.edu_sharing.alfresco.service.toolpermission.ToolPermissionException;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.collection.DuplicateNodeException;
+import org.edu_sharing.service.collection.NodeCountLimitExceededException;
 import org.edu_sharing.service.handleservicedoi.DOIServiceException;
 import org.edu_sharing.service.permission.PermissionException;
 import org.edu_sharing.service.upload.UploadChunkOffsetMismatchException;
@@ -166,6 +167,9 @@ public class DAOException extends RuntimeException {
         }
         if (t instanceof NodeFileSizeExceededException) {
             return new DAONodeFileSizeExceededException((NodeFileSizeExceededException) t, nodeId);
+        }
+        if (t instanceof NodeCountLimitExceededException) {
+            return new DAONodeCountLimitExceededException((NodeCountLimitExceededException) t, nodeId);
         }
         if (t instanceof ContentIOException && t.getCause() instanceof NodeFileSizeExceededException) {
             return new DAONodeFileSizeExceededException((NodeFileSizeExceededException) t.getCause(), nodeId);

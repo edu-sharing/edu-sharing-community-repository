@@ -4,6 +4,9 @@
     <i class="material-icons">upload</i>
   </div>
   <div class="center">
+    @if (item.path) {
+    <div class="path" [title]="item.path">{{ item.path }}/</div>
+    }
     <div class="fileName">{{ item.name }}</div>
     @if (item.progress.progress >= 0 && item.progress.progress < 100) {
     <div class="loading"></div>

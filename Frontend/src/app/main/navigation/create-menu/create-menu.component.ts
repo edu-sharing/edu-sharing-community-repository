@@ -27,7 +27,7 @@ import {
     UIAnimation,
     VirtualNode,
 } from 'ngx-edu-sharing-ui';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
 import { delay, filter, map, startWith, takeUntil } from 'rxjs/operators';
 import {
     Connector,
@@ -56,6 +56,7 @@ import { DialogsService } from '../../../features/dialogs/dialogs.service';
 import { PasteService } from '../../../services/paste.service';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
+import { DroppedFolder } from '../../../shared/directives/file-drop';
 import { MainNavConfig, MainNavService } from '../main-nav.service';
 import { CardDialogService } from '../../../features/dialogs/card-dialog/card-dialog.service';
 import { BridgeService } from '../../../services/bridge.service';
@@ -357,22 +358,7 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
 
     async openUploadSelect(): Promise<void> {
         if (this.editorialSidebarService.editorialSidebar) {
-            this.nodeEntriesGlobalService.getPrimaryInstance()?.selection.clear();
-            this.editorialSidebarService.showOption({
-                option: 'SORT_INTO',
-                trap: false,
-                optionConfig: {
-                    state: TabType.UPLOAD,
-                    allowCreate: true,
-                    autoClose: false,
-                    upload: 'default',
-                    onNodesChoosen: ({ nodes }) => {
-                        if (this.params.reurl) {
-                            this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
-                        }
-                    },
-                } as NodesSelectorConfig,
-            });
+            this.openUploadSidebar();
             return;
         }
         const nodes = await this.uploadDialog.openUploadDialog({
@@ -383,6 +369,41 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             this.localEventsService.nodesCreated.emit(nodes);
             this.createElement.emit(nodes);
         }
+    }
+
+    /**
+     * Opens the upload tab of the editorial sidebar, optionally with preselected files/folders
+     */
+    private openUploadSidebar(preselection?: DroppedFolder): void {
+        this.nodeEntriesGlobalService.getPrimaryInstance()?.selection.clear();
+        this.editorialSidebarService.showOption({
+            option: 'SORT_INTO',
+            trap: false,
+            optionConfig: {
+                state: TabType.UPLOAD,
+                allowCreate: true,
+                autoClose: false,
+                upload: 'default',
+                preselection,
+                onNodesChoosen: ({ nodes }) => {
+                    if (this.params.reurl) {
+                        this.nodeHelper.addNodeToLms(nodes[0], this.params.reurl);
+                    }
+                },
+            } as NodesSelectorConfig,
+        });
+    }
+
+    /**
+     * In a collection context, dropped files are not uploaded directly. Instead, the upload sidebar
+     * is opened with the dropped files preselected, so the user can pick the storage location.
+     */
+    private uploadDropInSidebar(): boolean {
+        return (
+            !!this.editorialSidebarService.editorialSidebar &&
+            !!this._parent &&
+            this.nodeHelper.isNodeCollection(this._parent)
+        );
     }
 
     public hasUsableOptions() {
@@ -423,12 +444,68 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     onFileDrop(fileList: FileList) {
-        if (!this.isDropAllowed()) {
+        if (!this.checkDropPermissions()) {
             return;
         }
-        if (!this.allowed) {
-            this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
+        const files: File[] = [];
+        for (let file of fileList) {
+            files.push(file);
+        }
+        if (this.uploadDropInSidebar()) {
+            this.openUploadSidebar({ name: '', files, folders: [] });
             return;
+        }
+        void this.openUpload(files);
+    }
+
+    /**
+     * A drop containing folders: recreate the folder structure and upload the files into it
+     */
+    async onFolderDrop(folder: DroppedFolder) {
+        if (!this.checkDropPermissions()) {
+            return;
+        }
+        if (this.uploadDropInSidebar()) {
+            // the folder permission is checked on upload, once the storage location is known
+            this.openUploadSidebar(folder);
+            return;
+        }
+        if (
+            !this.folder ||
+            !(await firstValueFrom(
+                this.connector.hasToolPermission(
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+                ),
+            ))
+        ) {
+            this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS);
+            return;
+        }
+        if (this.editorialSidebarService.editorialSidebar) {
+            // show the dropped tree in the upload sidebar first, so the user can remove elements
+            // before uploading into the current folder
+            this.openUploadSidebar(folder);
+            return;
+        }
+        const result = await this.uploadDialog.uploadFolderAndCreateNodes({
+            parent: await this.getParent(),
+            folder,
+        });
+        if (result) {
+            if (this.params.reurl && result.nodes.length) {
+                this.nodeHelper.addNodeToLms(result.nodes[0], this.params.reurl);
+            }
+            this.createElement.emit(result.topLevel);
+        }
+    }
+
+    private checkDropPermissions(): boolean {
+        if (!this.isDropAllowed()) {
+            return false;
+        }
+        if (!this.allowed || !this.allowBinary) {
+            this.toast.error(null, 'WORKSPACE.TOAST.NOT_POSSIBLE_GENERAL');
+            return false;
         }
         if (
             !this.connector.hasToolPermissionInstant(
@@ -436,13 +513,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             )
         ) {
             this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FILES);
-            return;
+            return false;
         }
-        const files: File[] = [];
-        for (let file of fileList) {
-            files.push(file);
-        }
-        void this.openUpload(files);
+        return true;
     }
 
     private async openUpload(files: File[]): Promise<void> {

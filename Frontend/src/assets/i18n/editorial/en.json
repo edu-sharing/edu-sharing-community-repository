@@ -170,6 +170,12 @@
             "MULTIPLE": "Include {{count}} contents"
           },
           "NO_CONFIG_OPTIONS": "There are no further copy options for this content."
+        },
+        "FOLDER_CONVERSION": {
+          "INFO_HEADING": "Adopting folders as collections:",
+          "INFO_MESSAGE": "A sub collection with the same structure is created for each folder. The contained materials are not copied but linked. The folders themselves remain unchanged.",
+          "CONFIG_HEADING": "Configure adoption",
+          "APPLY": "Adopt as collection"
         }
       },
       "ADD_COLLECTION": "Add collection",

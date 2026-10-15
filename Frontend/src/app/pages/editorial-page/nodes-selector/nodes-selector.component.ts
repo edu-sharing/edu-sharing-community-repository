@@ -6,6 +6,7 @@ import {
     effect,
     inject,
     input,
+    linkedSignal,
     model,
     OnInit,
     Signal,
@@ -18,6 +19,7 @@ import { MatTabChangeEvent } from '@angular/material/tabs';
 import { TranslateService } from '@ngx-translate/core';
 import {
     AboutService,
+    ApiErrorResponse,
     AuthenticationService,
     CollectionService as ApiCollectionService,
     ConfigService,
@@ -115,6 +117,10 @@ import { BridgeService } from '../../../services/bridge.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
 import { Toast, ToastType } from '../../../services/toast';
 import { UploadDialogService } from '../../../services/upload-dialog.service';
+import { DroppedFolder } from '../../../shared/directives/file-drop';
+import { ShareDialogModule } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
+import type { ExtendedAce } from '../../../features/dialogs/dialog-modules/share-dialog/share-dialog.component';
+import { getInheritedPermissions } from '../../../features/dialogs/dialog-modules/share-dialog/inherit/inherited-permissions';
 import { SharedModule } from '../../../shared/shared.module';
 import { MessageType } from '../../../util/message-type';
 import { filterMetadataSets, filterRepositories } from '../../../util/repository-filter';
@@ -132,6 +138,8 @@ export enum TabType {
 enum StepType {
     SELECT = 'select',
     CONFIGURE = 'configure',
+    /** selected / uploaded folders are about to be converted into collections */
+    CONFIGURE_FOLDERS = 'configureFolders',
 }
 
 enum InvalidSelectionReason {
@@ -147,6 +155,11 @@ export type NodesSelectorConfig = {
      * fast skips metadata & question for duplicate behaviour
      */
     upload?: 'fast' | 'default';
+    /**
+     * files and folders to preselect in the upload tab (e.g. dropped onto the page). The user picks
+     * the storage location and confirms the upload.
+     */
+    preselection?: DroppedFolder;
     /**
      * selected nodes that should be sorted into
      * If null or an empty selection, we assume that this component is used to select the nodes that SHALL be sorted into
@@ -231,6 +244,7 @@ type SearchMdsContext = {
         AddMaterialDialogModule,
         MdsModule,
         MetadataTemplateManagementComponent,
+        ShareDialogModule,
     ],
     // headless mds instance used to evaluate the search widgets' default values
     providers: [MdsEditorInstanceService],
@@ -373,9 +387,34 @@ export class NodesSelectorComponent implements OnInit {
     );
     private currentStep: WritableSignal<StepType> = signal(StepType.SELECT);
     isSelectStep: Signal<boolean> = computed((): boolean => this.currentStep() === StepType.SELECT);
+    /**
+     * nodes (folders, optionally with files) waiting for the configuration of their conversion
+     * into collections. `created`: the nodes were just uploaded (not selected in the workspace)
+     */
+    folderConversion = signal<{ nodes: Node[]; created: boolean } | null>(null);
+    /** whether the created collections inherit the permissions of the collection parent */
+    folderConversionInherit = signal(true);
+    /** the collections root is not a real node, so there is nothing to inherit */
+    folderConversionInheritAvailable = computed(
+        () => !!this.parent() && this.parent().ref.id !== ROOT,
+    );
+    folderConversionInheritedPermissions = signal<ExtendedAce[]>([]);
+    folderConversionInheritAccessDenied = signal(false);
     onlyOneSelected: Signal<boolean> = computed(() => this.selectedNodes().length === 1);
     onlyFilesSelected: Signal<boolean> = computed((): boolean =>
         this.selectedNodes().every((node) => node.type === RestConstants.CCM_TYPE_IO),
+    );
+    /**
+     * folders (and optionally files) are selected for a collection target: the folders are
+     * converted into child collections, the files are referenced (no configuration step)
+     */
+    foldersToConvertSelected: Signal<boolean> = computed(
+        (): boolean =>
+            this.parentIsCollection() &&
+            this.selectedNodes().some((node) => this.isFolder(node)) &&
+            this.selectedNodes().every(
+                (node) => node.type === RestConstants.CCM_TYPE_IO || this.isFolder(node),
+            ),
     );
     // opt-out for consumers that only need the list view in the search tab
     allowSearchViewSwitch: Signal<boolean> = computed(
@@ -411,6 +450,18 @@ export class NodesSelectorComponent implements OnInit {
                             this.selectedNodes()[0].mediatype === 'folder'))
                 ) {
                     return null;
+                }
+                if (this.foldersToConvertSelected()) {
+                    // the contents of the folders are checked by the backend (skipped if missing)
+                    const files = this.selectedNodes().filter((node) => !this.isFolder(node));
+                    return !files.length ||
+                        this.nodeHelperService.getNodesRight(
+                            files as Node[],
+                            RestConstants.ACCESS_CC_PUBLISH,
+                            NodesRightMode.Effective,
+                        )
+                        ? null
+                        : InvalidSelectionReason.MISSING_PRIVILEGES;
                 }
                 if (!this.onlyFilesSelected()) {
                     return InvalidSelectionReason.INVALID_COMBINATION;
@@ -599,7 +650,9 @@ export class NodesSelectorComponent implements OnInit {
                 this.parent()?.parent?.id !== node?.ref.id) ||
             node?.type === RestConstants.CCM_TYPE_IO ||
             // opt-in: folders are selectable as well
-            (this.allowFolderSelection() && node?.mediatype === 'folder'),
+            (this.allowFolderSelection() && node?.mediatype === 'folder') ||
+            // a collection target converts selected folders into child collections
+            (this.parentIsCollection() && this.isFolder(node)),
     }));
     @ViewChild('workspaceWrapperRef') workspaceWrapper!: NodeEntriesWrapperComponent<Node>;
 
@@ -634,6 +687,12 @@ export class NodesSelectorComponent implements OnInit {
     );
     /** the folder a newly created element is placed in */
     uploadParent = computed(() => (this.chooseParent() ? this.inboxNode() : this.parent()));
+    /**
+     * files / folders preselected in the upload tab. Follows the option config, but is cleared
+     * after a successful upload — the upload tab is re-created when returning from an
+     * intermediate step and would otherwise show the already uploaded selection again
+     */
+    uploadPreselection = linkedSignal(() => this.option()?.optionConfig?.preselection);
 
     // shared among tabs
     searchCompleted: WritableSignal<boolean> = signal(false);
@@ -987,17 +1046,37 @@ export class NodesSelectorComponent implements OnInit {
             return;
         }
         let createdNodes: Node[] | null;
+        /** the created nodes directly inside the parent, if they differ from `createdNodes` */
+        let createdTopLevel: Node[] | undefined;
         switch (result.kind) {
-            case 'file':
-                createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(
-                    {
-                        ...result,
-                        duplicateBehaviour:
-                            this.option().optionConfig?.upload === 'fast' ? 'unique' : 'ask-user',
-                    },
-                    this.option().optionConfig?.upload !== 'fast',
-                );
+            case 'file': {
+                const duplicateBehaviour =
+                    this.option().optionConfig?.upload === 'fast' ? 'unique' : 'ask-user';
+                const showMetadata = this.option().optionConfig?.upload !== 'fast';
+                if (result.folders?.length) {
+                    const uploaded = await this.uploadDialogService.uploadFolderAndCreateNodes(
+                        {
+                            parent: result.parent,
+                            folder: { name: '', files: result.files, folders: result.folders },
+                            duplicateBehaviour,
+                        },
+                        showMetadata,
+                    );
+                    // a collection parent gets the created top-level folders (converted to
+                    // collections by `addNodesToCollection`), otherwise the created folders
+                    // only act as the storage of the uploaded files
+                    createdNodes = this.parentIsCollection()
+                        ? uploaded?.topLevel ?? null
+                        : uploaded?.nodes ?? null;
+                    createdTopLevel = uploaded?.topLevel;
+                } else {
+                    createdNodes = await this.uploadDialogService.uploadFilesAndCreateNodes(
+                        { ...result, duplicateBehaviour },
+                        showMetadata,
+                    );
+                }
                 break;
+            }
             case 'link':
                 createdNodes = await this.uploadDialogService.createLinkNode(
                     result,
@@ -1008,8 +1087,23 @@ export class NodesSelectorComponent implements OnInit {
                 break;
         }
         if (createdNodes?.length) {
+            this.uploadPreselection.set(undefined);
+        }
+        if (
+            createdNodes?.length &&
+            this.parentIsCollection() &&
+            createdNodes.some((node) => this.isFolder(node))
+        ) {
+            // uploaded folders become collections, which is configured in an intermediate step
+            void this.openFolderConversion(createdNodes, true);
+        } else if (createdNodes?.length) {
             // a collection parent is referenced by `emitNodes`, common to all creation paths
-            this.emitNodes({ nodes: createdNodes, parent: this.parent(), created: true });
+            this.emitNodes({
+                nodes: createdNodes,
+                parent: this.parent(),
+                created: true,
+                createdTopLevel,
+            });
             // Standalone upload: select the created nodes so the sidebar shows their options.
             // Skipped for collections (added as an async reference — handled by the collection
             // page via applyNodeEmitted).
@@ -1018,11 +1112,12 @@ export class NodesSelectorComponent implements OnInit {
                 !this.option()?.optionConfig?.onNodesChoosen &&
                 !this.option()?.optionConfig?.autoClose
             ) {
-                this.editorialSidebarService.selectNode(createdNodes as Node[]);
+                // the uploaded files of a folder upload are nested, select what the list shows
+                this.editorialSidebarService.selectNode(createdTopLevel ?? createdNodes);
             }
         }
         // the sidebar may stay open (autoClose: false), so clear the link/file input for the next one
-        this.addMaterialDialogComponent.reset();
+        this.addMaterialDialogComponent?.reset();
     }
 
     // DRAG-AND-DROP RELATED FUNCTIONS
@@ -1265,6 +1360,12 @@ export class NodesSelectorComponent implements OnInit {
         if (!this.parent()) {
             this.emitNodes({ nodes: nodesToEmit, parent: this.parent() });
             this.resetNodeEntriesSelections();
+            return;
+        }
+        // folders for a collection target -> convert them into child collections, no configuration step
+        // folders for a collection target -> configure their conversion into collections first
+        if (this.foldersToConvertSelected()) {
+            void this.openFolderConversion(nodesToEmit, false);
             return;
         }
         // only files are selected -> directly copy them, depending on the parent type
@@ -1644,7 +1745,9 @@ export class NodesSelectorComponent implements OnInit {
             propertyFilter: [PROPERTY_FILTER_ALL],
             contentType: searchForCollections ? 'COLLECTIONS' : 'FILES',
             metadataset: searchForCollections ? DEFAULT : mdsContext?.metadataSet ?? DEFAULT,
-            sortProperties: [RestConstants.CM_MODIFIED_DATE],
+            sortProperties: [
+                searchForCollections ? RestConstants.CM_MODIFIED_DATE : RestConstants.LUCENE_SCORE,
+            ],
             sortAscending: [false],
             body: {
                 criteria,
@@ -1701,6 +1804,12 @@ export class NodesSelectorComponent implements OnInit {
         connectorId?: string;
         window?: Window;
         created?: boolean;
+        /**
+         * the created nodes directly inside the parent (e.g. the folders of a folder upload, whose
+         * files in `nodes` are nested). Announced as created instead of `nodes`, so views of the
+         * parent show what was actually added to it.
+         */
+        createdTopLevel?: Node[];
     }): void {
         this.editorialSidebarService.applyNodeEmitted.emit(payload);
         this.option()?.optionConfig?.onNodesChoosen?.({
@@ -1715,27 +1824,142 @@ export class NodesSelectorComponent implements OnInit {
         // so a collection parent needs an explicit reference. Copied nodes (`created` unset) have
         // already been added by `copyNodes` and must not be added a second time.
         if (payload.created && this.parentIsCollection()) {
-            this.addCreatedNodesToCollection(payload.nodes);
+            this.addNodesToCollection(payload.nodes);
         } else if (payload.created) {
-            // emit manually since addCreatedNodesToCollection will emit itself the added to collectionn nodes (no duplicates)
-            this.localEventsService.nodesCreated.emit(payload.nodes);
+            // emit manually since addNodesToCollection will emit itself the added to collectionn nodes (no duplicates)
+            this.localEventsService.nodesCreated.emit(payload.createdTopLevel ?? payload.nodes);
         }
     }
 
     /**
-     * References freshly created nodes into the collection parent. Deliberately runs after the
-     * `applyNodeEmitted` emission above, so the collection page has flagged the incoming nodes
-     * before the add triggers its reload.
+     * References nodes into the collection parent, folders are converted into child collections.
+     * Deliberately runs after the `applyNodeEmitted` emission, so the collection page has flagged
+     * the incoming nodes before the add triggers its reload.
      */
-    private addCreatedNodesToCollection(nodes: Node[]): void {
+    /**
+     * Shows the intermediate step to configure the conversion of the folders among the given nodes
+     * into collections (see `applyFolderConversion`)
+     */
+    private async openFolderConversion(nodes: Node[], created: boolean): Promise<void> {
+        this.folderConversion.set({ nodes, created });
+        this.folderConversionInheritedPermissions.set([]);
+        this.folderConversionInheritAccessDenied.set(false);
+        this.currentStep.set(StepType.CONFIGURE_FOLDERS);
+        if (!this.folderConversionInheritAvailable()) {
+            this.folderConversionInherit.set(false);
+            return;
+        }
+        try {
+            const [permissions, login] = await Promise.all([
+                firstValueFrom(this.nodeService.getPermissions(this.parent().ref.id)),
+                firstValueFrom(this.authenticationService.observeLoginInfo()),
+            ]);
+            this.folderConversionInheritedPermissions.set(
+                getInheritedPermissions(permissions, login?.authorityName),
+            );
+        } catch (e) {
+            (e as ApiErrorResponse)?.preventDefault?.();
+            this.folderConversionInheritAccessDenied.set(true);
+        }
+    }
+
+    /** back to the selection, the folders are not converted */
+    cancelFolderConversion(): void {
+        this.folderConversion.set(null);
+        this.currentStep.set(StepType.SELECT);
+    }
+
+    /** converts the pending folders into collections and references the remaining files */
+    applyFolderConversion(): void {
+        const { nodes, created } = this.folderConversion();
+        this.folderConversion.set(null);
+        this.currentStep.set(StepType.SELECT);
+        // emit first, so the collection page flags the incoming nodes before the add reloads it.
+        // Created nodes are added to the collection by `emitNodes` itself.
+        this.emitNodes({ nodes, parent: this.parent(), created });
+        if (!created) {
+            this.addNodesToCollection(nodes);
+            this.resetNodeEntriesSelections();
+        }
+    }
+
+    private addNodesToCollection(nodes: Node[]): void {
+        // folders (e.g. from a folder upload) are mirrored as child collections by the backend
+        void this.createCollectionsFromFolders(
+            nodes.filter((n) => this.isFolder(n)),
+            this.folderConversionInherit(),
+        );
+        const objects = nodes.filter((n) => !this.isFolder(n));
+        if (!objects.length) {
+            return;
+        }
         try {
             this.toast.showProgressSpinner();
-            this.uiService.addToCollection(this.parent(), nodes, false, () => {
+            this.uiService.addToCollection(this.parent(), objects, false, () => {
                 this.toast.closeProgressSpinner();
             });
         } catch (e) {
             console.error(e);
             this.toast.closeProgressSpinner();
+        }
+    }
+
+    /** a regular (workspace) folder, i.e. not a collection */
+    private isFolder(node: Partial<Node>): boolean {
+        return (
+            node?.type === RestConstants.CCM_TYPE_MAP &&
+            !this.nodeHelperService.isNodeCollection(node as Node)
+        );
+    }
+
+    /**
+     * Converts the given (freshly created) folders into child collections of the collection
+     * parent, including their sub folders and all contained objects as references
+     */
+    private async createCollectionsFromFolders(
+        folders: Node[],
+        inheritPermissions: boolean,
+    ): Promise<void> {
+        if (!folders.length) {
+            return;
+        }
+        const parent = this.parent();
+        this.toast.showProgressSpinner();
+        try {
+            let skippedRefs = 0;
+            for (const folder of folders) {
+                const response = await firstValueFrom(
+                    this.apiCollectionService.createCollectionFromFolder({
+                        repository: HOME_REPOSITORY,
+                        sourceFolder: folder.ref.id,
+                        // the collections root is not a real node, omitting the target creates
+                        // level0 collections
+                        targetCollection: parent.ref.id === ROOT ? undefined : parent.ref.id,
+                        convertRoot: true,
+                        inheritPermissions,
+                    }),
+                );
+                skippedRefs +=
+                    response?.entries?.filter(
+                        (entry) => entry?.errorCode === 'NO_PUBLISH_PERMISSION',
+                    )?.length ?? 0;
+                if (response?.root) {
+                    this.localEventsService.nodesCreated.emit([response.root]);
+                }
+            }
+            if (skippedRefs > 0) {
+                this.toast.toast('COLLECTIONS.TOAST.CREATED_FROM_FOLDER_NO_PUBLISH_PERMISSION', {
+                    count: skippedRefs,
+                });
+            } else {
+                this.toast.toast('COLLECTIONS.TOAST.CREATED_FROM_FOLDER');
+            }
+        } catch (error) {
+            this.toast.error(error);
+        } finally {
+            this.toast.closeProgressSpinner();
+            // reload the collection, also if only some of the folders could be converted
+            this.localEventsService.nodesChanged.emit([parent]);
         }
     }
 

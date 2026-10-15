@@ -1154,6 +1154,7 @@
     "STORAGE_LOCATION_RESET": "Der Standard-Ordner für Uploads wurde zurückgesetzt.",
     "OPTION_DISABLED_OR_UNAVAILABLE": "Die gewünschte Aktion steht leider nicht zur Verfügung.",
     "API_FORBIDDEN": "Keine Rechte, um auf diesen Inhalt zuzugreifen.",
+    "NODE_COUNT_LIMIT_EXCEEDED": "Vorgang nicht möglich: Es sind mehr als {{maxNodes}} Elemente enthalten.",
     "API_FORBIDDEN_LOGIN": "Bitte anmelden, um auf diesen Bereich zuzugreifen.",
     "ASSIGNMENT_CANCEL": "Die Aufgabe wurde abgebrochen.",
     "ASSIGNMENT_FINISH": "Die Aufgabe wurde abgeschlossen.",
