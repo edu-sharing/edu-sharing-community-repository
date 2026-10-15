@@ -74,6 +74,10 @@ export type ExtendedAce = Omit<Ace, 'authority'> & {
     standalone: false,
 })
 export class ShareDialogComponent implements OnInit, AfterViewInit {
+    private static readonly DEFAULT_PUBLISH_PERMISSIONS: readonly string[] = [
+        RestConstants.PERMISSION_CONSUMER,
+        RestConstants.ACCESS_CC_PUBLISH,
+    ];
     @ViewChild('publish') publishComponent: ShareDialogPublishComponent;
     @ViewChild(ShareDialogRestrictedAccessComponent)
     restrictedAccessComponent: ShareDialogRestrictedAccessComponent;
@@ -227,7 +231,7 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 authorityName: this.translate.instant('WORKSPACE.SHARE.PUBLISH_ENABLED'),
                 authorityType: 'EVERYONE',
             },
-            permissions: [RestConstants.PERMISSION_CONSUMER, RestConstants.ACCESS_CC_PUBLISH],
+            permissions: ShareDialogComponent.DEFAULT_PUBLISH_PERMISSIONS.slice(),
         };
 
         this.connector.isLoggedIn(false).subscribe((data: LoginResult) => {
@@ -476,7 +480,34 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                 permission.permissions.splice(index, 1);
             }
         }
+        if (permission === this.publishEnabled && !permission.permissions.length) {
+            // removing all permissions of GROUP_EVERYONE equals disabling the publishing
+            this.publishComponent.shareModeDirect = false;
+            this.publishEnabled.permissions =
+                ShareDialogComponent.DEFAULT_PUBLISH_PERMISSIONS.slice();
+        }
         this.applicationRef.tick();
+    }
+
+    /**
+     * permissions shown in the advanced tab
+     * GROUP_EVERYONE is synced with the publish tab (if available)
+     */
+    getAdvancedPermissions(): ExtendedAce[] {
+        const result = this.permissionsGroup.concat(this.permissionsUser);
+        if (this.publishComponent) {
+            if (this.publishComponent.shareModeDirect) {
+                result.unshift(this.publishEnabled);
+            }
+        } else {
+            const everyone = this.permissions?.find(
+                (p) => p.authority.authorityType === RestConstants.AUTHORITY_TYPE_EVERYONE,
+            );
+            if (everyone) {
+                result.unshift(everyone);
+            }
+        }
+        return result;
     }
 
     isImplicitPermission(permission: ExtendedAce, name: string) {
@@ -702,6 +733,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
                             if (everyone) {
                                 everyone.from = this.publishEnabled.from;
                                 everyone.to = this.publishEnabled.to;
+                                // permissions may have been customized in the advanced tab
+                                everyone.permissions = Helper.deepCopy(
+                                    this.publishEnabled.permissions,
+                                );
                             }
                             permissions = permissions
                                 .filter(
@@ -820,6 +855,9 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
         if (everyone) {
             this.publishEnabled.from = everyone.from;
             this.publishEnabled.to = everyone.to;
+            if (everyone.permissions?.length) {
+                this.publishEnabled.permissions = Helper.deepCopy(everyone.permissions);
+            }
         }
         this.permissionsUser = this.permissions.slice();
         this.permissionsGroup = this.permissions.slice();

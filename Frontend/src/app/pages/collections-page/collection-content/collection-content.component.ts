@@ -86,6 +86,14 @@ import { InfobarService } from '../infobar/infobar.service';
     standalone: false,
 })
 export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy {
+    /**
+     * root level scopes which are not expected to be empty
+     * if they are, we navigate the user to the public scope instead
+     */
+    private static NON_EMPTY_ROOT_SCOPES = [
+        RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
+        RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
+    ];
     private static DEFAULT_REQUEST = {
         sortBy: [
             RestConstants.CCM_PROP_COLLECTION_PINNED_STATUS,
@@ -107,6 +115,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
      */
     @Input() interactionType: InteractionType = InteractionType.DefaultActionLink;
     @Input() scope: string;
+    /**
+     * emitted when the component requests to switch to another scope
+     */
+    @Output() scopeChange = new EventEmitter<string>();
     /**
      * reference to the infobar component
      * this is required if you want to interconnect it to have support for editing & managing the collection
@@ -725,6 +737,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     );
                     this.dataSourceCollections.isLoading = false;
                     if (this.isRootLevel) {
+                        if (
+                            !collection.collections?.length &&
+                            CollectionContentComponent.NON_EMPTY_ROOT_SCOPES.includes(this.scope)
+                        ) {
+                            this.scopeChange.emit(RestConstants.COLLECTIONSCOPE_ALL);
+                            return;
+                        }
                         if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
                             this.listCollections.addVirtualNodes(
                                 (

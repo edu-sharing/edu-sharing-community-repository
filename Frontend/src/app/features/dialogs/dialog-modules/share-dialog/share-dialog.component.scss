@@ -27,11 +27,6 @@
     }
 }
 
-.advancedPermission {
-    float: left;
-    width: 33.33%;
-}
-
 .hintNoFuzzy {
     margin-top: -10px;
     margin-bottom: 10px;
@@ -63,10 +58,15 @@
     }
 }
 
+.advancedEntry {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: hidden;
+}
+
 .advancedAuthority {
+    grid-column: 1 / -1;
     color: $textLight;
-    float: left;
-    width: 100%;
     font-weight: bold;
     padding: 10px 0;
     i {
