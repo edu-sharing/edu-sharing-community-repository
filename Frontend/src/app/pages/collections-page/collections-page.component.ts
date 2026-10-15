@@ -5,6 +5,7 @@ import {
     EventEmitter,
     inject,
     OnDestroy,
+    signal,
     TemplateRef,
     viewChild,
     ViewChild,
@@ -52,6 +53,7 @@ import { CollectionInfoBarComponent } from './collection-info-bar/collection-inf
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
+import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 
 // component class
 @Component({
@@ -65,6 +67,7 @@ import { EditorialSidebarService } from '../../features/editorial-sidebar/editor
 export class CollectionsPageComponent implements OnDestroy {
     private breadcrumbsService = inject(BreadcrumbsService);
     private collectionService = inject(RestCollectionService);
+    private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
     private configService = inject(ConfigService);
     private connector = inject(RestConnectorService);
@@ -85,13 +88,30 @@ export class CollectionsPageComponent implements OnDestroy {
     private translations = inject(TranslationsService);
     private uiService = inject(UIService);
 
-    static INDEX_MAPPING = [
-        RestConstants.COLLECTIONSCOPE_MY,
-        RestConstants.COLLECTIONSCOPE_ORGA,
-        RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
-        RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
-        RestConstants.COLLECTIONSCOPE_ALL,
-    ];
+    /** How each category of collections is shown as a tab. */
+    readonly SCOPE_TABS: Record<
+        CollectionScope,
+        { icon: string; iconContext?: string; labelClass: string }
+    > = {
+        MY: { icon: 'person', labelClass: 'mat-tab-my data-test-collections-tab-my' },
+        EDU_GROUPS: {
+            icon: 'group',
+            labelClass: 'mat-tab-groups data-test-collections-tab-collaborative',
+        },
+        TYPE_EDITORIAL: {
+            icon: 'star',
+            iconContext: 'collection-scope',
+            labelClass: 'mat-tab-editorial data-test-collections-tab-editorial',
+        },
+        TYPE_MEDIA_CENTER: {
+            icon: 'domain',
+            labelClass: 'mat-tab-media-center data-test-collections-tab-media-centre',
+        },
+        EDU_ALL: {
+            icon: 'language',
+            labelClass: 'mat-tab-edu-all data-test-collections-tab-public',
+        },
+    };
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
@@ -145,30 +165,11 @@ export class CollectionsPageComponent implements OnDestroy {
     }
 
     set tabSelectedIndex(pos: number) {
-        if (this.isGuest) {
-            pos += 2; // skip first 2 tabs
-        }
-        if (!this.hasEditorial && pos > 1) {
-            pos++; // skip editorial
-        }
-        if (!this.hasMediacenter && pos > 2) {
-            pos++; // skip mediacenter
-        }
-        this.selectTab(CollectionsPageComponent.INDEX_MAPPING[pos]);
+        this.selectTab(this.scopes()[pos]);
     }
 
     get tabSelectedIndex() {
-        let pos = CollectionsPageComponent.INDEX_MAPPING.indexOf(this.tabSelected);
-        if (this.isGuest) {
-            pos -= 2;
-        }
-        if (!this.hasEditorial && pos > 1) {
-            pos--;
-        }
-        if (!this.hasMediacenter && pos > 2) {
-            pos--;
-        }
-        return pos;
+        return this.scopes().findIndex((scope) => scope === this.tabSelected);
     }
     private contentDetailObject: any = null;
     // real parentCollectionId is only available, if user was browsing
@@ -177,8 +178,8 @@ export class CollectionsPageComponent implements OnDestroy {
         RestConstants.ROOT,
     );
     private person: EduData.User;
-    hasEditorial = false;
-    hasMediacenter = false;
+    /** Categories of collections listed as tabs, empty until they are known. */
+    readonly scopes = signal<CollectionScope[]>([]);
     constructor() {
         this.translations.waitForInit().subscribe(() => {
             combineLatest([
@@ -194,22 +195,10 @@ export class CollectionsPageComponent implements OnDestroy {
                                 (m) => m.administrationAccess,
                             );
                         });
-                        this.collectionService
-                            .getCollectionSubcollections(
-                                RestConstants.ROOT,
-                                RestConstants.COLLECTIONSCOPE_TYPE_EDITORIAL,
-                            )
-                            .subscribe((data) => {
-                                this.hasEditorial = data.collections.length > 0;
-                            });
-                        this.collectionService
-                            .getCollectionSubcollections(
-                                RestConstants.ROOT,
-                                RestConstants.COLLECTIONSCOPE_TYPE_MEDIA_CENTER,
-                            )
-                            .subscribe((data) => {
-                                this.hasMediacenter = data.collections.length > 0;
-                            });
+                        this.collectionScopesService.getScopes().subscribe((scopes) => {
+                            this.scopes.set(scopes);
+                            this.selectListedTab();
+                        });
                         this.initialize();
                     } else {
                         this.uiService.goToLogin();
@@ -251,7 +240,7 @@ export class CollectionsPageComponent implements OnDestroy {
         return window.innerWidth < UIConstants.MOBILE_WIDTH;
     }
 
-    navigate(id = '', addToOther = '', feedback = false) {
+    navigate(id = '', addToOther = '', feedback = false, replaceUrl = false) {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.scope = this.tabSelected;
             if (id && id !== '-root-') {
@@ -265,6 +254,7 @@ export class CollectionsPageComponent implements OnDestroy {
             }
             void this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
                 queryParams: params,
+                replaceUrl,
             });
         });
     }
@@ -415,7 +405,19 @@ export class CollectionsPageComponent implements OnDestroy {
     }
 
     showTabs() {
-        return this.isRootLevelCollection() && (!this.isGuest || this.hasEditorial);
+        return this.isRootLevelCollection() && this.scopes().length > 1;
+    }
+
+    /**
+     * Moves to the first tab when the scope from the URL has no tab, e.g. an editorial scope
+     * without editorial collections, replacing the URL so going back does not return to it.
+     */
+    private selectListedTab(): void {
+        const scopes = this.scopes();
+        if (this.showTabs() && !scopes.some((scope) => scope === this.tabSelected)) {
+            this.tabSelected = scopes[0];
+            this.navigate('', '', false, true);
+        }
     }
 
     hasNonIconPreview(): boolean {
@@ -483,6 +485,7 @@ export class CollectionsPageComponent implements OnDestroy {
                             });
                     }
                     await this.displayCollectionById(id);
+                    this.selectListedTab();
 
                     /*if (params.nodeId) {
                         let node = params.nodeId.split('/');

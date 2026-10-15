@@ -14,7 +14,11 @@ import { RegisterFormFieldDirective } from '../../mds-editor-widget-container/re
 import { HighlightPipe } from '../mds-editor-widget-tree-core/highlight.pipe';
 import { MdsEditorWidgetTreeCoreComponent } from '../mds-editor-widget-tree-core/mds-editor-widget-tree-core.component';
 import { MdsEditorWidgetTreeComponent } from '../mds-editor-widget-tree.component';
-import { CollectionTreeScope } from './collection-tree-config';
+import {
+    COLLECTION_SCOPES,
+    CollectionScope,
+    CollectionScopesService,
+} from '../../../../../../services/collection-scopes.service';
 import {
     CollectionPage,
     CollectionTreeService,
@@ -28,7 +32,7 @@ interface FixtureCollection {
     title: string;
     parent: string | null;
     /** Categories a top-level collection is listed in. */
-    scopes?: CollectionTreeScope[];
+    scopes?: CollectionScope[];
 }
 
 const RESPONSE_DELAY_MS = 400;
@@ -111,14 +115,9 @@ class CollectionTreeServiceMock implements Partial<CollectionTreeService> {
         return of(placed).pipe(delay(RESPONSE_DELAY_MS));
     }
 
-    hasCollections(scope: CollectionTreeScope): Observable<boolean> {
-        const filled = FIXTURE.some((collection) => collection.scopes?.includes(scope));
-        return of(filled).pipe(delay(RESPONSE_DELAY_MS));
-    }
-
     getChildren(
         parent: Node | null,
-        options: { scope?: CollectionTreeScope; skipCount: number; maxItems: number },
+        options: { scope?: CollectionScope; skipCount: number; maxItems: number },
     ): Observable<CollectionPage> {
         const parentId = parent?.ref.id ?? null;
         const children = FIXTURE.filter(
@@ -146,6 +145,19 @@ class CollectionTreeServiceMock implements Partial<CollectionTreeService> {
                         .some((ancestor) => ancestor.id === options.rootId)),
         );
         return of(hits.slice(0, options.maxItems).map(toNode)).pipe(delay(RESPONSE_DELAY_MS));
+    }
+}
+
+/** Lists the categories that hold collections of {@link FIXTURE}, as for a signed-in user. */
+@Injectable()
+class CollectionScopesServiceMock implements Partial<CollectionScopesService> {
+    getScopes(
+        options: { scopes?: readonly CollectionScope[] } = {},
+    ): Observable<CollectionScope[]> {
+        const scopes = (options.scopes ?? COLLECTION_SCOPES).filter((scope) =>
+            FIXTURE.some((collection) => collection.scopes?.includes(scope)),
+        );
+        return of(scopes).pipe(delay(RESPONSE_DELAY_MS));
     }
 }
 
@@ -181,6 +193,7 @@ const meta: Meta<StoryArgs> = {
             providers: [
                 ...mdsStorybookProviders,
                 { provide: CollectionTreeService, useClass: CollectionTreeServiceMock },
+                { provide: CollectionScopesService, useClass: CollectionScopesServiceMock },
             ],
         }),
     ],

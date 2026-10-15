@@ -36,41 +36,18 @@
         [color]="$any('dark')"
         [(selectedIndex)]="tabSelectedIndex"
       >
-        @if (!isGuest) {
-        <mat-tab labelClass="mat-tab-my data-test-collections-tab-my">
+        @for (scope of scopes(); track scope) {
+        <mat-tab [labelClass]="SCOPE_TABS[scope].labelClass">
           <ng-template mat-tab-label>
-            <i esIcon="person" class="tab-icon"></i>
-            <span class="tab-label">{{ 'COLLECTIONS.TAB.MY' | translate }}</span>
-          </ng-template>
-        </mat-tab>
-        } @if (!isGuest) {
-        <mat-tab labelClass="mat-tab-groups data-test-collections-tab-collaborative">
-          <ng-template mat-tab-label>
-            <i esIcon="group" class="tab-icon"></i>
-            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_GROUPS' | translate }}</span>
-          </ng-template>
-        </mat-tab>
-        } @if (hasEditorial) {
-        <mat-tab labelClass="mat-tab-editorial data-test-collections-tab-editorial">
-          <ng-template mat-tab-label>
-            <i esIcon="star" esIconContext="collection-scope" class="tab-icon"></i>
-            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_EDITORIAL' | translate }}</span>
-          </ng-template>
-        </mat-tab>
-        } @if (hasMediacenter) {
-        <mat-tab labelClass="mat-tab-media-center data-test-collections-tab-media-centre">
-          <ng-template mat-tab-label>
-            <i esIcon="domain" class="tab-icon"></i>
-            <span class="tab-label">{{ 'COLLECTIONS.TAB.TYPE_MEDIA_CENTER' | translate }}</span>
+            <i
+              [esIcon]="SCOPE_TABS[scope].icon"
+              [esIconContext]="SCOPE_TABS[scope].iconContext"
+              class="tab-icon"
+            ></i>
+            <span class="tab-label">{{ 'COLLECTIONS.TAB.' + scope | translate }}</span>
           </ng-template>
         </mat-tab>
         }
-        <mat-tab labelClass="mat-tab-edu-all data-test-collections-tab-public">
-          <ng-template mat-tab-label>
-            <i esIcon="language" class="tab-icon"></i>
-            <span class="tab-label">{{ 'COLLECTIONS.TAB.EDU_ALL' | translate }}</span>
-          </ng-template>
-        </mat-tab>
       </mat-tab-group>
       }
       <div class="collections-body">

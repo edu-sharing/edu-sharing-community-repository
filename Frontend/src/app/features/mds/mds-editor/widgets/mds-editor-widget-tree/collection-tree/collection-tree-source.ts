@@ -2,20 +2,21 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { AuthenticationService, Node } from 'ngx-edu-sharing-api';
-import { firstValueFrom, forkJoin, from, Observable } from 'rxjs';
+import { Node } from 'ngx-edu-sharing-api';
+import { firstValueFrom, from, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Tree, TreeNode } from '../tree';
 import { TreeSource, TreeSourceValue } from '../tree-source';
 import {
+    CollectionScope,
+    CollectionScopesService,
+} from '../../../../../../services/collection-scopes.service';
+import {
     COLLECTION_TREE_MAX_SEARCH_HITS,
     COLLECTION_TREE_ROOT_QUERY_PARAM,
     CollectionTreeConfig,
-    CollectionTreeScope,
     DEFAULT_COLLECTION_TREE_PAGE_SIZE,
-    DEFAULT_COLLECTION_TREE_SCOPES,
     parseCollectionTreeConfig,
-    PERSONAL_COLLECTION_TREE_SCOPES,
 } from './collection-tree-config';
 import {
     CollectionTreeService,
@@ -33,14 +34,9 @@ const MAX_DEPTH = 50;
  */
 @Injectable()
 export class CollectionTreeSource implements TreeSource {
+    private readonly collectionScopesService = inject(CollectionScopesService);
     private readonly collectionTreeService = inject(CollectionTreeService);
     private readonly translate = inject(TranslateService);
-    private readonly isGuest = toSignal(
-        inject(AuthenticationService)
-            .observeLoginInfo()
-            .pipe(map((login) => !!login?.isGuest)),
-        { initialValue: false },
-    );
     private readonly urlRootId = toSignal(
         inject(ActivatedRoute).queryParamMap.pipe(
             map((params) => params.get(COLLECTION_TREE_ROOT_QUERY_PARAM)),
@@ -61,7 +57,7 @@ export class CollectionTreeSource implements TreeSource {
     /** What the children of a lazily loaded node are loaded from, and the tree it belongs to. */
     private readonly lazyNodes = new Map<
         TreeNode,
-        { tree: Tree; collection?: Node; scope?: CollectionTreeScope }
+        { tree: Tree; collection?: Node; scope?: CollectionScope }
     >();
     private browseTree: { key: string; tree: Promise<Tree> } | null = null;
 
@@ -177,7 +173,13 @@ export class CollectionTreeSource implements TreeSource {
             rootNode.children ??= [];
             rootNode.hasChildren = rootNode.children.length > 0;
         } else {
-            for (const scope of await this.getFilledCategories()) {
+            const scopes = await firstValueFrom(
+                this.collectionScopesService.getScopes({
+                    scopes: this.config().scopes,
+                    hideEmpty: true,
+                }),
+            );
+            for (const scope of scopes) {
                 const category = tree.addNode({
                     id: `category:${scope}`,
                     caption: this.translate.instant(`COLLECTIONS.TAB.${scope}`),
@@ -203,20 +205,6 @@ export class CollectionTreeSource implements TreeSource {
             this.rootNode.set(null);
         }
         return this.rootNode();
-    }
-
-    /** Categories of the top level that hold collections, guests having none of their own. */
-    private async getFilledCategories(): Promise<CollectionTreeScope[]> {
-        const scopes = (this.config().scopes ?? DEFAULT_COLLECTION_TREE_SCOPES).filter(
-            (scope) => !this.isGuest() || !PERSONAL_COLLECTION_TREE_SCOPES.includes(scope),
-        );
-        if (!scopes.length) {
-            return [];
-        }
-        const filled = await firstValueFrom(
-            forkJoin(scopes.map((scope) => this.collectionTreeService.hasCollections(scope))),
-        );
-        return scopes.filter((_, index) => filled[index]);
     }
 
     /** Appends the next page of collections below `node`, with a `more` row if any are left. */

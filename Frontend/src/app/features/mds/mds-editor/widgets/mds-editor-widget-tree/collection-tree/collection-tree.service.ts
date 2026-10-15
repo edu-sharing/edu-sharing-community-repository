@@ -12,7 +12,7 @@ import { NodeHelperService } from 'ngx-edu-sharing-ui';
 import { from, MonoTypeOperatorFunction, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, shareReplay, switchMap, tap, toArray } from 'rxjs/operators';
 import { RestConstants } from '../../../../../../core-module/rest/rest-constants';
-import { CollectionTreeScope } from './collection-tree-config';
+import { CollectionScope } from '../../../../../../services/collection-scopes.service';
 
 /** A page of collections together with the total number available. */
 export interface CollectionPage {
@@ -187,24 +187,13 @@ export class CollectionTreeService {
         return lookUpMissing();
     }
 
-    /** Whether the top level of `scope` holds collections; one that cannot be checked counts. */
-    hasCollections(scope: CollectionTreeScope): Observable<boolean> {
-        return this.getChildren(null, { scope, skipCount: 0, maxItems: 1 }).pipe(
-            map((page) => page.total > 0),
-            catchError((error: unknown) => {
-                markAsHandled(error);
-                return of(true);
-            }),
-        );
-    }
-
     /**
      * Child collections of `parent` in the order configured for it, or the top-level
      * collections of `scope` (pinned ones first, like the collections page) for `null`.
      */
     getChildren(
         parent: Node | null,
-        options: { scope?: CollectionTreeScope; skipCount: number; maxItems: number },
+        options: { scope?: CollectionScope; skipCount: number; maxItems: number },
     ): Observable<CollectionPage> {
         const sort = this.nodeHelper.getSortByForCollection(parent ?? ROOT);
         const ascending = sort.direction === 'asc';
