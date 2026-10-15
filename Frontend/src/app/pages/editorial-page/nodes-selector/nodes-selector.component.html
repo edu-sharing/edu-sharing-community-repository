@@ -322,12 +322,13 @@
         chooseParent: chooseParent(),
         multiple: true,
         parent: chooseParent() ? inboxNode() : parent(),
-        showLti: true
+        showLti: true,
+        preselection: uploadPreselection()
       }"
       (dialogResult)="uploadMaterialDialogResult($event)"
     ></es-add-material-dialog>
-    @if ( !material.selectedFiles()?.length && createOptions().length &&
-    option()?.optionConfig?.allowCreate !== false ) {
+    @if ( !material.hasSelection() && createOptions().length && option()?.optionConfig?.allowCreate
+    !== false ) {
     <div class="upload-create-row">
       <es-dropdown
         #connectorDropdown
@@ -348,7 +349,27 @@
     } } }
 
     <!-- FALLBACK -->
-    @default { No view defined for tab {{ tabType }}. } } } @else {
+    @default { No view defined for tab {{ tabType }}. } } } @else if (folderConversion()) {
+    <!-- CONFIGURE FOLDER CONVERSION -->
+    <es-info-message mode="info">
+      <h4>
+        {{ i18nPrefix + 'FOLDER_CONVERSION.INFO_HEADING' | translate }}
+      </h4>
+      {{ i18nPrefix + 'FOLDER_CONVERSION.INFO_MESSAGE' | translate }}
+    </es-info-message>
+    <h3>
+      {{ i18nPrefix + 'FOLDER_CONVERSION.CONFIG_HEADING' | translate }}
+    </h3>
+    @if (folderConversionInheritAvailable()) {
+    <es-share-dialog-inherit
+      [permissions]="folderConversionInheritedPermissions()"
+      [accessDenied]="folderConversionInheritAccessDenied()"
+      [isCollection]="true"
+      [isDirectory]="true"
+      [inherited]="folderConversionInherit()"
+      (inheritedChange)="folderConversionInherit.set($event)"
+    ></es-share-dialog-inherit>
+    } } @else {
     <es-info-message mode="info">
       <h4>
         {{ i18nPrefix + 'CONFIGURE_CONFIG.INFO_HEADING' | translate }}
@@ -414,9 +435,18 @@
 </ng-template>
 
 <!-- FOOTER ACTION BAR -->
-@if (selectedNodes().length || methodologyTabWithValue()) {
+@if (selectedNodes().length || methodologyTabWithValue() || folderConversion()) {
 <div class="tab-action-bar">
-  @if (selectionMode() === 'target') { @if (!isMethodologyTab()) {
+  @if (folderConversion()) {
+  <button mat-button color="primary" class="back-btn" (click)="cancelFolderConversion()">
+    <i esIcon="arrow_back"></i>
+    {{ 'BACK' | translate }}
+  </button>
+  <button mat-flat-button color="primary" (click)="applyFolderConversion()">
+    {{ i18nPrefix + 'FOLDER_CONVERSION.APPLY' | translate }}
+    <i esIcon="arrow_forward"></i>
+  </button>
+  } @else if (selectionMode() === 'target') { @if (!isMethodologyTab()) {
   <div
     [matTooltip]="
       invalidSelectionReason()
@@ -438,7 +468,7 @@
   <button mat-flat-button color="primary" (click)="saveMetadata()">
     {{ 'SAVE' | translate }}
   </button>
-  } } @if (selectionMode() === 'source') { @if (!isSelectStep()) {
+  } } @if (!folderConversion() && selectionMode() === 'source') { @if (!isSelectStep()) {
   <button mat-button color="primary" class="back-btn" (click)="goBack()">
     <i esIcon="arrow_back"></i>
     {{ 'BACK' | translate }}

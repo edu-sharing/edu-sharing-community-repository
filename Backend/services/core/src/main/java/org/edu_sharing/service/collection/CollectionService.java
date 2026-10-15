@@ -110,4 +110,15 @@ public interface CollectionService {
 	List<NodeRef> getCollectionProposals(String nodeId, CCConstants.PROPOSAL_STATUS status);
 
 	CopyResult copy(NodeRef src, NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable;
+
+	/**
+	 * Creates a collection structure analogous to the given folder: (sub) folders become (child) collections, all
+	 * contained ccm:io become collection references. The folder itself stays untouched.
+	 * @param folder the source folder
+	 * @param dst the parent collection, null to create a new level0 collection (only allowed if convertRoot is set)
+	 * @param convertRoot if true, the folder itself becomes a collection, else only its children are added to dst
+	 * @param inheritPermissions if true, the created collections inherit the permissions of their parent collection
+	 * @param copyPermissions if true, the permissions of each folder are copied to its collection
+	 */
+	CopyResult createFromFolder(NodeRef folder, NodeRef dst, boolean convertRoot, boolean inheritPermissions, boolean copyPermissions) throws Throwable;
 }

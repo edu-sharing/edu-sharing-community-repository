@@ -14,24 +14,39 @@
 ></es-location-picker>
 } @if (!hideFileUpload()) {
 <div @openOverlay>
-  @if (selectedFiles().length) {
+  @if (hasSelection()) {
   <div class="file-selection" @openOverlay>
-    @for (file of selectedFiles(); track file) {
-    <div>
-      <div class="name">{{ file.name }}</div>
-      <div class="size">{{ file.size | formatSize }}</div>
-      <button mat-icon-button color="primary">
-        <i esIcon="clear" (click)="removeFile(file)"></i>
+    @for (row of selectionRows(); track $index) {
+    <div [style.padding-left.px]="10 + row.depth * 20">
+      <i class="icon" [esIcon]="row.kind === 'folder' ? 'folder' : 'insert_drive_file'"></i>
+      <div class="name">{{ row.name }}</div>
+      <div class="size">{{ row.size | formatSize }}</div>
+      <button mat-icon-button color="primary" (click)="removeRow(row)">
+        <i esIcon="clear"></i>
       </button>
     </div>
     }
   </div>
-  } @if (!selectedFiles().length) {
+  @if (!data) {
+  <div class="link-submit">
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!canSave()"
+      (click)="setLink()"
+      data-test="upload-selection-button"
+    >
+      {{ 'WORKSPACE.UPLOAD_EXISTS.UPLOAD' | translate }}
+    </button>
+  </div>
+  } } @if (!hasSelection()) {
   <div
     class="dropArea"
     [class.dropActive]="isFileOver"
     esFileDrop
+    [allowFolders]="allowFolders"
     (fileDrop)="closeWithFiles($event)"
+    (folderDrop)="closeWithFolder($event)"
     (click)="selectFile()"
     (fileOver)="isFileOver = $event"
     esFocusState
@@ -52,13 +67,13 @@
   <div class="quota">
     <es-user-quota [quota]="userQuota"></es-user-quota>
   </div>
-  } @if (!selectedFiles().length) {
+  } @if (!hasSelection()) {
   <div class="separator-line uppercase">
     {{ 'WORKSPACE.SELECT_ORG' | translate }}
   </div>
   }
 </div>
-} @if (!selectedFiles().length) {
+} @if (!hasSelection()) {
 <div class="link" @openOverlay>
   <div class="link-info">
     <mat-form-field>
@@ -130,7 +145,7 @@
   </div>
   }
   <!-- Embedded-mode submit button: in dialog mode the OK button lives in the wrapper -->
-  @if (!data && !selectedFiles().length) {
+  @if (!data && !hasSelection()) {
   <div class="link-submit">
     <button mat-flat-button color="primary" [disabled]="!canSave()" (click)="setLink()">
       {{ 'WORKSPACE.ADD_LINK' | translate }}

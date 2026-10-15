@@ -126,14 +126,21 @@ mat-form-field {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    max-height: 50vh;
+    overflow-y: auto;
     background-color: var(--primaryBackground50);
     > div {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 5px 10px;
+        .icon {
+            font-size: 20px;
+            color: var(--textLight);
+        }
         .name {
             flex-grow: 1;
+            word-break: break-all;
         }
         .size {
             color: var(--textLight);

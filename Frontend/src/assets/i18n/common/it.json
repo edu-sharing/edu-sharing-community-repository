@@ -911,6 +911,7 @@
     "RENDER_NOT_FOUND": "L'elemento richiesto è cancellato o non esiste",
     "FIELD_REQUIRED": "Il campo {{ name }} è obbligatorio",
     "API_FORBIDDEN": "Nessun permesso per accedere a questo contenuto",
+    "NODE_COUNT_LIMIT_EXCEEDED": "Operazione non possibile: contiene più di {{maxNodes}} elementi.",
     "API_FORBIDDEN_LOGIN": "Effettuare il login per accedere a questa sezione",
     "NO_CONNECTION": "Connessione internet instabile, il contenuto non può essere caricato. Riprovare più tardi",
     "DOWNLOAD_STARTED": "È iniziato il download di \"{{name}}\".",

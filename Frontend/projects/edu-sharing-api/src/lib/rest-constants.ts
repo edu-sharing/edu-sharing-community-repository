@@ -27,6 +27,7 @@ export class RestConstants {
     public static PLUGIN_RENDERING_SERVICE_2 = 'rendering-service-2';
     public static METADATASET_DEFAULT_ID = 'default';
     public static SUGGESTION_DESCRIPTION_METHODOLOGY = 'METHODOLOGY';
+    public static NODE_COUNT_LIMIT_EXCEEDED_EXCEPTION = 'DAONodeCountLimitExceededException';
     public static COLLECTIONSCOPE_MY = 'MY';
     public static COLLECTIONSCOPE_ORGA = 'EDU_GROUPS';
     public static COLLECTIONSCOPE_ALL = 'EDU_ALL';

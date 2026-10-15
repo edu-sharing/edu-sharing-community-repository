@@ -137,4 +137,9 @@ public class CollectionServiceAdapter implements CollectionService {
     public CopyResult copy(org.alfresco.service.cmr.repository.NodeRef src, org.alfresco.service.cmr.repository.NodeRef dst, boolean copyRoot, boolean copyRefs, boolean copyPermissions, boolean copyChildCollections) throws Throwable {
         return null;
     }
+
+    @Override
+    public CopyResult createFromFolder(org.alfresco.service.cmr.repository.NodeRef folder, org.alfresco.service.cmr.repository.NodeRef dst, boolean convertRoot, boolean inheritPermissions, boolean copyPermissions) throws Throwable {
+        return null;
+    }
 }

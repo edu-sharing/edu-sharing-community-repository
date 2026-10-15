@@ -56,6 +56,7 @@ import { CardDialogRef } from '../../card-dialog/card-dialog-ref';
 import { CardDialogUtilsService } from '../../card-dialog/card-dialog-utils.service';
 import { DialogsService } from '../../dialogs.service';
 import { ShareDialogPublishComponent } from './publish/publish.component';
+import { getInheritedPermissions } from './inherit/inherited-permissions';
 import { ShareDialogData, ShareDialogResult } from './share-dialog-data';
 import { trigger } from '@angular/animations';
 import {
@@ -419,21 +420,10 @@ export class ShareDialogComponent implements OnInit, AfterViewInit {
             this.nodeApi.getPermissions(this._nodes[0].parent.id).subscribe(
                 (data) => {
                     if (data) {
-                        this.inherit = data.inheritedPermissions as ExtendedAce[];
-                        this.removePermissions(this.inherit, 'OWNER');
-                        this.inherit = this.inherit.filter(
-                            (p) =>
-                                p.authority.authorityName !==
-                                this.connector.getCurrentLogin()?.authorityName,
+                        this.inherit = getInheritedPermissions(
+                            data,
+                            this.connector.getCurrentLogin()?.authorityName,
                         );
-                        this.removePermissions(
-                            data.localPermissions.permissions as ExtendedAce[],
-                            'OWNER',
-                        );
-                        this.inherit = UIHelper.mergePermissions(
-                            this.inherit,
-                            data.localPermissions.permissions,
-                        ) as ExtendedAce[];
                         // dealy on tick to let sub-components (share-publish) init
                         this.initialState = this.getState();
                     }

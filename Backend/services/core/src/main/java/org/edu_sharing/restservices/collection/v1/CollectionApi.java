@@ -513,17 +513,51 @@ public class CollectionApi {
 			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
 
 			CopyResult copyResult = CollectionDao.copyCollection(repoDao, sourceCollection, targetCollection, copyRoot, copyRefs, copyPermissions, copyChildCollections);
-			Copy copy = new Copy();
-			copy.setRoot(NodeDao.getNode(repoDao,copyResult.getRoot().getId()).asNode());
-
-			for(CopyResult.Entry e : copyResult.getEntries()){
-				copy.getEntries().add(new Copy.Entry(NodeDao.getNode(repoDao,e.id()).asNode(),e.error()));
-			}
-
-			return Response.status(Response.Status.OK).entity(copy).build();
+			return Response.status(Response.Status.OK).entity(toCopy(repoDao, copyResult)).build();
 		} catch (Throwable t) {
 			return ErrorResponse.createResponse(t);
 		}
+	}
+
+	@POST
+
+	@Path("/collections/{repository}/{sourceFolder}/fromFolder")
+
+	@Operation(summary = "Create a collection structure from a folder.", description = "Creates collections analogous to the given folder structure (sub folders become child collections) and adds all contained objects as collection references. The folder itself stays untouched.")
+
+	@ApiResponses(value = {
+			@ApiResponse(responseCode="200", description=RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = Copy.class))),
+			@ApiResponse(responseCode="400", description=RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="401", description=RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="403", description=RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="404", description=RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+			@ApiResponse(responseCode="500", description=RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+
+	public Response createCollectionFromFolder(
+			@Parameter(description = "ID of repository (or \"-home-\" for home repository)", required = true, schema = @Schema(defaultValue="-home-")) @PathParam("repository") String repository,
+			@Parameter(description = "ID of the source folder", required = true) @PathParam("sourceFolder") String sourceFolder,
+			@Parameter(description = "ID of the parent collection. if not set, a new level0 collection will be created (requires convertRoot)", required = false) @QueryParam("targetCollection") String targetCollection,
+			@Parameter(description = "if true the folder itself becomes a collection, else only its children are added to targetCollection", required = false, schema = @Schema(defaultValue="true")) @DefaultValue("true") @QueryParam("convertRoot") boolean convertRoot,
+			@Parameter(description = "if true the created collections inherit the permissions of their parent collection", schema = @Schema(defaultValue="false")) @QueryParam("inheritPermissions") boolean inheritPermissions,
+			@Parameter(description = "if true the permissions of each folder will be copied to its collection", schema = @Schema(defaultValue="false")) @QueryParam("copyPermissions") boolean copyPermissions,
+			@Context HttpServletRequest req) {
+		try{
+			RepositoryDao repoDao = RepositoryDao.getRepository(repository);
+			CopyResult copyResult = CollectionDao.createCollectionFromFolder(repoDao, sourceFolder, targetCollection, convertRoot, inheritPermissions, copyPermissions);
+			return Response.status(Response.Status.OK).entity(toCopy(repoDao, copyResult)).build();
+		} catch (Throwable t) {
+			return ErrorResponse.createResponse(t);
+		}
+	}
+
+	private static Copy toCopy(RepositoryDao repoDao, CopyResult copyResult) throws DAOException {
+		Copy copy = new Copy();
+		copy.setRoot(NodeDao.getNode(repoDao,copyResult.getRoot().getId()).asNode());
+		for(CopyResult.Entry e : copyResult.getEntries()){
+			copy.getEntries().add(new Copy.Entry(NodeDao.getNode(repoDao,e.id()).asNode(),e.error()));
+		}
+		return copy;
 	}
 
 	@PUT

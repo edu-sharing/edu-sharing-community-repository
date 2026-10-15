@@ -911,6 +911,7 @@
     "RENDER_NOT_FOUND": "L'élément demandé est supprimé ou n'existe pas",
     "FIELD_REQUIRED": "Le champ {{ name }} est obligatoire",
     "API_FORBIDDEN": "Aucune autorisation pour accéder à ce contenu",
+    "NODE_COUNT_LIMIT_EXCEEDED": "Opération impossible : plus de {{maxNodes}} éléments sont contenus.",
     "API_FORBIDDEN_LOGIN": "Veuillez vous connecter pour accéder à cette section",
     "NO_CONNECTION": "Connexion internet instable, le contenu n'a pas pu être chargé. Veuillez réessayer plus tard",
     "DOWNLOAD_STARTED": "Le téléchargement de \"{{name}}\" a commencé",

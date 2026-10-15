@@ -96,6 +96,8 @@
       "CREATED": "Sammlung wurde erstellt",
       "COPIED": "Sammlung wurde kopiert",
       "COPIED_NO_PUBLISH_PERMISSION": "Sammlung kopiert ({{count}} übersprungen (fehlende Berechtigung)",
+      "CREATED_FROM_FOLDER": "Sammlung aus Ordner erstellt",
+      "CREATED_FROM_FOLDER_NO_PUBLISH_PERMISSION": "Sammlung aus Ordner erstellt ({{count}} übersprungen (fehlende Berechtigung))",
       "INVALID_NAME": "Der Name ist unzulässig. Bitte keine Sonderzeichen verwenden.",
       "SORT_SAVED_TYPE": "Die gewählte Sortierung nach \"{{type}}\" gilt zukünftig für alle Betrachter der Sammlung",
       "SORT_SAVED_CUSTOM": "Die festgelegte Reihenfolge gilt zukünftig für alle Betrachter der Sammlung"

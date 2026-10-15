@@ -27,12 +27,16 @@
     }
 }
 
-// A fullscreen editorial sidebar / es-global-progress can't cover the tabs via z-index (overlay
-// mode: outside the overlay container; inline mode: position: fixed in normal flow) — hide instead.
-body:has(es-editorial-sidebar.fullscreen) .es-edge-toggle-pane,
-body:has(es-global-progress) .es-edge-toggle-pane,
-body:has(es-editorial-sidebar.fullscreen) es-edge-toggle.inline,
-body:has(es-global-progress) es-edge-toggle.inline {
+// A fullscreen editorial sidebar / es-global-progress / the global file drop overlay can't cover the
+// tabs via z-index (overlay mode: outside the overlay container; inline mode: position: fixed in
+// normal flow) — hide instead.
+body:has(
+        es-editorial-sidebar.fullscreen,
+        es-global-progress,
+        es-create-menu .drop-zone,
+        es-main-menu-sidebar .dialog.darken
+    )
+    :is(.es-edge-toggle-pane, es-edge-toggle.inline) {
     display: none;
 }
 

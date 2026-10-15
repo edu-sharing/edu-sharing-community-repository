@@ -96,6 +96,8 @@
       "CREATED": "Collection has been created",
       "COPIED": "Collection has been copied",
       "COPIED_NO_PUBLISH_PERMISSION": "Collection copied ({{count}} skipped (missing permission)",
+      "CREATED_FROM_FOLDER": "Collection created from folder",
+      "CREATED_FROM_FOLDER_NO_PUBLISH_PERMISSION": "Collection created from folder ({{count}} skipped (missing permission))",
       "INVALID_NAME": "The given name is invalid. Please don't use special characters",
       "SORT_SAVED_TYPE": "The selected sorting by \"{{type}}\" will apply to all viewers of the collection in the future",
       "SORT_SAVED_CUSTOM": "The order established will apply to all viewers of the collection in the future"

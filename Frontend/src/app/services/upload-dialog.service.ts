@@ -2,7 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { Node, NodeService } from 'ngx-edu-sharing-api';
 import { LocalEventsService } from 'ngx-edu-sharing-ui';
 import * as rxjs from 'rxjs';
-import { ConfigurationService, RestConstants, RestNodeService } from '../core-module/core.module';
+import {
+    ConfigurationService,
+    RestConstants,
+    RestConnectorService,
+    RestHelper,
+    RestNodeService,
+} from '../core-module/core.module';
 import { Toast } from './toast';
 import { VirtualNode } from 'ngx-edu-sharing-ui';
 import {
@@ -16,6 +22,7 @@ import { firstValueFrom, merge } from 'rxjs';
 import { filter, map, toArray } from 'rxjs/operators';
 import { MdsEditorDialogResult } from '../features/dialogs/dialog-modules/mds-editor-dialog/mds-editor-dialog-data';
 import { FileUploadProgressDialogData } from '../features/dialogs/dialog-modules/file-upload-progress-dialog/file-upload-progress-dialog-data';
+import { DroppedFolder } from '../shared/directives/file-drop';
 
 /**
  * Provides high-level methods to allow uploading and saving new material.
@@ -25,6 +32,7 @@ import { FileUploadProgressDialogData } from '../features/dialogs/dialog-modules
 })
 export class UploadDialogService {
     private config = inject(ConfigurationService);
+    private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
     private localEvents = inject(LocalEventsService);
     private nodeService = inject(RestNodeService);
@@ -62,6 +70,13 @@ export class UploadDialogService {
         if (result) {
             switch (result.kind) {
                 case 'file':
+                    if (result.folders?.length) {
+                        const uploaded = await this.uploadFolderAndCreateNodes({
+                            parent: result.parent,
+                            folder: { name: '', files: result.files, folders: result.folders },
+                        });
+                        return uploaded?.topLevel ?? null;
+                    }
                     return this.uploadFilesAndCreateNodes(result);
                 case 'link':
                     return this.createLinkNode(result);
@@ -104,13 +119,13 @@ export class UploadDialogService {
     ): Promise<Node[] | null> {
         const dialogRef = await this.dialogs.openFileUploadProgressDialog(data);
         const result = await dialogRef.afterClosed().toPromise();
-        if (result.status === 'FINISHED' && result.nodes) {
+        if (result?.status === 'FINISHED' && result.nodes) {
             if (showMetadataAfterUpload) {
                 return this._onFilesUploaded(result.nodes);
             } else {
                 return result.nodes;
             }
-        } else if (result.status === 'CANCELED' && result.nodes) {
+        } else if (result?.status === 'CANCELED' && result.nodes) {
             try {
                 await Promise.all(
                     result.nodes.map((n) =>
@@ -124,6 +139,100 @@ export class UploadDialogService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Recreates a dropped folder tree as folders (`ccm:map`) below `parent`, uploads all contained
+     * files into their respective folder and then continues with the regular metadata flow for all
+     * uploaded files at once.
+     *
+     * If the user cancels, the created folders are removed again.
+     *
+     * @returns the created top-level nodes (folders and files directly inside `parent`) and all
+     * uploaded file nodes, or null if the process was cancelled
+     */
+    async uploadFolderAndCreateNodes(
+        {
+            parent,
+            folder,
+            duplicateBehaviour,
+        }: {
+            parent: Node;
+            folder: DroppedFolder;
+            duplicateBehaviour?: FileUploadProgressDialogData['duplicateBehaviour'];
+        },
+        showMetadataAfterUpload = true,
+    ): Promise<{ topLevel: Node[]; nodes: Node[] } | null> {
+        if (
+            folder.folders.length &&
+            !(await firstValueFrom(
+                this.connector.hasToolPermission(
+                    RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS,
+                ),
+            ))
+        ) {
+            this.toast.toolpermissionError(RestConstants.TOOLPERMISSION_CREATE_ELEMENTS_FOLDERS);
+            return null;
+        }
+        const files: File[] = [];
+        const parents: Node[] = [];
+        const paths: string[] = [];
+        const createdFolders: Node[] = [];
+        const createFolders = async (source: DroppedFolder, target: Node, path: string) => {
+            for (const file of source.files) {
+                files.push(file);
+                parents.push(target);
+                paths.push(path);
+            }
+            for (const child of source.folders) {
+                const node = await this._createFolder(target, child.name);
+                if (target === parent) {
+                    createdFolders.push(node);
+                }
+                // use the actual (possibly renamed) folder name
+                await createFolders(child, node, (path ? path + '/' : '') + node.name);
+            }
+        };
+        this.toast.showProgressSpinner();
+        try {
+            await createFolders(folder, parent, '');
+        } catch (e) {
+            console.warn(e);
+            this.toast.closeProgressSpinner();
+            await this._deleteNodes(createdFolders);
+            return null;
+        }
+        this.toast.closeProgressSpinner();
+        let nodes: Node[] = [];
+        if (files.length) {
+            nodes = await this.uploadFilesAndCreateNodes(
+                { parent, files, parents, paths, duplicateBehaviour },
+                showMetadataAfterUpload,
+            );
+            if (!Array.isArray(nodes)) {
+                await this._deleteNodes(createdFolders);
+                return null;
+            }
+        }
+        return {
+            topLevel: [
+                ...createdFolders,
+                ...nodes.filter((node) => node.parent?.id === parent.ref.id),
+            ],
+            nodes,
+        };
+    }
+
+    private _createFolder(parent: Node, name: string): Promise<Node> {
+        return firstValueFrom(
+            this.nodeApi.createChild({
+                repository: RestConstants.HOME_REPOSITORY,
+                node: parent.ref.id,
+                type: RestConstants.CCM_TYPE_MAP,
+                renameIfExists: true,
+                body: RestHelper.createNameProperty(name),
+            }),
+        );
     }
 
     private async _onFilesUploaded(nodes: Node[]): Promise<Node[] | null> {
@@ -213,6 +322,9 @@ export class UploadDialogService {
     }
 
     private async _deleteNodes(nodes: Node[]): Promise<void> {
+        if (!nodes.length) {
+            return;
+        }
         this.toast.showProgressSpinner();
         await rxjs
             .forkJoin(nodes.map((n) => this.nodeService.deleteNode(n.ref.id, false)))

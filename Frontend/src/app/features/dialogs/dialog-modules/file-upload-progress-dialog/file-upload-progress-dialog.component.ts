@@ -52,6 +52,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
 
     progress: {
         name: string;
+        path?: string;
         progress: UploadProgress;
         error?: { key: string; variables?: any };
     }[] = [];
@@ -59,8 +60,10 @@ export class FileUploadProgressDialogComponent implements OnInit {
     private error = false;
     /** The decision the user made for the first duplicate, applied to the whole batch. */
     private duplicateDecision: DuplicateDecision = null;
-    /** Lazily fetched children of the target folder, only required to overwrite an existing file. */
-    private childNodes: Node[] = null;
+    /**
+     * Lazily fetched children per target folder id, only required to overwrite an existing file.
+     */
+    private childNodes = new Map<string, Node[]>();
     private currentUploadSubscription: Subscription;
     processed = 0;
     /** Bound to the radio group of the "file exists" dialog: `true` = keep both files. */
@@ -73,9 +76,13 @@ export class FileUploadProgressDialogComponent implements OnInit {
                 new DialogButton('CANCEL', { color: 'standard' }, () => this._done('CANCELED')),
             ],
         });
-        for (const file of this.data.files) {
-            this.progress.push({ name: file.name, progress: { progress: 0 } });
-        }
+        this.data.files.forEach((file, i) => {
+            this.progress.push({
+                name: file.name,
+                path: this.data.paths?.[i],
+                progress: { progress: 0 },
+            });
+        });
         this._updateSubtitle();
         this._upload(0);
     }
@@ -98,8 +105,9 @@ export class FileUploadProgressDialogComponent implements OnInit {
         }
     }
 
-    private _getParent(): string {
-        return this.data.parent ? this.data.parent.ref.id : RestConstants.INBOX;
+    private _getParent(number: number): string {
+        const parent = this.data.parents?.[number] ?? this.data.parent;
+        return parent ? parent.ref.id : RestConstants.INBOX;
     }
 
     private _upload(number: number) {
@@ -134,7 +142,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
         try {
             // in 'unique' mode duplicates are renamed by the backend, in any other mode we let the
             // backend tell us about an existing file via a 409 response
-            node = await this._createChild(file, this.data.duplicateBehaviour === 'unique');
+            node = await this._createChild(number, file, this.data.duplicateBehaviour === 'unique');
         } catch (error) {
             if (!isDuplicateNodeNameError(error)) {
                 this._failed(number, error, null);
@@ -149,7 +157,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
                 return;
             }
             if (decision === 'overwrite') {
-                const existingNode = await this._findExistingNode(file.name);
+                const existingNode = await this._findExistingNode(number, file.name);
                 if (existingNode) {
                     try {
                         await this._changeContent(
@@ -169,7 +177,7 @@ export class FileUploadProgressDialogComponent implements OnInit {
                 // the existing node could not be resolved -> fall back to keeping both files
             }
             try {
-                node = await this._createChild(file, true);
+                node = await this._createChild(number, file, true);
             } catch (error) {
                 this._failed(number, error, null);
                 return;
@@ -184,11 +192,11 @@ export class FileUploadProgressDialogComponent implements OnInit {
         this._succeeded(number, node);
     }
 
-    private _createChild(file: File, renameIfExists: boolean): Promise<Node> {
+    private _createChild(number: number, file: File, renameIfExists: boolean): Promise<Node> {
         return firstValueFrom(
             this.nodeApi.createChild({
                 repository: RestConstants.HOME_REPOSITORY,
-                node: this._getParent(),
+                node: this._getParent(number),
                 type: RestConstants.CCM_TYPE_IO,
                 renameIfExists,
                 body: RestHelper.createNameProperty(file.name),
@@ -311,22 +319,23 @@ export class FileUploadProgressDialogComponent implements OnInit {
      * Resolves the already existing node with the given file name inside the target folder. The
      * children are only fetched when an existing file actually needs to be overwritten.
      */
-    private async _findExistingNode(fileName: string): Promise<Node | null> {
-        if (!this.childNodes) {
+    private async _findExistingNode(number: number, fileName: string): Promise<Node | null> {
+        const parent = this._getParent(number);
+        if (!this.childNodes.has(parent)) {
             try {
                 const children = await this.nodeApi
-                    .getChildren(this._getParent(), {
+                    .getChildren(parent, {
                         filter: [RestConstants.FILTER_FILES],
                         maxItems: RestConstants.COUNT_UNLIMITED,
                     })
                     .toPromise();
-                this.childNodes = children.nodes;
+                this.childNodes.set(parent, children.nodes);
             } catch (error) {
                 console.warn(error);
                 return null;
             }
         }
-        return this.childNodes.find((node) => node.name === fileName) ?? null;
+        return this.childNodes.get(parent).find((node) => node.name === fileName) ?? null;
     }
 
     private _updateSubtitle(): void {

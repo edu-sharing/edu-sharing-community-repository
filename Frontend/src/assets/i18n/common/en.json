@@ -1020,6 +1020,7 @@
     "RENDER_NOT_FOUND": "The requested element is deleted or does not exist",
     "FIELD_REQUIRED": "The field {{ name }} is required",
     "API_FORBIDDEN": "No permissions to access this content",
+    "NODE_COUNT_LIMIT_EXCEEDED": "Operation not possible: it contains more than {{maxNodes}} elements.",
     "API_FORBIDDEN_LOGIN": "Please login to access this section",
     "NO_CONNECTION": "Unstable internet connection, content could not be loaded. Please try again later",
     "DOWNLOAD_STARTED": "Download of \"{{name}}\" has started",

@@ -21432,6 +21432,134 @@
         ]
       }
     },
+    "/collection/v1/collections/{repository}/{sourceFolder}/fromFolder": {
+      "post": {
+        "description": "Creates collections analogous to the given folder structure (sub folders become child collections) and adds all contained objects as collection references. The folder itself stays untouched.",
+        "operationId": "createCollectionFromFolder",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the source folder",
+            "in": "path",
+            "name": "sourceFolder",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the parent collection. if not set, a new level0 collection will be created (requires convertRoot)",
+            "in": "query",
+            "name": "targetCollection",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "if true the folder itself becomes a collection, else only its children are added to targetCollection",
+            "in": "query",
+            "name": "convertRoot",
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "if true the created collections inherit the permissions of their parent collection",
+            "in": "query",
+            "name": "inheritPermissions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "if true the permissions of each folder will be copied to its collection",
+            "in": "query",
+            "name": "copyPermissions",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Copy"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Create a collection structure from a folder.",
+        "tags": [
+          "COLLECTION v1"
+        ]
+      }
+    },
     "/comment/v1/comments/{repository}/{comment}": {
       "delete": {
         "description": "Delete the comment with the given id",

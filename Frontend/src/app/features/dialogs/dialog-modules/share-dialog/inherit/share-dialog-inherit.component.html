@@ -1,0 +1,45 @@
+<div class="groupHeading">
+  <div class="inheritCheck">
+    <mat-checkbox
+      #inheritRef
+      (click)="checkboxClick.emit(inheritRef)"
+      [ngModel]="inherited"
+      (ngModelChange)="onInheritedChange($event)"
+      id="inherit"
+    >
+      <strong>
+        {{ 'WORKSPACE.SHARE.INHERIT' + (isCollection ? '_COLLECTION' : '') | translate }}
+        {{ permissions?.length > 0 ? '(' + permissions.length + ')' : '' }}
+      </strong>
+      <div class="inherit-info">
+        {{ 'WORKSPACE.SHARE.INHERIT' + (isCollection ? '_COLLECTION' : '') + '_INFO' | translate }}
+      </div>
+    </mat-checkbox>
+  </div>
+</div>
+@if (inherited && permissions?.length) {
+<div class="inherit">
+  @for (permission of permissions; track permission) {
+  <div class="groupEntry">
+    <es-share-dialog-permission
+      [permission]="permission"
+      [isDirectory]="isDirectory"
+      [inherit]="true"
+      [isEditable]="false"
+    ></es-share-dialog-permission>
+  </div>
+  }
+</div>
+} @if (!inherited) {
+<div class="inheritDisabled">
+  {{ 'WORKSPACE.INHERIT_DISABLED' | translate }}
+</div>
+} @if (inherited && accessDenied) {
+<div class="inheritDisabled">
+  {{ 'WORKSPACE.INHERIT_ACCESS_DENIED' | translate }}
+</div>
+} @if (inherited && !permissions?.length && !accessDenied) {
+<div class="inheritEmpty">
+  {{ 'WORKSPACE.INHERIT_EMPTY' | translate }}
+</div>
+}

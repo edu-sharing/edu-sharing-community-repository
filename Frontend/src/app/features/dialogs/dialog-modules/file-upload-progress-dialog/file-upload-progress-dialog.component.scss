@@ -24,6 +24,14 @@
             height: 1.5em;
             overflow: hidden;
         }
+        .path {
+            font-size: 8pt;
+            color: $textLight;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .path,
         .fileName,
         .info {
             padding-left: 10px;

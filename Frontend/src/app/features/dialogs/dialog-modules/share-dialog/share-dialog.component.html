@@ -199,57 +199,14 @@
         -->
         <!-- inheritance settings -->
         @if (inheritAllowed) {
-        <div>
-          <div class="groupHeading">
-            <div class="inheritCheck">
-              <mat-checkbox
-                #inheritRef
-                (click)="onCheckInherit(inheritRef)"
-                [(ngModel)]="inherited"
-                id="inherit"
-              >
-                <strong>
-                  {{
-                    'WORKSPACE.SHARE.INHERIT' + (isCollection() ? '_COLLECTION' : '') | translate
-                  }}
-                  {{ inherit.length > 0 ? '(' + inherit.length + ')' : '' }}
-                </strong>
-                <div class="inherit-info">
-                  {{
-                    'WORKSPACE.SHARE.INHERIT' + (isCollection() ? '_COLLECTION' : '') + '_INFO'
-                      | translate
-                  }}
-                </div>
-              </mat-checkbox>
-            </div>
-          </div>
-          @if (inherited && inherit && inherit.length) {
-          <div class="inherit" [class.crossed]="!inherited">
-            @for (permission of inherit; track permission) {
-            <div class="groupEntry">
-              <es-share-dialog-permission
-                [permission]="permission"
-                [isDirectory]="_nodes[0].isDirectory"
-                [inherit]="true"
-                [isEditable]="false"
-              ></es-share-dialog-permission>
-            </div>
-            }
-          </div>
-          } @if (!inherited) {
-          <div class="inheritDisabled">
-            {{ 'WORKSPACE.INHERIT_DISABLED' | translate }}
-          </div>
-          } @if (inherited && inheritAccessDenied) {
-          <div class="inheritDisabled">
-            {{ 'WORKSPACE.INHERIT_ACCESS_DENIED' | translate }}
-          </div>
-          } @if (inherited && !inherit.length && !inheritAccessDenied) {
-          <div class="inheritEmpty">
-            {{ 'WORKSPACE.INHERIT_EMPTY' | translate }}
-          </div>
-          }
-        </div>
+        <es-share-dialog-inherit
+          [permissions]="inherit"
+          [accessDenied]="inheritAccessDenied"
+          [isCollection]="isCollection()"
+          [isDirectory]="_nodes[0].isDirectory"
+          [(inherited)]="inherited"
+          (checkboxClick)="onCheckInherit($event)"
+        ></es-share-dialog-inherit>
         }
       </div>
       }
