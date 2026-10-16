@@ -47,9 +47,7 @@ import {
     Constrain,
     CustomOptions,
     DefaultGroups,
-    ElementType,
     Helper,
-    OptionItem,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -108,6 +106,7 @@ import {
     CustomSideMenuItem,
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
+import { TopicPageCreateOptionsService } from '../shared/services/topic-page-create-options.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import { TopicPageShareService } from '../shared/services/topic-page-share.service';
 import {
@@ -251,6 +250,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         OptionsHelperDataService,
         TopicPageHelperService,
         TopicPageEventsService,
+        TopicPageCreateOptionsService,
         TopicPageShareService,
         TopicPageVariantPreviewService,
     ],
@@ -280,6 +280,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private searchFieldService = inject(SearchFieldService);
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageCreateOptionsService = inject(TopicPageCreateOptionsService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private topicPageShareService = inject(TopicPageShareService);
     private variantPreviewService = inject(TopicPageVariantPreviewService);
@@ -1172,35 +1173,20 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
             // a collection holds at most one page template, so drop a create option that was added
             // while none existed yet (e.g. the template was just created in this session)
-            await this.removeCustomMainNavOptions(this.createPageTemplateTitle);
+            await this.topicPageCreateOptionsService.remove(this.createPageTemplateTitle);
         }
         // no (loadable) page template exists, so creating one starts a new propagate config
         else {
             this.collectionNodePagePropagateConfigRef = null;
-            // add a create page template option to the "new" button
-            const createPageTemplate = new OptionItem(
+            await this.topicPageCreateOptionsService.add(
                 this.createPageTemplateTitle,
                 'edu-add_page_template',
                 () => {
                     void this.createPageTemplate();
                 },
+                11,
+                Constrain.Admin,
             );
-            createPageTemplate.elementType = [ElementType.NoneOrUnknown];
-            createPageTemplate.group = DefaultGroups.Toggles;
-            createPageTemplate.priority = 11;
-            createPageTemplate.constrains = [Constrain.Admin];
-            // retrieve existing options from main nav config to extend them
-            const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-                .customCreateOptions;
-            const existingCreateOptions = currentConfig?.addOptions || [];
-            if (!existingCreateOptions.find((o) => o.name === this.createPageTemplateTitle)) {
-                this.mainNavService.patchMainNavConfig({
-                    customCreateOptions: {
-                        ...currentConfig,
-                        addOptions: existingCreateOptions.concat([createPageTemplate]),
-                    },
-                });
-            }
         }
         // idea: if "collectionNode" already has a page config, there is no need to search further
         if (this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP] && !this.templateMode()) {
@@ -2422,7 +2408,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.closeSideMenus();
         // remove the create buttons for a new page variant and a new page template: neither can be
         // created while the template itself is being edited
-        await this.removeCustomMainNavOptions(
+        await this.topicPageCreateOptionsService.remove(
             this.createPageVariantTitle,
             this.createPageTemplateTitle,
         );
@@ -2454,7 +2440,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.pageConfigNode = null;
             this.closeSideMenus();
             // neither a page variant nor a page template can be created from within the template
-            await this.removeCustomMainNavOptions(
+            await this.topicPageCreateOptionsService.remove(
                 this.createPageVariantTitle,
                 this.createPageTemplateTitle,
             );
@@ -2626,57 +2612,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     // HELPER FUNCTIONS
     /**
-     * Removes custom create options from the main nav config by their (i18n) name.
-     *
-     * @param names
+     * Adds the topic page's own options to the main nav.
      */
-    private async removeCustomMainNavOptions(...names: string[]): Promise<void> {
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        if (!existingCreateOptions.some((o) => names.includes(o.name))) {
-            return;
-        }
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.filter((o) => !names.includes(o.name)),
-            },
-        });
-    }
-
-    /**
-     * Helper function to add custom options to the main nav config.
-     */
-    private async addCustomMainNavOptions() {
+    private async addCustomMainNavOptions(): Promise<void> {
         // @TODO: setting scope does not work yet
         this.optionsHelperService.setData({
             scope: Scope.TopicPage,
         });
-
-        // add a create page variant option to the "new" button
-        const createPageVariant = new OptionItem(
+        await this.topicPageCreateOptionsService.add(
             this.createPageVariantTitle,
             'edu-page_variant',
             () => {
                 void this.createPageVariant();
             },
+            10,
+            Constrain.User,
         );
-        createPageVariant.elementType = [ElementType.NoneOrUnknown];
-        createPageVariant.group = DefaultGroups.Toggles;
-        createPageVariant.priority = 10;
-        createPageVariant.constrains = [Constrain.User];
-
-        // retrieve existing options from main nav config to extend them
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.concat([createPageVariant]),
-            },
-        });
     }
 
     /**
