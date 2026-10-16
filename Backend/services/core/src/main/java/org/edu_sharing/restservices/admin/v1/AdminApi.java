@@ -49,6 +49,7 @@ import org.edu_sharing.repository.server.tools.PropertiesHelper;
 import org.edu_sharing.repository.server.tools.cache.PreviewCache;
 import org.edu_sharing.restservices.*;
 import org.edu_sharing.restservices.admin.v1.model.*;
+import org.edu_sharing.restservices.search.v1.SearchApi;
 import org.edu_sharing.restservices.shared.*;
 import org.edu_sharing.service.NotAnAdminException;
 import org.edu_sharing.service.admin.AdminService;
@@ -1164,31 +1165,74 @@ public class AdminApi {
 
             //check that there is an admin
             AdminServiceFactory.getInstance();
-            SearchServiceElastic elastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
-            SearchResultNodeRefElastic search = elastic.searchDSL(dsl, index);
-            RepositoryDao repoDao = RepositoryDao.getHomeRepository();
-            List<Node> data = new ArrayList<>();
-            for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
-                try {
-                    data.add(NodeDao.getNode(repoDao, ref).asNode());
-                } catch (Throwable t) {
-                    logger.warn("Error mapping elastic node " + ref.getNodeId(), t);
-                }
+            return Response.status(Response.Status.OK).entity(searchElasticDSL(dsl, index)).build();
+
+        } catch (Throwable t) {
+            return ErrorResponse.createResponse(t);
+        }
+    }
+
+    private SearchResultElastic<Node> searchElasticDSL(String dsl, String index) throws Throwable {
+        SearchServiceElastic elastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
+        SearchResultNodeRefElastic search = elastic.searchDSL(dsl, index);
+        RepositoryDao repoDao = RepositoryDao.getHomeRepository();
+        List<Node> data = new ArrayList<>();
+        for (org.edu_sharing.service.model.NodeRef ref : search.getData()) {
+            try {
+                data.add(NodeDao.getNode(repoDao, ref).asNode());
+            } catch (Throwable t) {
+                logger.warn("Error mapping elastic node " + ref.getNodeId(), t);
             }
+        }
 
-            Pagination pagination = new Pagination();
-            pagination.setFrom(search.getStartIDX());
-            pagination.setCount(data.size());
-            pagination.setTotal(search.getNodeCount());
+        Pagination pagination = new Pagination();
+        pagination.setFrom(search.getStartIDX());
+        pagination.setCount(data.size());
+        pagination.setTotal(search.getNodeCount());
 
-            SearchResultElastic<Node> response = new SearchResultElastic<>();
+        SearchResultElastic<Node> response = new SearchResultElastic<>();
 
-            response.setNodes(data);
-            response.setPagination(pagination);
+        response.setNodes(data);
+        response.setPagination(pagination);
 
-            response.setElasticResponse(search.getElasticResponse().toString(2));
-            return Response.status(Response.Status.OK).entity(response).build();
+        response.setElasticResponse(search.getElasticResponse().toString(2));
+        return response;
+    }
 
+    @POST
+    @Path("/elastic/mds/{metadataset}/{query}")
+    @Consumes({"application/json"})
+
+    @Operation(summary = "Build the elastic DSL for a mds query", description = "Maps the given criteria to the statements of the mds query and returns the generated (readable and executable) elastic DSL. Optionally executes it.")
+
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = MdsQueryDebugResult.class))),
+            @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = RestConstants.HTTP_401, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = RestConstants.HTTP_500, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))})
+
+    public Response debugMdsQuery(
+            @Parameter(description = "ID of metadataset (or \"-default-\" for default metadata set)", required = true, schema = @Schema(defaultValue = "-default-")) @PathParam("metadataset") String mdsId,
+            @Parameter(description = "ID of query", required = true) @PathParam("query") String query,
+            @Parameter(description = "Type of element") @QueryParam("contentType") ContentType contentType,
+            @Parameter(description = "maximum items per page", schema = @Schema(defaultValue = "10")) @QueryParam("maxItems") Integer maxItems,
+            @Parameter(description = "skip a number of items", schema = @Schema(defaultValue = "0")) @QueryParam("skipCount") Integer skipCount,
+            @Parameter(description = RestConstants.MESSAGE_SORT_PROPERTIES) @QueryParam("sortProperties") List<String> sortProperties,
+            @Parameter(description = RestConstants.MESSAGE_SORT_ASCENDING) @QueryParam("sortAscending") List<Boolean> sortAscending,
+            @Parameter(description = "search parameters", required = true) MdsQueryDebugParameters parameters,
+            @Context HttpServletRequest req) {
+        try {
+            //check that there is an admin
+            AdminServiceFactory.getInstance();
+            MdsDao mdsDao = MdsDao.getMds(RepositoryDao.getHomeRepository(), mdsId);
+            SearchToken token = SearchApi.getSearchToken(contentType, maxItems, skipCount, sortProperties, sortAscending, parameters);
+            SearchServiceElastic elastic = ApplicationContextFactory.getApplicationContext().getBean(SearchServiceElastic.class);
+            MdsQueryDebugResult result = MdsQueryDebugger.debug(elastic, mdsDao.getMds(), query, parameters, token);
+            if (parameters.isExecute()) {
+                result.setResult(searchElasticDSL(result.getDsl(), result.getIndex()));
+            }
+            return Response.status(Response.Status.OK).entity(result).build();
         } catch (Throwable t) {
             return ErrorResponse.createResponse(t);
         }

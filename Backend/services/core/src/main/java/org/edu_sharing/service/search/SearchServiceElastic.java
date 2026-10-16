@@ -19,6 +19,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.cardme.engine.VCardEngine;
@@ -784,6 +785,149 @@ public class SearchServiceElastic implements SearchService {
         return excludes;
     }
 
+    /**
+     * The elastic requests which are required to run a search for a mds query
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class ElasticSearchRequests {
+        /**
+         * the main search request (query, sorting, paging and the aggregations which do not exclude their own facet)
+         */
+        private final SearchRequest searchRequest;
+        /**
+         * separate request for the facets which exclude their own values (null if not required)
+         */
+        private final SearchRequest aggregationsRequest;
+        /**
+         * aggregations which are part of the main search request (null if facets are handled via the aggregationsRequest)
+         */
+        private final Map<String, Aggregation> aggregations;
+        /**
+         * aggregations of the aggregationsRequest (null if not required)
+         */
+        private final Map<String, Aggregation> excludedOwnAggregations;
+    }
+
+    /**
+     * Builds (but does not execute) the elastic requests for the given mds query and criteria
+     *
+     * @param includeGlobalConditions include the global conditions (permissions, store, scope and special filters of the query).
+     *                                Should only be disabled for debugging purposes
+     */
+    public ElasticSearchRequests buildSearchRequests(MetadataSet mds, MetadataQuery queryData, Map<String, String[]> criteria, SearchToken searchToken, boolean includeGlobalConditions) {
+        BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
+        BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
+        StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
+        BoolQuery queryBuilderGlobalConditions = includeGlobalConditions
+                ? getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true).build()
+                : null;
+
+        // add collapse builder
+        // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
+        // searchSourceBuilder.collapse(collapseBuilder);
+        // cardinality aggregation to get correct total count
+        // https://github.com/elastic/elasticsearch/issues/24130
+        // CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
+        // searchSourceBuilder.aggregation(original_count);
+
+
+        SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
+                .index(WORKSPACE_INDEX)
+                .source(src -> src.filter(filter -> filter.excludes(appendDefaultExcludes(searchToken.getExcludes()))));
+
+        SearchRequest aggregationsRequest = null;
+        Map<String, Aggregation> excludedOwnAggregations = null;
+        Map<String, Aggregation> aggregations = null;
+        if (searchToken.getFacets() != null) {
+            Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criteria, searchToken.getFacets());
+            if (!excludeOwnFacets.isEmpty()) {
+
+                SearchRequest.Builder searchSourceAggsBuilder = new SearchRequest.Builder()
+                        .index(WORKSPACE_INDEX)
+                        .from(0)
+                        .size(0);
+                excludedOwnAggregations = MetadataElasticSearchHelper.applyAggregations(
+                        searchSourceAggsBuilder,
+                        mds,
+                        queryData,
+                        criteria,
+                        searchToken.getFacets(),
+                        excludeOwnFacets,
+                        queryBuilderGlobalConditions == null ? null : queryBuilderGlobalConditions._toQuery(),
+                        searchToken);
+
+                // remove duplicate facet entries
+                excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
+                searchSourceAggsBuilder.aggregations(excludedOwnAggregations);
+                aggregationsRequest = searchSourceAggsBuilder.build();
+            } else {
+                // globalConditions are passed as null: this request already carries queryBuilderGlobalConditions
+                // in its own top level query (see below), so the facet filters must not repeat them
+                aggregations = MetadataElasticSearchHelper.applyAggregations(searchRequestBuilder, mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), null, searchToken);
+                for (Map.Entry<String, Aggregation> agg : aggregations.entrySet()) {
+                    // we use a higher facet limit since the facets will be filtered for the containing string!
+                    searchRequestBuilder.aggregations(agg.getKey(), agg.getValue());
+                }
+            }
+        }
+
+        if (searchToken.isReturnSuggestion()) {
+            String[] ngsearches = criteria.get("ngsearchword");
+            if (ngsearches != null) {
+                searchRequestBuilder.suggest(suggest -> suggest
+                        .text(ngsearches[0])
+                        .suggesters("ngsearchword", s -> s
+                                .phrase(p -> p
+                                        .field("properties.cclom:title.trigram")
+                                        .gramSize(3)
+                                        .confidence(0.9)
+                                        .highlight(high -> high.preTag("<em>").postTag("</em>"))
+                                        .directGenerator(x -> x
+                                                .field("properties.cclom:title.trigram")
+                                                .suggestMode(SuggestMode.Popular))
+                                        .smoothing(smooth -> smooth.laplace(l -> l.alpha(0.5))))));
+            }
+        }
+
+
+        searchRequestBuilder.query(q -> {
+            BoolQuery boolQuery = BoolQuery.of(b -> b
+                    .filter(filter -> filter
+                            .bool(bool -> {
+                                bool.must(must -> must.bool(metadataQueryBuilderFilter));
+                                if (queryBuilderGlobalConditions != null) {
+                                    bool.must(must -> must.bool(queryBuilderGlobalConditions));
+                                }
+                                return bool;
+                            }))
+                    .must(must -> must.bool(metadataQueryBuilderAsQuery)));
+            if (!queryData.getFunctions().isEmpty()) {
+                return q.functionScore(f ->
+                        f.query(q2 -> q2.bool(boolQuery)).
+                                functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
+                                        f3 -> f3
+                                                .filter(f4 -> f4.wrapper(new ReadableWrapperQueryBuilder(
+                                                                QueryUtils.replaceCommonQueryParams(f2.getFilter(), QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL, true))
+                                                        ).build()
+                                                ))
+                                                .weight(f2.getWeight()))
+                                ).collect(Collectors.toList()))
+                );
+            } else {
+                return q
+                        .bool(boolQuery);
+            }
+        });
+        searchRequestBuilder.from(searchToken.getFrom());
+        searchRequestBuilder.size(searchToken.getMaxResult());
+        searchRequestBuilder.trackTotalHits(new TrackHits.Builder().enabled(true).build());
+        if (searchToken.getSortDefinition() != null) {
+            searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequestBuilder);
+        }
+        return new ElasticSearchRequests(searchRequestBuilder.build(), aggregationsRequest, aggregations, excludedOwnAggregations);
+    }
+
     @Override
     public SearchResultNodeRef search(MetadataSet mds, String query, Map<String, String[]> criteria,
                                       SearchToken searchToken) throws Throwable {
@@ -806,118 +950,17 @@ public class SearchServiceElastic implements SearchService {
         sr.setData(data);
         try {
 
-            BoolQuery metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
-            BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
-            StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
-            BoolQuery queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true).build();
-
-            // add collapse builder
-            // CollapseBuilder collapseBuilder = new CollapseBuilder("properties.ccm:original");
-            // searchSourceBuilder.collapse(collapseBuilder);
-            // cardinality aggregation to get correct total count
-            // https://github.com/elastic/elasticsearch/issues/24130
-            // CardinalityAggregationBuilder original_count = AggregationBuilders.cardinality("original_count").field("properties.ccm:original");
-            // searchSourceBuilder.aggregation(original_count);
-
-
-            SearchRequest.Builder searchRequestBuilder = new SearchRequest.Builder()
-                    .index(WORKSPACE_INDEX)
-                    .source(src -> src.filter(filter -> filter.excludes(appendDefaultExcludes(searchToken.getExcludes()))));
-
+            ElasticSearchRequests requests = buildSearchRequests(mds, queryData, criteria, searchToken, true);
             List<NodeSearch.Facet> facetsResult = null;
-            SearchResponse<Map> searchResponseAggregations = null;
-            Map<String, Aggregation> aggregations;
-            if (searchToken.getFacets() != null) {
-                Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, criteria, searchToken.getFacets());
-                if (!excludeOwnFacets.isEmpty()) {
-
-                    SearchRequest.Builder searchSourceAggsBuilder = new SearchRequest.Builder()
-                            .index(WORKSPACE_INDEX)
-                            .from(0)
-                            .size(0);
-                    Map<String, Aggregation> excludedOwnAggregations = MetadataElasticSearchHelper.applyAggregations(
-                            searchSourceAggsBuilder,
-                            mds,
-                            queryData,
-                            criteria,
-                            searchToken.getFacets(),
-                            excludeOwnFacets,
-                            queryBuilderGlobalConditions._toQuery(),
-                            searchToken);
-
-                    // remove duplicate facet entries
-                    excludedOwnAggregations.entrySet().removeIf(e -> e.getKey().endsWith(MetadataElasticSearchHelper.FACET_SELECTED_POSTFIX));
-                    searchSourceAggsBuilder.aggregations(excludedOwnAggregations);
-                    SearchRequest searchSourceAggs = searchSourceAggsBuilder.build();
-                    log.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
-                    searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
-                    facetsResult = getFacets(mds, queryData, excludedOwnAggregations, searchResponseAggregations);
-                    aggregations = null;
-                } else {
-                    // globalConditions are passed as null: this request already carries queryBuilderGlobalConditions
-                    // in its own top level query (see below), so the facet filters must not repeat them
-                    aggregations = MetadataElasticSearchHelper.applyAggregations(searchRequestBuilder, mds, queryData, searchToken.getParameters(), searchToken.getFacets(), Collections.emptySet(), null, searchToken);
-                    for (Map.Entry<String, Aggregation> agg : aggregations.entrySet()) {
-                        // we use a higher facet limit since the facets will be filtered for the containing string!
-                        searchRequestBuilder.aggregations(agg.getKey(), agg.getValue());
-                    }
-                }
-            } else {
-                aggregations = null;
+            Map<String, Aggregation> aggregations = requests.getAggregations();
+            if (requests.getAggregationsRequest() != null) {
+                SearchRequest searchSourceAggs = requests.getAggregationsRequest();
+                log.info("query aggs: " + JsonpUtils.toJsonString(searchSourceAggs, new JacksonJsonpMapper()));
+                SearchResponse<Map> searchResponseAggregations = LogTime.log("Searching elastic for facets", () -> client.search(searchSourceAggs, Map.class));
+                facetsResult = getFacets(mds, queryData, requests.getExcludedOwnAggregations(), searchResponseAggregations);
             }
 
-            if (searchToken.isReturnSuggestion()) {
-                String[] ngsearches = criteria.get("ngsearchword");
-                if (ngsearches != null) {
-                    searchRequestBuilder.suggest(suggest -> suggest
-                            .text(ngsearches[0])
-                            .suggesters("ngsearchword", s -> s
-                                    .phrase(p -> p
-                                            .field("properties.cclom:title.trigram")
-                                            .gramSize(3)
-                                            .confidence(0.9)
-                                            .highlight(high -> high.preTag("<em>").postTag("</em>"))
-                                            .directGenerator(x -> x
-                                                    .field("properties.cclom:title.trigram")
-                                                    .suggestMode(SuggestMode.Popular))
-                                            .smoothing(smooth -> smooth.laplace(l -> l.alpha(0.5))))));
-                }
-            }
-
-
-            searchRequestBuilder.query(q -> {
-                BoolQuery boolQuery = BoolQuery.of(b -> b
-                        .filter(filter -> filter
-                                .bool(bool -> bool
-                                        .must(must -> must.bool(metadataQueryBuilderFilter))
-                                        .must(must -> must.bool(queryBuilderGlobalConditions))))
-                        .must(must -> must.bool(metadataQueryBuilderAsQuery)));
-                if (!queryData.getFunctions().isEmpty()) {
-                    return q.functionScore(f ->
-                            f.query(q2 -> q2.bool(boolQuery)).
-                                    functions(queryData.getFunctions().stream().map(f2 -> FunctionScore.of(
-                                            f3 -> f3
-                                                    .filter(f4 -> f4.wrapper(new ReadableWrapperQueryBuilder(
-                                                                    QueryUtils.replaceCommonQueryParams(f2.getFilter(), QueryUtils.replacerFromSyntax(MetadataReader.QUERY_SYNTAX_DSL, true))
-                                                            ).build()
-                                                    ))
-                                                    .weight(f2.getWeight()))
-                                    ).collect(Collectors.toList()))
-                    );
-                } else {
-                    return q
-                            .bool(boolQuery);
-                }
-            });
-            searchRequestBuilder.from(searchToken.getFrom());
-            searchRequestBuilder.size(searchToken.getMaxResult());
-            searchRequestBuilder.trackTotalHits(new TrackHits.Builder().enabled(true).build());
-            if (searchToken.getSortDefinition() != null) {
-                searchToken.getSortDefinition().applyToSearchSourceBuilder(searchRequestBuilder);
-            }
-
-            // logger.info("query: "+searchSourceBuilder.toString());
-            SearchRequest searchRequest = searchRequestBuilder.build();
+            SearchRequest searchRequest = requests.getSearchRequest();
             try {
                 log.info("query: {}", JsonpUtils.toJsonString(searchRequest, new JacksonJsonpMapper()));
                 SearchResponse<Map> searchResponse = LogTime.log("Searching elastic", () -> client.search(searchRequest, Map.class));

@@ -2,6 +2,15 @@
 $sidenavWidth: 250px;
 $sidenavWidthMobile: 66px;
 
+// ngx-monaco-editor is vertically resizable (see es-code-editor). The initial height must therefore be set
+// on the editor itself and es-code-editor must grow with it, otherwise a resized editor overlaps the
+// following content
+@mixin resizableCodeEditor($height) {
+    height: auto;
+    ::ng-deep ngx-monaco-editor {
+        height: $height;
+    }
+}
 // shared layout of the admin forms (used by the admin page and its sub components)
 @mixin inputGroupGrow() {
     display: flex;

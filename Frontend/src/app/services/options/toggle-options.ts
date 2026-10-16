@@ -56,7 +56,13 @@ export function createToggleOptions({
             }
         },
     );
-    toggleViewType.scopes = [Scope.WorkspaceList, Scope.Search, Scope.CollectionsReferences];
+    toggleViewType.scopes = [
+        Scope.WorkspaceList,
+        Scope.Search,
+        Scope.CollectionsReferences,
+        // node browser
+        Scope.Admin,
+    ];
     toggleViewType.constrains = [];
     toggleViewType.group = DefaultGroups.Toggles;
     toggleViewType.elementType = [];

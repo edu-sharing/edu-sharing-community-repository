@@ -4166,6 +4166,223 @@
         ],
         "type": "object"
       },
+      "MdsQueryDebugCriterion": {
+        "properties": {
+          "applied": {
+            "description": "true if the criterion is part of the generated dsl",
+            "type": "boolean"
+          },
+          "asFilter": {
+            "description": "parameter is applied as filter (true) or as scoring query (false)",
+            "type": "boolean"
+          },
+          "elasticQuery": {
+            "description": "resulting elastic query fragment for all values of this criterion",
+            "type": "string"
+          },
+          "exactMatching": {
+            "type": "boolean"
+          },
+          "ignorable": {
+            "description": "> 0 if this criterion is removed when the search has no results",
+            "format": "int32",
+            "type": "integer"
+          },
+          "known": {
+            "description": "true if the parameter is defined in the mds query",
+            "type": "boolean"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "multiple": {
+            "type": "boolean"
+          },
+          "multipleJoin": {
+            "type": "string"
+          },
+          "preprocessor": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "statements": {
+            "additionalProperties": {
+              "description": "all statements of the parameter as defined in the mds (key \"default\" for the statement without value attribute)",
+              "type": "string"
+            },
+            "description": "all statements of the parameter as defined in the mds (key \"default\" for the statement without value attribute)",
+            "type": "object"
+          },
+          "valueMappings": {
+            "items": {
+              "$ref": "#/components/schemas/MdsQueryDebugValueMapping"
+            },
+            "type": "array"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MdsQueryDebugParameters": {
+        "properties": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/MdsQueryCriteria"
+            },
+            "type": "array"
+          },
+          "excludes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "execute": {
+            "default": false,
+            "description": "also execute the generated dsl and return the result",
+            "type": "boolean"
+          },
+          "facetLimit": {
+            "default": 10,
+            "format": "int32",
+            "type": "integer"
+          },
+          "facetMinCount": {
+            "default": 5,
+            "format": "int32",
+            "type": "integer"
+          },
+          "facetSuggest": {
+            "type": "string"
+          },
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/SearchFacet"
+            },
+            "type": "array"
+          },
+          "includeGlobalConditions": {
+            "default": true,
+            "description": "include the global conditions (read permissions of the current user, store, scope and special filters of the query)",
+            "type": "boolean"
+          },
+          "includeQueryBasequery": {
+            "default": true,
+            "description": "include the basequery and the conditions of the query itself",
+            "type": "boolean"
+          },
+          "includeSharedBasequery": {
+            "default": true,
+            "description": "include the basequery and the conditions of the <queries> element which are shared by all queries",
+            "type": "boolean"
+          },
+          "permissions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolveCollections": {
+            "type": "boolean"
+          },
+          "resolveUsernames": {
+            "type": "boolean"
+          },
+          "returnSuggestions": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "criteria"
+        ],
+        "type": "object"
+      },
+      "MdsQueryDebugResult": {
+        "properties": {
+          "aggregationsDsl": {
+            "description": "separate aggregations request for facets which exclude their own values (if required)",
+            "type": "string"
+          },
+          "availableParameters": {
+            "description": "all parameters which are defined in the mds query",
+            "items": {
+              "description": "all parameters which are defined in the mds query",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/MdsQueryDebugCriterion"
+            },
+            "type": "array"
+          },
+          "dsl": {
+            "description": "the generated elastic search body (wrapper queries are decoded, can be used directly in the elastic dsl debugger)",
+            "type": "string"
+          },
+          "globalConditionsIncluded": {
+            "type": "boolean"
+          },
+          "index": {
+            "description": "elastic index the dsl is meant for",
+            "type": "string"
+          },
+          "join": {
+            "description": "join of the parameters of the query (AND / OR)",
+            "type": "string"
+          },
+          "metadataset": {
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/SearchResultElasticNode"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MdsQueryDebugValueMapping": {
+        "properties": {
+          "elasticQuery": {
+            "description": "resulting elastic query fragment for this single value",
+            "type": "string"
+          },
+          "statement": {
+            "description": "statement template of the mds for this value (common query variables like ${user.*} are already replaced)",
+            "type": "string"
+          },
+          "statementKey": {
+            "description": "key of the mds statement which was used for this value (the value itself for value-specific statements, null for the default statement)",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "MdsSort": {
         "properties": {
           "columns": {
@@ -7729,6 +7946,47 @@
           "nodes": {
             "items": {
               "type": "object"
+            },
+            "type": "array"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "suggests": {
+            "items": {
+              "$ref": "#/components/schemas/Suggest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "facets",
+          "nodes",
+          "pagination"
+        ],
+        "type": "object"
+      },
+      "SearchResultElasticNode": {
+        "description": "result of the dsl, only if execute was requested",
+        "properties": {
+          "elasticResponse": {
+            "type": "string"
+          },
+          "facets": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array"
+          },
+          "ignored": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/Node"
             },
             "type": "array"
           },
@@ -13001,6 +13259,169 @@
           }
         },
         "summary": "Compare the indexed elastic document(s) of a node with the repository state",
+        "tags": [
+          "ADMIN v1"
+        ]
+      }
+    },
+    "/admin/v1/elastic/mds/{metadataset}/{query}": {
+      "post": {
+        "description": "Maps the given criteria to the statements of the mds query and returns the generated (readable and executable) elastic DSL. Optionally executes it.",
+        "operationId": "debugMdsQuery",
+        "parameters": [
+          {
+            "description": "ID of metadataset (or \"-default-\" for default metadata set)",
+            "in": "path",
+            "name": "metadataset",
+            "required": true,
+            "schema": {
+              "default": "-default-",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of query",
+            "in": "path",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of element",
+            "in": "query",
+            "name": "contentType",
+            "schema": {
+              "enum": [
+                "FILES",
+                "FOLDERS",
+                "FILES_AND_FOLDERS",
+                "COLLECTIONS",
+                "TOOLPERMISSIONS",
+                "COLLECTION_PROPOSALS",
+                "ALL"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "maximum items per page",
+            "in": "query",
+            "name": "maxItems",
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "skip a number of items",
+            "in": "query",
+            "name": "skipCount",
+            "schema": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "sort properties",
+            "in": "query",
+            "name": "sortProperties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "sort ascending, true if not set. Use multiple values to change the direction according to the given property at the same index",
+            "in": "query",
+            "name": "sortAscending",
+            "schema": {
+              "items": {
+                "type": "boolean"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MdsQueryDebugParameters"
+              }
+            }
+          },
+          "description": "search parameters",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MdsQueryDebugResult"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Preconditions are not present."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Authorization failed."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Fatal error occured."
+          }
+        },
+        "summary": "Build the elastic DSL for a mds query",
         "tags": [
           "ADMIN v1"
         ]

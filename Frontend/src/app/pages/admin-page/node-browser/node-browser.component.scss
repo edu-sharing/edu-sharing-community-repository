@@ -1,16 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 @use '../admin.variables' as admin;
 
-// ngx-monaco-editor is vertically resizable (see es-code-editor). The initial height must therefore be set
-// on the editor itself and es-code-editor must grow with it, otherwise a resized editor overlaps the
-// following content
-@mixin resizableCodeEditor($height) {
-    height: auto;
-    ::ng-deep ngx-monaco-editor {
-        height: $height;
-    }
-}
-
 :host {
     display: block;
 }
@@ -35,13 +25,13 @@ mat-radio-group {
         padding-bottom: 5px;
     }
     es-code-editor {
-        @include resizableCodeEditor(200px);
+        @include admin.resizableCodeEditor(250px);
     }
 }
 .elastic-response {
     padding-top: 20px;
     es-code-editor {
-        @include resizableCodeEditor(200px);
+        @include admin.resizableCodeEditor(250px);
     }
 }
 .elastic-response-stats {
@@ -60,7 +50,7 @@ mat-radio-group {
         font-weight: bold;
     }
     .elastic-response es-code-editor {
-        @include resizableCodeEditor(300px);
+        @include admin.resizableCodeEditor(300px);
     }
     .index-preview {
         display: flex;

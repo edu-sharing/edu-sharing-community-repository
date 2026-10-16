@@ -1,0 +1,77 @@
+@use '../admin.variables' as admin;
+
+.mds-debug-form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.mds-debug-query,
+.mds-debug-criterion {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    > mat-form-field {
+        flex-grow: 1;
+    }
+}
+.mds-debug-sort {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    > mat-form-field {
+        flex-grow: 1;
+        max-width: 300px;
+    }
+}
+.mds-debug-property {
+    max-width: 300px;
+}
+.mds-debug-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.mds-debug-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 10px;
+}
+.info {
+    color: var(--textLight);
+    padding-top: 5px;
+}
+.mds-debug-result {
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    es-code-editor {
+        @include admin.resizableCodeEditor(300px);
+    }
+}
+.mds-debug-warnings {
+    color: var(--colorStatusWarning);
+}
+.mds-debug-table {
+    width: 100%;
+    border-collapse: collapse;
+    th,
+    td {
+        text-align: left;
+        vertical-align: top;
+        padding: 5px;
+    }
+    tr.mds-debug-not-applied td {
+        color: var(--colorStatusWarning);
+    }
+    .mds-debug-details td {
+        padding-top: 0;
+    }
+    .mds-debug-code {
+        display: block;
+        margin-bottom: 10px;
+        @include admin.resizableCodeEditor(150px);
+    }
+}

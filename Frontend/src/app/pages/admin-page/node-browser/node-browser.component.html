@@ -8,6 +8,7 @@
       <mat-option value="NODEREF">{{ 'ADMIN.BROWSER.MODE_NODEREF' | translate }}</mat-option>
       <mat-option value="ELASTIC">{{ 'ADMIN.BROWSER.MODE_ELASTIC' | translate }}</mat-option>
       <mat-option value="INSPECT">{{ 'ADMIN.BROWSER.MODE_INSPECT' | translate }}</mat-option>
+      <mat-option value="MDS">{{ 'ADMIN.BROWSER.MDS_DEBUG.MODE' | translate }}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
@@ -299,8 +300,25 @@
   </div>
   }
 </div>
-} @if (lucene.mode === 'ELASTIC' && lucene.outputMode === 'view' && isElasticRaw() &&
-elasticResponse) {
+} @if (lucene.mode === 'MDS') {
+<div class="inputGroupGrow lucenePaging">
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+    <input matInput type="number" name="mdsOffset" [(ngModel)]="lucene.offset" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+    <input matInput type="number" name="mdsCount" [(ngModel)]="lucene.count" />
+  </mat-form-field>
+</div>
+<es-mds-query-debugger
+  [offset]="lucene.offset"
+  [count]="lucene.count"
+  (openDsl)="openMdsDebugDsl($event)"
+  (searchResult)="onMdsDebugResult($event)"
+></es-mds-query-debugger>
+} @if (((lucene.mode === 'ELASTIC' && lucene.outputMode === 'view' && isElasticRaw()) || lucene.mode
+=== 'MDS') && elasticResponse) {
 <div class="elastic-response">
   <label for="elasticResponseLabel">{{ 'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
   @if (elasticResponseStats) {
@@ -315,7 +333,8 @@ elasticResponse) {
     id="elasticResponseLabel"
   ></es-code-editor>
 </div>
-} @if (lucene.mode === 'NODEREF' || (lucene.mode === 'ELASTIC' && lucene.outputMode === 'view')) {
+} @if (lucene.mode === 'NODEREF' || lucene.mode === 'MDS' || (lucene.mode === 'ELASTIC' &&
+lucene.outputMode === 'view')) {
 <div class="search-list">
   <es-actionbar #actionbarComponent></es-actionbar>
   <es-node-entries-wrapper
@@ -324,7 +343,8 @@ elasticResponse) {
     [scope]="SCOPES.Admin"
     [columns]="searchColumns"
     [configureColumns]="true"
-    [displayType]="NodeEntriesDisplayType.Table"
+    [displayType]="lucene.displayType"
+    (displayTypeChange)="setDisplayType($event)"
     [elementInteractionType]="InteractionType.Emitter"
     (clickItem)="debugNode($event.element)"
   >
