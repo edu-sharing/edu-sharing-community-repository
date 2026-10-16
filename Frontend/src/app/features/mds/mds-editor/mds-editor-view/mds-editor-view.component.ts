@@ -20,7 +20,15 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subject } from 'rxjs';
+import {
+    BehaviorSubject,
+    combineLatest,
+    Observable,
+    of,
+    ReplaySubject,
+    Subject,
+    Subscription,
+} from 'rxjs';
 import { filter, first, map, take, takeUntil } from 'rxjs/operators';
 import { JUMP_MARK_POSTFIX } from '../../../dialogs/card-dialog/card-dialog-container/jump-marks-handler.directive';
 import { NativeWidgets, WidgetComponents } from '../../types/mds-types';
@@ -139,6 +147,7 @@ export class MdsEditorViewComponent
 
     private knownWidgetTags: string[];
     private destroyed = new ReplaySubject<void>(1);
+    private hideEmptySubscription: Subscription;
     private allWidgetsHidden = false;
     private expandContentDone = new Subject<void>();
 
@@ -195,11 +204,12 @@ export class MdsEditorViewComponent
         setTimeout(() => {
             this.injectWidgets();
             this.checkHideState();
-            MdsViewerService.hideEmpty(this.container);
+            this.hideEmptySubscription = MdsViewerService.hideEmpty(this.container, this.ngZone);
         });
     }
 
     ngOnDestroy(): void {
+        this.hideEmptySubscription?.unsubscribe();
         this.destroyed.next();
         this.destroyed.complete();
     }

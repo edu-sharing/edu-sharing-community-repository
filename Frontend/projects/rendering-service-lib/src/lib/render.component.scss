@@ -23,6 +23,8 @@
         align-items: center;
         flex-direction: column;
         gap: 10px;
+        // Self-centers horizontally regardless of the parent `.module`'s align-items
+        margin: 0 auto;
 
         > div {
             width: 100%;

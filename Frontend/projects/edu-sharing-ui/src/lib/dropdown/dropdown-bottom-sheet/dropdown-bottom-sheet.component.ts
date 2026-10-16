@@ -3,6 +3,7 @@ import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bott
 import { OptionItem } from '../../types/option-item';
 import { BehaviorSubject } from 'rxjs';
 import { Node } from 'ngx-edu-sharing-api';
+import { Helper } from '../../util/helper';
 
 @Component({
     selector: 'es-dropdown-bottom-sheet',
@@ -28,6 +29,19 @@ export class DropdownBottomSheetComponent {
         }
         setTimeout(() => option.callback(null, this.callbackObjects));
     }
+
+    /** Click on a link option; modified clicks are left to the browser. */
+    clickLink(option: OptionItem, event: MouseEvent): void {
+        if (!option.isEnabled || Helper.isModifiedClick(event)) {
+            return;
+        }
+        this._bottomSheetRef.dismiss();
+        if (!option.link.routerLink) {
+            event.preventDefault();
+        }
+        setTimeout(() => option.callback(null, this.callbackObjects));
+    }
+
     isNewGroup(i: number) {
         if (i > 0) {
             return this.options$.value[i].group !== this.options$.value[i - 1].group;

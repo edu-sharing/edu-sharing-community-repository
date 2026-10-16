@@ -164,11 +164,10 @@ $cardLineHeight: 1.4;
                     color: var(--textBlack);
                     flex-grow: 1;
                     margin: 5px 0;
-                    // FIXME: This breaks `limitLineCount` via `-webkit-line-clamp`, which requires
-                    // `display: -webkit-box`. What is this even for? `text-align: end` seems to
-                    // work just fine, even for containers.
-                    display: flex;
-                    justify-content: flex-end;
+                    // no `display: flex` / line clamp here: the value text itself is clamped
+                    // (see `es-list-text > span` below), nested clamps cut off too early
+                    display: block;
+                    min-width: 0;
                     text-align: end;
                     word-break: break-word;
                     // height: 1em;
@@ -233,6 +232,28 @@ $cardLineHeight: 1.4;
                             text-align: left;
                         }
                     }
+                }
+            }
+            &:not(:first-child) > es-list-base > es-list-text > span {
+                // Limit to 3 lines with a custom ellipsis: Chromium drops the `-webkit-line-clamp`
+                // ellipsis for right aligned text if the last visible line is not completely filled.
+                // `has-text-overflow` is set by `esCheckTextOverflow` (es-list-text) if truncated,
+                // the '…' is then floated into the bottom right corner. `shape-outside` cuts off the
+                // upper part of the float, so only the last visible line wraps around it.
+                overflow: hidden;
+                line-height: $cardLineHeight + em;
+                max-height: $cardLineHeight * 3em;
+                text-align: end;
+                &.has-text-overflow::before {
+                    content: '…';
+                    float: right;
+                    width: 1em;
+                    height: $cardLineHeight * 3em;
+                    // slightly below the 2nd line, otherwise it is shortened as well
+                    shape-outside: inset(($cardLineHeight * 2 + 0.2) * 1em 0 0 0);
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: flex-end;
                 }
             }
             es-node-url {

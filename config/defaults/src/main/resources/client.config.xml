@@ -82,6 +82,17 @@
 						<defaultVisibility>hidden</defaultVisibility>
 					</entry>
 				</shortcuts>
+				<!-- Swimlanes shown on the dashboard (in order). If not set, all swimlanes are shown expanded.
+				Available ids: featured-media, collections, recent-activities, shares, assignments
+				<swimlane>
+					<id>collections</id>
+					<defaultExpanded>true</defaultExpanded>
+				</swimlane>
+				<swimlane>
+					<id>recent-activities</id>
+					<defaultExpanded>false</defaultExpanded>
+				</swimlane>
+				-->
 			</dashboard>
 		</frontpage>
 	</values>

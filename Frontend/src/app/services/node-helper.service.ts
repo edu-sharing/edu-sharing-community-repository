@@ -60,6 +60,13 @@ export interface ConfigEntry {
     position?: number;
     url?: string;
     open?: () => void;
+    openInNew?: boolean;
+    /** Router commands of the internal target; set for entries that navigate within the app. */
+    routerLink?: string[];
+    /** Query params that belong to the target itself (not the ones carried over from the current route). */
+    queryParams?: Params;
+    /** Publishes the view switch without navigating, for callers that navigate via `routerLink`. */
+    notifyViewSwitched?: () => void;
 }
 
 export interface ConfigOptionItem extends ConfigEntry {

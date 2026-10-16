@@ -39,6 +39,12 @@ body:has(
     :is(.es-edge-toggle-pane, es-edge-toggle.inline) {
     display: none;
 }
+// The file drop overlay is trapped in the main nav's stacking context, so floating controls above
+// it are hidden while a file is dragged over the window.
+body:has(es-create-menu .drop-zone) .es-edge-toggle-pane,
+body:has(es-create-menu .drop-zone) es-edge-toggle.inline {
+    display: none;
+}
 
 .cdk-visually-hidden {
     margin: unset; // Causes scroll bars on surrounding `overflow: auto` containers

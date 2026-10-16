@@ -7,6 +7,13 @@ export class Helper {
         return JSON.parse(JSON.stringify(data));
     }
 
+    /** Whether a click asks the browser to open the target in a new tab or window. */
+    public static isModifiedClick(event: MouseEvent): boolean {
+        return (
+            event.button !== 0 || event.ctrlKey || event.shiftKey || event.altKey || event.metaKey
+        );
+    }
+
     public static deepCopyArray(data: any[]) {
         if (!Array.isArray(data)) return data;
         return data.slice();

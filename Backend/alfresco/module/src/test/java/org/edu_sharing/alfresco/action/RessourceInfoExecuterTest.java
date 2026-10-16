@@ -13,13 +13,17 @@ import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigCache;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -31,10 +35,20 @@ class RessourceInfoExecuterTest {
 
     private final NodeService mockedNodeService = Mockito.mock(NodeService.class);
     private final LightbendConfigLoader mockedLightbendConfigLoader = Mockito.mock(LightbendConfigLoader.class);
+    private MockedStatic<ApplicationInfoList> mockedApplicationInfoList;
+
     @BeforeEach
     void setUp() {
+        mockedApplicationInfoList = Mockito.mockStatic(ApplicationInfoList.class);
+        mockedApplicationInfoList.when(ApplicationInfoList::getAppInfosLtiTool).thenReturn(Collections.emptyList());
+
         underTest = new RessourceInfoExecuter(mockedLightbendConfigLoader);
         underTest.setNodeService(mockedNodeService);
+    }
+
+    @AfterEach
+    void tearDown() {
+        mockedApplicationInfoList.close();
     }
 
     @Test

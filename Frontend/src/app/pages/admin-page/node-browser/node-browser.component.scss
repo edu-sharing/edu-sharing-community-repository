@@ -1,0 +1,133 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
+@use '../admin.variables' as admin;
+
+:host {
+    display: block;
+}
+.inputGroupGrow {
+    @include admin.inputGroupGrow();
+}
+.heading {
+    @include admin.heading();
+}
+.info {
+    max-width: 800px;
+    margin: auto;
+}
+mat-radio-group {
+    mat-radio-button {
+        padding: 0 10px;
+    }
+}
+.dsl-query {
+    flex-direction: column;
+    > label {
+        padding-bottom: 5px;
+    }
+    es-code-editor {
+        @include admin.resizableCodeEditor(250px);
+    }
+}
+.elastic-response {
+    padding-top: 20px;
+    es-code-editor {
+        @include admin.resizableCodeEditor(250px);
+    }
+}
+.elastic-response-stats {
+    padding: 5px 0;
+    font-weight: bold;
+}
+.export-hint {
+    font-size: 90%;
+}
+.elastic-inspection {
+    padding-top: 20px;
+    clear: both;
+    .inspection-errors {
+        padding-left: 20px;
+        color: var(--colorStatusNegative);
+        font-weight: bold;
+    }
+    .elastic-response es-code-editor {
+        @include admin.resizableCodeEditor(300px);
+    }
+    .index-preview {
+        display: flex;
+        flex-direction: column;
+        margin: 5px 0 10px 0;
+        img {
+            max-width: 300px;
+            max-height: 250px;
+            border: 1px solid var(--borderLight);
+        }
+        small {
+            color: var(--textLight);
+        }
+    }
+    .inspection-table {
+        width: 100%;
+        margin: 10px 0 20px 0;
+        border-collapse: collapse;
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--colorStatusNeutral);
+            word-break: break-word;
+        }
+        td:first-child {
+            white-space: nowrap;
+        }
+        .inspection-status-different td:last-child {
+            color: var(--colorStatusNegative);
+        }
+        .inspection-status-onlyRepository td:last-child,
+        .inspection-status-onlyIndex td:last-child {
+            color: var(--colorStatusWarning);
+        }
+        .inspection-status-equal td:last-child {
+            color: var(--colorStatusPositive);
+        }
+    }
+}
+.lucenePaging {
+    max-width: 700px;
+    margin: auto;
+    a {
+        flex-grow: initial;
+        width: auto;
+    }
+}
+.luceneAuthorities {
+    margin-bottom: 20px;
+}
+.search-list {
+    padding: 20px 0 40px 0;
+    es-actionbar {
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        width: 100%;
+        height: 40px;
+    }
+    .no-results {
+        display: flex;
+        justify-content: center;
+        padding: 40px;
+        color: $textLight;
+        font-size: 120%;
+    }
+}
+// index autocomplete (rendered in an overlay, so not nested below .main)
+.index-option {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+    line-height: 1.3;
+    .index-description {
+        font-size: 80%;
+        color: var(--textLight);
+    }
+}

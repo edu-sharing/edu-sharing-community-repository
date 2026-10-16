@@ -40,6 +40,18 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
     public static final String COMBINED_SUGGESTION_FACET_SCRIPT = SearchServiceElastic.loadScript("suggestion-combined-facet.painless");
     /** Like {@link #COMBINED_SUGGESTION_FACET_SCRIPT} but nested suggestions are restricted to {@code createdBy == authority}. Params: {@code property}, {@code authority}. */
     public static final String COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT = SearchServiceElastic.loadScript("suggestion-combined-facet-current-user.painless");
+    /** Marker in the aggregation meta data for facets which are split into a plain and a suggestion branch */
+    public static final String COMBINED_SUGGESTION_META_KIND = "esKind";
+    public static final String COMBINED_SUGGESTION_META_KIND_VALUE = "combinedSuggestionFacet";
+    public static final String COMBINED_SUGGESTION_META_SIZE = "size";
+    public static final String COMBINED_SUGGESTION_META_MIN_DOC_COUNT = "minDocCount";
+    /** Branch without own suggestions of the current user: plain doc_values terms aggregation */
+    public static final String COMBINED_SUGGESTION_BRANCH_PLAIN = "plain";
+    /** Branch with own suggestions of the current user: painless script reading _source */
+    public static final String COMBINED_SUGGESTION_BRANCH_WITH_SUGGESTIONS = "withSuggestions";
+    public static final String COMBINED_SUGGESTION_BRANCH_VALUES = "values";
+    /** The suggestion branch is usually tiny, so we request more buckets there to keep the merge accurate */
+    static final int COMBINED_SUGGESTION_MIN_BRANCH_SIZE = 100;
     static Logger logger = Logger.getLogger(MetadataElasticSearchHelper.class);
     private static MetadataQueryPreprocessor preprocessor = new MetadataQueryPreprocessor(MetadataReader.QUERY_SYNTAX_DSL);
 
@@ -97,7 +109,6 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 continue;
             }
 
-            Query queryBuilderParam = null;
             if (query.isApplyBasequery()) {
                 String baseQueryParam = queries.findBasequery(parameters.keySet());
                 if (!StringUtils.isEmpty(baseQueryParam)) {
@@ -107,38 +118,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
             applyCondition(query, result);
-            BoolQuery sharedFilesSearch;
-            if (query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
-                sharedFilesSearch = handleSharedFilesSearch(queries, values);
-            } else {
-                sharedFilesSearch = null;
-            }
-            if (sharedFilesSearch != null) {
-                queryBuilderParam = Query.of(q -> q.bool(sharedFilesSearch));
-            } else if (parameter.isMultiple()) {
-
-                MetadataQueryParameter.ParameterJoinStrategy multipleJoin = parameter.getMultiplejoin();
-                BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-                if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.AND)) {
-                    for (String value : values) {
-                        boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
-                    }
-                } else if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.OR)) {
-                    for (String value : values) {
-                        boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
-                    }
-                } else {
-                    boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValues(parameter, values)), parameter).build()));
-                }
-
-                queryBuilderParam = Query.of(q -> q.bool(boolQueryBuilder.build()));
-            } else {
-                if (values.length > 1) {
-                    throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
-                }
-
-                queryBuilderParam = Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])), parameter).build()));
-            }
+            Query queryBuilderParam = getParameterQuery(queries, query, parameter, values);
 
             if (query.getJoin().equals("AND")) {
                 result.must(queryBuilderParam);
@@ -165,6 +145,42 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         return result;
+    }
+
+    /**
+     * Builds the elastic query for a single mds query parameter and its given values
+     * (statement lookup, preprocessors, value replacement and multiple join strategy)
+     */
+    public static Query getParameterQuery(MetadataQueries queries, MetadataQuery query, MetadataQueryParameter parameter, String[] values) {
+        BoolQuery sharedFilesSearch;
+        if (query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
+            sharedFilesSearch = handleSharedFilesSearch(queries, values);
+        } else {
+            sharedFilesSearch = null;
+        }
+        if (sharedFilesSearch != null) {
+            return Query.of(q -> q.bool(sharedFilesSearch));
+        }
+        if (parameter.isMultiple()) {
+            MetadataQueryParameter.ParameterJoinStrategy multipleJoin = parameter.getMultiplejoin();
+            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+            if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.AND)) {
+                for (String value : values) {
+                    boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
+                }
+            } else if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.OR)) {
+                for (String value : values) {
+                    boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
+                }
+            } else {
+                boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValues(parameter, values)), parameter).build()));
+            }
+            return Query.of(q -> q.bool(boolQueryBuilder.build()));
+        }
+        if (values.length > 1) {
+            throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
+        }
+        return Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])), parameter).build()));
     }
 
     private static BoolQuery handleSharedFilesSearch(MetadataQueries queries, String[] values) {
@@ -296,6 +312,113 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 excludeOwn.add(parameter);
         }
         return excludeOwn;
+    }
+
+    /**
+     * Builds the facet aggregation for {@code combineWithSuggestions} facets.
+     *
+     * <p>Instead of running the painless script (which has to load and parse {@code _source}) for every matching
+     * document, the documents are split into two disjoint branches:</p>
+     * <ul>
+     *     <li>{@link #COMBINED_SUGGESTION_BRANCH_PLAIN}: documents without own suggestions of the current user for this
+     *     property, aggregated via doc_values on {@code field}</li>
+     *     <li>{@link #COMBINED_SUGGESTION_BRANCH_WITH_SUGGESTIONS}: documents with own suggestions, aggregated via the
+     *     existing painless script</li>
+     * </ul>
+     * <p>Since every document is part of exactly one branch, summing the bucket counts of both branches yields the
+     * same result as the script-only aggregation. The merge happens in {@link #mergeCombinedSuggestionBuckets}.</p>
+     */
+    static Aggregation buildCombinedSuggestionFacetAggregation(String property, String field, String authority, int size, int minDocCount) {
+        TermsAggregation plainTerms = AggregationBuilders.terms()
+                .field(field)
+                .size(size)
+                .minDocCount(1)
+                .build();
+        if (StringUtils.isBlank(authority)) {
+            // without an authority the script can never add suggestion values, so the plain aggregation is sufficient
+            return new Aggregation.Builder()
+                    .filter(f -> f.matchAll(m -> m))
+                    .meta(combinedSuggestionMeta(size, minDocCount))
+                    .aggregations(COMBINED_SUGGESTION_BRANCH_PLAIN, new Aggregation.Builder()
+                            .filter(f -> f.matchAll(m -> m))
+                            .aggregations(COMBINED_SUGGESTION_BRANCH_VALUES, plainTerms._toAggregation())
+                            .build())
+                    .build();
+        }
+        Query ownSuggestions = Query.of(q -> q.nested(n -> n
+                .path("suggestions")
+                .query(nq -> nq.bool(b -> b
+                        .filter(f -> f.term(t -> t.field("suggestions.propertyId").value(property)))
+                        .filter(f -> f.term(t -> t.field("suggestions.createdBy").value(authority)))
+                ))
+        ));
+        Aggregation plain = new Aggregation.Builder()
+                .filter(f -> f.bool(b -> b.mustNot(ownSuggestions)))
+                .aggregations(COMBINED_SUGGESTION_BRANCH_VALUES, plainTerms._toAggregation())
+                .build();
+        Aggregation withSuggestions = new Aggregation.Builder()
+                .filter(ownSuggestions)
+                .aggregations(COMBINED_SUGGESTION_BRANCH_VALUES,
+                        buildCombinedSuggestionScriptTerms(property, authority, Math.max(size, COMBINED_SUGGESTION_MIN_BRANCH_SIZE), 1))
+                .build();
+        Map<String, Aggregation> branches = new LinkedHashMap<>();
+        branches.put(COMBINED_SUGGESTION_BRANCH_PLAIN, plain);
+        branches.put(COMBINED_SUGGESTION_BRANCH_WITH_SUGGESTIONS, withSuggestions);
+        return new Aggregation.Builder()
+                .filter(f -> f.matchAll(m -> m))
+                .meta(combinedSuggestionMeta(size, minDocCount))
+                .aggregations(branches)
+                .build();
+    }
+
+    static Aggregation buildCombinedSuggestionScriptTerms(String property, String authority, int size, int minDocCount) {
+        Map<String, JsonData> params = new HashMap<>();
+        params.put("property", JsonData.of(property));
+        params.put("authority", authority == null ? JsonData.of("") : JsonData.of(authority));
+        return AggregationBuilders.terms()
+                .script(s -> s
+                        .source(COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT)
+                        .lang("painless")
+                        .params(params))
+                .size(size)
+                .minDocCount(minDocCount)
+                .build()._toAggregation();
+    }
+
+    private static Map<String, JsonData> combinedSuggestionMeta(int size, int minDocCount) {
+        Map<String, JsonData> meta = new HashMap<>();
+        meta.put(COMBINED_SUGGESTION_META_KIND, JsonData.of(COMBINED_SUGGESTION_META_KIND_VALUE));
+        meta.put(COMBINED_SUGGESTION_META_SIZE, JsonData.of(size));
+        meta.put(COMBINED_SUGGESTION_META_MIN_DOC_COUNT, JsonData.of(minDocCount));
+        return meta;
+    }
+
+    /** Result of {@link #mergeCombinedSuggestionBuckets}: merged buckets (sorted, cut to size) and the remaining doc count */
+    public record MergedFacetBuckets(List<Map.Entry<String, Long>> buckets, long sumOtherDocCount) {
+    }
+
+    /**
+     * Merges the term buckets of the branches of a combined suggestion facet.
+     * Counts of equal keys are summed up, then {@code minDocCount} is applied, the buckets are sorted like the
+     * default terms aggregation (count desc, key asc) and cut to {@code size}. Cut buckets are added to
+     * {@code sumOtherDocCount}.
+     */
+    public static MergedFacetBuckets mergeCombinedSuggestionBuckets(List<Map<String, Long>> branchBuckets, List<Long> branchSumOtherDocCounts, int size, long minDocCount) {
+        Map<String, Long> counts = new HashMap<>();
+        for (Map<String, Long> branch : branchBuckets) {
+            branch.forEach((key, count) -> counts.merge(key, count, Long::sum));
+        }
+        long sumOther = branchSumOtherDocCounts.stream().filter(Objects::nonNull).mapToLong(Long::longValue).sum();
+        List<Map.Entry<String, Long>> sorted = counts.entrySet().stream()
+                .filter(e -> e.getValue() >= minDocCount)
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed().thenComparing(Map.Entry.<String, Long>comparingByKey()))
+                .map(e -> Map.entry(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        if (sorted.size() > size) {
+            sumOther += sorted.subList(size, sorted.size()).stream().mapToLong(Map.Entry::getValue).sum();
+            sorted = new ArrayList<>(sorted.subList(0, size));
+        }
+        return new MergedFacetBuckets(sorted, sumOther);
     }
 
     /**
@@ -450,17 +573,14 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                         && (metadataQueryFacet.get().getItems() == null || metadataQueryFacet.get().getItems().size() <= 1)) {
                     // only show suggestions created by the current user in addition to indexed property values
                     String authority = org.alfresco.repo.security.authentication.AuthenticationUtil.getFullyAuthenticatedUser();
-                    Map<String, JsonData> params = new HashMap<>();
-                    params.put("property", JsonData.of(facet.getProperty()));
-                    params.put("authority", authority == null ? JsonData.of("") : JsonData.of(authority));
-                    TermsAggregation.Builder builder = AggregationBuilders.terms()
-                            .script(s -> s
-                                    .source(COMBINED_SUGGESTION_FACET_CURRENT_USER_SCRIPT)
-                                    .lang("painless")
-                                    .params(params))
-                            .size(metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER))
-                            .minDocCount(searchToken.getFacetsMinCount());
-                    innerAggregation = builder.build()._toAggregation();
+                    int size = metadataQueryFacet.map(MetadataQueryParameter.MetadataQueryFacet::getMaxBucketSize).orElse(searchToken.getFacetLimit() * FACET_LIMIT_MULTIPLIER);
+                    if (fieldName.get(0).getNested() == null) {
+                        innerAggregation = buildCombinedSuggestionFacetAggregation(
+                                facet.getProperty(), fieldName.get(0).getValue(), authority, size, searchToken.getFacetsMinCount());
+                    } else {
+                        // nested facet fields keep the legacy script based behaviour
+                        innerAggregation = buildCombinedSuggestionScriptTerms(facet.getProperty(), authority, size, searchToken.getFacetsMinCount());
+                    }
                 } else {
                     TermsAggregation.Builder builder = AggregationBuilders.terms()
                             .field(fieldName.get(0).getValue())

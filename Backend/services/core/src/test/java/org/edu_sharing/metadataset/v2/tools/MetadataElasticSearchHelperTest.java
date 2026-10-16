@@ -442,13 +442,18 @@ class MetadataElasticSearchHelperTest {
         assertEquals(1, result.size());
 
         String json = JsonpUtils.toJsonString(result.get("test_facet"), new JacksonJsonpMapper());
-        // when combineWithSuggestions is set the terms agg must be driven by the painless script,
-        // not by a plain keyword field
-        assertTrue(json.contains("\"lang\":\"painless\""), "expected painless script-based aggregation, got: " + json);
+        // combineWithSuggestions splits the facet into a plain doc_values branch and a script branch which is
+        // restricted to documents with own suggestions of the current user
+        assertTrue(json.contains("\"" + MetadataElasticSearchHelper.COMBINED_SUGGESTION_META_KIND_VALUE + "\""), "expected combined facet marker in meta, got: " + json);
+        assertTrue(json.contains("\"" + MetadataElasticSearchHelper.COMBINED_SUGGESTION_BRANCH_PLAIN + "\""), "expected plain branch, got: " + json);
+        assertTrue(json.contains("\"" + MetadataElasticSearchHelper.COMBINED_SUGGESTION_BRANCH_WITH_SUGGESTIONS + "\""), "expected suggestion branch, got: " + json);
+        assertTrue(json.contains("\"field\":\"properties.test_facet.keyword\""), "expected field-based terms agg in plain branch, got: " + json);
+        assertTrue(json.contains("\"lang\":\"painless\""), "expected painless script in suggestion branch, got: " + json);
         assertTrue(json.contains("\"property\":\"test_facet\""), "expected property param wired to facet name, got: " + json);
-        // suggestions must be scoped to the current user via the authority param
+        // suggestions must be scoped to the current user, both in the script and in the branch filter
         assertTrue(json.contains("\"authority\":\"user\""), "expected current-user authority param, got: " + json);
-        assertFalse(json.contains("\"field\":\"properties.test_facet.keyword\""), "expected no field-based terms agg, got: " + json);
+        assertTrue(json.contains("\"path\":\"suggestions\""), "expected nested suggestions filter, got: " + json);
+        assertTrue(json.contains("\"must_not\""), "expected plain branch to exclude documents with own suggestions, got: " + json);
     }
 
 
@@ -570,4 +575,39 @@ class MetadataElasticSearchHelperTest {
     }
 
 
+
+    @Test
+    void mergeCombinedSuggestionBucketsSumsSortsAndCuts() {
+        Map<String, Long> plain = new HashMap<>();
+        plain.put("a", 5L);
+        plain.put("b", 3L);
+        plain.put("c", 1L);
+        Map<String, Long> withSuggestions = new HashMap<>();
+        withSuggestions.put("b", 4L);
+        withSuggestions.put("d", 2L);
+
+        MetadataElasticSearchHelper.MergedFacetBuckets merged = MetadataElasticSearchHelper.mergeCombinedSuggestionBuckets(
+                List.of(plain, withSuggestions), Arrays.asList(10L, null), 2, 1);
+
+        assertEquals(2, merged.buckets().size());
+        assertEquals("b", merged.buckets().get(0).getKey());
+        assertEquals(7L, merged.buckets().get(0).getValue());
+        assertEquals("a", merged.buckets().get(1).getKey());
+        assertEquals(5L, merged.buckets().get(1).getValue());
+        // 10 from the branch + cut buckets d(2) and c(1)
+        assertEquals(13L, merged.sumOtherDocCount());
+    }
+
+    @Test
+    void mergeCombinedSuggestionBucketsAppliesMinDocCountAfterMerge() {
+        Map<String, Long> plain = Map.of("a", 1L, "b", 1L);
+        Map<String, Long> withSuggestions = Map.of("a", 1L);
+
+        MetadataElasticSearchHelper.MergedFacetBuckets merged = MetadataElasticSearchHelper.mergeCombinedSuggestionBuckets(
+                List.of(plain, withSuggestions), List.of(0L, 0L), 10, 2);
+
+        assertEquals(1, merged.buckets().size());
+        assertEquals("a", merged.buckets().get(0).getKey());
+        assertEquals(2L, merged.buckets().get(0).getValue());
+    }
 }

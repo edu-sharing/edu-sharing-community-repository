@@ -91,6 +91,10 @@ html .mat-mdc-slide-toggle {
 }
 .mat-mdc-outlined-button:not(:disabled) {
     --mat-button-outlined-outline-color: var(--palette-primary-500);
+    // `color="warn"`
+    &.mat-warn {
+        --mat-button-outlined-outline-color: var(--warn);
+    }
 }
 .mdc-button {
     span {

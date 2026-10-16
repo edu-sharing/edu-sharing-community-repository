@@ -98,6 +98,7 @@
     "SHARE": {
       "TITLE": "Gestire la condivisione",
       "LOCAL_SHARING_TITLE": "Condivisioni locali",
+      "EXTERNAL_PERMISSIONS_INFO": "Questo elemento è esterno e può avere autorizzazioni proprie nello strumento. Le modifiche alle autorizzazioni effettuate qui riguardano solo la visibilità e la modifica dei metadati",
       "NO_PERMISSIONS": "Per questo oggetto non sono ancora state stipulate autorizzazioni esplicite.",
       "GROUP_OWNER": "Proprietario",
       "GROUP_USERS": "Persone",

@@ -34,6 +34,7 @@ public class ConnectorDAO {
 					resultConnector.setOnlyDesktop(connector.isOnlyDesktop());
 					resultConnector.setShowNew(connector.isShowNew());
 					resultConnector.setMdsGroup(connector.getMdsGroup());
+					resultConnector.setExternalPermissions(connector.isExternalPermissions());
 					return resultConnector;
 				}
 
@@ -54,6 +55,7 @@ public class ConnectorDAO {
 					resultConnector.setId(connector.getId());
 					resultConnector.setOnlyDesktop(connector.isOnlyDesktop());
 					resultConnector.setHasViewMode(connector.isHasViewMode());
+					resultConnector.setExternalPermissions(connector.isExternalPermissions());
 					if(connector.getParameters() != null){
 						resultConnector.setParameters(connector.getParameters().toArray(new String[0]));
 					}

@@ -28,8 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BApiProxyService {
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    private final BApiProxyConfig bApiProxyConfig;
+    private final BApiConfigProvider bApiConfigProvider;
 
     private final GuestService guestService;
 
@@ -48,6 +47,7 @@ public class BApiProxyService {
      */
     @Permission(value = CCConstants.CCM_VALUE_TOOLPERMISSION_BAPI)
     public Response forwardRequest(String path, String body, HttpHeaders headers, String queryParams, HttpMethod method) {
+        BApiProxyConfig bApiProxyConfig = bApiConfigProvider.getCurrentConfig();
         String authenticatedUser = AuthenticationUtil.getFullyAuthenticatedUser();
         String apiKey = guestService.isGuestUser(authenticatedUser) ?
                 bApiProxyConfig.getGuestUserApiKey() : bApiProxyConfig.getAuthUserApiKey();

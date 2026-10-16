@@ -17,6 +17,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+@Deprecated
 public class TrashcanCleanerJob extends AbstractJob {
 
 	protected static final long DEFAULT_TIME_TO_KEEP = -1;

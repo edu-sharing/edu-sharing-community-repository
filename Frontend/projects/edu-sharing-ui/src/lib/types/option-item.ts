@@ -9,6 +9,18 @@ import { KeyboardShortcutCondition } from '../types/keyboard-shortcuts';
 import { Node } from 'ngx-edu-sharing-api';
 import { NodeEntriesDataType } from '../node-entries/data-type';
 import { TemplateRef } from '@angular/core';
+import { Params } from '@angular/router';
+
+/** Navigation target of an option that is rendered as a real link instead of a button. */
+export interface OptionItemLink {
+    /** Router commands of an in-app target. Takes precedence over `href`. */
+    routerLink?: string[];
+    queryParams?: Params;
+    /** External url, used when no `routerLink` is given. */
+    href?: string;
+    /** Open an external `href` in a new tab. */
+    openInNew?: boolean;
+}
 
 export enum NodesRightMode {
     // rights on the current node, no matter if its a reference or origianl
@@ -127,6 +139,12 @@ export class OptionItem {
     public group: OptionGroup;
 
     public keyboardShortcut: KeyboardShortcutCondition;
+
+    /**
+     * Renders the option as a link. For a `routerLink` the router navigates, so the callback must
+     * not navigate again. For an `href` a plain click goes through the callback.
+     */
+    public link: OptionItemLink;
 
     /**
      * Material color theme for the option. Use 'warn' for critical/destructive actions.

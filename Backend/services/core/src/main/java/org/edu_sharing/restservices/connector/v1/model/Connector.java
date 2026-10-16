@@ -19,4 +19,5 @@ public class Connector {
 	private boolean onlyDesktop;
 	private boolean hasViewMode;
 	private String mdsGroup;
+	private boolean externalPermissions;
 }

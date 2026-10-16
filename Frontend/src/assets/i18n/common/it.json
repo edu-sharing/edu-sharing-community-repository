@@ -1395,6 +1395,7 @@
     "COPIED_TO_CLIPBOARD_NOTICE": "Il codice embed è stato copiato negli appunti."
   },
   "NODE_INFO": {
+    "OPEN_INDEX_INSPECTOR": "Apri nell'ispettore dell'indice",
     "TITLE": "Nodo \"{{name}}\"",
     "LOCATION": "Percorso dell'articolo",
     "NODE_ASPECTS": "Aspetti",
@@ -1543,6 +1544,7 @@
     "GO_TO_COURSE": "Vai al corso",
     "AUTHORED_BY": "di",
     "CONVERTING": "Conversione",
+    "PREPARING": "In preparazione",
     "QUEUED": "In coda",
     "QUEUE_POSITION": "Posizione in coda",
     "OPEN_IN_NEW_TAB": "Apri in una nuova scheda",

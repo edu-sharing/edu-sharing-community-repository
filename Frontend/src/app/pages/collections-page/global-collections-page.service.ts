@@ -3,10 +3,12 @@ import { BehaviorSubject } from 'rxjs';
 import { Node, SessionStorageService, Store } from 'ngx-edu-sharing-api';
 
 /**
- * Custom templates to replace or extend standard components within the search page.
+ * Custom templates to replace or extend standard components within the collections page.
  */
 export interface CollectionsPageCustomTemplates {
     belowTabs?: TemplateRef<unknown>;
+    /** Replaces the breadcrumbs inside the collection's header bar. */
+    breadcrumbs?: TemplateRef<unknown>;
 }
 
 /**
@@ -22,7 +24,8 @@ export class GlobalCollectionsPageService {
     constructor() {}
 
     /**
-     * Register custom templates to replace or extend standard components within the search page.
+     * Register custom templates to replace or extend standard components within the collections
+     * page.
      */
     setCustomTemplates(customTemplates: CollectionsPageCustomTemplates): void {
         this.internal.customTemplates.next(customTemplates);
@@ -43,8 +46,8 @@ export class GlobalCollectionsPageService {
 }
 
 /**
- * Internal part of the `GlobalSearchPageService` for use within the search page component and
- * services only.
+ * Internal part of the `GlobalCollectionsPageService` for use within the collections page
+ * component and services only.
  */
 @Injectable({
     providedIn: 'root',

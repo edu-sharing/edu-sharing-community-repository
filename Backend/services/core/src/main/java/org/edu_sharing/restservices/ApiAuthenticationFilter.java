@@ -41,6 +41,14 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
      */
     public static final String HEADER_AUTHENTICATED = "X-Edu-Authenticated";
 
+    /**
+     * Endpoints that receive a bearer token which is not an oauth2 access token but is validated
+     * by the endpoint itself (e.g. the LTI dynamic registration token issued by this platform).
+     * The oauth2 handling is skipped for them, so such a token does not get rejected here.
+     */
+    private static final List<String> SELF_VALIDATED_BEARER_ENDPOINTS = List.of(
+            "/ltiplatform/v13/openid-registration");
+
     Logger logger = Logger.getLogger(ApiAuthenticationFilter.class);
 
     private TokenService tokenService;
@@ -77,7 +85,8 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
                 if (validatedAuth != null) {
                     validatedAuth = applyValidatedAuth(authTool, validatedAuth, session, httpReq, httpResp);
                 }
-            } else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")) {
+            } else if (authHdr.length() > 6 && authHdr.substring(0, 6).equalsIgnoreCase("Bearer")
+                    && !isSelfValidatedBearerEndpoint(httpReq.getPathInfo())) {
 
                 logger.info("auth is OAuth");
 
@@ -287,6 +296,10 @@ public class ApiAuthenticationFilter implements jakarta.servlet.Filter {
         // 2fa second step: the session still holds the toolpermissions computed for the guest user
         ToolPermissionServiceFactory.getInstance().invalidateSessionCache();
         return authTool.validateAuthentication(session);
+    }
+
+    private static boolean isSelfValidatedBearerEndpoint(String pathInfo) {
+        return pathInfo != null && SELF_VALIDATED_BEARER_ENDPOINTS.stream().anyMatch(pathInfo::startsWith);
     }
 
     /**

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="appid">lti</entry>
+    <entry key="type">LTITOOL</entry>
+    <entry key="host">localhost</entry>
+    <entry key="ltitool_initiate_login_uri">https://lti.example.org/login</entry>
+    <entry key="ltitool_redirect_urls">https://lti.example.org/redirect</entry>
+</properties>

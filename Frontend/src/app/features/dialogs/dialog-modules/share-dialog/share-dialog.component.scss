@@ -65,6 +65,9 @@
 .share-group {
     display: flex;
     flex-direction: column;
+    > es-info-message {
+        padding-bottom: 20px;
+    }
 }
 
 .advanced {

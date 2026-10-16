@@ -19,6 +19,12 @@ public class Connector implements Serializable {
 
 	@Optional private boolean hasViewMode=false;
 
+	/**
+	 * the element is managed by an external tool which may have its own permissions,
+	 * i.e. permissions set in edu-sharing only affect visibility and metadata
+	 */
+	@Optional private boolean externalPermissions=false;
+
 	@Optional private String url;
 	
 	/**
@@ -109,5 +115,13 @@ public class Connector implements Serializable {
 
 	public void setHasViewMode(boolean hasViewMode) {
 		this.hasViewMode = hasViewMode;
+	}
+
+	public boolean isExternalPermissions() {
+		return externalPermissions;
+	}
+
+	public void setExternalPermissions(boolean externalPermissions) {
+		this.externalPermissions = externalPermissions;
 	}
 }

@@ -116,6 +116,7 @@
     "SHARE": {
       "TITLE": "Freigaben verwalten",
       "LOCAL_SHARING_TITLE": "Lokale Freigaben",
+      "EXTERNAL_PERMISSIONS_INFO": "Dieses Element ist extern und hat im Tool ggf. eigene Berechtigungen. Die Berechtigungsänderungen hier beziehen sich nur auf die Sichtbarkeit und das Bearbeiten der Metadaten",
       "NO_PERMISSIONS": "Noch keine expliziten Berechtigungen an diesem Element",
       "GROUP_OWNER": "Eigentümer",
       "GROUP_USERS": "Personen",

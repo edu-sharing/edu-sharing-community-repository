@@ -28,6 +28,7 @@ import {
     ColumnType,
     ListItemSort,
     ListSortConfig,
+    LocalEventsService,
     MdsHelperService,
     MdsWidgetType,
     NodeEntriesDisplayType,
@@ -84,6 +85,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     private _translate = inject(TranslateService);
     private _route = inject(ActivatedRoute);
     private _userModifiableValues = inject(UserModifiableValuesService);
+    private _localEvents = inject(LocalEventsService);
 
     readonly searchSort = this._userModifiableValues.createMapped<Sort>({
         fromString: (v) => JSON.parse(v),
@@ -121,6 +123,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
         this._registerLoadingProgress();
         this._registerResultDiffCount();
         this._registerDefaultSort();
+        this._registerNodesCreated();
     }
 
     ngOnDestroy(): void {
@@ -129,7 +132,12 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     }
 
     addNodes(nodes: Node[]): void {
-        this.resultsDataSource.appendData(nodes, 'before');
+        // the same node can be announced via several channels
+        const listed = new Set(this.resultsDataSource.getData().map((node) => node.ref.id));
+        const added = nodes.filter((node) => !listed.has(node.ref.id));
+        if (added.length) {
+            this.resultsDataSource.appendData(added, 'before');
+        }
     }
 
     readonly onDblClick = (node: Node) => {
@@ -137,6 +145,23 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
             queryParams: this._nodeHelper.getNodeLink('queryParams', node) as any,
         });
     };
+
+    /**
+     * Adds newly created materials at the first position, as the index does not contain them yet
+     * (a refresh might change the position depending on the sorting).
+     */
+    private _registerNodesCreated() {
+        this._localEvents.nodesCreated.pipe(takeUntil(this._destroyed)).subscribe((nodes) => {
+            const materials = nodes.filter(
+                (node) =>
+                    !node.isDirectory &&
+                    !node.aspects?.includes(RestConstants.CCM_ASPECT_IO_REFERENCE),
+            );
+            if (materials.length) {
+                this.addNodes(materials);
+            }
+        });
+    }
 
     private _registerPageRestore() {
         // restore last state

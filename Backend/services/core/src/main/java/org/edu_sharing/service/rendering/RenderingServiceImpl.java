@@ -94,6 +94,10 @@ public class RenderingServiceImpl implements RenderingService{
 	}
 
 	public RenderingVersionInfo getVersion() throws GeneralSecurityException {
+		// no classic rendering service (rs1) registered, e.g. only rendering service 2 is deployed
+		if (ApplicationInfoList.getRenderService() == null) {
+			return null;
+		}
 		String url = new RenderingTool().getRenderServiceUrl(ApplicationInfoList.getHomeRepository(), null);
 		url = url.replace("index.php", "version.php");
 		return new Gson().fromJson(new HttpQueryTool().query(url), RenderingVersionInfo.class);

@@ -66,10 +66,10 @@ public class VersionService implements ApplicationListener<RefreshScopeRefreshed
                 logger.error(t.getMessage(), t);
             }
             try {
-                licenses.getServices().put(
-                        Services.Rendering,
-                        renderingService.getVersion().licenses
-                );
+                RenderingVersionInfo rsVersion = renderingService.getVersion();
+                if (rsVersion != null) {
+                    licenses.getServices().put(Services.Rendering, rsVersion.licenses);
+                }
             } catch (Throwable t) {
                 logger.error(t.getMessage(), t);
             }

@@ -2,18 +2,22 @@ package org.edu_sharing.repository.server.jobs.quartz;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil.RunAsWork;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.apache.log4j.Logger;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobDescription;
 import org.edu_sharing.repository.server.jobs.quartz.annotation.JobFieldDescription;
+import org.edu_sharing.service.search.SearchService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @JobDescription(description = "job to cleanup archive")
-public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
+public class TrashcanCleanerEduSharingJob extends AbstractJobMapAnnotationParams {
 
 	@JobFieldDescription(description = "nr of days to keep")
 	public Integer DAYS_TO_KEEP;
@@ -25,8 +29,14 @@ public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
 	Boolean execute = true;
 	
 	protected static final int DEFAULT_DELETE_BATCH_COUNT = 1000;
+
+	@Autowired
+	private NodeService nodeService;
+	@Autowired
+	private SearchService searchService;
+
 	
-	Logger logger = Logger.getLogger(TrashcanCleanerSolrJob.class);
+	Logger logger = Logger.getLogger(TrashcanCleanerEduSharingJob.class);
 	
 	@Override
 	public void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -43,14 +53,10 @@ public class TrashcanCleanerSolrJob extends AbstractJobMapAnnotationParams {
 					: DEFAULT_DELETE_BATCH_COUNT;
 
 		
-		RunAsWork<Void> runAs = new RunAsWork<Void>() {
-			@Override
-			public Void doWork() throws Exception {
-				
-				new TrashcanCleanerSolr(TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch, execute).execute();
-				return null;
-			}
-		};
+		RunAsWork<Void> runAs = () -> {
+            new TrashcanCleanerWorker(nodeService, searchService, TimeUnit.MILLISECONDS.convert(time, TimeUnit.DAYS),batch, execute).execute();
+            return null;
+        };
 		AuthenticationUtil.runAs(runAs, "admin");
 	}
 	

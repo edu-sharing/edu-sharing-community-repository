@@ -8,8 +8,20 @@ import { SessionStorageService } from 'ngx-edu-sharing-api';
 interface LuceneTemplate {
     query: string;
     properties: string;
+    /** elastic index (name, pattern or one of the constants -workspace- / -authorities-) */
+    index?: string;
     isDefault?: boolean;
 }
+
+const dsl = (query: object) => JSON.stringify({ query }, null, 2);
+// the workspace index also contains archived nodes, restrict to the workspace store
+const workspaceDsl = (query: object) =>
+    dsl({
+        bool: {
+            filter: [{ match: { 'nodeRef.storeRef.protocol': 'workspace' } }],
+            must: [query],
+        },
+    });
 
 type LuceneTemplates = { [key: string]: LuceneTemplate };
 
@@ -28,7 +40,8 @@ export class LuceneTemplateMemoryComponent {
     private static readonly STORAGE_KEY = 'admin_lucene_templates';
     private static readonly DEFAULT_TEMPLATES: LuceneTemplates = {
         GROUPS: {
-            query: 'TYPE:"cm:authorityContainer"',
+            index: '-authorities-',
+            query: dsl({ term: { type: 'cm:authorityContainer' } }),
             properties: [
                 'cm:authorityDisplayName',
                 'cm:authorityName',
@@ -40,7 +53,15 @@ export class LuceneTemplateMemoryComponent {
             isDefault: true,
         },
         ORGS: {
-            query: 'TYPE:"cm:authorityContainer"',
+            index: '-authorities-',
+            query: dsl({
+                bool: {
+                    must: [
+                        { term: { type: 'cm:authorityContainer' } },
+                        { prefix: { 'properties.cm:authorityName.keyword': 'GROUP_ORG_' } },
+                    ],
+                },
+            }),
             properties: [
                 'cm:authorityDisplayName',
                 'cm:authorityName',
@@ -53,7 +74,8 @@ export class LuceneTemplateMemoryComponent {
             isDefault: true,
         },
         PERSONS: {
-            query: 'TYPE:"cm:person"',
+            index: '-authorities-',
+            query: dsl({ term: { type: 'cm:person' } }),
             properties: [
                 'cm:userName',
                 'cm:firstName',
@@ -66,9 +88,17 @@ export class LuceneTemplateMemoryComponent {
             isDefault: true,
         },
         CREATED_CONTENTS_BY_PERSON: {
-            query: '@cm\\:creator:"user" OR @cm\\:modifier:"user"',
+            index: '-workspace-',
+            query: workspaceDsl({
+                bool: {
+                    should: [
+                        { term: { 'properties.cm:creator.keyword': 'user' } },
+                        { term: { 'properties.cm:modifier.keyword': 'user' } },
+                    ],
+                    minimum_should_match: 1,
+                },
+            }),
             properties: [
-                'sys:node-uuid',
                 'cm:name',
                 'cclom:title',
                 'cm:creator',
@@ -81,9 +111,14 @@ export class LuceneTemplateMemoryComponent {
             isDefault: true,
         },
         BROKEN_LINKS: {
-            query: 'ISNOTNULL:"ccm:location_status" AND NOT @ccm\\:location_status:"200"',
+            index: '-workspace-',
+            query: workspaceDsl({
+                bool: {
+                    must: [{ exists: { field: 'properties.ccm:location_status' } }],
+                    must_not: [{ term: { 'properties.ccm:location_status': '200' } }],
+                },
+            }),
             properties: [
-                'sys:node-uuid',
                 'cm:name',
                 'cclom:title',
                 'cm:created',
@@ -95,13 +130,112 @@ export class LuceneTemplateMemoryComponent {
             ].join('\n'),
             isDefault: true,
         },
+        MISSING_LICENSE: {
+            index: '-workspace-',
+            query: workspaceDsl({
+                bool: {
+                    must: [{ term: { type: 'ccm:io' } }],
+                    must_not: [
+                        { exists: { field: 'properties.ccm:commonlicense_key' } },
+                        { term: { aspects: 'ccm:io_childobject' } },
+                        { term: { aspects: 'ccm:collection_io_reference' } },
+                    ],
+                },
+            }),
+            properties: [
+                'cm:name',
+                'cclom:title',
+                'cm:creator',
+                'cm:created',
+                'cm:modified',
+                'ccm:replicationsource',
+            ].join('\n'),
+            isDefault: true,
+        },
+        PUBLISHED_COPIES: {
+            index: '-workspace-',
+            query: workspaceDsl({ exists: { field: 'properties.ccm:published_original' } }),
+            properties: [
+                'cm:name',
+                'cclom:title',
+                'ccm:published_original',
+                'ccm:published_date',
+                'ccm:published_handle_id',
+                'ccm:published_doi_id',
+                'cm:creator',
+            ].join('\n'),
+            isDefault: true,
+        },
+        COLLECTIONS: {
+            index: '-workspace-',
+            query: workspaceDsl({
+                bool: {
+                    must: [{ term: { type: 'ccm:map' } }, { term: { aspects: 'ccm:collection' } }],
+                },
+            }),
+            properties: [
+                'cm:name',
+                'cclom:title',
+                'ccm:collectiontype',
+                'ccm:collectionscope',
+                'ccm:collection_pinned_status',
+                'cm:creator',
+                'cm:created',
+                'cm:modified',
+                'parent::cm:name',
+            ].join('\n'),
+            isDefault: true,
+        },
+        IMPORTED_BY_SOURCE: {
+            index: '-workspace-',
+            query: workspaceDsl({ term: { 'properties.ccm:replicationsource.keyword': 'source' } }),
+            properties: [
+                'cm:name',
+                'cclom:title',
+                'ccm:replicationsource',
+                'ccm:replicationsourceid',
+                'ccm:replicationsourcetimestamp',
+                'ccm:importblocked',
+                'cm:created',
+                'cm:modified',
+            ].join('\n'),
+            isDefault: true,
+        },
+        INACTIVE_PERSONS: {
+            index: '-authorities-',
+            query: dsl({
+                bool: {
+                    must: [{ term: { type: 'cm:person' } }],
+                    should: [
+                        { range: { 'properties.cm:esLastLogin': { lt: 'now-1y' } } },
+                        {
+                            bool: {
+                                must_not: [{ exists: { field: 'properties.cm:esLastLogin' } }],
+                            },
+                        },
+                    ],
+                    minimum_should_match: 1,
+                },
+            }),
+            properties: [
+                'cm:userName',
+                'cm:firstName',
+                'cm:lastName',
+                'cm:email',
+                'cm:esLastLogin',
+                'cm:created',
+            ].join('\n'),
+            isDefault: true,
+        },
     };
 
     @Input() query: string;
     @Input() properties: string;
+    @Input() index: string;
 
     @Output() queryChange = new EventEmitter<string>();
     @Output() propertiesChange = new EventEmitter<string>();
+    @Output() indexChange = new EventEmitter<string>();
 
     templates: LuceneTemplates;
     selectedTemplate: string;
@@ -152,6 +286,7 @@ export class LuceneTemplateMemoryComponent {
             this.templates[this.newTemplateName] = {
                 query: this.query,
                 properties: this.properties,
+                index: this.index,
             };
             this.updateStorage();
             this.selectedTemplate = this.newTemplateName;
@@ -170,6 +305,8 @@ export class LuceneTemplateMemoryComponent {
         this.queryChange.emit(this.query);
         this.properties = this.templates[key].properties;
         this.propertiesChange.emit(this.properties);
+        this.index = this.templates[key].index;
+        this.indexChange.emit(this.index);
     }
 
     async confirmUpdateTemplate(template: string): Promise<boolean> {
@@ -218,6 +355,7 @@ export class LuceneTemplateMemoryComponent {
         this.templates[template] = {
             query: this.query,
             properties: this.properties,
+            index: this.index,
         };
         this.updateStorage();
     }

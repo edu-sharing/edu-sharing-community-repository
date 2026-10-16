@@ -21,6 +21,7 @@
           @if (customUrl && customUrl(node.data)) {
           <a
             [href]="customUrl(node.data)"
+            [esTopicLink]="node.data"
             (click)="$event.stopPropagation()"
             class="item-link cursor-pointer"
             tabindex="-1"
@@ -113,6 +114,7 @@
           @if (customUrl && customUrl(node.data)) {
           <a
             [href]="customUrl(node.data)"
+            [esTopicLink]="node.data"
             (click)="$event.stopPropagation()"
             class="item-link cursor-pointer"
             tabindex="-1"

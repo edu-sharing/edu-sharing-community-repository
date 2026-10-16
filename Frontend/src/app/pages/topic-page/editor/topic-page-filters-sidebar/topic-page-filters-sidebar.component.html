@@ -1,26 +1,48 @@
-<div class="filter-bar-container mat-elevation-z3">
-  <div class="filter-bar-heading">
-    <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
-    @if (hasFilters()) {
-    <button class="filter-bar-reset-button" mat-button (click)="resetFilters()">
-      <i esIcon="undo"></i>
-      {{ 'CLEAR_FILTERS' | translate }}
-    </button>
-    }
-    <button class="filter-bar-close-button" mat-icon-button (click)="closeFilterBar()">
-      <i esIcon="close" [aria]="true"></i>
-    </button>
-  </div>
-  <div class="filter-bar-body">
-    <es-mds-editor-wrapper
-      class="filter-bar-editor-wrapper"
-      groupId="search_topic_page"
-      [repository]="HOME_REPOSITORY"
-      [setId]="genericWidgetGlobalService.getDefaultMds()"
-      [embedded]="true"
-      [currentValues]="currentValues"
-      (currentValuesChange)="applySearchFilters($event)"
-      mode="search"
-    ></es-mds-editor-wrapper>
+<!-- On a narrow screen the same filters open as a dialog instead of this card -->
+@if (!isMobileScreen()) {
+<div
+  class="filter-bar-resizable"
+  esResizableSidenav
+  position="start"
+  storageKey="TOPIC_PAGE_SIDENAV_LEFT_WIDTH"
+  [defaultWidthPx]="319"
+  [minWidth]="0"
+  [minWidthPx]="275"
+  [maxWidthPx]="619"
+>
+  <div class="filter-bar-container">
+    <div class="filter-bar-heading">
+      <h2 class="filter-bar-title">{{ 'SEARCH.FILTERS' | translate }}</h2>
+      <ng-container [ngTemplateOutlet]="resetButtonTemplate"></ng-container>
+      <button class="filter-bar-close-button" mat-icon-button (click)="closeFilterBar()">
+        <i esIcon="close" [aria]="true"></i>
+      </button>
+    </div>
+    <div class="filter-bar-body">
+      <ng-container [ngTemplateOutlet]="filtersTemplate"></ng-container>
+    </div>
   </div>
 </div>
+}
+
+<ng-template #filtersTemplate>
+  <es-mds-editor-wrapper
+    class="filter-bar-editor-wrapper"
+    groupId="search_topic_page"
+    [repository]="HOME_REPOSITORY"
+    [setId]="genericWidgetGlobalService.getDefaultMds()"
+    [embedded]="true"
+    [currentValues]="currentValues"
+    (currentValuesChange)="applySearchFilters($event)"
+    mode="search"
+  ></es-mds-editor-wrapper>
+</ng-template>
+
+<ng-template #resetButtonTemplate>
+  @if (hasFilters()) {
+  <button class="filter-bar-reset-button" mat-button (click)="resetFilters()">
+    <i esIcon="undo"></i>
+    {{ 'CLEAR_FILTERS' | translate }}
+  </button>
+  }
+</ng-template>

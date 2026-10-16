@@ -127,6 +127,11 @@ export { RefDashboardShortcutEntry } from './api/models/ref-dashboard-shortcut-e
 export { RefDashboardShortcut } from './api/models/ref-dashboard-shortcut';
 export { ShortcutConfig } from './api/models/shortcut-config';
 export { ShortcutConfigEntry } from './api/models/shortcut-config-entry';
+export { MdsQueryDebugCriterion } from './api/models/mds-query-debug-criterion';
+export { MdsQueryDebugParameters } from './api/models/mds-query-debug-parameters';
+export { MdsQueryDebugResult } from './api/models/mds-query-debug-result';
+export { MdsQueryDebugValueMapping } from './api/models/mds-query-debug-value-mapping';
+export { DashboardSwimlaneEntry } from './api/models/dashboard-swimlane-entry';
 export { Statistics } from './api/models/statistics';
 export { StatisticsGroup } from './api/models/statistics-group';
 export { StreamEntry } from './api/models/stream-entry';

@@ -50,7 +50,8 @@
       (click)="confirmUpdateTemplate(selectedTemplate)"
       [disabled]="
         query === templates[selectedTemplate].query &&
-        properties === templates[selectedTemplate].properties
+        properties === templates[selectedTemplate].properties &&
+        index === templates[selectedTemplate].index
       "
     >
       {{

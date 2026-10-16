@@ -136,17 +136,6 @@ es-listTable {
         display: flex;
         gap: 10px;
     }
-    .export-properties-mode {
-        margin-bottom: 20px;
-    }
-    .export-properties-list {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        max-height: 260px;
-        overflow-y: auto;
-        margin-bottom: 20px;
-    }
 }
 :host ::ng-deep {
     .mat-tab-body {

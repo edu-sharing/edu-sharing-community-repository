@@ -1,0 +1,367 @@
+<div class="heading">
+  <i class="material-icons">search</i><span>{{ 'ADMIN.BROWSER.NODE_BROWSER' | translate }}</span>
+</div>
+<div class="inputGroupGrow">
+  <div class="info">{{ 'ADMIN.BROWSER.MODE' | translate }}</div>
+  <mat-form-field>
+    <mat-select [(ngModel)]="lucene.mode">
+      <mat-option value="NODEREF">{{ 'ADMIN.BROWSER.MODE_NODEREF' | translate }}</mat-option>
+      <mat-option value="ELASTIC">{{ 'ADMIN.BROWSER.MODE_ELASTIC' | translate }}</mat-option>
+      <mat-option value="INSPECT">{{ 'ADMIN.BROWSER.MODE_INSPECT' | translate }}</mat-option>
+      <mat-option value="MDS">{{ 'ADMIN.BROWSER.MDS_DEBUG.MODE' | translate }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<mat-autocomplete #indexAutocomplete="matAutocomplete">
+  @for (index of elasticIndexOptions; track index.value) {
+  <mat-option [value]="index.value">
+    <div class="index-option">
+      <span>{{ index.value }}</span>
+      @if (index.description) {
+      <small class="index-description">{{ index.description }}</small>
+      }
+    </div>
+  </mat-option>
+  }
+</mat-autocomplete>
+<ng-template #indexInput>
+  <mat-form-field class="dsl-index">
+    <mat-label>{{ 'ADMIN.BROWSER.ELASTIC_INDEX' | translate }}</mat-label>
+    <input
+      matInput
+      name="elasticIndex"
+      [placeholder]="defaultElasticIndex"
+      [ngModel]="lucene.index"
+      (ngModelChange)="setIndex($event)"
+      [matAutocomplete]="indexAutocomplete"
+    />
+    <button
+      matSuffix
+      mat-icon-button
+      type="button"
+      [attr.aria-label]="'ADMIN.BROWSER.ELASTIC_INDEX_RELOAD' | translate"
+      [matTooltip]="'ADMIN.BROWSER.ELASTIC_INDEX_RELOAD' | translate"
+      (click)="loadElasticIndices()"
+    >
+      <i esIcon="refresh"></i>
+    </button>
+    <mat-hint>{{ 'ADMIN.BROWSER.ELASTIC_INDEX_HINT' | translate }}</mat-hint>
+  </mat-form-field>
+</ng-template>
+@if (lucene.mode === 'NODEREF') {
+<div class="group">
+  <div class="inputGroupGrow">
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
+      <input
+        matInput
+        type="text"
+        name="noderef"
+        [(ngModel)]="lucene.noderef"
+        placeholder="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+      />
+    </mat-form-field>
+  </div>
+  <button mat-flat-button color="primary" (click)="searchNoderef()">
+    {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
+  </button>
+</div>
+} @if (lucene.mode === 'INSPECT') {
+<div class="group">
+  <div class="inputGroupGrow">
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.NODEREF' | translate }}</mat-label>
+      <input
+        matInput
+        type="text"
+        name="inspectNodeId"
+        [(ngModel)]="lucene.noderef"
+        placeholder="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+      />
+    </mat-form-field>
+  </div>
+  <div class="inputGroupGrow">
+    <ng-container *ngTemplateOutlet="indexInput"></ng-container>
+  </div>
+  <button mat-flat-button color="primary" (click)="inspectElasticDocument()">
+    {{ 'ADMIN.BROWSER.INSPECT_START' | translate }}
+  </button>
+</div>
+@if (inspection) {
+<div class="elastic-inspection">
+  @if (!inspection.existsInRepository || inspection.documents?.length !== 1) {
+  <ul class="inspection-errors">
+    @if (!inspection.existsInRepository) {
+    <li>{{ 'ADMIN.BROWSER.INSPECT_MISSING' | translate }}</li>
+    } @if (inspection.documents?.length !== 1) {
+    <li>
+      {{
+        'ADMIN.BROWSER.INSPECT_DOCUMENTS'
+          | translate : { count: inspection.documents?.length ?? 0, index: inspection.index }
+      }}
+    </li>
+    }
+  </ul>
+  }
+  <mat-slide-toggle [(ngModel)]="inspectOnlyDifferences" name="inspectOnlyDifferences">
+    {{ 'ADMIN.BROWSER.INSPECT_ONLY_DIFFERENCES' | translate }}
+  </mat-slide-toggle>
+  <table class="inspection-table">
+    <thead>
+      <tr>
+        <th>{{ 'ADMIN.BROWSER.INSPECT_PROPERTY' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.INSPECT_REPOSITORY' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.INSPECT_INDEX' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.INSPECT_STATUS' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (diff of getInspectionProperties(); track diff.property) {
+      <tr [class]="'inspection-status-' + diff.status">
+        <td>{{ diff.property }}</td>
+        <td>{{ diff.repositoryValue?.join(', ') }}</td>
+        <td>{{ diff.indexValue?.join(', ') }}</td>
+        <td>{{ 'ADMIN.BROWSER.INSPECT_STATUS_' + diff.status | translate }}</td>
+      </tr>
+      } @empty {
+      <tr>
+        <td colspan="4">{{ 'ADMIN.BROWSER.INSPECT_NO_DIFFERENCES' | translate }}</td>
+      </tr>
+      }
+    </tbody>
+  </table>
+  @for (document of inspection.documents; track document.index + document.id) {
+  <div class="elastic-response">
+    <label>{{ document.index }} / {{ document.id }}</label>
+    <es-code-editor
+      [options]="elasticResponseCodeOptions"
+      [ngModel]="document.source"
+      [ngModelOptions]="{ standalone: true }"
+    ></es-code-editor>
+    @if (inspectionPreviews[document.index + document.id]; as preview) {
+    <div class="index-preview">
+      <h4 class="mat-heading-4">
+        {{ preview.type }}{{ preview.icon ? ' · icon' : '' }} @if (preview.bytes != null) { ·
+        {{ preview.bytes | formatSize }} } @if (preview.width) { · {{ preview.width }} ×
+        {{ preview.height }} px }
+      </h4>
+      @if (preview.src) {
+      <img
+        #previewImage
+        [src]="preview.src"
+        [alt]="'ADMIN.BROWSER.INSPECT_PREVIEW' | translate"
+        (load)="onPreviewLoaded(preview, previewImage)"
+      />
+      } @else {
+      <span>{{ 'ADMIN.BROWSER.INSPECT_PREVIEW_NONE' | translate }}</span>
+      }
+    </div>
+    }
+  </div>
+  }
+</div>
+} } @if (lucene.mode === 'ELASTIC') {
+<div class="group">
+  <div class="inputGroupGrow">
+    <div class="dsl-query">
+      <ng-container *ngTemplateOutlet="indexInput"></ng-container>
+      <label for="dslQuery">{{ 'ADMIN.BROWSER.DSL_QUERY' | translate }}</label>
+      <es-code-editor
+        [options]="dslCodeOptions"
+        [(ngModel)]="lucene.query"
+        [ngModelOptions]="{ standalone: true }"
+        id="dslQuery"
+      ></es-code-editor>
+    </div>
+  </div>
+  <div class="inputGroupGrow">
+    <div class="info">{{ 'ADMIN.BROWSER.OUTPUT_MODE' | translate }}</div>
+    <mat-radio-group [(ngModel)]="lucene.outputMode">
+      <mat-radio-button name="outputMode" value="view">{{
+        'ADMIN.BROWSER.OUTPUT_MODE_VIEW' | translate
+      }}</mat-radio-button>
+      <mat-radio-button name="outputMode" value="export">{{
+        'ADMIN.BROWSER.OUTPUT_MODE_EXPORT' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  @if (lucene.outputMode === 'view') {
+  <div class="inputGroupGrow">
+    <mat-checkbox
+      [ngModel]="isElasticRaw()"
+      (ngModelChange)="lucene.elasticRaw = $event"
+      [disabled]="isElasticRawEnforced()"
+      name="elasticRawMode"
+      >{{ 'ADMIN.BROWSER.ELASTIC_RAW' | translate }}</mat-checkbox
+    >
+  </div>
+  @if (isElasticRawEnforced()) {
+  <div class="inputGroupGrow">
+    <div class="export-hint">{{ 'ADMIN.BROWSER.ELASTIC_RAW_ENFORCED' | translate }}</div>
+  </div>
+  } } @if (lucene.outputMode === 'view' && !isElasticRaw()) {
+  <div class="inputGroupGrow">
+    <div class="info">{{ 'ADMIN.BROWSER.STORE' | translate }}</div>
+    <mat-radio-group [(ngModel)]="lucene.store">
+      <mat-radio-button name="luceneStore" value="Workspace">Workspace</mat-radio-button>
+      <mat-radio-button name="luceneStore" value="Archive">Archive</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <div class="inputGroupGrow">
+    <div class="info">{{ 'ADMIN.BROWSER.LUCENE_AUTHORITIES' | translate }}</div>
+    <es-authority-search-input
+      [globalSearchAllowed]="true"
+      [placeholder]="'ADMIN.BROWSER.ADD_AUTHORITY'"
+      [allowAny]="true"
+      (chooseAuthority)="addLuceneAuthority($event)"
+    ></es-authority-search-input>
+  </div>
+  @if (lucene.authorities && lucene.authorities.length) {
+  <div class="inputGroupGrow luceneAuthorities">
+    <div></div>
+    <mat-chip-listbox>
+      @for (authority of lucene.authorities; track authority) {
+      <mat-chip-option (removed)="removeLuceneAuthority(authority)">
+        <span>{{ authority | authorityName }}</span>
+        <i matChipRemove esIcon="cancel"></i>
+      </mat-chip-option>
+      }
+    </mat-chip-listbox>
+  </div>
+  } } @if (lucene.outputMode === 'export') {
+  <div class="inputGroupGrow">
+    <div class="info">{{ 'ADMIN.BROWSER.EXPORT_FORMAT' | translate }}</div>
+    <mat-radio-group [(ngModel)]="lucene.exportFormat">
+      <mat-radio-button name="exportFormat" value="csv">{{
+        'ADMIN.BROWSER.EXPORT_FORMAT_CSV' | translate
+      }}</mat-radio-button>
+      <mat-radio-button name="exportFormat" value="json">{{
+        'ADMIN.BROWSER.EXPORT_FORMAT_JSON' | translate
+      }}</mat-radio-button>
+      <mat-radio-button name="exportFormat" value="dump">{{
+        'ADMIN.BROWSER.EXPORT_FORMAT_DUMP' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  @if (lucene.exportFormat === 'dump') {
+  <div class="inputGroupGrow">
+    <div class="export-hint">{{ 'ADMIN.BROWSER.EXPORT_FORMAT_DUMP_HINT' | translate }}</div>
+  </div>
+  } @else {
+  <div class="inputGroupGrow">
+    <es-admin-export-properties
+      [(properties)]="lucene.properties"
+      [columns]="exportColumns"
+      label="ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES"
+      hint="ADMIN.BROWSER.LUCENE_EXPORT_PROPERTIES_HINT"
+    ></es-admin-export-properties>
+  </div>
+  <div class="inputGroupGrow">
+    <div class="info">{{ 'ADMIN.BROWSER.EXPORT_PROPERTY_SOURCE' | translate }}</div>
+    <mat-radio-group [(ngModel)]="lucene.propertySource">
+      <mat-radio-button name="propertySource" value="elastic">{{
+        'ADMIN.BROWSER.EXPORT_PROPERTY_SOURCE_ELASTIC' | translate
+      }}</mat-radio-button>
+      <mat-radio-button name="propertySource" value="alfresco">{{
+        'ADMIN.BROWSER.EXPORT_PROPERTY_SOURCE_ALFRESCO' | translate
+      }}</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  }
+  <div class="inputGroupGrow">
+    <mat-checkbox [(ngModel)]="lucene.exportAsync" name="exportAsync">{{
+      'ADMIN.BROWSER.EXPORT_ASYNC' | translate
+    }}</mat-checkbox>
+  </div>
+  <div class="inputGroupGrow">
+    <div>
+      <button mat-flat-button color="primary" (click)="exportElastic()">
+        {{ 'ADMIN.BROWSER.LUCENE_EXPORT_START' | translate }}
+      </button>
+    </div>
+  </div>
+  } @if (lucene.outputMode === 'view') {
+  <div class="inputGroupGrow lucenePaging">
+    @if (!isElasticRaw()) {
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+      <input matInput type="number" name="luceneOffset" [(ngModel)]="lucene.offset" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+      <input matInput type="number" name="luceneCount" [(ngModel)]="lucene.count" />
+    </mat-form-field>
+    }
+    <div>
+      <button mat-flat-button color="primary" (click)="searchNodes()">
+        {{ 'ADMIN.BROWSER.LUCENE_START' | translate }}
+      </button>
+    </div>
+  </div>
+  }
+</div>
+} @if (lucene.mode === 'MDS') {
+<div class="inputGroupGrow lucenePaging">
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.BROWSER.LUCENE_OFFSET' | translate }}</mat-label>
+    <input matInput type="number" name="mdsOffset" [(ngModel)]="lucene.offset" />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'ADMIN.BROWSER.LUCENE_COUNT' | translate }}</mat-label>
+    <input matInput type="number" name="mdsCount" [(ngModel)]="lucene.count" />
+  </mat-form-field>
+</div>
+<es-mds-query-debugger
+  [offset]="lucene.offset"
+  [count]="lucene.count"
+  (openDsl)="openMdsDebugDsl($event)"
+  (searchResult)="onMdsDebugResult($event)"
+></es-mds-query-debugger>
+} @if (((lucene.mode === 'ELASTIC' && lucene.outputMode === 'view' && isElasticRaw()) || lucene.mode
+=== 'MDS') && elasticResponse) {
+<div class="elastic-response">
+  <label for="elasticResponseLabel">{{ 'ADMIN.BROWSER.ELASTIC_RESPONSE' | translate }}</label>
+  @if (elasticResponseStats) {
+  <div class="elastic-response-stats">
+    {{ 'ADMIN.BROWSER.ELASTIC_RESPONSE_STATS' | translate : elasticResponseStats }}
+  </div>
+  }
+  <es-code-editor
+    [options]="elasticResponseCodeOptions"
+    [ngModel]="elasticResponse.elasticResponse"
+    [ngModelOptions]="{ standalone: true }"
+    id="elasticResponseLabel"
+  ></es-code-editor>
+</div>
+} @if (lucene.mode === 'NODEREF' || lucene.mode === 'MDS' || (lucene.mode === 'ELASTIC' &&
+lucene.outputMode === 'view')) {
+<div class="search-list">
+  <es-actionbar #actionbarComponent></es-actionbar>
+  <es-node-entries-wrapper
+    #searchResults
+    [dataSource]="searchResponse"
+    [scope]="SCOPES.Admin"
+    [columns]="searchColumns"
+    [configureColumns]="true"
+    [displayType]="lucene.displayType"
+    (displayTypeChange)="setDisplayType($event)"
+    [elementInteractionType]="InteractionType.Emitter"
+    (clickItem)="debugNode($event.element)"
+  >
+    <ng-template #empty>
+      <div class="no-results">
+        {{ 'WORKSPACE.NO_MATCHING_ITEMS' | translate }}
+      </div>
+    </ng-template>
+  </es-node-entries-wrapper>
+</div>
+} @if (lucene.mode === 'ELASTIC') {
+<es-lucene-template-memory
+  [(query)]="lucene.query"
+  [(properties)]="lucene.properties"
+  [index]="lucene.index"
+  (indexChange)="setIndex($event)"
+></es-lucene-template-memory>
+} @if (globalProgress) {
+<es-global-progress></es-global-progress>
+}

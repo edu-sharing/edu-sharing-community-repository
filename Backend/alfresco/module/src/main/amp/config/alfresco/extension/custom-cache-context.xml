@@ -42,10 +42,6 @@
         <constructor-arg value="cache.eduSharingJobsListCache"/>
     </bean>
 
-    <bean name="eduSharingApplicationInfoCache" factory-bean="cacheFactory" factory-method="createCache">
-        <constructor-arg value="cache.eduSharingApplicationInfoCache"/>
-    </bean>
-
     <bean name="eduSharingMdsCache" factory-bean="cacheFactory" factory-method="createCache">
         <constructor-arg value="cache.eduSharingMdsCache"/>
     </bean>

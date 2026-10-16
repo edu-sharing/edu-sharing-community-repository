@@ -10,8 +10,10 @@ import {
     ViewChild,
     inject,
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { ActivatedRoute, Params } from '@angular/router';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { UIHelper } from '../../../core-ui-module/ui-helper';
 import { ConfigEntry } from '../../../services/node-helper.service';
 import { MainMenuEntriesService } from '../main-menu-entries.service';
 import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
@@ -24,6 +26,7 @@ import { DropdownComponent, OptionItem } from 'ngx-edu-sharing-ui';
 })
 export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDestroy {
     private mainMenuEntries = inject(MainMenuEntriesService);
+    private route = inject(ActivatedRoute);
 
     @ViewChild('dropdown', { static: true }) dropdown: DropdownComponent;
 
@@ -51,14 +54,34 @@ export class MainMenuDropdownComponent implements OnChanges, AfterViewInit, OnDe
     }
 
     private setOptionItems() {
-        this.optionItems$ = this.mainMenuEntries.entries$.pipe(
-            map((entries) => this.toOptionItems(entries)),
-        );
+        this.optionItems$ = combineLatest([
+            this.mainMenuEntries.entries$,
+            this.route.queryParams,
+        ]).pipe(map(([entries, currentParams]) => this.toOptionItems(entries, currentParams)));
     }
 
-    private toOptionItems(entries: ConfigEntry[]): OptionItem[] {
+    private toOptionItems(entries: ConfigEntry[], currentParams: Params): OptionItem[] {
+        const preservedParams: Params = {};
+        for (const key of UIHelper.COPY_URL_PARAMS) {
+            if (currentParams.hasOwnProperty(key)) {
+                preservedParams[key] = currentParams[key];
+            }
+        }
         return entries.map((entry) => {
-            const optionItem = new OptionItem(entry.name, entry.icon, entry.open);
+            // The router navigates in-app links itself, so the callback only reports the switch.
+            const optionItem = new OptionItem(
+                entry.name,
+                entry.icon,
+                entry.routerLink ? () => entry.notifyViewSwitched?.() : entry.open,
+            );
+            if (entry.routerLink) {
+                optionItem.link = {
+                    routerLink: entry.routerLink,
+                    queryParams: { ...preservedParams, ...entry.queryParams },
+                };
+            } else if (entry.url) {
+                optionItem.link = { href: entry.url, openInNew: entry.openInNew };
+            }
             optionItem.isSeparate = entry.isSeparate;
             optionItem.isEnabled = !entry.isDisabled;
             optionItem.isSelected = this.currentScope === entry.scope;

@@ -9,6 +9,7 @@
     justify-content: flex-start;
     border-radius: 0;
     color: $textMain;
+    text-decoration: none;
     transition: all $transitionNormal;
     &:hover {
         background-color: $workspaceTreeSelectedBackground;

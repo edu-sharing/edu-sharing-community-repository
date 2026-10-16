@@ -161,6 +161,13 @@ export class NodeInfoDialogComponent implements OnInit, AfterViewInit {
         });
         this.dialogRef.close();
     }
+    /** open the node in the index inspector of the admin node browser (`AdminNodeBrowserComponent.QUERY_PARAM_INSPECT`) */
+    openIndexInspector(node: Node) {
+        void this.router.navigate([UIConstants.ROUTER_PREFIX, 'admin'], {
+            queryParams: { mode: 'BROWSER', inspect: node.ref.id },
+        });
+        this.dialogRef.close();
+    }
     openBreadcrumb(pos: number) {
         let node = this.breadcrumbsService.breadcrumbs$.value[pos - 1];
         this.breadcrumbsService.setNodePath([]);

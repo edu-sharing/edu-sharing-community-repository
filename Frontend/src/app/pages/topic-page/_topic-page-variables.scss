@@ -129,7 +129,8 @@ $secondary-text: vars.$textLight; // N-35
 // font-family
 $primary-font-family: vars.$primaryFontFamily;
 // note: open_sansbold is not provided at the moment
-$brand-font-family: 'Montserrat' !default;
+// Montserrat is not shipped with the app, the primary font stands in wherever it is unavailable
+$brand-font-family: 'Montserrat', $primary-font-family !default;
 // font-size (partly copied from variables-scss of Edu-Sharing)
 $font-size-x-large: vars.$fontSizeXLarge;
 $font-size-large: vars.$fontSizeLarge;

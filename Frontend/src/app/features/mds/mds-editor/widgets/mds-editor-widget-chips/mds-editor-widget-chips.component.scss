@@ -44,6 +44,10 @@ mat-chip {
         right: -10px;
     }
 }
+// ARIA-only wrapper, keeps the flex layout untouched
+.input-cell {
+    display: contents;
+}
 .chip-grid {
     // spacing for drop-down button
     padding-right: 35px;
