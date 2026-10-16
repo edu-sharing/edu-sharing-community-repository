@@ -107,6 +107,7 @@ import {
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
 import { TopicPageCreateOptionsService } from '../shared/services/topic-page-create-options.service';
+import { TopicPageGlobalTemplatesService } from '../shared/services/topic-page-global-templates.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import { TopicPageShareService } from '../shared/services/topic-page-share.service';
 import {
@@ -176,7 +177,6 @@ import {
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
-    isDefaultGlobalTemplate,
     markForCopy,
     markForRender,
     mergeConfig,
@@ -251,6 +251,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         TopicPageHelperService,
         TopicPageEventsService,
         TopicPageCreateOptionsService,
+        TopicPageGlobalTemplatesService,
         TopicPageShareService,
         TopicPageVariantPreviewService,
     ],
@@ -281,6 +282,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageCreateOptionsService = inject(TopicPageCreateOptionsService);
+    private topicPageGlobalTemplatesService = inject(TopicPageGlobalTemplatesService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private topicPageShareService = inject(TopicPageShareService);
     private variantPreviewService = inject(TopicPageVariantPreviewService);
@@ -357,7 +359,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // check for administration privileges
             this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
             // check whether the user may add children to the global templates folder
-            await this.updateGlobalTemplatesPermission();
+            await this.topicPageGlobalTemplatesService.updatePermission();
         });
         // subscribe to changes on the search input + search filters
         this.searchInputSubject
@@ -469,11 +471,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
-    canAddToGlobalTemplates: WritableSignal<boolean> = signal(false);
+    canAddToGlobalTemplates: Signal<boolean> = this.topicPageGlobalTemplatesService.canAdd;
     // set while a global template is edited in place of the collection's page; the collection
     // only provides the topic and sub-collections the preview is resolved for
     globalTemplateNode: WritableSignal<Node | null> = signal(null);
-    private globalTemplatesFolderId: WritableSignal<string | null> = signal(null);
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
     readonly sidebarOpen: Signal<boolean> = computed(
@@ -547,12 +548,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     });
     // the global template the page was created from; the collection's own template is edited in
     // template mode and the repository-maintained default template not at all
-    linkedGlobalTemplate: Signal<Node | null> = computed(() => {
-        const templateNode: Node = this.templateVariantNode();
-        const folderId: string = this.globalTemplatesFolderId();
-        const isGlobal: boolean = !!folderId && templateNode?.parent?.id === folderId;
-        return isGlobal && !isDefaultGlobalTemplate(templateNode) ? templateNode : null;
-    });
+    linkedGlobalTemplate: Signal<Node | null> = computed(() =>
+        this.topicPageGlobalTemplatesService.asLinkedGlobalTemplate(this.templateVariantNode()),
+    );
     canEditLinkedGlobalTemplate: Signal<boolean> = computed(() => {
         const templateNode: Node = this.linkedGlobalTemplate();
         return (
@@ -3858,75 +3856,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // at an outdated node object — the copy would then be built from stale metadata
             const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
             this.pageVariantNode.set(sourceNode);
-            // build the properties of the new global template based on the source variant. The
-            // title is taken over unchanged: a copy suffix only obscures which variant a global
-            // template originated from (and stacks up on every republish)
-            const properties: { [key: string]: string | string[] } =
-                await this.topicPageHelperService.retrievePageVariantProperties(sourceNode);
-            // overlay the title that was just persisted: it is the value the user entered, so the
-            // published template must carry it regardless of the state of the source node
-            const changedTitle: string | string[] = changesMap?.get(RestConstants.LOM_PROP_TITLE);
-            if (changedTitle) {
-                properties[RestConstants.LOM_PROP_TITLE] = Array.isArray(changedTitle)
-                    ? changedTitle[0]
-                    : changedTitle;
-            }
-            // mark as a (root) template with an initial version; the template ref is set to the
-            // new node's own ID once it has been created
-            properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
-                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
-            // create the global template node as a child of the global templates folder
-            let globalTemplateNode: Node = await this.topicPageHelperService.createChild(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-                RestConstants.CCM_TYPE_MAP,
-                sourceNode.name.replace(
-                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
-                    '',
-                ) +
-                    '_' +
-                    uuidv4(),
-                DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
-                properties,
-            );
-            // set the template ref to the new node's own ID (root template self-reference)
-            globalTemplateNode =
-                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                    retrieveNodeId(globalTemplateNode),
-                    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                    prependWorkspacePrefix(retrieveNodeId(globalTemplateNode)),
-                );
-            // workaround: copy profiling properties separately to avoid crashes
-            const updatedTemplateNode = await this.copyProfilingProperties(
+            const globalTemplateNode: Node = await this.topicPageGlobalTemplatesService.createFrom(
                 sourceNode,
-                retrieveNodeId(globalTemplateNode),
-            );
-            if (updatedTemplateNode) {
-                globalTemplateNode = updatedTemplateNode;
-            }
-            // overlay the parameter values that were just persisted (same reason as the title;
-            // written separately from the creation for the same reason as the profiling props)
-            const templateWithChanges: Node = await this.applyPersistedParametersToNode(
-                retrieveNodeId(globalTemplateNode),
                 changesMap,
+                {
+                    copyProfilingProperties: (node: Node, targetNodeId: string) =>
+                        this.copyProfilingProperties(node, targetNodeId),
+                    applyPersistedParametersToNode: (
+                        targetNodeId: string,
+                        changes: Map<string, string | string[]>,
+                    ) => this.applyPersistedParametersToNode(targetNodeId, changes),
+                    persistRelinkedVariantConfig: (
+                        variantConfig: PageVariantConfig,
+                        targetNode: Node,
+                    ) => this.persistRelinkedVariantConfig(variantConfig, targetNode),
+                },
             );
-            if (templateWithChanges) {
-                globalTemplateNode = templateWithChanges;
-            }
-            // copy + relink the swimlane widget nodes and persist the config. A public template
-            // is a clean skeleton: editorial members (breadcrumb) and topic header are dropped, and
-            // all custom colors (anchorItemColor, topicColor) are removed — only the swimlane colors
-            // remain. The breadcrumb/header are NOT propagated here (unlike parent-collection inheritance).
-            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
-            markForCopy(variantConfig);
-            delete variantConfig.structure.breadcrumbNodeId;
-            delete variantConfig.structure.headerNodeId;
-            delete variantConfig.structure.propagatedBreadcrumbNodeId;
-            delete variantConfig.structure.propagatedHeaderNodeId;
-            delete variantConfig.structure.anchorItemColor;
-            delete variantConfig.structure.topicColor;
-            await this.persistRelinkedVariantConfig(variantConfig, globalTemplateNode);
             // update the source variant: repoint its template ref to the new global template and
             // reset its template version so it tracks the new foundation
             await this.topicPageHelperService.setProperty(
@@ -3960,29 +3905,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.topicPageHelperService.displayErrorToast();
         } finally {
             this.endEditing();
-        }
-    }
-
-    /**
-     * Updates whether the current user is allowed to add nodes to the global templates folder and
-     * keeps its ID to recognize the global templates among the templates of a page.
-     */
-    private async updateGlobalTemplatesPermission(): Promise<void> {
-        try {
-            const folderNode: Node = await this.topicPageHelperService.getNode(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-            );
-            this.globalTemplatesFolderId.set(retrieveNodeId(folderNode));
-            this.canAddToGlobalTemplates.set(
-                this.nodeHelperService.getNodesRight(
-                    [folderNode],
-                    ApiRestConstants.ACCESS_ADD_CHILDREN,
-                ),
-            );
-        } catch {
-            // folder missing or no access
-            this.globalTemplatesFolderId.set(null);
-            this.canAddToGlobalTemplates.set(false);
         }
     }
 
