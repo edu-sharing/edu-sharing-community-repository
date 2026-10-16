@@ -405,9 +405,9 @@ export class TopicPageHelperService {
      * Retrieves a node referenced by a stored config, resolving to null without the global error
      * message if it was deleted or is no longer readable. Other errors are rethrown.
      */
-    async getNodeIfAvailable(nodeId: string): Promise<Node | null> {
+    async getNodeIfAvailable(nodeId: string, uncached: boolean = false): Promise<Node | null> {
         try {
-            return await this.getNode(nodeId);
+            return uncached ? await this.getNodeUncached(nodeId) : await this.getNode(nodeId);
         } catch (error) {
             if (
                 [RestConstants.HTTP_NOT_FOUND, RestConstants.HTTP_FORBIDDEN].includes(error?.status)

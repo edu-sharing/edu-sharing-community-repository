@@ -48,6 +48,8 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     templateMode: InputSignal<boolean> = input(false);
     templateNode: InputSignal<Node> = input<Node>(null);
     templateUpdateAvailable: InputSignal<boolean> = input(false);
+    // the referenced template is no longer available, so there is nothing to regenerate from
+    templateMissing: InputSignal<boolean> = input(false);
     @Input() viewIcons: string[] = [];
     @Input() viewLabels: string[] = [];
     @Input() viewModes: string[] = ['checkbox'];
@@ -87,6 +89,11 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
         });
     });
     regenerateTooltip: Signal<string> = computed(() => {
+        if (this.templateMissing()) {
+            return this.translateService.instant(
+                `${this.i18nPrefix}TEMPLATE_UPDATE.TEMPLATE_MISSING`,
+            );
+        }
         if (this.templateUpdateAvailable()) {
             return this.translateService.instant(
                 `${this.i18nPrefix}TEMPLATE_UPDATE.TOOLTIP_AVAILABLE`,

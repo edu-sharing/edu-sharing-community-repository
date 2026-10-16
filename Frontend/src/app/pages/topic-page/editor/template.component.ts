@@ -516,6 +516,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageVariantNodeIndex: number = 0;
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
+    // set while the page variant references a template that is no longer available
+    templateMissing: WritableSignal<boolean> = signal(false);
     templateUpdateAvailable: Signal<boolean> = computed(() => {
         const templateNode: Node = this.templateVariantNode();
         const pageVariantNode: Node = this.pageVariantNode();
@@ -3189,12 +3191,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private async loadTemplateVariantNode(): Promise<void> {
         if (!this.pageVariantNode()) {
             this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
             return;
         }
         const templateRef: string =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0];
         if (!templateRef) {
             this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
             return;
         }
         const pageVariantNode: Node = this.pageVariantNode();
@@ -3208,8 +3212,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 return;
             }
             this.templateVariantNode.set(templateNode);
+            this.templateMissing.set(!templateNode);
         } catch {
             this.templateVariantNode.set(null);
+            this.templateMissing.set(false);
         }
     }
 
@@ -3220,10 +3226,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * a new one (preserving the node ID and MDS properties).
      */
     async regeneratePageVariant(): Promise<void> {
-        const templateNode = this.templateVariantNode();
-        if (!templateNode || !this.pageVariantNode() || this.variantPreview()) {
+        if (!this.templateVariantNode() || !this.pageVariantNode() || this.variantPreview()) {
             return;
         }
+        // re-read, as the template may have been deleted or changed since the variant was loaded
+        const templateNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
+            retrieveNodeId(this.templateVariantNode()),
+            true,
+        );
+        if (!templateNode) {
+            this.templateVariantNode.set(null);
+            this.templateMissing.set(true);
+            this.toast.error(
+                null,
+                this.i18nPrefix + 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.TEMPLATE_MISSING',
+            );
+            return;
+        }
+        this.templateVariantNode.set(templateNode);
 
         const i18nExtension: string = 'SIDE_MENU.CONFIG_PAGE_VARIANT.TEMPLATE_UPDATE.';
         const dialogRef = await this.dialogs.openGenericDialog({
