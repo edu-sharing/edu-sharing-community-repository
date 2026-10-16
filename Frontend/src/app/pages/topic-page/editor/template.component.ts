@@ -1,5 +1,4 @@
 import { CdkAccordionItem, CdkAccordionModule } from '@angular/cdk/accordion';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { PlatformLocation } from '@angular/common';
 import {
@@ -110,6 +109,7 @@ import {
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
+import { TopicPageShareService } from '../shared/services/topic-page-share.service';
 import {
     TopicPageVariantPreviewService,
     VariantPreviewHost,
@@ -246,6 +246,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         OptionsHelperDataService,
         TopicPageHelperService,
         TopicPageEventsService,
+        TopicPageShareService,
         TopicPageVariantPreviewService,
     ],
     selector: 'es-template-page',
@@ -259,7 +260,6 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
 })
 export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
     private aiHelperService = inject(AiHelperService);
-    private clipboard = inject(Clipboard);
     private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
@@ -276,6 +276,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageShareService = inject(TopicPageShareService);
     private variantPreviewService = inject(TopicPageVariantPreviewService);
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
@@ -300,6 +301,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     constructor() {
         this.variantPreviewService.attach(this.variantPreviewHost);
+        this.topicPageShareService.setScrollContainer(
+            (): HTMLElement | undefined => this.scrollContainerRef()?.nativeElement,
+        );
         this.topicPageHelperService.setInPlaceNavigationHandler(
             (collectionId: string, url: string | null): boolean =>
                 this.openTopicInPlace(collectionId, url),
@@ -454,7 +458,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     requestInProgress: WritableSignal<boolean> = signal(false);
     private initializedWithParams: boolean = false;
     private customEventListenersInitialized: boolean = false;
-    private fragmentListenerInitialized: boolean = false;
     private switchedTopic: { collectionId: string; variantId?: string } | null = null;
     private readonly destroyed$ = new Subject<void>();
 
@@ -593,8 +596,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         };
     });
     pageVariantReloadNecessary: boolean = false;
-    qrCodeDialogRef: CardDialogRef;
-    qrCodeUrl: WritableSignal<string> = signal('');
+    qrCodeUrl: Signal<string> = this.topicPageShareService.qrCodeUrl;
     selectedVariantPosition: number = -1;
     showLoadingScreen: Signal<boolean> = computed(
         (): boolean =>
@@ -946,7 +948,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
             // listen to fragment changes to scroll given swimlane ID into view
             // note: setTimeout is necessary for view being loaded first
-            this.initializeFragmentListener();
+            this.topicPageShareService.listenToFragment();
 
             // void this.addCustomMainNavOptions();
         } catch (err) {
@@ -1095,98 +1097,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     await this.bumpTemplateVersionIfNeeded();
                 }
             });
-    }
-
-    /**
-     * Initializes a listener for the fragment part of the current route.
-     * If the fragment part changes, the corresponding element is scrolled into view.
-     */
-    private initializeFragmentListener(): void {
-        // the listener outlives a switch of the topic
-        if (this.fragmentListenerInitialized) {
-            return;
-        }
-        this.fragmentListenerInitialized = true;
-        this.route.fragment
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((urlFragment: string): void => {
-                this.latestUrlFragment = urlFragment;
-                // avoid attempting to scroll when no fragment is specified
-                if (!this.latestUrlFragment) {
-                    this.initialFragmentScrollPerformed = true;
-                    return;
-                }
-                // directly scroll into view if the page is already loaded
-                if (this.initialFragmentScrollPerformed) {
-                    this.scrollElementIntoView();
-                }
-                // otherwise, wait 3 seconds before trying to scroll into view
-                // TODO: this should be replaced by waiting for all widgets being loaded
-                else {
-                    setTimeout((): void => {
-                        this.performScrollAttempts();
-                    }, 3000);
-                }
-            });
-    }
-
-    /**
-     * Performs up to 10 scroll attempts (1 per second) until scrollElementIntoView returns true.
-     */
-    private performScrollAttempts(): void {
-        let attemptCount = 0;
-        const maxAttempts = 10;
-
-        const scrollInterval = setInterval(() => {
-            attemptCount++;
-
-            // attempt to scroll
-            const scrollSuccessully = this.scrollElementIntoView();
-
-            // when successful, stop the interval
-            if (scrollSuccessully) {
-                this.initialFragmentScrollPerformed = true;
-                clearInterval(scrollInterval);
-            }
-            // also stop after reaching the maximum of attempts
-            else if (attemptCount >= maxAttempts) {
-                clearInterval(scrollInterval);
-            }
-        }, 1000);
-    }
-
-    /**
-     * Scrolls the latest URL fragment into view if it exists.
-     */
-    private scrollElementIntoView(): boolean {
-        if (!this.latestUrlFragment) {
-            return false;
-        }
-        const element: HTMLElement = document.getElementById(this.latestUrlFragment);
-        const scrollContainer: HTMLElement = this.scrollContainerRef()?.nativeElement;
-        if (element && scrollContainer) {
-            // scroll only the card's scroll region (not the window), keeping the scroll-margin gap
-            const scrollMargin = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
-            const offsetInContainer =
-                element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top;
-            scrollContainer.scrollTo({
-                top: scrollContainer.scrollTop + offsetInContainer - scrollMargin,
-                behavior: 'smooth',
-            });
-
-            // set focus to element that was scrolled into view
-            if (!element.hasAttribute('tabindex')) {
-                element.setAttribute('tabindex', '-1');
-            }
-
-            window.setTimeout(() => {
-                element.focus({ preventScroll: true });
-            }, 500);
-
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -1945,21 +1855,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      *
      * @param fragment
      */
-    async navigateToFragment(fragment: string): Promise<void> {
-        // use history over router to avoid directly navigating to wrong fragment position
-        history.pushState(null, '', this.retrieveFragmentUrl(fragment));
-        // manually scroll into view
-        this.latestUrlFragment = fragment;
-        this.scrollElementIntoView();
-    }
-
-    /**
-     * Helper function to retrieve the URL to a given fragment.
-     */
-    retrieveFragmentUrl(fragment: string): string {
-        const url = new URL(window.location.href);
-        url.hash = fragment;
-        return url.toString();
+    navigateToFragment(fragment: string): void {
+        this.topicPageShareService.navigateToFragment(fragment);
     }
 
     // SWIMLANE SPECIFIC FUNCTIONS
@@ -2070,25 +1967,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
-        // change link to include current variantId
-        const queryParamsToAddOrOverwrite: Params = {
-            variantId: retrieveNodeId(this.pageVariantNode()),
-        };
-        await this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: queryParamsToAddOrOverwrite,
-            queryParamsHandling: 'merge',
-        });
-        this.qrCodeUrl.set(
-            this.retrieveFragmentUrl(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id),
+        await this.topicPageShareService.openQrCodeDialog(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            retrieveNodeId(this.pageVariantNode()),
+            this.showQrCodeDialogRef,
         );
-        this.qrCodeDialogRef = await this.dialogs.openGenericDialog({
-            title: 'TOPIC_PAGE.SWIMLANE.QR_CODE.HEADING',
-            contentPadding: 0,
-            contentTemplate: this.showQrCodeDialogRef,
-            closable: Closable.Casual,
-            buttons: [{ label: 'CANCEL', config: { color: 'standard' } }],
-        });
     }
 
     /**
@@ -2097,25 +1980,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
-        // change link to include current variantId
-        const queryParamsToAddOrOverwrite: Params = {
-            variantId: retrieveNodeId(this.pageVariantNode()),
-        };
-        await this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: queryParamsToAddOrOverwrite,
-            queryParamsHandling: 'merge',
-        });
-        // similar to copying links in GitHub issues, the target is first set to the URL and then copied
-        await this.navigateToFragment(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id);
-        // workaround: setTimeout is necessary, as navigateToFragment includes a delay
-        setTimeout((): void => {
-            this.clipboard.copy(window.location.href);
-            // inform user about URL being copied successfully
-            this.topicPageHelperService.openSaveConfigToast(
-                'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.COPY_LINK_SUCCESS',
-            );
-        }, 300);
+        await this.topicPageShareService.copyLink(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            retrieveNodeId(this.pageVariantNode()),
+        );
     }
 
     /**
@@ -2124,25 +1992,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     writeMail(swimlaneIndex: number): void {
-        const swimlane = this.swimlanes[swimlaneIndex];
-        const i18nPrefix = 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.';
-        if (swimlane) {
-            // TODO: Move into shared service
-            const subjectText = this.translate.instant(i18nPrefix + 'SUBJECT_SHARED_CONTENT', {
-                title: swimlane.heading || this.translate.instant(i18nPrefix + 'NO_TITLE'),
-            });
-            const bodyText = this.translate.instant(i18nPrefix + 'BODY_SHARED_CONTENT', {
-                url: this.retrieveFragmentUrl(this.SWIMLANE_ID_PREFIX + swimlane.id),
-            });
-
-            const subject = encodeURIComponent(subjectText);
-            const body = encodeURIComponent(bodyText);
-
-            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-            window.open(mailtoLink, '_self');
-        } else {
-            console.warn(this.translate.instant(i18nPrefix + 'ERROR_NO_URL'));
+        const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
+        if (!swimlane) {
+            console.warn(
+                this.translate.instant('TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.ERROR_NO_URL'),
+            );
+            return;
         }
+        this.topicPageShareService.writeMail(
+            this.SWIMLANE_ID_PREFIX + swimlane.id,
+            swimlane.heading,
+        );
     }
 
     /**
