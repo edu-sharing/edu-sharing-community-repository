@@ -148,8 +148,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
      * Reloads the widget config when the (propagated) node ID changes — e.g. when switching into
      * template mode or to another page variant — so a stale config from the previously loaded node
      * is not kept.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         const nodeIdChanged: boolean =
@@ -213,8 +211,6 @@ export class BreadcrumbComponent implements OnChanges, OnInit, OnDestroy {
 
     /**
      * Emits either the selected variantId or the navigate to template event to the parent component.
-     *
-     * @param variantId
      */
     selectVariant(variantId: string): void {
         if (variantId === this.navigateToTemplateValue) {

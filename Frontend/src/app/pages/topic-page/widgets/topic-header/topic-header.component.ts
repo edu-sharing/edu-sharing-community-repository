@@ -139,8 +139,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Initializes or updates the topic header component.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
@@ -244,8 +242,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     /**
      * Handles a manual change of the collection description text. The text is no longer
      * AI-generated once edited by the user, so the AI label must be hidden before persisting.
-     *
-     * @param description
      */
     async onCollectionDescriptionChanged(description: string): Promise<void> {
         this.aiGeneratedDescription.set(false);
@@ -311,8 +307,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description of a collection.
-     *
-     * @param contextNodeId
      */
     private async generateCollectionDescription(contextNodeId: string): Promise<void> {
         if (!(await this.aiHelperService.hasAISupport())) {
@@ -345,8 +339,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to set the edit mode and lock the config.
-     *
-     * @param editMode
      */
     private setEditMode(editMode: boolean): void {
         this.configLocked = true;
@@ -358,10 +350,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to read the config from a given string.
-     *
-     * @param configString
-     * @param nodeId
-     * @param colorOnly
      */
     private async readConfigFromJson(
         configString: string,
@@ -401,8 +389,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description text via AI.
-     *
-     * @param nodeId
      */
     private async generateDescription(nodeId: string): Promise<void> {
         if (!(await this.aiHelperService.hasAISupport())) {
@@ -442,8 +428,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Checks whether a given color is dark.
-     *
-     * @param color
      */
     isDarkColor(color: string): boolean {
         if (!color) {
@@ -456,8 +440,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      * Resolves the header text background color to paint. In dark mode a bright custom color is
      * adapted to a dark surface (so the light text stays readable); already-dark colors and light
      * mode are left as configured.
-     *
-     * @param color
      */
     headerBackgroundColor(color: string): string {
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;

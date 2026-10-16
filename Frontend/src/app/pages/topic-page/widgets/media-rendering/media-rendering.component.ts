@@ -174,8 +174,6 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
 
     /**
      * Handles the receiving of the APPLY_NODE event.
-     *
-     * @param event
      */
     private handleApplyNode = async (event: MessageEvent<any>): Promise<void> => {
         // APPLY_NODE event was received and windowRef must exist and not being closed already (as multiple listeners might exist)
@@ -272,8 +270,6 @@ export class MediaRenderingComponent implements AfterViewInit, OnDestroy, Widget
     // noinspection JSUnusedGlobalSymbols
     /**
      * Called by generic-widget component to set widget-specific values.
-     *
-     * @param config
      */
     async setWidgetValues(config: MediaRenderingConfig): Promise<void> {
         if (config.mediaRenderingLayout !== undefined) {

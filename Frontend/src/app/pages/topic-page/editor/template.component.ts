@@ -745,8 +745,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Listening to changes in the collection ID or variant ID to reinitialize the component.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         const collectionIdChanged: boolean =
@@ -769,9 +767,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Loads another topic into this component.
-     *
-     * @param collectionId
-     * @param variantId
      */
     private async switchTopic(collectionId: string, variantId?: string): Promise<void> {
         this.variantPreviewService.leave();
@@ -787,7 +782,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Loads the linked topic in this component instead of navigating to its link.
      * Returns false if navigateInPlace is not set.
      *
-     * @param collectionId
      * @param url the link of the topic, passed on to the host with topicChanged
      */
     private openTopicInPlace(collectionId: string, url: string | null): boolean {
@@ -802,8 +796,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Switches to the given topic and scrolls the page back to its top.
-     *
-     * @param topic
      */
     private async loadTopicInPlace(topic: TopicChangedEvent): Promise<void> {
         // as web component, the attributes feed the inputs, so the host can set a previous
@@ -919,8 +911,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Initializes the component with an optionally given variant ID.
-     *
-     * @param variantId
      */
     private async initializeComponent(variantId?: string): Promise<void> {
         this.initializedWithParams = true;
@@ -1104,8 +1094,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Sets the search filters to a given value.
-     *
-     * @param filters
      */
     applySearchFilters(filters: Values): void {
         this.searchFiltersSubject.next(filters);
@@ -1113,8 +1101,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Takes the search input and the page filters of the given query params into the page state.
-     *
-     * @param params
      */
     private restoreSearchStateFromParams(params: Params): void {
         const searchInput: string = params[SEARCH_INPUT_QUERY_PARAM] ?? '';
@@ -1147,9 +1133,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS
     /**
      * Retrieves the page config node, selects the proper variant and defines the breadcrumbNodeId, headerNodeId + swimlanes.
-     *
-     * @param variantId
-     * @param forceReload
      */
     private async retrievePageConfigAndSelectVariant(
         variantId: string = '',
@@ -1360,8 +1343,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Opens the dialog for picking the source of a new page variant or page template. The picked
      * node is either used right away or previewed in place of the collection's page.
-     *
-     * @param kind
      */
     async openVariantOrTemplateSelection(kind: CreationKind): Promise<void> {
         this.createVariantOrTemplateSelectedNode = null;
@@ -1413,8 +1394,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Adds a page variant built from a given source node to the collection's page.
-     *
-     * @param sourceNode
      */
     private async createPageVariantFrom(sourceNode: Node): Promise<void> {
         // start the editing process (idea: copy the selected node as a child and relink the widgets)
@@ -1500,8 +1479,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Applies the changes made to the currently selected page variant.
-     *
-     * @param changesMap
      */
     async applyPageVariant(changesMap: Map<string, string | string[]>): Promise<void> {
         // reset validity variable
@@ -1531,7 +1508,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * selected page variant node and refreshes it. Shared by "apply changes" and the global
      * template publishing, so publishing never copies the previously saved values.
      *
-     * @param changesMap
      * @returns the ID of the node the changes were written to (the currently selected variant if
      *          there was nothing to persist), or null if the variant config is invalid
      */
@@ -1571,8 +1547,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Re-reads the variant list of the current page config from the server and points
      * `pageVariantNode` at the given node. The UI resolves the selected variant from that list, so
      * writing a node without refreshing it would keep the previous values on screen.
-     *
-     * @param nodeId
      */
     private async syncPageVariantNode(nodeId: string): Promise<void> {
         if (retrieveNodeId(this.pageConfigNode) || this.globalTemplateNode()) {
@@ -1694,9 +1668,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Updates the topic or anchor item color of the page variant.
-     *
-     * @param color
-     * @param isTopicColor
      */
     async updateTopicOrAnchorItemColor(
         color: string,
@@ -1743,8 +1714,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Navigates to a given variantId and reloads the page structure accordingly.
-     *
-     * @param variantId
      */
     async navigateToVariant(variantId: string): Promise<void> {
         this.closeSideMenus();
@@ -1768,8 +1737,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Navigates to a given fragment by appending it to the url.
-     *
-     * @param fragment
      */
     navigateToFragment(fragment: string): void {
         this.topicPageShareService.navigateToFragment(fragment);
@@ -1836,10 +1803,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Updates the shape of a swimlane at a given index.
-     *
-     * @param swimlaneShape
-     * @param mirror
-     * @param index
      */
     async updateSwimlaneShape(
         swimlaneShape: SwimlaneBackgroundShape,
@@ -1879,8 +1842,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Opens a dialog that displays a QR code for the swimlane link.
-     *
-     * @param swimlaneIndex
      */
     async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
         await this.topicPageShareService.openQrCodeDialog(
@@ -1892,8 +1853,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Copies the link to the swimlane into the clipboard.
-     *
-     * @param swimlaneIndex
      */
     async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
         await this.topicPageShareService.copyLink(
@@ -1904,8 +1863,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Writes a mail with a link to a given swimlane.
-     *
-     * @param swimlaneIndex
      */
     writeMail(swimlaneIndex: number): void {
         const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
@@ -1923,9 +1880,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Reacts to es-editable-text textChange output event by persisting the changes in the page config.
-     *
-     * @param title
-     * @param index
      */
     async swimlaneTitleChanged(title: string, index: number): Promise<void> {
         this.startEditing();
@@ -1981,9 +1935,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Starts editing a swimlane by opening a dialog and handling the result status.
-     *
-     * @param swimlane
-     * @param index
      */
     async editSwimlane(swimlane: Swimlane, index: number): Promise<void> {
         this.swimlaneToEditForm = new UntypedFormGroup({
@@ -2117,8 +2068,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Builds the repeat rule from the advanced form values, or `null` when no source is chosen.
      * Empty options are left out so that a rule carries only what an author actually set.
-     *
-     * @param formValue
      */
     private retrieveRepeatFromForm(formValue: { [key: string]: any }): SwimlaneRepeat | null {
         if (!formValue.repeatSource) {
@@ -2139,8 +2088,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Deletes a swimlane from the page with possible widget nodes and persists it in the config.
-     *
-     * @param index
      */
     async deleteSwimlane(index: number): Promise<void> {
         if (!this.swimlanes?.[index]) {
@@ -2193,9 +2140,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Called by es-swimlane gridUpdated output event.
      * Handles the initial grid update of a given swimlane.
-     *
-     * @param grid
-     * @param swimlaneIndex
      */
     async handleGridUpdate(grid: GridTile[], swimlaneIndex: number): Promise<void> {
         try {
@@ -2221,9 +2165,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Called by es-editable-text searchResultsUpdated output event.
-     *
-     * @param event
-     * @param swimlaneId
      */
     updateTitleSearchResults(event: number, swimlaneId: string): void {
         // update the title matching
@@ -2234,9 +2175,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Called by es-swimlane searchHitsChanged output event.
-     *
-     * @param event
-     * @param swimlaneIndex
      */
     updateGridItemSearchInputHits(event: GridTileToHitsMapping, swimlaneIndex: number): void {
         // update the hasHits value of the grid tile
@@ -2248,9 +2186,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Called by es-swimlane totalSearchResultCountChanged output event.
      * Sets the search count and triggers an update.
-     *
-     * @param event
-     * @param swimlaneIndex
      */
     updateGridItemTotalSearchCount(event: GridTileToSearchCountMapping, swimlaneIndex: number) {
         this.swimlanes[swimlaneIndex].grid[event.gridIndex].searchCount = event?.count || 0;
@@ -2260,9 +2195,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Called by es-swimlane visibleNodesChanged output event.
      * Sets the visible nodes in the global service and triggers the hit matching.
-     *
-     * @param event
-     * @param swimlaneIndex
      */
     updateVisibleNodes(event: GridTileToSearchResultsMapping, swimlaneIndex: number): void {
         this.topicPageGlobalService.updateVisibleNodes(swimlaneIndex, event.gridIndex, event.nodes);
@@ -2272,8 +2204,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Called by es-profiling selectDimensionsChanged output event.
      * Retrieves a mapping between the dimension ID and the mds widgets from the mds service.
-     *
-     * @param event
      */
     selectDimensionsChanged(event: Map<string, MdsWidget>): void {
         if (!event) {
@@ -2358,8 +2288,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Called by es-topic-page-breadcrumb navigateToTemplate output event.
-     *
-     * @param reloadNecessary
      */
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
         this.templateMode.set(true);
@@ -2430,8 +2358,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Opens a global template picked in the dialog for creating a page variant or template.
-     *
-     * @param templateNode
      */
     async openGlobalTemplateFromDialog(templateNode: Node): Promise<void> {
         this.createVariantOrTemplateDialogRef?.close();
@@ -2441,8 +2367,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Re-resolves the template of the current page after a global template was deleted, as it may
      * have been that one, and drops the template from a running preview.
-     *
-     * @param templateNode
      */
     async onGlobalTemplateDeleted(templateNode: Node): Promise<void> {
         await this.loadTemplateVariantNode();
@@ -2471,8 +2395,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Shows the listed node at the given position of the running preview.
-     *
-     * @param index
      */
     async showVariantPreviewAt(index: number): Promise<void> {
         await this.variantPreviewService.showAt(index);
@@ -2608,8 +2530,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Helper function to parse the page config ref of the collection and return the proper page config node.
      * If no page config ref is set, check whether a parent propagates one.
-     *
-     * @param node
      */
     private async retrievePageConfigNode(node: Node): Promise<Node> {
         // check whether the node itself has a pageConfigRef
@@ -2651,8 +2571,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Checks whether the propagate config referenced by the collection still holds at least one
      * template variant that can be loaded.
-     *
-     * @param pageConfigPropagateRef
      */
     private async isPageTemplateAvailable(pageConfigPropagateRef: string): Promise<boolean> {
         if (!pageConfigPropagateRef) {
@@ -2939,8 +2857,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Checks whether the background color of a given swimlane is a dark color.
-     *
-     * @param swimlane
      */
     isDarkColor(swimlane: Swimlane): boolean {
         const color = swimlane.backgroundColor;
@@ -2957,8 +2873,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Resolves the background color to paint for a swimlane. In dark mode a bright custom color is
      * adapted to a dark surface (so the theme's light text stays readable); already-dark colors
      * and light mode are left as configured.
-     *
-     * @param color
      */
     swimlaneBackgroundColor(color: string): string {
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;
@@ -3103,8 +3017,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Helper function to reload the page variant configs.
-     *
-     * @param reloadNecessary
      */
     private async updatePageVariantConfigs(reloadNecessary: boolean = false): Promise<void> {
         if (reloadNecessary && this.globalTemplateNode()) {
@@ -3140,8 +3052,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Saves the page variant config and returns the updated node.
-     *
-     * @param pageVariant
      */
     private async savePageVariantConfig(pageVariant: PageVariantConfig): Promise<Node> {
         return this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
@@ -3319,8 +3229,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Helper function to start an editing process by setting requestInProgress to true and opening a toast to inform the user about it.
-     *
-     * @param msg
      */
     private startEditing(msg?: string): void {
         this.requestInProgress.set(true);
@@ -3431,10 +3339,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Copies the widget nodes referenced by the given variant config below the target variant node
      * and persists the relinked config on it, optionally also taking it over as the shown variant.
-     *
-     * @param variantConfig
-     * @param targetVariantNode
-     * @param options
      */
     private async persistRelinkedVariantConfig(
         variantConfig: PageVariantConfig,

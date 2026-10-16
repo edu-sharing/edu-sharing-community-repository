@@ -162,8 +162,6 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
 
     /**
      * Executes a specific display action based on a given editMode.
-     *
-     * @param editMode
      */
     private async editModeDisplayAction(editMode: boolean): Promise<void> {
         if (!editMode) {
@@ -202,8 +200,6 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
 
     /**
      * Reacts to es-editable-text (searchResultsUpdated) event and emit it.
-     *
-     * @param count
      */
     updateSearchResults(count: number): void {
         this.internalSearchResultCountChanged.emit(count);
@@ -253,8 +249,6 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
 
     /**
      * Executes the stored prompt using the B-API.
-     *
-     * @param givenVariables
      */
     private async executePrompt(givenVariables: { [key: string]: string[] } = {}): Promise<void> {
         const defaultConfigId: string = getNodeOrDefaultNodeId(
@@ -393,9 +387,6 @@ export class AiTextWidgetComponent implements WidgetComponentInterface {
     // noinspection JSUnusedGlobalSymbols
     /**
      * Called by generic-widget component to set widget-specific values.
-     *
-     * @param config
-     * @param aiConfig
      */
     async setWidgetValues(config: AiTextWidgetConfig, aiConfig: BapiConfigObject): Promise<void> {
         // read the latest stored prompt from the AI config

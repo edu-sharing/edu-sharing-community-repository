@@ -437,8 +437,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Reloads the view by (re)setting the datasource and node-entries-wrapper.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         // check if changes were really made and return, if not
@@ -527,9 +525,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Performs a search query to set the data source.
-     *
-     * @param resetNecessary
-     * @param skipCount
      */
     private async setDataSource(
         resetNecessary: boolean = false,
@@ -663,8 +658,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to handle the entire extension of the criteria array.
-     *
-     * @param criteria
      */
     private async extendCriteria(criteria: MdsQueryCriteria[]): Promise<MdsQueryCriteria[]> {
         // if necessary, retrieve the taxonomies first
@@ -706,11 +699,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Extends a given propertyName in a given criteria array by its children IDs using the taxonomy.
-     *
-     * @param criteriaId
-     * @param criteria
-     * @param taxonomyJson
-     * @param propertyName
      */
     private async extendCriteriaValue(
         criteriaId: string,
@@ -756,9 +744,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to search a sub-element with a given matchingId in a given element's tree.
-     *
-     * @param element
-     * @param matchingId
      */
     private searchTree(element: any, matchingId: string): any {
         if (element.id && element.id === matchingId) {
@@ -776,9 +761,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to recursively retrieve the full list of narrow IDs of a given element.
-     *
-     * @param element
-     * @param ids
      */
     private retrieveNarrowIds(element: any, ids: string[]): string[] {
         if (element.id && !ids.includes(element.id)) {
@@ -792,8 +774,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to push custom card at the end of the data source.
-     *
-     * @param positionToAdd
      */
     private injectCustomCards(positionToAdd: number): void {
         if (this.genericWidgetGlobalService.getCustomCards(CustomCardRole.SuggestContent)?.length) {
@@ -828,10 +808,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to mark blacklisted / selected nodes by adding / removing a specific CSS class to their card / row.
-     *
-     * @param nodes
-     * @param relevantNodeIds
-     * @param className
      */
     private dynamicallyAddCssClasses(
         nodes: Node[],
@@ -873,8 +849,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Helper function to query the correct HTML element for a given index.
-     *
-     * @param index
      */
     private queryElement(index: number): HTMLElement | null {
         if (
@@ -896,8 +870,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Fetches further data in response to es-node-entries-wrapper's fetchData output.
-     *
-     * @param currentPagination
      */
     async fetchData(currentPagination: any): Promise<void> {
         // Infinite scroll keeps firing while a page is in flight, and the offset it reports is
@@ -933,8 +905,6 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
 
     /**
      * Pass through the item clicked event.
-     *
-     * @param node
      */
     onItemClicked(node: Node): void {
         this.itemClicked.emit(node);

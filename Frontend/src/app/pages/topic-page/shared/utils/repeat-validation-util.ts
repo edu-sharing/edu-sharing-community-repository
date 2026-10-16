@@ -17,8 +17,6 @@ const I18N_PREFIX = 'TOPIC_PAGE.SWIMLANE.EDIT.ADVANCED.ERROR.';
  * Checks the config patch of a grid tile: it has to be a JSON object, and every placeholder it
  * uses has to be one a repeated swimlane can actually resolve. An empty text is valid and means
  * that the tile has no patch.
- *
- * @param text
  */
 export function checkConfigPatch(text: string): PatchCheckResult {
     if (!text?.trim()) {
@@ -48,8 +46,6 @@ export function checkConfigPatch(text: string): PatchCheckResult {
 
 /**
  * The placeholders of a text that no repeat item provides.
- *
- * @param text
  */
 export function findUnknownPlaceholders(text: string): string[] {
     const used: string[] = [...text.matchAll(PLACEHOLDER_PATTERN)].map((match) => match[1]);

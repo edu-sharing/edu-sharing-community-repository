@@ -79,8 +79,6 @@ export class ProfilingComponent implements AfterViewInit {
 
     /**
      * Applies the latest selected query params and emit the select values.
-     *
-     * @param resetTrigger
      */
     async applySelectValues(resetTrigger: boolean = false): Promise<void> {
         let selectedValues = await this.mdsEditor.getValues();

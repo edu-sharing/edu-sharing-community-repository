@@ -5,8 +5,6 @@ import { BapiConfigObject } from '../types/bapi-config-object';
 /**
  * Returns the message content of the first choices of a given completion result.
  * An absent result (e.g. a failed generation) yields an empty string.
- *
- * @param completionResult
  */
 export const retrieveResultString = (
     completionResult: CreateChatCompletionResponse | null,
@@ -30,10 +28,6 @@ export const containsAiTags = (text: string): boolean => {
 
 /**
  * Returns the BAPI config object with a given description and headline.
- *
- * @param description
- * @param headline
- * @param customKeyValues
  */
 export const retrieveBapiConfigObject = (
     description?: string,
@@ -57,8 +51,6 @@ export const retrieveBapiConfigObject = (
 
 /**
  * Returns the BAPI config with a given textual content.
- *
- * @param content
  */
 export const retrieveChatCompletionObject = (content: string): BapiChatCompletionConfig => {
     if (!content) {
@@ -78,8 +70,6 @@ export const retrieveChatCompletionObject = (content: string): BapiChatCompletio
 
 /**
  * Returns the MDS config with a given id.
- *
- * @param id
  */
 export const retrieveMdsConfig = (id: string): MdsConfig => {
     return {

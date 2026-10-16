@@ -154,8 +154,6 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
 
     /**
      * Handles the change of the current values input.
-     *
-     * @param currentValues
      */
     onCurrentValuesChange(currentValues: Values) {
         this.currentValues = currentValues;

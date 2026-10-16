@@ -45,9 +45,6 @@ export class SelectWidgetTypeComponent implements OnInit {
 
     /**
      * Selects the widget type for a grid tile at a given index.
-     *
-     * @param widgetType
-     * @param tileIndex
      */
     async selectWidgetType(widgetType: WIDGET_TYPE, tileIndex: number): Promise<void> {
         // change copy of the grid to avoid overwriting input

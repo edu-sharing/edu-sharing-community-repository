@@ -8,10 +8,6 @@ import { Swimlane } from '../types/swimlane';
 export class FilterSwimlaneTypePipe implements PipeTransform {
     /**
      * Filters a given array of swimlanes by a given type.
-     *
-     * @param swimlanes
-     * @param type
-     * @param trigger
      */
     transform(swimlanes: Swimlane[], type: string, trigger: number): Swimlane[] {
         // trigger is used to prevent usage of pure: false
