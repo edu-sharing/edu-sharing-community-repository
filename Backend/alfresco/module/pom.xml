@@ -667,6 +667,19 @@
       <scope>compile</scope>
     </dependency>
 
+    <!-- org.json (runtime dependency of altcha) is provided by alfresco -->
+    <dependency>
+      <groupId>org.altcha</groupId>
+      <artifactId>altcha</artifactId>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.json</groupId>
+          <artifactId>json</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <dependency>
       <groupId>co.elastic.clients</groupId>
       <artifactId>elasticsearch-java</artifactId>
