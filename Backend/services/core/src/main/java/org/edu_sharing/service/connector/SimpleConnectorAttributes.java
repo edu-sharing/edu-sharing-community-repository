@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.edu_sharing.metadataset.v2.tools.MetadataSearchHelper;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class SimpleConnectorAttributes {
      * replace attributes for usage inside an url, i.e. the values are url encoded
      */
     public static String replaceForUrl(Map<String, String[]> parameters, String strToReplace) {
-        return replace(parameters, strToReplace, (data) -> URLEncoder.encode(StringUtils.join(data)));
+        return replace(parameters, strToReplace, (data) -> URLEncoder.encode(StringUtils.join(data), StandardCharsets.UTF_8));
     }
 
     public static String replace(Map<String, String[]> parameters, String strToReplace, Formatter format) {
