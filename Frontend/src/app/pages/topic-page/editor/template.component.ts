@@ -513,6 +513,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     pageVariantConfigs: NodeEntries;
     private pageVariantDefaultPosition: number = -1;
     pageVariantNode: WritableSignal<Node | null> = signal(null);
+    private pageVariantNodeId: Signal<string | null> = computed(
+        (): string | null => retrieveNodeId(this.pageVariantNode()) ?? null,
+    );
     pageVariantNodeIndex: number = 0;
     pageVariantSettingsValid: WritableSignal<boolean> = signal(true);
     templateVariantNode: WritableSignal<Node | null> = signal(null);
@@ -1263,7 +1266,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 return;
             }
             this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
-                (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+                (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
             );
             this.pageVariantSettingsValid.set(true);
             const pageVariant: PageVariantConfig = retrievePageVariantConfig(
@@ -1536,7 +1539,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         changesMap: Map<string, string | string[]>,
     ): Promise<string | null> {
         if (!changesMap?.size) {
-            return retrieveNodeId(this.pageVariantNode());
+            return this.pageVariantNodeId();
         }
         // may replace the selected variant by an own copy when the page config is inherited
         const pageConfigCreated: boolean = await this.checkForCustomPageNodeExistence();
@@ -1547,7 +1550,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // resolve the target once: `pageVariantNode` is re-assigned from the cached
         // `pageVariantConfigs.nodes` entry in several places, so re-reading it per iteration could
         // scatter the writes across nodes
-        const targetNodeId: string = retrieveNodeId(this.pageVariantNode());
+        const targetNodeId: string = this.pageVariantNodeId();
         // iterate changes map and persist them
         for (const [key, value] of changesMap.entries()) {
             await this.topicPageHelperService.setProperty(targetNodeId, key, value);
@@ -1649,9 +1652,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                                 JSON.stringify(pageConfig),
                             );
                         // delete the page variant node along with all its children
-                        await this.topicPageHelperService.deleteNode(
-                            retrieveNodeId(this.pageVariantNode()),
-                        );
+                        await this.topicPageHelperService.deleteNode(this.pageVariantNodeId());
                         // reload the page without parameters
                         setTimeout(() => {
                             void this.reloadWithoutParameters();
@@ -1884,7 +1885,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
         await this.topicPageShareService.openQrCodeDialog(
             this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
-            retrieveNodeId(this.pageVariantNode()),
+            this.pageVariantNodeId(),
             this.showQrCodeDialogRef,
         );
     }
@@ -1897,7 +1898,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
         await this.topicPageShareService.copyLink(
             this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
-            retrieveNodeId(this.pageVariantNode()),
+            this.pageVariantNodeId(),
         );
     }
 
@@ -2750,9 +2751,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     if (prompt) {
                         const config: NodeConfig = {
                             type: 'node',
-                            nodeId: convertNodeRefIntoNodeId(
-                                retrieveNodeId(this.pageVariantNode()),
-                            ),
+                            nodeId: convertNodeRefIntoNodeId(this.pageVariantNodeId()),
                             configName: swimlane.id,
                         };
                         const result: CreateChatCompletionResponse =
@@ -2802,7 +2801,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             const updatedVariantNode =
                 await this.topicPageVariantNodesService.copyProfilingProperties(
                     sourceNode,
-                    retrieveNodeId(this.pageVariantNode()),
+                    this.pageVariantNodeId(),
                 );
             if (updatedVariantNode) {
                 this.pageVariantNode.set(updatedVariantNode);
@@ -3088,7 +3087,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return null;
         }
         this.pageVariantNodeIndex = this.pageVariantConfigs.nodes.findIndex(
-            (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+            (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
         );
         this.pageVariantSettingsValid.set(true);
         const pageVariant: PageVariantConfig = retrievePageVariantConfig(this.pageVariantNode());
@@ -3131,7 +3130,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         const index: number = nodes.findIndex(
-            (n) => retrieveNodeId(n) === retrieveNodeId(this.pageVariantNode()),
+            (n) => retrieveNodeId(n) === this.pageVariantNodeId(),
         );
         if (index === -1) {
             return;
@@ -3146,7 +3145,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private async savePageVariantConfig(pageVariant: PageVariantConfig): Promise<Node> {
         return this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-            retrieveNodeId(this.pageVariantNode()),
+            this.pageVariantNodeId(),
             DEFAULT_PAGE_VARIANT_CONFIG_PROP,
             JSON.stringify(pageVariant),
         );
@@ -3164,7 +3163,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
         this.pageVariantNode.set(
             await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                retrieveNodeId(this.pageVariantNode()),
+                this.pageVariantNodeId(),
                 DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
                 this.incrementPatchVersion(currentVersion),
             ),
