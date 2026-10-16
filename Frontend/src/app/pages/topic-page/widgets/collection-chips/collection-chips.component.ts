@@ -218,6 +218,9 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
      * @param event
      */
     async drop(event: CdkDragDrop<string[]>): Promise<void> {
+        if (event.previousIndex === event.currentIndex) {
+            return;
+        }
         moveItemInArray(this.list, event.previousIndex, event.currentIndex);
         this.configChanged.emit();
     }

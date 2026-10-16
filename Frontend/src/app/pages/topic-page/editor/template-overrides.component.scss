@@ -1,0 +1,300 @@
+@use '../topic-page-variables' as topicPageVars;
+@use '../topic-page-common-styles' as topicPageStyles;
+
+// Mobile, theming and global overrides. Follows template-content.component.scss.
+
+// media query for mobile devices
+@media (max-width: topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1) {
+    .template-header {
+        padding-top: var(--offcanvas-offset);
+        padding-bottom: var(--offcanvas-offset);
+
+        // reset padding-right, if the offcanvas menu is hidden
+        &.sidebar-hidden {
+            padding-right: var(--offcanvas-offset);
+        }
+
+        // special case for anchor menu
+        &.extra-padding-bottom {
+            padding-bottom: calc(var(--offcanvas-offset) + var(--anchor-menu-height) / 2);
+        }
+
+        // adjust border-radius set by workaround for keeping overflow: hidden
+        .template-header-wrapper .template-header-container ::ng-deep es-topic-header {
+            es-image-wrapper,
+            es-image-wrapper es-mds-editor-widget-preview,
+            es-image-wrapper .image-loading {
+                border-top-right-radius: var(--border-radius);
+                border-bottom-right-radius: unset;
+            }
+        }
+
+        // adjust position of topic color picker
+        .topic-color-picker {
+            top: -4px;
+            right: 50%;
+        }
+    }
+
+    // spacing adjustments when sidebar is hidden
+    .topic-page-content-outer-wrapper.sidebar-hidden {
+        // reset padding-right on mobile, as the offcanvas menu is moved to the main menu
+        .topic-page-content-wrapper .topic-page-swimlane-wrapper {
+            padding-right: var(--offcanvas-offset);
+        }
+
+        // special case for sidebar opening case, as it is blended on top of the main content
+        &.sidebar-open {
+            padding-right: 0;
+
+            .topic-page-content-wrapper .topic-page-swimlane-wrapper {
+                padding-right: var(--offcanvas-offset);
+            }
+        }
+    }
+
+    // use full width of the heading-wrapper, instead of centering it
+    .swimlane-heading-wrapper {
+        padding-left: 0 !important;
+    }
+
+    // change position of collapse/expand icon in accordion
+    .topic-page-accordion-item-description {
+        right: 140px !important;
+    }
+}
+
+// THEMING ADJUSTMENTS
+.action-btn {
+    color: topicPageVars.$secondary-text;
+    background: topicPageVars.$surface;
+
+    &.btn-modify {
+        color: topicPageVars.$on-primary;
+        background: topicPageVars.$primary;
+    }
+}
+
+.reloading-indicator-bg {
+    background: topicPageVars.$surface;
+
+    &.transparent-bg {
+        background: rgba(topicPageVars.$inverse-surface, 0.5);
+    }
+}
+
+.template-breadcrumb {
+    background: topicPageVars.$primary-dark;
+
+    &::ng-deep {
+        a,
+        i,
+        p {
+            color: topicPageVars.$on-primary !important;
+        }
+    }
+}
+
+.template-header-container,
+.topic-page-content-wrapper {
+    color: topicPageVars.$on-surface;
+}
+
+.topic-page-content-wrapper {
+    background: topicPageVars.$surface-container-lowest;
+}
+
+.topic-page-swimlane-wrapper {
+    .topic-page-swimlane {
+        &::ng-deep es-editable-text ::ng-deep {
+            h2,
+            h3 {
+                color: topicPageVars.$on-surface;
+            }
+        }
+    }
+
+    // default color for swimlanes without background color
+    &:not(.custom-background-color) .topic-page-swimlane {
+        background-color: topicPageVars.$surface-container-lowest;
+    }
+
+    // default color for accordions
+    &.topic-page-accordion-swimlane .topic-page-swimlane {
+        background-color: topicPageVars.$surface-container-low;
+    }
+
+    &.no-search-hit {
+        margin-top: -52px !important;
+        padding: 0 !important;
+        padding-bottom: 52px !important;
+        max-height: 0;
+        visibility: hidden;
+        .topic-page-swimlane {
+            max-height: 0;
+            overflow: hidden;
+        }
+    }
+}
+
+.anchor-container .anchor-menu .anchor-item {
+    .item-container {
+        background: var(--anchor-item-bg-color);
+    }
+
+    .total-count {
+        color: #fff;
+        background-color: topicPageVars.$pink-default;
+    }
+}
+
+// light text for a dark anchor-item surface
+.anchor-container.bright-color .item-text {
+    color: var(--textOnDarkSurface) !important;
+}
+
+// GENERAL OVERWRITES / FIXES
+// this is necessary for accordions to work properly
+es-editable-text {
+    width: 100%;
+}
+
+// TYPOGRAPHY ADJUSTMENTS
+.anchor-container .anchor-menu .anchor-item {
+    // decrease font-size + line-height of anchor item container
+    .item-text {
+        font-family: 'Montserrat', sans-serif;
+        font-size: topicPageVars.$font-size-medium;
+        line-height: topicPageVars.$line-height-medium;
+    }
+
+    // adjust font-size, line-height + font-weight of total count
+    .total-count {
+        font-size: 62.5%;
+        font-weight: topicPageVars.$font-weight-x-bold;
+        line-height: topicPageVars.$line-height-small;
+    }
+}
+
+.swimlane-qr-code {
+    max-width: 100%;
+}
+
+// edit page config dialog
+.missing-page-config {
+    padding: 24px;
+
+    es-info-message {
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .config-selection-container {
+        display: flex;
+        gap: 16px;
+
+        mat-form-field {
+            flex: 1;
+        }
+
+        .create-button > button {
+            min-height: 100%;
+        }
+    }
+}
+
+// common styles
+// styling of page edit button (template)
+button.topic-page-edit-toggle-btn {
+    margin-left: 16px;
+    padding-left: 16px;
+    padding-right: 25px;
+    height: 39px;
+    background-color: rgb(
+        from var(--workspaceTopBarFontColor) r g b / var(--workspaceTopBarNewAlpha)
+    );
+    border-radius: 0;
+
+    .mdc-button__label {
+        gap: 8px;
+    }
+}
+
+// page mode bar, shown while editing or in template mode
+.topic-page-edit-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 64px;
+    padding: 0 16px;
+    background-color: var(--primaryBackground50);
+    color: var(--textMain);
+
+    .topic-page-edit-bar-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+
+        &.template-mode {
+            color: var(--primary);
+        }
+    }
+
+    .topic-page-edit-bar-status {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .topic-page-template-mode-end {
+        margin-left: auto;
+    }
+
+    button {
+        --mat-button-text-label-text-color: var(--textMain);
+
+        i {
+            margin-right: 6px;
+        }
+    }
+}
+
+@media screen and (max-width: (topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1)) {
+    .topic-page-btn-label {
+        display: none;
+    }
+    button.topic-page-edit-toggle-btn {
+        padding-right: 15px;
+    }
+}
+
+// global styles
+::ng-deep {
+    // due to drag and drop, the styles have to be applied globally
+    @include topicPageStyles.grid-styles;
+    // menu styles have to be applied globally
+    @include topicPageStyles.menu-styles;
+
+    // override .topic-page-grid-border-container background when being dragged
+    .cdk-drag .topic-page-grid-border-container {
+        background: topicPageVars.$surface;
+    }
+
+    // custom styles for create menu of topic page (opened via add button)
+    // hint: the selector depends on the scope being applied
+    .create-menu-TopicPage {
+        i.mat-icon > .svg-icons {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    // reset padding of edu-icons
+    .edu-icons {
+        padding: 0;
+    }
+}

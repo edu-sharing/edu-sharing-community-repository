@@ -6,7 +6,9 @@
     "types": ["node", "jquery", "chai"],
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "emitDecoratorMetadata": false
+    "emitDecoratorMetadata": false,
+    // storybook's bundled .d.ts reference "@storybook/react", which is not installed in this Angular project
+    "skipLibCheck": true
   },
   "exclude": ["../src/test.ts", "../src/**/*.spec.ts", "../projects/edu-sharing-ui/**/*.spec.ts"],
   "include": ["../src/**/*", "../projects/edu-sharing-ui/**/*", "./preview.ts"],

@@ -1,4 +1,4 @@
-import { Node, NodeConstants } from 'ngx-edu-sharing-api';
+import { Node, NodeConstants, RestConstants } from 'ngx-edu-sharing-api';
 import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
@@ -7,6 +7,7 @@ import {
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_VALUE,
+    DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -156,6 +157,18 @@ export const retrievePageVariantTemplateRef = (node: Node): string => {
     const templateRefOrNodeId: string =
         node.properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP]?.[0] || retrieveNodeId(node);
     return prependWorkspacePrefix(templateRefOrNodeId);
+};
+
+/**
+ * Whether a node is the default global template.
+ *
+ * @param node
+ */
+export const isDefaultGlobalTemplate = (node: Node): boolean => {
+    return (
+        node?.properties?.[RestConstants.CCM_PROP_MAPTYPE]?.[0] ===
+        DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE
+    );
 };
 
 /**

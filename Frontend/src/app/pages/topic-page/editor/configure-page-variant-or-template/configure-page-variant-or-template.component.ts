@@ -32,9 +32,15 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
 
     readonly i18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_VARIANT.';
     readonly templateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_PAGE_TEMPLATE.';
+    readonly globalTemplateI18nPrefix: string = 'TOPIC_PAGE.SIDE_MENU.CONFIG_GLOBAL_TEMPLATE.';
 
     addToGlobalTemplatesEnabled: InputSignal<boolean> = input(false);
+    deleteGlobalTemplateEnabled: InputSignal<boolean> = input(false);
     deleteVariantEnabled: InputSignal<boolean> = input(false);
+    // the page is linked to a global template the user may edit
+    editGlobalTemplateEnabled: InputSignal<boolean> = input(false);
+    // the configured node is a global template itself, not a variant or template of a collection
+    globalTemplateMode: InputSignal<boolean> = input(false);
     pageVariantConfigNodes: InputSignal<Node[]> = input([]);
     @Input() pageVariantNode: Node;
     @Input() pageVariantTitle: string;
@@ -51,15 +57,25 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     @Output() applyChangesClicked: EventEmitter<Map<string, string | string[]>> = new EventEmitter<
         Map<string, string | string[]>
     >();
+    @Output() deleteGlobalTemplateClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() deletePageVariantClicked: EventEmitter<void> = new EventEmitter<void>();
+    @Output() editGlobalTemplateClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() regenerateClicked: EventEmitter<void> = new EventEmitter<void>();
     @Output() settingsValidityChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
     private translateService = inject(TranslateService);
 
     currentValues: Values = {};
-    dynamicI18nPrefix = computed(() =>
-        this.templateMode() ? this.templateI18nPrefix : this.i18nPrefix,
+    dynamicI18nPrefix = computed(() => {
+        if (this.globalTemplateMode()) {
+            return this.globalTemplateI18nPrefix;
+        }
+        return this.templateMode() ? this.templateI18nPrefix : this.i18nPrefix;
+    });
+    deleteEnabled: Signal<boolean> = computed(() =>
+        this.globalTemplateMode()
+            ? this.deleteGlobalTemplateEnabled()
+            : this.deleteVariantEnabled(),
     );
     templateModifiedDate: Signal<string> = computed(() => {
         const timestamp = this.templateNode()?.properties?.[RestConstants.CM_MODIFIED_DATE]?.[0];
@@ -140,10 +156,21 @@ export class ConfigurePageVariantOrTemplateComponent implements AfterViewInit, O
     }
 
     /**
-     * Emits the page variant delete event.
+     * Emits the delete event of the configured node: the global template or the page variant.
      */
     deletePageVariant(): void {
+        if (this.globalTemplateMode()) {
+            this.deleteGlobalTemplateClicked.emit();
+            return;
+        }
         this.deletePageVariantClicked.emit();
+    }
+
+    /**
+     * Emits the event to open the global template the page is linked to in the editor.
+     */
+    editGlobalTemplate(): void {
+        this.editGlobalTemplateClicked.emit();
     }
 
     /**

@@ -1,5 +1,4 @@
 import { CdkAccordionItem, CdkAccordionModule } from '@angular/cdk/accordion';
-import { Clipboard } from '@angular/cdk/clipboard';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { PlatformLocation } from '@angular/common';
 import {
@@ -48,11 +47,9 @@ import {
     Constrain,
     CustomOptions,
     DefaultGroups,
-    ElementType,
     Helper,
     KeyboardShortcut,
     Modifier,
-    OptionItem,
     OptionsHelperDataService,
     PreferredColor,
     Scope,
@@ -78,7 +75,6 @@ import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog
 import {
     DELETE_OR_CANCEL,
     GenericDialogButton,
-    USE_OR_CANCEL,
     YES_OR_NO,
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { QrDialogModule } from '../../../features/dialogs/dialog-modules/qr-dialog/qr-dialog.module';
@@ -113,7 +109,14 @@ import {
     CustomSideMenuItem,
     TopicPageGlobalService,
 } from '../shared/services/topic-page-global.service';
+import { TopicPageCreateOptionsService } from '../shared/services/topic-page-create-options.service';
+import { TopicPageGlobalTemplatesService } from '../shared/services/topic-page-global-templates.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
+import { TopicPageShareService } from '../shared/services/topic-page-share.service';
+import {
+    TopicPageVariantPreviewService,
+    VariantPreviewHost,
+} from '../shared/services/topic-page-variant-preview.service';
 import {
     HistoryTransaction,
     StepOptions,
@@ -141,7 +144,6 @@ import {
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
-    WIDGET_TYPE,
     WIDGET_TYPE_OPTIONS,
     WIDGETS,
 } from '../shared/types/custom-definitions';
@@ -172,7 +174,18 @@ import {
     retrieveResultString,
 } from '../shared/utils/ai-util';
 import { containsPlaceholder } from '../shared/utils/interpolate-util';
+import {
+    CreationKind,
+    VariantPreview,
+    VariantPreviewRestoreState,
+} from '../shared/types/variant-preview';
 import { checkUserAccess } from '../shared/utils/node-util';
+import {
+    computeSwimlaneHitMatching,
+    parseSearchFilters,
+    searchStateToQueryParams,
+    SwimlaneHitMatching,
+} from '../shared/utils/search-hit-util';
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
@@ -203,6 +216,9 @@ import { TopicHeaderComponent } from '../widgets/topic-header/topic-header.compo
 import {
     AddPageVariantOrTemplateDialogComponent,
     CopyOption,
+    PageVariantSearchState,
+    PREVIEW_USE_OR_CANCEL,
+    VARIANT_PREVIEW_BUTTON_LABEL,
 } from './add-page-variant-or-template-dialog/add-page-variant-or-template-dialog.component';
 import { AddSwimlaneBorderButtonComponent } from './add-swimlane-button/add-swimlane-border-button.component';
 import { ConfigurePageVariantOrTemplateComponent } from './configure-page-variant-or-template/configure-page-variant-or-template.component';
@@ -252,15 +268,22 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TopicPageHelperService,
         TopicPageEventsService,
         TopicPageHistoryService,
+        TopicPageCreateOptionsService,
+        TopicPageGlobalTemplatesService,
+        TopicPageShareService,
+        TopicPageVariantPreviewService,
     ],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
-    styleUrls: ['./template.component.scss'],
+    styleUrls: [
+        './template.component.scss',
+        './template-content.component.scss',
+        './template-overrides.component.scss',
+    ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
     private aiHelperService = inject(AiHelperService);
-    private clipboard = inject(Clipboard);
     private connector = inject(RestConnectorService);
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
@@ -278,7 +301,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private searchFieldService = inject(SearchFieldService);
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
+    private topicPageCreateOptionsService = inject(TopicPageCreateOptionsService);
+    private topicPageGlobalTemplatesService = inject(TopicPageGlobalTemplatesService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageShareService = inject(TopicPageShareService);
+    private variantPreviewService = inject(TopicPageVariantPreviewService);
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
@@ -302,6 +329,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
     constructor() {
+        this.variantPreviewService.attach(this.variantPreviewHost);
+        this.topicPageShareService.setScrollContainer(
+            (): HTMLElement | undefined => this.scrollContainerRef()?.nativeElement,
+        );
         this.topicPageHelperService.setInPlaceNavigationHandler(
             (collectionId: string, url: string | null): boolean =>
                 this.openTopicInPlace(collectionId, url),
@@ -356,7 +387,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // check for administration privileges
             this.isAdmin.set(this.connector.getCurrentLogin()?.isAdmin ?? false);
             // check whether the user may add children to the global templates folder
-            await this.updateGlobalTemplatesPermission();
+            await this.topicPageGlobalTemplatesService.updatePermission();
         });
         // subscribe to changes on the search input + search filters
         this.searchInputSubject
@@ -463,13 +494,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     requestInProgress: WritableSignal<boolean> = signal(false);
     private initializedWithParams: boolean = false;
     private customEventListenersInitialized: boolean = false;
-    private fragmentListenerInitialized: boolean = false;
     private switchedTopic: { collectionId: string; variantId?: string } | null = null;
     private readonly destroyed$ = new Subject<void>();
 
     userHasEditRights: WritableSignal<boolean> = signal(false);
     isAdmin: WritableSignal<boolean> = signal(false);
-    canAddToGlobalTemplates: WritableSignal<boolean> = signal(false);
+    canAddToGlobalTemplates: Signal<boolean> = this.topicPageGlobalTemplatesService.canAdd;
+    // set while a global template is edited in place of the collection's page; the collection
+    // only provides the topic and sub-collections the preview is resolved for
+    globalTemplateNode: WritableSignal<Node | null> = signal(null);
     editMode: WritableSignal<boolean> = signal(false);
     filterPanelOpen: WritableSignal<boolean> = signal(false);
     readonly sidebarOpen: Signal<boolean> = computed(
@@ -554,13 +587,61 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // full version against the foundation's current version.
         return currentTemplateVersion !== variantTemplateVersion;
     });
+    // the global template the page was created from; the collection's own template is edited in
+    // template mode and the repository-maintained default template not at all
+    linkedGlobalTemplate: Signal<Node | null> = computed(() =>
+        this.topicPageGlobalTemplatesService.asLinkedGlobalTemplate(this.templateVariantNode()),
+    );
+    canEditLinkedGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.linkedGlobalTemplate();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_WRITE)
+        );
+    });
+    canDeleteGlobalTemplate: Signal<boolean> = computed(() => {
+        const templateNode: Node = this.globalTemplateNode();
+        return (
+            !!templateNode &&
+            this.nodeHelperService.getNodesRight([templateNode], ApiRestConstants.ACCESS_DELETE)
+        );
+    });
+    // the i18n section of the settings menu matching the edited node
+    settingsI18nSection: Signal<string> = computed(() => {
+        if (this.globalTemplateNode()) {
+            return 'CONFIG_GLOBAL_TEMPLATE';
+        }
+        return this.templateMode() ? 'CONFIG_PAGE_TEMPLATE' : 'CONFIG_PAGE_VARIANT';
+    });
     createVariantOrTemplateDialogRef: CardDialogRef;
-    createVariantOrTemplateMode: WritableSignal<'template' | 'variant'> = signal('variant');
+    createVariantOrTemplateMode: WritableSignal<CreationKind> = signal('variant');
     createVariantOrTemplateSelectedNode: Node;
     createVariantOrTemplateCopyOption: CopyOption;
+    // the search the creation dialog listed its nodes by
+    createVariantOrTemplateSearchState: PageVariantSearchState | null = null;
+    // set while listed nodes are shown in place of the collection's page; such a preview never
+    // writes, as the shown node belongs to no page of this collection
+    variantPreview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
+    variantPreviewNode: Signal<Node | null> = this.variantPreviewService.node;
+    // the collection's own page variant, also while a preview is shown in its place
+    collectionPageVariantNode: Signal<Node | null> = computed(() => {
+        const restoreState: VariantPreviewRestoreState | null =
+            this.variantPreviewService.restoreState();
+        return restoreState ? restoreState.pageVariantNode : this.pageVariantNode();
+    });
+    // the search a reopened creation dialog continues with: the one of a preview of the same kind
+    variantPreviewSearchState: Signal<PageVariantSearchState | null> = computed(() => {
+        const preview: VariantPreview | null = this.variantPreview();
+        if (!preview?.searchState || preview.kind !== this.createVariantOrTemplateMode()) {
+            return null;
+        }
+        return {
+            ...preview.searchState,
+            selectedNodeId: retrieveNodeId(this.variantPreviewNode()) ?? null,
+        };
+    });
     pageVariantReloadNecessary: boolean = false;
-    qrCodeDialogRef: CardDialogRef;
-    qrCodeUrl: WritableSignal<string> = signal('');
+    qrCodeUrl: Signal<string> = this.topicPageShareService.qrCodeUrl;
     selectedVariantPosition: number = -1;
     showLoadingScreen: Signal<boolean> = computed(
         (): boolean =>
@@ -736,6 +817,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param variantId
      */
     private async switchTopic(collectionId: string, variantId?: string): Promise<void> {
+        this.variantPreviewService.leave();
         this.switchedTopic = { collectionId, variantId };
         // reset several values to ensure that the component is properly initialized
         this.selectedVariantPosition = -1;
@@ -913,7 +995,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
             // listen to fragment changes to scroll given swimlane ID into view
             // note: setTimeout is necessary for view being loaded first
-            this.initializeFragmentListener();
+            this.topicPageShareService.listenToFragment();
 
             // void this.addCustomMainNavOptions();
         } catch (err) {
@@ -940,6 +1022,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 const swimlaneIndex: number = event?.swimlaneIndex ?? -1;
 
                 if (
+                    !this.variantPreview() &&
                     pageVariantNode &&
                     retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode()) &&
                     swimlaneIndex > -1
@@ -987,6 +1070,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 const widget: WidgetConfigObject = event?.widget ?? null;
 
                 const validParentVariant: boolean =
+                    !this.variantPreview() &&
                     pageVariantNode &&
                     retrieveNodeId(pageVariantNode) === retrieveNodeId(this.pageVariantNode());
                 const validSwimlaneIndex: boolean = swimlaneIndex > -1;
@@ -1092,6 +1176,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .pipe(takeUntil(this.destroyed$))
             .subscribe(async (event: WidgetConfigUpdatedEvent): Promise<void> => {
                 if (
+                    !this.variantPreview() &&
                     event?.pageVariantNode &&
                     retrieveNodeId(event.pageVariantNode) === retrieveNodeId(this.pageVariantNode())
                 ) {
@@ -1110,98 +1195,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     await this.bumpTemplateVersionIfNeeded();
                 }
             });
-    }
-
-    /**
-     * Initializes a listener for the fragment part of the current route.
-     * If the fragment part changes, the corresponding element is scrolled into view.
-     */
-    private initializeFragmentListener(): void {
-        // the listener outlives a switch of the topic
-        if (this.fragmentListenerInitialized) {
-            return;
-        }
-        this.fragmentListenerInitialized = true;
-        this.route.fragment
-            .pipe(takeUntil(this.destroyed$))
-            .subscribe((urlFragment: string): void => {
-                this.latestUrlFragment = urlFragment;
-                // avoid attempting to scroll when no fragment is specified
-                if (!this.latestUrlFragment) {
-                    this.initialFragmentScrollPerformed = true;
-                    return;
-                }
-                // directly scroll into view if the page is already loaded
-                if (this.initialFragmentScrollPerformed) {
-                    this.scrollElementIntoView();
-                }
-                // otherwise, wait 3 seconds before trying to scroll into view
-                // TODO: this should be replaced by waiting for all widgets being loaded
-                else {
-                    setTimeout((): void => {
-                        this.performScrollAttempts();
-                    }, 3000);
-                }
-            });
-    }
-
-    /**
-     * Performs up to 10 scroll attempts (1 per second) until scrollElementIntoView returns true.
-     */
-    private performScrollAttempts(): void {
-        let attemptCount = 0;
-        const maxAttempts = 10;
-
-        const scrollInterval = setInterval(() => {
-            attemptCount++;
-
-            // attempt to scroll
-            const scrollSuccessully = this.scrollElementIntoView();
-
-            // when successful, stop the interval
-            if (scrollSuccessully) {
-                this.initialFragmentScrollPerformed = true;
-                clearInterval(scrollInterval);
-            }
-            // also stop after reaching the maximum of attempts
-            else if (attemptCount >= maxAttempts) {
-                clearInterval(scrollInterval);
-            }
-        }, 1000);
-    }
-
-    /**
-     * Scrolls the latest URL fragment into view if it exists.
-     */
-    private scrollElementIntoView(): boolean {
-        if (!this.latestUrlFragment) {
-            return false;
-        }
-        const element: HTMLElement = document.getElementById(this.latestUrlFragment);
-        const scrollContainer: HTMLElement = this.scrollContainerRef()?.nativeElement;
-        if (element && scrollContainer) {
-            // scroll only the card's scroll region (not the window), keeping the scroll-margin gap
-            const scrollMargin = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
-            const offsetInContainer =
-                element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top;
-            scrollContainer.scrollTo({
-                top: scrollContainer.scrollTop + offsetInContainer - scrollMargin,
-                behavior: 'smooth',
-            });
-
-            // set focus to element that was scrolled into view
-            if (!element.hasAttribute('tabindex')) {
-                element.setAttribute('tabindex', '-1');
-            }
-
-            window.setTimeout(() => {
-                element.focus({ preventScroll: true });
-            }, 500);
-
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -1224,7 +1217,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.searchInput.set(searchInput);
             this.searchFieldService.getCurrentInstance()?.setSearchString(searchInput);
         }
-        const filters: Values = this.parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
+        const filters: Values = parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
         if (Object.keys(filters).length > 0) {
             this.searchFilters.set(filters);
             // active filters stay visible: they explain the narrowed result set
@@ -1238,34 +1231,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * search state changes.
      */
     private persistSearchStateInParams(): void {
-        const filters: Values = this.searchFilters();
-        const hasFilters: boolean = Object.keys(filters ?? {}).length > 0;
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {
-                [SEARCH_INPUT_QUERY_PARAM]: this.searchInput() || null,
-                [SEARCH_FILTERS_QUERY_PARAM]: hasFilters ? JSON.stringify(filters) : null,
-            },
+            queryParams: searchStateToQueryParams(this.searchInput(), this.searchFilters()),
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
-    }
-
-    /**
-     * Reads a filter query param, which holds the values keyed by property as JSON.
-     *
-     * @param param
-     */
-    private parseSearchFilters(param: string): Values {
-        if (!param) {
-            return {};
-        }
-        try {
-            return JSON.parse(param) as Values;
-        } catch {
-            // the param is part of a URL and may hold anything
-            return {};
-        }
     }
 
     // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS
@@ -1279,6 +1250,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         variantId: string = '',
         forceReload: boolean = false,
     ): Promise<void> {
+        if (this.globalTemplateNode()) {
+            await this.loadGlobalTemplate();
+            return;
+        }
+        // the collection's page is restored as it was once the preview ends
+        if (this.variantPreview()) {
+            return;
+        }
         // check whether the collection node has a page propagate config
         // hint: this must be done before parsing the page config, as it might not exist and cancel the execution
         const pageConfigPropagateRef: string = retrievePageConfigPropagateRef(this.collectionNode);
@@ -1286,35 +1265,20 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.collectionNodePagePropagateConfigRef = pageConfigPropagateRef;
             // a collection holds at most one page template, so drop a create option that was added
             // while none existed yet (e.g. the template was just created in this session)
-            await this.removeCustomMainNavOptions(this.createPageTemplateTitle);
+            await this.topicPageCreateOptionsService.remove(this.createPageTemplateTitle);
         }
         // no (loadable) page template exists, so creating one starts a new propagate config
         else {
             this.collectionNodePagePropagateConfigRef = null;
-            // add a create page template option to the "new" button
-            const createPageTemplate = new OptionItem(
+            await this.topicPageCreateOptionsService.add(
                 this.createPageTemplateTitle,
                 'edu-add_page_template',
                 () => {
                     void this.createPageTemplate();
                 },
+                11,
+                Constrain.Admin,
             );
-            createPageTemplate.elementType = [ElementType.NoneOrUnknown];
-            createPageTemplate.group = DefaultGroups.Toggles;
-            createPageTemplate.priority = 11;
-            createPageTemplate.constrains = [Constrain.Admin];
-            // retrieve existing options from main nav config to extend them
-            const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-                .customCreateOptions;
-            const existingCreateOptions = currentConfig?.addOptions || [];
-            if (!existingCreateOptions.find((o) => o.name === this.createPageTemplateTitle)) {
-                this.mainNavService.patchMainNavConfig({
-                    customCreateOptions: {
-                        ...currentConfig,
-                        addOptions: existingCreateOptions.concat([createPageTemplate]),
-                    },
-                });
-            }
         }
         // idea: if "collectionNode" already has a page config, there is no need to search further
         if (this.collectionNode.properties[DEFAULT_PAGE_CONFIG_PROP] && !this.templateMode()) {
@@ -1432,27 +1396,122 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Loads the global template being edited as the only variant of the page. It belongs to no
+     * page config, so the one of the collection is neither read nor written.
+     */
+    private async loadGlobalTemplate(): Promise<void> {
+        const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
+            retrieveNodeId(this.globalTemplateNode()),
+        );
+        this.globalTemplateNode.set(templateNode);
+        await this.showDetachedVariant(templateNode, false);
+    }
+
+    /**
+     * Shows a node outside the collection's page config as the only variant of the page. A preview
+     * renders it read-only and without header and breadcrumb, which a copy does not take over.
+     */
+    private async showDetachedVariant(node: Node, preview: boolean): Promise<void> {
+        this.pageVariantConfigs = { nodes: [node], pagination: null };
+        this.pageVariantNode.set(node);
+        this.pageVariantNodeIndex = 0;
+        this.selectedVariantPosition = 0;
+        this.pageVariantSettingsValid.set(true);
+        this.pageConfigCheckFailed.set(false);
+        // neither the anchor color nor the AI headings of the page shown before may stay
+        this.anchorItemColor = null;
+        this.swimlaneIdToPromptTextMapping = new Map<string, PromptToTextMapping>();
+        const pageVariant: PageVariantConfig = retrievePageVariantConfig(node);
+        if (!pageVariant?.structure) {
+            console.error(
+                this.translate.instant('TOPIC_PAGE.NO_PAGE_VARIANT.VARIANT_OR_STRUCTURE_MISSING'),
+                pageVariant,
+            );
+            return;
+        }
+        if (preview) {
+            markForRender(pageVariant);
+            delete pageVariant.structure.propagatedBreadcrumbNodeId;
+            delete pageVariant.structure.propagatedHeaderNodeId;
+        }
+        await this.applyStructureToLocalState(pageVariant.structure);
+        // another node may have been shown in the meantime
+        if (this.pageVariantNode() !== node) {
+            return;
+        }
+        await this.updateSwimlaneIdToPromptTextMapping();
+        setTimeout((): void => {
+            this.checkAccordionExpansionState();
+        });
+    }
+
+    /**
      * Allows creating a new page variant by opening a new dialog.
      */
     async createPageVariant(): Promise<void> {
+        await this.openVariantOrTemplateSelection('variant');
+    }
+
+    /**
+     * Opens the dialog for picking the source of a new page variant or page template. The picked
+     * node is either used right away or previewed in place of the collection's page.
+     *
+     * @param kind
+     */
+    async openVariantOrTemplateSelection(kind: CreationKind): Promise<void> {
         this.createVariantOrTemplateSelectedNode = null;
-        this.createVariantOrTemplateMode.set('variant');
+        this.createVariantOrTemplateSearchState = null;
+        this.createVariantOrTemplateMode.set(kind);
         this.createVariantOrTemplateDialogRef = await this.dialogs.openGenericDialog({
-            title: 'TOPIC_PAGE.CREATE_PAGE_VARIANT.HEADING',
+            title:
+                kind === 'template'
+                    ? 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.HEADING'
+                    : 'TOPIC_PAGE.CREATE_PAGE_VARIANT.HEADING',
             minWidth: '700px',
             maxWidth: '100%',
             contentTemplate: this.addPageVariantOrTemplateRef,
             closable: Closable.Casual,
-            buttons: USE_OR_CANCEL,
+            buttons: PREVIEW_USE_OR_CANCEL,
         });
         const response = await firstValueFrom(this.createVariantOrTemplateDialogRef.afterClosed());
-        if (response !== 'USE') {
+        const sourceNode: Node = this.createVariantOrTemplateSelectedNode;
+        if (!sourceNode) {
             return;
         }
-        if (!this.createVariantOrTemplateSelectedNode) {
-            return;
+        if (response === VARIANT_PREVIEW_BUTTON_LABEL) {
+            await this.variantPreviewService.start(
+                kind,
+                this.createVariantOrTemplateCopyOption,
+                this.createVariantOrTemplateSearchState,
+                sourceNode,
+            );
+        } else if (response === 'USE') {
+            await this.endVariantPreview();
+            await this.createFrom(kind, sourceNode, this.createVariantOrTemplateCopyOption);
         }
+    }
 
+    /**
+     * Creates a page variant or a page template from a given source node.
+     */
+    private async createFrom(
+        kind: CreationKind,
+        sourceNode: Node,
+        copyOption: CopyOption,
+    ): Promise<void> {
+        if (kind === 'template') {
+            await this.createPageTemplateFrom(sourceNode, copyOption);
+            return;
+        }
+        await this.createPageVariantFrom(sourceNode);
+    }
+
+    /**
+     * Adds a page variant built from a given source node to the collection's page.
+     *
+     * @param sourceNode
+     */
+    private async createPageVariantFrom(sourceNode: Node): Promise<void> {
         // start the editing process (idea: copy the selected node as a child and relink the widgets)
         // the goal is to add another page variant to the existing (propagated) page config
         this.startEditing(this.i18nPrefix + 'CREATE_PAGE_VARIANT.PENDING_MESSAGE');
@@ -1462,7 +1521,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         const ownPageConfigMissing: boolean =
             !this.collectionNodePageConfigRef || !this.pageVariantConfigs?.nodes?.length;
         if (ownPageConfigMissing) {
-            await this.createCustomConfig();
+            await this.createCustomConfig(sourceNode);
             return;
         }
         // check for custom page node existence and create it if necessary
@@ -1484,9 +1543,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         try {
             this.closeSideMenus();
             // retrieve page variant config from selected source and prepare it
-            const variantConfig: PageVariantConfig = retrievePageVariantConfig(
-                this.createVariantOrTemplateSelectedNode,
-            );
+            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
             // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
             markForCopy(variantConfig);
             // a variant holds swimlanes, never the rules a template may define them by
@@ -1497,13 +1554,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // retrieve the page variant properties
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
-                    this.createVariantOrTemplateSelectedNode,
+                    sourceNode,
                     '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
                 );
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(this.pageConfigNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name.replace(
+                sourceNode.name.replace(
                     /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
                     '',
                 ) +
@@ -1514,7 +1571,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             // workaround: copy profiling properties separately to avoid crashes
             const updatedVariantNode = await this.copyProfilingProperties(
-                this.createVariantOrTemplateSelectedNode,
+                sourceNode,
                 retrieveNodeId(pageConfigVariantNode),
             );
             if (updatedVariantNode) {
@@ -1644,7 +1701,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param nodeId
      */
     private async syncPageVariantNode(nodeId: string): Promise<void> {
-        if (retrieveNodeId(this.pageConfigNode)) {
+        if (retrieveNodeId(this.pageConfigNode) || this.globalTemplateNode()) {
             await this.updatePageVariantConfigs(true);
         }
         const reloadedNode: Node = this.pageVariantConfigs?.nodes?.find(
@@ -1666,7 +1723,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * deletes the page config and its link as well if it is the last item.
      */
     async deletePageVariant(): Promise<void> {
-        if (!this.collectionNodePageConfigRef || !this.userHasEditRights()) {
+        if (
+            !this.collectionNodePageConfigRef ||
+            !this.userHasEditRights() ||
+            this.globalTemplateNode() ||
+            this.variantPreview()
+        ) {
             return;
         }
         const deleteString: string = this.templateMode()
@@ -1843,21 +1905,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      *
      * @param fragment
      */
-    async navigateToFragment(fragment: string): Promise<void> {
-        // use history over router to avoid directly navigating to wrong fragment position
-        history.pushState(null, '', this.retrieveFragmentUrl(fragment));
-        // manually scroll into view
-        this.latestUrlFragment = fragment;
-        this.scrollElementIntoView();
-    }
-
-    /**
-     * Helper function to retrieve the URL to a given fragment.
-     */
-    retrieveFragmentUrl(fragment: string): string {
-        const url = new URL(window.location.href);
-        url.hash = fragment;
-        return url.toString();
+    navigateToFragment(fragment: string): void {
+        this.topicPageShareService.navigateToFragment(fragment);
     }
 
     // SWIMLANE SPECIFIC FUNCTIONS
@@ -1986,25 +2035,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async openQrCodeDialog(swimlaneIndex: number): Promise<void> {
-        // change link to include current variantId
-        const queryParamsToAddOrOverwrite: Params = {
-            variantId: retrieveNodeId(this.pageVariantNode()),
-        };
-        await this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: queryParamsToAddOrOverwrite,
-            queryParamsHandling: 'merge',
-        });
-        this.qrCodeUrl.set(
-            this.retrieveFragmentUrl(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id),
+        await this.topicPageShareService.openQrCodeDialog(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            retrieveNodeId(this.pageVariantNode()),
+            this.showQrCodeDialogRef,
         );
-        this.qrCodeDialogRef = await this.dialogs.openGenericDialog({
-            title: 'TOPIC_PAGE.SWIMLANE.QR_CODE.HEADING',
-            contentPadding: 0,
-            contentTemplate: this.showQrCodeDialogRef,
-            closable: Closable.Casual,
-            buttons: [{ label: 'CANCEL', config: { color: 'standard' } }],
-        });
     }
 
     /**
@@ -2013,25 +2048,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     async copySwimlaneLink(swimlaneIndex: number): Promise<void> {
-        // change link to include current variantId
-        const queryParamsToAddOrOverwrite: Params = {
-            variantId: retrieveNodeId(this.pageVariantNode()),
-        };
-        await this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: queryParamsToAddOrOverwrite,
-            queryParamsHandling: 'merge',
-        });
-        // similar to copying links in GitHub issues, the target is first set to the URL and then copied
-        await this.navigateToFragment(this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id);
-        // workaround: setTimeout is necessary, as navigateToFragment includes a delay
-        setTimeout((): void => {
-            this.clipboard.copy(window.location.href);
-            // inform user about URL being copied successfully
-            this.topicPageHelperService.openSaveConfigToast(
-                'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.COPY_LINK_SUCCESS',
-            );
-        }, 300);
+        await this.topicPageShareService.copyLink(
+            this.SWIMLANE_ID_PREFIX + this.swimlanes[swimlaneIndex].id,
+            retrieveNodeId(this.pageVariantNode()),
+        );
     }
 
     /**
@@ -2040,25 +2060,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param swimlaneIndex
      */
     writeMail(swimlaneIndex: number): void {
-        const swimlane = this.swimlanes[swimlaneIndex];
-        const i18nPrefix = 'TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.';
-        if (swimlane) {
-            // TODO: Move into shared service
-            const subjectText = this.translate.instant(i18nPrefix + 'SUBJECT_SHARED_CONTENT', {
-                title: swimlane.heading || this.translate.instant(i18nPrefix + 'NO_TITLE'),
-            });
-            const bodyText = this.translate.instant(i18nPrefix + 'BODY_SHARED_CONTENT', {
-                url: this.retrieveFragmentUrl(this.SWIMLANE_ID_PREFIX + swimlane.id),
-            });
-
-            const subject = encodeURIComponent(subjectText);
-            const body = encodeURIComponent(bodyText);
-
-            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-            window.open(mailtoLink, '_self');
-        } else {
-            console.warn(this.translate.instant(i18nPrefix + 'ERROR_NO_URL'));
+        const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
+        if (!swimlane) {
+            console.warn(
+                this.translate.instant('TOPIC_PAGE.SWIMLANE.SHARE_CONTENT.WRITE_MAIL.ERROR_NO_URL'),
+            );
+            return;
         }
+        this.topicPageShareService.writeMail(
+            this.SWIMLANE_ID_PREFIX + swimlane.id,
+            swimlane.heading,
+        );
     }
 
     /**
@@ -2466,6 +2478,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Opens all accordions when the view is switched into edit mode.
      */
     async toggleEditMode(): Promise<void> {
+        if (this.variantPreview()) {
+            return;
+        }
         this.editMode.set(!this.editMode());
         this.checkAccordionExpansionState();
         this.closeSideMenus();
@@ -2677,66 +2692,226 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.closeSideMenus();
         // remove the create buttons for a new page variant and a new page template: neither can be
         // created while the template itself is being edited
-        await this.removeCustomMainNavOptions(
+        await this.topicPageCreateOptionsService.remove(
             this.createPageVariantTitle,
             this.createPageTemplateTitle,
         );
         await this.retrievePageConfigAndSelectVariant();
     }
 
-    // HELPER FUNCTIONS
     /**
-     * Removes custom create options from the main nav config by their (i18n) name.
-     *
-     * @param names
+     * Opens a global template in the editor in place of the collection's page. The rights on the
+     * template decide about editing; the collection's page itself stays untouched.
      */
-    private async removeCustomMainNavOptions(...names: string[]): Promise<void> {
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        if (!existingCreateOptions.some((o) => names.includes(o.name))) {
+    async switchIntoGlobalTemplateMode(templateNode: Node): Promise<void> {
+        if (!templateNode) {
             return;
         }
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.filter((o) => !names.includes(o.name)),
-            },
-        });
+        // the page may still offer a template that was deleted in the meantime
+        const availableTemplateNode: Node | null =
+            await this.topicPageHelperService.getNodeIfAvailable(retrieveNodeId(templateNode));
+        if (!availableTemplateNode) {
+            this.toast.error(null, this.i18nPrefix + 'GLOBAL_TEMPLATE_UNAVAILABLE');
+            await this.loadTemplateVariantNode();
+            return;
+        }
+        this.variantPreviewService.leave();
+        this.requestInProgress.set(true);
+        try {
+            this.globalTemplateNode.set(availableTemplateNode);
+            this.templateMode.set(false);
+            // no write may reach the collection's page config while the template is edited
+            this.pageConfigNode = null;
+            this.closeSideMenus();
+            // neither a page variant nor a page template can be created from within the template
+            await this.topicPageCreateOptionsService.remove(
+                this.createPageVariantTitle,
+                this.createPageTemplateTitle,
+            );
+            await this.retrievePageConfigAndSelectVariant();
+            this.userHasEditRights.set(
+                this.nodeHelperService.getNodesRight(
+                    [this.globalTemplateNode()],
+                    ApiRestConstants.ACCESS_WRITE,
+                ),
+            );
+            if (this.userHasEditRights()) {
+                this.initializeCustomEventListeners();
+            }
+            this.editMode.set(this.userHasEditRights());
+        } catch (err) {
+            console.error(err);
+            this.topicPageHelperService.displayErrorToast();
+        } finally {
+            this.endEditing();
+        }
     }
 
     /**
-     * Helper function to add custom options to the main nav config.
+     * Opens a global template picked in the dialog for creating a page variant or template.
+     *
+     * @param templateNode
      */
-    private async addCustomMainNavOptions() {
+    async openGlobalTemplateFromDialog(templateNode: Node): Promise<void> {
+        this.createVariantOrTemplateDialogRef?.close();
+        await this.switchIntoGlobalTemplateMode(templateNode);
+    }
+
+    /**
+     * Re-resolves the template of the current page after a global template was deleted, as it may
+     * have been that one, and drops the template from a running preview.
+     *
+     * @param templateNode
+     */
+    async onGlobalTemplateDeleted(templateNode: Node): Promise<void> {
+        await this.loadTemplateVariantNode();
+        await this.variantPreviewService.remove(templateNode);
+    }
+
+    /**
+     * Leaves the global template by reloading the collection's page.
+     */
+    leaveGlobalTemplateMode(): void {
+        window.location.reload();
+    }
+
+    /**
+     * Deletes the global template being edited and returns to the collection's page.
+     */
+    async deleteGlobalTemplate(): Promise<void> {
+        const templateNode: Node = this.globalTemplateNode();
+        if (
+            templateNode &&
+            (await this.topicPageHelperService.deleteGlobalTemplate(templateNode))
+        ) {
+            this.leaveGlobalTemplateMode();
+        }
+    }
+
+    /**
+     * Shows the listed node at the given position of the running preview.
+     *
+     * @param index
+     */
+    async showVariantPreviewAt(index: number): Promise<void> {
+        await this.variantPreviewService.showAt(index);
+    }
+
+    /**
+     * Creates a page variant or template from the node shown in the running preview.
+     */
+    async useVariantPreview(): Promise<void> {
+        await this.variantPreviewService.use();
+    }
+
+    /**
+     * Ends the running preview and restores the collection's page.
+     */
+    async endVariantPreview(): Promise<void> {
+        await this.variantPreviewService.end();
+    }
+
+    // the collection's page as the variant preview replaces and restores it
+    private readonly variantPreviewHost: VariantPreviewHost = {
+        isGlobalTemplateOpen: (): boolean => !!this.globalTemplateNode(),
+        enterPreview: (): VariantPreviewRestoreState => {
+            const restoreState: VariantPreviewRestoreState = this.captureCollectionPage();
+            this.editMode.set(false);
+            this.closeSideMenus();
+            return restoreState;
+        },
+        showNode: async (node: Node): Promise<void> => {
+            this.topicPageHelperService.closePreview();
+            this.topicPageGlobalService.deleteVisibleNodesMap();
+            this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
+            await this.showDetachedVariant(node, true);
+        },
+        restorePage: (restoreState: VariantPreviewRestoreState): void =>
+            this.restoreCollectionPage(restoreState),
+        reloadPage: async (): Promise<void> => {
+            if (this.initialLoadSuccessfully() && this.latestParams) {
+                await this.retrievePageConfigAndSelectVariant(this.latestParams.variantId, true);
+            }
+        },
+        createFrom: (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> =>
+            this.createFrom(kind, node, copyOption),
+    };
+
+    /**
+     * Captures the state of the collection's page that a preview replaces.
+     */
+    private captureCollectionPage(): VariantPreviewRestoreState {
+        return {
+            anchorItemColor: this.anchorItemColor,
+            breadcrumbNodeId: this.breadcrumbNodeId(),
+            editMode: this.editMode(),
+            headerNodeId: this.headerNodeId(),
+            pageConfigCheckFailed: this.pageConfigCheckFailed(),
+            pageVariantConfigs: this.pageVariantConfigs,
+            pageVariantNode: this.pageVariantNode(),
+            pageVariantNodeIndex: this.pageVariantNodeIndex,
+            pageVariantSettingsValid: this.pageVariantSettingsValid(),
+            persistedSwimlanes: this.persistedSwimlanes,
+            propagatedBreadcrumbNodeId: this.propagatedBreadcrumbNodeId(),
+            propagatedHeaderNodeId: this.propagatedHeaderNodeId(),
+            scrollTop: this.scrollContainerRef()?.nativeElement.scrollTop ?? 0,
+            selectedVariables: JSON.stringify(
+                this.topicPageHelperService.getSelectedVariables() ?? null,
+            ),
+            selectedVariantPosition: this.selectedVariantPosition,
+            swimlaneIdToPromptTextMapping: this.swimlaneIdToPromptTextMapping,
+            swimlanes: this.swimlanes,
+            topicColor: this.topicColor,
+        };
+    }
+
+    /**
+     * Restores the collection's page as captured before a preview, without reloading it.
+     */
+    private restoreCollectionPage(restoreState: VariantPreviewRestoreState): void {
+        this.anchorItemColor = restoreState.anchorItemColor;
+        this.topicColor = restoreState.topicColor;
+        this.breadcrumbNodeId.set(restoreState.breadcrumbNodeId);
+        this.headerNodeId.set(restoreState.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(restoreState.propagatedBreadcrumbNodeId);
+        this.propagatedHeaderNodeId.set(restoreState.propagatedHeaderNodeId);
+        this.pageConfigCheckFailed.set(restoreState.pageConfigCheckFailed);
+        this.pageVariantConfigs = restoreState.pageVariantConfigs;
+        this.pageVariantNodeIndex = restoreState.pageVariantNodeIndex;
+        this.pageVariantSettingsValid.set(restoreState.pageVariantSettingsValid);
+        this.selectedVariantPosition = restoreState.selectedVariantPosition;
+        this.persistedSwimlanes = restoreState.persistedSwimlanes;
+        this.swimlanes = restoreState.swimlanes;
+        this.swimlaneIdToPromptTextMapping = restoreState.swimlaneIdToPromptTextMapping;
+        // last, as effects reload the template and the rendered swimlanes from these
+        this.pageVariantNode.set(restoreState.pageVariantNode);
+        this.editMode.set(restoreState.editMode);
+        this.topicPageHelperService.closePreview();
+        this.topicPageGlobalService.deleteVisibleNodesMap();
+        this.endEditing();
+        setTimeout((): void => {
+            this.scrollContainerRef()?.nativeElement.scrollTo({ top: restoreState.scrollTop });
+        });
+    }
+
+    // HELPER FUNCTIONS
+    /**
+     * Adds the topic page's own options to the main nav.
+     */
+    private async addCustomMainNavOptions(): Promise<void> {
         // @TODO: setting scope does not work yet
         this.optionsHelperService.setData({
             scope: Scope.TopicPage,
         });
-
-        // add a create page variant option to the "new" button
-        const createPageVariant = new OptionItem(
+        await this.topicPageCreateOptionsService.add(
             this.createPageVariantTitle,
             'edu-page_variant',
             () => {
                 void this.createPageVariant();
             },
+            10,
+            Constrain.User,
         );
-        createPageVariant.elementType = [ElementType.NoneOrUnknown];
-        createPageVariant.group = DefaultGroups.Toggles;
-        createPageVariant.priority = 10;
-        createPageVariant.constrains = [Constrain.User];
-
-        // retrieve existing options from main nav config to extend them
-        const currentConfig = (await firstValueFrom(this.mainNavService.observeMainNavConfig()))
-            .customCreateOptions;
-        const existingCreateOptions = currentConfig?.addOptions || [];
-        this.mainNavService.patchMainNavConfig({
-            customCreateOptions: {
-                ...currentConfig,
-                addOptions: existingCreateOptions.concat([createPageVariant]),
-            },
-        });
     }
 
     /**
@@ -2860,34 +3035,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Helper function to update the swimlane ID to search hit matching.
      */
     private updateSwimlaneIdToHitMatching(): void {
-        const swimlaneIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
-        this.swimlanes.forEach((swimlane: Swimlane): void => {
-            // check for direct title match
-            let hasMatchingHits: boolean =
-                this.swimlaneTitleIdToHitMatching.get(swimlane.id) ?? false;
-            // if no title match was found, check for matching in the grid
-            if (!hasMatchingHits) {
-                swimlane.grid?.forEach((tile: GridTile): void => {
-                    const hasHits: boolean = tile.hasHits;
-                    const visibleWidgets: WIDGET_TYPE[] = [
-                        WIDGETS.COLLECTION_CHIPS,
-                        WIDGETS.TOPICS_COLUMN_BROWSER,
-                    ];
-                    const alwaysVisibleWidget: boolean = visibleWidgets.includes(tile.item);
-                    if (hasHits || alwaysVisibleWidget) {
-                        hasMatchingHits = true;
-                    }
-                });
-            }
-            swimlaneIdToHitMatching.set(swimlane.id, hasMatchingHits);
-        });
-        this.swimlaneIdToHitMatching = swimlaneIdToHitMatching;
-        this.firstMatchingSwimlaneId = this.swimlanes.find((swimlane) =>
-            this.swimlaneIdToHitMatching.get(swimlane.id),
-        )?.id;
-        this.lastMatchingSwimlaneId = [...this.swimlanes]
-            .reverse()
-            .find((swimlane) => this.swimlaneIdToHitMatching.get(swimlane.id))?.id;
+        const hitMatching: SwimlaneHitMatching = computeSwimlaneHitMatching(
+            this.swimlanes,
+            this.swimlaneTitleIdToHitMatching,
+        );
+        this.swimlaneIdToHitMatching = hitMatching.bySwimlaneId;
+        this.firstMatchingSwimlaneId = hitMatching.firstMatchingSwimlaneId;
+        this.lastMatchingSwimlaneId = hitMatching.lastMatchingSwimlaneId;
     }
 
     /**
@@ -2902,8 +3056,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(this.pageVariantNode());
-        // a section without a stored prompt shows its plain heading, so no entry may outlive it
-        this.swimlaneIdToPromptTextMapping = new Map<string, PromptToTextMapping>();
+        // a fresh map per run: a section without a stored prompt shows its plain heading, and a
+        // slower earlier run cannot fill the map of a later one
+        const mapping: Map<string, PromptToTextMapping> = new Map();
+        this.swimlaneIdToPromptTextMapping = mapping;
         if (!aiConfig || !Object.keys(aiConfig)?.length) {
             return;
         }
@@ -2930,7 +3086,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                             retrieveResultString(result) ||
                                 this.translate.instant('TOPIC_PAGE.AI.INVALID_PROMPT'),
                         );
-                        this.swimlaneIdToPromptTextMapping.set(swimlane.id, promptToTextMapping);
+                        mapping.set(swimlane.id, promptToTextMapping);
                     }
                 }
             }
@@ -2941,8 +3097,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     /**
      * Helper function to create a custom page config as a starting point.
+     *
+     * @param sourceNode the node the only variant of the new page config is built from
      */
-    async createCustomConfig(): Promise<void> {
+    async createCustomConfig(sourceNode: Node): Promise<void> {
         try {
             // fake page variant config nodes
             this.pageVariantConfigs = {
@@ -2954,7 +3112,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 },
             };
             this.selectedVariantPosition = 0;
-            this.pageVariantConfigs.nodes = [this.createVariantOrTemplateSelectedNode];
+            this.pageVariantConfigs.nodes = [sourceNode];
             // start reinitialization process
             this.pageConfigCreationInProgress.set(true);
             this.requestInProgress.set(true);
@@ -2962,7 +3120,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             await this.checkForCustomPageNodeExistence();
             // workaround: copy profiling properties separately to avoid crashes
             const updatedVariantNode = await this.copyProfilingProperties(
-                this.createVariantOrTemplateSelectedNode,
+                sourceNode,
                 retrieveNodeId(this.pageVariantNode()),
             );
             if (updatedVariantNode) {
@@ -3011,30 +3169,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Creates a page template by picking an existing variant as source, then
-     * creates the template variant under the ccm:page_config_propagate_ref node.
-     * If no propagate config node exists yet it is created and linked; otherwise
-     * the new template variant is added to the existing propagate config folder.
+     * Allows creating a page template by opening a dialog for picking its source.
      */
     async createPageTemplate(): Promise<void> {
-        this.createVariantOrTemplateSelectedNode = null;
-        this.createVariantOrTemplateMode.set('template');
-        this.createVariantOrTemplateDialogRef = await this.dialogs.openGenericDialog({
-            title: 'TOPIC_PAGE.CREATE_PAGE_TEMPLATE.HEADING',
-            minWidth: '700px',
-            maxWidth: '100%',
-            contentTemplate: this.addPageVariantOrTemplateRef,
-            closable: Closable.Casual,
-            buttons: USE_OR_CANCEL,
-        });
-        const response = await firstValueFrom(this.createVariantOrTemplateDialogRef.afterClosed());
-        if (response !== 'USE') {
-            return;
-        }
-        if (!this.createVariantOrTemplateSelectedNode) {
-            return;
-        }
+        await this.openVariantOrTemplateSelection('template');
+    }
 
+    /**
+     * Creates the template variant under the ccm:page_config_propagate_ref node from a given
+     * source. If no propagate config node exists yet it is created and linked; otherwise the new
+     * template variant is added to the existing propagate config folder.
+     */
+    private async createPageTemplateFrom(sourceNode: Node, copyOption: CopyOption): Promise<void> {
         this.startEditing(this.i18nPrefix + 'CREATE_PAGE_TEMPLATE.PENDING_MESSAGE');
         // when pageConfigCheckFailed() is true the showLoadingScreen first clause requires
         // pageConfigCreationInProgress — startEditing alone is not enough in that state
@@ -3045,35 +3191,31 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         try {
             this.closeSideMenus();
             // retrieve page variant config from selected source and prepare it
-            const variantConfig: PageVariantConfig = retrievePageVariantConfig(
-                this.createVariantOrTemplateSelectedNode,
-            );
+            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
             // delete the nodeIds but keep them as temporaryNodeIds + remove certain variables
             markForCopy(variantConfig);
             // retrieve the page variant properties
             const properties: { [key: string]: string | string[] } =
                 await this.topicPageHelperService.retrievePageVariantProperties(
-                    this.createVariantOrTemplateSelectedNode,
+                    sourceNode,
                     '_' + this.translate.instant(this.i18nPrefix + 'COPY_SUFFIX'),
                 );
             // mark this variant as the template
             properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
             // any template source is a "real" template (the default placeholder no longer exists)
-            const isRealTemplateSource: boolean =
-                this.createVariantOrTemplateCopyOption === CopyOption.Template;
+            const isRealTemplateSource: boolean = copyOption === CopyOption.Template;
             if (isRealTemplateSource) {
                 // inherit template version from A and append the default own_counter to
                 // form the compound "{parent_sync}:{own_counter}" format used by non-root
                 // templates
                 const parentVersion =
-                    this.createVariantOrTemplateSelectedNode.properties?.[
-                        DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP
-                    ]?.[0] ?? DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
+                    sourceNode.properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ??
+                    DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
                 properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
                     parentVersion + ':' + DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
                 // set template ref to A's node ID
                 properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP] = prependWorkspacePrefix(
-                    retrieveNodeId(this.createVariantOrTemplateSelectedNode),
+                    retrieveNodeId(sourceNode),
                 );
             } else {
                 // topic page source or default template placeholder: use default version
@@ -3111,7 +3253,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             let pageConfigVariantNode: Node = await this.topicPageHelperService.createChild(
                 retrieveNodeId(pageConfigPropagateNode),
                 RestConstants.CCM_TYPE_MAP,
-                this.createVariantOrTemplateSelectedNode.name.replace(
+                sourceNode.name.replace(
                     /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
                     '',
                 ) +
@@ -3122,7 +3264,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             // workaround: copy profiling properties separately to avoid crashes
             const updatedTemplateNode = await this.copyProfilingProperties(
-                this.createVariantOrTemplateSelectedNode,
+                sourceNode,
                 retrieveNodeId(pageConfigVariantNode),
             );
             if (updatedTemplateNode) {
@@ -3285,6 +3427,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         isHeaderNode?: boolean,
         isBreadcrumbNode?: boolean,
     ): Promise<boolean> {
+        // a global template is edited in place and must never give the collection a page config
+        if (this.globalTemplateNode()) {
+            await this.bumpTemplateVersionIfNeeded();
+            return false;
+        }
+        if (this.variantPreview()) {
+            return false;
+        }
         if (!this.collectionNodePageConfigRef) {
             // before creating another page config node, check which variant is currently selected
             const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
@@ -3429,6 +3579,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Helper function to retrieve the page variant of an existing page config node.
      */
     private retrievePageVariant(): PageVariantConfig {
+        if (this.variantPreview()) {
+            return null;
+        }
+        // a global template is the only variant of the page and belongs to no page config
+        if (this.globalTemplateNode()) {
+            return retrievePageVariantConfig(this.pageVariantNode());
+        }
         // parse the page config from the properties
         const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
         if (!pageConfig.variants) {
@@ -3482,6 +3639,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param reloadNecessary
      */
     private async updatePageVariantConfigs(reloadNecessary: boolean = false): Promise<void> {
+        if (reloadNecessary && this.globalTemplateNode()) {
+            const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
+                retrieveNodeId(this.globalTemplateNode()),
+            );
+            this.globalTemplateNode.set(templateNode);
+            this.pageVariantConfigs = { nodes: [templateNode], pagination: null };
+            return;
+        }
         if (reloadNecessary) {
             this.pageVariantConfigs = await this.topicPageHelperService.getNodeChildren(
                 retrieveNodeId(this.pageConfigNode),
@@ -3519,13 +3684,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Bumps the patch segment of `ccm:page_variant_template_version` on the
-     * current page variant node when in template mode (e.g. 1.0.0 → 1.0.1).
-     * Called by `checkForCustomPageNodeExistence` on every real modification
-     * and by the `widgetConfigUpdated` listener for widget settings edits.
+     * Bumps the patch segment of `ccm:page_variant_template_version` on the current node while a
+     * template is edited (template mode or a global template), e.g. 1.0.0 → 1.0.1. Called on
+     * every real modification and on widget settings edits.
      */
     private async bumpTemplateVersionIfNeeded(): Promise<void> {
-        if (!this.templateMode() || !this.pageVariantNode()) return;
+        if ((!this.templateMode() && !this.globalTemplateNode()) || !this.pageVariantNode()) return;
         const currentVersion =
             this.pageVariantNode().properties?.[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP]?.[0] ??
             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
@@ -3566,11 +3730,16 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.templateVariantNode.set(null);
             return;
         }
+        const pageVariantNode: Node = this.pageVariantNode();
         try {
             // a deleted template leaves the variant without a template to regenerate from
             const templateNode: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
                 convertNodeRefIntoNodeId(templateRef),
             );
+            // another page variant may be shown by now
+            if (this.pageVariantNode() !== pageVariantNode) {
+                return;
+            }
             this.templateVariantNode.set(templateNode);
         } catch {
             this.templateVariantNode.set(null);
@@ -3585,7 +3754,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     async regeneratePageVariant(): Promise<void> {
         const templateNode = this.templateVariantNode();
-        if (!templateNode || !this.pageVariantNode()) {
+        if (!templateNode || !this.pageVariantNode() || this.variantPreview()) {
             return;
         }
 
@@ -3935,7 +4104,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async addCurrentVariantToGlobalTemplates(
         changesMap?: Map<string, string | string[]>,
     ): Promise<void> {
-        if (!this.pageVariantNode() || !this.canAddToGlobalTemplates()) {
+        if (
+            !this.pageVariantNode() ||
+            !this.canAddToGlobalTemplates() ||
+            this.globalTemplateNode() ||
+            this.variantPreview()
+        ) {
             return;
         }
         this.startEditing(this.i18nPrefix + 'ADD_TO_GLOBAL.PENDING_MESSAGE');
@@ -3952,75 +4126,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             // at an outdated node object — the copy would then be built from stale metadata
             const sourceNode: Node = await this.topicPageHelperService.getNode(sourceNodeId);
             this.pageVariantNode.set(sourceNode);
-            // build the properties of the new global template based on the source variant. The
-            // title is taken over unchanged: a copy suffix only obscures which variant a global
-            // template originated from (and stacks up on every republish)
-            const properties: { [key: string]: string | string[] } =
-                await this.topicPageHelperService.retrievePageVariantProperties(sourceNode);
-            // overlay the title that was just persisted: it is the value the user entered, so the
-            // published template must carry it regardless of the state of the source node
-            const changedTitle: string | string[] = changesMap?.get(RestConstants.LOM_PROP_TITLE);
-            if (changedTitle) {
-                properties[RestConstants.LOM_PROP_TITLE] = Array.isArray(changedTitle)
-                    ? changedTitle[0]
-                    : changedTitle;
-            }
-            // mark as a (root) template with an initial version; the template ref is set to the
-            // new node's own ID once it has been created
-            properties[DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP] = 'true';
-            properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
-                DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
-            delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
-            // create the global template node as a child of the global templates folder
-            let globalTemplateNode: Node = await this.topicPageHelperService.createChild(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-                RestConstants.CCM_TYPE_MAP,
-                sourceNode.name.replace(
-                    /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
-                    '',
-                ) +
-                    '_' +
-                    uuidv4(),
-                DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
-                properties,
-            );
-            // set the template ref to the new node's own ID (root template self-reference)
-            globalTemplateNode =
-                await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
-                    retrieveNodeId(globalTemplateNode),
-                    DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
-                    prependWorkspacePrefix(retrieveNodeId(globalTemplateNode)),
-                );
-            // workaround: copy profiling properties separately to avoid crashes
-            const updatedTemplateNode = await this.copyProfilingProperties(
+            const globalTemplateNode: Node = await this.topicPageGlobalTemplatesService.createFrom(
                 sourceNode,
-                retrieveNodeId(globalTemplateNode),
-            );
-            if (updatedTemplateNode) {
-                globalTemplateNode = updatedTemplateNode;
-            }
-            // overlay the parameter values that were just persisted (same reason as the title;
-            // written separately from the creation for the same reason as the profiling props)
-            const templateWithChanges: Node = await this.applyPersistedParametersToNode(
-                retrieveNodeId(globalTemplateNode),
                 changesMap,
+                {
+                    copyProfilingProperties: (node: Node, targetNodeId: string) =>
+                        this.copyProfilingProperties(node, targetNodeId),
+                    applyPersistedParametersToNode: (
+                        targetNodeId: string,
+                        changes: Map<string, string | string[]>,
+                    ) => this.applyPersistedParametersToNode(targetNodeId, changes),
+                    persistRelinkedVariantConfig: (
+                        variantConfig: PageVariantConfig,
+                        targetNode: Node,
+                    ) => this.persistRelinkedVariantConfig(variantConfig, targetNode),
+                },
             );
-            if (templateWithChanges) {
-                globalTemplateNode = templateWithChanges;
-            }
-            // copy + relink the swimlane widget nodes and persist the config. A public template
-            // is a clean skeleton: editorial members (breadcrumb) and topic header are dropped, and
-            // all custom colors (anchorItemColor, topicColor) are removed — only the swimlane colors
-            // remain. The breadcrumb/header are NOT propagated here (unlike parent-collection inheritance).
-            const variantConfig: PageVariantConfig = retrievePageVariantConfig(sourceNode);
-            markForCopy(variantConfig);
-            delete variantConfig.structure.breadcrumbNodeId;
-            delete variantConfig.structure.headerNodeId;
-            delete variantConfig.structure.propagatedBreadcrumbNodeId;
-            delete variantConfig.structure.propagatedHeaderNodeId;
-            delete variantConfig.structure.anchorItemColor;
-            delete variantConfig.structure.topicColor;
-            await this.persistRelinkedVariantConfig(variantConfig, globalTemplateNode);
             // update the source variant: repoint its template ref to the new global template and
             // reset its template version so it tracks the new foundation
             await this.topicPageHelperService.setProperty(
@@ -4054,26 +4175,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.topicPageHelperService.displayErrorToast();
         } finally {
             this.endEditing();
-        }
-    }
-
-    /**
-     * Updates whether the current user is allowed to add nodes to the global templates folder.
-     */
-    private async updateGlobalTemplatesPermission(): Promise<void> {
-        try {
-            const folderNode: Node = await this.topicPageHelperService.getNode(
-                ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-            );
-            this.canAddToGlobalTemplates.set(
-                this.nodeHelperService.getNodesRight(
-                    [folderNode],
-                    ApiRestConstants.ACCESS_ADD_CHILDREN,
-                ),
-            );
-        } catch {
-            // folder missing or no access
-            this.canAddToGlobalTemplates.set(false);
         }
     }
 
