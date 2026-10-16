@@ -2734,13 +2734,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         const aiConfig: BapiConfigObject = retrieveAiConfigFromNode(this.pageVariantNode());
+        // a fresh map per run: a section without a stored prompt shows its plain heading, and a
+        // slower earlier run cannot fill the map of a later one
+        const mapping: Map<string, PromptToTextMapping> = new Map();
+        this.swimlaneIdToPromptTextMapping = mapping;
         if (!aiConfig || !Object.keys(aiConfig)?.length) {
             return;
         }
         try {
-            // a fresh map per run, so that a slower earlier run cannot fill the map of a later one
-            const mapping: Map<string, PromptToTextMapping> = new Map();
-            this.swimlaneIdToPromptTextMapping = mapping;
             for (const swimlane of this.swimlanes) {
                 if (aiConfig.hasOwnProperty(swimlane.id)) {
                     const prompt: string = retrievePromptFromAiConfig(aiConfig, swimlane.id);
