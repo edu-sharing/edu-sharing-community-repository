@@ -1754,9 +1754,10 @@ public class SearchServiceElastic implements SearchService {
 
     /**
      * @param sourceIncludes the _source fields to load, null to not load the _source at all
-     * @param docValueField  a field to read from the doc values (null for none), cheaper than loading the _source
+     * @param docValueFields fields to read from the doc values (null for none), cheaper than loading the _source.
+     *                       Properties are mapped as text, only their sub fields (.number, .date) have doc values.
      */
-    private SearchRequest getSitemapRequest(ContentType contentType, Long afterDbid, int size, List<String> sourceIncludes, String docValueField) {
+    private SearchRequest getSitemapRequest(ContentType contentType, Long afterDbid, int size, List<String> sourceIncludes, List<String> docValueFields) {
         BoolQuery.Builder conditions = getGlobalConditions(null, null, null, null, true);
         conditions.must(getContentTypeQuery(contentType));
         if (afterDbid != null) {
@@ -1774,8 +1775,8 @@ public class SearchServiceElastic implements SearchService {
             } else {
                 req.source(src -> src.fetch(false));
             }
-            if (docValueField != null) {
-                req.docvalueFields(d -> d.field(docValueField));
+            if (docValueFields != null) {
+                docValueFields.forEach(field -> req.docvalueFields(d -> d.field(field)));
             }
             return req;
         });
@@ -1787,21 +1788,24 @@ public class SearchServiceElastic implements SearchService {
      * (the _source of a node is large and has to be loaded and parsed for every hit).
      */
     public List<SitemapPage> getSitemapPages(ContentType contentType, int pageSize) throws IOException {
-        String modifiedField = "properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED);
+        // the property is indexed as a number or as a date, depending on how the value was detected
+        List<String> modifiedFields = List.of(
+                "properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED) + ".number",
+                "properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED) + ".date");
         List<SitemapPage> pages = new ArrayList<>();
         long count = 0;
         Long lastDbid = null;
         Long pageAfter = null;
         Long pageModified = null;
         while (true) {
-            List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, lastDbid, SITEMAP_WALK_SIZE, null, modifiedField)).hits().hits();
+            List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, lastDbid, SITEMAP_WALK_SIZE, null, modifiedFields)).hits().hits();
             for (Hit<Map> hit : hits) {
                 if (count > 0 && count % pageSize == 0) {
                     pages.add(new SitemapPage(pageAfter, pageModified));
                     pageAfter = lastDbid;
                     pageModified = null;
                 }
-                Long modified = getSitemapModifiedFromDocValues(hit, modifiedField);
+                Long modified = getSitemapModifiedFromDocValues(hit, modifiedFields);
                 if (modified != null && (pageModified == null || modified > pageModified)) {
                     pageModified = modified;
                 }
@@ -1861,13 +1865,18 @@ public class SearchServiceElastic implements SearchService {
         return toEpochMillis(getSitemapProperty(source, CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED)));
     }
 
-    private static Long getSitemapModifiedFromDocValues(Hit<Map> hit, String field) {
-        JsonData value = hit.fields() == null ? null : hit.fields().get(field);
-        if (value == null) {
-            return null;
+    private static Long getSitemapModifiedFromDocValues(Hit<Map> hit, List<String> fields) {
+        for (String field : fields) {
+            JsonData value = hit.fields() == null ? null : hit.fields().get(field);
+            if (value == null) {
+                continue;
+            }
+            List<?> values = value.to(List.class);
+            if (values != null && !values.isEmpty()) {
+                return toEpochMillis(values.get(0));
+            }
         }
-        List<?> values = value.to(List.class);
-        return values == null || values.isEmpty() ? null : toEpochMillis(values.get(0));
+        return null;
     }
 
     /**
