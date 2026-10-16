@@ -135,7 +135,6 @@ import {
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
-    WIDGET_TYPE,
     WIDGETS,
 } from '../shared/types/custom-definitions';
 import { BapiConfigObject } from '../shared/types/bapi-config-object';
@@ -169,6 +168,12 @@ import {
     VariantPreviewRestoreState,
 } from '../shared/types/variant-preview';
 import { checkUserAccess } from '../shared/utils/node-util';
+import {
+    computeSwimlaneHitMatching,
+    parseSearchFilters,
+    searchStateToQueryParams,
+    SwimlaneHitMatching,
+} from '../shared/utils/search-hit-util';
 import {
     addNodeIdToPageVariantConfig,
     convertNodeRefIntoNodeId,
@@ -1119,7 +1124,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.searchInput.set(searchInput);
             this.searchFieldService.getCurrentInstance()?.setSearchString(searchInput);
         }
-        const filters: Values = this.parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
+        const filters: Values = parseSearchFilters(params[SEARCH_FILTERS_QUERY_PARAM]);
         if (Object.keys(filters).length > 0) {
             this.searchFilters.set(filters);
             // active filters stay visible: they explain the narrowed result set
@@ -1133,34 +1138,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * search state changes.
      */
     private persistSearchStateInParams(): void {
-        const filters: Values = this.searchFilters();
-        const hasFilters: boolean = Object.keys(filters ?? {}).length > 0;
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {
-                [SEARCH_INPUT_QUERY_PARAM]: this.searchInput() || null,
-                [SEARCH_FILTERS_QUERY_PARAM]: hasFilters ? JSON.stringify(filters) : null,
-            },
+            queryParams: searchStateToQueryParams(this.searchInput(), this.searchFilters()),
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
-    }
-
-    /**
-     * Reads a filter query param, which holds the values keyed by property as JSON.
-     *
-     * @param param
-     */
-    private parseSearchFilters(param: string): Values {
-        if (!param) {
-            return {};
-        }
-        try {
-            return JSON.parse(param) as Values;
-        } catch {
-            // the param is part of a URL and may hold anything
-            return {};
-        }
     }
 
     // PAGE CONFIG + VARIANT SPECIFIC FUNCTIONS
@@ -2817,34 +2800,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Helper function to update the swimlane ID to search hit matching.
      */
     private updateSwimlaneIdToHitMatching(): void {
-        const swimlaneIdToHitMatching: Map<string, boolean> = new Map<string, boolean>();
-        this.swimlanes.forEach((swimlane: Swimlane): void => {
-            // check for direct title match
-            let hasMatchingHits: boolean =
-                this.swimlaneTitleIdToHitMatching.get(swimlane.id) ?? false;
-            // if no title match was found, check for matching in the grid
-            if (!hasMatchingHits) {
-                swimlane.grid?.forEach((tile: GridTile): void => {
-                    const hasHits: boolean = tile.hasHits;
-                    const visibleWidgets: WIDGET_TYPE[] = [
-                        WIDGETS.COLLECTION_CHIPS,
-                        WIDGETS.TOPICS_COLUMN_BROWSER,
-                    ];
-                    const alwaysVisibleWidget: boolean = visibleWidgets.includes(tile.item);
-                    if (hasHits || alwaysVisibleWidget) {
-                        hasMatchingHits = true;
-                    }
-                });
-            }
-            swimlaneIdToHitMatching.set(swimlane.id, hasMatchingHits);
-        });
-        this.swimlaneIdToHitMatching = swimlaneIdToHitMatching;
-        this.firstMatchingSwimlaneId = this.swimlanes.find((swimlane) =>
-            this.swimlaneIdToHitMatching.get(swimlane.id),
-        )?.id;
-        this.lastMatchingSwimlaneId = [...this.swimlanes]
-            .reverse()
-            .find((swimlane) => this.swimlaneIdToHitMatching.get(swimlane.id))?.id;
+        const hitMatching: SwimlaneHitMatching = computeSwimlaneHitMatching(
+            this.swimlanes,
+            this.swimlaneTitleIdToHitMatching,
+        );
+        this.swimlaneIdToHitMatching = hitMatching.bySwimlaneId;
+        this.firstMatchingSwimlaneId = hitMatching.firstMatchingSwimlaneId;
+        this.lastMatchingSwimlaneId = hitMatching.lastMatchingSwimlaneId;
     }
 
     /**
