@@ -210,6 +210,7 @@
           "TOOLTIP": "Eine neue Version der verwendeten Vorlage ist verfügbar.",
           "TOOLTIP_AVAILABLE": "ACHTUNG: neue Vorlage vom {{date}}",
           "TOOLTIP_UP_TO_DATE": "Vorlage noch aktuell",
+          "TEMPLATE_MISSING": "Die verknüpfte Vorlage ist nicht mehr verfügbar.",
           "HEADING": "Seiten-Variante aktualisieren",
           "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? An der Seiten-Variante vorgenommene Änderungen gehen dabei verloren."
         },

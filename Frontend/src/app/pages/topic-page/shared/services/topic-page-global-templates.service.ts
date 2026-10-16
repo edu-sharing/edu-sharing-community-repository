@@ -1,10 +1,8 @@
 import { inject, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { Node, RestConstants as ApiRestConstants } from 'ngx-edu-sharing-api';
-import { v4 as uuidv4 } from 'uuid';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import {
-    DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
     DEFAULT_PAGE_VARIANT_IS_TEMPLATE_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
@@ -19,19 +17,16 @@ import {
     retrievePageVariantConfig,
 } from '../utils/template-util';
 import { TopicPageHelperService } from './topic-page-helper.service';
+import { TopicPageVariantNodesService } from './topic-page-variant-nodes.service';
 
 /**
- * Writes of the editor that a new global template is built with: the same copy and relink steps
- * that create a page variant or template.
+ * Copies the widget nodes of a variant config to a target node and persists the relinked config
+ * on it, as the editor does when creating a page variant or template.
  */
-export interface GlobalTemplateCopySteps {
-    copyProfilingProperties(sourceNode: Node, targetNodeId: string): Promise<Node | null>;
-    applyPersistedParametersToNode(
-        targetNodeId: string,
-        changesMap: Map<string, string | string[]>,
-    ): Promise<Node | null>;
-    persistRelinkedVariantConfig(variantConfig: PageVariantConfig, targetNode: Node): Promise<Node>;
-}
+export type PersistRelinkedVariantConfig = (
+    variantConfig: PageVariantConfig,
+    targetNode: Node,
+) => Promise<Node>;
 
 /**
  * The global topic page templates folder (`-topic_page_templates-`): access to it, recognizing
@@ -41,6 +36,7 @@ export interface GlobalTemplateCopySteps {
 export class TopicPageGlobalTemplatesService {
     private nodeHelperService = inject(NodeHelperService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private topicPageVariantNodesService = inject(TopicPageVariantNodesService);
 
     private readonly folderId: WritableSignal<string | null> = signal(null);
     private readonly canAddValue: WritableSignal<boolean> = signal(false);
@@ -87,7 +83,7 @@ export class TopicPageGlobalTemplatesService {
     async createFrom(
         sourceNode: Node,
         changesMap: Map<string, string | string[]> | undefined,
-        steps: GlobalTemplateCopySteps,
+        persistRelinkedVariantConfig: PersistRelinkedVariantConfig,
     ): Promise<Node> {
         // the title is taken over unchanged: a copy suffix only obscures which variant a global
         // template originated from (and stacks up on every republish)
@@ -105,16 +101,9 @@ export class TopicPageGlobalTemplatesService {
         properties[DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP] =
             DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION;
         delete properties[DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP];
-        let templateNode: Node = await this.topicPageHelperService.createChild(
+        let templateNode: Node = await this.topicPageVariantNodesService.createVariantNode(
             ApiRestConstants.TOPIC_PAGE_TEMPLATES,
-            RestConstants.CCM_TYPE_MAP,
-            sourceNode.name.replace(
-                /(_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})+$/i,
-                '',
-            ) +
-                '_' +
-                uuidv4(),
-            DEFAULT_PAGE_VARIANT_CONFIG_ASPECT,
+            sourceNode,
             properties,
         );
         templateNode = await this.topicPageHelperService.setPropertyAndRetrieveUpdatedNode(
@@ -122,13 +111,9 @@ export class TopicPageGlobalTemplatesService {
             DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
             prependWorkspacePrefix(retrieveNodeId(templateNode)),
         );
-        // workaround: copy profiling properties separately to avoid crashes
+        // the parameter values just persisted, written apart from the creation like the profiling
         templateNode =
-            (await steps.copyProfilingProperties(sourceNode, retrieveNodeId(templateNode))) ??
-            templateNode;
-        // the parameter values just persisted, written separately for the same reason
-        templateNode =
-            (await steps.applyPersistedParametersToNode(
+            (await this.topicPageVariantNodesService.applyPersistedParameters(
                 retrieveNodeId(templateNode),
                 changesMap,
             )) ?? templateNode;
@@ -140,7 +125,7 @@ export class TopicPageGlobalTemplatesService {
         delete variantConfig.structure.propagatedHeaderNodeId;
         delete variantConfig.structure.anchorItemColor;
         delete variantConfig.structure.topicColor;
-        await steps.persistRelinkedVariantConfig(variantConfig, templateNode);
+        await persistRelinkedVariantConfig(variantConfig, templateNode);
         return templateNode;
     }
 }
