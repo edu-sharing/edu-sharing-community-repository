@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, OnDestroy, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { MatChipInputEvent, MatChipListboxChange } from '@angular/material/chips';
 import {
+    DEFAULT,
     Node,
     ScopeAssignment,
     ScopeBulkRequest,
@@ -13,6 +13,7 @@ import { NodeEntriesDataType, NodeHelperService } from 'ngx-edu-sharing-ui';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { SharedModule } from '../../../shared/shared.module';
+import { MdsModule } from '../../mds/mds.module';
 import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../dialogs/dialogs.service';
 import {
@@ -25,13 +26,10 @@ import { ScopeHistoryComponent } from './scope-history/scope-history.component';
 
 type ScopeValues = { [property: string]: string[] };
 
-/** one property of the field list, prepared for rendering */
+/** one property of the field list, prepared for rendering (the control itself is the mds widget) */
 type FieldModel = {
     field: ScopeField;
     label: string;
-    multiple: boolean;
-    /** valuespace of the scope mds; empty for free values */
-    values: { id: string; caption: string }[];
 };
 
 function sameValues(a: string[] | undefined, b: string[] | undefined) {
@@ -43,15 +41,15 @@ function sameValues(a: string[] | undefined, b: string[] | undefined) {
 /**
  * Editorial changes inside the active scope (sidebar option `SCOPE_EDITORIAL`).
  *
- * Generic: the controls are derived from the field list of the scope group and the valuespaces of
- * its mds. There are no enforced transitions, every value can be set at any time. A single node
+ * Generic: the fields come from the field list of the scope group, each one is rendered by its
+ * widget of the scope mds (`es-mds-editor-single-widget`). There are no enforced transitions, every value can be set at any time. A single node
  * is saved directly, several nodes or all hits of a search via a bulk job.
  */
 @Component({
     selector: 'es-scope-editorial-panel',
     templateUrl: 'scope-editorial-panel.component.html',
     styleUrls: ['scope-editorial-panel.component.scss'],
-    imports: [SharedModule, ScopeHistoryComponent],
+    imports: [SharedModule, MdsModule, ScopeHistoryComponent],
 })
 export class ScopeEditorialPanelComponent implements OnDestroy {
     private scopesService = inject(ScopesService);
@@ -84,20 +82,13 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
     protected readonly nodeId = computed(() =>
         this.node() ? this.nodeHelperService.getOriginalId(this.node()) : null,
     );
+    protected readonly mdsId = computed(() => this.scope()?.definition?.mds || DEFAULT);
     protected readonly fieldModels = computed<FieldModel[]>(() => {
         const widgets = this.widgets();
-        return this.scopesService.fields().map((field) => {
-            const widget = widgets[field.id];
-            return {
-                field,
-                label: ScopeMdsService.getLabel(widgets, field.id),
-                multiple: ScopeMdsService.isMultiple(widget),
-                values: (widget?.values ?? []).map((v) => ({
-                    id: v.id,
-                    caption: v.caption || v.id,
-                })),
-            };
-        });
+        return this.scopesService.fields().map((field) => ({
+            field,
+            label: ScopeMdsService.getLabel(widgets, field.id),
+        }));
     });
     protected readonly statusFields = computed(() =>
         this.fieldModels().filter((f) => !f.field.replaces),
@@ -121,6 +112,8 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
     protected readonly saving = signal(false);
     protected readonly bulkStatus = signal<ScopeBulkStatus | null>(null);
     protected readonly historyReload = signal(0);
+    /** increased when the values change from outside the widgets (load, discard, marking): re-creates them */
+    protected readonly revision = signal(0);
 
     protected readonly changedProperties = computed<ScopeValues>(() => {
         const edits = this.edits();
@@ -172,6 +165,7 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
             this.edits.set({});
             this.reason.set('');
             this.assignment.set(null);
+            this.revision.update((r) => r + 1);
             if (!scopeId || !nodeId) {
                 return;
             }
@@ -182,6 +176,7 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
                     next: (assignment) => {
                         this.assignment.set(assignment);
                         this.loading.set(false);
+                        this.revision.update((r) => r + 1);
                     },
                     error: () => this.loading.set(false),
                 });
@@ -210,27 +205,12 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         this.edits.update((edits) => ({ ...edits, [property]: values }));
     }
 
-    protected onListboxChange(model: FieldModel, event: MatChipListboxChange) {
-        const value = event.value;
-        this.setValues(
-            model.field.id,
-            Array.isArray(value) ? value : value != null && value !== '' ? [value] : [],
-        );
-    }
-
-    protected addFreeValue(model: FieldModel, event: MatChipInputEvent) {
-        const value = event.value?.trim();
-        if (value && !this.getValues(model.field.id).includes(value)) {
-            this.setValues(model.field.id, [...this.getValues(model.field.id), value]);
+    /** value of a widget; ignores the initial emit and unchanged values */
+    protected onWidgetChange(property: string, values: string[]) {
+        const cleaned = (values ?? []).filter((v) => v != null && v !== '');
+        if (!sameValues(cleaned, this.getValues(property))) {
+            this.setValues(property, cleaned);
         }
-        event.chipInput.clear();
-    }
-
-    protected removeFreeValue(model: FieldModel, value: string) {
-        this.setValues(
-            model.field.id,
-            this.getValues(model.field.id).filter((v) => v !== value),
-        );
     }
 
     /** "publish" / "exclude": set the field to the first of its marking values */
@@ -238,6 +218,7 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         const values =
             kind === 'published' ? model.field.publishedValues : model.field.excludedValues;
         this.setValues(model.field.id, [values[0]]);
+        this.revision.update((r) => r + 1);
     }
 
     protected valueLabel(property: string, value: string) {
@@ -260,17 +241,15 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         return this.isOverridden(property) ? [] : node?.properties?.[property] ?? [];
     }
 
-    protected setReplacingValue(property: string, value: string) {
-        this.setValues(property, value?.trim() ? [value] : []);
-    }
-
     protected resetToOriginal(property: string) {
         this.setValues(property, []);
+        this.revision.update((r) => r + 1);
     }
 
     protected discard() {
         this.edits.set({});
         this.reason.set('');
+        this.revision.update((r) => r + 1);
     }
 
     async save() {

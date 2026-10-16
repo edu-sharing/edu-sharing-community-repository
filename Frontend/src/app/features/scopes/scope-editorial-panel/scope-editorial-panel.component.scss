@@ -72,19 +72,17 @@
     &.touched {
         border-left-color: var(--primary);
     }
-    .field-label {
+    .field-hint {
         display: flex;
         align-items: center;
         gap: 4px;
-        font-weight: bold;
-        .visibility {
+        font-size: var(--fontSizeXSmall);
+        color: var(--textLight);
+        i {
             font-size: 16px;
-            color: var(--textLight);
         }
     }
 }
-.free-values,
-.replacing-input,
 .reason {
     width: 100%;
 }

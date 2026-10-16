@@ -25,7 +25,7 @@
         <i esIcon="edit"></i>
         {{ 'EDITORIAL.SCOPE.BASE_QUERY.EDIT' | translate }}
       </button>
-      <button mat-button [disabled]="saving()" (click)="remove($index)">
+      <button mat-button color="warn" [disabled]="saving()" (click)="remove($index)">
         <i esIcon="delete"></i>
         {{ 'EDITORIAL.SCOPE.BASE_QUERY.REMOVE' | translate }}
       </button>

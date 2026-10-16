@@ -87,47 +87,22 @@
 
     <section class="fields">
       <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_STATUS' | translate }}</h3>
-      @for (f of statusFields(); track f.field.id) {
+      <!-- widgets of the scope mds; re-created (track) when the values change from outside -->
+      @for (f of statusFields(); track f.field.id + ':' + revision()) {
       <div class="field" [class.touched]="isTouched(f.field.id)">
-        <div class="field-label">
-          {{ f.label }}
-          @if (f.field.visibility === 'public') {
-          <i
-            esIcon="public"
-            class="visibility"
-            [matTooltip]="'SCOPES.EDITORIAL.VISIBILITY_PUBLIC' | translate"
-          ></i>
-          }
+        <es-mds-editor-single-widget
+          [editorMode]="'form'"
+          [mds]="mdsId()"
+          [widgetId]="f.field.id"
+          [ngModel]="getValues(f.field.id)"
+          (ngModelChange)="onWidgetChange(f.field.id, $event)"
+          ngDefaultControl
+        ></es-mds-editor-single-widget>
+        @if (f.field.visibility === 'public') {
+        <div class="field-hint">
+          <i esIcon="public"></i>
+          {{ 'SCOPES.EDITORIAL.VISIBILITY_PUBLIC' | translate }}
         </div>
-        @if (f.values.length) {
-        <mat-chip-listbox
-          [multiple]="f.multiple"
-          [value]="f.multiple ? getValues(f.field.id) : getValues(f.field.id)[0]"
-          (change)="onListboxChange(f, $event)"
-          [attr.aria-label]="f.label"
-        >
-          @for (value of f.values; track value.id) {
-          <mat-chip-option [value]="value.id">{{ value.caption }}</mat-chip-option>
-          }
-        </mat-chip-listbox>
-        } @else {
-        <mat-form-field class="free-values" subscriptSizing="dynamic">
-          <mat-chip-grid #grid [attr.aria-label]="f.label">
-            @for (value of getValues(f.field.id); track value) {
-            <mat-chip-row (removed)="removeFreeValue(f, value)">
-              {{ value }}
-              <button matChipRemove [attr.aria-label]="'SCOPES.EDITORIAL.REMOVE_VALUE' | translate">
-                <i esIcon="cancel"></i>
-              </button>
-            </mat-chip-row>
-            }
-            <input
-              [placeholder]="'SCOPES.EDITORIAL.FREE_VALUE_PLACEHOLDER' | translate"
-              [matChipInputFor]="grid"
-              (matChipInputTokenEnd)="addFreeValue(f, $event)"
-            />
-          </mat-chip-grid>
-        </mat-form-field>
         }
       </div>
       }
@@ -139,17 +114,16 @@
       <p class="section-description">
         {{ 'SCOPES.EDITORIAL.SECTION_REPLACING_DESCRIPTION' | translate }}
       </p>
-      @for (f of replacingFields(); track f.field.id) {
+      @for (f of replacingFields(); track f.field.id + ':' + revision()) {
       <div class="field" [class.touched]="isTouched(f.field.id)">
-        <mat-form-field subscriptSizing="dynamic" class="replacing-input">
-          <mat-label>{{ f.label }}</mat-label>
-          <textarea
-            matInput
-            cdkTextareaAutosize
-            [value]="getValues(f.field.id).join(', ')"
-            (input)="setReplacingValue(f.field.id, $any($event.target).value)"
-          ></textarea>
-        </mat-form-field>
+        <es-mds-editor-single-widget
+          [editorMode]="'form'"
+          [mds]="mdsId()"
+          [widgetId]="f.field.id"
+          [ngModel]="getValues(f.field.id)"
+          (ngModelChange)="onWidgetChange(f.field.id, $event)"
+          ngDefaultControl
+        ></es-mds-editor-single-widget>
         <div class="original">
           <span class="original-label">{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}</span>
           <span class="original-value">{{ getOriginal(f.field.id).join(', ') || '–' }}</span>

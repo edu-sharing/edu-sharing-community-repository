@@ -1297,7 +1297,7 @@
     <template>
       <id>editorial_scope</id>
       <html><![CDATA[
-              <ccm:editorial_inventory expandable="expanded">
+              <ccm:editorial_inventory type="facetList" expandable="expanded" icon="fact_check">
 				]]></html>
     </template>
     <template>

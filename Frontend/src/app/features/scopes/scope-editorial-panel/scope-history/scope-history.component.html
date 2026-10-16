@@ -31,7 +31,7 @@
         {{ entry.actor }}
         }
       </span>
-      <span class="at">{{ entry.at | date : 'short' }}</span>
+      <span class="at">{{ entry.at | formatDate : { time: true } }}</span>
       @if (entry.contentVersion) {
       <span class="version">{{
         'SCOPES.EDITORIAL.HISTORY.VERSION' | translate : { version: entry.contentVersion }
