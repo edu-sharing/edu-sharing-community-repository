@@ -276,7 +276,11 @@ interface VariantPreviewRestoreState {
     providers: [OptionsHelperDataService, TopicPageHelperService, TopicPageEventsService],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
-    styleUrls: ['./template.component.scss'],
+    styleUrls: [
+        './template.component.scss',
+        './template-content.component.scss',
+        './template-overrides.component.scss',
+    ],
     schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
