@@ -53,10 +53,6 @@ main {
     border-radius: var(--borderRadiusCards);
     background: topicPageVars.$surface-container-lowest;
     @include topicPageVars.materialShadow();
-    @include topicPageVars.roundedContainerStaticScroll(
-        topicPageVars.$mobileTabSwitchWidth,
-        topicPageVars.$mobileTabNavHeight
-    );
 }
 
 // On mobile, drop the frame so the page uses the full width (like the other pages), leaving room
