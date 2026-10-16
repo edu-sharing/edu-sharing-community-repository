@@ -78,6 +78,7 @@ import org.edu_sharing.restservices.shared.NodeSearch;
 import org.edu_sharing.service.InsufficientPermissionException;
 import org.edu_sharing.service.admin.SystemFolder;
 import org.edu_sharing.service.authority.AuthorityServiceHelper;
+import org.edu_sharing.service.mime.MimeTypesV2;
 import org.edu_sharing.service.model.CollectionRef;
 import org.edu_sharing.service.model.CollectionRefImpl;
 import org.edu_sharing.service.model.NodeRef;
@@ -1828,8 +1829,9 @@ public class SearchServiceElastic implements SearchService {
     public List<SitemapEntry> getSitemapEntries(ContentType contentType, Long afterDbid, int size) throws IOException {
         String modifiedKey = CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED);
         String nameKey = CCConstants.getValidLocalName(CCConstants.CM_NAME);
-        List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, afterDbid, size,
-                List.of("nodeRef.id", "aspects", "content.mimetype", "properties." + modifiedKey, "properties." + nameKey), null)).hits().hits();
+        List<String> sourceIncludes = new ArrayList<>(List.of("nodeRef.id", "type", "aspects", "content.mimetype", "properties." + modifiedKey, "properties." + nameKey));
+        SITEMAP_MEDIATYPE_PROPERTIES.forEach(property -> sourceIncludes.add("properties." + CCConstants.getValidLocalName(property)));
+        List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, afterDbid, size, sourceIncludes, null)).hits().hits();
         List<SitemapEntry> entries = new ArrayList<>(hits.size());
         for (Hit<Map> hit : hits) {
             Map source = hit.source();
@@ -1842,11 +1844,52 @@ public class SearchServiceElastic implements SearchService {
                     hit.sort().get(0).longValue(),
                     getSitemapModified(source),
                     aspects instanceof Collection && ((Collection<?>) aspects).contains(CCConstants.getValidLocalName(CCConstants.CCM_ASPECT_COLLECTION)),
-                    content instanceof Map ? (String) ((Map) content).get("mimetype") : null,
+                    getSitemapMediatype(source),
+                    content instanceof Map && ((Map) content).get("mimetype") != null,
                     name != null ? name.toString() : null
             ));
         }
         return entries;
+    }
+
+    /**
+     * the properties MimeTypesV2 uses to decide the media type
+     */
+    private static final List<String> SITEMAP_MEDIATYPE_PROPERTIES = List.of(
+            CCConstants.LOM_PROP_TECHNICAL_FORMAT,
+            CCConstants.CM_NAME,
+            CCConstants.CCM_PROP_IO_WWWURL,
+            CCConstants.CCM_PROP_CCRESSOURCETYPE,
+            CCConstants.CCM_PROP_CCRESSOURCESUBTYPE,
+            CCConstants.CCM_PROP_IO_REPL_EDUCATIONAL_LEARNINGRESSOURCETYPE,
+            CCConstants.CCM_PROP_MAP_COLLECTIONTYPE);
+
+    /**
+     * The media type (e.g. file-video) as the ui and the rest api show it, so the sitemap needs no mapping of its own.
+     * MimeTypesV2 expects the full qualified names, the index has the short ones.
+     */
+    static String getSitemapMediatype(Map source) {
+        Map<String, Object> properties = new HashMap<>();
+        for (String property : SITEMAP_MEDIATYPE_PROPERTIES) {
+            Object value = getSitemapProperty(source, CCConstants.getValidLocalName(property));
+            if (value != null) {
+                properties.put(property, value.toString());
+            }
+        }
+        Object type = source.get("type");
+        Object aspects = source.get("aspects");
+        List<String> globalAspects = new ArrayList<>();
+        if (aspects instanceof Collection) {
+            for (Object aspect : (Collection<?>) aspects) {
+                String global = CCConstants.getValidGlobalName(aspect.toString());
+                if (global != null) {
+                    globalAspects.add(global);
+                }
+            }
+        }
+        return MimeTypesV2.getNodeType(
+                new MimeTypesV2.NodeInfo(type == null ? null : CCConstants.getValidGlobalName(type.toString()), properties, globalAspects),
+                MimeTypesV2.Type.Mediatype);
     }
 
     private static Object getSitemapProperty(Map source, String key) {
