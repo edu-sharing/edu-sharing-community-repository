@@ -387,19 +387,18 @@ export class TopicPageHelperService {
     }
 
     /**
-     * Retrieves a node from the repository past the short-lived node cache of `getNode`, for reads
-     * that have to reflect a write made to the node just before.
+     * Retrieves a node with a given ID from the server, bypassing the short-lived node cache that
+     * would still answer with the state from before a recent write.
      */
-    async getUpdatedNode(nodeId: string): Promise<Node> {
-        nodeId = convertNodeRefIntoNodeId(nodeId);
-        const nodeEntry = await firstValueFrom(
+    async getNodeUncached(nodeId: string): Promise<Node> {
+        const response = await firstValueFrom(
             this.nodeApiUnwrapped.getMetadata({
                 repository: HOME_REPOSITORY,
-                node: nodeId,
+                node: convertNodeRefIntoNodeId(nodeId),
                 propertyFilter: [PROPERTY_FILTER_ALL],
             }),
         );
-        return nodeEntry.node;
+        return response.node;
     }
 
     /**
@@ -647,7 +646,7 @@ export class TopicPageHelperService {
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);
-        return this.getUpdatedNode(nodeId);
+        return this.getNodeUncached(nodeId);
     }
 
     // INTERNAL HELPER FUNCTIONS
@@ -789,7 +788,7 @@ export class TopicPageHelperService {
                     await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
                 }
                 // return the updated node
-                return await this.getUpdatedNode(nodeId);
+                return await this.getNodeUncached(nodeId);
             }
         } catch (err) {
             this.displayErrorToast(err);

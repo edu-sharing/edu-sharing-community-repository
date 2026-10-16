@@ -1289,7 +1289,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             if (!this.templateMode() && !retrievePageConfigRef(this.collectionNode)) {
                 markForRender(pageVariant);
             }
-            await this.applyPageVariantStructure(pageVariant);
+            await this.applyStructureToLocalState(pageVariant.structure);
         }
         // update the swimlane ID to prompt text mapping
         if (initialLoad || pageVariantChanged || forceReload) {
@@ -1302,28 +1302,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Takes the colors, the breadcrumb and header node IDs and the swimlanes of a page variant
-     * into the rendered page.
-     */
-    private async applyPageVariantStructure(pageVariant: PageVariantConfig): Promise<void> {
-        if (pageVariant.structure.anchorItemColor) {
-            this.anchorItemColor = pageVariant.structure.anchorItemColor;
-        }
-        this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
-        this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-        this.headerNodeId.set(pageVariant.structure.headerNodeId);
-        this.propagatedBreadcrumbNodeId.set(pageVariant.structure.propagatedBreadcrumbNodeId);
-        this.propagatedHeaderNodeId.set(pageVariant.structure.propagatedHeaderNodeId);
-        this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
-        await this.updateRenderedSwimlanes();
-    }
-
-    /**
      * Loads the global template being edited as the only variant of the page. It belongs to no
      * page config, so the one of the collection is neither read nor written.
      */
     private async loadGlobalTemplate(): Promise<void> {
-        const templateNode: Node = await this.topicPageHelperService.getUpdatedNode(
+        const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
             retrieveNodeId(this.globalTemplateNode()),
         );
         this.globalTemplateNode.set(templateNode);
@@ -1357,7 +1340,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             delete pageVariant.structure.propagatedBreadcrumbNodeId;
             delete pageVariant.structure.propagatedHeaderNodeId;
         }
-        await this.applyPageVariantStructure(pageVariant);
+        await this.applyStructureToLocalState(pageVariant.structure);
         // another node may have been shown in the meantime
         if (this.pageVariantNode() !== node) {
             return;
@@ -1608,7 +1591,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         // ref yet, so the next variant resolution would fall back to the inherited page config and
         // display the values from before these changes
         if (pageConfigCreated) {
-            this.collectionNode = await this.topicPageHelperService.getUpdatedNode(
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(
                 retrieveNodeId(this.collectionNode),
             );
         }
@@ -1631,7 +1614,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             (n: Node) => retrieveNodeId(n) === nodeId,
         );
         this.pageVariantNode.set(
-            reloadedNode ?? (await this.topicPageHelperService.getUpdatedNode(nodeId)),
+            reloadedNode ?? (await this.topicPageHelperService.getNodeUncached(nodeId)),
         );
         const reloadedIndex: number = this.pageVariantConfigs?.nodes?.findIndex(
             (n: Node) => retrieveNodeId(n) === nodeId,
@@ -2382,6 +2365,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Renders a page structure and rebuilds the state derived from it. The structure is taken
+     * over by reference and edited in place afterwards, so it has to be a copy of its own.
+     */
+    private async applyStructureToLocalState(structure: PageStructure): Promise<void> {
+        this.anchorItemColor = structure.anchorItemColor;
+        this.topicColor = retrieveTopicColor({ structure }, this.collectionNode, this.topic());
+        this.breadcrumbNodeId.set(structure.breadcrumbNodeId);
+        this.headerNodeId.set(structure.headerNodeId);
+        this.propagatedBreadcrumbNodeId.set(structure.propagatedBreadcrumbNodeId ?? null);
+        this.propagatedHeaderNodeId.set(structure.propagatedHeaderNodeId ?? null);
+        this.persistedSwimlanes = structure.swimlanes ?? [];
+        await this.updateRenderedSwimlanes();
+        this.updateSwimlaneIdToHitMatching();
+        this.anchorTrigger++;
+        setTimeout((): void => this.checkAccordionExpansionState());
+    }
+
+    /**
      * Leaves the template mode by setting the according variable and reloading the page.
      */
     leaveTemplateMode(): void {
@@ -2397,7 +2398,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     async switchIntoTemplateMode(reloadNecessary: boolean = false): Promise<void> {
         this.templateMode.set(true);
         if (reloadNecessary) {
-            this.collectionNode = await this.topicPageHelperService.getUpdatedNode(
+            this.collectionNode = await this.topicPageHelperService.getNodeUncached(
                 retrieveNodeId(this.collectionNode),
             );
         }
@@ -3063,7 +3064,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         for (const [key, value] of parameterChanges) {
             await this.topicPageHelperService.setProperty(targetNodeId, key, value);
         }
-        return await this.topicPageHelperService.getUpdatedNode(targetNodeId);
+        return await this.topicPageHelperService.getNodeUncached(targetNodeId);
     }
 
     /**
@@ -3085,7 +3086,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             }
         }
         if (modified) {
-            return await this.topicPageHelperService.getUpdatedNode(targetNodeId);
+            return await this.topicPageHelperService.getNodeUncached(targetNodeId);
         }
         return null;
     }
@@ -3271,14 +3272,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             await this.updatePageVariantConfigs(true);
             // parse the page config ref again
             const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            if (pageVariant.structure.anchorItemColor) {
-                this.anchorItemColor = pageVariant.structure.anchorItemColor;
-            }
-            this.topicColor = retrieveTopicColor(pageVariant, this.collectionNode, this.topic());
-            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-            this.persistedSwimlanes = pageVariant.structure.swimlanes ?? [];
-            await this.updateRenderedSwimlanes();
+            await this.applyStructureToLocalState(pageVariant.structure);
             // update the ccm:page_config_ref in the collection
             await this.topicPageHelperService.setProperty(
                 retrieveNodeId(this.collectionNode),
@@ -3360,7 +3354,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     private async updatePageVariantConfigs(reloadNecessary: boolean = false): Promise<void> {
         if (reloadNecessary && this.globalTemplateNode()) {
-            const templateNode: Node = await this.topicPageHelperService.getUpdatedNode(
+            const templateNode: Node = await this.topicPageHelperService.getNodeUncached(
                 retrieveNodeId(this.globalTemplateNode()),
             );
             this.globalTemplateNode.set(templateNode);
@@ -3696,19 +3690,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
         if (options.syncLocalState) {
             this.pageVariantNode.set(updatedNode);
-            this.persistedSwimlanes = variantConfig.structure.swimlanes ?? [];
-            void this.updateRenderedSwimlanes();
-            if (variantConfig.structure.breadcrumbNodeId) {
-                this.breadcrumbNodeId.set(variantConfig.structure.breadcrumbNodeId);
-            }
-            if (variantConfig.structure.headerNodeId) {
-                this.headerNodeId.set(variantConfig.structure.headerNodeId);
-            }
-            // markers were materialized above, so clear the render (propagated) signals
-            this.propagatedBreadcrumbNodeId.set(
-                variantConfig.structure.propagatedBreadcrumbNodeId ?? null,
-            );
-            this.propagatedHeaderNodeId.set(variantConfig.structure.propagatedHeaderNodeId ?? null);
+            await this.applyStructureToLocalState(variantConfig.structure);
             await this.updatePageVariantConfigs(true);
         }
         return updatedNode;
