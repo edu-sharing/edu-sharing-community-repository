@@ -438,6 +438,7 @@
         "TOPIC_PAGE": "Themenseite",
         "TEMPLATE": "Vorlage"
       },
+      "PREVIEW": "Vorschau",
       "TEMPLATE_ACTIONS": {
         "EDIT": "Bearbeiten",
         "DELETE": "Löschen"
@@ -478,6 +479,14 @@
       "HEADING": "Globale Vorlage löschen",
       "MESSAGE": "Möchtest du die globale Vorlage „{{title}}“ wirklich löschen? Themenseiten, die aus ihr erstellt wurden, behalten ihren Inhalt, können aber nicht mehr aus ihr neu generiert werden.",
       "SUCCESS_MESSAGE": "Die globale Vorlage wurde gelöscht."
+    },
+    "VARIANT_PREVIEW": {
+      "INFO": "Vorschau: „{{title}}“ ({{position}} von {{total}})",
+      "PREVIOUS": "Vorherige Vorschau",
+      "NEXT": "Nächste Vorschau",
+      "BACK_TO_SELECTION": "Zur Auswahl",
+      "END": "Vorschau beenden",
+      "UNAVAILABLE": "„{{title}}“ ist nicht mehr verfügbar."
     }
   }
 }

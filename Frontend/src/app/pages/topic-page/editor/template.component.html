@@ -26,6 +26,53 @@
       {{ i18nPrefix + 'GLOBAL_TEMPLATE_MODE_ACTIVE.END' | translate }}
     </button>
   </es-info-message>
+  } @else if (variantPreview(); as preview) {
+  <es-info-message mode="info" class="template-mode">
+    <span>
+      {{
+        i18nPrefix + 'VARIANT_PREVIEW.INFO'
+          | translate
+            : {
+                title: (variantPreviewNode() | nodeTitle),
+                position: preview.index + 1,
+                total: preview.nodes.length
+              }
+      }}
+    </span>
+    <div class="variant-preview-actions">
+      <button
+        mat-icon-button
+        [disabled]="preview.index === 0"
+        [matTooltip]="i18nPrefix + 'VARIANT_PREVIEW.PREVIOUS' | translate"
+        tooltipAriaLabel
+        (click)="showVariantPreviewAt(preview.index - 1)"
+      >
+        <i esIcon="chevron_left"></i>
+      </button>
+      <button
+        mat-icon-button
+        [disabled]="preview.index >= preview.nodes.length - 1"
+        [matTooltip]="i18nPrefix + 'VARIANT_PREVIEW.NEXT' | translate"
+        tooltipAriaLabel
+        (click)="showVariantPreviewAt(preview.index + 1)"
+      >
+        <i esIcon="chevron_right"></i>
+      </button>
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="openVariantOrTemplateSelection(preview.kind)"
+      >
+        {{ i18nPrefix + 'VARIANT_PREVIEW.BACK_TO_SELECTION' | translate }}
+      </button>
+      <button mat-flat-button color="primary" (click)="useVariantPreview()">
+        {{ 'USE' | translate }}
+      </button>
+      <button mat-button color="primary" (click)="endVariantPreview()">
+        {{ i18nPrefix + 'VARIANT_PREVIEW.END' | translate }}
+      </button>
+    </div>
+  </es-info-message>
   } @else if (templateMode()) {
   <es-info-message mode="info" class="template-mode">
     {{
@@ -37,8 +84,10 @@
     </button>
   </es-info-message>
   }
-  <!-- a global template is no variant of the collection's page, so its variant selection is hidden -->
-  @if (initialLoadSuccessfully() && showBreadcrumb() && !globalTemplateNode()) {
+  <!-- a global template or a previewed node is no variant of the collection's page, so the variant
+    selection is hidden -->
+  @if (initialLoadSuccessfully() && showBreadcrumb() && !globalTemplateNode() && !variantPreview())
+  {
   <!-- BREADCRUMBS -->
   @if (parentEntries()) {
   <div class="template-breadcrumb">
@@ -550,7 +599,8 @@
                 "
                 (textChange)="swimlaneTitleChanged($event, index)"
               ></es-editable-text>
-              @if (!editMode()) {
+              <!-- sharing refers to the collection's page, which a preview does not show -->
+              @if (!editMode() && !variantPreview()) {
               <div class="swimlane-heading-buttons">
                 <button
                   mat-icon-button
@@ -681,12 +731,14 @@
     [dialogRef]="createVariantOrTemplateDialogRef"
     [collectionNodeId]="topicCollectionId()"
     [pageConfigRef]="collectionNodePageConfigRef"
-    [pageVariantNode]="pageVariantNode()"
+    [pageVariantNode]="collectionPageVariantNode()"
+    [restoredSearchState]="variantPreviewSearchState()"
     [(selectedNode)]="createVariantOrTemplateSelectedNode"
     [templateMode]="createVariantOrTemplateMode() === 'template'"
     (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
     (editGlobalTemplate)="openGlobalTemplateFromDialog($event)"
-    (globalTemplateDeleted)="onGlobalTemplateDeleted()"
+    (globalTemplateDeleted)="onGlobalTemplateDeleted($event)"
+    (searchStateChange)="createVariantOrTemplateSearchState = $event"
   ></es-add-page-variant-or-template-dialog>
 </ng-template>
 
@@ -695,7 +747,7 @@
 </ng-template>
 
 <ng-template #editModeToggle>
-  @if (userHasEditRights() && (!pageConfigCheckFailed() || templateMode())) {
+  @if (userHasEditRights() && (!pageConfigCheckFailed() || templateMode()) && !variantPreview()) {
   <button
     mat-button
     class="topic-page-edit-toggle-btn mat-button-no-uppercase"

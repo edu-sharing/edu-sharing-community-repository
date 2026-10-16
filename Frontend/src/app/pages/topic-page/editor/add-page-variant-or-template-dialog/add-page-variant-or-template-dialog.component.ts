@@ -7,7 +7,9 @@ import {
     InputSignal,
     OnDestroy,
     OnInit,
+    output,
     Output,
+    OutputEmitterRef,
     signal,
     ViewChild,
     WritableSignal,
@@ -48,6 +50,8 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { CardDialogRef } from '../../../../features/dialogs/card-dialog/card-dialog-ref';
+import { GenericDialogButton } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
+import { valuesDictIsEquivalent } from '../../../../features/mds/mds-editor/mds-editor-wrapper/values-dict-is-equivalent';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { OptionsHelperService } from '../../shared/services/options-helper.service';
@@ -70,6 +74,31 @@ export enum CopyOption {
     TopicPage = 'topicPage',
     Template = 'template',
 }
+
+/**
+ * The search a list of page variants or templates was produced by, with the listed and the
+ * selected nodes, so that a later dialog or a preview can continue from it.
+ */
+export interface PageVariantSearchState {
+    copyOption: CopyOption;
+    searchValue: string;
+    searchFilters: Values;
+    collectionFilterActive: boolean;
+    sortActive: string;
+    sortDirection: SortDirection;
+    selectedNodeId: string | null;
+    nodes: Node[];
+}
+type ListedSearch = Omit<PageVariantSearchState, 'selectedNodeId' | 'nodes'>;
+
+// footer button that shows the selected node on the topic page instead of using it right away
+export const VARIANT_PREVIEW_BUTTON_LABEL = 'TOPIC_PAGE.CREATE_PAGE_VARIANT.PREVIEW';
+export type PageVariantDialogResult = 'CANCEL' | typeof VARIANT_PREVIEW_BUTTON_LABEL | 'USE';
+export const PREVIEW_USE_OR_CANCEL: GenericDialogButton<PageVariantDialogResult>[] = [
+    { label: 'CANCEL', config: { color: 'standard' } },
+    { label: VARIANT_PREVIEW_BUTTON_LABEL, config: { color: 'standard' } },
+    { label: 'USE', config: { color: 'primary' } },
+];
 
 @Component({
     selector: 'es-add-page-variant-or-template-dialog',
@@ -99,6 +128,10 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     @Input() pageVariantNode: Node;
     @Input() selectedNode: Node;
     templateMode: InputSignal<boolean> = input(false);
+    // the search of an earlier dialog to continue with, e.g. when returning from a preview
+    restoredSearchState: InputSignal<PageVariantSearchState | null> =
+        input<PageVariantSearchState | null>(null);
+    searchStateChange: OutputEmitterRef<PageVariantSearchState> = output<PageVariantSearchState>();
     @Output() copyOptionChanged: EventEmitter<CopyOption> = new EventEmitter<CopyOption>();
     // a global template is to be opened in the editor
     @Output() editGlobalTemplate: EventEmitter<Node> = new EventEmitter<Node>();
@@ -122,6 +155,8 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     // mds-editor-wrapper
     searchFilters: Values;
+    // the filter values the filter editor starts with
+    initialSearchFilters: Values = {};
 
     // whether the search is restricted to the collection the topic page belongs to
     collectionFilterActive: boolean = true;
@@ -152,6 +187,10 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     // whether the initial node was attempted to be selected
     private initialSelectionMade: boolean = false;
+    // the node to select once a restored search has been listed
+    private pendingSelectedNodeId: string | null = null;
+    // the search the listed nodes were produced by; text typed afterwards is not part of it
+    private listedSearch: ListedSearch | null = null;
     private initialized: boolean = false;
     private destroyed: Subject<void> = new Subject<void>();
 
@@ -167,9 +206,14 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     }
 
     async ngOnInit(): Promise<void> {
-        this.selectedOption = !this.pageConfigRef
-            ? this.copyOptions[this.copyOptions.length - 1].value
-            : this.copyOptions[0].value;
+        const restoredSearchState: PageVariantSearchState | null = this.restoredSearchState();
+        if (restoredSearchState) {
+            this.restoreSearch(restoredSearchState);
+        } else {
+            this.selectedOption = !this.pageConfigRef
+                ? this.copyOptions[this.copyOptions.length - 1].value
+                : this.copyOptions[0].value;
+        }
         this.copyOptionChanged.emit(this.selectedOption as CopyOption);
         // if no page config exists, retrieve page variant templates to be chosen by the user
         await this.updateList();
@@ -188,6 +232,48 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     ngOnDestroy(): void {
         this.destroyed.next();
         this.destroyed.complete();
+    }
+
+    /**
+     * Takes over the search of an earlier dialog, including the node to select once it is listed.
+     */
+    private restoreSearch(state: PageVariantSearchState): void {
+        this.selectedOption = state.copyOption;
+        this.searchValue = state.searchValue;
+        this.searchFilters = state.searchFilters;
+        this.initialSearchFilters = state.searchFilters ?? {};
+        this.collectionFilterActive = state.collectionFilterActive;
+        this.sortActive = state.sortActive;
+        this.sortDirection = state.sortDirection;
+        this.pendingSelectedNodeId = state.selectedNodeId;
+    }
+
+    /**
+     * The search as currently entered, to be stored once its results are listed.
+     */
+    private captureSearch(): ListedSearch {
+        return {
+            copyOption: this.selectedOption as CopyOption,
+            searchValue: this.searchValue ?? '',
+            searchFilters: this.searchFilters ?? {},
+            collectionFilterActive: this.collectionFilterActive,
+            sortActive: this.sortActive,
+            sortDirection: this.sortDirection,
+        };
+    }
+
+    /**
+     * Reports the search of the listed nodes together with them and the selected one.
+     */
+    private emitSearchState(): void {
+        if (!this.listedSearch) {
+            return;
+        }
+        this.searchStateChange.emit({
+            ...this.listedSearch,
+            selectedNodeId: retrieveNodeId(this.selectedNode) ?? null,
+            nodes: this.dataSource.getData(),
+        });
     }
 
     /**
@@ -308,8 +394,10 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
      * @param filters
      */
     onSearchFiltersChange(filters: Values): void {
+        // the filter editor also reports the values it was started with
+        const unchanged: boolean = valuesDictIsEquivalent(filters, this.searchFilters);
         this.searchFilters = filters;
-        if (!this.initialized) {
+        if (!this.initialized || unchanged) {
             return;
         }
         void this.updateList();
@@ -460,6 +548,7 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
             );
             this.dataSource.appendData(searchResult.nodes ?? []);
             this.updateTemplateActionsAvailable(this.dataSource.getData());
+            this.emitSearchState();
         } finally {
             this.dataSource.isLoading = false;
         }
@@ -471,8 +560,10 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
      * sorting and paging are handled by the backend instead of being emulated on a fixed list.
      */
     async updateList(): Promise<void> {
+        const search: ListedSearch = this.captureSearch();
         if (!this.searchScopeAvailable()) {
             this.dataSource.setData([], null);
+            this.listedSearch = search;
             this.templateActionsAvailable.set(false);
             return;
         }
@@ -488,9 +579,15 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
         } finally {
             this.dataSource.isLoading = false;
         }
+        this.listedSearch = search;
         // select the page variant referred to as the template (if one exists)
         let matchingVariantNode: Node;
-        if (!this.initialSelectionMade) {
+        if (this.pendingSelectedNodeId) {
+            const pendingId: string = this.pendingSelectedNodeId;
+            this.pendingSelectedNodeId = null;
+            this.initialSelectionMade = true;
+            matchingVariantNode = nodes.find((n) => retrieveNodeId(n) === pendingId);
+        } else if (!this.initialSelectionMade) {
             this.initialSelectionMade = true;
             // retrieve either the template ref ID (copy mode: template) or the page variant ID (copy mode: topic page)
             let nodeRefToReferTo: string;
@@ -529,15 +626,18 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
     }
 
     /**
-     * Updates the selected node and the state of the use button based on the current selection.
+     * Updates the selected node and the state of the buttons acting on it.
      */
     private async updateSelectedNode(): Promise<void> {
         this.selectedNode = this.nodeEntries.getSelection().selected[0] || null;
         this.selectedNodeChange.emit(this.selectedNode);
+        this.emitSearchState();
         const buttons = (await firstValueFrom(this.dialogRef.observeConfig())).buttons;
-        const useButton = buttons.find((b) => b.label === 'USE');
-        if (useButton) {
-            useButton.disabled = !this.nodeEntries.getSelection().hasValue();
+        const hasSelection: boolean = this.nodeEntries.getSelection().hasValue();
+        for (const button of buttons) {
+            if (button.label === 'USE' || button.label === VARIANT_PREVIEW_BUTTON_LABEL) {
+                button.disabled = !hasSelection;
+            }
         }
         this.dialogRef.patchConfig({ buttons });
     }

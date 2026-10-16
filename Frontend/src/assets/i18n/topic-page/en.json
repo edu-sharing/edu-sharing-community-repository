@@ -438,6 +438,7 @@
         "TOPIC_PAGE": "Topic page",
         "TEMPLATE": "Template"
       },
+      "PREVIEW": "Preview",
       "TEMPLATE_ACTIONS": {
         "EDIT": "Edit",
         "DELETE": "Delete"
@@ -478,6 +479,14 @@
       "HEADING": "Delete global template",
       "MESSAGE": "Do you really want to delete the global template \"{{title}}\"? Topic pages created from it keep their content but can no longer be regenerated from it.",
       "SUCCESS_MESSAGE": "The global template was deleted."
+    },
+    "VARIANT_PREVIEW": {
+      "INFO": "Preview: \"{{title}}\" ({{position}} of {{total}})",
+      "PREVIOUS": "Previous preview",
+      "NEXT": "Next preview",
+      "BACK_TO_SELECTION": "Back to selection",
+      "END": "End preview",
+      "UNAVAILABLE": "\"{{title}}\" is no longer available."
     }
   }
 }

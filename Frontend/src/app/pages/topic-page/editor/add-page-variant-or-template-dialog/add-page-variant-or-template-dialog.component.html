@@ -111,7 +111,7 @@
       [repository]="HOME_REPOSITORY"
       [setId]="genericWidgetGlobalService.getDefaultMds()"
       [embedded]="true"
-      [currentValues]="{}"
+      [currentValues]="initialSearchFilters"
       (currentValuesChange)="onSearchFiltersChange($event)"
       mode="search"
     ></es-mds-editor-wrapper>

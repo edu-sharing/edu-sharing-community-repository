@@ -150,6 +150,14 @@ es-side-menu-wrapper {
     }
 }
 
+.variant-preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .template-breadcrumb {
     flex-shrink: 0;
     box-sizing: border-box;
