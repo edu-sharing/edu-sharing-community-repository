@@ -105,6 +105,21 @@ public class SitemapServlet extends SpringHttpServlet {
         return DATE_FORMAT.format(Instant.ofEpochMilli(epochMillis));
     }
 
+    /**
+     * The urls of the download and the preview carry the session id of the request and a cache buster that changes
+     * with every call. Neither belongs in a public file, and an url that changes on every fetch is no stable url.
+     */
+    static String removeVolatileUrlParts(String url) {
+        if (url == null) {
+            return null;
+        }
+        String result = url
+                .replaceAll(";jsessionid=[^?&#]*", "")
+                .replaceAll("&dontcache=[^&#]*", "")
+                .replaceAll("\\?dontcache=[^&#]*&?", "?");
+        return result.endsWith("?") ? result.substring(0, result.length() - 1) : result;
+    }
+
     private static SearchService.ContentType getContentType(String type) {
         return "collection".equals(type) ? SearchService.ContentType.COLLECTIONS : SearchService.ContentType.FILES;
     }
@@ -142,9 +157,9 @@ public class SitemapServlet extends SpringHttpServlet {
                     if (contentLoc != null) {
                         Urlset.Url.Video video = new Urlset.Url.Video();
                         video.title = entry.getName();
-                        video.content_loc = contentLoc;
-                        video.thumbnail_loc = NodeServiceHelper.getPreview(
-                                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNodeId())).getUrl();
+                        video.content_loc = removeVolatileUrlParts(contentLoc);
+                        video.thumbnail_loc = removeVolatileUrlParts(NodeServiceHelper.getPreview(
+                                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNodeId())).getUrl());
                         url.video.add(video);
                     }
                 } catch (Throwable t) {
