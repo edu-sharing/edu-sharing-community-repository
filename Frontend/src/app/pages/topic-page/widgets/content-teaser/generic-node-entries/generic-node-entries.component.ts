@@ -640,7 +640,7 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      * Helper function to initially retrieve the taxonomies.
      */
     async retrieveTaxonomies(): Promise<void> {
-        for (const [propertyName, taxonomies] of this.propertyToTaxonomiesMatching) {
+        for (const taxonomies of this.propertyToTaxonomiesMatching.values()) {
             for (const taxonomy of taxonomies) {
                 try {
                     const response: Response = await fetch(taxonomy);

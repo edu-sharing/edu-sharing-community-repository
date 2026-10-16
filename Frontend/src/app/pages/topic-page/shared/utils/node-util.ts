@@ -1,6 +1,4 @@
 import { Node } from 'ngx-edu-sharing-api';
-import { RestConstants } from '../../../../core-module/rest/rest-constants';
-import { DEFAULT_OER_LICENSES } from '../types/custom-definitions';
 
 /**
  * Checks, whether a given node has write access.
@@ -14,29 +12,4 @@ export const checkUserAccess = (node: Node): boolean => {
  */
 export const getNodeOrDefaultNodeId = (nodeId: string, defaultNodeId: string): string => {
     return nodeId && nodeId !== '' ? nodeId : defaultNodeId;
-};
-
-/**
- * Returns, whether a given node is proven editorial or not.
- */
-export const isEditorial = (node: Node): boolean => {
-    return node.usedInCollections.some(
-        (collection: Node): boolean =>
-            collection.collection?.type === RestConstants.COLLECTIONTYPE_EDITORIAL,
-    );
-};
-
-/**
- * Returns, whether a given node contains OER content or not.
- */
-export const isOer = (node: Node): boolean => {
-    const nodeLicense: string = node.properties?.[RestConstants.CCM_PROP_LICENSE]?.[0] ?? '';
-    return DEFAULT_OER_LICENSES.includes(nodeLicense);
-};
-
-/**
- * Returns, whether the metadataset of a given node has a specific given type.
- */
-export const checkMetadataset = (node: Node, type: string): boolean => {
-    return node.properties?.[RestConstants.CM_PROP_METADATASET_EDU_METADATASET]?.[0] === type;
 };

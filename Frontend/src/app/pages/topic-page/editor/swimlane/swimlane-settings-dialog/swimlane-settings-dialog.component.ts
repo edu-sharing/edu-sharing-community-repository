@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';

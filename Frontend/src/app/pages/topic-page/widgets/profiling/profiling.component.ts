@@ -11,7 +11,7 @@ import {
     inject,
 } from '@angular/core';
 import { DEFAULT, HOME_REPOSITORY, MdsWidget, SessionStorageService } from 'ngx-edu-sharing-api';
-import { firstValueFrom, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MdsModule } from '../../../../features/mds/mds.module';
 import { Widget } from '../../../../features/mds/mds-editor/mds-editor-instance.service';

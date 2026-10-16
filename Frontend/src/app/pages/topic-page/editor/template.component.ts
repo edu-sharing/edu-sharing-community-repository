@@ -630,8 +630,6 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     topicWidgets: NodeEntries;
 
     latestParams: Params;
-    private initialFragmentScrollPerformed: boolean = false;
-    private latestUrlFragment: string;
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
