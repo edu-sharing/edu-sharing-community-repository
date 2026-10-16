@@ -1,5 +1,5 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, Input, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, signal } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { Closable } from '../../../../../features/dialogs/card-dialog/card-dialog-config';
@@ -22,8 +22,6 @@ import { SelectWidgetTypeComponent } from '../select-widget-type/select-widget-t
 
 /**
  * Formats an example config patch the way it appears in the field.
- *
- * @param patch
  */
 function patchExample(patch: Record<string, unknown>): string {
     return JSON.stringify(patch, null, 2);
@@ -88,8 +86,6 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
 
     /**
      * Handles the drop event by moving a grid item from one to another position.
-     *
-     * @param event
      */
     drop(event: CdkDragDrop<string[]>): void {
         moveItemInArray(this.gridItems, event.previousIndex, event.currentIndex);
@@ -99,8 +95,6 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
     /**
      * Called by es-configure-grid and es-select-widget-type-dialog gridUpdated output event.
      * Updates the grid items and sync them with the form data.
-     *
-     * @param grid
      */
     updatedGrid(grid: GridTile[]): void {
         this.gridItems = grid;
@@ -111,9 +105,6 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
     /**
      * Validates the config patch an author typed for a tile and, when it is sound, stores it.
      * An unsound patch marks the form invalid instead of being written, so it cannot be applied.
-     *
-     * @param tileIndex
-     * @param text
      */
     protected patchChanged(tileIndex: number, text: string): void {
         this.patchTexts[tileIndex] = text;
@@ -137,8 +128,6 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
      * Ready-made config patches for a widget type, so the field does not have to be understood
      * from scratch. Only a content teaser is bound to the repeated item itself; for the others
      * the texts are what differs per section.
-     *
-     * @param widgetType
      */
     protected examplesFor(widgetType: string): { key: string; json: string }[] {
         const texts = [
@@ -177,10 +166,6 @@ export class SwimlaneSettingsDialogComponent implements OnInit {
     /**
      * Writes an example into the config patch of a tile, replacing what is there. The select it
      * was picked from is a menu rather than a state, so it does not keep the choice.
-     *
-     * @param tileIndex
-     * @param json
-     * @param select
      */
     protected applyExample(tileIndex: number, json: string, select?: MatSelect): void {
         this.patchChanged(tileIndex, json);

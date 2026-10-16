@@ -23,8 +23,6 @@ export class ConfigureGridComponent {
 
     /**
      * Configures the swimlane grid based on a selected grid option value.
-     *
-     * @param gridOptionValue
      */
     async configureSwimlaneGrid(gridOptionValue: string): Promise<void> {
         // if the grid is already defined, a reconfiguration is necessary
@@ -57,8 +55,6 @@ export class ConfigureGridComponent {
 
     /**
      * Reconfigures the swimlane grid based on a selected grid option value.
-     *
-     * @param gridOptionValue
      */
     async reconfigureSwimlaneGrid(gridOptionValue: string): Promise<void> {
         // set the new grid length

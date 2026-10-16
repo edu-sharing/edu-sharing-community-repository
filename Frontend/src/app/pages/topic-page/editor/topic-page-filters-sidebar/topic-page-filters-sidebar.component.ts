@@ -28,8 +28,6 @@ import { GenericWidgetGlobalService } from '../../widgets/generic-widget/generic
 
 /**
  * Whether a set of MDS values holds a value at all.
- *
- * @param values
  */
 function containsValues(values: Values): boolean {
     return Object.keys(values ?? {}).length > 0;
@@ -92,8 +90,6 @@ export class TopicPageFiltersSidebarComponent implements OnInit, AfterViewInit {
 
     /**
      * Reacts to the currentValuesChange event and emits it the same way.
-     *
-     * @param selectedValues
      */
     applySearchFilters(selectedValues: Values): void {
         selectedValues = Object.fromEntries(

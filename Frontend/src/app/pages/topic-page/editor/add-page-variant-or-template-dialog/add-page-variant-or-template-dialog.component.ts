@@ -347,8 +347,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Updates whether the action column is shown: only when a listed global template offers one.
-     *
-     * @param nodes
      */
     private updateTemplateActionsAvailable(nodes: Node[]): void {
         this.templateActionsAvailable.set(
@@ -360,8 +358,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Switches to the clicked copy option and updates the list of page variants.
-     *
-     * @param event
      */
     onCopyOptionChange(event: any): void {
         this.selectedOption = event.value;
@@ -390,8 +386,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Sets the search filters to a given value.
-     *
-     * @param filters
      */
     onSearchFiltersChange(filters: Values): void {
         // the filter editor also reports the values it was started with
@@ -405,8 +399,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Handles the sorting of the list of page variants.
-     *
-     * @param event
      */
     onSort(event: ListSortConfig) {
         this.sortActive = event.active;
@@ -416,8 +408,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Handles the click event on a page variant.
-     *
-     * @param event
      */
     onNodeClick(event: NodeClickEvent<any>) {
         const alreadySelected: boolean = this.nodeEntries.getSelection().isSelected(event.element);
@@ -458,8 +448,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Switches the search between the collection the topic page belongs to and all collections.
-     *
-     * @param event
      */
     protected onCollectionFilterChange(event: MatCheckboxChange): void {
         this.collectionFilterActive = event.checked;
@@ -492,8 +480,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
 
     /**
      * Builds the search request for the page variants of the selected copy option.
-     *
-     * @param skipCount
      */
     private createSearchRequest(skipCount: number = 0): SearchRequestParams {
         const criteria: MdsQueryCriteria[] = [];
@@ -530,8 +516,6 @@ export class AddPageVariantOrTemplateDialogComponent implements AfterViewInit, O
      * Loads the next page of page variants, triggered by the fetchData output of the node entries
      * wrapper. Without this, the list would be capped at the first request and a newly created
      * variant or template could be missing from it entirely.
-     *
-     * @param event
      */
     async loadMore(event: FetchEvent): Promise<void> {
         if (

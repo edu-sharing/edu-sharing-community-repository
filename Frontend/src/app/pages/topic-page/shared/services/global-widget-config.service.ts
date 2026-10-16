@@ -83,8 +83,6 @@ export class GlobalWidgetConfigService {
 
     /**
      * Sets the ID of the global AI config node.
-     *
-     * @param value
      */
     set defaultAiConfigId(value: string) {
         this._defaultAiConfigId = value;
@@ -99,8 +97,6 @@ export class GlobalWidgetConfigService {
 
     /**
      * Sets the ID of the global AI chat completion config node.
-     *
-     * @param value
      */
     set defaultAiChatCompletionConfigId(value: string) {
         this._defaultAiChatCompletionConfigId = value;
@@ -115,8 +111,6 @@ export class GlobalWidgetConfigService {
 
     /**
      * Sets the ID of the global AI image create config node.
-     *
-     * @param value
      */
     set defaultAiImageCreateConfigId(value: string) {
         this._defaultAiImageCreateConfigId = value;
@@ -131,8 +125,6 @@ export class GlobalWidgetConfigService {
 
     /**
      * Sets the ID of the global AI config node to clear the cache.
-     *
-     * @param value
      */
     set defaultAiClearCacheConfigId(value: string) {
         this._defaultAiClearCacheConfigId = value;

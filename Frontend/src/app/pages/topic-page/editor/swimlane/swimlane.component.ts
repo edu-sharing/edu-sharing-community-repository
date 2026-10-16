@@ -96,9 +96,6 @@ export class SwimlaneComponent implements AfterViewChecked {
     /**
      * Called by es-generic-widget visibleNodesChanged output event.
      * Emits the visible nodes.
-     *
-     * @param nodes
-     * @param gridIndex
      */
     changeVisibleNodes(nodes: Node[], gridIndex: number): void {
         this.visibleNodesChanged.emit({ gridIndex, nodes });
@@ -107,9 +104,6 @@ export class SwimlaneComponent implements AfterViewChecked {
     /**
      * Called by es-generic-widget totalSearchResultCountChanged output event.
      * Emits the total search result count.
-     *
-     * @param count
-     * @param gridIndex
      */
     changeTotalSearchResultCount(count: number, gridIndex: number): void {
         this.totalSearchResultCountChanged.emit({ gridIndex, count });
@@ -118,9 +112,6 @@ export class SwimlaneComponent implements AfterViewChecked {
     /**
      * Called by es-generic-widget searchHitsChanged output event.
      * Emits the hasHits.
-     *
-     * @param hasHits
-     * @param gridIndex
      */
     changeSearchHits(hasHits: boolean, gridIndex: number): void {
         this.searchHitsChanged.emit({ hasHits, gridIndex });
@@ -129,8 +120,6 @@ export class SwimlaneComponent implements AfterViewChecked {
     /**
      * Called by es-configure-grid and es-select-widget-type-dialog gridUpdated output event.
      * Emits the updated grid.
-     *
-     * @param grid
      */
     updatedGrid(grid: GridTile[]): void {
         this.gridUpdated.emit(grid);
@@ -138,8 +127,6 @@ export class SwimlaneComponent implements AfterViewChecked {
 
     /**
      * Checks whether a given widget type name is a supported widget type.
-     *
-     * @param name
      */
     isSupportedWidget(name: string) {
         return (

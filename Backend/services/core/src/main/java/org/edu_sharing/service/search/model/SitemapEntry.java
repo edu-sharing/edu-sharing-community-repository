@@ -17,6 +17,13 @@ public class SitemapEntry {
      */
     Long modified;
     boolean collection;
-    String mimetype;
+    /**
+     * the media type as the ui and the rest api show it (MimeTypesV2), e.g. file-video
+     */
+    String mediatype;
+    /**
+     * the node has its own binary content (and is not only a link)
+     */
+    boolean content;
     String name;
 }

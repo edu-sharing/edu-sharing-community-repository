@@ -9,9 +9,6 @@ import { Swimlane } from '../types/swimlane';
 export class SwimlaneSearchCountPipe implements PipeTransform {
     /**
      * Returns the total search count of a swimlane grid.
-     *
-     * @param swimlane
-     * @param searchCountTrigger
      */
     transform(swimlane: Swimlane, searchCountTrigger: number): number {
         if (searchCountTrigger === 0 || !swimlane?.grid?.length) {

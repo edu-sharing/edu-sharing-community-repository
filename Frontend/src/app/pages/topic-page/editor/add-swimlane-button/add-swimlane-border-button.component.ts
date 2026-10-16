@@ -27,9 +27,6 @@ export class AddSwimlaneBorderButtonComponent {
 
     /**
      * Configures the swimlane and grid by emitting a newly created swimlane.
-     *
-     * @param swimlaneType
-     * @param gridType
      */
     configureSwimlaneAndGrid(swimlaneType: string, gridType: string): void {
         if (!this.supportedSwimlaneTypes.includes(swimlaneType)) {

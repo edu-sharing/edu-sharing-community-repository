@@ -334,8 +334,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
 
     /**
      * Reacts to es-node-entries (itemClicked) event and emits it.
-     *
-     * @param node
      */
     itemClicked(node: Node): void {
         this.itemClickedEvent.emit(node);
@@ -344,8 +342,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     /**
      * Reacts to es-node-entries (totalSearchResultCountChanged) event
      * by displaying the new count and emitting it.
-     *
-     * @param count
      */
     changeTotalSearchResultCount(count: number): void {
         this.totalSearchResultCount = count;
@@ -354,8 +350,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
 
     /**
      * Reacts to es-node-entries (visibleNodesChanged) event by emitting the visible nodes.
-     *
-     * @param nodes
      */
     changeVisibleNodes(nodes: Node[] = []): void {
         this.visibleNodesChanged.emit(nodes);
@@ -380,8 +374,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     // noinspection JSUnusedGlobalSymbols
     /**
      * Called by generic-widget component to set widget-specific values.
-     *
-     * @param config
      */
     setWidgetValues(config: ContentTeaserConfig): void {
         this.blacklistedNodeIds = config.blacklistedNodeIds ?? [];
@@ -408,8 +400,6 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
     // HELPERS
     /**
      * Helper function to handle the receiving of the APPLY_FILTER event.
-     *
-     * @param event
      */
     private handleApplyFilter = async (event: MessageEvent<any>): Promise<void> => {
         // APPLY_FILTER event was received, and windowRef must exist (as multiple listeners might exist)

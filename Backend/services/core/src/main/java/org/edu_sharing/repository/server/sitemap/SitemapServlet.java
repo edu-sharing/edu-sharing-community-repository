@@ -134,17 +134,22 @@ public class SitemapServlet extends SpringHttpServlet {
             url.loc = entry.isCollection()
                     ? URLTool.getNgCollectionUrl(entry.getNodeId())
                     : URLHelper.getNgRenderNodeUrl(entry.getNodeId(), null);
-            if (entry.getMimetype() != null && MimeTypesV2.getTypeFromMimetype(entry.getMimetype()).equals("file-video")) {
-                NodeRef ref = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNodeId());
-                Urlset.Url.Video video = new Urlset.Url.Video();
-                video.title = entry.getName();
+            // only nodes with their own binary have a download url, links (e.g. to a video on another site) have none
+            // and would be an incomplete video entry
+            if ("file-video".equals(entry.getMediatype()) && entry.isContent()) {
                 try {
-                    video.thumbnail_loc = NodeServiceHelper.getPreview(ref).getUrl();
-                    video.content_loc = new MCAlfrescoAPIClient().getDownloadUrl(entry.getNodeId());
+                    String contentLoc = new MCAlfrescoAPIClient().getDownloadUrl(entry.getNodeId());
+                    if (contentLoc != null) {
+                        Urlset.Url.Video video = new Urlset.Url.Video();
+                        video.title = entry.getName();
+                        video.content_loc = contentLoc;
+                        video.thumbnail_loc = NodeServiceHelper.getPreview(
+                                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNodeId())).getUrl();
+                        url.video.add(video);
+                    }
                 } catch (Throwable t) {
                     log.warn("Can not read video data of {}: {}", entry.getNodeId(), t.getMessage());
                 }
-                url.video.add(video);
             }
             set.url.add(url);
         }

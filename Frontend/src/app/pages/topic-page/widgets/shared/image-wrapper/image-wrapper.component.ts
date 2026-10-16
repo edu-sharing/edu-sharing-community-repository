@@ -160,10 +160,6 @@ export class ImageWrapperComponent implements OnInit {
 
     /**
      * Loads an image based on the variables set for aiGeneratedImage and userUploadedNodeId.
-     *
-     * @param aiGeneratedImage
-     * @param userUploadedNodeId
-     * @param regenerateNecessary
      */
     async loadImage(
         aiGeneratedImage: boolean,
@@ -294,8 +290,6 @@ export class ImageWrapperComponent implements OnInit {
 
     /**
      * Handles the upload of an image if the user confirms that he/she has the necessary rights.
-     *
-     * @param file
      */
     async imageChanged(file: File): Promise<void> {
         const dialogRef = await this.dialogsService.openGenericDialog({

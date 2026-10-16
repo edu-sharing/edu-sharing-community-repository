@@ -110,8 +110,6 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
     // noinspection JSUnusedGlobalSymbols
     /**
      * Called by generic-widget component to set widget-specific values.
-     *
-     * @param config
      */
     setWidgetValues(config: IframeWidgetConfig): void {
         this.iframeForm.patchValue(config);

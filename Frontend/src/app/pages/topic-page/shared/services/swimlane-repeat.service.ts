@@ -52,9 +52,6 @@ export class SwimlaneRepeatService {
      * Replaces every swimlane carrying a repeat rule by one swimlane per resolved item, in place.
      * A rule that resolves to nothing leaves no swimlane behind, and a source without a resolver
      * leaves the swimlane as it is so an unknown rule cannot empty a page.
-     *
-     * @param structure
-     * @param page
      */
     async expandRepeats(
         structure: PageStructure,
@@ -90,9 +87,6 @@ export class SwimlaneRepeatService {
      * Resolves the repeat rules into swimlanes meant for rendering only, leaving the structure
      * untouched. A tile's config patch becomes the config it renders from, so a preview shows
      * what the rule produces without anything being created.
-     *
-     * @param structure
-     * @param page
      */
     async expandForPreview(structure: PageStructure, page: RepeatPageContext): Promise<Swimlane[]> {
         const preview: PageStructure = {
@@ -113,11 +107,6 @@ export class SwimlaneRepeatService {
     /**
      * Builds one concrete swimlane for a resolved item. The grid tiles keep their `nodeId`, so the
      * template's widget node is copied once per item by the regular widget copy step.
-     *
-     * @param template
-     * @param item
-     * @param index
-     * @param page
      */
     private buildSwimlane(
         template: Swimlane,
@@ -143,9 +132,6 @@ export class SwimlaneRepeatService {
 
     /**
      * Resolves the direct sub collections of the page's collection.
-     *
-     * @param repeat
-     * @param page
      */
     private async resolveSubCollections(
         repeat: SwimlaneRepeat,

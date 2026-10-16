@@ -102,8 +102,6 @@ export class TopicsColumnBrowserComponent implements WidgetComponentInterface {
 
     /**
      * Reacts to a list option being selected.
-     *
-     * @param value
      */
     onSelectedChange(value: TreeNode<Node> | null): void {
         if (value) {

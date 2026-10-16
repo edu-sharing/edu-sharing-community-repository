@@ -176,7 +176,6 @@ export class TopicPageHelperService {
      * Lets the surrounding topic page load the linked topic inside itself.
      * Returns false if the caller has to navigate to the link itself.
      *
-     * @param collectionId
      * @param url the link of the topic, as given by the custom URL function
      */
     navigateInPlace(collectionId: string, url: string | null): boolean {
@@ -185,8 +184,6 @@ export class TopicPageHelperService {
 
     /**
      * Retrieves the base href of the application.
-     *
-     * @param cutOffTrailingSlash
      */
     getBaseHref(cutOffTrailingSlash: boolean = true): string {
         let href: string = this.platformLocation.getBaseHrefFromDOM();
@@ -279,8 +276,6 @@ export class TopicPageHelperService {
 
     /**
      * Opens the link to a node for inspection.
-     *
-     * @param node
      */
     openChangeOnInspectionTableLink(node: Node): void {
         const component = this.topicPageGlobalService.getCustomApplyFilterComponent() || 'render';
@@ -298,9 +293,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to build the inspection table URL base.
-     *
-     * @param component
-     * @param node
      */
     private buildInspectionTableUrlBase(component: string, node: Node): string[] {
         if (component !== 'render') {
@@ -318,9 +310,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to merge navigation extras with special consideration for filters.
-     *
-     * @param obj1
-     * @param obj2
      */
     private mergeNavigationExtras(
         obj1: NavigationExtras,
@@ -340,8 +329,6 @@ export class TopicPageHelperService {
 
     /**
      * Sets the selected variables for the topic page.
-     *
-     * @param variables
      */
     setSelectedVariables(variables: { [property: string]: string[] }): void {
         this.selectedVariablesSubject.next(variables);
@@ -363,8 +350,6 @@ export class TopicPageHelperService {
 
     /**
      * Sets an input blob as the next upload.
-     *
-     * @param blob
      */
     setBlobToUpload(blob: Blob): void {
         this.blobToUpload = blob;
@@ -449,10 +434,6 @@ export class TopicPageHelperService {
     /**
      * Retrieves the sub-collections with counts of a collection with a given ID. Ordering and the
      * upper bound are left to the repository, which knows the property types.
-     *
-     * @param collectionId
-     * @param fetchCounts
-     * @param options
      */
     getSubcollections(
         collectionId: string,
@@ -685,10 +666,6 @@ export class TopicPageHelperService {
 
     /**
      * Persists a selected color string by notifying the topic-page about the change.
-     *
-     * @param color
-     * @param pageVariantNode
-     * @param swimlaneIndex
      */
     persistColorChange(color: string, pageVariantNode: Node, swimlaneIndex: number): boolean {
         this.openSaveConfigToast();
@@ -712,16 +689,6 @@ export class TopicPageHelperService {
 
     /**
      * Persists a given widgetConfig and aiConfig by either creating a new or updating an existing node with the config.
-     *
-     * @param nodeId
-     * @param gridIndex
-     * @param swimlaneIndex
-     * @param pageVariantNode
-     * @param widgetConfig
-     * @param aiConfig
-     * @param parentWidgetConfigNodeId
-     * @param isHeaderNode
-     * @param isBreadcrumbNode
      */
     async persistConfig(
         nodeId: string,
@@ -810,11 +777,6 @@ export class TopicPageHelperService {
 
     /**
      * Uploads a file by creating a child node for a given parent node ID and setting the file data.
-     *
-     * @param parentId
-     * @param name
-     * @param mimeType
-     * @param blob
      */
     async uploadFile(parentId: string, name: string, mimeType: string, blob: Blob): Promise<Node> {
         const fileNode: Node = await this.createChild(parentId, RestConstants.CCM_TYPE_IO, name);
@@ -823,10 +785,6 @@ export class TopicPageHelperService {
 
     /**
      * Retrieves the page variant properties for a given node, title suffix and page config.
-     *
-     * @param node
-     * @param customTitleSuffix
-     * @param variantConfig
      */
     async retrievePageVariantProperties(
         node: Node,
@@ -961,8 +919,6 @@ export class TopicPageHelperService {
 
     /**
      * Handles an error by opening a toast container for the error.
-     *
-     * @param error
      */
     displayErrorToast(error: any = null): void {
         this.toast.error(error, 'TOPIC_PAGE.WIDGET.SAVE_CONFIG_ERROR_MESSAGE', null, null, null, {
@@ -990,8 +946,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to write an email to share a given node.
-     *
-     * @param node
      */
     private writeMail(node: Node): void {
         if (node.content?.url) {

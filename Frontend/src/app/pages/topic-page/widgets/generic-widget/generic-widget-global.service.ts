@@ -50,8 +50,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Sets the default metadata set to a given value.
-     *
-     * @param mds
      */
     setDefaultMds(mds: string) {
         this.defaultMds = mds;
@@ -59,8 +57,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Retrieves a custom widget component for a given widget ID.
-     *
-     * @param widgetId
      */
     async getCustomWidgetComponent(widgetId: string) {
         const info = this.customWidgets.find((w) => w.id === widgetId);
@@ -72,8 +68,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Retrieves the matching widget type of a custom widget component for a given widget ID.
-     *
-     * @param widgetId
      */
     getCustomWidgetMatchingWidgetType(widgetId: string) {
         return this.customWidgets.find((w) => w.id === widgetId)?.matchingWidgetType;
@@ -81,8 +75,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Retrieves a custom display type component for a given display type.
-     *
-     * @param displayType
      */
     async getCustomDisplayTypeComponent(displayType: GenericNodeEntriesDisplayType) {
         const info = this.customDisplayType.find((w) => w.displayType === displayType);
@@ -94,8 +86,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Retrieves a list of custom cards with a given role.
-     *
-     * @param role
      */
     getCustomCards(role: CustomCardRole) {
         return this.customCards.filter((c) => c.role === role);
@@ -110,8 +100,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Checks if a given widget ID is registered as a custom widget.
-     *
-     * @param widgetId
      */
     hasCustomWidget(widgetId: string) {
         return !!this.customWidgets.find((w) => w.id === widgetId);
@@ -119,8 +107,6 @@ export class GenericWidgetGlobalService {
 
     /**
      * Checks if a given display type is registered as a custom display type.
-     *
-     * @param displayType
      */
     hasCustomDisplayType(displayType?: GenericNodeEntriesDisplayType) {
         return !!this.customDisplayType.find((w) => w.displayType === displayType);
