@@ -111,6 +111,10 @@ import {
 } from '../shared/services/topic-page-global.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import {
+    TopicPageVariantPreviewService,
+    VariantPreviewHost,
+} from '../shared/services/topic-page-variant-preview.service';
+import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_COLLECTION_ID_PROP,
     DEFAULT_PAGE_CONFIG_ASPECT,
@@ -159,6 +163,11 @@ import {
     retrieveResultString,
 } from '../shared/utils/ai-util';
 import { containsPlaceholder } from '../shared/utils/interpolate-util';
+import {
+    CreationKind,
+    VariantPreview,
+    VariantPreviewRestoreState,
+} from '../shared/types/variant-preview';
 import { checkUserAccess } from '../shared/utils/node-util';
 import {
     addNodeIdToPageVariantConfig,
@@ -203,46 +212,6 @@ import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-di
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
 
-type CreationKind = 'variant' | 'template';
-
-/**
- * Nodes listed by the dialog for creating a page variant or template, shown one at a time in place
- * of the collection's page.
- */
-interface VariantPreview {
-    kind: CreationKind;
-    // where the nodes were listed, which decides how a page is created from one of them
-    copyOption: CopyOption;
-    nodes: Node[];
-    index: number;
-    // the dialog search the nodes were listed by, to continue with when returning to the dialog
-    searchState: PageVariantSearchState | null;
-}
-
-/**
- * The state of the collection's page a preview replaces, restored as it was once the preview ends.
- */
-interface VariantPreviewRestoreState {
-    anchorItemColor: string;
-    breadcrumbNodeId: string;
-    editMode: boolean;
-    headerNodeId: string;
-    pageConfigCheckFailed: boolean;
-    pageVariantConfigs: NodeEntries;
-    pageVariantNode: Node | null;
-    pageVariantNodeIndex: number;
-    pageVariantSettingsValid: boolean;
-    persistedSwimlanes: Swimlane[];
-    propagatedBreadcrumbNodeId: string;
-    propagatedHeaderNodeId: string;
-    scrollTop: number;
-    selectedVariables: string;
-    selectedVariantPosition: number;
-    swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping>;
-    swimlanes: Swimlane[];
-    topicColor: string;
-}
-
 @Component({
     imports: [
         AddPageVariantOrTemplateDialogComponent,
@@ -273,7 +242,12 @@ interface VariantPreviewRestoreState {
         TranslateModule,
         VarDirective,
     ],
-    providers: [OptionsHelperDataService, TopicPageHelperService, TopicPageEventsService],
+    providers: [
+        OptionsHelperDataService,
+        TopicPageHelperService,
+        TopicPageEventsService,
+        TopicPageVariantPreviewService,
+    ],
     selector: 'es-template-page',
     templateUrl: './template.component.html',
     styleUrls: [
@@ -302,6 +276,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private topicPageEventsService = inject(TopicPageEventsService);
     private topicPageGlobalService = inject(TopicPageGlobalService);
     private topicPageHelperService = inject(TopicPageHelperService);
+    private variantPreviewService = inject(TopicPageVariantPreviewService);
     private translate = inject(TranslateService);
     private translationsService = inject(TranslationsService);
     private nodeHelperService = inject(NodeHelperService);
@@ -324,6 +299,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private readonly TOPIC_COLOR_CSS_PROPERTY: string = '--topic-color';
 
     constructor() {
+        this.variantPreviewService.attach(this.variantPreviewHost);
         this.topicPageHelperService.setInPlaceNavigationHandler(
             (collectionId: string, url: string | null): boolean =>
                 this.openTopicInPlace(collectionId, url),
@@ -597,18 +573,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     createVariantOrTemplateSearchState: PageVariantSearchState | null = null;
     // set while listed nodes are shown in place of the collection's page; such a preview never
     // writes, as the shown node belongs to no page of this collection
-    variantPreview: WritableSignal<VariantPreview | null> = signal(null);
-    variantPreviewNode: Signal<Node | null> = computed(() => {
-        const preview: VariantPreview | null = this.variantPreview();
-        return preview?.nodes[preview.index] ?? null;
-    });
-    private variantPreviewRestoreState: WritableSignal<VariantPreviewRestoreState | null> =
-        signal(null);
-    // identifies the latest preview load, so that an outdated one is dropped
-    private variantPreviewLoadId: number = 0;
+    variantPreview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
+    variantPreviewNode: Signal<Node | null> = this.variantPreviewService.node;
     // the collection's own page variant, also while a preview is shown in its place
     collectionPageVariantNode: Signal<Node | null> = computed(() => {
-        const restoreState: VariantPreviewRestoreState | null = this.variantPreviewRestoreState();
+        const restoreState: VariantPreviewRestoreState | null =
+            this.variantPreviewService.restoreState();
         return restoreState ? restoreState.pageVariantNode : this.pageVariantNode();
     });
     // the search a reopened creation dialog continues with: the one of a preview of the same kind
@@ -799,7 +769,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * @param variantId
      */
     private async switchTopic(collectionId: string, variantId?: string): Promise<void> {
-        this.leaveVariantPreview();
+        this.variantPreviewService.leave();
         this.switchedTopic = { collectionId, variantId };
         // reset several values to ensure that the component is properly initialized
         this.selectedVariantPosition = -1;
@@ -1555,7 +1525,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             return;
         }
         if (response === VARIANT_PREVIEW_BUTTON_LABEL) {
-            await this.startVariantPreview(
+            await this.variantPreviewService.start(
                 kind,
                 this.createVariantOrTemplateCopyOption,
                 this.createVariantOrTemplateSearchState,
@@ -2632,7 +2602,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             await this.loadTemplateVariantNode();
             return;
         }
-        this.leaveVariantPreview();
+        this.variantPreviewService.leave();
         this.requestInProgress.set(true);
         try {
             this.globalTemplateNode.set(availableTemplateNode);
@@ -2682,7 +2652,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      */
     async onGlobalTemplateDeleted(templateNode: Node): Promise<void> {
         await this.loadTemplateVariantNode();
-        await this.removeFromVariantPreview(templateNode);
+        await this.variantPreviewService.remove(templateNode);
     }
 
     /**
@@ -2706,137 +2676,53 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Shows a node listed by the creation dialog in place of the collection's page, read-only and
-     * resolved for this collection. Paging then moves through the other listed nodes.
-     */
-    private async startVariantPreview(
-        kind: CreationKind,
-        copyOption: CopyOption,
-        searchState: PageVariantSearchState | null,
-        node: Node,
-    ): Promise<void> {
-        if (this.globalTemplateNode()) {
-            return;
-        }
-        let nodes: Node[] = searchState?.nodes ?? [];
-        let index: number = nodes.findIndex(
-            (listedNode: Node): boolean => retrieveNodeId(listedNode) === retrieveNodeId(node),
-        );
-        if (index === -1) {
-            nodes = [node];
-            index = 0;
-        }
-        // a new list from the dialog keeps the state captured when the first preview started
-        if (!this.variantPreviewRestoreState()) {
-            this.variantPreviewRestoreState.set(this.captureCollectionPage());
-            this.editMode.set(false);
-            this.closeSideMenus();
-        }
-        this.variantPreview.set({ kind, copyOption, nodes, index, searchState });
-        await this.showVariantPreviewAt(index);
-    }
-
-    /**
      * Shows the listed node at the given position of the running preview.
      *
      * @param index
      */
     async showVariantPreviewAt(index: number): Promise<void> {
-        const preview: VariantPreview | null = this.variantPreview();
-        const listedNode: Node = preview?.nodes[index];
-        if (!listedNode) {
-            return;
-        }
-        this.variantPreview.set({ ...preview, index });
-        const loadId: number = ++this.variantPreviewLoadId;
-        try {
-            const node: Node | null = await this.topicPageHelperService.getNodeIfAvailable(
-                retrieveNodeId(listedNode),
-            );
-            if (loadId !== this.variantPreviewLoadId) {
-                return;
-            }
-            if (!node) {
-                this.toast.error(null, this.i18nPrefix + 'VARIANT_PREVIEW.UNAVAILABLE', {
-                    title: listedNode.title || listedNode.name,
-                });
-                await this.removeFromVariantPreview(listedNode);
-                return;
-            }
-            this.topicPageHelperService.closePreview();
-            this.topicPageGlobalService.deleteVisibleNodesMap();
-            this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
-            await this.showDetachedVariant(node, true);
-        } catch (err) {
-            console.error(err);
-            this.topicPageHelperService.displayErrorToast();
-        }
+        await this.variantPreviewService.showAt(index);
     }
 
     /**
      * Creates a page variant or template from the node shown in the running preview.
      */
     async useVariantPreview(): Promise<void> {
-        const preview: VariantPreview | null = this.variantPreview();
-        const node: Node | null = this.variantPreviewNode();
-        if (!preview || !node) {
-            return;
-        }
-        await this.endVariantPreview();
-        await this.createFrom(preview.kind, node, preview.copyOption);
+        await this.variantPreviewService.use();
     }
 
     /**
-     * Ends the running preview. A profiling selection made meanwhile is applied to the restored
-     * page, as the preview kept it from switching the variant.
+     * Ends the running preview and restores the collection's page.
      */
     async endVariantPreview(): Promise<void> {
-        const restoreState: VariantPreviewRestoreState | null = this.variantPreviewRestoreState();
-        if (!restoreState) {
-            return;
-        }
-        this.leaveVariantPreview();
-        const selectedVariables: string = JSON.stringify(
-            this.topicPageHelperService.getSelectedVariables() ?? null,
-        );
-        if (
-            selectedVariables !== restoreState.selectedVariables &&
-            this.initialLoadSuccessfully() &&
-            this.latestParams
-        ) {
-            await this.retrievePageConfigAndSelectVariant(this.latestParams.variantId, true);
-        }
+        await this.variantPreviewService.end();
     }
 
-    /**
-     * Drops a node that no longer exists from the running preview. If it was the one shown, its
-     * neighbour is shown instead; without any node left, the preview ends.
-     *
-     * @param node
-     */
-    private async removeFromVariantPreview(node: Node): Promise<void> {
-        const preview: VariantPreview | null = this.variantPreview();
-        const removedIndex: number =
-            preview?.nodes.findIndex(
-                (listedNode: Node): boolean => retrieveNodeId(listedNode) === retrieveNodeId(node),
-            ) ?? -1;
-        if (removedIndex === -1) {
-            return;
-        }
-        const nodes: Node[] = preview.nodes.filter((_, index: number) => index !== removedIndex);
-        if (!nodes.length) {
-            await this.endVariantPreview();
-            return;
-        }
-        const index: number =
-            removedIndex < preview.index
-                ? preview.index - 1
-                : Math.min(preview.index, nodes.length - 1);
-        this.variantPreview.set({ ...preview, nodes, index });
-        if (removedIndex === preview.index) {
-            await this.showVariantPreviewAt(index);
-        }
-    }
+    // the collection's page as the variant preview replaces and restores it
+    private readonly variantPreviewHost: VariantPreviewHost = {
+        isGlobalTemplateOpen: (): boolean => !!this.globalTemplateNode(),
+        enterPreview: (): VariantPreviewRestoreState => {
+            const restoreState: VariantPreviewRestoreState = this.captureCollectionPage();
+            this.editMode.set(false);
+            this.closeSideMenus();
+            return restoreState;
+        },
+        showNode: async (node: Node): Promise<void> => {
+            this.topicPageHelperService.closePreview();
+            this.topicPageGlobalService.deleteVisibleNodesMap();
+            this.scrollContainerRef()?.nativeElement.scrollTo({ top: 0 });
+            await this.showDetachedVariant(node, true);
+        },
+        restorePage: (restoreState: VariantPreviewRestoreState): void =>
+            this.restoreCollectionPage(restoreState),
+        reloadPage: async (): Promise<void> => {
+            if (this.initialLoadSuccessfully() && this.latestParams) {
+                await this.retrievePageConfigAndSelectVariant(this.latestParams.variantId, true);
+            }
+        },
+        createFrom: (kind: CreationKind, node: Node, copyOption: CopyOption): Promise<void> =>
+            this.createFrom(kind, node, copyOption),
+    };
 
     /**
      * Captures the state of the collection's page that a preview replaces.
@@ -2867,16 +2753,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Restores the collection's page as it was before the running preview, without reloading it.
+     * Restores the collection's page as captured before a preview, without reloading it.
      */
-    private leaveVariantPreview(): void {
-        const restoreState: VariantPreviewRestoreState | null = this.variantPreviewRestoreState();
-        this.variantPreviewLoadId++;
-        this.variantPreview.set(null);
-        this.variantPreviewRestoreState.set(null);
-        if (!restoreState) {
-            return;
-        }
+    private restoreCollectionPage(restoreState: VariantPreviewRestoreState): void {
         this.anchorItemColor = restoreState.anchorItemColor;
         this.topicColor = restoreState.topicColor;
         this.breadcrumbNodeId.set(restoreState.breadcrumbNodeId);
