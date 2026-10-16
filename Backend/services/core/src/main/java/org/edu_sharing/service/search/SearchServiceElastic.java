@@ -1709,42 +1709,56 @@ public class SearchServiceElastic implements SearchService {
 
     private static final int SITEMAP_WALK_SIZE = 10000;
 
-    private SearchRequest getSitemapRequest(ContentType contentType, Long afterDbid, int size, List<String> sourceIncludes) {
+    /**
+     * @param sourceIncludes the _source fields to load, null to not load the _source at all
+     * @param docValueField  a field to read from the doc values (null for none), cheaper than loading the _source
+     */
+    private SearchRequest getSitemapRequest(ContentType contentType, Long afterDbid, int size, List<String> sourceIncludes, String docValueField) {
         BoolQuery.Builder conditions = getGlobalConditions(null, null, null, null, true);
         conditions.must(getContentTypeQuery(contentType));
         if (afterDbid != null) {
             conditions.must(m -> m.range(r -> r.number(n -> n.field("dbid").gt(afterDbid.doubleValue()))));
         }
         // "from" is limited to 10.000 hits by the index, so the sitemap pages by a cursor on the unique dbid
-        return SearchRequest.of(req -> req
-                .index(WORKSPACE_INDEX)
-                .size(size)
-                .query(conditions.build()._toQuery())
-                .sort(s -> s.field(f -> f.field("dbid").order(SortOrder.Asc)))
-                .source(src -> src.filter(f -> f.includes(sourceIncludes)))
-                .trackTotalHits(t -> t.enabled(false)));
+        return SearchRequest.of(req -> {
+            req.index(WORKSPACE_INDEX)
+                    .size(size)
+                    .query(conditions.build()._toQuery())
+                    .sort(s -> s.field(f -> f.field("dbid").order(SortOrder.Asc)))
+                    .trackTotalHits(t -> t.enabled(false));
+            if (sourceIncludes != null) {
+                req.source(src -> src.filter(f -> f.includes(sourceIncludes)));
+            } else {
+                req.source(src -> src.fetch(false));
+            }
+            if (docValueField != null) {
+                req.docvalueFields(d -> d.field(docValueField));
+            }
+            return req;
+        });
     }
 
     /**
      * Splits all nodes of the given type (visible to the current user) into sitemap pages.
-     * Reads only the sort cursor and cm:modified, no repository lookups.
+     * Reads only the sort cursor and cm:modified from the doc values, neither the _source nor repository lookups
+     * (the _source of a node is large and has to be loaded and parsed for every hit).
      */
     public List<SitemapPage> getSitemapPages(ContentType contentType, int pageSize) throws IOException {
+        String modifiedField = "properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED);
         List<SitemapPage> pages = new ArrayList<>();
         long count = 0;
         Long lastDbid = null;
         Long pageAfter = null;
         Long pageModified = null;
         while (true) {
-            List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, lastDbid, SITEMAP_WALK_SIZE,
-                    List.of("properties." + CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED)))).hits().hits();
+            List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, lastDbid, SITEMAP_WALK_SIZE, null, modifiedField)).hits().hits();
             for (Hit<Map> hit : hits) {
                 if (count > 0 && count % pageSize == 0) {
                     pages.add(new SitemapPage(pageAfter, pageModified));
                     pageAfter = lastDbid;
                     pageModified = null;
                 }
-                Long modified = getSitemapModified(hit.source());
+                Long modified = getSitemapModifiedFromDocValues(hit, modifiedField);
                 if (modified != null && (pageModified == null || modified > pageModified)) {
                     pageModified = modified;
                 }
@@ -1768,7 +1782,7 @@ public class SearchServiceElastic implements SearchService {
         String modifiedKey = CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED);
         String nameKey = CCConstants.getValidLocalName(CCConstants.CM_NAME);
         List<Hit<Map>> hits = searchNative(getSitemapRequest(contentType, afterDbid, size,
-                List.of("nodeRef.id", "aspects", "content.mimetype", "properties." + modifiedKey, "properties." + nameKey))).hits().hits();
+                List.of("nodeRef.id", "aspects", "content.mimetype", "properties." + modifiedKey, "properties." + nameKey), null)).hits().hits();
         List<SitemapEntry> entries = new ArrayList<>(hits.size());
         for (Hit<Map> hit : hits) {
             Map source = hit.source();
@@ -1801,7 +1815,22 @@ public class SearchServiceElastic implements SearchService {
     }
 
     private static Long getSitemapModified(Map source) {
-        Object value = getSitemapProperty(source, CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED));
+        return toEpochMillis(getSitemapProperty(source, CCConstants.getValidLocalName(CCConstants.CM_PROP_C_MODIFIED)));
+    }
+
+    private static Long getSitemapModifiedFromDocValues(Hit<Map> hit, String field) {
+        JsonData value = hit.fields() == null ? null : hit.fields().get(field);
+        if (value == null) {
+            return null;
+        }
+        List<?> values = value.to(List.class);
+        return values == null || values.isEmpty() ? null : toEpochMillis(values.get(0));
+    }
+
+    /**
+     * a number as epoch millis, or a date string (iso or millis)
+     */
+    private static Long toEpochMillis(Object value) {
         if (value instanceof Number) {
             return ((Number) value).longValue();
         }
