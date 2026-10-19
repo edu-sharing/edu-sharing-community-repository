@@ -212,7 +212,7 @@
           "TOOLTIP_UP_TO_DATE": "Vorlage noch aktuell",
           "TEMPLATE_MISSING": "Die verknüpfte Vorlage ist nicht mehr verfügbar.",
           "HEADING": "Seiten-Variante aktualisieren",
-          "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? An der Seiten-Variante vorgenommene Änderungen gehen dabei verloren."
+          "MESSAGE": "Möchtest du die Seiten-Variante auf Grundlage der neuen Vorlage aktualisieren? Änderungen am Seiteninhalt gehen dabei verloren."
         },
         "REGENERATE_VARIANT": "Neu generieren",
         "DELETE_VARIANT": "Variante löschen",

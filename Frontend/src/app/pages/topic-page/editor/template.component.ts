@@ -181,6 +181,7 @@ import {
 } from '../shared/utils/search-hit-util';
 import {
     convertNodeRefIntoNodeId,
+    keepOwnHeaderBreadcrumbAndColors,
     markForCopy,
     markForRender,
     prependWorkspacePrefix,
@@ -3422,10 +3423,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
-     * Replaces the current page variant with a fresh copy from its template variant.
-     * Delegates to `createPageVariant` logic: prepares template config, copies widgets,
-     * and persists the result back to the existing variant node rather than creating
-     * a new one (preserving the node ID and MDS properties).
+     * Rebuilds the content of the current page variant from its template variant in place
+     * (node ID and MDS properties stay). Header, breadcrumb and colors of the page are kept.
      */
     async regeneratePageVariant(): Promise<void> {
         if (!this.templateVariantNode() || !this.pageVariantNode() || this.variantPreview()) {
@@ -3458,7 +3457,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (response !== 'YES') {
             return;
         }
-        // the page is replaced wholesale, which no step can undo
+        // the page content is replaced wholesale, which no step can undo
         await this.history.reset();
         this.startEditing();
         try {
@@ -3471,14 +3470,9 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     if (tile.nodeId) oldNodeIds.push(tile.nodeId);
                 }),
             );
-            if (oldVariantConfig?.structure?.breadcrumbNodeId) {
-                oldNodeIds.push(oldVariantConfig.structure.breadcrumbNodeId);
-            }
-            if (oldVariantConfig?.structure?.headerNodeId) {
-                oldNodeIds.push(oldVariantConfig.structure.headerNodeId);
-            }
             const variantConfig = retrievePageVariantConfig(templateNode);
-            markForCopy(variantConfig);
+            markForCopy(variantConfig, true);
+            keepOwnHeaderBreadcrumbAndColors(variantConfig, oldVariantConfig?.structure);
             // create new widget nodes + persist config
             await this.persistRelinkedVariantConfig(variantConfig, this.pageVariantNode(), {
                 syncLocalState: true,
