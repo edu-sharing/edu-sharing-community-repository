@@ -5,5 +5,6 @@ import org.edu_sharing.service.authentication.sso.mapping.Mapping;
 
 @Data
 public class AuthByAppProperties {
+    private boolean checkClientIp = true;
     private Mapping mapping = new Mapping();
 }
