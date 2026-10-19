@@ -360,11 +360,19 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.editMode();
             untracked((): void => void this.updateRenderedSwimlanes());
         });
-        // a history spans one edit session on one variant
+        // a history spans one edit session on one variant; a preview only shows other nodes in
+        // between, so the session of the page continues once the preview ends
         effect((): void => {
-            this.editMode();
-            this.pageVariantNodeId();
-            untracked((): void => void this.history.reset());
+            const session: string = `${this.editMode()}:${this.pageVariantNodeId()}`;
+            if (this.variantPreview()) {
+                return;
+            }
+            untracked((): void => {
+                if (session !== this.historySession) {
+                    this.historySession = session;
+                    void this.history.reset();
+                }
+            });
         });
         this.history.attach(this.historyHost);
         // listening to changes on the page variant node
@@ -544,6 +552,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private pageVariantNodeId: Signal<string | null> = computed(
         (): string | null => retrieveNodeId(this.pageVariantNode()) ?? null,
     );
+    // the edit mode and variant the history was last reset for
+    private historySession: string | null = null;
     private readonly historyHost: TopicPageHistoryHost = {
         variantNodeId: (): string | null => this.pageVariantNodeId(),
         // a page records once it has its own config; a global template is always written itself
