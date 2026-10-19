@@ -24,7 +24,7 @@ public class Saml2ConfigProvider {
     public Saml2Properties getConfig() {
         Config rootConfig = configLoader.getConfig();
         Saml2Properties saml2Properties = new Saml2Properties();
-        if(!rootConfig.hasPath(SECURITY_SSO_SAML_MAPPING)){
+        if(rootConfig.hasPath(SECURITY_SSO_SAML_MAPPING)){
             saml2Properties.setMapping(MappingBeanFactory.getMapping(rootConfig.getConfig(SECURITY_SSO_SAML_MAPPING)));
         }
 

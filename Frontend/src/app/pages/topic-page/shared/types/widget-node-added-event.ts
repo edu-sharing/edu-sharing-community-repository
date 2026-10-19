@@ -8,4 +8,6 @@ export interface WidgetNodeAddedEvent {
     pageVariantNode: Node;
     swimlaneIndex: number;
     widget: WidgetConfigObject;
+    // called once the event is handled, with the node now holding the config (null if none)
+    nodeAvailable?: (widgetNodeId: string | null) => void;
 }

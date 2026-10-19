@@ -689,6 +689,7 @@ export class TopicPageHelperService {
 
     /**
      * Persists a given widgetConfig and aiConfig by either creating a new or updating an existing node with the config.
+     * A new node is created by the topic page, which reports it via nodeAvailable (null if none).
      */
     async persistConfig(
         nodeId: string,
@@ -700,6 +701,7 @@ export class TopicPageHelperService {
         parentWidgetConfigNodeId: string,
         isBreadcrumbNode: boolean = false,
         isHeaderNode: boolean = false,
+        nodeAvailable?: (widgetNodeId: string | null) => void,
     ): Promise<Node> {
         this.openSaveConfigToast();
         const configNodeExists: boolean = nodeId && nodeId !== '';
@@ -721,6 +723,12 @@ export class TopicPageHelperService {
                         isBreadcrumbNode,
                         isHeaderNode,
                     );
+                    nodeAvailable?.(null);
+                    return null;
+                }
+                // only an editable topic page listens and creates the node
+                if (!this.topicPageEventsService.widgetNodeAdded.observed) {
+                    nodeAvailable?.(null);
                     return null;
                 }
                 // create a new node with the given widget and AI configs
@@ -728,6 +736,7 @@ export class TopicPageHelperService {
                     gridIndex,
                     isBreadcrumbNode,
                     isHeaderNode,
+                    nodeAvailable,
                     pageVariantNode,
                     swimlaneIndex,
                     widget: {
@@ -740,21 +749,7 @@ export class TopicPageHelperService {
             } else {
                 const previousNode: Node = await this.getNodeUncached(nodeId);
                 // update the config(s) and return the updated node
-                await this.setProperty(
-                    nodeId,
-                    DEFAULT_WIDGET_CONFIG_PROP,
-                    JSON.stringify(widgetConfig),
-                );
-                // either update or reset the AI config
-                if (aiConfig && Object.keys(aiConfig)?.length) {
-                    await this.setProperty(
-                        nodeId,
-                        DEFAULT_AI_CONFIG_PROP,
-                        JSON.stringify(aiConfig),
-                    );
-                } else {
-                    await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
-                }
+                await this.writeWidgetConfig(nodeId, widgetConfig, aiConfig);
                 const updatedNode: Node = await this.getNodeUncached(nodeId);
                 this.topicPageEventsService.widgetConfigUpdated.emit({
                     pageVariantNode,
@@ -771,7 +766,25 @@ export class TopicPageHelperService {
             }
         } catch (err) {
             this.displayErrorToast(err);
+            nodeAvailable?.(null);
             return null;
+        }
+    }
+
+    /**
+     * Writes a widget config and an AI config to an existing widget node. An empty AI config
+     * resets the stored one.
+     */
+    async writeWidgetConfig(
+        nodeId: string,
+        widgetConfig: WidgetConfig,
+        aiConfig: BapiConfigObject,
+    ): Promise<void> {
+        await this.setProperty(nodeId, DEFAULT_WIDGET_CONFIG_PROP, JSON.stringify(widgetConfig));
+        if (aiConfig && Object.keys(aiConfig)?.length) {
+            await this.setProperty(nodeId, DEFAULT_AI_CONFIG_PROP, JSON.stringify(aiConfig));
+        } else {
+            await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
         }
     }
 

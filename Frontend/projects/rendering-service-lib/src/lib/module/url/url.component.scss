@@ -87,13 +87,13 @@
         height: var(--containerHeight);
     }
 
-    .gdpr-wrapper {
+    .external-embed-wrapper {
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
 
-        .gdpr-image-container {
+        .external-embed-image-container {
             position: relative;
             width: 100%;
             display: inline-block;
@@ -106,7 +106,7 @@
                 display: block;
             }
 
-            .gdpr-overlay {
+            .external-embed-overlay {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -121,7 +121,7 @@
                 align-items: center;
                 justify-content: center;
 
-                .gdpr-content {
+                .external-embed-content {
                     display: flex;
                     flex-direction: column;
                     align-items: center;

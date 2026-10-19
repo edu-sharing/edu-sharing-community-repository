@@ -103,7 +103,6 @@ public class SSOAuthorityMapper {
         private boolean hashGroupNames = false;
         private boolean updateMemberships = true;
         private boolean debug = false;
-        private String mappingGroupBuilderClass;
         boolean setupHomeDir = true;
         private boolean authByAppCheckClientIp = true;
         private String organisationParam;
