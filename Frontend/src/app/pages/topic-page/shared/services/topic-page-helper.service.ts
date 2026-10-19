@@ -754,6 +754,7 @@ export class TopicPageHelperService {
                 } else {
                     await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
                 }
+                this.topicPageEventsService.widgetConfigUpdated.emit(pageVariantNode);
                 // return the updated node
                 return await this.getNodeUncached(nodeId);
             }
