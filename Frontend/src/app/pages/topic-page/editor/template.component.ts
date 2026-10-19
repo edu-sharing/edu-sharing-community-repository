@@ -110,7 +110,10 @@ import { TopicPageCreateOptionsService } from '../shared/services/topic-page-cre
 import { TopicPageGlobalTemplatesService } from '../shared/services/topic-page-global-templates.service';
 import { TopicPageHelperService } from '../shared/services/topic-page-helper.service';
 import { TopicPageShareService } from '../shared/services/topic-page-share.service';
-import { TopicPageVariantCopyService } from '../shared/services/topic-page-variant-copy.service';
+import {
+    PendingWidget,
+    TopicPageVariantCopyService,
+} from '../shared/services/topic-page-variant-copy.service';
 import { TopicPageVariantNodesService } from '../shared/services/topic-page-variant-nodes.service';
 import {
     TopicPageVariantPreviewService,
@@ -489,6 +492,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
 
     collectionNode: Node;
     collectionNodePageConfigRef: string;
+    // the copy of an inherited page config in progress, which concurrent edits wait for
+    private inheritedPageConfigCopy: Promise<void> | null = null;
     collectionNodePagePropagateConfigRef: string;
     parentEntries: WritableSignal<ParentEntries> = signal(null);
     propagatingParentNode: Node;
@@ -1017,10 +1022,15 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 const validInputs: boolean = validGridIndex && validSwimlaneIndex;
 
                 if (
-                    validParentVariant &&
-                    validWidgetOrAiConfig &&
-                    (validInputs || isBreadcrumbNode || isHeaderNode)
+                    !validParentVariant ||
+                    !validWidgetOrAiConfig ||
+                    !(validInputs || isBreadcrumbNode || isHeaderNode)
                 ) {
+                    event?.nodeAvailable?.(null);
+                    return;
+                }
+                let widgetNodeId: string | null = null;
+                try {
                     // if no page configuration exists yet, a config has to be created and a reload of the page is necessary
                     // this also creates the widget node, as it has to be added as children of the page variant node
                     const addedSuccessfully = await this.checkForCustomPageNodeExistence(
@@ -1031,49 +1041,14 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                         isHeaderNode,
                         isBreadcrumbNode,
                     );
-                    // if no page node was created, the adding is not yet successfully, so updating is necessary
-                    if (!addedSuccessfully) {
-                        const pageVariant: PageVariantConfig = this.retrievePageVariant();
-                        // create the widget node
-                        const properties: { [key: string]: string } = {
-                            [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(widget.widgetConfig),
-                        };
-                        if (widget.aiConfig && Object.keys(widget.aiConfig)?.length) {
-                            properties[DEFAULT_AI_CONFIG_PROP] = JSON.stringify(widget.aiConfig);
-                        }
-                        let widgetNode: Node = await this.topicPageHelperService.createChild(
-                            retrieveNodeId(this.pageVariantNode()),
-                            RestConstants.CCM_TYPE_MAP,
-                            DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
-                            null,
-                            properties,
-                        );
-                        const convertedWidgetNodeId: string = prependWorkspacePrefix(
-                            retrieveNodeId(widgetNode),
-                        );
-                        // modify breadcrumb nodeId
-                        if (isBreadcrumbNode) {
-                            pageVariant.structure.breadcrumbNodeId = convertedWidgetNodeId;
-                            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                        // modify header nodeId
-                        else if (isHeaderNode) {
-                            pageVariant.structure.headerNodeId = convertedWidgetNodeId;
-                            this.headerNodeId.set(pageVariant.structure.headerNodeId);
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                        // modify nodeId of swimlane grid tile
-                        else if (
-                            this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex] &&
-                            pageVariant
-                        ) {
-                            this.swimlanes[swimlaneIndex].grid[gridIndex].nodeId =
-                                convertedWidgetNodeId;
-                            pageVariant.structure.swimlanes = this.swimlanes;
-                            this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
-                        }
-                    }
+                    widgetNodeId = addedSuccessfully
+                        ? this.findWidgetNodeId(event)
+                        : await this.storeWidgetWithoutNode(event);
+                } catch (err) {
+                    console.error(err);
+                    this.topicPageHelperService.displayErrorToast();
+                } finally {
+                    event.nodeAvailable?.(widgetNodeId);
                 }
             });
 
@@ -1672,14 +1647,19 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         color: string,
         isTopicColor: boolean = false,
     ): Promise<void> {
-        if (isTopicColor) {
-            this.topicColor = color;
-        } else {
-            this.anchorItemColor = color;
+        const shownColor: string = isTopicColor
+            ? this.topicColor ?? this.initialTopicColor
+            : this.anchorItemColor ?? this.initialAnchorItemColor;
+        // the color picker also reports colors the page sets itself, which change nothing
+        if (color === shownColor) {
+            return;
         }
+        this.setTopicOrAnchorItemColor(color, isTopicColor);
         this.startEditing();
         try {
             await this.checkForCustomPageNodeExistence();
+            // a copied page config is shown with its own colors, which the chosen one replaces
+            this.setTopicOrAnchorItemColor(color, isTopicColor);
             const pageVariant: PageVariantConfig = this.retrievePageVariant();
             if (!pageVariant) {
                 this.endEditing();
@@ -1695,6 +1675,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             console.error(err);
             this.endEditing();
             this.topicPageHelperService.displayErrorToast();
+        }
+    }
+
+    /**
+     * Shows a given color as the topic or anchor item color of the page.
+     */
+    private setTopicOrAnchorItemColor(color: string, isTopicColor: boolean): void {
+        if (isTopicColor) {
+            this.topicColor = color;
+        } else {
+            this.anchorItemColor = color;
         }
     }
 
@@ -2908,52 +2899,143 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         if (this.variantPreview()) {
             return false;
         }
+        // edits made while the inherited page config is copied apply to that copy
+        if (this.inheritedPageConfigCopy) {
+            await this.inheritedPageConfigCopy;
+        }
         if (!this.collectionNodePageConfigRef) {
-            // before creating another page config node, check which variant is currently selected
-            const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
-            const copy: { pageConfigNode: Node; selectedVariantPosition: number | null } =
-                await this.topicPageVariantCopyService.copyPageConfig(
-                    this.collectionNode,
-                    this.pageVariantConfigs?.nodes ?? [],
-                    pageConfig.variants?.[this.selectedVariantPosition] || '',
-                    this.pageVariantDefaultPosition,
-                    widget
-                        ? {
-                              variantNodeId: retrieveNodeId(pageVariantNode),
-                              swimlaneIndex,
-                              gridIndex,
-                              widget,
-                              isHeaderNode,
-                              isBreadcrumbNode,
-                          }
-                        : null,
-                    { collectionId: this.topicCollectionId(), title: this.topic() },
-                );
-            this.pageConfigNode = copy.pageConfigNode;
-            // the copy of the shown variant stays selected
-            if (copy.selectedVariantPosition !== null) {
-                this.selectedVariantPosition = copy.selectedVariantPosition;
+            this.inheritedPageConfigCopy = this.copyInheritedPageConfig(
+                widget
+                    ? {
+                          variantNodeId: retrieveNodeId(pageVariantNode),
+                          swimlaneIndex,
+                          gridIndex,
+                          widget,
+                          isHeaderNode,
+                          isBreadcrumbNode,
+                      }
+                    : null,
+            );
+            try {
+                await this.inheritedPageConfigCopy;
+            } finally {
+                this.inheritedPageConfigCopy = null;
             }
-            // retrieve the updated page variant configs
-            await this.updatePageVariantConfigs(true); // retrieve the updated page variant configs
-            await this.updatePageVariantConfigs(true);
-            // parse the page config ref again
-            const pageVariant: PageVariantConfig = this.retrievePageVariant();
-            await this.applyStructureToLocalState(pageVariant.structure);
-            // update the ccm:page_config_ref in the collection
-            await this.topicPageHelperService.setProperty(
-                retrieveNodeId(this.collectionNode),
-                DEFAULT_PAGE_CONFIG_REF_PROP,
-                prependWorkspacePrefix(retrieveNodeId(this.pageConfigNode)),
-            );
-            this.collectionNodePageConfigRef = prependWorkspacePrefix(
-                retrieveNodeId(this.pageConfigNode),
-            );
             return true;
         }
         // existing config — this is a real modification, not initial creation
         await this.bumpTemplateVersionIfNeeded();
         return false;
+    }
+
+    /**
+     * Gives the collection a page config of its own, copied from the inherited one, and shows it.
+     */
+    private async copyInheritedPageConfig(pendingWidget: PendingWidget | null): Promise<void> {
+        // before creating another page config node, check which variant is currently selected
+        const pageConfig: PageConfig = retrievePageConfig(this.pageConfigNode);
+        const copy: { pageConfigNode: Node; selectedVariantPosition: number | null } =
+            await this.topicPageVariantCopyService.copyPageConfig(
+                this.collectionNode,
+                this.pageVariantConfigs?.nodes ?? [],
+                pageConfig.variants?.[this.selectedVariantPosition] || '',
+                this.pageVariantDefaultPosition,
+                pendingWidget,
+                { collectionId: this.topicCollectionId(), title: this.topic() },
+            );
+        this.pageConfigNode = copy.pageConfigNode;
+        // the copy of the shown variant stays selected
+        if (copy.selectedVariantPosition !== null) {
+            this.selectedVariantPosition = copy.selectedVariantPosition;
+        }
+        // retrieve the updated page variant configs
+        await this.updatePageVariantConfigs(true); // retrieve the updated page variant configs
+        await this.updatePageVariantConfigs(true);
+        // parse the page config ref again
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        await this.applyStructureToLocalState(pageVariant.structure);
+        // update the ccm:page_config_ref in the collection
+        await this.topicPageHelperService.setProperty(
+            retrieveNodeId(this.collectionNode),
+            DEFAULT_PAGE_CONFIG_REF_PROP,
+            prependWorkspacePrefix(retrieveNodeId(this.pageConfigNode)),
+        );
+        this.collectionNodePageConfigRef = prependWorkspacePrefix(
+            retrieveNodeId(this.pageConfigNode),
+        );
+    }
+
+    /**
+     * Retrieves the node holding the config of the widget (header, breadcrumb or grid tile) a
+     * given event belongs to, or null if it has none.
+     */
+    private findWidgetNodeId(event: WidgetNodeAddedEvent): string | null {
+        let nodeId: string | undefined;
+        if (event.isHeaderNode) {
+            nodeId = this.headerNodeId();
+        } else if (event.isBreadcrumbNode) {
+            nodeId = this.breadcrumbNodeId();
+        } else {
+            nodeId = this.swimlanes?.[event.swimlaneIndex]?.grid?.[event.gridIndex]?.nodeId;
+        }
+        return nodeId ? convertNodeRefIntoNodeId(nodeId) : null;
+    }
+
+    /**
+     * Stores the config of a widget that had no node when it was changed. A node it got meanwhile,
+     * e.g. from a page config copy, receives the config; otherwise a new node is linked.
+     *
+     * @returns the ID of the node holding the config, null if none could be linked
+     */
+    private async storeWidgetWithoutNode(event: WidgetNodeAddedEvent): Promise<string | null> {
+        const { gridIndex, isBreadcrumbNode, isHeaderNode, swimlaneIndex, widget } = event;
+        const existingNodeId: string | null = this.findWidgetNodeId(event);
+        if (
+            existingNodeId &&
+            (await this.topicPageHelperService.getNodeIfAvailable(existingNodeId, true))
+        ) {
+            await this.topicPageHelperService.writeWidgetConfig(
+                existingNodeId,
+                widget.widgetConfig,
+                widget.aiConfig,
+            );
+            return existingNodeId;
+        }
+        const pageVariant: PageVariantConfig = this.retrievePageVariant();
+        // create the widget node
+        const properties: { [key: string]: string } = {
+            [DEFAULT_WIDGET_CONFIG_PROP]: JSON.stringify(widget.widgetConfig),
+        };
+        if (widget.aiConfig && Object.keys(widget.aiConfig)?.length) {
+            properties[DEFAULT_AI_CONFIG_PROP] = JSON.stringify(widget.aiConfig);
+        }
+        const widgetNode: Node = await this.topicPageHelperService.createChild(
+            retrieveNodeId(this.pageVariantNode()),
+            RestConstants.CCM_TYPE_MAP,
+            DEFAULT_WIDGET_NAME_PREFIX + uuidv4(),
+            null,
+            properties,
+        );
+        const convertedWidgetNodeId: string = prependWorkspacePrefix(retrieveNodeId(widgetNode));
+        // modify breadcrumb nodeId
+        if (isBreadcrumbNode) {
+            pageVariant.structure.breadcrumbNodeId = convertedWidgetNodeId;
+            this.breadcrumbNodeId.set(pageVariant.structure.breadcrumbNodeId);
+        }
+        // modify header nodeId
+        else if (isHeaderNode) {
+            pageVariant.structure.headerNodeId = convertedWidgetNodeId;
+            this.headerNodeId.set(pageVariant.structure.headerNodeId);
+        }
+        // modify nodeId of swimlane grid tile
+        else if (this.swimlanes?.[swimlaneIndex]?.grid?.[gridIndex] && pageVariant) {
+            this.swimlanes[swimlaneIndex].grid[gridIndex].nodeId = convertedWidgetNodeId;
+            pageVariant.structure.swimlanes = this.swimlanes;
+        } else {
+            return null;
+        }
+        this.pageVariantNode.set(await this.savePageVariantConfig(pageVariant));
+        return retrieveNodeId(widgetNode);
     }
 
     /**
