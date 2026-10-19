@@ -126,7 +126,18 @@
 </div>
 }
 <ng-template #editors let-context="context" let-form="form">
-  @for (variant of ConfigVarians; track variant) {
+  @if (scopes().length) {
+  <mat-form-field [formGroup]="form" class="scope-group">
+    <mat-label>{{ 'ADMIN.CONTEXT.SCOPE_GROUP' | translate }}</mat-label>
+    <mat-select formControlName="scopeGroup">
+      <mat-option [value]="null">{{ 'ADMIN.CONTEXT.SCOPE_GROUP_NONE' | translate }}</mat-option>
+      @for (scope of scopes(); track scope.scopeId) {
+      <mat-option [value]="scope.scopeId">{{ scope.displayName }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>{{ 'ADMIN.CONTEXT.SCOPE_GROUP_HINT' | translate }}</mat-hint>
+  </mat-form-field>
+  } @for (variant of ConfigVarians; track variant) {
   <div [formGroup]="form">
     <div
       class="open-close clickable"

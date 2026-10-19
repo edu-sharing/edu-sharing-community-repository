@@ -1053,7 +1053,10 @@
       "DELETED": "Context deleted",
       "DELETE_TITLE": "Delete Context?",
       "DELETE_MESSAGE": "Do you really want to delete the context (Id: {{id}}, Domains: {{domain}})?",
-      "MISSING_VALUES": "Please fill out all fields"
+      "MISSING_VALUES": "Please fill out all fields",
+      "SCOPE_GROUP": "Editorial team",
+      "SCOPE_GROUP_NONE": "No editorial team",
+      "SCOPE_GROUP_HINT": "Content on these domains is shown in the view of this editorial team. Members edit, everyone else sees the published entries."
     },
     "LTITOOL": {
       "REGISTER": "Start registration",

@@ -1756,6 +1756,10 @@
             },
             "type": "array"
           },
+          "scopeGroup": {
+            "description": "Scope group (authority name, groupType SCOPE) that is the active scope (editorial team) of this context",
+            "type": "string"
+          },
           "values": {
             "$ref": "#/components/schemas/Values"
           },

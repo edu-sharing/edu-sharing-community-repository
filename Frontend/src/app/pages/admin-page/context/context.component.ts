@@ -12,7 +12,10 @@ import {
     ConfigService,
     ConfigV1Service,
     Context,
+    ScopesService,
 } from 'ngx-edu-sharing-api';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { of } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Toast, UIAnimation } from 'ngx-edu-sharing-ui';
 import { trigger } from '@angular/animations';
@@ -21,7 +24,7 @@ import {
     DELETE_OR_CANCEL,
     YES_OR_NO,
 } from '../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
-import { first } from 'rxjs/operators';
+import { catchError, first, switchMap } from 'rxjs/operators';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { UIService } from '../../../core-module/rest/services/ui.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,6 +48,17 @@ export class AdminContextComponent implements OnInit {
     private dialogsService = inject(DialogsService);
     private uiService = inject(UIService);
     private toast = inject(Toast);
+    private scopesService = inject(ScopesService);
+
+    /** scope groups a context can be connected to, empty while the scopes feature is disabled */
+    readonly scopes = toSignal(
+        this.scopesService.enabled$.pipe(
+            switchMap((enabled) =>
+                enabled ? this.scopesService.getAllScopes().pipe(catchError(() => of([]))) : of([]),
+            ),
+        ),
+        { initialValue: [] },
+    );
 
     readonly ConfigVarians = ['values', 'language', 'variables'];
     @ViewChild('createFormRef') createFormRef: ElementRef;
@@ -102,6 +116,7 @@ export class AdminContextComponent implements OnInit {
                     values,
                     language,
                     variables,
+                    scopeGroup: form.get('scopeGroup').value || undefined,
                 },
             })
             .toPromise();
@@ -125,6 +140,7 @@ export class AdminContextComponent implements OnInit {
 
     private initForm(context: Context = null) {
         return new FormGroup({
+            scopeGroup: new FormControl<string | null>(context?.scopeGroup ?? null),
             domain: new FormControl(
                 context ? context.domain : ([] as string[]),
                 Validators.required,

@@ -207,11 +207,20 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
     }
 
     /**
-     * @return repository.context.&lt;contextId&gt;.repository.scopes.group, null if not configured
+     * @return the scope group of the context (admin context editor), else
+     * repository.context.&lt;contextId&gt;.repository.scopes.group, null if not configured
      */
     protected String getContextScopeGroup(String contextId) {
         if (StringUtils.isBlank(contextId)) {
             return null;
+        }
+        try {
+            org.edu_sharing.alfresco.service.config.model.Context context = ConfigServiceFactory.getConfigService().getContextById(contextId);
+            if (context != null && StringUtils.isNotBlank(context.scopeGroup)) {
+                return context.scopeGroup.trim();
+            }
+        } catch (Exception e) {
+            log.warn("could not read context {}: {}", contextId, e.getMessage());
         }
         Config config = LightbendConfigLoader.get();
         String path = ConfigUtil.joinPath("repository", "context", contextId) + "." + ScopesSettings.CONTEXT_GROUP_PATH;

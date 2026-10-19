@@ -1176,9 +1176,12 @@ public class SearchServiceElastic implements SearchService {
                 if (stored.getCriteria() != null) {
                     stored.getCriteria().forEach((key, values) -> criteria.put(key, values.toArray(new String[0])));
                 }
-                BoolQuery.Builder builder = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(),
-                        mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true);
-                result.add(Query.of(q -> q.bool(builder.build())));
+                // like the regular search: parameters (and the mds base query) are split into a filter and a query part
+                BoolQuery filter = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(),
+                        mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, true).build();
+                BoolQuery query = MetadataElasticSearchHelper.getElasticSearchQuery(new SearchToken(),
+                        mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
+                result.add(Query.of(q -> q.bool(b -> b.filter(f -> f.bool(filter)).must(m -> m.bool(query)))));
             } catch (Throwable t) {
                 log.warn("could not resolve base query {} of scope {}: {}", stored.getQuery(), scope.getScopeId(), t.getMessage());
             }

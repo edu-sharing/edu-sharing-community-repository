@@ -898,7 +898,10 @@
       "DELETED": "Kontext wurde gelöscht",
       "DELETE_TITLE": "Kontext löschen?",
       "DELETE_MESSAGE": "Möchten Sie den Kontext (Id: {{id}}, Domains: {{domain}}) wirklich löschen?",
-      "MISSING_VALUES": "Bitte alle Felder ausfüllen"
+      "MISSING_VALUES": "Bitte alle Felder ausfüllen",
+      "SCOPE_GROUP": "Redaktion",
+      "SCOPE_GROUP_NONE": "Keine Redaktion",
+      "SCOPE_GROUP_HINT": "Inhalte dieser Domains werden in der Sicht dieser Redaktion angezeigt. Mitglieder bearbeiten, alle anderen sehen die veröffentlichten Einträge."
     }
   },
   "Key": "DE FORMAL",
