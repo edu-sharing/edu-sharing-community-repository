@@ -325,6 +325,15 @@ Internal Tomcat port detection uses `httpReq.getLocalPort()` compared to `Applic
 
 - The "by object" node-statistics filters (`published`, `contentType`, …) are declared as `@QueryParam` on `StatisticApi` (the six endpoints `getByUsers`/`getByNodes`/`getByOrganization` + their `*Async` scheduler variants) and threaded straight into `TrackingDAO`. There is **no** intermediate TrackingService / ibatis / SQL layer for these — each `getNodeStatisticsBy*` builds a `co.elastic.clients` `BoolQuery` executed via `SearchServiceElastic.search`. The global `all` / mediacenter path instead uses `getStatisticsNode` (DB-based) and takes **none** of these filters.
 
+## Admin Elastic Tooling — `ElasticAdminService`
+
+**File:** `Backend/services/core/src/main/java/org/edu_sharing/service/admin/elastic/ElasticAdminService.java`
+
+Backs the admin node browser (`/admin/v1/elastic/indices`, `/elastic/export`, `/elastic/inspect/{nodeId}`). The former Solr/Lucene export (`/lucene/export`) has been removed.
+- Raw ES access goes through `SearchServiceElastic.performRawRequest(method, endpoint, body)` (low-level client, **no permission filtering** — admin only). Always pass user supplied index names through `SearchServiceElastic.validateIndexExpression`, which also resolves the version independent constants `-workspace-` / `-authorities-`.
+- Exports scroll over all hits (no 10k limit) and stream csv / json / `dump` (zip: mapping, settings, aliases + `data-*.ndjson` in `_bulk` format, chunked per 10 000 docs).
+- Async variant `scheduleExport` uses `@Queued` (same concept as the statistics `*Async` endpoints): parameters must stay JSON-serializable primitives, the result is written to the user's inbox and a notification is sent. The admin check is repeated inside the job.
+
 ## i18n
 
 Backend i18n uses plain `.properties` files loaded by `I18nServer`.

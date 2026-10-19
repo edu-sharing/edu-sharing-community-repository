@@ -357,11 +357,14 @@ export class EditorialSidebarService {
     }
 
     /**
-     * Resolve the index of the currently previewed node within the list the preview steps
-     * through. Returns -1 when there is no such list or the node is not part of it.
+     * Resolve the index of the currently previewed node among the nodes of the list the preview
+     * steps through. Returns -1 when there is no such list or the node is not part of it.
      */
     private getPreviewIndex(): { data: NodeEntriesDataType[]; index: number } {
-        const data = this.resolvePreviewList()?.data ?? [];
+        const entries = this.resolvePreviewList()?.data ?? [];
+        // lists may contain entries the preview cannot show, such as custom cards between the
+        // nodes; leaving them out makes the preview step directly from node to node
+        const data = entries.filter((entry) => !!(entry as Node)?.ref?.id);
         const current = this.nodes()?.[0] as Node;
         const index = current
             ? data.findIndex((n) => (n as Node)?.ref?.id === current.ref?.id)

@@ -3,7 +3,6 @@ package org.edu_sharing.service.dataprotection;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.edu_sharing.service.transform.TransformServiceStatic;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -43,10 +43,12 @@ public class PDFReport {
         ctx.setVariable("templateStyle","html/dataprotection/style");
 
         String content = templateEngine.process("html/baseLayout.html", ctx);
+        // content length must be the utf-8 byte count, not the char count (umlauts etc. are multibyte)
+        byte[] contentBytes = content.getBytes(StandardCharsets.UTF_8);
 
         byte[] result = transformService.callTransformer(
-                IOUtils.toInputStream(content, StandardCharsets.UTF_8),
-                content.length(),
+                new ByteArrayInputStream(contentBytes),
+                contentBytes.length,
                 "text/html",
                 "application/pdf",
                 TransformServiceStatic.TransformerId.EDU_SHARING,

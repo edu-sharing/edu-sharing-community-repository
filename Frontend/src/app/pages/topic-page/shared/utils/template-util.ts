@@ -1,4 +1,4 @@
-import { Node, NodeConstants } from 'ngx-edu-sharing-api';
+import { Node, NodeConstants, RestConstants } from 'ngx-edu-sharing-api';
 import {
     DEFAULT_AI_CONFIG_PROP,
     DEFAULT_WIDGET_CONFIG_PROP,
@@ -7,12 +7,14 @@ import {
     DEFAULT_PAGE_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_PROP,
     DEFAULT_PAGE_VARIANT_CONFIG_VALUE,
+    DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE,
     DEFAULT_PAGE_VARIANT_TEMPLATE_REF_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION_PROP,
     DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION,
 } from '../types/custom-definitions';
 import { BapiConfigObject } from '../types/bapi-config-object';
 import { PageVariantConfig } from '../types/page-variant-config';
+import { PageStructure } from '../types/page-structure';
 import { Swimlane } from '../types/swimlane';
 import { GridTile } from '../types/grid-tile';
 import { WidgetConfig } from '../types/widget-config/widget-config';
@@ -37,8 +39,6 @@ export const retrieveTopicColor = (
 
 /**
  * Retrieves a background color for a given topic name (just for visuals).
- *
- * @param topicName
  */
 const getTopicColor = (topicName: string): string => {
     let topicColor: string = stringToColour(topicName);
@@ -66,8 +66,6 @@ const getTopicColor = (topicName: string): string => {
 /**
  * Creates a hexadecimal color based on a string.
  * Reference: https://stackoverflow.com/a/16348977
- *
- * @param str
  */
 const stringToColour = (str: string): string => {
     let hash = 0;
@@ -85,9 +83,6 @@ const stringToColour = (str: string): string => {
 /**
  * Shades a given color code by a given percentage number.
  * Reference: https://stackoverflow.com/a/13532993
- *
- * @param color
- * @param percent
  */
 const shadeColor = (color: string, percent: number): string => {
     let r: number = parseInt(color.substring(1, 3), 16);
@@ -115,8 +110,6 @@ const shadeColor = (color: string, percent: number): string => {
 
 /**
  * Retrieves the ID from a given node.
- *
- * @param node
  */
 export const retrieveNodeId = (node: Node): string => {
     return node?.ref.id;
@@ -124,8 +117,6 @@ export const retrieveNodeId = (node: Node): string => {
 
 /**
  * Prepends the workspace spaces store prefix to a given node ID.
- *
- * @param nodeId
  */
 export const prependWorkspacePrefix = (nodeId: string): string => {
     if (!nodeId.startsWith(NodeConstants.SPACES_STORE_REF)) {
@@ -137,8 +128,6 @@ export const prependWorkspacePrefix = (nodeId: string): string => {
 /**
  * Converts a given node ref including the workspace prefix into its node ID.
  * Example: workspace://SpacesStore/UUID -> UUID
- *
- * @param nodeRef
  */
 export const convertNodeRefIntoNodeId = (nodeRef: string): string => {
     if (nodeRef?.includes(NodeConstants.SPACES_STORE_REF)) {
@@ -149,8 +138,6 @@ export const convertNodeRefIntoNodeId = (nodeRef: string): string => {
 
 /**
  * Retrieves the page variant template ref by checking if the node has one, otherwise set it to its ref.
- *
- * @param node
  */
 export const retrievePageVariantTemplateRef = (node: Node): string => {
     const templateRefOrNodeId: string =
@@ -159,9 +146,17 @@ export const retrievePageVariantTemplateRef = (node: Node): string => {
 };
 
 /**
+ * Whether a node is the default global template.
+ */
+export const isDefaultGlobalTemplate = (node: Node): boolean => {
+    return (
+        node?.properties?.[RestConstants.CCM_PROP_MAPTYPE]?.[0] ===
+        DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE
+    );
+};
+
+/**
  * Retrieves the page variant template version by checking if the node has one, otherwise set it to a default.
- *
- * @param node
  */
 export const retrievePageVariantTemplateVersion = (node: Node): string => {
     return (
@@ -172,8 +167,6 @@ export const retrievePageVariantTemplateVersion = (node: Node): string => {
 
 /**
  * Retrieves an AI config from a given node.
- *
- * @param widgetNode
  */
 export const retrieveAiConfigFromNode = (widgetNode: Node): BapiConfigObject => {
     const configString: string = widgetNode.properties[DEFAULT_AI_CONFIG_PROP]?.[0] ?? '{}';
@@ -182,9 +175,6 @@ export const retrieveAiConfigFromNode = (widgetNode: Node): BapiConfigObject => 
 
 /**
  * Retrieves the prompt from an AI config.
- *
- * @param aiConfig
- * @param propertyName
  */
 export const retrievePromptFromAiConfig = (
     aiConfig: BapiConfigObject,
@@ -195,8 +185,6 @@ export const retrievePromptFromAiConfig = (
 
 /**
  * Retrieves the page config ref from a given (collection) node.
- *
- * @param node
  */
 export const retrievePageConfigRef = (node: Node): string => {
     return node.properties?.[DEFAULT_PAGE_CONFIG_REF_PROP]?.[0];
@@ -204,8 +192,6 @@ export const retrievePageConfigRef = (node: Node): string => {
 
 /**
  * Retrieves the page config from a given page config node.
- *
- * @param node
  */
 export const retrievePageConfig = (node: Node): PageConfig => {
     if (node?.properties?.[DEFAULT_PAGE_CONFIG_PROP]?.[0]) {
@@ -216,8 +202,6 @@ export const retrievePageConfig = (node: Node): PageConfig => {
 
 /**
  * Retrieves the page config propagate ref from a given (collection) node.
- *
- * @param node
  */
 export const retrievePageConfigPropagateRef = (node: Node): string => {
     return node.properties?.[DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP]?.[0];
@@ -225,8 +209,6 @@ export const retrievePageConfigPropagateRef = (node: Node): string => {
 
 /**
  * Retrieves the variant config from a given variant node.
- *
- * @param variantNode
  */
 export const retrievePageVariantConfig = (variantNode: Node): PageVariantConfig => {
     // fall back to the default config for valid variant nodes that do not carry a
@@ -243,8 +225,6 @@ export const retrievePageVariantConfig = (variantNode: Node): PageVariantConfig 
  * Each real nodeId is moved to a `propagated*` marker and the real id removed, so widgets,
  * breadcrumb and header render read-only from the parent's nodes. The result is never persisted;
  * the actual copy is deferred to markForCopy + persistRelinkedVariantConfig once the page is adjusted.
- *
- * @param pageVariant
  */
 export const markForRender = (pageVariant: PageVariantConfig): void => {
     pageVariant.structure.swimlanes?.forEach((swimlane: Swimlane): void => {
@@ -270,10 +250,9 @@ export const markForRender = (pageVariant: PageVariantConfig): void => {
  * Marks a page variant config for COPYING into a freshly created variant node. Each real nodeId is
  * moved to a `temporary*` copy-source pointer (consumed and deleted by persistRelinkedVariantConfig)
  * and the real id removed. Widget nodes are always marked; breadcrumb/header are only marked when
- * `includeHeaderAndBreadcrumb` is set (parent-collection materialization) — otherwise they are
- * dropped (duplicate / create-template / regenerate).
+ * `includeHeaderAndBreadcrumb` is set (parent-collection materialization / regenerate) — otherwise
+ * they are dropped (duplicate / create-template).
  *
- * @param pageVariant
  * @param includeHeaderAndBreadcrumb whether the breadcrumb/header nodes should be copied too
  */
 export const markForCopy = (
@@ -301,6 +280,27 @@ export const markForCopy = (
     // from the temporary pointers above, or dropped entirely
     delete pageVariant.structure.breadcrumbNodeId;
     delete pageVariant.structure.headerNodeId;
+};
+
+/**
+ * Puts the header, breadcrumb and colors of a page back into a template config marked by
+ * markForCopy, so only the content is taken from the template. What the page lacks stays as marked.
+ */
+export const keepOwnHeaderBreadcrumbAndColors = (
+    pageVariant: PageVariantConfig,
+    ownStructure: PageStructure | undefined,
+): void => {
+    const structure: PageStructure = pageVariant.structure;
+    if (ownStructure?.headerNodeId) {
+        structure.headerNodeId = ownStructure.headerNodeId;
+        delete structure.temporaryHeaderNodeId;
+    }
+    if (ownStructure?.breadcrumbNodeId) {
+        structure.breadcrumbNodeId = ownStructure.breadcrumbNodeId;
+        delete structure.temporaryBreadcrumbNodeId;
+    }
+    structure.topicColor = ownStructure?.topicColor ?? structure.topicColor;
+    structure.anchorItemColor = ownStructure?.anchorItemColor ?? structure.anchorItemColor;
 };
 
 /**
@@ -340,8 +340,6 @@ export const addNodeIdToPageVariantConfig = (
 
 /**
  * Retrieves the widget config from a given widget config node.
- *
- * @param node
  */
 export const retrieveWidgetConfigFromNode = (node: Node): WidgetConfig => {
     if (node.properties?.[DEFAULT_WIDGET_CONFIG_PROP]?.[0]) {
@@ -354,9 +352,6 @@ export const retrieveWidgetConfigFromNode = (node: Node): WidgetConfig => {
  * Merges a patch into a widget config. Plain objects are merged key by key, every other value —
  * arrays included — is taken from the patch as a whole, so a filter list replaces rather than
  * extends the one it overrides.
- *
- * @param config
- * @param patch
  */
 export const mergeConfig = <T>(config: T, patch: Partial<T>): T => {
     const merged = { ...config } as { [key: string]: unknown };
@@ -372,8 +367,6 @@ export const mergeConfig = <T>(config: T, patch: Partial<T>): T => {
 
 /**
  * Whether a value is a plain object, i.e. mergeable key by key.
- *
- * @param value
  */
 const isPlainObject = (value: unknown): value is { [key: string]: unknown } => {
     return !!value && typeof value === 'object' && !Array.isArray(value);

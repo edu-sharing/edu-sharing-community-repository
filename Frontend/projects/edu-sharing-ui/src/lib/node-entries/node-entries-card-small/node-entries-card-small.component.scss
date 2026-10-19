@@ -122,6 +122,12 @@ $collectionIconSize: 25px;
             &:nth-child(3) {
                 grid-row: 2;
                 font-size: var(--fontSizeXSmall);
+                // the regular card uses `display: block` here (for its 3 line clamp), keep the
+                // single line value right aligned in the small card
+                > es-list-base {
+                    display: flex;
+                    justify-content: flex-end;
+                }
                 ::ng-deep es-list-text {
                     @include limitLineCount(1);
                 }

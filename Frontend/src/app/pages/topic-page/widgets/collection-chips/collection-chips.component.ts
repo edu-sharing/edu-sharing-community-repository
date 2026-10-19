@@ -107,8 +107,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     /**
      * Opens the link to a collection in edit mode.
      * Note: The click event is necessary, as drag-and-drop does not work with href.
-     *
-     * @param node
      */
     async collectionItemClicked(node: Node): Promise<void> {
         if (this.dragging) {
@@ -129,8 +127,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
 
     /**
      * The link of a collection outside of edit mode: its custom URL, or the collection's page.
-     *
-     * @param node
      */
     protected collectionUrl(node: Node): string {
         if (this.customUrl && this.customUrl(node)) {
@@ -143,9 +139,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     /**
      * Opens the collection's page via the router, so the app is not reloaded.
      * Custom URLs and modified clicks (e.g. into a new tab) are left to the browser.
-     *
-     * @param event
-     * @param node
      */
     protected collectionLinkClicked(event: MouseEvent, node: Node): void {
         if (
@@ -165,8 +158,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
 
     /**
      * The router URL of the collection's page, without the scope parameter.
-     *
-     * @param node
      */
     private collectionRouterUrl(node: Node): string {
         const queryParamsArray = Object.entries(this.nodeHelper.getNodeLink('queryParams', node))
@@ -181,9 +172,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     /**
      * Records whether the preview of a node is square, which the tile uses to decide
      * whether the image may be cropped to the header's proportions.
-     *
-     * @param event
-     * @param node
      */
     protected previewLoaded(event: Event, node: Node): void {
         const image: HTMLImageElement = event.target as HTMLImageElement;
@@ -205,8 +193,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
 
     /**
      * Whether the preview of a node is square.
-     *
-     * @param node
      */
     protected hasSquarePreview(node: Node): boolean {
         return this.squarePreviewIds().has(node.ref.id);
@@ -214,10 +200,11 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
 
     /**
      * Reacts to an item being dropped.
-     *
-     * @param event
      */
     async drop(event: CdkDragDrop<string[]>): Promise<void> {
+        if (event.previousIndex === event.currentIndex) {
+            return;
+        }
         moveItemInArray(this.list, event.previousIndex, event.currentIndex);
         this.configChanged.emit();
     }
@@ -290,8 +277,6 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
     // noinspection JSUnusedGlobalSymbols
     /**
      * Called by generic-widget component to set widget-specific values.
-     *
-     * @param config
      */
     setWidgetValues(config: CollectionChipsConfig): void {
         // 0 is a valid enum value, so check for undefined

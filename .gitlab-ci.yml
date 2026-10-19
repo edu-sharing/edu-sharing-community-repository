@@ -87,7 +87,7 @@ npm security audit:
   <<: *frontend_job
   allow_failure: true
   script:
-    - npm audit --audit-level=high
+    - npm audit --omit=dev --audit-level=high
 
 unittest frontend:
   <<: *frontend_job

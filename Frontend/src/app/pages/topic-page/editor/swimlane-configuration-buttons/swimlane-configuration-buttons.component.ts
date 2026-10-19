@@ -78,8 +78,6 @@ export class SwimlaneConfigurationButtonsComponent {
 
     /**
      * Handles the update of a swimlane shape by emitting the selected shape.
-     *
-     * @param backgroundShape
      */
     updateSwimlaneShape(backgroundShape: SwimlaneBackgroundShape): void {
         this.swimlaneShapeUpdated.emit(backgroundShape);

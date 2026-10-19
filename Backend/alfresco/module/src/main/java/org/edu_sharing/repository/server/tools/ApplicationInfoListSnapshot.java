@@ -29,9 +29,11 @@ record ApplicationInfoListSnapshot(Map<String, ApplicationInfo> appInfos,
     /**
      * reads the repository registry and all application files listed in it
      *
+     * @param previous the currently published snapshot or null. If an application file listed in the registry can not
+     *                 be loaded (e.g. because it is just being rewritten), its application info is taken from here
      * @return the new snapshot or null if the registry could not be read or no application could be loaded
      */
-    static ApplicationInfoListSnapshot build() {
+    static ApplicationInfoListSnapshot build(ApplicationInfoListSnapshot previous) {
         String[] appFileArray;
         try {
             ApplicationInfo registry = new ApplicationInfo("ccapp-registry.properties.xml");
@@ -62,25 +64,20 @@ record ApplicationInfoListSnapshot(Map<String, ApplicationInfo> appInfos,
                 continue;
             }
 
-            try {
-                ApplicationInfo repInfo = new ApplicationInfo(appFile);
-                if (repInfo.getAppId() == null) {
-                    logger.error("application file " + appFile + " has no appid, skipping it");
-                    continue;
-                }
-                logger.debug("put:" + appFile + " " + repInfo);
-                appInfos.put(repInfo.getAppId(), repInfo);
-                if (repInfo.ishomeNode()) {
-                    appInfoHome = repInfo;
-                }
-                if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(repInfo.getType())) {
-                    appInfoRenderingService2 = repInfo;
-                }
-                if (repInfo.isLtiTool()) {
-                    appInfosLtiTool.add(repInfo);
-                }
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+            ApplicationInfo repInfo = load(appFile, previous);
+            if (repInfo == null) {
+                continue;
+            }
+            logger.debug("put:" + appFile + " " + repInfo);
+            appInfos.put(repInfo.getAppId(), repInfo);
+            if (repInfo.ishomeNode()) {
+                appInfoHome = repInfo;
+            }
+            if (ApplicationInfo.TYPE_RENDERSERVICE_2.equals(repInfo.getType())) {
+                appInfoRenderingService2 = repInfo;
+            }
+            if (repInfo.isLtiTool()) {
+                appInfosLtiTool.add(repInfo);
             }
         }
 
@@ -89,5 +86,31 @@ record ApplicationInfoListSnapshot(Map<String, ApplicationInfo> appInfos,
             return null;
         }
         return new ApplicationInfoListSnapshot(appInfos, appInfoHome, appInfoRenderingService2, appInfosLtiTool);
+    }
+
+    /**
+     * @return the application info of the given file, the one of the previous snapshot if the file can not be loaded
+     * or null if there is none
+     */
+    private static ApplicationInfo load(String appFile, ApplicationInfoListSnapshot previous) {
+        try {
+            ApplicationInfo repInfo = new ApplicationInfo(appFile);
+            if (repInfo.getAppId() != null) {
+                return repInfo;
+            }
+            logger.error("application file " + appFile + " has no appid");
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        ApplicationInfo previousRepInfo = previous == null ? null : previous.appInfos().values().stream()
+                .filter(appInfo -> appFile.equals(appInfo.getAppFileName()))
+                .findFirst()
+                .orElse(null);
+        if (previousRepInfo == null) {
+            logger.error("skipping application file " + appFile);
+        } else {
+            logger.warn("keeping the previously loaded application info of " + appFile);
+        }
+        return previousRepInfo;
     }
 }

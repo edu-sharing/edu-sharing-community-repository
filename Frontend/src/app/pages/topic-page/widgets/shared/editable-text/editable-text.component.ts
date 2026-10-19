@@ -76,8 +76,6 @@ export class EditableTextComponent {
 
     /**
      * Emits the change event whether the text should be generated with AI received by self-adjusting-textarea.
-     *
-     * @param checked
      */
     onGenerateWithAiChanged(checked: boolean): void {
         this.generateWithAiChanged.emit(checked);
@@ -85,8 +83,6 @@ export class EditableTextComponent {
 
     /**
      * Emits text changes received by self-adjusting-textarea.
-     *
-     * @param text
      */
     emitTextChange(text: string): void {
         this.textChange.emit(text);

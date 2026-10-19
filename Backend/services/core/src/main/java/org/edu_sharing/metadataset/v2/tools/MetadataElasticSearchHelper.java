@@ -109,7 +109,6 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
                 continue;
             }
 
-            Query queryBuilderParam = null;
             if (query.isApplyBasequery()) {
                 String baseQueryParam = queries.findBasequery(parameters.keySet());
                 if (!StringUtils.isEmpty(baseQueryParam)) {
@@ -119,38 +118,7 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
             }
 
             applyCondition(query, result);
-            BoolQuery sharedFilesSearch;
-            if (query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
-                sharedFilesSearch = handleSharedFilesSearch(queries, values);
-            } else {
-                sharedFilesSearch = null;
-            }
-            if (sharedFilesSearch != null) {
-                queryBuilderParam = Query.of(q -> q.bool(sharedFilesSearch));
-            } else if (parameter.isMultiple()) {
-
-                MetadataQueryParameter.ParameterJoinStrategy multipleJoin = parameter.getMultiplejoin();
-                BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-                if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.AND)) {
-                    for (String value : values) {
-                        boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
-                    }
-                } else if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.OR)) {
-                    for (String value : values) {
-                        boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
-                    }
-                } else {
-                    boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValues(parameter, values)), parameter).build()));
-                }
-
-                queryBuilderParam = Query.of(q -> q.bool(boolQueryBuilder.build()));
-            } else {
-                if (values.length > 1) {
-                    throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
-                }
-
-                queryBuilderParam = Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])), parameter).build()));
-            }
+            Query queryBuilderParam = getParameterQuery(queries, query, parameter, values);
 
             if (query.getJoin().equals("AND")) {
                 result.must(queryBuilderParam);
@@ -177,6 +145,42 @@ public class MetadataElasticSearchHelper extends MetadataSearchHelper {
         }
 
         return result;
+    }
+
+    /**
+     * Builds the elastic query for a single mds query parameter and its given values
+     * (statement lookup, preprocessors, value replacement and multiple join strategy)
+     */
+    public static Query getParameterQuery(MetadataQueries queries, MetadataQuery query, MetadataQueryParameter parameter, String[] values) {
+        BoolQuery sharedFilesSearch;
+        if (query.getId().equals("workspace") && parameter.getName().equals("parent") && parameter.getPreprocessor().equals("node_path")) {
+            sharedFilesSearch = handleSharedFilesSearch(queries, values);
+        } else {
+            sharedFilesSearch = null;
+        }
+        if (sharedFilesSearch != null) {
+            return Query.of(q -> q.bool(sharedFilesSearch));
+        }
+        if (parameter.isMultiple()) {
+            MetadataQueryParameter.ParameterJoinStrategy multipleJoin = parameter.getMultiplejoin();
+            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+            if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.AND)) {
+                for (String value : values) {
+                    boolQueryBuilder.must(must -> must.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
+                }
+            } else if (multipleJoin.equals(MetadataQueryParameter.ParameterJoinStrategy.OR)) {
+                for (String value : values) {
+                    boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, value)), parameter).build()));
+                }
+            } else {
+                boolQueryBuilder.should(should -> should.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValues(parameter, values)), parameter).build()));
+            }
+            return Query.of(q -> q.bool(boolQueryBuilder.build()));
+        }
+        if (values.length > 1) {
+            throw new InvalidParameterException("Trying to search for multiple values of a non-multivalue field " + parameter.getName());
+        }
+        return Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(replaceCommonQueryVariables(getStatementForValue(parameter, values[0])), parameter).build()));
     }
 
     private static BoolQuery handleSharedFilesSearch(MetadataQueries queries, String[] values) {

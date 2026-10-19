@@ -1,0 +1,31 @@
+@if (allowInput) {
+<mat-button-toggle-group class="export-properties-mode" [(ngModel)]="mode">
+  <mat-button-toggle value="input">
+    {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_INPUT' | translate }}
+  </mat-button-toggle>
+  <mat-button-toggle value="list">
+    {{ 'ADMIN.STATISTICS.EXPORT_PROPERTIES_MODE_LIST' | translate }}
+  </mat-button-toggle>
+</mat-button-toggle-group>
+} @if (allowInput && mode === 'input') {
+<mat-form-field>
+  <mat-label>{{ label | translate }}</mat-label>
+  <textarea
+    matInput
+    cdkTextareaAutosize
+    cdkAutosizeMinRows="4"
+    cdkAutosizeMaxRows="6"
+    [ngModel]="properties"
+    (ngModelChange)="setProperties($event)"
+  ></textarea>
+  <mat-hint>{{ hint | translate }}</mat-hint>
+</mat-form-field>
+} @else {
+<div class="export-properties-list">
+  @for (column of columns; track column.name) {
+  <mat-checkbox [checked]="isSelected(column)" (change)="toggle(column, $event.checked)">
+    {{ column | esListItemLabel | async }}
+  </mat-checkbox>
+  }
+</div>
+}

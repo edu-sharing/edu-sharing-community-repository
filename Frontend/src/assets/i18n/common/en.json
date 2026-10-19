@@ -1497,6 +1497,7 @@
     "NODE_PROPERTIES": "Properties",
     "NODE_TYPE": "Objekt type",
     "COPY_NODE_ID": "Copy node id",
+    "OPEN_INDEX_INSPECTOR": "Open in index inspector",
     "JSON": "Entire Objekt",
     "PERMISSIONS": "Permissions",
     "PERMISSIONS_INHERITED": "Inherited permissions",

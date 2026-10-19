@@ -57,8 +57,6 @@ export class TopicPageGlobalService {
 
     /**
      * Registers a custom breadcrumb extension.
-     *
-     * @param customBreadcrumbExtension
      */
     registerCustomBreadcrumbExtension(customBreadcrumbExtension: CustomBreadcrumbExtension) {
         this.customBreadcrumbExtension = customBreadcrumbExtension;
@@ -66,8 +64,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets a custom root link for the breadcrumb component.
-     *
-     * @param link
      */
     setCustomBreadcrumbRootLink(link: string) {
         this.customBreadcrumbRootLink = link;
@@ -75,8 +71,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets a custom component for the reurl link to be used.
-     *
-     * @param component
      */
     setCustomReurlComponent(component: string) {
         this.customReurlComponent = component;
@@ -84,8 +78,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets custom navigation extras for the reurl link to be used.
-     *
-     * @param extras
      */
     setCustomReurlExtras(extras: NavigationExtras) {
         this.customReurlExtras = extras;
@@ -93,8 +85,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets a custom color palette for the topic page.
-     *
-     * @param palette
      */
     setCustomColorPalette(palette: string[] | NgxColorsColor[]) {
         this.customColorPalette = palette;
@@ -102,8 +92,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets a custom component for the apply filter link to be used.
-     *
-     * @param component
      */
     setCustomApplyFilterComponent(component: string) {
         this.customApplyFilterComponent = component;
@@ -111,8 +99,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets custom navigation extras for the applyFilter link to be used.
-     *
-     * @param extras
      */
     setCustomApplyFilterExtras(extras: NavigationExtras) {
         this.customApplyFilterExtras = extras;
@@ -155,12 +141,6 @@ export class TopicPageGlobalService {
 
     /**
      * Registers a custom breadcrumb extension.
-     *
-     * @param id
-     * @param heading
-     * @param templateRef
-     * @param icon
-     * @param position
      */
     registerCustomSideMenuItem(
         id: string,
@@ -174,8 +154,6 @@ export class TopicPageGlobalService {
 
     /**
      * Sets a custom URL function to be used for links.
-     *
-     * @param urlFunction
      */
     setCustomUrlFunction(urlFunction: (node: Node) => string): void {
         this.customUrlFunction = urlFunction;
@@ -192,7 +170,6 @@ export class TopicPageGlobalService {
      * Remembers how the topic page that opened the preview of a node loads linked topics.
      * The preview is rendered outside of that topic page, so its links cannot reach it otherwise.
      *
-     * @param nodeId
      * @param navigate null if that topic page does not load topics in place
      */
     setPreviewTopicNavigation(nodeId: string, navigate: TopicNavigation | null): void {
@@ -201,8 +178,6 @@ export class TopicPageGlobalService {
 
     /**
      * Forgets the given navigation, e.g. when its topic page is destroyed.
-     *
-     * @param navigate
      */
     clearPreviewTopicNavigation(navigate: TopicNavigation): void {
         if (this.previewTopicNavigation?.navigate === navigate) {
@@ -213,10 +188,6 @@ export class TopicPageGlobalService {
     /**
      * Lets the topic page that opened the preview of the given node load the linked topic in place.
      * Returns false for previews opened elsewhere.
-     *
-     * @param previewNodeId
-     * @param collectionId
-     * @param url
      */
     navigateInPlaceFromPreview(
         previewNodeId: string,
@@ -230,8 +201,6 @@ export class TopicPageGlobalService {
     /**
      * Sets a callback invoked before a selected node is applied.
      * The callback may cancel the selection.
-     *
-     * @param validator
      */
     setNodeSelectionValidator(validator: NodeSelectionValidator | null): void {
         this.nodeSelectionValidator = validator;
@@ -361,8 +330,6 @@ export class TopicPageGlobalService {
 
     /**
      * Runs the registered node selection validator against the given node.
-     *
-     * @param node
      */
     async validateNodeSelection(node: Node): Promise<boolean> {
         if (!this.nodeSelectionValidator) {
@@ -373,10 +340,6 @@ export class TopicPageGlobalService {
 
     /**
      * Updates the visible nodes for a given swimlane and grid index.
-     *
-     * @param swimlaneIndex
-     * @param gridIndex
-     * @param nodes
      */
     updateVisibleNodes(swimlaneIndex: number, gridIndex: number, nodes: Node[]): void {
         const key = this.getKey(swimlaneIndex, gridIndex);
@@ -400,8 +363,6 @@ export class TopicPageGlobalService {
 
     /**
      * Deletes all visible nodes of a given swimlane index.
-     *
-     * @param swimlaneIndex
      */
     deleteVisibleNodesBySwimlane(swimlaneIndex: number): void {
         Array.from(this.visibleNodesMap.keys())
@@ -421,9 +382,6 @@ export class TopicPageGlobalService {
 
     /**
      * Retrieves a custom key for a given swimlane and grid index.
-     *
-     * @param swimlaneIndex
-     * @param gridIndex
      */
     getKey(swimlaneIndex: number, gridIndex: number): string {
         return `${swimlaneIndex}-${gridIndex}`;

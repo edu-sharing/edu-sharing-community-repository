@@ -19,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApplicationInfoListFailureTest {
 
     private static final String REGISTRY = PropertiesHelper.Config.getPropertyFilePath("ccapp-registry.properties.xml");
+    private static final String APP_RS2 = PropertiesHelper.Config.getPropertyFilePath("app-rs2.xml");
+    private static final String APP_NO_APPID = PropertiesHelper.Config.getPropertyFilePath("app-noappid.xml");
     private static final String FAILURE_DIR = "applicationinfolist-failure/";
     private static final int EXPECTED_APP_COUNT = 5;
 
@@ -88,6 +90,34 @@ class ApplicationInfoListFailureTest {
         assertTrue(ApplicationInfoList.getAppInfosLtiTool().isEmpty());
     }
 
+    @Test
+    void refresh_previouslyLoadedApplicationFileMissing_keepsPreviousApplicationInfo() throws Exception {
+        assertRefreshKeepsPreviousRenderingService2(null);
+    }
+
+    @Test
+    void refresh_previouslyLoadedApplicationFileWithoutAppId_keepsPreviousApplicationInfo() throws Exception {
+        // a file which is just being rewritten is read as empty properties, so it has no appid
+        assertRefreshKeepsPreviousRenderingService2(APP_NO_APPID);
+    }
+
+    /**
+     * @param replacement resource to deliver instead of the rendering service 2 application file, null to hide it
+     */
+    private void assertRefreshKeepsPreviousRenderingService2(String replacement) throws Exception {
+        ApplicationInfo previousRenderingService2 = ApplicationInfoList.getRenderingService2();
+        assertNotNull(previousRenderingService2);
+        Object previousSnapshot = getSnapshot();
+
+        useResource(APP_RS2, replacement);
+        ApplicationInfoList.refresh();
+
+        assertNotSame(previousSnapshot, getSnapshot());
+        assertEquals(EXPECTED_APP_COUNT, ApplicationInfoList.getApplicationInfos().size());
+        assertSame(previousRenderingService2, ApplicationInfoList.getRenderingService2());
+        assertSame(previousRenderingService2, ApplicationInfoList.getRepositoryInfoById(previousRenderingService2.getAppId()));
+    }
+
     private void assertRefreshKeepsPreviousSnapshot(String registryReplacement) throws Exception {
         ApplicationInfo previousHome = ApplicationInfoList.getHomeRepository();
         ApplicationInfo previousRenderingService2 = ApplicationInfoList.getRenderingService2();
@@ -109,10 +139,17 @@ class ApplicationInfoListFailureTest {
      * @param replacement resource to deliver instead of the repository registry, null to hide the registry
      */
     private void useRegistry(String replacement) {
+        useResource(REGISTRY, replacement);
+    }
+
+    /**
+     * @param replacement resource to deliver instead of the given one, null to hide it
+     */
+    private void useResource(String resource, String replacement) {
         Thread.currentThread().setContextClassLoader(new ClassLoader(originalClassLoader) {
             @Override
             public URL getResource(String name) {
-                if (REGISTRY.equals(name)) {
+                if (resource.equals(name)) {
                     return replacement == null ? null : super.getResource(replacement);
                 }
                 return super.getResource(name);

@@ -44,6 +44,7 @@ import org.json.JSONObject;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -302,10 +303,10 @@ public class ConnectorServlet extends SpringHttpServlet {
 			} else if(simpleConnector.getApi().getBodyType().equals(SimpleConnector.SimpleConnectorApi.BodyType.Form)) {
 				List<? extends NameValuePair> data = mapSimpleConnectorBody(requestParameters, simpleConnector);
 				try {
-					logger.debug(EntityUtils.toString(new UrlEncodedFormEntity(data)));
+					logger.debug(EntityUtils.toString(new UrlEncodedFormEntity(data, StandardCharsets.UTF_8)));
 				}catch(Throwable ignored) {}
-				builder.setEntity(new UrlEncodedFormEntity(data));
-				builder.setHeader("Content-Type", "application/x-www-form-urlencoded");
+				builder.setEntity(new UrlEncodedFormEntity(data, StandardCharsets.UTF_8));
+				builder.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 			}
 		}
 		String resultStr = new HttpQueryTool().query(builder);

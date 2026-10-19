@@ -109,12 +109,12 @@
     }
   </div>
   } @if (gdpr !== null) {
-  <div class="gdpr-wrapper">
-    <div class="gdpr-image-container">
+  <div class="external-embed-wrapper">
+    <div class="external-embed-image-container">
       <img [src]="previewUrl" alt="" />
-      <div class="gdpr-overlay" [class.contrast-mode]="isContrastMode">
+      <div class="external-embed-overlay" [class.contrast-mode]="isContrastMode">
         @if (isGdprGeneric()) {
-        <div class="gdpr-content">
+        <div class="external-embed-content">
           <h3>{{ 'RENDERING.GDPR.EXTERNAL_SITE' | translate }}</h3>
           <span>{{ gdprInfoText }}</span>
           <a mat-button="outlined" [href]="gdpr.ref" target="_blank">{{
@@ -125,7 +125,7 @@
           </button>
         </div>
         } @if (!isGdprGeneric()) {
-        <div class="gdpr-content">
+        <div class="external-embed-content">
           <h3>{{ 'RENDERING.GDPR.EXTERNAL_CONTENT' | translate }}</h3>
           <span>{{ gdprInfoText }}</span>
           <span>{{ 'RENDERING.GDPR.FURTHER_INFORMATION' | translate }}</span>

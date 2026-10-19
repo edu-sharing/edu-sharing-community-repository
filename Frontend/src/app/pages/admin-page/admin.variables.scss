@@ -1,2 +1,60 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as *;
 $sidenavWidth: 250px;
 $sidenavWidthMobile: 66px;
+
+// ngx-monaco-editor is vertically resizable (see es-code-editor). The initial height must therefore be set
+// on the editor itself and es-code-editor must grow with it, otherwise a resized editor overlaps the
+// following content
+@mixin resizableCodeEditor($height) {
+    height: auto;
+    ::ng-deep ngx-monaco-editor {
+        height: $height;
+    }
+}
+// shared layout of the admin forms (used by the admin page and its sub components)
+@mixin inputGroupGrow() {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    > * {
+        width: 0;
+        flex-grow: 1;
+        display: flex;
+        margin: 0 10px;
+    }
+    > input {
+        margin-bottom: 0;
+    }
+    mat-radio-group {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    // mobile: stack label and control, otherwise the form overflows horizontally
+    @media all and (max-width: $mobileWidth+$mobileStage*1) {
+        flex-wrap: wrap;
+        row-gap: 10px;
+        > * {
+            width: 100%;
+            flex-basis: 100%;
+            min-width: 0;
+        }
+    }
+}
+@mixin heading() {
+    color: $textLight;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 110%;
+    width: 100%;
+    border-bottom: 1px solid $cardSeparatorLineColor;
+    margin: 20px 0;
+    padding: 0 10px;
+    i {
+        font-size: 13pt;
+    }
+    span {
+        position: relative;
+        top: -3px;
+        margin-left: 10px;
+    }
+}

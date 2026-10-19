@@ -2,7 +2,6 @@ package org.edu_sharing.repository.server.sitemap.xml;
 
 import org.edu_sharing.repository.server.sitemap.SitemapServlet;
 
-import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
@@ -14,5 +13,6 @@ public class Sitemapindex {
 
     public static class Sitemap{
         @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public String loc;
+        @XmlElement(namespace = SitemapServlet.NS_SITEMAP) public String lastmod;
     }
 }

@@ -18,8 +18,6 @@ export const getBodyHeight = (): number => {
 
 /**
  * Scrolls a given HTMLElement into view.
- *
- * @param element
  */
 export const scrollIntoView = (element: HTMLElement): void => {
     element.scrollIntoView({

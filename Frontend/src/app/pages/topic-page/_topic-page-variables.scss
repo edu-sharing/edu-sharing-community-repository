@@ -14,11 +14,10 @@ $mobileTabSwitchWidth: vars.$mobileTabSwitchWidth;
 // define a set of variables for the topic pages from Material, Edu-Sharing and WLO based on Material v3 role names
 $inverse-surface: #000;
 $on-primary: var(--light-primary-text, #fff);
-$on-surface: if(
-    meta.global-variable-exists('textMain', vars),
-    vars.$textMain,
-    var(--palette-foreground-text, #1a1c1c)
-);
+$on-surface: var(--palette-foreground-text, #1a1c1c);
+@if meta.global-variable-exists('textMain', vars) {
+    $on-surface: vars.$textMain;
+}
 $outline: var(
     --mat-form-field-outlined-outline-color,
     var(--mat-app-outline)
@@ -26,11 +25,10 @@ $outline: var(
 $primary: var(--primary, #003b7c);
 $primary-light: #3da6ee;
 // note: $primaryMediumDark is currently not equal to #032850
-$primary-dark: if(
-    meta.global-variable-exists('primaryMediumDark', vars),
-    vars.$primaryMediumDark,
-    #032850
-);
+$primary-dark: #032850;
+@if meta.global-variable-exists('primaryMediumDark', vars) {
+    $primary-dark: vars.$primaryMediumDark;
+}
 // the following colors are retrieved from Materials neutral palette (tone value as comment)
 $surface: var(
     --cardLightBackground
@@ -52,72 +50,41 @@ $surface-selected: var(--listItemSelectedBackground); //#f2f5f8;
 
 // EXTENDED COLOR VARIABLES
 // status colors
-$error: if(
-    meta.global-variable-exists('warning', vars),
-    color.adjust(vars.$warning, $lightness: -10%),
-    #ba1a1a
-); // E-40
-$error-container: if(
-    meta.global-variable-exists('warning', vars),
-    color.adjust(vars.$warning, $lightness: 45%),
-    #ffdad6
-); // E-90
-$success: if(
-    meta.global-variable-exists('colorStatusPositive', vars),
-    color.adjust(vars.$colorStatusPositive, $lightness: -15%),
-    #43a047
-);
-$success-container: if(
-    meta.global-variable-exists('colorStatusPositive', vars),
-    color.adjust(vars.$colorStatusPositive, $lightness: 40%),
-    #e8f5e9
-);
-$warn: if(
-    meta.global-variable-exists('warningMedium', vars),
-    color.adjust(vars.$warningMedium, $lightness: -10%),
-    #ffb930
-);
-$warn-container: if(
-    meta.global-variable-exists('warningMedium', vars),
-    color.adjust(vars.$warningMedium, $lightness: 40%),
-    #fff1d6
-);
-// chip colors
-$chip-color-discipline: if(
-    map.has-key(vars.$chip-colors, 'ccm_taxonid'),
-    map.get(vars.$chip-colors, 'ccm_taxonid'),
-    #a6d6ae
-);
-$chip-color-educationalContext: if(
-    map.has-key(vars.$chip-colors, 'ccm_educationalcontext'),
-    map.get(vars.$chip-colors, 'ccm_educationalcontext'),
-    #d6a6a6
-);
-$chip-color-intendedEndUserRole: if(
-    map.has-key(vars.$chip-colors, 'ccm_educationalintendedenduserrole'),
-    map.get(vars.$chip-colors, 'ccm_educationalintendedenduserrole'),
-    #d3d6a6
-);
-$chip-color-learningResourceType: if(
-    map.has-key(vars.$chip-colors, 'ccm_educationallearningresourcetype'),
-    map.get(vars.$chip-colors, 'ccm_educationallearningresourcetype'),
-    #d6c1a6
-);
+$error: #ba1a1a; // E-40
+$error-container: #ffdad6; // E-90
+@if meta.global-variable-exists('warning', vars) {
+    $error: color.adjust(vars.$warning, $lightness: -10%);
+    $error-container: color.adjust(vars.$warning, $lightness: 45%);
+}
+$success: #43a047;
+$success-container: #e8f5e9;
+@if meta.global-variable-exists('colorStatusPositive', vars) {
+    $success: color.adjust(vars.$colorStatusPositive, $lightness: -15%);
+    $success-container: color.adjust(vars.$colorStatusPositive, $lightness: 40%);
+}
+$warn: #ffb930;
+$warn-container: #fff1d6;
+@if meta.global-variable-exists('warningMedium', vars) {
+    $warn: color.adjust(vars.$warningMedium, $lightness: -10%);
+    $warn-container: color.adjust(vars.$warningMedium, $lightness: 40%);
+}
+// chip colors (theme value from $chip-colors, fixed fallback otherwise)
+$chip-color-discipline: map.get(vars.$chip-colors, 'ccm_taxonid') or #a6d6ae;
+$chip-color-educationalContext: map.get(vars.$chip-colors, 'ccm_educationalcontext') or #d6a6a6;
+$chip-color-intendedEndUserRole: map.get(vars.$chip-colors, 'ccm_educationalintendedenduserrole') or
+    #d3d6a6;
+$chip-color-learningResourceType: map.get(vars.$chip-colors, 'ccm_educationallearningresourcetype')
+    or #d6c1a6;
 $chip-color-oer: #d6a6d6;
 $chip-color-source: #d0a6d6;
-$chip-color-type: if(
-    map.has-key(vars.$chip-colors, 'ccm_objecttype'),
-    map.get(vars.$chip-colors, 'ccm_objecttype'),
-    #a6c0d6
-);
+$chip-color-type: map.get(vars.$chip-colors, 'ccm_objecttype') or #a6c0d6;
 // further colors
 $neon-default: #e4f700;
 $neon-medium: #b4da1c;
-$outline-light: if(
-    meta.global-variable-exists('searchInputBorderColor', vars),
-    vars.$searchInputBorderColor,
-    #c3c6d2
-);
+$outline-light: #c3c6d2;
+@if meta.global-variable-exists('searchInputBorderColor', vars) {
+    $outline-light: vars.$searchInputBorderColor;
+}
 $pink-default: #ec4a70;
 $primary-dark: var(
     --palette-primary-900,
@@ -129,7 +96,8 @@ $secondary-text: vars.$textLight; // N-35
 // font-family
 $primary-font-family: vars.$primaryFontFamily;
 // note: open_sansbold is not provided at the moment
-$brand-font-family: 'Montserrat' !default;
+// Montserrat is not shipped with the app, the primary font stands in wherever it is unavailable
+$brand-font-family: 'Montserrat', $primary-font-family !default;
 // font-size (partly copied from variables-scss of Edu-Sharing)
 $font-size-x-large: vars.$fontSizeXLarge;
 $font-size-large: vars.$fontSizeLarge;

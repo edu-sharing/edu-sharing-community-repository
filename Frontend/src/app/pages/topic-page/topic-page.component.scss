@@ -1,4 +1,5 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+@use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
 :host {
     display: block;
@@ -39,7 +40,7 @@ es-template-page {
     padding-right: var(--roundedContainerMargin);
     position: sticky;
     top: calc(var(--mainnavCurrentHeight) + var(--roundedContainerMargin));
-    // runs down to the bottom of the viewport
+    // runs down to the bottom of the viewport; the sidebar card inside keeps the bottom gap
     height: calc(100vh - var(--mainnavCurrentHeight) - var(--roundedContainerMargin));
 
     &.open {
@@ -54,12 +55,18 @@ es-template-page {
         z-index: vars.$topBarZIndex - 1;
     }
 
-    // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height
+    // `.sidebar-wrapper` inside the sidebar is `height: 100%` and needs the column's height.
+    // Framed as a rounded card like the page card and the sidebars of the other pages.
     es-editorial-sidebar {
         display: flex;
         flex-direction: column;
         flex: 1;
         min-height: 0;
+        margin-bottom: var(--roundedContainerMargin);
+        border-radius: var(--borderRadiusCards);
+        overflow: hidden;
+        background-color: var(--roundedContainerBackground);
+        @include mixins.materialShadow();
     }
 
     // The handle is created by the directive without this component's encapsulation attribute,
@@ -89,6 +96,13 @@ es-template-page {
         height: auto;
         padding: 0;
         z-index: 98;
+
+        // covering the page, the sidebar drops its card frame
+        es-editorial-sidebar {
+            margin-bottom: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
     }
 }
 

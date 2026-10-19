@@ -124,7 +124,7 @@ public class ApplicationInfoList {
      */
     private static synchronized ApplicationInfoListSnapshot initAppInfos() {
         if (snapshot == null) {
-            snapshot = ApplicationInfoListSnapshot.build();
+            snapshot = ApplicationInfoListSnapshot.build(null);
         }
         return snapshot != null ? snapshot : ApplicationInfoListSnapshot.EMPTY;
     }
@@ -193,11 +193,12 @@ public class ApplicationInfoList {
 
     /**
      * builds a new snapshot and replaces the current one, readers keep using the previous snapshot until then.
-     * If loading fails, the previous snapshot is kept.
+     * If loading fails, the previous snapshot is kept. Single application files which can not be loaded keep their
+     * previous application info.
      */
 	public static synchronized void refresh(){
         logger.debug("calling");
-        ApplicationInfoListSnapshot newSnapshot = ApplicationInfoListSnapshot.build();
+        ApplicationInfoListSnapshot newSnapshot = ApplicationInfoListSnapshot.build(snapshot);
         if (newSnapshot == null) {
             logger.error("refresh of application infos failed, keeping the previous state");
         } else {

@@ -226,9 +226,7 @@ export class AdminStatisticsComponent implements OnInit {
     exportProperties: string;
     /** initial default for exportProperties (node columns), used by the reset button */
     exportPropertiesDefault: string;
-    /** edit the export properties as free text or pick from a list of available columns */
-    exportPropertiesMode: 'input' | 'list' = 'input';
-    /** available columns for the "list" export properties mode */
+    /** columns which can be picked in the export properties selection */
     availableExportColumns: ListItem[] = [];
     showModes = false;
     groupModeTemplates: GroupTemplate[];
@@ -1018,24 +1016,8 @@ export class AdminStatisticsComponent implements OnInit {
         void this.storage.set('admin_statistics_properties', this.exportProperties);
     }
 
-    /** currently selected export property names (comma or newline separated) */
-    private exportColumnNames(): string[] {
-        return this.exportProperties
-            .split(/[\n,]/)
-            .map((p) => p.trim())
-            .filter(Boolean);
-    }
-
-    isExportColumnSelected(column: ListItem): boolean {
-        return this.exportColumnNames().includes(column.name);
-    }
-
-    toggleExportColumn(column: ListItem, selected: boolean) {
-        const names = this.exportColumnNames().filter((n) => n !== column.name);
-        if (selected) {
-            names.push(column.name);
-        }
-        this.exportProperties = names.join('\n');
+    setExportProperties(properties: string) {
+        this.exportProperties = properties;
         void this.storage.set('admin_statistics_properties', this.exportProperties);
     }
 

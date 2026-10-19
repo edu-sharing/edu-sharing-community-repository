@@ -153,6 +153,8 @@ class CollectionTreeServiceMock implements Partial<CollectionTreeService> {
 class CollectionTreeWidgetDummy extends WidgetDummy {
     constructor(definition: MdsWidget, private readonly initialIds: string[]) {
         super(definition);
+        // collection trees filter searches, which list no proposals
+        this.setSuggestions([]);
     }
 
     getInitalValuesAsync(): Promise<InitialValues> {
@@ -163,7 +165,7 @@ class CollectionTreeWidgetDummy extends WidgetDummy {
 type StoryArgs = MdsWidget & { initialIds?: string[] };
 
 const meta: Meta<StoryArgs> = {
-    title: 'Mds/Widget/CollectionTree',
+    title: 'Mds/Widget/Tree',
     component: MdsEditorWidgetTreeComponent,
     decorators: [
         moduleMetadata({

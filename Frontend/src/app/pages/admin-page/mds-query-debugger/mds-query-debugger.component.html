@@ -1,0 +1,243 @@
+<div class="mds-debug-form">
+  <div class="mds-debug-query">
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.METADATASET' | translate }}</mat-label>
+      <mat-select [(ngModel)]="state.metadataSet">
+        <mat-option value="-default-">-default-</mat-option>
+        @for (mds of metadataSets; track mds.id) {
+        <mat-option [value]="mds.id">{{ mds.name }} ({{ mds.id }})</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.QUERY' | translate }}</mat-label>
+      <input matInput [(ngModel)]="state.query" placeholder="ngsearch" />
+    </mat-form-field>
+  </div>
+
+  <div class="info">{{ 'ADMIN.BROWSER.MDS_DEBUG.CRITERIA' | translate }}</div>
+  <datalist id="mdsDebugParameters">
+    @for (parameter of result?.availableParameters ?? []; track parameter) {
+    <option [value]="parameter"></option>
+    }
+  </datalist>
+  @for (criterion of state.criteria; track $index) {
+  <div class="mds-debug-criterion">
+    <mat-form-field class="mds-debug-property">
+      <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.PROPERTY' | translate }}</mat-label>
+      <input matInput [(ngModel)]="criterion.property" list="mdsDebugParameters" />
+    </mat-form-field>
+    <mat-form-field class="mds-debug-values">
+      <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.VALUES' | translate }}</mat-label>
+      <textarea
+        matInput
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="1"
+        cdkAutosizeMaxRows="6"
+        [(ngModel)]="criterion.values"
+      ></textarea>
+    </mat-form-field>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="removeCriterion(criterion)"
+      [attr.aria-label]="'ADMIN.BROWSER.MDS_DEBUG.REMOVE_CRITERION' | translate"
+    >
+      <i esIcon="delete"></i>
+    </button>
+  </div>
+  }
+  <div class="mds-debug-add">
+    <button mat-button color="primary" (click)="addCriterion()">
+      <i esIcon="add"></i> {{ 'ADMIN.BROWSER.MDS_DEBUG.ADD_CRITERION' | translate }}
+    </button>
+    @if (getUnusedParameters().length) {
+    <mat-chip-set>
+      @for (parameter of getUnusedParameters(); track parameter) {
+      <mat-chip (click)="addCriterion(parameter)" class="clickable">{{ parameter }}</mat-chip>
+      }
+    </mat-chip-set>
+    }
+  </div>
+
+  <mat-form-field class="mds-debug-facets">
+    <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.FACETS' | translate }}</mat-label>
+    <mat-chip-grid #facetChips>
+      @for (facet of state.facets; track facet) {
+      <mat-chip-row (removed)="removeFacet(facet)">
+        {{ facet }}
+        <i esIcon="cancel" matChipRemove></i>
+      </mat-chip-row>
+      }
+      <input
+        #facetInput
+        list="mdsDebugParameters"
+        placeholder="ccm:educationalcontext"
+        [matChipInputFor]="facetChips"
+        [matChipInputAddOnBlur]="true"
+        (matChipInputTokenEnd)="addFacet(facetInput)"
+      />
+    </mat-chip-grid>
+    <mat-hint>{{ 'WORKSPACE.EDITOR.HINT_ENTER' | translate }}</mat-hint>
+  </mat-form-field>
+  <datalist id="mdsDebugSortProperties">
+    @for (property of sortProperties; track property) {
+    <option [value]="property"></option>
+    }
+  </datalist>
+  <div class="mds-debug-sort">
+    <mat-form-field>
+      <mat-label>{{ 'ADMIN.BROWSER.MDS_DEBUG.SORT' | translate }}</mat-label>
+      <input matInput [(ngModel)]="state.sortProperty" list="mdsDebugSortProperties" />
+      <mat-hint>{{ 'ADMIN.BROWSER.MDS_DEBUG.SORT_HINT' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-checkbox [(ngModel)]="state.sortAscending">{{
+      'ADMIN.BROWSER.MDS_DEBUG.SORT_ASCENDING' | translate
+    }}</mat-checkbox>
+  </div>
+  <mat-checkbox [(ngModel)]="state.includeGlobalConditions">{{
+    'ADMIN.BROWSER.MDS_DEBUG.INCLUDE_GLOBAL_CONDITIONS' | translate
+  }}</mat-checkbox>
+  <mat-checkbox [(ngModel)]="state.includeQueryBasequery">{{
+    'ADMIN.BROWSER.MDS_DEBUG.INCLUDE_QUERY_BASEQUERY' | translate : { query: state.query }
+  }}</mat-checkbox>
+  <mat-checkbox [(ngModel)]="state.includeSharedBasequery">{{
+    'ADMIN.BROWSER.MDS_DEBUG.INCLUDE_SHARED_BASEQUERY' | translate
+  }}</mat-checkbox>
+
+  <div class="mds-debug-buttons">
+    <button mat-flat-button color="primary" [disabled]="loading" (click)="debug(false)">
+      {{ 'ADMIN.BROWSER.MDS_DEBUG.GENERATE' | translate }}
+    </button>
+    <button mat-stroked-button color="primary" [disabled]="loading" (click)="debug(true)">
+      {{ 'ADMIN.BROWSER.MDS_DEBUG.EXECUTE' | translate }}
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      [disabled]="!result?.dsl"
+      (click)="openInDslEditor()"
+    >
+      {{ 'ADMIN.BROWSER.MDS_DEBUG.OPEN_IN_DSL_EDITOR' | translate }}
+    </button>
+  </div>
+</div>
+
+@if (result) {
+<div class="mds-debug-result">
+  @if (result.warnings?.length) {
+  <ul class="mds-debug-warnings">
+    @for (warning of result.warnings; track warning) {
+    <li>{{ warning }}</li>
+    }
+  </ul>
+  }
+  <div class="info">
+    {{ 'ADMIN.BROWSER.MDS_DEBUG.MAPPING' | translate }} ({{ result.metadataset }} /
+    {{ result.query }}, join: {{ result.join }})
+  </div>
+  <table class="mds-debug-table">
+    <thead>
+      <tr>
+        <th>{{ 'ADMIN.BROWSER.MDS_DEBUG.PROPERTY' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.MDS_DEBUG.VALUES' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.MDS_DEBUG.DEFINITION' | translate }}</th>
+        <th>{{ 'ADMIN.BROWSER.MDS_DEBUG.WARNINGS' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (criterion of result.criteria; track $index) {
+      <tr [class.mds-debug-not-applied]="!criterion.applied">
+        <td>
+          <code>{{ criterion.property }}</code>
+        </td>
+        <td>{{ criterion.values?.join(', ') }}</td>
+        <td>
+          @if (criterion.known) {
+          <span>asFilter: {{ criterion.asFilter ?? false }}</span>
+          @if (criterion.multiple) {
+          <span>, multiple ({{ criterion.multipleJoin }})</span>
+          } @if (criterion.exactMatching) {
+          <span>, exactMatching</span>
+          } @if (criterion.ignorable) {
+          <span>, ignorable</span>
+          } @if (criterion.preprocessor) {
+          <span>, preprocessor: {{ criterion.preprocessor }}</span>
+          } }
+        </td>
+        <td>
+          @for (warning of criterion.warnings; track warning) {
+          <div>{{ warning }}</div>
+          }
+        </td>
+      </tr>
+      @if (criterion.known) {
+      <tr class="mds-debug-details">
+        <td colspan="4">
+          <mat-expansion-panel class="mat-elevation-z0">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ 'ADMIN.BROWSER.MDS_DEBUG.DETAILS' | translate }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <!-- lazy: the editors are only created once the panel is opened -->
+            <ng-template matExpansionPanelContent>
+              @for (statement of getStatements(criterion.statements); track statement.key) {
+              <div class="info">statement [{{ statement.key }}]</div>
+              <ng-container
+                *ngTemplateOutlet="codeView; context: { $implicit: statement.statement }"
+              ></ng-container>
+              } @for (mapping of criterion.valueMappings; track $index) {
+              <!-- the statement itself is listed above, only reference its key -->
+              <div class="info">
+                {{ 'ADMIN.BROWSER.MDS_DEBUG.VALUE' | translate }} "{{ mapping.value }}" → statement
+                [{{ mapping.statementKey ?? 'default' }}]
+              </div>
+              <!-- with a single value the fragment equals the fragment of the whole criterion -->
+              @if (mapping.elasticQuery && criterion.valueMappings.length > 1) {
+              <ng-container
+                *ngTemplateOutlet="codeView; context: { $implicit: mapping.elasticQuery }"
+              ></ng-container>
+              } } @if (criterion.elasticQuery) {
+              <div class="info">{{ 'ADMIN.BROWSER.MDS_DEBUG.CRITERION_QUERY' | translate }}</div>
+              <ng-container
+                *ngTemplateOutlet="codeView; context: { $implicit: criterion.elasticQuery }"
+              ></ng-container>
+              }
+            </ng-template>
+          </mat-expansion-panel>
+        </td>
+      </tr>
+      } }
+    </tbody>
+  </table>
+
+  <label for="mdsDebugDsl"
+    >{{ 'ADMIN.BROWSER.MDS_DEBUG.DSL' | translate }} ({{ result.index }})</label
+  >
+  <es-code-editor
+    [options]="codeOptions"
+    [ngModel]="result.dsl"
+    [ngModelOptions]="{ standalone: true }"
+    id="mdsDebugDsl"
+  ></es-code-editor>
+  @if (result.aggregationsDsl) {
+  <label for="mdsDebugAggregationsDsl">{{
+    'ADMIN.BROWSER.MDS_DEBUG.AGGREGATIONS_DSL' | translate
+  }}</label>
+  <es-code-editor
+    [options]="codeOptions"
+    [ngModel]="result.aggregationsDsl"
+    [ngModelOptions]="{ standalone: true }"
+    id="mdsDebugAggregationsDsl"
+  ></es-code-editor>
+  }
+</div>
+}
+
+<ng-template #codeView let-code>
+  <es-code-editor
+    class="mds-debug-code"
+    [options]="codeOptions"
+    [ngModel]="code"
+    [ngModelOptions]="{ standalone: true }"
+  ></es-code-editor>
+</ng-template>

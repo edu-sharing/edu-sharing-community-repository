@@ -26,6 +26,17 @@
     >
       <i esIcon="content_copy" color="primary"></i>
     </button>
+    @if (null | esGlobalAdmin | async) {
+    <button
+      mat-icon-button
+      color="primary"
+      [attr.aria-label]="'NODE_INFO.OPEN_INDEX_INSPECTOR' | translate"
+      [matTooltip]="'NODE_INFO.OPEN_INDEX_INSPECTOR' | translate"
+      (click)="openIndexInspector(node)"
+    >
+      <i esIcon="find_in_page" color="primary"></i>
+    </button>
+    }
   </span>
   }
 </div>

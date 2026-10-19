@@ -135,8 +135,6 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
 
     /**
      * Listens to initial changes of the text and resizes the textarea accordingly.
-     *
-     * @param changes
      */
     ngOnChanges(changes: SimpleChanges): void {
         // listen to text changes
@@ -210,8 +208,6 @@ export class SelfAdjustingTextareaComponent implements OnInit, OnChanges {
 
     /**
      * Emits the change event whether the text should be generated with AI.
-     *
-     * @param checked
      */
     private onGenerateWithAiChange = (checked: boolean): void => {
         this.generateWithAiChanged.emit(checked);

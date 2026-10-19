@@ -1,10 +1,13 @@
 package org.edu_sharing.repository.server.sitemap;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.ServletException;
@@ -14,6 +17,9 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.StoreRef;
+import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.metadataset.v2.MetadataReader;
 import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.repository.client.tools.CCConstants;
@@ -29,37 +35,140 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.search.SearchService;
+import org.edu_sharing.service.search.SearchServiceElastic;
 import org.edu_sharing.service.search.SearchServiceFactory;
 import org.edu_sharing.service.search.model.SearchToken;
+import org.edu_sharing.service.search.model.SitemapEntry;
+import org.edu_sharing.service.search.model.SitemapPage;
 import org.edu_sharing.service.search.model.SortDefinition;
 import org.edu_sharing.spring.servlet.SpringHttpServlet;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class SitemapServlet extends SpringHttpServlet {
     public final static String NS_SITEMAP="http://www.sitemaps.org/schemas/sitemap/0.9";
-    public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneId.systemDefault());
     private static final int NODES_PER_MAP = 500;
+    private static final int DEFAULT_PAGE_SIZE = 5000;
+    private static final String CONFIG_PAGE_SIZE = "angular.sitemap.pageSize";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
             String from = req.getParameter("from");
+            String after = req.getParameter("after");
             String type = req.getParameter("type");
+            SearchService search = SearchServiceFactory.getInstance().getLocalService();
 
-            if(from==null){
+            if (search instanceof SearchServiceElastic) {
+                SearchServiceElastic elastic = (SearchServiceElastic) search;
+                if (type == null) {
+                    toXml(getAllElastic(req, elastic), resp);
+                } else if (from != null) {
+                    // legacy offset urls (before the cursor paging): the pages are not addressable anymore
+                    toXml(new Urlset(), resp);
+                } else {
+                    toXml(getNodesElastic(elastic, type, after == null ? null : Long.valueOf(after)), resp);
+                }
+            } else if (from == null) {
                 Sitemapindex index = getAll(req);
-                toXml(index,resp);
+                toXml(index, resp);
+            } else {
+                Urlset set = getNodes(req, type, Integer.parseInt(from));
+                toXml(set, resp);
             }
-            else{
-                Urlset set = getNodes(req,type,Integer.parseInt(from));
-                toXml(set,resp);
-            }
+        }
+        catch(NumberFormatException t){
+            resp.sendError(400, "invalid parameter: " + t.getMessage());
         }
         catch(Throwable t){
             log.error(t.getMessage(),t);
             resp.sendError(500,t.toString());
         }
+    }
+
+    @Autowired
+    private LightbendConfigLoader lightbendConfigLoader;
+
+    private int getPageSize() {
+        try {
+            return Math.max(1, lightbendConfigLoader.getConfig().getInt(CONFIG_PAGE_SIZE));
+        } catch (Throwable t) {
+            return DEFAULT_PAGE_SIZE;
+        }
+    }
+
+    private static String formatDate(long epochMillis) {
+        return DATE_FORMAT.format(Instant.ofEpochMilli(epochMillis));
+    }
+
+    /**
+     * The urls of the download and the preview carry the session id of the request and a cache buster that changes
+     * with every call. Neither belongs in a public file, and an url that changes on every fetch is no stable url.
+     */
+    static String removeVolatileUrlParts(String url) {
+        if (url == null) {
+            return null;
+        }
+        String result = url
+                .replaceAll(";jsessionid=[^?&#]*", "")
+                .replaceAll("&dontcache=[^&#]*", "")
+                .replaceAll("\\?dontcache=[^&#]*&?", "?");
+        return result.endsWith("?") ? result.substring(0, result.length() - 1) : result;
+    }
+
+    private static SearchService.ContentType getContentType(String type) {
+        return "collection".equals(type) ? SearchService.ContentType.COLLECTIONS : SearchService.ContentType.FILES;
+    }
+
+    private Sitemapindex getAllElastic(HttpServletRequest request, SearchServiceElastic elastic) throws Throwable {
+        Sitemapindex index = new Sitemapindex();
+        for (String type : new String[]{"io", "collection"}) {
+            for (SitemapPage page : elastic.getSitemapPages(getContentType(type), getPageSize())) {
+                Sitemapindex.Sitemap map = new Sitemapindex.Sitemap();
+                map.loc = request.getRequestURL() + "?type=" + type + (page.getAfter() != null ? "&after=" + page.getAfter() : "");
+                if (page.getLastModified() != null) {
+                    map.lastmod = formatDate(page.getLastModified());
+                }
+                index.sitemap.add(map);
+            }
+        }
+        return index;
+    }
+
+    private Urlset getNodesElastic(SearchServiceElastic elastic, String type, Long after) throws Throwable {
+        Urlset set = new Urlset();
+        for (SitemapEntry entry : elastic.getSitemapEntries(getContentType(type), after, getPageSize())) {
+            Urlset.Url url = new Urlset.Url();
+            if (entry.getModified() != null) {
+                url.lastmod = formatDate(entry.getModified());
+            }
+            url.loc = entry.isCollection()
+                    ? URLTool.getNgCollectionUrl(entry.getNodeId())
+                    : URLHelper.getNgRenderNodeUrl(entry.getNodeId(), null);
+            // only nodes with their own binary have a download url, links (e.g. to a video on another site) have none
+            // and would be an incomplete video entry
+            if ("file-video".equals(entry.getMediatype()) && entry.isContent()) {
+                try {
+                    String contentLoc = new MCAlfrescoAPIClient().getDownloadUrl(entry.getNodeId());
+                    if (contentLoc != null) {
+                        Urlset.Url.Video video = new Urlset.Url.Video();
+                        video.title = entry.getName();
+                        video.content_loc = removeVolatileUrlParts(contentLoc);
+                        video.thumbnail_loc = removeVolatileUrlParts(NodeServiceHelper.getPreview(
+                                new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, entry.getNodeId())).getUrl());
+                        url.video.add(video);
+                    }
+                } catch (Throwable t) {
+                    log.warn("Can not read video data of {}: {}", entry.getNodeId(), t.getMessage());
+                }
+            }
+            set.url.add(url);
+        }
+        return set;
     }
 
     private Sitemapindex getAll(HttpServletRequest request) throws Throwable {
@@ -69,7 +178,7 @@ public class SitemapServlet extends SpringHttpServlet {
         SearchToken token=new SearchToken();
         token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(0);
-        token.setExcludes(Arrays.asList(new String[]{"preview"}));
+        token.setExcludes(List.of("preview"));
         SearchResultNodeRef resultFiles = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
         token.setContentType(SearchService.ContentType.COLLECTIONS);
         SearchResultNodeRef resultCollections = search.search(getMds(request), MetadataSet.DEFAULT_CLIENT_QUERY, getSearchAllCriterias(), token);
@@ -110,7 +219,7 @@ public class SitemapServlet extends SpringHttpServlet {
             token.setContentType(SearchService.ContentType.FILES);
         token.setMaxResult(NODES_PER_MAP);
         token.setFrom(from);
-        token.setExcludes(Arrays.asList(new String[]{"preview"}));
+        token.setExcludes(List.of("preview"));
         SortDefinition sort = new SortDefinition();
         sort.addSortDefinitionEntry(new SortDefinition.SortDefinitionEntry(CCConstants.getValidLocalName(CCConstants.CM_PROP_C_CREATED),true));
         token.setSortDefinition(sort);
@@ -122,7 +231,7 @@ public class SitemapServlet extends SpringHttpServlet {
             Date property = (ref.getProperties() != null)
                     ? new Date((long)ref.getProperties().get(CCConstants.CM_PROP_C_MODIFIED))
                     : (Date) nodeService.getPropertyNative(ref.getStoreProtocol(), ref.getStoreId(), ref.getNodeId(), CCConstants.CM_PROP_C_MODIFIED);
-            url.lastmod = DATE_FORMAT.format(property);
+            url.lastmod = formatDate(property.getTime());
             if(Arrays.asList(aspects).contains(CCConstants.CCM_ASPECT_COLLECTION)){
                 url.loc=URLTool.getNgCollectionUrl(ref.getNodeId());
             }

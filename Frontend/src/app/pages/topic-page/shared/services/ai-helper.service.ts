@@ -40,10 +40,6 @@ export class AiHelperService {
 
     /**
      * Helper function to call the B-API to generate a text from a prompt stored in a node with a given ID.
-     *
-     * @param configId
-     * @param variables
-     * @param contextNodeId
      */
     async generateFromPrompt(
         configId: string | NodeConfig,
@@ -85,10 +81,6 @@ export class AiHelperService {
 
     /**
      * Calls the B-API to generate an image from a prompt stored in a node with a given ID.
-     *
-     * @param widgetNodeId
-     * @param contextNodeId
-     * @param variables
      */
     async createAiImage(
         widgetNodeId: string,
@@ -117,10 +109,6 @@ export class AiHelperService {
 
     /**
      * Calls the B-API to regenerate an image from a prompt stored in a node with a given ID.
-     *
-     * @param widgetNodeId
-     * @param contextNodeId
-     * @param variables
      */
     async updateAiImage(
         widgetNodeId: string,

@@ -24,11 +24,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     }
     /**
      * Filter options by handling callbacks based on the target type.
-     *
-     * @param options
-     * @param target
-     * @param data
-     * @param objects
      */
     async filterOptions(
         options: OptionItem[],
@@ -48,10 +43,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     /**
      * Handle callbacks by iterating options and defining showCallback functions for those.
      * reduced version of Frontend/src/app/services/options-helper.service.ts
-     *
-     * @param options
-     * @param objects
-     * @param data
      */
     protected handleCallbacks(
         options: OptionItem[],
@@ -117,11 +108,6 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
 
     /**
      * Retrieves available options by filtering those.
-     *
-     * @param target
-     * @param objects
-     * @param components
-     * @param data
      */
     async getAvailableOptions(
         target: Target,

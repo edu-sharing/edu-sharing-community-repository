@@ -251,8 +251,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Handles changes made via input to the widget component.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         // allow later changes if certain inputs were changed
@@ -363,9 +361,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Updates the common properties of the widget (description, headline + mappings).
-     *
-     * @param widgetConfig
-     * @param aiConfig
      */
     async updateCommonProperties(
         widgetConfig: WidgetConfig,
@@ -624,8 +619,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Retrieves an update of the generate with AI flag.
-     *
-     * @param event
      */
     async onGenerateWithAiChanged(event: GenerateWithAiChangeEvent): Promise<void> {
         if (event.isHeadline) {
@@ -638,8 +631,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Reacts to es-generic-widget-header (textChange) event by updating the widget config.
-     *
-     * @param event
      */
     async onHeaderTextChange(event: TextChangeEvent): Promise<void> {
         if (this.widgetInstance) {
@@ -658,8 +649,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
     /**
      * Reacts to es-editable-text (searchResultsUpdated) event by setting the search results
      * and updating the search input count.
-     *
-     * @param event
      */
     onSearchResultsUpdated(event: { count: number; type: string }): void {
         this.searchResults.set(event.type, event.count);
@@ -668,9 +657,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Handles the update of the generic widget search results.
-     *
-     * @param count
-     * @param type
      */
     updateSearchResults(count: number, type: string): void {
         this.searchResults.set(type, count);
@@ -1020,8 +1006,6 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
     /**
      * Helper function to process changes made to the widget component.
-     *
-     * @param changes
      */
     private async processChanges(changes: SimpleChanges): Promise<void> {
         if (this.widgetInstance && this.widgetComponentRef) {

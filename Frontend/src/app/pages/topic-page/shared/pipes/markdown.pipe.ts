@@ -68,8 +68,6 @@ export class MarkdownPipe implements PipeTransform {
 
     /**
      * Converts a given Markdown string into an HTML string.
-     *
-     * @param value
      */
     transform(value: string): string {
         return this.sanitizer.sanitize(SecurityContext.HTML, this.md.parse(value));

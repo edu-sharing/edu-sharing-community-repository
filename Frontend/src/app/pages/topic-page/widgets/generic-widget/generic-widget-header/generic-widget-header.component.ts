@@ -63,9 +63,6 @@ export class WidgetHeaderComponent {
 
     /**
      * Emits the change event whether the text should be generated with AI received by self-adjusting-textarea.
-     *
-     * @param checked
-     * @param isHeadline
      */
     onGenerateWithAiChanged = (checked: boolean, isHeadline: boolean): void => {
         this.generateWithAiChanged.emit({ aiGenerated: checked, isHeadline });

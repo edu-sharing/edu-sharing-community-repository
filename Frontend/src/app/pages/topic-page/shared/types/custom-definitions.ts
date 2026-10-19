@@ -7,8 +7,6 @@ import { WidgetSelectOption } from './widget-select-option';
 // GENERAL CONSTANTS
 export const DEFAULT_AI_CONFIG_PROP: string = 'ccm:bapi_config';
 export const DEFAULT_COLLECTION_ID_PROP: string = 'virtual:collection_id_tree';
-export const DEFAULT_DISCIPLINE_PROP: string = 'ccm:taxonid';
-export const DEFAULT_OER_LICENSES: string[] = ['CC_0', 'CC_BY', 'CC_BY_SA', 'PDM'];
 export const DEFAULT_PAGE_CONFIG_ASPECT: string = 'ccm:page';
 export const DEFAULT_PAGE_CONFIG_PROP: string = 'ccm:page_config';
 export const DEFAULT_PAGE_CONFIG_PROPAGATE_REF_PROP: string =
@@ -36,6 +34,9 @@ export const DEFAULT_PAGE_VARIANT_QUERY_ID: string = 'page_variant';
 // Fallback config for page variant nodes that do not carry a `ccm:page_variant_config`
 // (e.g. the default node auto-created when requesting the global page templates).
 export const DEFAULT_PAGE_VARIANT_CONFIG_VALUE: string = '{"structure":{"swimlanes":[]}}';
+// `ccm:maptype` of the default global template, which the repository maintains itself
+export const DEFAULT_PAGE_VARIANT_DEFAULT_TEMPLATE_MAP_TYPE: string =
+    'EDUSYSTEM_PAGE_VARIANT_DEFAULT_TEMPLATE';
 export const DEFAULT_WIDGET_CONFIG_PROP: string = 'ccm:widget_config';
 
 // query params carrying the page-wide search state
@@ -47,7 +48,6 @@ export const DEFAULT_BG_COLOR: string = '#F4F4F4';
 export const DEFAULT_PAGE_NAME_PREFIX: string = 'PAGE_';
 export const DEFAULT_PAGE_VARIANT_NAME_PREFIX: string = 'PAGE_VARIANT_';
 export const DEFAULT_PAGE_VARIANT_TEMPLATE_VERSION: string = '1';
-export const DEFAULT_ICON_PATH: string = 'assets/images/topic-page/';
 export const DEFAULT_WIDGET_NAME_PREFIX: string = 'WIDGET_';
 
 // WIDGET DEFINITIONS

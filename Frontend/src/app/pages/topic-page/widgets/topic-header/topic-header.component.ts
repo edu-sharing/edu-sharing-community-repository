@@ -85,13 +85,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     @Input() defaultDescriptionNodeId?: string = '';
     @Input() defaultImageNodeId?: string = '';
     @Input() defaultTextNodeId?: string = '';
-    private _editMode: boolean = false;
-    @Input() get editMode(): boolean {
-        return this._editMode;
-    }
-    set editMode(val: boolean) {
-        this.setEditMode(val);
-    }
+    @Input() editMode: boolean = false;
     @Input() nodeId: string = '';
     // propagated header node: only its text background color is taken over,
     // other parameters fall back to defaults
@@ -109,10 +103,15 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     aiSupported: WritableSignal<boolean> = signal(false);
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
     collectionDescription: string;
-    private configLocked: boolean = false;
     // description is used for the "description" of importance (stored in a "header" widget node)
     description: string = this.DEFAULT_DESCRIPTION;
     initialized: WritableSignal<boolean> = signal(false);
+    // the page is creating the config node this header asked for
+    private nodeCreationPending: boolean = false;
+    // saves run one after another, each storing the state current at its turn
+    private saveQueue: Promise<void> = Promise.resolve();
+    // the config last stored (or loaded), so an unchanged state is not stored again
+    private storedConfig: string = null;
     textBackgroundColor: string = this.DEFAULT_HEADER_TEXT_BG_COLOR;
     userUploadedNodeId: string = null;
     widgetNodeId: string = null;
@@ -139,8 +138,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Initializes or updates the topic header component.
-     *
-     * @param changes
      */
     async ngOnChanges(changes: SimpleChanges): Promise<void> {
         const topicChanged: boolean = changes.topic && !changes.topic?.firstChange;
@@ -149,7 +146,16 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
         const propagatedNodeIdChanged: boolean =
             !!changes.propagatedNodeId &&
             changes.propagatedNodeId.currentValue !== changes.propagatedNodeId.previousValue;
-        if (
+        // a node created on request of this header keeps the local state, which may be newer
+        const ownNodeCreated: boolean =
+            nodeIdChanged &&
+            !changes.nodeId.firstChange &&
+            !!this.nodeId &&
+            !topicChanged &&
+            (this.nodeCreationPending || this.nodeId === this.availableNodeId);
+        if (ownNodeCreated) {
+            this.availableNodeId = this.nodeId;
+        } else if (
             changes.nodeId?.firstChange ||
             changes.propagatedNodeId?.firstChange ||
             nodeIdChanged ||
@@ -202,6 +208,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
             this.globalWidgetConfigService.defaultTopicHeaderTextWidgetNodeId,
         );
         await this.readConfigFromJson(configJson, aiNodeId, colorOnly);
+        this.storedConfig = JSON.stringify(this.retrieveWidgetConfig());
         // set the component to be initialized (further processing is done in the child component)
         this.initialized.set(true);
     }
@@ -244,8 +251,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     /**
      * Handles a manual change of the collection description text. The text is no longer
      * AI-generated once edited by the user, so the AI label must be hidden before persisting.
-     *
-     * @param description
      */
     async onCollectionDescriptionChanged(description: string): Promise<void> {
         this.aiGeneratedDescription.set(false);
@@ -253,47 +258,71 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     }
 
     /**
-     * Persists the currently defined config.
+     * Persists the currently defined config once the saves requested before are done.
      *
-     * @param force user-triggered changes (e.g. an image upload) are stored even while locked
+     * @param force stores the config even if unchanged, e.g. to get a node for an image upload
      */
-    async persistConfig(force: boolean = false): Promise<void> {
-        if (this.configLocked && !force) {
+    persistConfig(force: boolean = false): Promise<void> {
+        const save: Promise<void> = this.saveQueue.then(() => this.storeConfig(force));
+        this.saveQueue = save.catch((): void => undefined);
+        return save;
+    }
+
+    /**
+     * Stores the current config, either in the own node or in a node the page creates for it.
+     */
+    private async storeConfig(force: boolean): Promise<void> {
+        // a config being loaded is no state of this header yet
+        if (!this.initialized()) {
             return;
         }
-        // retrieve a widget config from the currently set variables
         const widgetConfig: TopicHeaderConfig = this.retrieveWidgetConfig();
-        // ensure that the config is not attempted to be stored twice
-        this.configLocked = true;
-        setTimeout((): void => {
-            this.configLocked = false;
-        }, 500);
-        // persist the config by creating a new or updating an existing node
-        await this.topicPageHelperService.persistConfig(
-            this.availableNodeId,
-            -1,
-            -1,
-            this.pageVariantNode,
-            widgetConfig,
-            null,
-            this.contextNodeId,
-            false,
-            true,
-        );
+        const serializedConfig: string = JSON.stringify(widgetConfig);
+        if (!force && serializedConfig === this.storedConfig) {
+            return;
+        }
+        if (this.availableNodeId) {
+            const node: Node = await this.topicPageHelperService.persistConfig(
+                this.availableNodeId,
+                -1,
+                -1,
+                this.pageVariantNode,
+                widgetConfig,
+                null,
+                this.contextNodeId,
+                false,
+                true,
+            );
+            this.storedConfig = node ? serializedConfig : null;
+            return;
+        }
+        // creating the node may involve copying an inherited page config first
+        this.nodeCreationPending = true;
+        const nodeId: string | null = await new Promise<string | null>((resolve): void => {
+            void this.topicPageHelperService.persistConfig(
+                '',
+                -1,
+                -1,
+                this.pageVariantNode,
+                widgetConfig,
+                null,
+                this.contextNodeId,
+                false,
+                true,
+                resolve,
+            );
+        });
+        this.nodeCreationPending = false;
+        if (nodeId) {
+            this.availableNodeId = nodeId;
+            this.storedConfig = serializedConfig;
+        }
     }
 
     /**
      * Persists the description of the collection.
      */
     async persistCollectionDescription(description: string): Promise<void> {
-        if (this.configLocked) {
-            return;
-        }
-        // ensure that the config is not attempted to be stored twice
-        this.configLocked = true;
-        setTimeout((): void => {
-            this.configLocked = false;
-        }, 500);
         if (!this.collectionNode?.ref.id) {
             return;
         }
@@ -311,8 +340,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description of a collection.
-     *
-     * @param contextNodeId
      */
     private async generateCollectionDescription(contextNodeId: string): Promise<void> {
         if (!(await this.aiHelperService.hasAISupport())) {
@@ -331,12 +358,8 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
                 );
             const responseText: string = retrieveResultString(promptResponse) ?? '';
             if (responseText !== '') {
-                this.configLocked = true;
                 this.collectionDescription = responseText;
                 this.aiGeneratedDescription.set(true);
-                setTimeout((): void => {
-                    this.configLocked = false;
-                }, 1000);
             }
         } catch {
             // AI generation failed; fall back to no collection description
@@ -344,24 +367,7 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
     }
 
     /**
-     * Helper function to set the edit mode and lock the config.
-     *
-     * @param editMode
-     */
-    private setEditMode(editMode: boolean): void {
-        this.configLocked = true;
-        this._editMode = editMode;
-        setTimeout((): void => {
-            this.configLocked = false;
-        }, 1000);
-    }
-
-    /**
      * Helper function to read the config from a given string.
-     *
-     * @param configString
-     * @param nodeId
-     * @param colorOnly
      */
     private async readConfigFromJson(
         configString: string,
@@ -401,8 +407,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Helper function to generate the description text via AI.
-     *
-     * @param nodeId
      */
     private async generateDescription(nodeId: string): Promise<void> {
         if (!(await this.aiHelperService.hasAISupport())) {
@@ -413,12 +417,8 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
                 await this.aiHelperService.generateFromPrompt(nodeId, {}, this.contextNodeId);
             const responseText: string = retrieveResultString(promptResponse) ?? '';
             if (responseText !== '') {
-                this.configLocked = true;
                 this.description = responseText;
                 this.aiGeneratedText.set(true);
-                setTimeout((): void => {
-                    this.configLocked = false;
-                }, 1000);
             }
         } catch {
             // AI generation failed; fall back to no description text
@@ -442,8 +442,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
 
     /**
      * Checks whether a given color is dark.
-     *
-     * @param color
      */
     isDarkColor(color: string): boolean {
         if (!color) {
@@ -456,8 +454,6 @@ export class TopicHeaderComponent implements OnChanges, OnInit {
      * Resolves the header text background color to paint. In dark mode a bright custom color is
      * adapted to a dark surface (so the light text stays readable); already-dark colors and light
      * mode are left as configured.
-     *
-     * @param color
      */
     headerBackgroundColor(color: string): string {
         return this.themeService.isDarkMode() ? this.themeService.toDarkSurfaceColor(color) : color;

@@ -10,16 +10,35 @@ $collectionIconSize: 40px;
 
 .grid-card {
     grid-template-rows: $topBarHeight auto auto;
-    .card-meta {
-        .card-meta-row {
-            > es-list-base {
-                @include limitLineCount(2, $cardLineHeight);
-            }
-        }
-    }
 }
 :host ::ng-deep {
     .grid-card {
+        // only for the regular card, the small card (which also imports node-entries-card.main)
+        // limits its meta values to a single line
+        .card-meta-row {
+            &:not(:first-child) > es-list-base > es-list-text > span {
+                // Limit to 3 lines with a custom ellipsis: Chromium drops the `-webkit-line-clamp`
+                // ellipsis for right aligned text if the last visible line is not completely filled.
+                // `has-text-overflow` is set by `esCheckTextOverflow` (es-list-text) if truncated,
+                // the '…' is then floated into the bottom right corner. `shape-outside` cuts off the
+                // upper part of the float, so only the last visible line wraps around it.
+                overflow: hidden;
+                line-height: $cardLineHeight + em;
+                max-height: $cardLineHeight * 3em;
+                text-align: end;
+                &.has-text-overflow::before {
+                    content: '…';
+                    float: right;
+                    width: 1em;
+                    height: $cardLineHeight * 3em;
+                    // slightly below the 2nd line, otherwise it is shortened as well
+                    shape-outside: inset(($cardLineHeight * 2 + 0.2) * 1em 0 0 0);
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: flex-end;
+                }
+            }
+        }
         es-node-url {
             .node-url-wrapper {
                 height: 100%;

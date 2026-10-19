@@ -19,6 +19,8 @@ import org.edu_sharing.spring.security.oauth2.config.OAuth2ConfigProvider;
 import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +28,10 @@ import org.springframework.stereotype.Service;
 public class SilentLoginModeRedirect {
     public static String SESS_ATT_SILENT_LOGIN_TARGET = "SILENT_LOGIN_TARGET";
     public static String SESS_ATT_SILENT_LOGIN_RESULT = "SILENT_LOGIN_RESULT";
+
+    private static final Pattern CRAWLER_USER_AGENT = Pattern.compile(
+            "\\bbot\\b|[a-z]bot\\b|crawl|spider|slurp|mediapartners|facebookexternalhit|embedly",
+            Pattern.CASE_INSENSITIVE);
 
     private final OAuth2ConfigProvider configService;
 
@@ -44,6 +50,16 @@ public class SilentLoginModeRedirect {
         // preview redirect is problematic since browser seem to load random images from cache on 302 responses
         if (request.getServletPath().equals("/rest") || request.getServletPath().equals("/preview")) {
             log.debug("servlet path {} is not allowed",request.getServletPath());
+            return false;
+        }
+
+        // machine endpoints and crawlers keep no session, they would loop between the redirects and never get the content
+        if (isMachineEndpoint(request.getServletPath(), request.getPathInfo())) {
+            log.debug("machine endpoint {}{} is not allowed", request.getServletPath(), request.getPathInfo());
+            return false;
+        }
+        if (isCrawler(request.getHeader("User-Agent"))) {
+            log.debug("crawler {} is not allowed", request.getHeader("User-Agent"));
             return false;
         }
 
@@ -88,6 +104,25 @@ public class SilentLoginModeRedirect {
 
         response.sendRedirect("/edu-sharing/oauth2/authorization/"+config.getRegistrationId(registrationKey)+"?prompt=none");
         return true;
+    }
+
+    /**
+     * endpoints that are only consumed by machines, an interactive login makes no sense there
+     */
+    static boolean isMachineEndpoint(String servletPath, String pathInfo) {
+        if (!"/eduservlet".equals(servletPath) || pathInfo == null) {
+            return false;
+        }
+        return pathInfo.equals("/sitemap")
+                || pathInfo.equals("/oembed")
+                || pathInfo.equals("/oai") || pathInfo.startsWith("/oai/");
+    }
+
+    /**
+     * common crawlers (Googlebot, bingbot, ...) and link preview bots
+     */
+    static boolean isCrawler(String userAgent) {
+        return userAgent != null && CRAWLER_USER_AGENT.matcher(userAgent).find();
     }
 
     private boolean isLocalLoginForced(HttpServletRequest request) {

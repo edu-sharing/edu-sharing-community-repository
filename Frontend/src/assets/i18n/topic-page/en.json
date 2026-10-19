@@ -210,12 +210,14 @@
           "TOOLTIP": "A new version of the template used is available.",
           "TOOLTIP_AVAILABLE": "WARNING: new template from {{date}}",
           "TOOLTIP_UP_TO_DATE": "Template up to date",
+          "TEMPLATE_MISSING": "The linked template is no longer available.",
           "HEADING": "Update page variant",
-          "MESSAGE": "Do you want to update the page variant based on the new template? Changes made to the page variant will be lost."
+          "MESSAGE": "Do you want to update the page variant based on the new template? Changes to the page content will be lost."
         },
         "REGENERATE_VARIANT": "Regenerate",
         "DELETE_VARIANT": "Delete variant",
         "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
+        "EDIT_GLOBAL_TEMPLATE": "Edit global template",
         "DEFINE_PARAMETERS": "Define parameters",
         "DUPLICATE_PARAMETERS": "Duplicate in existing variant detected"
       },
@@ -224,7 +226,14 @@
         "TITLE": "Template title",
         "TITLE_PLACEHOLDER": "Topic page template for xyz",
         "DELETE_VARIANT": "Delete template",
-        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates"
+        "ADD_TO_GLOBAL_TEMPLATES": "Add to global templates",
+        "EDIT_GLOBAL_TEMPLATE": "Edit global template"
+      },
+      "CONFIG_GLOBAL_TEMPLATE": {
+        "HEADING": "Settings of the global template",
+        "TITLE": "Global template title",
+        "TITLE_PLACEHOLDER": "Global topic page template for xyz",
+        "DELETE_VARIANT": "Delete global template"
       }
     },
     "ADD_PAGE_TEMPLATE": {
@@ -430,6 +439,11 @@
         "TOPIC_PAGE": "Topic page",
         "TEMPLATE": "Template"
       },
+      "PREVIEW": "Preview",
+      "TEMPLATE_ACTIONS": {
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+      },
       "COLLECTION_FILTER": {
         "LABEL": "Filtered:",
         "CHIP": "Current collection",
@@ -455,6 +469,25 @@
       "VIEW": "You are currently in the template viewing mode.",
       "EDIT": "You are currently in the template editing mode.",
       "END": "Leave template mode"
+    },
+    "GLOBAL_TEMPLATE_UNAVAILABLE": "The global template no longer exists.",
+    "GLOBAL_TEMPLATE_MODE_ACTIVE": {
+      "VIEW": "You are viewing the global template \"{{title}}\".",
+      "EDIT": "You are editing the global template \"{{title}}\". Topic pages created from it can take over the changes via \"Regenerate\".",
+      "END": "Leave global template"
+    },
+    "DELETE_GLOBAL_TEMPLATE": {
+      "HEADING": "Delete global template",
+      "MESSAGE": "Do you really want to delete the global template \"{{title}}\"? Topic pages created from it keep their content but can no longer be regenerated from it.",
+      "SUCCESS_MESSAGE": "The global template was deleted."
+    },
+    "VARIANT_PREVIEW": {
+      "INFO": "Preview: \"{{title}}\" ({{position}} of {{total}})",
+      "PREVIOUS": "Previous preview",
+      "NEXT": "Next preview",
+      "BACK_TO_SELECTION": "Back to selection",
+      "END": "End preview",
+      "UNAVAILABLE": "\"{{title}}\" is no longer available."
     }
   }
 }

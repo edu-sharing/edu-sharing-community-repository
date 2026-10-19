@@ -28,6 +28,8 @@ import {
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { UIHelper } from '../../../../core-ui-module/ui-helper';
+import { Closable } from '../../../../features/dialogs/card-dialog/card-dialog-config';
+import { DELETE_OR_CANCEL } from '../../../../features/dialogs/dialog-modules/generic-dialog/generic-dialog-data';
 import { DialogsService } from '../../../../features/dialogs/dialogs.service';
 import type { PreviewConfig } from '../../../../features/editorial-sidebar/editorial-sidebar.component';
 import { EditorialSidebarService } from '../../../../features/editorial-sidebar/editorial-sidebar.service';
@@ -174,7 +176,6 @@ export class TopicPageHelperService {
      * Lets the surrounding topic page load the linked topic inside itself.
      * Returns false if the caller has to navigate to the link itself.
      *
-     * @param collectionId
      * @param url the link of the topic, as given by the custom URL function
      */
     navigateInPlace(collectionId: string, url: string | null): boolean {
@@ -183,8 +184,6 @@ export class TopicPageHelperService {
 
     /**
      * Retrieves the base href of the application.
-     *
-     * @param cutOffTrailingSlash
      */
     getBaseHref(cutOffTrailingSlash: boolean = true): string {
         let href: string = this.platformLocation.getBaseHrefFromDOM();
@@ -277,8 +276,6 @@ export class TopicPageHelperService {
 
     /**
      * Opens the link to a node for inspection.
-     *
-     * @param node
      */
     openChangeOnInspectionTableLink(node: Node): void {
         const component = this.topicPageGlobalService.getCustomApplyFilterComponent() || 'render';
@@ -296,9 +293,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to build the inspection table URL base.
-     *
-     * @param component
-     * @param node
      */
     private buildInspectionTableUrlBase(component: string, node: Node): string[] {
         if (component !== 'render') {
@@ -316,9 +310,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to merge navigation extras with special consideration for filters.
-     *
-     * @param obj1
-     * @param obj2
      */
     private mergeNavigationExtras(
         obj1: NavigationExtras,
@@ -338,8 +329,6 @@ export class TopicPageHelperService {
 
     /**
      * Sets the selected variables for the topic page.
-     *
-     * @param variables
      */
     setSelectedVariables(variables: { [property: string]: string[] }): void {
         this.selectedVariablesSubject.next(variables);
@@ -361,8 +350,6 @@ export class TopicPageHelperService {
 
     /**
      * Sets an input blob as the next upload.
-     *
-     * @param blob
      */
     setBlobToUpload(blob: Blob): void {
         this.blobToUpload = blob;
@@ -385,12 +372,27 @@ export class TopicPageHelperService {
     }
 
     /**
+     * Retrieves a node with a given ID from the server, bypassing the short-lived node cache that
+     * would still answer with the state from before a recent write.
+     */
+    async getNodeUncached(nodeId: string): Promise<Node> {
+        const response = await firstValueFrom(
+            this.nodeApiUnwrapped.getMetadata({
+                repository: HOME_REPOSITORY,
+                node: convertNodeRefIntoNodeId(nodeId),
+                propertyFilter: [PROPERTY_FILTER_ALL],
+            }),
+        );
+        return response.node;
+    }
+
+    /**
      * Retrieves a node referenced by a stored config, resolving to null without the global error
      * message if it was deleted or is no longer readable. Other errors are rethrown.
      */
-    async getNodeIfAvailable(nodeId: string): Promise<Node | null> {
+    async getNodeIfAvailable(nodeId: string, uncached: boolean = false): Promise<Node | null> {
         try {
-            return await this.getNode(nodeId);
+            return uncached ? await this.getNodeUncached(nodeId) : await this.getNode(nodeId);
         } catch (error) {
             if (
                 [RestConstants.HTTP_NOT_FOUND, RestConstants.HTTP_FORBIDDEN].includes(error?.status)
@@ -432,10 +434,6 @@ export class TopicPageHelperService {
     /**
      * Retrieves the sub-collections with counts of a collection with a given ID. Ordering and the
      * upper bound are left to the repository, which knows the property types.
-     *
-     * @param collectionId
-     * @param fetchCounts
-     * @param options
      */
     getSubcollections(
         collectionId: string,
@@ -585,6 +583,32 @@ export class TopicPageHelperService {
         }
     }
 
+    /**
+     * Deletes a global topic-page template once the user confirmed it and tells whether it was
+     * deleted. Pages created from it keep their content but can no longer be regenerated from it.
+     */
+    async deleteGlobalTemplate(templateNode: Node): Promise<boolean> {
+        const i18nPrefix: string = 'TOPIC_PAGE.DELETE_GLOBAL_TEMPLATE.';
+        const dialogRef = await this.dialogs.openGenericDialog({
+            title: i18nPrefix + 'HEADING',
+            message: i18nPrefix + 'MESSAGE',
+            messageParameters: { title: templateNode.title || templateNode.name },
+            buttons: DELETE_OR_CANCEL,
+            closable: Closable.Casual,
+        });
+        if ((await firstValueFrom(dialogRef.afterClosed())) !== 'YES_DELETE') {
+            return false;
+        }
+        try {
+            await this.deleteNode(retrieveNodeId(templateNode));
+        } catch (error) {
+            this.displayErrorToast(error);
+            return false;
+        }
+        this.toast.toast(i18nPrefix + 'SUCCESS_MESSAGE');
+        return true;
+    }
+
     // COMBINED NODE FUNCTIONS
     /**
      * Resets a given property of a node with a given ID.
@@ -603,7 +627,7 @@ export class TopicPageHelperService {
     ): Promise<Node> {
         nodeId = convertNodeRefIntoNodeId(nodeId);
         await this.setProperty(nodeId, propertyName, value);
-        return this.getNode(nodeId);
+        return this.getNodeUncached(nodeId);
     }
 
     // INTERNAL HELPER FUNCTIONS
@@ -642,10 +666,6 @@ export class TopicPageHelperService {
 
     /**
      * Persists a selected color string by notifying the topic-page about the change.
-     *
-     * @param color
-     * @param pageVariantNode
-     * @param swimlaneIndex
      */
     persistColorChange(color: string, pageVariantNode: Node, swimlaneIndex: number): boolean {
         this.openSaveConfigToast();
@@ -669,16 +689,7 @@ export class TopicPageHelperService {
 
     /**
      * Persists a given widgetConfig and aiConfig by either creating a new or updating an existing node with the config.
-     *
-     * @param nodeId
-     * @param gridIndex
-     * @param swimlaneIndex
-     * @param pageVariantNode
-     * @param widgetConfig
-     * @param aiConfig
-     * @param parentWidgetConfigNodeId
-     * @param isHeaderNode
-     * @param isBreadcrumbNode
+     * A new node is created by the topic page, which reports it via nodeAvailable (null if none).
      */
     async persistConfig(
         nodeId: string,
@@ -690,6 +701,7 @@ export class TopicPageHelperService {
         parentWidgetConfigNodeId: string,
         isBreadcrumbNode: boolean = false,
         isHeaderNode: boolean = false,
+        nodeAvailable?: (widgetNodeId: string | null) => void,
     ): Promise<Node> {
         this.openSaveConfigToast();
         const configNodeExists: boolean = nodeId && nodeId !== '';
@@ -711,6 +723,12 @@ export class TopicPageHelperService {
                         isBreadcrumbNode,
                         isHeaderNode,
                     );
+                    nodeAvailable?.(null);
+                    return null;
+                }
+                // only an editable topic page listens and creates the node
+                if (!this.topicPageEventsService.widgetNodeAdded.observed) {
+                    nodeAvailable?.(null);
                     return null;
                 }
                 // create a new node with the given widget and AI configs
@@ -718,6 +736,7 @@ export class TopicPageHelperService {
                     gridIndex,
                     isBreadcrumbNode,
                     isHeaderNode,
+                    nodeAvailable,
                     pageVariantNode,
                     swimlaneIndex,
                     widget: {
@@ -729,37 +748,37 @@ export class TopicPageHelperService {
                 return null;
             } else {
                 // update the config(s) and return the updated node
-                await this.setProperty(
-                    nodeId,
-                    DEFAULT_WIDGET_CONFIG_PROP,
-                    JSON.stringify(widgetConfig),
-                );
-                // either update or reset the AI config
-                if (aiConfig && Object.keys(aiConfig)?.length) {
-                    await this.setProperty(
-                        nodeId,
-                        DEFAULT_AI_CONFIG_PROP,
-                        JSON.stringify(aiConfig),
-                    );
-                } else {
-                    await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
-                }
+                await this.writeWidgetConfig(nodeId, widgetConfig, aiConfig);
+                this.topicPageEventsService.widgetConfigUpdated.emit(pageVariantNode);
                 // return the updated node
-                return await this.getNode(nodeId);
+                return await this.getNodeUncached(nodeId);
             }
         } catch (err) {
             this.displayErrorToast(err);
+            nodeAvailable?.(null);
             return null;
         }
     }
 
     /**
+     * Writes a widget config and an AI config to an existing widget node. An empty AI config
+     * resets the stored one.
+     */
+    async writeWidgetConfig(
+        nodeId: string,
+        widgetConfig: WidgetConfig,
+        aiConfig: BapiConfigObject,
+    ): Promise<void> {
+        await this.setProperty(nodeId, DEFAULT_WIDGET_CONFIG_PROP, JSON.stringify(widgetConfig));
+        if (aiConfig && Object.keys(aiConfig)?.length) {
+            await this.setProperty(nodeId, DEFAULT_AI_CONFIG_PROP, JSON.stringify(aiConfig));
+        } else {
+            await this.resetProperty(nodeId, DEFAULT_AI_CONFIG_PROP);
+        }
+    }
+
+    /**
      * Uploads a file by creating a child node for a given parent node ID and setting the file data.
-     *
-     * @param parentId
-     * @param name
-     * @param mimeType
-     * @param blob
      */
     async uploadFile(parentId: string, name: string, mimeType: string, blob: Blob): Promise<Node> {
         const fileNode: Node = await this.createChild(parentId, RestConstants.CCM_TYPE_IO, name);
@@ -768,10 +787,6 @@ export class TopicPageHelperService {
 
     /**
      * Retrieves the page variant properties for a given node, title suffix and page config.
-     *
-     * @param node
-     * @param customTitleSuffix
-     * @param variantConfig
      */
     async retrievePageVariantProperties(
         node: Node,
@@ -906,8 +921,6 @@ export class TopicPageHelperService {
 
     /**
      * Handles an error by opening a toast container for the error.
-     *
-     * @param error
      */
     displayErrorToast(error: any = null): void {
         this.toast.error(error, 'TOPIC_PAGE.WIDGET.SAVE_CONFIG_ERROR_MESSAGE', null, null, null, {
@@ -935,8 +948,6 @@ export class TopicPageHelperService {
 
     /**
      * Helper function to write an email to share a given node.
-     *
-     * @param node
      */
     private writeMail(node: Node): void {
         if (node.content?.url) {

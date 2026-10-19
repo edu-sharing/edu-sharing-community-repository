@@ -15,7 +15,65 @@
 ></es-topic-page-filters-sidebar>
 }
 <main>
-  @if (templateMode()) {
+  @if (globalTemplateNode()) {
+  <es-info-message mode="info" class="template-mode">
+    {{
+      i18nPrefix +
+        (editMode() ? 'GLOBAL_TEMPLATE_MODE_ACTIVE.EDIT' : 'GLOBAL_TEMPLATE_MODE_ACTIVE.VIEW')
+        | translate : { title: (globalTemplateNode() | nodeTitle) }
+    }}
+    <button mat-flat-button color="primary" (click)="leaveGlobalTemplateMode()">
+      {{ i18nPrefix + 'GLOBAL_TEMPLATE_MODE_ACTIVE.END' | translate }}
+    </button>
+  </es-info-message>
+  } @else if (variantPreview(); as preview) {
+  <es-info-message mode="info" class="template-mode">
+    <span>
+      {{
+        i18nPrefix + 'VARIANT_PREVIEW.INFO'
+          | translate
+            : {
+                title: (variantPreviewNode() | nodeTitle),
+                position: preview.index + 1,
+                total: preview.nodes.length
+              }
+      }}
+    </span>
+    <div class="variant-preview-actions">
+      <button
+        mat-icon-button
+        [disabled]="preview.index === 0"
+        [matTooltip]="i18nPrefix + 'VARIANT_PREVIEW.PREVIOUS' | translate"
+        tooltipAriaLabel
+        (click)="showVariantPreviewAt(preview.index - 1)"
+      >
+        <i esIcon="chevron_left"></i>
+      </button>
+      <button
+        mat-icon-button
+        [disabled]="preview.index >= preview.nodes.length - 1"
+        [matTooltip]="i18nPrefix + 'VARIANT_PREVIEW.NEXT' | translate"
+        tooltipAriaLabel
+        (click)="showVariantPreviewAt(preview.index + 1)"
+      >
+        <i esIcon="chevron_right"></i>
+      </button>
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="openVariantOrTemplateSelection(preview.kind)"
+      >
+        {{ i18nPrefix + 'VARIANT_PREVIEW.BACK_TO_SELECTION' | translate }}
+      </button>
+      <button mat-flat-button color="primary" (click)="useVariantPreview()">
+        {{ 'USE' | translate }}
+      </button>
+      <button mat-button color="primary" (click)="endVariantPreview()">
+        {{ i18nPrefix + 'VARIANT_PREVIEW.END' | translate }}
+      </button>
+    </div>
+  </es-info-message>
+  } @else if (templateMode()) {
   <es-info-message mode="info" class="template-mode">
     {{
       i18nPrefix + (editMode() ? 'TEMPLATE_MODE_ACTIVE.EDIT' : 'TEMPLATE_MODE_ACTIVE.VIEW')
@@ -25,7 +83,11 @@
       {{ i18nPrefix + 'TEMPLATE_MODE_ACTIVE.END' | translate }}
     </button>
   </es-info-message>
-  } @if (initialLoadSuccessfully() && showBreadcrumb()) {
+  }
+  <!-- a global template or a previewed node is no variant of the collection's page, so the variant
+    selection is hidden -->
+  @if (initialLoadSuccessfully() && showBreadcrumb() && !globalTemplateNode() && !variantPreview())
+  {
   <!-- BREADCRUMBS -->
   @if (parentEntries()) {
   <div class="template-breadcrumb">
@@ -61,7 +123,8 @@
           (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
         "
       >
-        @if (editMode()) {
+        <!-- a global template carries no topic header and no custom colors -->
+        @if (editMode() && !globalTemplateNode()) {
         <es-color-picker
           class="topic-color-picker"
           [selectedColor]="topicColor ?? initialTopicColor"
@@ -77,7 +140,7 @@
             <es-topic-header
               [collectionNode]="collectionNode"
               [contextNodeId]="topicCollectionId()"
-              [editMode]="editMode()"
+              [editMode]="editMode() && !globalTemplateNode()"
               [nodeId]="convertedHeaderNodeId()"
               [propagatedNodeId]="convertedPropagatedHeaderNodeId()"
               [parentEntries]="parentEntries()"
@@ -202,16 +265,14 @@
           translate) ) {
           <div>
             <h2 class="side-menu-header mat-heading-4 font-bold">
-              {{
-                i18nPrefix +
-                  'SIDE_MENU.CONFIG_PAGE_' +
-                  (templateMode() ? 'TEMPLATE' : 'VARIANT') +
-                  '.HEADING' | translate
-              }}
+              {{ i18nPrefix + 'SIDE_MENU.' + settingsI18nSection() + '.HEADING' | translate }}
             </h2>
             <es-configure-page-variant-or-template
               [addToGlobalTemplatesEnabled]="canAddToGlobalTemplates()"
+              [deleteGlobalTemplateEnabled]="canDeleteGlobalTemplate()"
               [deleteVariantEnabled]="collectionNodePageConfigRef && userHasEditRights()"
+              [editGlobalTemplateEnabled]="canEditLinkedGlobalTemplate()"
+              [globalTemplateMode]="!!globalTemplateNode()"
               [pageVariantConfigNodes]="pageVariantConfigs?.nodes"
               [pageVariantNode]="pageVariantNode()"
               [pageVariantTitle]="
@@ -226,10 +287,13 @@
               [templateMode]="templateMode()"
               [templateNode]="templateVariantNode()"
               [templateUpdateAvailable]="templateUpdateAvailable()"
+              [templateMissing]="templateMissing()"
               [viewModes]="['checkbox', 'checkbox']"
               (addToGlobalTemplatesClicked)="addCurrentVariantToGlobalTemplates($event)"
               (applyChangesClicked)="applyPageVariant($event)"
+              (deleteGlobalTemplateClicked)="deleteGlobalTemplate()"
               (deletePageVariantClicked)="deletePageVariant()"
+              (editGlobalTemplateClicked)="switchIntoGlobalTemplateMode(linkedGlobalTemplate())"
               (regenerateClicked)="regeneratePageVariant()"
               (settingsValidityChanged)="pageVariantSettingsValid.set($event)"
             ></es-configure-page-variant-or-template>
@@ -296,7 +360,7 @@
                     }
                   </ng-container>
                 </button>
-                @if (editMode() && i === 0) {
+                @if (editMode() && i === 0 && !globalTemplateNode()) {
                 <es-color-picker
                   class="anchor-item-color-picker"
                   [selectedColor]="anchorItemColor ?? initialAnchorItemColor"
@@ -536,7 +600,8 @@
                 "
                 (textChange)="swimlaneTitleChanged($event, index)"
               ></es-editable-text>
-              @if (!editMode()) {
+              <!-- sharing refers to the collection's page, which a preview does not show -->
+              @if (!editMode() && !variantPreview()) {
               <div class="swimlane-heading-buttons">
                 <button
                   mat-icon-button
@@ -667,10 +732,14 @@
     [dialogRef]="createVariantOrTemplateDialogRef"
     [collectionNodeId]="topicCollectionId()"
     [pageConfigRef]="collectionNodePageConfigRef"
-    [pageVariantNode]="pageVariantNode()"
+    [pageVariantNode]="collectionPageVariantNode()"
+    [restoredSearchState]="variantPreviewSearchState()"
     [(selectedNode)]="createVariantOrTemplateSelectedNode"
     [templateMode]="createVariantOrTemplateMode() === 'template'"
     (copyOptionChanged)="createVariantOrTemplateCopyOption = $event"
+    (editGlobalTemplate)="openGlobalTemplateFromDialog($event)"
+    (globalTemplateDeleted)="onGlobalTemplateDeleted($event)"
+    (searchStateChange)="createVariantOrTemplateSearchState = $event"
   ></es-add-page-variant-or-template-dialog>
 </ng-template>
 
@@ -679,7 +748,7 @@
 </ng-template>
 
 <ng-template #editModeToggle>
-  @if (userHasEditRights() && (!pageConfigCheckFailed() || templateMode())) {
+  @if (userHasEditRights() && (!pageConfigCheckFailed() || templateMode()) && !variantPreview()) {
   <button
     mat-button
     class="topic-page-edit-toggle-btn mat-button-no-uppercase"

@@ -12,6 +12,7 @@ import org.edu_sharing.repository.server.tools.http.HttpQueryTool;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -27,8 +28,8 @@ public class SimpleConnectorHelper {
                 builderAuth = RequestBuilder.post(authentication.getUrl());
                 if (SimpleConnector.SimpleConnectorApi.BodyType.Form.equals(authentication.getBodyType())) {
                     List<? extends NameValuePair> data = authentication.getBody().entrySet().stream().map((e) -> new BasicNameValuePair(e.getKey(), e.getValue().toString())).collect(Collectors.toList());
-                    builderAuth.setEntity(new UrlEncodedFormEntity(data));
-                    builderAuth.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                    builderAuth.setEntity(new UrlEncodedFormEntity(data, StandardCharsets.UTF_8));
+                    builderAuth.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 }
                 // builder.setHeader()
             }
