@@ -3,7 +3,6 @@ import {
     Component,
     computed,
     effect,
-    untracked,
     EventEmitter,
     inject,
     Injector,
@@ -147,7 +146,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
     private nodeHelperService = inject(NodeHelperService);
     editorialSidebarService = inject(EditorialSidebarService);
     private scopesService = inject(ScopesService);
-    private scopeEditorialService = inject(ScopeEditorialService);
     private optionsHelperDataService = inject(OptionsHelperDataService);
     private breakpointObserver = inject(BreakpointObserver);
     private loadingScreenService = inject(LoadingScreenService);
@@ -227,23 +225,6 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     constructor() {
         this.editorialSidebarService.registerSidebar(this);
-        // a host asked to edit all hits of a search inside the active scope
-        effect(() => {
-            if (this.scopeEditorialService.searchTarget()) {
-                untracked(() =>
-                    this.editorialSidebarService.showOption({
-                        option: ScopeEditorialService.SIDEBAR_OPTION,
-                        trap: false,
-                    }),
-                );
-            }
-        });
-        // the search target only lives as long as the scope option is open
-        effect(() => {
-            if (this.enabledOption()?.option !== ScopeEditorialService.SIDEBAR_OPTION) {
-                untracked(() => this.scopeEditorialService.searchTarget.set(null));
-            }
-        });
         effect(() => {
             this.editorialSidebarService.nodes();
             // read synchronously so a registration arriving after the first run is picked up

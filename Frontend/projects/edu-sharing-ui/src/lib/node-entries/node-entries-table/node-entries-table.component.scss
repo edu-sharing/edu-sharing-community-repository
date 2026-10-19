@@ -99,6 +99,12 @@ mat-cell {
         min-width: 85px;
         justify-content: center;
     }
+    &.mat-column-selectAllBanner {
+        flex: 1 1 100%;
+        margin: 0;
+        padding: 0;
+        min-height: 0;
+    }
     &.mat-column-actions {
         flex: 0 58px;
         min-width: 58px;
@@ -254,4 +260,12 @@ mat-cell {
 }
 es-node-entries-global-options {
     padding: 20px 0;
+}
+
+// the banner row only takes space while the banner has content
+mat-header-row.select-all-banner-row {
+    min-height: 0;
+    &:has(es-node-entries-select-all-banner:empty) {
+        display: none;
+    }
 }

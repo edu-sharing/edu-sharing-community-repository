@@ -13,6 +13,7 @@
   <es-node-entries-table></es-node-entries-table>
   } @if ( entriesService.displayType === NodeEntriesDisplayType.SmallGrid ||
   entriesService.displayType === NodeEntriesDisplayType.Grid ) {
+  <es-node-entries-select-all-banner></es-node-entries-select-all-banner>
   <es-node-entries-card-grid [displayType]="entriesService.displayType">
   </es-node-entries-card-grid>
   } @if (entriesService.displayType === NodeEntriesDisplayType.Tree) {

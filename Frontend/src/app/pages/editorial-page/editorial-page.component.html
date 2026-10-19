@@ -191,6 +191,8 @@
           (dblClickItem)="openItem($event)"
           (fetchData)="fetchEvent($event)"
           (selectionChange)="selectionChange($event)"
+          [allowSelectAllResults]="mode === 'scope'"
+          (allResultsSelectedChange)="allResultsSelectedChange($event)"
           [columns]="columns()"
           [configureColumns]="mode === 'scope'"
           (columnsChange)="saveScopeColumns($event)"
@@ -198,18 +200,7 @@
         >
           <!-- actions for the whole result set: bottom left, next to the paginator -->
           <ng-template #footer>
-            @if (mode === 'scope') {
-            <button
-              mat-flat-button
-              color="primary"
-              data-test="button-scope-edit-all"
-              [disabled]="!scopeHitCount()"
-              (click)="editAllScopeHits()"
-            >
-              <i esIcon="checklist"></i>
-              {{ 'EDITORIAL.SCOPE.EDIT_ALL' | translate : { count: scopeHitCount() } }}
-            </button>
-            @if (scopesService.isOrgAdmin() && scopeInboxTab()) {
+            @if (mode === 'scope' && scopesService.isOrgAdmin() && scopeInboxTab()) {
             <button
               mat-button
               color="primary"
@@ -219,7 +210,7 @@
               <i esIcon="manage_search"></i>
               {{ 'EDITORIAL.SCOPE.BASE_QUERY.OPEN' | translate }}
             </button>
-            } }
+            }
           </ng-template>
           <ng-template #empty>
             <div class="empty">
@@ -240,7 +231,7 @@
         class="selection-action-bar"
         cdkOverlayOrigin
         #selectionBar="cdkOverlayOrigin"
-        [class.visible]="selectedNodes.length"
+        [class.visible]="selectionCount"
       >
         <button
           mat-icon-button
@@ -255,10 +246,13 @@
           mat-button
           color="primary"
           class="count"
+          [disabled]="allResultsSelected()"
           (click)="selectionOverlayOpen = !selectionOverlayOpen"
         >
-          {{ 'SEARCH.N_SELECTED' | translate : { count: selectedNodes.length || 0 } }}
+          {{ 'SEARCH.N_SELECTED' | translate : { count: selectionCount } }}
+          @if (!allResultsSelected()) {
           <i [esIcon]="selectionOverlayOpen ? 'expand_more' : 'expand_less'"></i>
+          }
         </button>
         <es-actionbar
           #selectionActionbarRef

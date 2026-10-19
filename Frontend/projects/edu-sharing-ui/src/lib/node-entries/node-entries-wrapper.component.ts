@@ -5,6 +5,7 @@ import {
     Component,
     ComponentRef,
     ContentChild,
+    effect,
     ElementRef,
     EventEmitter,
     HostBinding,
@@ -19,6 +20,7 @@ import {
     SimpleChange,
     TemplateRef,
     Type,
+    untracked,
     ViewChild,
     ViewContainerRef,
     ChangeDetectionStrategy,
@@ -153,6 +155,13 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     @Input() paginationStrategy: PaginationStrategy | null = null;
     @Output() displayTypeChange = new EventEmitter<NodeEntriesDisplayType>();
     @Output() selectionChange = new EventEmitter<SelectionChange<T>>();
+    /**
+     * offer to select all results (not only the loaded ones) once all loaded entries are selected.
+     * Only for paginated lists, results are reported via `allResultsSelectedChange`
+     */
+    @Input() allowSelectAllResults = false;
+    /** the user selected all results (true) or went back to the plain selection (false) */
+    @Output() allResultsSelectedChange = new EventEmitter<boolean>();
     @Input() elementInteractionType = InteractionType.DefaultActionLink;
     @Input() sort: ListSortConfig;
     @Input() dragDrop: ListDragGropConfig<T>;
@@ -233,7 +242,18 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         */
         this.virtualNodesAdded = this.optionsHelper.virtualNodesAdded;
         this.displayTypeChanged = this.optionsHelper.displayTypeChanged;
+        effect(() => {
+            const allSelected = this.entriesService.allResultsSelected();
+            this.allResultsSelectedChange.emit(allSelected);
+            const data = untracked(() => this.optionsHelper.getData());
+            if (data && !!data.allResultsSelected !== allSelected) {
+                data.allResultsSelected = allSelected;
+                void this.optionsHelper.refreshComponents();
+            }
+        });
         this.entriesService.selection.changed.subscribe((event) => {
+            // the selection only holds the loaded entries, so any change ends "all results"
+            this.entriesService.resetAllResultsSelected();
             this.selectionChange.emit(event);
             if (this.optionsHelper.getData()) {
                 this.optionsHelper.getData().selectedObjects =
@@ -273,6 +293,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
                 .connect()
                 .pipe(distinctUntilChanged(), takeUntil(this.dataSourceDestroy$))
                 .subscribe((o) => {
+                    this.entriesService.resetAllResultsSelected();
                     if (this.optionsHelper.getData()) {
                         this.optionsHelper.getData().allObjects = o;
                         void this.optionsHelper.refreshComponents();
@@ -300,6 +321,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
         }
         this.entriesService.configureColumns = this.configureColumns;
         this.entriesService.checkbox = this.checkbox;
+        this.entriesService.allowSelectAllResults.set(this.allowSelectAllResults);
         this.entriesService.displayType = this.displayType;
         if (changes.paginationStrategy) {
             this.entriesService.paginationStrategy = this.paginationStrategy;

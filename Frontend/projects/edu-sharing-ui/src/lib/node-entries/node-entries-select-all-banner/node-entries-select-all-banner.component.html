@@ -1,0 +1,19 @@
+@switch (state()) { @case ('offer') {
+<es-info-message data-test="select-all-results-offer">
+  <div class="content">
+    <span>{{ 'LIST_TABLE.ALL_LOADED_SELECTED' | translate : { count: loaded() } }}</span>
+    <button mat-button color="primary" (click)="entriesService.selectAllResults()">
+      {{ 'LIST_TABLE.SELECT_ALL_RESULTS' | translate : { total: total() } }}
+    </button>
+  </div>
+</es-info-message>
+} @case ('active') {
+<es-info-message data-test="select-all-results-active">
+  <div class="content">
+    <span>{{ 'LIST_TABLE.ALL_RESULTS_SELECTED' | translate : { total: total() } }}</span>
+    <button mat-button color="primary" (click)="entriesService.selection.clear()">
+      {{ 'LIST_TABLE.CLEAR_SELECTION' | translate }}
+    </button>
+  </div>
+</es-info-message>
+} }

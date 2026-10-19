@@ -322,7 +322,6 @@
     "SCOPE": {
       "EMPTY": "No content in this view.",
       "NO_ACTIVE_SCOPE": "No editorial office is active in which you are an editor. Select one via the switcher in the header.",
-      "EDIT_ALL": "Edit all {{count}} hits",
       "OPTION": {
         "EDIT": "Edit editorial status"
       },

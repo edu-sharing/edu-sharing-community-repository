@@ -270,7 +270,11 @@
     "CONFIGURE_COLUMNS": "Configure columns",
     "COLUMN_ACTIONS": "Actions",
     "ENTRY_COUNT": "{{total}} entries",
-    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected"
+    "ENTRY_COUNT_SELECTED": "{{selected}} of {{total}} selected",
+    "ALL_LOADED_SELECTED": "All {{count}} displayed items are selected.",
+    "SELECT_ALL_RESULTS": "Select all {{total}} items",
+    "ALL_RESULTS_SELECTED": "All {{total}} items are selected.",
+    "CLEAR_SELECTION": "Clear selection"
   },
   "PAGINATOR": {
     "getRangeLabel": "Page {{page}} of {{pageCount}}",

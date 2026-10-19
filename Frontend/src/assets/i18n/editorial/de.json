@@ -322,7 +322,6 @@
     "SCOPE": {
       "EMPTY": "Keine Inhalte in dieser Ansicht.",
       "NO_ACTIVE_SCOPE": "Es ist keine Redaktion aktiv, in der Sie Redakteur sind. Wählen Sie eine Redaktion über den Umschalter in der Kopfzeile.",
-      "EDIT_ALL": "Alle {{count}} Treffer bearbeiten",
       "OPTION": {
         "EDIT": "Redaktionell bearbeiten"
       },

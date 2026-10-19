@@ -521,6 +521,8 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         scopeEditorial.priority = 5;
         scopeEditorial.showAsAction = true;
         scopeEditorial.showAlways = true;
+        // with "all N selected" it edits all hits (bulk via `searchTarget`)
+        scopeEditorial.supportsAllResults = true;
         scopeEditorial.toolpermissions = [RestConstants.TOOLPERMISSION_SCOPE_WRITE];
         scopeEditorial.customShowCallback = async () =>
             this.params$.value?.primaryMode === 'scope' && this.scopeAvailable();
@@ -1127,9 +1129,11 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    /** opens the scope editorial sidebar option for the given nodes */
+    /**
+     * opens the scope editorial sidebar option for the given nodes, or for all hits if the user
+     * selected them (`searchTarget` is kept in sync by `allResultsSelectedChange`)
+     */
     openScopeEditorial(nodes: Node[]) {
-        this.scopeEditorialService.searchTarget.set(null);
         this.editorialSidebarService.nodes.set(nodes);
         this.editorialSidebarService.showOption({
             option: ScopeEditorialService.SIDEBAR_OPTION,
@@ -1137,9 +1141,15 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    /** opens the scope editorial sidebar option for all hits of the current search (bulk) */
-    editAllScopeHits() {
-        this.clearSelection();
+    /**
+     * the user chose "select all N" in the list: edit all hits of the current search (bulk)
+     * instead of the loaded selection, or go back to the loaded selection
+     */
+    allResultsSelectedChange(allSelected: boolean) {
+        if (!allSelected) {
+            this.scopeEditorialService.searchTarget.set(null);
+            return;
+        }
         this.scopeEditorialService.openForSearch({
             search: {
                 mds: DEFAULT,
@@ -1147,11 +1157,6 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 criteria: this.lastScopeCriteria,
             },
             count: this.scopeHitCount(),
-        });
-        this.editorialSidebarService.nodes.set([]);
-        this.editorialSidebarService.showOption({
-            option: ScopeEditorialService.SIDEBAR_OPTION,
-            trap: false,
         });
     }
 
@@ -1257,6 +1262,17 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     }
     openItem(element: NodeClickEvent<NodeEntriesDataType>) {
         void this.nodeHelperService.navigateToNode(element);
+    }
+
+    /** the user selected all hits of the list (not only the loaded ones), see `searchTarget` */
+    readonly allResultsSelected = computed(() => !!this.scopeEditorialService.searchTarget());
+
+    /**
+     * number shown in the selection bar: all hits or the loaded selection. A getter on purpose,
+     * the selection model is mutated in place (a signal would not notice)
+     */
+    get selectionCount(): number {
+        return this.scopeEditorialService.searchTarget()?.count ?? this.selectedNodes.length;
     }
 
     /** Selected elements as a node list, for the selection bar / overlay. */

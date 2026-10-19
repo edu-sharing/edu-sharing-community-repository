@@ -300,7 +300,11 @@
     "CONFIGURE_COLUMNS": "Spalten konfigurieren",
     "COLUMN_ACTIONS": "Optionen",
     "ENTRY_COUNT": "{{total}} Einträge",
-    "ENTRY_COUNT_SELECTED": "{{selected}} von {{total}} ausgewählt"
+    "ENTRY_COUNT_SELECTED": "{{selected}} von {{total}} ausgewählt",
+    "ALL_LOADED_SELECTED": "Alle {{count}} angezeigten Inhalte sind gewählt.",
+    "SELECT_ALL_RESULTS": "Alle {{total}} Inhalte wählen",
+    "ALL_RESULTS_SELECTED": "Alle {{total}} Inhalte sind gewählt.",
+    "CLEAR_SELECTION": "Auswahl aufheben"
   },
   "MAPTYPE": {
     "IMAGES": "Bilder",

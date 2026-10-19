@@ -40,8 +40,9 @@ export class ScopeEditorialService {
     static readonly SIDEBAR_OPTION = 'SCOPE_EDITORIAL';
 
     /**
-     * set by a host to edit all hits of a search instead of the selected nodes; the sidebar option
-     * clears it when it is closed
+     * set by a host while the user selected all hits of a search ("select all N" in the list), so
+     * the scope editorial option edits all of them instead of the loaded selection. The host resets
+     * it once that selection ends
      */
     readonly searchTarget = signal<ScopeEditorialSearchTarget | null>(null);
 
@@ -49,8 +50,8 @@ export class ScopeEditorialService {
     readonly changed = signal(0);
 
     /**
-     * open the scope editorial sidebar option for all hits of a search. The sidebar reacts on
-     * `searchTarget` and activates `SIDEBAR_OPTION` (wired by the sidebar option itself)
+     * target all hits of a search for the scope editorial option (see `searchTarget`); does not
+     * open the sidebar itself
      */
     openForSearch(target: ScopeEditorialSearchTarget) {
         this.searchTarget.set(target);

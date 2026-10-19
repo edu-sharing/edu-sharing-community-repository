@@ -30,6 +30,12 @@ export enum NodesRightMode {
 }
 export class OptionItem {
     /**
+     * If true, this option can act on all results of the list, not only on the loaded selection.
+     * While "all results" is selected, every other (non-toggle) option is hidden.
+     * @type {boolean}
+     */
+    public supportsAllResults = false;
+    /**
      * If true, this option will be shown all the time in the node table
      * @type {boolean}
      */

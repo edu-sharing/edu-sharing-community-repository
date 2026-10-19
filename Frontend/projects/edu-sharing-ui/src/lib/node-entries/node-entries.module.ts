@@ -31,6 +31,7 @@ import { NodeEntriesCardSmallComponent } from './node-entries-card-small/node-en
 import { NodeEntriesCardComponent } from './node-entries-card/node-entries-card.component';
 import { NodeEntriesGlobalOptionsComponent } from './node-entries-global-options/node-entries-global-options.component';
 import { ColumnChooserComponent } from './node-entries-table/column-chooser/column-chooser.component';
+import { NodeEntriesSelectAllBannerComponent } from './node-entries-select-all-banner/node-entries-select-all-banner.component';
 import { NodeEntriesTableComponent } from './node-entries-table/node-entries-table.component';
 import { NodeEntriesTreeComponent } from './node-entries-tree/node-entries-tree.component';
 import { NodeEntriesWrapperComponent } from './node-entries-wrapper.component';
@@ -50,6 +51,7 @@ import { SortSelectPanelComponent } from './sort-select-panel/sort-select-panel.
         NodeEntriesCardComponent,
         NodeEntriesCardGridComponent,
         NodeEntriesCardSmallComponent,
+        NodeEntriesSelectAllBannerComponent,
         NodeEntriesTableComponent,
         NodeEntriesTreeComponent,
         NodeRatingComponent,
