@@ -212,7 +212,7 @@
           "TOOLTIP_UP_TO_DATE": "Template up to date",
           "TEMPLATE_MISSING": "The linked template is no longer available.",
           "HEADING": "Update page variant",
-          "MESSAGE": "Do you want to update the page variant based on the new template? Changes made to the page variant will be lost."
+          "MESSAGE": "Do you want to update the page variant based on the new template? Changes to the page content will be lost."
         },
         "REGENERATE_VARIANT": "Regenerate",
         "DELETE_VARIANT": "Delete variant",

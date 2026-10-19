@@ -14,6 +14,7 @@ import {
 } from '../types/custom-definitions';
 import { BapiConfigObject } from '../types/bapi-config-object';
 import { PageVariantConfig } from '../types/page-variant-config';
+import { PageStructure } from '../types/page-structure';
 import { Swimlane } from '../types/swimlane';
 import { GridTile } from '../types/grid-tile';
 import { WidgetConfig } from '../types/widget-config/widget-config';
@@ -249,8 +250,8 @@ export const markForRender = (pageVariant: PageVariantConfig): void => {
  * Marks a page variant config for COPYING into a freshly created variant node. Each real nodeId is
  * moved to a `temporary*` copy-source pointer (consumed and deleted by persistRelinkedVariantConfig)
  * and the real id removed. Widget nodes are always marked; breadcrumb/header are only marked when
- * `includeHeaderAndBreadcrumb` is set (parent-collection materialization) — otherwise they are
- * dropped (duplicate / create-template / regenerate).
+ * `includeHeaderAndBreadcrumb` is set (parent-collection materialization / regenerate) — otherwise
+ * they are dropped (duplicate / create-template).
  *
  * @param includeHeaderAndBreadcrumb whether the breadcrumb/header nodes should be copied too
  */
@@ -279,6 +280,27 @@ export const markForCopy = (
     // from the temporary pointers above, or dropped entirely
     delete pageVariant.structure.breadcrumbNodeId;
     delete pageVariant.structure.headerNodeId;
+};
+
+/**
+ * Puts the header, breadcrumb and colors of a page back into a template config marked by
+ * markForCopy, so only the content is taken from the template. What the page lacks stays as marked.
+ */
+export const keepOwnHeaderBreadcrumbAndColors = (
+    pageVariant: PageVariantConfig,
+    ownStructure: PageStructure | undefined,
+): void => {
+    const structure: PageStructure = pageVariant.structure;
+    if (ownStructure?.headerNodeId) {
+        structure.headerNodeId = ownStructure.headerNodeId;
+        delete structure.temporaryHeaderNodeId;
+    }
+    if (ownStructure?.breadcrumbNodeId) {
+        structure.breadcrumbNodeId = ownStructure.breadcrumbNodeId;
+        delete structure.temporaryBreadcrumbNodeId;
+    }
+    structure.topicColor = ownStructure?.topicColor ?? structure.topicColor;
+    structure.anchorItemColor = ownStructure?.anchorItemColor ?? structure.anchorItemColor;
 };
 
 /**
