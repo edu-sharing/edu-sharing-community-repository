@@ -546,8 +546,11 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     );
     private readonly historyHost: TopicPageHistoryHost = {
         variantNodeId: (): string | null => this.pageVariantNodeId(),
+        // a page records once it has its own config; a global template is always written itself
         canRecord: (): boolean =>
-            this.editMode() && !!this.collectionNodePageConfigRef && !!this.pageVariantNode(),
+            this.editMode() &&
+            !!this.pageVariantNode() &&
+            (!!this.collectionNodePageConfigRef || !!this.globalTemplateNode()),
         readStructure: (): PageStructure | null => this.readPersistedStructure(),
         writeStructure: (structure: PageStructure): Promise<void> =>
             this.writePersistedStructure(structure),
