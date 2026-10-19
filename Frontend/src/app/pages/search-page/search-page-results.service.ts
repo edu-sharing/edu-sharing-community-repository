@@ -1,4 +1,5 @@
 import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import {
     HOME_REPOSITORY,
@@ -6,6 +7,7 @@ import {
     MdsQueryCriteria,
     MdsService,
     Node,
+    ScopesService,
     SearchService,
 } from 'ngx-edu-sharing-api';
 import * as rxjs from 'rxjs';
@@ -43,6 +45,7 @@ import {
     NodeRequestParams,
 } from './node-data-source-remote';
 import { SearchPageRestoreService } from './search-page-restore.service';
+import { ScopeMdsService } from '../../features/scopes/scope-mds.service';
 import { SearchPageService, SearchRequestParams } from './search-page.service';
 import { RestConstants } from '../../core-module/rest/rest-constants';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -87,6 +90,9 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
     private _route = inject(ActivatedRoute);
     private _userModifiableValues = inject(UserModifiableValuesService);
     private _localEvents = inject(LocalEventsService);
+    private _scopes = inject(ScopesService);
+    /** "view as reader" of editors: part of the search parameters, switching it searches again */
+    private _scopeRole = toObservable(this._scopes.searchRole);
 
     readonly searchSort = this._userModifiableValues.createMapped<Sort>({
         fromString: (v) => JSON.parse(v),
@@ -185,6 +191,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 // .pipe(tap((value) => console.log('searchFilters changed', value))),
                 this._searchPage.searchString.observeValue(),
                 this.state,
+                this._scopeRole,
                 // .pipe(tap((value) => console.log('searchString changed', value))),
             ])
             .pipe(
@@ -212,13 +219,14 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                 ),
                 tap(() => this.loadingParams.next(false)),
                 map(
-                    ([repository, metadataSet, searchFilters, searchString, state]) =>
+                    ([repository, metadataSet, searchFilters, searchString, state, scopeRole]) =>
                         new SearchRequestParams(
                             repository,
                             metadataSet,
                             searchFilters,
                             searchString,
                             state.sortConfig,
+                            scopeRole,
                         ),
                 ),
                 distinctUntilChanged((x, y) => x.equals(y)),
@@ -285,10 +293,18 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                     this._mds.getMetadataSet({ repository, metadataSet }),
                 ),
             );
-        // Register columns.
-        mds.pipe(map((mds) => this.mdsHelperService.getColumns(mds, 'search'))).subscribe(
-            this.resultColumns,
-        );
+        // Register columns. Inside a scope its card columns replace the mds list
+        rxjs.combineLatest([mds, this._scopes.observeActiveScope()])
+            .pipe(
+                map(([mds, scope]) =>
+                    ScopeMdsService.applyCardColumns(
+                        this.mdsHelperService.getColumns(mds, 'search'),
+                        scope,
+                        mds,
+                    ),
+                ),
+            )
+            .subscribe(this.resultColumns);
         mds.pipe(
             map((mds) => this.mdsHelperService.getColumns(mds, 'searchCollections')),
         ).subscribe(this.collectionColumns);
@@ -389,6 +405,7 @@ export class SearchPageResultsService extends SearchPageResults implements OnDes
                         permissions: this._searchPage.reUrl.value
                             ? [RestConstants.ACCESS_CC_PUBLISH]
                             : [],
+                        scopeRole: params.scopeRole ?? undefined,
                     },
                     maxItems: request.range.endIndex - request.range.startIndex,
                     skipCount: request.range.startIndex,

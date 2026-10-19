@@ -26,6 +26,8 @@
       }
     </div>
     <div class="filter-bar-body">
+      <!-- editors: check the scope the way its readers see it -->
+      <es-scope-view-as-reader></es-scope-view-as-reader>
       @if ((showingAllRepositories | async) === false) {
       <es-search-page-filter-bar></es-search-page-filter-bar>
       }

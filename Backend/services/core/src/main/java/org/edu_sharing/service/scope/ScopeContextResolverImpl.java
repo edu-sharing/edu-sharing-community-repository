@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 /**
  * Active scope of the current request (ADR-4): context of the current domain with repository.scopes.group
@@ -35,6 +36,8 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
 
     /** per request cache, resolve() is called on every permission check */
     static final String REQUEST_ATTRIBUTE = ScopeContextResolverImpl.class.getName() + ".activeScope";
+    /** active scope of a thread without request (jobs), see {@link #runWithScope} */
+    private static final ThreadLocal<ActiveScope> THREAD_SCOPE = new ThreadLocal<>();
 
     private final ScopesSettings scopesSettings;
     private final ScopeDefinitionService definitionService;
@@ -51,6 +54,9 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
     public Optional<ActiveScope> resolve() {
         if (!scopesSettings.isEnabled()) {
             return Optional.empty();
+        }
+        if (THREAD_SCOPE.get() != null) {
+            return Optional.of(THREAD_SCOPE.get());
         }
         HttpServletRequest request = getRequest();
         if (request != null && request.getAttribute(REQUEST_ATTRIBUTE) != null) {
@@ -160,6 +166,28 @@ public class ScopeContextResolverImpl implements ScopeContextResolver {
             throw new InsufficientPermissionException("not a member of scope " + scopeId);
         }
         session.setAttribute(CCConstants.SESSION_SCOPE_ACTIVE, scopeId);
+    }
+
+    @Override
+    public <T> T runWithScope(String scopeId, Callable<T> work) throws Exception {
+        ScopeDefinition definition = definitionService.getDefinition(scopeId)
+                .orElseThrow(() -> new ScopeNotFoundException("unknown scope " + scopeId));
+        boolean member = definitionService.isMember(scopeId);
+        ActiveScope previous = THREAD_SCOPE.get();
+        THREAD_SCOPE.set(ActiveScope.builder()
+                .definition(definition)
+                .role(member ? ScopeRole.EDITOR : ScopeRole.TEMPORARY_READER)
+                .orgAdmin(member && authorityService.hasAdminAccessToGroup(scopeId))
+                .build());
+        try {
+            return work.call();
+        } finally {
+            if (previous == null) {
+                THREAD_SCOPE.remove();
+            } else {
+                THREAD_SCOPE.set(previous);
+            }
+        }
     }
 
     // --- request access, overridable for tests

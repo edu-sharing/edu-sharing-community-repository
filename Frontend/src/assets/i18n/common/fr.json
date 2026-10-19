@@ -762,6 +762,7 @@
     "LICENSE": "licence",
     "WORKFLOW": "état du flux de travail",
     "BULK_EDIT": "Editer",
+    "BULK_APPEND": "Ajouter",
     "LICENSE_LINK": "gérer la licence",
     "TEMPLATE_LINK": "Gérer le modèle de métadonnées",
     "CONTRIBUTOR_LINK": "Autres contributeur-trices",

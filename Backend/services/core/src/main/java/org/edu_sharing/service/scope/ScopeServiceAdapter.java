@@ -86,4 +86,8 @@ public class ScopeServiceAdapter implements ScopeService {
     @Override
     public void onScopeGroupDeleted(String scopeId) {
     }
+
+    @Override
+    public void onDefinitionChanged(String scopeId) {
+    }
 }

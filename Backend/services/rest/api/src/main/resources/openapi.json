@@ -4336,6 +4336,15 @@
           },
           "returnSuggestions": {
             "type": "boolean"
+          },
+          "scopeRole": {
+            "description": "scopes: search the active scope with this role instead of the own one. Only reduces: an editor may request a reader role (\"view as reader\": only published content), other roles are never changed",
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -7914,8 +7923,32 @@
         },
         "type": "object"
       },
+      "ScopeBulkQueue": {
+        "properties": {
+          "done": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "jobsAhead": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "ScopeBulkRequest": {
         "properties": {
+          "appendProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
           "delete": {
             "type": "boolean"
           },
@@ -7936,6 +7969,15 @@
           },
           "reason": {
             "type": "string"
+          },
+          "removeValues": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
           },
           "search": {
             "$ref": "#/components/schemas/ScopeQuery"
@@ -7961,6 +8003,9 @@
           },
           "jobId": {
             "type": "string"
+          },
+          "queue": {
+            "$ref": "#/components/schemas/ScopeBulkQueue"
           },
           "scopeId": {
             "type": "string"
@@ -8039,6 +8084,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
           }
         },
         "type": "object"
@@ -8062,6 +8110,9 @@
           },
           "mds": {
             "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
           },
           "scopeId": {
             "type": "string"
@@ -8087,6 +8138,8 @@
             "type": "array"
           },
           "replaces": {
+            "description": "derived: true for regular node properties, false for scope only properties",
+            "readOnly": true,
             "type": "boolean"
           },
           "uploadValues": {
@@ -8311,6 +8364,19 @@
         ],
         "type": "object"
       },
+      "ScopePresentation": {
+        "properties": {
+          "cardColumns": {
+            "description": "properties of the content cards (search, collection contents), null or empty: the mds default",
+            "items": {
+              "description": "properties of the content cards (search, collection contents), null or empty: the mds default",
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "ScopeQuery": {
         "properties": {
           "criteria": {
@@ -8349,6 +8415,9 @@
           },
           "mds": {
             "type": "string"
+          },
+          "presentation": {
+            "$ref": "#/components/schemas/ScopePresentation"
           }
         },
         "type": "object"
@@ -8414,6 +8483,15 @@
           },
           "returnSuggestions": {
             "type": "boolean"
+          },
+          "scopeRole": {
+            "description": "scopes: search the active scope with this role instead of the own one. Only reduces: an editor may request a reader role (\"view as reader\": only published content), other roles are never changed",
+            "enum": [
+              "EDITOR",
+              "GUEST",
+              "TEMPORARY_READER"
+            ],
+            "type": "string"
           }
         },
         "required": [
@@ -42084,6 +42162,14 @@
               "default": true,
               "type": "boolean"
             }
+          },
+          {
+            "description": "only organizations of this group type (e.g. SCOPE)",
+            "in": "query",
+            "name": "groupType",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -44647,6 +44733,63 @@
         ]
       }
     },
+    "/scope/v1/{repository}/admin/scopeOnlyProperties": {
+      "get": {
+        "description": "Every other property of a field list replaces the original value inside the scope (ScopeField.replaces). Admin only.",
+        "operationId": "getScopeOnlyProperties",
+        "parameters": [
+          {
+            "description": "ID of repository (or \"-home-\" for home repository)",
+            "in": "path",
+            "name": "repository",
+            "required": true,
+            "schema": {
+              "default": "-home-",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Session user has insufficient rights to perform this operation."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Ressources are not found."
+          }
+        },
+        "summary": "Properties that only exist in scope entries",
+        "tags": [
+          "SCOPE v1"
+        ]
+      }
+    },
     "/scope/v1/{repository}/admin/scopes": {
       "get": {
         "description": "Admin only.",
@@ -44777,7 +44920,7 @@
     },
     "/scope/v1/{repository}/admin/scopes/{scopeId}": {
       "put": {
-        "description": "Admin only.",
+        "description": "Admin only. presentation = null removes the settings.",
         "operationId": "updateScope",
         "parameters": [
           {
@@ -44851,7 +44994,7 @@
             "description": "Ressources are not found."
           }
         },
-        "summary": "Change mds and field list of a scope group",
+        "summary": "Change mds, field list and presentation settings of a scope group",
         "tags": [
           "SCOPE v1"
         ]
@@ -45314,7 +45457,7 @@
     },
     "/scope/v1/{repository}/scopes/{scopeId}/bulk": {
       "post": {
-        "description": "Sets properties for (or removes the entries of) a list of nodes or all hits of a search. Runs asynchronously, returns the job id.",
+        "description": "Sets properties for (or removes the entries of) a list of nodes or all hits of a search. Runs asynchronously, returns the initial state of the job (jobId).",
         "operationId": "startBulk",
         "parameters": [
           {
@@ -45351,7 +45494,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ScopeBulkStatus"
                 }
               }
             },

@@ -39,6 +39,20 @@ class ScopeSearchFilterTest {
     }
 
     @Test
+    void requestedRoleOnlyReducesEditors() {
+        assertEquals(ScopeRole.TEMPORARY_READER, ScopeSearchFilter.searchRole(scope(ScopeRole.EDITOR), ScopeRole.TEMPORARY_READER));
+        assertEquals(ScopeRole.GUEST, ScopeSearchFilter.searchRole(scope(ScopeRole.EDITOR), ScopeRole.GUEST));
+        assertEquals(ScopeRole.EDITOR, ScopeSearchFilter.searchRole(scope(ScopeRole.EDITOR), null));
+        // readers can never search as editors
+        assertEquals(ScopeRole.GUEST, ScopeSearchFilter.searchRole(scope(ScopeRole.GUEST), ScopeRole.EDITOR));
+        assertEquals(ScopeRole.TEMPORARY_READER, ScopeSearchFilter.searchRole(scope(ScopeRole.TEMPORARY_READER), ScopeRole.EDITOR));
+
+        Query filter = ScopeSearchFilter.build(scope(ScopeRole.EDITOR), ScopeRole.TEMPORARY_READER, () -> ACL, List.of(BASE_QUERY));
+        assertTrue(filter.isTerm());
+        assertEquals(ScopeSearchFilter.FIELD_SCOPE_IDS_PUBLISHED, filter.term().field());
+    }
+
+    @Test
     void editorsSeeCandidatesReadableEntriesAndPublishedEntries() {
         BoolQuery filter = ScopeSearchFilter.build(scope(ScopeRole.EDITOR), () -> ACL, List.of(BASE_QUERY)).bool();
 

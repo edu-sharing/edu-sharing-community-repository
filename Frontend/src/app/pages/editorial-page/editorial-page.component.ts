@@ -36,6 +36,8 @@ import {
     ScopesService,
     SearchService,
     SearchServiceUnwrapped,
+    SessionStorageService,
+    PROPERTY_FILTER_ALL,
 } from 'ngx-edu-sharing-api';
 import {
     BehaviorSubject,
@@ -102,8 +104,12 @@ import { RestConnectorService } from '../../core-module/rest/services/rest-conne
 import { UIService } from '../../core-module/rest/services/ui.service';
 import { UIHelper } from '../../core-ui-module/ui-helper';
 import { SearchFieldInternalService } from '../../main/navigation/search-field/search-field-internal.service';
-import { ScopeEditorialService } from '../../features/scopes/scope-editorial.service';
-import { ScopeMdsService } from '../../features/scopes/scope-mds.service';
+import {
+    ScopeEditorialService,
+    ScopeEntryChange,
+} from '../../features/scopes/scope-editorial.service';
+import { ScopeMdsService, ScopeWidgets } from '../../features/scopes/scope-mds.service';
+import { applyUserLayout } from '../workspace-page/workspace-columns';
 
 type RouteConfig = {
     primaryMode: PrimaryMode;
@@ -157,6 +163,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     readonly scopesService = inject(ScopesService);
     private scopeEditorialService = inject(ScopeEditorialService);
     private scopeMdsService = inject(ScopeMdsService);
+    private storage = inject(SessionStorageService);
     /** hide the filter toggle tab while the global loading screen covers the app */
     readonly isLoading = toSignal(this.loadingScreenService.observeIsLoading(), {
         initialValue: true,
@@ -172,11 +179,11 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     readonly TabWidgetShares = 'virtual:shareDirection';
     readonly TabWidgetAssignment = 'virtual:assignmentType';
     readonly TabWidgetSuggestions = 'virtual:suggestionType';
-    readonly TabWidgetScope = 'virtual:scope_view';
+    readonly TabWidgetScope = ScopeMdsService.VIEW_WIDGET;
     /** prefix of the list columns that show a property of the entry in the active scope */
     static readonly SCOPE_COLUMN_PREFIX = 'scope:';
-    /** properties of the active scope shown as list columns (if part of its field list) */
-    static readonly SCOPE_COLUMNS = ['ccm:editorial_inventory'];
+    /** session storage key prefix of the column layout of a scope (column chooser) */
+    static readonly SCOPE_COLUMNS_STORAGE_KEY = 'editorial_scope_columns_';
     readonly InteractionType = InteractionType;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly Scope = Scope;
@@ -188,7 +195,8 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     );
     /** cell template of the scope status columns (registered as custom field rendering) */
     readonly scopeStatusTemplate = viewChild<TemplateRef<unknown>>('scopeStatusTemplateRef');
-    private scopeColumnsRegistered = false;
+    /** scope columns with a registered custom field rendering */
+    private readonly scopeColumnsRegistered = new Set<string>();
     /** criteria (raw values) of the last search in scope mode, for "edit all hits" */
     private lastScopeCriteria: { [key: string]: string[] } = {};
     readonly scopeHitCount = signal(0);
@@ -226,6 +234,13 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     loginInfo$ = new BehaviorSubject<LoginInfo>(null);
     queryParams$ = new BehaviorSubject<Params>(null);
     tabSelection$ = new BehaviorSubject<number>(0);
+    /** the base query decides about the candidates: only offered on the inbox tab of the scope mode */
+    readonly scopeInboxTab = toSignal(
+        combineLatest([this.editorialPageService.observeTabs(), this.tabSelection$]).pipe(
+            map(([tabs, tab]) => tabs?.[tab]?.id === ScopeMdsService.INVENTORY_NONE),
+        ),
+        { initialValue: false },
+    );
 
     /**
      * primary component to show in the center
@@ -326,15 +341,21 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                 this.injectVirtualNodes();
             }
         });
-        // scope status columns: the cell template lives in this page's template
+        // scope columns (one per field of the active scope): the cell template lives in this page's
+        // template
         effect(() => {
             const template = this.scopeStatusTemplate();
-            if (template && !this.scopeColumnsRegistered) {
-                this.scopeColumnsRegistered = true;
-                for (const property of EditorialPageComponent.SCOPE_COLUMNS) {
+            const fields = this.scopesService.fields();
+            if (!template) {
+                return;
+            }
+            for (const field of fields) {
+                const name = EditorialPageComponent.SCOPE_COLUMN_PREFIX + field.id;
+                if (!this.scopeColumnsRegistered.has(name)) {
+                    this.scopeColumnsRegistered.add(name);
                     this.nodeEntriesGlobalService.registerCustomFieldRendering({
                         type: 'NODE',
-                        name: EditorialPageComponent.SCOPE_COLUMN_PREFIX + property,
+                        name,
                         templateRef: template,
                     });
                 }
@@ -346,6 +367,13 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
             this.scopeEditorialService.changed();
             if (untracked(() => this.isScopeMode() && this.init$.value)) {
                 untracked(() => this.reloadScopeMode());
+            }
+        });
+        // a single entry was changed: update the row in place (keeps the selection and the sidebar)
+        effect(() => {
+            const change = this.scopeEditorialService.entryChanged();
+            if (change) {
+                untracked(() => this.applyScopeEntryChange(change));
             }
         });
         effect(() => {
@@ -479,7 +507,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         };
         const scopeEditorial = new OptionItem(
             'EDITORIAL.SCOPE.OPTION.EDIT',
-            'rule',
+            'edit_note',
             (node: Node, nodes?: Node[]) => {
                 const elements = this.optionsHelperService.getObjects(
                     nodes ?? node,
@@ -943,6 +971,8 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
                     metadataset: DEFAULT,
                     query: RestConstants.DEFAULT_QUERY_NAME,
                     contentType: 'FILES',
+                    // the scope columns read node.properties (effective value of replacing fields)
+                    propertyFilter: [PROPERTY_FILTER_ALL],
                     ...pagination,
                     body: {
                         facetLimit: 5,
@@ -1015,22 +1045,7 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         const scopeWidgets = await firstValueFrom(
             this.scopeMdsService.observeWidgets(scope?.definition?.mds),
         );
-        const fields = this.scopesService.fields().map((f) => f.id);
-        this.columns.set({
-            Default: [
-                new ListItem('NODE', RestConstants.LOM_PROP_TITLE),
-                ...EditorialPageComponent.SCOPE_COLUMNS.filter(
-                    (property) => !fields.length || fields.includes(property),
-                ).map((property) => {
-                    const column = new ListItem(
-                        'NODE',
-                        EditorialPageComponent.SCOPE_COLUMN_PREFIX + property,
-                    );
-                    column.label = ScopeMdsService.getLabel(scopeWidgets, property);
-                    return column;
-                }),
-            ],
-        });
+        this.columns.set({ Default: await this.getScopeColumns(scopeWidgets) });
         const widget = MdsHelperService.getWidget(
             this.TabWidgetScope,
             null,
@@ -1047,6 +1062,45 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
         }
     }
 
+    /**
+     * all fields of the active scope as columns (effective value, original value of replaced fields),
+     * the title first. The user layout of the column chooser is stored per scope
+     */
+    private async getScopeColumns(scopeWidgets: ScopeWidgets): Promise<ListItem[]> {
+        const fields = this.scopesService.fields().map((f) => f.id);
+        const scopeColumns = fields.map((property) => {
+            const column = new ListItem(
+                'NODE',
+                EditorialPageComponent.SCOPE_COLUMN_PREFIX + property,
+            );
+            column.label = ScopeMdsService.getLabel(scopeWidgets, property);
+            return column;
+        });
+        // a replaced title is shown by its scope column (effective + original value)
+        const columns = fields.includes(RestConstants.LOM_PROP_TITLE)
+            ? scopeColumns
+            : [new ListItem('NODE', RestConstants.LOM_PROP_TITLE), ...scopeColumns];
+        const modified = new ListItem('NODE', RestConstants.CM_MODIFIED_DATE);
+        modified.visible = false;
+        columns.push(modified);
+        const stored = await this.storage.get<ListItem[]>(this.getScopeColumnsStorageKey(), null);
+        return applyUserLayout(columns, stored);
+    }
+
+    private getScopeColumnsStorageKey() {
+        return (
+            EditorialPageComponent.SCOPE_COLUMNS_STORAGE_KEY +
+            (this.scopesService.activeScope()?.scopeId ?? '')
+        );
+    }
+
+    /** column chooser of the scope list */
+    saveScopeColumns(columns: ListItem[]) {
+        if (this.isScopeMode()) {
+            void this.storage.set(this.getScopeColumnsStorageKey(), columns);
+        }
+    }
+
     /** property of a scope status column, see `SCOPE_COLUMN_PREFIX` */
     getScopeColumnProperty(item: ListItem): string {
         return item.name.substring(EditorialPageComponent.SCOPE_COLUMN_PREFIX.length);
@@ -1055,6 +1109,21 @@ export class EditorialPageComponent implements AfterViewInit, OnDestroy {
     private reloadScopeMode() {
         if (this.queryParams$.value && this.params$.value) {
             void this.processCurrentValues(this.queryParams$.value, this.params$.value);
+        }
+    }
+
+    private applyScopeEntryChange(change: ScopeEntryChange) {
+        const wrapper = this.nodeEntriesRef();
+        const node = (wrapper?.dataSource?.getData() as Node[] | undefined)?.find(
+            (n) => this.nodeHelperService.getOriginalId(n) === change.nodeId,
+        );
+        // in place: the selection (and so the sidebar) keeps the same objects, `updateNodes` would
+        // re-select and close it; the scope cells recompute on `entryChanged`
+        if (node) {
+            Object.assign(
+                node,
+                ScopeEditorialService.applyEntryChange(node, change, this.scopesService.fields()),
+            );
         }
     }
 

@@ -32,7 +32,10 @@
     [class.selected]="!activeScope()"
     data-test="scope-switcher-global"
   >
-    <i [esIcon]="!activeScope() ? 'radio_button_checked' : 'radio_button_unchecked'"></i>
+    <i
+      class="radio"
+      [esIcon]="!activeScope() ? 'radio_button_checked' : 'radio_button_unchecked'"
+    ></i>
     <span>{{ 'SCOPES.SWITCHER.GLOBAL' | translate }}</span>
   </button>
   @if (scopes() === null) {
@@ -46,6 +49,7 @@
     [attr.data-test]="'scope-switcher-' + scope.scopeId"
   >
     <i
+      class="radio"
       [esIcon]="
         activeScope()?.scopeId === scope.scopeId ? 'radio_button_checked' : 'radio_button_unchecked'
       "

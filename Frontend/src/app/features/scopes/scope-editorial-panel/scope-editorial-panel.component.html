@@ -1,28 +1,27 @@
 @if (!scope()) {
 <es-info-message mode="info" [message]="'SCOPES.EDITORIAL.NO_SCOPE' | translate"></es-info-message>
-} @else {
+} @else { @if (isBulk()) {
 <div class="scope-heading">
   <i esIcon="fact_check"></i>
-  <span class="scope-name">{{ scope().definition?.displayName || scope().scopeId }}</span>
-  @if (isBulk()) {
   <span class="target">{{
     'SCOPES.EDITORIAL.BULK.TARGET' | translate : { count: bulkCount() }
   }}</span>
-  } @else if (node()) {
-  <span class="target" [title]="node().title || node().name">{{
-    node().title || node().name
-  }}</span>
-  }
 </div>
-
-@if (isBulk()) {
 <ng-container *ngTemplateOutlet="editor"></ng-container>
 } @else {
-<mat-tab-group class="tabs" mat-stretch-tabs="false">
-  <mat-tab [label]="'SCOPES.EDITORIAL.TAB_EDIT' | translate">
+<mat-tab-group class="tabs">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="edit" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SCOPES.EDITORIAL.TAB_EDIT' | translate }}</span>
+    </ng-template>
     <ng-container *ngTemplateOutlet="editor"></ng-container>
   </mat-tab>
-  <mat-tab [label]="'SCOPES.EDITORIAL.TAB_HISTORY' | translate">
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <i esIcon="history" class="tab-icon"></i>
+      <span class="tab-label">{{ 'SCOPES.EDITORIAL.TAB_HISTORY' | translate }}</span>
+    </ng-template>
     <ng-template matTabContent>
       @if (nodeId()) {
       <es-scope-history
@@ -41,99 +40,50 @@
   <div class="editor">
     @if (loading()) {
     <es-spinner></es-spinner>
-    } @else {
+    } @else { @if (isBulk()) {
     <div class="entry-state">
-      @if (isBulk()) {
       <span class="state">{{ 'SCOPES.EDITORIAL.BULK.HINT' | translate }}</span>
-      } @else if (!assignment()) {
-      <span class="state">{{ 'SCOPES.EDITORIAL.STATE.NO_ENTRY' | translate }}</span>
-      } @else {
-      <span class="state" [class.published]="assignment().published">
-        <i [esIcon]="assignment().published ? 'visibility' : 'visibility_off'"></i>
-        {{
-          (assignment().published
-            ? 'SCOPES.EDITORIAL.STATE.PUBLISHED'
-            : 'SCOPES.EDITORIAL.STATE.NOT_PUBLISHED'
-          ) | translate
-        }}
-      </span>
-      @if (assignment().excluded) {
-      <span class="state excluded">
-        <i esIcon="block"></i>{{ 'SCOPES.EDITORIAL.STATE.EXCLUDED' | translate }}
-      </span>
-      } }
     </div>
-
-    @if (publishFields().length || excludeFields().length) {
-    <div class="primary-actions">
-      @for (f of publishFields(); track f.field.id) {
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="applyMarking(f, 'published')"
-        [matTooltip]="f.label"
-      >
-        <i esIcon="check_circle"></i>
-        {{ 'SCOPES.EDITORIAL.PUBLISH' | translate }}
-      </button>
-      } @for (f of excludeFields(); track f.field.id) {
-      <button mat-stroked-button (click)="applyMarking(f, 'excluded')" [matTooltip]="f.label">
-        <i esIcon="block"></i>
-        {{ 'SCOPES.EDITORIAL.EXCLUDE' | translate }}
-      </button>
-      }
-    </div>
-    }
-
-    <section class="fields">
-      <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_STATUS' | translate }}</h3>
-      <!-- widgets of the scope mds; re-created (track) when the values change from outside -->
-      @for (f of statusFields(); track f.field.id + ':' + revision()) {
-      <div class="field" [class.touched]="isTouched(f.field.id)">
-        <es-mds-editor-single-widget
-          [editorMode]="'form'"
-          [mds]="mdsId()"
-          [widgetId]="f.field.id"
-          [ngModel]="getValues(f.field.id)"
-          (ngModelChange)="onWidgetChange(f.field.id, $event)"
-          ngDefaultControl
-        ></es-mds-editor-single-widget>
-        @if (f.field.visibility === 'public') {
-        <div class="field-hint">
-          <i esIcon="public"></i>
-          {{ 'SCOPES.EDITORIAL.VISIBILITY_PUBLIC' | translate }}
-        </div>
-        }
-      </div>
-      }
-    </section>
-
-    @if (!isBulk() && replacingFields().length) {
-    <section class="fields replacing">
+    } @if (inventoryField(); as f) {
+    <!-- the inventory decision: directly selectable -->
+    <es-scope-inventory
+      [widgets]="widgets()"
+      [value]="getValues(f.field.id)[0]"
+      (valueChange)="onWidgetChange(f.field.id, $event ? [$event] : [])"
+    ></es-scope-inventory>
+    } @if (editorFieldIds().length) {
+    <!-- all other fields: the mds editor in form mode (bulk: keep / replace / append per field),
+      re-created (track) when the values change from outside -->
+    @for (key of [editorKey()]; track key) {
+    <es-mds-editor-wrapper
+      class="fields-editor"
+      [embedded]="true"
+      [editorMode]="'form'"
+      [widgetIds]="editorFieldIds()"
+      [nodes]="editorNodes()"
+      [nodeRefetch]="false"
+      [forceBulk]="isBulk()"
+      [bulkAppend]="true"
+      [ignoreRequired]="true"
+    ></es-mds-editor-wrapper>
+    } } @if (!isBulk() && overriddenFields().length) {
+    <!-- replaced values of this scope: the original stays untouched -->
+    <section class="originals">
       <h3 class="section-title">{{ 'SCOPES.EDITORIAL.SECTION_REPLACING' | translate }}</h3>
       <p class="section-description">
         {{ 'SCOPES.EDITORIAL.SECTION_REPLACING_DESCRIPTION' | translate }}
       </p>
-      @for (f of replacingFields(); track f.field.id + ':' + revision()) {
-      <div class="field" [class.touched]="isTouched(f.field.id)">
-        <es-mds-editor-single-widget
-          [editorMode]="'form'"
-          [mds]="mdsId()"
-          [widgetId]="f.field.id"
-          [ngModel]="getValues(f.field.id)"
-          (ngModelChange)="onWidgetChange(f.field.id, $event)"
-          ngDefaultControl
-        ></es-mds-editor-single-widget>
-        <div class="original">
-          <span class="original-label">{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}</span>
-          <span class="original-value">{{ getOriginal(f.field.id).join(', ') || '–' }}</span>
-          @if (getValues(f.field.id).length) {
-          <button mat-button (click)="resetToOriginal(f.field.id)">
-            <i esIcon="undo"></i>
-            {{ 'SCOPES.EDITORIAL.RESET_TO_ORIGINAL' | translate }}
-          </button>
-          }
-        </div>
+      @for (f of overriddenFields(); track f.field.id) {
+      <div class="original">
+        <span class="original-label">{{ f.label }}:</span>
+        <span class="original-value"
+          >{{ 'SCOPES.EDITORIAL.ORIGINAL' | translate }}
+          {{ getOriginal(f.field.id).join(', ') || '–' }}</span
+        >
+        <button mat-button (click)="resetToOriginal(f.field.id)" [disabled]="saving()">
+          <i esIcon="undo"></i>
+          {{ 'SCOPES.EDITORIAL.RESET_TO_ORIGINAL' | translate }}
+        </button>
       </div>
       }
     </section>
@@ -154,13 +104,27 @@
       mode="warning"
       [message]="'SCOPES.EDITORIAL.HINT_NOT_PUBLIC' | translate"
     ></es-info-message>
-    } @if (hintConflict()) {
-    <es-info-message
-      mode="warning"
-      [message]="'SCOPES.EDITORIAL.HINT_EXCLUDED_AND_PUBLISHED' | translate"
-    ></es-info-message>
+
     } @if (bulkStatus(); as status) {
     <div class="bulk-status">
+      @if (status.state === 'QUEUED' && status.queue?.jobsAhead) {
+      <!-- bulk jobs run one after another: progress of the jobs ahead -->
+      <div class="bulk-status-text">
+        {{
+          'SCOPES.EDITORIAL.BULK.STATE_QUEUED_AHEAD'
+            | translate
+              : {
+                  jobs: status.queue.jobsAhead,
+                  done: status.queue.done,
+                  total: status.queue.total
+                }
+        }}
+      </div>
+      <mat-progress-bar
+        [mode]="status.queue.total ? 'determinate' : 'indeterminate'"
+        [value]="queueProgress(status)"
+      ></mat-progress-bar>
+      } @else {
       <div class="bulk-status-text">
         {{
           'SCOPES.EDITORIAL.BULK.STATE_' + status.state
@@ -171,7 +135,7 @@
         [mode]="status.state === 'QUEUED' ? 'indeterminate' : 'determinate'"
         [value]="bulkProgress(status)"
       ></mat-progress-bar>
-      @if (status.failed?.length) {
+      } @if (status.failed?.length) {
       <details class="bulk-failures">
         <summary>
           {{ 'SCOPES.EDITORIAL.BULK.FAILURES' | translate : { count: status.failed.length } }}
@@ -199,15 +163,10 @@
       </button>
       }
       <span class="spacer"></span>
-      <button mat-button (click)="discard()" [disabled]="saving() || !hasChanges()">
+      <button mat-button (click)="discard()" [disabled]="saving()">
         {{ 'DISCARD' | translate }}
       </button>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="save()"
-        [disabled]="saving() || !hasChanges()"
-      >
+      <button mat-flat-button color="primary" (click)="save()" [disabled]="saving()">
         {{ (isBulk() ? 'SCOPES.EDITORIAL.BULK.APPLY' : 'SAVE') | translate }}
       </button>
     </div>

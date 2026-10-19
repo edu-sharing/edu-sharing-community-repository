@@ -2,18 +2,14 @@ package org.edu_sharing.service.scope;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import lombok.RequiredArgsConstructor;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.namespace.QName;
-import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.metadataset.v2.MetadataSet;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Decides how a search criterion is applied with respect to scopes (F2/F3, concept §5.4/§6.3), see
@@ -24,12 +20,15 @@ import java.util.stream.Stream;
 public class ScopeCriteria {
 
     /** editorial work sets: only meaningful for editors, they would reveal internal states to others */
-    static final Set<String> EDITOR_ONLY_CRITERIA = Set.of("virtual:scope_view");
+    /** work sets (tabs) of the editorial page */
+    public static final String WORK_SET_CRITERION = "virtual:scope_view";
+    static final Set<String> EDITOR_ONLY_CRITERIA = Set.of(WORK_SET_CRITERION);
+    /** full text criteria over many fields: they also match the replaced values of the own scope */
+    static final Set<String> FULL_TEXT_CRITERIA = Set.of(MetadataSet.DEFAULT_CLIENT_QUERY_CRITERIA);
 
     private final ScopesSettings scopesSettings;
     private final ScopeContextResolver scopeContextResolver;
-    private final DictionaryService dictionaryService;
-    private volatile Set<String> scopeOnlyProperties;
+    private final ScopeProperties scopeProperties;
 
     public static Optional<ScopeCriteria> getInstance() {
         ApplicationContext context = ApplicationContextFactory.getApplicationContext();
@@ -68,8 +67,25 @@ public class ScopeCriteria {
             return query;
         }
         Optional<ActiveScope> scope = scopeContextResolver.resolve();
+        if (FULL_TEXT_CRITERIA.contains(criterion) && scope.isPresent()) {
+            boolean editor = scope.get().getRole() == ScopeRole.EDITOR;
+            return ScopeCriteriaRewriter.fullText(scope.get().getScopeId(), getVisibleReplacingFields(scope.get()), !editor, query);
+        }
         ScopeCriteriaRewriter.Mode mode = getMode(scope, criterion);
         return ScopeCriteriaRewriter.apply(mode, scope.map(ActiveScope::getScopeId).orElse(null), criterion, query);
+    }
+
+    /**
+     * replacing fields of the scope the user may see: all for editors, the public ones for readers
+     */
+    List<String> getVisibleReplacingFields(ActiveScope scope) {
+        boolean editor = scope.getRole() == ScopeRole.EDITOR;
+        List<ScopeField> fields = scope.getDefinition().getFields() == null ? List.of() : scope.getDefinition().getFields();
+        return fields.stream()
+                .filter(ScopeField::isReplaces)
+                .filter(field -> editor || field.getVisibility() == ScopeFieldVisibility.PUBLIC)
+                .map(ScopeField::getId)
+                .toList();
     }
 
     ScopeCriteriaRewriter.Mode getMode(Optional<ActiveScope> scope, String criterion) {
@@ -93,20 +109,9 @@ public class ScopeCriteria {
     }
 
     /**
-     * properties that only exist in scope entries: aspect ccm:editorialScopeProperties and all its sub aspects, so custom
-     * models add their own editorial properties via an aspect with parent ccm:editorialScopeProperties
+     * properties that only exist in scope entries, see {@link ScopeProperties}
      */
     Set<String> getScopeOnlyProperties() {
-        if (scopeOnlyProperties == null) {
-            QName root = QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES);
-            scopeOnlyProperties = Stream.concat(Stream.of(root), dictionaryService.getSubAspects(root, true).stream())
-                    .distinct()
-                    .map(dictionaryService::getAspect)
-                    .filter(Objects::nonNull)
-                    .flatMap(aspect -> aspect.getProperties().keySet().stream())
-                    .map(q -> CCConstants.getValidLocalName(q.toString()))
-                    .collect(Collectors.toUnmodifiableSet());
-        }
-        return scopeOnlyProperties;
+        return scopeProperties.getScopeOnlyProperties();
     }
 }

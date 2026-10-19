@@ -32,4 +32,16 @@
     .selected {
         font-weight: bold;
     }
+    // radio icon and label on one line, vertically centered
+    .mat-mdc-menu-item-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .radio {
+        color: var(--primary);
+    }
+    .mat-mdc-menu-item[disabled] .radio {
+        color: inherit;
+    }
 }

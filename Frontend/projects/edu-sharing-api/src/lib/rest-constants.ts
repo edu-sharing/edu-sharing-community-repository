@@ -187,6 +187,8 @@ export class RestConstants {
     public static CCM_TYPE_COLLECTION_PROPOSAL = 'ccm:collection_proposal';
     public static CCM_PROP_COLLECTION_ORDERED_POSITION = 'ccm:collection_ordered_position';
     public static COLLECTION_ORDER_MODE_CUSTOM = 'custom';
+    /** default search query of the mds */
+    public static DEFAULT_QUERY_NAME = 'ngsearch';
     public static CM_NAME = 'cm:name';
     public static LOM_PROP_TITLE = 'cclom:title';
     public static CM_PROP_TITLE = 'cm:title';
@@ -245,6 +247,10 @@ export class RestConstants {
     public static GROUP_TYPE_CLASS = 'CLASS';
     public static GROUP_TYPE_WORKING_GROUP = 'WORKING_GROUP';
     public static GROUP_TYPE_LESSON = 'LESSON';
+    /** scope group (organization), created via the scope management only */
+    public static GROUP_TYPE_SCOPE = 'SCOPE';
+    /** inventory decision of a scope entry, mandatory field of every scope */
+    public static CCM_PROP_EDITORIAL_INVENTORY = 'ccm:editorial_inventory';
     public static GROUP_TYPE_SCHOOL_NATIONAL = 'SCHOOL_NATIONAL';
     public static GROUP_TYPE_SCHOOL_MUNICIPAL = 'SCHOOL_MUNICIPAL';
     public static GROUP_TYPE_SCHOOL_PRIVATE = 'SCHOOL_PRIVATE';

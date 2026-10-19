@@ -24,14 +24,28 @@ public final class ScopeSearchFilter {
     }
 
     /**
+     * @param requested role requested by the search (SearchParameters.scopeRole), null for the own role
+     * @return the role the search filters with: an editor may search with any role ("view as reader"), other roles
+     * are never changed, so a request only ever reduces
+     */
+    public static ScopeRole searchRole(ActiveScope scope, ScopeRole requested) {
+        return requested != null && scope.getRole() == ScopeRole.EDITOR ? requested : scope.getRole();
+    }
+
+    public static Query build(ActiveScope scope, Supplier<Query> aclFilter, List<Query> baseQueries) {
+        return build(scope, scope.getRole(), aclFilter, baseQueries);
+    }
+
+    /**
      * @param scope       the active scope
+     * @param role        the role to filter with, see {@link #searchRole}
      * @param aclFilter   the regular read permission filter of the current user
      * @param baseQueries the resolved base queries of the scope (OR-combined), only used for editors
      */
-    public static Query build(ActiveScope scope, Supplier<Query> aclFilter, List<Query> baseQueries) {
+    public static Query build(ActiveScope scope, ScopeRole role, Supplier<Query> aclFilter, List<Query> baseQueries) {
         String scopeId = scope.getScopeId();
         Query published = Query.of(q -> q.term(t -> t.field(FIELD_SCOPE_IDS_PUBLISHED).value(scopeId)));
-        if (scope.getRole() != ScopeRole.EDITOR) {
+        if (role != ScopeRole.EDITOR) {
             return published;
         }
         return Query.of(q -> q.bool(b -> {

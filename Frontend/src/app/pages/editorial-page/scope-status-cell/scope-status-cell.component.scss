@@ -1,15 +1,40 @@
 :host {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.effective {
     display: inline-flex;
     flex-wrap: wrap;
     gap: 4px;
+    min-width: 0;
 }
-.value {
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding: 2px 8px;
     border-radius: 12px;
     background: var(--primaryBackground100);
     color: var(--textMain);
     font-size: 90%;
     white-space: nowrap;
+}
+.value-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+.text,
+.original {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.original {
+    font-size: var(--fontSizeXSmall);
+    color: var(--textLight);
 }
 .empty {
     color: var(--textLight);

@@ -452,7 +452,7 @@ public class SearchServiceElastic implements SearchService {
 
         MetadataQuery queryData = mds.findQuery(query, MetadataReader.QUERY_SYNTAX_DSL);
         Query globalConditions = new Query.Builder()
-                .bool(getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData).build())
+                .bool(getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole()).build())
                 .build();
 
         Set<MetadataQueryParameter> excludeOwnFacets = MetadataElasticSearchHelper.getExcludeOwnFacets(queryData, new HashMap<>(), searchToken.getFacets());
@@ -714,7 +714,7 @@ public class SearchServiceElastic implements SearchService {
 
         BoolQuery.Builder metadataQueryBuilderFilter = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, true);
         BoolQuery.Builder metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criterias, false);
-        BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData);
+        BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole());
 
         SearchRequest.Builder searchRequest = new SearchRequest.Builder()
                 .index(WORKSPACE_INDEX)
@@ -838,7 +838,7 @@ public class SearchServiceElastic implements SearchService {
         BoolQuery metadataQueryBuilderAsQuery = MetadataElasticSearchHelper.getElasticSearchQuery(searchToken, mds.getQueries(MetadataReader.QUERY_SYNTAX_DSL), queryData, criteria, false).build();
         StoreRef storeRef = (searchToken.getStoreName() != null && searchToken.getStoreProtocol() != null) ? new StoreRef(searchToken.getStoreProtocol(), searchToken.getStoreName()) : null;
         BoolQuery queryBuilderGlobalConditions = includeGlobalConditions
-                ? getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true).build()
+                ? getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, storeRef, true, searchToken.getScopeRole()).build()
                 : null;
 
         // add collapse builder
@@ -1092,6 +1092,14 @@ public class SearchServiceElastic implements SearchService {
     }
 
     BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef, boolean scoped) {
+        return getGlobalConditions(authorityScope, permissions, query, storeRef, scoped, null);
+    }
+
+    /**
+     * @param scopeRole role to search the active scope with (SearchToken.scopeRole), null for the own role
+     */
+    BoolQuery.Builder getGlobalConditions(List<String> authorityScope, List<String> permissions, MetadataQuery query, StoreRef storeRef, boolean scoped,
+                                          ScopeRole scopeRole) {
 
         String storeRefProtocol = (storeRef == null) ? "workspace" : storeRef.getProtocol();
         Function<BoolQuery.Builder, BoolQuery.Builder> queryGlobalConditionsFactory = (builder) ->
@@ -1105,18 +1113,22 @@ public class SearchServiceElastic implements SearchService {
 
 
         BoolQuery.Builder queryBuilderGlobalConditions = queryGlobalConditionsFactory.apply(QueryBuilders.bool());
+        // an empty list requests no additional permissions (the search page always sends one): same as none
+        boolean extraPermissions = permissions != null && !permissions.isEmpty();
         // scopes: mds searches inside an active scope see only this scope, the scope filter replaces the acl filter
-        Optional<ActiveScope> activeScope = query != null && authorityScope == null && permissions == null ? getActiveScope() : Optional.empty();
+        Optional<ActiveScope> activeScope = query != null && authorityScope == null && !extraPermissions ? getActiveScope() : Optional.empty();
         if (activeScope.isPresent()) {
             ActiveScope scope = activeScope.get();
-            Query scopeFilter = ScopeSearchFilter.build(scope,
+
+            ScopeRole role = ScopeSearchFilter.searchRole(scope, scopeRole);
+            Query scopeFilter = ScopeSearchFilter.build(scope, role,
                     () -> Query.of(q -> q.bool(getReadPermissionsQuery(QueryBuilders.bool()).build())),
-                    scope.getRole() == ScopeRole.EDITOR ? getScopeBaseQueries(scope) : List.of());
+                    role == ScopeRole.EDITOR ? getScopeBaseQueries(scope) : List.of());
             queryBuilderGlobalConditions = QueryBuilders.bool()
                     .must(must -> must.match(match -> match.field("nodeRef.storeRef.protocol").query(storeRefProtocol)))
                     .filter(scopeFilter);
         }
-        if (permissions != null) {
+        if (extraPermissions) {
             BoolQuery.Builder permissionsFilter = QueryBuilders.bool().must(must -> must.bool(queryGlobalConditionsFactory::apply));
             String user = authenticationService.getCurrentUserName();
             permissionsFilter.should(should -> should.match(match -> match.field("owner").query(user)));
@@ -2580,7 +2592,7 @@ public class SearchServiceElastic implements SearchService {
         result.setFacets(queryResult.getFacets());
 
         if (searchToken.getFacets() != null) {
-            BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true);
+            BoolQuery.Builder queryBuilderGlobalConditions = getGlobalConditions(searchToken.getAuthorityScope(), searchToken.getPermissions(), queryData, null, true, searchToken.getScopeRole());
             queryBuilderGlobalConditions.must(
                     childQuery
             );
@@ -3442,6 +3454,11 @@ public class SearchServiceElastic implements SearchService {
 
     @Override
     public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips) {
+        return searchOrganizations(pattern, skipCount, maxValues, sort, scoped, onlyMemberShips, null);
+    }
+
+    @Override
+    public SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips, String groupType) {
         try {
             String searchPattern = pattern == null ? "" : pattern;
 
@@ -3480,6 +3497,11 @@ public class SearchServiceElastic implements SearchService {
                                             .field("properties.ccm:edu_homedir.keyword")
                                             .value("workspace://*")
                                     ));
+                    if (groupType != null) {
+                        finalQuery.filter(filter -> filter.term(term -> term
+                                .field("properties.ccm:groupType.keyword")
+                                .value(groupType)));
+                    }
 
                     //only search organisations the curren user is in,except: its adminuser and onlyMemberShips == true
                     if (onlyMemberShips) {

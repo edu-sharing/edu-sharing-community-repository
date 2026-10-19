@@ -42,6 +42,16 @@ public interface SearchService {
 
 	SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips) throws Throwable;
 
+	/**
+	 * @param groupType only organizations of this group type (ccm:groupType), e.g. SCOPE; null for all
+	 */
+	default SearchResult<EduGroup> searchOrganizations(String pattern, int skipCount, int maxValues, SortDefinition sort, boolean scoped, boolean onlyMemberShips, String groupType) throws Throwable {
+		if (groupType != null) {
+			throw new UnsupportedOperationException("filtering organizations by group type is not supported by " + getClass().getSimpleName());
+		}
+		return searchOrganizations(pattern, skipCount, maxValues, sort, scoped, onlyMemberShips);
+	}
+
 	default List<String> getAllMediacenters() throws Exception {
 		return getAllMediacenters(false);
 	}

@@ -35,6 +35,24 @@ public class ScopeBulkStatus implements Serializable {
     private String startedBy;
     private Date startedAt;
     private Date finishedAt;
+    /**
+     * queued jobs only: the jobs that run before this one (bulk jobs run one after another) and their progress, without
+     * details of these jobs (they may belong to other scopes)
+     */
+    private Queue queue;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Schema(name = "ScopeBulkQueue")
+    public static class Queue implements Serializable {
+        /** number of queued or running jobs before this one */
+        private long jobsAhead;
+        /** nodes the jobs ahead already changed / will change (0 while they are not started) */
+        private long done;
+        private long total;
+    }
 
     @Data
     @NoArgsConstructor

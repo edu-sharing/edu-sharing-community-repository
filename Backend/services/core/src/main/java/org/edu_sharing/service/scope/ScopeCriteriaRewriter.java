@@ -13,6 +13,7 @@ import org.edu_sharing.service.search.ReadableWrapperQueryBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,32 @@ public final class ScopeCriteriaRewriter {
         };
     }
 
+    /**
+     * full text criterion (e.g. ngsearchword over many fields): matches the original values or the replaced values of
+     * the own scope entry
+     *
+     * @param properties    replacing properties the user may see in the own scope
+     * @param publishedOnly readers: only published entries
+     */
+    public static Query fullText(String scopeId, Collection<String> properties, boolean publishedOnly, Query original) {
+        if (scopeId == null || properties.isEmpty()) {
+            return original;
+        }
+        Query replaced = rewrite(original, properties);
+        return Query.of(q -> q.bool(b -> b
+                .minimumShouldMatch("1")
+                .should(original)
+                .should(s -> s.nested(n -> n
+                        .path(NESTED_PATH)
+                        .query(nq -> nq.bool(own -> {
+                            own.filter(f -> f.term(t -> t.field(PREFIX + "scopeId").value(scopeId)));
+                            if (publishedOnly) {
+                                own.filter(f -> f.term(t -> t.field(PREFIX + "published").value(true)));
+                            }
+                            return own.must(replaced);
+                        }))))));
+    }
+
     private static Query own(String scopeId, Query rewritten) {
         return Query.of(q -> q.nested(n -> n
                 .path(NESTED_PATH)
@@ -78,20 +105,28 @@ public final class ScopeCriteriaRewriter {
      * @return the query with every field "properties.&lt;property&gt;[.suffix]" moved to "scopes.properties.&lt;property&gt;[.suffix]"
      */
     static Query rewrite(Query query, String property) {
+        return rewrite(query, List.of(property));
+    }
+
+    /**
+     * @return the query with every field of the given properties moved to the scope entries
+     */
+    static Query rewrite(Query query, Collection<String> properties) {
         try {
             JsonNode json = MAPPER.readTree(JsonpUtils.toJsonString(query, new JacksonJsonpMapper()));
-            String rewritten = MAPPER.writeValueAsString(rewriteNode(json, "properties." + property));
+            List<String> fields = properties.stream().map(property -> "properties." + property).toList();
+            String rewritten = MAPPER.writeValueAsString(rewriteNode(json, fields));
             return Query.of(q -> q.wrapper(new ReadableWrapperQueryBuilder(rewritten).build()));
         } catch (Exception e) {
-            throw new IllegalStateException("could not rewrite query for scope property " + property, e);
+            throw new IllegalStateException("could not rewrite query for scope properties " + properties, e);
         }
     }
 
-    private static boolean isField(String value, String field) {
-        return value.equals(field) || value.startsWith(field + ".");
+    private static boolean isField(String value, List<String> fields) {
+        return fields.stream().anyMatch(field -> value.equals(field) || value.startsWith(field + "."));
     }
 
-    private static JsonNode rewriteNode(JsonNode node, String field) throws Exception {
+    private static JsonNode rewriteNode(JsonNode node, List<String> field) throws Exception {
         if (node instanceof ObjectNode object) {
             List<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
             for (Iterator<Map.Entry<String, JsonNode>> it = object.fields(); it.hasNext(); ) {

@@ -46,7 +46,15 @@
       <!-- <span *ngIf="widget?.getHasChanged()" class="changes-notice">{{
         'MDS.HAS_CHANGES' | translate
       }}</span> -->
-      @if (shouldShowBulkEditToggle()) {
+      @if (shouldShowBulkEditToggle()) { @if (shouldShowBulkAppend() && (bulkMode | async) !==
+      'no-change') {
+      <mat-checkbox
+        class="bulk-append"
+        [checked]="(bulkMode | async) === 'append'"
+        (change)="onBulkAppendChange($event.checked)"
+        >{{ 'MDS.BULK_APPEND' | translate }}</mat-checkbox
+      >
+      }
       <mat-slide-toggle (change)="onBulkEditToggleChange($event)">{{
         'MDS.BULK_EDIT' | translate
       }}</mat-slide-toggle>

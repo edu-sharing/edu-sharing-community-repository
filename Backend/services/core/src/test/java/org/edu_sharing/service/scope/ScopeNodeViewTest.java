@@ -69,6 +69,26 @@ class ScopeNodeViewTest {
     }
 
     @Test
+    void anEditorialChangeUpdatesModified() {
+        String modified = CCConstants.CM_PROP_C_MODIFIED;
+        nodeProps.put(modified, "1000");
+        nodeProps.put(modified + CCConstants.LONG_DATE_SUFFIX, "1000");
+        ScopeIndexData later = ScopeIndexData.builder().nodeId("n1").scopes(List.of(
+                ScopeIndexData.Entry.builder().scopeId(OWN).published(true).modified(new Date(5000)).properties(Map.of()).build())).build();
+
+        ScopeNodeView.View view = underTest.view(scope(ScopeRole.GUEST), later, nodeProps);
+        assertEquals("5000", view.properties().get(modified));
+        assertEquals("5000", view.properties().get(modified + CCConstants.LONG_DATE_SUFFIX));
+        assertEquals("1970-01-01T00:00:05.000Z", view.properties().get(modified + CCConstants.ISODATE_SUFFIX));
+        assertEquals("1000", nodeProps.get(modified));
+
+        // an older entry keeps the date of the node
+        nodeProps.put(modified, "9000");
+        nodeProps.put(modified + CCConstants.LONG_DATE_SUFFIX, "9000");
+        assertEquals("9000", underTest.view(scope(ScopeRole.GUEST), later, nodeProps).properties().get(modified));
+    }
+
+    @Test
     void guestsSeePublicPropertiesOfPublishedEntriesOnly() {
         assertTrue(underTest.view(scope(ScopeRole.GUEST), data(false, false), nodeProps).scopes().isEmpty());
 

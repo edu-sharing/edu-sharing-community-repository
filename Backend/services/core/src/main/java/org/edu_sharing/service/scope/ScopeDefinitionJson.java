@@ -46,6 +46,21 @@ public final class ScopeDefinitionJson {
     }
 
     /**
+     * @return the presentation settings, null if not set
+     * @throws IllegalArgumentException if the json is invalid
+     */
+    public static ScopePresentation parsePresentation(String json) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        try {
+            return MAPPER.readValue(json, ScopePresentation.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("invalid scope settings: " + e.getOriginalMessage(), e);
+        }
+    }
+
+    /**
      * @param values  values of the multi value property ccm:scope_base_query, one json query each
      * @param version ccm:scope_base_query_version
      * @return the base query or null if no query is set

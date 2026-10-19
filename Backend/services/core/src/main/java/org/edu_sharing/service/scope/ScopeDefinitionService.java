@@ -17,6 +17,12 @@ public interface ScopeDefinitionService {
     List<ScopeDefinition> getAllScopes();
 
     /**
+     * properties that only exist in scope entries (sorted). Every other property replaces the original value
+     * inside the scope (see {@link ScopeField#isReplaces()}). Admin only.
+     */
+    List<String> getScopeOnlyProperties();
+
+    /**
      * scopes of all scope groups the current user is a member of
      */
     List<ScopeDefinition> getScopesOfCurrentUser();
@@ -30,12 +36,13 @@ public interface ScopeDefinitionService {
      *
      * @throws IllegalArgumentException if a field is not known by the dictionary
      */
-    ScopeDefinition createScope(String name, String displayName, String mds, List<ScopeField> fields);
+    ScopeDefinition createScope(String name, String displayName, String mds, List<ScopeField> fields, ScopePresentation presentation);
 
     /**
-     * replaces mds and field list of a scope group. Global admins only (operator).
+     * replaces mds, field list and presentation settings (null removes them) of a scope group. Global admins only
+     * (operator).
      */
-    ScopeDefinition updateScope(String scopeId, String mds, List<ScopeField> fields);
+    ScopeDefinition updateScope(String scopeId, String mds, List<ScopeField> fields, ScopePresentation presentation);
 
     /**
      * writes ccm:scope_base_query and increases its version.

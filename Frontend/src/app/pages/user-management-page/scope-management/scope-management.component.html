@@ -38,73 +38,70 @@
 
     <h3>{{ 'SCOPES.ADMIN.FIELDS' | translate }}</h3>
     <p class="hint">{{ 'SCOPES.ADMIN.FIELDS_HINT' | translate }}</p>
-    <div class="fields-editor">
-      <div class="property-picker">
-        <mat-form-field class="property-filter" subscriptSizing="dynamic">
-          <mat-label>{{ 'SCOPES.ADMIN.FIELD.FILTER' | translate }}</mat-label>
-          <input
-            matInput
-            [ngModel]="propertyFilter()"
-            (ngModelChange)="propertyFilter.set($event)"
-          />
-        </mat-form-field>
-        <div class="properties-list" data-test="scope-management-properties">
-          @for (property of availableProperties(); track property.name) {
-          <mat-checkbox
-            [checked]="isSelected(property)"
-            (change)="toggleField(property, $event.checked)"
-          >
-            <span class="property-label">
-              <span class="caption">{{ property | esListItemLabel | async }}</span>
-              <span class="property-id">{{ property.name }}</span>
-            </span>
-          </mat-checkbox>
-          }
-        </div>
-      </div>
-      <div
-        class="selected-fields"
-        cdkDropList
-        [cdkDropListData]="d.fields"
-        (cdkDropListDropped)="dropField($event)"
-      >
-        @for (field of d.fields; track field.id; let i = $index) {
-        <div class="field-row" cdkDrag [attr.data-test]="'scope-management-field-' + i">
-          <div class="handle" cdkDragHandle><i esIcon="reorder"></i></div>
-          <div class="field-label">
-            <span class="caption">{{ getLabel(field.id) }}</span>
-            <span class="property-id">{{ field.id }}</span>
-          </div>
-          <mat-form-field class="visibility" subscriptSizing="dynamic">
-            <mat-label>{{ 'SCOPES.ADMIN.FIELD.VISIBILITY' | translate }}</mat-label>
-            <mat-select [(ngModel)]="field.visibility">
-              @for (v of visibilities; track v) {
-              <mat-option [value]="v">{{
-                'SCOPES.ADMIN.VISIBILITY.' + v.toUpperCase() | translate
-              }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          <mat-checkbox
-            [(ngModel)]="field.replaces"
-            [matTooltip]="'SCOPES.ADMIN.FIELD.REPLACES_HINT' | translate"
-            >{{ 'SCOPES.ADMIN.FIELD.REPLACES' | translate }}</mat-checkbox
-          >
-          <div class="field-actions">
-            <button
-              mat-icon-button
-              (click)="removeField(i)"
-              color="warn"
-              [attr.aria-label]="'SCOPES.ADMIN.FIELD.REMOVE' | translate"
-            >
-              <i esIcon="delete"></i>
-            </button>
-          </div>
-        </div>
-        } @empty {
-        <p class="empty">{{ 'SCOPES.ADMIN.FIELDS_EMPTY' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-field"
+      [properties]="fieldProperties()"
+      [selected]="fieldIds()"
+      [locked]="MANDATORY_FIELDS"
+      lockedHint="SCOPES.ADMIN.FIELD.MANDATORY"
+      emptyText="SCOPES.ADMIN.FIELDS_EMPTY"
+      (selectedChange)="setFields($event)"
+    >
+      <ng-template #row let-id>
+        @if (getField(id); as field) {
+        <!-- derived by the backend: regular properties replace the original, scope only ones don't -->
+        @if (field.replaces) {
+        <span class="replaces" [matTooltip]="'SCOPES.ADMIN.FIELD.REPLACES_HINT' | translate">
+          <i esIcon="swap_horiz"></i>{{ 'SCOPES.ADMIN.FIELD.REPLACES' | translate }}
+        </span>
         }
-      </div>
+        <!-- the inventory decision is always internal -->
+        @if (!MANDATORY_FIELDS.includes(id)) {
+        <mat-form-field class="visibility" subscriptSizing="dynamic">
+          <mat-label>{{ 'SCOPES.ADMIN.FIELD.VISIBILITY' | translate }}</mat-label>
+          <mat-select [(ngModel)]="field.visibility">
+            @for (v of visibilities; track v) {
+            <mat-option [value]="v">{{
+              'SCOPES.ADMIN.VISIBILITY.' + v.toUpperCase() | translate
+            }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        } }
+      </ng-template>
+    </es-scope-property-list>
+
+    <h3 class="card-heading">
+      {{ 'SCOPES.ADMIN.CARD.TITLE' | translate }}
+      @if (customCardColumns()) {
+      <button mat-button (click)="resetCardColumns()" data-test="scope-management-card-reset">
+        <i esIcon="undo"></i>{{ 'SCOPES.ADMIN.CARD.RESET' | translate }}
+      </button>
+      } @else {
+      <span class="default-hint">{{ 'SCOPES.ADMIN.CARD.DEFAULT' | translate }}</span>
+      }
+    </h3>
+    <p class="hint">{{ 'SCOPES.ADMIN.CARD.HINT' | translate }}</p>
+    <es-scope-property-list
+      testId="scope-management-card"
+      [properties]="cardProperties()"
+      [selected]="cardColumnIds()"
+      emptyText="SCOPES.ADMIN.CARD.EMPTY"
+      (selectedChange)="setCardColumns($event)"
+    ></es-scope-property-list>
+    <div class="card-preview" data-test="scope-management-card-preview">
+      <div class="preview-label">{{ 'SCOPES.ADMIN.CARD.PREVIEW' | translate }}</div>
+      <es-node-entries-wrapper
+        [dataSource]="previewDataSource()"
+        [scope]="Scope.Search"
+        [columns]="previewColumns()"
+        [displayType]="NodeEntriesDisplayType.Grid"
+        [checkbox]="false"
+        [showActions]="false"
+        [dragDrop]="{ dragAllowed: false }"
+        [gridConfig]="{ layout: 'scroll' }"
+        [elementInteractionType]="InteractionType.None"
+      ></es-node-entries-wrapper>
     </div>
 
     <div class="buttons">
@@ -129,26 +126,7 @@
       <i esIcon="add"></i> {{ 'SCOPES.ADMIN.CREATE' | translate }}
     </button>
   </div>
-  @if (scopes() === null) {
-  <es-spinner></es-spinner>
-  } @else {
-  <es-node-entries-wrapper
-    #scopeList
-    class="list"
-    data-test="scope-management-list"
-    [scope]="Scope.UserManagement"
-    [displayType]="DisplayType.Table"
-    [elementInteractionType]="InteractionType.Emitter"
-    [columns]="columns"
-    [dataSource]="dataSource"
-    [checkbox]="false"
-  >
-    <ng-template #empty>
-      <p class="empty" role="status">{{ 'SCOPES.ADMIN.EMPTY' | translate }}</p>
-    </ng-template>
-  </es-node-entries-wrapper>
-  <es-info-message mode="warning" class="delete-info">
-    <div>{{ 'SCOPES.ADMIN.DELETE_INFO' | translate }}</div>
-  </es-info-message>
-  } }
+  <!-- organization list of the scope groups, projected by the page -->
+  <ng-content></ng-content>
+  }
 </div>

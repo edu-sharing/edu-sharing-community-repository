@@ -6,7 +6,7 @@ package org.edu_sharing.service.scope;
 public enum ScopeRole {
     /** member of the scope group */
     EDITOR,
-    /** guest user of the context that references the scope group */
+    /** guest user of the context that references the scope group (read only) */
     GUEST,
     /** signed in via the domain of a context, but not a member of the scope group (read only) */
     TEMPORARY_READER

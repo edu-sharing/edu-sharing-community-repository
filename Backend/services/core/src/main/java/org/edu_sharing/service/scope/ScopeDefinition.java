@@ -27,4 +27,6 @@ public class ScopeDefinition implements Serializable {
     private ScopeBaseQuery baseQuery;
     /** ccm:scope_folder (node id) */
     private String folderId;
+    /** ccm:scope_settings, null if none is set */
+    private ScopePresentation presentation;
 }

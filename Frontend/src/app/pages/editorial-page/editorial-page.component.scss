@@ -228,22 +228,6 @@ mat-sidenav.es-mat-sidenav[position='start'] {
 }
 
 // scope mode: name of the active scope and actions on all hits / the base query
-.scope-toolbar {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px 16px 0;
-    .scope-name {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        flex: 1;
-        min-width: 0;
-        font-weight: bold;
-        color: var(--textMain);
-    }
-}
 .scope-unavailable {
     display: block;
     margin: 16px;

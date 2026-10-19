@@ -1,13 +1,4 @@
-import {
-    Component,
-    computed,
-    effect,
-    inject,
-    input,
-    output,
-    signal,
-    viewChild,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -15,50 +6,49 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
-    Group,
+    DEFAULT,
     HOME_REPOSITORY,
     MdsService,
+    Node,
+    RestConstants,
     ScopeDefinition,
     ScopeField,
     ScopeFieldVisibility,
     ScopesService,
+    SearchService,
 } from 'ngx-edu-sharing-api';
-import { AsyncPipe } from '@angular/common';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
     ColumnType,
-    Constrain,
-    CustomOptions,
-    DefaultGroups,
     EduSharingUiCommonModule,
-    ElementType,
     InteractionType,
     ListItem,
+    MdsHelperService,
+    MdsWidgetType,
     NodeDataSource,
     NodeEntriesDisplayType,
     NodeEntriesModule,
-    NodeEntriesWrapperComponent,
-    OptionItem,
-    OptionsHelperDataService,
     Scope,
 } from 'ngx-edu-sharing-ui';
 import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { catchError, debounceTime, map, switchMap } from 'rxjs/operators';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Toast } from '../../../services/toast';
 import { ScopeMdsService, ScopeWidgets } from '../../../features/scopes/scope-mds.service';
+import { ScopePropertyListComponent } from './scope-property-list/scope-property-list.component';
 
 /**
  * a row of the field list editor. publishedValues / excludedValues / uploadValues are a property of
  * the editorial property itself, not of a scope: they are not edited here, but taken from
  * `DEFAULT_FIELD_VALUES` for new fields and kept unchanged for existing ones
  */
-type FieldDraft = Pick<ScopeField, 'publishedValues' | 'excludedValues' | 'uploadValues'> & {
+type FieldDraft = Pick<
+    ScopeField,
+    'publishedValues' | 'excludedValues' | 'uploadValues' | 'replaces'
+> & {
     id: string;
     visibility: ScopeFieldVisibility;
-    replaces: boolean;
 };
 
 /** semantics of the predefined editorial properties (keys of their valuespaces in the default mds) */
@@ -73,14 +63,8 @@ const DEFAULT_FIELD_VALUES: Record<
     },
 };
 
-/**
- * a scope group as row of the node entries table. Shaped like a group authority, so the table's
- * `ORG` columns (display name) and the options' element type (`Group`) work unchanged; the other
- * columns read the generic `properties`
- */
-type ScopeRow = Group & {
-    definition: ScopeDefinition;
-};
+/** mandatory field of every scope: the inventory decision controls publishing */
+const MANDATORY_FIELD = RestConstants.CCM_PROP_EDITORIAL_INVENTORY;
 
 type ScopeDraft = {
     /** null while creating a new scope */
@@ -91,18 +75,35 @@ type ScopeDraft = {
     fields: FieldDraft[];
 };
 
+/** list of the mds providing the default card columns (search page) */
+const DEFAULT_CARD_LIST = 'search';
+/** shown for free text values of the preview card */
+const DUMMY_TEXT = 'Lorem ipsum';
+/** example values of the preview card if the repository has no value (the renderer needs a valid one) */
+const EXAMPLE_VALUES: Record<string, string> = {
+    [RestConstants.CCM_PROP_LICENSE]: 'CC_BY',
+};
+/** widgets whose values are free text, others get a real value or none */
+const FREE_TEXT_WIDGETS: string[] = [
+    MdsWidgetType.Text,
+    MdsWidgetType.Textarea,
+    MdsWidgetType.TinyMCE,
+    MdsWidgetType.MultiValueBadges,
+    MdsWidgetType.MultiValueSuggestBadges,
+    MdsWidgetType.SingleValueSuggestBadges,
+];
+
 /**
  * Admin view of all scope groups (see scopes concept §4.1, §8): create scope groups and maintain
- * their mds and field list. Members are managed via the organization the scope group is based on.
+ * their mds and field list. The list itself is projected by the page: the organization list
+ * (`es-permissions-authorities`, group type SCOPE) with the regular organization options; it calls
+ * `configure` to open the editor of a scope.
  */
 @Component({
     selector: 'es-scope-management',
     templateUrl: './scope-management.component.html',
     styleUrls: ['./scope-management.component.scss'],
-    providers: [OptionsHelperDataService],
     imports: [
-        AsyncPipe,
-        DragDropModule,
         EduSharingUiCommonModule,
         FormsModule,
         MatButtonModule,
@@ -111,7 +112,9 @@ type ScopeDraft = {
         MatInputModule,
         MatSelectModule,
         MatTooltipModule,
+        // preview card
         NodeEntriesModule,
+        ScopePropertyListComponent,
         TranslateModule,
     ],
 })
@@ -119,57 +122,22 @@ export class ScopeManagementComponent {
     private scopesService = inject(ScopesService);
     private mdsService = inject(MdsService);
     private scopeMdsService = inject(ScopeMdsService);
+    private mdsHelperService = inject(MdsHelperService);
+    private searchService = inject(SearchService);
+    private translate = inject(TranslateService);
     private toast = inject(Toast);
 
-    /** search string of the page's search field, filters the list client side */
-    readonly searchQuery = input<string>(null);
-    /** emits the scope id (authority name of the organization) to manage its members */
-    readonly manageMembers = output<string>();
+    protected readonly MANDATORY_FIELDS = [MANDATORY_FIELD];
+    protected readonly Scope = Scope;
+    protected readonly InteractionType = InteractionType;
+    protected readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
 
-    readonly Scope = Scope;
-    readonly InteractionType = InteractionType;
-    readonly DisplayType = NodeEntriesDisplayType;
-    /** column keys of the generic (`properties`) columns */
-    private static readonly COLUMN_SCOPE_ID = 'scope:id';
-    private static readonly COLUMN_MDS = 'scope:mds';
-    private static readonly COLUMN_FIELDS = 'scope:fields';
-    private static readonly COLUMN_BASE_QUERY = 'scope:baseQueryVersion';
-
-    readonly scopes = signal<ScopeDefinition[] | null>(null);
-    readonly dataSource = new NodeDataSource<ScopeRow>();
-    readonly columns: ColumnType = {
-        Default: [
-            new ListItem('ORG', 'displayName'),
-            ScopeManagementComponent.column(ScopeManagementComponent.COLUMN_SCOPE_ID),
-            ScopeManagementComponent.column(ScopeManagementComponent.COLUMN_MDS),
-            ScopeManagementComponent.column(ScopeManagementComponent.COLUMN_FIELDS),
-            ScopeManagementComponent.column(ScopeManagementComponent.COLUMN_BASE_QUERY),
-        ],
-    };
-    readonly entriesRef = viewChild<NodeEntriesWrapperComponent<ScopeRow>>('scopeList');
-    private readonly options: CustomOptions = {
-        useDefaultOptions: false,
-        addOptions: [
-            ScopeManagementComponent.rowOption('SCOPES.ADMIN.MANAGE_MEMBERS', 'group', (row) =>
-                this.manageMembers.emit(row.authorityName),
-            ),
-            ScopeManagementComponent.rowOption('SCOPES.ADMIN.EDIT', 'edit', (row) =>
-                this.edit(row.definition),
-            ),
-        ],
-    };
-    readonly filteredScopes = computed(() => {
-        const query = this.searchQuery()?.trim().toLowerCase();
-        const scopes = this.scopes() ?? [];
-        if (!query) {
-            return scopes;
-        }
-        return scopes.filter(
-            (s) =>
-                s.scopeId?.toLowerCase().includes(query) ||
-                s.displayName?.toLowerCase().includes(query),
-        );
+    /** properties that only exist in scope entries: they never replace an original value */
+    private readonly scopeOnlyProperties = toSignal(this.scopesService.getScopeOnlyProperties(), {
+        initialValue: [] as string[],
     });
+    /** all scope definitions (configuration of the listed scope groups) */
+    readonly scopes = signal<ScopeDefinition[] | null>(null);
     readonly metadataSets = toSignal(
         this.mdsService.getAvailableMetadataSets() as Observable<{ id: string; name: string }[]>,
         { initialValue: [] },
@@ -191,109 +159,147 @@ export class ScopeManagementComponent {
         ),
         { initialValue: {} as ScopeWidgets },
     );
-    /** filter text of the property picker */
-    readonly propertyFilter = signal('');
     /** fields of the draft by id; bumped on every change of the field list */
     private readonly fieldsVersion = signal(0);
-    readonly selectedIds = computed(() => {
+    readonly fieldIds = computed(() => {
         this.fieldsVersion();
-        return new Set(this.draft()?.fields.map((f) => f.id) ?? []);
+        return this.draft()?.fields.map((f) => f.id) ?? [];
     });
-    /**
-     * selectable properties as list items (same picker as the export columns of the statistics),
-     * editorial properties first. Fields of the draft that are not part of the mds stay listed so
-     * they can be deselected
-     */
-    readonly availableProperties = computed<ListItem[]>(() => {
-        const widgets = this.widgets();
-        const ids = new Set(
-            Object.keys(widgets).filter((id) =>
+    /** real (stored) properties of the mds as field candidates, editorial properties first */
+    readonly fieldProperties = computed<ListItem[]>(() =>
+        this.toListItems(
+            Object.keys(this.widgets()).filter((id) =>
                 ScopeManagementComponent.PROPERTY_PREFIXES.some((prefix) => id.startsWith(prefix)),
             ),
-        );
-        this.selectedIds().forEach((id) => ids.add(id));
-        const filter = this.propertyFilter().trim().toLowerCase();
-        return [...ids]
-            .map((id) => {
-                const item = new ListItem('NODE', id);
-                item.label = ScopeMdsService.getLabel(widgets, id);
-                return item;
-            })
-            .filter(
-                (item) =>
-                    !filter ||
-                    item.name.toLowerCase().includes(filter) ||
-                    item.label.toLowerCase().includes(filter),
-            )
-            .sort(
-                (a, b) =>
-                    Number(!a.name.startsWith('ccm:editorial_')) -
-                        Number(!b.name.startsWith('ccm:editorial_')) ||
-                    a.label.localeCompare(b.label),
-            );
+        ).sort(
+            (a, b) =>
+                Number(!a.name.startsWith('ccm:editorial_')) -
+                    Number(!b.name.startsWith('ccm:editorial_')) || a.label.localeCompare(b.label),
+        ),
+    );
+
+    /** full mds of the draft: default card columns (list "search") */
+    private readonly mdsDefinition = toSignal(
+        toObservable(this.draftMds).pipe(
+            switchMap((mds) =>
+                mds === null
+                    ? of(null)
+                    : this.mdsService.getMetadataSet({
+                          repository: HOME_REPOSITORY,
+                          metadataSet: mds || undefined,
+                      }),
+            ),
+        ),
+        { initialValue: null },
+    );
+    private readonly defaultCardColumns = computed<ListItem[]>(() =>
+        this.mdsDefinition()
+            ? this.mdsHelperService.getColumns(this.mdsDefinition(), DEFAULT_CARD_LIST)?.Default ??
+              []
+            : [],
+    );
+    /** card columns of the scope, null: the mds default (later mds changes apply) */
+    readonly customCardColumns = signal<string[] | null>(null);
+    readonly cardColumnIds = computed(
+        () => this.customCardColumns() ?? this.defaultCardColumns().map((c) => c.name),
+    );
+    /** every widget of the mds (incl. virtual properties) plus the scope fields */
+    readonly cardProperties = computed<ListItem[]>(() => {
+        const ids = new Set([
+            ...Object.keys(this.widgets()).filter((id) => id.includes(':')),
+            ...this.fieldIds(),
+        ]);
+        return this.toListItems([...ids]).sort((a, b) => a.label.localeCompare(b.label));
     });
+    /** columns of the preview card (grid), formats of the mds columns are kept */
+    readonly previewColumns = computed<ColumnType>(() => ({
+        Default: ScopeMdsService.toColumns(
+            this.cardColumnIds(),
+            this.defaultCardColumns(),
+            this.mdsDefinition(),
+        ),
+    }));
+    /**
+     * most frequent real value of every stored card column (facets of the repository): renderers
+     * interpret their values (license icon, repository of the source), a placeholder would break them
+     */
+    private readonly realValues = toSignal(
+        toObservable(
+            computed(() =>
+                this.cardColumnIds()
+                    .filter((id) => this.isFacetable(id))
+                    .join(','),
+            ),
+        ).pipe(
+            debounceTime(300),
+            switchMap((ids) =>
+                !ids
+                    ? of({} as Record<string, string>)
+                    : this.searchService
+                          .requestSearch({
+                              repository: HOME_REPOSITORY,
+                              metadataset: this.draftMds() || DEFAULT,
+                              query: RestConstants.DEFAULT_QUERY_NAME,
+                              contentType: 'FILES',
+                              maxItems: 1,
+                              body: {
+                                  criteria: [],
+                                  facets: ids.split(',').map((property) => ({ property })),
+                                  facetLimit: 1,
+                                  facetMinCount: 1,
+                              },
+                          })
+                          .pipe(
+                              map(
+                                  (result) =>
+                                      Object.fromEntries(
+                                          (result.facets ?? [])
+                                              .filter((f) => f.values?.length)
+                                              .map((f) => [f.property, f.values[0].value]),
+                                      ) as Record<string, string>,
+                              ),
+                              catchError(() => of({} as Record<string, string>)),
+                          ),
+            ),
+        ),
+        { initialValue: {} as Record<string, string> },
+    );
+    /** a dummy content with a value for every card column */
+    readonly previewDataSource = computed(
+        () =>
+            new NodeDataSource<Node>([
+                this.createPreviewNode(this.cardColumnIds(), this.realValues()),
+            ]),
+    );
 
     constructor() {
         this.refresh();
         effect(() => this.draftMds.set(this.draft()?.mds ?? null));
-        effect(() => {
-            const rows = this.filteredScopes().map((s) => ScopeManagementComponent.toRow(s));
-            this.dataSource.setData(rows, {
-                count: rows.length,
-                total: rows.length,
-                from: 0,
-            });
-        });
-        // the table is (re-)created whenever the editor is closed
-        effect(() => {
-            const entries = this.entriesRef();
-            if (entries) {
-                void entries.initOptionsGenerator({ customOptions: this.options });
-            }
-        });
     }
 
-    /** generic column, its header is translated via `NODE.<name>` like any node property */
-    private static column(name: string): ListItem {
-        return new ListItem('NODE', name);
-    }
-
-    private static rowOption(name: string, icon: string, callback: (row: ScopeRow) => void) {
-        const option = new OptionItem(name, icon, (row: ScopeRow, rows?: ScopeRow[]) =>
-            callback(row ?? rows?.[0]),
-        );
-        option.elementType = [ElementType.Group];
-        option.constrains = [Constrain.NoBulk];
-        option.group = DefaultGroups.Edit;
-        option.showAsAction = true;
-        return option;
-    }
-
-    private static toRow(scope: ScopeDefinition): ScopeRow {
-        return {
-            authorityName: scope.scopeId,
-            authorityType: 'GROUP',
-            ref: { id: scope.scopeId, repo: HOME_REPOSITORY, archived: false },
-            profile: { displayName: scope.displayName || scope.scopeId, groupType: 'SCOPE' },
-            properties: {
-                [ScopeManagementComponent.COLUMN_SCOPE_ID]: [scope.scopeId],
-                [ScopeManagementComponent.COLUMN_MDS]: [scope.mds || '-'],
-                [ScopeManagementComponent.COLUMN_FIELDS]: [String(scope.fields?.length ?? 0)],
-                [ScopeManagementComponent.COLUMN_BASE_QUERY]: [
-                    scope.baseQuery?.version != null ? String(scope.baseQuery.version) : '-',
-                ],
-            },
-            definition: scope,
-        };
-    }
-
-    refresh() {
+    refresh(then?: () => void) {
         this.scopesService.getAllScopes().subscribe({
-            next: (scopes) => this.scopes.set(scopes ?? []),
+            next: (scopes) => {
+                this.scopes.set(scopes ?? []);
+                then?.();
+            },
             error: (e) => {
                 this.scopes.set([]);
                 this.toast.error(e);
             },
+        });
+    }
+
+    /** opens the editor of a scope group of the list (authority name) */
+    configure(scopeId: string) {
+        // reload: the definition may have changed meanwhile (other admins, base query of the editors)
+        this.refresh(() => {
+            const scope = this.scopes()?.find((s) => s.scopeId === scopeId);
+            if (scope) {
+                this.edit(scope);
+            } else {
+                this.toast.error(null, 'SCOPES.ADMIN.NOT_FOUND');
+            }
         });
     }
 
@@ -303,23 +309,48 @@ export class ScopeManagementComponent {
             name: '',
             displayName: '',
             mds: this.metadataSets()?.[0]?.id ?? '',
-            fields: [],
+            fields: [this.newField(MANDATORY_FIELD)],
         });
+        this.customCardColumns.set(null);
     }
 
     edit(scope: ScopeDefinition) {
+        const fields: FieldDraft[] = (scope.fields ?? []).map((f) => ({
+            ...f,
+            id: f.id ?? '',
+            // the inventory decision is always internal
+            visibility: f.id === MANDATORY_FIELD ? 'internal' : f.visibility ?? 'internal',
+            // scopes configured before the defaults existed: complete them, saving stores them
+            publishedValues: f.publishedValues ?? DEFAULT_FIELD_VALUES[f.id]?.publishedValues,
+            excludedValues: f.excludedValues ?? DEFAULT_FIELD_VALUES[f.id]?.excludedValues,
+            uploadValues: f.uploadValues ?? DEFAULT_FIELD_VALUES[f.id]?.uploadValues,
+        }));
+        if (!fields.some((f) => f.id === MANDATORY_FIELD)) {
+            fields.unshift(this.newField(MANDATORY_FIELD));
+        }
         this.draft.set({
             scopeId: scope.scopeId,
             name: scope.scopeId,
             displayName: scope.displayName,
             mds: scope.mds ?? '',
-            fields: (scope.fields ?? []).map((f) => ({
-                ...f,
-                id: f.id ?? '',
-                visibility: f.visibility ?? 'internal',
-                replaces: !!f.replaces,
-            })),
+            fields,
         });
+        const cardColumns = scope.presentation?.cardColumns;
+        this.customCardColumns.set(cardColumns?.length ? cardColumns : null);
+    }
+
+    isMandatory(id: string): boolean {
+        return id === MANDATORY_FIELD;
+    }
+
+    private newField(id: string): FieldDraft {
+        return {
+            id,
+            visibility: 'internal',
+            // same rule as the backend, which derives the stored value
+            replaces: !this.scopeOnlyProperties().includes(id),
+            ...DEFAULT_FIELD_VALUES[id],
+        };
     }
 
     cancel() {
@@ -331,37 +362,96 @@ export class ScopeManagementComponent {
         this.draftMds.set(mds);
     }
 
-    isSelected(item: ListItem): boolean {
-        return this.selectedIds().has(item.name);
-    }
-
-    toggleField(item: ListItem, checked: boolean) {
-        const fields = this.draft().fields;
-        if (checked && !fields.some((f) => f.id === item.name)) {
-            fields.push({
-                id: item.name,
-                visibility: 'internal',
-                replaces: false,
-                ...DEFAULT_FIELD_VALUES[item.name],
-            });
-        } else if (!checked) {
-            this.draft().fields = fields.filter((f) => f.id !== item.name);
-        }
+    /** new field list from the property list: existing drafts are kept, new ones get the defaults */
+    setFields(ids: string[]) {
+        const draft = this.draft();
+        draft.fields = ids.map((id) => draft.fields.find((f) => f.id === id) ?? this.newField(id));
         this.fieldsVersion.update((v) => v + 1);
     }
 
+    getField(id: string): FieldDraft | undefined {
+        return this.draft()?.fields.find((f) => f.id === id);
+    }
+
+    /** caption of the mds widget, else the translation of the property (e.g. NODE.ccm:commonlicense_key) */
     getLabel(id: string): string {
-        return ScopeMdsService.getLabel(this.widgets(), id);
+        const caption = ScopeMdsService.getLabel(this.widgets(), id);
+        if (caption !== id) {
+            return caption;
+        }
+        const key = 'NODE.' + id;
+        const translated = this.translate.instant(key);
+        return translated && translated !== key ? translated : id;
     }
 
-    removeField(index: number) {
-        this.draft().fields.splice(index, 1);
-        this.fieldsVersion.update((v) => v + 1);
+    /** stored, non date properties can be aggregated */
+    /**
+     * stored, non date properties with a widget in the mds can be aggregated (the search rejects facets
+     * without a widget)
+     */
+    private isFacetable(id: string): boolean {
+        const widget = this.widgets()[id];
+        return (
+            !!widget &&
+            ScopeManagementComponent.PROPERTY_PREFIXES.some((prefix) => id.startsWith(prefix)) &&
+            !widget.type?.startsWith('date')
+        );
     }
 
-    dropField(event: CdkDragDrop<FieldDraft[]>) {
-        moveItemInArray(this.draft().fields, event.previousIndex, event.currentIndex);
-        this.fieldsVersion.update((v) => v + 1);
+    setCardColumns(ids: string[]) {
+        this.customCardColumns.set(ids);
+    }
+
+    resetCardColumns() {
+        this.customCardColumns.set(null);
+    }
+
+    private toListItems(ids: string[]): ListItem[] {
+        return ids.map((id) =>
+            Object.assign(new ListItem('NODE', id), { label: this.getLabel(id) }),
+        );
+    }
+
+    /**
+     * dummy content of the preview: every card column gets a value, a real value of the repository,
+     * the first value of a valuespace, a date for date widgets or a placeholder text
+     */
+    private createPreviewNode(columns: string[], realValues: Record<string, string>): Node {
+        const widgets = this.widgets();
+        const properties: Record<string, string[]> = {};
+        for (const id of columns) {
+            const widget = widgets[id];
+            const value =
+                realValues[id] ??
+                EXAMPLE_VALUES[id] ??
+                widget?.values?.[0]?.id ??
+                (widget?.type?.startsWith('date')
+                    ? new Date().toISOString()
+                    : FREE_TEXT_WIDGETS.includes(widget?.type)
+                    ? DUMMY_TEXT
+                    : null);
+            // no value: the renderer shows its empty state (a placeholder would break e.g. the
+            // license icon or the repository of the source)
+            if (value) {
+                properties[id] = [value];
+            }
+        }
+        properties[RestConstants.CM_NAME] ??= [DUMMY_TEXT];
+        properties[RestConstants.LOM_PROP_TITLE] ??= [DUMMY_TEXT];
+        return {
+            ref: { id: 'scope-card-preview', repo: HOME_REPOSITORY, isHomeRepo: true },
+            name: DUMMY_TEXT,
+            title: DUMMY_TEXT,
+            type: RestConstants.CCM_TYPE_IO,
+            mediatype: 'file',
+            isDirectory: false,
+            aspects: [],
+            access: [],
+            // no image: the card shows the icon, like a content without a preview
+            preview: { isIcon: true, url: '', width: 0, height: 0 },
+            icon: { fontGlyphId: 'description' },
+            properties,
+        } as Node;
     }
 
     canSave(): boolean {
@@ -381,14 +471,17 @@ export class ScopeManagementComponent {
             id: f.id.trim(),
         }));
         const mds = draft.mds?.trim() || null;
+        const custom = this.customCardColumns();
+        const presentation = custom ? { cardColumns: custom } : null;
         this.saving.set(true);
         const request = draft.scopeId
-            ? this.scopesService.updateScope(draft.scopeId, { mds, fields })
+            ? this.scopesService.updateScope(draft.scopeId, { mds, fields, presentation })
             : this.scopesService.createScope({
                   name: draft.name.trim(),
                   displayName: draft.displayName?.trim() || draft.name.trim(),
                   mds,
                   fields,
+                  presentation,
               });
         request.subscribe({
             next: () => {

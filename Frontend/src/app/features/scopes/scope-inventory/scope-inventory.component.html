@@ -1,0 +1,32 @@
+<div class="label" [id]="labelId">{{ widget()?.caption || property }}</div>
+<mat-radio-group
+  [value]="value() || NONE"
+  [disabled]="disabled()"
+  [attr.aria-labelledby]="labelId"
+  (change)="onChange($event.value)"
+>
+  @for (v of widget()?.values ?? []; track v.id) {
+  <mat-radio-button [value]="v.id" color="primary">
+    @if (v.icon) {
+    <i class="value-icon" [esIcon]="v.icon"></i>
+    }
+    {{ v.caption || v.id }}
+  </mat-radio-button>
+  }
+</mat-radio-group>
+<div class="state">
+  <span class="status" [class.published]="state().published">
+    <i [esIcon]="state().published ? 'visibility' : 'visibility_off'"></i>
+    {{
+      (state().published
+        ? 'SCOPES.EDITORIAL.STATE.PUBLISHED'
+        : 'SCOPES.EDITORIAL.STATE.NOT_PUBLISHED'
+      ) | translate
+    }}
+  </span>
+  @if (state().excluded) {
+  <span class="status excluded">
+    <i esIcon="block"></i>{{ 'SCOPES.EDITORIAL.STATE.EXCLUDED' | translate }}
+  </span>
+  }
+</div>

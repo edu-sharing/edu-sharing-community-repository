@@ -66,4 +66,12 @@ class ScopeDefinitionJsonTest {
         String json = ScopeDefinitionJson.write(List.of(ScopeField.builder().id("a").visibility(ScopeFieldVisibility.PUBLIC).build()));
         assertTrue(json.contains("\"visibility\":\"public\""), json);
     }
+
+    @Test
+    void presentationIgnoresUnknownKeys() {
+        ScopePresentation presentation = ScopeDefinitionJson.parsePresentation("{\"cardColumns\":[\"cclom:title\"],\"future\":true}");
+        assertEquals(List.of("cclom:title"), presentation.getCardColumns());
+        assertNull(ScopeDefinitionJson.parsePresentation(null));
+        assertThrows(IllegalArgumentException.class, () -> ScopeDefinitionJson.parsePresentation("{"));
+    }
 }

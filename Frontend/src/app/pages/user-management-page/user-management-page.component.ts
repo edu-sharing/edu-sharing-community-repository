@@ -1,6 +1,11 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TranslationsService, UIService } from 'ngx-edu-sharing-ui';
-import { HOME_REPOSITORY, OrganizationV1Service, ScopesService } from 'ngx-edu-sharing-api';
+import {
+    HOME_REPOSITORY,
+    OrganizationV1Service,
+    RestConstants,
+    ScopesService,
+} from 'ngx-edu-sharing-api';
 import {
     ConfigurationService,
     LoginResult,
@@ -30,6 +35,7 @@ type UserManagementTab = 'ORG' | 'SCOPES' | 'GROUP' | 'USER' | 'DELETE';
     standalone: false,
 })
 export class UserManagementPageComponent implements OnInit, OnDestroy {
+    readonly GROUP_TYPE_SCOPE = RestConstants.GROUP_TYPE_SCOPE;
     private toast = inject(Toast);
     private router = inject(Router);
     private platformLocation = inject(PlatformLocation);

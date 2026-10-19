@@ -41,7 +41,8 @@ export interface Constraints {
 export type Values = { [property: string]: string[] | null };
 
 /** User-selectable Bulk mode per field */
-export type BulkMode = 'no-change' | 'replace';
+/** `append`: add the values to the ones of each node (multi value widgets, see EditorBulkMode.allowAppend) */
+export type BulkMode = 'no-change' | 'replace' | 'append';
 
 /** Bulk mode and -behavior of the editor. */
 export type EditorBulkMode =
@@ -52,6 +53,8 @@ export type EditorBulkMode =
     | {
           isBulk: true;
           bulkBehavior: BulkBehavior.Default;
+          /** offer "append" next to "replace" for multi value widgets */
+          allowAppend?: boolean;
       }
     // All fields are replaced.
     | {

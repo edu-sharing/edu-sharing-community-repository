@@ -178,35 +178,8 @@
           </mat-tab>
           }
         </mat-tab-group>
-        } } @if ((params$ | async)?.primaryMode; as mode) { @if (mode === 'scope') {
-        <div class="scope-toolbar">
-          <span class="scope-name">
-            <i esIcon="rule"></i>
-            {{ scopesService.activeScope()?.definition?.displayName }}
-          </span>
-          <button
-            mat-button
-            color="primary"
-            data-test="button-scope-edit-all"
-            [disabled]="!scopeHitCount()"
-            (click)="editAllScopeHits()"
-          >
-            <i esIcon="checklist"></i>
-            {{ 'EDITORIAL.SCOPE.EDIT_ALL' | translate : { count: scopeHitCount() } }}
-          </button>
-          @if (scopesService.isOrgAdmin()) {
-          <button
-            mat-button
-            data-test="button-scope-settings"
-            (click)="goToComponent('scopeSettings')"
-          >
-            <i esIcon="manage_search"></i>
-            {{ 'EDITORIAL.SCOPE.BASE_QUERY.OPEN' | translate }}
-          </button>
-          }
-        </div>
-        } @if ( mode === 'activity' || mode === 'share' || mode === 'assignment' || mode ===
-        'suggestions' || mode === 'scope' ) {
+        } } @if ((params$ | async)?.primaryMode; as mode) { @if ( mode === 'activity' || mode ===
+        'share' || mode === 'assignment' || mode === 'suggestions' || mode === 'scope' ) {
         <es-node-entries-wrapper
           [primaryInstance]="true"
           [dataSource]="dataSource"
@@ -219,8 +192,35 @@
           (fetchData)="fetchEvent($event)"
           (selectionChange)="selectionChange($event)"
           [columns]="columns()"
+          [configureColumns]="mode === 'scope'"
+          (columnsChange)="saveScopeColumns($event)"
           [displayType]="editorialPageService.displayType()"
         >
+          <!-- actions for the whole result set: bottom left, next to the paginator -->
+          <ng-template #footer>
+            @if (mode === 'scope') {
+            <button
+              mat-flat-button
+              color="primary"
+              data-test="button-scope-edit-all"
+              [disabled]="!scopeHitCount()"
+              (click)="editAllScopeHits()"
+            >
+              <i esIcon="checklist"></i>
+              {{ 'EDITORIAL.SCOPE.EDIT_ALL' | translate : { count: scopeHitCount() } }}
+            </button>
+            @if (scopesService.isOrgAdmin() && scopeInboxTab()) {
+            <button
+              mat-button
+              color="primary"
+              data-test="button-scope-settings"
+              (click)="goToComponent('scopeSettings')"
+            >
+              <i esIcon="manage_search"></i>
+              {{ 'EDITORIAL.SCOPE.BASE_QUERY.OPEN' | translate }}
+            </button>
+            } }
+          </ng-template>
           <ng-template #empty>
             <div class="empty">
               {{

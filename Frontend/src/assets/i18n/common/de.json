@@ -942,6 +942,7 @@
     "LICENSE": "Lizenz",
     "WORKFLOW": "Workflow-Status",
     "BULK_EDIT": "Bearbeiten",
+    "BULK_APPEND": "Ergänzen",
     "LICENSE_LINK": "Lizenz verwalten",
     "TEMPLATE_LINK": "Metadaten-Vorlage verwalten",
     "CONTRIBUTOR_LINK": "Weitere Beteiligte",
@@ -1175,10 +1176,10 @@
     "ASSIGNMENT_COPY": "Die Aufgabe wurde kopiert.",
     "ASSIGNMENT_DELETE": "Die Aufgabe wurde gelöscht.",
     "SCOPE": {
-      "SAVED": "Gespeichert. Die Suche ist in spätestens einer Minute aktualisiert.",
-      "DELETED": "Eintrag entfernt. Die Suche ist in spätestens einer Minute aktualisiert.",
+      "SAVED": "Gespeichert.",
+      "DELETED": "Eintrag entfernt.",
       "NOTHING_CHANGED": "Es wurde nichts geändert.",
-      "BULK_FINISHED": "{{done}} von {{total}} Inhalten geändert. Die Suche wird in Kürze aktualisiert.",
+      "BULK_FINISHED": "{{done}} von {{total}} Inhalten geändert.",
       "BULK_FINISHED_WITH_ERRORS": "{{done}} von {{total}} Inhalten geändert, einige mit Fehlern. Details im Redaktions-Panel."
     }
   },
@@ -1798,6 +1799,10 @@
     "TO": "bis"
   },
   "SCOPES": {
+    "VIEW_AS_READER": {
+      "LABEL": "Als Leser ansehen",
+      "HINT": "Die Suche zeigt die Redaktion so, wie Nutzer und Gäste sie sehen: nur veröffentlichte Inhalte."
+    },
     "SWITCHER": {
       "TOOLTIP": "Redaktion (Scope) wechseln",
       "GLOBAL": "Global (keine Redaktion)",
@@ -1814,8 +1819,9 @@
       "CREATE": "Redaktion anlegen",
       "CREATE_TITLE": "Neue Redaktion",
       "EDIT_TITLE": "Redaktion bearbeiten",
-      "EDIT": "Bearbeiten",
+      "EDIT": "Redaktion konfigurieren",
       "MANAGE_MEMBERS": "Mitglieder verwalten",
+      "NOT_FOUND": "Die Redaktion wurde nicht gefunden.",
       "NAME": "Name",
       "NAME_HINT": "Technischer Name, die Gruppe heißt GROUP_ORG_<Name>",
       "DISPLAY_NAME": "Anzeigename",
@@ -1825,10 +1831,17 @@
       "FIELDS": "Feldliste",
       "FIELDS_HINT": "Properties aus dem Metadatenset auswählen, die die Redaktion pflegen darf",
       "FIELDS_EMPTY": "Noch keine Felder",
+      "CARD": {
+        "TITLE": "Kachel-Metadaten",
+        "HINT": "Diese Angaben zeigen die Kacheln und die Liste der Suche sowie die Inhalte von Sammlungen in dieser Redaktion – für alle Nutzer und Gäste. Interne Felder sehen nur Redakteure.",
+        "DEFAULT": "Standard aus dem Metadatenset",
+        "RESET": "Auf Standard zurücksetzen",
+        "EMPTY": "Keine Angaben",
+        "PREVIEW": "Vorschau"
+      },
       "BASE_QUERY_VERSION": "Basisabfrage (Version)",
       "ACTIONS": "Aktionen",
       "EMPTY": "Keine Redaktionen vorhanden",
-      "DELETE_INFO": "Eine Redaktion wird über ihre Organisation gelöscht. Dabei werden alle Einträge und die Historie sofort und endgültig entfernt.",
       "CREATED": "Redaktion angelegt",
       "UPDATED": "Redaktion gespeichert",
       "VISIBILITY": {
@@ -1838,7 +1851,8 @@
       "FIELD": {
         "VISIBILITY": "Sichtbarkeit",
         "REPLACES": "Ersetzt Original",
-        "REPLACES_HINT": "Der Wert ersetzt im aktiven Scope den Originalwert",
+        "REPLACES_HINT": "Der Wert ersetzt im aktiven Scope den Originalwert. Gilt automatisch für alle regulären Eigenschaften, redaktionelle Eigenschaften gibt es nur im Scope.",
+        "MANDATORY": "Pflichtfeld: Die Bestandsentscheidung steuert die Veröffentlichung",
         "REMOVE": "Entfernen",
         "FILTER": "Properties filtern"
       }
@@ -1863,7 +1877,7 @@
       "REMOVE_VALUE": "Wert entfernen",
       "ORIGINAL": "Original:",
       "RESET_TO_ORIGINAL": "Auf Original zurücksetzen",
-      "REASON": "Anlass (optional)",
+      "REASON": "Änderungskommentar (optional)",
       "HINT_NOT_PUBLIC": "Der Inhalt ist nicht öffentlich. Mit der Zulassung wird er für alle Nutzer und Gäste dieser Redaktion sichtbar.",
       "HINT_EXCLUDED_AND_PUBLISHED": "Der Inhalt ist abgelehnt und gleichzeitig zugelassen. Er bleibt für Gäste sichtbar.",
       "DELETE": {
@@ -1881,6 +1895,7 @@
         "CONFIRM_DELETE_TITLE": "Einträge entfernen?",
         "CONFIRM_DELETE_MESSAGE": "Die Einträge von {{count}} Inhalten werden aus dieser Redaktion entfernt.",
         "STATE_QUEUED": "Wartet…",
+        "STATE_QUEUED_AHEAD": "Wartet auf {{jobs}} Aufträge davor...",
         "STATE_RUNNING": "{{done}} von {{total}} bearbeitet",
         "STATE_FINISHED": "Fertig: {{done}} von {{total}}",
         "STATE_FAILED": "Abgebrochen nach {{done}} von {{total}}",

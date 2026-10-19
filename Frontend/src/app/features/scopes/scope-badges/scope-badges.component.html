@@ -1,15 +1,24 @@
-@if (own(); as own) {
+@if (own(); as own) { @if (own.inventory; as inventory) {
+<es-scope-inventory
+  [widgets]="widgets()"
+  [value]="inventory.value"
+  [disabled]="saving()"
+  (valueChange)="setInventory($event)"
+></es-scope-inventory>
+}
 <div class="own" [attr.aria-label]="'SCOPES.BADGES.OWN' | translate">
-  @if (!own.entry) {
+  @if (!own.entry) { @if (!own.inventory) {
+  <!-- otherwise the inventory decision without a selection says it -->
   <span class="status muted">{{ 'SCOPES.BADGES.NO_ENTRY' | translate }}</span>
-  } @else {
+  } } @else { @if (!own.inventory) {
+  <!-- otherwise the inventory decision shows the state -->
   <span class="status" [class.published]="own.entry.published">
     <i [esIcon]="own.entry.published ? 'visibility' : 'visibility_off'"></i>
     {{
       (own.entry.published ? 'SCOPES.BADGES.PUBLISHED' : 'SCOPES.BADGES.NOT_PUBLISHED') | translate
     }}
   </span>
-  @for (s of own.status; track s.label) {
+  } @for (s of own.status; track s.label) {
   <span class="status" [matTooltip]="s.label">{{ s.value }}</span>
   } }
 </div>

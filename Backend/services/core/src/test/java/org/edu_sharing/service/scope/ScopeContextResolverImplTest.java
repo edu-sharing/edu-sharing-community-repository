@@ -109,6 +109,21 @@ class ScopeContextResolverImplTest {
         return underTest.resolve();
     }
 
+    @Test
+    void runWithScopeSetsTheActiveScopeOfTheThread() throws Exception {
+        // a job thread: no domain, no selection
+        assertTrue(resolveFresh().isEmpty());
+
+        ActiveScope inJob = underTest.runWithScope(OWN_SCOPE, () -> resolveFresh().orElseThrow());
+        assertEquals(OWN_SCOPE, inJob.getScopeId());
+        assertEquals(ScopeRole.EDITOR, inJob.getRole());
+        // not a member: read only
+        assertEquals(ScopeRole.TEMPORARY_READER, underTest.runWithScope(DOMAIN_SCOPE, () -> resolveFresh().orElseThrow()).getRole());
+
+        assertTrue(resolveFresh().isEmpty());
+        assertThrows(ScopeNotFoundException.class, () -> underTest.runWithScope("GROUP_gone", () -> null));
+    }
+
     /**
      * domain x membership x selection of the switcher (concept §2.1)
      */

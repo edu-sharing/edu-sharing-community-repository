@@ -1,6 +1,7 @@
 package org.edu_sharing.service.scope;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,15 @@ public interface ScopeContextResolver {
      * @throws org.edu_sharing.service.InsufficientPermissionException if the user is not a member of the scope group
      */
     void setSelectedScope(String scopeId);
+
+    /**
+     * runs the work with the given scope as active scope of the current thread, for jobs without request and session
+     * (e.g. the bulk job resolving its search). The role is resolved for the current user like for a selection of the
+     * switcher: members are editors, others readers.
+     *
+     * @throws ScopeNotFoundException if the scope does not exist
+     */
+    <T> T runWithScope(String scopeId, Callable<T> work) throws Exception;
 
     /**
      * @throws org.edu_sharing.service.InsufficientPermissionException unless an active scope exists and the user is

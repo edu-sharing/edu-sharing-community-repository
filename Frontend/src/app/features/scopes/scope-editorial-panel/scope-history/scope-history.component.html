@@ -39,7 +39,9 @@
       }
     </div>
     @if (entry.reason) {
-    <div class="reason">{{ entry.reason }}</div>
+    <div class="reason" [title]="'SCOPES.EDITORIAL.REASON' | translate">
+      <i esIcon="comment"></i>{{ entry.reason }}
+    </div>
     }
   </li>
   }

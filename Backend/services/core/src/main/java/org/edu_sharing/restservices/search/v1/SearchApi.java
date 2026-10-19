@@ -144,6 +144,7 @@ public class SearchApi {
 					? parameters.getFacetMinCount() : 5);
 			token.setQueryString(parameters.getFacetSuggest());
 			token.setPermissions(parameters.getPermissions());
+			token.setScopeRole(parameters.getScopeRole());
 			token.setResolveCollections(parameters.isResolveCollections());
 			token.setReturnSuggestion(parameters.isReturnSuggestions());
 			token.setExcludes(parameters.getExcludes());

@@ -24,14 +24,26 @@
   </div>
   }
 </div>
-} @if (entriesService.paginationStrategy === 'paginator') {
-<mat-paginator
-  #paginator
-  [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"
-  [class.display-none]="
-    (entriesService.dataSource.isLoading && entriesService.dataSource.isLoading !== 'page') ||
-    entriesService.dataSource.isEmpty()
-  "
-  (page)="openPage($event)"
-></mat-paginator>
+} @if (templatesService.footer) {
+<div class="footer">
+  <div class="footer-content">
+    <ng-container *ngTemplateOutlet="templatesService.footer"></ng-container>
+  </div>
+  <ng-container *ngTemplateOutlet="paginatorTemplate"></ng-container>
+</div>
+} @else {
+<ng-container *ngTemplateOutlet="paginatorTemplate"></ng-container>
 }
+<ng-template #paginatorTemplate>
+  @if (entriesService.paginationStrategy === 'paginator') {
+  <mat-paginator
+    #paginator
+    [pageSizeOptions]="entriesGlobalService.getPaginatorSizeOptions(entriesService.scope)"
+    [class.display-none]="
+      (entriesService.dataSource.isLoading && entriesService.dataSource.isLoading !== 'page') ||
+      entriesService.dataSource.isEmpty()
+    "
+    (page)="openPage($event)"
+  ></mat-paginator>
+  }
+</ng-template>

@@ -128,7 +128,7 @@ export class MainMenuEntriesService {
         },
         {
             name: 'SIDEBAR.EDITORIAL_SCOPE',
-            icon: 'rule',
+            icon: 'newspaper',
             target: { type: 'path', path: 'editorial/scope' },
             scope: 'editorial_scope',
             // only inside an active scope the user is an editor of (see ScopesService)

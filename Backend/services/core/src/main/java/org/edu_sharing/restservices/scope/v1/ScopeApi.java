@@ -93,6 +93,17 @@ public class ScopeApi {
         return Response.ok(getDefinitionService().getAllScopes()).build();
     }
 
+    @GET
+    @Path("/{repository}/admin/scopeOnlyProperties")
+    @Operation(summary = "Properties that only exist in scope entries", description = "Every other property of a field list replaces the original value inside the scope (ScopeField.replaces). Admin only.")
+    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))
+    @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    public Response getScopeOnlyProperties(
+            @Parameter(description = RestConstants.MESSAGE_REPOSITORY_ID, required = true, schema = @Schema(defaultValue = "-home-")) @PathParam("repository") String repository) {
+        return Response.ok(getDefinitionService().getScopeOnlyProperties()).build();
+    }
+
     @POST
     @Path("/{repository}/admin/scopes")
     @Operation(summary = "Create a scope group", description = "Creates the group like an organization (org admins, shared folder) and marks it as scope group. Admin only.")
@@ -106,12 +117,12 @@ public class ScopeApi {
         if (request == null || request.getName() == null || request.getName().isBlank()) {
             throw new BadRequestException("name must be set");
         }
-        return Response.ok(getDefinitionService().createScope(request.getName(), request.getDisplayName(), request.getMds(), request.getFields())).build();
+        return Response.ok(getDefinitionService().createScope(request.getName(), request.getDisplayName(), request.getMds(), request.getFields(), request.getPresentation())).build();
     }
 
     @PUT
     @Path("/{repository}/admin/scopes/{scopeId}")
-    @Operation(summary = "Change mds and field list of a scope group", description = "Admin only.")
+    @Operation(summary = "Change mds, field list and presentation settings of a scope group", description = "Admin only. presentation = null removes the settings.")
     @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ScopeDefinition.class)))
     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -123,7 +134,7 @@ public class ScopeApi {
         if (request == null) {
             throw new BadRequestException("body must be set");
         }
-        return Response.ok(getDefinitionService().updateScope(scopeId, request.getMds(), request.getFields())).build();
+        return Response.ok(getDefinitionService().updateScope(scopeId, request.getMds(), request.getFields(), request.getPresentation())).build();
     }
 
     @PUT
@@ -205,8 +216,8 @@ public class ScopeApi {
 
     @POST
     @Path("/{repository}/scopes/{scopeId}/bulk")
-    @Operation(summary = "Start a bulk change", description = "Sets properties for (or removes the entries of) a list of nodes or all hits of a search. Runs asynchronously, returns the job id.")
-    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = String.class)))
+    @Operation(summary = "Start a bulk change", description = "Sets properties for (or removes the entries of) a list of nodes or all hits of a search. Runs asynchronously, returns the initial state of the job (jobId).")
+    @ApiResponse(responseCode = "200", description = RestConstants.HTTP_200, content = @Content(schema = @Schema(implementation = ScopeBulkStatus.class)))
     @ApiResponse(responseCode = "400", description = RestConstants.HTTP_400, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @ApiResponse(responseCode = "403", description = RestConstants.HTTP_403, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @ApiResponse(responseCode = "404", description = RestConstants.HTTP_404, content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -217,7 +228,10 @@ public class ScopeApi {
         if (request == null || (request.getNodeIds() == null) == (request.getSearch() == null)) {
             throw new BadRequestException("exactly one of nodeIds or search must be set");
         }
-        return Response.ok(getScopeService(repository).startBulk(scopeId, request)).build();
+        ScopeService scopeService = getScopeService(repository);
+        String jobId = scopeService.startBulk(scopeId, request);
+        ScopeBulkStatus status = scopeService.getBulkStatus(scopeId, jobId);
+        return Response.ok(status != null ? status : ScopeBulkStatus.builder().jobId(jobId).scopeId(scopeId).state(ScopeBulkStatus.State.QUEUED).build()).build();
     }
 
     @GET

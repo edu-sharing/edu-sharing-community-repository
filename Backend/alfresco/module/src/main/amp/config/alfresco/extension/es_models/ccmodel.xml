@@ -2576,6 +2576,12 @@
                     <type>d:noderef</type>
                     <multiple>false</multiple>
                 </property>
+                <!-- json object of presentation settings (ScopePresentation), e.g. {"cardColumns": ["cclom:title"]} -->
+                <property name="ccm:scope_settings">
+                    <type>d:text</type>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
             </properties>
         </aspect>
         <aspect name="ccm:editorialScopeProperties">

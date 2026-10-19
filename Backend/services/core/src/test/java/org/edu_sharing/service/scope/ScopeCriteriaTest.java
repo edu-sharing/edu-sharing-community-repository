@@ -3,11 +3,6 @@ package org.edu_sharing.service.scope;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.json.JsonpUtils;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import org.alfresco.service.cmr.dictionary.AspectDefinition;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.dictionary.PropertyDefinition;
-import org.alfresco.service.namespace.QName;
-import org.edu_sharing.repository.client.tools.CCConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,13 +10,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class ScopeCriteriaTest {
 
@@ -32,33 +25,12 @@ class ScopeCriteriaTest {
             ScopeField.builder().id("cclom:title").visibility(ScopeFieldVisibility.PUBLIC).replaces(true).build(),
             ScopeField.builder().id("ccm:curriculum").visibility(ScopeFieldVisibility.INTERNAL).replaces(true).build())).build();
 
-    private final ScopeCriteria underTest = new ScopeCriteria(new ScopesSettings(), mock(ScopeContextResolver.class), mock(DictionaryService.class)) {
+    private final ScopeCriteria underTest = new ScopeCriteria(new ScopesSettings(), mock(ScopeContextResolver.class), mock(ScopeProperties.class)) {
         @Override
         Set<String> getScopeOnlyProperties() {
             return Set.of("ccm:editorial_release", "ccm:editorial_recommendation", "ccm:editorial_inventory");
         }
     };
-
-    @Test
-    void scopeOnlyPropertiesIncludeSubAspects() {
-        DictionaryService dictionary = mock(DictionaryService.class);
-        QName root = QName.createQName(CCConstants.CCM_ASPECT_EDITORIAL_SCOPE_PROPERTIES);
-        QName custom = QName.createQName(CCConstants.NAMESPACE_CCM, "customEditorialScopeProperties");
-        when(dictionary.getSubAspects(root, true)).thenReturn(List.of(custom));
-        AspectDefinition rootAspect = aspect("editorial_inventory");
-        AspectDefinition customAspect = aspect("editorial_release");
-        when(dictionary.getAspect(root)).thenReturn(rootAspect);
-        when(dictionary.getAspect(custom)).thenReturn(customAspect);
-        ScopeCriteria criteria = new ScopeCriteria(new ScopesSettings(), mock(ScopeContextResolver.class), dictionary);
-        assertEquals(Set.of("ccm:editorial_inventory", "ccm:editorial_release"), criteria.getScopeOnlyProperties());
-    }
-
-    private static AspectDefinition aspect(String property) {
-        AspectDefinition aspect = mock(AspectDefinition.class);
-        PropertyDefinition definition = mock(PropertyDefinition.class);
-        when(aspect.getProperties()).thenReturn(Map.of(QName.createQName(CCConstants.NAMESPACE_CCM, property), definition));
-        return aspect;
-    }
 
     private static Optional<ActiveScope> scope(String role) {
         return role.equals("-") ? Optional.empty()
@@ -115,6 +87,32 @@ class ScopeCriteriaTest {
         assertTrue(json(ScopeCriteriaRewriter.rewrite(exists, "ccm:editorial_release")).contains("\"scopes.properties.ccm:editorial_release\""));
         // only the exact property, not one that merely starts with the same name
         assertTrue(json(ScopeCriteriaRewriter.rewrite(other, "ccm:editorial_release")).contains("\"properties.ccm:editorial_release_x.keyword\""));
+    }
+
+    /**
+     * ngsearchword searches many fields: inside the scope it also matches the replaced values of the own entry
+     */
+    @Test
+    void fullTextAlsoMatchesTheReplacedValuesOfTheOwnScope() {
+        Query fullText = Query.of(q -> q.bool(b -> b
+                .should(s -> s.wildcard(w -> w.field("properties.cclom:title.keyword").value("*test*")))
+                .should(s -> s.wildcard(w -> w.field("properties.cm:name.keyword").value("*test*")))));
+
+        assertEquals(List.of("cclom:title", "ccm:curriculum"), underTest.getVisibleReplacingFields(scope("EDITOR").orElseThrow()));
+        // readers: public replacing fields only
+        assertEquals(List.of("cclom:title"), underTest.getVisibleReplacingFields(scope("GUEST").orElseThrow()));
+
+        String editor = json(ScopeCriteriaRewriter.fullText(SCOPE, List.of("cclom:title"), false, fullText));
+        // the original query stays, the replaced title is searched in the own entry
+        assertTrue(editor.contains("\"properties.cclom:title.keyword\""));
+        assertTrue(editor.contains("\"scopes.properties.cclom:title.keyword\""));
+        assertTrue(editor.contains("\"scopes.scopeId\""));
+        assertFalse(editor.contains("\"scopes.published\""));
+        // cm:name is not replaced: never moved
+        assertFalse(editor.contains("scopes.properties.cm:name"));
+        assertTrue(json(ScopeCriteriaRewriter.fullText(SCOPE, List.of("cclom:title"), true, fullText)).contains("\"scopes.published\""));
+        // no replacing fields: unchanged
+        assertSame(fullText, ScopeCriteriaRewriter.fullText(SCOPE, List.of(), false, fullText));
     }
 
     @Test

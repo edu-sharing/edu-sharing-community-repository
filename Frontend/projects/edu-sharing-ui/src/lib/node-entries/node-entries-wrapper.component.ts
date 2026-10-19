@@ -117,6 +117,10 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
      */
     @ContentChild('empty') emptyRef: TemplateRef<any>;
     /**
+     * content at the bottom left, next to the paginator
+     */
+    @ContentChild('footer') footerRef: TemplateRef<unknown>;
+    /**
      * custom area for actions only for NodeEntriesDisplayType.SmallGrid (per card at the bottom)
      */
     @ContentChild('actionArea') actionAreaRef: TemplateRef<any>;
@@ -580,6 +584,7 @@ export class NodeEntriesWrapperComponent<T extends NodeEntriesDataType>
     private updateTemplates(): void {
         this.templatesService.title = this.titleRef;
         this.templatesService.empty = this.emptyRef;
+        this.templatesService.footer = this.footerRef;
         this.templatesService.actionArea = this.actionAreaRef;
         this.templatesService.overlay = this.overlayRef;
         this.templatesService.customCard = this.customCard;

@@ -58,6 +58,17 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
     @Input() addWidget = false;
     @Input() allowReplacing = true;
     @Input() bulkBehaviour = BulkBehavior.Default;
+    /**
+     * edit exactly these widgets of the mds (in this order) instead of an mds group, e.g. a field
+     * list configured outside of the mds. Takes precedence over `groupId`
+     */
+    @Input() widgetIds: string[];
+    /** bulk mode (keep / replace per widget) even for a single node */
+    @Input() forceBulk = false;
+    /** bulk mode: offer "append" next to "replace" for multi value widgets */
+    @Input() bulkAppend = false;
+    /** all widgets optional, e.g. values that only complement an existing node */
+    @Input() ignoreRequired = false;
     @Input() create: string;
     @Input() currentValues: MdsExtendedValues;
     /**
@@ -312,11 +323,18 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
         }
         this.isLoading = true;
         try {
+            this.mdsEditorInstance.customWidgetIds = this.widgetIds?.length ? this.widgetIds : null;
+            this.mdsEditorInstance.ignoreRequired = this.ignoreRequired;
+            const groupId = this.mdsEditorInstance.customWidgetIds
+                ? MdsEditorInstanceService.CUSTOM_GROUP_ID
+                : this.groupId;
             const config = {
-                groupId: this.groupId,
+                groupId,
                 refetch: this.nodeRefetch,
                 bulkBehavior: this.bulkBehaviour,
                 editorMode: this.editorMode ?? 'nodes',
+                forceBulk: this.forceBulk,
+                allowAppend: this.bulkAppend,
             };
             /*if (this.graphqlIds) {
                 this.editorType = await this.mdsEditorInstance.initWithGraphqlData(
@@ -328,7 +346,7 @@ export class MdsEditorWrapperComponent implements OnInit, OnChanges, OnDestroy {
             } else {
                 try {
                     this.editorType = await this.mdsEditorInstance.initWithoutNodes(
-                        this.groupId,
+                        groupId,
                         this.setId,
                         this.repository,
                         this.editorMode ?? 'search',

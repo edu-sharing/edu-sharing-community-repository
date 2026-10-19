@@ -1,5 +1,6 @@
 package org.edu_sharing.service.scope;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,11 @@ public class ScopeField implements Serializable {
     /** property in local form, e.g. "ccm:editorial_release" */
     private String id;
     private ScopeFieldVisibility visibility;
-    /** true: the value replaces the original value of the node inside the own active scope */
+    /**
+     * true: the value replaces the original value of the node inside the own active scope. Not configurable, derived
+     * from the dictionary (see {@link ScopeProperties}): regular properties replace, scope only properties don't
+     */
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, description = "derived: true for regular node properties, false for scope only properties")
     private boolean replaces;
     /**
      * values of this property that mark the entry as published (e.g. ["zugelassen"] for ccm:editorial_release).

@@ -23,6 +23,9 @@
       [value]="value"
       color="primary"
     >
+      @if (value.icon) {
+      <i class="value-icon" [esIcon]="value.icon"></i>
+      }
       {{ value.label }}
     </mat-radio-button>
     }

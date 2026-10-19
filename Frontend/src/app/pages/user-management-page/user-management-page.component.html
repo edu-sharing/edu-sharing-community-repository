@@ -29,10 +29,18 @@
       bodyClass="data-test-permissions-body-scopes"
     >
       <ng-template matTabContent>
-        <es-scope-management
-          [searchQuery]="searchQuery"
-          (manageMembers)="manageScopeMembers($event)"
-        ></es-scope-management>
+        <es-scope-management #scopeManagement>
+          <!-- the scope groups are organizations: same list and options, plus their configuration -->
+          @if (!scopeManagement.draft()) {
+          <es-permissions-authorities
+            [mode]="'ORG'"
+            [groupType]="GROUP_TYPE_SCOPE"
+            [searchQuery]="searchQuery"
+            (configureScope)="scopeManagement.configure($event)"
+            (manageScopeMembers)="manageScopeMembers($event)"
+          ></es-permissions-authorities>
+          }
+        </es-scope-management>
       </ng-template>
     </mat-tab>
     } @if (selected || isAdmin) {

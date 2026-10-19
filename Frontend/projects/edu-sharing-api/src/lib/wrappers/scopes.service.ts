@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, Observable, firstValueFrom, of, timer } from 'rxjs';
 import { catchError, distinctUntilChanged, map, switchMap, takeWhile, tap } from 'rxjs/operators';
@@ -41,6 +41,16 @@ export class ScopesService {
     readonly isEditor = computed(() => this.activeScope()?.role === 'EDITOR');
     /** true if the user is an org admin of the active scope group (may change the base query) */
     readonly isOrgAdmin = computed(() => !!this.activeScope()?.orgAdmin);
+    /**
+     * editors: search the active scope like its readers (`SearchParameters.scopeRole`). Only a view of
+     * the search, the role is unchanged; remembered per browser tab
+     */
+    readonly viewAsReader = signal(ScopesService.loadViewAsReader());
+    /** role a search inside the active scope requests, null for the own role */
+    readonly searchRole = computed(() =>
+        this.isEditor() && this.viewAsReader() ? ('TEMPORARY_READER' as const) : null,
+    );
+    private static readonly VIEW_AS_READER_KEY = 'scopes_view_as_reader';
     /** field list of the active scope */
     readonly fields = computed<ScopeField[]>(() => this.activeScope()?.definition?.fields ?? []);
 
@@ -72,6 +82,23 @@ export class ScopesService {
             this.api.setCurrentScope({ repository: HOME_REPOSITORY, body: { scopeId } }),
         );
         return this.refresh();
+    }
+
+    setViewAsReader(enabled: boolean) {
+        this.viewAsReader.set(enabled);
+        try {
+            sessionStorage.setItem(ScopesService.VIEW_AS_READER_KEY, String(enabled));
+        } catch (e) {
+            // storage not available (private mode): only for this page
+        }
+    }
+
+    private static loadViewAsReader(): boolean {
+        try {
+            return sessionStorage.getItem(ScopesService.VIEW_AS_READER_KEY) === 'true';
+        } catch (e) {
+            return false;
+        }
     }
 
     async refresh(): Promise<ActiveScope | null> {
@@ -130,7 +157,7 @@ export class ScopesService {
     startBulk(scopeId: string, request: ScopeBulkRequest): Observable<string> {
         return this.api
             .startBulk({ repository: HOME_REPOSITORY, scopeId, body: request })
-            .pipe(map((jobId) => String(jobId).replace(/^"|"$/g, '')));
+            .pipe(map((status) => status.jobId));
     }
 
     /** polls the job until it is finished or failed (emits every state) */
@@ -153,6 +180,14 @@ export class ScopesService {
 
     getAllScopes() {
         return this.api.getAllScopes({ repository: HOME_REPOSITORY });
+    }
+
+    /**
+     * properties that only exist in scope entries; every other field of a field list replaces the
+     * original value inside the scope (`ScopeField.replaces`)
+     */
+    getScopeOnlyProperties() {
+        return this.api.getScopeOnlyProperties({ repository: HOME_REPOSITORY });
     }
 
     createScope(body: Parameters<ScopeV1Service['createScope']>[0]['body']) {

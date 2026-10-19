@@ -579,6 +579,8 @@ public class CCConstants {
     public final static String CCM_PROP_SCOPE_BASE_QUERY_VERSION = "{http://www.campuscontent.de/model/1.0}scope_base_query_version";
     // shared folder of the scope group (upload target)
     public final static String CCM_PROP_SCOPE_FOLDER = "{http://www.campuscontent.de/model/1.0}scope_folder";
+    // json object of presentation settings (card columns ...)
+    public final static String CCM_PROP_SCOPE_SETTINGS = "{http://www.campuscontent.de/model/1.0}scope_settings";
 
     /**
      * scopes: editorial properties, only stored inside scope assignments (mongo), never on alfresco nodes

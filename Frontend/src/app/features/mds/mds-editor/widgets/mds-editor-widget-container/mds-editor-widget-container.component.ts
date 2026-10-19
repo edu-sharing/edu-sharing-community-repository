@@ -251,6 +251,21 @@ export class MdsEditorWidgetContainerComponent
         this.bulkMode.next(event.checked ? 'replace' : 'no-change');
     }
 
+    onBulkAppendChange(append: boolean): void {
+        this.bulkMode.next(append ? 'append' : 'replace');
+    }
+
+    /** "append" instead of "replace": offered by the editor (EditorBulkMode.allowAppend) for multi value widgets */
+    shouldShowBulkAppend(): boolean {
+        return (
+            this.shouldShowBulkEditToggle() &&
+            this.editorBulkMode?.isBulk === true &&
+            this.editorBulkMode.bulkBehavior === BulkBehavior.Default &&
+            !!this.editorBulkMode.allowAppend &&
+            !!this.widget.definition.type?.startsWith('multivalue')
+        );
+    }
+
     shouldShowError(): boolean {
         return !!this.control?.invalid && (this.control.touched || this.control.dirty);
     }

@@ -1,0 +1,18 @@
+.view-as-reader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    border-left: 4px solid transparent;
+    border-radius: 0 var(--borderRadiusCards) var(--borderRadiusCards) 0;
+    background-color: var(--backgroundColor);
+    // highlighted while active, same as the inventory decision
+    &.active {
+        border-left-color: var(--primary);
+    }
+    .hint {
+        font-size: var(--fontSizeXSmall);
+        color: var(--textLight);
+    }
+}

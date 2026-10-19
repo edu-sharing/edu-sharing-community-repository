@@ -3,8 +3,11 @@ package org.edu_sharing.service.scope;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.util.ISO8601DateFormat;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.client.tools.metadata.ValueTool;
+import org.edu_sharing.repository.server.tools.DateTool;
 import org.edu_sharing.spring.ApplicationContextFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -88,6 +91,13 @@ public class ScopeNodeView {
                         properties.put(global, ValueTool.toMultivalue(value.toArray(new String[0])));
                     }
                 }
+                // an editorial change is a change of the content inside the scope: "modified" shows the later one
+                if (entry.getModified() != null && entry.getModified().getTime() > getModified(nodeProps)) {
+                    if (properties == nodeProps) {
+                        properties = new HashMap<>(nodeProps);
+                    }
+                    setModified(properties, nodeProps, entry.getModified());
+                }
                 scopes.add(nodeScope(entry, definition.getDisplayName(), visible, editor ? originals : null));
             } else {
                 if (!entry.isPublished() || entry.getPublicFields() == null) {
@@ -118,6 +128,35 @@ public class ScopeNodeView {
                 .properties(visible)
                 .originals(originals)
                 .build();
+    }
+
+    /**
+     * @return cm:modified of the node in milliseconds, 0 if unknown
+     */
+    static long getModified(Map<String, Object> nodeProps) {
+        for (String key : List.of(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, CCConstants.CM_PROP_C_MODIFIED)) {
+            Object value = nodeProps.get(key);
+            if (value instanceof Date date) {
+                return date.getTime();
+            }
+            if (value != null && NumberUtils.isDigits(value.toString())) {
+                return Long.parseLong(value.toString());
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * sets cm:modified in every form of the node properties: milliseconds (or formatted like the original value), the
+     * long and the iso variant
+     */
+    private static void setModified(Map<String, Object> properties, Map<String, Object> nodeProps, Date modified) {
+        String millis = String.valueOf(modified.getTime());
+        Object original = nodeProps.get(CCConstants.CM_PROP_C_MODIFIED);
+        boolean formatted = original != null && !(original instanceof Date) && !NumberUtils.isDigits(original.toString());
+        properties.put(CCConstants.CM_PROP_C_MODIFIED, formatted ? new DateTool().formatDate(modified.getTime()) : millis);
+        properties.put(CCConstants.CM_PROP_C_MODIFIED + CCConstants.LONG_DATE_SUFFIX, millis);
+        properties.put(CCConstants.CM_PROP_C_MODIFIED + CCConstants.ISODATE_SUFFIX, ISO8601DateFormat.format(modified));
     }
 
     private static List<String> toList(Object value) {

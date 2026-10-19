@@ -46,6 +46,13 @@
     margin-top: 4px;
 }
 .reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
     margin-top: 4px;
     font-style: italic;
+    i {
+        font-size: 16px;
+        color: var(--textLight);
+    }
 }

@@ -15,6 +15,7 @@ import org.alfresco.service.namespace.QName;
 import org.edu_sharing.alfresco.service.OrganisationService;
 import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.service.InsufficientPermissionException;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.edu_sharing.service.authority.AuthorityService;
 import org.edu_sharing.service.search.SearchServiceElastic;
 import org.springframework.beans.factory.ObjectProvider;
@@ -34,6 +35,7 @@ import java.util.*;
 public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
 
     private static final int MAX_SCOPES = 10000;
+    private static final String VIRTUAL_PREFIX = "virtual:";
 
     private final org.alfresco.service.cmr.security.AuthorityService alfAuthorityService;
     private final NodeService nodeService;
@@ -44,6 +46,9 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     private final OrganisationService organisationService;
     private final DictionaryService dictionaryService;
     private final PermissionService permissionService;
+    private final ScopeProperties scopeProperties;
+    // lazy: the scope service depends on this service
+    private final ObjectProvider<ScopeServiceFactory> scopeServiceFactory;
 
     @Override
     public Optional<ScopeDefinition> getDefinition(String scopeId) {
@@ -68,7 +73,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
                 .scopeId(scopeId)
                 .displayName(alfAuthorityService.getAuthorityDisplayName(scopeId))
                 .mds((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS)))
-                .fields(ScopeDefinitionJson.parseFields((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS))))
+                .fields(scopeProperties.deriveReplaces(ScopeDefinitionJson.parseFields((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS)))))
+                .presentation(ScopeDefinitionJson.parsePresentation((String) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS))))
                 .baseQuery(ScopeDefinitionJson.parseBaseQuery(toStringList(properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_BASE_QUERY))),
                         (Long) properties.get(QName.createQName(CCConstants.CCM_PROP_SCOPE_BASE_QUERY_VERSION))))
                 .folderId(folder == null ? null : folder.getId())
@@ -88,10 +94,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     }
 
     @Override
+    @Permission(requiresGlobalAdmin = true)
     public List<ScopeDefinition> getAllScopes() {
-        if (!authorityService.isGlobalAdmin()) {
-            throw new InsufficientPermissionException("only admins can list all scopes");
-        }
         try {
             SearchResponse<Map> response = searchServiceElastic.getObject().searchNative(SearchRequest.of(req -> req
                     .index(SearchServiceElastic.AUTHORITIES_INDEX)
@@ -113,6 +117,12 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     }
 
     @Override
+    @Permission(requiresGlobalAdmin = true)
+    public List<String> getScopeOnlyProperties() {
+        return scopeProperties.getScopeOnlyProperties().stream().sorted().toList();
+    }
+
+    @Override
     public List<ScopeDefinition> getScopesOfCurrentUser() {
         String user = AuthenticationUtil.getFullyAuthenticatedUser();
         List<ScopeDefinition> result = new ArrayList<>();
@@ -129,9 +139,10 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     }
 
     @Override
-    public ScopeDefinition createScope(String name, String displayName, String mds, List<ScopeField> fields) {
-        checkGlobalAdmin();
+    @Permission(requiresGlobalAdmin = true)
+    public ScopeDefinition createScope(String name, String displayName, String mds, List<ScopeField> fields, ScopePresentation presentation) {
         validateFields(fields);
+        validatePresentation(presentation);
         String groupName = AuthenticationUtil.runAsSystem(() -> retryingTransactionHelper.doInTransaction(() -> {
             String group = organisationService.createOrganization(name, displayName, mds, null);
             String scopeId = org.alfresco.service.cmr.security.PermissionService.GROUP_PREFIX + group;
@@ -142,6 +153,7 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
             properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS), mds);
             properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS), ScopeDefinitionJson.write(fields == null ? List.of() : fields));
             properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_FOLDER), folder);
+            properties.put(QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS), writePresentation(presentation));
             nodeService.addAspect(groupRef, QName.createQName(CCConstants.CCM_ASPECT_SCOPE_GROUP), properties);
             nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
 
@@ -156,23 +168,49 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
     }
 
     @Override
-    public ScopeDefinition updateScope(String scopeId, String mds, List<ScopeField> fields) {
-        checkGlobalAdmin();
+    @Permission(requiresGlobalAdmin = true)
+    public ScopeDefinition updateScope(String scopeId, String mds, List<ScopeField> fields, ScopePresentation presentation) {
         getDefinition(scopeId).orElseThrow(() -> new ScopeNotFoundException("unknown scope " + scopeId));
         validateFields(fields);
+        validatePresentation(presentation);
         AuthenticationUtil.runAsSystem(() -> retryingTransactionHelper.doInTransaction(() -> {
             NodeRef groupRef = alfAuthorityService.getAuthorityNodeRef(scopeId);
             nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_MDS), mds);
             nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_FIELDS), ScopeDefinitionJson.write(fields == null ? List.of() : fields));
+            nodeService.setProperty(groupRef, QName.createQName(CCConstants.CCM_PROP_SCOPE_SETTINGS), writePresentation(presentation));
             return null;
         }));
+        // published / excluded of the entries depend on the field list
+        scopeServiceFactory.getObject().getLocalService().onDefinitionChanged(scopeId);
         return getDefinition(scopeId).orElseThrow();
     }
 
-    private void checkGlobalAdmin() {
-        if (!authorityService.isGlobalAdmin()) {
-            throw new InsufficientPermissionException("only admins can create or change scope groups");
+    /**
+     * card columns: properties of the dictionary or virtual properties of the mds, each once
+     */
+    private void validatePresentation(ScopePresentation presentation) {
+        if (presentation == null || presentation.getCardColumns() == null) {
+            return;
         }
+        Set<String> ids = new HashSet<>();
+        for (String column : presentation.getCardColumns()) {
+            boolean known = column != null && (column.startsWith(VIRTUAL_PREFIX)
+                    || dictionaryService.getProperty(QName.createQName(CCConstants.getValidGlobalName(column))) != null);
+            if (!known) {
+                throw new IllegalArgumentException("card column " + column + " is not known by the dictionary");
+            }
+            if (!ids.add(column)) {
+                throw new IllegalArgumentException("card column " + column + " is configured twice");
+            }
+        }
+    }
+
+    /**
+     * @return the json of the settings, null if nothing is set (removes the property)
+     */
+    private static String writePresentation(ScopePresentation presentation) {
+        boolean empty = presentation == null || presentation.getCardColumns() == null || presentation.getCardColumns().isEmpty();
+        return empty ? null : ScopeDefinitionJson.write(presentation);
     }
 
     /**
@@ -182,6 +220,8 @@ public class ScopeDefinitionServiceImpl implements ScopeDefinitionService {
         if (fields == null) {
             return;
         }
+        // replaces is not configurable: regular properties replace, scope only properties don't
+        scopeProperties.deriveReplaces(fields);
         Set<String> ids = new HashSet<>();
         for (ScopeField field : fields) {
             if (field.getId() == null || dictionaryService.getProperty(QName.createQName(CCConstants.getValidGlobalName(field.getId()))) == null) {

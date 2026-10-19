@@ -106,4 +106,10 @@ public interface ScopeService {
      */
     @ScopesFeature(requiresEnabled = false)
     void onScopeGroupDeleted(String scopeId);
+
+    /**
+     * the field list of the scope changed: recomputes published / excluded of all its entries and queues them for the
+     * index (overrides and public fields depend on the field list as well)
+     */
+    void onDefinitionChanged(String scopeId);
 }

@@ -915,10 +915,12 @@
       <type>singleoption</type>
       <valuespace_i18n_prefix>ccm_editorial_inventory_</valuespace_i18n_prefix>
       <values>
-        <value>proposed</value>
-        <value>accepted</value>
-        <value>rejected</value>
-        <value>recommended</value>
+        <value icon="block">rejected</value>
+        <!-- no decision yet: never stored, choosing it removes the value (see es-scope-inventory) -->
+        <value icon="inbox">inbox</value>
+        <value icon="lightbulb">proposed</value>
+        <value icon="check_circle">accepted</value>
+        <value icon="thumb_up">recommended</value>
       </values>
     </widget>
     <!-- scopes: tabs (work sets) of the editorial page inside the active scope, see query ngsearch -->
@@ -929,10 +931,10 @@
       <values>
         <entry icon="inbox">inbox</entry>
         <entry icon="lightbulb">proposed</entry>
-        <entry icon="public">published</entry>
+        <entry icon="check_circle">accepted</entry>
         <entry icon="thumb_up">recommended</entry>
-        <entry icon="block">rejected</entry>
         <entry icon="list">all</entry>
+        <entry icon="block">rejected</entry>
       </values>
     </widget>
   </widgets>
@@ -1297,7 +1299,8 @@
     <template>
       <id>editorial_scope</id>
       <html><![CDATA[
-              <ccm:editorial_inventory type="facetList" expandable="expanded" icon="fact_check">
+              <ccm:educationallearningresourcetype type="facetList" expandable="expanded" icon="library_books">
+              <cclom:general_keyword type="facetList" expandable="expanded" icon="tag">
 				]]></html>
     </template>
     <template>
@@ -2491,13 +2494,14 @@
         <facets type="geo_grid"/>
       </property>
       <!-- scopes: work sets inside the active scope (${scope}), see scopes concept §6.2 -->
-      <!-- scopes: tabs of the editorial page (virtual:scope_view) inside the active scope -->
+      <!-- scopes: tabs of the editorial page (virtual:scope_view) inside the active scope: the inventory decision
+           (ccm:editorial_inventory) of the scope entry, "inbox" = no decision yet (candidates of the base query) -->
       <property name="virtual:scope_view">
-        <statement value="inbox">{"bool":{"must_not":[{"term":{"scope_ids_published":"${scope}"}},{"term":{"scope_ids_excluded":"${scope}"}}]}}</statement>
-        <statement value="proposed">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"terms":{"scopes.properties.ccm:editorial_inventory.keyword":["proposed"]}}]}}}}</statement>
-        <statement value="published">{"term":{"scope_ids_published":"${scope}"}}</statement>
-        <statement value="recommended">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"terms":{"scopes.properties.ccm:editorial_inventory.keyword":["recommended"]}}]}}}}</statement>
-        <statement value="rejected">{"term":{"scope_ids_excluded":"${scope}"}}</statement>
+        <statement value="inbox">{"bool":{"must_not":{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"exists":{"field":"scopes.properties.ccm:editorial_inventory.keyword"}}]}}}}}}</statement>
+        <statement value="proposed">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"proposed"}}]}}}}</statement>
+        <statement value="accepted">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"accepted"}}]}}}}</statement>
+        <statement value="recommended">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"recommended"}}]}}}}</statement>
+        <statement value="rejected">{"nested":{"path":"scopes","query":{"bool":{"filter":[{"term":{"scopes.scopeId":"${scope}"}},{"term":{"scopes.properties.ccm:editorial_inventory.keyword":"rejected"}}]}}}}</statement>
         <statement value="all">{"match_all": {}}</statement>
         <statement>{"match_all": {}}</statement>
       </property>

@@ -1,5 +1,7 @@
 package org.edu_sharing.service.scope;
 
+import java.lang.reflect.Method;
+import org.edu_sharing.service.permission.annotation.Permission;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.repo.transaction.RetryingTransactionHelper;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -43,6 +45,7 @@ class ScopeDefinitionServiceImplTest {
     private OrganisationService organisationService;
     private DictionaryService dictionaryService;
     private PermissionService permissionService;
+    private ScopeService scopeService;
     private MockedStatic<AuthenticationUtil> authenticationUtil;
     private ScopeDefinitionServiceImpl underTest;
 
@@ -75,8 +78,15 @@ class ScopeDefinitionServiceImplTest {
         authenticationUtil.when(() -> AuthenticationUtil.runAsSystem(any()))
                 .thenAnswer(i -> ((AuthenticationUtil.RunAsWork<?>) i.getArgument(0)).doWork());
 
+        scopeService = mock(ScopeService.class);
+        ScopeServiceFactory factory = mock(ScopeServiceFactory.class);
+        when(factory.getLocalService()).thenReturn(scopeService);
+        ObjectProvider<ScopeServiceFactory> scopeServiceFactory = mock(ObjectProvider.class);
+        when(scopeServiceFactory.getObject()).thenReturn(factory);
+
         underTest = new ScopeDefinitionServiceImpl(alfAuthorityService, nodeService, authorityService, transactionHelper,
-                mock(ObjectProvider.class), organisationService, dictionaryService, permissionService);
+                mock(ObjectProvider.class), organisationService, dictionaryService, permissionService, new ScopeProperties(dictionaryService),
+                scopeServiceFactory);
     }
 
     @AfterEach
@@ -94,10 +104,9 @@ class ScopeDefinitionServiceImplTest {
 
     @Test
     void createScope() {
-        when(authorityService.isGlobalAdmin()).thenReturn(true);
         List<ScopeField> fields = List.of(ScopeField.builder().id("ccm:editorial_release").visibility(ScopeFieldVisibility.INTERNAL).publishedValues(List.of("released")).build());
 
-        ScopeDefinition definition = underTest.createScope("wlo", "WLO", "mds_wlo", fields);
+        ScopeDefinition definition = underTest.createScope("wlo", "WLO", "mds_wlo", fields, null);
 
         assertEquals(SCOPE, definition.getScopeId());
         assertEquals("WLO", definition.getDisplayName());
@@ -110,22 +119,57 @@ class ScopeDefinitionServiceImplTest {
         verify(permissionService).setPermission(FOLDER_REF, SCOPE, CCConstants.PERMISSION_COLLABORATOR, true);
     }
 
+    /**
+     * enforced by PermissionChecking (proxy), not inside the methods
+     */
     @Test
-    void onlyAdminsCreateAndChangeScopes() {
-        assertThrows(InsufficientPermissionException.class, () -> underTest.createScope("wlo", "WLO", "mds_wlo", List.of()));
-        assertThrows(InsufficientPermissionException.class, () -> underTest.updateScope(SCOPE, "mds", List.of()));
-        assertThrows(InsufficientPermissionException.class, () -> underTest.getAllScopes());
-        verifyNoInteractions(organisationService);
+    void onlyAdminsCreateAndChangeScopes() throws NoSuchMethodException {
+        for (Method method : List.of(
+                ScopeDefinitionServiceImpl.class.getMethod("createScope", String.class, String.class, String.class, List.class, ScopePresentation.class),
+                ScopeDefinitionServiceImpl.class.getMethod("updateScope", String.class, String.class, List.class, ScopePresentation.class),
+                ScopeDefinitionServiceImpl.class.getMethod("getAllScopes"),
+                ScopeDefinitionServiceImpl.class.getMethod("getScopeOnlyProperties"))) {
+            Permission permission = method.getAnnotation(Permission.class);
+            assertNotNull(permission, method.getName());
+            assertTrue(permission.requiresGlobalAdmin(), method.getName());
+        }
+    }
+
+    @Test
+    void updateRecomputesTheEntries() {
+        groupProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
+        List<ScopeField> fields = List.of(ScopeField.builder().id("ccm:editorial_inventory").publishedValues(List.of("accepted")).build());
+
+        underTest.updateScope(SCOPE, "mds", fields, null);
+
+        verify(scopeService).onDefinitionChanged(SCOPE);
+    }
+
+    @Test
+    void presentationIsStoredAndValidated() {
+        groupProperties.put(QName.createQName(CCConstants.CCM_PROP_GROUPEXTENSION_GROUPTYPE), CCConstants.GROUP_TYPE_SCOPE);
+        ScopePresentation presentation = ScopePresentation.builder().cardColumns(List.of("cclom:title", "virtual:licenseicon")).build();
+
+        ScopeDefinition definition = underTest.updateScope(SCOPE, "mds", List.of(), presentation);
+        assertEquals(List.of("cclom:title", "virtual:licenseicon"), definition.getPresentation().getCardColumns());
+
+        // empty settings remove the property, the mds default applies again
+        assertNull(underTest.updateScope(SCOPE, "mds", List.of(), ScopePresentation.builder().cardColumns(List.of()).build()).getPresentation());
+        assertNull(underTest.updateScope(SCOPE, "mds", List.of(), null).getPresentation());
+
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().cardColumns(List.of("ccm:unknown")).build()));
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateScope(SCOPE, "mds", List.of(),
+                ScopePresentation.builder().cardColumns(List.of("cclom:title", "cclom:title")).build()));
     }
 
     @Test
     void fieldsMustBeKnownByTheDictionary() {
-        when(authorityService.isGlobalAdmin()).thenReturn(true);
         List<ScopeField> unknown = List.of(ScopeField.builder().id("ccm:unknown").build());
         List<ScopeField> twice = List.of(ScopeField.builder().id("ccm:a").build(), ScopeField.builder().id("ccm:a").build());
 
-        assertThrows(IllegalArgumentException.class, () -> underTest.createScope("wlo", "WLO", "mds_wlo", unknown));
-        assertThrows(IllegalArgumentException.class, () -> underTest.createScope("wlo", "WLO", "mds_wlo", twice));
+        assertThrows(IllegalArgumentException.class, () -> underTest.createScope("wlo", "WLO", "mds_wlo", unknown, null));
+        assertThrows(IllegalArgumentException.class, () -> underTest.createScope("wlo", "WLO", "mds_wlo", twice, null));
         verifyNoInteractions(organisationService);
     }
 

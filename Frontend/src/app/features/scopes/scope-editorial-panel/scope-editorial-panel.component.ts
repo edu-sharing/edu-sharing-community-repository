@@ -1,8 +1,20 @@
-import { Component, computed, effect, inject, input, OnDestroy, signal } from '@angular/core';
+import {
+    Component,
+    computed,
+    effect,
+    inject,
+    input,
+    OnDestroy,
+    signal,
+    untracked,
+    viewChild,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
     DEFAULT,
+    HOME_REPOSITORY,
     Node,
+    RestConstants,
     ScopeAssignment,
     ScopeBulkRequest,
     ScopeBulkStatus,
@@ -14,6 +26,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { SharedModule } from '../../../shared/shared.module';
 import { MdsModule } from '../../mds/mds.module';
+import { MdsEditorWrapperComponent } from '../../mds/mds-editor/mds-editor-wrapper/mds-editor-wrapper.component';
 import { Toast } from '../../../services/toast';
 import { DialogsService } from '../../dialogs/dialogs.service';
 import {
@@ -23,14 +36,22 @@ import {
 import { ScopeEditorialService } from '../scope-editorial.service';
 import { ScopeMdsService, ScopeWidgets } from '../scope-mds.service';
 import { ScopeHistoryComponent } from './scope-history/scope-history.component';
+import { ScopeInventoryComponent } from '../scope-inventory/scope-inventory.component';
 
 type ScopeValues = { [property: string]: string[] };
+
+/** shared empty list: a stable reference for the widget bindings */
+const EMPTY_VALUES: string[] = [];
 
 /** one property of the field list, prepared for rendering (the control itself is the mds widget) */
 type FieldModel = {
     field: ScopeField;
     label: string;
 };
+
+function clean(values: string[] | undefined): string[] {
+    return (values ?? []).filter((v) => v != null && v !== '');
+}
 
 function sameValues(a: string[] | undefined, b: string[] | undefined) {
     const x = [...(a ?? [])].sort();
@@ -41,15 +62,17 @@ function sameValues(a: string[] | undefined, b: string[] | undefined) {
 /**
  * Editorial changes inside the active scope (sidebar option `SCOPE_EDITORIAL`).
  *
- * Generic: the fields come from the field list of the scope group, each one is rendered by its
- * widget of the scope mds (`es-mds-editor-single-widget`). There are no enforced transitions, every value can be set at any time. A single node
- * is saved directly, several nodes or all hits of a search via a bulk job.
+ * The inventory decision is chosen in its own block, all other fields of the scope group are edited
+ * with the mds editor (widgets of the scope mds, `widgetIds`), in form mode on pseudo nodes carrying
+ * the values of the scope entries: it never saves itself. A single node is saved directly, several
+ * nodes or all hits of a search via a bulk job (keep / replace / append per field, like the
+ * workspace editor).
  */
 @Component({
     selector: 'es-scope-editorial-panel',
     templateUrl: 'scope-editorial-panel.component.html',
     styleUrls: ['scope-editorial-panel.component.scss'],
-    imports: [SharedModule, MdsModule, ScopeHistoryComponent],
+    imports: [SharedModule, MdsModule, ScopeHistoryComponent, ScopeInventoryComponent],
 })
 export class ScopeEditorialPanelComponent implements OnDestroy {
     private scopesService = inject(ScopesService);
@@ -90,23 +113,53 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
             label: ScopeMdsService.getLabel(widgets, field.id),
         }));
     });
-    protected readonly statusFields = computed(() =>
-        this.fieldModels().filter((f) => !f.field.replaces),
+    /** the inventory decision (mandatory field of every scope): directly selectable at the top */
+    protected readonly inventoryField = computed(() =>
+        this.fieldModels().find((f) => f.field.id === RestConstants.CCM_PROP_EDITORIAL_INVENTORY),
     );
     protected readonly replacingFields = computed(() =>
         this.fieldModels().filter((f) => f.field.replaces),
     );
-    protected readonly publishFields = computed(() =>
-        this.statusFields().filter((f) => f.field.publishedValues?.length),
+    /** fields of the mds editor: all but the inventory decision */
+    protected readonly editorFields = computed(() =>
+        this.fieldModels()
+            .map((f) => f.field)
+            .filter((f) => f.id !== RestConstants.CCM_PROP_EDITORIAL_INVENTORY),
     );
-    protected readonly excludeFields = computed(() =>
-        this.statusFields().filter((f) => f.field.excludedValues?.length),
+    protected readonly editorFieldIds = computed(() => this.editorFields().map((f) => f.id));
+    protected readonly editor = viewChild(MdsEditorWrapperComponent);
+    /** re-creates the editor when its nodes or the stored values change */
+    protected readonly editorKey = computed(
+        () =>
+            `${this.scope()?.scopeId}|${this.targetNodes()
+                .map((n) => n.ref?.id)
+                .join(',')}|${!!this.searchTarget()}|${this.revision()}`,
     );
+    /** replacing fields with a value of this scope (single node) */
+    protected readonly overriddenFields = computed(() =>
+        this.replacingFields().filter((f) => this.isOverridden(f.field.id)),
+    );
+    /**
+     * the editor works on pseudo nodes with the values of the scope entries (replacing fields: the
+     * effective value), one per selected node, a single empty one for all hits of a search
+     */
+    protected readonly editorNodes = computed<Node[]>(() => {
+        if (this.searchTarget()) {
+            return [this.toEditorNode(null, null, 0)];
+        }
+        if (this.isBulk()) {
+            return this.targetNodes().map((node, i) =>
+                this.toEditorNode(node, this.scopesService.getNodeScope(node)?.properties, i),
+            );
+        }
+        const node = this.node();
+        return node ? [this.toEditorNode(node, this.assignment()?.properties, 0)] : [];
+    });
 
     /** the entry of the single node, null if it has none yet */
     protected readonly assignment = signal<ScopeAssignment | null>(null);
     protected readonly loading = signal(false);
-    /** properties touched by the user (an empty list removes the property) */
+    /** inventory decision chosen by the user (an empty list removes it) */
     protected readonly edits = signal<ScopeValues>({});
     protected readonly reason = signal('');
     protected readonly saving = signal(false);
@@ -125,38 +178,38 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
             Object.entries(edits).filter(([key, values]) => !sameValues(values, current[key])),
         );
     });
-    protected readonly hasChanges = computed(
-        () => Object.keys(this.changedProperties()).length > 0,
-    );
-    /** the effective values publish the entry */
-    protected readonly isPublished = computed(() =>
-        this.publishFields().some((f) =>
-            this.getValues(f.field.id).some((v) => f.field.publishedValues.includes(v)),
-        ),
-    );
-    protected readonly isExcluded = computed(() =>
-        this.excludeFields().some((f) =>
-            this.getValues(f.field.id).some((v) => f.field.excludedValues.includes(v)),
-        ),
-    );
-    /** hint: the change publishes content that is not public (visible for guests of the scope) */
+    /** hint: the inventory decision publishes content that is not public (visible for guests of the scope) */
     protected readonly hintNotPublic = computed(() => {
-        const publishing = this.publishFields().some((f) =>
-            (this.changedProperties()[f.field.id] ?? []).some((v) =>
-                f.field.publishedValues.includes(v),
-            ),
+        const field = this.inventoryField()?.field;
+        const publishing = (this.changedProperties()[field?.id] ?? []).some((v) =>
+            field.publishedValues?.includes(v),
         );
         return (
             publishing &&
             (!!this.searchTarget() || this.targetNodes().some((n) => n.isPublic === false))
         );
     });
-    protected readonly hintConflict = computed(() => this.isPublished() && this.isExcluded());
 
     private assignmentSubscription: Subscription;
     private bulkSubscription: Subscription;
 
     constructor() {
+        // the entry was changed elsewhere (e.g. the inventory decision in the preview)
+        effect(() => {
+            const change = this.scopeEditorialService.entryChanged();
+            untracked(() => {
+                if (
+                    change &&
+                    change.scopeId === this.scope()?.scopeId &&
+                    change.nodeId === this.nodeId() &&
+                    change.assignment !== this.assignment()
+                ) {
+                    this.assignment.set(change.assignment);
+                    this.revision.update((r) => r + 1);
+                    this.historyReload.update((r) => r + 1);
+                }
+            });
+        });
         // (re)load the entry whenever the single node or the scope changes
         effect(() => {
             const scopeId = this.scope()?.scopeId;
@@ -188,13 +241,25 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         this.bulkSubscription?.unsubscribe();
     }
 
-    /** effective values of a property: the edit, else the stored value (single node only) */
-    protected getValues(property: string): string[] {
+    /**
+     * effective values of all fields: the edit, else the stored value (single node only).
+     * A computed on purpose: the widgets bind it via `ngModel`, a new array on every change
+     * detection would make NgModel write the value again and again (endless change detection)
+     */
+    protected readonly effectiveValues = computed<ScopeValues>(() => {
         const edits = this.edits();
-        if (property in edits) {
-            return edits[property];
-        }
-        return this.isBulk() ? [] : this.assignment()?.properties?.[property] ?? [];
+        const stored = this.isBulk() ? {} : this.assignment()?.properties ?? {};
+        return Object.fromEntries(
+            this.fieldModels().map(({ field }) => [
+                field.id,
+                field.id in edits ? edits[field.id] : stored[field.id] ?? EMPTY_VALUES,
+            ]),
+        );
+    });
+
+    /** effective values of a property, see `effectiveValues` */
+    protected getValues(property: string): string[] {
+        return this.effectiveValues()[property] ?? EMPTY_VALUES;
     }
 
     protected isTouched(property: string) {
@@ -213,18 +278,6 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         }
     }
 
-    /** "publish" / "exclude": set the field to the first of its marking values */
-    protected applyMarking(model: FieldModel, kind: 'published' | 'excluded') {
-        const values =
-            kind === 'published' ? model.field.publishedValues : model.field.excludedValues;
-        this.setValues(model.field.id, [values[0]]);
-        this.revision.update((r) => r + 1);
-    }
-
-    protected valueLabel(property: string, value: string) {
-        return ScopeMdsService.getValueLabel(this.widgets(), property, value);
-    }
-
     // replacing fields (single node only)
 
     protected isOverridden(property: string) {
@@ -241,31 +294,137 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
         return this.isOverridden(property) ? [] : node?.properties?.[property] ?? [];
     }
 
-    protected resetToOriginal(property: string) {
-        this.setValues(property, []);
-        this.revision.update((r) => r + 1);
+    /** removes the replaced value of the scope, the original applies again */
+    protected async resetToOriginal(property: string) {
+        await this.saveProperties({ [property]: [] });
+    }
+
+    private toEditorNode(
+        node: Node | null,
+        entry: ScopeValues | null | undefined,
+        index: number,
+    ): Node {
+        // the node's own properties stay: conditions of the mds widgets refer to them (e.g. title
+        // vs. link), an empty list would count as "set"
+        const properties: ScopeValues = { ...(node?.properties ?? {}) };
+        for (const field of this.editorFields()) {
+            // replacing fields: the node dto carries the effective value inside the scope
+            const values = clean(field.replaces ? node?.properties?.[field.id] : entry?.[field.id]);
+            if (values.length) {
+                properties[field.id] = values;
+            } else {
+                delete properties[field.id];
+            }
+        }
+        return {
+            ref: { id: 'scope-editor-' + index, repo: HOME_REPOSITORY, isHomeRepo: true },
+            name: node?.name ?? '',
+            type: RestConstants.CCM_TYPE_IO,
+            metadataset: this.mdsId(),
+            isDirectory: false,
+            aspects: [],
+            access: [],
+            properties,
+        } as Node;
+    }
+
+    /** changed fields of the single node editor (null: invalid) */
+    private async getEditorChanges(): Promise<ScopeValues | null> {
+        const editor = this.editor();
+        if (!editor) {
+            return {};
+        }
+        const values = await editor.getValues();
+        if (!values) {
+            return null;
+        }
+        const initial = this.editorNodes()[0]?.properties ?? {};
+        return Object.fromEntries(
+            this.editorFieldIds()
+                .map((id): [string, string[]] => [id, clean(values[id])])
+                .filter(([id, v]) => !sameValues(v, initial[id])),
+        );
+    }
+
+    /**
+     * bulk request of the editor: replaced fields set their values; with values of only some of
+     * the selected nodes (indeterminate) or "append", the values are added and the deselected ones
+     * removed per node, like the workspace editor does it
+     */
+    private getEditorBulkRequest(): Pick<
+        ScopeBulkRequest,
+        'properties' | 'appendProperties' | 'removeValues'
+    > {
+        const properties: ScopeValues = {};
+        const appendProperties: string[] = [];
+        const removeValues: ScopeValues = {};
+        const ids = this.editorFieldIds();
+        const nodes = this.editorNodes();
+        for (const widget of this.editor()?.mdsEditorInstance.widgets.value ?? []) {
+            const id = widget.definition.id;
+            const mode = widget.getBulkMode();
+            if (!ids.includes(id) || !mode || mode === 'no-change') {
+                continue;
+            }
+            const values = clean(widget.getValue());
+            const multi = !!widget.definition.type?.startsWith('multivalue');
+            const indeterminate = widget.getIndeterminateValues() ?? [];
+            if (mode === 'append') {
+                properties[id] = values;
+                appendProperties.push(id);
+            } else if (multi && (indeterminate.length || nodes.length > 1)) {
+                const initial = [...new Set(nodes.flatMap((n) => n.properties?.[id] ?? []))];
+                properties[id] = values.filter((v) => !indeterminate.includes(v));
+                appendProperties.push(id);
+                const removed = initial.filter(
+                    (v) => !values.includes(v) && !indeterminate.includes(v),
+                );
+                if (removed.length) {
+                    removeValues[id] = removed;
+                }
+            } else {
+                properties[id] = values;
+            }
+        }
+        return { properties, appendProperties, removeValues };
     }
 
     protected discard() {
         this.edits.set({});
         this.reason.set('');
+        // re-creates the editor with the stored values
         this.revision.update((r) => r + 1);
     }
 
     async save() {
-        const scopeId = this.scope()?.scopeId;
-        const properties = this.changedProperties();
-        if (!scopeId) {
+        if (!this.scope()?.scopeId) {
             return;
         }
+        const inventory = this.changedProperties();
+        if (this.isBulk()) {
+            const request = this.getEditorBulkRequest();
+            const properties = { ...request.properties, ...inventory };
+            if (!Object.keys(properties).length && !Object.keys(request.removeValues).length) {
+                this.toast.toast('TOAST.SCOPE.NOTHING_CHANGED');
+                return;
+            }
+            await this.runBulk({ ...request, properties, reason: this.reason() || undefined });
+            return;
+        }
+        const changes = await this.getEditorChanges();
+        if (changes === null) {
+            return;
+        }
+        const properties = { ...changes, ...inventory };
         if (!Object.keys(properties).length) {
             this.toast.toast('TOAST.SCOPE.NOTHING_CHANGED');
             return;
         }
-        if (this.isBulk()) {
-            await this.runBulk({ properties, reason: this.reason() || undefined });
-            return;
-        }
+        await this.saveProperties(properties);
+    }
+
+    private async saveProperties(properties: ScopeValues) {
+        const scopeId = this.scope()?.scopeId;
         this.saving.set(true);
         this.scopesService
             .setAssignment(scopeId, this.nodeId(), properties, this.reason() || undefined)
@@ -275,7 +434,11 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
                     this.assignment.set(assignment);
                     this.discard();
                     this.historyReload.update((r) => r + 1);
-                    this.scopeEditorialService.notifyChanged();
+                    this.scopeEditorialService.notifyEntryChanged({
+                        scopeId,
+                        nodeId: this.nodeId(),
+                        assignment,
+                    });
                     this.toast.toast('TOAST.SCOPE.SAVED');
                 },
                 error: (error) => {
@@ -311,7 +474,11 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
                     this.assignment.set(null);
                     this.discard();
                     this.historyReload.update((r) => r + 1);
-                    this.scopeEditorialService.notifyChanged();
+                    this.scopeEditorialService.notifyEntryChanged({
+                        scopeId,
+                        nodeId: this.nodeId(),
+                        assignment: null,
+                    });
                     this.toast.toast('TOAST.SCOPE.DELETED');
                 },
                 error: (error) => {
@@ -372,6 +539,12 @@ export class ScopeEditorialPanelComponent implements OnDestroy {
                     this.toast.error(error);
                 },
             });
+    }
+
+    /** waiting: progress of the jobs ahead in the queue */
+    protected queueProgress(status: ScopeBulkStatus) {
+        const queue = status.queue;
+        return queue?.total ? Math.round((100 * (queue.done ?? 0)) / queue.total) : 0;
     }
 
     protected bulkProgress(status: ScopeBulkStatus) {
