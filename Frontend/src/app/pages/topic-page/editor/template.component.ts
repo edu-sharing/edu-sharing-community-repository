@@ -705,7 +705,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DefaultGroups.FileOperations,
             ),
         ];
-        this.topicPageHelperService.previewCustomOptions = this.customSidebarOptions;
+        this.topicPageHelperService.setPreviewCustomOptions(this.customSidebarOptions);
         // retrieve the search URL
         this.searchUrl = this.retrieveSearchUrl();
         // retrieve the AI support state
@@ -909,6 +909,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.destroyed$.next();
         this.destroyed$.complete();
         this.topicPageHelperService.setInPlaceNavigationHandler(null);
+        this.topicPageHelperService.setPreviewCustomOptions(null);
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
         this.scrollHelperService.setScrollContainer(null);
     }
