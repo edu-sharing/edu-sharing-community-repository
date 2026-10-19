@@ -94,7 +94,7 @@ public class SSOAuthorityMapper {
     }
 
     @Data
-    @ConfigurationProperties(prefix = "edu-sharing.sso.authority-mapper")
+    @ConfigurationProperties(prefix = "security.sso.common")
     public static class Configuration {
         private boolean createUser = true;
         private boolean updateUser = true;
