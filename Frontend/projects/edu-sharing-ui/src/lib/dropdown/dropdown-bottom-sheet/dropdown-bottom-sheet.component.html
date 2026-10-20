@@ -1,14 +1,38 @@
 <ng-template #itemContent let-option>
   @if (option.customTemplate) {
   <ng-container *ngTemplateOutlet="option.customTemplate; context: { option }"></ng-container>
-  } @if (!option.customTemplate) { @if (option.icon) {
+  } @if (!option.customTemplate) { @if (selectable()) {
+  <i
+    esIcon="check"
+    esIconContext="option"
+    class="check-icon"
+    [class.hidden]="!option.isSelected"
+  ></i>
+  } @else if (option.icon) {
   <i [esIcon]="option.icon" esIconContext="option"></i>
   }
-  {{ option.name | translate }}
-  }
+  {{ option.name | translate }} @if (option.subOptions?.length) {
+  <i esIcon="chevron_right" esIconContext="option" class="submenu-icon"></i>
+  } }
 </ng-template>
 <ul role="none">
-  @for (option of options$ | async; track option; let i = $index) { @if (option.isEnabled ||
+  @if (currentParent(); as parent) {
+  <li role="none">
+    <button
+      mat-button
+      color="primary"
+      class="mat-menu-item back-item"
+      [attr.aria-label]="
+        (parent.subOptionsTitle || parent.name | translate) + ', ' + ('BACK' | translate)
+      "
+      (click)="back()"
+      data-test="menu-item-back"
+    >
+      <i esIcon="chevron_left" esIconContext="option"></i>
+      {{ parent.subOptionsTitle || parent.name | translate }}
+    </button>
+  </li>
+  } @for (option of visibleOptions(); track option; let i = $index) { @if (option.isEnabled ||
   showDisabled) {
   <li role="none">
     @if (option.isEnabled && option.link?.routerLink) {
@@ -21,6 +45,7 @@
       matTooltip="{{ option | optionTooltip | async }}"
       matTooltipPosition="right"
       matTooltipTouchGestures="off"
+      [matTooltipDisabled]="!option.keyboardShortcut"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
       [class.mat-menu-item-selected]="option.isSelected"
@@ -41,6 +66,7 @@
       matTooltip="{{ option | optionTooltip | async }}"
       matTooltipPosition="right"
       matTooltipTouchGestures="off"
+      [matTooltipDisabled]="!option.keyboardShortcut"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
       [class.mat-menu-item-selected]="option.isSelected"
@@ -63,6 +89,8 @@
       matTooltip="{{ option | optionTooltip | async }}"
       matTooltipPosition="right"
       matTooltipTouchGestures="off"
+      [matTooltipDisabled]="!option.keyboardShortcut"
+      [attr.aria-current]="selectable() && option.isSelected ? 'true' : null"
       [attr.aria-label]="option.ariaLabel || option.name | translate"
       [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
       [class.mat-menu-item-selected]="option.isSelected"

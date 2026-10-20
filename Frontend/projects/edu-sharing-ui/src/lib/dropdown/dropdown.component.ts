@@ -50,9 +50,22 @@ export class DropdownComponent implements OnChanges {
      */
     @Input() menuClass: string;
 
+    /** i18n key of a non-interactive header rendered above the options. */
+    @Input() menuTitle: string;
+
+    /** Shows a check mark for the option with `isSelected` and exposes the options as radio items. */
+    @Input() selectable = false;
+
+    /** Renders options with `subOptions` as submenus. Disabled inside submenus (one level max). */
+    @Input() allowSubmenus = true;
+
     ngOnChanges(changes?: SimpleChanges): void {
         if (changes == null || changes?.options || changes?.callbackObjects) {
-            this.options$.next(this.ui.filterValidOptions(Helper.deepCopyArray(this.options)));
+            this.options$.next(
+                this.ui
+                    .filterValidOptions(Helper.deepCopyArray(this.options))
+                    ?.filter((o) => this.allowSubmenus || !o.subOptions?.length),
+            );
             if (this.callbackObjects !== undefined) {
                 void this.ui.updateOptionEnabledState(this.options$, this.callbackObjects);
             }
@@ -60,7 +73,7 @@ export class DropdownComponent implements OnChanges {
     }
 
     click(option: OptionItem) {
-        if (!option.isEnabled) {
+        if (!option.isEnabled || option.subOptions?.length) {
             return;
         }
         setTimeout(() => option.callback(null, this.callbackObjects));

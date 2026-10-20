@@ -1,4 +1,7 @@
 @use '../dropdown.component' as dropdown;
+.check-icon.hidden {
+    visibility: hidden;
+}
 ul {
     @include dropdown.list();
     > li {
@@ -9,6 +12,12 @@ ul {
             height: fit-content;
             justify-content: flex-start;
             border-radius: 0;
+            .submenu-icon {
+                margin-left: auto;
+            }
+            &.back-item {
+                border-bottom: 1px solid var(--borderLight);
+            }
         }
     }
 }

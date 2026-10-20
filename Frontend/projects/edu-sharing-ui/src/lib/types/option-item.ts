@@ -147,6 +147,18 @@ export class OptionItem {
     public link: OptionItemLink;
 
     /**
+     * Nested options. If set, the option opens a submenu instead of running its callback.
+     * Only supported by the dropdown, and only one level deep.
+     */
+    public subOptions: OptionItem[];
+
+    /** i18n key of a non-interactive header at the top of the submenu. */
+    public subOptionsTitle: string;
+
+    /** Shows a check mark for the entry with `isSelected` and exposes the entries as radio items. */
+    public subOptionsSelectable = false;
+
+    /**
      * Material color theme for the option. Use 'warn' for critical/destructive actions.
      */
     public color: 'warn' | 'primary' | 'accent' = 'primary';

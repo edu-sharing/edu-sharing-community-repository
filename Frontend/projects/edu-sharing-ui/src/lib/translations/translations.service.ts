@@ -1,11 +1,13 @@
 import { ApplicationRef, Injectable, Injector, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, from, Observable, of, of as observableOf } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, from, Observable, of, of as observableOf } from 'rxjs';
 import { debounce, debounceTime, first, map, switchMap, tap } from 'rxjs/operators';
 import { ConfigService, LANGUAGES, SessionStorageService } from 'ngx-edu-sharing-api';
 import { AppService } from '../services/abstract/app.service';
 import { I18N_CONFIG, I18nConfig } from '../types/injection-tokens';
+
+const PICKER_EXCLUDED_LANGUAGES = ['none', 'de-informal', 'de-no-binnen-i'];
 
 // 'none' means that only labels should be shown (for dev)
 const DEFAULT_SUPPORTED_LANGUAGES = [
@@ -205,6 +207,7 @@ export class TranslationsService {
             .subscribe(() => {
                 // Notify anyone waiting for translations to be loaded.
                 this.languageLoaded.next(true);
+                this.updateHtmlLang();
             });
         return this.waitForInit();
     }
@@ -222,6 +225,7 @@ export class TranslationsService {
         this.language = language;
         this.translate.use(language).subscribe(() => {
             this.languageLoaded.next(true);
+            this.updateHtmlLang();
         });
         // this.translate.getTranslation(language).subscribe(() => {
         // });
@@ -233,6 +237,58 @@ export class TranslationsService {
             first((languageLoaded) => languageLoaded),
             map(() => undefined as void),
         );
+    }
+
+    /**
+     * The languages selectable in a language picker, i.e. the configured `supportedLanguages`
+     * without the `'none'` dev-only pseudo-language and the German style variants
+     * (`de-informal`, `de-no-binnen-i`), which are not offered as a choice of their own.
+     */
+    async getSupportedLanguages(): Promise<string[]> {
+        const supportedLanguages = await this.config.get(
+            'supportedLanguages',
+            DEFAULT_SUPPORTED_LANGUAGES,
+        );
+        return supportedLanguages.filter((lang) => !PICKER_EXCLUDED_LANGUAGES.includes(lang));
+    }
+
+    /**
+     * The name of a language in that language itself followed by its code, e.g. `Deutsch (de)`.
+     * Falls back to the upper-cased code if the browser does not know the language.
+     */
+    getLanguageDisplayName(lang: string): string {
+        try {
+            const name = new Intl.DisplayNames([lang], { type: 'language' }).of(lang);
+            if (name && name !== lang) {
+                return `${name.charAt(0).toLocaleUpperCase(lang)}${name.slice(1)} (${lang})`;
+            }
+        } catch {
+            // invalid language tag, use the fallback below
+        }
+        return lang.toUpperCase();
+    }
+
+    /**
+     * Switches the active language. Persisted per user (or in `localStorage` for guests) via
+     * `SessionStorageService`, which `initialize()` observes to re-apply the language everywhere,
+     * including on other open tabs.
+     */
+    async setLanguage(lang: string): Promise<void> {
+        if (this.appService?.isRunningApp()) {
+            this.language = lang;
+            await firstValueFrom(this.translate.use(lang));
+            this.updateHtmlLang();
+        } else {
+            // triggers the `initialize()` re-run subscribed to in the constructor
+            await this.injector.get(SessionStorageService).set('language', lang);
+        }
+    }
+
+    private updateHtmlLang(): void {
+        const lang = this.language?.split('-')[0];
+        if (lang) {
+            document.documentElement.lang = lang;
+        }
     }
 
     /** Same as `translate.currentLang`. */

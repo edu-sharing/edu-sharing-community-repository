@@ -893,6 +893,7 @@
     "LIST_SETTINGS": "Liste konfigurieren",
     "METADATA_SIDEBAR": "Materialinformationen",
     "ACCESSIBILITY": "Barrierefreiheit",
+    "LANGUAGE_SWITCH": "Sprache",
     "LTI": "In LTI Plattform übernehmen",
     "RELATIONS": "Beziehungen verwalten",
     "SELECT_ALL": "Alle auswählen",
@@ -1317,6 +1318,7 @@
   },
   "LANGUAGE": {
     "INTERNATIONAL": "International",
+    "SELECT": "Sprache wählen",
     "ar": "Arabisch",
     "ar_AE": "Arabisch (Vereinigte Arabische Emirate)",
     "ar_BH": "Arabisch (Bahrain)",

@@ -6,17 +6,53 @@
   [xPosition]="position === 'right' ? 'after' : 'before'"
 >
   <ng-template #itemContent let-option>
-    @if (option.icon) {
+    @if (selectable) {
+    <i
+      esIcon="check"
+      esIconContext="option"
+      class="check-icon"
+      [class.hidden]="!option.isSelected"
+    ></i>
+    } @else if (option.icon) {
     <i [esIcon]="option.icon" esIconContext="option"></i>
     }
     {{ option.name | translate }}
   </ng-template>
   <!-- MatMenu has role="menu", so the only meaningful role of descendants is "menuitem" -->
   <ul role="none">
-    @for (option of options$ | async; track option; let i = $index) { @if (option.isEnabled ||
+    @if (menuTitle) {
+    <li role="presentation" class="dropdown-title">{{ menuTitle | translate }}</li>
+    } @for (option of options$ | async; track option; let i = $index) { @if (option.isEnabled ||
     showDisabled) {
     <li role="none">
-      @if (option.isEnabled && option.link?.routerLink) {
+      @if (option.subOptions?.length) {
+      <button
+        mat-menu-item
+        class="mat-menu-item collection-item-{{
+          option.name | replaceChars : { search: '.', replace: '-' }
+        }}"
+        [matMenuTriggerFor]="sub.menu"
+        [attr.aria-label]="option.ariaLabel || option.name | translate"
+        [class.mat-menu-item-separate]="option.isSeparate || isNewGroup(i)"
+        [disabled]="!option.isEnabled"
+        attr.data-test="menu-item-{{ option.name }}"
+      >
+        <ng-container
+          *ngTemplateOutlet="itemContent; context: { $implicit: option }"
+        ></ng-container>
+      </button>
+      <es-dropdown
+        #sub
+        [options]="option.subOptions"
+        [callbackObjects]="callbackObjects"
+        [position]="position"
+        [menuClass]="menuClass"
+        [menuTitle]="option.subOptionsTitle"
+        [selectable]="option.subOptionsSelectable"
+        [allowSubmenus]="false"
+        [showDisabled]="showDisabled"
+      ></es-dropdown>
+      } @else if (option.isEnabled && option.link?.routerLink) {
       <a
         mat-menu-item
         class="mat-menu-item collection-item-{{
@@ -71,6 +107,8 @@
           option.name | replaceChars : { search: '.', replace: '-' }
         }}"
         [class.warn]="option.color === 'warn'"
+        [role]="selectable ? 'menuitemradio' : 'menuitem'"
+        [attr.aria-checked]="selectable ? !!option.isSelected : null"
         matTooltip="{{ option | optionTooltip | async }}"
         matTooltipPosition="right"
         matTooltipTouchGestures="off"

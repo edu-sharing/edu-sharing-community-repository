@@ -714,6 +714,7 @@
     "METADATA_SIDEBAR": "Détails des matériaux",
     "DOWNLOAD_SAFE": "Archives",
     "ACCESSIBILITY": "Accessibilité",
+    "LANGUAGE_SWITCH": "Langue",
     "COLLECTION_PROPOSAL_ACCEPT": "Accepter la proposition",
     "LTI": "Adopter dans la plateforme LTI",
     "EMBED": "Embarquer",
@@ -1006,6 +1007,7 @@
   },
   "LANGUAGE": {
     "INTERNATIONAL": "internationale",
+    "SELECT": "Choisir la langue",
     "ar": "L'arabe",
     "ar_AE": "Arabe (Émirats arabes unis)",
     "ar_BH": "Arabe (Bahreïn)",
