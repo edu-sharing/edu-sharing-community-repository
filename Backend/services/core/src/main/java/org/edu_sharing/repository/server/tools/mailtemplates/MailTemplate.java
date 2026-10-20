@@ -120,7 +120,7 @@ public class MailTemplate {
 		addContentLinks(nodeId, target, keyName, nodetype);
 	}
 
-	static void addContentLinks(String nodeId, Map<String, String> target, String keyName, String nodetype) {
+	public static void addContentLinks(String nodeId, Map<String, String> target, String keyName, String nodetype) {
 		if("collection".equals(nodetype)){
 			target.put(keyName, URLHelper.getNgComponentsUrl() + "collections?id="+ nodeId);
 			target.put(keyName + ".static", URLHelper.getNgComponentsUrl(false) + "collections?id="+ nodeId);
