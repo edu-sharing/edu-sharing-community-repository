@@ -51,7 +51,7 @@
     <tomcat.version>10.1.55</tomcat.version>
     <jackson.version>2.17.2</jackson.version>
     <mongodb.version>5.5.1</mongodb.version>
-    <spring.version>6.2.11</spring.version>
+    <spring.version>6.2.19</spring.version>
     <spring-security.version>6.5.9</spring-security.version>
     <redisson.version>3.50.0</redisson.version>
 
@@ -190,6 +190,42 @@
         <type>zip</type>
       </dependency>
 
+      <!-- security update: cxf, camel, netty and spring boms override the versions of acs-community-packaging,
+           can be removed again once we switch to a newer alfresco version that ships fixed versions.
+           must be imported before acs-community-packaging, first imported bom wins -->
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-bom</artifactId>
+        <version>4.1.7</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-bom</artifactId>
+        <version>4.18.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- keep in sync with netty version of camel -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.1.132.Final</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>acs-community-packaging</artifactId>
@@ -264,18 +300,23 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
-        <version>1.81</version>
+        <version>1.81.1</version>
       </dependency>
 
       <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcjmail-jdk18on</artifactId>
-          <version>1.81</version>
+          <version>1.81.1</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcutil-jdk18on</artifactId>
-        <version>1.81</version>
+        <version>1.81.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.81.1</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.cardme</groupId>
@@ -882,12 +923,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-aspects</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>edu.uoc.elc.lti</groupId>
         <artifactId>spring-boot-lti-advantage</artifactId>
         <version>0.0.10</version>
@@ -964,60 +999,6 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-saml2-service-provider</artifactId>
         <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-test</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-webmvc</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-tx</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-aop</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-core</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-expression</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-context</artifactId>
-        <version>${spring.version}</version>
       </dependency>
 
       <dependency>

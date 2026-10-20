@@ -17,6 +17,9 @@ RUN locale-gen \
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
+# security update: spring-*-6.2.11, bc*, cxf, camel, netty jars (+ angus-activation, neethi, qpid-jms-client,
+# xmlschema-core as their deps) are removed from alfresco.war and replaced
+# by newer versions from the edu-sharing amp, can be removed again once we switch to a newer alfresco version
 RUN set -eux \
     && mkdir -p alf_safe \
     && mkdir -p tomcat/shared/classes/config/defaults \
@@ -27,9 +30,20 @@ RUN set -eux \
     && rm \
         tomcat/webapps/alfresco/WEB-INF/lib/jsr305-* \
         tomcat/webapps/alfresco/WEB-INF/lib/spring-security-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/spring-*-6.2.11.jar \
         tomcat/webapps/alfresco/WEB-INF/lib/oauth2-oidc-sdk-* \
         tomcat/webapps/alfresco/WEB-INF/lib/tika-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/bcjmail-jdk18on-* \
         tomcat/webapps/alfresco/WEB-INF/lib/bcutil-jdk18on-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/bcprov-jdk18on-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/bcpkix-jdk18on-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/cxf-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/camel-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/netty-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/angus-activation-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/neethi-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/qpid-jms-client-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/xmlschema-core-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-collections4-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-exec-* \
         tomcat/webapps/alfresco/WEB-INF/lib/dd-plist-* \
