@@ -777,6 +777,7 @@
     "METADATA_SIDEBAR": "Material details",
     "DOWNLOAD_SAFE": "Archive",
     "ACCESSIBILITY": "Accessibility",
+    "LANGUAGE_SWITCH": "Language",
     "COLLECTION_PROPOSAL_ACCEPT": "Accept proposal",
     "LTI": "Adopt in LTI platform",
     "EMBED": "Embed",
@@ -1125,6 +1126,7 @@
   },
   "LANGUAGE": {
     "INTERNATIONAL": "international",
+    "SELECT": "Select language",
     "ancient_greek": "Ancient Green",
     "ancient_indian": "Ancient Indian",
     "ar": "Arabic",

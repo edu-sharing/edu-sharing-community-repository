@@ -28,6 +28,7 @@ import {
     OptionGroup,
     OptionItem,
     Target,
+    TranslationsService,
     UIAnimation,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
@@ -94,6 +95,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     private ngZone = inject(NgZone);
     private rocketChat = inject(RocketChatService);
     private dialogs = inject(DialogsService);
+    private translations = inject(TranslationsService);
     private licenseAgreement = inject(LicenseAgreementService);
     private searchField = inject(SearchFieldService);
     private imprintPrivacy = inject(ImprintPrivacyService);
@@ -429,6 +431,8 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private async updateUserOptions() {
+        // Resolved before the options are reset, so concurrent runs cannot interleave their pushes.
+        const languages = await this.translations.getSupportedLanguages();
         const mainGroup = new OptionGroup('main', 15);
         this.userMenuOptions = [];
         if (
@@ -518,6 +522,29 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
         accessibilityOptions.group = mainGroup;
         accessibilityOptions.priority = 40;
         this.userMenuOptions.push(accessibilityOptions);
+        // A single language leaves nothing to choose.
+        if (languages.length > 1) {
+            const languageOption = new OptionItem('OPTIONS.LANGUAGE_SWITCH', 'translate', () => {});
+            languageOption.subOptions = languages.map((lang) => {
+                const option = new OptionItem(
+                    this.translations.getLanguageDisplayName(lang),
+                    '',
+                    async () => {
+                        await this.translations.setLanguage(lang);
+                        languageOption.subOptions.forEach(
+                            (o, i) => (o.isSelected = languages[i] === lang),
+                        );
+                    },
+                );
+                option.isSelected = lang === this.translations.getLanguage();
+                return option;
+            });
+            languageOption.subOptionsTitle = 'LANGUAGE.SELECT';
+            languageOption.subOptionsSelectable = true;
+            languageOption.group = mainGroup;
+            languageOption.priority = 45;
+            this.userMenuOptions.push(languageOption);
+        }
         for (const option of this.getConfigMenuHelpOptions()) {
             this.userMenuOptions.push(option);
         }

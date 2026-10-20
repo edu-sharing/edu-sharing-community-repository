@@ -181,9 +181,17 @@
           }
         </div>
       </div>
+      } @if (showProviders() && languageOptions().length > 1) {
+      <div class="language-picker">
+        <ng-container *ngTemplateOutlet="languagePicker"></ng-container>
+      </div>
       }
     </div>
-    @if (showProviders()) {
+    @if (!showProviders() && languageOptions().length > 1) {
+    <div action-area>
+      <ng-container *ngTemplateOutlet="languagePicker"></ng-container>
+    </div>
+    } @if (showProviders()) {
     <div class="login-help">
       <div innerHTML="{{ 'LOGIN.ACTION_HELP' | translate }}"></div>
     </div>
@@ -195,6 +203,21 @@
   ></es-powered-by>
 </div>
 }
+<ng-template #languagePicker>
+  <es-dropdown #languageDropdown [options]="languageOptions()" [selectable]="true"></es-dropdown>
+  <button
+    mat-button
+    class="language-trigger"
+    #languageTrigger="matMenuTrigger"
+    [matMenuTriggerFor]="languageDropdown.menu"
+    [attr.aria-label]="('LANGUAGE.SELECT' | translate) + ', ' + currentLanguageName()"
+    data-test="login-language-picker"
+  >
+    <i esIcon="language"></i>
+    {{ currentLanguageName() }}
+    <i [esIcon]="languageTrigger.menuOpen ? 'expand_less' : 'expand_more'"></i>
+  </button>
+</ng-template>
 <ng-template #faConfirmRef>
   <form class="fa-confirm" [formGroup]="faConfirm" (ngSubmit)="show2FaDialog.close('NEXT')">
     <h3 class="mat-heading-6">

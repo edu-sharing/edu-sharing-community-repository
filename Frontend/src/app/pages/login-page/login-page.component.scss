@@ -37,6 +37,18 @@
         width: calc(100% - 0.2rem);
     }
 }
+.language-picker {
+    display: flex;
+    justify-content: flex-end;
+}
+.language-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: normal;
+    width: auto !important;
+    flex-grow: 0 !important;
+}
 es-powered-by {
     position: fixed;
     left: 0;

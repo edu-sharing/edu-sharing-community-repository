@@ -145,3 +145,21 @@ export const ActionbarOnBrightBackground: Story = {
         backgroundType: 'bright',
     },
 };
+const submenuOption = new OptionItem('Submenu', 'translate', () => {});
+submenuOption.showAsAction = false;
+submenuOption.subOptionsTitle = 'Select language';
+submenuOption.subOptionsSelectable = true;
+submenuOption.subOptions = ['Deutsch (de)', 'English (en)', 'Français (fr)'].map((name, i) => {
+    const option = new OptionItem(name, '', () => {});
+    option.isSelected = i === 0;
+    return option;
+});
+export const ActionbarWithSubmenu: Story = {
+    args: {
+        backgroundType: 'bright',
+        options: [
+            ...defaultOptions.map((o) => new OptionItem(o.name, o.icon, o.callback)),
+            submenuOption,
+        ],
+    },
+};

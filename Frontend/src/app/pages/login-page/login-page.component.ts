@@ -17,7 +17,16 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { delay, filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import {
+    catchError,
+    delay,
+    filter,
+    first,
+    map,
+    startWith,
+    switchMap,
+    takeUntil,
+} from 'rxjs/operators';
 import { BridgeService } from '../../services/bridge.service';
 import {
     ConfigurationService,
@@ -32,6 +41,7 @@ import { RouterHelper } from '../../util/router.helper';
 import { Toast } from '../../services/toast';
 import {
     OPEN_URL_MODE,
+    OptionItem,
     TranslationsService,
     UIAnimation,
     UIConstants,
@@ -41,7 +51,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { AuthenticationService, LoginInfo, OAuthEntry, PrimaryLogin } from 'ngx-edu-sharing-api';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { firstValueFrom, from, Observable, of, Subject } from 'rxjs';
 import { ThemeService } from '../../services/theme.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
 import { Closable } from '../../features/dialogs/card-dialog/card-dialog-config';
@@ -102,6 +112,10 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
     password = '';
     providerControl = new UntypedFormControl();
     readonly showProviders = signal(false);
+    protected readonly languageOptions = signal<OptionItem[]>([]);
+    /** Name of the active language without its code. */
+    protected readonly currentLanguageName = signal('');
+    private readonly languageOptionsByCode = new Map<string, OptionItem>();
     username = '';
     loginSafeFailed = false;
 
@@ -136,6 +150,29 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
         const loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed });
         this.isLoading = true;
         this.updateButtons();
+        this.translations
+            .waitForInit()
+            .pipe(
+                first(),
+                switchMap(() => from(this.translations.getSupportedLanguages())),
+                // Without a language list the picker stays hidden.
+                catchError(() => of([] as string[])),
+                takeUntil(this.destroyed),
+            )
+            .subscribe((languages) => {
+                this.languageOptions.set(
+                    languages.map((lang) => {
+                        const option = new OptionItem(
+                            this.translations.getLanguageDisplayName(lang),
+                            '',
+                            () => void this.setLanguage(lang),
+                        );
+                        this.languageOptionsByCode.set(lang, option);
+                        return option;
+                    }),
+                );
+                this.updateSelectedLanguage();
+            });
         this.translations
             .waitForInit()
             .pipe(switchMap(() => this.configService.getAll()))
@@ -412,6 +449,26 @@ export class LoginPageComponent implements OnInit, OnDestroy, AfterViewInit {
             currentScope: 'login',
             title: 'SIDEBAR.LOGIN',
         });
+    }
+
+    /** Selects `lang` right away, as the active language only changes after re-initialization. */
+    private async setLanguage(lang: string): Promise<void> {
+        const previous = this.translations.getLanguage();
+        this.updateSelectedLanguage(lang);
+        try {
+            await this.translations.setLanguage(lang);
+        } catch {
+            this.updateSelectedLanguage(previous);
+        }
+    }
+
+    private updateSelectedLanguage(current = this.translations.getLanguage()): void {
+        this.languageOptionsByCode.forEach(
+            (option, lang) => (option.isSelected = lang === current),
+        );
+        this.currentLanguageName.set(
+            this.translations.getLanguageDisplayName(current).replace(/ \([^)]*\)$/, ''),
+        );
     }
 
     openLoginUrl() {
