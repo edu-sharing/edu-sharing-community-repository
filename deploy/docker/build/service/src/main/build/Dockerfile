@@ -17,8 +17,8 @@ RUN locale-gen \
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# security update: spring-*-6.2.11, bc*, cxf, camel, netty jars (+ angus-activation, neethi, qpid-jms-client,
-# xmlschema-core as their deps) are removed from alfresco.war and replaced
+# security update: spring-*-6.2.11, bc*, cxf, camel, netty, jackson, jsoup jars (+ angus-activation, neethi, qpid-jms-client,
+# proton-j, xmlschema-core as their deps) are removed from alfresco.war and replaced
 # by newer versions from the edu-sharing amp, can be removed again once we switch to a newer alfresco version
 RUN set -eux \
     && mkdir -p alf_safe \
@@ -43,7 +43,13 @@ RUN set -eux \
         tomcat/webapps/alfresco/WEB-INF/lib/angus-activation-* \
         tomcat/webapps/alfresco/WEB-INF/lib/neethi-* \
         tomcat/webapps/alfresco/WEB-INF/lib/qpid-jms-client-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/proton-j-* \
         tomcat/webapps/alfresco/WEB-INF/lib/xmlschema-core-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-core-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-databind-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-annotations-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jackson-dataformat-yaml-* \
+        tomcat/webapps/alfresco/WEB-INF/lib/jsoup-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-collections4-* \
         tomcat/webapps/alfresco/WEB-INF/lib/commons-exec-* \
         tomcat/webapps/alfresco/WEB-INF/lib/dd-plist-* \
