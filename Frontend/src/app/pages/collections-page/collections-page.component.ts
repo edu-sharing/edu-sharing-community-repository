@@ -8,6 +8,7 @@ import {
     TemplateRef,
     viewChild,
     ViewChild,
+    DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
@@ -47,6 +48,7 @@ import { UIHelper } from '../../core-ui-module/ui-helper';
 import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
+import { ImprintPrivacyService } from '../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
 import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
@@ -69,6 +71,8 @@ export class CollectionsPageComponent implements OnDestroy {
     private configService = inject(ConfigService);
     private connector = inject(RestConnectorService);
     private iamService = inject(RestIamService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     private localEvents = inject(LocalEventsService);
     private mediacenterService = inject(RestMediacenterService);
     private nodeHelper = inject(NodeHelperService);
@@ -405,6 +409,7 @@ export class CollectionsPageComponent implements OnDestroy {
         } else {
             this.setCollectionId(RestConstants.ROOT);
         }
+        this.imprintPrivacy.setContextNode(id ? this.collection : null, this.destroyRef);
         this.isLoading = false;
         this.renderBreadcrumbs();
         this.isRootLevel = !id;

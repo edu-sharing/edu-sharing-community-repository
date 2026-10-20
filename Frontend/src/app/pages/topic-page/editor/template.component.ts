@@ -28,6 +28,7 @@ import {
     ViewChildren,
     WritableSignal,
     inject,
+    DestroyRef,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
@@ -85,6 +86,7 @@ import {
     TemplateSlot,
 } from '../../../main/navigation/main-nav.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ImprintPrivacyService } from '../../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 import { ThemeService } from '../../../services/theme.service';
 import { Toast } from '../../../services/toast';
 import {
@@ -266,6 +268,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -926,6 +930,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.topicCollectionId(),
             );
             this.topic.set(this.collectionNode.title ?? 'No topic defined');
+            this.imprintPrivacy.setContextNode(this.collectionNode, this.destroyRef);
             // retrieve parent entries
             const parentEntries: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 this.topicCollectionId(),

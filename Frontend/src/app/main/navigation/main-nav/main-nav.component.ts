@@ -522,7 +522,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             this.userMenuOptions.push(option);
         }
         const infoGroup = new OptionGroup('info', 20);
-        if (this.config.imprintUrl) {
+        if (this.imprintPrivacy.imprintUrl()) {
             const option = new OptionItem('IMPRINT', 'info', () =>
                 this.imprintPrivacy.openImprint(),
             );
@@ -531,7 +531,7 @@ export class MainNavComponent implements OnInit, AfterViewInit, OnDestroy {
             option.mediaQueryValue = UIConstants.MOBILE_TAB_SWITCH_WIDTH;
             this.userMenuOptions.push(option);
         }
-        if (this.config.privacyInformationUrl) {
+        if (this.imprintPrivacy.privacyInformationUrl()) {
             const option = new OptionItem('PRIVACY_INFORMATION', 'verified_user', () =>
                 this.imprintPrivacy.openPrivacy(),
             );
