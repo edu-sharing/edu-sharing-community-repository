@@ -125,7 +125,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profil gespeichert – jetzt bekommst du passende Inhalte angezeigt!",
-        "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt."
+        "CHANGES_RESET": "Deine Profilierung wurde zurückgesetzt.",
+        "PINNED_VARIANT_HINT": "Ersetzt die direkt ausgewählte Seiten-Variante durch die zu deinem Profil passende."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Suche",

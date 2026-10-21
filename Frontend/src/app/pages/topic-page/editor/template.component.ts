@@ -640,6 +640,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     topicWidgets: NodeEntries;
 
     latestParams: Params;
+    /** Whether the URL selects a variant explicitly, which overrides the profile's best match. */
+    variantPinned: WritableSignal<boolean> = signal(false);
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
@@ -733,6 +735,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .pipe(filter((params: Params) => params.collectionId))
             .subscribe(async (params: Params): Promise<void> => {
                 this.latestParams = params;
+                this.variantPinned.set(!!params.variantId);
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
@@ -1706,6 +1709,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         });
         // TODO: remove, if a solution without page reload is found
         window.location.reload();
+    }
+
+    /**
+     * Drops an explicitly selected variant, so the variant selection follows the profile again.
+     * Runs synchronously before the profile values are set, which reloads the page variant.
+     */
+    releasePinnedVariant(): void {
+        if (!this.latestParams?.variantId) {
+            return;
+        }
+        this.latestParams = { ...this.latestParams, variantId: undefined };
+        this.variantPinned.set(false);
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
     }
 
     /**

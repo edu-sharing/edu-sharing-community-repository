@@ -216,6 +216,8 @@
               {{ i18nPrefix + 'SIDE_MENU.PROFILING.HEADING' | translate }}
             </h2>
             <es-profiling
+              [variantPinned]="variantPinned()"
+              (profileApplied)="releasePinnedVariant()"
               (selectDimensionsChanged)="selectDimensionsChanged($event)"
             ></es-profiling>
           </div>

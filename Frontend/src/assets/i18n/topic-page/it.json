@@ -123,7 +123,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profilo salvato – ora vi verranno mostrati contenuti pertinenti!",
-        "CHANGES_RESET": "La vostra profilazione è stata reimpostata."
+        "CHANGES_RESET": "La vostra profilazione è stata reimpostata.",
+        "PINNED_VARIANT_HINT": "Sostituisce la variante di pagina selezionata direttamente con quella adatta al vostro profilo."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Ricerca",

@@ -125,7 +125,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profile saved – you'll now see relevant content!",
-        "CHANGES_RESET": "Your profiling has been reset."
+        "CHANGES_RESET": "Your profiling has been reset.",
+        "PINNED_VARIANT_HINT": "Replaces the directly selected page variant with the one matching your profile."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Search",
