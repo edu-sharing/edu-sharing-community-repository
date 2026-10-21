@@ -2,7 +2,12 @@ FROM ${docker.from.openjdk.17.liberica.debian}
 
 ########################################################################################################################
 
+# Debian 11 (bullseye) is EOL and its packages have been moved to archive.debian.org
 RUN set -eux \
+    && sed -i \
+        -e 's#deb.debian.org/debian-security#archive.debian.org/debian-security#' \
+        -e 's#deb.debian.org/debian#archive.debian.org/debian#' \
+        /etc/apt/sources.list \
     && apt-get update -y \
     && apt-get install -y --no-install-recommends \
 		jq \
