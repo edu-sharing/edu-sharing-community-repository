@@ -1,13 +1,9 @@
 @if (initialized()) {
 <div class="es-topic-page-breadcrumb" [class.edit-mode]="editMode()">
   <ul class="es-topic-page-breadcrumb-list">
-    @for (node of processedNodes(); track node; let i = $index; let last = $last) {
+    @for (node of processedNodes(); track node; let last = $last) {
     <li class="es-topic-page-breadcrumb-list-item" [class.last-item]="last">
-      @if (i === 0 && rootLink()) {
-      <a [href]="rootLink()">
-        {{ rootName ?? (i18nPrefix + 'DEFAULT_ROOT_NAME' | translate) }}
-      </a>
-      } @else { @if (customUrl && customUrl(node)) {
+      @if (customUrl && customUrl(node)) {
       <a [href]="customUrl(node)" [target]="customUrlTarget" [esTopicLink]="node">
         <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
       </a>
@@ -15,7 +11,7 @@
       <es-node-url [node]="node" [mode]="'link'">
         <ng-container *ngTemplateOutlet="nodeTitle; context: { node }"></ng-container>
       </es-node-url>
-      } } @if (!last || pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
+      } @if (!last || pageVariantConfigNodes().length || (isAdmin() && pageTemplateExists())) {
       <i esIcon="chevron_right"></i>
       }
     </li>

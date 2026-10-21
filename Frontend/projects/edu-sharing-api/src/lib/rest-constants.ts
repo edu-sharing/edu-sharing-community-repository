@@ -178,6 +178,8 @@ export class RestConstants {
     public static CM_PROP_C_CREATED = 'cm:created';
     public static CM_CREATOR = 'cm:creator';
     public static CCM_PROP_IO_ORIGINAL = 'ccm:original';
+    public static CCM_PROP_EDUCONTEXT_NAME = 'ccm:educontextname';
+    public static EDUCONTEXT_DEFAULT = 'default';
     public static CCM_PROP_EAF_PRODUCTIONYEAR = 'ccm:eaf_productionyear';
     public static EXIF_PROP_DATE_TIME_ORIGINAL = 'exif:dateTimeOriginal';
     public static CCM_TYPE_COLLECTION_PROPOSAL = 'ccm:collection_proposal';

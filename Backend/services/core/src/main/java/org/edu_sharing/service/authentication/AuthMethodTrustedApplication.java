@@ -10,6 +10,7 @@ import org.alfresco.repo.security.authentication.AuthenticationException;
 import org.apache.tika.utils.StringUtils;
 import org.edu_sharing.repository.server.tools.ApplicationInfo;
 import org.edu_sharing.repository.server.tools.ApplicationInfoList;
+import org.edu_sharing.service.authentication.authByApp.config.AuthByAppConfigProvider;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class AuthMethodTrustedApplication implements AuthMethodInterface {
 
 	private final SSOAuthorityMapper ssoAuthorityMapper;
+	private final AuthByAppConfigProvider authByAppConfigProvider;
 
     public String authenticate(Map<String, String> params) throws AuthenticationException {
 
@@ -41,7 +43,7 @@ public class AuthMethodTrustedApplication implements AuthMethodInterface {
         }
 
         // check host
-        if (ssoAuthorityMapper.isAuthByAppCheckClientIp() && (clientIp == null || !appInfo.isTrustedHost(clientIp))) {
+        if (authByAppConfigProvider.getConfig().isCheckClientIp() && (clientIp == null || !appInfo.isTrustedHost(clientIp))) {
             log.error("{} clientHost:{} appInfo.trusted hosts:{} {} {} appInfo.getAppId():{} appfile:{} param appid:{}", AuthenticationExceptionMessages.INVALID_HOST, clientIp, appInfo.getHost(), appInfo.getHostAliases(), appInfo.getDomain(), appInfo.getAppId(), appInfo.getAppFile(), applicationId);
             throw new AuthenticationException(AuthenticationExceptionMessages.INVALID_HOST + ": " + clientIp);
         }

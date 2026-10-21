@@ -216,6 +216,8 @@
               {{ i18nPrefix + 'SIDE_MENU.PROFILING.HEADING' | translate }}
             </h2>
             <es-profiling
+              [variantPinned]="variantPinned()"
+              (profileApplied)="releasePinnedVariant()"
               (selectDimensionsChanged)="selectDimensionsChanged($event)"
             ></es-profiling>
           </div>
@@ -683,9 +685,11 @@
           : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
+    @if (userHasEditRights()) {
     <button mat-flat-button color="primary" (click)="createPageVariant()">
       {{ createPageVariantTitle | translate }}
     </button>
+    }
   </div>
   }
 </main>

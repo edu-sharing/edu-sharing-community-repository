@@ -28,6 +28,7 @@ import {
     ViewChildren,
     WritableSignal,
     inject,
+    DestroyRef,
 } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Params, Router, UrlTree } from '@angular/router';
@@ -85,6 +86,7 @@ import {
     TemplateSlot,
 } from '../../../main/navigation/main-nav.service';
 import { NodeHelperService } from '../../../services/node-helper.service';
+import { ImprintPrivacyService } from '../../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 import { ThemeService } from '../../../services/theme.service';
 import { Toast } from '../../../services/toast';
 import {
@@ -266,6 +268,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private dialogs = inject(DialogsService);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     private swimlaneRepeatService = inject(SwimlaneRepeatService);
     private mainNavService = inject(MainNavService);
     private mdsService = inject(MdsService);
@@ -636,6 +640,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     topicWidgets: NodeEntries;
 
     latestParams: Params;
+    /** Whether the URL selects a variant explicitly, which overrides the profile's best match. */
+    variantPinned: WritableSignal<boolean> = signal(false);
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
@@ -705,7 +711,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 DefaultGroups.FileOperations,
             ),
         ];
-        this.topicPageHelperService.previewCustomOptions = this.customSidebarOptions;
+        this.topicPageHelperService.setPreviewCustomOptions(this.customSidebarOptions);
         // retrieve the search URL
         this.searchUrl = this.retrieveSearchUrl();
         // retrieve the AI support state
@@ -729,6 +735,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .pipe(filter((params: Params) => params.collectionId))
             .subscribe(async (params: Params): Promise<void> => {
                 this.latestParams = params;
+                this.variantPinned.set(!!params.variantId);
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
@@ -864,6 +871,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 filter((i) => !!i),
             )
             .subscribe((instance) => {
+                // the search input taken from the URL predates the search field
+                if (this.searchInput()) {
+                    instance.setSearchString(this.searchInput());
+                }
                 instance
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
@@ -909,6 +920,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         this.destroyed$.next();
         this.destroyed$.complete();
         this.topicPageHelperService.setInPlaceNavigationHandler(null);
+        this.topicPageHelperService.setPreviewCustomOptions(null);
         this.mainNavService.unregisterCustomTemplateSlot(TemplateSlot.AfterCreateMenu);
         this.scrollHelperService.setScrollContainer(null);
     }
@@ -925,6 +937,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.topicCollectionId(),
             );
             this.topic.set(this.collectionNode.title ?? 'No topic defined');
+            this.imprintPrivacy.setContextNode(this.collectionNode, this.destroyRef);
             // retrieve parent entries
             const parentEntries: ParentEntries = await this.topicPageHelperService.getNodeParents(
                 this.topicCollectionId(),
@@ -1096,9 +1109,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * search state changes.
      */
     private persistSearchStateInParams(): void {
+        const queryParams: Params = searchStateToQueryParams(
+            this.searchInput(),
+            this.searchFilters(),
+        );
+        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment
+        const currentParams: Params = this.route.snapshot.queryParams;
+        if (
+            Object.entries(queryParams).every(
+                ([key, value]) => (currentParams[key] ?? null) === value,
+            )
+        ) {
+            return;
+        }
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: searchStateToQueryParams(this.searchInput(), this.searchFilters()),
+            queryParams,
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -1703,6 +1729,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Drops an explicitly selected variant, so the variant selection follows the profile again.
+     * Runs synchronously before the profile values are set, which reloads the page variant.
+     */
+    releasePinnedVariant(): void {
+        if (!this.latestParams?.variantId) {
+            return;
+        }
+        this.latestParams = { ...this.latestParams, variantId: undefined };
+        this.variantPinned.set(false);
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
      * Navigates to a given variantId and reloads the page structure accordingly.
      */
     async navigateToVariant(variantId: string): Promise<void> {
@@ -1854,7 +1898,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Writes a mail with a link to a given swimlane.
      */
-    writeMail(swimlaneIndex: number): void {
+    async writeMail(swimlaneIndex: number): Promise<void> {
         const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
         if (!swimlane) {
             console.warn(
@@ -1862,9 +1906,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             return;
         }
-        this.topicPageShareService.writeMail(
+        await this.topicPageShareService.writeMail(
             this.SWIMLANE_ID_PREFIX + swimlane.id,
             swimlane.heading,
+            this.pageVariantNodeId(),
         );
     }
 

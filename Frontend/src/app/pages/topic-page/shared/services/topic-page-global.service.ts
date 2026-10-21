@@ -29,7 +29,6 @@ export type TopicNavigation = (collectionId: string, url: string | null) => bool
 export class TopicPageGlobalService {
     private backToCollectionButtonVisible: boolean = true;
     private customBreadcrumbExtension: CustomBreadcrumbExtension = null;
-    private customBreadcrumbRootLink: string = '';
     private customReurlComponent: string = '';
     private customReurlExtras: NavigationExtras;
     private customApplyFilterComponent: string = '';
@@ -60,13 +59,6 @@ export class TopicPageGlobalService {
      */
     registerCustomBreadcrumbExtension(customBreadcrumbExtension: CustomBreadcrumbExtension) {
         this.customBreadcrumbExtension = customBreadcrumbExtension;
-    }
-
-    /**
-     * Sets a custom root link for the breadcrumb component.
-     */
-    setCustomBreadcrumbRootLink(link: string) {
-        this.customBreadcrumbRootLink = link;
     }
 
     /**
@@ -305,13 +297,6 @@ export class TopicPageGlobalService {
      */
     getCustomSideMenuItems(): CustomSideMenuItem[] {
         return this.customSideMenuItems;
-    }
-
-    /**
-     * Retrieves the custom root link for the breadcrumb component.
-     */
-    getCustomBreadcrumbRootLink() {
-        return this.customBreadcrumbRootLink;
     }
 
     /**

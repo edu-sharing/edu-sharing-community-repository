@@ -39,7 +39,6 @@
         "NO_ANSWER_DEFINED": "Aucun texte n'a encore été défini pour la sélection."
       },
       "BREADCRUMB": {
-        "DEFAULT_ROOT_NAME": "Portails thématiques",
         "PAGE_VARIANT_LABEL": "Variante de page",
         "NAVIGATE_TO_PAGE_TEMPLATE": "Aller au modèle de page"
       },
@@ -124,7 +123,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profil enregistré – vous voyez désormais des contenus adaptés !",
-        "CHANGES_RESET": "Votre profilage a été réinitialisé."
+        "CHANGES_RESET": "Votre profilage a été réinitialisé.",
+        "PINNED_VARIANT_HINT": "Remplace la variante de page sélectionnée directement par celle correspondant à votre profil."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Recherche",

@@ -65,6 +65,7 @@ export interface DisplayTypeComponentInterface {
     contextNodeId: string;
     criteria: MdsQueryCriteria[];
     selectedNode: Node;
+    nodeEntries?: NodeEntriesWrapperComponent<Node>;
     // outputs
     itemClicked: EventEmitter<Node>;
     totalSearchResultCountChanged: EventEmitter<number>;
@@ -908,7 +909,10 @@ export class GenericNodeEntriesComponent implements OnChanges, OnDestroy, OnInit
      */
     onItemClicked(node: Node): void {
         this.itemClicked.emit(node);
-        this.topicPageHelperService.togglePreview(node, this.nodeEntries);
+        this.topicPageHelperService.togglePreview(
+            node,
+            this.nodeEntries ?? this.customTypeInstance?.nodeEntries,
+        );
     }
 
     /**

@@ -3,6 +3,8 @@ import {
     Component,
     CUSTOM_ELEMENTS_SCHEMA,
     EventEmitter,
+    input,
+    InputSignal,
     Output,
     signal,
     ViewChild,
@@ -44,7 +46,11 @@ export class ProfilingComponent implements AfterViewInit {
     readonly selectedProfilingVariablesKey: string = 'selectedProfilingVariables';
     storageValues: { [p: string]: string[] } = {};
     initialValuesLoaded: WritableSignal<boolean> = signal(false);
+    /** Whether the page shows an explicitly selected variant instead of the profile's best match. */
+    variantPinned: InputSignal<boolean> = input<boolean>(false);
 
+    /** Emitted when the user applies or resets the profile, before the new values take effect. */
+    @Output() profileApplied: EventEmitter<void> = new EventEmitter<void>();
     @Output() selectDimensionsChanged: EventEmitter<Map<string, MdsWidget>> = new EventEmitter<
         Map<string, MdsWidget>
     >();
@@ -86,6 +92,7 @@ export class ProfilingComponent implements AfterViewInit {
         selectedValues = Object.fromEntries(
             Object.entries(selectedValues).filter(([, value]) => value && value.length > 0),
         );
+        this.profileApplied.emit();
         this.topicPageHelperService.setSelectedVariables(selectedValues);
         await this.storage.set(this.selectedProfilingVariablesKey, selectedValues);
         // inform the user about the changes
