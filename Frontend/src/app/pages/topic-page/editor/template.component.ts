@@ -1881,7 +1881,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Writes a mail with a link to a given swimlane.
      */
-    writeMail(swimlaneIndex: number): void {
+    async writeMail(swimlaneIndex: number): Promise<void> {
         const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
         if (!swimlane) {
             console.warn(
@@ -1889,9 +1889,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             return;
         }
-        this.topicPageShareService.writeMail(
+        await this.topicPageShareService.writeMail(
             this.SWIMLANE_ID_PREFIX + swimlane.id,
             swimlane.heading,
+            this.pageVariantNodeId(),
         );
     }
 

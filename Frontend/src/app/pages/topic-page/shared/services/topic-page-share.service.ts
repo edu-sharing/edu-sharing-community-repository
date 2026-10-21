@@ -117,9 +117,10 @@ export class TopicPageShareService {
     }
 
     /**
-     * Opens the mail client with a message linking to a fragment of the page.
+     * Opens the mail client with a message linking to a fragment of the given page variant.
      */
-    writeMail(fragment: string, title: string): void {
+    async writeMail(fragment: string, title: string, variantId: string): Promise<void> {
+        await this.setVariantIdInUrl(variantId);
         const subjectText = this.translate.instant(MAIL_I18N_PREFIX + 'SUBJECT_SHARED_CONTENT', {
             title: title || this.translate.instant(MAIL_I18N_PREFIX + 'NO_TITLE'),
         });
