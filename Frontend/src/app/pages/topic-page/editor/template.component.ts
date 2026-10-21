@@ -871,6 +871,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 filter((i) => !!i),
             )
             .subscribe((instance) => {
+                // the search input taken from the URL predates the search field
+                if (this.searchInput()) {
+                    instance.setSearchString(this.searchInput());
+                }
                 instance
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
@@ -1105,9 +1109,22 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * search state changes.
      */
     private persistSearchStateInParams(): void {
+        const queryParams: Params = searchStateToQueryParams(
+            this.searchInput(),
+            this.searchFilters(),
+        );
+        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment
+        const currentParams: Params = this.route.snapshot.queryParams;
+        if (
+            Object.entries(queryParams).every(
+                ([key, value]) => (currentParams[key] ?? null) === value,
+            )
+        ) {
+            return;
+        }
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: searchStateToQueryParams(this.searchInput(), this.searchFilters()),
+            queryParams,
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
