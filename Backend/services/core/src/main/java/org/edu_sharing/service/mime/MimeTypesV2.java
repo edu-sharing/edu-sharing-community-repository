@@ -201,6 +201,9 @@ public class MimeTypesV2 {
 	 * @return
 	 */
 	public static String getNodeType(String nodeType,Map<String,Object> properties,List<String> aspects){
+		// elastic delivers short type names, the alfresco node service global ones
+		String nodeTypeLong = CCConstants.getValidGlobalName(nodeType);
+		nodeType = nodeTypeLong == null ? nodeType : nodeTypeLong;
 		if(isCollection(aspects, properties))
 			return "collection";
 		if(isDirectory(properties, nodeType)) {
@@ -311,10 +314,10 @@ public class MimeTypesV2 {
 		return aspects.contains(CCConstants.CCM_ASPECT_TOOL_DEFINITION);
 	}
 	private static boolean isSavedSearch(String type) {
-		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(CCConstants.getValidGlobalName(type));
+		return CCConstants.CCM_TYPE_SAVED_SEARCH.equals(type);
 	}
 	private static boolean isLtiInstance(String nodeType) {
-		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(CCConstants.getValidGlobalName(nodeType));
+		return CCConstants.CCM_TYPE_TOOL_INSTANCE.equals(nodeType);
 	}
 
 	private static boolean isLTI13ToolObject(List<String> aspects){

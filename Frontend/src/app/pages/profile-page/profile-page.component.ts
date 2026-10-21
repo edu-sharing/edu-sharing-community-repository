@@ -36,7 +36,7 @@ import { trigger } from '@angular/animations';
 import { Helper } from '../../core-module/rest/helper';
 import { LoadingScreenService } from '../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../main/navigation/main-nav.service';
-import { catchError, first, take, takeUntil } from 'rxjs/operators';
+import { catchError, filter, first, switchMap, take, takeUntil } from 'rxjs/operators';
 import {
     About,
     AboutService,
@@ -177,14 +177,21 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
                     )?.copy() as any;
                     if (this.isMe) {
                         this.getProfileSetting(this.params.authority);
-                        this.iamService
-                            .getDataProtectionExport({
-                                person: ME,
-                                repository: HOME_REPOSITORY,
-                            })
+                        this.aboutService
+                            .getAbout()
                             .pipe(
+                                take(1),
+                                filter((about) =>
+                                    about.features?.some((f) => f.id === 'dataprotection'),
+                                ),
+                                switchMap(() =>
+                                    this.iamService.getDataProtectionExport({
+                                        person: ME,
+                                        repository: HOME_REPOSITORY,
+                                    }),
+                                ),
                                 catchError((e) => {
-                                    e.preventDefault();
+                                    e.preventDefault?.();
                                     return of(null);
                                 }),
                             )

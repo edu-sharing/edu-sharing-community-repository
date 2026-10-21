@@ -47,10 +47,10 @@
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.7.7</postgresql.jdbc.version>
-    <tomcat.version>10.1.55</tomcat.version>
-    <jackson.version>2.17.2</jackson.version>
+    <tomcat.version>10.1.61</tomcat.version>
+    <jackson.version>2.18.12</jackson.version>
     <mongodb.version>5.5.1</mongodb.version>
-    <spring.version>6.2.11</spring.version>
+    <spring.version>6.2.19</spring.version>
     <spring-security.version>6.5.9</spring-security.version>
     <redisson.version>3.50.0</redisson.version>
 
@@ -189,6 +189,50 @@
         <type>zip</type>
       </dependency>
 
+      <!-- security update: cxf, camel, netty, spring and jackson boms override the versions of acs-community-packaging,
+           can be removed again once we switch to a newer alfresco version that ships fixed versions.
+           must be imported before acs-community-packaging, first imported bom wins -->
+      <dependency>
+        <groupId>org.apache.cxf</groupId>
+        <artifactId>cxf-bom</artifactId>
+        <version>4.1.7</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-bom</artifactId>
+        <version>4.18.5</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- must be >= netty version of camel (4.18.5 -> 4.1.137.Final), stay on 4.1.x -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.1.139.Final</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-framework-bom</artifactId>
+        <version>${spring.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>acs-community-packaging</artifactId>
@@ -263,18 +307,23 @@
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcpkix-jdk18on</artifactId>
-        <version>1.81</version>
+        <version>1.81.1</version>
       </dependency>
 
       <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcjmail-jdk18on</artifactId>
-          <version>1.81</version>
+          <version>1.81.1</version>
       </dependency>
       <dependency>
         <groupId>org.bouncycastle</groupId>
         <artifactId>bcutil-jdk18on</artifactId>
-        <version>1.81</version>
+        <version>1.81.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.81.1</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.cardme</groupId>
@@ -602,21 +651,9 @@
 
 
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-core-asl</artifactId>
         <version>1.9.13</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
@@ -626,63 +663,9 @@
       </dependency>
 
       <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-cbor</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-smile</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-xml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
-        <artifactId>jackson-dataformat-yaml</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-joda</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-base</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>org.codehaus.jackson</groupId>
         <artifactId>jackson-mapper-asl</artifactId>
         <version>1.9.13</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
-        <version>${jackson.version}</version>
       </dependency>
 
       <dependency>
@@ -772,7 +755,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.21.1</version>
+        <version>1.23.2</version>
       </dependency>
 
       <dependency>
@@ -881,12 +864,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-aspects</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>edu.uoc.elc.lti</groupId>
         <artifactId>spring-boot-lti-advantage</artifactId>
         <version>0.0.10</version>
@@ -963,60 +940,6 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-saml2-service-provider</artifactId>
         <version>${spring-security.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-test</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-web</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-webmvc</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-tx</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-aop</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-core</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-expression</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-context</artifactId>
-        <version>${spring.version}</version>
       </dependency>
 
       <dependency>

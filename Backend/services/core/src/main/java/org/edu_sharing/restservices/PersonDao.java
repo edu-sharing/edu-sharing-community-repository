@@ -850,12 +850,19 @@ public class PersonDao {
 	}
 
 	public boolean requestDataProtectionExport(){
-		ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+		assertDataProtectionEnabled();
 		return dataProtectionService.requestDataProtectionExport(getUserName());
 	}
 
 	public DataProtectionQueueEntry getDataProtectionQueueEntry(){
-		ApplicationContextFactory.getApplicationContext().getBean(FeatureInfoDataProtectionService.class);
+		assertDataProtectionEnabled();
 		return dataProtectionService.getDataProtectionQueueEntry(getUserName());
+	}
+
+	private static void assertDataProtectionEnabled() {
+		if (ApplicationContextFactory.getApplicationContext()
+				.getBeanProvider(FeatureInfoDataProtectionService.class).getIfAvailable() == null) {
+			throw new UnsupportedOperationException("dataprotection feature is not enabled");
+		}
 	}
 }
