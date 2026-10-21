@@ -683,9 +683,11 @@
           : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
+    @if (userHasEditRights()) {
     <button mat-flat-button color="primary" (click)="createPageVariant()">
       {{ createPageVariantTitle | translate }}
     </button>
+    }
   </div>
   }
 </main>
