@@ -23,9 +23,7 @@ public class LTIConfigProvider {
     public LTIProperties getConfig() {
         Config rootConfig = configLoader.getConfig();
         LTIProperties ltiProperties = new LTIProperties();
-        if (rootConfig.hasPath(SECURITY_SSO_LTI_MAPPING)) {
-            ltiProperties.setMapping(MappingBeanFactory.getMapping(rootConfig.getConfig(SECURITY_SSO_LTI_MAPPING)));
-        }
+        ltiProperties.setMapping(MappingBeanFactory.getMapping(rootConfig, SECURITY_SSO_LTI_MAPPING));
 
         return ltiProperties;
 

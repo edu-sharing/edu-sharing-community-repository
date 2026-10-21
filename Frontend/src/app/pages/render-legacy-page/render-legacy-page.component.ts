@@ -16,6 +16,7 @@ import {
     ViewChild,
     ViewContainerRef,
     inject,
+    DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -81,6 +82,7 @@ import { Toast } from '../../services/toast';
 import $ from 'jquery';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CardComponent } from '../../shared/components/card/card.component';
+import { ImprintPrivacyService } from '../../shared/components/imprint-privacy-footer/imprint-privacy-service';
 import { RenderHelperService } from './render-helper.service';
 import { CardDialogService } from '../../features/dialogs/card-dialog/card-dialog.service';
 import { DialogsService } from '../../features/dialogs/dialogs.service';
@@ -136,6 +138,8 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
     private networkServiceLegacy = inject(RestNetworkService);
     private networkService = inject(NetworkService);
     private breadcrumbsService = inject(BreadcrumbsService);
+    private imprintPrivacy = inject(ImprintPrivacyService);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private platformLocation = inject(PlatformLocation);
     private optionsHelper = inject(OptionsHelperDataService);
@@ -550,6 +554,7 @@ export class RenderLegacyPageComponent implements EventListener, OnInit, OnDestr
                     } else {
                         try {
                             this._node = data.node;
+                            this.imprintPrivacy.setContextNode(this._node, this.destroyRef);
                             // if it's an remote repo, the repo id will be updated from the node endpoint
                             this.repository = data.node.ref.repo || HOME_REPOSITORY;
                             this._fromHomeRepository = await this.networkService

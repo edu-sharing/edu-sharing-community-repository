@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.edu_sharing.alfresco.lightbend.LightbendConfigLoader;
 import org.edu_sharing.repository.client.tools.CCConstants;
+import org.edu_sharing.service.authentication.SSOAuthorityMapper;
 import org.edu_sharing.service.authentication.sso.mapping.MappingBeanFactory;
 import org.edu_sharing.spring.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,7 +35,7 @@ public class OAuth2ConfigProvider {
     public OAuth2ClientProperties getDefaultConfig() {
         Config rootConfig = configLoader.getConfig();
         Config config = rootConfig.getConfig(REPOSITORY_OAUTH2_CONFIG_PATH);
-        return createConfig(CCConstants.EDUCONTEXT_DEFAULT, config);
+        return createConfig(CCConstants.EDUCONTEXT_DEFAULT, config, getDefaultSettings(rootConfig));
     }
 
     @Cacheable(key = "#context", cacheNames = "oauth2Configs", cacheManager = "localCacheManager")
@@ -52,7 +53,7 @@ public class OAuth2ConfigProvider {
         Config defaultConfig = rootConfig.getConfig(REPOSITORY_OAUTH2_CONFIG_PATH);
         Config config = rootConfig.getConfig(contextConfigPath).withFallback(defaultConfig);
 
-        return createConfig(context, config);
+        return createConfig(context, config, getDefaultSettings(rootConfig));
     }
 
     @Cacheable(cacheNames = "oauth2AllConfigs" , cacheManager = "localCacheManager")
@@ -72,13 +73,13 @@ public class OAuth2ConfigProvider {
                 Config openIdConfig = contextConfig.hasPath(configPath)
                         ? contextConfig.getConfig(configPath).withFallback(defaultConfig)
                         : defaultConfig;
-                configs.add(createConfig(contextId, openIdConfig));
+                configs.add(createConfig(contextId, openIdConfig, getDefaultSettings(rootConfig)));
             }
         }
         return configs;
     }
 
-    private OAuth2ClientProperties createConfig(String contextId, Config config) {
+    private OAuth2ClientProperties createConfig(String contextId, Config config, Config defaultSettings) {
         OAuth2ClientProperties oAuth2ClientProperties = new OAuth2ClientProperties();
         oAuth2ClientProperties.setContextId(contextId);
 
@@ -98,7 +99,7 @@ public class OAuth2ConfigProvider {
 
         if(config.hasPath("mapping")) {
             config.getObject("mapping").forEach((key, value) -> {
-                oAuth2ClientProperties.getMapping().put(key, MappingBeanFactory.getMapping(((ConfigObject) value).toConfig()));
+                oAuth2ClientProperties.getMapping().put(key, MappingBeanFactory.getMapping(((ConfigObject) value).toConfig(), defaultSettings));
             });
         }
 
@@ -108,6 +109,10 @@ public class OAuth2ConfigProvider {
         }
 
         return oAuth2ClientProperties;
+    }
+
+    private static Config getDefaultSettings(Config rootConfig) {
+        return rootConfig.getConfig(SSOAuthorityMapper.CONFIG_PATH);
     }
 
     private static String getContextConfigPath(String context) {
