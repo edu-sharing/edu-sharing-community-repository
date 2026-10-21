@@ -22101,6 +22101,16 @@
               }
             },
             "description": "Fatal error occured."
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Feature is not enabled on this repository."
           }
         },
         "summary": "Fetches the node of general data protection export",
@@ -22193,6 +22203,16 @@
               }
             },
             "description": "Fatal error occured."
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Feature is not enabled on this repository."
           }
         },
         "summary": "requests General Data Protection Regulation (GDPR) export.",
