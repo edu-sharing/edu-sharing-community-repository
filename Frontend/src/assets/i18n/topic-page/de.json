@@ -489,6 +489,14 @@
       "BACK_TO_SELECTION": "Zur Auswahl",
       "END": "Vorschau beenden",
       "UNAVAILABLE": "„{{title}}“ ist nicht mehr verfügbar."
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Abschnitte mit Handlungsbedarf:",
+      "UNFINISHED": "{{count}} nicht fertiggestellt (für Leser ausgeblendet)",
+      "PARTIAL": "{{count}} unvollständig",
+      "JUMP": "Zum nächsten Abschnitt",
+      "LABEL_UNFINISHED": "Nicht fertiggestellt – für Leser ausgeblendet",
+      "LABEL_PARTIAL": "Unvollständig – leere Spalten bleiben für Leser frei"
     }
   }
 }

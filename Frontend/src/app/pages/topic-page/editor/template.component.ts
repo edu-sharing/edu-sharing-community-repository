@@ -97,6 +97,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { VarDirective } from '../shared/directives/ng-var.directive';
 import { TooltipAriaLabelDirective } from '../shared/directives/tooltip-aria-label.directive';
 import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
+import { FilterUnfinishedSwimlanesPipe } from '../shared/pipes/filter-unfinished-swimlanes.pipe';
 import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
 import { FilterVisibleSwimlanePipe } from '../shared/pipes/filter-swimlane-hits.pipe';
@@ -137,6 +138,7 @@ import {
     SEARCH_FILTERS_QUERY_PARAM,
     SEARCH_INPUT_QUERY_PARAM,
     SWIMLANE_TYPE_OPTIONS,
+    WIDGET_TYPE_OPTIONS,
     WIDGETS,
 } from '../shared/types/custom-definitions';
 import { BapiConfigObject } from '../shared/types/bapi-config-object';
@@ -172,6 +174,10 @@ import {
     searchStateToQueryParams,
     SwimlaneHitMatching,
 } from '../shared/utils/search-hit-util';
+import {
+    retrieveSwimlaneCompletion,
+    SwimlaneCompletion,
+} from '../shared/utils/swimlane-completion-util';
 import {
     convertNodeRefIntoNodeId,
     keepOwnHeaderBreadcrumbAndColors,
@@ -223,6 +229,7 @@ import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/t
         ConfigurePageVariantOrTemplateComponent,
         EditableTextComponent,
         FilterSwimlaneTypePipe,
+        FilterUnfinishedSwimlanesPipe,
         FilterVisibleSwimlanePipe,
         GenericWidgetComponent,
         EditorialSidebarModule,
@@ -633,6 +640,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     swimlaneToEditForm: UntypedFormGroup;
     // the swimlanes as persisted; `swimlanes` may hold a preview of them resolved for rendering
     private persistedSwimlanes: Swimlane[] = [];
+    // the unfinished or partial swimlane the editor jumped to last, to continue with the next one
+    private lastIncompleteSwimlaneJumpedTo: string | null = null;
     swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
         string,
         PromptToTextMapping
@@ -2169,6 +2178,64 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 this.endEditing();
             }
         });
+    }
+
+    // SWIMLANE COMPLETION
+    /**
+     * Whether the page can render the given widget type; es-swimlane leaves tiles of other types
+     * empty, so the same rules apply.
+     */
+    readonly isRenderableWidgetType = (widgetType: string): boolean => {
+        if (widgetType === WIDGETS.AI_TEXT_WIDGET && !this.aiSupported()) {
+            return false;
+        }
+        if (widgetType === WIDGETS.MEDIA_RENDERING && !this.rendering2Supported()) {
+            return false;
+        }
+        return (
+            WIDGET_TYPE_OPTIONS.some((option) => option.value === widgetType) ||
+            this.genericWidgetGlobalService.hasCustomWidget(widgetType)
+        );
+    };
+
+    /**
+     * Rates how far the grid of the given swimlane is filled with renderable widgets.
+     */
+    swimlaneCompletion(swimlane: Swimlane): SwimlaneCompletion {
+        return retrieveSwimlaneCompletion(swimlane, this.isRenderableWidgetType);
+    }
+
+    /**
+     * Counts the swimlanes still to be finished, or returns null when all are complete.
+     */
+    swimlaneCompletionCounts(): { unfinished: number; partial: number } | null {
+        const completions: SwimlaneCompletion[] = this.swimlanes.map((swimlane: Swimlane) =>
+            this.swimlaneCompletion(swimlane),
+        );
+        const unfinished: number = completions.filter((c) => c === 'unfinished').length;
+        const partial: number = completions.filter((c) => c === 'partial').length;
+        return unfinished + partial > 0 ? { unfinished, partial } : null;
+    }
+
+    /**
+     * Scrolls to the next swimlane still to be finished after the one jumped to last, starting
+     * over at the first one.
+     */
+    scrollToNextIncompleteSwimlane(): void {
+        const incompleteSwimlanes: Swimlane[] = this.swimlanes.filter(
+            (swimlane: Swimlane) => swimlane.id && this.swimlaneCompletion(swimlane) !== 'complete',
+        );
+        if (!incompleteSwimlanes.length) {
+            return;
+        }
+        const lastIndex: number = incompleteSwimlanes.findIndex(
+            (swimlane: Swimlane) => swimlane.id === this.lastIncompleteSwimlaneJumpedTo,
+        );
+        const target: Swimlane = incompleteSwimlanes[(lastIndex + 1) % incompleteSwimlanes.length];
+        this.lastIncompleteSwimlaneJumpedTo = target.id;
+        this.topicPageShareService.scrollToElement(
+            document.getElementById(this.SWIMLANE_ID_PREFIX + target.id),
+        );
     }
 
     // REACT TO FURTHER OUTPUT EVENTS

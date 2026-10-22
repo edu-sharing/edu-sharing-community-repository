@@ -489,6 +489,14 @@
       "BACK_TO_SELECTION": "Back to selection",
       "END": "End preview",
       "UNAVAILABLE": "\"{{title}}\" is no longer available."
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Sections requiring action:",
+      "UNFINISHED": "{{count}} unfinished (hidden from readers)",
+      "PARTIAL": "{{count}} incomplete",
+      "JUMP": "Go to next section",
+      "LABEL_UNFINISHED": "Unfinished – hidden from readers",
+      "LABEL_PARTIAL": "Incomplete – empty columns stay blank for readers"
     }
   }
 }

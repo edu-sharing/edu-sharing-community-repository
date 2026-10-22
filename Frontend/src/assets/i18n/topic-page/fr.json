@@ -432,6 +432,14 @@
       "VIEW": "Vous vous trouvez actuellement en mode affichage du modèle.",
       "EDIT": "Vous vous trouvez actuellement en mode édition du modèle.",
       "END": "Quitter le mode modèle"
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Sections nécessitant une action :",
+      "UNFINISHED": "{{count}} non terminée(s) (masquée(s) pour les lecteurs)",
+      "PARTIAL": "{{count}} incomplète(s)",
+      "JUMP": "Aller à la section suivante",
+      "LABEL_UNFINISHED": "Non terminée – masquée pour les lecteurs",
+      "LABEL_PARTIAL": "Incomplète – les colonnes vides restent vides pour les lecteurs"
     }
   }
 }

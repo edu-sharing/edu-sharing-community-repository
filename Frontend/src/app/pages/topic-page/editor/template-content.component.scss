@@ -145,6 +145,33 @@
                 max-width: var(--content-max-width);
                 position: relative;
 
+                // marks a swimlane still to be finished, in the colors of a warning info message
+                .swimlane-completion-label {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    margin-bottom: 8px;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    background-color: color-mix(
+                        in srgb,
+                        var(--colorStatusWarning),
+                        var(--textWhite) 75%
+                    );
+                    border: 1px solid
+                        color-mix(in srgb, var(--colorStatusWarning), var(--textBlack) 25%);
+                    color: color-mix(in srgb, var(--colorStatusWarning), var(--textBlack) 55%);
+
+                    // the icon box shrinks to the glyph, so both are centered alike
+                    i {
+                        font-size: 18px;
+                        width: 18px;
+                        height: 18px;
+                        line-height: 18px;
+                    }
+                }
+
                 &.bright-color {
                     // light text for the dark swimlane surface
                     color: var(--textOnDarkSurface);
