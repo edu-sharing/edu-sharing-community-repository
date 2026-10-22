@@ -171,6 +171,7 @@ import { checkUserAccess } from '../shared/utils/node-util';
 import {
     computeSwimlaneHitMatching,
     parseSearchFilters,
+    sameSearchFilters,
     searchStateToQueryParams,
     SwimlaneHitMatching,
 } from '../shared/utils/search-hit-util';
@@ -1122,13 +1123,17 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             this.searchInput(),
             this.searchFilters(),
         );
-        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment
+        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment;
+        // the filter panel may report the URL's filters in another order
         const currentParams: Params = this.route.snapshot.queryParams;
-        if (
-            Object.entries(queryParams).every(
-                ([key, value]) => (currentParams[key] ?? null) === value,
-            )
-        ) {
+        const searchInputUnchanged: boolean =
+            (currentParams[SEARCH_INPUT_QUERY_PARAM] ?? null) ===
+            queryParams[SEARCH_INPUT_QUERY_PARAM];
+        const filtersUnchanged: boolean = sameSearchFilters(
+            parseSearchFilters(currentParams[SEARCH_FILTERS_QUERY_PARAM]),
+            this.searchFilters(),
+        );
+        if (searchInputUnchanged && filtersUnchanged) {
             return;
         }
         void this.router.navigate([], {
