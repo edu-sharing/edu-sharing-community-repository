@@ -69,6 +69,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { environment } from '../../../../environments/environment';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import {
@@ -301,6 +302,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private nodeHelperService = inject(NodeHelperService);
     private themeService = inject(ThemeService);
     private toast = inject(Toast);
+    private uiService = inject(UIService);
 
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
@@ -852,6 +854,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             currentScope: Scope.TopicPage,
             title: 'TOPIC_PAGE.NAVIGATION.TITLE',
             create: this.getCreateConfig(),
+            // new material is stored in the inbox, as the create menu does for a collection parent
+            onCreate: (nodes: Node[]): void => this.addCreatedNodesToCollection(nodes),
         });
         void this.addCustomMainNavOptions();
         // register the edit mode toggle button next to the create button
@@ -920,7 +924,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     ApiRestConstants.ACCESS_ADD_CHILDREN,
                 ),
             allowBinary: true,
+            parent: this.collectionNode ?? null,
         };
+    }
+
+    /**
+     * Adds the material created via the main nav to the topic's collection.
+     */
+    private addCreatedNodesToCollection(nodes: Node[]): void {
+        if (!this.collectionNode || !nodes?.length) {
+            return;
+        }
+        this.uiService.addToCollection(this.collectionNode, nodes);
     }
 
     /**
