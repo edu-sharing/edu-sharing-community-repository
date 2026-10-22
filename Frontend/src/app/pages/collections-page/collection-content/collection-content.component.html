@@ -1,11 +1,9 @@
 <div class="collections-master-div">
-  @if (isRootLevel || viewState.viewType() !== 'tree') {
+  @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-subcollections">
     <div
       class="collections-wrapper"
-      [class.wrapper-table]="
-        !isRootLevel && viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
-      "
+      [class.wrapper-table]="viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table"
       [class.wrapper-empty]="dataSourceCollections.isEmpty()"
       [class.wrapper-edit]="isUserAllowedToEdit(collection)"
     >
@@ -18,9 +16,7 @@
         (fetchData)="loadMoreCollections()"
         [infiniteScrollWindow]="false"
         [checkbox]="false"
-        [displayType]="
-          isRootLevel ? NodeEntriesDisplayType.SmallGrid : viewState.collectionsDisplayType()
-        "
+        [displayType]="viewState.collectionsDisplayType()"
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
         [dragDrop]="{
           dragAllowed: isAllowedToEditCollection(),
@@ -42,13 +38,10 @@
       >
         <ng-template #title>
           <div class="heading-group">
-            @if (isAllowedToEditCollection() || !dataSourceCollections.isEmpty()) {
+            @if (!isRootLevel && (isAllowedToEditCollection() || !dataSourceCollections.isEmpty()))
+            {
             <h2 class="mat-heading-3">
-              @if (isRootLevel) {
-              {{ 'COLLECTIONS.TAB.' + scope + '_LONG' | translate }}
-              } @if (!isRootLevel) {
               {{ 'COLLECTION.INFO_REFERENCES_MULTI' | translate }}
-              }
             </h2>
             }
           </div>
@@ -176,7 +169,7 @@
       </es-node-entries-wrapper>
     </div>
   </section>
-  } @else if (treeReady()) {
+  } } @if (viewState.viewType() === 'tree' && treeReady()) {
   <section class="collections-cards-div" data-test="collection-content-tree">
     <es-node-entries-wrapper
       #listTree
@@ -188,6 +181,11 @@
       [checkbox]="false"
       (selectionChange)="onTreeSelectionChange($event)"
     ></es-node-entries-wrapper>
+    @if (isRootLevel && dataSourceCollections.isEmpty() && !createAllowed()) {
+    <div class="collection-nocontent-container collection-nocontent-big">
+      <ng-container *ngTemplateOutlet="emptyRef"></ng-container>
+    </div>
+    }
   </section>
-  } }
+  }
 </div>

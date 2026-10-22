@@ -215,7 +215,7 @@
         </span>
       </span>
     </div>
-    @if (dropdown && hasDropdownOptions()) {
+    @if (dropdown && hasDropdownOptions() && hasOptionsFor(flatNode.item)) {
     <div class="node-options">
       @if (!UIService.isMobileWidth()) {
       <button

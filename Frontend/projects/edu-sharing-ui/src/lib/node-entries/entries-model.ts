@@ -146,6 +146,8 @@ export type TreeConfig = {
     includeResolveInheritedAccess?: boolean;
     /** node attribute used to determine the initial selection state */
     initialSelectionAttribute?: string;
+    /** nodes for which neither the options button nor the context menu is offered */
+    hasNoOptions?: (node: Node) => boolean;
 };
 
 export interface ListEventInterface<T extends NodeEntriesDataType> {

@@ -246,7 +246,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     dataSourceReferences = new NodeDataSource<CollectionReference>();
     /** the collection as the root of the tree, followed by its sub-collections and materials */
     readonly dataSourceTree = new NodeDataSource<Node>();
-    readonly treeConfig: TreeConfig = { label: 'COLLECTIONS.TITLE', showFiles: true };
+    readonly treeConfig: TreeConfig = {
+        label: 'COLLECTIONS.TITLE',
+        showFiles: true,
+        // the stand-in for the root level is no node the options or the sidebar could work on
+        hasNoOptions: (node) => node.ref.id === ROOT,
+    };
     /**
      * Whether the tree view may be rendered. The tree reads its data once when it is created, so
      * it is created only after the data has been put into `dataSourceTree`.
@@ -281,7 +286,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.mainNavService.getDialogs().eventTriggered.subscribe((event: ManagementEvent) => {
             if (event.event === ManagementEventType.AddCollectionNodes) {
                 if (event.data.collection.ref.id === this.collection.ref.id) {
-                    this.listReferences.addVirtualNodes(event.data.references);
+                    this.listReferences?.addVirtualNodes(event.data.references);
                 }
             }
         });
@@ -858,7 +863,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                     this.dataSourceCollections.isLoading = false;
                     if (this.isRootLevel) {
                         if (this.scope === RestConstants.COLLECTIONSCOPE_MY) {
-                            this.listCollections.addVirtualNodes(
+                            this.listCollections?.addVirtualNodes(
                                 (
                                     await this.sessionStorageService.get<VirtualNode[]>(
                                         SessionStorageService.KEY_ROOT_COLLECTIONS,
@@ -898,8 +903,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     getCollectionsColumns(): ColumnType {
-        return !this.isRootLevel &&
-            this.viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
+        return this.viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
             ? this.collectionsTableColumns
             : this.collectionsColumns;
     }
@@ -1024,8 +1028,8 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (callback) {
             callback();
         }
-        if (!this.isRootLevel && this.viewState.viewType() === 'tree') {
-            this.buildTree();
+        if (this.viewState.viewType() === 'tree') {
+            void this.buildTree();
         }
         setTimeout(() => {
             this.wireListOptions();
@@ -1062,9 +1066,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         this.shownViewType = viewType;
         this.clearSelection();
         if (viewType === 'tree') {
-            if (!this.isRootLevel) {
-                this.buildTree();
-            }
+            void this.buildTree();
         } else {
             this.treeReady.set(false);
             setTimeout(() => this.wireListOptions());
@@ -1072,8 +1074,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     }
 
     /** (Re-)creates the tree from the sub-collections and materials that are currently loaded. */
-    private buildTree() {
+    private async buildTree() {
         this.treeReady.set(false);
+        if (this.isRootLevel) {
+            // the tree cannot page, so it needs every collection of the scope
+            await this.loadRemainingCollections();
+        }
         // the tree adjusts the counts of the nodes it is given, so it works on copies
         const copy = (node: Node): Node => ({
             ...node,
@@ -1081,8 +1087,12 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         });
         this.dataSourceTree.setData(
             [
-                this.collection,
-                ...(this.dataSourceCollections.getData() ?? []),
+                this.treeRoot(),
+                ...(this.dataSourceCollections.getData() ?? []).map((node) =>
+                    this.isRootLevel
+                        ? { ...node, parent: { ...node.parent, id: this.collection.ref.id } }
+                        : node,
+                ),
                 ...(this.dataSourceReferences.getData() ?? []),
             ].map(copy),
         );
@@ -1090,6 +1100,43 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.treeReady.set(true);
             setTimeout(() => void this.listTree?.initOptionsGenerator({ parent: this.collection }));
         });
+    }
+
+    /**
+     * The node the tree hangs from. The root level has no collection of its own, so a stand-in
+     * named after the selected scope is used.
+     */
+    private treeRoot(): Node {
+        if (!this.isRootLevel) {
+            return this.collection;
+        }
+        const title = this.translation.instant('COLLECTIONS.TAB.' + this.scope);
+        return { ...this.collection, title, name: title, icon: { fontGlyphId: 'layers' } } as Node;
+    }
+
+    /** Loads the pages of the root collections that have not been requested yet. */
+    private async loadRemainingCollections() {
+        if (!(await this.dataSourceCollections.hasMore())) {
+            return;
+        }
+        const request: RequestObject = Helper.deepCopy(CollectionContentComponent.DEFAULT_REQUEST);
+        request.offset = (await this.dataSourceCollections.getData()).length;
+        request.count = RestConstants.COUNT_UNLIMITED;
+        this.dataSourceCollections.isLoading = true;
+        try {
+            const remaining = await firstValueFrom(
+                this.collectionService.getCollectionSubcollections(
+                    this.collection.ref.id,
+                    this.scope,
+                    [],
+                    request,
+                    this.collection.ref.repo,
+                ),
+            );
+            this.dataSourceCollections.appendData(remaining.collections);
+        } finally {
+            this.dataSourceCollections.isLoading = false;
+        }
     }
 
     private handlingTreeSelection = false;
@@ -1195,7 +1242,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             this.sortReferences.customSortingInProgress = false;
             if (response === 'SAVE') {
                 void this.changeReferencesOrder();
-                this.listReferences.getSelection().clear();
+                this.listReferences?.getSelection().clear();
             } else {
                 this.refreshContent();
             }

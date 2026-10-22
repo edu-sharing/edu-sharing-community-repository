@@ -142,6 +142,18 @@
                 ></es-view-toggle-group>
               </div>
               <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
+              } @if (isRootLevelCollection() && !isLoading) {
+              <div class="breadcrumb-space root-bar" data-test="collections-root-bar">
+                <h2 class="root-bar-title mat-heading-3">
+                  {{ 'COLLECTIONS.TAB.' + tabSelected + '_LONG' | translate }}
+                </h2>
+                <es-view-toggle-group
+                  class="display-type-toggle"
+                  groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
+                  [items]="displayTypeItems"
+                  [(value)]="viewState.viewType"
+                ></es-view-toggle-group>
+              </div>
               }
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
               <div class="collections-scroll">

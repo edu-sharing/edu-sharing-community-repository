@@ -60,10 +60,10 @@
       "TYPE_EDITORIAL": "Editorial",
       "TYPE_MEDIA_CENTER": "Mediacenter",
       "MY": "My",
-      "EDU_GROUPS": "Invited",
+      "EDU_GROUPS": "Shared with me",
       "EDU_ALL": "Public",
       "MY_SHORT": "My",
-      "EDU_GROUPS_SHORT": "Invited",
+      "EDU_GROUPS_SHORT": "Shared with me",
       "EDU_ALL_SHORT": "Public",
       "TYPE_EDITORIAL_SHORT": "Editorial"
     },

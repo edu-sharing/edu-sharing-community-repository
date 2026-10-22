@@ -334,6 +334,22 @@ section {
     flex: none;
 }
 
+// the heading of the root level takes the place of the breadcrumb and gives way first
+.breadcrumb-space.root-bar {
+    padding-left: 20px;
+    margin-top: 12px;
+    box-shadow: none;
+
+    .root-bar-title {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
 @media only screen and (max-width: vars.$mobileWidth + vars.$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {

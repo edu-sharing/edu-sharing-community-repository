@@ -122,7 +122,7 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
     onContextMenu(event: MouseEvent | Event, node: T): void {
         event.stopPropagation();
         event.preventDefault();
-        if (!this.dropdown) {
+        if (!this.dropdown || this.entriesService.treeConfig?.hasNoOptions?.(node as Node)) {
             return;
         }
         if (event instanceof MouseEvent) {
@@ -151,6 +151,11 @@ export class NodeEntriesTreeComponent<T extends NodeEntriesDataType>
         } else {
             this.entriesService.openDropdown(this.dropdown, node);
         }
+    }
+
+    /** Whether the options menu may be opened for the node. */
+    hasOptionsFor(node: Partial<Node>): boolean {
+        return !this.entriesService.treeConfig?.hasNoOptions?.(node as Node);
     }
 
     hasDropdownOptions(): boolean {
