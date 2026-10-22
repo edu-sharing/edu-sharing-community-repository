@@ -81,6 +81,8 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
     );
     statusConfirmed: WritableSignal<boolean> = signal(false);
     updateInProgress: WritableSignal<boolean> = signal(false);
+    // set between saving and generic-widget handing back the saved config
+    private savePending: boolean = false;
 
     constructor() {
         effect(() => {
@@ -94,6 +96,7 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
      * Saves the config by emitting a config changed event.
      */
     saveConfig(): void {
+        this.savePending = true;
         this.configChanged.emit();
     }
 
@@ -103,6 +106,18 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
     showPreview(): void {
         this.previewConfig.set(this.iframeForm.getRawValue());
         this.statusConfirmed.set(false);
+    }
+
+    /**
+     * Shows the saved config in the preview, which needs no request as it is live anyway.
+     * The consent to the external content holds as long as the source stays the same.
+     */
+    private showSavedConfigInPreview(): void {
+        const previousSource: string | undefined = this.previewConfig()?.src;
+        this.previewConfig.set(this.savedConfig());
+        if (previousSource !== this.savedConfig().src) {
+            this.statusConfirmed.set(false);
+        }
     }
 
     /**
@@ -145,5 +160,9 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
         this.iframeForm.patchValue(config);
         this.iframeConfig = this.iframeForm.value;
         this.savedConfig.set(this.iframeForm.getRawValue());
+        if (this.savePending) {
+            this.savePending = false;
+            this.showSavedConfigInPreview();
+        }
     }
 }
