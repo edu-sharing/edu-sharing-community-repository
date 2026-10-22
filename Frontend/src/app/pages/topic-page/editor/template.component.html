@@ -389,8 +389,8 @@
           }
           <!-- note: do not show empty swimlanes to users -->
           @for (swimlane of swimlanes; track swimlane.id; let i = $index) {
-          <!-- border with button to add a swimlane -->
-          @if (swimlane.grid?.length > 0 && userHasEditRights() && editMode()) {
+          <!-- border with button to add a swimlane, also next to one whose grid is still undefined -->
+          @if (userHasEditRights() && editMode()) {
           <es-add-swimlane-border-button
             [requestInProgress]="requestInProgress()"
             (addSwimlaneTriggered)="addSwimlane($event, i)"
@@ -560,8 +560,7 @@
           </div>
           }
           <!-- border with button to add a swimlane (special case for last element) -->
-          @if ( swimlane.grid?.length > 0 && userHasEditRights() && editMode() && i ===
-          swimlanes.length - 1 ) {
+          @if (userHasEditRights() && editMode() && i === swimlanes.length - 1) {
           <es-add-swimlane-border-button
             [requestInProgress]="requestInProgress()"
             (addSwimlaneTriggered)="addSwimlane($event, i + 1)"
