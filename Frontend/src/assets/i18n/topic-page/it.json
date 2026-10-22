@@ -96,6 +96,7 @@
         "PREVIEW_TITLE": "Anteprima dell'iFrame",
         "SAVE_CONFIG": "Salva configurazione",
         "UNSAVED_CHANGES": "Modifiche non salvate – compaiono sulla pagina solo dopo il salvataggio.",
+        "PREVIEW_OUTDATED": "L’anteprima non mostra lo stato attuale dei vostri inserimenti.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Sì, mostra il contenuto esterno",
           "MESSAGE": "State per caricare e visualizzare contenuti esterni. Ciò potrebbe comportare la trasmissione di dati personali a servizi esterni e il loro trattamento da parte di questi ultimi.",

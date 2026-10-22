@@ -23,6 +23,16 @@
             font-weight: topicPageVars.$font-weight-bold;
         }
 
+        // a live region like the unsaved changes note, taking no space while the preview is current
+        .preview-outdated {
+            display: contents;
+
+            es-info-message {
+                display: block;
+                margin-top: 8px;
+            }
+        }
+
         .confirmation-dialog {
             margin-top: 8px;
             padding: 16px;

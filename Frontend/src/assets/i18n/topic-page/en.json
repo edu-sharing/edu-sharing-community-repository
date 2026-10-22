@@ -98,6 +98,7 @@
         "PREVIEW_TITLE": "iframe preview",
         "SAVE_CONFIG": "Save config",
         "UNSAVED_CHANGES": "Unsaved changes – they only appear on the page once saved.",
+        "PREVIEW_OUTDATED": "The preview does not show the current state of your input.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Yes, show external content",
           "MESSAGE": "You are about to load and display external content. This may result in personal data being transmitted to and processed by external services.",

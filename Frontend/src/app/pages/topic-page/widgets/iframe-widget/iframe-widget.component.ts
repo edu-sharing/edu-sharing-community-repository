@@ -69,15 +69,16 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
         { initialValue: this.iframeForm.value },
     );
     /** Whether the form holds changes that are not live yet, as only saving publishes them. */
-    readonly hasUnsavedChanges: Signal<boolean> = computed(() => {
-        const formValue: Partial<IframeWidgetConfig> = this.formValue();
-        const savedConfig: IframeWidgetConfig = this.savedConfig();
-        return (Object.keys(this.iframeForm.controls) as (keyof IframeWidgetConfig)[]).some(
-            (key) => (formValue[key] ?? '') !== (savedConfig[key] ?? ''),
-        );
-    });
+    readonly hasUnsavedChanges: Signal<boolean> = computed(() =>
+        this.differsFromForm(this.savedConfig()),
+    );
     initialized: WritableSignal<boolean> = signal(false);
-    previewConfig: IframeWidgetConfig | null = null;
+    // the config the preview shows; it only follows the form on request, never while typing
+    previewConfig: WritableSignal<IframeWidgetConfig | null> = signal(null);
+    /** Whether a shown preview lags behind the form. */
+    readonly previewOutdated: Signal<boolean> = computed(
+        () => !!this.previewConfig() && this.differsFromForm(this.previewConfig()),
+    );
     statusConfirmed: WritableSignal<boolean> = signal(false);
     updateInProgress: WritableSignal<boolean> = signal(false);
 
@@ -100,8 +101,18 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
      * Shows a preview of the current form state.
      */
     showPreview(): void {
-        this.previewConfig = this.iframeForm.value;
+        this.previewConfig.set(this.iframeForm.getRawValue());
         this.statusConfirmed.set(false);
+    }
+
+    /**
+     * Whether any field of the form differs from the given config, treating unset fields as empty.
+     */
+    private differsFromForm(config: Partial<IframeWidgetConfig>): boolean {
+        const formValue: Partial<IframeWidgetConfig> = this.formValue();
+        return (Object.keys(this.iframeForm.controls) as (keyof IframeWidgetConfig)[]).some(
+            (key) => (formValue[key] ?? '') !== (config[key] ?? ''),
+        );
     }
 
     /**
