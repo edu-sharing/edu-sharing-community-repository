@@ -1,0 +1,29 @@
+<div class="content">
+  <es-collection-info-hero [collection]="collection()"></es-collection-info-hero>
+  <es-collection-info-facts [collection]="collection()"></es-collection-info-facts>
+  <es-collection-info-participants [collection]="collection()"></es-collection-info-participants>
+  @if (collection()?.properties) {
+  <es-collection-info-section heading="COLLECTIONS.INFO.SECTION_METADATA">
+    <div data-test="collection-info-metadata">
+      <es-mds-viewer
+        [mdsEditorInstanceService]="mdsEditorInstanceService"
+        [groupId]="metadataGroupId()"
+        [data]="collection().properties"
+        [headingLevel]="4"
+      ></es-mds-viewer>
+    </div>
+  </es-collection-info-section>
+  }
+</div>
+@if (canEdit()) {
+<es-sidebar-sticky-footer>
+  <button
+    mat-stroked-button
+    color="primary"
+    data-test="collection-info-all-details"
+    (click)="showAllDetails()"
+  >
+    {{ 'COLLECTIONS.INFO.ALL_DETAILS' | translate }}
+  </button>
+</es-sidebar-sticky-footer>
+}

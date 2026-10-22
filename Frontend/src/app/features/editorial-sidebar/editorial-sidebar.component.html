@@ -66,6 +66,10 @@
         ></es-nodes-selector>
         } @if (option === 'ADD_COLLECTION') {
         <es-add-collection-sidebar [parent]="parent()"></es-add-collection-sidebar>
+        } @if (option === 'COLLECTION_INFO') {
+        <es-collection-info-sidebar
+          [collection]="collectionInfoTarget()!"
+        ></es-collection-info-sidebar>
         } @if (option === 'VERSION_MANAGEMENT') {
         <es-metadata-sidebar
           [nodeSidebar]="$any(editorialSidebarService.nodes())?.[0]"

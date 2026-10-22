@@ -179,7 +179,9 @@
         }
       },
       "ADD_COLLECTION": "Add collection",
-      "ADD_COLLECTION_DESCRIPTION": "Create a new collection or copy an existing collection to this location"
+      "ADD_COLLECTION_DESCRIPTION": "Create a new collection or copy an existing collection to this location",
+      "COLLECTION_INFO": "Collection information",
+      "COLLECTION_INFO_DESCRIPTION": "Show general information about this collection"
     },
     "TITLE": "Manage",
     "TITLE_ASSIGNMENT": "Assignments",

@@ -1,7 +1,11 @@
 <div class="collections-master-div">
+  @if (isRootLevel || viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-subcollections">
     <div
       class="collections-wrapper"
+      [class.wrapper-table]="
+        !isRootLevel && viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
+      "
       [class.wrapper-empty]="dataSourceCollections.isEmpty()"
       [class.wrapper-edit]="isUserAllowedToEdit(collection)"
     >
@@ -9,12 +13,14 @@
         #listCollections
         [dataSource]="dataSourceCollections"
         [elementInteractionType]="interactionType"
-        [columns]="collectionsColumns"
+        [columns]="getCollectionsColumns()"
         (clickItem)="clickItem.emit($event)"
         (fetchData)="loadMoreCollections()"
         [infiniteScrollWindow]="false"
         [checkbox]="false"
-        [displayType]="NodeEntriesDisplayType.SmallGrid"
+        [displayType]="
+          isRootLevel ? NodeEntriesDisplayType.SmallGrid : viewState.collectionsDisplayType()
+        "
         [globalOptions]="createAllowed() ? [createSubCollectionOptionItem] : []"
         [dragDrop]="{
           dragAllowed: isAllowedToEditCollection(),
@@ -57,12 +63,13 @@
       </es-node-entries-wrapper>
     </div>
   </section>
-  @if (!isRootLevel) {
+  } @if (!isRootLevel) {
   <es-collection-proposals
     [collection]="collection"
     [canEdit]="isAllowedToEditCollection()"
     (contentClick)="onContentClick($any($event))"
   ></es-collection-proposals>
+  @if (viewState.viewType() !== 'tree') {
   <section class="collections-cards-div" data-test="collection-content-materials">
     <es-actionbar
       #actionbarToggles
@@ -72,7 +79,7 @@
     ></es-actionbar>
     <div
       class="references-wrapper"
-      [class.wrapper-table]="referencesDisplayType === NodeEntriesDisplayType.Table"
+      [class.wrapper-table]="viewState.referencesDisplayType() === NodeEntriesDisplayType.Table"
       [class.wrapper-empty]="dataSourceReferences.isEmpty()"
       [class.wrapper-edit]="isAllowedToAddContent()"
     >
@@ -83,7 +90,7 @@
         [scope]="Scope.CollectionsReferences"
         [primaryInstance]="true"
         [columns]="referencesColumns"
-        [(displayType)]="referencesDisplayType"
+        [displayType]="viewState.referencesDisplayType()"
         [dragDrop]="{
             dragAllowed: isAllowedToEditCollection(),
             dropAllowed: canDropOnRef,
@@ -169,5 +176,18 @@
       </es-node-entries-wrapper>
     </div>
   </section>
-  }
+  } @else if (treeReady()) {
+  <section class="collections-cards-div" data-test="collection-content-tree">
+    <es-node-entries-wrapper
+      #listTree
+      [elementInteractionType]="InteractionType.Emitter"
+      [dataSource]="dataSourceTree"
+      [displayType]="NodeEntriesDisplayType.Tree"
+      [treeConfig]="treeConfig"
+      [scope]="Scope.CollectionsReferences"
+      [checkbox]="false"
+      (selectionChange)="onTreeSelectionChange($event)"
+    ></es-node-entries-wrapper>
+  </section>
+  } }
 </div>

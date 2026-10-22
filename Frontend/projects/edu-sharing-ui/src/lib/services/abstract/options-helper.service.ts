@@ -98,19 +98,20 @@ export abstract class OptionsHelperService {
             if (!this.enabledCache[option.name]) {
                 this.enabledCache[option.name] = {};
             }
-            if (this.enabledCache[option.name]?.[objects?.[0]?.ref?.id] !== undefined) {
-                return await this.enabledCache[option.name][objects?.[0]?.ref?.id]
+            // The cache may be replaced while the callback is pending, so keep a local reference.
+            const optionCache = this.enabledCache[option.name];
+            const cacheKey = objects?.[0]?.ref?.id;
+            if (optionCache[cacheKey] !== undefined) {
+                return await optionCache[cacheKey]
                     .pipe(
                         filter((f) => f !== null),
                         first(),
                     )
                     .toPromise();
             }
-            this.enabledCache[option.name][objects?.[0]?.ref?.id] = new BehaviorSubject<boolean>(
-                null,
-            );
+            optionCache[cacheKey] = new BehaviorSubject<boolean>(null);
             const status = await option.customEnabledCallback(objects);
-            this.enabledCache[option.name][objects?.[0]?.ref?.id].next(status);
+            optionCache[cacheKey].next(status);
             return status;
         }
         return true;

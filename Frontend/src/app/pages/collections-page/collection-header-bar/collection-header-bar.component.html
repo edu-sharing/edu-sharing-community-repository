@@ -1,0 +1,41 @@
+<section
+  class="header"
+  [attr.aria-label]="'COLLECTIONS.DETAILS' | translate"
+  [style.--collection-color]="collection()?.collection?.color"
+>
+  @if (canEdit()) {
+  <button
+    type="button"
+    class="thumbnail-button"
+    data-test="collection-header-edit"
+    [attr.aria-label]="'OPTIONS.COLLECTION_EDIT' | translate"
+    (click)="edit()"
+  >
+    <ng-container *ngTemplateOutlet="thumbnail"></ng-container>
+  </button>
+  } @else {
+  <ng-container *ngTemplateOutlet="thumbnail"></ng-container>
+  }
+  <ng-template #thumbnail>
+    <es-collection-thumbnail
+      [collection]="collection()"
+      size="var(--collection-header-thumbnail-size, 72px)"
+    ></es-collection-thumbnail>
+  </ng-template>
+  <div class="text">
+    <h1 esTitle class="title" data-test="collection-header-title">
+      {{ collection()?.collection?.title }}
+    </h1>
+    <es-collection-scope-label
+      class="scope"
+      data-test="collection-header-scope"
+      [collection]="collection()"
+    ></es-collection-scope-label>
+  </div>
+  <es-actionbar
+    [numberOfAlwaysVisibleOptions]="1"
+    [numberOfAlwaysVisibleOptionsMobile]="1"
+    appearance="round"
+    dropdownPosition="right"
+  ></es-actionbar>
+</section>

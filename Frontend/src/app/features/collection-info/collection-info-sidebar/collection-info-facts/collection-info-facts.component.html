@@ -1,0 +1,32 @@
+<es-collection-info-section heading="COLLECTIONS.INFO.SECTION_FACTS">
+  <div class="rows">
+    <es-collection-info-row
+      icon="lock"
+      label="COLLECTIONS.INFO.VISIBILITY"
+      data-test="collection-info-sharing-state"
+    >
+      <es-collection-scope-label [collection]="collection()"></es-collection-scope-label>
+    </es-collection-info-row>
+    <es-collection-info-row
+      icon="layers"
+      label="COLLECTIONS.INFO.TYPE.LABEL"
+      data-test="collection-info-type"
+    >
+      {{ typeKey() | translate }}
+    </es-collection-info-row>
+    <es-collection-info-row
+      icon="layers"
+      label="COLLECTIONS.INFO.SUBCOLLECTIONS"
+      data-test="collection-info-child-collections-count"
+    >
+      {{ collection()?.collection?.childCollectionsCount ?? 0 }}
+    </es-collection-info-row>
+    <es-collection-info-row
+      icon="insert_drive_file"
+      label="COLLECTIONS.INFO.MATERIALS"
+      data-test="collection-info-child-references-count"
+    >
+      {{ collection()?.collection?.childReferencesCount ?? 0 }}
+    </es-collection-info-row>
+  </div>
+</es-collection-info-section>

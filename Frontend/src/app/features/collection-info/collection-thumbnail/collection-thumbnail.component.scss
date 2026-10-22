@@ -1,0 +1,29 @@
+:host {
+    display: inline-block;
+    flex: none;
+}
+
+.thumbnail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    // hosts may reduce the rounding through `--collection-thumbnail-radius`
+    border-radius: var(--collection-thumbnail-radius, var(--borderRadiusCards));
+    // collections without an own colour use the theme colour
+    background-color: var(--primary);
+    color: var(--textWhite);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    // the icon scales with the shorter edge, whatever size the host gives the thumbnail
+    container-type: size;
+    i {
+        font-size: 50cqmin;
+    }
+}

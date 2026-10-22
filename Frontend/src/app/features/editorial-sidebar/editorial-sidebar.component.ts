@@ -78,6 +78,8 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     MANAGE_CONTENT: { selectionMode: 'multi' },
     /** entry step to either create a new collection or copy an existing one to this location */
     ADD_COLLECTION: { selectionMode: 'none' },
+    /** general information about the collection that is shown as `parent` */
+    COLLECTION_INFO: { selectionMode: 'any' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
     VIEW_ASSIGNMENT: { selectionMode: 'single' },
 } as const satisfies Record<string, EditorialSidebarOptionDescriptor>;
@@ -152,6 +154,17 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
 
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     parent = input<Node>();
+    /**
+     * The collection the collection information describes: a collection selected in a list, else
+     * the `parent`.
+     */
+    readonly collectionInfoTarget = computed(
+        () =>
+            (this.editorialSidebarService
+                .nodes()
+                ?.find((node) => (node as Node).mediatype === 'collection') as Node) ??
+            this.parent(),
+    );
     /**
      * current main component (only for editorial page context)
      */
@@ -350,6 +363,26 @@ export class EditorialSidebarComponent implements OnInit, OnChanges, OnDestroy {
             );
         };
         options.push(addCollection);
+
+        const collectionInfo = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_INFO', 'info', () =>
+            this.enabledOption.set({
+                trap: false,
+                option: 'COLLECTION_INFO',
+            }),
+        );
+        collectionInfo.group = DefaultGroups.Primary;
+        collectionInfo.elementType = [ElementType.NoneOrUnknown];
+        collectionInfo.scopes = ['collections'];
+        // the root of the collections has no collection to describe
+        collectionInfo.customShowCallback = async () => {
+            const parent = this.parent();
+            return (
+                !!parent &&
+                parent.ref?.id !== ROOT &&
+                this.nodeHelperService.isNodeCollection(parent)
+            );
+        };
+        options.push(collectionInfo);
 
         const sortInto = new OptionItem(
             'EDITORIAL.OPTIONS.SORT_INTO',

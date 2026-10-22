@@ -69,7 +69,7 @@
             [ngTemplateOutletContext]="{
               $implicit: null,
               collection: collection,
-              permissions: collectionContentRef?.permissions ?? null,
+              permissions: details.permissions() ?? null,
               isLoading: isLoading,
               tabSelected: tabSelected
             }"
@@ -84,14 +84,6 @@
             class="collectionsContainer"
             [attr.data-test]="'collections-grid-' + tabSelected.toLowerCase().replaceAll('_', '-')"
           >
-            @if (!isLoading && !isRootLevelCollection() && collection) {
-            <es-collection-info-bar
-              #infobar
-              [collection]="collection"
-              [permissions]="collectionContentRef?.permissions ?? null"
-              (edit)="collectionEdit()"
-            ></es-collection-info-bar>
-            }
             <!-- <div *ngIf="isLoading" class="collection-loading"><es-spinner-small></es-spinner-small></div> -->
             <div class="collections-right" role="main" esSkipTarget="MAIN_CONTENT">
               @if (isLoading || !isReady) {
@@ -126,6 +118,7 @@
                 } @else {
                 <es-breadcrumbs
                   class="collections-breadcrumb"
+                  esScrollStartOverflow
                   [home]="'COLLECTIONS.TAB.' + tabSelected"
                   [showLanding]="true"
                   [homeRouterLink]="{
@@ -141,14 +134,21 @@
                   "
                 ></es-breadcrumbs>
                 }
+                <es-view-toggle-group
+                  class="display-type-toggle"
+                  groupLabel="EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.LABEL"
+                  [items]="displayTypeItems"
+                  [(value)]="viewState.viewType"
+                ></es-view-toggle-group>
               </div>
+              <es-collection-header-bar [collection]="collection"></es-collection-header-bar>
               }
               <!-- Only this region scrolls; the breadcrumb header above stays fixed. -->
               <div class="collections-scroll">
                 <es-collection-content
                   #collectionContentComponent
                   [collection]="collection"
-                  [getInfobar]="getInfobar"
+                  [headerActionbar]="headerActionbar"
                   [selectionActionbar]="selectionActionbar"
                   [scope]="getScope()"
                   [isRootLevel]="isRootLevelCollection()"
@@ -172,7 +172,7 @@
         </div>
       </div>
 
-      <!-- Full-width selection bar (incl. the info-bar column) shown when references are selected;
+      <!-- Full-width selection bar shown when references are selected;
         mirrors the search-page selection layout. State lives in es-collection-content. -->
       <div
         class="selection-action-bar"
@@ -226,7 +226,7 @@
         <es-search-selection-overlay
           [nodes]="collectionContentRef?.selection || []"
           [columns]="collectionContentRef?.referencesColumns"
-          [displayType]="collectionContentRef?.referencesDisplayType"
+          [displayType]="viewState.referencesDisplayType()"
           (deselect)="collectionContentRef?.deselectNode($event)"
         ></es-search-selection-overlay>
       </ng-template>

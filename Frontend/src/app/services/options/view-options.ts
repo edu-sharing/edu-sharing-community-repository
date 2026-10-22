@@ -324,6 +324,20 @@ export function createViewOptions({
     showStatistics.group = DefaultGroups.View;
     showStatistics.priority = 35;
 
+    const collectionInfo = new OptionItem('EDITORIAL.OPTIONS.COLLECTION_INFO', 'info', () => {
+        // a collection selected in a list would otherwise take the place of the one in the header
+        service.editorialSidebarService.nodes.set([]);
+        service.editorialSidebarService.showOption({
+            option: 'COLLECTION_INFO',
+            trap: false,
+        });
+    });
+    collectionInfo.constrains = [Constrain.Collections, Constrain.NoBulk];
+    collectionInfo.scopes = [Scope.CollectionsCollection];
+    collectionInfo.showAsAction = true;
+    collectionInfo.group = DefaultGroups.View;
+    collectionInfo.priority = 0;
+
     const downloadNode = service.getDownloadOption(data, false);
     const downloadNodeSafe = service.getDownloadOption(data, true);
 
@@ -473,6 +487,7 @@ export function createViewOptions({
         viewAssignmentSubmission,
         infoVersions,
         showStatistics,
+        collectionInfo,
         downloadNode,
         downloadNodeSafe,
         downloadMetadataNode,

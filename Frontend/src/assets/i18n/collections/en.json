@@ -17,11 +17,26 @@
     "EDITORIAL_PUBLIC": "Publicly visible",
     "EDITORIAL_PUBLIC_INFO": "The editorial collection is for all users and guests visible",
     "CREATOR": "Creator",
-    "SHARING_STATE": "Sharing state",
     "NO_SUBCOLLECTIONS": "No subcollections available",
     "NO_SUBCOLLECTIONS_HINT": "You can create new subcollections using the \"New\"-Button",
     "STATS": {
       "TOTAL": "Total views"
+    },
+    "INFO": {
+      "SECTION_FACTS": "Collection information",
+      "SECTION_PARTICIPANTS": "Participants",
+      "SECTION_METADATA": "Metadata",
+      "VISIBILITY": "Visibility",
+      "TYPE": {
+        "LABEL": "Collection type",
+        "DEFAULT": "General collection",
+        "EDITORIAL": "Editorial collection",
+        "CURRICULUM": "Curriculum collection",
+        "MEDIA_CENTER": "Media center collection"
+      },
+      "SUBCOLLECTIONS": "Subcollections",
+      "MATERIALS": "Materials",
+      "ALL_DETAILS": "All details"
     },
     "STEP": {
       "GENERAL": "Title, Image, Description and Color",

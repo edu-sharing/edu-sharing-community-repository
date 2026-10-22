@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { MdsModule } from '../../features/mds/mds.module';
 import { SharedModule } from '../../shared/shared.module';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
+import { CollectionHeaderBarComponent } from './collection-header-bar/collection-header-bar.component';
 import { CollectionNewComponent } from './collection-new/collection-new.component';
 import { CollectionsPageRoutingModule } from './collections-page-routing.module';
 import { CollectionsPageComponent } from './collections-page.component';
@@ -12,12 +12,13 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { ShareDialogModule } from '../../features/dialogs/dialog-modules/share-dialog/share-dialog.module';
 import { ResizableSidenavDirective } from '../editorial-page/resizable-sidenav.directive';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { ViewToggleGroupComponent } from '../../shared/components/view-toggle-group/view-toggle-group.component';
+import { ScrollStartOverflowDirective } from '../../shared/directives/scroll-start-overflow.directive';
 import { EditorialSidebarModule } from '../../features/editorial-sidebar/editorial-sidebar.module';
 
 @NgModule({
     declarations: [
         CollectionContentComponent,
-        CollectionInfoBarComponent,
         CollectionNewComponent,
         CollectionProposalsComponent,
         CollectionsPageComponent,
@@ -32,7 +33,10 @@ import { EditorialSidebarModule } from '../../features/editorial-sidebar/editori
         MatSidenavModule,
         ResizableSidenavDirective,
         EditorialSidebarModule,
+        CollectionHeaderBarComponent,
+        ViewToggleGroupComponent,
+        ScrollStartOverflowDirective,
     ],
-    exports: [CollectionInfoBarComponent, CollectionContentComponent],
+    exports: [CollectionContentComponent],
 })
 export class CollectionsPageModule {}

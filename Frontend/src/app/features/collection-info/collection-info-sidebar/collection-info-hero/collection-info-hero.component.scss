@@ -1,0 +1,23 @@
+:host {
+    display: block;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--borderLight);
+}
+
+es-collection-thumbnail {
+    display: block;
+    --collection-thumbnail-radius: 0;
+}
+
+.title {
+    margin: 20px 0 6px;
+    font-size: 1.7em;
+    font-weight: 600;
+}
+
+.description {
+    margin: 0;
+    font-size: 1.05em;
+    color: var(--textMediumLight);
+    white-space: pre-line;
+}

@@ -1,6 +1,7 @@
 import {
     Component,
     ContentChild,
+    effect,
     EventEmitter,
     inject,
     Input,
@@ -8,9 +9,11 @@ import {
     OnDestroy,
     OnInit,
     Output,
+    signal,
     Signal,
     SimpleChanges,
     TemplateRef,
+    untracked,
     ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -46,7 +49,9 @@ import {
     NodeClickEvent,
     NodeDataSource,
     NodeEntriesDisplayType,
+    ClickSource,
     NodeEntriesWrapperComponent,
+    TreeConfig,
     NodesRightMode,
     OptionItem,
     OptionsHelperDataService,
@@ -57,7 +62,7 @@ import {
 import { firstValueFrom, forkJoin, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as EduData from '../../../core-module/core.module';
-import { ConfigurationHelper, LoginResult, Permission } from '../../../core-module/core.module';
+import { ConfigurationHelper, LoginResult } from '../../../core-module/core.module';
 import { Helper } from '../../../core-module/rest/helper';
 import { RequestObject } from '../../../core-module/rest/request-object';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
@@ -76,7 +81,7 @@ import {
 import { LoadingScreenService } from '../../../main/loading-screen/loading-screen.service';
 import { MainNavService } from '../../../main/navigation/main-nav.service';
 import { BridgeService } from '../../../services/bridge.service';
-import { CollectionInfoBarComponent } from '../collection-info-bar/collection-info-bar.component';
+import { CollectionViewStateService, CollectionViewType } from '../collection-view-state.service';
 import { InfobarService } from '../infobar/infobar.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { ConnectedPosition } from '@angular/cdk/overlay';
@@ -127,7 +132,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         ],
         sortAscending: [false, true, false],
     };
-    referencesDisplayType = NodeEntriesDisplayType.Grid;
+    readonly viewState = inject(CollectionViewStateService);
     private readonly destroyed$ = new Subject<void>();
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
@@ -142,11 +147,10 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     @Input() interactionType: InteractionType = InteractionType.DefaultActionLink;
     @Input() scope: string;
     /**
-     * reference to the infobar component
-     * this is required if you want to interconnect it to have support for editing & managing the collection
-     * (the options service is inited in the content component)
+     * the actionbar that shows the actions of the collection; the options service is initialized
+     * for it by this component
      */
-    @Input() getInfobar: () => CollectionInfoBarComponent;
+    @Input() headerActionbar: Signal<ActionbarComponent | undefined>;
     /** The page-level selection actionbar (rendered full-width in the bottom selection bar), provided
      * as the page's `viewChild` signal so it resolves lazily/reactively. */
     @Input() selectionActionbar: Signal<ActionbarComponent | undefined>;
@@ -157,6 +161,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     /** Toggles-only bar above the list (display type / sort). */
     @ViewChild('actionbarToggles') actionbarToggles: ActionbarComponent;
     @ViewChild('listReferences') listReferences: NodeEntriesWrapperComponent<CollectionReference>;
+    @ViewChild('listTree') listTree: NodeEntriesWrapperComponent<Node>;
     @ViewChild('listCollections') listCollections: ListEventInterface<Node>;
 
     /** Currently selected references, mirrored from the references list for the selection bar/overlay. */
@@ -239,16 +244,32 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
     });
     dataSourceCollections = new NodeDataSource<Node>();
     dataSourceReferences = new NodeDataSource<CollectionReference>();
+    /** the collection as the root of the tree, followed by its sub-collections and materials */
+    readonly dataSourceTree = new NodeDataSource<Node>();
+    readonly treeConfig: TreeConfig = { label: 'COLLECTIONS.TITLE', showFiles: true };
+    /**
+     * Whether the tree view may be rendered. The tree reads its data once when it is created, so
+     * it is created only after the data has been put into `dataSourceTree`.
+     */
+    readonly treeReady = signal(false);
+    private shownViewType = this.viewState.viewType();
     collectionsColumns: ColumnType;
+    /** columns of the sub-collections in the list view, which cannot render the card columns */
+    readonly collectionsTableColumns: ColumnType = {
+        Default: [new ListItem('NODE', 'cm:title'), new ListItem('NODE', 'cm:modified')],
+    };
     referencesColumns: ColumnType;
     private loadingTask = this.loadingScreen.addLoadingTask({ until: this.destroyed$ });
 
     private contentNode: Node;
-    permissions: Permission[];
     login: LoginResult;
     config: ConfigValues;
 
     constructor() {
+        effect(() => {
+            const viewType = this.viewState.viewType();
+            untracked(() => this.onViewTypeChange(viewType));
+        });
         this.sortCollectionColumns[this.sortCollectionColumns.length - 1].mode = 'ascending';
         // this.collectionSortEmitter.subscribe((sort: SortEvent) => this.setCollectionSort(sort));
         // this.collectionCustomSortEmitter.subscribe((state: boolean) => state ? this.toggleCollectionsOrder() : this.changeCollectionsOrder());
@@ -368,18 +389,6 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 this.dataSourceCollections.isLoading = false;
                 this.setOptionsCollection();
                 this.refreshContent();
-                if (
-                    this.collection.access.indexOf(RestConstants.ACCESS_CHANGE_PERMISSIONS) !== -1
-                ) {
-                    this.nodeService
-                        .getNodePermissions(this.collection.ref.id)
-                        .subscribe((permissions) => {
-                            this.permissions =
-                                permissions.permissions.localPermissions.permissions.concat(
-                                    permissions.permissions.inheritedPermissions,
-                                );
-                        });
-                }
             }
         }
         // update the main nav buttons & availability
@@ -732,10 +741,14 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
                 );
                 return;
             }
+            // the tree selects a node on click already, so there the selection is kept
+            const inTree = this.viewState.viewType() === 'tree';
             this.editorialSidebarService.handleSelect(
-                this.listReferences,
+                inTree ? this.listTree : this.listReferences,
                 event,
                 Scope.CollectionsReferences,
+                undefined,
+                !inTree,
             );
         } else {
             this.clickItem.emit(event);
@@ -884,6 +897,13 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             );
     }
 
+    getCollectionsColumns(): ColumnType {
+        return !this.isRootLevel &&
+            this.viewState.collectionsDisplayType() === NodeEntriesDisplayType.Table
+            ? this.collectionsTableColumns
+            : this.collectionsColumns;
+    }
+
     isMobile() {
         return this.uiService.isMobile();
     }
@@ -1004,23 +1024,106 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
         if (callback) {
             callback();
         }
+        if (!this.isRootLevel && this.viewState.viewType() === 'tree') {
+            this.buildTree();
+        }
         setTimeout(() => {
-            this.setOptionsCollection();
-            void this.listReferences?.initOptionsGenerator({
-                actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
-                parent: this.collection,
-            });
-            // in reurl picker mode with applyCollections, wire options on the sub-collections
-            // list too so their cards expose the APPLY action (mirrors the search page). The
-            // one-shot call in ngOnChanges runs before the view/data are ready and is unreliable.
-            const queryParams = this.route.snapshot.queryParams;
-            if (queryParams.reurl && queryParams.applyCollections === 'true') {
-                void this.listCollections?.initOptionsGenerator({});
-            }
+            this.wireListOptions();
             if (!this.loadingTask.isDone) {
                 this.loadingTask.done();
             }
         });
+    }
+
+    /** Connects the lists that are currently rendered to the options of the collection. */
+    private wireListOptions() {
+        this.setOptionsCollection();
+        void this.listReferences?.initOptionsGenerator({
+            actionbar: [this.actionbarToggles, this.selectionActionbar?.()],
+            parent: this.collection,
+        });
+        // in reurl picker mode with applyCollections, wire options on the sub-collections
+        // list too so their cards expose the APPLY action (mirrors the search page). The
+        // one-shot call in ngOnChanges runs before the view/data are ready and is unreliable.
+        const queryParams = this.route.snapshot.queryParams;
+        if (queryParams.reurl && queryParams.applyCollections === 'true') {
+            void this.listCollections?.initOptionsGenerator({});
+        }
+    }
+
+    /**
+     * The lists are destroyed and re-created when the tree is entered or left, so the selection
+     * is dropped and the options are wired to whatever is rendered afterwards.
+     */
+    private onViewTypeChange(viewType: CollectionViewType) {
+        if (viewType === this.shownViewType) {
+            return;
+        }
+        this.shownViewType = viewType;
+        this.clearSelection();
+        if (viewType === 'tree') {
+            if (!this.isRootLevel) {
+                this.buildTree();
+            }
+        } else {
+            this.treeReady.set(false);
+            setTimeout(() => this.wireListOptions());
+        }
+    }
+
+    /** (Re-)creates the tree from the sub-collections and materials that are currently loaded. */
+    private buildTree() {
+        this.treeReady.set(false);
+        // the tree adjusts the counts of the nodes it is given, so it works on copies
+        const copy = (node: Node): Node => ({
+            ...node,
+            collection: node.collection ? { ...node.collection } : node.collection,
+        });
+        this.dataSourceTree.setData(
+            [
+                this.collection,
+                ...(this.dataSourceCollections.getData() ?? []),
+                ...(this.dataSourceReferences.getData() ?? []),
+            ].map(copy),
+        );
+        setTimeout(() => {
+            this.treeReady.set(true);
+            setTimeout(() => void this.listTree?.initOptionsGenerator({ parent: this.collection }));
+        });
+    }
+
+    private handlingTreeSelection = false;
+
+    /**
+     * A material that is selected in the tree is opened the same way as in the list; a selected
+     * collection shows its information.
+     */
+    onTreeSelectionChange(selection: SelectionChange<Node>) {
+        // Opening the material re-selects it in the tree, which emits another change event.
+        if (this.handlingTreeSelection) {
+            return;
+        }
+        const collection = selection.added.find((node) => this.nodeHelper.isNodeCollection(node));
+        if (collection) {
+            this.editorialSidebarService.nodes.set([collection]);
+            this.editorialSidebarService.showOption({ option: 'COLLECTION_INFO', trap: false });
+            return;
+        }
+        if (
+            selection.removed.some((node) => this.nodeHelper.isNodeCollection(node)) &&
+            !selection.source.selected.length
+        ) {
+            this.editorialSidebarService.close();
+            return;
+        }
+        const material = selection.added.find((node) => !this.nodeHelper.isNodeCollection(node));
+        if (material) {
+            this.handlingTreeSelection = true;
+            void this.onContentClick({
+                element: material as CollectionReference,
+                source: ClickSource.Preview,
+            }).finally(() => (this.handlingTreeSelection = false));
+        }
     }
 
     deleteReference(content: EduData.CollectionReference | EduData.Node) {
@@ -1060,7 +1163,7 @@ export class CollectionContentComponent implements OnChanges, OnInit, OnDestroy 
             scope: Scope.CollectionsCollection,
             activeObjects: [this.collection],
         });
-        void this.optionsService.initComponents(this.getInfobar()?.actionbar, this.listReferences);
+        void this.optionsService.initComponents(this.headerActionbar?.(), this.listReferences);
         void this.optionsService.refreshComponents();
     }
 

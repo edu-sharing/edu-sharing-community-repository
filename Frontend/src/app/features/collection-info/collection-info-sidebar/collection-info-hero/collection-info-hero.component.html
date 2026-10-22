@@ -1,0 +1,11 @@
+<es-collection-thumbnail
+  [collection]="collection()"
+  size="100%"
+  aspectRatio="17 / 3"
+></es-collection-thumbnail>
+<h3 class="title" data-test="collection-info-title">
+  {{ collection()?.collection?.title }}
+</h3>
+@if (description()) {
+<p class="description" data-test="collection-info-description">{{ description() }}</p>
+}

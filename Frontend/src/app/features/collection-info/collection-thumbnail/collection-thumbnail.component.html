@@ -1,0 +1,15 @@
+<div
+  class="thumbnail"
+  [style.width]="size()"
+  [style.aspect-ratio]="aspectRatio()"
+  [style.background-color]="collection()?.collection?.color"
+>
+  @if (hasImage()) {
+  <img
+    role="presentation"
+    [src]="collection() | esNodeImage : { maxWidth: 300, maxHeight: 300, crop: true } | async"
+  />
+  } @else {
+  <i esIcon="layers"></i>
+  }
+</div>

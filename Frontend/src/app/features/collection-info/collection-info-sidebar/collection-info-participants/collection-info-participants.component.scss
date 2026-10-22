@@ -1,0 +1,20 @@
+.rows {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.authorities {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+}

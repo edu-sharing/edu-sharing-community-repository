@@ -19,6 +19,7 @@ import { UsagesPreviewComponent } from '../../pages/workspace-page/metadata/usag
 import { AssignmentSidebarComponent } from '../../pages/editorial-page/assignment-sidebar/assignment-sidebar.component';
 import { ResizableSidenavDirective } from '../../pages/editorial-page/resizable-sidenav.directive';
 import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-collection-sidebar.component';
+import { CollectionInfoSidebarComponent } from '../collection-info/collection-info-sidebar/collection-info-sidebar.component';
 
 @NgModule({
     declarations: [
@@ -46,6 +47,7 @@ import { AddCollectionSidebarComponent } from './add-collection-sidebar/add-coll
         RenderWrapperComponent,
         ResizableSidenavDirective,
         AddCollectionSidebarComponent,
+        CollectionInfoSidebarComponent,
     ],
     exports: [EditorialSidebarComponent, PreviewSidebarComponent, PreviewSidebarWrapperComponent],
 })

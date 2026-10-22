@@ -435,7 +435,6 @@
     "INFO_REFERENCES": "collection",
     "INFO_REFERENCES_MULTI": "subcollections",
     "INFO_CHILDS": "material",
-    "INFO_CHILDS_MULTI": "materials",
     "INFO_NO_CONTENT": "empty collection",
     "INFO_UPDATING": "Being updated",
     "SCOPE": {

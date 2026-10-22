@@ -1,0 +1,44 @@
+:host {
+    display: inline-flex;
+}
+
+mat-button-toggle-group {
+    --mat-button-toggle-shape: 4px;
+    --mat-button-toggle-height: 40px;
+    --mat-button-toggle-legacy-height: 40px;
+    --mat-button-toggle-text-color: var(--textMain);
+    --mat-button-toggle-selected-state-text-color: var(--textMain);
+    --mat-button-toggle-selected-state-background-color: var(--primaryBackground100);
+    --mat-button-toggle-background-color: var(--cardLightBackground);
+    --mat-button-toggle-divider-color: var(--borderLight);
+    border: 1px solid var(--borderLight);
+    border-radius: 4px;
+    background: var(--cardLightBackground);
+    overflow: hidden;
+}
+
+.mat-button-toggle {
+    background: transparent;
+    color: var(--textMain);
+
+    &.mat-button-toggle-checked {
+        background: var(--primaryBackground100);
+        color: var(--textMain);
+    }
+
+    ::ng-deep .mat-button-toggle-label-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--view-toggle-button-width, 52px);
+        height: 40px;
+        padding: 0;
+        line-height: 100%;
+    }
+
+    i {
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+    }
+}

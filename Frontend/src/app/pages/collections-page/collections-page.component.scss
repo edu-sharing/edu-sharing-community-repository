@@ -1,8 +1,6 @@
 @use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
 @use 'projects/edu-sharing-ui/assets/scss/mixins' as mixins;
 
-$sidenavWidth: 250px;
-
 :host {
     position: relative;
     display: flex;
@@ -92,8 +90,7 @@ mat-sidenav.es-mat-sidenav {
 }
 
 // The region below the tabs. It fills the card height and clips; the actual scrolling happens
-// further in, inside `.collections-scroll` (and the info-bar column), so the breadcrumb header and
-// the footer stay fixed.
+// further in, inside `.collections-scroll`, so the breadcrumb header and the footer stay fixed.
 .collections-body {
     flex: 1;
     min-height: 0;
@@ -102,7 +99,7 @@ mat-sidenav.es-mat-sidenav {
     flex-direction: column;
 
     // The collection header is a static block; the drop area fills the remaining height so the
-    // grid (and its left info-bar column) can stretch to the full card height.
+    // grid can stretch to the full card height.
     .collections-header-group {
         flex-shrink: 0;
     }
@@ -114,7 +111,7 @@ mat-sidenav.es-mat-sidenav {
         .collectionsContainer {
             flex: 1;
             min-height: 0;
-            // Single stretchable row so the cells (incl. the left info-bar) fill the full height.
+            // Single stretchable row so the cell fills the full height.
             grid-template-rows: 1fr;
         }
         es-footer {
@@ -140,18 +137,9 @@ mat-tab-group {
     display: grid;
     // Do not set `overflow: hidden` as this would inhibit the `position: sticky` property of the
     // actionbar.
-    grid-template-columns: $sidenavWidth auto;
+    grid-template-columns: auto;
     position: relative;
-    // The left info-bar column scrolls on its own if it gets taller than the card.
-    es-collection-info-bar {
-        display: block;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-        @include mixins.materialScrollbarLight();
-    }
     .collections-right {
-        max-width: calc(100vw - $sidenavWidth);
         // Column = fixed breadcrumb header + internally scrolling body. `hidden` keeps the
         // breadcrumb overflow clipped and bounds the inner scroll region.
         display: flex;
@@ -175,12 +163,10 @@ mat-tab-group {
 
     &.collectionsContainerNoSidebar {
         padding: 0 10%;
-        grid-template-columns: auto;
     }
     &.collectionsContainerTabs {
         padding: 0;
         .collections-right {
-            max-width: unset;
             es-collection-content {
                 padding: 40px 10% 0 10%;
             }
@@ -310,6 +296,44 @@ section {
     z-index: 1;
 }
 
+// the breadcrumb gives way first when the card gets narrow, the view switch keeps its size;
+// an rtl scroll container starts scrolled to its end, which keeps the current collection in view
+// when the trail has to scroll
+.collections-breadcrumb {
+    flex: 1;
+    min-width: 0;
+
+    ::ng-deep .breadcrumbs-wrapper {
+        display: flex;
+        direction: rtl;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+
+        > * {
+            direction: ltr;
+        }
+    }
+
+    // marks that the beginning of the trail is clipped; the pinned ellipsis is the last flex item,
+    // which sits at the left end of the rtl container
+    &.scroll-start-overflow ::ng-deep .breadcrumbs-wrapper::after {
+        content: '…';
+        position: sticky;
+        left: 0;
+        flex: none;
+        align-self: center;
+        padding: 0 6px 2px 0;
+        direction: ltr;
+        background: var(--roundedContainerBackground);
+    }
+}
+
+.display-type-toggle {
+    flex: none;
+}
+
 @media only screen and (max-width: vars.$mobileWidth + vars.$mobileStage*3) {
     :host ::ng-deep {
         .tab-label {
@@ -332,86 +356,44 @@ section {
     }
 }
 @media only screen and (max-width: vars.$mobileWidth) {
-    .collection-new-preview-headline {
-        overflow-wrap: break-word;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 1;
-        /*line-height: 1em;*/
-        //max-height: 1.5em;
-        text-align: center;
-        overflow: hidden;
-    }
     .collectionsContainer {
         grid-template-columns: auto;
-        // Single column: rows size to their content (info-bar then content) and the whole card
-        // body scrolls — not a stretched `1fr` row, which would collapse the info-bar height.
+        // Rows size to their content and the whole card body scrolls — not a stretched `1fr` row.
         grid-template-rows: auto;
         min-height: auto;
         // Undo the desktop "scroll only the right column" split. These selectors are nested under
         // `.collectionsContainer` on purpose so they outrank the desktop rules above (equal/higher
         // specificity); a scrollable grid item has a 0 auto-row min-size and would collapse to zero
-        // height (hiding the info-bar) — `overflow: visible` + `min-height: auto` restores content sizing.
-        es-collection-info-bar,
+        // height — `overflow: visible` + `min-height: auto` restores content sizing.
         .collections-right,
         .collections-scroll {
             display: block;
             overflow: visible;
             min-height: auto;
         }
-        .collections-right {
-            max-width: unset;
-        }
-    }
-    .card-image-icon-container {
-        margin-top: 20px;
     }
     // Mobile is a single column with the breadcrumb as an absolute overlay, so the desktop
     // "scroll only the right column" split is undone: the whole card body scrolls again.
     .collections-body {
         overflow-y: auto;
     }
+    // The breadcrumb and the view switch share one bar that sticks to the top of the scrolling
+    // card body.
     .breadcrumb-space {
-        // the breadcrumb becomes an absolute overlay here, so drop the fixed bar height/frame
-        min-height: 0;
-        background: transparent;
-        padding: 0;
-        margin-top: 0;
+        position: sticky;
+        top: 0;
+        padding: 0 10px 0 0;
     }
     .collections-breadcrumb {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(5px);
-        height: vars.$secondaryBarHeight;
-        @include mixins.materialShadowBottom();
-        padding-top: 22px;
-        padding-bottom: 20px;
-        padding-right: 50px;
+        flex: 1;
+        min-width: 0;
         margin: 0;
     }
-    .collection-new-preview-infoline,
-    .collection-description,
-    .collection-permissions {
-        display: none !important;
+    .display-type-toggle {
+        --view-toggle-button-width: 44px;
     }
     .collections-master-div-notabs {
         margin-top: 0;
-    }
-
-    .collections-header {
-        margin-top: 0;
-        width: 100%;
-        // Handle negative margin of `mds-editor-widget-container`.
-        overflow: hidden;
-    }
-
-    .collections-header-texttop {
-        display: flex;
-        justify-content: center;
     }
 
     .table-tab-middle {
@@ -425,13 +407,6 @@ section {
 
     .collections-master-div-notabs {
         min-width: unset;
-    }
-    .card-collection-image-container {
-        height: 200px;
-    }
-
-    .collections-header-detailview {
-        display: none;
     }
     .tab-group {
         max-width: 1000px;

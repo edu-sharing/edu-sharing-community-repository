@@ -17,7 +17,6 @@
     "EDITORIAL_PUBLIC": "Öffentlich sichtbar",
     "EDITORIAL_PUBLIC_INFO": "Die redaktionelle Sammlung ist für alle Nutzende und ggf. Gäste sichtbar",
     "CREATOR": "Ersteller{{GENDER_SEPARATOR}}in",
-    "SHARING_STATE": "Freigabezustand",
     "NO_SUBCOLLECTIONS": "Keine Untersammlungen vorhanden",
     "NO_SUBCOLLECTIONS_HINT": "Sie können weitere Sammlungen über den \"Neu\"-Button anlegen",
     "STATS": {
@@ -120,6 +119,22 @@
         "ACCEPTED": "Das Element wurde der Sammlung hinzugefügt.",
         "DECLINED": "Der Vorschlag wurde abgelehnt."
       }
+    },
+    "INFO": {
+      "SECTION_FACTS": "Sammlungsinformationen",
+      "SECTION_PARTICIPANTS": "Beteiligte",
+      "SECTION_METADATA": "Metadaten",
+      "VISIBILITY": "Sichtbarkeit",
+      "TYPE": {
+        "LABEL": "Sammlungstyp",
+        "DEFAULT": "Allgemeine Sammlung",
+        "EDITORIAL": "Redaktionelle Sammlung",
+        "CURRICULUM": "Lehrplansammlung",
+        "MEDIA_CENTER": "Medienzentrum-Sammlung"
+      },
+      "SUBCOLLECTIONS": "Untersammlungen",
+      "MATERIALS": "Materialien",
+      "ALL_DETAILS": "Alle Details"
     }
   },
   "collections_description": "Beschreibung:",

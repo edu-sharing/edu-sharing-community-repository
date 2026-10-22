@@ -179,10 +179,14 @@ export class TreeNodeService {
                             (sum, node) => sum + (node.collection?.childCollectionsCount || 0),
                             0,
                         );
-                    child.collection.childReferencesCount = subChildren.reduce(
-                        (sum, node) => sum + (node.collection?.childReferencesCount || 0),
-                        0,
-                    );
+                    // children that are no collections are materials of this collection
+                    child.collection.childReferencesCount =
+                        subChildren.length -
+                        numberOfSubCollections +
+                        subChildren.reduce(
+                            (sum, node) => sum + (node.collection?.childReferencesCount || 0),
+                            0,
+                        );
                 } else if (!subChildren.length && treeNode && treeNode.level === 0) {
                     // fix directories do not store information on whether they contain sub-nodes
                     const isDirectory: boolean =

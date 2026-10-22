@@ -1,5 +1,7 @@
 import {
+    AfterContentInit,
     Component,
+    computed,
     ContentChild,
     ElementRef,
     EventEmitter,
@@ -23,6 +25,7 @@ import {
     TranslationsService,
     UIConstants,
 } from 'ngx-edu-sharing-ui';
+import { ViewToggleItem } from '../../shared/components/view-toggle-group/view-toggle-group.component';
 import { ConnectedPosition } from '@angular/cdk/overlay';
 import { combineLatest, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -49,11 +52,13 @@ import { NodeHelperService } from '../../services/node-helper.service';
 import { Toast } from '../../services/toast';
 import { BreadcrumbsService } from '../../shared/components/breadcrumbs/breadcrumbs.service';
 import { CollectionContentComponent } from './collection-content/collection-content.component';
-import { CollectionInfoBarComponent } from './collection-info-bar/collection-info-bar.component';
+import { CollectionHeaderBarComponent } from './collection-header-bar/collection-header-bar.component';
+import { CollectionViewStateService, CollectionViewType } from './collection-view-state.service';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
+import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
 
 // component class
 @Component({
@@ -61,11 +66,36 @@ import { CollectionScope, CollectionScopesService } from '../../services/collect
     templateUrl: 'collections-page.component.html',
     styleUrls: ['collections-page.component.scss'],
     // provide a new instance so to not get conflicts with other service instances
-    providers: [OptionsHelperDataService, OptionsHelperService],
+    providers: [
+        OptionsHelperDataService,
+        OptionsHelperService,
+        CollectionDetailsService,
+        CollectionViewStateService,
+    ],
     standalone: false,
 })
-export class CollectionsPageComponent implements OnDestroy {
+export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private breadcrumbsService = inject(BreadcrumbsService);
+    readonly details = inject(CollectionDetailsService);
+    readonly viewState = inject(CollectionViewStateService);
+    /** the ways the user can present the content of a collection */
+    readonly displayTypeItems: ViewToggleItem<CollectionViewType>[] = [
+        {
+            id: 'grid',
+            icon: 'grid_view',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.GRID',
+        },
+        {
+            id: 'list',
+            icon: 'list',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TABLE',
+        },
+        {
+            id: 'tree',
+            icon: 'account_tree',
+            label: 'EDITORIAL.OPTIONS.NODES_SELECTOR.COLLECTIONS.DISPLAY_TYPE.TREE',
+        },
+    ];
     private collectionService = inject(RestCollectionService);
     private collectionScopesService = inject(CollectionScopesService);
     private config = inject(ConfigurationService);
@@ -115,9 +145,10 @@ export class CollectionsPageComponent implements OnDestroy {
     readonly SCOPES = Scope;
     readonly NodeEntriesDisplayType = NodeEntriesDisplayType;
     readonly ROUTER_PREFIX = UIConstants.ROUTER_PREFIX;
-    readonly getInfobar = () => this.infobar;
 
-    @ViewChild('infobar') infobar: CollectionInfoBarComponent;
+    private readonly headerBar = viewChild(CollectionHeaderBarComponent);
+    /** the actionbar in the header bar of the open collection */
+    readonly headerActionbar = computed(() => this.headerBar()?.actionbar());
     @ViewChild('collectionContentComponent') collectionContentRef: CollectionContentComponent;
     readonly selectionActionbar = viewChild<ActionbarComponent>('selectionActionbarRef');
     @ContentChild('collectionContentTemplate') collectionContentTemplateRef: TemplateRef<any>;
@@ -140,7 +171,21 @@ export class CollectionsPageComponent implements OnDestroy {
     tabSelected: string = RestConstants.COLLECTIONSCOPE_MY;
     isLoading = true;
     isReady = false;
-    collection: Node;
+    private currentCollection: Node;
+    get collection(): Node {
+        return this.currentCollection;
+    }
+    set collection(collection: Node) {
+        this.currentCollection = collection;
+        this.details.collection.set(collection);
+    }
+    ngAfterContentInit(): void {
+        // a host template receives the permissions of the collection, so they are requested
+        // even though no sidebar asks for them
+        if (this.collectionContentTemplateRef) {
+            this.details.activate();
+        }
+    }
     collectionSortEmitter = new EventEmitter<SortEvent>();
     collectionCustomSortEmitter = new EventEmitter<boolean>();
     referenceSortEmitter = new EventEmitter<SortEvent>();
@@ -322,20 +367,6 @@ export class CollectionsPageComponent implements OnDestroy {
 
     getScopeInfo() {
         return this.nodeHelper.getCollectionScopeInfo(this.collection);
-    }
-
-    collectionEdit(): void {
-        if (this.isAllowedToEditCollection()) {
-            void this.router.navigate(
-                [
-                    UIConstants.ROUTER_PREFIX + 'collections/collection',
-                    'edit',
-                    this.collection.ref.id,
-                ],
-                { queryParams: { mainnav: this.mainnav } },
-            );
-            return;
-        }
     }
 
     getScope() {
