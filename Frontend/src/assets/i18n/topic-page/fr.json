@@ -95,6 +95,7 @@
         "UPDATE_PREVIEW": "Mettre à jour l'aperçu",
         "PREVIEW_TITLE": "Aperçu de l'iFrame",
         "SAVE_CONFIG": "Enregistrer la configuration",
+        "UNSAVED_CHANGES": "Modifications non enregistrées – elles n’apparaissent sur la page qu’après l’enregistrement.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Oui, afficher le contenu externe",
           "MESSAGE": "Vous êtes sur le point de charger et d'afficher du contenu externe. Cela peut entraîner la transmission de données personnelles à des services externes et leur traitement par ceux-ci.",

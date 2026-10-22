@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     CUSTOM_ELEMENTS_SCHEMA,
     effect,
     EventEmitter,
@@ -7,10 +8,12 @@ import {
     Input,
     InputSignal,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -57,6 +60,22 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
         confirmation: new FormControl<boolean>(true),
     });
     iframeConfig: IframeWidgetConfig | null = null;
+    // the saved config; the form starts from it, or from its own defaults for a new widget
+    private readonly savedConfig: WritableSignal<IframeWidgetConfig> = signal(
+        this.iframeForm.getRawValue(),
+    );
+    private readonly formValue: Signal<Partial<IframeWidgetConfig>> = toSignal(
+        this.iframeForm.valueChanges,
+        { initialValue: this.iframeForm.value },
+    );
+    /** Whether the form holds changes that are not live yet, as only saving publishes them. */
+    readonly hasUnsavedChanges: Signal<boolean> = computed(() => {
+        const formValue: Partial<IframeWidgetConfig> = this.formValue();
+        const savedConfig: IframeWidgetConfig = this.savedConfig();
+        return (Object.keys(this.iframeForm.controls) as (keyof IframeWidgetConfig)[]).some(
+            (key) => (formValue[key] ?? '') !== (savedConfig[key] ?? ''),
+        );
+    });
     initialized: WritableSignal<boolean> = signal(false);
     previewConfig: IframeWidgetConfig | null = null;
     statusConfirmed: WritableSignal<boolean> = signal(false);
@@ -114,5 +133,6 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
     setWidgetValues(config: IframeWidgetConfig): void {
         this.iframeForm.patchValue(config);
         this.iframeConfig = this.iframeForm.value;
+        this.savedConfig.set(this.iframeForm.getRawValue());
     }
 }

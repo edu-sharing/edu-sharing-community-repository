@@ -97,6 +97,7 @@
         "UPDATE_PREVIEW": "Vorschau aktualisieren",
         "PREVIEW_TITLE": "Vorschau des iFrames",
         "SAVE_CONFIG": "Konfiguration speichern",
+        "UNSAVED_CHANGES": "Nicht gespeicherte Änderungen – erst nach dem Speichern sind sie auf der Seite sichtbar.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Ja, externen Inhalt anzeigen",
           "MESSAGE": "Sie sind dabei, externe Inhalte zu laden und anzuzeigen. Dabei werden unter Umständen persönliche Daten an diese übermittelt und dort verarbeitet.",

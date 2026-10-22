@@ -33,11 +33,24 @@
     <mat-slide-toggle formControlName="confirmation" class="toggle-input">
       {{ i18nPrefix + 'SHOW_CONFIRMATION' | translate }}
     </mat-slide-toggle>
+    <div class="unsaved-changes" role="status">
+      @if (hasUnsavedChanges()) {
+      <es-info-message mode="warning">
+        {{ i18nPrefix + 'UNSAVED_CHANGES' | translate }}
+      </es-info-message>
+      }
+    </div>
     <div class="iframe-buttons">
       <button mat-raised-button type="button" (click)="showPreview()">
         {{ i18nPrefix + (previewConfig ? 'UPDATE_PREVIEW' : 'SHOW_PREVIEW') | translate }}
       </button>
-      <button mat-raised-button color="primary" type="submit" (click)="saveConfig()">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="!hasUnsavedChanges() || updateInProgress()"
+        (click)="saveConfig()"
+      >
         {{ i18nPrefix + 'SAVE_CONFIG' | translate }}
       </button>
     </div>
