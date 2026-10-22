@@ -384,8 +384,7 @@
       "DELETE": {
         "LABEL": "Delete section",
         "MESSAGE": "Do you really want to delete this section?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "The widget is not defined or unknown."
+      }
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
     "NO_PAGE_CONFIG": {

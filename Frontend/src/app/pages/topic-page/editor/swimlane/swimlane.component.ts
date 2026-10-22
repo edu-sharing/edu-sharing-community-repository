@@ -5,7 +5,9 @@ import {
     ElementRef,
     EventEmitter,
     Input,
+    OnChanges,
     Output,
+    SimpleChanges,
     inject,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
@@ -34,7 +36,7 @@ import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-ty
     templateUrl: './swimlane.component.html',
     styleUrls: ['./swimlane.component.scss'],
 })
-export class SwimlaneComponent implements AfterViewChecked {
+export class SwimlaneComponent implements AfterViewChecked, OnChanges {
     private cdr = inject(ChangeDetectorRef);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
@@ -74,6 +76,20 @@ export class SwimlaneComponent implements AfterViewChecked {
 
     supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map((option) => option.value);
     swimlaneColor: string;
+
+    /**
+     * Reports widget types this installation cannot render; readers only see an empty tile.
+     */
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes.grid) {
+            return;
+        }
+        (this.grid ?? [])
+            .filter((tile: GridTile) => tile.item && !this.isSupportedWidget(tile.item))
+            .forEach((tile: GridTile) =>
+                console.warn('Unsupported topic page widget type, tile left empty:', tile.item),
+            );
+    }
 
     /**
      * After the view was checked, retrieve the swimlane color from the computed styles

@@ -362,8 +362,7 @@
       "DELETE": {
         "LABEL": "Supprimer la section",
         "MESSAGE": "Voulez-vous vraiment supprimer cette section ?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "Le widget n'est pas défini ou est inconnu."
+      }
     },
     "NO_SWIMLANES": "Aucune section avec du contenu n'a encore été créée.",
     "NO_PAGE_CONFIG": {

@@ -384,8 +384,7 @@
       "DELETE": {
         "LABEL": "Abschnitt löschen",
         "MESSAGE": "Willst du diesen Abschnitt wirklich löschen?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "Das Widget ist nicht definiert oder unbekannt."
+      }
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
     "NO_PAGE_CONFIG": {
