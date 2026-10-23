@@ -1,11 +1,13 @@
 import {
     AfterContentInit,
+    afterNextRender,
     Component,
     computed,
     ContentChild,
     ElementRef,
     EventEmitter,
     inject,
+    Injector,
     OnDestroy,
     signal,
     TemplateRef,
@@ -129,6 +131,7 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     private networkService = inject(RestNetworkService);
     private temporaryStorageService = inject(TemporaryStorageService);
     editorialSidebarService = inject(EditorialSidebarService);
+    private injector = inject(Injector);
     private toast = inject(Toast);
     private translations = inject(TranslationsService);
     private uiService = inject(UIService);
@@ -494,18 +497,19 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
 
     /**
      * Opens the sidebar to create a collection in the current one and removes the request from
-     * the url, so a reload does not open it again.
+     * the url, so a reload does not open it again. The list sets the scope of the main navigation
+     * while it is rendered, which closes the sidebar, so it opens after that render.
      */
     private openCreateCollectionSidebar(): void {
-        // the sidebar closes itself when the scope of the main navigation changes, which happens
-        // while the page is set up
-        setTimeout(() => {
-            this.editorialSidebarService.showOption({
-                option: 'CREATE_COLLECTION',
-                trap: true,
-                optionConfig: { entry: 'menu' } as CreateCollectionConfig,
-            });
-        });
+        afterNextRender(
+            () =>
+                this.editorialSidebarService.showOption({
+                    option: 'CREATE_COLLECTION',
+                    trap: true,
+                    optionConfig: { entry: 'menu' } as CreateCollectionConfig,
+                }),
+            { injector: this.injector },
+        );
         void this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { createCollection: null },
