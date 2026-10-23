@@ -80,6 +80,8 @@ $chip-color-source: #d0a6d6;
 $chip-color-type: map.get(vars.$chip-colors, 'ccm_objecttype') or #a6c0d6;
 // further colors
 $neon-default: #e4f700;
+// text on the bright highlight background in dark mode, where the primary color is light
+$search-highlight-text-dark: color-mix(in srgb, var(--primary) 30%, black);
 $neon-medium: #b4da1c;
 $outline-light: #c3c6d2;
 @if meta.global-variable-exists('searchInputBorderColor', vars) {
