@@ -95,6 +95,8 @@
         "UPDATE_PREVIEW": "Mettre à jour l'aperçu",
         "PREVIEW_TITLE": "Aperçu de l'iFrame",
         "SAVE_CONFIG": "Enregistrer la configuration",
+        "UNSAVED_CHANGES": "Modifications non enregistrées – elles n’apparaissent sur la page qu’après l’enregistrement.",
+        "PREVIEW_OUTDATED": "L’aperçu ne reflète pas l’état actuel de vos saisies.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Oui, afficher le contenu externe",
           "MESSAGE": "Vous êtes sur le point de charger et d'afficher du contenu externe. Cela peut entraîner la transmission de données personnelles à des services externes et leur traitement par ceux-ci.",
@@ -123,7 +125,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profil enregistré – vous voyez désormais des contenus adaptés !",
-        "CHANGES_RESET": "Votre profilage a été réinitialisé."
+        "CHANGES_RESET": "Votre profilage a été réinitialisé.",
+        "PINNED_VARIANT_HINT": "Remplace la variante de page sélectionnée directement par celle correspondant à votre profil."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Recherche",
@@ -359,8 +362,7 @@
       "DELETE": {
         "LABEL": "Supprimer la section",
         "MESSAGE": "Voulez-vous vraiment supprimer cette section ?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "Le widget n'est pas défini ou est inconnu."
+      }
     },
     "NO_SWIMLANES": "Aucune section avec du contenu n'a encore été créée.",
     "HISTORY": {
@@ -463,6 +465,14 @@
       "VIEW": "Mode affichage du modèle",
       "EDIT": "Mode édition du modèle",
       "END": "Quitter le mode modèle"
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Sections nécessitant une action :",
+      "UNFINISHED": "{{count}} non terminée(s) (masquée(s) pour les lecteurs)",
+      "PARTIAL": "{{count}} incomplète(s)",
+      "JUMP": "Aller à la section suivante",
+      "LABEL_UNFINISHED": "Non terminée – masquée pour les lecteurs",
+      "LABEL_PARTIAL": "Incomplète – les colonnes vides restent vides pour les lecteurs"
     }
   }
 }

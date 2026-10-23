@@ -66,6 +66,20 @@ export const parseSearchFilters = (param: string): Values => {
 };
 
 /**
+ * Whether two sets of page filters select the same values, regardless of the order of their
+ * properties and values.
+ */
+export const sameSearchFilters = (a: Values, b: Values): boolean => {
+    const normalize = (filters: Values): string =>
+        JSON.stringify(
+            Object.keys(filters ?? {})
+                .sort()
+                .map((key: string) => [key, [...(filters[key] ?? [])].sort()]),
+        );
+    return normalize(a) === normalize(b);
+};
+
+/**
  * The query params holding a search input and page filters; empty ones are removed from the URL.
  */
 export const searchStateToQueryParams = (searchInput: string, filters: Values): Params => {

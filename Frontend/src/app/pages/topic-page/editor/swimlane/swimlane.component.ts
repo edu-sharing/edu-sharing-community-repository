@@ -5,13 +5,15 @@ import {
     ElementRef,
     EventEmitter,
     Input,
+    OnChanges,
     Output,
+    SimpleChanges,
     inject,
 } from '@angular/core';
 import { MdsWidget, Node, NodeEntries } from 'ngx-edu-sharing-api';
 import { Values } from 'ngx-edu-sharing-ui';
 import { SharedModule } from '../../../../shared/shared.module';
-import { WIDGET_TYPE_OPTIONS, WIDGETS } from '../../shared/types/custom-definitions';
+import { canRenderWidgetType } from '../../shared/utils/widget-type-util';
 import { GridTile } from '../../shared/types/grid-tile';
 import { GridTileToHitsMapping } from '../../shared/types/grid-tile-to-hits-mapping';
 import { GridTileToSearchCountMapping } from '../../shared/types/grid-tile-to-search-count-mapping';
@@ -34,31 +36,19 @@ import { SelectWidgetTypeComponent } from './select-widget-type/select-widget-ty
     templateUrl: './swimlane.component.html',
     styleUrls: ['./swimlane.component.scss'],
 })
-export class SwimlaneComponent implements AfterViewChecked {
+export class SwimlaneComponent implements AfterViewChecked, OnChanges {
     private cdr = inject(ChangeDetectorRef);
     private elementRef = inject(ElementRef);
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
 
-    @Input() set aiSupported(value: boolean) {
-        if (!value) {
-            this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
-                (widgetType) => widgetType !== WIDGETS.AI_TEXT_WIDGET,
-            );
-        }
-    }
+    @Input() aiSupported: boolean = false;
     @Input() backgroundColor?: string;
     @Input() backgroundShape?: SwimlaneBackgroundShape = SwimlaneBackgroundShape.None;
     @Input() contextNodeId: string;
     @Input() editMode: boolean;
     @Input() grid: GridTile[] = [];
     @Input() pageVariantNode?: Node;
-    @Input() set rendering2Supported(value: boolean) {
-        if (!value) {
-            this.supportedWidgetTypes = this.supportedWidgetTypes.filter(
-                (widgetType) => widgetType !== WIDGETS.MEDIA_RENDERING,
-            );
-        }
-    }
+    @Input() rendering2Supported: boolean = false;
     @Input() searchInput: string;
     @Input() searchFilters: Values;
     @Input() selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
@@ -72,8 +62,21 @@ export class SwimlaneComponent implements AfterViewChecked {
     @Output() visibleNodesChanged: EventEmitter<GridTileToSearchResultsMapping> =
         new EventEmitter<GridTileToSearchResultsMapping>();
 
-    supportedWidgetTypes: string[] = WIDGET_TYPE_OPTIONS.map((option) => option.value);
     swimlaneColor: string;
+
+    /**
+     * Reports widget types this installation cannot render; readers only see an empty tile.
+     */
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes.grid && !changes.aiSupported && !changes.rendering2Supported) {
+            return;
+        }
+        (this.grid ?? [])
+            .filter((tile: GridTile) => tile.item && !this.isSupportedWidget(tile.item))
+            .forEach((tile: GridTile) =>
+                console.warn('Unsupported topic page widget type, tile left empty:', tile.item),
+            );
+    }
 
     /**
      * After the view was checked, retrieve the swimlane color from the computed styles
@@ -128,11 +131,13 @@ export class SwimlaneComponent implements AfterViewChecked {
     /**
      * Checks whether a given widget type name is a supported widget type.
      */
-    isSupportedWidget(name: string) {
-        return (
-            this.supportedWidgetTypes.includes(name) ||
-            this.genericWidgetGlobalService.hasCustomWidget(name)
-        );
+    isSupportedWidget(name: string): boolean {
+        return canRenderWidgetType(name, {
+            aiSupported: this.aiSupported,
+            rendering2Supported: this.rendering2Supported,
+            hasCustomWidget: (type: string) =>
+                this.genericWidgetGlobalService.hasCustomWidget(type),
+        });
     }
 
     protected readonly convertNodeRefIntoNodeId = convertNodeRefIntoNodeId;

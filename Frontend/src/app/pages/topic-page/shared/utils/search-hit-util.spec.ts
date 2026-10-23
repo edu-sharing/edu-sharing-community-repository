@@ -8,6 +8,7 @@ import { Swimlane } from '../types/swimlane';
 import {
     computeSwimlaneHitMatching,
     parseSearchFilters,
+    sameSearchFilters,
     searchStateToQueryParams,
 } from './search-hit-util';
 
@@ -50,6 +51,21 @@ describe('search-hit-util', () => {
             });
             void expect(parseSearchFilters('not json')).toEqual({});
             void expect(parseSearchFilters(undefined)).toEqual({});
+        });
+    });
+
+    describe('sameSearchFilters', () => {
+        it('ignores the order of properties and values', () => {
+            void expect(
+                sameSearchFilters({ a: ['1', '2'], b: ['3'] }, { b: ['3'], a: ['2', '1'] }),
+            ).toBeTrue();
+            void expect(sameSearchFilters({}, {})).toBeTrue();
+        });
+
+        it('tells apart differing selections', () => {
+            void expect(sameSearchFilters({ a: ['1'] }, { a: ['2'] })).toBeFalse();
+            void expect(sameSearchFilters({ a: ['1'] }, { a: ['1'], b: ['2'] })).toBeFalse();
+            void expect(sameSearchFilters({ a: ['1'] }, {})).toBeFalse();
         });
     });
 

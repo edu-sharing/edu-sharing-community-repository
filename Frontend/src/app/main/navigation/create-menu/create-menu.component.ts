@@ -611,6 +611,11 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     pickMaterialFromSearch() {
         UIHelper.getCommonParameters(this.route).subscribe((params) => {
             params.addToCollection = this._parent.ref.id;
+            // Workaround for 11.0, superseded in 12.0: a topic page passes itself as return target,
+            // so the search returns there instead of to the collection page
+            if (this.scope === Scope.TopicPage) {
+                params.addToCollectionReturnUrl = this.router.url;
+            }
             void this.router.navigate([UIConstants.ROUTER_PREFIX + 'search'], {
                 queryParams: params,
             });

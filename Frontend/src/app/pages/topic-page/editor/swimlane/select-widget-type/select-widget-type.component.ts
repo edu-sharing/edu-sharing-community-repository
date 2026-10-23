@@ -6,13 +6,10 @@ import { YES_OR_NO } from '../../../../../features/dialogs/dialog-modules/generi
 import { DialogsService } from '../../../../../features/dialogs/dialogs.service';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { AiHelperService } from '../../../shared/services/ai-helper.service';
-import {
-    WIDGET_TYPE,
-    WIDGET_TYPE_OPTIONS,
-    WIDGETS,
-} from '../../../shared/types/custom-definitions';
+import { WIDGET_TYPE, WIDGET_TYPE_OPTIONS } from '../../../shared/types/custom-definitions';
 import { GridTile } from '../../../shared/types/grid-tile';
 import { WidgetSelectOption } from '../../../shared/types/widget-select-option';
+import { canRenderWidgetType } from '../../../shared/utils/widget-type-util';
 
 @Component({
     selector: 'es-select-widget-type',
@@ -36,10 +33,13 @@ export class SelectWidgetTypeComponent implements OnInit {
             this.aiHelperService.hasRendering2Support(),
         ]);
 
-        this.widgetTypeOptions = WIDGET_TYPE_OPTIONS.filter(
-            ({ value }) =>
-                (hasAI || value !== WIDGETS.AI_TEXT_WIDGET) &&
-                (hasRendering2 || value !== WIDGETS.MEDIA_RENDERING),
+        // only built-in types are offered, so custom widgets are left out of the check
+        this.widgetTypeOptions = WIDGET_TYPE_OPTIONS.filter(({ value }) =>
+            canRenderWidgetType(value, {
+                aiSupported: hasAI,
+                rendering2Supported: hasRendering2,
+                hasCustomWidget: () => false,
+            }),
         );
     }
 

@@ -135,5 +135,9 @@
         font-weight: topicPageVars.$font-weight-bold;
         color: topicPageVars.$primary;
         background-color: topicPageVars.$neon-default;
+
+        :host-context(body.isDarkTheme) & {
+            color: topicPageVars.$search-highlight-text-dark;
+        }
     }
 }
