@@ -2289,10 +2289,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Called by es-editable-text searchResultsUpdated output event.
      */
     updateTitleSearchResults(event: number, swimlaneId: string): void {
-        // update the title matching
-        this.swimlaneTitleIdToHitMatching.set(swimlaneId, event > 0);
-        // update the hit matching
-        this.updateSwimlaneIdToHitMatching();
+        // the title reports its hits while this page is being checked, and the matching feeds
+        // bindings checked before it, so the update follows the current check
+        queueMicrotask((): void => {
+            this.swimlaneTitleIdToHitMatching.set(swimlaneId, event > 0);
+            this.updateSwimlaneIdToHitMatching();
+        });
     }
 
     /**
