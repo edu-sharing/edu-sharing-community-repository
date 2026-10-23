@@ -27,6 +27,7 @@ import { ConfigurationOption } from '../../shared/types/configuration-option';
 import { LayoutOption } from '../../shared/types/layout-option';
 import { CollectionChipsConfig } from '../../shared/types/widget-config/collection-chips-config';
 import { WidgetComponentInterface } from '../generic-widget/generic-widget.component';
+import { HighlightSearchPipe } from '../../shared/pipes/highlight-search.pipe';
 import { WidgetConfigurationButtonsComponent } from '../shared/widget-configuration-buttons/widget-configuration-buttons.component';
 
 @Component({
@@ -34,6 +35,7 @@ import { WidgetConfigurationButtonsComponent } from '../shared/widget-configurat
     encapsulation: ViewEncapsulation.Emulated,
     imports: [
         EduSharingUiCommonModule,
+        HighlightSearchPipe,
         SharedModule,
         TopicLinkDirective,
         WidgetConfigurationButtonsComponent,
