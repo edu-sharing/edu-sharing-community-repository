@@ -43,7 +43,6 @@ import {
     NodeEvent,
     NodeService,
     NodeShare,
-    ROOT,
     SearchResultGeneric,
     SearchResultNode,
     SearchService,
@@ -257,11 +256,9 @@ export class DashboardSwimlaneComponent {
                 }),
             );
             const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'add', () => {
-                void this.router.navigate([
-                    UIConstants.ROUTER_PREFIX + 'collections/collection',
-                    'new',
-                    ROOT,
-                ]);
+                void this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+                    queryParams: { createCollection: true },
+                });
             });
             newCollection.elementType = [ElementType.NoneOrUnknown];
             void this.setGlobalOptions([newCollection]);

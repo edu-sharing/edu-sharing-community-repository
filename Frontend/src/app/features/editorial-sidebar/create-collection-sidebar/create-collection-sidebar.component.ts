@@ -169,12 +169,12 @@ export class CreateCollectionSidebarComponent {
 
     protected readonly metadataGroupId = computed(() => {
         switch (this.type()) {
-            case 'EDITORIAL':
-                return this.editorialConfig.metadataGroup;
             case 'MEDIA_CENTER':
                 return 'collection_media_center';
+            case 'EDITORIAL':
             default:
-                return null;
+                // types without a group of their own share the editorial one
+                return this.editorialConfig.metadataGroup;
         }
     });
     /** a type without a group, or a set that lacks it, has no metadata to ask for */

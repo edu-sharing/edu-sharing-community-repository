@@ -373,8 +373,8 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Creates a collection in the sidebar of the page, or in the full page editor when the page
-     * has no sidebar.
+     * Creates a collection in the sidebar of the page, or in the sidebar of the collections page
+     * when the current page has none.
      */
     private createCollection(): void {
         if (this.editorialSidebarService.editorialSidebar) {
@@ -384,7 +384,13 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
                 optionConfig: { entry: 'menu' } as CreateCollectionConfig,
             });
         } else {
-            this.uiService.goToCollection(this._parent, 'new');
+            const parentId =
+                this._parent && this.nodeHelper.isNodeCollection(this._parent)
+                    ? this._parent.ref.id
+                    : null;
+            void this.router.navigate([UIConstants.ROUTER_PREFIX + 'collections'], {
+                queryParams: { id: parentId, createCollection: true },
+            });
         }
     }
 

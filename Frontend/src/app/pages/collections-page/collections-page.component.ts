@@ -58,6 +58,7 @@ import { CollectionHeaderBarComponent } from './collection-header-bar/collection
 import { CollectionViewStateService, CollectionViewType } from './collection-view-state.service';
 import { GlobalCollectionsPageServiceInternal } from './global-collections-page.service';
 import { OptionsHelperService } from 'src/app/services/options-helper.service';
+import { CreateCollectionConfig } from '../../features/editorial-sidebar/create-collection-sidebar/create-collection-sidebar.component';
 import { EditorialSidebarService } from '../../features/editorial-sidebar/editorial-sidebar.service';
 import { CollectionScope, CollectionScopesService } from '../../services/collection-scopes.service';
 import { CollectionDetailsService } from '../../features/collection-info/collection-details.service';
@@ -492,6 +493,28 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
     }
 
     /**
+     * Opens the sidebar to create a collection in the current one and removes the request from
+     * the url, so a reload does not open it again.
+     */
+    private openCreateCollectionSidebar(): void {
+        // the sidebar closes itself when the scope of the main navigation changes, which happens
+        // while the page is set up
+        setTimeout(() => {
+            this.editorialSidebarService.showOption({
+                option: 'CREATE_COLLECTION',
+                trap: true,
+                optionConfig: { entry: 'menu' } as CreateCollectionConfig,
+            });
+        });
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { createCollection: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
      * Drops a scope from the URL that is not listed for the user, e.g. an editorial scope without
      * editorial collections, so the default category shows; going back does not return to it.
      */
@@ -558,7 +581,10 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     if (
                         this.params &&
                         changed.length > 0 &&
-                        changed.every((key) => key === 'viewType' || key === 'query')
+                        changed.every(
+                            (key) =>
+                                key === 'viewType' || key === 'query' || key === 'createCollection',
+                        )
                     ) {
                         this.params = params;
                         return;
@@ -588,6 +614,9 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                     }
                     await this.displayCollectionById(id);
                     this.dropUnlistedScope();
+                    if (params.createCollection) {
+                        this.openCreateCollectionSidebar();
+                    }
 
                     /*if (params.nodeId) {
                         let node = params.nodeId.split('/');
