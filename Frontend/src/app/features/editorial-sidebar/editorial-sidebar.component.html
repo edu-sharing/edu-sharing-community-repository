@@ -66,7 +66,20 @@
         ></es-nodes-selector>
         } @if (option === 'ADD_COLLECTION') {
         <es-add-collection-sidebar [parent]="parent()"></es-add-collection-sidebar>
-        } @if (option === 'COLLECTION_INFO') {
+        } @if (option === 'CREATE_COLLECTION') {
+        <es-create-collection-sidebar
+          [parent]="parent()"
+          [option]="$any(enabledOption())"
+        ></es-create-collection-sidebar>
+        } @if (option === 'EDIT_COLLECTION') {
+        <!-- opening the editor for another collection has to start over with that one -->
+        @for (collectionId of [$any(enabledOption().optionConfig)?.collectionId]; track
+        collectionId) {
+        <es-create-collection-sidebar
+          [parent]="parent()"
+          [option]="$any(enabledOption())"
+        ></es-create-collection-sidebar>
+        } } @if (option === 'COLLECTION_INFO') {
         <es-collection-info-sidebar
           [collection]="collectionInfoTarget()!"
         ></es-collection-info-sidebar>

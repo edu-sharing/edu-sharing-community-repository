@@ -96,6 +96,11 @@ export class MdsEditorWidgetPreviewComponent implements NativeWidgetComponent, O
      * create/edit dialog). The change-preview button then shows a "more options" icon.
      */
     @Input() deleteAsOption = false;
+    /**
+     * icon of the change-preview button; defaults to "more options" when the delete action lives
+     * in the menu and to the pencil otherwise
+     */
+    @Input() menuIcon: string = null;
     /** load the shown node's preview as a 400x300 crop instead of the uncropped preview */
     @Input() cropPreview = true;
 

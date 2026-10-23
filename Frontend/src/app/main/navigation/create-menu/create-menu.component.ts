@@ -63,6 +63,7 @@ import { BridgeService } from '../../../services/bridge.service';
 import { ConnectorOptionsService } from '../../../services/connector-options.service';
 import { LtiToolOptionsService } from '../../../services/lti-tool-options.service';
 import { OptionsHelperService } from '../../../services/options-helper.service';
+import { CreateCollectionConfig } from '../../../features/editorial-sidebar/create-collection-sidebar/create-collection-sidebar.component';
 import { EditorialSidebarService } from '../../../features/editorial-sidebar/editorial-sidebar.service';
 import {
     NodesSelectorConfig,
@@ -263,9 +264,9 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
             (this._parent && this.nodeHelper.isNodeCollection(this._parent)) ||
             ['collections', 'landing'].includes(this.scope)
         ) {
-            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', (node) =>
+            const newCollection = new OptionItem('OPTIONS.NEW_COLLECTION', 'layers', () =>
                 // new collection always creates a new collection (selection to create or copy is skipped here)
-                this.uiService.goToCollection(this._parent, 'new'),
+                this.createCollection(),
             );
             newCollection.elementType = [ElementType.NoneOrUnknown];
             newCollection.constrains = [Constrain.NoSelection, Constrain.User];
@@ -368,6 +369,22 @@ export class CreateMenuComponent implements OnInit, OnDestroy {
         if (nodes && Array.isArray(nodes)) {
             this.localEventsService.nodesCreated.emit(nodes);
             this.createElement.emit(nodes);
+        }
+    }
+
+    /**
+     * Creates a collection in the sidebar of the page, or in the full page editor when the page
+     * has no sidebar.
+     */
+    private createCollection(): void {
+        if (this.editorialSidebarService.editorialSidebar) {
+            this.editorialSidebarService.showOption({
+                option: 'CREATE_COLLECTION',
+                trap: true,
+                optionConfig: { entry: 'menu' } as CreateCollectionConfig,
+            });
+        } else {
+            this.uiService.goToCollection(this._parent, 'new');
         }
     }
 

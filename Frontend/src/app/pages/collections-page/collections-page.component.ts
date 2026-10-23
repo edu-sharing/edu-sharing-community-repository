@@ -259,6 +259,20 @@ export class CollectionsPageComponent implements AfterContentInit, OnDestroy {
                 filter((nodes) => nodes.some((node) => node.ref.id === this.collection.ref.id)),
             )
             .subscribe(() => this.navigate(this.parentCollectionId.id));
+        // The header shows the collection, so it has to follow changes made in the sidebar.
+        this.localEvents.nodesChanged
+            .pipe(
+                takeUntil(this.destroyed),
+                filter((nodes) =>
+                    nodes.some(
+                        (node) =>
+                            !this.isRootLevel &&
+                            node?.ref?.id === this.collection?.ref?.id &&
+                            !!node.collection,
+                    ),
+                ),
+            )
+            .subscribe(() => this.refreshAll());
     }
     reurl: any;
     private _collectionShare: Node;

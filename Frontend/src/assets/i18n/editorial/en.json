@@ -69,6 +69,32 @@
           "DESCRIPTION": "Copy an existing collection including the desired contents and sub-collections to this location.",
           "ACTION": "Copy"
         }
+      },
+      "CREATE_COLLECTION": {
+        "DESIGN_TITLE": "Design collection",
+        "CONFIGURE_TITLE": "Configure collection",
+        "NEXT": "Next",
+        "CREATE": "Create",
+        "CREATED": "The collection was created.",
+        "TYPE": "Collection type",
+        "TYPE_EDITORIAL": "Editorial collection",
+        "TYPE_MEDIA_CENTER": "Media center",
+        "METADATA": "Metadata",
+        "DEFAULT_VIEW": "Default view",
+        "OPEN_AS_TOPIC_PAGE": "Open as topic page",
+        "DEFAULT_SORT": "Default sorting",
+        "SORT_SUBCOLLECTIONS": "Sort sub-collections by",
+        "SORT_REFERENCES": "Sort materials by",
+        "SORT": {
+          "TITLE": "Title",
+          "MODIFIED": "Last modified",
+          "CREATED": "Created"
+        },
+        "TYPE_DEFAULT": "General collection",
+        "NO_METADATA": "No metadata available",
+        "TYPE_INFO": "Information about {{type}}",
+        "DONE": "Done",
+        "SAVED": "The collection was saved."
       }
     },
     "OPTION": {

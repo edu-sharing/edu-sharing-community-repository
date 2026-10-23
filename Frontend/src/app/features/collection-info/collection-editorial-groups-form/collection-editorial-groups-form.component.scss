@@ -1,0 +1,42 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: block;
+    height: 100%;
+}
+
+.editorial-group {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .editorial-list {
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    .editorial-public {
+        padding: vars.$cardPadding vars.$cardPadding 20px vars.$cardPadding;
+        background-color: vars.$cardLightBackground;
+
+        ::ng-deep .mat-slide-toggle {
+            height: auto;
+        }
+    }
+}
+
+.noGroups {
+    padding-top: 15px;
+    font-size: vars.$fontSizeXLarge;
+    color: vars.$textLight;
+    text-align: center;
+}
+
+.noPermission {
+    color: vars.$textLight;
+    text-align: center;
+    h4 {
+        font-size: vars.$fontSizeXLarge;
+    }
+    h5 {
+        font-size: 100%;
+    }
+}

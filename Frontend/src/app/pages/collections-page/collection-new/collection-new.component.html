@@ -140,132 +140,15 @@
       width="xsmall"
       height="auto"
     >
-      <div class="collection-general">
-        <div class="collectionImage">
-          <!-- reuse the MDS preview widget so the image sources (upload / clipboard / search)
-               stay in sync with the node preview widget. Host-controlled: it hands back the
-               chosen file/delete via (previewChange) and this component persists it on save -->
-          <es-mds-editor-widget-preview
-            [standalone]="true"
-            [deleteAsOption]="true"
-            [cropPreview]="false"
-            [standaloneNode]="$any(currentCollection)"
-            (previewChange)="onPreviewChange($event)"
-          >
-            <ng-template #previewPlaceholder>
-              <div class="card-collection-icon-container">
-                <div class="card-image-distance"></div>
-                <div
-                  class="card-image-icon-container"
-                  [style.background-color]="currentCollection.collection.color"
-                >
-                  <i esIcon="layers"></i>
-                </div>
-              </div>
-            </ng-template>
-          </es-mds-editor-widget-preview>
-        </div>
-        <div
-          class="collection-new-preview-infoarea"
-          [style.background-color]="currentCollection.collection.color + '33'"
-        >
-          <div class="dialog-basic-area dialog-input-area">
-            <mat-form-field>
-              <mat-label>{{ 'collectionNew_placeholderTitle' | translate }}</mat-label>
-              <!-- Autofocus and autocomplete don't work well together here, because the
-                  autocomplete list will open before the card animation finishes. -->
-              <input
-                matInput
-                class="title"
-                [(ngModel)]="currentCollection.title"
-                autofocus
-                autocomplete="off"
-                data-test="new-collection-name-input"
-              />
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
-              <textarea matInput [(ngModel)]="currentCollection.collection.description"></textarea>
-            </mat-form-field>
-          </div>
-          <div class="collection-new-owner">
-            @if (!authorFreetext) {
-            <i esIcon="person"></i>
-            <span>{{ user | authorityName }}</span>
-            @if (authorFreetextAllowed || authorFreetextFixedAllowed) {
-            <button
-              mat-icon-button
-              [attr.aria-label]="
-                'EDIT' | translate : { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }
-              "
-              (click)="switchToAuthorFreetext()"
-            >
-              <i esIcon="edit"></i>
-            </button>
-            } } @if (authorFreetext) {
-            <i esIcon="person"></i>
-            <mat-form-field class="mat-form-field-no-padding">
-              <mat-label id="collection-new-author-freetext-label">
-                {{ 'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
-              </mat-label>
-              <input
-                #authorFreetextInput
-                matInput
-                [disabled]="!authorFreetextAllowed"
-                [(ngModel)]="currentCollection.collection.authorFreetext"
-              />
-            </mat-form-field>
-            <button
-              mat-icon-button
-              [attr.aria-label]="'CANCEL' | translate"
-              aria-describedby="collection-new-author-freetext-label"
-              (click)="cancelAuthorFreetext()"
-            >
-              <i esIcon="close"></i>
-            </button>
-            }
-          </div>
-          <div class="dialog-basic-area dialog-color-group">
-            <div id="collection-new-color-picker-label" class="collection-new-preview-infoline">
-              {{ 'collectionNew_setColor' | translate }}
-            </div>
-            <ul
-              class="color-group"
-              aria-labelledby="collection-new-color-picker-label"
-              tabindex="0"
-              role="listbox"
-              aria-orientation="horizontal"
-              cdkMonitorElementFocus
-              (keydown.arrowright)="setColorByDirection($event)"
-              (keydown.arrowup)="setColorByDirection($event)"
-              (keydown.arrowleft)="setColorByDirection($event)"
-              (keydown.arrowdown)="setColorByDirection($event)"
-              [attr.aria-activedescendant]="
-                COLORS.indexOf(currentCollection.collection.color) !== -1
-                  ? 'collection-new-color-picker-option-' +
-                    COLORS.indexOf(currentCollection.collection.color)
-                  : null
-              "
-            >
-              @for (color of COLORS; track color; let index = $index) {
-              <li
-                id="collection-new-color-picker-option-{{ index }}"
-                role="option"
-                class="color-option"
-                [ngClass]="{ 'color-selected': currentCollection.collection.color === color }"
-                [attr.aria-selected]="currentCollection.collection.color === color"
-                [style.background-color]="color"
-                (click)="setColor(color)"
-              >
-                <span class="cdk-visually-hidden">
-                  {{ 'collectionNew_colorIndex' | translate : { index: index + 1 } }}
-                </span>
-              </li>
-              }
-            </ul>
-          </div>
-        </div>
-      </div>
+      <es-collection-design-form
+        [collection]="currentCollection"
+        [colors]="COLORS"
+        [user]="user"
+        [authorFreetextAllowed]="authorFreetextAllowed"
+        [authorFreetextFixedAllowed]="authorFreetextFixedAllowed"
+        [defaultAuthorName]="getDefaultAuthorName()"
+        (previewChange)="onPreviewChange($event)"
+      ></es-collection-design-form>
     </es-card>
     } @if (newCollectionStep === STEP_METADATA) {
     <es-card
@@ -306,46 +189,11 @@
       [buttons]="buttons"
       class="collection-metadata"
     >
-      <div class="editorial-group">
-        <div class="editorial-list">
-          @if (!shareToAll) {
-          <div class="noPermission">
-            <h4>{{ 'TOOLPERMISSION_ERROR_HEADER' | translate }}</h4>
-            <h5>{{ 'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate }}</h5>
-          </div>
-          }
-          <es-node-entries-wrapper
-            #organizations
-            [dataSource]="editorialGroups"
-            [displayType]="NodeEntriesDisplayType.Table"
-            [columns]="editorialColumns"
-            [sort]="{
-              active: null,
-              direction: 'asc',
-              columns: [],
-              allowed: false
-            }"
-            [elementInteractionType]="InteractionType.Emitter"
-            (clickItem)="organizations.getSelection().toggle($event.element)"
-          >
-            <ng-template #empty>
-              <div class="noGroups">{{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}</div>
-            </ng-template>
-          </es-node-entries-wrapper>
-        </div>
-        <div class="editorial-public">
-          <mat-slide-toggle [(ngModel)]="editorialPublic" color="primary">
-            <es-multi-line-label>
-              <ng-container slot="label">
-                {{ 'COLLECTIONS.EDITORIAL_PUBLIC' | translate }}
-              </ng-container>
-              <ng-container slot="description">
-                {{ 'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate }}
-              </ng-container>
-            </es-multi-line-label>
-          </mat-slide-toggle>
-        </div>
-      </div>
+      <es-collection-editorial-groups-form
+        [initialPermissions]="originalPermissions?.permissions ?? []"
+        [shareToAll]="shareToAll"
+        [(publicVisible)]="editorialPublic"
+      ></es-collection-editorial-groups-form>
     </es-card>
     } @if (newCollectionStep === STEP_PERMISSIONS) {
     <es-card

@@ -43,6 +43,10 @@ import { EdgeToggleComponent } from '../../shared/components/edge-toggle/edge-to
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { NodesSelectorConfig } from '../../pages/editorial-page/nodes-selector/nodes-selector.component';
+import {
+    CreateCollectionConfig,
+    EditCollectionConfig,
+} from './create-collection-sidebar/create-collection-sidebar.component';
 import { CardDialogRef } from '../dialogs/card-dialog/card-dialog-ref';
 import { DialogsService } from '../dialogs/dialogs.service';
 import {
@@ -78,6 +82,10 @@ export const EDITORIAL_SIDEBAR_OPTIONS = {
     MANAGE_CONTENT: { selectionMode: 'multi' },
     /** entry step to either create a new collection or copy an existing one to this location */
     ADD_COLLECTION: { selectionMode: 'none' },
+    /** form to create a new collection, reached from the "add collection" step or the create menu */
+    CREATE_COLLECTION: { selectionMode: 'none' },
+    /** the same form for a collection that exists; it is about that collection, not the selection */
+    EDIT_COLLECTION: { selectionMode: 'any' },
     /** general information about the collection that is shown as `parent` */
     COLLECTION_INFO: { selectionMode: 'any' },
     MANAGE_SUBMISSION: { selectionMode: 'single' },
@@ -103,7 +111,9 @@ export type OptionConfig =
     | NodesSelectorConfig
     | SubmissionConfig
     | AssignmentConfig
-    | PreviewConfig;
+    | PreviewConfig
+    | CreateCollectionConfig
+    | EditCollectionConfig;
 export type OptionState<T extends OptionConfig> = {
     option: EditorialSidebarOption;
     /**

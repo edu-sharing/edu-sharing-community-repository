@@ -104,6 +104,8 @@
     padding: 0 20px;
     height: 100%;
     &.option-VERSION_MANAGEMENT,
+    &.option-CREATE_COLLECTION,
+    &.option-EDIT_COLLECTION,
     &.option-PREVIEW,
     &.option-SORT_INTO,
     &.option-MANAGE_CONTENT,
@@ -136,6 +138,8 @@
         padding-bottom: 20px;
     }
     &.option-PREVIEW,
+    &.option-CREATE_COLLECTION,
+    &.option-EDIT_COLLECTION,
     &.option-MANAGE_SUBMISSION,
     &.option-VIEWS_AND_USAGE {
         display: flex;

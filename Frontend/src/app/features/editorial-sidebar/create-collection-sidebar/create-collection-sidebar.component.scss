@@ -1,0 +1,93 @@
+@use 'projects/edu-sharing-ui/assets/scss/variables-scss' as vars;
+
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+.section {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--borderLight);
+
+    &:first-child {
+        padding-top: 0;
+    }
+    &:last-of-type {
+        border-bottom: 0;
+    }
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.section-title {
+    margin: 0 0 8px;
+    font-size: vars.$fontSizeLarge;
+    font-weight: bold;
+}
+
+.types {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.type {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.type-info {
+    margin: 0 0 8px 40px;
+    color: var(--textLight);
+
+    p {
+        margin: 0 0 4px;
+    }
+}
+
+.no-metadata {
+    margin: 0;
+    color: var(--textLight);
+}
+
+.permissions {
+    display: flex;
+    flex-direction: column;
+
+    es-share-dialog,
+    es-collection-editorial-groups-form {
+        flex: 1;
+        min-height: 0;
+    }
+}
+
+.permissions-title {
+    padding-bottom: 8px;
+    font-size: 140%;
+    font-weight: bold;
+}
+
+.permissions-description {
+    padding-bottom: 20px;
+    color: var(--textLight);
+}
+
+// without a button on its left, the only button of the last step stays on the right
+.finish {
+    margin-left: auto;
+}

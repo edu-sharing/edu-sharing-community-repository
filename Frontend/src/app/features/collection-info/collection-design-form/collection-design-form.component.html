@@ -1,0 +1,137 @@
+<div class="collection-general">
+  <div class="collectionImage">
+    <!-- reuse the MDS preview widget so the image sources (upload / clipboard / search) stay in
+         sync with the node preview widget. Host-controlled: it hands back the chosen file or the
+         delete request via (previewChange) and the host persists it on save -->
+    <es-mds-editor-widget-preview
+      [standalone]="true"
+      [deleteAsOption]="deleteAsOption()"
+      [menuIcon]="menuIcon()"
+      [cropPreview]="false"
+      [standaloneNode]="$any(collection())"
+      (previewChange)="previewChange.emit($event)"
+    >
+      <ng-template #previewPlaceholder>
+        <div class="card-collection-icon-container">
+          <div class="card-image-distance"></div>
+          <div
+            class="card-image-icon-container"
+            [style.background-color]="collection().collection.color"
+          >
+            <i esIcon="layers"></i>
+          </div>
+        </div>
+      </ng-template>
+    </es-mds-editor-widget-preview>
+  </div>
+  <div
+    class="collection-new-preview-infoarea"
+    [style.background-color]="
+      'color-mix(in srgb, ' + collection().collection.color + ' 20%, transparent)'
+    "
+  >
+    <div class="dialog-basic-area dialog-input-area">
+      <mat-form-field>
+        <mat-label>{{ 'collectionNew_placeholderTitle' | translate }}</mat-label>
+        <!-- Autofocus and autocomplete don't work well together here, because the autocomplete
+             list will open before the card animation finishes. -->
+        <input
+          matInput
+          class="title"
+          [ngModel]="collection().title"
+          (ngModelChange)="setTitle($event)"
+          autofocus
+          autocomplete="off"
+          data-test="new-collection-name-input"
+        />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'collectionNew_placeholderDescription' | translate }}</mat-label>
+        <textarea
+          matInput
+          [ngModel]="collection().collection.description"
+          (ngModelChange)="setDescription($event)"
+        ></textarea>
+      </mat-form-field>
+    </div>
+    @if (showAuthor()) {
+    <div class="collection-new-owner">
+      @if (!authorFreetext) {
+      <i esIcon="person"></i>
+      <span>{{ user() | authorityName }}</span>
+      @if (authorFreetextAllowed() || authorFreetextFixedAllowed()) {
+      <button
+        mat-icon-button
+        [attr.aria-label]="
+          'EDIT' | translate : { thing: ('COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate) }
+        "
+        (click)="switchToAuthorFreetext()"
+      >
+        <i esIcon="edit"></i>
+      </button>
+      } } @else {
+      <i esIcon="person"></i>
+      <mat-form-field class="mat-form-field-no-padding">
+        <mat-label id="collection-design-form-author-freetext-label">
+          {{ 'COLLECTIONS.NEW.AUTHOR_FREETEXT' | translate }}
+        </mat-label>
+        <input
+          #authorFreetextInput
+          matInput
+          [disabled]="!authorFreetextAllowed()"
+          [ngModel]="collection().collection.authorFreetext"
+          (ngModelChange)="setAuthorFreetext($event)"
+        />
+      </mat-form-field>
+      <button
+        mat-icon-button
+        [attr.aria-label]="'CANCEL' | translate"
+        aria-describedby="collection-design-form-author-freetext-label"
+        (click)="cancelAuthorFreetext()"
+      >
+        <i esIcon="close"></i>
+      </button>
+      }
+    </div>
+    }
+    <div class="dialog-basic-area dialog-color-group">
+      <div id="collection-design-form-color-picker-label" class="collection-new-preview-infoline">
+        {{ 'collectionNew_setColor' | translate }}
+      </div>
+      <ul
+        class="color-group"
+        aria-labelledby="collection-design-form-color-picker-label"
+        tabindex="0"
+        role="listbox"
+        aria-orientation="horizontal"
+        cdkMonitorElementFocus
+        (keydown.arrowright)="setColorByDirection($event)"
+        (keydown.arrowup)="setColorByDirection($event)"
+        (keydown.arrowleft)="setColorByDirection($event)"
+        (keydown.arrowdown)="setColorByDirection($event)"
+        [attr.aria-activedescendant]="
+          colors().indexOf(collection().collection.color) !== -1
+            ? 'collection-design-form-color-picker-option-' +
+              colors().indexOf(collection().collection.color)
+            : null
+        "
+      >
+        @for (color of colors(); track color; let index = $index) {
+        <li
+          id="collection-design-form-color-picker-option-{{ index }}"
+          role="option"
+          class="color-option"
+          [class.color-selected]="collection().collection.color === color"
+          [attr.aria-selected]="collection().collection.color === color"
+          [style.background-color]="color"
+          (click)="setColor(color)"
+        >
+          <span class="cdk-visually-hidden">
+            {{ 'collectionNew_colorIndex' | translate : { index: index + 1 } }}
+          </span>
+        </li>
+        }
+      </ul>
+    </div>
+  </div>
+</div>

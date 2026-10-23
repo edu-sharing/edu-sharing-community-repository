@@ -1,7 +1,6 @@
 :host {
     display: block;
     padding-bottom: 16px;
-    border-bottom: 1px solid var(--borderLight);
 }
 
 es-collection-thumbnail {
@@ -9,8 +8,18 @@ es-collection-thumbnail {
     --collection-thumbnail-radius: 0;
 }
 
+// the collection colour as a light tint, like the header bar of the collection page
+.text {
+    padding: 12px 16px 14px;
+    background-color: color-mix(
+        in srgb,
+        var(--collection-color, var(--primary)) 14%,
+        var(--cardLightBackground)
+    );
+}
+
 .title {
-    margin: 20px 0 6px;
+    margin: 0 0 6px;
     font-size: 1.7em;
     font-weight: 600;
 }

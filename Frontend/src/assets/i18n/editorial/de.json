@@ -69,6 +69,32 @@
           "DESCRIPTION": "Eine bestehende Sammlung inklusive gewünschter Inhalte und Untersammlungen hierher kopieren.",
           "ACTION": "Kopieren"
         }
+      },
+      "CREATE_COLLECTION": {
+        "DESIGN_TITLE": "Sammlung gestalten",
+        "CONFIGURE_TITLE": "Sammlung konfigurieren",
+        "NEXT": "Weiter",
+        "CREATE": "Erstellen",
+        "CREATED": "Die Sammlung wurde erstellt.",
+        "TYPE": "Sammlungstyp",
+        "TYPE_EDITORIAL": "Redaktionelle Sammlung",
+        "TYPE_MEDIA_CENTER": "Medienzentrum",
+        "METADATA": "Metadaten",
+        "DEFAULT_VIEW": "Standarddarstellung",
+        "OPEN_AS_TOPIC_PAGE": "Als Themenseite öffnen",
+        "DEFAULT_SORT": "Standardsortierung",
+        "SORT_SUBCOLLECTIONS": "Untersammlungen sortieren nach",
+        "SORT_REFERENCES": "Materialien sortieren nach",
+        "SORT": {
+          "TITLE": "Titel",
+          "MODIFIED": "Zuletzt geändert",
+          "CREATED": "Erstellt"
+        },
+        "TYPE_DEFAULT": "Allgemeine Sammlung",
+        "NO_METADATA": "Keine Metadaten verfügbar",
+        "TYPE_INFO": "Informationen zu {{type}}",
+        "DONE": "Fertig",
+        "SAVED": "Die Sammlung wurde gespeichert."
       }
     },
     "OPTION": {

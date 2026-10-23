@@ -1,0 +1,44 @@
+<div class="editorial-group">
+  <div class="editorial-list">
+    @if (!shareToAll()) {
+    <div class="noPermission">
+      <h4>{{ 'TOOLPERMISSION_ERROR_HEADER' | translate }}</h4>
+      <h5>{{ 'TOOLPERMISSION.TOOLPERMISSION_INVITE_ALLAUTHORITIES' | translate }}</h5>
+    </div>
+    }
+    <es-node-entries-wrapper
+      #organizations
+      [dataSource]="groups"
+      [displayType]="NodeEntriesDisplayType.Table"
+      [columns]="columns"
+      [sort]="{
+        active: null,
+        direction: 'asc',
+        columns: [],
+        allowed: false
+      }"
+      [elementInteractionType]="InteractionType.Emitter"
+      (clickItem)="organizations.getSelection().toggle($event.element)"
+    >
+      <ng-template #empty>
+        <div class="noGroups">{{ 'COLLECTIONS.NO_EDITORIAL_GROUPS' | translate }}</div>
+      </ng-template>
+    </es-node-entries-wrapper>
+  </div>
+  <div class="editorial-public">
+    <mat-slide-toggle
+      [ngModel]="publicVisible()"
+      (ngModelChange)="publicVisible.set($event)"
+      color="primary"
+    >
+      <es-multi-line-label>
+        <ng-container slot="label">
+          {{ 'COLLECTIONS.EDITORIAL_PUBLIC' | translate }}
+        </ng-container>
+        <ng-container slot="description">
+          {{ 'COLLECTIONS.EDITORIAL_PUBLIC_INFO' | translate }}
+        </ng-container>
+      </es-multi-line-label>
+    </mat-slide-toggle>
+  </div>
+</div>

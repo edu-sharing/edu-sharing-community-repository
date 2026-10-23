@@ -66,6 +66,7 @@ import { ConfigOptionItem, NodeHelperService } from './node-helper.service';
 import { Toast } from './toast';
 import { UIHelper } from '../core-ui-module/ui-helper';
 import { GlobalOptionsService } from './global-options.service';
+import { CollectionNavigationService } from '../features/collection-info/collection-navigation.service';
 import { EditorialSidebarService } from '../features/editorial-sidebar/editorial-sidebar.service';
 import { OptionsContext } from './options/options-context';
 import { createPrimaryOptions } from './options/primary-options';
@@ -96,6 +97,7 @@ export class OptionsHelperService extends OptionsHelperServiceAbstract implement
     public localEvents = inject(LocalEventsService);
     private mainNavService = inject(MainNavService);
     public editorialSidebarService = inject(EditorialSidebarService);
+    public collectionNavigation = inject(CollectionNavigationService);
     private nodeList = inject(NodeListService);
     public nodeService = inject(NodeService);
     public nodeServiceLegacy = inject(RestNodeService);
