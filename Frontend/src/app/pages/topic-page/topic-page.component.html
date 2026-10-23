@@ -28,7 +28,7 @@
         uploaded in the sidebar is added to. -->
       <es-editorial-sidebar
         [primaryMode]="'activity'"
-        [parent]="templateComponent?.collectionNode"
+        [parent]="templateComponent?.collectionNode ?? null"
         [showEdgeToggle]="false"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
       ></es-editorial-sidebar>
