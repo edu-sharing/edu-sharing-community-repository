@@ -35,9 +35,9 @@
         }
     }
     &.warning {
-        background-color: color-mix(in srgb, var(--colorStatusWarning), var(--textWhite) 75%);
-        border: 1px solid color-mix(in srgb, var(--colorStatusWarning), var(--textBlack) 25%);
-        color: color-mix(in srgb, var(--colorStatusWarning), var(--textBlack) 55%);
+        background-color: var(--warningSurfaceBackgroundColor);
+        border: 1px solid var(--warningSurfaceBorderColor);
+        color: var(--warningSurfaceTextColor);
     }
     &.error {
         background-color: color-mix(in srgb, var(--colorStatusNegative), var(--textWhite) 83%);

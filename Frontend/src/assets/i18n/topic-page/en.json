@@ -387,6 +387,9 @@
       }
     },
     "NO_SWIMLANES": "No swimlanes with content have been created yet.",
+    "STATUS_BAR": {
+      "LABEL": "Page status"
+    },
     "HISTORY": {
       "UNDO": "Undo",
       "REDO": "Redo",
@@ -506,6 +509,7 @@
     },
     "GLOBAL_TEMPLATE_UNAVAILABLE": "The global template no longer exists.",
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
+      "TITLE": "Global template \"{{title}}\"",
       "VIEW": "You are viewing the global template \"{{title}}\".",
       "EDIT": "You are editing the global template \"{{title}}\". Topic pages created from it can take over the changes via \"Regenerate\".",
       "END": "Leave global template"
@@ -516,6 +520,7 @@
       "SUCCESS_MESSAGE": "The global template was deleted."
     },
     "VARIANT_PREVIEW": {
+      "TITLE": "Preview: \"{{title}}\"",
       "INFO": "Preview: \"{{title}}\" ({{position}} of {{total}})",
       "PREVIOUS": "Previous preview",
       "NEXT": "Next preview",
@@ -524,10 +529,12 @@
       "UNAVAILABLE": "\"{{title}}\" is no longer available."
     },
     "SWIMLANE_COMPLETION": {
-      "INFO": "Sections requiring action:",
-      "UNFINISHED": "{{count}} unfinished (hidden from readers)",
-      "PARTIAL": "{{count}} incomplete",
-      "JUMP": "Go to next section",
+      "UNFINISHED_ONE": "1 section unfinished",
+      "UNFINISHED": "{{count}} sections unfinished",
+      "PARTIAL_ONE": "1 section incomplete",
+      "PARTIAL": "{{count}} sections incomplete",
+      "CHIP_ONE": "section needs action",
+      "CHIP": "sections need action",
       "LABEL_UNFINISHED": "Unfinished – hidden from readers",
       "LABEL_PARTIAL": "Incomplete – empty columns stay blank for readers"
     }

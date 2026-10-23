@@ -231,6 +231,10 @@ import { SwimlaneBackgroundShapeComponent } from './swimlane-background-shape/sw
 import { SwimlaneSettingsDialogComponent } from './swimlane/swimlane-settings-dialog/swimlane-settings-dialog.component';
 import { SwimlaneConfigurationButtonsComponent } from './swimlane-configuration-buttons/swimlane-configuration-buttons.component';
 import { TopicPageFiltersSidebarComponent } from './topic-page-filters-sidebar/topic-page-filters-sidebar.component';
+import {
+    TopicPageStatusBarComponent,
+    TopicPageStatusBarMode,
+} from './topic-page-status-bar/topic-page-status-bar.component';
 
 // the app-wide shortcuts only skip text inputs; textareas and rich text keep their own undo too
 const isEditableTarget = (target: EventTarget | null): boolean =>
@@ -265,6 +269,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         TooltipAriaLabelDirective,
         TopicHeaderComponent,
         TopicPageFiltersSidebarComponent,
+        TopicPageStatusBarComponent,
         TranslateModule,
         VarDirective,
     ],
@@ -652,6 +657,21 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     // writes, as the shown node belongs to no page of this collection
     variantPreview: Signal<VariantPreview | null> = this.variantPreviewService.preview;
     variantPreviewNode: Signal<Node | null> = this.variantPreviewService.node;
+    // the one state the status bar above the breadcrumb stands for, by priority
+    statusBarMode: Signal<TopicPageStatusBarMode | null> = computed(
+        (): TopicPageStatusBarMode | null => {
+            if (this.variantPreview()) {
+                return 'preview';
+            }
+            if (this.globalTemplateNode()) {
+                return 'globalTemplate';
+            }
+            if (this.templateMode()) {
+                return 'template';
+            }
+            return this.editMode() ? 'edit' : null;
+        },
+    );
     // the collection's own page variant, also while a preview is shown in its place
     collectionPageVariantNode: Signal<Node | null> = computed(() => {
         const restoreState: VariantPreviewRestoreState | null =
@@ -2609,13 +2629,13 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * The translated label of a history step, with the names it refers to filled in.
      */
-    historyStepLabel(step: HistoryStep): string {
+    readonly historyStepLabel = (step: HistoryStep): string => {
         const params: { [param: string]: string } = {};
         Object.entries(step.labelParams ?? {}).forEach(([param, key]: [string, string]): void => {
             params[param] = this.translate.instant(key);
         });
         return this.translate.instant(step.labelKey, params);
-    }
+    };
 
     /**
      * Names a change of a swimlane grid the way the user made it: picking a widget for an empty
