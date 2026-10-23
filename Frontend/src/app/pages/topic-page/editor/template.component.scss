@@ -129,35 +129,11 @@ es-side-menu-wrapper {
 }
 
 // BREADCRUMB NAVIGATION
-// notices placed on top of the breadcrumb navigation
-.template-mode ::ng-deep {
-    .block {
-        border-radius: 0 !important;
-        border: none !important;
-    }
-    .message-container {
-        text-align: center;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-    }
-}
-
 .template-fixed-top {
     flex-shrink: 0;
     position: relative;
     // overflow contents such as the image of the navbar or the AI labels
     z-index: 12;
-}
-
-.variant-preview-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
 }
 
 .template-breadcrumb {

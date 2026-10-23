@@ -365,6 +365,9 @@
       }
     },
     "NO_SWIMLANES": "Non è ancora stata creata alcuna sezione con contenuti.",
+    "STATUS_BAR": {
+      "LABEL": "Stato della pagina"
+    },
     "HISTORY": {
       "UNDO": "Annulla",
       "REDO": "Ripeti",
@@ -467,10 +470,11 @@
       "END": "Esci dalla modalità modello"
     },
     "SWIMLANE_COMPLETION": {
-      "INFO": "Sezioni che richiedono un intervento:",
-      "UNFINISHED": "{{count}} non completate (nascoste ai lettori)",
-      "PARTIAL": "{{count}} incomplete",
-      "JUMP": "Vai alla sezione successiva",
+      "UNFINISHED_ONE": "1 sezione non completata",
+      "UNFINISHED": "{{count}} sezioni non completate",
+      "PARTIAL_ONE": "1 sezione incompleta",
+      "PARTIAL": "{{count}} sezioni incomplete",
+      "CHIP": "sezione/i che richiedono un intervento",
       "LABEL_UNFINISHED": "Non completata – nascosta ai lettori",
       "LABEL_PARTIAL": "Incompleta – le colonne vuote restano vuote per i lettori"
     }

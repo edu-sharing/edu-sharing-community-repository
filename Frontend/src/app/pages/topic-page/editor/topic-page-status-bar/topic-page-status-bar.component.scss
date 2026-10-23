@@ -1,0 +1,94 @@
+@use '../../topic-page-variables' as topicPageVars;
+
+.status-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    min-height: 64px;
+    padding: 8px 16px;
+    box-sizing: border-box;
+    background-color: var(--primaryBackground50);
+    color: var(--textMain);
+    border-left: 4px solid transparent;
+
+    // states shown in place of the collection's own page
+    &.status-bar-highlighted {
+        border-left-color: var(--primary);
+
+        .status-bar-title {
+            color: var(--primary);
+        }
+    }
+
+    button {
+        --mat-button-text-label-text-color: var(--textMain);
+
+        i {
+            margin-right: 6px;
+        }
+    }
+
+    button[mat-icon-button] i {
+        margin-right: 0;
+    }
+}
+
+.status-bar-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.status-bar-status {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+button.status-bar-completion {
+    --mat-button-text-label-text-color: color-mix(
+        in srgb,
+        var(--colorStatusWarning),
+        var(--textBlack) 55%
+    );
+    background-color: color-mix(in srgb, var(--colorStatusWarning), var(--textWhite) 75%);
+    border-radius: 16px;
+    // sets the chip apart from the undo and redo buttons
+    margin-right: 16px;
+
+    .status-bar-completion-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        line-height: 1;
+
+        i {
+            margin-right: 0;
+        }
+    }
+}
+
+.status-bar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+
+    &:empty {
+        display: none;
+    }
+}
+
+@media screen and (max-width: (topicPageVars.$mobileWidth + topicPageVars.$mobileStage * 1)) {
+    .topic-page-btn-label {
+        display: none;
+    }
+}

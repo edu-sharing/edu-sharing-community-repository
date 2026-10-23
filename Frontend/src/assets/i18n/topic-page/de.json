@@ -387,6 +387,9 @@
       }
     },
     "NO_SWIMLANES": "Bisher wurden noch keine Swimlanes mit Inhalten erstellt.",
+    "STATUS_BAR": {
+      "LABEL": "Seitenstatus"
+    },
     "HISTORY": {
       "UNDO": "Rückgängig",
       "REDO": "Wiederholen",
@@ -506,6 +509,7 @@
     },
     "GLOBAL_TEMPLATE_UNAVAILABLE": "Die globale Vorlage existiert nicht mehr.",
     "GLOBAL_TEMPLATE_MODE_ACTIVE": {
+      "TITLE": "Globale Vorlage „{{title}}“",
       "VIEW": "Du siehst die globale Vorlage „{{title}}“.",
       "EDIT": "Du bearbeitest die globale Vorlage „{{title}}“. Themenseiten, die aus ihr erstellt wurden, können die Änderungen per „Neu generieren“ übernehmen.",
       "END": "Globale Vorlage verlassen"
@@ -524,10 +528,11 @@
       "UNAVAILABLE": "„{{title}}“ ist nicht mehr verfügbar."
     },
     "SWIMLANE_COMPLETION": {
-      "INFO": "Abschnitte mit Handlungsbedarf:",
-      "UNFINISHED": "{{count}} nicht fertiggestellt (für Leser ausgeblendet)",
-      "PARTIAL": "{{count}} unvollständig",
-      "JUMP": "Zum nächsten Abschnitt",
+      "UNFINISHED_ONE": "1 Abschnitt nicht fertiggestellt",
+      "UNFINISHED": "{{count}} Abschnitte nicht fertiggestellt",
+      "PARTIAL_ONE": "1 Abschnitt unvollständig",
+      "PARTIAL": "{{count}} Abschnitte unvollständig",
+      "CHIP": "Abschnitte mit Handlungsbedarf",
       "LABEL_UNFINISHED": "Nicht fertiggestellt – für Leser ausgeblendet",
       "LABEL_PARTIAL": "Unvollständig – leere Spalten bleiben für Leser frei"
     }
