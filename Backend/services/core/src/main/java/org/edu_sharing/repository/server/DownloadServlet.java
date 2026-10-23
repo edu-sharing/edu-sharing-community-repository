@@ -1,7 +1,6 @@
 package org.edu_sharing.repository.server;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,11 +10,9 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.util.TempFileProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.edu_sharing.alfrescocontext.gate.AlfAppContextGate;
 import org.edu_sharing.metadataset.v2.tools.MetadataHelper;
 import org.edu_sharing.metadataset.v2.tools.MetadataTemplateRenderer;
 import org.edu_sharing.repository.client.rpc.Share;
@@ -23,6 +20,7 @@ import org.edu_sharing.repository.client.tools.CCConstants;
 import org.edu_sharing.repository.server.authentication.ContextManagementFilter;
 import org.edu_sharing.repository.server.tools.*;
 import org.edu_sharing.repository.server.tracking.TrackingTool;
+import org.edu_sharing.repository.tools.URLHelper;
 import org.edu_sharing.restservices.NodeDao;
 import org.edu_sharing.restservices.RepositoryDao;
 import org.edu_sharing.service.InsufficientPermissionException;
@@ -30,20 +28,20 @@ import org.edu_sharing.service.nodeservice.NodeService;
 import org.edu_sharing.service.nodeservice.NodeServiceFactory;
 import org.edu_sharing.service.nodeservice.NodeServiceHelper;
 import org.edu_sharing.service.permission.PermissionChecking;
-import org.edu_sharing.service.permission.PermissionService;
 import org.edu_sharing.service.permission.PermissionServiceFactory;
 import org.edu_sharing.service.share.ShareService;
 import org.edu_sharing.service.share.ShareServiceImpl;
 import org.edu_sharing.service.tracking.TrackingService;
 import org.edu_sharing.service.tracking.TrackingServiceFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.edu_sharing.repository.tools.URLHelper;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -91,7 +89,21 @@ public class DownloadServlet extends HttpServlet {
 			NodeService nodeService = repositoryId == null ? NodeServiceFactory.getLocalService() : NodeServiceFactory.getNodeService(repositoryId);
 			logger.debug("Access tool: " + ContextManagementFilter.accessTool.get());
 			NodeRef nodeRef = new NodeRef(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, nodeId);
-			String name = fileName!=null ? fileName : nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
+
+			String version=req.getParameter("version");
+			if(version!=null && version.isEmpty()) {
+				version=null;
+			}
+
+			String name = null;
+			 if(fileName!=null){
+				 name = fileName;
+			 }else{
+				 if(version != null) {
+					 name = (String)nodeService.getVersionProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME,version);
+				 }
+				 if(name == null) name = nodeService.getProperty(nodeRef.getStoreRef().getProtocol(), nodeRef.getStoreRef().getIdentifier(), nodeRef.getId(), CCConstants.CM_NAME);
+			 }
 			// metadata export only requires read permission (enforced via NodeDao), not download permission
 			if("true".equalsIgnoreCase(req.getParameter("metadata"))){
 				String metadata = getMetadataRenderer(nodeRef).render("io_text");
@@ -116,10 +128,7 @@ public class DownloadServlet extends HttpServlet {
 				logger.info("Download forbidden for node " + nodeId);
 				throw new ErrorFilter.ErrorFilterException(HttpServletResponse.SC_FORBIDDEN);
 			}
-			String version=req.getParameter("version");
-			if(version!=null && version.isEmpty()) {
-				version=null;
-			}
+
 			String originalNodeId;
 			if(repositoryId == null) {
 				// do only track downloads if it was not accessed by the connector service

@@ -146,6 +146,11 @@ public class NodeServiceAdapter implements NodeService {
 	}
 
 	@Override
+	public Serializable getVersionProperty(String protocol, String storeId, String nodeId, String property, String version) {
+		return null;
+	}
+
+	@Override
 	public void moveNode(String newParentId, String childAssocType, String nodeId) {
 	}
 	
