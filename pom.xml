@@ -47,7 +47,7 @@
     <npm.args.build>run build</npm.args.build>
 
     <postgresql.jdbc.version>42.7.13</postgresql.jdbc.version>
-    <tomcat.version>11.0.24</tomcat.version>
+    <tomcat.version>11.0.27</tomcat.version>
     <jackson.version>2.17.2</jackson.version>
     <mongodb.version>5.5.1</mongodb.version>
     <spring.version>7.0.2</spring.version>

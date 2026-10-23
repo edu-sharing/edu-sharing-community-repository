@@ -95,6 +95,8 @@
         "UPDATE_PREVIEW": "Aggiorna anteprima",
         "PREVIEW_TITLE": "Anteprima dell'iFrame",
         "SAVE_CONFIG": "Salva configurazione",
+        "UNSAVED_CHANGES": "Modifiche non salvate – compaiono sulla pagina solo dopo il salvataggio.",
+        "PREVIEW_OUTDATED": "L’anteprima non mostra lo stato attuale dei vostri inserimenti.",
         "SHOW_EXTERNAL_CONTENT": {
           "HEADING": "Sì, mostra il contenuto esterno",
           "MESSAGE": "State per caricare e visualizzare contenuti esterni. Ciò potrebbe comportare la trasmissione di dati personali a servizi esterni e il loro trattamento da parte di questi ultimi.",
@@ -123,7 +125,8 @@
       },
       "PROFILING": {
         "CHANGES_SAVED": "Profilo salvato – ora vi verranno mostrati contenuti pertinenti!",
-        "CHANGES_RESET": "La vostra profilazione è stata reimpostata."
+        "CHANGES_RESET": "La vostra profilazione è stata reimpostata.",
+        "PINNED_VARIANT_HINT": "Sostituisce la variante di pagina selezionata direttamente con quella adatta al vostro profilo."
       },
       "SEARCH_WIDGET": {
         "SEARCH": "Ricerca",
@@ -359,8 +362,7 @@
       "DELETE": {
         "LABEL": "Elimina sezione",
         "MESSAGE": "Volete davvero eliminare questa sezione?"
-      },
-      "INVALID_OR_UNKNOWN_WIDGET": "Il widget non è definito o è sconosciuto."
+      }
     },
     "NO_SWIMLANES": "Non è ancora stata creata alcuna sezione con contenuti.",
     "HISTORY": {
@@ -463,6 +465,14 @@
       "VIEW": "Modalità di visualizzazione del modello",
       "EDIT": "Modalità di modifica del modello",
       "END": "Esci dalla modalità modello"
+    },
+    "SWIMLANE_COMPLETION": {
+      "INFO": "Sezioni che richiedono un intervento:",
+      "UNFINISHED": "{{count}} non completate (nascoste ai lettori)",
+      "PARTIAL": "{{count}} incomplete",
+      "JUMP": "Vai alla sezione successiva",
+      "LABEL_UNFINISHED": "Non completata – nascosta ai lettori",
+      "LABEL_PARTIAL": "Incompleta – le colonne vuote restano vuote per i lettori"
     }
   }
 }

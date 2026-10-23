@@ -18,7 +18,13 @@
     <a href="javascript:void(0);" (click)="resetSelectValues()">
       {{ 'RESET' | translate }}
     </a>
-    <button mat-flat-button color="primary" (click)="applySelectValues()">
+    <button
+      mat-flat-button
+      color="primary"
+      [matTooltip]="'TOPIC_PAGE.WIDGET.PROFILING.PINNED_VARIANT_HINT' | translate"
+      [matTooltipDisabled]="!variantPinned()"
+      (click)="applySelectValues()"
+    >
       {{ 'APPLY' | translate }}
     </button>
   </div>

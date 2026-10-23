@@ -427,13 +427,6 @@ export class TopicPageHelperService {
     }
 
     /**
-     * Retrieves the sub-collections of a collection with a given ID.
-     */
-    async getSubCollections(collectionId: string): Promise<Node[]> {
-        return firstValueFrom(this.collectionApi.getSubCollections(collectionId));
-    }
-
-    /**
      * Retrieves the sub-collections with counts of a collection with a given ID. Ordering and the
      * upper bound are left to the repository, which knows the property types.
      */

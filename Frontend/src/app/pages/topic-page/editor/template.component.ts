@@ -71,6 +71,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { environment } from '../../../../environments/environment';
 import { RestConstants } from '../../../core-module/rest/rest-constants';
 import { RestConnectorService } from '../../../core-module/rest/services/rest-connector.service';
+import { UIService } from '../../../core-module/rest/services/ui.service';
 import { Closable } from '../../../features/dialogs/card-dialog/card-dialog-config';
 import { CardDialogRef } from '../../../features/dialogs/card-dialog/card-dialog-ref';
 import {
@@ -100,6 +101,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { VarDirective } from '../shared/directives/ng-var.directive';
 import { TooltipAriaLabelDirective } from '../shared/directives/tooltip-aria-label.directive';
 import { FilterSwimlaneTypePipe } from '../shared/pipes/filter-swimlane-type.pipe';
+import { FilterUnfinishedSwimlanesPipe } from '../shared/pipes/filter-unfinished-swimlanes.pipe';
 import { AiTextPromptPipe } from '../shared/pipes/ai-text-prompt.pipe';
 import { SwimlaneSearchCountPipe } from '../shared/pipes/swimlane-search-count.pipe';
 import { FilterVisibleSwimlanePipe } from '../shared/pipes/filter-swimlane-hits.pipe';
@@ -181,9 +183,15 @@ import { checkUserAccess } from '../shared/utils/node-util';
 import {
     computeSwimlaneHitMatching,
     parseSearchFilters,
+    sameSearchFilters,
     searchStateToQueryParams,
     SwimlaneHitMatching,
 } from '../shared/utils/search-hit-util';
+import {
+    retrieveSwimlaneCompletion,
+    SwimlaneCompletion,
+} from '../shared/utils/swimlane-completion-util';
+import { canRenderWidgetType } from '../shared/utils/widget-type-util';
 import {
     convertNodeRefIntoNodeId,
     keepOwnHeaderBreadcrumbAndColors,
@@ -240,6 +248,7 @@ const isEditableTarget = (target: EventTarget | null): boolean =>
         ConfigurePageVariantOrTemplateComponent,
         EditableTextComponent,
         FilterSwimlaneTypePipe,
+        FilterUnfinishedSwimlanesPipe,
         FilterVisibleSwimlanePipe,
         GenericWidgetComponent,
         EditorialSidebarModule,
@@ -313,6 +322,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     private nodeHelperService = inject(NodeHelperService);
     private themeService = inject(ThemeService);
     private toast = inject(Toast);
+    private uiService = inject(UIService);
 
     readonly ACCORDION_TYPE: string = SWIMLANE_TYPE_OPTIONS.find(
         (o) => o.viewValue === 'ACCORDION_ELEMENT',
@@ -684,6 +694,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     swimlaneToEditForm: UntypedFormGroup;
     // the swimlanes as persisted; `swimlanes` may hold a preview of them resolved for rendering
     private persistedSwimlanes: Swimlane[] = [];
+    // the unfinished or partial swimlane the editor jumped to last, to continue with the next one
+    private lastIncompleteSwimlaneJumpedTo: string | null = null;
     swimlaneIdToPromptTextMapping: Map<string, PromptToTextMapping> = new Map<
         string,
         PromptToTextMapping
@@ -691,6 +703,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     topicWidgets: NodeEntries;
 
     latestParams: Params;
+    /** Whether the URL selects a variant explicitly, which overrides the profile's best match. */
+    variantPinned: WritableSignal<boolean> = signal(false);
     selectDimensions: Map<string, MdsWidget> = new Map<string, MdsWidget>();
 
     backToCollectionButtonVisible: WritableSignal<boolean> = signal(false);
@@ -785,6 +799,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             .pipe(filter((params: Params) => params.collectionId))
             .subscribe(async (params: Params): Promise<void> => {
                 this.latestParams = params;
+                this.variantPinned.set(!!params.variantId);
                 // due to reload with queryParams, this might be called twice, thus, initializedWithParams is important
                 if (params.collectionId && !this.initializedWithParams) {
                     // set the topicCollectionID
@@ -891,6 +906,8 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             currentScope: Scope.TopicPage,
             title: 'TOPIC_PAGE.NAVIGATION.TITLE',
             create: this.getCreateConfig(),
+            // new material is stored in the inbox, as the create menu does for a collection parent
+            onCreate: (nodes: Node[]): void => this.addCreatedNodesToCollection(nodes),
         });
         void this.addCustomMainNavOptions();
         // register the edit mode toggle button next to the create button
@@ -920,6 +937,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                 filter((i) => !!i),
             )
             .subscribe((instance) => {
+                // the search input taken from the URL predates the search field
+                if (this.searchInput()) {
+                    instance.setSearchString(this.searchInput());
+                }
                 instance
                     .onFiltersButtonClicked()
                     .subscribe(() => this.filterPanelOpen.set(!this.filterPanelOpen()));
@@ -955,7 +976,18 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
                     ApiRestConstants.ACCESS_ADD_CHILDREN,
                 ),
             allowBinary: true,
+            parent: this.collectionNode ?? null,
         };
+    }
+
+    /**
+     * Adds the material created via the main nav to the topic's collection.
+     */
+    private addCreatedNodesToCollection(nodes: Node[]): void {
+        if (!this.collectionNode || !nodes?.length) {
+            return;
+        }
+        this.uiService.addToCollection(this.collectionNode, nodes);
     }
 
     /**
@@ -1194,9 +1226,26 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * search state changes.
      */
     private persistSearchStateInParams(): void {
+        const queryParams: Params = searchStateToQueryParams(
+            this.searchInput(),
+            this.searchFilters(),
+        );
+        // an unchanged search state, e.g. reported on page load, must not drop the URL fragment;
+        // the filter panel may report the URL's filters in another order
+        const currentParams: Params = this.route.snapshot.queryParams;
+        const searchInputUnchanged: boolean =
+            (currentParams[SEARCH_INPUT_QUERY_PARAM] ?? null) ===
+            queryParams[SEARCH_INPUT_QUERY_PARAM];
+        const filtersUnchanged: boolean = sameSearchFilters(
+            parseSearchFilters(currentParams[SEARCH_FILTERS_QUERY_PARAM]),
+            this.searchFilters(),
+        );
+        if (searchInputUnchanged && filtersUnchanged) {
+            return;
+        }
         void this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: searchStateToQueryParams(this.searchInput(), this.searchFilters()),
+            queryParams,
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -1807,6 +1856,24 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     }
 
     /**
+     * Drops an explicitly selected variant, so the variant selection follows the profile again.
+     * Runs synchronously before the profile values are set, which reloads the page variant.
+     */
+    releasePinnedVariant(): void {
+        if (!this.latestParams?.variantId) {
+            return;
+        }
+        this.latestParams = { ...this.latestParams, variantId: undefined };
+        this.variantPinned.set(false);
+        void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { variantId: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+        });
+    }
+
+    /**
      * Navigates to a given variantId and reloads the page structure accordingly.
      */
     async navigateToVariant(variantId: string): Promise<void> {
@@ -1976,7 +2043,7 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
     /**
      * Writes a mail with a link to a given swimlane.
      */
-    writeMail(swimlaneIndex: number): void {
+    async writeMail(swimlaneIndex: number): Promise<void> {
         const swimlane: Swimlane = this.swimlanes[swimlaneIndex];
         if (!swimlane) {
             console.warn(
@@ -1984,9 +2051,10 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
             );
             return;
         }
-        this.topicPageShareService.writeMail(
+        await this.topicPageShareService.writeMail(
             this.SWIMLANE_ID_PREFIX + swimlane.id,
             swimlane.heading,
+            this.pageVariantNodeId(),
         );
     }
 
@@ -2261,6 +2329,58 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
         );
     }
 
+    // SWIMLANE COMPLETION
+    /**
+     * Whether this page can render the given widget type, by the rule es-swimlane renders with.
+     */
+    readonly isRenderableWidgetType = (widgetType: string): boolean =>
+        canRenderWidgetType(widgetType, {
+            aiSupported: this.aiSupported(),
+            rendering2Supported: this.rendering2Supported(),
+            hasCustomWidget: (type: string) =>
+                this.genericWidgetGlobalService.hasCustomWidget(type),
+        });
+
+    /**
+     * Rates how far the grid of the given swimlane is filled with renderable widgets.
+     */
+    swimlaneCompletion(swimlane: Swimlane): SwimlaneCompletion {
+        return retrieveSwimlaneCompletion(swimlane, this.isRenderableWidgetType);
+    }
+
+    /**
+     * Counts the swimlanes still to be finished, or returns null when all are complete.
+     */
+    swimlaneCompletionCounts(): { unfinished: number; partial: number } | null {
+        const completions: SwimlaneCompletion[] = this.swimlanes.map((swimlane: Swimlane) =>
+            this.swimlaneCompletion(swimlane),
+        );
+        const unfinished: number = completions.filter((c) => c === 'unfinished').length;
+        const partial: number = completions.filter((c) => c === 'partial').length;
+        return unfinished + partial > 0 ? { unfinished, partial } : null;
+    }
+
+    /**
+     * Scrolls to the next swimlane still to be finished after the one jumped to last, starting
+     * over at the first one.
+     */
+    scrollToNextIncompleteSwimlane(): void {
+        const incompleteSwimlanes: Swimlane[] = this.swimlanes.filter(
+            (swimlane: Swimlane) => swimlane.id && this.swimlaneCompletion(swimlane) !== 'complete',
+        );
+        if (!incompleteSwimlanes.length) {
+            return;
+        }
+        const lastIndex: number = incompleteSwimlanes.findIndex(
+            (swimlane: Swimlane) => swimlane.id === this.lastIncompleteSwimlaneJumpedTo,
+        );
+        const target: Swimlane = incompleteSwimlanes[(lastIndex + 1) % incompleteSwimlanes.length];
+        this.lastIncompleteSwimlaneJumpedTo = target.id;
+        this.topicPageShareService.scrollToElement(
+            document.getElementById(this.SWIMLANE_ID_PREFIX + target.id),
+        );
+    }
+
     // REACT TO FURTHER OUTPUT EVENTS
     /**
      * Called by es-swimlane gridUpdated output event.
@@ -2304,10 +2424,12 @@ export class TemplateComponent implements AfterViewInit, OnChanges, OnDestroy, O
      * Called by es-editable-text searchResultsUpdated output event.
      */
     updateTitleSearchResults(event: number, swimlaneId: string): void {
-        // update the title matching
-        this.swimlaneTitleIdToHitMatching.set(swimlaneId, event > 0);
-        // update the hit matching
-        this.updateSwimlaneIdToHitMatching();
+        // the title reports its hits while this page is being checked, and the matching feeds
+        // bindings checked before it, so the update follows the current check
+        queueMicrotask((): void => {
+            this.swimlaneTitleIdToHitMatching.set(swimlaneId, event > 0);
+            this.updateSwimlaneIdToHitMatching();
+        });
     }
 
     /**

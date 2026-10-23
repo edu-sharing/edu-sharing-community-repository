@@ -145,6 +145,22 @@
       </button>
       }
     </div>
+    } @if (editMode() && userHasEditRights() && swimlaneCompletionCounts(); as counts) {
+    <es-info-message mode="warning" class="template-mode swimlane-completion">
+      <span>
+        {{ i18nPrefix + 'SWIMLANE_COMPLETION.INFO' | translate }}
+        @if (counts.unfinished) {
+        {{
+          i18nPrefix + 'SWIMLANE_COMPLETION.UNFINISHED' | translate : { count: counts.unfinished }
+        }}
+        } @if (counts.unfinished && counts.partial) { / } @if (counts.partial) {
+        {{ i18nPrefix + 'SWIMLANE_COMPLETION.PARTIAL' | translate : { count: counts.partial } }}
+        }
+      </span>
+      <button mat-button color="primary" (click)="scrollToNextIncompleteSwimlane()">
+        {{ i18nPrefix + 'SWIMLANE_COMPLETION.JUMP' | translate }}
+      </button>
+    </es-info-message>
     }
     <!-- a global template or a previewed node is no variant of the collection's page, so the
       variant selection is hidden -->
@@ -184,7 +200,11 @@
         class="template-header"
         [class.sidebar-hidden]="sidebarMobileHidden() || !showSidebar()"
         [class.extra-padding-bottom]="
-          (swimlanes | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger)?.length > 0
+          (
+            swimlanes
+            | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger
+            | filterUnfinishedSwimlanes : editMode() : isRenderableWidgetType : anchorTrigger
+          )?.length > 0
         "
       >
         <!-- a global template carries no topic header and no custom colors -->
@@ -280,6 +300,8 @@
               {{ i18nPrefix + 'SIDE_MENU.PROFILING.HEADING' | translate }}
             </h2>
             <es-profiling
+              [variantPinned]="variantPinned()"
+              (profileApplied)="releasePinnedVariant()"
               (selectDimensionsChanged)="selectDimensionsChanged($event)"
             ></es-profiling>
           </div>
@@ -380,6 +402,7 @@
           *ngVar="
             (swimlanes
               | filterSwimlaneType : ANCHOR_TYPE : anchorTrigger
+              | filterUnfinishedSwimlanes : editMode() : isRenderableWidgetType : anchorTrigger
               | filterVisibleSwimlanes : searchInputOrFiltersDefined() : swimlaneIdToHitMatching) ??
             [] as anchorSwimlanes
           "
@@ -451,16 +474,16 @@
           }
           <!-- note: do not show empty swimlanes to users -->
           @for (swimlane of swimlanes; track swimlane.id; let i = $index) {
-          <!-- border with button to add a swimlane -->
-          @if (swimlane.grid?.length > 0 && userHasEditRights() && editMode()) {
+          <!-- border with button to add a swimlane, also next to one whose grid is still undefined -->
+          @if (userHasEditRights() && editMode()) {
           <es-add-swimlane-border-button
             [requestInProgress]="requestInProgress()"
             (addSwimlaneTriggered)="addSwimlane($event, i)"
           ></es-add-swimlane-border-button>
           }
           <!-- swimlane content -->
-          <!-- note: do not show empty swimlanes or swimlanes without search hit -->
-          @if (editMode() || swimlane.grid?.length > 0) {
+          <!-- note: do not show unfinished swimlanes, i.e. without any renderable widget, to readers -->
+          @if (editMode() || swimlaneCompletion(swimlane) !== 'unfinished') {
           <div
             [attr.id]="swimlane.id ? SWIMLANE_ID_PREFIX + swimlane.id : null"
             class="topic-page-swimlane-wrapper"
@@ -500,7 +523,18 @@
               "
             >
               <!-- edit privileges -->
-              @if (userHasEditRights() && editMode()) {
+              @if (userHasEditRights() && editMode()) { @if (swimlaneCompletion(swimlane); as
+              completion) { @if (completion !== 'complete') {
+              <div class="swimlane-completion-label">
+                <i esIcon="warning" [aria]="false"></i>
+                {{
+                  i18nPrefix +
+                    (completion === 'unfinished'
+                      ? 'SWIMLANE_COMPLETION.LABEL_UNFINISHED'
+                      : 'SWIMLANE_COMPLETION.LABEL_PARTIAL') | translate
+                }}
+              </div>
+              } }
               <!-- action buttons for moving -->
               <div class="topic-page-move-buttons">
                 <button
@@ -622,8 +656,7 @@
           </div>
           }
           <!-- border with button to add a swimlane (special case for last element) -->
-          @if ( swimlane.grid?.length > 0 && userHasEditRights() && editMode() && i ===
-          swimlanes.length - 1 ) {
+          @if (userHasEditRights() && editMode() && i === swimlanes.length - 1) {
           <es-add-swimlane-border-button
             [requestInProgress]="requestInProgress()"
             (addSwimlaneTriggered)="addSwimlane($event, i + 1)"
@@ -724,7 +757,8 @@
   } @else {
   <!-- failed to load page config -> currently, no further action possible -->
   <div class="missing-page-config template-scroll" #scrollContainerRef>
-    <h1 class="mat-heading-1 topic-header-title">
+    <!-- the explicit title leaves out the button's icon text -->
+    <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic() || null">
       <span [innerHTML]="topic()"></span>
       @if (backToCollectionButtonVisible()) {
       <button
@@ -747,9 +781,11 @@
           : (i18nPrefix + 'NO_PAGE_CONFIG.VIEW_MESSAGE' | translate)
       }}
     </es-info-message>
+    @if (userHasEditRights()) {
     <button mat-flat-button color="primary" (click)="createPageVariant()">
       {{ createPageVariantTitle | translate }}
     </button>
+    }
   </div>
   }
 </main>

@@ -117,9 +117,10 @@ export class TopicPageShareService {
     }
 
     /**
-     * Opens the mail client with a message linking to a fragment of the page.
+     * Opens the mail client with a message linking to a fragment of the given page variant.
      */
-    writeMail(fragment: string, title: string): void {
+    async writeMail(fragment: string, title: string, variantId: string): Promise<void> {
+        await this.setVariantIdInUrl(variantId);
         const subjectText = this.translate.instant(MAIL_I18N_PREFIX + 'SUBJECT_SHARED_CONTENT', {
             title: title || this.translate.instant(MAIL_I18N_PREFIX + 'NO_TITLE'),
         });
@@ -163,7 +164,13 @@ export class TopicPageShareService {
         if (!this.latestUrlFragment) {
             return false;
         }
-        const element: HTMLElement = document.getElementById(this.latestUrlFragment);
+        return this.scrollToElement(document.getElementById(this.latestUrlFragment));
+    }
+
+    /**
+     * Scrolls the given element of the page into view and focuses it.
+     */
+    scrollToElement(element: HTMLElement | null): boolean {
         const scrollContainer: HTMLElement = this.scrollContainer();
         if (!element || !scrollContainer) {
             return false;

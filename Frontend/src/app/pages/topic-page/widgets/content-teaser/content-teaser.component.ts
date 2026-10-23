@@ -16,6 +16,7 @@ import {
     WritableSignal,
     inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -27,10 +28,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MdsQueryCriteria, Node } from 'ngx-edu-sharing-api';
 import {
     EduSharingUiCommonModule,
+    LocalEventsService,
     OptionsHelperService as OptionsHelperServiceAbstract,
     SearchHelperService,
     Values,
 } from 'ngx-edu-sharing-ui';
+import { delay, filter } from 'rxjs/operators';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { COLLECTION_TREE_ROOT_QUERY_PARAM } from '../../../../features/mds/mds-editor/widgets/mds-editor-widget-tree/collection-tree/collection-tree-config';
 import { SearchFilter } from '../../../search-page/search-page-results.component';
@@ -74,10 +77,14 @@ import { GenericNodeEntriesComponent } from './generic-node-entries/generic-node
 })
 export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetComponentInterface {
     private genericWidgetGlobalService = inject(GenericWidgetGlobalService);
+    private localEventsService = inject(LocalEventsService);
     private scrollHelperService = inject(ScrollHelperService);
     private searchHelperService = inject(SearchHelperService);
     private topicPageHelperService = inject(TopicPageHelperService);
     private translate = inject(TranslateService);
+
+    // the time the search index usually needs to pick up material added to the collection
+    private readonly RESEARCH_AFTER_ADDING_DELAY_MS: number = 10000;
 
     // INPUTS + OUTPUTS
     @Input() contextNodeId!: string;
@@ -242,6 +249,15 @@ export class ContentTeaserComponent implements AfterViewInit, OnDestroy, WidgetC
             this.searchFilters();
             this.lastSearchUpdate.set(new Date());
         });
+        // material added to the topic's collection only becomes searchable once the search index
+        // caught up, so the teaser searches again once after a short delay
+        this.localEventsService.nodesChanged
+            .pipe(
+                filter((nodes: Node[]) => nodes?.some((n) => n?.ref?.id === this.contextNodeId)),
+                delay(this.RESEARCH_AFTER_ADDING_DELAY_MS),
+                takeUntilDestroyed(),
+            )
+            .subscribe(() => this.lastSearchUpdate.set(new Date()));
     }
 
     /**

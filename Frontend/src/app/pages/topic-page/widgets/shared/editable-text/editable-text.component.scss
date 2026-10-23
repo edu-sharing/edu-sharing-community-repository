@@ -28,7 +28,7 @@
 
     &.prominent-text {
         margin-bottom: 8px;
-        padding: 0 16px;
+        padding: 4px 16px;
         border-left: 4px solid topicPageVars.$primary;
         height: unset;
         font-size: 106%;
@@ -37,6 +37,11 @@
         // use ng-deep due to innerHTML
         &::ng-deep p {
             margin-bottom: 0 !important;
+
+            // keeps the text flush with the top of the border, as it is at the bottom
+            &:first-child {
+                margin-top: 0;
+            }
         }
     }
 

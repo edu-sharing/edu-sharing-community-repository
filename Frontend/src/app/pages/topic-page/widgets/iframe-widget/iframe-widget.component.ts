@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     CUSTOM_ELEMENTS_SCHEMA,
     effect,
     EventEmitter,
@@ -7,10 +8,12 @@ import {
     Input,
     InputSignal,
     Output,
+    Signal,
     signal,
     ViewEncapsulation,
     WritableSignal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Node } from 'ngx-edu-sharing-api';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -57,10 +60,29 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
         confirmation: new FormControl<boolean>(true),
     });
     iframeConfig: IframeWidgetConfig | null = null;
+    // the saved config; the form starts from it, or from its own defaults for a new widget
+    private readonly savedConfig: WritableSignal<IframeWidgetConfig> = signal(
+        this.iframeForm.getRawValue(),
+    );
+    private readonly formValue: Signal<Partial<IframeWidgetConfig>> = toSignal(
+        this.iframeForm.valueChanges,
+        { initialValue: this.iframeForm.value },
+    );
+    /** Whether the form holds changes that are not live yet, as only saving publishes them. */
+    readonly hasUnsavedChanges: Signal<boolean> = computed(() =>
+        this.differsFromForm(this.savedConfig()),
+    );
     initialized: WritableSignal<boolean> = signal(false);
-    previewConfig: IframeWidgetConfig | null = null;
+    // the config the preview shows; it only follows the form on request, never while typing
+    previewConfig: WritableSignal<IframeWidgetConfig | null> = signal(null);
+    /** Whether a shown preview lags behind the form. */
+    readonly previewOutdated: Signal<boolean> = computed(
+        () => !!this.previewConfig() && this.differsFromForm(this.previewConfig()),
+    );
     statusConfirmed: WritableSignal<boolean> = signal(false);
     updateInProgress: WritableSignal<boolean> = signal(false);
+    // set between saving and generic-widget handing back the saved config
+    private savePending: boolean = false;
 
     constructor() {
         effect(() => {
@@ -74,6 +96,7 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
      * Saves the config by emitting a config changed event.
      */
     saveConfig(): void {
+        this.savePending = true;
         this.configChanged.emit();
     }
 
@@ -81,8 +104,30 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
      * Shows a preview of the current form state.
      */
     showPreview(): void {
-        this.previewConfig = this.iframeForm.value;
+        this.previewConfig.set(this.iframeForm.getRawValue());
         this.statusConfirmed.set(false);
+    }
+
+    /**
+     * Shows the saved config in the preview, which needs no request as it is live anyway.
+     * The consent to the external content holds as long as the source stays the same.
+     */
+    private showSavedConfigInPreview(): void {
+        const previousSource: string | undefined = this.previewConfig()?.src;
+        this.previewConfig.set(this.savedConfig());
+        if (previousSource !== this.savedConfig().src) {
+            this.statusConfirmed.set(false);
+        }
+    }
+
+    /**
+     * Whether any field of the form differs from the given config, treating unset fields as empty.
+     */
+    private differsFromForm(config: Partial<IframeWidgetConfig>): boolean {
+        const formValue: Partial<IframeWidgetConfig> = this.formValue();
+        return (Object.keys(this.iframeForm.controls) as (keyof IframeWidgetConfig)[]).some(
+            (key) => (formValue[key] ?? '') !== (config[key] ?? ''),
+        );
     }
 
     /**
@@ -114,5 +159,10 @@ export class IframeWidgetComponent implements WidgetComponentInterface {
     setWidgetValues(config: IframeWidgetConfig): void {
         this.iframeForm.patchValue(config);
         this.iframeConfig = this.iframeForm.value;
+        this.savedConfig.set(this.iframeForm.getRawValue());
+        if (this.savePending) {
+            this.savePending = false;
+            this.showSavedConfigInPreview();
+        }
     }
 }

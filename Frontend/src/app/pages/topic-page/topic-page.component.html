@@ -24,9 +24,11 @@
       [maxWidthPx]="800"
     >
       <!-- `primaryMode` becomes the options scope: 'activity' leaves out the options scoped to other
-        pages (workspace, search, collections, …). -->
+        pages (workspace, search, collections, …). The topic's collection is the parent material
+        uploaded in the sidebar is added to. -->
       <es-editorial-sidebar
         [primaryMode]="'activity'"
+        [parent]="templateComponent?.collectionNode ?? null"
         [showEdgeToggle]="false"
         (closeTrigger)="editorialSidebarService.sidebarOpened.set(false)"
       ></es-editorial-sidebar>

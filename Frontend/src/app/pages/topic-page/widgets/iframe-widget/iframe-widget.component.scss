@@ -16,11 +16,21 @@
         margin-top: 8px;
 
         &.edit-mode {
-            margin-top: 24px;
+            margin-top: 30px;
         }
 
         .preview-title {
             font-weight: topicPageVars.$font-weight-bold;
+        }
+
+        // a live region like the unsaved changes note, taking no space while the preview is current
+        .preview-outdated {
+            display: contents;
+
+            es-info-message {
+                display: block;
+                margin-top: 8px;
+            }
         }
 
         .confirmation-dialog {
@@ -51,5 +61,19 @@
         margin-top: 24px;
         display: inline-flex;
         gap: 16px;
+    }
+
+    // a live region without a box of its own: it announces the note, but adds no flex gap
+    .unsaved-changes {
+        display: contents;
+
+        es-info-message {
+            margin-top: 24px;
+        }
+    }
+
+    // a shown note takes over the distance to the toggles and sits right above the buttons
+    .unsaved-changes:not(:empty) + .iframe-buttons {
+        margin-top: 0;
     }
 }

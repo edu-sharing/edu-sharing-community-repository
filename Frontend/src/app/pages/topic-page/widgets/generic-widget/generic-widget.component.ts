@@ -965,6 +965,7 @@ export class GenericWidgetComponent implements AfterViewInit, OnChanges, OnDestr
 
             case WIDGETS.COLLECTION_CHIPS:
                 this.widgetComponentRef.setInput('displayLimit', this.displayLimit);
+                this.widgetComponentRef.setInput('searchInput', this.searchInput());
                 break;
 
             case WIDGETS.CONTENT_TEASER:
