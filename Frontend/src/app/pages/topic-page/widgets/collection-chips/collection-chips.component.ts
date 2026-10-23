@@ -16,6 +16,7 @@ import {
 import { Router } from '@angular/router';
 import { Node } from 'ngx-edu-sharing-api';
 import { EduSharingUiCommonModule } from 'ngx-edu-sharing-ui';
+import { firstValueFrom } from 'rxjs';
 import { RestConstants } from '../../../../core-module/rest/rest-constants';
 import { NodeHelperService } from '../../../../services/node-helper.service';
 import { SharedModule } from '../../../../shared/shared.module';
@@ -236,9 +237,12 @@ export class CollectionChipsComponent implements WidgetComponentInterface {
         }
         let subCollections: Node[];
         try {
-            subCollections = await this.topicPageHelperService.getSubCollections(
-                this.contextNodeId,
+            const entries = await firstValueFrom(
+                this.topicPageHelperService.getSubcollections(this.contextNodeId, false, {
+                    maxItems: RestConstants.COUNT_UNLIMITED,
+                }),
             );
+            subCollections = entries.collections;
         } catch {
             // children may be inaccessible (e.g. missing read permission) - render nothing
             this.list = [];
