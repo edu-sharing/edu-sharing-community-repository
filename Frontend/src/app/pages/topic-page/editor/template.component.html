@@ -691,7 +691,8 @@
   } @else {
   <!-- failed to load page config -> currently, no further action possible -->
   <div class="missing-page-config template-scroll" #scrollContainerRef>
-    <h1 class="mat-heading-1 topic-header-title">
+    <!-- the explicit title leaves out the button's icon text -->
+    <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic() || null">
       <span [innerHTML]="topic()"></span>
       @if (backToCollectionButtonVisible()) {
       <button

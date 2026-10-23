@@ -29,7 +29,8 @@
         {{ parentEntries().nodes[parentEntries().nodes.length - 2].title }}
       </div>
       }
-      <h1 class="mat-heading-1 topic-header-title">
+      <!-- the explicit title leaves out the search highlighting and the button's icon text -->
+      <h1 class="mat-heading-1 topic-header-title" [esTitle]="topic || null">
         <span [innerHTML]="topic | highlightSearch : searchInput()"></span>
         @if (backToCollectionButtonVisible()) {
         <button
